@@ -9,11 +9,13 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
 
+	"github.com/istoo/myna/internal/proc"
 	"github.com/istoo/myna/internal/provider"
 	"github.com/klauspost/compress/zstd"
 )
@@ -117,10 +119,16 @@ func TestCodexBodyLimitFromMemory(t *testing.T) {
 			t.Errorf("%d GiB: %d MiB, want %d MiB", c.mem>>30, got>>20, c.want>>20)
 		}
 	}
-	// memory not known is not a small machine, nor a large one
+	// memory not known is not a small machine, nor a large one. On the
+	// system the test runs on, the code falls back to that system's own
+	// memory when the files it reads don't say, so that is the bound.
 	memGOOS, memRoot = "linux", t.TempDir()
-	if got := codexBodyLimit(); got != defaultBodyLimit {
-		t.Errorf("unknown: %d MiB", got>>20)
+	want := int64(defaultBodyLimit)
+	if runtime.GOOS == "linux" {
+		want = min(max(proc.MemTotal()/16, defaultBodyLimit), codexBodyMost)
+	}
+	if got := codexBodyLimit(); got != want {
+		t.Errorf("unknown: %d MiB, want %d MiB", got>>20, want>>20)
 	}
 }
 

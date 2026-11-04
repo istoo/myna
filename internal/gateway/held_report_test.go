@@ -20,7 +20,10 @@ import (
 func TestUnroutedHeldReportSaved(t *testing.T) {
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
 	unroutedLimits(t, 50*time.Millisecond, time.Second)
-	s, _ := slowEyed(t, 0)
+	// the description outlasts the 1s hold, so the report is written while
+	// it is under way: a description that ends with the hold may or may not
+	// have ended when the report is read, and CI read it ended
+	s, _ := slowEyed(t, 2*time.Second)
 	heldSight(t, s)
 	srv := httptest.NewServer(s.Handler())
 	t.Cleanup(srv.Close)
