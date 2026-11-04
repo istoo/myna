@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"net/http/httptrace"
@@ -163,9 +164,11 @@ type replayable struct{ http.RoundTripper }
 // one: "write tcp …: use of closed network connection". The vendor never
 // had the whole request, so it is sent again on another new connection,
 // after a moment, up to unsentAgain times (dealyang_ on X: a Codex turn through a TUN proxy's
-// fake IP, 198.18.0.17, failed with it on every reconnect). Still closed,
-// the error says why (errClosedUnsent), and the routing rests nobody for
-// it (failProxy).
+// fake IP, 198.18.0.17, failed with it on every reconnect). Go's read loop
+// may see that close before the write loop does, and say EOF instead; a
+// body the write loop didn't read whole is no more an answer then (short
+// below). Still closed, the error says why (errClosedUnsent), and the
+// routing rests nobody for it (failProxy).
 func (t replayable) RoundTrip(req *http.Request) (*http.Response, error) {
 	_, marked := req.Header["Idempotency-Key"]
 	if _, ok := req.Header["X-Idempotency-Key"]; ok {
@@ -180,6 +183,7 @@ func (t replayable) RoundTrip(req *http.Request) (*http.Response, error) {
 	}
 	for n := 0; ; n++ {
 		var fresh, h2 atomic.Bool
+		var sent atomic.Int64 // of the body, as the write loop read it
 		trace := &httptrace.ClientTrace{GotConn: func(i httptrace.GotConnInfo) {
 			fresh.Store(!i.Reused)
 			if tc, ok := i.Conn.(interface{ ConnectionState() tls.ConnectionState }); ok {
@@ -187,8 +191,20 @@ func (t replayable) RoundTrip(req *http.Request) (*http.Response, error) {
 			}
 		}}
 		try := r.WithContext(httptrace.WithClientTrace(r.Context(), trace))
+		wrapped := false
+		if b := r.Body; b != nil && b != http.NoBody && r.ContentLength > 0 {
+			try.Body = &countedBody{rc: b, n: &sent}
+			wrapped = true
+		}
 		res, err := t.RoundTripper.RoundTrip(try)
-		if err == nil || !fresh.Load() || h2.Load() || !closedBeforeSent(err) || req.Context().Err() != nil {
+		// A body the write loop didn't read whole was not written whole, so
+		// the far side's close is no answer to it — Go reports that close
+		// from whichever end it sees first, the write's ("broken pipe") or
+		// the read's (an EOF while the body was still going), and only the
+		// first was taken for it until a slow body made the read end win.
+		short := wrapped && sent.Load() < r.ContentLength
+		if err == nil || !fresh.Load() || h2.Load() || req.Context().Err() != nil ||
+			!(closedBeforeSent(err) || (short && closedByPeer(err))) {
 			return res, err
 		}
 		if n >= len(unsentAgain) || (r.Body != nil && r.Body != http.NoBody && r.GetBody == nil) {
@@ -214,6 +230,28 @@ func (t replayable) RoundTrip(req *http.Request) (*http.Response, error) {
 // unsentAgain is the pause before each new try of a request whose new
 // connection was closed before the whole of it was sent.
 var unsentAgain = []time.Duration{250 * time.Millisecond, time.Second}
+
+// countedBody is a request's body, counted as the write loop reads it: how
+// much of it went, whatever the far side did with it.
+type countedBody struct {
+	rc io.ReadCloser
+	n  *atomic.Int64
+}
+
+func (b *countedBody) Read(p []byte) (int, error) {
+	n, err := b.rc.Read(p)
+	b.n.Add(int64(n))
+	return n, err
+}
+
+func (b *countedBody) Close() error { return b.rc.Close() }
+
+// closedByPeer says the far side ended the connection: the read's end, a
+// reset, or a write that found it closed (closedBeforeSent).
+func closedByPeer(err error) bool {
+	return closedBeforeSent(err) || errors.Is(err, io.EOF) || errors.Is(err, io.ErrUnexpectedEOF) ||
+		strings.Contains(err.Error(), "connection reset by peer")
+}
 
 // closedBeforeSent says err is Go's HTTP/1.1 transport failing to write
 // the request: the far side had closed the connection, so the write found

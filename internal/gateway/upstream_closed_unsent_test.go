@@ -2,7 +2,6 @@ package gateway
 
 import (
 	"bufio"
-	"bytes"
 	"crypto/tls"
 	"errors"
 	"io"
@@ -129,13 +128,41 @@ func closedUnsentClient(t *testing.T) *http.Client {
 // in it, so the write is still under way when the close arrives.
 func closedUnsentPost(t *testing.T, cl *http.Client, addr string) (*http.Response, error) {
 	t.Helper()
-	body := bytes.Repeat([]byte("x"), 8<<20)
-	req, err := http.NewRequest(http.MethodPost, "https://"+addr+"/backend-api/codex/responses", bytes.NewReader(body))
+	const size = 8 << 20
+	newBody := func() io.Reader { return &dripped{left: size} }
+	req, err := http.NewRequest(http.MethodPost, "https://"+addr+"/backend-api/codex/responses", newBody())
 	if err != nil {
 		t.Fatal(err)
 	}
+	req.ContentLength = size
+	req.GetBody = func() (io.ReadCloser, error) { return io.NopCloser(newBody()), nil }
 	req.Header.Set("Authorization", "Bearer "+strings.Repeat("a", 1500))
 	return cl.Do(req)
+}
+
+// dripped is a turn's body written a piece at a time, so the far side's
+// close lands while the request is still being written. Written at once,
+// a large body can all fit in the socket's buffers before the close is
+// seen, and the close then surfaces as the reply read's EOF rather than
+// the write's error this test is about (ubuntu CI, 11-04).
+type dripped struct{ left int }
+
+func (r *dripped) Read(p []byte) (int, error) {
+	if r.left == 0 {
+		return 0, io.EOF
+	}
+	if len(p) > 64<<10 {
+		p = p[:64<<10]
+	}
+	if len(p) > r.left {
+		p = p[:r.left]
+	}
+	for i := range p {
+		p[i] = 'x'
+	}
+	r.left -= len(p)
+	time.Sleep(500 * time.Microsecond)
+	return len(p), nil
 }
 
 // A new connection the network closes right after the TLS handshake,

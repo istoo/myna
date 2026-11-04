@@ -50,3 +50,9 @@
 - [x] `TestClientGoneRecordedAsCanceled`（#2）：不再"开始后睡 200ms 再取消"，
       改为等回复内容真正写到 writer 后取消（`saysWhen`），CI 负载下不再
       在回复开始前就结束 run。
+- [x] 新连接被对端关闭时，读端报 EOF 也按“未发出”重试
+      （`internal/gateway/upstream_transport.go` 的 `countedBody`/
+      `closedByPeer`）：写循环没读完请求体就说明没写完，写端、读端哪个先
+      看到关闭都重试；读完整的不重试。测试改成逐片写体（`dripped`）。
+      验证：`-run '^TestClosed' -count=20` 80 通过；旧代码下 8KB 体复现
+      CI 的 `EOF, want errClosedUnsent`，8MB 慢体 3 次中 1 次复现。
