@@ -20,10 +20,7 @@ import (
 func TestUnroutedHeldReportSaved(t *testing.T) {
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
 	unroutedLimits(t, 50*time.Millisecond, time.Second)
-	// the description outlasts the 1s hold, so the report is written while
-	// it is under way: a description that ends with the hold may or may not
-	// have ended when the report is read, and CI read it ended
-	s, _ := slowEyed(t, 2*time.Second)
+	s, _ := slowEyed(t, 0)
 	heldSight(t, s)
 	srv := httptest.NewServer(s.Handler())
 	t.Cleanup(srv.Close)
@@ -64,7 +61,11 @@ func TestUnroutedHeldReportSaved(t *testing.T) {
 	if err != nil {
 		t.Fatalf("its report %q: %v", rs[0].Held, err)
 	}
-	for _, want := range []string{"POST /v1/chat/completions", "probe/text", "image description", "(under way)", "body room:", "goroutine profile:"} {
+	// whether it is still under way when the report is taken is the
+	// client's race: the 504 closes the connection, and the description
+	// ends with its context either side of the report. That marker is
+	// checked on its own in TestWaitsSaidMarksUnderway.
+	for _, want := range []string{"POST /v1/chat/completions", "probe/text", "image description", "body room:", "goroutine profile:"} {
 		if !strings.Contains(text, want) {
 			t.Errorf("the report doesn't say %q:\n%.2000s", want, text)
 		}
@@ -107,5 +108,19 @@ func TestHeldReportsKeptAndNamed(t *testing.T) {
 		if _, err := HeldReport(bad); err == nil {
 			t.Errorf("HeldReport(%q) read a file that isn't a report", bad)
 		}
+	}
+}
+
+// TestWaitsSaidMarksUnderway: a wait still under way is named with
+// "(under way)", and one that has ended is not.
+func TestWaitsSaidMarksUnderway(t *testing.T) {
+	u := &unroutedHold{}
+	done := u.wait("image description")
+	if got := u.waitsSaid(); !strings.Contains(got, "image description") || !strings.Contains(got, "(under way)") {
+		t.Fatalf("a wait under way reads %q", got)
+	}
+	done()
+	if got := u.waitsSaid(); !strings.Contains(got, "image description") || strings.Contains(got, "(under way)") {
+		t.Fatalf("a wait that ended reads %q", got)
 	}
 }
