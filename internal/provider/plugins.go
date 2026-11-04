@@ -14,11 +14,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tidwall/gjson"
 	"github.com/istoo/myna/internal/catalog"
 	"github.com/istoo/myna/internal/plugin"
 	"github.com/istoo/myna/internal/probelog"
 	"github.com/istoo/myna/internal/settings"
+	"github.com/tidwall/gjson"
 )
 
 // A plugin's provider (see internal/plugin) is a subscription like the

@@ -114,8 +114,8 @@ func TestPanelRule(t *testing.T) {
 func TestRegexpQuote(t *testing.T) {
 	for in, want := range map[string]string{
 		"myna panel": "myna panel",
-		"a.b(c)":       `a\.b\(c\)`,
-		"x+y*":         `x\+y\*`,
+		"a.b(c)":     `a\.b\(c\)`,
+		"x+y*":       `x\+y\*`,
 	} {
 		if got := regexpQuote(in); got != want {
 			t.Errorf("regexpQuote(%q) = %q, want %q", in, got, want)

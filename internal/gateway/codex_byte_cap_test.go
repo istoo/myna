@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/tidwall/gjson"
 	"github.com/istoo/myna/internal/provider"
+	"github.com/tidwall/gjson"
 )
 
 // nginx413 is the page nginx answers a body past client_max_body_size

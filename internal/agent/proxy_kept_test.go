@@ -242,8 +242,8 @@ func TestMynaProbe(t *testing.T) {
 	}))
 	t.Cleanup(srv.Close)
 	for base, want := range map[string]bool{
-		srv.URL + "/myna":  true,
-		srv.URL + "/myna/": true,
+		srv.URL + "/myna":    true,
+		srv.URL + "/myna/":   true,
 		srv.URL + "/relay":   false,
 		srv.URL + "/broken":  false,
 		"http://127.0.0.1:1": false,

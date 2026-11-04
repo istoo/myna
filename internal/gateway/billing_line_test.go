@@ -8,8 +8,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/tidwall/gjson"
 	"github.com/istoo/myna/internal/provider"
+	"github.com/tidwall/gjson"
 )
 
 // claudeCodeTurn is Claude Code 2.1.114's request as #1600 (justrun1983)

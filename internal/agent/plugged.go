@@ -17,8 +17,6 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/tidwall/gjson"
-	"github.com/tidwall/jsonc"
 	"github.com/istoo/myna/internal/agentplug"
 	"github.com/istoo/myna/internal/catalog"
 	"github.com/istoo/myna/internal/edit"
@@ -26,6 +24,8 @@ import (
 	"github.com/istoo/myna/internal/plugin"
 	"github.com/istoo/myna/internal/provider"
 	"github.com/istoo/myna/internal/usage"
+	"github.com/tidwall/gjson"
+	"github.com/tidwall/jsonc"
 )
 
 func init() {

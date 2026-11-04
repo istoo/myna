@@ -23,7 +23,7 @@ func TestPiTakes(t *testing.T) {
 		{"myna/*", "myna/deepseek/deepseek-v4", false}, // Pi's * stops at a /
 		{"myna/*/*", "myna/deepseek/deepseek-v4", true},
 		{"deepseek/*:low", "myna/deepseek/deepseek-v4", true}, // the model id fits
-		{"grok-4.6", "xai/grok-4.6", false},                     // a bare id: added beside
+		{"grok-4.6", "xai/grok-4.6", false},                   // a bare id: added beside
 		{"xai/grok-4.6", "xai/grok-4.7", false},
 		{"openai-codex/gpt-5.6-sol", "opencode-go/deepseek-v4-flash", false},
 	} {

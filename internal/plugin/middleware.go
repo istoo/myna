@@ -33,7 +33,7 @@ func Middleware(target string) (file string, only bool) {
 	var pkg struct {
 		Main    string          `json:"main"`
 		Exports json.RawMessage `json:"exports"`
-		Myna  struct {
+		Myna    struct {
 			Middleware string `json:"middleware"`
 			Gateway    string `json:"gateway"`
 		} `json:"magpie"`

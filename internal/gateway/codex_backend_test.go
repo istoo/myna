@@ -15,12 +15,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/klauspost/compress/zstd"
 	"github.com/istoo/myna/internal/codexcat"
 	"github.com/istoo/myna/internal/gwmw"
 	"github.com/istoo/myna/internal/provider"
 	"github.com/istoo/myna/internal/settings"
 	"github.com/istoo/myna/internal/usage"
+	"github.com/klauspost/compress/zstd"
 )
 
 // chatgpt stands in for the ChatGPT backend behind CodexBase.

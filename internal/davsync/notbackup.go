@@ -16,8 +16,8 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/klauspost/compress/zstd"
 	"github.com/istoo/myna/internal/backup"
+	"github.com/klauspost/compress/zstd"
 )
 
 // ServerFile is what the server held, or answered with, where the backup

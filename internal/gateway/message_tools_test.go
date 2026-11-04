@@ -11,9 +11,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tidwall/gjson"
 	"github.com/istoo/myna/internal/provider"
 	"github.com/istoo/myna/internal/testenv"
+	"github.com/tidwall/gjson"
 )
 
 // piAddedTool is Pi 1.2.0's own Chat request for the turn after an

@@ -5,8 +5,8 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/tidwall/gjson"
 	"github.com/istoo/myna/internal/provider"
+	"github.com/tidwall/gjson"
 )
 
 // #2379 (jiz4oh): OpenCode's fast variant of a Codex account's GPT model

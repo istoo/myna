@@ -27,8 +27,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/klauspost/compress/zstd"
 	"github.com/istoo/myna/internal/appdir"
+	"github.com/klauspost/compress/zstd"
 )
 
 const (

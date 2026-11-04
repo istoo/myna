@@ -11,8 +11,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tidwall/gjson"
 	"github.com/istoo/myna/internal/provider"
+	"github.com/tidwall/gjson"
 )
 
 // cua-driver's drag tool, as its MCP server listed it before cua's #4888

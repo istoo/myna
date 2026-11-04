@@ -72,7 +72,7 @@ type dshPatches struct {
 // dshRow is an mcp-client row an insert adds: its item, and its lines in it.
 type dshRow struct {
 	item, from, to int
-	alone, myna  bool
+	alone, myna    bool
 	config         map[string]any
 }
 

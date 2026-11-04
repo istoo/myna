@@ -12,9 +12,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/klauspost/compress/zstd"
 	"github.com/istoo/myna/internal/proc"
 	"github.com/istoo/myna/internal/provider"
+	"github.com/klauspost/compress/zstd"
 )
 
 // Bound a single body and its read time without limiting how long a client

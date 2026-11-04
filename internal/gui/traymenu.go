@@ -11,11 +11,11 @@ import (
 // (i18n.js), and these few are all the menu and the icon's tooltip show
 // (#301).
 var trayZh = map[string]string{
-	"Open myna":                          "打开 myna",
+	"Open myna":                            "打开 myna",
 	"Version %s":                           "版本 %s",
 	"Restart to Update":                    "重启以更新",
 	"Restart to Update to %s":              "重启以更新到 %s",
-	"Quit myna":                          "退出 myna",
+	"Quit myna":                            "退出 myna",
 	"Restart Now to Update":                "立即重启以更新",
 	"Restart Now to Update (%d in flight)": "立即重启以更新（%d 个进行中）",
 	// the tray icon's tooltip (trayusage.go; yi_time on Discord)
@@ -28,8 +28,8 @@ var trayZh = map[string]string{
 	"%dm":                                 "%d 分钟",
 	"as of %s, couldn't be read just now": "截至 %s，暂时无法获取最新额度",
 	"Jan 2 15:04":                         "1月2日 15:04",
-	"Today in myna":                     "myna 今日",
-	"Last 7 days in myna":               "myna 近 7 天",
+	"Today in myna":                       "myna 今日",
+	"Last 7 days in myna":                 "myna 近 7 天",
 	"%d requests":                         "%d 个请求",
 	"%d request":                          "%d 个请求",
 	", %d with no known price":            "，其中 %d 个没有已知价格",
@@ -43,11 +43,11 @@ var trayZh = map[string]string{
 
 // trayZhTW is the tray menu in Traditional Chinese, with Taiwan's words.
 var trayZhTW = map[string]string{
-	"Open myna":                          "開啟 myna",
+	"Open myna":                            "開啟 myna",
 	"Version %s":                           "版本 %s",
 	"Restart to Update":                    "重新啟動以更新",
 	"Restart to Update to %s":              "重新啟動以更新到 %s",
-	"Quit myna":                          "結束 myna",
+	"Quit myna":                            "結束 myna",
 	"Restart Now to Update":                "立即重新啟動以更新",
 	"Restart Now to Update (%d in flight)": "立即重新啟動以更新（%d 個進行中）",
 	// the tray icon's tooltip (trayusage.go; yi_time on Discord)
@@ -60,8 +60,8 @@ var trayZhTW = map[string]string{
 	"%dm":                                 "%d 分鐘",
 	"as of %s, couldn't be read just now": "截至 %s，暫時無法取得最新額度",
 	"Jan 2 15:04":                         "1月2日 15:04",
-	"Today in myna":                     "myna 今日",
-	"Last 7 days in myna":               "myna 近 7 天",
+	"Today in myna":                       "myna 今日",
+	"Last 7 days in myna":                 "myna 近 7 天",
 	"%d requests":                         "%d 個請求",
 	"%d request":                          "%d 個請求",
 	", %d with no known price":            "，其中 %d 個沒有已知價格",
@@ -75,11 +75,11 @@ var trayZhTW = map[string]string{
 
 // trayJa is the tray menu in Japanese.
 var trayJa = map[string]string{
-	"Open myna":                          "myna を開く",
+	"Open myna":                            "myna を開く",
 	"Version %s":                           "バージョン %s",
 	"Restart to Update":                    "再起動してアップデート",
 	"Restart to Update to %s":              "再起動して %s にアップデート",
-	"Quit myna":                          "myna を終了",
+	"Quit myna":                            "myna を終了",
 	"Restart Now to Update":                "今すぐ再起動してアップデート",
 	"Restart Now to Update (%d in flight)": "今すぐ再起動してアップデート（%d 件処理中）",
 	// the tray icon's tooltip (trayusage.go; yi_time on Discord)
@@ -92,8 +92,8 @@ var trayJa = map[string]string{
 	"%dm":                                 "%d分",
 	"as of %s, couldn't be read just now": "%s 時点、現在は読み取れません",
 	"Jan 2 15:04":                         "1月2日 15:04",
-	"Today in myna":                     "myna の今日",
-	"Last 7 days in myna":               "myna の過去 7 日間",
+	"Today in myna":                       "myna の今日",
+	"Last 7 days in myna":                 "myna の過去 7 日間",
 	"%d requests":                         "%d 件のリクエスト",
 	"%d request":                          "%d 件のリクエスト",
 	", %d with no known price":            "、うち %d 件は価格不明",
@@ -107,11 +107,11 @@ var trayJa = map[string]string{
 
 // trayDe is the tray menu in German.
 var trayDe = map[string]string{
-	"Open myna":                          "myna öffnen",
+	"Open myna":                            "myna öffnen",
 	"Version %s":                           "Version %s",
 	"Restart to Update":                    "Zum Aktualisieren neu starten",
 	"Restart to Update to %s":              "Zum Aktualisieren auf %s neu starten",
-	"Quit myna":                          "myna beenden",
+	"Quit myna":                            "myna beenden",
 	"Restart Now to Update":                "Jetzt neu starten und aktualisieren",
 	"Restart Now to Update (%d in flight)": "Jetzt neu starten und aktualisieren (%d laufend)",
 	// the tray icon's tooltip (trayusage.go; yi_time on Discord)
@@ -124,8 +124,8 @@ var trayDe = map[string]string{
 	"%dm":                                 "%d min",
 	"as of %s, couldn't be read just now": "Stand %s, konnte gerade nicht gelesen werden",
 	"Jan 2 15:04":                         "2.1. 15:04",
-	"Today in myna":                     "Heute in myna",
-	"Last 7 days in myna":               "Letzte 7 Tage in myna",
+	"Today in myna":                       "Heute in myna",
+	"Last 7 days in myna":                 "Letzte 7 Tage in myna",
 	"%d requests":                         "%d Anfragen",
 	"%d request":                          "%d Anfrage",
 	", %d with no known price":            ", %d ohne bekannten Preis",

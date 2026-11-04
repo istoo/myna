@@ -12,10 +12,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tidwall/gjson"
 	"github.com/istoo/myna/internal/provider"
 	"github.com/istoo/myna/internal/redact"
 	"github.com/istoo/myna/internal/settings"
+	"github.com/tidwall/gjson"
 )
 
 const mediaSecret = "sk-proj-abcdEFGH1234ijklMNOP5678qrst"

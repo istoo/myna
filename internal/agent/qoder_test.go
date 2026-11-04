@@ -109,7 +109,7 @@ func testQoder(t *testing.T, mk func(string) *Agent, rel string) {
 	edit.DelJSON(path, "model.reasoningEffort")
 	edit.SetJSON(path, edit.KV{Path: "model.preferences", Value: map[string]any{
 		"myna/deepseek/flash": map[string]any{"reasoning": map[string]any{"effort": "high", "enabled": false}, "contextWindow": 1000},
-		"performance":           map[string]any{"reasoning": map[string]any{"effort": "max"}}}})
+		"performance":         map[string]any{"reasoning": map[string]any{"effort": "max"}}}})
 	if e.Get() != "high" {
 		t.Fatalf("preference get: %q", e.Get())
 	}

@@ -88,13 +88,13 @@ func TestT3CodeCodexInstance(t *testing.T) {
 	cat := filepath.Join(base, "userdata", "myna-codex-models.json")
 	str := func(v string) string { return t3TOML(v) }
 	want := map[string]string{
-		"model_provider":                                   str(mynaID),
+		"model_provider":                                 str(mynaID),
 		"model_providers.myna.name":                      str("myna"),
 		"model_providers.myna.base_url":                  str(gateway.URL() + "/v1"),
 		"model_providers.myna.wire_api":                  str("responses"),
 		"model_providers.myna.experimental_bearer_token": str(gateway.Token),
 		"model_providers.myna.http_headers":              `{"x-openai-actor-authorization"="myna"}`,
-		"model_catalog_json":                               str(cat),
+		"model_catalog_json":                             str(cat),
 	}
 	if got := t3Overrides(t, e.Config.LaunchArgs); !maps.Equal(got, want) {
 		t.Errorf("overrides:\n got %v\nwant %v", got, want)

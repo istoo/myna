@@ -8,9 +8,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/tidwall/gjson"
 	"github.com/istoo/myna/internal/catalog"
 	"github.com/istoo/myna/internal/provider"
+	"github.com/tidwall/gjson"
 )
 
 // thinkUp is a vendor answering the routing classifier "1" on Chat,

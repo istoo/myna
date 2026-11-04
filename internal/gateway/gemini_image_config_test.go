@@ -9,8 +9,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/tidwall/gjson"
 	"github.com/istoo/myna/internal/provider"
+	"github.com/tidwall/gjson"
 )
 
 // imageAsk is #3820's request (GuoJinguang): a frame and the words to redraw

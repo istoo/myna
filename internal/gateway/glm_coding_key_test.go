@@ -8,8 +8,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/tidwall/gjson"
 	"github.com/istoo/myna/internal/provider"
+	"github.com/tidwall/gjson"
 )
 
 // zhipuNoBalance is Zhipu's answer to a key whose account has no balance

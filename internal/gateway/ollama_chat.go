@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tidwall/gjson"
 	"github.com/istoo/myna/internal/provider"
+	"github.com/tidwall/gjson"
 )
 
 // Ollama's own chat routes, POST /api/chat and POST /api/generate, for a

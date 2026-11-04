@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/tidwall/gjson"
 	"github.com/istoo/myna/internal/sessions"
+	"github.com/tidwall/gjson"
 )
 
 // TitleLink contains only fingerprints. Native request IDs and account affinity

@@ -52,9 +52,9 @@ func TestAirIDEAddsMynaAgent(t *testing.T) {
 	}
 	cfg := filepath.Join(home, ".jetbrains", "myna-opencode.json")
 	for k, v := range map[string]string{
-		"default_mcp_settings.use_idea_mcp":        "true",
-		"agent_servers.Goose.command":              "/usr/local/bin/goose",
-		"agent_servers.Goose.use_idea_mcp":         "false",
+		"default_mcp_settings.use_idea_mcp":      "true",
+		"agent_servers.Goose.command":            "/usr/local/bin/goose",
+		"agent_servers.Goose.use_idea_mcp":       "false",
 		"agent_servers.Myna.command":             "/opt/bin/opencode",
 		"agent_servers.Myna.args.0":              "acp",
 		"agent_servers.Myna.env.OPENCODE_CONFIG": cfg,

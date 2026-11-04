@@ -12,10 +12,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/klauspost/compress/zstd"
 	"github.com/istoo/myna/internal/backup"
 	"github.com/istoo/myna/internal/provider"
 	"github.com/istoo/myna/internal/settings"
+	"github.com/klauspost/compress/zstd"
 )
 
 // "not a myna backup" was all a sync said whatever the server sent where

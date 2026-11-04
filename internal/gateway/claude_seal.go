@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 
-	"github.com/tidwall/gjson"
 	"github.com/istoo/myna/internal/claudeseal"
+	"github.com/tidwall/gjson"
 )
 
 // Claude's signed reasoning through a Responses client (mysterious_dove_96933

@@ -281,7 +281,7 @@ func TestForeignPagesRefused(t *testing.T) {
 		{"http://tauri.localhost", "127.0.0.1:3425", loop, secret},                   // a localhost subdomain, with a key (keyless on Windows: TestLocalhostSubdomainNeedsAKey)
 		{"https://app.example.com", "127.0.0.1:3425", loop, secret},                  // listed, with its key
 		{"http://192.168.1.5:3425", "192.168.1.5:3425", "192.168.1.9:50123", secret}, // the gateway's own origin, shared on the LAN
-		{"https://myna.example.com", "myna.example.com", loop, secret},           // its own origin behind a port-443 name, with a key (without one, a rebound page: TestReboundPageRefused)
+		{"https://myna.example.com", "myna.example.com", loop, secret},               // its own origin behind a port-443 name, with a key (without one, a rebound page: TestReboundPageRefused)
 		{"null", "127.0.0.1:3425", loop, secret},                                     // a sandboxed frame or a file:// page, with its key
 		{"app://cherry", "127.0.0.1:3425", loop, ""},                                 // an Electron renderer
 		{"file://", "127.0.0.1:3425", loop, ""},

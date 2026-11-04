@@ -13,9 +13,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/tidwall/gjson"
 	"github.com/istoo/myna/internal/access"
 	"github.com/istoo/myna/internal/provider"
+	"github.com/tidwall/gjson"
 )
 
 // A Responses client may send only a turn's new input and name the

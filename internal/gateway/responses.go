@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tidwall/gjson"
 	"github.com/istoo/myna/internal/claudeseal"
 	"github.com/istoo/myna/internal/provider"
+	"github.com/tidwall/gjson"
 )
 
 // ---- OpenAI Responses -------------------------------------------------------

@@ -29,7 +29,7 @@ const SearchingHeader = "X-Magpie-Searching"
 // Web search as a Remote myna's list says it.
 const (
 	searchNative = "native"
-	searchMyna = "myna"
+	searchMyna   = "myna"
 )
 
 // remoteSearch is how a Remote myna says it searches the web for model,

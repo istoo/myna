@@ -7,8 +7,8 @@ import (
 	"log"
 	"strings"
 
-	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/istoo/myna/internal/settings"
+	"github.com/wailsapp/wails/v3/pkg/application"
 )
 
 // errPanelKeyFailed is a refusal that isn't another app's hold: a key

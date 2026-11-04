@@ -11,10 +11,10 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/tidwall/gjson"
 	"github.com/istoo/myna/internal/catalog"
 	"github.com/istoo/myna/internal/provider"
 	"github.com/istoo/myna/internal/settings"
+	"github.com/tidwall/gjson"
 )
 
 // pickEfforts saves the levels picked in Settings for Image recognition's

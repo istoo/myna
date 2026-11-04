@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/klauspost/compress/zstd"
 	"github.com/istoo/myna/internal/provider"
+	"github.com/klauspost/compress/zstd"
 )
 
 const oldBodyLimit = 64 << 20

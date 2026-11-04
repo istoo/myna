@@ -127,7 +127,7 @@ func TestUsersOwnServerStaysAsItIs(t *testing.T) {
 	write(t, otherBuild, "")
 	mine := map[string]string{
 		"gone-tool":    `C:\Users\me\tools\imagetool.exe`, // mcp image, but not myna
-		"myna-cli":   `C:\Users\me\tools\myna-helper.exe`,
+		"myna-cli":     `C:\Users\me\tools\myna-helper.exe`,
 		"pinned-build": otherBuild,
 		"npx-server":   "npx",
 	}

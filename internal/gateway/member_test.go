@@ -14,9 +14,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/tidwall/gjson"
 	"github.com/istoo/myna/internal/provider"
 	"github.com/istoo/myna/internal/settings"
+	"github.com/tidwall/gjson"
 )
 
 // A reply from a group says which member answered it (#822): its

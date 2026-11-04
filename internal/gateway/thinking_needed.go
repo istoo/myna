@@ -3,8 +3,8 @@ package gateway
 import (
 	"regexp"
 
-	"github.com/tidwall/gjson"
 	"github.com/istoo/myna/internal/provider"
+	"github.com/tidwall/gjson"
 )
 
 // thinkingNeededRefusal is an upstream turning away a Messages request

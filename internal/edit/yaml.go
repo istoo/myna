@@ -9,8 +9,8 @@ import (
 	"io/fs"
 	"strings"
 
-	"github.com/tidwall/jsonc"
 	"github.com/istoo/myna/internal/filememo"
+	"github.com/tidwall/jsonc"
 	"gopkg.in/yaml.v3"
 )
 

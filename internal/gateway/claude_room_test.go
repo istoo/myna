@@ -252,7 +252,7 @@ func TestClaudeMemRunsFromTheCgroup(t *testing.T) {
 		"proc/self/cgroup": "0::/system.slice/myna.service\n",
 		"sys/fs/cgroup/system.slice/myna.service/memory.max":  "536870912\n",
 		"sys/fs/cgroup/system.slice/myna.service/memory.high": "max\n",
-		"sys/fs/cgroup/system.slice/memory.max":                 "max\n",
+		"sys/fs/cgroup/system.slice/memory.max":               "max\n",
 	})
 	limit, why := memLimit("linux", root)
 	if limit != 536870912 || !strings.Contains(why, "memory.max") {

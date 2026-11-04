@@ -20,14 +20,14 @@ var readsEnv = regexp.MustCompile(`(?:Getenv|LookupEnv|getenv)\("([A-Z][A-Z_0-9]
 // notAnAgent are the variables the same sources read that are not an agent's
 // folder, so no sandbox clears them through agentenv.Vars.
 var notAnAgent = map[string]string{
-	"APPDATA":               "Windows' own folder, which a sandbox sets to one of its own rather than clears",
-	"LOCALAPPDATA":          "the same",
-	"PATH":                  "the process' own",
-	"USER":                  "the process' own",
-	"XDG_CONFIG_HOME":       "myna's own folder's, which appdir decides",
-	"XDG_DATA_HOME":         "the same",
-	"XDG_DATA_DIRS":         "the system's own data folders, where a .deb puts Lody's desktop entry; a test that reaches agent.OpenLody sets it to its own",
-	"XDG_CACHE_HOME":        "Go's build cache's too, which a sandbox keeps shared; Air's ACP OpenCode under it is found by path in a test's own home (#2423)",
+	"APPDATA":             "Windows' own folder, which a sandbox sets to one of its own rather than clears",
+	"LOCALAPPDATA":        "the same",
+	"PATH":                "the process' own",
+	"USER":                "the process' own",
+	"XDG_CONFIG_HOME":     "myna's own folder's, which appdir decides",
+	"XDG_DATA_HOME":       "the same",
+	"XDG_DATA_DIRS":       "the system's own data folders, where a .deb puts Lody's desktop entry; a test that reaches agent.OpenLody sets it to its own",
+	"XDG_CACHE_HOME":      "Go's build cache's too, which a sandbox keeps shared; Air's ACP OpenCode under it is found by path in a test's own home (#2423)",
 	"MYNA_ADDR":           "myna's own",
 	"MYNA_DEBUG":          "myna's own debug flag",
 	"MYNA_PUBLIC_URL":     "myna's own public URL",

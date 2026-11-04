@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"syscall"
 
-	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/istoo/myna/internal/proc"
+	"github.com/wailsapp/wails/v3/pkg/application"
 )
 
 // openFolder starts Explorer on the folder and leaves it to open: not on the

@@ -7,11 +7,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/tidwall/gjson"
 	"github.com/istoo/myna/internal/access"
 	"github.com/istoo/myna/internal/budget"
 	"github.com/istoo/myna/internal/provider"
 	"github.com/istoo/myna/internal/usage"
+	"github.com/tidwall/gjson"
 )
 
 // searchTally counts the web searches a provider's reply says it ran by

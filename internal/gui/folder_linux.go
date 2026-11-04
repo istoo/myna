@@ -3,8 +3,8 @@
 package gui
 
 import (
-	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/istoo/myna/internal/proc"
+	"github.com/wailsapp/wails/v3/pkg/application"
 )
 
 // openFolder starts the desktop's opener and leaves the file manager to open;

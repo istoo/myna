@@ -58,7 +58,7 @@ func TestAirAddsMynaAgent(t *testing.T) {
 	}
 	cfg := filepath.Join(dir, "myna-opencode.json")
 	for k, v := range map[string]string{
-		"agent_servers.Goose.command":              "goose",
+		"agent_servers.Goose.command":            "goose",
 		"agent_servers.Myna.command":             "/opt/bin/opencode",
 		"agent_servers.Myna.args.0":              "acp",
 		"agent_servers.Myna.env.OPENCODE_CONFIG": cfg,
@@ -68,9 +68,9 @@ func TestAirAddsMynaAgent(t *testing.T) {
 		}
 	}
 	for k, v := range map[string]string{
-		"model":                           "myna/fake/m1",
-		"small_model":                     "myna/fake/m1",
-		"enabled_providers":               `["myna"]`,
+		"model":                         "myna/fake/m1",
+		"small_model":                   "myna/fake/m1",
+		"enabled_providers":             `["myna"]`,
 		"provider.myna.options.baseURL": gatewayV1(),
 		"provider.myna.options.apiKey":  "myna",
 		"provider.myna.npm":             "@ai-sdk/openai-compatible",

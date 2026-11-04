@@ -38,9 +38,9 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/tidwall/gjson"
 	"github.com/istoo/myna/internal/provider"
 	"github.com/istoo/myna/internal/settings"
+	"github.com/tidwall/gjson"
 )
 
 const (

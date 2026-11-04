@@ -13,11 +13,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/wailsapp/wails/v3/pkg/application"
-	"github.com/wailsapp/wails/v3/pkg/services/notifications"
 	"github.com/istoo/myna/internal/gateway"
 	"github.com/istoo/myna/internal/provider"
 	"github.com/istoo/myna/internal/settings"
+	"github.com/wailsapp/wails/v3/pkg/application"
+	"github.com/wailsapp/wails/v3/pkg/services/notifications"
 )
 
 // notifier is the system's notifications, started the first time an alert

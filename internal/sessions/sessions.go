@@ -33,13 +33,13 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/klauspost/compress/zstd"
 	"github.com/istoo/myna/internal/appdir"
 	"github.com/istoo/myna/internal/catalog"
 	"github.com/istoo/myna/internal/dirent"
 	"github.com/istoo/myna/internal/proc"
 	"github.com/istoo/myna/internal/provider"
 	"github.com/istoo/myna/internal/settings"
+	"github.com/klauspost/compress/zstd"
 )
 
 // Tokens is a count of tokens. Input excludes what was read from cache.

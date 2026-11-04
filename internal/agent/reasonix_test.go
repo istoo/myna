@@ -12,13 +12,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/pelletier/go-toml/v2"
 	"github.com/istoo/myna/internal/catalog"
 	"github.com/istoo/myna/internal/edit"
 	"github.com/istoo/myna/internal/gateway"
 	"github.com/istoo/myna/internal/proc"
 	"github.com/istoo/myna/internal/provider"
 	"github.com/istoo/myna/internal/usage"
+	"github.com/pelletier/go-toml/v2"
 )
 
 func TestReasonixRegistered(t *testing.T) {

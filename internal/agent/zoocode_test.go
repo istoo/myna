@@ -6,10 +6,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tidwall/gjson"
 	"github.com/istoo/myna/internal/edit"
 	"github.com/istoo/myna/internal/provider"
 	"github.com/istoo/myna/internal/usage"
+	"github.com/tidwall/gjson"
 )
 
 // zooCodeHere is Zoo Code in a VS Code User folder under home, the
@@ -63,7 +63,7 @@ func TestZooCode(t *testing.T) {
 	// a current profile that is one of apiConfigs, and a modelInfo with
 	// contextWindow and supportsPromptCache
 	for k, want := range map[string]string{
-		"providerProfiles.currentApiConfigName":                                        "myna",
+		"providerProfiles.currentApiConfigName":                                      "myna",
 		"providerProfiles.apiConfigs.myna.apiProvider":                               "openai",
 		"providerProfiles.apiConfigs.myna.openAiBaseUrl":                             gatewayV1(),
 		"providerProfiles.apiConfigs.myna.openAiApiKey":                              agentKey("zoo-code"),

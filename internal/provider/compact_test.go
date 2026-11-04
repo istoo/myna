@@ -42,12 +42,12 @@ func TestModelCompactsSetFromTheEditor(t *testing.T) {
 		t.Errorf("CompactsOf: %v", got)
 	}
 	for id, n := range map[string]int{
-		"deepseek/deepseek-v4-flash":      272000,
+		"deepseek/deepseek-v4-flash":    272000,
 		"myna/deepseek/deepseek-v4-pro": 500000,
-		"deepseek/deepseek-v4-pro[1m]":    500000,
-		"other/deepseek-v4-flash":         0,
-		"other/deepseek-v4-pro":           300000,
-		"nobody/deepseek-v4-pro":          0,
+		"deepseek/deepseek-v4-pro[1m]":  500000,
+		"other/deepseek-v4-flash":       0,
+		"other/deepseek-v4-pro":         300000,
+		"nobody/deepseek-v4-pro":        0,
 	} {
 		if got := CompactSet(id); got != n {
 			t.Errorf("CompactSet(%s) = %d; want %d", id, got, n)

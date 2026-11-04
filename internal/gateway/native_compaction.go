@@ -28,10 +28,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/tidwall/gjson"
 	"github.com/istoo/myna/internal/edit"
 	"github.com/istoo/myna/internal/provider"
 	"github.com/istoo/myna/internal/steady"
+	"github.com/tidwall/gjson"
 )
 
 const (

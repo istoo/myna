@@ -13,11 +13,11 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/istoo/myna/internal/agent"
+	"github.com/istoo/myna/internal/edit"
 	"github.com/pelletier/go-toml/v2"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/jsonc"
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/edit"
 )
 
 // Hooks (#1790) are commands an agent runs at a point of its turn: when

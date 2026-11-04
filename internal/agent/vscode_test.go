@@ -6,11 +6,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tidwall/gjson"
-	"github.com/tidwall/jsonc"
 	"github.com/istoo/myna/internal/edit"
 	"github.com/istoo/myna/internal/provider"
 	"github.com/istoo/myna/internal/usage"
+	"github.com/tidwall/gjson"
+	"github.com/tidwall/jsonc"
 )
 
 // VS Code's chat: switched on, myna's group joins the user's in

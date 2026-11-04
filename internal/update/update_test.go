@@ -50,7 +50,7 @@ func TestHomebrew(t *testing.T) {
 	for exe, want := range map[string]bool{
 		"/opt/homebrew/Cellar/myna/0.1.126/bin/myna":              true,
 		"/home/linuxbrew/.linuxbrew/Cellar/myna/0.1.126/bin/myna": true,
-		"/usr/local/bin/myna":                                       false,
+		"/usr/local/bin/myna":                                     false,
 		"/Applications/myna.app/Contents/MacOS/myna":              false,
 	} {
 		if Homebrew(exe) != want {

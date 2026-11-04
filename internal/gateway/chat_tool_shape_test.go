@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tidwall/gjson"
 	"github.com/istoo/myna/internal/provider"
+	"github.com/tidwall/gjson"
 )
 
 // zcodeAsking is jinyue806's reproduction of #2622 as they sent it to

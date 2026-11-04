@@ -504,7 +504,7 @@ func hermesOffKey(p string) string { return "hermes:" + p + ":off" }
 
 type hermesOff struct {
 	Myna hermesModel `json:"magpie"`
-	Left   hermesModel `json:"left"`
+	Left hermesModel `json:"left"`
 }
 
 // hermesUnwireProfile takes myna's provider out of a profile's config. A

@@ -16,8 +16,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/tidwall/gjson"
 	"github.com/istoo/myna/internal/desktopdir"
+	"github.com/tidwall/gjson"
 )
 
 // Call is one model call as an agent's own session file records it.

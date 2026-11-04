@@ -920,7 +920,7 @@ func (a *Agent) DisconnectOffline() error {
 // fields it changed (Routed: those that were myna's) and what it left
 // every field at.
 type reconnection struct {
-	Myna map[string]string `json:"magpie"`
+	Myna   map[string]string `json:"magpie"`
 	Routed []string          `json:"routed,omitempty"`
 	Left   map[string]string `json:"left"`
 }

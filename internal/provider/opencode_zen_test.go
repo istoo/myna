@@ -17,8 +17,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/tidwall/gjson"
 	"github.com/istoo/myna/internal/catalog"
+	"github.com/tidwall/gjson"
 )
 
 // OpenCode Zen's free models are listed: myna asks them as OpenCode does

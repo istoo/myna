@@ -78,8 +78,8 @@ done
 	}
 	for what, want := range map[string]string{
 		"call-search: search the web for myna": "mcp__myna__myna-web-search__web_search",
-		"call-browser: click the button":         "mcp__myna__myna-browser__browser_click",
-		"read a file":                            "Read",
+		"call-browser: click the button":       "mcp__myna__myna-browser__browser_click",
+		"read a file":                          "Read",
 	} {
 		if got := call(what); got != want {
 			t.Errorf("%s: the client is handed a call of %q, want %q", what, got, want)

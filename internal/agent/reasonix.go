@@ -18,10 +18,10 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/pelletier/go-toml/v2"
 	"github.com/istoo/myna/internal/catalog"
 	"github.com/istoo/myna/internal/edit"
 	"github.com/istoo/myna/internal/provider"
+	"github.com/pelletier/go-toml/v2"
 )
 
 const reasonixKey = "MYNA_REASONIX_API_KEY"

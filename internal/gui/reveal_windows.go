@@ -7,8 +7,8 @@ import (
 	"os"
 	"syscall"
 
-	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/istoo/myna/internal/proc"
+	"github.com/wailsapp/wails/v3/pkg/application"
 )
 
 // revealFolder shows the folder selected in its parent's Explorer window,

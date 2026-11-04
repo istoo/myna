@@ -47,9 +47,9 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/tidwall/gjson"
 	"github.com/istoo/myna/internal/appdir"
 	"github.com/istoo/myna/internal/edit"
+	"github.com/tidwall/gjson"
 )
 
 // copilotJBID is the agent's id, and what its token names.

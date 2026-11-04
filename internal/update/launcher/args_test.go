@@ -11,13 +11,13 @@ import (
 // opens the window to run on its own.
 func TestArgsOf(t *testing.T) {
 	for line, want := range map[string]string{
-		`myna`:              ``,
-		`myna plugin login`: `plugin login`,
-		`myna   version`:    `version`,
+		`myna`:                                  ``,
+		`myna plugin login`:                     `plugin login`,
+		`myna   version`:                        `version`,
 		`"C:\Program Files\m\myna.com" "a b" c`: `"a b" c`,
 		`"C:\m\myna" x`:                         `x`,
 		`C:\m\myna.com	-v`:                      `-v`,
-		`"unclosed`:                               ``,
+		`"unclosed`:                             ``,
 	} {
 		if got := argsOf(line); got != want {
 			t.Errorf("argsOf(%q) = %q, want %q", line, got, want)

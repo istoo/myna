@@ -19,7 +19,7 @@ const (
 
 // SharedGroup is the text a group is shared as.
 type SharedGroup struct {
-	Myna  string `json:"magpie"`
+	Myna    string `json:"magpie"`
 	Version int    `json:"version"`
 	Group   Group  `json:"group"`
 }
@@ -114,7 +114,7 @@ func ReadShared(text string) (SharedGroup, error) {
 		return s, notOne
 	}
 	var probe struct {
-		Myna  string          `json:"magpie"`
+		Myna    string          `json:"magpie"`
 		Version int             `json:"version"`
 		Group   json.RawMessage `json:"group"`
 	}

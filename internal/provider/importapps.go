@@ -21,12 +21,12 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/tidwall/jsonc"
 	"github.com/istoo/myna/internal/appdir"
 	"github.com/istoo/myna/internal/edit"
 	"github.com/istoo/myna/internal/plugin"
 	"github.com/istoo/myna/internal/settings"
 	_ "github.com/istoo/myna/internal/sqlitedb"
+	"github.com/tidwall/jsonc"
 )
 
 // AppSource is one app myna can import from, with what it holds.

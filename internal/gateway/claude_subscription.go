@@ -60,7 +60,6 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/santhosh-tekuri/jsonschema/v6"
 	"github.com/istoo/myna/internal/appdir"
 	"github.com/istoo/myna/internal/claudecode"
 	"github.com/istoo/myna/internal/claudetui"
@@ -69,6 +68,7 @@ import (
 	"github.com/istoo/myna/internal/provider"
 	"github.com/istoo/myna/internal/settings"
 	"github.com/istoo/myna/internal/wslrun"
+	"github.com/santhosh-tekuri/jsonschema/v6"
 )
 
 type subscriptionBridge struct {

@@ -517,9 +517,9 @@ func dshJoin(items []dshItem) string {
 
 // dshItem is one entry of the patch list, as its lines.
 type dshItem struct {
-	id     string
-	myna bool
-	lines  []string
+	id    string
+	myna  bool
+	lines []string
 }
 
 var dshIDLine = regexp.MustCompile(`^(?:- |  )id:\s*['"]?([^'"#\s]+)['"]?\s*(#.*)?$`)
