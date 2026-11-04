@@ -147,6 +147,7 @@ func TestCodexGeneratedImagesPastOldLimit(t *testing.T) {
 		t.Skip("allocates a few GB")
 	}
 	codexMemory(t, 16<<30)
+	roomForRace(t)
 	setup(t, provider.Chat, &fake{t: t})
 	var got atomic.Int64
 	chatgpt(t, func(w http.ResponseWriter, r *http.Request) {

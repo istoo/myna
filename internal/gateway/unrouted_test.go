@@ -32,6 +32,19 @@ func unknownLimit(t *testing.T, d time.Duration) {
 	t.Cleanup(func() { unroutedUnknown = was })
 }
 
+// roomForRace gives a test that reads and routes hundreds of megabytes the
+// time -race needs for it: the hold that stops a request myna can't place
+// is 30s, and a 516 MB turn is several times that under -race (ubuntu and
+// macOS CI, 11-04). A run without -race keeps the real limits.
+func roomForRace(t *testing.T) {
+	t.Helper()
+	if !raceOn {
+		return
+	}
+	unknownLimit(t, 5*time.Minute)
+	unroutedLimits(t, unroutedShow, 10*time.Minute)
+}
+
 // watchedHold is the watch of s's one request held before routing, once
 // it is there.
 func watchedHold(t *testing.T, s *Server) *unroutedHold {

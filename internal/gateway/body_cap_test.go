@@ -102,6 +102,7 @@ func underCap(t *testing.T, sent []byte) {
 // again with its oldest screenshots left out, and Codex gets the model's
 // summary.
 func TestCompactionOverByteCapLeavesOutOldImages(t *testing.T) {
+	roomForRace(t)
 	for _, proto := range []provider.Protocol{provider.Responses, provider.Chat} {
 		t.Run(string(proto), func(t *testing.T) {
 			up := &capped{proto: proto, most: commandCodeMost, status: 400, ctype: "application/json", body: commandCodeCap}
