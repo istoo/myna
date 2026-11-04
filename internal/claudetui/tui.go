@@ -92,6 +92,10 @@ type shim struct {
 
 	exited chan struct{}
 	exit   error
+	// readDone is closed when what Claude Code drew has been read to the
+	// terminal's end: Wait reaps the process while its last line is still
+	// in the terminal, so an error's screen could end at nothing
+	readDone chan struct{}
 
 	// images is where a message's images are written for their paths to
 	// be pasted, made with the first; images counts them
@@ -143,7 +147,7 @@ func Run(args []string) error {
 		return fmt.Errorf("Claude Code's interactive mode didn't run: %s", why)
 	}
 	args = interactiveArgs(pargs[len(wslArgs(wsl)):])
-	s := &shim{out: os.Stdout, changed: make(chan struct{}, 1), rowsCh: make(chan struct{}, 1), exited: make(chan struct{}), wsl: wsl, listed: mcpListed(args)}
+	s := &shim{out: os.Stdout, changed: make(chan struct{}, 1), rowsCh: make(chan struct{}, 1), exited: make(chan struct{}), readDone: make(chan struct{}), wsl: wsl, listed: mcpListed(args)}
 	resume := ""
 	for i, a := range args {
 		if a == "--resume" && i+1 < len(args) {
@@ -277,6 +281,11 @@ func childEnv(extra ...string) []string {
 // read keeps the tail of what Claude Code draws, and answers what it asks
 // of the terminal: where the cursor is, and what terminal it is.
 func (s *shim) read() {
+	defer func() {
+		if s.readDone != nil {
+			close(s.readDone)
+		}
+	}()
 	buf := make([]byte, 64<<10)
 	for {
 		n, err := s.pty.Read(buf)
@@ -359,6 +368,19 @@ func (s *shim) looks() (now, panel string) {
 		now = s.grid.text()
 	}
 	return now, s.panel
+}
+
+// endedScreen is lastScreen once what Claude Code drew before it ended has
+// been read: Wait reaps the process as its last line is still in the
+// terminal, so an error composed at that moment ended at the colon.
+func (s *shim) endedScreen() string {
+	if s.readDone != nil {
+		select {
+		case <-s.readDone:
+		case <-time.After(time.Second):
+		}
+	}
+	return s.lastScreen()
 }
 
 // lastScreen is the end of what Claude Code drew, for an error to say.
@@ -542,7 +564,7 @@ func (s *shim) ready() error {
 		case <-s.changed:
 		case <-time.After(200 * time.Millisecond):
 		case <-s.exited:
-			return fmt.Errorf("Claude Code ended before it showed its prompt (%v): %s", s.exit, s.lastScreen())
+			return fmt.Errorf("Claude Code ended before it showed its prompt (%v): %s", s.exit, s.endedScreen())
 		case <-deadline:
 			if prompted {
 				return fmt.Errorf("Claude Code showed its prompt, but hadn't listed the tools of myna's tool server in %s", readyWait)
@@ -740,7 +762,7 @@ func (s *shim) command(name string) error {
 		case <-by:
 			waiting = false
 		case <-s.exited:
-			return fmt.Errorf("Claude Code ended (%v): %s", s.exit, s.lastScreen())
+			return fmt.Errorf("Claude Code ended (%v): %s", s.exit, s.endedScreen())
 		}
 	}
 	_, _ = io.WriteString(s.pty, "\x1b")
@@ -1033,7 +1055,7 @@ func (s *shim) send(pieces []piece) error {
 				continue
 			case <-by:
 			case <-s.exited:
-				return fmt.Errorf("Claude Code ended (%v): %s", s.exit, s.lastScreen())
+				return fmt.Errorf("Claude Code ended (%v): %s", s.exit, s.endedScreen())
 			}
 			break
 		}
@@ -1073,7 +1095,7 @@ func (s *shim) pasteImage(path string, after int) (int, error) {
 		case <-by:
 			return 0, fmt.Errorf("Claude Code did not take an image pasted as its path: %s", s.lastScreen())
 		case <-s.exited:
-			return 0, fmt.Errorf("Claude Code ended (%v): %s", s.exit, s.lastScreen())
+			return 0, fmt.Errorf("Claude Code ended (%v): %s", s.exit, s.endedScreen())
 		}
 	}
 }
@@ -1111,7 +1133,7 @@ shown:
 		case <-shownBy:
 			break shown
 		case <-s.exited:
-			return fmt.Errorf("Claude Code ended (%v): %s", s.exit, s.lastScreen())
+			return fmt.Errorf("Claude Code ended (%v): %s", s.exit, s.endedScreen())
 		}
 	}
 	return nil

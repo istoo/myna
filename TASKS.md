@@ -56,3 +56,8 @@
       看到关闭都重试；读完整的不重试。测试改成逐片写体（`dripped`）。
       验证：`-run '^TestClosed' -count=20` 80 通过；旧代码下 8KB 体复现
       CI 的 `EOF, want errClosedUnsent`，8MB 慢体 3 次中 1 次复现。
+- [x] Claude Code 退出时的错误带上它最后画的内容：`claudetui` 的终端读取
+      结束（`readDone`）后再取屏幕（`endedScreen`），不再在 `Wait` 回收进程
+      的瞬间取到空屏（ubuntu CI 的 `TestShimNeverPrints/failed_start`）。
+      验证：`go test ./internal/claudetui -count=1` 48 通过；
+      `TestShimNeverPrints -count=5` 通过；全量除 #3 的环境项外全绿。
