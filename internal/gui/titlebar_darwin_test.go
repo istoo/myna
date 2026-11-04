@@ -90,9 +90,12 @@ func checkMainWindowCorners(t *testing.T, sdk uint32) {
 		if !near(s.Main.Titlebar, s.Toolbar.Titlebar) {
 			t.Errorf("%s: a title bar %.0fpt tall, the toolbar's was %.0fpt", s.Name, s.Main.Titlebar, s.Toolbar.Titlebar)
 		}
-		// Where a toolbar doesn't change the corners (the earlier design),
-		// the main window is left as it was
-		if near(s.Plain.Radius, s.Toolbar.Radius) && !s.Main.Toolbar {
+		// Where the earlier design's program has no toolbar difference,
+		// the main window is left as it was. A later OS can draw the
+		// macOS 26 design without the difference too (macOS 27 does), and
+		// the program that asked for that design takes the toolbar off:
+		// the corners above are still the plain window's.
+		if sdk < sdkMacOS26 && near(s.Plain.Radius, s.Toolbar.Radius) && !s.Main.Toolbar {
 			t.Errorf("%s: a toolbar doesn't change the corners in this design, yet the main window's was taken off", s.Name)
 		}
 	}
