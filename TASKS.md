@@ -42,3 +42,11 @@
       （5.15 内核）上整包测试通过，含 `setuid(65534)` 子进程的
       `TestSameRefusesAnotherUser`；Windows 交叉编译 + vet，CI 新增
       windows-latest 运行 `TestSameOwnConnection` 的步骤。
+- [x] 取走的账号不被迟到的轮换写回来（#1）：`host.js` 的 `client.auth.set`
+      现在只更新"请求所属账号"仍在的账号；被登出/被搬移后，插件手里那份
+      旧 token 不再把它签回来（登录流程与插件写另一 provider 的记录不受限）。
+      验证：新测试 `TestTakenAccountNotSignedBackInByALateListing` 在旧
+      host.js 上红、修复后绿；`TestMoveCutShort` 负载下 200 次由 10 红变 0 红。
+- [x] `TestClientGoneRecordedAsCanceled`（#2）：不再"开始后睡 200ms 再取消"，
+      改为等回复内容真正写到 writer 后取消（`saysWhen`），CI 负载下不再
+      在回复开始前就结束 run。
