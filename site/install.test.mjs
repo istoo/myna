@@ -206,7 +206,7 @@ test("no proxy and no mirror unless given", (t) => {
   const r = install(t, { termux: false, github: true });
   assert.equal(r.status, 0, r.stderr);
   for (const a of r.calls) assert.ok(!a.includes("--proxy"), JSON.stringify(a));
-  assert.match(r.requests, /^https:\/\/github\.com\/yetone\/myna-releases\//m);
+  assert.match(r.requests, /^https:\/\/github\.com\/istoo\/myna\//m);
 });
 
 test("--proxy takes every download through it, as does MYNA_PROXY", (t) => {
@@ -243,7 +243,7 @@ test("--mirror fetches the file through the mirror, the feed and its checksum fr
 test("a file the mirror changed is refused and the installed myna kept", (t) => {
   const r = install(t, { termux: false, github: true, args: ["--mirror", "https://gh.mirror.example/"], tamper: "https://gh.mirror.example/" });
   assert.notEqual(r.status, 0);
-  assert.match(r.stderr, /from https:\/\/gh\.mirror\.example\/ does not match its checksum from https:\/\/usemyna\.ai; not installed/);
+  assert.match(r.stderr, /from https:\/\/gh\.mirror\.example\/ does not match its checksum from https:\/\/github\.com\/istoo\/myna; not installed/);
   assert.equal(readFileSync(join(r.bin, "myna"), "utf8"), "old installation");
   const bad = install(t, { termux: false, args: ["--mirror", "gh.mirror.example"] });
   assert.notEqual(bad.status, 0);

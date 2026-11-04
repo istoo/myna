@@ -675,13 +675,13 @@ test("seo: the sitemap lists the home pages and every docs page, each its own ca
   const want = ["https://github.com/istoo/myna/", ...Object.keys(LANGS).map((l) => `https://github.com/istoo/myna/${l}/`)];
   for (const dir of ["docs/", "docs/zh/", "docs/ja/"])
     for (const f of (await readdir(new URL(dir, pub))).filter((f) => f.endsWith(".html")).sort())
-      want.push(`https://github.com/istoo/myna/${dir}${f.slice(0, -5)}`);
+      want.push(`https://github.com/istoo/myna/blob/main/${dir}${f.slice(0, -5)}`);
   assert.deepEqual([...listed].sort(), [...want].sort());
   const home = await readFile(new URL("index.html", pub), "utf8");
-  assert.match(home, /<link rel="canonical" data-i18n-attr="href:meta.url" href="https:\/\/github.com/istoo/myna\/">/);
+  assert.match(home, /<link rel="canonical" data-i18n-attr="href:meta.url" href="https:\/\/github\.com\/istoo\/myna\/">/);
   for (const [l, { dict }] of Object.entries(LANGS)) assert.equal(dict["meta.url"], `https://github.com/istoo/myna/${l}/`);
   for (const u of listed.filter((u) => u.includes("/docs/"))) {
-    const html = await readFile(new URL(u.slice("https://github.com/istoo/myna/".length) + ".html", pub), "utf8");
+    const html = await readFile(new URL(u.slice("https://github.com/istoo/myna/blob/main/".length) + ".html", pub), "utf8");
     const canon = [...html.matchAll(/<link rel="canonical" href="([^"]+)">/g)].map((m) => m[1]);
     assert.deepEqual(canon, [u], `${u} canonical`);
     assert.ok(html.includes(`<link rel="alternate" hreflang="x-default" href="https://github.com/istoo/myna/blob/main/docs/${u.split("/").pop()}">`), `${u} x-default`);
@@ -695,7 +695,7 @@ test("seo: the sitemap lists the home pages and every docs page, each its own ca
 test("seo: robots.txt names the sitemap and keeps crawlers off the counted links", async () => {
   const { readFile } = await import("node:fs/promises");
   const txt = await readFile(new URL("./public/robots.txt", import.meta.url), "utf8");
-  assert.match(txt, /^Sitemap: https:\/\/github.com/istoo/myna\/sitemap.xml$/m);
+  assert.match(txt, /^Sitemap: https:\/\/github\.com\/istoo\/myna\/sitemap.xml$/m);
   for (const p of ["/api/", "/go/", "/r/", "/download"]) assert.match(txt, new RegExp(`^Disallow: ${p}$`, "m"));
 });
 
