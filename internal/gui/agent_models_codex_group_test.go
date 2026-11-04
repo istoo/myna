@@ -10,18 +10,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/agent"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // Codex's own models, a ChatGPT account's, stay in its model picker with a
 // routing group switched on and its own models switched off (shiqi_40904 on
-// Discord: "开启路由组后 … 模型列表里不会显示 codex 模型"). magpie's list shows
+// Discord: "开启路由组后 … 模型列表里不会显示 codex 模型"). myna's list shows
 // them Codex as its Codex section, and its pickers offer them as Codex's own
 // (codex/… would only add a hop), so the switch for the agent's own models
 // never takes them out. It did once the group gave the picker one of
-// magpie's models, which is what the switch waits for: the picker was the
+// myna's models, which is what the switch waits for: the picker was the
 // group alone, and with the group off every model was back.
 func TestCodexOwnModelsStayWithGroupOn(t *testing.T) {
 	ids := codexSignedInSandbox(t)
@@ -60,9 +60,9 @@ func TestCodexOwnModelsStayWithGroupOn(t *testing.T) {
 	// nothing of Codex's own is left for the switch to take out, so the
 	// list has none to show
 	if codex.OwnModels(codex.Values()) {
-		t.Fatal("Codex's list offers a switch for its own models, every one of them magpie's too")
+		t.Fatal("Codex's list offers a switch for its own models, every one of them myna's too")
 	}
-	// one the list takes out is the switch's again: magpie no longer shows
+	// one the list takes out is the switch's again: myna no longer shows
 	// it Codex
 	if err := provider.SetHiddenModels("codex", []string{"codex/gpt-5.4"}); err != nil {
 		t.Fatal(err)
@@ -112,7 +112,7 @@ func codexSignedInSandbox(t *testing.T) []string {
 // group that lists itself alone, keeps the ChatGPT account's models out of
 // other agents' lists but in Codex's own (士奇 on Discord, 10-28: "开启路由组以后，agent 设置页面，模型列表里就是丢失 codex 供应商和对应模型，在下拉
 // 选项中虽然能显示 codex 模型但是实际codex 应用中是没有的"). Codex's list
-// has its Codex section, so its picker offers them as magpie's and there is
+// has its Codex section, so its picker offers them as myna's and there is
 // no own-models switch to show them by.
 func TestCodexOwnModelsListedOnlyThroughGroups(t *testing.T) {
 	ids := codexSignedInSandbox(t)
@@ -227,7 +227,7 @@ func TestGroupAloneKeepsSubscriptionModelsOutOfEveryAgentsList(t *testing.T) {
 	for _, a := range agent.All() {
 		got := listed(a)
 		if !got["group/mygpt"] {
-			continue // an agent shown no models of magpie's (or no groups)
+			continue // an agent shown no models of myna's (or no groups)
 		}
 		if strings.EqualFold(a.ListsFor(), "codex") {
 			continue // its own sign-in's models stay (catalogOf)

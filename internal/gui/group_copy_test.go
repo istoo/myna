@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // The Routing view's Duplicate (lc on Discord) makes a group of the

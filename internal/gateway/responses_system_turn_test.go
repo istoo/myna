@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // Claude Code 2.1.296 and later send their environment as a message with

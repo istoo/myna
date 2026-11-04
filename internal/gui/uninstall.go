@@ -4,10 +4,10 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/yetone/magpie/internal/uninstall"
+	"github.com/istoo/myna/internal/uninstall"
 )
 
-// what Settings › Uninstall magpie asks of the system; the tests put
+// what Settings › Uninstall myna asks of the system; the tests put
 // fakes in
 var (
 	uninstallSystem = uninstall.System
@@ -15,20 +15,20 @@ var (
 	uninstallData   = uninstall.DataAfterExit
 )
 
-// uninstallRoutes: Settings › Uninstall magpie, the app's `magpie
+// uninstallRoutes: Settings › Uninstall myna, the app's `myna
 // uninstall`. The app does it in two steps. POST /api/uninstall removes
-// magpie's service, login item and shortcuts and disconnects every agent,
+// myna's service, login item and shortcuts and disconnects every agent,
 // putting back what each had, and answers with what it did, so the page
 // can say what failed or that the Codex app needs a restart. POST
-// /api/uninstall/finish then starts the removal of magpie's files once the
+// /api/uninstall/finish then starts the removal of myna's files once the
 // app has quit (WebView2 holds its folder while the app runs), and quits.
-// Never from a browser (magpie web): that would take magpie off the
+// Never from a browser (myna web): that would take myna off the
 // computer it serves from, not the one the page is on.
 func uninstallRoutes(mux *http.ServeMux, w Windows) {
 	web := isWeb(w)
 	refuse := func(rw http.ResponseWriter) bool {
 		if web {
-			http.Error(rw, "magpie is uninstalled from the computer it runs on, with magpie uninstall there", http.StatusForbidden)
+			http.Error(rw, "myna is uninstalled from the computer it runs on, with myna uninstall there", http.StatusForbidden)
 		}
 		return web
 	}
@@ -37,7 +37,7 @@ func uninstallRoutes(mux *http.ServeMux, w Windows) {
 			return
 		}
 		rep := &uninstall.Report{}
-		// the service first: one still serving would put magpie back
+		// the service first: one still serving would put myna back
 		uninstallSystem(rep)
 		uninstallAgents(r.Context(), rep)
 		writeJSON(rw, struct {
@@ -51,7 +51,7 @@ func uninstallRoutes(mux *http.ServeMux, w Windows) {
 			return
 		}
 		if err := uninstallData(); err != nil {
-			fail(rw, errors.New("magpie's files can't be removed after it quits: "+err.Error()))
+			fail(rw, errors.New("myna's files can't be removed after it quits: "+err.Error()))
 			return
 		}
 		rw.WriteHeader(http.StatusNoContent)

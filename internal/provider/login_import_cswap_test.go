@@ -12,13 +12,13 @@ import (
 	"time"
 )
 
-// StringKe (#4532): moving from claude-swap to magpie took signing in to
-// every account again, since `magpie accounts import claude` didn't read
+// StringKe (#4532): moving from claude-swap to myna took signing in to
+// every account again, since `myna accounts import claude` didn't read
 // cswap's export. testdata/cswap_0.29.0_export.json is what cswap 0.29.0's
 // own `cswap export` wrote (in a sandbox HOME on Linux, with made-up
 // tokens): a Max account and a Team seat named "work". Each comes in
 // with its sign-in as the file has it, its account and organization, and
-// "work" as its name in magpie; Anthropic is asked nothing.
+// "work" as its name in myna; Anthropic is asked nothing.
 func TestImportCswapExport(t *testing.T) {
 	claudeHome(t)
 	asked := false
@@ -68,7 +68,7 @@ func TestImportCswapExport(t *testing.T) {
 		}
 	}
 
-	// again: both are magpie's already, and a name the user gave since
+	// again: both are myna's already, and a name the user gave since
 	// is kept
 	if err := SetAccountName("claude", "team@x.com", "mine"); err != nil {
 		t.Fatal(err)
@@ -82,7 +82,7 @@ func TestImportCswapExport(t *testing.T) {
 	}
 }
 
-// What cswap's own import refuses, magpie refuses too: an encrypted
+// What cswap's own import refuses, myna refuses too: an encrypted
 // export, another format. A cswap API-key account is a key, a cswap file
 // isn't Codex's, and a name another account has already isn't given.
 func TestImportCswapRefusals(t *testing.T) {
@@ -180,7 +180,7 @@ func cswapWith(t *testing.T, at map[string]int64) string {
 // is signed in to wrote the file's sign-in over Claude Code's own. cswap
 // exports what it saved when it last switched; Claude Code has refreshed
 // since, and each refresh spends the refresh token before it, so the
-// file's was spent and Claude Code was signed out. A sign-in magpie has
+// file's was spent and Claude Code was signed out. A sign-in myna has
 // that is no older than the file's (by expiresAt, which each refresh moves
 // on) is kept, Claude Code's own or a saved one; a newer one in the file
 // is taken, as before.

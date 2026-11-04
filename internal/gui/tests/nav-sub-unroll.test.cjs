@@ -30,7 +30,7 @@ function serve(lang, held) {
     if (url.pathname === "/api/plugins/npm") return json({ npm: {} });
     if (url.pathname === "/api/plugins/github") return json({ repos: [] });
     if (url.pathname.startsWith("/api/")) return json({});
-    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "magpie.test") return route.fulfill({ status: 404, body: "" });
+    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "myna.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -48,14 +48,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const held = new Promise((r) => { open = r; });
       const context = await browser.newContext({ viewport: { width, height: 760 } });
       // the reader left Plugins on Installed
-      await context.addInitScript(() => { try { localStorage.setItem("magpie.pluginTab", "installed"); } catch {} });
+      await context.addInitScript(() => { try { localStorage.setItem("myna.pluginTab", "installed"); } catch {} });
       const page = await context.newPage();
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(60000);
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, held));
-      await page.goto("http://magpie.test/");
+      await page.goto("http://myna.test/");
       await page.waitForSelector("#nav button.on");
       assert.ok(await page.evaluate(() => document.body.classList.contains("side-nav")), "a sidebar at " + width);
 

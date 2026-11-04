@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // What the classifier must never be told of the turn before: the system

@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // Claude Desktop's model menu lists the models picked for it on the Agents
@@ -71,7 +71,7 @@ func TestClaudeDesktopPickedModels(t *testing.T) {
 		t.Fatalf("both shown: %v", all)
 	}
 
-	// three picked, the other DeepSeek, the routing group magpie found for
+	// three picked, the other DeepSeek, the routing group myna found for
 	// the two and GLM left out: only those three, the DeepSeek still with
 	// its provider after it
 	hide := []string{"relay/deepseek-v4.1-flash", "opencode-go/glm-5"}
@@ -193,7 +193,7 @@ func TestClaudeDesktopNamesFollowSuffixMode(t *testing.T) {
 // A Claude Desktop build that has no mythos word (the Store's 1.6608.2,
 // sublatesublate-design) keeps a gateway model only when its id reads as a
 // sonnet|opus|haiku tier or has claude, sonnet, opus, haiku or anthropic in
-// it, so every reasoning-level model listed by mythos-magpie-<n> vanished
+// it, so every reasoning-level model listed by mythos-myna-<n> vanished
 // from its menu. To a build whose User-Agent names no 2.x, a
 // reasoning-level model is listed by its plain alias, which every build
 // keeps; one that says 2.x keeps the picker alias.
@@ -253,7 +253,7 @@ func TestClaudeDesktopOldBuildModels(t *testing.T) {
 	// a 2.x build is still offered the effort picker, and so is a request
 	// that names no build (the Code tab's Claude Code, known by its key)
 	for _, ua := range []string{"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Claude/2.7032.0 Chrome/140.0.0.0 Electron/37.2.0 Safari/537.36", "claude-cli/2.1.295 (external, claude-desktop)", ""} {
-		if id := list(ua)["opencode-go/deepseek-v4.1-flash"]; !regexp.MustCompile(`^mythos-magpie-\d{10}$`).MatchString(id) {
+		if id := list(ua)["opencode-go/deepseek-v4.1-flash"]; !regexp.MustCompile(`^mythos-myna-\d{10}$`).MatchString(id) {
 			t.Errorf("User-Agent %q: deepseek-v4.1-flash is listed as %q, want the mythos picker alias", ua, id)
 		}
 	}
@@ -368,7 +368,7 @@ func TestClaudeDesktopCatalogNamedSaysProvider(t *testing.T) {
 		got := list()
 		for ref, by := range opus {
 			r := got[ref]
-			if !regexp.MustCompile(`^magpie-\d{10}\.anthropic\.claude-opus-5-5$`).MatchString(r.ID) {
+			if !regexp.MustCompile(`^myna-\d{10}\.anthropic\.claude-opus-5-5$`).MatchString(r.ID) {
 				t.Fatalf("%s: %s listed as %q, not one Desktop names after its catalog", c.mode, ref, r.ID)
 			}
 			if r.Description != by {
@@ -383,7 +383,7 @@ func TestClaudeDesktopCatalogNamedSaysProvider(t *testing.T) {
 		if r := got["chatflowsai/claude-sonnet-5-5"]; r.Description != c.sonnet {
 			t.Errorf("%s: the lone Sonnet 5.5 described %q, want %q", c.mode, r.Description, c.sonnet)
 		}
-		// named by display_name (mythos-magpie-<n>), which says it already
+		// named by display_name (mythos-myna-<n>), which says it already
 		if r := got["chatflowsai/glm-5.3"]; r.ID == "" || r.Description != "" {
 			t.Errorf("%s: glm-5.3 (%s) described %q, want nothing", c.mode, r.ID, r.Description)
 		}

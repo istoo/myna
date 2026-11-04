@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // tomlString quotes a path for a TOML basic string: Windows separators
@@ -17,7 +17,7 @@ func tomlString(p string) string {
 	return strings.ReplaceAll(p, `\`, `\\`)
 }
 
-// The lists magpie writes into Codex's model_catalog_json and Pi's
+// The lists myna writes into Codex's model_catalog_json and Pi's
 // models.json name models by the Provider in model names setting, and are
 // written again as it changes: on, as by default, a renamed model too has
 // its provider's after it (#203); own, the name the user gave is just as
@@ -31,13 +31,13 @@ func TestSuffixModesReachAgentFiles(t *testing.T) {
 		t.Fatal(err)
 	}
 	piModels := filepath.Join(home, ".pi", "agent", "models.json")
-	writeFile(t, piModels, `{"providers":{"magpie":{"name":"magpie","models":[]}}}`)
-	// Pi runs a model of magpie's: connected, so its list follows
-	writeFile(t, filepath.Join(home, ".pi", "agent", "settings.json"), `{"defaultProvider":"magpie","defaultModel":"relay/glm-4.6"}`)
-	setUpInMagpie("pi")
+	writeFile(t, piModels, `{"providers":{"myna":{"name":"myna","models":[]}}}`)
+	// Pi runs a model of myna's: connected, so its list follows
+	writeFile(t, filepath.Join(home, ".pi", "agent", "settings.json"), `{"defaultProvider":"myna","defaultModel":"relay/glm-4.6"}`)
+	setUpInMyna("pi")
 	codexDir := filepath.Join(home, ".codex")
-	codexCat := filepath.Join(codexDir, "magpie-models.json")
-	writeFile(t, filepath.Join(codexDir, "config.toml"), "model = \"relay/glm-4.6\"\nmodel_provider = \"magpie\"\nmodel_catalog_json = \""+tomlString(codexCat)+"\"\n")
+	codexCat := filepath.Join(codexDir, "myna-models.json")
+	writeFile(t, filepath.Join(codexDir, "config.toml"), "model = \"relay/glm-4.6\"\nmodel_provider = \"myna\"\nmodel_catalog_json = \""+tomlString(codexCat)+"\"\n")
 	writeFile(t, codexCat, `{"models":[]}`)
 	catalog.Changed = SyncCatalog
 	t.Cleanup(func() { catalog.Changed = nil })
@@ -55,7 +55,7 @@ func TestSuffixModesReachAgentFiles(t *testing.T) {
 			t.Fatal(err)
 		}
 		pi = map[string]string{}
-		for _, m := range p.Providers["magpie"].Models {
+		for _, m := range p.Providers["myna"].Models {
 			pi[m["id"].(string)], _ = m["name"].(string)
 		}
 		var cx struct {

@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // A chat client that asks DeepSeek for its reply length OpenAI's way

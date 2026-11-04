@@ -7,7 +7,7 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // Format is the shape a client asked the answer to come in (structured

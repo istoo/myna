@@ -8,29 +8,29 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/istoo/myna/internal/agent"
+	"github.com/istoo/myna/internal/proc"
 )
 
-// `magpie agy run [args…]` is what the function agy magpie puts in the
-// user's shells runs (agent/agy.go): the agy on PATH, given magpie's
-// gateway, key and model while settings.json's model is one of magpie's,
-// and as it is otherwise. Every argument is agy's, --help too. `magpie agy
+// `myna agy run [args…]` is what the function agy myna puts in the
+// user's shells runs (agent/agy.go): the agy on PATH, given myna's
+// gateway, key and model while settings.json's model is one of myna's,
+// and as it is otherwise. Every argument is agy's, --help too. `myna agy
 // env` prints those variables and the model, one NAME=value a line and
-// nothing off magpie, for PowerShell's function.
+// nothing off myna, for PowerShell's function.
 
-const agyRunUsage = `magpie agy run [args…]   start agy, on magpie while its model is one of magpie's
+const agyRunUsage = `myna agy run [args…]   start agy, on myna while its model is one of myna's
 
 The agy on your PATH starts with GEMINI_API_KEY, GOOGLE_GEMINI_BASE_URL and
 --model <its model> (not when you give --model yourself); every argument is
-agy's. Off magpie's models it starts as it is. The function agy magpie puts
+agy's. Off myna's models it starts as it is. The function agy myna puts
 in your shell's profile runs this.
 
-magpie agy env           the variables and model it starts agy with, a NAME=value
-                         a line; nothing while agy isn't on magpie
+myna agy env           the variables and model it starts agy with, a NAME=value
+                         a line; nothing while agy isn't on myna
 `
 
-// agyCmd is `magpie agy run|env …`; ok false for another form.
+// agyCmd is `myna agy run|env …`; ok false for another form.
 func agyCmd(args []string) (ok bool, err error) {
 	if len(args) < 2 || args[0] != "agy" && args[0] != "antigravity-cli" {
 		return false, nil
@@ -44,7 +44,7 @@ func agyCmd(args []string) (ok bool, err error) {
 				fmt.Print(agyRunUsage)
 				return true, nil
 			}
-			return true, fmt.Errorf("magpie agy env takes nothing after it, not %q", args[2])
+			return true, fmt.Errorf("myna agy env takes nothing after it, not %q", args[2])
 		}
 		env, model := agent.AgyStart()
 		if model == "" {
@@ -60,7 +60,7 @@ func agyCmd(args []string) (ok bool, err error) {
 }
 
 // agyExec starts the program bin as agy with args and env, in place of
-// magpie where the system can (agy_exec_*.go); tests set it.
+// myna where the system can (agy_exec_*.go); tests set it.
 var agyExec = agyExecOS
 
 // agyLook is the agy on PATH; tests set it.
@@ -72,7 +72,7 @@ func agyRun(args []string) error {
 		return errors.New("agy isn't installed, or isn't on your PATH")
 	}
 	if self, err := os.Executable(); err == nil && sameProgram(self, bin) {
-		return errors.New("the agy on your PATH is magpie itself; install Antigravity CLI")
+		return errors.New("the agy on your PATH is myna itself; install Antigravity CLI")
 	}
 	env := os.Environ()
 	start, model := agent.AgyStart()

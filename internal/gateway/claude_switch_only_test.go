@@ -6,10 +6,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
-// myduso on Discord: Claude's subscription kept to Claude Code, magpie
+// myduso on Discord: Claude's subscription kept to Claude Code, myna
 // only switching its sign-in. A request naming the Claude accounts runs
 // no Claude Code through the bridge and is told why, with how to undo it;
 // unticked, it is served again.

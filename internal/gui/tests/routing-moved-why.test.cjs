@@ -1,7 +1,7 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // Neo on Discord read a Requests row, "chatflowsai/claude-opus-5-5 →
 // AgentRouter · gpt-6.1-sol", as Claude Desktop asking for another
-// provider's model, with nothing saying why. A route magpie put on another
+// provider's model, with nothing saying why. A route myna put on another
 // model than the agent named (Route.Moved) is tagged in the list by request
 // and by session, in the replay and the tray panel, and says why under the
 // pointer, in the row's title and once in the story. A kind's tag wins, and
@@ -61,25 +61,25 @@ function serve(lang) {
 // Expected reader-facing words, independent of the translation lookup.
 const W = {
   en: { title: "Title", check: "Connection check", stood: "Stand-in", review: "Review",
-    titleWhy: "Claude Desktop picked chatflowsai/claude-opus-5-5 by itself for a short request without tools, such as a chat's title; magpie served it on agentrouter/gpt-6.1-sol, the model of its latest chat turn, so it stays with the provider the chat is on.",
-    privacy: "Masking would have changed this request, so magpie sent it as written to fake/m2, the model set for that in Settings › Privacy.",
-    codex: "Codex asked for fake/m1 for a call of its own, which magpie doesn't serve; magpie served it on fake/m2, the model its last turn was answered on." },
+    titleWhy: "Claude Desktop picked chatflowsai/claude-opus-5-5 by itself for a short request without tools, such as a chat's title; myna served it on agentrouter/gpt-6.1-sol, the model of its latest chat turn, so it stays with the provider the chat is on.",
+    privacy: "Masking would have changed this request, so myna sent it as written to fake/m2, the model set for that in Settings › Privacy.",
+    codex: "Codex asked for fake/m1 for a call of its own, which myna doesn't serve; myna served it on fake/m2, the model its last turn was answered on." },
   zh: { title: "标题", check: "连接检查", stood: "替代", review: "审查",
-    titleWhy: "Claude Desktop 自行选了 chatflowsai/claude-opus-5-5 来发一个不带工具的短请求（比如对话标题）；magpie 让 agentrouter/gpt-6.1-sol 来处理，即它最近一轮对话所用的模型，这样它留在对话所在的服务商。",
-    privacy: "脱敏会改动这个请求，所以 magpie 把它原样发给了 fake/m2，即在 设置 › 隐私 里为此设定的模型。",
-    codex: "Codex 为它自己的调用请求了 fake/m1，但 magpie 不提供它；magpie 让 fake/m2 来处理，即它上一轮所用的模型。" },
+    titleWhy: "Claude Desktop 自行选了 chatflowsai/claude-opus-5-5 来发一个不带工具的短请求（比如对话标题）；myna 让 agentrouter/gpt-6.1-sol 来处理，即它最近一轮对话所用的模型，这样它留在对话所在的服务商。",
+    privacy: "脱敏会改动这个请求，所以 myna 把它原样发给了 fake/m2，即在 设置 › 隐私 里为此设定的模型。",
+    codex: "Codex 为它自己的调用请求了 fake/m1，但 myna 不提供它；myna 让 fake/m2 来处理，即它上一轮所用的模型。" },
   "zh-TW": { title: "標題", check: "連線檢查", stood: "替代", review: "審查",
-    titleWhy: "Claude Desktop 自行選了 chatflowsai/claude-opus-5-5 來發一個不帶工具的短請求（例如對話標題）；magpie 讓 agentrouter/gpt-6.1-sol 來處理，即它最近一輪對話所用的模型，這樣它留在對話所在的服務商。",
-    privacy: "去識別化會改動這個請求，所以 magpie 把它原樣送給了 fake/m2，即在 設定 › 隱私 裡為此設定的模型。",
-    codex: "Codex 為它自己的呼叫請求了 fake/m1，但 magpie 不提供它；magpie 讓 fake/m2 來處理，即它上一輪所用的模型。" },
+    titleWhy: "Claude Desktop 自行選了 chatflowsai/claude-opus-5-5 來發一個不帶工具的短請求（例如對話標題）；myna 讓 agentrouter/gpt-6.1-sol 來處理，即它最近一輪對話所用的模型，這樣它留在對話所在的服務商。",
+    privacy: "去識別化會改動這個請求，所以 myna 把它原樣送給了 fake/m2，即在 設定 › 隱私 裡為此設定的模型。",
+    codex: "Codex 為它自己的呼叫請求了 fake/m1，但 myna 不提供它；myna 讓 fake/m2 來處理，即它上一輪所用的模型。" },
   ja: { title: "タイトル", check: "接続チェック", stood: "代替", review: "レビュー",
-    titleWhy: "Claude Desktop はツールなしの短いリクエスト（チャットのタイトルなど）に chatflowsai/claude-opus-5-5 を自分で選びました。magpie は agentrouter/gpt-6.1-sol（直近のチャットのターンのモデル）で応答し、チャットと同じプロバイダーに留めました。",
-    privacy: "マスキングでこのリクエストが変わるため、magpie はそのまま fake/m2（設定 › プライバシーで指定されたモデル）に送りました。",
-    codex: "Codex は自身の呼び出しに magpie が提供していない fake/m1 をリクエストしました。magpie は fake/m2（直前のターンに応答したモデル）で応答しました。" },
+    titleWhy: "Claude Desktop はツールなしの短いリクエスト（チャットのタイトルなど）に chatflowsai/claude-opus-5-5 を自分で選びました。myna は agentrouter/gpt-6.1-sol（直近のチャットのターンのモデル）で応答し、チャットと同じプロバイダーに留めました。",
+    privacy: "マスキングでこのリクエストが変わるため、myna はそのまま fake/m2（設定 › プライバシーで指定されたモデル）に送りました。",
+    codex: "Codex は自身の呼び出しに myna が提供していない fake/m1 をリクエストしました。myna は fake/m2（直前のターンに応答したモデル）で応答しました。" },
   de: { title: "Titel", check: "Verbindungstest", stood: "Ersatz", review: "Review",
-    titleWhy: "Claude Desktop hat chatflowsai/claude-opus-5-5 selbst für eine kurze Anfrage ohne Werkzeuge gewählt, etwa den Titel eines Chats; magpie hat sie mit agentrouter/gpt-6.1-sol beantwortet, dem Modell seines letzten Chat-Zugs, damit sie beim Anbieter des Chats bleibt.",
-    privacy: "Die Maskierung hätte diese Anfrage verändert, daher hat magpie sie unverändert an fake/m2 gesendet, das dafür unter Einstellungen › Datenschutz festgelegte Modell.",
-    codex: "Codex hat für einen eigenen Aufruf fake/m1 angefordert, das magpie nicht anbietet; magpie hat ihn mit fake/m2 beantwortet, dem Modell, das seinen letzten Zug beantwortet hat." },
+    titleWhy: "Claude Desktop hat chatflowsai/claude-opus-5-5 selbst für eine kurze Anfrage ohne Werkzeuge gewählt, etwa den Titel eines Chats; myna hat sie mit agentrouter/gpt-6.1-sol beantwortet, dem Modell seines letzten Chat-Zugs, damit sie beim Anbieter des Chats bleibt.",
+    privacy: "Die Maskierung hätte diese Anfrage verändert, daher hat myna sie unverändert an fake/m2 gesendet, das dafür unter Einstellungen › Datenschutz festgelegte Modell.",
+    codex: "Codex hat für einen eigenen Aufruf fake/m1 angefordert, das myna nicht anbietet; myna hat ihn mit fake/m2 beantwortet, dem Modell, das seinen letzten Zug beantwortet hat." },
 };
 
 const engines = process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"];
@@ -88,7 +88,7 @@ const langs = process.env.LANGS ? process.env.LANGS.split(",") : Object.keys(W);
 for (const engine of engines) {
   for (const lang of langs) {
     for (const width of [1100, 420]) {
-      test(`${engine} ${lang} ${width}px: a request magpie put on another model says why`, async (t) => {
+      test(`${engine} ${lang} ${width}px: a request myna put on another model says why`, async (t) => {
         const w = W[lang];
         const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
         const errors = [], pages = [];
@@ -106,7 +106,7 @@ for (const engine of engines) {
           page.setDefaultNavigationTimeout(60000);
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", serve(lang));
-          await page.addInitScript((on) => localStorage.setItem("magpie.routingBySession", on ? "1" : "0"), bySession);
+          await page.addInitScript((on) => localStorage.setItem("myna.routingBySession", on ? "1" : "0"), bySession);
           await page.goto(url);
           return page;
         };
@@ -120,13 +120,13 @@ for (const engine of engines) {
 
         // the list, by request: the tag beside the model, the reason under
         // the pointer and in the row's title, nothing pushed out of the row
-        let page = await open("http://magpie.test/?view=routing", { width, height: 760 });
+        let page = await open("http://myna.test/?view=routing", { width, height: 760 });
         await page.locator(".rt-req").nth(routes.length - 1).waitFor();
         same(await tags(page, ".rt-req"), "by request");
         const titles = await page.locator(".rt-req").evaluateAll((rows) => rows.map((r) => r.title));
         for (const [i, s] of said.entries()) {
           if (s) assert(titles[i].includes("\n" + s), `row ${i} title: ${titles[i]}`);
-          else assert(!/magpie served|magpie sent it as written/.test(titles[i]), `row ${i} title: ${titles[i]}`);
+          else assert(!/myna served|myna sent it as written/.test(titles[i]), `row ${i} title: ${titles[i]}`);
         }
         const fits = await page.locator(".rt-req").evaluateAll((rows) => rows.map((r) => r.scrollWidth <= r.clientWidth + 1));
         assert.deepEqual(fits, routes.map(() => true), "a row overflows");
@@ -135,7 +135,7 @@ for (const engine of engines) {
         for (const [i, s] of said.entries()) {
           if (i) {
             await page.close();
-            page = await open("http://magpie.test/?view=routing", { width, height: 760 });
+            page = await open("http://myna.test/?view=routing", { width, height: 760 });
             await page.locator(".rt-req").nth(routes.length - 1).waitFor();
           }
           await page.locator(".rt-req").nth(i).evaluate((e) => e.click());
@@ -153,7 +153,7 @@ for (const engine of engines) {
 
         // the replay: the oldest, Desktop's title, goes first with its tag
         await page.close();
-        page = await open("http://magpie.test/?view=routing", { width, height: 760 });
+        page = await open("http://myna.test/?view=routing", { width, height: 760 });
         await page.locator(".rt-req").nth(routes.length - 1).waitFor();
         const replay = await page.evaluate(() => t("Replay them all"));
         await page.getByRole("button", { name: replay, exact: true }).evaluate((e) => e.click());
@@ -167,13 +167,13 @@ for (const engine of engines) {
 
         // by session: the same tags and reasons
         await page.close();
-        page = await open("http://magpie.test/?view=routing", { width, height: 760 }, true);
+        page = await open("http://myna.test/?view=routing", { width, height: 760 }, true);
         await page.locator(".rt-req").nth(routes.length - 1).waitFor();
         const sorted = (xs) => xs.map((x) => x[0] === w.review || x[0] === w.check ? [x[0]] : x).map((x) => JSON.stringify(x)).sort();
         assert.deepEqual(sorted(await tags(page, ".rt-req")), sorted(want), "by session");
 
         // the tray panel's rows, from the live trace
-        const panel = await open("http://magpie.test/?mode=panel", { width: Math.min(width, 440), height: 600 });
+        const panel = await open("http://myna.test/?mode=panel", { width: Math.min(width, 440), height: 600 });
         await panel.locator('[data-ptab="routing"]').click();
         await panel.locator(".pr-req").nth(routes.length - 1).waitFor();
         const pr = await panel.locator(".pr-req").evaluateAll((rows) => rows.map((r) => [r.querySelector(".pr-a .kind")?.textContent || "", r.querySelector(".pr-a .kind")?.title || ""]));

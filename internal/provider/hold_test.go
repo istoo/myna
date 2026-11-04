@@ -9,11 +9,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/filememo"
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/filememo"
+	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // A request that only reads builds the catalog once for all its look-ups
@@ -55,7 +55,7 @@ func TestHoldBuildsOnce(t *testing.T) {
 func TestHoldKeptForTheNextRequest(t *testing.T) {
 	defer func(d time.Duration) { heldFor = d }(heldFor)
 	heldFor = time.Minute // a loaded machine's pause between requests isn't the change
-	t.Setenv("MAGPIE_HOLD_TEST", "1")
+	t.Setenv("MYNA_HOLD_TEST", "1")
 	n := 0
 	build := func() int { n++; return n }
 	for range 5 {
@@ -74,7 +74,7 @@ func TestHoldKeptForTheNextRequest(t *testing.T) {
 			t.Fatalf("after a write: built %d times, want 2", n)
 		}
 	}()
-	t.Setenv("MAGPIE_HOLD_TEST", "2")
+	t.Setenv("MYNA_HOLD_TEST", "2")
 	func() {
 		defer Hold()()
 		if heldOf("t-next", build); n != 3 {
@@ -89,7 +89,7 @@ func TestHoldKeptForTheNextRequest(t *testing.T) {
 // What is held across requests is built again when anything it was built
 // from may have moved: a write that only tells filememo (settings.Save, an
 // account's file), the providers' or the settings' file written by
-// another process (the CLI's "magpie group add"), the groups served or
+// another process (the CLI's "myna group add"), the groups served or
 // not (GateGroups, ServeGroups), and the models.dev catalog read again.
 func TestHoldKeptUntilAWrite(t *testing.T) {
 	defer func(d time.Duration) { heldFor = d }(heldFor)
@@ -142,7 +142,7 @@ func TestHoldKeptUntilAWrite(t *testing.T) {
 
 // A change the plugin host tells (a sign-in saved, a plugin added) drops
 // what a request holds before it returns: a SyncCatalog running held the
-// plugins as they were before `magpie plugin login` saved its account,
+// plugins as they were before `myna plugin login` saved its account,
 // and the look at the accounts right after it found none (#2449). The
 // hooks told in the background are left out, so only what goes at once
 // is looked at.
@@ -264,7 +264,7 @@ func TestHoldBuildsProvidersOnce(t *testing.T) {
 
 // cursor-agent's token is read from the Keychain once a while, not on
 // each look at the accounts (#746: some 200 `security` runs a request); a
-// sign-in or out in magpie, and CursorToken renewing it, read it afresh.
+// sign-in or out in myna, and CursorToken renewing it, read it afresh.
 func TestCursorKeychainReadOnce(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("a shell script stands in for security")
@@ -288,7 +288,7 @@ func TestCursorKeychainReadOnce(t *testing.T) {
 	if runs() != 1 {
 		t.Fatalf("security ran %d times, want 1", runs())
 	}
-	forgetCursorStatus() // signed in or out in magpie
+	forgetCursorStatus() // signed in or out in myna
 	if tok := cursorKeychainToken(false); tok != "tok-2" || runs() != 2 {
 		t.Fatalf("after a sign-in: %q, %d runs", tok, runs())
 	}
@@ -394,14 +394,14 @@ func TestHeldGroupsAreTheCallers(t *testing.T) {
 	}
 }
 
-// Pricing an agent's models (agent.magpieModels) asks All for each model,
+// Pricing an agent's models (agent.mynaModels) asks All for each model,
 // under one Hold: settings.json is read with the providers, not once per
-// signed-in account per model. Asked for each account, a magpie at rest
+// signed-in account per model. Asked for each account, a myna at rest
 // parsed it hundreds of times on every drift look the GUI makes each 15s
 // and every dsh round each 30s, most of its idle CPU (xsw on Discord).
 func TestAllReadsNoSettingsPerLookWhileHeld(t *testing.T) {
 	signIn(t)
-	t.Setenv("MAGPIE_NO_ACCOUNTS", "")
+	t.Setenv("MYNA_NO_ACCOUNTS", "")
 	if err := settings.Save(settings.Settings{Proxy: "direct"}); err != nil {
 		t.Fatal(err)
 	}
@@ -433,7 +433,7 @@ func TestAllReadsNoSettingsPerLookWhileHeld(t *testing.T) {
 		t.Fatalf("settings.json parsed %d times for %d looks at %d accounts under one Hold: once a look or more", n, looks, accounts)
 	}
 	// turned off, the accounts are still left out
-	t.Setenv("MAGPIE_NO_ACCOUNTS", "1")
+	t.Setenv("MYNA_NO_ACCOUNTS", "1")
 	for _, p := range All() {
 		if p.Account != nil {
 			t.Fatalf("%s's account listed with discovery off", p.ID)

@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/istoo/myna/internal/catalog"
 )
 
 // installCacheDir is Bun's install cache for plugins/: each version of a

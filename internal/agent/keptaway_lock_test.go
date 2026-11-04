@@ -10,10 +10,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/settings"
 )
 
-// magpie's own files written while a sync's filter is on, with ~/.config a
+// myna's own files written while a sync's filter is on, with ~/.config a
 // link into another folder (a dotfiles repo; ylorn on Discord): the window's
 // size saved after a resize (settings.Save, under the settings' lock) and
 // wsl.json (under wsl's) are written, the filter leaves them as they are,
@@ -21,7 +21,7 @@ import (
 // good ~10s after every start, with SIGTERM ignored.
 func TestOwnWritesDuringASyncWithALinkedConfig(t *testing.T) {
 	home := syncHome(t)
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("MYNA_ADDR", "")
 	cfg := filepath.Join(home, ".config")
 	if err := os.RemoveAll(cfg); err != nil {
 		t.Fatal(err)
@@ -32,7 +32,7 @@ func TestOwnWritesDuringASyncWithALinkedConfig(t *testing.T) {
 	s := settings.Load()
 	s.Port = 3593
 	// an address on another machine and keys in settings.json: what the
-	// filter would weigh, with the LAN key, were it not magpie's own
+	// filter would weigh, with the LAN key, were it not myna's own
 	s.UpdateMirror = "https://mirror.example/"
 	if err := settings.Save(s); err != nil {
 		t.Fatal(err)

@@ -101,7 +101,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         await page.route("**/*", serve(lang));
-        await page.goto("http://magpie.test/?view=routing");
+        await page.goto("http://myna.test/?view=routing");
         await page.locator("#view-routing .rt-srcs .rt-node").first().waitFor();
         // in sight, the list keeps up
         await page.waitForFunction(`(${newestListed})() >= 6`);

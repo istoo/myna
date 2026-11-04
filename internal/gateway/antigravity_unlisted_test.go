@@ -13,8 +13,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/access"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // unlistedArgon signs in two Antigravity accounts, a and b, with the model

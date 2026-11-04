@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// A ChatGPT sign-in by device code (curtinp118 on Discord: magpie on a VPS,
+// A ChatGPT sign-in by device code (curtinp118 on Discord: myna on a VPS,
 // its web UI in a browser at home; ChatGPT's browser sign-in comes back to
 // localhost:1455, the home machine). Opened from another computer, the
 // sign-in asks for a device code: the box shows the code and ChatGPT's
@@ -53,7 +53,7 @@ function server(lang, started) {
 
 const W = {
   en: {
-    say: "magpie opened ChatGPT's device page. Enter this code there; the account shows up here as soon as you're done.",
+    say: "myna opened ChatGPT's device page. Enter this code there; the account shows up here as soon as you're done.",
     browser: "Sign in in the browser instead", code: "Sign in with a code instead", field: "Callback URL",
   },
   zh: {

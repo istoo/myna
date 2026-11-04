@@ -75,7 +75,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     page.on("pageerror", (e) => errors.push(e.message));
     if (clock) await page.clock.install();
     await page.route("**/*", serve(lang, theme));
-    await page.goto("http://magpie.test/?view=providers");
+    await page.goto("http://myna.test/?view=providers");
     return { page, errors };
   };
 

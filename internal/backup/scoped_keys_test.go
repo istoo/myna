@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/library"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/appdir"
+	"github.com/istoo/myna/internal/library"
+	"github.com/istoo/myna/internal/settings"
 )
 
 func TestRestoreLibraryKeysScope(t *testing.T) {

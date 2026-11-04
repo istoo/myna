@@ -6,11 +6,11 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/istoo/myna/internal/catalog"
 )
 
 // An entry with something that tells it apart (catalog.Model.Apart) says
-// it in its display_name alone, whether magpie makes the entry, its vendor
+// it in its display_name alone, whether myna makes the entry, its vendor
 // lists it, or it is Codex's own: the description, which Codex puts in
 // spawn_agent's list of models upstream, is as it was.
 func TestCodexApartInDisplayNameOnly(t *testing.T) {
@@ -37,9 +37,9 @@ func TestCodexApartInDisplayNameOnly(t *testing.T) {
 	}
 	want := [][2]string{
 		{"GPT-6.1-Sol · Codex · codex", "Frontier agentic coding model."},
-		{"GPT-6.1-Sol · Codex · codex-b", "GPT-6.1-Sol · Codex via magpie"},
-		{"GPT-6.1-Sol · Relay · relay", "Frontier agentic coding model. via magpie"},
-		{"GLM-5.3 · OpenRouter", "GLM-5.3 · OpenRouter via magpie"},
+		{"GPT-6.1-Sol · Codex · codex-b", "GPT-6.1-Sol · Codex via myna"},
+		{"GPT-6.1-Sol · Relay · relay", "Frontier agentic coding model. via myna"},
+		{"GLM-5.3 · OpenRouter", "GLM-5.3 · OpenRouter via myna"},
 	}
 	for i, m := range got.Models {
 		if [2]string{m.Name, m.Desc} != want[i] {

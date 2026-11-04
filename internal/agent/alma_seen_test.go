@@ -27,7 +27,7 @@ func TestAlmaProvidersSeenDecodeOnce(t *testing.T) {
 		m := model
 		mu.Unlock()
 		var b strings.Builder
-		b.WriteString(`[{"id":"mg","name":"magpie","type":"openai","baseURL":"http://x/v1","enabled":true,"models":["` + m + `"],"availableModels":[`)
+		b.WriteString(`[{"id":"mg","name":"myna","type":"openai","baseURL":"http://x/v1","enabled":true,"models":["` + m + `"],"availableModels":[`)
 		for i := range 400 {
 			if i > 0 {
 				b.WriteString(",")
@@ -43,7 +43,7 @@ func TestAlmaProvidersSeenDecodeOnce(t *testing.T) {
 	t.Cleanup(func() { almaAPI, almaReadFor = oldAPI, oldFor })
 
 	ps, err := almaProvidersSeen()
-	if err != nil || len(ps) != 1 || ps[0].Name != "magpie" || len(ps[0].Known) != 400 || ps[0].Models[0] != "gpt-5.4" {
+	if err != nil || len(ps) != 1 || ps[0].Name != "myna" || len(ps[0].Known) != 400 || ps[0].Models[0] != "gpt-5.4" {
 		t.Fatalf("first look: %v %+v", err, ps)
 	}
 	if n := testing.AllocsPerRun(20, func() {

@@ -11,14 +11,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/sessions"
-	stats "github.com/yetone/magpie/internal/usage"
+	"github.com/istoo/myna/internal/agent"
+	"github.com/istoo/myna/internal/sessions"
+	stats "github.com/istoo/myna/internal/usage"
 )
 
-const sessionsUsage = "usage: magpie sessions [--days N|today|all] [--model <model>] [--folder <folder>] [--limit N] [--json]"
+const sessionsUsage = "usage: myna sessions [--days N|today|all] [--model <model>] [--folder <folder>] [--limit N] [--json]"
 
-// sessionsCmd: `magpie sessions` — the latest sessions of Claude Code and
+// sessionsCmd: `myna sessions` — the latest sessions of Claude Code and
 // Codex; with --days, what they spent day by day, as the app's Sessions
 // view shows it.
 func sessionsCmd(args []string) error {
@@ -34,14 +34,14 @@ func sessionsCmd(args []string) error {
 	return sessionsTo(os.Stdout, args[1:], time.Now())
 }
 
-const sessionReadsUsage = "usage: magpie sessions read [on|off all|<agent>...]"
+const sessionReadsUsage = "usage: myna sessions read [on|off all|<agent>...]"
 
 // notAskedLine: a fresh install reads no agent's sessions until the user
 // allows it (RustCats on X), so an empty list says why.
-const notAskedLine = "magpie reads no agent's session history until you allow it: magpie sessions read on all (or on <agent>…), or the Sessions page"
+const notAskedLine = "myna reads no agent's session history until you allow it: myna sessions read on all (or on <agent>…), or the Sessions page"
 
-// sessionReadsTo: `magpie sessions read` — which agents' session history
-// magpie may read, as the Sessions page's consent and Settings › Privacy
+// sessionReadsTo: `myna sessions read` — which agents' session history
+// myna may read, as the Sessions page's consent and Settings › Privacy
 // set it; `read on|off all|<agent>…` changes it. "all" is every agent,
 // those found later too.
 func sessionReadsTo(w io.Writer, args []string) error {
@@ -96,7 +96,7 @@ func sessionReadsTo(w io.Writer, args []string) error {
 			return fmt.Errorf("%s", sessionReadsUsage)
 		}
 		if _, ok := known[a]; !ok && !slices.Contains(sessions.Found(), a) {
-			return fmt.Errorf("unknown agent %q (magpie sessions read lists them)\n%s", a, sessionReadsUsage)
+			return fmt.Errorf("unknown agent %q (myna sessions read lists them)\n%s", a, sessionReadsUsage)
 		}
 		agents[a] = on
 	}
@@ -107,7 +107,7 @@ func sessionReadsTo(w io.Writer, args []string) error {
 }
 
 func relocateClaudeTo(w io.Writer, args []string) error {
-	const usage = "usage: magpie sessions relocate-claude --from <absolute-path> --to <absolute-path> [--confirm <preview-token>]"
+	const usage = "usage: myna sessions relocate-claude --from <absolute-path> --to <absolute-path> [--confirm <preview-token>]"
 	var in sessions.ClaudeRelocation
 	for i := 0; i < len(args); i += 2 {
 		if i+1 >= len(args) || args[i+1] == "" {

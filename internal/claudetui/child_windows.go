@@ -10,7 +10,7 @@ import (
 
 	"golang.org/x/sys/windows"
 
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/istoo/myna/internal/proc"
 )
 
 // child is Claude Code, started in a pseudo console (ConPTY): Windows' own

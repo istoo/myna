@@ -62,28 +62,28 @@ function serve(lang) {
 // Expected reader-facing words, independent of the translation lookup.
 const W = {
   en: { tag: "Subagent", review: "Review",
-    moved: "Claude Desktop requested a subagent on fake/m1; magpie put it on fake/m2, the model set for its subagents.",
-    group: "Claude Desktop requested a subagent; magpie selects its model within this routing group.",
+    moved: "Claude Desktop requested a subagent on fake/m1; myna put it on fake/m2, the model set for its subagents.",
+    group: "Claude Desktop requested a subagent; myna selects its model within this routing group.",
     terminal: "Claude Code requested a subagent on fake/m1.", codex: "Codex requested a subagent on fake/m1.",
     desktop: "Claude Desktop requested a subagent on fake/m1." },
   zh: { tag: "子代理", review: "审查",
-    moved: "Claude Desktop 请求了使用 fake/m1 的子代理；magpie 将其改用 fake/m2，即为它的子代理设定的模型。",
-    group: "Claude Desktop 请求了子代理，由 magpie 在此路由组内选择模型。",
+    moved: "Claude Desktop 请求了使用 fake/m1 的子代理；myna 将其改用 fake/m2，即为它的子代理设定的模型。",
+    group: "Claude Desktop 请求了子代理，由 myna 在此路由组内选择模型。",
     terminal: "Claude Code 请求了使用 fake/m1 的子代理。", codex: "Codex 请求了使用 fake/m1 的子代理。",
     desktop: "Claude Desktop 请求了使用 fake/m1 的子代理。" },
   "zh-TW": { tag: "子代理", review: "審查",
-    moved: "Claude Desktop 請求了使用 fake/m1 的子代理；magpie 將其改用 fake/m2，即為它的子代理設定的模型。",
-    group: "Claude Desktop 請求了子代理，由 magpie 在此路由組內選擇模型。",
+    moved: "Claude Desktop 請求了使用 fake/m1 的子代理；myna 將其改用 fake/m2，即為它的子代理設定的模型。",
+    group: "Claude Desktop 請求了子代理，由 myna 在此路由組內選擇模型。",
     terminal: "Claude Code 請求了使用 fake/m1 的子代理。", codex: "Codex 請求了使用 fake/m1 的子代理。",
     desktop: "Claude Desktop 請求了使用 fake/m1 的子代理。" },
   ja: { tag: "サブエージェント", review: "レビュー",
-    moved: "Claude Desktop が fake/m1 のサブエージェントをリクエストしました。magpie はサブエージェント用に設定された fake/m2 に切り替えました。",
-    group: "Claude Desktop がサブエージェントをリクエストしました。モデルは magpie がこのルーティンググループ内で選びます。",
+    moved: "Claude Desktop が fake/m1 のサブエージェントをリクエストしました。myna はサブエージェント用に設定された fake/m2 に切り替えました。",
+    group: "Claude Desktop がサブエージェントをリクエストしました。モデルは myna がこのルーティンググループ内で選びます。",
     terminal: "Claude Code が fake/m1 のサブエージェントをリクエストしました。", codex: "Codex が fake/m1 のサブエージェントをリクエストしました。",
     desktop: "Claude Desktop が fake/m1 のサブエージェントをリクエストしました。" },
   de: { tag: "Subagent", review: "Review",
-    moved: "Claude Desktop hat einen Subagent mit fake/m1 angefordert; magpie hat ihn auf fake/m2 gesetzt, das für seine Subagenten festgelegte Modell.",
-    group: "Claude Desktop hat einen Subagenten angefordert; magpie wählt sein Modell innerhalb dieser Weiterleitungsgruppe.",
+    moved: "Claude Desktop hat einen Subagent mit fake/m1 angefordert; myna hat ihn auf fake/m2 gesetzt, das für seine Subagenten festgelegte Modell.",
+    group: "Claude Desktop hat einen Subagenten angefordert; myna wählt sein Modell innerhalb dieser Weiterleitungsgruppe.",
     terminal: "Claude Code hat einen Subagent mit fake/m1 angefordert.", codex: "Codex hat einen Subagent mit fake/m1 angefordert.",
     desktop: "Claude Desktop hat einen Subagent mit fake/m1 angefordert." },
 };
@@ -128,7 +128,7 @@ for (const engine of engines) {
           page.setDefaultNavigationTimeout(60000);
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", serve(lang));
-          await page.addInitScript((on) => localStorage.setItem("magpie.routingBySession", on ? "1" : "0"), bySession);
+          await page.addInitScript((on) => localStorage.setItem("myna.routingBySession", on ? "1" : "0"), bySession);
           await page.goto(url);
           return page;
         };
@@ -155,7 +155,7 @@ for (const engine of engines) {
 
         // the list, by request: the tag beside the model, Codex's reasons
         // under the pointer, nothing pushed out of the row
-        let page = await open("http://magpie.test/?view=routing", { width, height: 760 });
+        let page = await open("http://myna.test/?view=routing", { width, height: 760 });
         await page.locator(".rt-req").nth(routes.length - 1).waitFor();
         await still(page);
         same(await tags(page, ".rt-req"));
@@ -181,7 +181,7 @@ for (const engine of engines) {
         for (const [n, [i, said, tagged]] of stories.entries()) {
           if (n) {
             await page.close();
-            page = await open("http://magpie.test/?view=routing", { width, height: 760 });
+            page = await open("http://myna.test/?view=routing", { width, height: 760 });
             await page.locator(".rt-req").nth(routes.length - 1).waitFor();
           }
           await page.locator(".rt-req").nth(i).evaluate((e) => e.click());
@@ -195,7 +195,7 @@ for (const engine of engines) {
         // the Purpose filter: Claude Code names no purpose, so the tagged
         // turns stay under Unmarked, Codex's subagent not
         await page.close();
-        page = await open("http://magpie.test/?view=routing", { width, height: 760 });
+        page = await open("http://myna.test/?view=routing", { width, height: 760 });
         await page.locator(".rt-req").nth(routes.length - 1).waitFor();
         await click(page, page.locator("#rtPurpose"));
         const unmarked = await page.evaluate(() => t("Unmarked"));
@@ -212,7 +212,7 @@ for (const engine of engines) {
         // the replay: the oldest, a Desktop subagent's turn on its effort,
         // goes first with its tag
         await page.close();
-        page = await open("http://magpie.test/?view=routing", { width, height: 760 });
+        page = await open("http://myna.test/?view=routing", { width, height: 760 });
         await page.locator(".rt-req").nth(routes.length - 1).waitFor();
         const replay = await page.evaluate(() => t("Replay them all"));
         await click(page, page.getByRole("button", { name: replay, exact: true }));
@@ -229,7 +229,7 @@ for (const engine of engines) {
 
         // by session: the same rows under their sessions
         await page.close();
-        page = await open("http://magpie.test/?view=routing", { width, height: 760 }, true);
+        page = await open("http://myna.test/?view=routing", { width, height: 760 }, true);
         await page.locator(".rt-session").nth(2).waitFor();
         await page.locator(".rt-req").nth(routes.length - 1).waitFor();
         const grouped = await tags(page, ".rt-req");
@@ -237,7 +237,7 @@ for (const engine of engines) {
         assert.deepEqual(sorted(grouped), sorted(want), "the same tags and reasons by session");
 
         // the tray panel's newest rows, from the live trace
-        const panel = await open("http://magpie.test/?mode=panel", { width: Math.min(width, 440), height: 600 });
+        const panel = await open("http://myna.test/?mode=panel", { width: Math.min(width, 440), height: 600 });
         await panel.locator('[data-ptab="routing"]').click();
         await panel.locator(".pr-req").nth(5).waitFor();
         const pr = await panel.locator(".pr-req").evaluateAll((rows) => rows.map((r) => [r.querySelector(".pr-a .kind")?.textContent || "", r.querySelector(".pr-a .kind")?.title || ""]));

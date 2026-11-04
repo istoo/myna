@@ -8,14 +8,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/istoo/myna/internal/gateway"
 )
 
-// Behind magpie's MCP hub the server is started once for every agent, in
+// Behind myna's MCP hub the server is started once for every agent, in
 // the home folder: a call the hub makes carries its agent's roots and
 // name in _meta, and the images go into that agent's project, asked for
 // under its name. With no roots (an agent that says none) they go into
-// ~/Pictures/Magpie, never the folder the server was started in. The hub
+// ~/Pictures/Myna, never the folder the server was started in. The hub
 // keeps the call's row in the request log, so the server reports none.
 func TestHubCallSavesInTheCallersProject(t *testing.T) {
 	home := t.TempDir()
@@ -24,18 +24,18 @@ func TestHubCallSavesInTheCallersProject(t *testing.T) {
 	g := &reportGW{}
 	mine := t.TempDir() // what this server's own client says is its root
 	c := start(t, g, mine)
-	c.call("initialize", map[string]any{"protocolVersion": "2025-06-18", "capabilities": map[string]any{"roots": map[string]any{}}, "clientInfo": map[string]any{"name": "magpie", "version": "1"}})
+	c.call("initialize", map[string]any{"protocolVersion": "2025-06-18", "capabilities": map[string]any{"roots": map[string]any{}}, "clientInfo": map[string]any{"name": "myna", "version": "1"}})
 
 	project := t.TempDir()
-	r := c.call("tools/call", map[string]any{"name": "generate_image", "arguments": map[string]any{"prompt": "a magpie"},
+	r := c.call("tools/call", map[string]any{"name": "generate_image", "arguments": map[string]any{"prompt": "a myna"},
 		"_meta": map[string]any{gateway.HubRootsMeta: []string{"https://example.com/x", fileURI(project)}, gateway.HubClientMeta: "claude-code/2.1.314"}})
 	if r["isError"] == true || !strings.Contains(text(r), filepath.Join(project, Folder)) {
 		t.Fatalf("%v", r)
 	}
-	if files, _ := filepath.Glob(filepath.Join(project, Folder, "a-magpie-*.png")); len(files) != 1 {
+	if files, _ := filepath.Glob(filepath.Join(project, Folder, "a-myna-*.png")); len(files) != 1 {
 		t.Fatalf("saved %v", files)
 	}
-	if got := g.ua[len(g.ua)-1]; got != "claude-code/2.1.314 magpie-image/1" {
+	if got := g.ua[len(g.ua)-1]; got != "claude-code/2.1.314 myna-image/1" {
 		t.Errorf("asked as %q", got)
 	}
 	// the hub's row names the model, from the result's _meta
@@ -43,9 +43,9 @@ func TestHubCallSavesInTheCallersProject(t *testing.T) {
 		t.Errorf("no model in the result's _meta: %v", r)
 	}
 
-	r = c.call("tools/call", map[string]any{"name": "generate_image", "arguments": map[string]any{"prompt": "a magpie"},
+	r = c.call("tools/call", map[string]any{"name": "generate_image", "arguments": map[string]any{"prompt": "a myna"},
 		"_meta": map[string]any{gateway.HubRootsMeta: []string{}}})
-	pictures := filepath.Join(home, "Pictures", "Magpie")
+	pictures := filepath.Join(home, "Pictures", "Myna")
 	if r["isError"] == true || !strings.Contains(text(r), pictures) {
 		t.Fatalf("no roots: %v", r)
 	}

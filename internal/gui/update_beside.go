@@ -4,18 +4,18 @@ import (
 	"context"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/update"
+	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/myna/internal/update"
 )
 
-// restartBeside answers the gateway's RestartPath: `magpie update`, run in
+// restartBeside answers the gateway's RestartPath: `myna update`, run in
 // a terminal (gaubeebangeel on X: an agent this gateway serves, at 4am),
-// put version in where this magpie runs from. Before, the app ran on as
+// put version in where this myna runs from. Before, the app ran on as
 // the old version until someone quit and reopened it, which cut what the
 // agents had in flight. It now restarts into it as Settings' AutoRestart
 // does: at once when the restart cuts nothing short (on a Mac or Linux it
 // hands the gateway over, so the agent's own requests go on), else once
-// that is done (waitIdle). A magpie that wasn't the one replaced (another
+// that is done (waitIdle). A myna that wasn't the one replaced (another
 // copy) stays as it is.
 func (u *updater) restartBeside(version string) gateway.RestartReply {
 	u.mu.Lock()
@@ -55,10 +55,10 @@ func (u *updater) restartBeside(version string) gateway.RestartReply {
 // shorten it.
 var replacedTick = 5 * time.Second
 
-// followReplaced restarts this magpie into an update another magpie put in
-// where it runs from, as restartBeside does for magpie update's ask
-// (visamzh on X). The app and magpie web run from the same program (the
-// terminal's magpie is the app's, linked), and each had its own updater:
+// followReplaced restarts this myna into an update another myna put in
+// where it runs from, as restartBeside does for myna update's ask
+// (visamzh on X). The app and myna web run from the same program (the
+// terminal's myna is the app's, linked), and each had its own updater:
 // one restarting to update put the new version in, and the other ran on
 // as the old one, its Update still offering the version already in, its
 // page never reloaded. Neither tells the other, and the other may serve

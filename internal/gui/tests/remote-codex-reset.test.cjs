@@ -1,8 +1,8 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// #3850 (prgrmrwy): magpie on a home server, and the office's remote magpie
-// card said "1 reset" with no way to use it there. A remote magpie's Codex
+// #3850 (prgrmrwy): myna on a home server, and the office's remote myna
+// card said "1 reset" with no way to use it there. A remote myna's Codex
 // card now offers the reset as this computer's does: the same in-app
-// confirmation (no confirm()), which says the magpie on that computer uses
+// confirmation (no confirm()), which says the myna on that computer uses
 // it, and nothing is spent before the user says so. The use names the
 // card's remote provider and the account. A GLM team's resets (byWindow),
 // spent on the vendor's page, and a remote's other cards offer none. What
@@ -28,7 +28,7 @@ const quotas = [
     resets: { count: 2, byWindow: true } },
 ];
 
-const READ_ONLY = "this key is read-only on the remote magpie; give the provider a key with full access to use a reset from here";
+const READ_ONLY = "this key is read-only on the remote myna; give the provider a key with full access to use a reset from here";
 const LATE = "Office didn't say in time whether the reset was used; it may have been. Refresh the card to see before asking again";
 
 function serve(lang, posted, answer) {
@@ -54,15 +54,15 @@ function serve(lang, posted, answer) {
   };
 }
 
-const KEYS = ["The magpie on {computer}, where this account is signed in, uses it.",
-  "This key is read-only on that computer's magpie — give this provider a key with full access to use a reset from here",
+const KEYS = ["The myna on {computer}, where this account is signed in, uses it.",
+  "This key is read-only on that computer's myna — give this provider a key with full access to use a reset from here",
   "That computer didn't say in time whether the reset was used — it may have been. Refresh the card before asking again",
-  "That computer's magpie can't use a reset from here yet — update magpie there",
-  "That computer's magpie holds this key to a budget, models or accounts, so it uses none of its resets — give this provider a key with full access"];
+  "That computer's myna can't use a reset from here yet — update myna there",
+  "That computer's myna holds this key to a budget, models or accounts, so it uses none of its resets — give this provider a key with full access"];
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   for (const lang of ["en", "zh", "zh-TW", "ja", "de"]) {
-    test(`${engine} ${lang}: a remote magpie's Codex reset is used from here, asked first`, async (t) => {
+    test(`${engine} ${lang}: a remote myna's Codex reset is used from here, asked first`, async (t) => {
       const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
       t.after(() => browser.close());
       const errors = [];
@@ -90,7 +90,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const ask = page.locator(".reset-ask");
         await page.locator(useSel).click();
         await ask.waitFor();
-        assert.equal((await ask.locator(".reset-remote").textContent()).trim(), await say(page, "The magpie on {computer}, where this account is signed in, uses it.", { computer: "Office" }));
+        assert.equal((await ask.locator(".reset-remote").textContent()).trim(), await say(page, "The myna on {computer}, where this account is signed in, uses it.", { computer: "Office" }));
         assert.equal(await page.evaluate(() => { const e = document.querySelector(".reset-ask").getBoundingClientRect(); return e.right <= innerWidth && e.left >= 0; }), true, "the confirmation fits");
         // Cancel spends nothing
         await page.keyboard.press("Escape");
@@ -124,8 +124,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.context().close();
       };
 
-      for (const width of [900, 390]) await run("http://magpie.test/?view=usage", { width, height: 800 }, ".quota-resets button", ".quota-resets");
-      await run("http://magpie.test/?mode=panel", { width: 440, height: 700 }, ".pq-use", ".pq-use");
+      for (const width of [900, 390]) await run("http://myna.test/?view=usage", { width, height: 800 }, ".quota-resets button", ".quota-resets");
+      await run("http://myna.test/?mode=panel", { width: 440, height: 700 }, ".pq-use", ".pq-use");
       assert.deepEqual(errors, []);
     });
   }

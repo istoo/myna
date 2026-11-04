@@ -5,18 +5,18 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/agent"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // zgjfjfl on Discord (10-31): Codex on a relay's gpt-6-A compacted near
 // 128K with Long conversations at 544K. Codex compacts at 90% of the
-// window magpie tells it, and no threshold above that window can move it,
+// window myna tells it, and no threshold above that window can move it,
 // so Settings names the model Codex's config runs and its window when
 // Long conversations doesn't come below it. Under Full window, below the
 // window, or with a threshold on the model, it says nothing, and a model
-// Codex runs on its own provider is not magpie's to name.
+// Codex runs on its own provider is not myna's to name.
 func TestCodexWindowUnderLongConversations(t *testing.T) {
 	h := sandboxHome(t)
 	if _, err := provider.Add(provider.Provider{ID: "relay", Name: "Relay", Chat: "http://127.0.0.1:1/v1", Key: "sk-relay",
@@ -41,14 +41,14 @@ func TestCodexWindowUnderLongConversations(t *testing.T) {
 	}
 	got := func() *codexRunWindow { return settingsState().CodexWindow }
 
-	cfg("model = \"relay/gpt-6-A\"\nmodel_provider = \"magpie\"\n")
+	cfg("model = \"relay/gpt-6-A\"\nmodel_provider = \"myna\"\n")
 	save(settings.Settings{CompactAt: 544000})
 	if w := got(); w == nil || *w != (codexRunWindow{Model: "relay/gpt-6-A", Window: 128000, Size: "128K"}) {
 		t.Fatalf("544K over a 128K model: codexWindow = %+v; want relay/gpt-6-A at 128000", w)
 	}
 
 	// the profile the config picks is the model Codex runs
-	cfg("model = \"gpt-5.5\"\nmodel_provider = \"openai\"\nprofile = \"r\"\n\n[profiles.r]\nmodel = \"relay/gpt-6-A\"\nmodel_provider = \"magpie\"\n")
+	cfg("model = \"gpt-5.5\"\nmodel_provider = \"openai\"\nprofile = \"r\"\n\n[profiles.r]\nmodel = \"relay/gpt-6-A\"\nmodel_provider = \"myna\"\n")
 	if w := got(); w == nil || w.Model != "relay/gpt-6-A" {
 		t.Fatalf("profile's model: codexWindow = %+v", w)
 	}
@@ -58,7 +58,7 @@ func TestCodexWindowUnderLongConversations(t *testing.T) {
 		t.Fatalf("Codex's own provider: codexWindow = %+v; want none", w)
 	}
 
-	cfg("model = \"relay/gpt-6-A\"\nmodel_provider = \"magpie\"\n")
+	cfg("model = \"relay/gpt-6-A\"\nmodel_provider = \"myna\"\n")
 	save(settings.Settings{CompactAt: 100000})
 	if w := got(); w != nil {
 		t.Fatalf("100K under the window: codexWindow = %+v; want none", w)

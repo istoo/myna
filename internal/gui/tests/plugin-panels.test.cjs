@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// A community plugin's panels in magpie's own pages (pluginpages.js, P5):
+// A community plugin's panels in myna's own pages (pluginpages.js, P5):
 // the example plugin (testdata/panel-plugin) adds a note to each
 // provider's editor, told which provider it is in, the top models at the
 // end of Usage, and its settings on Settings' Plugins tab, a tab there
@@ -22,8 +22,8 @@ const example = path.resolve(__dirname, "../testdata/panel-plugin/ui");
 const bridge = path.resolve(__dirname, "../pagebridge.js");
 
 const NOTES = "1".repeat(32), SPEND = "2".repeat(32), SETS = "3".repeat(32), TALL = "4".repeat(32), BROKEN = "5".repeat(32), LIB = "6".repeat(32);
-const panel = (tok, i, slot, title, file, name = "magpie-provider-notes", reads = ["usage:summary"]) => ({
-  spec: "/x/" + name, name, key: `plugin-${name.replace("magpie-", "")}-${i}`, slot, title, reads, url: `/_magpie/plugin/${tok}/${file}`,
+const panel = (tok, i, slot, title, file, name = "myna-provider-notes", reads = ["usage:summary"]) => ({
+  spec: "/x/" + name, name, key: `plugin-${name.replace("myna-", "")}-${i}`, slot, title, reads, url: `/_myna/plugin/${tok}/${file}`,
 });
 const allPanels = [
   panel(NOTES, 0, "provider", "Notes", "notes.html"),
@@ -32,11 +32,11 @@ const allPanels = [
   panel(TALL, 0, "agents", "Tall", "tall.html", "tall", []),
   panel(BROKEN, 0, "agents", "Broken", "broken.html", "broken", []),
 ];
-const pages = [{ spec: "/x/my-library", name: "my-library", key: "plugin-my-library", title: "My library", replaces: "library", reads: [], url: `/_magpie/plugin/${LIB}/index.html` }];
+const pages = [{ spec: "/x/my-library", name: "my-library", key: "plugin-my-library", title: "My library", replaces: "library", reads: [], url: `/_myna/plugin/${LIB}/index.html` }];
 
-const TALL_HTML = `<!doctype html><meta charset="utf-8"><style>body{margin:0;padding:0}</style><script src="_magpie/bridge.js"></script><div id="box" style="height:180px">tall</div>`;
-const BROKEN_HTML = `<!doctype html><meta charset="utf-8"><script src="_magpie/bridge.js"></script><script src="app.js"></script><p id="ok">drawn</p>`;
-const LIB_HTML = `<!doctype html><meta charset="utf-8"><script src="_magpie/bridge.js"></script><p id="mine">my library</p>`;
+const TALL_HTML = `<!doctype html><meta charset="utf-8"><style>body{margin:0;padding:0}</style><script src="_myna/bridge.js"></script><div id="box" style="height:180px">tall</div>`;
+const BROKEN_HTML = `<!doctype html><meta charset="utf-8"><script src="_myna/bridge.js"></script><script src="app.js"></script><p id="ok">drawn</p>`;
+const LIB_HTML = `<!doctype html><meta charset="utf-8"><script src="_myna/bridge.js"></script><p id="mine">my library</p>`;
 
 const providerList = [{ id: "openai", name: "OpenAI", icon: "generic", host: "api.openai.com", chat: "https://api.openai.com/v1", models: [] }]
   .map((p) => ({ responses: "", anthropic: "", agents: [], fallback: [], headers: {}, key: { set: false }, keyList: [], ready: true, ...p }));
@@ -66,12 +66,12 @@ function server(lang, seen, opts) {
     if (url.pathname === "/api/plugins/market") return json({ listings: [], state: opts.plugins || { plugins: [] } });
     if (url.pathname === "/api/plugins/listings") return json({ listings: [] });
     if (url.pathname.startsWith("/api/")) return json({});
-    const m = url.pathname.match(/^\/_magpie\/plugin\/([0-9a-f]{32})\/(.+)$/);
+    const m = url.pathname.match(/^\/_myna\/plugin\/([0-9a-f]{32})\/(.+)$/);
     if (m) {
       const [, tok, rel] = m;
       const type = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css" }[path.extname(rel)];
       let body;
-      if (rel === "_magpie/bridge.js") body = await fs.readFile(bridge);
+      if (rel === "_myna/bridge.js") body = await fs.readFile(bridge);
       else if ([NOTES, SPEND, SETS].includes(tok)) body = await fs.readFile(path.join(example, rel)).catch(() => null);
       else if (tok === TALL && rel === "tall.html") body = TALL_HTML;
       else if (tok === BROKEN && rel === "broken.html") body = BROKEN_HTML;
@@ -80,7 +80,7 @@ function server(lang, seen, opts) {
       if (body == null) return route.fulfill({ status: 404, body: "" });
       return route.fulfill({ status: 200, headers: { "Content-Security-Policy": "sandbox allow-scripts; connect-src 'none'", "Content-Type": type }, body });
     }
-    if (url.host !== "magpie.test") return route.fulfill({ status: 404, body: "" });
+    if (url.host !== "myna.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -96,7 +96,7 @@ async function frameReady(page, tok) {
 const fits = (page, sel) => page.evaluate((sel) => { const v = document.querySelector(sel); return v.scrollWidth <= v.clientWidth + 1; }, sel);
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
-  test(`${engine}: a plugin's panels draw in magpie's own pages, shut in`, async (t) => {
+  test(`${engine}: a plugin's panels draw in myna's own pages, shut in`, async (t) => {
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     t.after(() => browser.close());
     for (const lang of ["en", "zh", "zh-TW", "ja", "de"]) {
@@ -110,7 +110,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         const seen = { reads: [], options: [], broken: lang === "en" && width === 1100 };
         await page.route("**/*", server(lang, seen, { panels: allPanels, pages }));
-        await page.goto("http://magpie.test/");
+        await page.goto("http://myna.test/");
         const tr = (k, v) => page.evaluate(([k, v]) => t(k, v), [k, v]);
 
         // the Agents page: a panel as tall as it draws, in a frame sandboxed to scripts
@@ -166,7 +166,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const spend = await frameReady(page, SPEND);
         await spend.waitForFunction(() => document.querySelectorAll("#top li").length === 2);
         assert.equal(await spend.locator("#top li").first().textContent(), "gpt-5: 9 calls", where);
-        assert.ok(seen.reads.some((r) => r.spec === "/x/magpie-provider-notes" && r.read === "usage:summary"), where);
+        assert.ok(seen.reads.some((r) => r.spec === "/x/myna-provider-notes" && r.read === "usage:summary"), where);
         assert.equal(await spend.evaluate(() => document.documentElement.lang), lang, `${where}: the window's language`);
         assert.ok(await fits(page, "#view-usage"), `${where}: Usage fits`);
         // Usage hides its own headings while a period loads, not a panel's
@@ -180,11 +180,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.evaluate(() => openModal(renderEditor(providers.providers[0])));
         const notes = await frameReady(page, NOTES);
         assert.equal(await page.locator('#modal .plugin-slot[data-slot="provider"] iframe').getAttribute("sandbox"), "allow-scripts", where);
-        await notes.waitForFunction(() => window.magpie.context?.provider?.id === "openai");
-        assert.equal(await notes.evaluate(() => magpie.context.provider.name), "OpenAI", where);
+        await notes.waitForFunction(() => window.myna.context?.provider?.id === "openai");
+        assert.equal(await notes.evaluate(() => myna.context.provider.name), "OpenAI", where);
         await notes.locator("#note").fill("work account");
         await notes.locator("#saved").filter({ hasText: "Saved" }).waitFor();
-        assert.deepEqual(seen.options.at(-1), { spec: "/x/magpie-provider-notes", options: { notes: { openai: "work account" } } }, `${where}: its own options`);
+        assert.deepEqual(seen.options.at(-1), { spec: "/x/myna-provider-notes", options: { notes: { openai: "work account" } } }, `${where}: its own options`);
         assert.ok(await page.evaluate(() => { const m = document.querySelector("#modal .plugin-slot"); return m.getBoundingClientRect().right <= innerWidth + 1; }), `${where}: the editor fits`);
         // a new provider's editor has no provider to tell: no panel
         await page.evaluate(() => openModal(renderEditor(null)));
@@ -237,7 +237,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     const errors = [];
     page.on("pageerror", (e) => errors.push(e.message));
     await page.route("**/*", server("en", { reads: [], options: [] }, { panels: allPanels.filter((p) => p.slot !== "settings"), pages: [] }));
-    await page.goto("http://magpie.test/?view=settings");
+    await page.goto("http://myna.test/?view=settings");
     await page.locator('.plugin-panel[data-panel="plugin-tall-0"]').waitFor({ state: "attached" });
     assert.equal(await page.locator("#setTab-plugins").isVisible(), false);
     assert.equal(await page.locator(".nav-sub .nav-s", { hasText: "Plugins" }).count(), 0, "not in the sidebar");
@@ -254,8 +254,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     t.after(() => browser.close());
     const plugins = { bun: true, bunVersion: "1.3.0", plugins: [
-      { spec: "/x/magpie-provider-notes", providers: [], moved: [], inMagpieOnly: true, panels: [{ slot: "provider", title: "Notes" }, { slot: "usage", title: "Top models today" }, { slot: "settings", title: "Provider notes" }], panelReads: ["usage:summary"] },
-      { spec: "/x/my-library", providers: [], moved: [], inMagpieOnly: true, page: { title: "My library", replaces: "library", reads: [] } },
+      { spec: "/x/myna-provider-notes", providers: [], moved: [], inMynaOnly: true, panels: [{ slot: "provider", title: "Notes" }, { slot: "usage", title: "Top models today" }, { slot: "settings", title: "Provider notes" }], panelReads: ["usage:summary"] },
+      { spec: "/x/my-library", providers: [], moved: [], inMynaOnly: true, page: { title: "My library", replaces: "library", reads: [] } },
     ] };
     for (const lang of ["en", "zh", "zh-TW", "ja", "de"]) {
       for (const width of [980, 420]) {
@@ -266,19 +266,19 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, { reads: [], options: [] }, { panels: [], pages: [], plugins }));
-        await page.goto("http://magpie.test/?view=plugins");
+        await page.goto("http://myna.test/?view=plugins");
         const view = page.locator("#view-plugins");
         const installed = await page.evaluate(() => t("Installed"));
         await page.locator(":is(.lib-tabs .opt, .nav-s):visible", { hasText: installed }).first().click();
         const row = (name) => view.locator(".pm-row").filter({ has: page.locator(".name", { hasText: name }) });
         const tr = (k, v) => page.evaluate(([k, v]) => t(k, v), [k, v]);
-        const notes = row("magpie-provider-notes");
+        const notes = row("myna-provider-notes");
         await notes.waitFor();
         assert.deepEqual((await notes.locator(".pm-chip.kind").allInnerTexts()).map((x) => x.trim()), [await tr("Panels")], where);
         const where2 = [await tr("each provider's editor"), await tr("the Usage page"), await tr("Settings")].join(await tr(", "));
         assert.equal((await notes.locator(".pm-page").innerText()).trim(), await tr("Adds panels to {where}, which can read {reads}", { where: where2, reads: await tr("your usage totals, by model") }), where);
         const lib = row("my-library");
-        assert.equal((await lib.locator(".pm-page").innerText()).trim(), await tr("Takes the place of the {page} page, and reads nothing of magpie's", { page: await tr("Library") }), where);
+        assert.equal((await lib.locator(".pm-page").innerText()).trim(), await tr("Takes the place of the {page} page, and reads nothing of myna's", { page: await tr("Library") }), where);
         if (lang !== "en") assert.ok(!(await notes.locator(".pm-page").innerText()).includes("Adds panels"), `${where}: translated`);
         assert.ok(await view.evaluate((v) => v.scrollWidth <= v.clientWidth + 1), `${where}: fits`);
         assert.deepEqual(errors, [], where);

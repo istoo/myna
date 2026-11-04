@@ -4,7 +4,7 @@
 // Ask before quitting is On by default, says when it asks, and Off saves
 // quitNoAsk with the rest of the settings kept; a quitNoAsk the question's
 // Don't ask again saved shows Off, and On saves it false. The app's only:
-// a browser's page (magpie web) quits without asking, so the row isn't
+// a browser's page (myna web) quits without asking, so the row isn't
 // there. In every language, both engines, 1100 and 420 wide; segments,
 // never a native <select>, and the click moves nothing.
 const assert = require("node:assert/strict");
@@ -65,7 +65,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const saved = [];
       await page.route("**/*", serve(lang, saved, own, web));
       await watchSettingsReads(page);
-      await page.goto("http://magpie.test/?view=settings&tab=general");
+      await page.goto("http://myna.test/?view=settings&tab=general");
       await settingsDrawn(page);
       return { page, saved };
     };

@@ -8,10 +8,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // A plugin's sign-in changing reaches the model lists agents keep in
@@ -22,13 +22,13 @@ import (
 // go from the file, by the same hook.
 func TestPluginSignInReachesPiModels(t *testing.T) {
 	home := syncHome(t)
-	t.Setenv("MAGPIE_BUN", "")
+	t.Setenv("MYNA_BUN", "")
 	catalog.Changed = SyncCatalog
 	t.Cleanup(func() { plugin.Told(); catalog.Changed = nil })
 	if err := provider.Save(provider.Provider{ID: "deepseek", Name: "DeepSeek", Chat: "https://api.deepseek.com/v1", Key: "k", Models: []string{"pro"}}); err != nil {
 		t.Fatal(err)
 	}
-	spec := "@magpie-community/opencode-trae-auth"
+	spec := "@myna-community/opencode-trae-auth"
 	write := func(name string, v any) {
 		t.Helper()
 		b, _ := json.Marshal(v)
@@ -46,7 +46,7 @@ func TestPluginSignInReachesPiModels(t *testing.T) {
 	t.Cleanup(plugin.Settle)
 
 	p := pi(home)
-	if err := p.Pick("model", "magpie/deepseek/pro"); err != nil {
+	if err := p.Pick("model", "myna/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	plugin.Told()

@@ -12,15 +12,15 @@ import (
 
 // DefaultReplyHeaders are passed on from every provider's reply, without a
 // word from the user: request ids, opaque to everyone but the vendor, which
-// magpie sets no header of its own under. OpenAI's and Anthropic's names,
+// myna sets no header of its own under. OpenAI's and Anthropic's names,
 // and one-api's (new-api and the relays built on it).
 var DefaultReplyHeaders = []string{"Request-Id", "X-Request-Id", "X-Oneapi-Request-Id"}
 
 // replyHeadersNever are never passed on, listed or not: the reply's own
-// framing, which magpie writes for what it sends (a translated or
+// framing, which myna writes for what it sends (a translated or
 // unpacked body has another length, encoding and type), what is said of
 // the connection, cookies and sign-ins of the vendor's that would be set
-// on magpie's address, and what tells a browser to trust or reach magpie
+// on myna's address, and what tells a browser to trust or reach myna
 // otherwise. The prefixes below go with them.
 var replyHeadersNever = map[string]bool{
 	"Connection": true, "Keep-Alive": true, "Te": true, "Trailer": true, "Transfer-Encoding": true, "Upgrade": true,
@@ -33,8 +33,8 @@ var replyHeadersNever = map[string]bool{
 
 // replyHeadersNeverPrefix: Content-Length, -Encoding, -Type and the rest;
 // Proxy-Authenticate and the rest; CORS's, which would let a page read
-// magpie; Sec- fetch metadata; and magpie's own, which the gateway reads
-// as said by the magpie that answered (a rest, a refusal, a key limit).
+// myna; Sec- fetch metadata; and myna's own, which the gateway reads
+// as said by the myna that answered (a rest, a refusal, a key limit).
 var replyHeadersNeverPrefix = []string{"Content-", "Proxy-", "Access-Control-", "Sec-", "X-Magpie-"}
 
 // ReplyHeaderPassable says whether a header of a vendor's reply may be
@@ -67,7 +67,7 @@ func validHeaderName(k string) bool {
 }
 
 // ReplyHeadersOK says what is wrong with a list of reply headers to pass
-// on, "" when nothing is: a name that isn't one, or one magpie never
+// on, "" when nothing is: a name that isn't one, or one myna never
 // passes on.
 func ReplyHeadersOK(names []string) string {
 	for _, n := range names {
@@ -79,7 +79,7 @@ func ReplyHeadersOK(names []string) string {
 			return "\"" + n + "\" isn't a header name"
 		}
 		if !ReplyHeaderPassable(n) {
-			return n + " is never passed on: magpie writes it, or it would act on magpie's own address"
+			return n + " is never passed on: myna writes it, or it would act on myna's own address"
 		}
 	}
 	return ""

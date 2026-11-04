@@ -24,7 +24,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // The kinds of a prompt's parts, in the order they are shown.
@@ -1231,7 +1231,7 @@ func windowFor(id, model string) int {
 
 // livePrompt is p as a route still answering shows it: in the window of
 // the model its try went to, read as the try went out (packinggoods on
-// Discord: a request in flight on a remote magpie's claude-opus-5-5 said
+// Discord: a request in flight on a remote myna's claude-opus-5-5 said
 // the model's window isn't known, its window set only once it was done).
 // p itself is left as it is, for the route's end to scale and give the
 // window of the model that answered.

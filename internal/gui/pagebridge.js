@@ -1,47 +1,47 @@
-// The page's side of a plugin page's messages to magpie's window
+// The page's side of a plugin page's messages to myna's window
 // (docs/subsystems/plugin-runtime.md, P4). A plugin's page loads it with
-// <script src="_magpie/bridge.js"></script>; it is served beside every
+// <script src="_myna/bridge.js"></script>; it is served beside every
 // page's own files.
 //
-//   await magpie.ready            the window's theme, once it has answered
-//   magpie.theme                  { dark, lang, tokens: { bg, fg, … } }
-//   magpie.onTheme(fn)            fn(theme) on each change of it
-//   await magpie.options.get()    the plugin's own options (plugins.json)
-//   await magpie.options.set(o)   sets them, and answers with them
-//   await magpie.read(name, p)    a read its package.json's
-//                                 magpie.permissions declares
-//   magpie.context                where a panel is (P5): { provider: {
+//   await myna.ready            the window's theme, once it has answered
+//   myna.theme                  { dark, lang, tokens: { bg, fg, … } }
+//   myna.onTheme(fn)            fn(theme) on each change of it
+//   await myna.options.get()    the plugin's own options (plugins.json)
+//   await myna.options.set(o)   sets them, and answers with them
+//   await myna.read(name, p)    a read its package.json's
+//                                 myna.permissions declares
+//   myna.context                where a panel is (P5): { provider: {
 //                                 id, name } } in a provider's editor,
-//                                 else {}; set once magpie.ready is
-//   magpie.service               the address of the page's local service
-//                                 (package.json's magpie.page.service)
-//                                 through magpie, set once magpie.ready
+//                                 else {}; set once myna.ready is
+//   myna.service               the address of the page's local service
+//                                 (package.json's myna.page.service)
+//                                 through myna, set once myna.ready
 //                                 is, on a page a browser opened through
-//                                 magpie web; "" where 127.0.0.1 is the
+//                                 myna web; "" where 127.0.0.1 is the
 //                                 service's own computer (the app's
-//                                 window) or magpie is older
-//   magpie.onAction(fn)           fn({ id, provider | agent: { id, name } })
-//                                 when one of its magpie.actions is picked
+//                                 window) or myna is older
+//   myna.onAction(fn)           fn({ id, provider | agent: { id, name } })
+//                                 when one of its myna.actions is picked
 //                                 in a row's menu (P6); one picked before
 //                                 fn was given waits for it
-//   magpie.visible               false while the reader is on another of
+//   myna.visible               false while the reader is on another of
 //                                 the window's pages
-//   magpie.onVisibility(fn)      fn(visible) as the reader leaves the
+//   myna.onVisibility(fn)      fn(visible) as the reader leaves the
 //                                 page and comes back, to pause what only
 //                                 matters while it is seen; a page left
 //                                 10 minutes is let go, and loads again
 //                                 when next opened, unless package.json
-//                                 says magpie.page.keepAlive
+//                                 says myna.page.keepAlive
 //
-// A panel (magpie.panels) is as tall as what it draws: the window is told
+// A panel (myna.panels) is as tall as what it draws: the window is told
 // its height as it changes.
 //
-// What the page leaves unstyled takes magpie's look: the bridge adds a
+// What the page leaves unstyled takes myna's look: the bridge adds a
 // stylesheet of no weight (:where()) for the font, colours, headings,
 // buttons, fields and tables, and the theme's colours are the page's
-// --magpie-<token> variables.
+// --myna-<token> variables.
 //
-// The page can't reach the network or magpie's API itself: everything goes
+// The page can't reach the network or myna's API itself: everything goes
 // through the window, which answers only what the package declared. An
 // error the page doesn't catch shows the window's "This page stopped
 // working" in its place.
@@ -56,7 +56,7 @@
     const id = ++next;
     return new Promise((resolve, reject) => {
       waiting.set(id, { resolve, reject });
-      parent.postMessage({ magpie: 1, id, method, params }, "*");
+      parent.postMessage({ myna: 1, id, method, params }, "*");
     });
   }
   function paint(theme) {
@@ -65,12 +65,12 @@
     // the frame's canvas matches the window's, not a white sheet in dark
     root.style.colorScheme = theme.dark ? "dark" : "light";
     root.lang = theme.lang || "en";
-    for (const [k, v] of Object.entries(theme.tokens || {})) root.style.setProperty("--magpie-" + k, v);
+    for (const [k, v] of Object.entries(theme.tokens || {})) root.style.setProperty("--myna-" + k, v);
   }
   addEventListener("message", (e) => {
     if (e.source !== parent) return;
     const m = e.data;
-    if (!m || m.magpie !== 1) return;
+    if (!m || m.myna !== 1) return;
     if (m.event === "theme") {
       api.theme = m.data;
       paint(m.data);
@@ -92,7 +92,7 @@
     if (m.error) w.reject(new Error(m.error)); else w.resolve(m.result);
   });
   function report(err) {
-    parent.postMessage({ magpie: 1, method: "error", params: { message: String(err?.message || err) } }, "*");
+    parent.postMessage({ myna: 1, method: "error", params: { message: String(err?.message || err) } }, "*");
   }
   // a script's error reaches a sandboxed page only as "Script error." (its
   // files are another origin's to it); the window then says "The page hit
@@ -145,7 +145,7 @@
     const h = Math.ceil(document.documentElement.getBoundingClientRect().height);
     if (h === told) return;
     told = h;
-    parent.postMessage({ magpie: 1, method: "size", params: { height: h } }, "*");
+    parent.postMessage({ myna: 1, method: "size", params: { height: h } }, "*");
   };
   const watch = () => {
     new ResizeObserver(() => {
@@ -155,36 +155,36 @@
     size();
   };
   if (document.readyState === "loading") addEventListener("DOMContentLoaded", watch); else watch();
-  // magpie's look for what the page leaves unstyled: its font, colours,
+  // myna's look for what the page leaves unstyled: its font, colours,
   // headings, buttons, fields and tables, so a page with no stylesheet of
   // its own reads as part of the window, not a browser's default sheet.
   // Every rule is :where(), of no weight: any rule of the page's wins.
   const base = document.createElement("style");
-  base.dataset.magpie = "base";
+  base.dataset.myna = "base";
   base.textContent = `
-:where(html) { background: var(--magpie-bg, Canvas); color: var(--magpie-fg, CanvasText); font: 13px/1.45 var(--magpie-font, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif); -webkit-font-smoothing: antialiased; }
+:where(html) { background: var(--myna-bg, Canvas); color: var(--myna-fg, CanvasText); font: 13px/1.45 var(--myna-font, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif); -webkit-font-smoothing: antialiased; }
 :where(body) { margin: 0; padding: 20px 24px; }
 :where(h1, h2, h3, h4) { font-weight: 600; margin: 0 0 8px; letter-spacing: -.01em; }
 :where(h1) { font-size: 20px; } :where(h2) { font-size: 15px; } :where(h3, h4) { font-size: 13px; }
 :where(p) { margin: 0 0 8px; }
-:where(small, .muted) { color: var(--magpie-muted, GrayText); }
-:where(a) { color: var(--magpie-accent, LinkText); text-decoration: none; }
+:where(small, .muted) { color: var(--myna-muted, GrayText); }
+:where(a) { color: var(--myna-accent, LinkText); text-decoration: none; }
 :where(a:hover) { text-decoration: underline; }
 :where(button, input, textarea, select) { font: inherit; color: inherit; }
-:where(button) { background: var(--magpie-card, ButtonFace); border: 1px solid var(--magpie-line, ButtonBorder); border-radius: 6px; padding: 3px 10px; }
-:where(button:hover:not(:disabled)) { border-color: var(--magpie-muted, ButtonBorder); }
-:where(button[aria-pressed="true"], button[aria-selected="true"]) { background: var(--magpie-accent-soft, Highlight); border-color: transparent; color: var(--magpie-accent, HighlightText); }
+:where(button) { background: var(--myna-card, ButtonFace); border: 1px solid var(--myna-line, ButtonBorder); border-radius: 6px; padding: 3px 10px; }
+:where(button:hover:not(:disabled)) { border-color: var(--myna-muted, ButtonBorder); }
+:where(button[aria-pressed="true"], button[aria-selected="true"]) { background: var(--myna-accent-soft, Highlight); border-color: transparent; color: var(--myna-accent, HighlightText); }
 :where(button:disabled) { opacity: .5; }
-:where(input, textarea, select) { background: var(--magpie-card, Field); border: 1px solid var(--magpie-line, ButtonBorder); border-radius: 6px; padding: 4px 8px; }
-:where(:focus-visible) { outline: 2px solid var(--magpie-accent, Highlight); outline-offset: 1px; }
+:where(input, textarea, select) { background: var(--myna-card, Field); border: 1px solid var(--myna-line, ButtonBorder); border-radius: 6px; padding: 4px 8px; }
+:where(:focus-visible) { outline: 2px solid var(--myna-accent, Highlight); outline-offset: 1px; }
 :where(table) { border-collapse: collapse; width: 100%; }
-:where(th) { text-align: left; font-weight: 500; font-size: 12px; color: var(--magpie-muted, GrayText); }
-:where(th, td) { padding: 6px 8px; border-bottom: 1px solid var(--magpie-line, ButtonBorder); }
-:where(code, kbd, pre) { font-family: var(--magpie-code, ui-monospace, Menlo, monospace); font-size: 12px; }
-:where(pre) { background: var(--magpie-card, Canvas); border: 1px solid var(--magpie-line, ButtonBorder); border-radius: 8px; padding: 8px 10px; overflow: auto; }
-:where(hr) { border: 0; border-top: 1px solid var(--magpie-line, ButtonBorder); margin: 12px 0; }
-:where(::selection) { background: var(--magpie-accent-soft, Highlight); }
+:where(th) { text-align: left; font-weight: 500; font-size: 12px; color: var(--myna-muted, GrayText); }
+:where(th, td) { padding: 6px 8px; border-bottom: 1px solid var(--myna-line, ButtonBorder); }
+:where(code, kbd, pre) { font-family: var(--myna-code, ui-monospace, Menlo, monospace); font-size: 12px; }
+:where(pre) { background: var(--myna-card, Canvas); border: 1px solid var(--myna-line, ButtonBorder); border-radius: 8px; padding: 8px 10px; overflow: auto; }
+:where(hr) { border: 0; border-top: 1px solid var(--myna-line, ButtonBorder); margin: 12px 0; }
+:where(::selection) { background: var(--myna-accent-soft, Highlight); }
 `;
   (document.head || document.documentElement).prepend(base);
-  window.magpie = api;
+  window.myna = api;
 })();

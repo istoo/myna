@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/probelog"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/probelog"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // A provider renamed is shown by the id it has now everywhere usage names

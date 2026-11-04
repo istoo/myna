@@ -26,7 +26,7 @@ function serve(lang) {
     if (url.pathname === "/api/providers") return json({ providers: [], presets: [], excluded: [], gateway: { url: "http://127.0.0.1:3425", running: true, window: true }, plugins: [] });
     if (url.pathname === "/api/groups") return json({ groups: [], pools: [] });
     if (url.pathname.startsWith("/api/")) return json({});
-    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "magpie.test") return route.fulfill({ status: 404, body: "" });
+    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "myna.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -65,7 +65,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://myna.test/?view=providers");
       await page.waitForSelector("#nav > .nav-top-hl:not([hidden])");
       assert.ok(await page.evaluate(() => document.body.classList.contains("side-nav")), "a sidebar at " + width);
       await on(page, "providers");
@@ -130,7 +130,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(60000);
       await page.route("**/*", serve("en"));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://myna.test/?view=providers");
       await page.waitForSelector("#nav button.on");
       assert.ok(!(await page.evaluate(() => document.body.classList.contains("side-nav"))));
       await page.locator('#nav button[data-view="usage"]').click();

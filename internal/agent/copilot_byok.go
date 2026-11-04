@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/istoo/myna/internal/edit"
 )
 
 // Copilot CLI takes its own model providers from providers.json (BYOK, `copilot
@@ -15,7 +15,7 @@ import (
 //	 "models":    [{"id", "provider", "name", "maxPromptTokens", "maxOutputTokens", ...}]}
 //
 // and a model is picked as <provider>/<id> (settings.json "model"). It needs
-// no GitHub sign-in. magpie owns the entry named magpie in providers and the
+// no GitHub sign-in. myna owns the entry named myna in providers and the
 // entries of models that name it; every other entry, and any other key the
 // file has, is the user's and stays.
 
@@ -32,7 +32,7 @@ func copilotFile(path string) (map[string]json.RawMessage, error) {
 		return top, nil
 	}
 	if err := json.Unmarshal(b, &top); err != nil || top == nil {
-		return nil, fmt.Errorf("%s isn't a JSON object, so magpie leaves it as it is", path)
+		return nil, fmt.Errorf("%s isn't a JSON object, so myna leaves it as it is", path)
 	}
 	return top, nil
 }
@@ -44,23 +44,23 @@ func copilotList(top map[string]json.RawMessage, key string) ([]json.RawMessage,
 	}
 	var l []json.RawMessage
 	if err := json.Unmarshal(raw, &l); err != nil {
-		return nil, fmt.Errorf("providers.json's %s isn't a list, so magpie leaves it as it is", key)
+		return nil, fmt.Errorf("providers.json's %s isn't a list, so myna leaves it as it is", key)
 	}
 	return l, nil
 }
 
-// ofMagpie reports whether entry (a provider, or a model by its provider
-// key) is magpie's.
+// ofMyna reports whether entry (a provider, or a model by its provider
+// key) is myna's.
 func copilotOwn(entry json.RawMessage, key string) bool {
 	var e map[string]any
 	if json.Unmarshal(entry, &e) != nil {
 		return false
 	}
 	n, _ := e[key].(string)
-	return n == magpieID
+	return n == mynaID
 }
 
-// copilotProvider is magpie's provider entry in the file at path, empty
+// copilotProvider is myna's provider entry in the file at path, empty
 // when there is none.
 func copilotProvider(path string) map[string]any {
 	top, err := copilotFile(path)
@@ -79,14 +79,14 @@ func copilotProvider(path string) map[string]any {
 	return map[string]any{}
 }
 
-// copilotBlock is magpie's provider and its models for the gateway at url
+// copilotBlock is myna's provider and its models for the gateway at url
 // (ending in /v1), as the catalog lists them for Copilot. The wire is
 // OpenAI's chat completions, which the gateway translates for every model.
 func copilotBlock(url, key string) (map[string]any, []map[string]any) {
-	prov := map[string]any{"name": magpieID, "type": "openai", "baseUrl": url, "apiKey": key}
+	prov := map[string]any{"name": mynaID, "type": "openai", "baseUrl": url, "apiKey": key}
 	ms := []map[string]any{}
 	for _, m := range sharedModels("copilot") {
-		e := map[string]any{"id": m.ID, "provider": magpieID}
+		e := map[string]any{"id": m.ID, "provider": mynaID}
 		if m.Name != "" {
 			e["name"] = m.Name
 		}
@@ -106,9 +106,9 @@ func copilotBlock(url, key string) (map[string]any, []map[string]any) {
 	return prov, ms
 }
 
-// copilotWrite puts magpie's provider and models into providers.json,
+// copilotWrite puts myna's provider and models into providers.json,
 // everything else in the file as it was. What the file already holds in
-// magpie's own provider entry under a key magpie doesn't write stays.
+// myna's own provider entry under a key myna doesn't write stays.
 func copilotWrite(path, url, key string) error {
 	top, err := copilotFile(path)
 	if err != nil {
@@ -173,8 +173,8 @@ func copilotWrite(path, url, key string) error {
 	return copilotSave(path, top)
 }
 
-// copilotUnwrite takes magpie's provider and models out of providers.json,
-// leaving the rest; a file left with nothing in it that magpie made is not
+// copilotUnwrite takes myna's provider and models out of providers.json,
+// leaving the rest; a file left with nothing in it that myna made is not
 // deleted, as it may be the user's.
 func copilotUnwrite(path string) error {
 	top, err := copilotFile(path)
@@ -210,7 +210,7 @@ func copilotUnwrite(path string) error {
 	return copilotSave(path, top)
 }
 
-// copilotSync brings magpie's entries up to the catalog as it is now, when
+// copilotSync brings myna's entries up to the catalog as it is now, when
 // the file has them; one that already says the same is not written.
 func copilotSync(path, url, key string) error {
 	top, err := copilotFile(path)

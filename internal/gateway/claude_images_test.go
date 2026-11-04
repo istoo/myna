@@ -15,7 +15,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // tallShot is a screenshot as DeepSeek Harness sends one: a JPEG 400 px

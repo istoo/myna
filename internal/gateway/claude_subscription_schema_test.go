@@ -12,8 +12,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // A request with output_config.format runs Claude Code with --json-schema;

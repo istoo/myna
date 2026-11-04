@@ -12,7 +12,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // dashScopeImages stands in for a DashScope host as Qwen Cloud's Token
@@ -107,7 +107,7 @@ func imageURLs(t *testing.T, raw string) []string {
 
 // qwen-image-3.0-pro on a Qwen Token Plan drew nothing (judi0713 on
 // Discord): its host has no OpenAI images API, and the chat completions it
-// went on to answer with no image magpie reads. It is asked on DashScope's
+// went on to answer with no image myna reads. It is asked on DashScope's
 // own API, and its image read from output.choices[].message.content[].image.
 func TestDashScopeDrawsOnItsOwnAPI(t *testing.T) {
 	s, d := dashScoped(t, provider.Provider{ID: "qwen", Name: "Qwen Token Plan", Preset: "qwen-token-plan", Models: []string{"qwen3.8-max", "qwen-image-3.0-pro"}})

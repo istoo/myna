@@ -6,7 +6,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // OpenCode Zen's free models (-free) are served to OpenCode alone: a
@@ -18,7 +18,7 @@ import (
 // late October 2026 carry OpenCode 2's User-Agent and its environment
 // block in the system prompt (provider.OpenCodeEnvironment), or Zen
 // answers 429 "Free usage limit reached. Free models work in OpenCode"
-// (#3491). The user allowed magpie to ask them as OpenCode does, on this
+// (#3491). The user allowed myna to ask them as OpenCode does, on this
 // route only. So a request to one is never relayed as it came: it is
 // translated (which always streams upstream, and gathers the stream into
 // one reply for a client that didn't ask for a stream), and on the way

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // #2633: a rule picks its model and the reasoning that model is asked
@@ -102,7 +102,7 @@ func TestIntentEffortSurvivesTheGroupsFailover(t *testing.T) {
 		{"fitted to its own", "b/big", []string{"medium", "high"}, "medium", "medium", ""},
 		{"fixed at its own", "b/big:high", []string{"low", "medium", "high"}, "high", "", "high"},
 	} {
-		// each its own magpie: the first failure rests a/small's key
+		// each its own myna: the first failure rests a/small's key
 		s, a, b, c := intented(t, provider.Rule{Use: "a/small", Intent: "simple questions", UseEffort: "low"})
 		if err := provider.SetModelEfforts("a/small", []string{"low", "medium", "high"}); err != nil {
 			t.Fatal(err)

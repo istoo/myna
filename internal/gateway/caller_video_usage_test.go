@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/istoo/myna/internal/usage"
 )
 
 func TestCallerUsageVideos(t *testing.T) {

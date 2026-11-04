@@ -7,10 +7,10 @@ import (
 	"testing"
 )
 
-// `magpie claude default` takes magpie out and puts back the model Claude
+// `myna claude default` takes myna out and puts back the model Claude
 // Code was on before it, as the Agents page's Disconnect does, the user's
 // own lines kept (__jingling on X: it took their model away with
-// magpie's); a field's own default still leaves the agent as installed.
+// myna's); a field's own default still leaves the agent as installed.
 func TestAgentDefaultPutsBackTheModelBefore(t *testing.T) {
 	groupsHome(t)
 	t.Setenv("CLAUDE_CONFIG_DIR", "")
@@ -44,8 +44,8 @@ func TestAgentDefaultPutsBackTheModelBefore(t *testing.T) {
 	}
 }
 
-// `magpie claude model default` on a Claude Code wired into magpie puts
-// back the endpoint and token the user had before magpie and leaves them:
+// `myna claude model default` on a Claude Code wired into myna puts
+// back the endpoint and token the user had before myna and leaves them:
 // it took them away, and Disconnect after it had nothing to put back
 // (__jingling on X, twice).
 func TestAgentModelDefaultKeepsTheEndpointBefore(t *testing.T) {

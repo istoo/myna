@@ -4,7 +4,7 @@
 // answered 429 "您的使用量已超出频率限制，将在 2026-11-03 23:57:19 UTC+8
 // 重置，您也可以切换其他模型继续使用。" with 82% of its credits left, and
 // the page said nothing). A rest of one model names the model and when it
-// is back; the vendor's words show beside it, so a refusal whose time magpie
+// is back; the vendor's words show beside it, so a refusal whose time myna
 // couldn't read is still explained; Try now lifts it by the gateway's key.
 // A rest gone by, and an account not resting, show nothing. It fits at
 // 360px. In every language.
@@ -71,7 +71,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, until, lifted));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://myna.test/?view=providers");
         await page.locator(".row.provider", { hasText: "WorkBuddy AI" }).first().click();
         const row = (id) => page.locator(`.editor .accts .acc[data-account-id="${id}"]`);
         await row(USER).waitFor();

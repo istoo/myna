@@ -11,7 +11,7 @@
 // or a rate changed) and tab (the tab shown, for the allowance card a
 // link opens on). The allowance cards themselves, which the tray panel
 // shows too, stay app.js's.
-magpie.plugin("usage", (ctx) => {
+myna.plugin("usage", (ctx) => {
   ctx.slots.add("page", {
     key: "usage",
     title: "Usage",

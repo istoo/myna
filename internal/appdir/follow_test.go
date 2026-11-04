@@ -9,7 +9,7 @@ import (
 )
 
 // fakeRegistry stands in for Windows' registry: reg is what a process
-// started now would get. followStart is taken again over it, as magpie's
+// started now would get. followStart is taken again over it, as myna's
 // start would, and both are put back after the test.
 func fakeRegistry(t *testing.T, reg map[string]string) {
 	t.Helper()
@@ -27,37 +27,37 @@ func unset(t *testing.T, name string) {
 }
 
 // bm_rabbit on Discord: Pi's AgentDir moved, PI_CODING_AGENT_DIR changed
-// in the user's variables while magpie ran, and magpie wrote Pi's files
+// in the user's variables while myna ran, and myna wrote Pi's files
 // into the old folder again. A variable that came from the registry reads
-// as the registry has it now, and the programs magpie starts get it too.
+// as the registry has it now, and the programs myna starts get it too.
 func TestAgentVarFollowsTheRegistry(t *testing.T) {
 	const v = "PI_CODING_AGENT_DIR"
 	old, moved := filepath.Join(t.TempDir(), "old"), filepath.Join(t.TempDir(), "new")
 	reg := map[string]string{v: old}
 	fakeRegistry(t, reg)
-	t.Setenv(v, old) // as Windows gave it to magpie at its start
+	t.Setenv(v, old) // as Windows gave it to myna at its start
 	followStart()
 	if got := Getenv(v); got != old {
 		t.Fatalf("at start %s = %q, want %q", v, got, old)
 	}
 	reg[v] = moved // the user changes it in System Properties
 	if got := Getenv(v); got != moved {
-		t.Fatalf("after the user moved it, %s = %q, want %q (the registry's now, not magpie's start's)", v, got, moved)
+		t.Fatalf("after the user moved it, %s = %q, want %q (the registry's now, not myna's start's)", v, got, moved)
 	}
 	if got := os.Getenv(v); got != moved {
-		t.Errorf("magpie's environment, which the programs it starts get, has %s = %q, want %q", v, got, moved)
+		t.Errorf("myna's environment, which the programs it starts get, has %s = %q, want %q", v, got, moved)
 	}
 	delete(reg, v) // and then deletes it
 	if got, ok := LookupEnv(v); ok {
 		t.Errorf("after the user deleted it, %s = %q, want it unset", v, got)
 	}
 	if _, ok := os.LookupEnv(v); ok {
-		t.Errorf("magpie's environment still has %s after the user deleted it", v)
+		t.Errorf("myna's environment still has %s after the user deleted it", v)
 	}
 }
 
 // One set while none was in the registry at start is followed too: a
-// CODEX_HOME the user adds while magpie runs.
+// CODEX_HOME the user adds while myna runs.
 func TestAgentVarAddedLaterFollows(t *testing.T) {
 	const v = "CODEX_HOME"
 	reg := map[string]string{}
@@ -72,32 +72,32 @@ func TestAgentVarAddedLaterFollows(t *testing.T) {
 }
 
 // A value the launcher set, unlike the registry's, and one set inside
-// magpie since it started, stand as they are.
+// myna since it started, stand as they are.
 func TestAgentVarSetByHandStands(t *testing.T) {
 	const v, w = "CLAUDE_CONFIG_DIR", "CODEX_HOME"
 	mine, reg1, reg2 := t.TempDir(), t.TempDir(), t.TempDir()
 	reg := map[string]string{v: reg1, w: reg1}
 	fakeRegistry(t, reg)
-	t.Setenv(v, mine) // `$env:CLAUDE_CONFIG_DIR=…; magpie`
+	t.Setenv(v, mine) // `$env:CLAUDE_CONFIG_DIR=…; myna`
 	t.Setenv(w, reg1)
 	followStart()
 	reg[v], reg[w] = reg2, reg2
 	if got := Getenv(v); got != mine {
 		t.Errorf("the launcher's %s reads %q, want %q", v, got, mine)
 	}
-	os.Setenv(w, mine) // inside magpie, a test's sandbox
+	os.Setenv(w, mine) // inside myna, a test's sandbox
 	if got := Getenv(w); got != mine {
-		t.Errorf("%s set inside magpie reads %q, want %q", w, got, mine)
+		t.Errorf("%s set inside myna reads %q, want %q", w, got, mine)
 	}
 }
 
-// What isn't an agent's variable is magpie's environment as it is.
+// What isn't an agent's variable is myna's environment as it is.
 func TestOtherVarsDontFollow(t *testing.T) {
-	reg := map[string]string{"MAGPIE_FOLLOW_TEST": "reg"}
+	reg := map[string]string{"MYNA_FOLLOW_TEST": "reg"}
 	fakeRegistry(t, reg)
-	unset(t, "MAGPIE_FOLLOW_TEST")
+	unset(t, "MYNA_FOLLOW_TEST")
 	followStart()
-	if _, ok := LookupEnv("MAGPIE_FOLLOW_TEST"); ok {
+	if _, ok := LookupEnv("MYNA_FOLLOW_TEST"); ok {
 		t.Error("a variable no agent reads followed the registry")
 	}
 }

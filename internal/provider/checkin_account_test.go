@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // Check in now for one account (xiaowu_95660: 手动签到一次) asks that

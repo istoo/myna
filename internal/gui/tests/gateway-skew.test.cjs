@@ -1,8 +1,8 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// A magpie of another version serving the gateway (matrix0487 on Discord:
+// A myna of another version serving the gateway (matrix0487 on Discord:
 // pi got 404 for a model the newer app had written it, and only the Gateway
-// page named the older magpie) is said over the Agents list: an older copy
-// of the app being taken over once idle, an older magpie serve or app with
+// page named the older myna) is said over the Agents list: an older copy
+// of the app being taken over once idle, an older myna serve or app with
 // the Gateway page's button, a newer one, a build of its own. In English
 // and Chinese, in both engines, at the panel's width, with nothing cut off.
 const assert = require("node:assert/strict");
@@ -43,23 +43,23 @@ function fixture(lang, other, posts) {
 const base = { version: "0.1.2400", mine: "0.1.2500", pid: 4242 };
 const cases = {
   en: [
-    { other: { ...base, serves: "app", older: true, replacing: true, busy: 2 }, head: "magpie 0.1.2400, an older copy of this app, still serves the gateway", why: /once its 2 requests in flight finish/, quit: false },
-    { other: { ...base, serves: "app", older: true, replacing: true, busy: 1 }, head: "magpie 0.1.2400, an older copy of this app, still serves the gateway", why: /once its 1 request in flight finishes/, quit: false },
-    { other: { ...base, serves: "serve", older: true }, head: "The gateway is served by magpie 0.1.2400, older than this app (0.1.2500)", why: /magpie serve.*magpie daemon restart/, quit: true },
-    { other: { ...base, serves: "app", older: true, stuck: "denied" }, head: "The gateway is served by magpie 0.1.2400, older than this app (0.1.2500)", why: /Quit it here and this app serves the gateway at once/, quit: true },
-    { other: { ...base, version: "0.1.2600", serves: "app", newer: true }, head: "The gateway is served by magpie 0.1.2600, newer than this app (0.1.2500)", why: /Update this magpie/, quit: false },
-    { other: { ...base, version: "0.1.2400-3-gabcdef1", serves: "app" }, head: "The gateway is served by magpie 0.1.2400-3-gabcdef1, a different build from this app (0.1.2500)", why: /Quit it there/, quit: false },
+    { other: { ...base, serves: "app", older: true, replacing: true, busy: 2 }, head: "myna 0.1.2400, an older copy of this app, still serves the gateway", why: /once its 2 requests in flight finish/, quit: false },
+    { other: { ...base, serves: "app", older: true, replacing: true, busy: 1 }, head: "myna 0.1.2400, an older copy of this app, still serves the gateway", why: /once its 1 request in flight finishes/, quit: false },
+    { other: { ...base, serves: "serve", older: true }, head: "The gateway is served by myna 0.1.2400, older than this app (0.1.2500)", why: /myna serve.*myna daemon restart/, quit: true },
+    { other: { ...base, serves: "app", older: true, stuck: "denied" }, head: "The gateway is served by myna 0.1.2400, older than this app (0.1.2500)", why: /Quit it here and this app serves the gateway at once/, quit: true },
+    { other: { ...base, version: "0.1.2600", serves: "app", newer: true }, head: "The gateway is served by myna 0.1.2600, newer than this app (0.1.2500)", why: /Update this myna/, quit: false },
+    { other: { ...base, version: "0.1.2400-3-gabcdef1", serves: "app" }, head: "The gateway is served by myna 0.1.2400-3-gabcdef1, a different build from this app (0.1.2500)", why: /Quit it there/, quit: false },
   ],
   zh: [
-    { other: { ...base, serves: "app", older: true, replacing: true, busy: -1 }, head: "更旧的 magpie 0.1.2400（这个应用的旧副本）仍在提供网关", why: /没有进行中的请求时接管网关/, quit: false },
-    { other: { ...base, serves: "serve", older: true }, head: "网关由 magpie 0.1.2400 提供，比这个应用（0.1.2500）旧", why: /magpie serve.*magpie daemon restart/, quit: true },
-    { other: { ...base, version: "0.1.2600", serves: "app", newer: true }, head: "网关由 magpie 0.1.2600 提供，比这个应用（0.1.2500）新", why: /请更新当前 magpie/, quit: false },
+    { other: { ...base, serves: "app", older: true, replacing: true, busy: -1 }, head: "更旧的 myna 0.1.2400（这个应用的旧副本）仍在提供网关", why: /没有进行中的请求时接管网关/, quit: false },
+    { other: { ...base, serves: "serve", older: true }, head: "网关由 myna 0.1.2400 提供，比这个应用（0.1.2500）旧", why: /myna serve.*myna daemon restart/, quit: true },
+    { other: { ...base, version: "0.1.2600", serves: "app", newer: true }, head: "网关由 myna 0.1.2600 提供，比这个应用（0.1.2500）新", why: /请更新当前 myna/, quit: false },
   ],
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   for (const lang of ["en", "zh"]) {
-    test(`${engine} ${lang}: another magpie's version serving the gateway is said on the Agents page`, async (t) => {
+    test(`${engine} ${lang}: another myna's version serving the gateway is said on the Agents page`, async (t) => {
       assert(["chromium", "webkit"].includes(engine), "BROWSER must be chromium or webkit");
       const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch());
       t.after(() => browser.close());
@@ -72,7 +72,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", fixture(lang, c.other, posts));
-        await page.goto("http://magpie.test/");
+        await page.goto("http://myna.test/");
         await page.locator('.row.agent[data-id="pi"]').waitFor();
         const box = page.locator("#gwSkew");
         if (!c.other) {
@@ -90,7 +90,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert(await box.evaluate((b) => [...b.querySelectorAll(".dep-head,.dep-why")].every((e) => e.scrollWidth <= e.clientWidth + 1)), "cut off");
         assert(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), "the page scrolls sideways");
         const button = box.locator("button");
-        assert.equal(await button.count(), c.quit ? 1 : 0, "the button's there only for an older magpie this app can quit");
+        assert.equal(await button.count(), c.quit ? 1 : 0, "the button's there only for an older myna this app can quit");
         if (c.quit) {
           await button.click();
           // the take-over is asked for, and once it's done the line goes

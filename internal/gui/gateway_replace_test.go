@@ -14,15 +14,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/istoo/myna/internal/gateway"
 )
 
-// resetSkew forgets what the tests' fakes left of another magpie seen
+// resetSkew forgets what the tests' fakes left of another myna seen
 // serving the gateway (set by gateway_skew_test.go).
 var resetSkew = func() {}
 
 // skewHome gives the test a home and a gateway port of its own, this
-// magpie the version mine and the app's handover host, and stops the
+// myna the version mine and the app's handover host, and stops the
 // gateway it comes to serve when it ends.
 func skewHome(t *testing.T, mine string) string {
 	t.Helper()
@@ -32,7 +32,7 @@ func skewHome(t *testing.T, mine string) string {
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(h, ".config"))
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(h, ".cache"))
 	addr := "127.0.0.1:" + strconv.Itoa(freePort(t))
-	t.Setenv("MAGPIE_ADDR", addr)
+	t.Setenv("MYNA_ADDR", addr)
 	was, wasHost := gateway.Version, handoverHost.Load()
 	gateway.Version = mine
 	handoverHost.Store(true)
@@ -59,16 +59,16 @@ func skewHome(t *testing.T, mine string) string {
 	return addr
 }
 
-// startFakeMagpie runs the test binary, named magpie, as another magpie
+// startFakeMyna runs the test binary, named myna, as another myna
 // of version v holding the gateway's port, started as serves says; ended
 // is closed once it has ended.
-func startFakeMagpie(t *testing.T, addr, v, serves string) (ended chan struct{}) {
+func startFakeMyna(t *testing.T, addr, v, serves string) (ended chan struct{}) {
 	t.Helper()
 	self, err := os.Executable()
 	if err != nil {
 		t.Fatal(err)
 	}
-	name := "magpie"
+	name := "myna"
 	if runtime.GOOS == "windows" {
 		name += ".exe"
 	}
@@ -83,7 +83,7 @@ func startFakeMagpie(t *testing.T, addr, v, serves string) (ended chan struct{})
 		}
 	}
 	cmd := exec.Command(bin, "-test.run=^$")
-	cmd.Env = append(os.Environ(), "MAGPIE_TEST_FAKE_GATEWAY="+addr, "MAGPIE_TEST_FAKE_VERSION="+v, "MAGPIE_TEST_FAKE_SERVES="+serves)
+	cmd.Env = append(os.Environ(), "MYNA_TEST_FAKE_GATEWAY="+addr, "MYNA_TEST_FAKE_VERSION="+v, "MYNA_TEST_FAKE_SERVES="+serves)
 	if err := cmd.Start(); err != nil {
 		t.Fatal(err)
 	}
@@ -92,7 +92,7 @@ func startFakeMagpie(t *testing.T, addr, v, serves string) (ended chan struct{})
 	t.Cleanup(func() { cmd.Process.Kill(); <-ended })
 	for deadline := time.Now().Add(10 * time.Second); gateway.ServedBy().Version != v; time.Sleep(50 * time.Millisecond) {
 		if time.Now().After(deadline) {
-			t.Fatalf("the fake magpie %s didn't answer", v)
+			t.Fatalf("the fake myna %s didn't answer", v)
 		}
 	}
 	return ended
@@ -106,7 +106,7 @@ func startFakeMagpie(t *testing.T, addr, v, serves string) (ended chan struct{})
 // serves the gateway.
 func TestAppReplacesItsOlderGatewayOnceIdle(t *testing.T) {
 	addr := skewHome(t, "0.1.2500")
-	ended := startFakeMagpie(t, addr, "0.1.2400", "app")
+	ended := startFakeMyna(t, addr, "0.1.2400", "app")
 
 	// an agent's reply streaming through the older one
 	lines := make(chan int, 1)
@@ -126,7 +126,7 @@ func TestAppReplacesItsOlderGatewayOnceIdle(t *testing.T) {
 		lines <- n
 	}()
 	for deadline := time.Now().Add(5 * time.Second); ; time.Sleep(20 * time.Millisecond) {
-		if res, err := http.Get("http://" + addr + "/v1/magpie/concurrency"); err == nil {
+		if res, err := http.Get("http://" + addr + "/v1/myna/concurrency"); err == nil {
 			b, _ := io.ReadAll(res.Body)
 			res.Body.Close()
 			if strings.Contains(string(b), `"requests":1,`) {
@@ -146,10 +146,10 @@ func TestAppReplacesItsOlderGatewayOnceIdle(t *testing.T) {
 	select {
 	case n := <-lines:
 		if n != 20 {
-			t.Fatalf("the stream through the older magpie was cut at %d lines of 20", n)
+			t.Fatalf("the stream through the older myna was cut at %d lines of 20", n)
 		}
 	case <-ended:
-		t.Fatal("the older magpie was quit with a request in flight")
+		t.Fatal("the older myna was quit with a request in flight")
 	case <-time.After(15 * time.Second):
 		t.Fatal("the stream never ended")
 	}

@@ -64,8 +64,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang));
-      await page.addInitScript(() => { localStorage.setItem("magpie.usageTab", "sessions"); localStorage.setItem("magpie.sessRange", "all"); localStorage.setItem("magpie.usageEvery", "0"); });
-      await page.goto("http://magpie.test/?view=usage");
+      await page.addInitScript(() => { localStorage.setItem("myna.usageTab", "sessions"); localStorage.setItem("myna.sessRange", "all"); localStorage.setItem("myna.usageEvery", "0"); });
+      await page.goto("http://myna.test/?view=usage");
       const pick = page.locator("#sessAgent");
       await pick.waitFor({ state: "visible" });
       const listed = () => page.locator("#sessList .sess-item .who .name").allInnerTexts();

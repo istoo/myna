@@ -10,19 +10,19 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
 )
 
-// A Remote magpie searches the web for the models it serves, and its list
-// says how (Player on Discord: Claude Code's WebSearch on remoteMagpie's
-// glm-5.3 went to this magpie's searcher, another model, and Settings'
+// A Remote myna searches the web for the models it serves, and its list
+// says how (Player on Discord: Claude Code's WebSearch on remoteMyna's
+// glm-5.3 went to this myna's searcher, another model, and Settings'
 // Searcher didn't offer the remote's models). Claude Code's web search
 // goes on to it as it was offered; the models it searches natively for
 // are ones Settings may name, and a search run for another model is
-// marked, so the other magpie only lets the model itself search for it.
-func TestRemoteMagpieSearches(t *testing.T) {
+// marked, so the other myna only lets the model itself search for it.
+func TestRemoteMynaSearches(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
 	setHome(t, t.TempDir()) // no signed-in agent searches
@@ -63,7 +63,7 @@ func TestRemoteMagpieSearches(t *testing.T) {
 		}
 	}
 	h := New().Handler()
-	var hops []string // what the remote magpie was sent, and how
+	var hops []string // what the remote myna was sent, and how
 	remote := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
 			b, _ := io.ReadAll(r.Body)
@@ -75,7 +75,7 @@ func TestRemoteMagpieSearches(t *testing.T) {
 		h.ServeHTTP(w, r)
 	}))
 	t.Cleanup(remote.Close)
-	id, err := provider.Add(provider.Provider{ID: "office", Name: "Office", Preset: provider.RemoteMagpiePreset, Chat: strings.TrimPrefix(remote.URL, "http://")})
+	id, err := provider.Add(provider.Provider{ID: "office", Name: "Office", Preset: provider.RemoteMynaPreset, Chat: strings.TrimPrefix(remote.URL, "http://")})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -91,7 +91,7 @@ func TestRemoteMagpieSearches(t *testing.T) {
 	for _, m := range live {
 		how[m.ID] = m.WebSearch
 	}
-	if how["zhipu/glm-5.3"] != searchNative || how["plain/m1"] != searchMagpie {
+	if how["zhipu/glm-5.3"] != searchNative || how["plain/m1"] != searchMyna {
 		t.Fatalf("the remote's list says it searches %v", how)
 	}
 
@@ -111,7 +111,7 @@ func TestRemoteMagpieSearches(t *testing.T) {
 	hops, vendor = nil, nil
 	mu.Unlock()
 	if len(sent) != 1 || !strings.Contains(sent[0], `"web_search_20250305"`) || strings.HasPrefix(sent[0], "1") {
-		t.Fatalf("the remote magpie was sent %q", sent)
+		t.Fatalf("the remote myna was sent %q", sent)
 	}
 	if len(asked) != 1 || !strings.Contains(asked[0], `"web_search_20250305"`) {
 		t.Fatalf("the vendor was sent %q", asked)
@@ -126,7 +126,7 @@ func TestRemoteMagpieSearches(t *testing.T) {
 		}
 	}
 	if choice == nil {
-		t.Fatalf("the remote magpie isn't a searcher: %v", Searchers())
+		t.Fatalf("the remote myna isn't a searcher: %v", Searchers())
 	}
 	if choice.Small != "zhipu/glm-5.3" || slices.ContainsFunc(choice.Models, func(m catalog.Model) bool { return m.ID == "plain/m1" }) {
 		t.Fatalf("it searches with %s of %v", choice.Small, choice.Models)
@@ -149,13 +149,13 @@ func TestRemoteMagpieSearches(t *testing.T) {
 	mu.Lock()
 	defer mu.Unlock()
 	if len(hops) != 1 || !strings.HasPrefix(hops[0], "1 ") {
-		t.Fatalf("the remote magpie was sent %q", hops)
+		t.Fatalf("the remote myna was sent %q", hops)
 	}
 }
 
-// A request another magpie marks as a search is one the model searches
-// for alone: this magpie runs no searcher of its own for it.
-func TestSearchingFromAnotherMagpie(t *testing.T) {
+// A request another myna marks as a search is one the model searches
+// for alone: this myna runs no searcher of its own for it.
+func TestSearchingFromAnotherMyna(t *testing.T) {
 	var seen bool
 	h := withCaller(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		seen = searching(r.Context()) && r.Header.Get(SearchingHeader) == ""
@@ -163,7 +163,7 @@ func TestSearchingFromAnotherMagpie(t *testing.T) {
 	for _, c := range []struct {
 		ua   string
 		want bool
-	}{{"magpie/0.1.983", true}, {"curl/8", false}} {
+	}{{"myna/0.1.983", true}, {"curl/8", false}} {
 		r := httptest.NewRequest(http.MethodPost, "/v1/messages", nil)
 		r.Header.Set("User-Agent", c.ua)
 		r.Header.Set(SearchingHeader, "1")

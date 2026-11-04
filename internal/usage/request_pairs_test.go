@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/sessions"
+	"github.com/istoo/myna/internal/sessions"
 )
 
 // A page turned over the same chunks reuses the last pairing. It must give

@@ -18,7 +18,7 @@ const UPGRADE = "winget upgrade --id rtk-ai.rtk --exact --silent --accept-packag
 const WHY = "winget failed (exit code 0x8A150101): RTK is in use — close the agents running it and try again";
 const agent = (id, name) => ({ id, name, icon: "", skills: `${HOME}/.${id}/skills`, mcp: `${HOME}/.${id}/mcp.json` });
 const lib = () => ({
-  dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+  dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
   agents: [agent("codex", "Codex")],
   instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [], skills: [], servers: [],
 });
@@ -72,13 +72,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         let open;
         const state = { version: "0.43.0", fail: true, reads: 0, gate: new Promise((r) => { open = r; }) };
         const ctx = await browser.newContext({ viewport: { width: 980, height: 800 } });
-        await ctx.addInitScript(() => { try { localStorage.setItem("magpie.libTab", "rtk"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "rtk"); } catch {} });
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, state));
-        await page.goto("http://magpie.test/");
+        await page.goto("http://myna.test/");
         await page.locator('button[data-view="library"]').click();
         const v = page.locator("#view-library");
         const button = v.locator(".lib-cardhead button");
@@ -154,14 +154,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const w = waitWords[lang];
         const state = { reads: 0, checked: false, wingetHas: false };
         const ctx = await browser.newContext({ viewport: { width: 440, height: 800 } });
-        await ctx.addInitScript(() => { try { localStorage.setItem("magpie.libTab", "rtk"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "rtk"); } catch {} });
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", waitServer(lang, state));
         const open = async () => {
-          await page.goto("http://magpie.test/");
+          await page.goto("http://myna.test/");
           await page.locator('button[data-view="library"]').click();
           await page.locator("#view-library .lib-cardhead .lib-tag").waitFor();
         };
@@ -206,18 +206,18 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 }
 
 // 新v学员 (10-27): on Windows, an RTK cargo installed had a newer release
-// and a greyed Upgrade that did nothing — magpie found no cargo, and only
+// and a greyed Upgrade that did nothing — myna found no cargo, and only
 // the button's tooltip, which a click never shows, said anything. Now the
-// card says it: for cargo's RTK, what to install or run; for one magpie
+// card says it: for cargo's RTK, what to install or run; for one myna
 // can't place, to update it the way it was installed. In every language,
 // at 440px.
 const CARGO = "cargo install --git https://github.com/rtk-ai/rtk --branch master rtk --force";
 const noUpgradeWords = {
-  en: { cargo: `RTK was installed with cargo, but magpie can't find cargo to upgrade it. Install Rust from rustup.rs, or run ${CARGO} in a terminal.`, other: "magpie can't tell how this RTK was installed — update it the way you installed it" },
-  zh: { cargo: `RTK 是用 cargo 安装的，但 magpie 找不到 cargo 来升级它。请从 rustup.rs 安装 Rust，或在终端里运行 ${CARGO}。`, other: "无法判断 RTK 的安装方式，请按原安装方式更新" },
-  "zh-TW": { cargo: `RTK 是用 cargo 安裝的，但 magpie 找不到 cargo 來升級它。請從 rustup.rs 安裝 Rust，或在終端機裡執行 ${CARGO}。`, other: "無法判斷 RTK 的安裝方式，請按原安裝方式更新" },
-  ja: { cargo: `RTK は cargo でインストールされていますが、magpie は更新に使う cargo を見つけられません。rustup.rs から Rust をインストールするか、ターミナルで ${CARGO} を実行してください。`, other: "magpie はこの RTK のインストール方法を判別できません — インストールしたのと同じ方法で更新してください" },
-  de: { cargo: `RTK wurde mit cargo installiert, aber magpie findet kein cargo, um es zu aktualisieren. Installieren Sie Rust von rustup.rs, oder führen Sie ${CARGO} in einem Terminal aus.`, other: "magpie kann nicht erkennen, wie dieses RTK installiert wurde – aktualisieren Sie es auf dem Weg, auf dem Sie es installiert haben" },
+  en: { cargo: `RTK was installed with cargo, but myna can't find cargo to upgrade it. Install Rust from rustup.rs, or run ${CARGO} in a terminal.`, other: "myna can't tell how this RTK was installed — update it the way you installed it" },
+  zh: { cargo: `RTK 是用 cargo 安装的，但 myna 找不到 cargo 来升级它。请从 rustup.rs 安装 Rust，或在终端里运行 ${CARGO}。`, other: "无法判断 RTK 的安装方式，请按原安装方式更新" },
+  "zh-TW": { cargo: `RTK 是用 cargo 安裝的，但 myna 找不到 cargo 來升級它。請從 rustup.rs 安裝 Rust，或在終端機裡執行 ${CARGO}。`, other: "無法判斷 RTK 的安裝方式，請按原安裝方式更新" },
+  ja: { cargo: `RTK は cargo でインストールされていますが、myna は更新に使う cargo を見つけられません。rustup.rs から Rust をインストールするか、ターミナルで ${CARGO} を実行してください。`, other: "myna はこの RTK のインストール方法を判別できません — インストールしたのと同じ方法で更新してください" },
+  de: { cargo: `RTK wurde mit cargo installiert, aber myna findet kein cargo, um es zu aktualisieren. Installieren Sie Rust von rustup.rs, oder führen Sie ${CARGO} in einem Terminal aus.`, other: "myna kann nicht erkennen, wie dieses RTK installiert wurde – aktualisieren Sie es auf dem Weg, auf dem Sie es installiert haben" },
 };
 
 function noUpgradeServer(lang, state) {
@@ -234,7 +234,7 @@ function noUpgradeServer(lang, state) {
 }
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
-  test(engine + ": an RTK magpie can't upgrade says why on the card", async (t) => {
+  test(engine + ": an RTK myna can't upgrade says why on the card", async (t) => {
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     const errors = [];
     t.after(async () => {
@@ -247,13 +247,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const want = noUpgradeWords[lang][cargo ? "cargo" : "other"];
           const state = { cargo, upgrades: 0, reads: 0 };
           const ctx = await browser.newContext({ viewport: { width: 440, height: 800 } });
-          await ctx.addInitScript(() => { try { localStorage.setItem("magpie.libTab", "rtk"); } catch {} });
+          await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "rtk"); } catch {} });
           const page = await ctx.newPage();
           page.setDefaultTimeout(5000);
           page.setDefaultNavigationTimeout(60000);
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", noUpgradeServer(lang, state));
-          await page.goto("http://magpie.test/");
+          await page.goto("http://myna.test/");
           await page.locator('button[data-view="library"]').click();
           const v = page.locator("#view-library");
           const note = v.locator(".lib-rtk-noupgrade");

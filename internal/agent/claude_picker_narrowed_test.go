@@ -5,16 +5,16 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/myna/internal/provider"
 )
 
-// yyhhyyyyyy on Discord: Claude Code's list in magpie narrowed to a routing
+// yyhhyyyyyy on Discord: Claude Code's list in myna narrowed to a routing
 // group's models, and /model still listed others. Claude Code puts its
 // built-in lineup above a modelPicker's rows unless the picker says
 // replaceBuiltInOptions, and the lineup's Fable row (no tier names it while
 // the main model is no Fable) named a model the user hadn't picked. A list
-// narrowed in magpie, by picks or by models taken out, now says the flag as
+// narrowed in myna, by picks or by models taken out, now says the flag as
 // the own-models switch does; one that leaves nothing out doesn't, and a
 // custom row of the user's own (ANTHROPIC_CUSTOM_MODEL_OPTION), which the
 // flag hides too, keeps the lineup.

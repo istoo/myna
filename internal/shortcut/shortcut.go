@@ -1,10 +1,10 @@
-// Package shortcut puts magpie in the Start menu on Windows. There it is
+// Package shortcut puts myna in the Start menu on Windows. There it is
 // one exe with no installer, so nothing else would: the first start of the
-// desktop app makes a Magpie shortcut in the user's Start menu opening the
+// desktop app makes a Myna shortcut in the user's Start menu opening the
 // exe it runs as, and Windows search finds it by that. It is made once:
-// magpie remembers it did, and a shortcut the user deleted stays deleted
+// myna remembers it did, and a shortcut the user deleted stays deleted
 // (#508); one still there is pointed at the exe again when that was moved.
-// A portable magpie (a data folder beside it) makes none and registers
+// A portable myna (a data folder beside it) makes none and registers
 // nothing, leaving no trace on the machine. Elsewhere it does nothing —
 // the Mac has the app in Applications, Linux its own ways.
 package shortcut
@@ -17,35 +17,35 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/yetone/magpie/internal/appdir"
+	"github.com/istoo/myna/internal/appdir"
 )
 
 // Name is what the shortcut is called, and what Windows search finds.
-const Name = "Magpie"
+const Name = "Myna"
 
-// StateName is the file in magpie's folder recording that the shortcut was
+// StateName is the file in myna's folder recording that the shortcut was
 // made, and for which exe.
 const StateName = "start-menu-shortcut"
 
 // what Ensure asks of the system; the tests put fakes in
 var (
-	// startMenu is where the shortcut goes (…\Start Menu\Programs\Magpie.lnk)
+	// startMenu is where the shortcut goes (…\Start Menu\Programs\Myna.lnk)
 	startMenu = startMenuLink
 	// writeLink has the shortcut at lnk open exe, and reports whether it had to
 	writeLink = writeShortcut
-	// register has Win+R and `start magpie` find exe
+	// register has Win+R and `start myna` find exe
 	register = registerAppPath
-	// registered reports whether a magpie registered itself there before
+	// registered reports whether a myna registered itself there before
 	registered = registeredAppPath
 )
 
 // Ensure makes the shortcut on the first start, keeps it pointed at this
-// magpie after that while it is there, and never makes it again once the
-// user deleted it. A portable magpie makes none. It fails quietly — magpie
-// runs the same without one — and is skipped with MAGPIE_NO_SHORTCUT=1
+// myna after that while it is there, and never makes it again once the
+// user deleted it. A portable myna makes none. It fails quietly — myna
+// runs the same without one — and is skipped with MYNA_NO_SHORTCUT=1
 // (tests, sandboxes).
 func Ensure() {
-	if os.Getenv("MAGPIE_NO_SHORTCUT") == "1" {
+	if os.Getenv("MYNA_NO_SHORTCUT") == "1" {
 		return
 	}
 	exe, err := os.Executable()
@@ -64,7 +64,7 @@ func Ensure() {
 var errNoStartMenu = errors.New("no Start menu here")
 
 // ensure is Ensure for exe, portable being the data folder of a portable
-// magpie ("" installed) and state the file remembering the shortcut was
+// myna ("" installed) and state the file remembering the shortcut was
 // made.
 func ensure(exe, portable, state string) error {
 	if portable != "" {
@@ -74,7 +74,7 @@ func ensure(exe, portable, state string) error {
 	if errors.Is(err, errNoStartMenu) {
 		return nil
 	}
-	// a magpie from before the state file registered itself at every start
+	// a myna from before the state file registered itself at every start
 	before := registered()
 	register(exe)
 	if err != nil {
@@ -87,7 +87,7 @@ func ensure(exe, portable, state string) error {
 			return nil
 		}
 		if before {
-			// an older magpie made it at its every start, and it is gone:
+			// an older myna made it at its every start, and it is gone:
 			// the user deleted it, so it isn't made again now either
 			return remember(state, exe)
 		}
@@ -107,10 +107,10 @@ func remember(state, exe string) error {
 }
 
 // aside is what an update moves the exe it replaces to, or stages the new
-// one as: magpie.exe.old, magpie.exe.old-2…, magpie.exe.new
+// one as: myna.exe.old, myna.exe.old-2…, myna.exe.new
 var aside = regexp.MustCompile(`(?i)(\.exe)\.(old(-\d+)?|new)$`)
 
-// Target is what the shortcut opens for exe: exe itself, but for a magpie
+// Target is what the shortcut opens for exe: exe itself, but for a myna
 // left running from where an update moved it aside, the exe in its place,
 // which is what the next start runs. An update replaces the exe where it
 // is, so the shortcut stays good through it.
@@ -131,10 +131,10 @@ func Stale(target, dir, exe string) bool {
 // what Remove asks of the system besides startMenu; the tests put fakes in
 var unregister = unregisterAppPath
 
-// Remove takes out what Ensure made, for magpie uninstall: the Start menu
+// Remove takes out what Ensure made, for myna uninstall: the Start menu
 // shortcut, the App Paths entry while it names exe (or an exe gone), and
-// the record of having made them. A portable magpie made none, and an
-// entry another copy of magpie registered stays that copy's.
+// the record of having made them. A portable myna made none, and an
+// entry another copy of myna registered stays that copy's.
 func Remove(exe string) error {
 	var errs []error
 	if lnk, err := startMenu(); err == nil {

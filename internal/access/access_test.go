@@ -9,8 +9,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
 )
 
 func TestNamedKeys(t *testing.T) {
@@ -100,7 +100,7 @@ func TestConcurrentKeyCreationAndCorruptStore(t *testing.T) {
 func TestLegacyLANKeyMigrationIsIdempotentAndRevocable(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	s := settings.Load()
-	s.LAN, s.LANKey = true, "sk-magpie-legacy-lan-secret"
+	s.LAN, s.LANKey = true, "sk-myna-legacy-lan-secret"
 	if err := settings.Save(s); err != nil {
 		t.Fatal(err)
 	}
@@ -108,11 +108,11 @@ func TestLegacyLANKeyMigrationIsIdempotentAndRevocable(t *testing.T) {
 		t.Fatal(err)
 	}
 	keys, err := List()
-	if err != nil || len(keys) != 1 || keys[0].Name != "Magpie" || !strings.HasPrefix(keys[0].Masked, "sk-magpie-…") {
+	if err != nil || len(keys) != 1 || keys[0].Name != "Myna" || !strings.HasPrefix(keys[0].Masked, "sk-myna-…") {
 		t.Fatal(keys, err)
 	}
 	if settings.Load().LANKey != s.LANKey || !settings.Load().LAN {
-		t.Fatal("migration broke older Magpie's sharing settings")
+		t.Fatal("migration broke older Myna's sharing settings")
 	}
 	if who, ok := Authenticate(s.LANKey); !ok || who.KeyID != keys[0].ID {
 		t.Fatal(who, ok)
@@ -153,7 +153,7 @@ func TestLegacyLANKeyMigrationPreservesNamedKeys(t *testing.T) {
 	keys, _ := List()
 	id := keys[0].ID
 	s := settings.Load()
-	s.LANKey = "sk-magpie-legacy"
+	s.LANKey = "sk-myna-legacy"
 	if err := settings.Save(s); err != nil {
 		t.Fatal(err)
 	}
@@ -161,7 +161,7 @@ func TestLegacyLANKeyMigrationPreservesNamedKeys(t *testing.T) {
 		t.Fatal(err)
 	}
 	keys, _ = List()
-	if len(keys) != 2 || keys[0].ID != id || keys[1].Name != "Magpie" {
+	if len(keys) != 2 || keys[0].ID != id || keys[1].Name != "Myna" {
 		t.Fatal(keys)
 	}
 	if _, ok := Authenticate(secret); !ok {
@@ -175,7 +175,7 @@ func TestLegacyLANKeyMigrationPreservesNamedKeys(t *testing.T) {
 func TestLegacyLANKeyMigrationRetryAndFailure(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	s := settings.Load()
-	s.LANKey = "sk-magpie-test-legacy-lan"
+	s.LANKey = "sk-myna-test-legacy-lan"
 	if err := settings.Save(s); err != nil {
 		t.Fatal(err)
 	}
@@ -208,7 +208,7 @@ func TestLegacyLANKeyMigrationRetryAndFailure(t *testing.T) {
 }
 
 func TestNamedLANKeyKeepsItsName(t *testing.T) {
-	for _, name := range []string{"Local network", "Magpie", "Desk"} {
+	for _, name := range []string{"Local network", "Myna", "Desk"} {
 		t.Run(name, func(t *testing.T) {
 			t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 			s := settings.Load()
@@ -277,14 +277,14 @@ func TestCallerKeyRotationPreservesIdentityAndState(t *testing.T) {
 	}
 }
 
-func TestLANRotationKeepsOlderMagpieWorking(t *testing.T) {
+func TestLANRotationKeepsOlderMynaWorking(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	if err := ConfigureLAN(true, false); err != nil {
 		t.Fatal(err)
 	}
 	before := settings.Load()
 	if before.LANKey == "" {
-		t.Fatal("older Magpie has no sharing key")
+		t.Fatal("older Myna has no sharing key")
 	}
 	next, err := Update("rotate-key", Change{Key: before.LANKeyID})
 	if err != nil {
@@ -327,7 +327,7 @@ func TestOwnKeyValue(t *testing.T) {
 	if !Named(own) || Named(own+"x") || Named("") || !Named(Prefix+"abc") {
 		t.Fatal("Named")
 	}
-	for _, bad := range []string{"short", own, "has a space in it", "tab\there-and-more", "非ascii-key-value", "sk-magpie-key-mine-1234", strings.Repeat("k", 257)} {
+	for _, bad := range []string{"short", own, "has a space in it", "tab\there-and-more", "非ascii-key-value", "sk-myna-key-mine-1234", strings.Repeat("k", 257)} {
 		if _, err := Update("add-key", Change{Name: "Other", Secret: bad}); err == nil {
 			t.Fatalf("accepted %q", bad)
 		}
@@ -335,7 +335,7 @@ func TestOwnKeyValue(t *testing.T) {
 	if keys, _ := List(); len(keys) != 1 {
 		t.Fatal("a refused key was kept", keys)
 	}
-	// rotating it gives it one magpie makes; the old value no longer works
+	// rotating it gives it one myna makes; the old value no longer works
 	rotated, err := Update("rotate-key", Change{Key: keys[0].ID})
 	if err != nil || !strings.HasPrefix(rotated, Prefix) {
 		t.Fatal(rotated, err)
@@ -352,7 +352,7 @@ func TestOwnKeyValue(t *testing.T) {
 	}
 }
 
-// Authenticate tells the sharing key magpie made itself (the one it writes
+// Authenticate tells the sharing key myna made itself (the one it writes
 // into this computer's own agents) from every other gateway key, so a
 // plugin's ctx.origin can tell the owner's agents from a friend's key
 // (plugins#526): marked LAN, named by LANKeyID only, or the older
@@ -397,10 +397,10 @@ func TestAuthenticateTellsTheDefaultKey(t *testing.T) {
 			t.Fatal(who, ok)
 		}
 	})
-	t.Run("older magpie's settings key", func(t *testing.T) {
+	t.Run("older myna's settings key", func(t *testing.T) {
 		t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 		s := settings.Load()
-		s.LAN, s.LANKey = true, "sk-magpie-legacy-lan-secret"
+		s.LAN, s.LANKey = true, "sk-myna-legacy-lan-secret"
 		if err := settings.Save(s); err != nil {
 			t.Fatal(err)
 		}
@@ -410,9 +410,9 @@ func TestAuthenticateTellsTheDefaultKey(t *testing.T) {
 	})
 }
 
-// A key magpie made can be given a value of the user's own when it is
+// A key myna made can be given a value of the user's own when it is
 // rotated (isaac_bai on Discord: one easy to remember and pass on),
-// checked as add-key's is, and never a key magpie sends a provider.
+// checked as add-key's is, and never a key myna sends a provider.
 func TestRotateToOwnValue(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	made, err := Update("add-key", Change{Name: "Family"})
@@ -427,7 +427,7 @@ func TestRotateToOwnValue(t *testing.T) {
 	}
 	keys, _ := List()
 	id := keys[0].ID
-	for _, bad := range []string{"short", "has a space in it", "非ascii-key-value", "sk-magpie-key-mine-1234", "other-key-of-mine", "upstream-first-key", "upstream-second-key", strings.Repeat("k", 257)} {
+	for _, bad := range []string{"short", "has a space in it", "非ascii-key-value", "sk-myna-key-mine-1234", "other-key-of-mine", "upstream-first-key", "upstream-second-key", strings.Repeat("k", 257)} {
 		if _, err := Update("rotate-key", Change{Key: id, Secret: bad}); err == nil {
 			t.Fatalf("accepted %q", bad)
 		}
@@ -453,7 +453,7 @@ func TestRotateToOwnValue(t *testing.T) {
 	if _, err := Update("rotate-key", Change{Key: id, Secret: own}); err != nil {
 		t.Fatal(err)
 	}
-	// none: magpie makes one again
+	// none: myna makes one again
 	if again, err := Update("rotate-key", Change{Key: id}); err != nil || !strings.HasPrefix(again, Prefix) {
 		t.Fatal(again, err)
 	}

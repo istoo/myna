@@ -7,10 +7,10 @@ import (
 
 	"golang.org/x/sys/windows/registry"
 
-	"github.com/yetone/magpie/internal/appdir"
+	"github.com/istoo/myna/internal/appdir"
 )
 
-// UserPath gives magpie, and what it starts, the Node a terminal has from
+// UserPath gives myna, and what it starts, the Node a terminal has from
 // fnm (#2685). An app started from the Start menu gets the user's PATH from
 // the registry, as a terminal does, but fnm puts its Node on PATH from the
 // shell's profile (`fnm env | Invoke-Expression`) and never in the
@@ -58,7 +58,7 @@ func UserBinDirs() []string {
 }
 
 // LoginPath is the PATH the registry has now, the machine's then the
-// user's: what a terminal opened now gets, and what a magpie started
+// user's: what a terminal opened now gets, and what a myna started
 // before a CLI was installed doesn't.
 func LoginPath() []string {
 	var dirs []string
@@ -91,7 +91,7 @@ func LoginPath() []string {
 }
 
 // LoginEnv is "" on Windows: an app started from the Start menu gets the
-// user's variables from the registry, as a terminal does, so magpie's own
+// user's variables from the registry, as a terminal does, so myna's own
 // environment has them.
 func LoginEnv(string) string { return "" }
 
@@ -103,11 +103,11 @@ func LoginEnvKnown(string) string { return "" }
 func ShellPath(string) []string { return LoginPath() }
 
 // LoginVars are the values the registry has now for names, the user's
-// over the machine's: what a terminal opened now gets, and what a magpie
+// over the machine's: what a terminal opened now gets, and what a myna
 // started before the variable was set (setx, the Environment Variables
 // dialog) doesn't. A ${NAME} in an MCP server's headers or environment is
-// read so where magpie's own environment hasn't it. The values are only
-// returned, never set in magpie's environment or logged.
+// read so where myna's own environment hasn't it. The values are only
+// returned, never set in myna's environment or logged.
 func LoginVars(names []string) map[string]string {
 	out := map[string]string{}
 	for _, k := range []struct {

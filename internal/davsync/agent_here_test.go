@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/yetone/magpie/internal/backup"
-	"github.com/yetone/magpie/internal/profile"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/backup"
+	"github.com/istoo/myna/internal/profile"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // hereAgents sets the agents whose picks stay on this computer, as the

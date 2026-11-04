@@ -39,7 +39,7 @@ function serve(lang, posts, web = true) {
     if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (url.pathname === "/api/state") return json({ agents: [], profiles: [], settings: { lang, theme: "light", quotaLeft: true, codexAutoReset: [user], codexAutoResetOnly: {} } });
     // husky_bobo's: both times on for the account
-    if (url.pathname === "/api/settings") return json({ lang, theme: "light", quotaLeft: true, version: "0.1.2597", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425", fx: { rate: 7.2, at: new Date().toISOString(), stale: false }, codexUsers: [user], codexAutoReset: [user], codexAutoResetOnly: {}, codexResetLead: 30 });
+    if (url.pathname === "/api/settings") return json({ lang, theme: "light", quotaLeft: true, version: "0.1.2597", dir: "~/.config/myna", gateway: "http://127.0.0.1:3425", fx: { rate: 7.2, at: new Date().toISOString(), stale: false }, codexUsers: [user], codexAutoReset: [user], codexAutoResetOnly: {}, codexResetLead: 30 });
     if (url.pathname === "/api/providers") return json({ providers, presets: [], excluded: [], gateway: { running: true, window: true } });
     if (url.pathname === "/api/login/usage") {
       const agent = url.searchParams.get("agent");
@@ -74,7 +74,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         const posts = [];
         await page.route("**/*", serve(lang, posts));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://myna.test/?view=providers");
         const w = await page.evaluate((lang) => {
           const tr = (s) => (lang === "en" ? s : I18N[lang]?.[s]);
           return { two: "↺ " + tr("{n} resets")?.replace("{n}", 2), one: "↺ " + tr("1 reset"), use: tr("Use a reset"), ask: tr("Use a Codex reset?"), cancel: tr("Cancel") };
@@ -154,7 +154,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.addInitScript(() => Object.defineProperty(navigator, "platform", { value: "Win32" }));
         await page.route("**/*", serve(lang, posts, false));
         await watchSettingsReads(page);
-        await page.goto("http://magpie.test/?view=settings&tab=usage");
+        await page.goto("http://myna.test/?view=settings&tab=usage");
         await settingsDrawn(page);
         const w = await page.evaluate((lang) => {
           const tr = (s) => (lang === "en" ? s : I18N[lang]?.[s]);

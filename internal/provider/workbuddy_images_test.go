@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/istoo/myna/internal/catalog"
 )
 
 // WorkBuddy AI's GLM models take no images, though its config says every

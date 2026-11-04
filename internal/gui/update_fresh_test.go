@@ -14,9 +14,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/update"
+	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/myna/internal/update"
 )
 
 // coeo91 on Discord: "更新行为不对，他会在点击更新按钮后下载上一次或最近一次获取到的
@@ -44,7 +44,7 @@ func newFreshFeed(t *testing.T) *freshFeed {
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(h, ".cache"))
 	f := &freshFeed{}
 	f.latest.Store("0.1.11")
-	body := []byte("new magpie")
+	body := []byte("new myna")
 	sum := sha256.Sum256(body)
 	f.srv = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/asset" {
@@ -64,7 +64,7 @@ func newFreshFeed(t *testing.T) *freshFeed {
 		}})
 	}))
 	t.Cleanup(f.srv.Close)
-	t.Setenv("MAGPIE_UPDATE_FEED", f.srv.URL)
+	t.Setenv("MYNA_UPDATE_FEED", f.srv.URL)
 	old := Version
 	Version = "0.1.10"
 	t.Cleanup(func() { Version = old })
@@ -239,7 +239,7 @@ func TestTrayRestartTakesTheNewest(t *testing.T) {
 	}
 }
 
-// A magpie that can't replace itself sends a click to the release page:
+// A myna that can't replace itself sends a click to the release page:
 // the newest's, not the one an old check found.
 func TestAvailableOpensTheNewestPage(t *testing.T) {
 	f := newFreshFeed(t)

@@ -5,26 +5,26 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/usage"
 )
 
-// yi_time on Discord: magpie set to Chinese on Windows, and the tray icon's
+// yi_time on Discord: myna set to Chinese on Windows, and the tray icon's
 // tooltip said "Today: 121K tokens (2.9K in · 180 out · 118K cached)" and
-// "3 requests" in English. The tooltip is in magpie's language, as the
-// tray menu is: the idle tip, magpie's totals and a subscription's
-// windows, in every language magpie has. A window's name and the numbers
+// "3 requests" in English. The tooltip is in myna's language, as the
+// tray menu is: the idle tip, myna's totals and a subscription's
+// windows, in every language myna has. A window's name and the numbers
 // are the card's own.
-func TestTrayTooltipFollowsMagpiesLanguage(t *testing.T) {
+func TestTrayTooltipFollowsMynasLanguage(t *testing.T) {
 	// yi_time's numbers
 	today := usage.Totals{Calls: 3, Input: 2_900, Output: 180, CacheRead: 118_000}
-	if got, want := trayIdleTip("zh", today, "usd", 0), "magpie\n今天：121K token（输入 2.9K · 输出 180 · 缓存 118K）\n3 个请求"; got != want {
+	if got, want := trayIdleTip("zh", today, "usd", 0), "myna\n今天：121K token（输入 2.9K · 输出 180 · 缓存 118K）\n3 个请求"; got != want {
 		t.Errorf("zh idle tip =\n%q, want\n%q", got, want)
 	}
-	if got, want := trayIdleTip("en", today, "usd", 0), "magpie\nToday: 121K tokens (2.9K in · 180 out · 118K cached)\n3 requests"; got != want {
+	if got, want := trayIdleTip("en", today, "usd", 0), "myna\nToday: 121K tokens (2.9K in · 180 out · 118K cached)\n3 requests"; got != want {
 		t.Errorf("en idle tip =\n%q, want\n%q", got, want)
 	}
-	if got, want := trayTotalCard("zh", "usage:today", today, "usd", 0).Name, "magpie 今日\n121K token（输入 2.9K · 输出 180 · 缓存 118K）\n3 个请求"; got != want {
+	if got, want := trayTotalCard("zh", "usage:today", today, "usd", 0).Name, "myna 今日\n121K token（输入 2.9K · 输出 180 · 缓存 118K）\n3 个请求"; got != want {
 		t.Errorf("zh total card =\n%q, want\n%q", got, want)
 	}
 

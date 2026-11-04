@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // A call to a DeepSeek model billed by the hour is costed at the hour it

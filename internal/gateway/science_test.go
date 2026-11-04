@@ -6,18 +6,18 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
-// Claude Science, started on magpie's gateway, sends what its client sends
+// Claude Science, started on myna's gateway, sends what its client sends
 // once signed in (its bundle's yz(): its Claude sign-in as a bearer,
 // X-Anthropic-Surface: operon, anthropic-beta: oauth-2025-04-20). It is
 // known by that header, listed every model by a claude-… alias its picker
 // keeps, and served the model it picked on a third-party provider, with
 // the provider's key: its sign-in goes nowhere. A Claude model it asks for
-// by Anthropic's id that magpie doesn't serve (its default before a pick,
+// by Anthropic's id that myna doesn't serve (its default before a pick,
 // its haiku for small tasks) goes to the model it was last on.
-func TestClaudeScienceIsServedMagpiesModels(t *testing.T) {
+func TestClaudeScienceIsServedMynasModels(t *testing.T) {
 	f := &fake{t: t, reply: sse(
 		`data: {"id":"c1","model":"m1","choices":[{"delta":{"role":"assistant","content":"ok"}}]}`,
 		`data: {"id":"c1","choices":[{"delta":{},"finish_reason":"stop"}]}`,
@@ -47,7 +47,7 @@ func TestClaudeScienceIsServedMagpiesModels(t *testing.T) {
 	}
 
 	// its list: only ids its picker keeps (claude-…, a name that isn't a
-	// slug), each one magpie's model by its alias
+	// slug), each one myna's model by its alias
 	rec := send("GET", "/v1/models?limit=1000", "")
 	var list struct {
 		Data []struct {
@@ -66,7 +66,7 @@ func TestClaudeScienceIsServedMagpiesModels(t *testing.T) {
 		}
 		real, ok := aliased(m.ID)
 		if !ok {
-			t.Errorf("%q is no alias of magpie's", m.ID)
+			t.Errorf("%q is no alias of myna's", m.ID)
 		}
 		alias[real] = m.ID
 	}

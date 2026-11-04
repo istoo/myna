@@ -3,10 +3,10 @@ package cli
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
-// #2008: `magpie provider quota-rest <id> until 00:00+08:00` sets the time
+// #2008: `myna provider quota-rest <id> until 00:00+08:00` sets the time
 // of day the allowance comes back, a number of minutes after it takes its
 // place, and default lets both go.
 func TestQuotaRestUntil(t *testing.T) {
@@ -50,7 +50,7 @@ func TestQuotaRestUntil(t *testing.T) {
 	}
 }
 
-// #2008: `magpie provider rest-cap <id> 4h` sets where its keys' rests stop
+// #2008: `myna provider rest-cap <id> 4h` sets where its keys' rests stop
 // doubling, and default gives it back to the gateway's own.
 func TestRestCapCmd(t *testing.T) {
 	home := t.TempDir()
@@ -93,7 +93,7 @@ func TestRestCapCmd(t *testing.T) {
 	}
 }
 
-// `magpie quota reset --card <n>` picks which of the account's resets is
+// `myna quota reset --card <n>` picks which of the account's resets is
 // spent (01huadalang on Discord); a card that isn't a place among them, or
 // a flag it doesn't know, is turned away before any account is read, never
 // taken for an account's name.

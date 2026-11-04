@@ -12,17 +12,17 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/istoo/myna/internal/appdir"
+	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/myna/internal/gateway"
 )
 
 // ZCode (Zhipu's desktop app) keeps its model providers in
 // ~/.zcode/v2/config.json (under the folder the user moved its data to, when
 // they did: appdir.ZCodeDataIn), OpenCode's provider shape with a kind of its own:
 //
-//	{"provider":{"magpie":{"name":"magpie","kind":"anthropic",
-//	  "options":{"apiKey":"magpie","baseURL":"http://127.0.0.1:3425"},
+//	{"provider":{"myna":{"name":"myna","kind":"anthropic",
+//	  "options":{"apiKey":"myna","baseURL":"http://127.0.0.1:3425"},
 //	  "enabled":true,"source":"custom",
 //	  "models":{"<id>":{"name":…,"limit":{"context":…,"output":…},"modalities":{…},
 //	    "reasoning":{"enabled":true,"levels":[…],"defaultLevel":…,
@@ -30,7 +30,7 @@ import (
 //
 // An anthropic provider is asked at baseURL + /v1/messages. The model is
 // picked per task in ZCode's own picker and kept in its window, not in a
-// file, so what magpie sets is whether its models are in that picker.
+// file, so what myna sets is whether its models are in that picker.
 //
 // ZCode 3.14 moved its providers to ~/.zcode/v2/provider_config.json and
 // reads config.json's only once, to import them, so a provider added there
@@ -38,25 +38,25 @@ import (
 // context window and inputs are rules of their own:
 //
 //	{"schemaVersion":1,"config":{
-//	  "providerConfigRules":{"providerRules":[{"providerId":"magpie",
-//	    "providerName":"magpie","enabled":true,"config":{
+//	  "providerConfigRules":{"providerRules":[{"providerId":"myna",
+//	    "providerName":"myna","enabled":true,"config":{
 //	      "group":"standard-personal",
-//	      "access":{"type":"api-key","apiKey":"magpie"},
+//	      "access":{"type":"api-key","apiKey":"myna"},
 //	      "api":{"type":"anthropic-messages","baseUrl":"http://127.0.0.1:3425"},
 //	      "personalModelIds":[…],"modelOrder":[…]}}]},
-//	  "modelConfigRules":{"providerModelRules":[{"providerId":"magpie",
+//	  "modelConfigRules":{"providerModelRules":[{"providerId":"myna",
 //	    "modelId":…,"config":{"properties":{"contextWindow":…,
 //	      "inputFormat":{"supportsImage":…},"supportsNativeWebSearch":true},
 //	      "optionSpecs":{"maxOutputTokens":{"max":…},"reasoningLevel":{"values":[…]}}}}],
 //	    "manualProviderModelRules":[…]}}}
 //
-// magpie writes both files, so an older ZCode sees its models too. A model
+// myna writes both files, so an older ZCode sees its models too. A model
 // the user set by hand in ZCode (a manual rule) keeps what they set.
 //
-// magpie's gateway answers all three of ZCode's API formats at the same
+// myna's gateway answers all three of ZCode's API formats at the same
 // address (/v1/messages, /chat/completions, /responses), so the format the
 // user picked in ZCode's provider settings is theirs: a sync keeps it in both
-// files (zcodeFormat), and only a provider magpie adds new starts on
+// files (zcodeFormat), and only a provider myna adds new starts on
 // Anthropic Messages.
 
 // zcodeOS is the OS ZCode's home is found for, so a test can ask for
@@ -69,7 +69,7 @@ func zcode(home string) *Agent {
 	dir := filepath.Join(appdir.ZCodeDataIn(appdir.ZCodeHomeOn(zcodeOS, home)), ".zcode")
 	path := filepath.Join(dir, "v2", "config.json")
 	rules := filepath.Join(dir, "v2", "provider_config.json")
-	key := "provider." + magpieID
+	key := "provider." + mynaID
 	wired := func() bool {
 		_, ok := edit.GetJSON(path, key)
 		return ok || zcodeRuled(rules)
@@ -90,7 +90,7 @@ func zcode(home string) *Agent {
 			if !wired() {
 				return nil
 			}
-			// a ZCode that keeps its providers as rules, with magpie's taken
+			// a ZCode that keeps its providers as rules, with myna's taken
 			// out there, had it removed in ZCode: it isn't put back
 			if _, err := os.Stat(rules); err != nil || zcodeRuled(rules) {
 				if err := zcodeRules(rules, true, true); err != nil {
@@ -103,7 +103,7 @@ func zcode(home string) *Agent {
 			Key: "provider", Label: "provider",
 			Get: func() string {
 				if wired() {
-					return magpieID
+					return mynaID
 				}
 				return ""
 			},
@@ -120,13 +120,13 @@ func zcode(home string) *Agent {
 				return edit.SetJSON(path, edit.KV{Path: key, Value: zcodeProviderJSON(path, false)})
 			},
 			Options: func(map[string]string) []Option {
-				return []Option{{Value: magpieID, Label: "magpie", Icon: "magpie", Note: "every magpie model in ZCode's picker"}}
+				return []Option{{Value: mynaID, Label: "myna", Icon: "myna", Note: "every myna model in ZCode's picker"}}
 			},
 		}},
 	}
 }
 
-// zcodeProviderJSON is magpie's provider in config.json at path; one
+// zcodeProviderJSON is myna's provider in config.json at path; one
 // turned off in ZCode stays off. A sync (keep) leaves an address on another
 // machine as it found it (zcodeAddress).
 func zcodeProviderJSON(path string, keep bool) any {
@@ -156,21 +156,21 @@ func zcodeProviderJSON(path string, keep bool) any {
 		ms[m.ID] = e
 	}
 	on := true
-	if v, ok := edit.GetJSON(path, "provider."+magpieID+".enabled"); ok && v == "false" {
+	if v, ok := edit.GetJSON(path, "provider."+mynaID+".enabled"); ok && v == "false" {
 		on = false
 	}
 	base, token := gateway.URL(), hereKey()
 	if keep {
 		base, token = zcodeKept(filepath.Dir(path))
 	}
-	return map[string]any{"name": "magpie", "kind": zcodeKinds[zcodeFormat(filepath.Dir(path))], "enabled": on, "source": "custom",
+	return map[string]any{"name": "myna", "kind": zcodeKinds[zcodeFormat(filepath.Dir(path))], "enabled": on, "source": "custom",
 		"options": map[string]any{"apiKey": token, "baseURL": base}, "models": ms}
 }
 
-// zcodeDefaultLevels is the default level each of magpie's models has in
+// zcodeDefaultLevels is the default level each of myna's models has in
 // config.json at path, which one set by hand keeps (keptEffort). A default
-// a magpie before #3852 wrote as defaultVariant is carried over: ZCode never
-// read that key, only magpie wrote it.
+// a myna before #3852 wrote as defaultVariant is carried over: ZCode never
+// read that key, only myna wrote it.
 func zcodeDefaultLevels(path string) map[string]string {
 	var c struct {
 		Provider map[string]struct {
@@ -187,7 +187,7 @@ func zcodeDefaultLevels(path string) map[string]string {
 		return nil
 	}
 	out := map[string]string{}
-	for id, m := range c.Provider[magpieID].Models {
+	for id, m := range c.Provider[mynaID].Models {
 		out[id] = m.Reasoning.DefaultLevel
 		if out[id] == "" {
 			out[id] = m.Reasoning.DefaultVariant
@@ -196,10 +196,10 @@ func zcodeDefaultLevels(path string) map[string]string {
 	return out
 }
 
-// zcodeAddress is the address and key magpie's provider is synced with:
-// the gateway's, unless the user pointed the provider at a magpie on another
+// zcodeAddress is the address and key myna's provider is synced with:
+// the gateway's, unless the user pointed the provider at a myna on another
 // machine (a NAS's), which a sync, there to bring the models up to date,
-// keeps with its key. An address on this machine's loopback is magpie's own
+// keeps with its key. An address on this machine's loopback is myna's own
 // and follows the gateway.
 func zcodeAddress(was, wasKey string) (string, string) {
 	if !onAnotherMachine(was) || sameGateway(was, gateway.URL()) {
@@ -211,11 +211,11 @@ func zcodeAddress(was, wasKey string) (string, string) {
 	return was, wasKey
 }
 
-// zcodeKept is the address a sync gives magpie's provider in both of
+// zcodeKept is the address a sync gives myna's provider in both of
 // ZCode's files in dir: one on another machine found in either file, so an
 // edit ZCode made to one of them is carried to the other (ZCode's own
 // settings write provider_config.json, and a config.json left on this
-// machine's magpie took the provider back there), else the gateway's.
+// machine's myna took the provider back there), else the gateway's.
 func zcodeKept(dir string) (string, string) {
 	var r struct {
 		Config struct {
@@ -237,13 +237,13 @@ func zcodeKept(dir string) (string, string) {
 	b, _ := os.ReadFile(filepath.Join(dir, "provider_config.json"))
 	json.Unmarshal(b, &r)
 	for _, p := range r.Config.ProviderConfigRules.ProviderRules {
-		if p.ProviderID == magpieID && onAnotherMachine(p.Config.API.BaseURL) {
+		if p.ProviderID == mynaID && onAnotherMachine(p.Config.API.BaseURL) {
 			return zcodeAddress(p.Config.API.BaseURL, p.Config.Access.APIKey)
 		}
 	}
 	path := filepath.Join(dir, "config.json")
-	was, _ := edit.GetJSON(path, "provider."+magpieID+".options.baseURL")
-	wasKey, _ := edit.GetJSON(path, "provider."+magpieID+".options.apiKey")
+	was, _ := edit.GetJSON(path, "provider."+mynaID+".options.baseURL")
+	wasKey, _ := edit.GetJSON(path, "provider."+mynaID+".options.apiKey")
 	return zcodeAddress(was, wasKey)
 }
 
@@ -255,16 +255,16 @@ var zcodeKinds = map[string]string{
 	"openai-responses":        "openai",
 }
 
-// zcodeFormat is the API format magpie's provider has in ZCode's files in
+// zcodeFormat is the API format myna's provider has in ZCode's files in
 // dir: the one the user picked in ZCode's settings, else Anthropic Messages.
-// magpie writes both files together, so where they differ the user changed
+// myna writes both files together, so where they differ the user changed
 // one of them in ZCode (provider_config.json from 3.14 on, config.json
 // before): the one written last has their choice, which is carried to the
 // other.
 func zcodeFormat(dir string) string {
 	rules, kind := zcodeRuleFormat(dir), ""
 	path := filepath.Join(dir, "config.json")
-	if k, _ := edit.GetJSON(path, "provider."+magpieID+".kind"); k != "" {
+	if k, _ := edit.GetJSON(path, "provider."+mynaID+".kind"); k != "" {
 		for f, fk := range zcodeKinds {
 			if fk == k {
 				kind = f
@@ -287,7 +287,7 @@ func zcodeFormat(dir string) string {
 	return rules
 }
 
-// zcodeRuleFormat is magpie's provider's API format in provider_config.json
+// zcodeRuleFormat is myna's provider's API format in provider_config.json
 // in dir, or "" when it has none ZCode knows.
 func zcodeRuleFormat(dir string) string {
 	var r struct {
@@ -307,7 +307,7 @@ func zcodeRuleFormat(dir string) string {
 	b, _ := os.ReadFile(filepath.Join(dir, "provider_config.json"))
 	json.Unmarshal(b, &r)
 	for _, p := range r.Config.ProviderConfigRules.ProviderRules {
-		if _, ok := zcodeKinds[p.Config.API.Type]; ok && p.ProviderID == magpieID {
+		if _, ok := zcodeKinds[p.Config.API.Type]; ok && p.ProviderID == mynaID {
 			return p.Config.API.Type
 		}
 	}
@@ -358,7 +358,7 @@ func zcodeLevels(efforts []string) []string {
 // of a Claude before 4.6 (budget_tokens is required with "enabled"); the
 // gateway makes it adaptive for a later Claude and fits it under the
 // reply's limit. A level's options already in config.json are the user's
-// and stay: no magpie before #3852 wrote any.
+// and stay: no myna before #3852 wrote any.
 func zcodeOptionsByLevel(levels []string, own map[string]any) map[string]any {
 	out := map[string]any{}
 	for _, l := range levels {
@@ -375,7 +375,7 @@ func zcodeOptionsByLevel(levels []string, own map[string]any) map[string]any {
 	return out
 }
 
-// zcodeLevelOptions are the providerOptionsByLevel each of magpie's models
+// zcodeLevelOptions are the providerOptionsByLevel each of myna's models
 // has in config.json at path, which zcodeOptionsByLevel keeps.
 func zcodeLevelOptions(path string) map[string]map[string]any {
 	var c struct {
@@ -392,7 +392,7 @@ func zcodeLevelOptions(path string) map[string]map[string]any {
 		return nil
 	}
 	out := map[string]map[string]any{}
-	for id, m := range c.Provider[magpieID].Models {
+	for id, m := range c.Provider[mynaID].Models {
 		if len(m.Reasoning.Options) > 0 {
 			out[id] = m.Reasoning.Options
 		}
@@ -413,7 +413,7 @@ func zcodeDefaultLevel(levels []string) string {
 	return on[len(on)/2]
 }
 
-// zcodeRuled reports whether provider_config.json has magpie's provider.
+// zcodeRuled reports whether provider_config.json has myna's provider.
 func zcodeRuled(path string) bool {
 	var c struct {
 		Config struct {
@@ -429,14 +429,14 @@ func zcodeRuled(path string) bool {
 		return false
 	}
 	for _, r := range c.Config.ProviderConfigRules.ProviderRules {
-		if r.ProviderID == magpieID {
+		if r.ProviderID == mynaID {
 			return true
 		}
 	}
 	return false
 }
 
-// zcodeRules puts magpie's provider and its models' rules into ZCode's
+// zcodeRules puts myna's provider and its models' rules into ZCode's
 // provider_config.json (on) or takes them out, leaving every other rule and
 // key as ZCode wrote it. A sync (keep) leaves an address on another machine
 // as it found it (zcodeAddress).
@@ -460,11 +460,11 @@ func zcodeRules(path string, on, keep bool) error {
 	cfg := zcodeObj(doc, "config")
 	pcr := zcodeObj(cfg, "providerConfigRules")
 	mcr := zcodeObj(cfg, "modelConfigRules")
-	mine := func(r any) bool { m, _ := r.(map[string]any); return m != nil && m["providerId"] == magpieID }
+	mine := func(r any) bool { m, _ := r.(map[string]any); return m != nil && m["providerId"] == mynaID }
 
 	var old map[string]any
 	var providers []any
-	at := -1 // where magpie's was, which it keeps
+	at := -1 // where myna's was, which it keeps
 	for _, r := range zcodeList(pcr, "providerRules") {
 		if mine(r) {
 			old, _ = r.(map[string]any)
@@ -484,7 +484,7 @@ func zcodeRules(path string, on, keep bool) error {
 		}
 		manual = append(manual, r)
 	}
-	// magpie's model rules as they are now, which ZCode's own settings
+	// myna's model rules as they are now, which ZCode's own settings
 	// write a model's edits into while it keeps its recommended config
 	ours := map[any]map[string]any{}
 	for _, r := range zcodeList(mcr, "providerModelRules") {
@@ -528,7 +528,7 @@ func zcodeRules(path string, on, keep bool) error {
 			if len(specs) > 0 {
 				config["optionSpecs"] = specs
 			}
-			models = append(models, map[string]any{"providerId": magpieID, "modelId": m.ID, "config": config})
+			models = append(models, map[string]any{"providerId": mynaID, "modelId": m.ID, "config": config})
 		}
 		if ids == nil {
 			ids = []string{}
@@ -540,7 +540,7 @@ func zcodeRules(path string, on, keep bool) error {
 		if keep {
 			base, token = zcodeKept(filepath.Dir(path))
 		}
-		rule := map[string]any{"providerId": magpieID, "providerName": "magpie", "enabled": true,
+		rule := map[string]any{"providerId": mynaID, "providerName": "myna", "enabled": true,
 			"config": map[string]any{
 				"group":            "standard-personal",
 				"access":           map[string]any{"type": "api-key", "apiKey": token},
@@ -555,7 +555,7 @@ func zcodeRules(path string, on, keep bool) error {
 		// visibility, a header or the key's management link
 		// (packages/provider/src/config/provider-data-schema.ts). ZCode
 		// checks the file strictly, so only keys it already took are kept;
-		// the address, key, format and model lists are magpie's.
+		// the address, key, format and model lists are myna's.
 		if old != nil {
 			if name, _ := old["providerName"].(string); strings.TrimSpace(name) != "" {
 				rule["providerName"] = name
@@ -598,31 +598,31 @@ func zcodeRules(path string, on, keep bool) error {
 // it has native web search (properties.supportsNativeWebSearch, 原生联网搜索
 // in a model's settings), off by default. Its tool then asks the model
 // again with Anthropic's web_search tool, which only an Anthropic Messages
-// provider is sent: on another API format ZCode fails the search. magpie's
+// provider is sent: on another API format ZCode fails the search. myna's
 // gateway runs that tool for any of its models, so it turns native web
 // search on for each model it lists while the format is Anthropic Messages
-// (Gearclickist on Discord: every magpie model had to be ticked by hand).
+// (Gearclickist on Discord: every myna model had to be ticked by hand).
 //
 // ZCode writes a change to a model with its recommended config into the
-// model's rule, magpie's, and leaves a value equal to ZCode's default out of
-// it: unticking native web search takes the key out. So the models magpie
+// model's rule, myna's, and leaves a value equal to ZCode's default out of
+// it: unticking native web search takes the key out. So the models myna
 // turned it on for are kept in the stash (zcodeSearchedKey), and one of
 // them whose rule has no key now was unticked in ZCode and stays off. A
 // value in the rule is kept as it is.
 const zcodeSearchedKey = "zcode.web_search"
 
-// zcodeWebSearch is what magpie's rule for model id, which says old now,
+// zcodeWebSearch is what myna's rule for model id, which says old now,
 // says of native web search: v, or nothing when set is false. anthropic is
 // whether ZCode sends the model's provider-native search (the provider's
 // format is Anthropic Messages, and the stash could be read). searched holds
-// the models magpie turned it on for and is updated.
+// the models myna turned it on for and is updated.
 func zcodeWebSearch(old map[string]any, id string, anthropic bool, searched map[string]bool) (v, set bool) {
 	props, _ := old["config"].(map[string]any)
 	props, _ = props["properties"].(map[string]any)
 	was, had := props["supportsNativeWebSearch"].(bool)
 	switch {
 	case !anthropic:
-		// magpie's on can't be used there; the user's own value stays
+		// myna's on can't be used there; the user's own value stays
 		if had && was && searched[id] {
 			delete(searched, id)
 			return false, false
@@ -641,7 +641,7 @@ func zcodeWebSearch(old map[string]any, id string, anthropic bool, searched map[
 	return true, true
 }
 
-// zcodeSearched is the models magpie turned ZCode's native web search on
+// zcodeSearched is the models myna turned ZCode's native web search on
 // for, and whether the stash could be read: a stash there that can't be
 // read or parsed is unknown, and nothing is turned on.
 func zcodeSearched() (map[string]bool, bool) {
@@ -662,7 +662,7 @@ func zcodeSearched() (map[string]bool, bool) {
 	return out, true
 }
 
-// zcodeSearchedPut keeps searched in the stash, only for models magpie
+// zcodeSearchedPut keeps searched in the stash, only for models myna
 // still lists (ids), and writes it only when that changes it.
 func zcodeSearchedPut(searched map[string]bool, ids []string) {
 	var keep []string
@@ -697,5 +697,5 @@ func zcodeNonNil(l []any) []any {
 
 // what zcode says after a change (notice.go)
 var (
-	noticeZcode = newNotice("ZCode reads its providers at start-up — restart ZCode to see magpie's models in its picker.")
+	noticeZcode = newNotice("ZCode reads its providers at start-up — restart ZCode to see myna's models in its picker.")
 )

@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/plugin"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/plugin"
 )
 
 // parseCursorModels reads `cursor-agent models` as it prints it, the way the

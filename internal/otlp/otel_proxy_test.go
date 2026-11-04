@@ -14,7 +14,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // A switch of the global proxy left the exporter on the old one: its

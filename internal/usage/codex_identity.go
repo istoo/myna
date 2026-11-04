@@ -8,7 +8,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/yetone/magpie/internal/sessions"
+	"github.com/istoo/myna/internal/sessions"
 )
 
 func codexIdentityRow(row Row, actor string, identities map[string]sessions.CodexIdentity) Row {

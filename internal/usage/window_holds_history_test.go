@@ -2,7 +2,7 @@ package usage
 
 import (
 	"encoding/json"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 	"testing"
 	"time"
 )

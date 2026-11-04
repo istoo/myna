@@ -11,7 +11,7 @@ import (
 )
 
 // A plugin's search hook (testdata/search): the host lists the APIs with an
-// id magpie can use and an execute, leaves out the rest, and notes them for
+// id myna can use and an execute, leaves out the rest, and notes them for
 // the provider package, which reads the note without starting the host and
 // only for plugins that are on. A search is run with the user's key and
 // address, its results read from a list or {results}, a throw with a

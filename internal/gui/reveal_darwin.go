@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/istoo/myna/internal/proc"
 )
 
 // revealFolder shows the folder selected in its parent's Finder window,

@@ -3,9 +3,9 @@ package gateway
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // A Codex account searches for a model that can't with its cheap model,
@@ -22,7 +22,7 @@ func TestCodexSearchesWithItsCheapModel(t *testing.T) {
 	if err := catalog.SaveLive("codex", provider.CodexBase, list); err != nil {
 		t.Fatal(err)
 	}
-	// magpie's own pick searches by the backend's search (search_codex.go);
+	// myna's own pick searches by the backend's search (search_codex.go);
 	// the cheap model is what it falls back on, and what "codex" names
 	pick := func() (string, string) {
 		p, m, ok := searcher()

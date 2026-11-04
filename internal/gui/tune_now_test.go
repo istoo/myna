@@ -3,14 +3,14 @@ package gui
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // Where Tuned for you says Codex runs now is worked out the same way in
 // every range (hoobnn on Discord). Over 7 days the calls held one of
-// Codex's own models as well, outside magpie's catalog, which made "Now"
+// Codex's own models as well, outside myna's catalog, which made "Now"
 // unknown for the whole range: it was guessed from the prompts (380K)
-// while today's calls, on magpie's models alone, read the 430K magpie
+// while today's calls, on myna's models alone, read the 430K myna
 // tells Codex. And a model's own Compact at is where Codex runs, over Long
 // conversations: the card says so instead of "In use" for a Long
 // conversations value that doesn't move it.
@@ -39,11 +39,11 @@ func TestTuneCodexNowIsTheSameInEveryRange(t *testing.T) {
 		return st.Agents[0].Advice[0]
 	}
 
-	// Long conversations at 170K: magpie's model runs at 170K, with one of
+	// Long conversations at 170K: myna's model runs at 170K, with one of
 	// Codex's own models beside it or not
 	today, week := advice("cpa/gpt-cpa-1m"), advice("cpa/gpt-cpa-1m", "gpt-5.5")
 	if today.Compact.Current != 170000 || week.Compact.Current != 170000 {
-		t.Errorf("Codex now: %d on magpie's model, %d with Codex's own beside it; want 170000 both", today.Compact.Current, week.Compact.Current)
+		t.Errorf("Codex now: %d on myna's model, %d with Codex's own beside it; want 170000 both", today.Compact.Current, week.Compact.Current)
 	}
 	if today.Own != nil || week.Own != nil {
 		t.Errorf("Long conversations is where Codex runs, yet the advice names a model's own threshold: %+v, %+v", today.Own, week.Own)

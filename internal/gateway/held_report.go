@@ -13,19 +13,19 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/appdir"
+	"github.com/istoo/myna/internal/appdir"
 )
 
-// A request magpie holds too long before routing it is stopped with a 504
+// A request myna holds too long before routing it is stopped with a 504
 // (giveUp), and what held it is written to a report of its own: the GUI
 // app's log goes only to a stderr its user never sees, so the log alone
 // can't be sent with a bug report. The report is a small file in HeldDir,
 // the last heldKept of them kept, and the Routing page's row for the
 // request copies it (Route.Held).
 //
-// What it holds: when, magpie's version and system, the method and path,
+// What it holds: when, myna's version and system, the method and path,
 // the model asked for and the agent, how long it was held, each kind of
-// wait magpie knew it was in and for how long, the body room's state, how
+// wait myna knew it was in and for how long, the body room's state, how
 // many requests were in flight, and where every goroutine stood (function
 // names and lines, no values). Never the request's body or headers.
 
@@ -120,9 +120,9 @@ func HeldReport(name string) (string, error) {
 // heldReport is the report of u's request, held for held and stopped.
 func (s *Server) heldReport(u *unroutedHold, held time.Duration, status int, who, asked, where string) string {
 	var b strings.Builder
-	fmt.Fprintf(&b, "magpie held a request before routing it, and stopped it with %d\n\n", status)
+	fmt.Fprintf(&b, "myna held a request before routing it, and stopped it with %d\n\n", status)
 	fmt.Fprintf(&b, "time: %s\n", time.Now().UTC().Format(time.RFC3339))
-	fmt.Fprintf(&b, "magpie: %s (%s/%s, served by %s)\n", cmpOr(Version, "dev"), runtime.GOOS, runtime.GOARCH, cmpOr(Serves, "?"))
+	fmt.Fprintf(&b, "myna: %s (%s/%s, served by %s)\n", cmpOr(Version, "dev"), runtime.GOOS, runtime.GOARCH, cmpOr(Serves, "?"))
 	fmt.Fprintf(&b, "request: %s %s\n", u.r.Method, u.r.URL.Path)
 	fmt.Fprintf(&b, "model: %s\n", cmpOr(asked, "? (not read yet)"))
 	fmt.Fprintf(&b, "agent: %s\n", who)

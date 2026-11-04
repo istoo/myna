@@ -6,9 +6,9 @@
 
 // renderPort: the gateway's address on this computer (Magic_zero on Discord:
 // 3425 taken by another program, or one easier to tell apart). Only its
-// port, 1024 up, is typed here; magpie moves its gateway there and every
+// port, 1024 up, is typed here; myna moves its gateway there and every
 // agent it connected with it, or says why it can't (another program has
-// it). MAGPIE_ADDR, a whole host:port, comes first and the field shows it,
+// it). MYNA_ADDR, a whole host:port, comes first and the field shows it,
 // off (Chicring on Discord: the row was titled a port while it showed one).
 let portDraft = { value: null, err: "" };
 // portSays is the gateway's word on a port it couldn't take, in the page's
@@ -16,7 +16,7 @@ let portDraft = { value: null, err: "" };
 function portSays(m) {
   let x;
   if ((x = /^port (\d+) is in use by another program/.exec(m))) return t("Port {p} is in use by another program: pick another one", { p: x[1] });
-  if ((x = /^another magpie serves the gateway at (\S+):/.exec(m))) return t("Another magpie serves the gateway at {url}: set its port there, or quit it first", { url: x[1] });
+  if ((x = /^another myna serves the gateway at (\S+):/.exec(m))) return t("Another myna serves the gateway at {url}: set its port there, or quit it first", { url: x[1] });
   if (/from 1024 to 65535/.test(m)) return t("A port is a number from 1024 to 65535");
   return t(m);
 }
@@ -36,11 +36,11 @@ function renderPort(s) {
   if (s.addrEnv) {
     field.value = s.addrEnv;
     field.disabled = save.disabled = true;
-    sub.textContent = t("MAGPIE_ADDR={addr} sets the gateway’s whole address, host:port: unset it to set the port here", { addr: s.addrEnv });
+    sub.textContent = t("MYNA_ADDR={addr} sets the gateway’s whole address, host:port: unset it to set the port here", { addr: s.addrEnv });
   } else if (d.err) {
     sub.textContent = d.err;
     sub.classList.add("err");
-  } else sub.textContent = t("Only the port is set here, 1024 to 65535; MAGPIE_ADDR=host:port sets the whole address instead. Agents magpie connected move with it. Now {url}", { url: s.gateway || "" });
+  } else sub.textContent = t("Only the port is set here, 1024 to 65535; MYNA_ADDR=host:port sets the whole address instead. Agents myna connected move with it. Now {url}", { url: s.gateway || "" });
   who.append(sub);
   save.onclick = () => {
     const p = Number(field.value.trim());
@@ -85,7 +85,7 @@ function renderBareIds(s) {
 }
 
 // renderBusyLoad: the load past which a model its plugin says is busy
-// (magpie.load) goes behind the others (settings.BusyLoad, axelburks on
+// (myna.load) goes behind the others (settings.BusyLoad, axelburks on
 // Discord). Custom… opens a field for any other number, 1 to 9999, which
 // is then shown as its own choice; Enter or Apply saves it, Escape closes
 let busyDraft = null;
@@ -137,7 +137,7 @@ let corsDraft = { value: "", err: "" };
 // corsSays is the gateway's word on an origin it didn't take, in the
 // page's language
 function corsSays(m) {
-  if (/wildcard/.test(m)) return t("Name each origin: a wildcard would let every web page use magpie");
+  if (/wildcard/.test(m)) return t("Name each origin: a wildcard would let every web page use myna");
   if (/is not an (extension's )?origin/.test(m)) return t("Write an origin as http://localhost:3000 or https://app.example.com, or a browser extension's as chrome-extension://, moz-extension:// or safari-web-extension:// followed by its ID");
   return t(m);
 }
@@ -165,7 +165,7 @@ function renderCORS(s) {
   field.onkeydown = (e) => { e.stopPropagation(); if (e.key === "Enter") add.onclick(); };
   const r = el("div", "row pref rule-row");
   const who = el("div", "who");
-  who.append(el("div", "name", t("Web pages that may call magpie")),
+  who.append(el("div", "name", t("Web pages that may call myna")),
     el("div", "sub" + (d.err ? " err" : ""), d.err || t("Scripts on these origins can call the gateway from a browser, each request with a gateway key from Gateway. A page from any other site is refused; pages on this computer are not")));
   const val = el("div", "val rule-add");
   val.append(field, add);
@@ -184,13 +184,13 @@ function renderCORS(s) {
   }
 }
 
-// renderAllow: the addresses other computers may reach magpie from at
-// all (lc on Discord: magpie in Docker on a public host), as IPs and CIDR
+// renderAllow: the addresses other computers may reach myna from at
+// all (lc on Discord: myna in Docker on a public host), as IPs and CIDR
 // ranges, under Share on local network — a row to add one, and one row
 // each to take it away. None listed lets every address in, with a gateway
-// key, as before; this computer is always let in. MAGPIE_ALLOW_IPS, where
+// key, as before; this computer is always let in. MYNA_ALLOW_IPS, where
 // set, is the list, shown and not edited here.
-// A list that would shut out the page saving it names the address magpie
+// A list that would shut out the page saving it names the address myna
 // sees the page from (Mathresearcher on Discord: which address?), and
 // offers to add it to the list that was refused; behind Docker or a proxy
 // that is the proxy's, not the user's computer's (gateway.peerAddr).
@@ -198,8 +198,8 @@ let allowDraft = { value: "", err: "", addr: "", tried: null };
 function allowSays(m) {
   if (/is not an IP address/.test(m)) return t("Write an address as 203.0.113.7, or a range as 10.0.0.0/8 or 2001:db8::/32");
   const out = /shut out (\S+), the address/.exec(m);
-  if (out) return t("That list leaves out {addr}, the address magpie sees this page open from: add it first, or this page can’t reach magpie", { addr: out[1] });
-  if (/MAGPIE_ALLOW_IPS/.test(m)) return t("MAGPIE_ALLOW_IPS sets this list; change it there");
+  if (out) return t("That list leaves out {addr}, the address myna sees this page open from: add it first, or this page can’t reach myna", { addr: out[1] });
+  if (/MYNA_ALLOW_IPS/.test(m)) return t("MYNA_ALLOW_IPS sets this list; change it there");
   return t(m);
 }
 function renderAllow(s) {
@@ -219,8 +219,8 @@ function renderAllow(s) {
     });
   const r = el("div", "row pref rule-row");
   const who = el("div", "who");
-  const sub = d.err || (env ? t("Set by MAGPIE_ALLOW_IPS. Other computers reach magpie only from these addresses, even with a gateway key; this computer always can")
-    : t("Other computers reach magpie only from these addresses or ranges (CIDR), even with a gateway key; this computer always can. None listed lets every address in"));
+  const sub = d.err || (env ? t("Set by MYNA_ALLOW_IPS. Other computers reach myna only from these addresses, even with a gateway key; this computer always can")
+    : t("Other computers reach myna only from these addresses or ranges (CIDR), even with a gateway key; this computer always can. None listed lets every address in"));
   who.append(el("div", "name", t("Allowed addresses")), el("div", "sub" + (d.err ? " err" : ""), sub));
   // the address the refusal named, added to the list that was refused in
   // one click
@@ -272,11 +272,11 @@ function renderAllow(s) {
 let lanSelectedURL = "", lanProtocol = "openai";
 // the address picked under Share on local network is kept like Connect's
 let lanWant = "";
-try { lanWant = localStorage.getItem("magpie.lanAddress") || ""; } catch {}
+try { lanWant = localStorage.getItem("myna.lanAddress") || ""; } catch {}
 // lanShown: the addresses the gateway is offered at beyond this computer,
 // those of them for other containers on this host, and a line on them
-// when magpie runs in a container, for Settings, Gateway, Connect, the
-// sidebar and the key page alike. In a container magpie finds only its
+// when myna runs in a container, for Settings, Gateway, Connect, the
+// sidebar and the key page alike. In a container myna finds only its
 // own addresses; the page opened over the network was reached at the
 // host's, so the gateway is offered there, on its port. Other containers
 // on the host reach it at the host's Docker bridge address, the
@@ -288,11 +288,11 @@ function lanShown(urls, container, bridge) {
   const host = location.hostname, at = urls[0] || bridge ? new URL(urls[0] || bridge) : null;
   if (web && host && at?.port && !/^(localhost|127\.|\[::1\]$)/.test(host))
     return { urls: [at.protocol + "//" + host + ":" + at.port, ...others], others, // an IPv6 hostname comes bracketed
-      sub: others.length ? t("Other devices use the host’s address this page was opened at, and other containers on this host the host’s Docker bridge address, both on the gateway’s port; MAGPIE_PUBLIC_URL sets another")
-        : t("Where this page was opened, on the gateway’s port; MAGPIE_PUBLIC_URL sets another") };
+      sub: others.length ? t("Other devices use the host’s address this page was opened at, and other containers on this host the host’s Docker bridge address, both on the gateway’s port; MYNA_PUBLIC_URL sets another")
+        : t("Where this page was opened, on the gateway’s port; MYNA_PUBLIC_URL sets another") };
   if (others.length) return { urls: others, others,
-    sub: t("Other containers on this host use the host’s Docker bridge address, on the gateway’s port; other devices use the host’s own, which MAGPIE_PUBLIC_URL puts here") };
-  return { urls, others, sub: t("The container’s own addresses, which other devices can’t reach: set MAGPIE_PUBLIC_URL to the host’s") };
+    sub: t("Other containers on this host use the host’s Docker bridge address, on the gateway’s port; other devices use the host’s own, which MYNA_PUBLIC_URL puts here") };
+  return { urls, others, sub: t("The container’s own addresses, which other devices can’t reach: set MYNA_PUBLIC_URL to the host’s") };
 }
 // gwLAN: lanShown for the gateway's read (providers', or boot.js's line),
 // which says whether its addresses are a container's and where other
@@ -307,7 +307,7 @@ function gwFar(g) {
   return far.length ? far : urls;
 }
 // sideLAN: where other machines reach the gateway while it is shared, for
-// the sidebar's line (coeo91 on Discord): MAGPIE_PUBLIC_URL, else the
+// the sidebar's line (coeo91 on Discord): MYNA_PUBLIC_URL, else the
 // address picked here, else the first
 function sideLAN(g) {
   const u = gwFar(g);
@@ -337,7 +337,7 @@ function renderLAN(s) {
     if (ns.rekeyed) status(ns.rekeyed, "err");
   })
     .catch((e) => { status(t(e.message), "err"); renderSettings(); });
-  row(t("Share on local network"), t("Agents on other computers on this network, or through a tunnel to this one such as Cloudflare Tunnel, can use magpie’s models with a gateway key from Gateway"), "",
+  row(t("Share on local network"), t("Agents on other computers on this network, or through a tunnel to this one such as Cloudflare Tunnel, can use myna’s models with a gateway key from Gateway"), "",
     segs([["off", t("Off")], ["on", t("On")]], s.lan ? "on" : "off", (v) => set({ on: v === "on" })));
   if (!s.lan) return;
   const { urls, others, sub } = lanShown(s.lanURLs || [], s.lanContainer, s.lanContainerHost);
@@ -358,7 +358,7 @@ function renderLAN(s) {
         if (address.classList.contains("open")) return closeProtoMenu();
         const suffix = lanProtocol === "openai" ? "/v1" : "";
         openProtoMenu(address, urls.map((u) => ({ v: u, name: u + suffix, note: far.has(u) ? t("On the internet") : others.includes(u) ? t("Other containers on this host") : "" })), lanSelectedURL,
-          (v) => { lanSelectedURL = lanWant = v; keepPick("magpie.lanAddress", v); update(); renderSideGw(); }, "Address", "lan-address-menu");
+          (v) => { lanSelectedURL = lanWant = v; keepPick("myna.lanAddress", v); update(); renderSideGw(); }, "Address", "lan-address-menu");
       };
     }
     const copyControl = el("span", "lan-copy");
@@ -377,7 +377,7 @@ function renderLAN(s) {
       who.querySelector(".sub")?.remove();
       if (far.has(lanSelectedURL)) who.append(el("div", "sub", listed
         ? t("An internet address: only the addresses under Allowed addresses get in")
-        : t("An internet address: anyone online can reach magpie here with a gateway key. To keep it to this network, list its range under Allowed addresses")));
+        : t("An internet address: anyone online can reach myna here with a gateway key. To keep it to this network, list its range under Allowed addresses")));
     };
     controls.append(segs([["openai", "OpenAI"], ["anthropic", "Anthropic"]], lanProtocol,
       (v) => { lanProtocol = v; update(); }), address, copyControl);
@@ -389,8 +389,8 @@ function renderLAN(s) {
 }
 
 // renderWebPage: Browser access, the app's own page served to a browser
-// (apppage.go; jiakun_zhao on X managed magpie through a Cloudflare tunnel
-// with `magpie web` kept running in a terminal beside the app). Off, this
+// (apppage.go; jiakun_zhao on X managed myna through a Cloudflare tunnel
+// with `myna web` kept running in a terminal beside the app). Off, this
 // computer alone (for a tunnel or an SSH forward to reach), or the local
 // network. The page always asks for its key: the link carries it, and a
 // browser without it gets nothing. The app's windows alone draw it; a
@@ -421,11 +421,11 @@ function renderWebPage(asked) {
     rows.push(r);
     return r;
   };
-  row(t("Open magpie in a browser"),
-    t("The app serves this window’s page with a key in its link, as magpie web does, while it runs. For a tunnel such as Cloudflare Tunnel, point it at http://127.0.0.1:{port}", { port: s.port }),
+  row(t("Open myna in a browser"),
+    t("The app serves this window’s page with a key in its link, as myna web does, while it runs. For a tunnel such as Cloudflare Tunnel, point it at http://127.0.0.1:{port}", { port: s.port }),
     segs([["", t("Off")], ["local", t("This computer")], ["lan", t("Local network")]], s.mode || "", (mode) => set({ mode }))).classList.add("web-page-mode");
   if (s.mode) {
-    const why = s.error ? el("div", "sub err", s.error.startsWith("port ") ? t("Port {p} is taken by another program, magpie web perhaps: magpie tries again every few seconds", { p: s.port }) : t(s.error))
+    const why = s.error ? el("div", "sub err", s.error.startsWith("port ") ? t("Port {p} is taken by another program, myna web perhaps: myna tries again every few seconds", { p: s.port }) : t(s.error))
       : el("div", "sub say", s.serving ? t("Served; anyone with this link can change every setting") : t("Starting…"));
     const links = [s.link, ...(s.mode === "lan" ? s.network || [] : [])].filter(Boolean);
     const box2 = el("div", "web-page-links");

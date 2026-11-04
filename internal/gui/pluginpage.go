@@ -21,30 +21,30 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/usage"
 )
 
-// A community plugin's own page in magpie's window (P4 of
-// docs/subsystems/plugin-runtime.md): package.json's magpie.page, shown in
-// a sandboxed frame (pluginpages.js), and its panels in magpie's own pages
-// (magpie.panels, P5), each in a frame of its own shut in the same way.
+// A community plugin's own page in myna's window (P4 of
+// docs/subsystems/plugin-runtime.md): package.json's myna.page, shown in
+// a sandboxed frame (pluginpages.js), and its panels in myna's own pages
+// (myna.panels, P5), each in a frame of its own shut in the same way.
 // Their files are served under
-// pluginPagePrefix and a token only this run of magpie hands out, with a
+// pluginPagePrefix and a token only this run of myna hands out, with a
 // policy that lets the page load nothing but its own files and reach
-// nothing over the network; it has no way to magpie's /api (apiFramed),
-// and what it may read of magpie's it asks the window for, which asks
+// nothing over the network; it has no way to myna's /api (apiFramed),
+// and what it may read of myna's it asks the window for, which asks
 // /api/plugin-pages/read for the reads its package declared.
 
 // pluginPagePrefix is where a plugin's page's files are served:
 // pluginPagePrefix + token + "/" + the file's path in the page's folder.
-const pluginPagePrefix = "/_magpie/plugin/"
+const pluginPagePrefix = "/_myna/plugin/"
 
 // pluginBridgePath is the window's side of the page's messages, served
 // beside every page's files: a page loads it as
-// <script src="_magpie/bridge.js">.
-const pluginBridgePath = "_magpie/bridge.js"
+// <script src="_myna/bridge.js">.
+const pluginBridgePath = "_myna/bridge.js"
 
 //go:embed pagebridge.js
 var pageBridgeJS []byte
@@ -70,7 +70,7 @@ type pluginPage struct {
 	Spec  string `json:"spec"`
 	Name  string `json:"name"`  // its package's
 	Key   string `json:"key"`   // the window's page key
-	Title string `json:"title"` // the page's, or the package's magpie.name or short name
+	Title string `json:"title"` // the page's, or the package's myna.name or short name
 	// Titles are its title by the window's language (plugin.PageSpec)
 	Titles map[string]string `json:"titles,omitempty"`
 	URL    string            `json:"url"` // the page, under pluginPagePrefix
@@ -79,7 +79,7 @@ type pluginPage struct {
 	// plugin's in plugins.json's order to ask for it
 	Replaces string   `json:"replaces,omitempty"`
 	Reads    []string `json:"reads"` // what it may read, of plugin.PageReads
-	// Actions are its items in magpie's menus (plugin.ActionSpec); each
+	// Actions are its items in myna's menus (plugin.ActionSpec); each
 	// opens this page
 	Actions []pluginAction `json:"actions,omitempty"`
 	// Service is where a browser reaches the page's local service
@@ -97,7 +97,7 @@ type pluginPage struct {
 	options   map[string]any // its plugin's, as plugins.json keeps them
 }
 
-// pluginAction is an item a plugin's page adds to one of magpie's menus.
+// pluginAction is an item a plugin's page adds to one of myna's menus.
 type pluginAction struct {
 	ID     string            `json:"id"`
 	Menu   string            `json:"menu"`  // of plugin.ActionMenus
@@ -105,14 +105,14 @@ type pluginAction struct {
 	Titles map[string]string `json:"titles,omitempty"`
 }
 
-// pluginPanel is a panel a plugin that is on adds to one of magpie's own
+// pluginPanel is a panel a plugin that is on adds to one of myna's own
 // pages (plugin.PanelSlots).
 type pluginPanel struct {
 	Spec   string            `json:"spec"`
 	Name   string            `json:"name"`  // its package's
 	Key    string            `json:"key"`   // the panel's, among every plugin's
 	Slot   string            `json:"slot"`  // the page it is in
-	Title  string            `json:"title"` // the panel's, or the package's magpie.name or short name
+	Title  string            `json:"title"` // the panel's, or the package's myna.name or short name
 	Titles map[string]string `json:"titles,omitempty"`
 	URL    string            `json:"url"`   // the panel, under pluginPagePrefix
 	Reads  []string          `json:"reads"` // what it may read, of plugin.PageReads
@@ -257,9 +257,9 @@ func pagePolicy(r *http.Request, tok string) string {
 // the scheme from the URL loaded, which is why only the iPhone failed.
 //
 // The desktop window names its own transport (ownWindow): wails://, or
-// http:// on Windows (#2501). A browser's page (magpie web) can come over
-// http or https, directly or through a proxy that ends TLS before magpie
-// (nginx, Cloudflare), and nothing magpie trusts says which, so both are
+// http:// on Windows (#2501). A browser's page (myna web) can come over
+// http or https, directly or through a proxy that ends TLS before myna
+// (nginx, Cloudflare), and nothing myna trusts says which, so both are
 // named: the same host, port and folder either way, and an https page
 // can't load http:// files anyway (mixed content).
 func ownSources(r *http.Request, path string) []string {
@@ -279,7 +279,7 @@ var warmHost = plugin.Warm
 
 // pageHost has the plugin host up for a page whose plugin has a part for
 // it too, waiting pageHostWait at most. Such a page can be the way into
-// a service that part runs: Magiczerowxy/magpie-chat's page sends its
+// a service that part runs: Magiczerowxy/myna-chat's page sends its
 // frame to the chat server its host part starts. The host starts only on
 // a call, and every Restart (a plugin installed, updated or set, a Bun
 // update) stops it until the next one, so with no other plugin asking,

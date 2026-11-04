@@ -2,7 +2,7 @@
 // The agents on the Routing stage together are each marked in a colour of
 // their own (Pkh on Discord: trails in the same colour, or the wrong one).
 // An agent with no maker's colour was given one of eight by its id, and 49
-// of magpie's 59 agents have none: QwenPaw, ZCode, Qwen Code and AstrBot all
+// of myna's 59 agents have none: QwenPaw, ZCode, Qwen Code and AstrBot all
 // drew #65a30d, and Gemini's and DevEco's own blues sat 8 degrees of hue
 // apart. Four agents with requests at once each get a colour at least 20
 // degrees of OKLCH hue from every other's, and an agent's colour stays its
@@ -14,7 +14,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_ROUTING_ASSETS || path.join(__dirname, "../assets"));
+const assets = path.resolve(process.env.MYNA_ROUTING_ASSETS || path.join(__dirname, "../assets"));
 
 // OKLCH hue of an sRGB colour, #rrggbb or rgb()
 function hueOf(css) {
@@ -79,7 +79,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.route("**/*", serve(lang, theme, live));
         const colours = () => page.evaluate(() => Object.fromEntries([...document.querySelectorAll(".rt-src")]
           .map((n) => [n.querySelector("b").textContent, getComputedStyle(n.querySelector("b"), "::before").backgroundColor])));
-        await page.goto("http://magpie.test/?view=routing");
+        await page.goto("http://myna.test/?view=routing");
         await page.waitForFunction(() => document.querySelectorAll(".rt-src").length === 4);
         const got = await colours();
         assert.deepEqual(Object.keys(got).sort(), AGENTS.map(([, n]) => n).sort());

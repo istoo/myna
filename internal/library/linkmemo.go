@@ -19,7 +19,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/yetone/magpie/internal/agent"
+	"github.com/istoo/myna/internal/agent"
 )
 
 // part is what one entry on the way to a path is: there or not, and

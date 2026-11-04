@@ -16,23 +16,20 @@ import (
 	"slices"
 	"strings"
 	"sync"
-	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/lastgood"
-	"github.com/yetone/magpie/internal/source"
+	"github.com/istoo/myna/internal/appdir"
+	"github.com/istoo/myna/internal/lastgood"
+	"github.com/istoo/myna/internal/source"
 )
 
 // Partners are services that pay to be listed first in the add sheet,
 // under a heading of their own that says so. Who they are changes without
-// a release: the list is fetched from PartnersURL, as the plugin market's
-// is, and kept on disk. A partner is a preset in all but where it comes
-// from, so adding one, its editor and its key page work as a preset's do.
-
-// PartnersURL is where the list is kept; MAGPIE_PARTNERS moves it, and
-// MAGPIE_PARTNERS=off keeps to none.
-const PartnersURL = "https://usemagpie.ai/api/partners"
+// a release: the list is fetched from the URL MYNA_PARTNERS names, as the
+// plugin market's is, and kept on disk. This build turns the upstream
+// list off; a list of one's own is asked for by naming it. A partner is a
+// preset in all but where it comes from, so adding one, its editor and
+// its key page work as a preset's do.
 
 // KindPartner is a partner's Kind: the add sheet lists them apart.
 const KindPartner Kind = "partner"
@@ -107,14 +104,12 @@ var partnerID = regexp.MustCompile(`^[a-z0-9][a-z0-9-]{1,40}$`)
 func partnerCacheFile() string { return filepath.Join(appdir.Cache(), "partners.json") }
 
 func partnersSource() string {
-	src := os.Getenv("MAGPIE_PARTNERS")
+	src := os.Getenv("MYNA_PARTNERS")
 	if src == "" {
-		if testing.Testing() {
-			// a test never asks the real site; one that wants a list
-			// names its own
-			return "off"
-		}
-		src = PartnersURL
+		// This build lists no partners of its own: the upstream list and
+		// the affiliate links in it are upstream's business. MYNA_PARTNERS
+		// names a list of one's own, as it always could.
+		return "off"
 	}
 	return src
 }
@@ -169,7 +164,7 @@ func PartnersNow(wait time.Duration) []Partner {
 	return Partners()
 }
 
-// KeepPartnersFresh fetches the partner list when the magpie serving the
+// KeepPartnersFresh fetches the partner list when the myna serving the
 // gateway starts, and again whenever it is due (every hour, ten minutes
 // after a failed fetch), whether or not a page asks for it, so a partner
 // added reaches an app left running within the hour, and the list kept on
@@ -349,7 +344,7 @@ func fetchPartners(ctx context.Context, src string) ([]Partner, error) {
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("User-Agent", "magpie")
+	req.Header.Set("User-Agent", "myna")
 	req.Header.Set("Accept", "application/json")
 	res, err := source.Do(http.DefaultClient, req)
 	if err != nil {
@@ -366,7 +361,7 @@ func fetchPartners(ctx context.Context, src string) ([]Partner, error) {
 	return validPartners(f.Partners), nil
 }
 
-// validPartners keeps the entries magpie can list safely, at most
+// validPartners keeps the entries myna can list safely, at most
 // MaxPartners: an id of its own that no built-in preset has, a name, and
 // https addresses only. What a partner may not set (a decision API, no
 // key, an endpoint of the user's own) is cleared.

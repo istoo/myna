@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/agentenv"
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/agentenv"
+	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // A provider no longer known to LoginUsage has no quota, but its remembered

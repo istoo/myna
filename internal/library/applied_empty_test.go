@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-// An entry of Applied with nothing in it is no record of what magpie wrote
+// An entry of Applied with nothing in it is no record of what myna wrote
 // into an agent, and the syncs that only looked at an agent — its hooks,
 // its subagents, its MCP file, with nothing of the library's to give it —
 // must not leave one behind in library.json: entries grew there per agent

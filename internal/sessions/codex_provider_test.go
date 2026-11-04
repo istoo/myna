@@ -16,8 +16,8 @@ import (
 	"github.com/klauspost/compress/zstd"
 	"modernc.org/sqlite"
 
-	"github.com/yetone/magpie/internal/filelock"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/filelock"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // codexState makes a Codex state database with a thread's row, as Codex
@@ -52,7 +52,7 @@ func threadProvider(t *testing.T, db, id string) (provider, title string, archiv
 }
 
 // A Codex session made with another provider (CC Switch's "custom") is
-// hidden from Codex's history once Codex uses magpie (#887). The Sessions
+// hidden from Codex's history once Codex uses myna (#887). The Sessions
 // page says which provider each was made with and which Codex uses now;
 // MoveCodexProvider changes the provider in its files and in Codex's state
 // database and nothing else, keeps a copy of the files first, and moving
@@ -70,23 +70,32 @@ func TestMoveCodexProvider(t *testing.T) {
 	os.Chtimes(main, old, old)
 	seg := filepath.Join(codex, "sessions", "2026", "09", "23", "rollout-2026-09-23T00-27-05-"+mgCX+"_01a0c9f1-3d6f-7f33-b3bd-25c1dd14251b.jsonl")
 	segOrig, _ := os.ReadFile(seg)
-	os.WriteFile(filepath.Join(codex, "config.toml"), []byte("model = \"gpt-6\"\nmodel_provider = \"magpie\"\n\n[model_providers.magpie]\nname = \"magpie\"\n"), 0o644)
+	os.WriteFile(filepath.Join(codex, "config.toml"), []byte("model = \"gpt-6\"\nmodel_provider = \"myna\"\n\n[model_providers.myna]\nname = \"myna\"\n"), 0o644)
 	db := codexStateDB(t, codex, mgCX, "custom")
 
 	m, ok := findManaged(ListAgent("codex"), mgCX)
-	if !ok || m.Provider != "custom" || m.UsesProvider != "magpie" {
-		t.Fatalf("listed %q, uses %q; want custom, magpie", m.Provider, m.UsesProvider)
+	if !ok || m.Provider != "custom" || m.UsesProvider != "myna" {
+		t.Fatalf("listed %q, uses %q; want custom, myna", m.Provider, m.UsesProvider)
 	}
 
-	mv, err := MoveCodexProvider(mgCX, "magpie")
+	mv, err := MoveCodexProvider(mgCX, "myna")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if mv.From != "custom" || mv.To != "magpie" || len(mv.Files) != 1 || mv.Files[0] != main || len(mv.DB) != 1 {
+	if mv.From != "custom" || mv.To != "myna" || len(mv.Files) != 1 || mv.Files[0] != main || len(mv.DB) != 1 {
 		t.Fatalf("moved %+v", mv)
 	}
 	now, _ := os.ReadFile(main)
-	if want := bytes.Replace(orig, []byte(`"model_provider":"custom"`), []byte(`"model_provider":"magpie"`), 1); !bytes.Equal(now, want) {
+	// the shorter id is padded with spaces: the session_meta keeps its
+	// line's length, and so its place in a paginated rollout
+	head := orig
+	if i := bytes.IndexByte(orig, '\n'); i >= 0 {
+		head = orig[:i]
+	}
+	line := bytes.Replace(head, []byte(`"model_provider":"custom"`), []byte(`"model_provider":"myna"`), 1)
+	line = padLine(head, line)
+	want := append(append([]byte{}, line...), orig[len(head):]...)
+	if !bytes.Equal(now, want) {
 		t.Fatalf("the file became\n%s", now)
 	}
 	if fi, _ := os.Stat(main); !fi.ModTime().Equal(old) {
@@ -95,7 +104,7 @@ func TestMoveCodexProvider(t *testing.T) {
 	if b, _ := os.ReadFile(seg); !bytes.Equal(b, segOrig) {
 		t.Error("a segment naming no provider was changed")
 	}
-	if p, title, arch := threadProvider(t, db, mgCX); p != "magpie" || title != "the title" || arch != 1 {
+	if p, title, arch := threadProvider(t, db, mgCX); p != "myna" || title != "the title" || arch != 1 {
 		t.Errorf("thread row %q %q %d", p, title, arch)
 	}
 	if p, _, _ := threadProvider(t, db, "other"); p != "custom" {
@@ -109,7 +118,7 @@ func TestMoveCodexProvider(t *testing.T) {
 	if !strings.HasPrefix(mv.Backup, os.Getenv("XDG_CONFIG_HOME")) || !strings.Contains(mv.Backup, filepath.Join("trash", "codex-provider")) {
 		t.Errorf("backup in %s", mv.Backup)
 	}
-	if m, _ := findManaged(ListAgent("codex"), mgCX); m.Provider != "magpie" {
+	if m, _ := findManaged(ListAgent("codex"), mgCX); m.Provider != "myna" {
 		t.Fatalf("listed as %q after the move", m.Provider)
 	}
 
@@ -127,7 +136,7 @@ func TestMoveCodexProvider(t *testing.T) {
 	// one being written is left alone
 	hot := time.Now()
 	os.Chtimes(main, hot, hot)
-	if _, err := MoveCodexProvider(mgCX, "magpie"); !errors.Is(err, ErrActive) {
+	if _, err := MoveCodexProvider(mgCX, "myna"); !errors.Is(err, ErrActive) {
 		t.Fatalf("err %v, want ErrActive", err)
 	}
 	if b, _ := os.ReadFile(main); !bytes.Equal(b, orig) {
@@ -180,8 +189,8 @@ func TestCodexProviderIn(t *testing.T) {
 	if p := CodexProviderIn(d); p != "openai" {
 		t.Fatalf("no config: %q", p)
 	}
-	os.WriteFile(filepath.Join(d, "config.toml"), []byte("model_provider = \"custom\"\nprofile = \"m\"\n[profiles.m]\nmodel_provider = \"magpie\"\n"), 0o644)
-	if p := CodexProviderIn(d); p != "magpie" {
+	os.WriteFile(filepath.Join(d, "config.toml"), []byte("model_provider = \"custom\"\nprofile = \"m\"\n[profiles.m]\nmodel_provider = \"myna\"\n"), 0o644)
+	if p := CodexProviderIn(d); p != "myna" {
 		t.Fatalf("profile: %q", p)
 	}
 }
@@ -251,7 +260,7 @@ func holdThread(t *testing.T, home, id string) (path string, letGo func()) {
 	return path, letGo
 }
 
-// providerTrash is what magpie's trash keeps of Codex provider moves.
+// providerTrash is what myna's trash keeps of Codex provider moves.
 func providerTrash(t *testing.T) []string {
 	t.Helper()
 	kept, _ := filepath.Glob(filepath.Join(settings.Dir(), "trash", "codex-provider", "*"))
@@ -278,7 +287,7 @@ func TestMoveCodexProviderLeavesAnOpenThread(t *testing.T) {
 	db := codexStateDB(t, codex, mgCX, "custom")
 	lock, letGo := holdThread(t, codex, mgCX)
 
-	if _, err := MoveCodexProvider(mgCX, "magpie"); !errors.Is(err, ErrActive) {
+	if _, err := MoveCodexProvider(mgCX, "myna"); !errors.Is(err, ErrActive) {
 		t.Fatalf("err %v, want ErrActive", err)
 	}
 	if b, _ := os.ReadFile(main); !bytes.Equal(b, orig) {
@@ -293,19 +302,19 @@ func TestMoveCodexProviderLeavesAnOpenThread(t *testing.T) {
 	if kept := providerTrash(t); len(kept) != 0 {
 		t.Errorf("a copy kept of a thread left as it was: %v", kept)
 	}
-	if left, _ := filepath.Glob(filepath.Join(filepath.Dir(main), ".magpie-*")); len(left) > 0 {
+	if left, _ := filepath.Glob(filepath.Join(filepath.Dir(main), ".myna-*")); len(left) > 0 {
 		t.Errorf("left behind: %v", left)
 	}
 
 	letGo()
-	mv, err := MoveCodexProvider(mgCX, "magpie")
+	mv, err := MoveCodexProvider(mgCX, "myna")
 	if err != nil || len(mv.Files) != 1 || len(mv.DB) != 1 {
 		t.Fatalf("after the Codex let go: %+v %v", mv, err)
 	}
-	if got := codexMetaProvider(main); got != "magpie" {
+	if got := codexMetaProvider(main); got != "myna" {
 		t.Fatalf("file on %q", got)
 	}
-	if p, _, _ := threadProvider(t, db, mgCX); p != "magpie" {
+	if p, _, _ := threadProvider(t, db, mgCX); p != "myna" {
 		t.Errorf("row on %q", p)
 	}
 	if _, err := os.Stat(lock); !errors.Is(err, fs.ErrNotExist) {
@@ -313,7 +322,7 @@ func TestMoveCodexProviderLeavesAnOpenThread(t *testing.T) {
 	}
 }
 
-// moveProbe is run by magpie_move_probe(), which a test's state database
+// moveProbe is run by myna_move_probe(), which a test's state database
 // calls from a trigger as a move writes a thread's row.
 var (
 	moveProbeOnce sync.Once
@@ -325,7 +334,7 @@ var (
 func probeRowMove(t *testing.T, db string, probe func()) {
 	t.Helper()
 	moveProbeOnce.Do(func() {
-		sqlite.MustRegisterScalarFunction("magpie_move_probe", 0, func(*sqlite.FunctionContext, []driver.Value) (driver.Value, error) {
+		sqlite.MustRegisterScalarFunction("myna_move_probe", 0, func(*sqlite.FunctionContext, []driver.Value) (driver.Value, error) {
 			if moveProbe != nil {
 				moveProbe()
 			}
@@ -339,7 +348,7 @@ func probeRowMove(t *testing.T, db string, probe func()) {
 		t.Fatal(err)
 	}
 	defer d.Close()
-	if _, err := d.Exec(`CREATE TRIGGER probe BEFORE UPDATE OF model_provider ON threads BEGIN SELECT magpie_move_probe(); END`); err != nil {
+	if _, err := d.Exec(`CREATE TRIGGER probe BEFORE UPDATE OF model_provider ON threads BEGIN SELECT myna_move_probe(); END`); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -379,11 +388,11 @@ func TestMoveCodexProviderHoldsTheThread(t *testing.T) {
 		seen = append(seen, "file on "+codexMetaProvider(main))
 	})
 
-	if _, err := MoveCodexProvider(mgCX, "magpie"); err != nil {
+	if _, err := MoveCodexProvider(mgCX, "myna"); err != nil {
 		t.Fatal(err)
 	}
-	if got := strings.Join(seen, ", "); got != "held, file on magpie" {
-		t.Fatalf("as the row was written: %s; want held, file on magpie", got)
+	if got := strings.Join(seen, ", "); got != "held, file on myna" {
+		t.Fatalf("as the row was written: %s; want held, file on myna", got)
 	}
 	if _, err := os.Stat(lock); !errors.Is(err, fs.ErrNotExist) {
 		t.Errorf("the thread's lock file is left: %v", err)

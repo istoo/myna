@@ -14,9 +14,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // plugins#349 through a real plugin host: the fake plugin as Factory, two
@@ -29,7 +29,7 @@ import (
 func TestPluginCarefulPool(t *testing.T) {
 	bun := testenv.Bun(t)
 	fresh(t)
-	t.Setenv("MAGPIE_BUN", bun)
+	t.Setenv("MYNA_BUN", bun)
 	t.Setenv("FAKE_ID", "factory")
 	windows := filepath.Join(t.TempDir(), "windows.json")
 	t.Setenv("FAKE_WINDOWS", windows)

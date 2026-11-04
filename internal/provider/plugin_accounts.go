@@ -10,8 +10,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // A plugin's provider is signed in to as many times as the user likes, as
@@ -28,8 +28,8 @@ func pluginAgent(pp plugin.Provider) string { return "plugin:" + pp.ID }
 // Zen Free's shared "public". Such an account is nobody's, so with
 // subscription accounts off (#1535, discovery.go) it is still listed and
 // served. Before, Zen Free signed in all the same with them off, the
-// Plugins page said so, and magpie listed it nowhere (lileo0668 on
-// Discord: "signed in, but magpie can't list it").
+// Plugins page said so, and myna listed it nowhere (lileo0668 on
+// Discord: "signed in, but myna can't list it").
 func publicPlugin(pp plugin.Provider) bool {
 	if len(pp.Methods) == 0 {
 		return false
@@ -70,7 +70,7 @@ func (p Provider) publicAccount() bool {
 // it signed in with; a name two share gets the account's slot. The slot
 // goes on after the own name, so the own account never reads as another
 // signed in to the same one (dev on Discord: ZCode's, its id "ZCode",
-// named as one magpie signed in, and Remove on that one took the own).
+// named as one myna signed in, and Remove on that one took the own).
 func pluginLabels(pp plugin.Provider, named map[string]string) map[string]string {
 	out := map[string]string{}
 	seen := map[string]int{}
@@ -209,7 +209,7 @@ var pluginLoginLocks atomic.Int64
 
 // pluginLogins are the provider's accounts, the first in use first. What
 // plugin-auth.json keeps is the truth: logins.json follows it. The agent's
-// own account is named as the agent is signed in now; removed in magpie,
+// own account is named as the agent is signed in now; removed in myna,
 // it is only hidden, and shows again once the agent signs in anew.
 func pluginLogins(pp plugin.Provider) []pluginLogin {
 	if settings.AccountDiscoveryOff() {
@@ -274,7 +274,7 @@ func pluginLogins(pp plugin.Provider) []pluginLogin {
 		return ls, changed
 	}
 	// what nothing changes takes no lock: taken, it opens logins.json's
-	// lock file, across magpies, and /api/providers lists every plugin
+	// lock file, across mynas, and /api/providers lists every plugin
 	// (a fifth of its CPU). A change is made from a read under it.
 	if _, changed := settle(sharedLogins()); changed {
 		pluginLoginLocks.Add(1)
@@ -302,7 +302,7 @@ func pluginSide(pp plugin.Provider) []sideLogin {
 }
 
 // pluginOfAgent is the plugin provider the accounts page names by its
-// magpie id.
+// myna id.
 func pluginOfAgent(agent string) (plugin.Provider, bool) {
 	if strings.HasPrefix(agent, "plugin:") {
 		id := strings.TrimPrefix(agent, "plugin:")
@@ -326,7 +326,7 @@ func setPluginLoginOn(pp plugin.Provider, user string, on bool) error {
 	return setSideLoginOn(pluginAgent(pp), user, on, pluginSide(pp))
 }
 
-// forgetPluginLogin signs the account out: its sign-in is magpie's own.
+// forgetPluginLogin signs the account out: its sign-in is myna's own.
 // The agent's own is only hidden, as the built-in hid it: the agent stays
 // signed in, and the account shows again once it signs in anew. Qoder's
 // first goes as the built-in's did, the next put first.
@@ -510,12 +510,12 @@ func lapsedText(pp plugin.Provider, user string) string {
 }
 
 // clearPluginLapse takes the mark off an account signed in again, and
-// brings back the agent's own account removed in magpie, as signing in to
+// brings back the agent's own account removed in myna, as signing in to
 // the built-in's did (#320). The account's kept usage reading goes too: it
 // was read under the old sign-in, and for a minute it would answer the
 // next reading with the old sign-in's "expired" without asking the plugin,
 // and so without marking or clearing anything. The mark goes by the
-// account alone: the providers' list is empty while another magpie's
+// account alone: the providers' list is empty while another myna's
 // change to plugins.json is read again, and a sign-in finished then left
 // the account saying "sign in again" (#2748).
 func clearPluginLapse(saved plugin.Saved) {

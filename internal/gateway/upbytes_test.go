@@ -10,8 +10,8 @@ import (
 
 	"github.com/klauspost/compress/zstd"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/usage"
 )
 
 // A request asked twice — its first member overloaded, the next answering

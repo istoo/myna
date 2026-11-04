@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/myna/internal/usage"
 )
 
 // archivedOf reads every object in b back, by the call's provider.
@@ -25,7 +25,7 @@ func archivedOf(t *testing.T, b *memBucket) map[string][]Archived {
 		if err := json.Unmarshal(data, &a); err != nil {
 			t.Fatalf("%s: %v", name, err)
 		}
-		if strings.Contains(string(data), archiveKey) || strings.Contains(string(data), "magpie-gateway-key") || strings.Contains(string(data), "Bearer k") {
+		if strings.Contains(string(data), archiveKey) || strings.Contains(string(data), "myna-gateway-key") || strings.Contains(string(data), "Bearer k") {
 			t.Errorf("a secret in %s:\n%s", name, data)
 		}
 		out[a.Call.Provider] = append(out[a.Call.Provider], a)
@@ -33,7 +33,7 @@ func archivedOf(t *testing.T, b *memBucket) map[string][]Archived {
 	return out
 }
 
-// With the request archive on, a System One request an app sends magpie
+// With the request archive on, a System One request an app sends myna
 // (/v1/systemone) is kept as a chat request is, and its route, its Recent
 // call and its usage row name where (wangb on Discord: 请求存档开启, 但是
 // systemone 的请求没有记录下来). Off, nothing is kept.
@@ -55,7 +55,7 @@ func TestArchiveKeepsSystemOne(t *testing.T) {
 		t.Helper()
 		body := `{"model":"load-a/jev-latest","questions":{"intent":{"type":"choice","criteria":{"bug":"a bug report"}}},"state":{"message":"it crashes, token ` + archiveKey + `"}}`
 		req := httptest.NewRequest("POST", "/v1/systemone", strings.NewReader(body))
-		req.Header.Set("Authorization", "Bearer magpie-gateway-key")
+		req.Header.Set("Authorization", "Bearer myna-gateway-key")
 		rec := httptest.NewRecorder()
 		s.Handler().ServeHTTP(rec, req)
 		if rec.Code != 200 || !strings.Contains(rec.Body.String(), `"bug"`) {
@@ -100,9 +100,9 @@ func TestArchiveKeepsSystemOne(t *testing.T) {
 }
 
 // With the request archive on, the System One question a routing group's
-// Jev classifier asks for a turn, which magpie makes itself, is kept too:
+// Jev classifier asks for a turn, which myna makes itself, is kept too:
 // the request as it went, its key taken out, and the answer; its usage
-// row, magpie's own, names it.
+// row, myna's own, names it.
 func TestArchiveKeepsJevClassifier(t *testing.T) {
 	s, _, _, j := jevved(t, "", provider.Rule{Use: "b/big", Intent: "debugging"})
 	j.choice, j.sure = "debugging", 0.7

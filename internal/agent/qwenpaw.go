@@ -14,7 +14,7 @@ package agent
 //
 //	"active_model": {"provider_id": "…", "model": "…"}
 //
-// beside fallback_models and subagent_model, which magpie leaves alone,
+// beside fallback_models and subagent_model, which myna leaves alone,
 // and thinking_level, which is the agent's effort field. Only an agent
 // whose backend is "qwenpaw" (the default) runs that model
 // (app/routers/agents.py); one on an ACP backend runs another program.
@@ -29,20 +29,20 @@ package agent
 // Provider model as QwenPaw saves it from its console's "Add provider":
 // id, name, base_url, api_key, chat_model ("OpenAIChatModel" is OpenAI's
 // Chat Completions), is_custom, and the models the user added in
-// extra_models. magpie writes custom/magpie.json, OpenAI Chat at the
+// extra_models. myna writes custom/myna.json, OpenAI Chat at the
 // gateway's /v1 with a key naming QwenPaw and one model of extra_models
-// for each of magpie's, and sets an agent's active_model to
-// {"provider_id": "magpie", "model": "<provider>/<model>"}. QwenPaw keeps
+// for each of myna's, and sets an agent's active_model to
+// {"provider_id": "myna", "model": "<provider>/<model>"}. QwenPaw keeps
 // api_key encrypted (security/secret_store.py, "ENC:…") and takes one
 // written in plain text, encrypting it at its next start
 // (_maybe_migrate_plaintext): that is how its own files hold a key, so the
 // key goes nowhere QwenPaw doesn't keep it. What the user changes in
-// magpie's provider in QwenPaw's console (a model's window, its generation
+// myna's provider in QwenPaw's console (a model's window, its generation
 // settings, the provider's headers) stays.
 //
 // QwenPaw reads the provider files once, at start (ProviderManager), so the
-// first connect needs QwenPaw restarted; until then a turn on magpie's
-// model fails with "Provider 'magpie' not found".
+// first connect needs QwenPaw restarted; until then a turn on myna's
+// model fails with "Provider 'myna' not found".
 //
 // Each agent is a row: "qwenpaw" is the default agent, any other
 // qwenpaw#<id>, as omp's named profiles are.
@@ -63,8 +63,8 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/edit"
 )
 
 // qwenpawDefault is the agent QwenPaw always has, which can't be removed.
@@ -249,10 +249,10 @@ func qwenpawBackend(path string) string {
 func qwenpawAt(at place, work string, p qwenpawProfile) *Agent {
 	secret := qwenpawSecret(at, work)
 	providers := filepath.Join(secret, "providers")
-	prov := filepath.Join(providers, "custom", magpieID+".json")
+	prov := filepath.Join(providers, "custom", mynaID+".json")
 	path := filepath.Join(p.dir, "agent.json")
-	// keyWas is the active_model this agent had before magpie's, as JSON
-	// ("{}": none); keyWrote the key magpie last wrote in plain text, which
+	// keyWas is the active_model this agent had before myna's, as JSON
+	// ("{}": none); keyWrote the key myna last wrote in plain text, which
 	// QwenPaw has encrypted since
 	keyWas := at.key("qwenpaw.was." + p.id)
 	keyWrote := at.key("qwenpaw.key")
@@ -313,11 +313,11 @@ func qwenpawAt(at place, work string, p qwenpawProfile) *Agent {
 		b, _ := json.Marshal(slot)
 		return setRaw(string(b))
 	}
-	// provider writes magpie's provider file as it is now, or takes it out
+	// provider writes myna's provider file as it is now, or takes it out
 	// when no agent of QwenPaw's names it any more
 	provider := func(on bool) error {
 		if !on {
-			if qwenpawNamesMagpie(at, work) || !isFile(prov) {
+			if qwenpawNamesMyna(at, work) || !isFile(prov) {
 				return nil
 			}
 			return os.Remove(prov)
@@ -327,11 +327,11 @@ func qwenpawAt(at place, work string, p qwenpawProfile) *Agent {
 			return err
 		}
 		k := key()
-		// an encrypted key is kept while it is the one magpie wrote: it
+		// an encrypted key is kept while it is the one myna wrote: it
 		// can't be read back
 		was := gjson.GetBytes(raw, "api_key").String()
 		keep := strings.HasPrefix(was, qwenpawEncrypted) && unstashPeek(keyWrote) == k
-		out, err := qwenpawProviderJSON(raw, at.v1(), k, keep, magpieModels("qwenpaw"))
+		out, err := qwenpawProviderJSON(raw, at.v1(), k, keep, mynaModels("qwenpaw"))
 		if err != nil {
 			return fmt.Errorf("QwenPaw's %s: %w", prov, err)
 		}
@@ -373,7 +373,7 @@ func qwenpawAt(at place, work string, p qwenpawProfile) *Agent {
 			return err
 		}
 		if !json.Valid(raw) {
-			return fmt.Errorf("QwenPaw's %s isn't JSON magpie can read; it was left as it is", path)
+			return fmt.Errorf("QwenPaw's %s isn't JSON myna can read; it was left as it is", path)
 		}
 		if b := qwenpawBackend(path); b != "qwenpaw" {
 			return fmt.Errorf("this QwenPaw agent runs on the %s backend, which doesn't use QwenPaw's models; switch it to QwenPaw's own backend first", b)
@@ -401,11 +401,11 @@ func qwenpawAt(at place, work string, p qwenpawProfile) *Agent {
 				return ""
 			}
 			if b := qwenpawBackend(path); b != "qwenpaw" {
-				return "this QwenPaw agent's backend (agent.json) is " + b + ", which doesn't use its model, so it no longer asks magpie"
+				return "this QwenPaw agent's backend (agent.json) is " + b + ", which doesn't use its model, so it no longer asks myna"
 			}
 			raw, err := os.ReadFile(prov)
 			if errors.Is(err, os.ErrNotExist) {
-				return "magpie's provider is gone from QwenPaw's " + prov + " — connect it again"
+				return "myna's provider is gone from QwenPaw's " + prov + " — connect it again"
 			}
 			if err != nil || !json.Valid(raw) {
 				return ""
@@ -417,7 +417,7 @@ func qwenpawAt(at place, work string, p qwenpawProfile) *Agent {
 				kvs = append(kvs, "api_key", key())
 			}
 			if e := gjson.GetBytes(raw, "enabled"); e.Exists() && !e.Bool() {
-				return "magpie's provider is switched off in QwenPaw (" + filepath.Base(prov) + "), so it no longer asks magpie"
+				return "myna's provider is switched off in QwenPaw (" + filepath.Base(prov) + "), so it no longer asks myna"
 			}
 			return wiringOff("QwenPaw", prov, func(k string) (string, bool) {
 				r := gjson.GetBytes(raw, k)
@@ -431,8 +431,8 @@ func qwenpawAt(at place, work string, p qwenpawProfile) *Agent {
 			return provider(true)
 		},
 		Fields: []Field{{
-			// the agent's active_model as <provider_id>/<model>: magpie's
-			// is magpie/<provider>/<model>
+			// the agent's active_model as <provider_id>/<model>: myna's
+			// is myna/<provider>/<model>
 			Key: "model", Label: "model",
 			Get: pick,
 			Set: func(v string) error {
@@ -442,10 +442,10 @@ func qwenpawAt(at place, work string, p qwenpawProfile) *Agent {
 					}
 					return setRaw("")
 				}
-				if ref, ok := strings.CutPrefix(v, magpieID+"/"); ok && isMagpie(ref) {
+				if ref, ok := strings.CutPrefix(v, mynaID+"/"); ok && isMyna(ref) {
 					return put(v)
 				}
-				// one of the user's own: magpie's provider stays in
+				// one of the user's own: myna's provider stays in
 				// QwenPaw's list until Disconnect
 				if ours() {
 					forget(keyWas)
@@ -453,7 +453,7 @@ func qwenpawAt(at place, work string, p qwenpawProfile) *Agent {
 				return setPick(v)
 			},
 			Options: func(cur map[string]string) []Option {
-				return append(qwenpawOwn(providers, cur["model"]), viaMagpie("qwenpaw", magpieID+"/")...)
+				return append(qwenpawOwn(providers, cur["model"]), viaMyna("qwenpaw", mynaID+"/")...)
 			},
 		}, {
 			// the agent's thinking_level (config.py's AgentProfileConfig),
@@ -490,7 +490,7 @@ func qwenpawAt(at place, work string, p qwenpawProfile) *Agent {
 				return edit.WriteAtomic(path, out)
 			},
 			Options: func(cur map[string]string) []Option {
-				// no off: magpie's models declare none (qwenpawModelJSON);
+				// no off: myna's models declare none (qwenpawModelJSON);
 				// a level set in QwenPaw is listed as it is
 				o := static(qwenpawLevels...)
 				if l := cur["effort"]; l == "off" || l == "budget" {
@@ -509,20 +509,20 @@ func unstashPeek(k string) string {
 	return stashShared()[k]
 }
 
-// qwenpawNamesMagpie says an agent of QwenPaw's still names magpie's
+// qwenpawNamesMyna says an agent of QwenPaw's still names myna's
 // provider: its active_model, a fallback or its subagent model.
-func qwenpawNamesMagpie(at place, work string) bool {
+func qwenpawNamesMyna(at place, work string) bool {
 	for _, p := range qwenpawProfiles(at, work) {
 		raw, err := os.ReadFile(filepath.Join(p.dir, "agent.json"))
 		if err != nil || !json.Valid(raw) {
 			continue
 		}
-		if gjson.GetBytes(raw, "active_model.provider_id").String() == magpieID ||
-			gjson.GetBytes(raw, "subagent_model.provider_id").String() == magpieID {
+		if gjson.GetBytes(raw, "active_model.provider_id").String() == mynaID ||
+			gjson.GetBytes(raw, "subagent_model.provider_id").String() == mynaID {
 			return true
 		}
 		for _, f := range gjson.GetBytes(raw, "fallback_models").Array() {
-			if f.Get("provider_id").String() == magpieID {
+			if f.Get("provider_id").String() == mynaID {
 				return true
 			}
 		}
@@ -547,7 +547,7 @@ func qwenpawOwn(providers, cur string) []Option {
 			}
 			p := gjson.ParseBytes(raw)
 			id := p.Get("id").String()
-			if id == "" || id == magpieID {
+			if id == "" || id == mynaID {
 				continue
 			}
 			if e := p.Get("enabled"); e.Exists() && !e.Bool() {
@@ -580,24 +580,24 @@ func qwenpawOwn(providers, cur string) []Option {
 	return out
 }
 
-// qwenpawOwned are the keys of magpie's provider file that are magpie's to
+// qwenpawOwned are the keys of myna's provider file that are myna's to
 // say; the rest are the user's to change in QwenPaw's console.
 var qwenpawOwned = []string{"id", "name", "base_url", "api_key", "chat_model", "is_custom", "extra_models"}
 
-// qwenpawModelOwned are the keys of one of magpie's models that are
-// magpie's to say, unless the user changed one in QwenPaw (the model's
+// qwenpawModelOwned are the keys of one of myna's models that are
+// myna's to say, unless the user changed one in QwenPaw (the model's
 // config_overrides names it).
 var qwenpawModelOwned = []string{"id", "name", "source", "supports_image", "supports_multimodal", "supports_tool_calling", "max_input_length", "max_input_length_configured", "max_output_length", "thinking_param_style", "reasoning_effort_options"}
 
-// qwenpawProviderJSON is magpie's provider file as it should be, from raw,
+// qwenpawProviderJSON is myna's provider file as it should be, from raw,
 // the file as it is (nil: none yet): OpenAI Chat at gw with key (the one
-// there kept when keep), and models. What isn't magpie's to say is kept.
+// there kept when keep), and models. What isn't myna's to say is kept.
 // nil when the file already says that.
 func qwenpawProviderJSON(raw []byte, gw, key string, keep bool, models []catalog.Model) ([]byte, error) {
 	have := map[string]json.RawMessage{}
 	if len(bytes.TrimSpace(raw)) > 0 {
 		if err := json.Unmarshal(raw, &have); err != nil {
-			return nil, errors.New("not JSON magpie can read; it was left as it is")
+			return nil, errors.New("not JSON myna can read; it was left as it is")
 		}
 	}
 	// the models as they are, by id
@@ -623,7 +623,7 @@ func qwenpawProviderJSON(raw []byte, gw, key string, keep bool, models []catalog
 			out[k] = v
 		}
 	}
-	out["id"], out["name"], out["base_url"] = magpieID, "magpie", gw
+	out["id"], out["name"], out["base_url"] = mynaID, "myna", gw
 	out["chat_model"], out["is_custom"] = "OpenAIChatModel", true
 	if !keep {
 		out["api_key"] = key
@@ -635,7 +635,7 @@ func qwenpawProviderJSON(raw []byte, gw, key string, keep bool, models []catalog
 			var overrides []string
 			json.Unmarshal(h["config_overrides"], &overrides)
 			for hk, hv := range h {
-				// what QwenPaw filled in itself where magpie says
+				// what QwenPaw filled in itself where myna says
 				// nothing (a window it detected, its own defaults)
 				// stays too, so a sync after QwenPaw's start writes
 				// nothing
@@ -645,7 +645,7 @@ func qwenpawProviderJSON(raw []byte, gw, key string, keep bool, models []catalog
 				}
 			}
 		}
-		// a null of magpie's takes back what it said before, and is
+		// a null of myna's takes back what it said before, and is
 		// written nowhere it said nothing
 		for k, v := range e {
 			if _, had := was[m.ID][k]; v == nil && !had {
@@ -671,10 +671,10 @@ func qwenpawProviderJSON(raw []byte, gw, key string, keep bool, models []catalog
 	return b.Bytes(), nil
 }
 
-// qwenpawModelJSON is one of magpie's models as a model of QwenPaw's
+// qwenpawModelJSON is one of myna's models as a model of QwenPaw's
 // (providers/model_info.py's ModelInfo), added by the user. Every one is
 // said to take tools, as the gateway hands a tool call on whatever the
-// model; images are what magpie knows it sees, or describes to it. A
+// model; images are what myna knows it sees, or describes to it. A
 // window under QwenPaw's least (1000) or not known is left to QwenPaw's
 // default.
 func qwenpawModelJSON(m catalog.Model) map[string]any {
@@ -696,7 +696,7 @@ func qwenpawModelJSON(m catalog.Model) map[string]any {
 	// "effort" makes it send the level as Chat's reasoning_effort, held to
 	// the levels the model has; none is left out, as QwenPaw turns an off
 	// into Qwen's and DeepSeek's switches (extra_body enable_thinking,
-	// thinking), not the reasoning_effort magpie hands every vendor.
+	// thinking), not the reasoning_effort myna hands every vendor.
 	e["thinking_param_style"], e["reasoning_effort_options"] = nil, nil
 	if levels := qwenpawEfforts(m.Efforts); len(levels) > 0 {
 		e["thinking_param_style"], e["reasoning_effort_options"] = "effort", levels
@@ -721,4 +721,4 @@ func qwenpawEfforts(efforts []string) []string {
 }
 
 // what qwenpaw says after a change (notice.go)
-var noticeQwenpaw = newNotice("QwenPaw reads its providers at start-up — restart QwenPaw once after connecting it, and after magpie's models change; a model picked for an agent after that is used from its next message.")
+var noticeQwenpaw = newNotice("QwenPaw reads its providers at start-up — restart QwenPaw once after connecting it, and after myna's models change; a model picked for an agent after that is used from its next message.")

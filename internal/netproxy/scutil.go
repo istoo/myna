@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/istoo/myna/internal/proc"
 )
 
 // toolWait is how long a tool that reads the system's proxy gets. scutil

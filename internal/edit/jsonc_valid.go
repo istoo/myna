@@ -109,7 +109,7 @@ func lone(b []byte, i int) bool {
 }
 
 // dropLoneCommas is raw without the commas before a closing bracket that
-// have no value before them: what magpie's own delete left in a JSONC file
+// have no value before them: what myna's own delete left in a JSONC file
 // when the member it took out was the only one and had a trailing comma
 // ("mcp": {,}), which the app then calls invalid. Anything else is left as
 // it is.

@@ -8,8 +8,8 @@ import (
 
 	"github.com/pelletier/go-toml/v2"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/myna/internal/provider"
 )
 
 func TestKimi(t *testing.T) {
@@ -85,7 +85,7 @@ max_steps_per_turn = 100
 	}
 	var own []string
 	for _, o := range f.Options(a.Values()) {
-		if !strings.HasPrefix(o.Value, "magpie/") {
+		if !strings.HasPrefix(o.Value, "myna/") {
 			own = append(own, o.Value)
 		}
 	}
@@ -93,19 +93,19 @@ max_steps_per_turn = 100
 		t.Fatalf("own options: %v", own)
 	}
 
-	if err := f.Set("magpie/deepseek/pro"); err != nil {
+	if err := f.Set("myna/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	valid()
 	raw := read()
-	p := table("providers.magpie")
-	m := table(`models."magpie/deepseek/pro"`)
-	if p["type"] != "kimi" || p["api_key"] != "magpie" || !strings.HasSuffix(p["base_url"], "/v1") ||
-		m["provider"] != "magpie" || m["model"] != "deepseek/pro" || m["max_context_size"] == "" ||
-		table(`models."magpie/deepseek/flash"`) == nil {
+	p := table("providers.myna")
+	m := table(`models."myna/deepseek/pro"`)
+	if p["type"] != "kimi" || p["api_key"] != "myna" || !strings.HasSuffix(p["base_url"], "/v1") ||
+		m["provider"] != "myna" || m["model"] != "deepseek/pro" || m["max_context_size"] == "" ||
+		table(`models."myna/deepseek/flash"`) == nil {
 		t.Fatalf("tables:\n%s", raw)
 	}
-	if f.Get() != "magpie/deepseek/pro" || table(`providers."managed:kimi-code".oauth`)["key"] != "oauth/kimi-code" ||
+	if f.Get() != "myna/deepseek/pro" || table(`providers."managed:kimi-code".oauth`)["key"] != "oauth/kimi-code" ||
 		table("loop_control")["max_steps_per_turn"] != "100" || !strings.Contains(raw, "default_thinking = true") {
 		t.Fatalf("config:\n%s", raw)
 	}
@@ -121,42 +121,42 @@ max_steps_per_turn = 100
 		t.Fatal(err)
 	}
 	valid()
-	if table(`models."magpie/glm/glm-5"`) == nil || strings.Count(read(), "[providers.magpie]") != 1 {
+	if table(`models."myna/glm/glm-5"`) == nil || strings.Count(read(), "[providers.myna]") != 1 {
 		t.Fatalf("sync:\n%s", read())
 	}
 
-	// its wiring gone while the default is still magpie's
-	edit.SetTOMLKey(path, "providers.magpie", "base_url", "http://elsewhere/v1")
+	// its wiring gone while the default is still myna's
+	edit.SetTOMLKey(path, "providers.myna", "base_url", "http://elsewhere/v1")
 	if a.Check() == "" {
 		t.Fatal("check missed the moved base_url")
 	}
 
-	// reset: back to the Kimi Code model the user had, magpie's tables gone
+	// reset: back to the Kimi Code model the user had, myna's tables gone
 	if err := f.Set(""); err != nil {
 		t.Fatal(err)
 	}
 	valid()
 	raw = read()
-	if f.Get() != "kimi-code/kimi-for-coding" || strings.Contains(raw, "magpie") {
+	if f.Get() != "kimi-code/kimi-for-coding" || strings.Contains(raw, "myna") {
 		t.Fatalf("reset:\n%s", raw)
 	}
-	// and Sync, with magpie out, writes nothing back
+	// and Sync, with myna out, writes nothing back
 	if err := a.Sync(); err != nil || read() != raw {
 		t.Fatalf("sync after reset: %v\n%s", err, read())
 	}
 
-	// its own model from magpie: magpie's tables go too
-	f.Set("magpie/deepseek/flash")
+	// its own model from myna: myna's tables go too
+	f.Set("myna/deepseek/flash")
 	if err := f.Set("kimi-code/kimi-for-coding"); err != nil {
 		t.Fatal(err)
 	}
 	valid()
-	if strings.Contains(read(), "magpie") {
+	if strings.Contains(read(), "myna") {
 		t.Fatalf("own:\n%s", read())
 	}
 }
 
-// A kimi that has never run has no config; magpie writes one Kimi takes.
+// A kimi that has never run has no config; myna writes one Kimi takes.
 func TestKimiNoConfig(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
@@ -172,26 +172,26 @@ func TestKimiNoConfig(t *testing.T) {
 		t.Fatalf("path: %s", a.Path)
 	}
 	f := a.Field("model")
-	if err := f.Set("magpie/deepseek/pro"); err != nil {
+	if err := f.Set("myna/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	b, _ := os.ReadFile(a.Path)
 	var c map[string]any
-	if err := toml.Unmarshal(b, &c); err != nil || c["default_model"] != "magpie/deepseek/pro" {
+	if err := toml.Unmarshal(b, &c); err != nil || c["default_model"] != "myna/deepseek/pro" {
 		t.Fatalf("%v\n%s", err, b)
 	}
 	if err := f.Set(""); err != nil {
 		t.Fatal(err)
 	}
 	b, _ = os.ReadFile(a.Path)
-	if strings.Contains(string(b), "magpie") {
+	if strings.Contains(string(b), "myna") {
 		t.Fatalf("reset:\n%s", b)
 	}
 }
 
-// What the user set on magpie's provider table in Kimi Code's config.toml
+// What the user set on myna's provider table in Kimi Code's config.toml
 // stays through every sync and pick (#2030's siblings): headers, env and a
-// default model of its own. The type, address and key stay magpie's.
+// default model of its own. The type, address and key stay myna's.
 func TestKimiKeepsTheUsersSettings(t *testing.T) {
 	home := syncHome(t)
 	t.Setenv("KIMI_SHARE_DIR", "")
@@ -200,16 +200,16 @@ func TestKimiKeepsTheUsersSettings(t *testing.T) {
 	os.WriteFile(path, []byte("default_model = \"x\"\n"), 0o644)
 	a := kimi(home)
 	f := a.Field("model")
-	if err := f.Set("magpie/relay/glm-4.6"); err != nil {
+	if err := f.Set("myna/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	raw := readFile(path)
-	if !strings.Contains(raw, "[providers.magpie]\n") {
+	if !strings.Contains(raw, "[providers.myna]\n") {
 		t.Fatalf("no table:\n%s", raw)
 	}
-	raw = strings.Replace(raw, "[providers.magpie]\n", "[providers.magpie]\ndefault_model = \"relay/glm-4.6\"\ncustom_headers = { X-Mine = \"1\" }\nenv = { HTTPS_PROXY = \"http://proxy:8080\" }\n", 1)
+	raw = strings.Replace(raw, "[providers.myna]\n", "[providers.myna]\ndefault_model = \"relay/glm-4.6\"\ncustom_headers = { X-Mine = \"1\" }\nenv = { HTTPS_PROXY = \"http://proxy:8080\" }\n", 1)
 	os.WriteFile(path, []byte(raw), 0o644)
-	edit.SetTOMLKey(path, "providers.magpie", "base_url", "http://127.0.0.1:1/v1")
+	edit.SetTOMLKey(path, "providers.myna", "base_url", "http://127.0.0.1:1/v1")
 	if err := provider.Save(provider.Provider{ID: "deepseek", Name: "DeepSeek", Key: "k", Chat: "http://127.0.0.1:1/v1", Models: []string{"pro"}}); err != nil {
 		t.Fatal(err)
 	}
@@ -234,16 +234,16 @@ func TestKimiKeepsTheUsersSettings(t *testing.T) {
 		if err := toml.Unmarshal([]byte(raw), &c); err != nil {
 			t.Fatalf("%v\n%s", err, raw)
 		}
-		p := c.Providers[magpieID]
+		p := c.Providers[mynaID]
 		if p.Default != "relay/glm-4.6" || p.Headers["X-Mine"] != "1" || p.Env["HTTPS_PROXY"] != "http://proxy:8080" {
 			t.Errorf("%s: the user's settings not kept:\n%s", when, raw)
 		}
 		if p.Type != "kimi" || p.BaseURL == "http://127.0.0.1:1/v1" || p.BaseURL == "" || p.APIKey == "" {
-			t.Errorf("%s: magpie's own parts not written:\n%s", when, raw)
+			t.Errorf("%s: myna's own parts not written:\n%s", when, raw)
 		}
 	}
 	check("sync")
-	if err := f.Set("magpie/deepseek/pro"); err != nil {
+	if err := f.Set("myna/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	check("pick")

@@ -66,7 +66,7 @@ var scrubRuns atomic.Uint64
 // what is kept of each request (the request archive, a gateway
 // conversation) is scrubbed whole, so without it every turn ran each rule
 // over the whole history again: a core's worth while Codex ran
-// (yetone/magpie-releases#24). A short string costs less to scrub than to
+// (istoo/myna#24). A short string costs less to scrub than to
 // look up. Only a hash of a string is kept, and what it became when that
 // is not the string itself.
 const (

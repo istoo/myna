@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/proc"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // The Codex app on macOS keeps running, its app-server with it, when its
@@ -53,7 +53,7 @@ var restartAppServer = provider.RestartCodexApp
 // request names otherwise.
 func ReopenCodexApp(ctx context.Context, bundle string) error {
 	if runtime.GOOS != "darwin" {
-		return errors.New("only the macOS Codex app is restarted by magpie")
+		return errors.New("only the macOS Codex app is restarted by myna")
 	}
 	a, err := Find("codex")
 	if err != nil {
@@ -73,9 +73,9 @@ func reopenApp(ctx context.Context, a *Agent, bundle string) error {
 // says when it didn't go through (tNotice).
 var (
 	noticeSwitchAppGone    = newNotice("The {agent} app isn't running any more. It opens on the new account.")
-	noticeSwitchAppNoEnd   = newNotice("magpie couldn't restart the {agent} app's app-server. Quit the app and open it again.")
+	noticeSwitchAppNoEnd   = newNotice("myna couldn't restart the {agent} app's app-server. Quit the app and open it again.")
 	noticeSwitchAppNotBack = newNotice("The {agent} app's app-server ended, but the app didn't start another. Quit the app and open it again.")
-	noticeSwitchAppUnknown = newNotice("magpie couldn't tell whether the {agent} app restarted. Quit the app and open it again.")
+	noticeSwitchAppUnknown = newNotice("myna couldn't tell whether the {agent} app restarted. Quit the app and open it again.")
 )
 
 // restartSwitchedApp restarts the Codex app's app-server; a var so tests
@@ -135,13 +135,13 @@ func codexAppOpen(context.Context) (open, known bool) {
 // codexAppReopen is provider.CodexAppReopen: on Windows it quits the
 // Codex app and opens it again, as the Agents row's Restart does for
 // Claude Desktop (restartWin), when the app started no app-server in
-// place of the one magpie ended and so can't send. Its threads are kept
+// place of the one myna ended and so can't send. Its threads are kept
 // by Codex; a draft not sent is lost, but nothing could be sent from it.
 // macOS isn't reopened unasked: there the Agents row's Restart and the
-// line magpie shows are the user's.
+// line myna shows are the user's.
 func codexAppReopen(ctx context.Context) error {
 	if !restartOnWindows {
-		return errors.New("magpie reopens only the Windows Codex app")
+		return errors.New("myna reopens only the Windows Codex app")
 	}
 	c, ok := findRestartable(codexWinApp)
 	if !ok {

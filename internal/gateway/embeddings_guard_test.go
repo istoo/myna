@@ -7,21 +7,21 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/pii"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/appdir"
+	"github.com/istoo/myna/internal/pii"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // #4553 (SunnyRx, Windows): with AstrLink Guard masking requests, an
 // embeddings input with a stray byte (the reporter's body, a lone 0xff)
 // panicked in the model's tokenizer, on the model's own goroutine, and
-// magpie exited with code 2. The real model reads it now, the vendor gets
+// myna exited with code 2. The real model reads it now, the vendor gets
 // the request, and the next request is served. It needs the model's
-// files, in MAGPIE_GUARD_DIR, as internal/pii/guard's tests do.
+// files, in MYNA_GUARD_DIR, as internal/pii/guard's tests do.
 func TestEmbeddingsWithAStrayByteUnderAstrLinkGuard(t *testing.T) {
-	src := os.Getenv("MAGPIE_GUARD_DIR")
+	src := os.Getenv("MYNA_GUARD_DIR")
 	if src == "" {
-		t.Skip("MAGPIE_GUARD_DIR is not set")
+		t.Skip("MYNA_GUARD_DIR is not set")
 	}
 	s, l := shelved(t)
 	// where pii looks for the pinned revision's files

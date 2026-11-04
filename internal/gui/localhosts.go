@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // localHostsRoutes: POST /api/local-hosts {"hosts":[...]} answers

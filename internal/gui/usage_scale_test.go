@@ -1,6 +1,6 @@
 package gui
 
-// Run with MAGPIE_USAGE_SCALE=1 go test -tags nogui ./internal/gui
+// Run with MYNA_USAGE_SCALE=1 go test -tags nogui ./internal/gui
 // -run TestUsageScale -count=1 -v. The fixture is entirely synthetic.
 
 import (
@@ -14,14 +14,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/sessions"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/myna/internal/usage"
 )
 
 func TestUsageScale(t *testing.T) {
-	if os.Getenv("MAGPIE_USAGE_SCALE") != "1" {
-		t.Skip("large synthetic fixture; opt in with MAGPIE_USAGE_SCALE=1")
+	if os.Getenv("MYNA_USAGE_SCALE") != "1" {
+		t.Skip("large synthetic fixture; opt in with MYNA_USAGE_SCALE=1")
 	}
 	home := sandboxHome(t)
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(home, ".cache"))
@@ -32,7 +32,7 @@ func TestUsageScale(t *testing.T) {
 	catalog.Reset()
 	t.Cleanup(func() { sessions.Reset(); catalog.Reset() })
 	now := time.Now().Add(-time.Hour)
-	active := os.Getenv("MAGPIE_USAGE_ACTIVE") == "1"
+	active := os.Getenv("MYNA_USAGE_ACTIVE") == "1"
 	wantCalls := 300_000
 	var activePaths []string
 	if active {

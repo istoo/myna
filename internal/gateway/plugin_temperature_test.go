@@ -34,7 +34,7 @@ func TestPluginModelRefusingTemperature(t *testing.T) {
 	h := New().Handler()
 	ask := func(path, body string) (int, string) {
 		req := httptest.NewRequest("POST", path, strings.NewReader(body))
-		req.Header.Set("Authorization", "Bearer magpie")
+		req.Header.Set("Authorization", "Bearer myna")
 		rec := httptest.NewRecorder()
 		h.ServeHTTP(rec, req)
 		return rec.Code, rec.Body.String()

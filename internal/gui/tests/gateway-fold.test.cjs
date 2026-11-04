@@ -60,7 +60,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     });
 
     // folded until it is opened: set up once, seldom read again (the owner)
-    await page.goto("http://magpie.test/?view=gateway");
+    await page.goto("http://myna.test/?view=gateway");
     await page.locator("#connectNote code").waitFor();
     const fold = page.locator("#foldConnect");
     assert.equal(await fold.getAttribute("aria-expanded"), "false", "Connect starts folded");

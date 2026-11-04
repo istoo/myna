@@ -36,7 +36,7 @@ func (p Provider) AccountServes(ref, model string) bool {
 // of an approval (the guardian) asks for. It is hidden from the
 // provider's models, so an account's list, picked from those, never had
 // it, and a list kept for the big models turned every approval away as
-// "every account barred" once Codex's turns went through magpie's
+// "every account barred" once Codex's turns went through myna's
 // account failover (#1959, parkavenue9639). ChatGPT serves it to every
 // plan, free since 2026-10-06 (#1593).
 func codexOwnHidden(p Provider, model string) bool {
@@ -109,7 +109,7 @@ func (p Provider) AccountIDs() []AccountRef {
 // gateway key's (#905), a routing group's — keeps for provider pid's
 // account or key ref: an account named by its stable id or the name it
 // is shown by, resolved to that id, a key by its fingerprint. It fails
-// for a provider magpie doesn't have, or one with no such account or key.
+// for a provider myna doesn't have, or one with no such account or key.
 func ResolveAccount(pid, ref string) (string, error) {
 	p, err := Find(pid)
 	if err != nil {

@@ -98,13 +98,13 @@ func TestGrokCallsForkKeepsItsOwnTurns(t *testing.T) {
 	}
 }
 
-// A turn asked through magpie's gateway is the gateway's to count, so it
+// A turn asked through myna's gateway is the gateway's to count, so it
 // is not a Local session call too: its turn_completed sums every request
 // of the turn per model, keyed by the model the reply named, which no
 // gateway record matches one to one (liubing0806's modelCalls 7 and 17).
 // The model it was asked on is in its prompt's _meta.modelId, one of the
-// [model."magpie/…"] tables magpie writes in config.toml. The lines are a
-// real session's of each kind, the prompt text cut: e asked on magpie's
+// [model."myna/…"] tables myna writes in config.toml. The lines are a
+// real session's of each kind, the prompt text cut: e asked on myna's
 // group/auto-kimi-k3 and answered as moonshotai/Kimi-K3; f asked on Grok's
 // own grok-4.7, four calls in one turn.
 func TestGrokCallsLeaveTheGatewaysTurnsOut(t *testing.T) {
@@ -120,7 +120,7 @@ func TestGrokCallsLeaveTheGatewaysTurnsOut(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	write(filepath.Join(dir, "config.toml"), "[models]\ndefault = \"magpie/group/auto-kimi-k3\"\n\n[model.\"magpie/group/auto-kimi-k3\"]\nmodel = \"group/auto-kimi-k3\"\nbase_url = \"http://127.0.0.1:3425/v1\"\napi_key = \"magpie\"\n")
+	write(filepath.Join(dir, "config.toml"), "[models]\ndefault = \"myna/group/auto-kimi-k3\"\n\n[model.\"myna/group/auto-kimi-k3\"]\nmodel = \"group/auto-kimi-k3\"\nbase_url = \"http://127.0.0.1:3425/v1\"\napi_key = \"myna\"\n")
 	sessions := filepath.Join(dir, "sessions", "%2Fwork%2Fgrok")
 	const e, f = "01a10341-1c84-7bc0-935e-a35c28f59817", "01a19751-b6a2-7172-b233-ebb9aaac02ba"
 	write(filepath.Join(sessions, e, "summary.json"), `{"info":{"id":"`+e+`","cwd":"/work/grok"},"created_at":"2026-10-03T19:32:41.254395Z","current_model_id":"group/auto-kimi-k3"}`)
@@ -132,18 +132,18 @@ func TestGrokCallsLeaveTheGatewaysTurnsOut(t *testing.T) {
 {"timestamp":1793540091,"method":"_x.ai/session/update","params":{"sessionId":"`+f+`","update":{"sessionUpdate":"turn_completed","prompt_id":"aae30f85-b907-4557-82d7-5ac8fe6363db","stop_reason":"end_turn","usage":{"inputTokens":97708,"outputTokens":435,"totalTokens":98143,"cachedReadTokens":82304,"cacheCreationTokens":0,"reasoningTokens":223,"modelCalls":4,"apiDurationMs":12347,"costUsdTicks":745700000,"modelUsage":{"grok-4.7-build":{"inputTokens":97708,"outputTokens":435,"totalTokens":98143,"cachedReadTokens":82304,"cacheCreationTokens":0,"reasoningTokens":223,"modelCalls":4,"apiDurationMs":12347,"costUsdTicks":745700000}},"numTurns":4},"elapsed_ms":14206},"_meta":{"eventId":"`+f+`-102","agentTimestampMs":1793540091654}}}
 `)
 	// g: e's turn with no prompt line before it, so the session's own
-	// model (summary.json) tells; h: asked on a magpie/ table name that
-	// config.toml doesn't list (written by an older magpie, or edited).
+	// model (summary.json) tells; h: asked on a myna/ table name that
+	// config.toml doesn't list (written by an older myna, or edited).
 	turn := `{"timestamp":1791056019,"method":"_x.ai/session/update","params":{"sessionId":"ID","update":{"sessionUpdate":"turn_completed","stop_reason":"end_turn","usage":{"inputTokens":26124,"outputTokens":92,"cachedReadTokens":0,"modelCalls":1,"modelUsage":{"moonshotai/Kimi-K3":{"inputTokens":26124,"outputTokens":92,"cachedReadTokens":0,"modelCalls":1}}}}}}` + "\n"
 	const g, h = "01a10341-1c84-7bc0-935e-a35c28f5981a", "01a10341-1c84-7bc0-935e-a35c28f5981b"
 	write(filepath.Join(sessions, g, "summary.json"), `{"info":{"id":"`+g+`","cwd":"/work/grok"},"created_at":"2026-10-03T19:32:41Z","current_model_id":"group/auto-kimi-k3"}`)
 	write(filepath.Join(sessions, g, "updates.jsonl"), strings.ReplaceAll(turn, "ID", g))
 	write(filepath.Join(sessions, h, "summary.json"), `{"info":{"id":"`+h+`","cwd":"/work/grok"},"created_at":"2026-10-03T19:32:41Z","current_model_id":"grok-4.7"}`)
-	write(filepath.Join(sessions, h, "updates.jsonl"), `{"timestamp":1791056007,"method":"session/update","params":{"sessionId":"`+h+`","update":{"sessionUpdate":"user_message_chunk","content":{"type":"text","text":"hi"},"_meta":{"modelId":"magpie/deepseek/pro","promptIndex":0}}}}`+"\n"+strings.ReplaceAll(turn, "ID", h))
+	write(filepath.Join(sessions, h, "updates.jsonl"), `{"timestamp":1791056007,"method":"session/update","params":{"sessionId":"`+h+`","update":{"sessionUpdate":"user_message_chunk","content":{"type":"text","text":"hi"},"_meta":{"modelId":"myna/deepseek/pro","promptIndex":0}}}}`+"\n"+strings.ReplaceAll(turn, "ID", h))
 	got := grokCallsBy(func(c Call) string { return c.Session })
 	for _, s := range []string{e, g, h} {
 		if _, ok := got[s]; ok {
-			t.Fatalf("%s: a turn asked through magpie's gateway is a Local session call too: %+v", s, got[s])
+			t.Fatalf("%s: a turn asked through myna's gateway is a Local session call too: %+v", s, got[s])
 		}
 	}
 	if w := (grokTotal{1, 97708 - 82304, 82304, 0, 435}); got[f] != w {

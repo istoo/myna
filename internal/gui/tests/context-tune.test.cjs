@@ -4,7 +4,7 @@
 // puts one in on a click: Claude Code's auto-compact window for a model and
 // its two cache lifetimes, Codex's compact limit. A setting already the
 // leanest says so and has no button; one a variable comes before is told
-// of and has none either; one magpie put in has Undo. Drawn before the
+// of and has none either; one myna put in has Undo. Drawn before the
 // gateway has read anything, in Chromium and WebKit, at a phone's width and
 // a desk's, in every language, none of it wider than the page. Each row
 // draws what every setting would have spent past the advice. The advice is
@@ -99,14 +99,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     for (const lang of Object.keys(heading)) for (const [width, height] of [[360, 760], [1100, 760]]) {
       await t.test(`${lang}, ${width}x${height}`, async () => {
         const ctx = await browser.newContext({ viewport: { width, height }, reducedMotion: "reduce" });
-        await ctx.addInitScript(() => { try { localStorage.setItem("magpie.usageTab", "context"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("myna.usageTab", "context"); } catch {} });
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         const posts = [];
         await page.route("**/*", serve(lang, posts));
-        await page.goto("http://magpie.test/?view=usage");
+        await page.goto("http://myna.test/?view=usage");
         const rows = page.locator(".ctx-tune-row");
         await rows.first().waitFor();
         assert.equal(await page.getByText(heading[lang], { exact: true }).count(), 1, "the heading in " + lang);
@@ -177,7 +177,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     t.after(() => browser.close());
     const ctx = await browser.newContext({ viewport: { width: 1100, height: 900 } });
     await ctx.addInitScript(() => {
-      try { localStorage.setItem("magpie.usageTab", "context"); } catch {}
+      try { localStorage.setItem("myna.usageTab", "context"); } catch {}
       window.drawn = 0;
       document.addEventListener("animationstart", (e) => { if (e.animationName === "ctx-draw") window.drawn++; }, true);
     });
@@ -197,7 +197,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await base(r);
       if (p === "/api/tune") tuned();
     });
-    await page.goto("http://magpie.test/?view=usage");
+    await page.goto("http://myna.test/?view=usage");
     await page.locator(".ctx-tune-chart svg").first().waitFor();
     const charts = await page.locator(".ctx-tune-chart svg").count();
     assert.ok(charts > 0);
@@ -229,14 +229,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     for (const lang of Object.keys(heading)) for (const [width, height] of [[360, 760], [1100, 760]]) {
       await t.test(`${lang}, ${width}x${height}`, async () => {
         const ctx = await browser.newContext({ viewport: { width, height }, reducedMotion: "reduce" });
-        await ctx.addInitScript(() => { try { localStorage.setItem("magpie.usageTab", "context"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("myna.usageTab", "context"); } catch {} });
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         const posts = [];
         await page.route("**/*", serve(lang, posts));
-        await page.goto("http://magpie.test/?view=usage");
+        await page.goto("http://myna.test/?view=usage");
         const row = page.locator(".ctx-tune-row").nth(0);
         await row.locator(".ctx-tune-pick").waitFor();
         await page.locator(".ctx-none").waitFor(); // the history has answered: the pane is its full length
@@ -315,7 +315,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     // German's "Sparsamste" is the widest "Leanest"
     for (const lang of ["en", "de"]) for (const [width, height] of [[360, 760], [1100, 760]]) {
       const ctx = await browser.newContext({ viewport: { width, height }, reducedMotion: "reduce" });
-      await ctx.addInitScript(() => { try { localStorage.setItem("magpie.usageTab", "context"); } catch {} });
+      await ctx.addInitScript(() => { try { localStorage.setItem("myna.usageTab", "context"); } catch {} });
       const page = await ctx.newPage();
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(60000);
@@ -323,7 +323,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       const base = serve(lang, []);
       await page.route("**/*", (r) => new URL(r.request().url()).pathname === "/api/tune" ? r.fulfill({ json: close }) : base(r));
-      await page.goto("http://magpie.test/?view=usage");
+      await page.goto("http://myna.test/?view=usage");
       await page.locator(".ctx-tune-chart").nth(2).waitFor();
       const axes = await page.locator(".ctx-tc-x").evaluateAll((all) => all.map((a) => [...a.children].map((s) => {
         const r = s.getBoundingClientRect();
@@ -413,14 +413,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     for (const lang of Object.keys(heading)) for (const [width, height] of [[360, 760], [1100, 760]]) {
       await t.test(`${lang}, ${width}x${height}`, async () => {
         const ctx = await browser.newContext({ viewport: { width, height }, reducedMotion: "reduce" });
-        await ctx.addInitScript(() => { try { localStorage.setItem("magpie.usageTab", "context"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("myna.usageTab", "context"); } catch {} });
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         const base = serve(lang, []);
         await page.route("**/*", (r) => new URL(r.request().url()).pathname === "/api/tune" ? r.fulfill({ json: timedTune }) : base(r));
-        await page.goto("http://magpie.test/?view=usage");
+        await page.goto("http://myna.test/?view=usage");
         const row = page.locator(".ctx-tune-row").nth(0);
         await row.locator(".ctx-tune-pick").waitFor();
         await page.locator(".ctx-none").waitFor();
@@ -504,7 +504,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     for (const lang of Object.keys(heading)) for (const [width, height] of [[360, 760], [1100, 760]]) {
       await t.test(`${lang}, ${width}x${height}`, async () => {
         const ctx = await browser.newContext({ viewport: { width, height }, reducedMotion: "reduce" });
-        await ctx.addInitScript(() => { try { localStorage.setItem("magpie.usageTab", "context"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("myna.usageTab", "context"); } catch {} });
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
@@ -523,7 +523,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           }
           return base(r);
         });
-        await page.goto("http://magpie.test/?view=usage");
+        await page.goto("http://myna.test/?view=usage");
         const row = page.locator(".ctx-tune-row").nth(0);
         await row.locator(".ctx-tune-pick").waitFor();
         const chip = row.locator(".ctx-tune-foot .ctx-chip");
@@ -546,7 +546,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await use.evaluate((b) => b.click());
         await row.locator(".ctx-tune-foot .ctx-chip.good").waitFor();
         assert.deepEqual(posts.map((p) => [p.agent, p.knob, p.model, p.value]), [["claude", "compact", "claude-opus-5-5", "270000"]]);
-        // inside the band: magpie's pick is in use, and no button to change it
+        // inside the band: myna's pick is in use, and no button to change it
         const row2 = page.locator(".ctx-tune-row").nth(0);
         assert.equal(await row2.locator(".ctx-tune-foot .ctx-chip").innerText(), inUse[lang]);
         assert.equal(await row2.locator(".ctx-tune-foot button.primary").count(), 0);
@@ -558,7 +558,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 }
 
 // A model's own Compact at, over Long conversations (hoobnn on Discord):
-// Long conversations held the 170K magpie put in, the advice was 170K, and
+// Long conversations held the 170K myna put in, the advice was 170K, and
 // the row said "In use" beside "Now 430K", where the provider's own
 // threshold has Codex compact. It now names that threshold, as it does a
 // variable that comes first, and offers no window Long conversations
@@ -587,7 +587,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     for (const lang of Object.keys(heading)) for (const [width, height] of [[360, 760], [1100, 760]]) {
       await t.test(`${lang}, ${width}x${height}`, async () => {
         const ctx = await browser.newContext({ viewport: { width, height }, reducedMotion: "reduce" });
-        await ctx.addInitScript(() => { try { localStorage.setItem("magpie.usageTab", "context"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("myna.usageTab", "context"); } catch {} });
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
@@ -595,7 +595,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         let own = true;
         const base = serve(lang, []);
         await page.route("**/*", (r) => new URL(r.request().url()).pathname === "/api/tune" ? r.fulfill({ json: ownTune(own) }) : base(r));
-        await page.goto("http://magpie.test/?view=usage");
+        await page.goto("http://myna.test/?view=usage");
         const row = page.locator(".ctx-tune-row").nth(0);
         await row.locator(".ctx-tune-foot .ctx-chip").waitFor();
         assert.equal(await row.locator(".ctx-tune-src").innerText(), ownNote[lang]);
@@ -666,7 +666,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     for (const lang of Object.keys(heading)) for (const [width, height] of [[360, 760], [1100, 760]]) {
       await t.test(`${lang}, ${width}x${height}`, async () => {
         const ctx = await browser.newContext({ viewport: { width, height }, reducedMotion: "reduce" });
-        await ctx.addInitScript(() => { try { localStorage.setItem("magpie.usageTab", "context"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("myna.usageTab", "context"); } catch {} });
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
@@ -685,7 +685,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           }
           return base(r);
         });
-        await page.goto("http://magpie.test/?view=usage");
+        await page.goto("http://myna.test/?view=usage");
         const row = page.locator(".ctx-tune-row").nth(0);
         const go = row.locator(".ctx-tune-foot button.ctx-tune-async");
         await go.waitFor();
@@ -768,7 +768,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     for (const days of ["7", "30"]) for (const lang of Object.keys(heading)) for (const [width, height] of [[360, 760], [1100, 760]]) {
       await t.test(`${days} days, ${lang}, ${width}x${height}`, async () => {
         const ctx = await browser.newContext({ viewport: { width, height }, reducedMotion: "reduce" });
-        await ctx.addInitScript((d) => { try { localStorage.setItem("magpie.usageTab", "context"); localStorage.setItem("magpie.ctxDays", d); } catch {} }, days);
+        await ctx.addInitScript((d) => { try { localStorage.setItem("myna.usageTab", "context"); localStorage.setItem("myna.ctxDays", d); } catch {} }, days);
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
@@ -785,7 +785,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           if (url.pathname === "/api/tune/apply") at = +JSON.parse(r.request().postData()).value;
           return base(r);
         });
-        await page.goto("http://magpie.test/?view=usage");
+        await page.goto("http://myna.test/?view=usage");
         const row = page.locator(".ctx-tune-row").nth(0);
         await row.locator(".ctx-tune-foot .ctx-chip").waitFor();
         assert.deepEqual([...new Set(asked)], [days]);
@@ -822,7 +822,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 // calls were Codex's own models, whose window Long conversations doesn't
 // move, so Now stayed and the row read "In use"; over 7 and 30 days a
 // provider's model moved with it, Now read the advice, and the row said
-// "Already the leanest" instead. The advice magpie put in is "In use" in
+// "Already the leanest" instead. The advice myna put in is "In use" in
 // each range, Undo beside it, and Undo puts Use back. In both engines,
 // every language, a phone's width and a desk's.
 const rangeTune = (days, set) => ({
@@ -841,7 +841,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     for (const days of ["1", "7", "30"]) for (const lang of Object.keys(heading)) for (const [width, height] of [[360, 760], [1100, 760]]) {
       await t.test(`${days} days, ${lang}, ${width}x${height}`, async () => {
         const ctx = await browser.newContext({ viewport: { width, height }, reducedMotion: "reduce" });
-        await ctx.addInitScript((d) => { try { localStorage.setItem("magpie.usageTab", "context"); localStorage.setItem("magpie.ctxDays", d); } catch {} }, days);
+        await ctx.addInitScript((d) => { try { localStorage.setItem("myna.usageTab", "context"); localStorage.setItem("myna.ctxDays", d); } catch {} }, days);
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
@@ -856,7 +856,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           if (url.pathname === "/api/tune/undo") set = false;
           return base(r);
         });
-        await page.goto("http://magpie.test/?view=usage");
+        await page.goto("http://myna.test/?view=usage");
         const row = page.locator(".ctx-tune-row").nth(0);
         const go = row.locator(".ctx-tune-foot button.primary");
         await go.waitFor();

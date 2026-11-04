@@ -42,13 +42,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       t.after(async () => { await browser.close(); });
       const errors = [];
       const context = await browser.newContext({ viewport: { width: 380, height: 640 }, reducedMotion: "reduce" });
-      await context.addInitScript(() => { try { localStorage.setItem("magpie.panelTab", "usage"); } catch {} });
+      await context.addInitScript(() => { try { localStorage.setItem("myna.panelTab", "usage"); } catch {} });
       const page = await context.newPage();
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(60000);
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang));
-      await page.goto("http://magpie.test/?mode=panel");
+      await page.goto("http://myna.test/?mode=panel");
       await page.waitForFunction(() => document.querySelectorAll("#panelQuota .pq-card[data-card]").length >= 2);
       const say = await page.evaluate(() => {
         const out = {};

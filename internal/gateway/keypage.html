@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="referrer" content="no-referrer">
-<title>magpie key</title>
+<title>myna key</title>
 <style>
 :root {
   --bg: #f5f5f7; --card: #fff; --text: #1d1d1f; --sub: #6e6e73; --line: #d2d2d7;
@@ -263,16 +263,16 @@ const LANG = (() => {
 const t = (k, v) => String(STR[LANG][k] ?? STR.en[k] ?? k).replace(/\{(\w+)\}/g, (_, n) => (v && n in v ? v[n] : ""));
 document.documentElement.lang = LANG;
 document.querySelectorAll("[data-t]").forEach((e) => { e.textContent = t(e.dataset.t); });
-document.title = t("title") + " · magpie";
+document.title = t("title") + " · myna";
 const $ = (id) => document.getElementById(id);
 $("filter").placeholder = t("filter");
 const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 
 // the gateway's address is where this page was opened, less "/me": a
-// reverse proxy that serves magpie under a path keeps it
+// reverse proxy that serves myna under a path keeps it
 const BASE = location.origin + location.pathname.replace(/\/me\/?$/, "");
 const PLACEHOLDER = "YOUR_GATEWAY_KEY";
-const STORE = "magpie-key";
+const STORE = "myna-key";
 let key = "", data = null, model = "", tab = "claude";
 const store = {
   get() { try { return sessionStorage.getItem(STORE) || ""; } catch { return ""; } },
@@ -285,7 +285,7 @@ const total = (u) => (u.input || 0) + (u.output || 0) + (u.cache_read || 0) + (u
 const when = (s) => new Date(s).toLocaleString(LANG, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 
 async function load(k) {
-  const res = await fetch(BASE + "/v1/magpie/me", { headers: { Authorization: "Bearer " + k }, cache: "no-store", credentials: "omit", referrerPolicy: "no-referrer" });
+  const res = await fetch(BASE + "/v1/myna/me", { headers: { Authorization: "Bearer " + k }, cache: "no-store", credentials: "omit", referrerPolicy: "no-referrer" });
   if (res.ok) return { ok: true, body: await res.json() };
   return { ok: false, status: res.status };
 }
@@ -443,8 +443,8 @@ function drawSetup() {
   } else if (tab === "codex") {
     $("tabNote").textContent = t("codexNote") + " " + t("pick");
     block("~/.codex/config.toml", [
-      "model = " + q(m), 'model_provider = "magpie"', "",
-      "[model_providers.magpie]", 'name = "magpie"', "base_url = " + q(v1), 'wire_api = "responses"', "experimental_bearer_token = " + q(k),
+      "model = " + q(m), 'model_provider = "myna"', "",
+      "[model_providers.myna]", 'name = "myna"', "base_url = " + q(v1), 'wire_api = "responses"', "experimental_bearer_token = " + q(k),
     ].join("\n"));
   } else if (tab === "openai") {
     $("tabNote").textContent = t("oaiNote");

@@ -1,6 +1,6 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // #3964 (MYCF711): a prepaid wallet's points come in batches that are lost
-// on their own days. SuperMagic's plugin (magpie-magicrew-auth daca18e)
+// on their own days. SuperMagic's plugin (myna-magicrew-auth daca18e)
 // sends its balance window with the soonest batch (runsOutAt, runsOut:
 // 185 points at 23:59 today) and the day's, timed and permanent points as
 // rows set aside. The Usage card said all of it; the Routing page's rows
@@ -85,7 +85,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             const errors = [];
             page.on("pageerror", (error) => errors.push(error.message));
             await page.route("**/*", serve(lang));
-            await page.goto("http://magpie.test/?view=routing");
+            await page.goto("http://myna.test/?view=routing");
             const req = page.locator(".rt-req").first();
             await req.waitFor();
             if (await req.getAttribute("aria-pressed") !== "true") await req.click();

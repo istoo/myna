@@ -29,14 +29,14 @@ import (
 // usage, on the model and provider in use. A call that failed is written
 // with no usage, and is none.
 //
-// A call made through magpie's own entry (provider "magpie", which
+// A call made through myna's own entry (provider "myna", which
 // internal/agent's pi.go and omp.go write, "dial" before the rename) is the
 // gateway's to count: it logged the call itself, with the provider and
 // account that answered. Cindy's Pi names it otherwise: Cindy gives a
 // custom provider it imports the link's id and eight hex digits of a new
 // UUID (its import parser: `${id.slice(0,24)}-${randomUUID().slice(0,8)}`),
-// so magpie's link, id "magpie" (internal/agent's cindy.go), is
-// "magpie-beedee1a" there, and a call through it was counted twice: by the
+// so myna's link, id "myna" (internal/agent's cindy.go), is
+// "myna-beedee1a" there, and a call through it was counted twice: by the
 // gateway, and again here as Cindy's own (jealousy03888 on Discord, ZCode's
 // GLM-5.3 in Cindy listed once as a gateway request and once as a local
 // session).
@@ -54,20 +54,20 @@ func piCallFiles() []file {
 	return append(out, wslFiles("pi", "raft", "omp")...)
 }
 
-// piGateway is whether a provider is magpie's own entry, in agent's files.
+// piGateway is whether a provider is myna's own entry, in agent's files.
 func piGateway(agent, provider string) bool {
-	if provider == "magpie" || provider == "dial" {
+	if provider == "myna" || provider == "dial" {
 		return true
 	}
 	return agent == "cindy" && cindyGatewayProvider(provider)
 }
 
 // cindyGatewayProvider is whether a provider id is the one Cindy gives
-// magpie's import link: "magpie-" and eight lowercase hex digits. A
-// provider the user adds in Cindy by hand under the name Magpie is
-// "magpie", or "magpie-2" beside another (its slug), never this shape.
+// myna's import link: "myna-" and eight lowercase hex digits. A
+// provider the user adds in Cindy by hand under the name Myna is
+// "myna", or "myna-2" beside another (its slug), never this shape.
 func cindyGatewayProvider(id string) bool {
-	rest, ok := strings.CutPrefix(id, "magpie-")
+	rest, ok := strings.CutPrefix(id, "myna-")
 	if !ok || len(rest) != 8 {
 		return false
 	}

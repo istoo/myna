@@ -16,7 +16,7 @@ const assets = path.resolve(__dirname, "../assets");
 const days = (n) => new Date(Date.now() - n * 86400e3).toISOString();
 const codex = {
   id: "codex", name: "Codex", icon: "generic", path: "/fixture/codex", wired: true,
-  fields: [{ key: "model", label: "model", value: "gpt-6.1-sol", options: [{ value: "gpt-6.1-sol", label: "GPT-6.1 Sol", ref: "group/auto-gpt-6-1-sol", note: "Group · via magpie" }] }],
+  fields: [{ key: "model", label: "model", value: "gpt-6.1-sol", options: [{ value: "gpt-6.1-sol", label: "GPT-6.1 Sol", ref: "group/auto-gpt-6-1-sol", note: "Group · via myna" }] }],
   stale: 3, staleCopies: [{ kind: "app", since: days(3) }, { kind: "daemon", since: days(1) }, { kind: "embedded", app: "Agents Anywhere", since: days(1) }],
 };
 
@@ -55,7 +55,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang));
-        await page.goto("http://magpie.test/?view=agents");
+        await page.goto("http://myna.test/?view=agents");
         await page.locator(`${row} .ag-conn`).waitFor();
         await page.locator(`${row} .ag-link`).click();
         const copies = page.locator(`${row} .ag-stale-copy`);
@@ -112,7 +112,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         for (const [name, c] of Object.entries(folded)) {
           await page.unrouteAll();
           await page.route("**/*", serve(lang, { ...codex, stale: c.copies.length, staleCopies: c.copies }));
-          await page.goto("http://magpie.test/?view=agents");
+          await page.goto("http://myna.test/?view=agents");
           const words = page.locator(`${row} .ag-st-t`);
           await page.locator(`${row} .ag-conn`).waitFor();
           const said = await words.textContent();
@@ -129,10 +129,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           assert.equal(box.lines, 1, `${name}: one line`);
           if (process.env.ARTIFACT_DIR) await page.locator(row).screenshot({ path: path.join(process.env.ARTIFACT_DIR, `stale-${engine}-${lang}-${width}-${name}.png`) });
         }
-        // a copy of no kind magpie knows keeps the plain words
+        // a copy of no kind myna knows keeps the plain words
         await page.unrouteAll();
         await page.route("**/*", serve(lang, { ...codex, stale: 1, staleCopies: [{ since: days(1) }] }));
-        await page.goto("http://magpie.test/?view=agents");
+        await page.goto("http://myna.test/?view=agents");
         await page.locator(`${row} .ag-conn`).waitFor();
         assert.equal(await page.locator(`${row} .ag-st-t`).getAttribute("title"), null);
         assert.deepEqual(errors, []);
@@ -143,7 +143,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
 // luci on Discord (Codex 0.162): every new codex showed Codex's own models
 // after Codex was wired in, since the daemon they attach to had the list
-// from before. magpie restarts it itself while no codex session is on it;
+// from before. myna restarts it itself while no codex session is on it;
 // with one on, the daemon's line has a Restart, which restarts it, and
 // the row as it is after takes the line away. Only the daemon's line has
 // it. Every language, both widths.
@@ -173,7 +173,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           if (url.pathname === "/api/state") return route.fulfill({ json: { agents: [agent], profiles: [], settings: { lang, theme: "light" } } });
           return fake(route);
         });
-        await page.goto("http://magpie.test/?view=agents");
+        await page.goto("http://myna.test/?view=agents");
         await page.locator(`${row} .ag-conn`).waitFor();
         await page.locator(`${row} .ag-link`).click();
         const copies = page.locator(`${row} .ag-stale-copy`);
@@ -196,7 +196,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
   }
 }
 
-// the Codex app's line has a Restart of its own (the owner, 10-23): magpie
+// the Codex app's line has a Restart of its own (the owner, 10-23): myna
 // asks, then restarts only the app-server of the app named by its bundle,
 // and says its window stays (yoshi037070: a quit and open opened a new one)
 const appName = { en: "The Codex app", zh: "Codex 应用", "zh-TW": "Codex 應用", ja: "Codex アプリ", de: "Die Codex-App" };
@@ -227,7 +227,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           if (url.pathname === "/api/state") return route.fulfill({ json: { agents: [agent], profiles: [], settings: { lang, theme: "light" } } });
           return fake(route);
         });
-        await page.goto("http://magpie.test/?view=agents");
+        await page.goto("http://myna.test/?view=agents");
         await page.locator(`${row} .ag-conn`).waitFor();
         await page.locator(`${row} .ag-link`).click();
         const go = page.locator(`${row} .ag-stale-copy button`);
@@ -235,7 +235,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal((await go.textContent()).trim(), restartSays[lang]);
         const box = await go.boundingBox();
         assert.ok(box.x + box.width <= width, "past the window");
-        // asked first, in magpie's own dialog (微雨南山 and stones): Cancel
+        // asked first, in myna's own dialog (微雨南山 and stones): Cancel
         // quits nothing
         await go.click();
         const ask = page.locator("dialog.action-confirm[open]");

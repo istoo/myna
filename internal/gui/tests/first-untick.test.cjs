@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Rime_Nan on X: in a subscription magpie's gateway serves (Copilot, a
+// Rime_Nan on X: in a subscription myna's gateway serves (Copilot, a
 // plugin's), the first account's tick was fixed, so it could be ticked off
 // only after dragging it down the list. With another account ticked, its
 // tick posts login/off, and the next ticked one is first (the server's);
@@ -61,7 +61,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       const posts = [];
       await page.route("**/*", serve(lang, list, posts));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://myna.test/?view=providers");
       await page.locator(".row.provider", { hasText: "Copilot" }).first().click();
       await page.locator(".editor .acc").first().waitFor();
       return { page, errors, posts };

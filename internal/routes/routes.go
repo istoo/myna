@@ -48,7 +48,7 @@ type Seat struct {
 	// Spent: it rests because it is out of quota or credit, not for a
 	// rate limit or a failure. Drain goes on from it.
 	Spent bool
-	// Tokens is what magpie sent it lately, decayed by an hour's half-life
+	// Tokens is what myna sent it lately, decayed by an hour's half-life
 	Tokens float64
 	// Free: the model this seat would be asked for costs nothing on it —
 	// its vendor serves that model at no cost to the subscription's

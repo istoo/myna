@@ -74,7 +74,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         const saves = [];
         await page.route("**/*", serve(lang, saves));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://myna.test/?view=providers");
         const editor = page.locator("#modal:not([hidden]) .editor");
         const chip = (id) => editor.locator(".mchips .mchip", { hasText: id });
         const cls = (id) => chip(id).evaluate((c) => [c.classList.contains("on"), c.classList.contains("auto")]);

@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // A plugin provider offers the models any account switched on serves,
@@ -19,7 +19,7 @@ import (
 // its own list for routing.
 func TestPluginProviderOffersEveryOnAccountsModels(t *testing.T) {
 	claudeHome(t)
-	t.Setenv("MAGPIE_BUN", "")
+	t.Setenv("MYNA_BUN", "")
 	spec := "@example/opencode-acme-auth"
 	write := func(name string, v any) {
 		t.Helper()

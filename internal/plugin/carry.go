@@ -6,8 +6,8 @@ import (
 	"io/fs"
 	"os"
 
-	"github.com/yetone/magpie/internal/lastgood"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/lastgood"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // AuthEntries is plugin-auth.json's sign-ins by key, each as written, for

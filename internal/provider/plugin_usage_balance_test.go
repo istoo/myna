@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // A prepaid wallet (SuperMagic's points, #3950) tells how much is left in
@@ -79,7 +79,7 @@ func TestAllowanceLeftIsTheLeastBalance(t *testing.T) {
 	}
 }
 
-// Through the plugin host: a balance the plugin sends reaches magpie as
+// Through the plugin host: a balance the plugin sends reaches myna as
 // that figure; one that isn't a number is not said.
 func TestPluginHostPassesABalanceOn(t *testing.T) {
 	windows := filepath.Join(t.TempDir(), "windows.json")
@@ -104,7 +104,7 @@ func fakePluginUsage(t *testing.T, windows string) map[string]SubscriptionQuota 
 	t.Helper()
 	bun := testenv.Bun(t)
 	claudeHome(t)
-	t.Setenv("MAGPIE_BUN", bun)
+	t.Setenv("MYNA_BUN", bun)
 	t.Setenv("FAKE_WINDOWS", windows)
 	t.Cleanup(plugin.Settle)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)

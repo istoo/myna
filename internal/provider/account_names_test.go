@@ -9,17 +9,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // #1515: a plugin's signed-in account (ZCode's, through
-// opencode-zcode-auth) takes a name of the user's own. It is magpie's,
+// opencode-zcode-auth) takes a name of the user's own. It is myna's,
 // in providers.json: plugin-auth.json and logins.json are not written.
 func TestAccountNameOfAPluginAccount(t *testing.T) {
 	bun := testenv.Bun(t)
 	claudeHome(t)
-	t.Setenv("MAGPIE_BUN", bun)
+	t.Setenv("MYNA_BUN", bun)
 	t.Cleanup(plugin.Settle)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()

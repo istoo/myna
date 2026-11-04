@@ -16,7 +16,7 @@ import (
 // order the sync can add and take out entries in, from each shape of file,
 // leaves a file OpenCode reads.
 func TestHubToggleLeavesValidJSONC(t *testing.T) {
-	hub := map[string]any{"type": "remote", "url": "http://127.0.0.1:3425/mcp/magpie/hub/opencode", "enabled": true}
+	hub := map[string]any{"type": "remote", "url": "http://127.0.0.1:3425/mcp/myna/hub/opencode", "enabled": true}
 	srv := map[string]any{"type": "local", "command": []string{"npx", "x"}, "enabled": true}
 	fixtures := map[string]string{
 		"empty_mcp":         "{\n  \"mcp\": {}\n}\n",
@@ -33,13 +33,13 @@ func TestHubToggleLeavesValidJSONC(t *testing.T) {
 		"compact_trailing":  `{"mcp":{"x":{"type":"local"},}}`,
 	}
 	seqs := map[string][]string{
-		"hub_on_off":           {"+magpie", "-magpie"},
-		"add_first_del_first":  {"+magpie", "-x", "-magpie", "+x"},
-		"add_first_add_first":  {"+magpie", "-x", "+x", "-magpie"},
-		"del_first_del_first":  {"-x", "+magpie", "-magpie", "+x"},
-		"del_first_add_first":  {"-x", "+magpie", "+x", "-magpie"},
-		"two_servers":          {"+magpie", "-x", "-y", "-magpie", "+x", "+y"},
-		"two_servers_add_back": {"-x", "-y", "+magpie", "+x", "+y", "-magpie"},
+		"hub_on_off":           {"+myna", "-myna"},
+		"add_first_del_first":  {"+myna", "-x", "-myna", "+x"},
+		"add_first_add_first":  {"+myna", "-x", "+x", "-myna"},
+		"del_first_del_first":  {"-x", "+myna", "-myna", "+x"},
+		"del_first_add_first":  {"-x", "+myna", "+x", "-myna"},
+		"two_servers":          {"+myna", "-x", "-y", "-myna", "+x", "+y"},
+		"two_servers_add_back": {"-x", "-y", "+myna", "+x", "+y", "-myna"},
 	}
 	for fn, fx := range fixtures {
 		for sn, seq := range seqs {
@@ -53,7 +53,7 @@ func TestHubToggleLeavesValidJSONC(t *testing.T) {
 					var err error
 					if st[0] == '+' {
 						v := srv
-						if name == "magpie" {
+						if name == "myna" {
 							v = hub
 						}
 						err = SetJSON(p, KV{Path: "mcp." + name, Value: v})
@@ -82,14 +82,14 @@ func TestHubToggleLeavesValidJSONC(t *testing.T) {
 // The reporter's file, as the delete leaves it.
 func TestDelOnlyMemberTakesItsTrailingComma(t *testing.T) {
 	for _, c := range []struct{ in, want string }{
-		{"{\n  \"mcp\": {\n    \"magpie\": {\n      \"type\": \"remote\"\n    },\n  },\n}\n", "{\n  \"mcp\": {},\n}\n"},
-		{"{\r\n  \"mcp\": {\r\n    \"magpie\": {\"type\": \"remote\"},\r\n  }\r\n}\r\n", "{\r\n  \"mcp\": {}\r\n}\r\n"},
-		{"{\n  \"mcp\": {\n    \"a\": 1,\n    \"magpie\": 2,\n  }\n}\n", "{\n  \"mcp\": {\n    \"a\": 1\n  }\n}\n"},
-		{`{"mcp":{"magpie":2,}}`, `{"mcp":{}}`},
+		{"{\n  \"mcp\": {\n    \"myna\": {\n      \"type\": \"remote\"\n    },\n  },\n}\n", "{\n  \"mcp\": {},\n}\n"},
+		{"{\r\n  \"mcp\": {\r\n    \"myna\": {\"type\": \"remote\"},\r\n  }\r\n}\r\n", "{\r\n  \"mcp\": {}\r\n}\r\n"},
+		{"{\n  \"mcp\": {\n    \"a\": 1,\n    \"myna\": 2,\n  }\n}\n", "{\n  \"mcp\": {\n    \"a\": 1\n  }\n}\n"},
+		{`{"mcp":{"myna":2,}}`, `{"mcp":{}}`},
 	} {
 		p := filepath.Join(t.TempDir(), "opencode.jsonc")
 		os.WriteFile(p, []byte(c.in), 0o644)
-		if err := DelJSON(p, "mcp.magpie"); err != nil {
+		if err := DelJSON(p, "mcp.myna"); err != nil {
 			t.Fatal(err)
 		}
 		if b, _ := os.ReadFile(p); string(b) != c.want {
@@ -102,27 +102,27 @@ func TestDelOnlyMemberTakesItsTrailingComma(t *testing.T) {
 func TestInsertIntoCommentOnlyObjectNoTrailingComma(t *testing.T) {
 	p := filepath.Join(t.TempDir(), "opencode.jsonc")
 	os.WriteFile(p, []byte("{\n  \"mcp\": {\n    // none yet\n  }\n}\n"), 0o644)
-	if err := SetJSON(p, KV{Path: "mcp.magpie", Value: 1}); err != nil {
+	if err := SetJSON(p, KV{Path: "mcp.myna", Value: 1}); err != nil {
 		t.Fatal(err)
 	}
-	want := "{\n  \"mcp\": {\n    \"magpie\": 1\n    // none yet\n  }\n}\n"
+	want := "{\n  \"mcp\": {\n    \"myna\": 1\n    // none yet\n  }\n}\n"
 	if b, _ := os.ReadFile(p); string(b) != want {
 		t.Errorf("got %q\nwant %q", b, want)
 	}
 }
 
-// A file an older magpie left with {,} is mended by the next edit of it.
+// A file an older myna left with {,} is mended by the next edit of it.
 func TestLoneCommaMendedOnNextEdit(t *testing.T) {
 	p := filepath.Join(t.TempDir(), "opencode.jsonc")
 	os.WriteFile(p, []byte("{\n  \"mcp\": {\n,\n  },\n  \"x\": [\n  ,]\n}\n"), 0o644)
-	if err := SetJSON(p, KV{Path: "mcp.magpie", Value: 1}); err != nil {
+	if err := SetJSON(p, KV{Path: "mcp.myna", Value: 1}); err != nil {
 		t.Fatal(err)
 	}
 	if b, _ := os.ReadFile(p); !ValidJSONC(b) {
 		t.Errorf("still invalid:\n%s", b)
 	}
-	os.WriteFile(p, []byte("{\n  \"mcp\": {\n,\n  },\n  \"magpie\": 1\n}\n"), 0o644)
-	if err := DelJSON(p, "magpie"); err != nil {
+	os.WriteFile(p, []byte("{\n  \"mcp\": {\n,\n  },\n  \"myna\": 1\n}\n"), 0o644)
+	if err := DelJSON(p, "myna"); err != nil {
 		t.Fatal(err)
 	}
 	if b, _ := os.ReadFile(p); !ValidJSONC(b) {

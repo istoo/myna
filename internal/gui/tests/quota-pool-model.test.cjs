@@ -18,7 +18,7 @@ const assets = path.resolve(__dirname, "../assets");
 const at = (h) => new Date(Date.now() + h * 36e5).toISOString();
 const model = (name, family, pool, used, h) => ({ name, family, pool, used, resetsAt: at(h) });
 const pool = (pool, name, used, h) => ({ name, pool, used, resetsAt: at(h) });
-// as magpie reports it: the models, then each group's windows as Google
+// as myna reports it: the models, then each group's windows as Google
 // lists the groups, Argon's last with its week alone
 const ag = (user) => ({
   provider: "antigravity", name: "Antigravity", icon: "antigravity-color", user, plan: "Google AI Pro",
@@ -84,7 +84,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const fill = (loc) => loc.evaluateAll((es) => es.map((e) => Math.round(parseFloat(e.style.width))));
 
       // the Usage page: every group's windows, Claude & GPT before Argon
-      const page = await open("http://magpie.test/?view=usage", { width: 900, height: 700 });
+      const page = await open("http://myna.test/?view=usage", { width: 900, height: 700 });
       const box = page.locator(".subscription-card", { hasText: "Antigravity" }).locator(".quota-windows").first();
       await box.waitFor();
       assert.deepEqual(await box.locator(".quota-labels > span:first-child").allTextContents(),
@@ -93,7 +93,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert(tip.includes("Gemini 3 Flash") && !tip.includes("Gemini 4 Argon"), "Gemini's pool is the other Gemini models': " + tip);
 
       // the menu bar panel: five rings, Claude's among them, Argon's named for it
-      const panel = await open("http://magpie.test/?mode=panel", { width: 440, height: 640 });
+      const panel = await open("http://myna.test/?mode=panel", { width: 440, height: 640 });
       await panel.locator('#ptabs [data-ptab="usage"]').click();
       const card = panel.locator(".pq-group", { hasText: "Antigravity" }).locator(".pq-card").first();
       await card.locator(".pq-ring").first().waitFor();
@@ -106,7 +106,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert(await card.locator(".pq-user").evaluate((e) => e.getBoundingClientRect().width >= 80), "the account's name keeps room");
 
       // the provider's account row: every pool, Claude & GPT's included
-      const prov = await open("http://magpie.test/?view=providers", { width: 900, height: 700 });
+      const prov = await open("http://myna.test/?view=providers", { width: 900, height: 700 });
       await prov.locator(".row.provider", { hasText: "Antigravity" }).click();
       const row = prov.locator(".accts .acc", { hasText: "ada@example.com" });
       await row.locator(".aq-w").first().waitFor();

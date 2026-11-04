@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // withHeaders gives the saved provider id the headers.
@@ -58,7 +58,7 @@ func TestHeadersCarryTheSession(t *testing.T) {
 }
 
 // ${subagentId} in a header is the Claude Code subagent the request is
-// of, as in extraBody (yetone/magpie#2937): "" on the conversation's own
+// of, as in extraBody (istoo/myna#2937): "" on the conversation's own
 // turns, never the literal.
 func TestHeadersCarryTheSubagent(t *testing.T) {
 	f := &fake{t: t, reply: responsesReply, ctype: "application/json"}
@@ -100,7 +100,7 @@ func TestHeadersDerivedSessionMatchesExtraBody(t *testing.T) {
 	}
 	one := ask(`[{"role":"user","content":"first"}]`)
 	again := ask(`[{"role":"user","content":"first"},{"role":"assistant","content":"OK"},{"role":"user","content":"next"}]`)
-	if !strings.HasPrefix(one, "magpie-") || one != again {
+	if !strings.HasPrefix(one, "myna-") || one != again {
 		t.Errorf("ids %q %q", one, again)
 	}
 }

@@ -7,27 +7,27 @@ import (
 	"net/http"
 	"sync/atomic"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
-// RestartPath is where `magpie update`, once it has put a new version in,
-// asks the magpie serving the gateway to restart into it
-// (gaubeebangeel on X: an agent served by magpie runs the update at 4am,
+// RestartPath is where `myna update`, once it has put a new version in,
+// asks the myna serving the gateway to restart into it
+// (gaubeebangeel on X: an agent served by myna runs the update at 4am,
 // and the app stayed on the old version until someone quit and reopened
 // it, which cut whatever the agents had in flight). The app restarts the
 // way its own update does: on a Mac or Linux it hands the gateway to the
 // new version, so the request that ran the update, and every other,
 // goes on. Loopback only, from a program, never a page.
-const RestartPath = "/v1/magpie/restart"
+const RestartPath = "/v1/myna/restart"
 
 // RestartReply is what RestartPath answers.
 type RestartReply struct {
 	// restarting: at once; waiting: once what a restart would cut short
-	// (Busy) is done; current: this magpie wasn't the one updated (another
-	// copy, or nothing put in); unsupported: this magpie (magpie serve)
+	// (Busy) is done; current: this myna wasn't the one updated (another
+	// copy, or nothing put in); unsupported: this myna (myna serve)
 	// doesn't restart itself, and is restarted the way it was started
 	State string `json:"state"`
-	// Version is this magpie's, the one restarting
+	// Version is this myna's, the one restarting
 	Version string `json:"version"`
 	// Handover: the new version takes the gateway over while this one
 	// finishes its requests (Busy is then the Claude subscription's turns)
@@ -37,7 +37,7 @@ type RestartReply struct {
 
 var restarter atomic.Pointer[func(version string) RestartReply]
 
-// SetRestarter has RestartPath call f with the version `magpie update`
+// SetRestarter has RestartPath call f with the version `myna update`
 // put in; the gui's updater sets it. Without one the answer is
 // "unsupported".
 func SetRestarter(f func(version string) RestartReply) {
@@ -48,17 +48,17 @@ func SetRestarter(f func(version string) RestartReply) {
 	restarter.Store(&f)
 }
 
-// restartRefused says why r may not restart this magpie, "" when it may:
+// restartRefused says why r may not restart this myna, "" when it may:
 // as heapRefused, only a program on this computer calling localhost or a
 // loopback address, never another machine, a page, or another Host.
 func restartRefused(r *http.Request) string {
 	switch {
 	case !local(r):
-		return "magpie restarts to update only when a program on this computer asks, over loopback: run magpie update there"
+		return "myna restarts to update only when a program on this computer asks, over loopback: run myna update there"
 	case fromBrowser(r):
-		return "magpie doesn't restart when a web page asks: run magpie update in a terminal"
+		return "myna doesn't restart when a web page asks: run myna update in a terminal"
 	case !loopbackHost(r.Host):
-		return "magpie restarts to update only on a call to localhost or a loopback address, not " + r.Host + ": run magpie update"
+		return "myna restarts to update only on a call to localhost or a loopback address, not " + r.Host + ": run myna update"
 	}
 	return ""
 }

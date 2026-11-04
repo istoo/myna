@@ -6,10 +6,10 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/backup"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/access"
+	"github.com/istoo/myna/internal/appdir"
+	"github.com/istoo/myna/internal/backup"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // A computer joining a folder keeps the gateway keys it holds that the
@@ -40,7 +40,7 @@ func TestGatewayKeysJoinKeepsUnseenKeys(t *testing.T) {
 	remote := func() backup.Bundle {
 		t.Helper()
 		fake.mu.Lock()
-		data := append([]byte(nil), fake.files["/dav/magpie/magpie.magpie-backup"]...)
+		data := append([]byte(nil), fake.files["/dav/myna/myna.myna-backup"]...)
 		fake.mu.Unlock()
 		got, err := backup.Open(data, cfg.Passphrase)
 		if err != nil {
@@ -163,7 +163,7 @@ func TestGatewayKeysJoinWithoutStoreKeepsKeys(t *testing.T) {
 	remote := func() backup.Bundle {
 		t.Helper()
 		fake.mu.Lock()
-		data := append([]byte(nil), fake.files["/dav/magpie/magpie.magpie-backup"]...)
+		data := append([]byte(nil), fake.files["/dav/myna/myna.myna-backup"]...)
 		fake.mu.Unlock()
 		got, err := backup.Open(data, cfg.Passphrase)
 		if err != nil {

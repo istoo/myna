@@ -9,23 +9,23 @@ import (
 	"testing"
 )
 
-// usemagpie.ai on an Omarchy machine asks the magpie there for the theme it
+// github.com/istoo/myna on an Omarchy machine asks the myna there for the theme it
 // draws itself in: only from this machine, only readable by the site.
 func TestOmarchyThemeForTheSite(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("MYNA_ADDR", "")
 	dir := t.TempDir()
 	if err := os.WriteFile(filepath.Join(dir, "colors.toml"), []byte("mode = \"light\"\naccent = \"#1e66f5\"\nbackground = \"#eff1f5\"\nforeground = \"#4c4f69\"\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	t.Setenv("MAGPIE_OMARCHY_THEME", dir)
-	t.Setenv("MAGPIE_OMARCHY_FONT", "iA Writer Mono S")
+	t.Setenv("MYNA_OMARCHY_THEME", dir)
+	t.Setenv("MYNA_OMARCHY_FONT", "iA Writer Mono S")
 	t.Setenv("HYPRLAND_INSTANCE_SIGNATURE", "")
 	was := onOmarchy
 	t.Cleanup(func() { onOmarchy = was })
 	h := lanGuard(New().Handler())
 	call := func(method, from, origin string) *httptest.ResponseRecorder {
-		r := httptest.NewRequest(method, "/v1/magpie/omarchy", nil)
+		r := httptest.NewRequest(method, "/v1/myna/omarchy", nil)
 		r.RemoteAddr = from
 		r.Host = "127.0.0.1:3425"
 		if origin != "" {
@@ -41,13 +41,13 @@ func TestOmarchyThemeForTheSite(t *testing.T) {
 	}
 
 	onOmarchy = false
-	if w := call("GET", "127.0.0.1:5000", "https://usemagpie.ai"); w.Code != http.StatusNotFound {
+	if w := call("GET", "127.0.0.1:5000", "https://github.com/istoo/myna"); w.Code != http.StatusNotFound {
 		t.Fatal("not on Omarchy:", w.Code, w.Body)
 	}
 
 	onOmarchy = true
-	w := call("GET", "127.0.0.1:5000", "https://usemagpie.ai")
-	if w.Code != 200 || w.Header().Get("Access-Control-Allow-Origin") != "https://usemagpie.ai" {
+	w := call("GET", "127.0.0.1:5000", "https://github.com/istoo/myna")
+	if w.Code != 200 || w.Header().Get("Access-Control-Allow-Origin") != "https://github.com/istoo/myna" {
 		t.Fatal("the site, on this machine:", w.Code, w.Header(), w.Body)
 	}
 	var th struct {
@@ -70,7 +70,7 @@ func TestOmarchyThemeForTheSite(t *testing.T) {
 	if w := call("GET", "192.168.1.9:5000", ""); w.Code == 200 {
 		t.Fatal("another machine got it:", w.Code)
 	}
-	w = call("OPTIONS", "127.0.0.1:5000", "https://usemagpie.ai")
+	w = call("OPTIONS", "127.0.0.1:5000", "https://github.com/istoo/myna")
 	if w.Code != http.StatusNoContent || w.Header().Get("Access-Control-Allow-Private-Network") != "true" {
 		t.Fatal("preflight:", w.Code, w.Header())
 	}

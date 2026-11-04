@@ -8,42 +8,42 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/codexcat"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/codexcat"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // codexSignInToken is Codex's ChatGPT sign-in as Codex keeps it, which
 // tests set.
 var codexSignInToken = provider.CodexSignInAsKept
 
-// codexOwnOffMagpie is the request a Codex on this computer sent to /v1
-// for one of its own models that magpie serves nothing for, put on the
+// codexOwnOffMyna is the request a Codex on this computer sent to /v1
+// for one of its own models that myna serves nothing for, put on the
 // ChatGPT backend's route (CodexPath) and signed with Codex's own ChatGPT
 // sign-in, as Codex's built-in provider would have sent it. A thread
-// keeps the provider it was started on: one started while magpie was
+// keeps the provider it was started on: one started while myna was
 // Codex's provider (its API, or the takeover of a used-up account) goes
 // on sending to /v1 after Codex is disconnected or set back to ChatGPT,
-// and an official model picked in it (gpt-6.1-sol) met "magpie knows no
-// model" whenever no ChatGPT account in magpie serves it (iuengei on
-// Discord). nil when that isn't the case: a model magpie serves, switched
+// and an official model picked in it (gpt-6.1-sol) met "myna knows no
+// model" whenever no ChatGPT account in myna serves it (iuengei on
+// Discord). nil when that isn't the case: a model myna serves, switched
 // off, disabled or a group; a model not OpenAI's; a request from another
 // computer or held by its gateway key. Codex's sign-in not to be had
-// (subscription accounts off in magpie, signed out, expired), why is what
+// (subscription accounts off in myna, signed out, expired), why is what
 // the request is answered instead of the bare 404: what sends it here and
 // what to do.
-func codexOwnOffMagpie(r *http.Request, body []byte, model string) (to *http.Request, why string) {
+func codexOwnOffMyna(r *http.Request, body []byte, model string) (to *http.Request, why string) {
 	if model == "" || strings.Contains(model, "/") || !local(r) {
 		return nil, ""
 	}
 	// one of Codex's hidden side calls on its own model that a setting
 	// sends elsewhere — a thread's title or description, a composer
-	// prediction — is magpie's to answer where it stands (codexTitlesTo
+	// prediction — is myna's to answer where it stands (codexTitlesTo
 	// and its siblings, further down handle), never to put on Codex's
 	// ChatGPT sign-in: with no sign-in to be had the request was answered
 	// 404 and Codex named the thread after its first message, whatever the
-	// settings said (#4590). With no setting magpie has nothing of its own
+	// settings said (#4590). With no setting myna has nothing of its own
 	// to answer it with, and it goes on the sign-in as the thread's turns do.
 	if codexSideSet(requestCallKind(r.Header, requestSessionMetadata(r.Header, body))) {
 		return nil, ""
@@ -83,9 +83,9 @@ func codexOwnOffMagpie(r *http.Request, body []byte, model string) (to *http.Req
 		if err == nil {
 			err = errors.New("Codex is signed out")
 		}
-		return nil, fmt.Sprintf("%q is one of Codex's own models, and this Codex thread was started while magpie was Codex's model provider, so it is still sent to magpie whatever Codex is set to now. "+
-			"No ChatGPT account in magpie serves it, and magpie can't send it on Codex's own ChatGPT sign-in: %v. "+
-			"Start a new thread in Codex for its own models, or add Codex's ChatGPT account in magpie (Providers)", model, err)
+		return nil, fmt.Sprintf("%q is one of Codex's own models, and this Codex thread was started while myna was Codex's model provider, so it is still sent to myna whatever Codex is set to now. "+
+			"No ChatGPT account in myna serves it, and myna can't send it on Codex's own ChatGPT sign-in: %v. "+
+			"Start a new thread in Codex for its own models, or add Codex's ChatGPT account in myna (Providers)", model, err)
 	}
 	r2 := r.Clone(r.Context())
 	r2.URL.Path = CodexPath + "/responses"
@@ -95,8 +95,8 @@ func codexOwnOffMagpie(r *http.Request, body []byte, model string) (to *http.Req
 	r2.ContentLength = int64(len(body))
 	r2.Header.Del("Content-Encoding")
 	r2.Header.Del("Content-Length")
-	// magpie's key and the header that names magpie Codex's provider are
-	// magpie's own, never sent on to OpenAI
+	// myna's key and the header that names myna Codex's provider are
+	// myna's own, never sent on to OpenAI
 	r2.Header.Del("X-Api-Key")
 	r2.Header.Del("X-Openai-Actor-Authorization")
 	r2.Header.Set("Authorization", "Bearer "+tok)
@@ -107,7 +107,7 @@ func codexOwnOffMagpie(r *http.Request, body []byte, model string) (to *http.Req
 }
 
 // codexOwnModel: model is one of Codex's own, as the ChatGPT backend last
-// listed it to Codex (models_cache.json, magpie's entries left out) or as
+// listed it to Codex (models_cache.json, myna's entries left out) or as
 // the catalog has it for OpenAI.
 func codexOwnModel(model string) bool {
 	if _, ok := codexcat.CacheEntries()[model]; ok {

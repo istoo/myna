@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/istoo/myna/internal/usage"
 )
 
 // busyThenAnswers holds its first request for hold and answers it 503, as
@@ -30,11 +30,11 @@ func (b *busyThenAnswers) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // #1532: a request answered on its second try, after the vendor held the
-// first for a long while and said 503, recorded that wait as magpie's own
-// time ("In magpie" 104 s) — what the detail showed the reporter as magpie
-// being slow. Magpie's own time is only its own; the try that failed first
+// first for a long while and said 503, recorded that wait as myna's own
+// time ("In myna" 104 s) — what the detail showed the reporter as myna
+// being slow. Myna's own time is only its own; the try that failed first
 // is told apart.
-func TestSentTellsMagpieFromEarlierTries(t *testing.T) {
+func TestSentTellsMynaFromEarlierTries(t *testing.T) {
 	fresh(t)
 	const hold = 1500 * time.Millisecond
 	up := &busyThenAnswers{hold: hold}
@@ -60,11 +60,11 @@ func TestSentTellsMagpieFromEarlierTries(t *testing.T) {
 		t.Fatalf("earlier tries %d of sent %d", r.Retried, r.Sent)
 	}
 	if r.Own < 0 || r.Own >= 500 || r.Queued != 0 || r.Own+r.Retried+r.Queued > r.Sent+1 {
-		t.Fatalf("magpie's own %d, earlier tries %d, queued %d, sent %d", r.Own, r.Retried, r.Queued, r.Sent)
+		t.Fatalf("myna's own %d, earlier tries %d, queued %d, sent %d", r.Own, r.Retried, r.Queued, r.Sent)
 	}
 }
 
-// What of Sent was whose: the try that failed first is not magpie's, nor
+// What of Sent was whose: the try that failed first is not myna's, nor
 // a wait for a slot, nor connecting and sending the body.
 func TestSplitSent(t *testing.T) {
 	start := time.Unix(1000, 0)

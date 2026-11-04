@@ -1,8 +1,8 @@
-// Package autostart opens magpie when the user logs in, in the tray with
+// Package autostart opens myna when the user logs in, in the tray with
 // no window, so the gateway every agent is pointed at is there from the
 // start. Whether it does is the system's own record — a launch agent on
 // the Mac, a Run value on Windows, an autostart entry on Linux — not a
-// setting of magpie's, so it can't say one thing while the system does
+// setting of myna's, so it can't say one thing while the system does
 // another.
 package autostart
 
@@ -13,14 +13,14 @@ import (
 	"strings"
 )
 
-// Arg is what magpie is started with at login: the tray, no window.
+// Arg is what myna is started with at login: the tray, no window.
 const Arg = "tray"
 
-// State is whether magpie opens at login, as the system will act on it.
+// State is whether myna opens at login, as the system will act on it.
 type State string
 
 const (
-	// Off: no record, so nothing opens magpie at login.
+	// Off: no record, so nothing opens myna at login.
 	Off State = "off"
 	// On: the record is there, and nothing the system says holds it back.
 	On State = "on"
@@ -35,7 +35,7 @@ const (
 // that NeedsAllowing is allowed again.
 const LoginItemsURL = "x-apple.systempreferences:com.apple.LoginItems-Settings.extension"
 
-// Enabled reports whether magpie opens at login. A system that can't be
+// Enabled reports whether myna opens at login. A system that can't be
 // asked, or that answers something else, is not taken for a no: the
 // record's own word stands (On).
 func Enabled() State {
@@ -48,8 +48,8 @@ func Enabled() State {
 	return On
 }
 
-// Set has magpie open at login, or not, as this copy of it; on Linux,
-// where a package's own autostart entry starts magpie, as that package's.
+// Set has myna open at login, or not, as this copy of it; on Linux,
+// where a package's own autostart entry starts myna, as that package's.
 func Set(on bool) error {
 	if !on {
 		return disable()
@@ -61,7 +61,7 @@ func Set(on bool) error {
 	return enable(exe)
 }
 
-// Refresh brings the system's record up to date when magpie opens at
+// Refresh brings the system's record up to date when myna opens at
 // login, for a record an older version wrote; it never turns it on.
 func Refresh() error { return refresh() }
 
@@ -82,12 +82,12 @@ func self() (string, error) {
 	// a Mac app opened where it was downloaded runs from a copy the system
 	// makes somewhere random, gone at the next login
 	if strings.Contains(exe, "/AppTranslocation/") {
-		return "", errors.New("move magpie to Applications first, then turn this on")
+		return "", errors.New("move myna to Applications first, then turn this on")
 	}
 	return exe, nil
 }
 
-// Repoint has the record that opens magpie at login open to instead, when
+// Repoint has the record that opens myna at login open to instead, when
 // it opens from: the Windows app installed itself from where it was
 // downloaded (update.Settle). Nothing else in it changes, so a record the
 // user switched off in Task Manager stays off, and none is made when there

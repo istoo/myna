@@ -34,7 +34,7 @@ func piAsk(t *testing.T, ctx context.Context, provider, model string, req map[st
 	b, _ := json.Marshal(req)
 	res, err := Fetch(ctx, FetchRequest{
 		Provider: provider, Model: model, NPM: "@ai-sdk/anthropic",
-		URL: "http://pi.magpie/v1/messages", Method: "POST",
+		URL: "http://pi.myna/v1/messages", Method: "POST",
 		Headers: map[string]string{"content-type": "application/json"},
 		Body:    b,
 	})
@@ -119,7 +119,7 @@ func (r piReply) seen(t *testing.T) map[string]any {
 // installed with it, its extensions load with their commands and tools
 // left aside, its providers list their models, sign in as pi signs in
 // (the OAuth login's questions asked one at a time, the code pasted
-// back; a key), renew through magpie, and answer Anthropic's Messages
+// back; a key), renew through myna, and answer Anthropic's Messages
 // from pi's stream: text, thinking with its signature, tool calls and
 // their thought signatures back, usage, and a failure's status.
 func TestPiPackage(t *testing.T) {
@@ -210,7 +210,7 @@ func TestPiPackage(t *testing.T) {
 		t.Fatalf("Finish = %+v, %v", got, err)
 	}
 	if b, err := os.ReadFile(filepath.Join(filepath.Dir(AuthPath()), "pi", "stolen")); err == nil {
-		t.Fatalf("a program the login started read magpie's messages: %s", b)
+		t.Fatalf("a program the login started read myna's messages: %s", b)
 	}
 	var saved map[string]map[string]any
 	b, _ := os.ReadFile(AuthPath())
@@ -315,7 +315,7 @@ func TestPiPackage(t *testing.T) {
 		t.Fatalf("message_delta = %v", md)
 	}
 	// and back: the signatures go with the turn (the call's kept by
-	// magpie, as tool_use has no field for it), the result named
+	// myna, as tool_use has no field for it), the result named
 	r = piAsk(t, ctx, "fakepi", "fp-think", map[string]any{"max_tokens": 100, "stream": false, "messages": []map[string]any{
 		{"role": "user", "content": "think, then use a tool"},
 		{"role": "assistant", "content": []map[string]any{
@@ -353,7 +353,7 @@ func TestPiPackage(t *testing.T) {
 		t.Fatalf("fakepi-key was handed %v", s)
 	}
 
-	// a sign-in about to expire is renewed by magpie, with pi's refresh,
+	// a sign-in about to expire is renewed by myna, with pi's refresh,
 	// and kept
 	b, _ = os.ReadFile(AuthPath())
 	var all map[string]map[string]any
@@ -479,7 +479,7 @@ func pinnedPiCache(now time.Time) string {
 	if os.Getuid() == 0 {
 		return ""
 	}
-	name := "magpie-test-bun-cache-" + strconv.Itoa(os.Getuid()) + "-"
+	name := "myna-test-bun-cache-" + strconv.Itoa(os.Getuid()) + "-"
 	n := now.Unix() / int64(pinnedPiCacheDays*24*time.Hour/time.Second)
 	old, _ := filepath.Glob(filepath.Join(os.TempDir(), name+"*"))
 	for _, o := range old {
@@ -556,7 +556,7 @@ func TestEnsurePi(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Setenv("MAGPIE_BUN", self) // never downloaded
+	t.Setenv("MYNA_BUN", self) // never downloaded
 	var ran [][]string
 	orig := bunCommand
 	bunCommand = func(ctx context.Context, bun, dir string, args ...string) *exec.Cmd {

@@ -59,7 +59,7 @@ function serve(lang, posts) {
 
 const strings = [
   "Compaction", "Codex compacts on this provider",
-  "Codex's compaction is asked of this provider as Codex sent it, and the summary it seals goes back to Codex unchanged. Off, magpie writes the summary. A conversation compacted this way continues only on this provider and account: another is refused with an error, never sent without the context.",
+  "Codex's compaction is asked of this provider as Codex sent it, and the summary it seals goes back to Codex unchanged. Off, myna writes the summary. A conversation compacted this way continues only on this provider and account: another is refused with an error, never sent without the context.",
 ];
 const words = {
   en: { tick: "Codex compacts on this provider", save: "Save" },
@@ -89,7 +89,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         const posts = [];
         await page.route("**/*", serve(lang, posts));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://myna.test/?view=providers");
         await page.locator(".row.provider", { hasText: name }).click();
         await unfold(page);
         await page.locator(".editor .bar").waitFor();

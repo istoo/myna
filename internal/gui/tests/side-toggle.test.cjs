@@ -68,7 +68,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           new MutationObserver(() => { if (document.body.classList.contains("side-nav")) window.sideSeen = true; }).observe(document.body, { attributes: true, attributeFilter: ["class"] });
         });
       });
-      await page.goto("http://magpie.test/");
+      await page.goto("http://myna.test/");
       await page.waitForSelector("#nav button.on");
       const mac = await page.evaluate(() => /^Mac/.test(navigator.platform));
       const keys = mac ? "⌃⌘S" : "Ctrl+Shift+S";
@@ -92,7 +92,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.equal(await btn.getAttribute("aria-pressed"), "false");
       assert.equal(await btn.locator(".st-pane").evaluate((p) => getComputedStyle(p).opacity), "0", "its pane empty");
       await headerFits(page);
-      assert.equal(await page.evaluate(() => localStorage.getItem("magpie.navLayout")), "top");
+      assert.equal(await page.evaluate(() => localStorage.getItem("myna.navLayout")), "top");
 
       // opened again: the header from the first frame, no sidebar on the way
       await page.reload();
@@ -116,7 +116,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await btn.click();
       await page.waitForFunction(() => document.body.classList.contains("side-nav"));
       await frame(page);
-      assert.equal(await page.evaluate(() => localStorage.getItem("magpie.navLayout")), "side");
+      assert.equal(await page.evaluate(() => localStorage.getItem("myna.navLayout")), "side");
       assert.equal(Math.round((await page.locator("#side").boundingBox()).width), 184, "a narrower sidebar");
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), "the window does not scroll sideways");
       const [tb, cr, ac] = await page.evaluate(() => ["#sideToggle", "#crumb", ".top .actions"].map((q) => document.querySelector(q).getBoundingClientRect().toJSON()));
@@ -129,10 +129,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // the shortcut trades them, and keeps what it gives
       await page.keyboard.press(mac ? "Control+Meta+KeyS" : "Control+Shift+KeyS");
       await page.waitForFunction(() => !document.body.classList.contains("side-nav"));
-      assert.equal(await page.evaluate(() => localStorage.getItem("magpie.navLayout")), "top");
+      assert.equal(await page.evaluate(() => localStorage.getItem("myna.navLayout")), "top");
       await page.keyboard.press(mac ? "Control+Meta+KeyS" : "Control+Shift+KeyS");
       await page.waitForFunction(() => document.body.classList.contains("side-nav"));
-      assert.equal(await page.evaluate(() => localStorage.getItem("magpie.navLayout")), "side");
+      assert.equal(await page.evaluate(() => localStorage.getItem("myna.navLayout")), "side");
       assert.ok(await page.locator("#side .side-scroll #nav").isVisible());
       assert.equal(await btn.getAttribute("title"), `${hide} (${keys})`);
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth));
@@ -146,7 +146,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
     // the button is in the one place whether the sidebar shows or not, as
     // Finder's and Notes' is: it hid the sidebar from the sidebar's top and
-    // came back elsewhere, after the magpie (ztf4080 on X: "收起按钮在左上角，
+    // came back elsewhere, after the myna (ztf4080 on X: "收起按钮在左上角，
     // 但是收起后展开按钮变了"). Each title bar, wide and narrow, every language
     // and the sidebar at its narrowest
     for (const [os, platform] of [["Mac", "MacIntel"], ["Windows", "Win32"], ["Linux", "Linux x86_64"]]) {
@@ -160,11 +160,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           page.on("pageerror", (e) => errors.push(e.message));
           await page.addInitScript(([p, w]) => {
             Object.defineProperty(Navigator.prototype, "platform", { get: () => p });
-            localStorage.setItem("magpie.navLayout", "side");
-            if (w) localStorage.setItem("magpie.sideWidth", String(w));
+            localStorage.setItem("myna.navLayout", "side");
+            if (w) localStorage.setItem("myna.sideWidth", String(w));
           }, [platform, sideW]);
           await page.route("**/*", serve(lang));
-          await page.goto("http://magpie.test/");
+          await page.goto("http://myna.test/");
           await page.waitForSelector("#nav button.on");
           await frame(page);
           const at = `${lang} ${width}${sideW ? ` sidebar ${sideW}` : ""}`;
@@ -172,7 +172,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const place = () => btn.evaluate((b) => { const r = b.getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; });
           assert.ok(await side(page), at);
           const shown = await place();
-          // the sidebar's top holds it and the magpie, nothing running over its edge
+          // the sidebar's top holds it and the myna, nothing running over its edge
           assert.ok(await btn.evaluate((b) => !!b.closest("#side .side-top")), `${at}: in the sidebar's top`);
           assert.ok(await page.evaluate(() => { const s = document.querySelector(".side-top"); return s.scrollWidth <= s.clientWidth; }), `${at}: the sidebar's top fits`);
           assert.ok(shown.x + shown.w <= (await page.locator("#side").boundingBox()).width, `${at}: inside the sidebar`);
@@ -196,7 +196,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve("en"));
-      await page.goto("http://magpie.test/");
+      await page.goto("http://myna.test/");
       await page.waitForSelector("#nav button.on");
       assert.ok(await page.evaluate(() => !!document.startViewTransition), "the webview has view transitions");
       // what plays, read as the button is clicked: the old drawn, the new laid out
@@ -253,7 +253,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         if (real) Document.prototype.startViewTransition = function (...a) { window.morphs++; return real.apply(this, a); };
       });
       await page.route("**/*", serve("en"));
-      await page.goto("http://magpie.test/");
+      await page.goto("http://myna.test/");
       await page.waitForSelector("#nav button.on");
       assert.ok(await page.evaluate(() => document.body.classList.contains("linux")));
       for (const want of [false, true, false]) {
@@ -284,7 +284,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         };
       });
       await page.route("**/*", serve("en"));
-      await page.goto("http://magpie.test/");
+      await page.goto("http://myna.test/");
       await page.waitForSelector("#nav button.on");
       const t0 = Date.now();
       await page.locator("#sideToggle").click();
@@ -305,7 +305,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const context = await browser.newContext({ viewport: { width: 1280, height: 760 }, reducedMotion: "reduce" });
       const page = await context.newPage();
       await page.route("**/*", serve("en"));
-      await page.goto("http://magpie.test/");
+      await page.goto("http://myna.test/");
       await page.waitForSelector("#nav button.on");
       await page.evaluate(() => { window.morphed = false; new MutationObserver(() => { if (document.documentElement.classList.contains("nav-morph")) window.morphed = true; }).observe(document.documentElement, { attributes: true }); });
       await page.locator("#sideToggle").click();

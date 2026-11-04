@@ -1,13 +1,13 @@
 package gateway
 
-// The native route: a provider's own API, reached through magpie
+// The native route: a provider's own API, reached through myna
 // (axelburks on Discord). /v1/images/generations and /v1/videos take
 // OpenAI's shape and pass on the vendor fields they don't read, but a
-// vendor's API grows faster than magpie maps it: Ark's image streams, its
+// vendor's API grows faster than myna maps it: Ark's image streams, its
 // task list and cancel, a field of a new model. A caller who wants all of
 // it asks
 //
-//	POST /v1/magpie/native/<provider>/<path>
+//	POST /v1/myna/native/<provider>/<path>
 //
 // and gets the vendor's answer as it came, its stream too. What it keeps
 // of the gateway:
@@ -16,7 +16,7 @@ package gateway
 //     loopback, a read-only key refused, corsGuard, the key's rate);
 //   - a key held to models, accounts or a spend limit is refused: the
 //     route can't say which model a task's poll or cancel is of, and
-//     magpie prices no answer it doesn't read, so it can't hold such a key
+//     myna prices no answer it doesn't read, so it can't hold such a key
 //     to them. Such a key uses the OpenAI routes;
 //   - only paths the vendor makes images and videos at (nativePaths), on
 //     the methods the vendor takes there: never its chat, whose routing,
@@ -29,7 +29,7 @@ package gateway
 //     uncounted in tokens, as a video's start is.
 //
 // Only Volcengine Ark is served so far: the one asked for, and the one
-// whose API magpie's own routes read. Another provider is told so.
+// whose API myna's own routes read. Another provider is told so.
 
 import (
 	"bytes"
@@ -40,13 +40,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/istoo/myna/internal/access"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/usage"
 )
 
 // NativePath is where a provider's own API is reached.
-const NativePath = "/v1/magpie/native/"
+const NativePath = "/v1/myna/native/"
 
 // nativePaths are the paths under an Ark key's base (/api/v3) the native
 // route passes on, and their methods: images, and video tasks (create,
@@ -85,21 +85,21 @@ func (s *Server) native(w http.ResponseWriter, r *http.Request) {
 		s.record(call)
 	}
 	if k := access.Caller(r.Context()); nativeHeld(k) {
-		fail(http.StatusForbidden, fmt.Sprintf("The gateway key %q is held to some models, accounts or a spend limit, which magpie can't hold a vendor's own API to: use /v1/images/generations and /v1/videos, which pass on the vendor's own fields too", k.KeyName))
+		fail(http.StatusForbidden, fmt.Sprintf("The gateway key %q is held to some models, accounts or a spend limit, which myna can't hold a vendor's own API to: use /v1/images/generations and /v1/videos, which pass on the vendor's own fields too", k.KeyName))
 		return
 	}
 	found, err := provider.Find(id)
 	if err != nil || !found.On() || found.DecideOnly() {
-		fail(http.StatusNotFound, fmt.Sprintf("magpie has no provider %q turned on", id))
+		fail(http.StatusNotFound, fmt.Sprintf("myna has no provider %q turned on", id))
 		return
 	}
 	p := *found
-	if p.IsRemoteMagpie() || !isArk(p) {
-		fail(http.StatusNotFound, fmt.Sprintf("%s's own API isn't passed on: magpie passes on Volcengine Ark's (a provider at ark.<region>.volces.com) so far. Use /v1/images/generations and /v1/videos", p.Name))
+	if p.IsRemoteMyna() || !isArk(p) {
+		fail(http.StatusNotFound, fmt.Sprintf("%s's own API isn't passed on: myna passes on Volcengine Ark's (a provider at ark.<region>.volces.com) so far. Use /v1/images/generations and /v1/videos", p.Name))
 		return
 	}
 	if !nativeArkPath(r.Method, path) {
-		fail(http.StatusNotFound, fmt.Sprintf("magpie passes on Ark's images and video tasks: POST images/generations, POST or GET contents/generations/tasks, GET or DELETE contents/generations/tasks/<id>; not %s %s", r.Method, path))
+		fail(http.StatusNotFound, fmt.Sprintf("myna passes on Ark's images and video tasks: POST images/generations, POST or GET contents/generations/tasks, GET or DELETE contents/generations/tasks/<id>; not %s %s", r.Method, path))
 		return
 	}
 	var body []byte

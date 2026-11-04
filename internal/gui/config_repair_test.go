@@ -12,7 +12,7 @@ import (
 )
 
 // YouWhat on Discord: ~/.config wasn't the user's (sudo had made it), so
-// adding a custom provider failed with "mkdir ~/.config/magpie: permission
+// adding a custom provider failed with "mkdir ~/.config/myna: permission
 // denied" and nothing said what to do. The failed save now names the
 // folder (config_blocked), /api/state names it for the window's Repair,
 // and Repair makes it writable again, after which the same save goes
@@ -63,8 +63,8 @@ func TestBlockedConfigIsRepairedInOneClick(t *testing.T) {
 	if code, body := call("POST", "/api/provider/save", add); code != 200 {
 		t.Fatalf("save after repair: %d %s", code, body)
 	}
-	if _, err := os.Stat(filepath.Join(dotConfig, "magpie", "providers.json")); err != nil {
-		t.Fatalf("the provider isn't in ~/.config/magpie, where every reader looks: %v", err)
+	if _, err := os.Stat(filepath.Join(dotConfig, "myna", "providers.json")); err != nil {
+		t.Fatalf("the provider isn't in ~/.config/myna, where every reader looks: %v", err)
 	}
 	_, body = call("GET", "/api/state", "")
 	s.ConfigBlocked = ""
@@ -76,8 +76,8 @@ func TestBlockedConfigIsRepairedInOneClick(t *testing.T) {
 
 // A folder another user owns (root, after sudo) can't be chmodded by the
 // user: Repair asks the system's password prompt to give that folder alone
-// back, not everything under it, while magpie's own folder is given back
-// whole. Magpie web's page, on another device, never shows the prompt.
+// back, not everything under it, while myna's own folder is given back
+// whole. Myna web's page, on another device, never shows the prompt.
 func TestRepairOfAnotherUsersFolderAsksAnAdmin(t *testing.T) {
 	if os.Getuid() == 0 {
 		t.Skip("root writes any folder")
@@ -106,12 +106,12 @@ func TestRepairOfAnotherUsersFolderAsksAnAdmin(t *testing.T) {
 	if len(scripts) != 1 || strings.Contains(scripts[0], "-R") || !strings.Contains(scripts[0], "'"+dotConfig+"'") {
 		t.Fatalf("scripts = %q; want one chown of %s alone, not -R over other apps' folders", scripts, dotConfig)
 	}
-	if _, err := os.Stat(filepath.Join(dotConfig, "magpie")); err != nil {
-		t.Fatalf("magpie's folder not made after repair: %v", err)
+	if _, err := os.Stat(filepath.Join(dotConfig, "myna")); err != nil {
+		t.Fatalf("myna's folder not made after repair: %v", err)
 	}
 
-	// magpie's own folder taken: given back whole
-	own := filepath.Join(dotConfig, "magpie")
+	// myna's own folder taken: given back whole
+	own := filepath.Join(dotConfig, "myna")
 	os.Chmod(own, 0o555)
 	t.Cleanup(func() { os.Chmod(own, 0o755) })
 	scripts = nil
@@ -120,10 +120,10 @@ func TestRepairOfAnotherUsersFolderAsksAnAdmin(t *testing.T) {
 		t.Fatal(err)
 	}
 	if len(scripts) != 1 || !strings.Contains(scripts[0], "chown -R ") {
-		t.Fatalf("scripts = %q; want magpie's own folder given back whole", scripts)
+		t.Fatalf("scripts = %q; want myna's own folder given back whole", scripts)
 	}
 
-	// magpie web: no prompt, the command to run instead
+	// myna web: no prompt, the command to run instead
 	os.Chmod(own, 0o555)
 	scripts = nil
 	err := repairConfig(false)

@@ -7,9 +7,9 @@ import (
 )
 
 // CodexThreadCwd is the folder Codex thread id runs in, as its newest
-// rollout's session_meta says; "" when no rollout of it is read. magpie's
+// rollout's session_meta says; "" when no rollout of it is read. myna's
 // MCP hub asks it for Codex, which says no roots (roots/list answers
-// none) but names its thread in each tool call's _meta, so magpie-image
+// none) but names its thread in each tool call's _meta, so myna-image
 // behind the hub still saves into the thread's project.
 func CodexThreadCwd(id string) string {
 	id = strings.TrimSpace(id)

@@ -1,6 +1,6 @@
-// A plugin declaring switches for its provider (auth.options, magpie's own
+// A plugin declaring switches for its provider (auth.options, myna's own
 // field, #2038) and reading them as they stand: its key prompt's check
-// answers with what input.magpie.options says, read when it is asked.
+// answers with what input.myna.options says, read when it is asked.
 export const Optco = async (input) => ({
   // its list goes by a switch, as WorkBuddy's "Free models only" does
   // (plugins#430): beta-model is listed only while beta is on
@@ -12,7 +12,7 @@ export const Optco = async (input) => ({
     id: "optco",
     async models(provider) {
       const out = { ...provider.models }
-      if (input.magpie?.option("optco", "beta")) out["beta-model"] = { ...out["base-model"], id: "beta-model", name: "Beta" }
+      if (input.myna?.option("optco", "beta")) out["beta-model"] = { ...out["base-model"], id: "beta-model", name: "Beta" }
       return out
     },
   },
@@ -33,7 +33,7 @@ export const Optco = async (input) => ({
       {
         type: "api",
         label: "API key",
-        prompts: [{ type: "text", key: "probe", message: "probe", validate: () => JSON.stringify([input.magpie?.options("optco"), input.magpie?.option("optco", "beta"), input.magpie?.option("optco", "nope")]) }],
+        prompts: [{ type: "text", key: "probe", message: "probe", validate: () => JSON.stringify([input.myna?.options("optco"), input.myna?.option("optco", "beta"), input.myna?.option("optco", "nope")]) }],
       },
     ],
   },

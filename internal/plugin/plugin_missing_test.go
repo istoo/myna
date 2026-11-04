@@ -12,11 +12,11 @@ import (
 	"time"
 )
 
-// With MAGPIE_FAKE_BUN_ONE set, the test binary stands in for a bun that
+// With MYNA_FAKE_BUN_ONE set, the test binary stands in for a bun that
 // can tell when another runs in the same folder at once: it holds a busy
 // file while it works, and fails when one is held already.
 func init() {
-	if os.Getenv("MAGPIE_FAKE_BUN_ONE") != "1" {
+	if os.Getenv("MYNA_FAKE_BUN_ONE") != "1" {
 		return
 	}
 	f, err := os.OpenFile("busy", os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0o644)
@@ -97,14 +97,14 @@ func TestBunCommandsOneAtATime(t *testing.T) {
 	if err := os.MkdirAll(Dir(), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(Dir(), "package.json"), []byte(`{"name":"magpie-plugins","private":true}`), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(Dir(), "package.json"), []byte(`{"name":"myna-plugins","private":true}`), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	orig := bunCommand
 	bunCommand = func(ctx context.Context, bun, dir string, args ...string) *exec.Cmd {
 		cmd := exec.CommandContext(ctx, self, args...)
 		cmd.Dir = dir
-		cmd.Env = append(os.Environ(), "MAGPIE_FAKE_BUN_ONE=1")
+		cmd.Env = append(os.Environ(), "MYNA_FAKE_BUN_ONE=1")
 		return cmd
 	}
 	t.Cleanup(func() { bunCommand = orig })

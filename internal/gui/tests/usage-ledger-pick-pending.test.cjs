@@ -45,7 +45,7 @@ function server(lang, held) {
       if (held.fail) return route.fulfill({ status: 500, body: "read failed" });
       return json(answer(q));
     }
-    if (url.pathname === "/api/usage") return json({ calls: 40, input: 40000, output: 4000, cost: 0.04, bucket: "day", series: [], agents: [], models: [], path: "~/.config/magpie/usage.jsonl" });
+    if (url.pathname === "/api/usage") return json({ calls: 40, input: 40000, output: 4000, cost: 0.04, bucket: "day", series: [], agents: [], models: [], path: "~/.config/myna/usage.jsonl" });
     if (url.pathname === "/api/sessions") return json({ sessions: [], dirs: [] });
     if (url.pathname === "/api/providers") return json({ providers: [], presets: [], excluded: [], models: [], gateway: { running: false } });
     if (url.pathname === "/api/groups") return json({ groups: [], models: [] });
@@ -74,7 +74,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.setDefaultNavigationTimeout(60000);
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", server(lang, held));
-      await page.goto("http://magpie.test/");
+      await page.goto("http://myna.test/");
       await page.locator('[data-view="usage"]').first().click();
       await page.locator(":is(#usageTab .opt, .nav-s):visible").nth(1).click();
       await page.locator("#ledWrap .led tbody tr").first().waitFor();

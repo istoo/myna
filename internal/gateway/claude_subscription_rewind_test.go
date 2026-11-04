@@ -12,8 +12,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // rewindClaude stands in for Claude Code: it logs its arguments and each

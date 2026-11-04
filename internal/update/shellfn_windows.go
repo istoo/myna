@@ -8,7 +8,7 @@ import (
 	"golang.org/x/sys/windows"
 	"golang.org/x/sys/windows/registry"
 
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/istoo/myna/internal/proc"
 )
 
 // shellProfiles are PowerShell 7's and Windows PowerShell's profiles, each

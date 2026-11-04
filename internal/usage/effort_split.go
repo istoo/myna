@@ -9,7 +9,7 @@ import (
 	"slices"
 	"time"
 
-	"github.com/yetone/magpie/internal/sessions"
+	"github.com/istoo/myna/internal/sessions"
 )
 
 // Codex's effort before the last few days is kept as the heatmap's days

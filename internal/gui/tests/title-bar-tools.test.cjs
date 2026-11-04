@@ -16,13 +16,13 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_GUI_ASSETS || path.join(__dirname, "../assets"));
+const assets = path.resolve(process.env.MYNA_GUI_ASSETS || path.join(__dirname, "../assets"));
 const HOME = "/Users/tester";
 const agent = (id, name, icon) => ({ id, name, icon, skills: `${HOME}/.${id}/skills`, mcp: `${HOME}/.${id}/mcp.json` });
 
 function serve(lang) {
   const view = {
-    dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+    dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
     agents: [agent("claude", "Claude Code", "claudecode-color")],
     instructions: { agents: [], sets: [] },
     servers: [{ name: "filesystem", transport: "stdio", command: "npx", args: ["-y", "fs"], agents: ["claude"] }],
@@ -75,8 +75,8 @@ function bar(head) {
 }
 
 const pages = [
-  ...["instructions", "mcp", "skills", "hooks", "subagents", "rtk"].map((tab) => ({ name: "library " + tab, url: "?view=library", head: "#view-library .lib-head", init: ["magpie.libTab", tab] })),
-  ...["builtin", "discover", "installed"].map((tab) => ({ name: "plugins " + tab, url: "?view=plugins", head: "#view-plugins .pm-head", init: ["magpie.pluginTab", tab] })),
+  ...["instructions", "mcp", "skills", "hooks", "subagents", "rtk"].map((tab) => ({ name: "library " + tab, url: "?view=library", head: "#view-library .lib-head", init: ["myna.libTab", tab] })),
+  ...["builtin", "discover", "installed"].map((tab) => ({ name: "plugins " + tab, url: "?view=plugins", head: "#view-plugins .pm-head", init: ["myna.pluginTab", tab] })),
   { name: "settings", url: "?view=settings", head: "#view-settings .set-head" },
 ];
 
@@ -100,11 +100,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           errors.push(`${width}px ${on}: ${e.stack}`);
         });
         await page.route("**/*", serve(lang));
-        await page.addInitScript(() => { localStorage.setItem("magpie.navLayout", "side"); });
+        await page.addInitScript(() => { localStorage.setItem("myna.navLayout", "side"); });
         for (const p of pages) {
           on = p.name;
           if (p.init) await page.evaluate(([k, v]) => localStorage.setItem(k, v), p.init).catch(() => {});
-          await page.goto("http://magpie.test/" + p.url);
+          await page.goto("http://myna.test/" + p.url);
           if (p.init) { await page.evaluate(([k, v]) => localStorage.setItem(k, v), p.init); await page.reload(); }
           await page.locator(p.head).waitFor();
           await page.locator("#crumb b").waitFor();

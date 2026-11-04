@@ -4,7 +4,7 @@
 // the page was told of — an allowance's user, a route's account — is
 // blurred in its row, a sentence and a tooltip, on Usage and Routing; a
 // card's own name ("ZCode" signed in with no name of its own, WorkBuddy)
-// stays, as do magpie's own labels for a nameless account ("API key") and
+// stays, as do myna's own labels for a nameless account ("API key") and
 // a name inside a longer word. The tray panel follows the
 // window's setting, as it is turned. English and Chinese; no backend, the
 // API is faked here. A one-letter name (Shinji_Zl's WorkBuddy account 他)
@@ -23,7 +23,7 @@ const quotas = () => [
   { provider: "zcode", name: "ZCode", icon: "zcode", plan: "Start", user: "ZCode", windows: [{ name: "5 hours", used: 10 }] },
   { provider: "qoder", name: "Qoder", icon: "qoder", plan: "Pro", user: "Lee", windows: [{ name: "Credits", used: 3 }] },
   { provider: "codex", name: "Codex", icon: "openai", plan: "Plus", user: "dev.one@example.com", windows: [{ name: "5 hours", used: 20 }] },
-  // a plugin's accounts with no name, as magpie labels them (pluginLabels)
+  // a plugin's accounts with no name, as myna labels them (pluginLabels)
   { provider: "kiro", name: "Kiro", icon: "kiro-color", plan: "Pro", user: "API key", windows: [{ name: "Credits", used: 2 }] },
   { provider: "kiro", name: "Kiro", icon: "kiro-color", plan: "Pro", user: "Signed in (2)", windows: [{ name: "Credits", used: 4 }] },
 ];
@@ -72,7 +72,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       };
       // a new context's storage is empty: no reload to clear it, which
       // would cancel the page's first reads, each a page error in WebKit (#1350)
-      const page = await open("http://magpie.test/?view=usage");
+      const page = await open("http://myna.test/?view=usage");
       await page.waitForSelector(".subscription-account .user");
       const btn = page.locator("#usageMask");
       assert.equal((await btn.textContent()).trim(), w.hide);
@@ -109,7 +109,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.ok(got.users.some((u) => u.raw === null && u.text === "ZCode"), "ZCode's own name stays");
       assert.ok(got.heads.includes("WorkBuddy") && got.heads.includes("ZCode"), got.heads.join());
       assert.deepEqual(got.sampleRaws, ["李雷", "Lee", "他"]);
-      // magpie's labels for a plugin's nameless accounts are words, kept
+      // myna's labels for a plugin's nameless accounts are words, kept
       // (outloudvi: Kiro's summary "…or an API key" was blurred)
       assert.match(got.sample, /^\S+ checked in · Sleeper \S+ · ZCode · or an API key · Signed in · 其他 · \S+$/);
       assert.equal(got.sampleTitle, "WorkBuddy · •••••••••••");
@@ -126,7 +126,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.match(await page.locator("#route").textContent(), /^\S+ answered; team key waited$/);
 
       // the tray panel follows the window's setting, as it is turned
-      const panel = await open("http://magpie.test/?mode=panel");
+      const panel = await open("http://myna.test/?mode=panel");
       await panel.evaluate(() => setPanelTab("usage"));
       await panel.waitForFunction(() => [...document.querySelectorAll("#panelQuota .pq-user .pii")].some((e) => e.dataset.raw === "李雷"));
       const pq = await panel.evaluate(() => [...document.querySelectorAll("#panelQuota .pq-card")].map((c) => ({ text: c.querySelector(".pq-user").textContent, title: c.title })));
@@ -136,7 +136,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await panel.evaluate(() => {
         const li = document.createElement("li");
         li.id = "pickRow";
-        li.textContent = "GPT-6-Astra via magpie dev.one@example.com";
+        li.textContent = "GPT-6-Astra via myna dev.one@example.com";
         li.title = "dev.one@example.com";
         document.querySelector("#pop #list").append(li);
       });
@@ -147,7 +147,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.equal((await btn.textContent()).trim(), w.hide);
       await panel.waitForFunction(() => !document.querySelector("#panelQuota .pii"));
       await panel.waitForFunction(() => !document.querySelector("#pickRow .pii"));
-      assert.equal(await panel.locator("#pickRow").textContent(), "GPT-6-Astra via magpie dev.one@example.com");
+      assert.equal(await panel.locator("#pickRow").textContent(), "GPT-6-Astra via myna dev.one@example.com");
       assert.ok(await panel.evaluate(() => [...document.querySelectorAll("#panelQuota .pq-user")].some((e) => e.textContent === "李雷")));
       // and back as they were in the window
       assert.equal(await page.locator("#sample").textContent(), "李雷 checked in · Sleeper Lee · ZCode · or an API key · Signed in · 其他 · 他");

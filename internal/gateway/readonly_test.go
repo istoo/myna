@@ -10,8 +10,8 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/access"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // readOnlyRefused is every route a read-only key is refused, by the pattern
@@ -24,14 +24,14 @@ var readOnlyRefused = []string{
 	"GET /api/hello", "GET /api/version", "GET /api/tags",
 	"POST /api/show", "POST /api/chat", "POST /api/generate",
 	// writes, another key's routes, the whole trace, debugging
-	"POST /v1/magpie/usage/requests", "POST " + provider.RemoteRefreshPath,
+	"POST /v1/myna/usage/requests", "POST " + provider.RemoteRefreshPath,
 	// a Codex reset, which can't be undone (#3850)
 	"POST " + provider.RemoteCodexResetPath,
-	"GET /v1/magpie/route", "GET /v1/magpie/trace",
+	"GET /v1/myna/route", "GET /v1/myna/trace",
 	"GET " + ClaudeRunsPath, "GET " + HeapPath, "GET " + CPUPath, "GET " + GoroutinesPath,
 	"POST " + RestartPath,
 	"POST " + KeysPath, "GET " + KeysPath, "DELETE " + KeysPath + "/{id}", "POST " + OIDCKeysPath,
-	"GET /v1/magpie/omarchy", "OPTIONS /v1/magpie/omarchy",
+	"GET /v1/myna/omarchy", "OPTIONS /v1/myna/omarchy",
 	// models, a WebSocket's upgrade and count_tokens among them
 	"POST /v1/chat/completions", "POST /chat/completions",
 	"POST /v1/responses", "POST /responses", "GET /v1/responses", "GET /responses",
@@ -77,7 +77,7 @@ func requestsFor(pattern string) [][2]string {
 	return out
 }
 
-// Steven on Discord: an ESP32 desk display polls magpie's quotas and usage
+// Steven on Discord: an ESP32 desk display polls myna's quotas and usage
 // on his network every 15s and sends no model request, yet the key it
 // keeps in flash had to be one that could spend every account. A
 // read-only key is answered the stats alone: every other route the
@@ -88,7 +88,7 @@ func requestsFor(pattern string) [][2]string {
 // account's quotas, and none of it is a key's secret.
 func TestReadOnlyKeyEveryRoute(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("MYNA_ADDR", "")
 	var reached atomic.Int32
 	up := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		reached.Add(1)
@@ -178,11 +178,11 @@ func TestReadOnlyKeyEveryRoute(t *testing.T) {
 			}
 		}
 		// the usage summary, which a held key isn't told, and the quotas
-		c, b := do("GET", "/v1/magpie/usage", from, display)
+		c, b := do("GET", "/v1/myna/usage", from, display)
 		if c != 200 || !strings.Contains(b, "Laptop") {
 			t.Errorf("read-only key from %s: the usage summary: %d %.300s", from, c, b)
 		}
-		if c, b := do("GET", "/v1/magpie/quotas", from, display); c != 200 || strings.Contains(b, provider.KeyHeldCode) {
+		if c, b := do("GET", "/v1/myna/quotas", from, display); c != 200 || strings.Contains(b, provider.KeyHeldCode) {
 			t.Errorf("read-only key from %s: the quotas: %d %.300s", from, c, b)
 		}
 	}

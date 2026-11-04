@@ -4,7 +4,7 @@
 # gateway. The page refreshes what it shows in place; UI files under
 # internal/gui/assets reload the page as before. A build that fails leaves
 # the running backend alone. A change to the shell's own code
-# (internal/gui/app.go, dev_on.go) restarts the windows too. Quitting magpie
+# (internal/gui/app.go, dev_on.go) restarts the windows too. Quitting myna
 # from the tray, or Ctrl-C, ends it all.
 #
 # A restart is a handover, so an agent streaming through the dev gateway
@@ -13,8 +13,8 @@
 # has and exit. A backend that builds but never comes up leaves the old one
 # serving.
 #
-# make passes MAGPIE_ADDR, MAGPIE_DEV_UI, MAGPIE_DEV_BACKEND and
-# MAGPIE_DEV_CONTROL.
+# make passes MYNA_ADDR, MYNA_DEV_UI, MYNA_DEV_BACKEND and
+# MYNA_DEV_CONTROL.
 set -u
 cd "$(dirname "$0")/.." || exit 1
 
@@ -22,7 +22,7 @@ shell='' backend='' watch='' fsw='' draining=''
 
 stop() { [ -n "$1" ] && kill "$1" 2>/dev/null && wait "$1" 2>/dev/null; }
 
-start_backend() { MAGPIE_DEV_ROLE=backend ./magpie-dev-backend app & backend=$!; }
+start_backend() { MYNA_DEV_ROLE=backend ./myna-dev-backend app & backend=$!; }
 
 # listening waits (up to 30s) for backend $1 to listen on the gateway's
 # port and the backend's; no, once it has exited
@@ -30,7 +30,7 @@ listening() {
 	local i
 	for ((i = 0; i < 150; i++)); do
 		kill -0 "$1" 2>/dev/null || return 1
-		listens "$1" "${MAGPIE_ADDR##*:}" && listens "$1" "${MAGPIE_DEV_BACKEND##*:}" && return 0
+		listens "$1" "${MYNA_ADDR##*:}" && listens "$1" "${MYNA_DEV_BACKEND##*:}" && return 0
 		sleep 0.2
 	done
 	return 1
@@ -54,7 +54,7 @@ handover() {
 
 # the shell, and a watcher that ends everything once it is quit
 start_shell() {
-	MAGPIE_DEV_ROLE=shell ./magpie-dev app & shell=$!
+	MYNA_DEV_ROLE=shell ./myna-dev app & shell=$!
 	{ while kill -0 "$shell" 2>/dev/null; do sleep 1; done; kill -TERM $$; } & watch=$!
 }
 
@@ -80,15 +80,15 @@ relevant() {
 }
 
 # builds to a new file and moves it in, never over a running binary
-build() { go build -tags dev -o magpie-dev.new . && cp magpie-dev.new magpie-dev-backend.new && mv magpie-dev-backend.new magpie-dev-backend; }
+build() { go build -tags dev -o myna-dev.new . && cp myna-dev.new myna-dev-backend.new && mv myna-dev-backend.new myna-dev-backend; }
 
 build || exit 1
-mv magpie-dev.new magpie-dev
+mv myna-dev.new myna-dev
 start_backend
 start_shell
-exec 3< <(fswatch -r -e '/\.git/' -e '/site/' -e '/magpie-dev' "$PWD")
+exec 3< <(fswatch -r -e '/\.git/' -e '/site/' -e '/myna-dev' "$PWD")
 fsw=$!
-echo "  magpie-dev · UI from internal/gui/assets, reload on save · Go changes restart the backend only · gateway $MAGPIE_ADDR"
+echo "  myna-dev · UI from internal/gui/assets, reload on save · Go changes restart the backend only · gateway $MYNA_ADDR"
 
 while read -r -u 3 path; do
 	relevant "$path" || continue
@@ -105,9 +105,9 @@ while read -r -u 3 path; do
 	*/internal/gui/app.go* | */internal/gui/dev_on.go*)
 		echo "  window code changed · reopening the windows"
 		stop_shell
-		mv magpie-dev.new magpie-dev
+		mv myna-dev.new myna-dev
 		start_shell
 		;;
-	*) rm -f magpie-dev.new ;;
+	*) rm -f myna-dev.new ;;
 	esac
 done

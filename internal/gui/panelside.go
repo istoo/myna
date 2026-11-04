@@ -37,10 +37,10 @@ func panelOpenAt(goos string, panel, screen panelRect, known bool) string {
 	return "head"
 }
 
-// panelOpenAtJS tells the panel's page the side (app.js magpiePanelOpenAt).
+// panelOpenAtJS tells the panel's page the side (app.js mynaPanelOpenAt).
 func panelOpenAtJS(side string) string {
 	if side != "foot" {
 		side = "head"
 	}
-	return `window.magpiePanelOpenAt && window.magpiePanelOpenAt("` + side + `")`
+	return `window.mynaPanelOpenAt && window.mynaPanelOpenAt("` + side + `")`
 }

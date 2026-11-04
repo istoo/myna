@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/myna/internal/usage"
 )
 
 // The Usage page's clear on a model's row, and the one for all usage

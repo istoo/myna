@@ -11,15 +11,15 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // Settings' SearchAll (cybercaius on Discord: "能否强制支持联网搜索的供应商
 // 模型走代搜 API"): a provider that searches the web by itself is sent the
-// client's web_search as sent while it is off; on, magpie's search APIs
+// client's web_search as sent while it is off; on, myna's search APIs
 // answer it and the provider is sent no search tool of its own. With no
-// search magpie can run, the provider keeps its own: the client's search
+// search myna can run, the provider keeps its own: the client's search
 // isn't lost.
 func TestSearchAllTakesTheSearchFromAProviderThatSearches(t *testing.T) {
 	var mu sync.Mutex
@@ -36,7 +36,7 @@ func TestSearchAllTakesTheSearchFromAProviderThatSearches(t *testing.T) {
 		got = append(got, string(q["stream"])+" "+string(q["tools"]))
 		mu.Unlock()
 		if string(q["stream"]) == "true" && strings.Contains(string(q["tools"]), "input_schema") && !strings.Contains(string(b), "tool_result") {
-			// magpie's own web_search tool: the model calls it
+			// myna's own web_search tool: the model calls it
 			w.Header().Set("Content-Type", "text/event-stream")
 			io.WriteString(w, sse(`event: message_start`+"\n"+`data: {"type":"message_start","message":{"id":"m","type":"message","role":"assistant","model":"claude-haiku-4-5","content":[],"usage":{"input_tokens":5}}}`,
 				`event: content_block_start`+"\n"+`data: {"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"toolu_1","name":"web_search","input":{}}}`,
@@ -109,11 +109,11 @@ func TestSearchAllTakesTheSearchFromAProviderThatSearches(t *testing.T) {
 		}
 	}
 
-	// on, but magpie can't search: the provider keeps its own, relayed as
+	// on, but myna can't search: the provider keeps its own, relayed as
 	// sent (not built again, which streams)
 	all(true)
 	if n, tools := ask(); n != 0 || !strings.HasPrefix(tools, "false ") || !strings.Contains(tools, "web_search_20250305") {
-		t.Fatalf("no search of magpie's: %d asks, provider sent %s", n, tools)
+		t.Fatalf("no search of myna's: %d asks, provider sent %s", n, tools)
 	}
 
 	forgetSearchKeys()
@@ -129,7 +129,7 @@ func TestSearchAllTakesTheSearchFromAProviderThatSearches(t *testing.T) {
 	if n, tools := ask(); n == 0 || strings.Contains(tools, "web_search_20250305") {
 		t.Fatalf("on: %d search API asks, provider sent %s", n, tools)
 	}
-	if !magpieSearches(context.Background(), p) || magpieSearches(context.WithValue(context.Background(), searchingKey{}, true), p) {
-		t.Error("magpie's own searcher request lost the provider's search, or a client's kept it")
+	if !mynaSearches(context.Background(), p) || mynaSearches(context.WithValue(context.Background(), searchingKey{}, true), p) {
+		t.Error("myna's own searcher request lost the provider's search, or a client's kept it")
 	}
 }

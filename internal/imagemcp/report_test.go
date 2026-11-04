@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/istoo/myna/internal/gateway"
 )
 
 // reportGW is gw that keeps the tool calls the server reports.
@@ -52,7 +52,7 @@ func (g *reportGW) reported(n int) []string {
 	return nil
 }
 
-// Each tool call the Magpie Image server answers is reported to the
+// Each tool call the Myna Image server answers is reported to the
 // gateway (MCPCalledMethod), for its row in the request log: the tool,
 // how long it took, the model the gateway named, and never the prompt.
 func TestToolCallsAreReported(t *testing.T) {

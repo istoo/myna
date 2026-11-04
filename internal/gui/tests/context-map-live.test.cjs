@@ -75,8 +75,8 @@ async function open(browser, lang, width, reduced) {
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", serve(lang));
-  await page.addInitScript(() => { try { localStorage.clear(); localStorage.setItem("magpie.usageTab", "context"); } catch {} });
-  await page.goto("http://magpie.test/?view=usage");
+  await page.addInitScript(() => { try { localStorage.clear(); localStorage.setItem("myna.usageTab", "context"); } catch {} });
+  await page.goto("http://myna.test/?view=usage");
   const row = page.locator(".ctx-sess-row", { hasText: "Fix checkout" });
   await row.waitFor();
   await row.click();

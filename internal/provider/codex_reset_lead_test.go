@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // setResetLead saves the user's lead, in minutes, in a sandbox HOME.

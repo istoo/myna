@@ -11,10 +11,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/sessions"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/myna/internal/usage"
 )
 
 func TestGatewayConversationCapture(t *testing.T) {
@@ -78,7 +78,7 @@ func TestGatewayConversationCodexDirectRelay(t *testing.T) {
 
 // Text is recorded only under a session the client named, so every recorded
 // conversation is one the Sessions page lists and can open. A request with no
-// session is not recorded at all, and magpie makes up no id for it (#1355).
+// session is not recorded at all, and myna makes up no id for it (#1355).
 func TestGatewayConversationNeedsTheClientsSession(t *testing.T) {
 	fresh(t)
 	serveOn(t, "fake", "k", []string{"m1"}, archiveVendor{})

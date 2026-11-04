@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/myna/internal/settings"
 )
 
 func TestRoutingEffectiveCosts(t *testing.T) {

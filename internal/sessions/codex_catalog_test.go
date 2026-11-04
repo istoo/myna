@@ -141,13 +141,13 @@ func TestDeleteForgetsCodexAppCatalog(t *testing.T) {
 	}
 }
 
-// A conversation deleted before magpie forgot catalog rows is taken out
+// A conversation deleted before myna forgot catalog rows is taken out
 // of the app's list when the Sessions page is next read, and Restore
 // still brings it back. The app's non-prod build's codex-dev.db counts.
 func TestTidyCodexCatalogForgetsEarlierDeletes(t *testing.T) {
 	_, codex := manageSetup(t)
 	cxMakeState(t, codex)
-	tr, err := Delete("codex", mgCX) // no catalog yet: as an older magpie did
+	tr, err := Delete("codex", mgCX) // no catalog yet: as an older myna did
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/myna/internal/usage"
 )
 
 // codexTitleRequest is a title request as Codex's TUI sends one on its own
@@ -62,7 +62,7 @@ func outputText(t *testing.T, body string) (string, int) {
 
 // Codex's title requests go where Settings says (#705): as they came to
 // Codex's ChatGPT sign-in by default; turned off, answered here with no
-// title and sent nowhere; or to a model of magpie's, its plain answer
+// title and sent nowhere; or to a model of myna's, its plain answer
 // handed back as the {"title": …} Codex reads. Each stays a title request
 // in the Usage and Routing views.
 func TestCodexTitlesSetting(t *testing.T) {
@@ -91,7 +91,7 @@ func TestCodexTitlesSetting(t *testing.T) {
 	s := New()
 	rec := codexTitleRequest(t, s, "")
 	if text, _ := outputText(t, rec.Body.String()); chatgptCalls != 1 || f.calls != 0 || text != `{"title":"From ChatGPT"}` {
-		t.Fatalf("default: chatgpt %d, magpie model %d, %q", chatgptCalls, f.calls, text)
+		t.Fatalf("default: chatgpt %d, myna model %d, %q", chatgptCalls, f.calls, text)
 	}
 
 	// off: nothing goes out, a finished reply with no title in it
@@ -100,22 +100,22 @@ func TestCodexTitlesSetting(t *testing.T) {
 		rec = codexTitleRequest(t, s, sub)
 		text, n := outputText(t, rec.Body.String())
 		if rec.Code != 200 || n != 0 || text != "" || chatgptCalls != 1 || f.calls != 0 {
-			t.Fatalf("off (%q): %d %q, %d items, chatgpt %d, magpie model %d", sub, rec.Code, rec.Body.String(), n, chatgptCalls, f.calls)
+			t.Fatalf("off (%q): %d %q, %d items, chatgpt %d, myna model %d", sub, rec.Code, rec.Body.String(), n, chatgptCalls, f.calls)
 		}
 	}
 
-	// a model of magpie's: it writes the title, in the shape Codex reads
+	// a model of myna's: it writes the title, in the shape Codex reads
 	save("fake/m1")
 	rec = codexTitleRequest(t, s, "thread_title")
 	if text, _ := outputText(t, rec.Body.String()); rec.Code != 200 || text != `{"title":"Fix login bug"}` || f.calls != 1 || chatgptCalls != 1 {
-		t.Fatalf("routed: %d %q, magpie model %d, chatgpt %d", rec.Code, rec.Body.String(), f.calls, chatgptCalls)
+		t.Fatalf("routed: %d %q, myna model %d, chatgpt %d", rec.Code, rec.Body.String(), f.calls, chatgptCalls)
 	}
 	var sent struct {
 		Model string `json:"model"`
 	}
 	json.Unmarshal(f.got, &sent)
 	if sent.Model != "m1" {
-		t.Errorf("the magpie model was asked for %q", sent.Model)
+		t.Errorf("the myna model was asked for %q", sent.Model)
 	}
 
 	// a turn of the conversation is not a title: it goes as before
@@ -124,24 +124,24 @@ func TestCodexTitlesSetting(t *testing.T) {
 	req.Header.Set("Authorization", "Bearer chatgpt-token")
 	s.Handler().ServeHTTP(rec, req)
 	if chatgptCalls != 2 || f.calls != 1 {
-		t.Errorf("a plain turn: chatgpt %d, magpie model %d", chatgptCalls, f.calls)
+		t.Errorf("a plain turn: chatgpt %d, myna model %d", chatgptCalls, f.calls)
 	}
 
 	// every title request is in the ledger as one: ChatGPT's, the three
-	// answered here, the magpie model's
+	// answered here, the myna model's
 	var kinds []string
 	for _, u := range usage.Load(time.Time{}) {
 		kinds = append(kinds, u.Provider+":"+u.Kind)
-		if u.Provider == "magpie" && (!u.IsRejected() || u.Status != 200) {
+		if u.Provider == "myna" && (!u.IsRejected() || u.Status != 200) {
 			t.Errorf("an answered-here title %+v", u)
 		}
 		// and says where the setting is: Codex's row on the Agents page
 		// since f1e4516d, not Settings (#3425)
-		if u.Provider == "magpie" && !strings.Contains(u.Error, "in Codex's settings on magpie's Agents page") {
+		if u.Provider == "myna" && !strings.Contains(u.Error, "in Codex's settings on myna's Agents page") {
 			t.Errorf("an answered-here title says %q", u.Error)
 		}
 	}
-	want := "openai:thread_title magpie:thread_title magpie:thread_title magpie:thread_title_reconsideration fake:thread_title openai:"
+	want := "openai:thread_title myna:thread_title myna:thread_title myna:thread_title_reconsideration fake:thread_title openai:"
 	if got := strings.Join(kinds, " "); got != want {
 		t.Errorf("ledger %s\nwant   %s", got, want)
 	}
@@ -158,9 +158,9 @@ func TestCodexTitlesSetting(t *testing.T) {
 }
 
 // codexProviderTitle is a title request as Codex's TUI sends one with
-// magpie as its model provider (model_provider = "magpie", #743): to
-// magpie's own /v1/responses, on the conversation's model, a magpie id —
-// or, with backend, to the ChatGPT backend path on that magpie model.
+// myna as its model provider (model_provider = "myna", #743): to
+// myna's own /v1/responses, on the conversation's model, a myna id —
+// or, with backend, to the ChatGPT backend path on that myna model.
 func codexProviderTitle(t *testing.T, s *Server, backend bool) *httptest.ResponseRecorder {
 	t.Helper()
 	body := `{"model":"fake/m1","stream":true,"reasoning":{"effort":"low"},"input":[{"type":"message","role":"user","content":[{"type":"input_text","text":"Generate a concise title. User prompt:\nfix the login bug"}]}],` +
@@ -177,14 +177,14 @@ func codexProviderTitle(t *testing.T, s *Server, backend bool) *httptest.Respons
 	return rec
 }
 
-// A title Codex asks one of magpie's models for is one it can read
-// (#743): with magpie as Codex's provider the request comes to /v1, where
+// A title Codex asks one of myna's models for is one it can read
+// (#743): with myna as Codex's provider the request comes to /v1, where
 // the Codex titles setting is heeded too, and with no model set there the
 // conversation's model's plain answer — a Chat model is never shown the
 // schema — is handed back as {"title": …}, as it is on the ChatGPT path.
 // An answer with no title in it is in the Routing and Usage views as the
 // failure it is to Codex.
-func TestCodexTitleOnMagpieProvider(t *testing.T) {
+func TestCodexTitleOnMynaProvider(t *testing.T) {
 	answer := "Fix login bug"
 	f := &fake{t: t}
 	setup(t, provider.Chat, f)
@@ -332,30 +332,30 @@ func TestCodexDescriptionsSetting(t *testing.T) {
 	s := New()
 	rec := codexDescriptionRequest(t, s)
 	if text, _ := outputText(t, rec.Body.String()); chatgptCalls != 1 || f.calls != 0 || text != `{"description":"From ChatGPT"}` {
-		t.Fatalf("default: chatgpt %d, magpie model %d, %q", chatgptCalls, f.calls, text)
+		t.Fatalf("default: chatgpt %d, myna model %d, %q", chatgptCalls, f.calls, text)
 	}
 
 	save("fake/m1")
 	rec = codexDescriptionRequest(t, s)
 	if text, _ := outputText(t, rec.Body.String()); rec.Code != 200 || text != `{"description":"Reviewed the routing change and verified it"}` || f.calls != 1 || chatgptCalls != 1 {
-		t.Fatalf("routed: %d %q, magpie model %d, chatgpt %d", rec.Code, rec.Body.String(), f.calls, chatgptCalls)
+		t.Fatalf("routed: %d %q, myna model %d, chatgpt %d", rec.Code, rec.Body.String(), f.calls, chatgptCalls)
 	}
 	var sent struct {
 		Model string `json:"model"`
 	}
 	json.Unmarshal(f.got, &sent)
 	if sent.Model != "m1" {
-		t.Errorf("the magpie model was asked for %q", sent.Model)
+		t.Errorf("the myna model was asked for %q", sent.Model)
 	}
 
 	// off (cybercaius on Discord): nothing goes out, on the ChatGPT
-	// backend's path or magpie's own /v1, and Codex gets a finished reply
+	// backend's path or myna's own /v1, and Codex gets a finished reply
 	// with no description in it, which it reads as none, as titles' Off
 	save("off")
 	rec = codexDescriptionRequest(t, s)
 	if text, n := outputText(t, rec.Body.String()); rec.Code != 200 || n != 0 || text != "" || chatgptCalls != 1 || f.calls != 1 ||
 		!strings.Contains(rec.Body.String(), `"type":"response.completed"`) {
-		t.Fatalf("off: %d %q, %d items, chatgpt %d, magpie model %d", rec.Code, rec.Body.String(), n, chatgptCalls, f.calls)
+		t.Fatalf("off: %d %q, %d items, chatgpt %d, myna model %d", rec.Code, rec.Body.String(), n, chatgptCalls, f.calls)
 	}
 	rec = httptest.NewRecorder()
 	req := httptest.NewRequest("POST", "/v1/responses", strings.NewReader(`{"model":"fake/m1","stream":true,"input":"Describe the thread",`+
@@ -363,23 +363,23 @@ func TestCodexDescriptionsSetting(t *testing.T) {
 	req.Header.Set("x-codex-turn-metadata", `{"thread_source":"thread_description"}`)
 	s.Handler().ServeHTTP(rec, req)
 	if text, n := outputText(t, rec.Body.String()); rec.Code != 200 || n != 0 || text != "" || chatgptCalls != 1 || f.calls != 1 {
-		t.Fatalf("off on /v1: %d %q, %d items, chatgpt %d, magpie model %d", rec.Code, rec.Body.String(), n, chatgptCalls, f.calls)
+		t.Fatalf("off on /v1: %d %q, %d items, chatgpt %d, myna model %d", rec.Code, rec.Body.String(), n, chatgptCalls, f.calls)
 	}
 
 	var kinds []string
 	for _, u := range usage.Load(time.Time{}) {
 		kinds = append(kinds, u.Provider+":"+u.Kind)
-		if u.Provider == "magpie" && (!u.IsRejected() || u.Status != 200 || !strings.Contains(u.Error, "descriptions are off in Codex's settings on magpie's Agents page")) {
+		if u.Provider == "myna" && (!u.IsRejected() || u.Status != 200 || !strings.Contains(u.Error, "descriptions are off in Codex's settings on myna's Agents page")) {
 			t.Errorf("an answered-here description %+v", u)
 		}
 	}
-	want := "openai:thread_description fake:thread_description magpie:thread_description magpie:thread_description"
+	want := "openai:thread_description fake:thread_description myna:thread_description myna:thread_description"
 	if got := strings.Join(kinds, " "); got != want {
 		t.Errorf("ledger %s\nwant   %s", got, want)
 	}
 }
 
-func TestCodexDescriptionFallbackOnMagpie(t *testing.T) {
+func TestCodexDescriptionFallbackOnMyna(t *testing.T) {
 	for _, path := range []string{"/v1/responses", "/backend-api/codex/responses"} {
 		t.Run(path, func(t *testing.T) {
 			f := &fake{t: t, reply: sse(

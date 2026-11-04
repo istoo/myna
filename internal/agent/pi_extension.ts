@@ -1,11 +1,11 @@
-// magpie: written by magpie, and written again as its models change.
-// magpie's decision models (System One) and image models (Settings ›
+// myna: written by myna, and written again as its models change.
+// myna's decision models (System One) and image models (Settings ›
 // Images), for codemode's models.classify() and models.generateImages().
 // Pi's models.json holds chat models only, so they are registered here,
-// as providers magpie-systemone and magpie-images. Take Pi off magpie in
-// magpie to have this file gone; with this first line changed, magpie
+// as providers myna-systemone and myna-images. Take Pi off myna in
+// myna to have this file gone; with this first line changed, myna
 // leaves the file to you.
-const MAGPIE = __MAGPIE__;
+const MYNA = __MYNA__;
 
 export default async function (pi) {
 	// a Pi older than its classifier models (1.x) has no such module, or a
@@ -19,29 +19,29 @@ export default async function (pi) {
 	}
 	if (typeof typesafe?.classify !== "function") return;
 	const cost = { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 };
-	if (MAGPIE.classifiers.length)
-		pi.registerProvider("magpie-systemone", {
-			name: "magpie System One",
-			baseUrl: MAGPIE.baseUrl,
-			apiKey: MAGPIE.apiKey,
-			// magpie's /v1/systemone takes TypeSafe's System One protocol for
+	if (MYNA.classifiers.length)
+		pi.registerProvider("myna-systemone", {
+			name: "myna System One",
+			baseUrl: MYNA.baseUrl,
+			apiKey: MYNA.apiKey,
+			// myna's /v1/systemone takes TypeSafe's System One protocol for
 			// every decision model, Cloudflare's and OpenRouter's too
-			models: MAGPIE.classifiers.map((m) => ({ type: "classifier", api: "typesafe-system-one", id: m.id, name: m.name, input: ["text"], cost, contextWindow: 64000 })),
+			models: MYNA.classifiers.map((m) => ({ type: "classifier", api: "typesafe-system-one", id: m.id, name: m.name, input: ["text"], cost, contextWindow: 64000 })),
 			classifiers: {
 				"typesafe-system-one": { classify: (model, context, options) => typesafe.classify(model, context, options) },
 			},
 		});
-	if (MAGPIE.images.length)
-		pi.registerProvider("magpie-images", {
-			name: "magpie Images",
-			baseUrl: MAGPIE.baseUrl,
-			apiKey: MAGPIE.apiKey,
-			models: MAGPIE.images.map((m) => ({ type: "image", api: "magpie-images", id: m.id, name: m.name, input: m.input, output: ["image"], cost })),
-			images: { "magpie-images": { generateImages: draw } },
+	if (MYNA.images.length)
+		pi.registerProvider("myna-images", {
+			name: "myna Images",
+			baseUrl: MYNA.baseUrl,
+			apiKey: MYNA.apiKey,
+			models: MYNA.images.map((m) => ({ type: "image", api: "myna-images", id: m.id, name: m.name, input: m.input, output: ["image"], cost })),
+			images: { "myna-images": { generateImages: draw } },
 		});
 }
 
-// draw asks magpie's images API (POST …/v1/images/generations) for the
+// draw asks myna's images API (POST …/v1/images/generations) for the
 // input's text, with its images as references.
 async function draw(model, context, options) {
 	const out = { api: model.api, provider: model.provider, model: model.id, output: [], stopReason: "stop", timestamp: Date.now() };
@@ -63,7 +63,7 @@ async function draw(model, context, options) {
 		} catch {
 			got = undefined;
 		}
-		if (!res.ok) throw new Error(`magpie answered ${res.status}: ${got?.error?.message ?? text.slice(0, 500)}`);
+		if (!res.ok) throw new Error(`myna answered ${res.status}: ${got?.error?.message ?? text.slice(0, 500)}`);
 		if (got?.text) out.output.push({ type: "text", text: got.text });
 		for (const d of got?.data ?? []) {
 			if (d.b64_json) out.output.push({ type: "image", data: d.b64_json, mimeType: d.mime_type ?? "image/png" });

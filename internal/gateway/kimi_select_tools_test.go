@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // Kimi Code's tool select (dynamically_loaded_tools, behind its
@@ -12,7 +12,7 @@ import (
 // request's tools until the model asks for it with select_tools; the tools
 // it then loads go as a system message of their own in the history,
 // {"role":"system","content":"","tools":[…]} (Kimi Code 2.4.1,
-// llm-kimi/trait.ts convertMessage). magpie writes the capability on a Kimi
+// llm-kimi/trait.ts convertMessage). myna writes the capability on a Kimi
 // Code plan model, so the tools that message loads reach Kimi callable:
 // the gateway lifts them into the request's tools, as for Pi (#2322),
 // each once, as Kimi Code wrote them, and the empty message goes. That

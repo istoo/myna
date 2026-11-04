@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // postMessages sends an Anthropic Messages request to the gateway, as dsh's
@@ -196,7 +196,7 @@ func TestLoopCutMidLine(t *testing.T) {
 		t.Fatalf("the run-on reply was not cut by the loop guard: %s", body[:min(600, len(body))])
 	}
 	// the upstream's own last line is the only event the client may read
-	// unparseable: a join of two halves is magpie's doing
+	// unparseable: a join of two halves is myna's doing
 	joined := 0
 	readSSE(strings.NewReader(body), func(_, data string) error {
 		if strings.Contains(data, "\n") && json.Valid([]byte(data)) == false {
@@ -251,7 +251,7 @@ func TestPassthroughResponsesBigLastEvent(t *testing.T) {
 // The upstream reset inside an event (#2580: Z.ai cut a glm-5.3 stream
 // mid-line under pi): the half event went to the client as data, and the
 // client's SSE parser died reading it — "malformed server-sent event
-// JSON" — so the error event magpie appended after it was never reached,
+// JSON" — so the error event myna appended after it was never reached,
 // and the turn failed without a word of what went wrong. A line the
 // upstream never ended is no event of its own: the client reads the
 // events that were whole and then the error, nothing it has to fail on.

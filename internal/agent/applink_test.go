@@ -25,7 +25,7 @@ func TestCommandProgram(t *testing.T) {
 	}
 }
 
-// sungt (10-29): Add magpie on Cindy did nothing, as the system starts its
+// sungt (10-29): Add myna on Cindy did nothing, as the system starts its
 // opener and never says that nothing opens the link. The link is handed
 // over only when something does, and otherwise the reason is said.
 func TestOpenAppLinkSaysNothingOpensIt(t *testing.T) {
@@ -89,7 +89,7 @@ func TestOpenAppLinkSaysNothingOpensIt(t *testing.T) {
 // The system's own answer for a scheme nothing registers: none, not an
 // error, where it can be read (the registry, Launch Services, xdg-mime).
 func TestSystemLinkHandlerNoSuchScheme(t *testing.T) {
-	scheme := fmt.Sprintf("magpie-no-such-%d", time.Now().UnixNano())
+	scheme := fmt.Sprintf("myna-no-such-%d", time.Now().UnixNano())
 	exe, found, err := systemLinkHandler(scheme)
 	if err != nil {
 		t.Skipf("can't be read here: %v", err)

@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // codexUsedUp is ChatGPT's refusal of an account whose plan's window is
@@ -38,7 +38,7 @@ func usedUpSearcher(t *testing.T) (*httptest.Server, *atomic.Int32) {
 }
 
 // The searcher picked in Settings that can't serve — its plan used up —
-// gives way to the searchers magpie would pick, though none is named after
+// gives way to the searchers myna would pick, though none is named after
 // it: pedestrianz (plugins#635) named Codex to search for Cursor's models,
 // and when Codex ran out and Cursor took the turns over, every search
 // failed with it. Once it is known to be out its vendor isn't asked again,

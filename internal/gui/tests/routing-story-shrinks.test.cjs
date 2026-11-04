@@ -70,7 +70,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         const feed = { next: null };
         await page.route("**/*", serve(lang, feed));
-        await page.goto("http://magpie.test/?view=routing");
+        await page.goto("http://myna.test/?view=routing");
         await page.locator(".rt-req").nth(first.length - 1).waitFor();
         await page.locator(".rt-log .rt-steps li").first().waitFor();
         await page.waitForTimeout(800);
@@ -116,7 +116,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await context.close();
       });
 
-      // A busy gateway (shensmart on Discord, a remote magpie in a local
+      // A busy gateway (shensmart on Discord, a remote myna in a local
       // browser: the room under the story grew and never shrank back):
       // each request is answered as the next one starts, so the two come
       // in one trace and the newest is always under way. None of them is
@@ -131,7 +131,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         const feed = { next: null };
         await page.route("**/*", serve(lang, feed));
-        await page.goto("http://magpie.test/?view=routing");
+        await page.goto("http://myna.test/?view=routing");
         await page.locator(".rt-req").nth(first.length - 1).waitFor();
         await page.locator(".rt-log .rt-steps li").first().waitFor();
         await page.waitForTimeout(800);

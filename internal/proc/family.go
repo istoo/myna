@@ -16,7 +16,7 @@ type Kin struct {
 
 // EndTrees ends the processes match picks from every process this user
 // can see, each with all it started, and says how many match picked. A
-// process under one already picked goes with that one; magpie and what it
+// process under one already picked goes with that one; myna and what it
 // runs under are never picked. It is how a turned-off MCP server's
 // processes go when the agent that started them keeps running (#3885).
 func EndTrees(ctx context.Context, match func(args string) bool) (int, error) {

@@ -12,13 +12,13 @@ import (
 
 	"golang.org/x/term"
 
-	"github.com/yetone/magpie/internal/backup"
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/istoo/myna/internal/backup"
+	"github.com/istoo/myna/internal/edit"
 )
 
 // backupCmd writes every provider, setting, profile and agent model, and
 // the library, to one file sealed with a passphrase:
-// magpie backup [--no-keys] [--no-library] [--sign-ins] [file].
+// myna backup [--no-keys] [--no-library] [--sign-ins] [file].
 func backupCmd(args []string) error {
 	keys, lib, signIns, file := true, true, false, ""
 	for _, a := range args {
@@ -30,15 +30,15 @@ func backupCmd(args []string) error {
 		case a == "--sign-ins":
 			signIns = true
 		case strings.HasPrefix(a, "-"):
-			return fmt.Errorf("unknown flag %s (magpie backup [--no-keys] [--no-library] [--sign-ins] [file])", a)
+			return fmt.Errorf("unknown flag %s (myna backup [--no-keys] [--no-library] [--sign-ins] [file])", a)
 		case file == "":
 			file = a
 		default:
-			return errors.New("usage: magpie backup [--no-keys] [--no-library] [--sign-ins] [file]")
+			return errors.New("usage: myna backup [--no-keys] [--no-library] [--sign-ins] [file]")
 		}
 	}
 	if file == "" {
-		file = "magpie" + backup.Ext
+		file = "myna" + backup.Ext
 	}
 	b, err := backup.Collect(keys, version)
 	if err != nil {
@@ -88,7 +88,7 @@ func backupCmd(args []string) error {
 	return nil
 }
 
-// restoreCmd puts a backup in: magpie restore [--no-agents] [--no-library] [--no-sign-ins] <file>.
+// restoreCmd puts a backup in: myna restore [--no-agents] [--no-library] [--no-sign-ins] <file>.
 func restoreCmd(args []string) error {
 	parts, file := backup.All, ""
 	for _, a := range args {
@@ -100,15 +100,15 @@ func restoreCmd(args []string) error {
 		case a == "--no-sign-ins":
 			parts.SignIns = false
 		case strings.HasPrefix(a, "-"):
-			return fmt.Errorf("unknown flag %s (magpie restore [--no-agents] [--no-library] [--no-sign-ins] <file>)", a)
+			return fmt.Errorf("unknown flag %s (myna restore [--no-agents] [--no-library] [--no-sign-ins] <file>)", a)
 		case file == "":
 			file = a
 		default:
-			return errors.New("usage: magpie restore [--no-agents] [--no-library] [--no-sign-ins] <file>")
+			return errors.New("usage: myna restore [--no-agents] [--no-library] [--no-sign-ins] <file>")
 		}
 	}
 	if file == "" {
-		return errors.New("usage: magpie restore [--no-agents] [--no-library] [--no-sign-ins] <file>")
+		return errors.New("usage: myna restore [--no-agents] [--no-library] [--no-sign-ins] <file>")
 	}
 	data, err := os.ReadFile(file)
 	if err != nil {
@@ -142,10 +142,10 @@ func restoreCmd(args []string) error {
 	}
 	fmt.Println()
 	if len(r.NeedKey) > 0 {
-		fmt.Println(muted.Render("Needs a key (magpie provider key <id>): " + strings.Join(r.NeedKey, ", ")))
+		fmt.Println(muted.Render("Needs a key (myna provider key <id>): " + strings.Join(r.NeedKey, ", ")))
 	}
 	if len(r.SignIn) > 0 {
-		fmt.Println(muted.Render("The backup's settings use these, not signed in on this computer (a backup carries settings, not sign-ins; to use one here: magpie accounts add <id>): " + strings.Join(r.SignIn, ", ")))
+		fmt.Println(muted.Render("The backup's settings use these, not signed in on this computer (a backup carries settings, not sign-ins; to use one here: myna accounts add <id>): " + strings.Join(r.SignIn, ", ")))
 	}
 	if len(r.Plugins) > 0 {
 		fmt.Println(muted.Render("Plugins added: " + strings.Join(r.Plugins, ", ")))

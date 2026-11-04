@@ -12,8 +12,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // senseNova is token.sensenova.cn as its docs describe it: an OpenAI
@@ -99,7 +99,7 @@ func TestSenseNovaU1Draws(t *testing.T) {
 		t.Fatalf("drawers %v, want sensenova-u1.5-lite alone", drawers)
 	}
 	s := New()
-	code, a, raw := postImages(t, s, "/v1/images/generations", "application/json", `{"model":"sensenova/sensenova-u1.5-lite","prompt":"a magpie","size":"1024x1024"}`)
+	code, a, raw := postImages(t, s, "/v1/images/generations", "application/json", `{"model":"sensenova/sensenova-u1.5-lite","prompt":"a myna","size":"1024x1024"}`)
 	if code != 200 || len(a.Data) != 1 {
 		t.Fatalf("%d %s", code, raw)
 	}
@@ -119,7 +119,7 @@ func TestSenseNovaU1Draws(t *testing.T) {
 	}
 }
 
-// The SenseNova plugin (aqiu817/magpie-sensenova), in front of
+// The SenseNova plugin (aqiu817/myna-sensenova), in front of
 // token.sensenova.cn/v1 on @ai-sdk/openai-compatible, lists
 // sensenova-u1.5-lite from SenseNova's /models: Settings' image
 // generation picker lists it, and it draws and edits on SenseNova's images
@@ -146,7 +146,7 @@ func TestSenseNovaPluginDraws(t *testing.T) {
 		t.Fatalf("drawers %v, want sensenova-u1.5-lite alone", drawers)
 	}
 	s := New()
-	code, a, raw := postImages(t, s, "/v1/images/generations", "application/json", `{"model":"`+pid+`/sensenova-u1.5-lite","prompt":"a magpie","size":"1024x1024"}`)
+	code, a, raw := postImages(t, s, "/v1/images/generations", "application/json", `{"model":"`+pid+`/sensenova-u1.5-lite","prompt":"a myna","size":"1024x1024"}`)
 	if code != 200 || len(a.Data) != 1 {
 		t.Fatalf("%d %s", code, raw)
 	}

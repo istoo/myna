@@ -10,15 +10,15 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/steady"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/steady"
+	"github.com/istoo/myna/internal/usage"
 )
 
 // A Codex subagent resumed with resume_agent went on its lead's model, not
 // the one it was spawned on (HoGee_xxl on X). Codex's multi-agent V1, which
-// magpie's own models ask for, builds the resumed subagent's config from
+// myna's own models ask for, builds the resumed subagent's config from
 // the lead's current turn (codex-rs core/src/agent/child_config.rs,
 // build_agent_resume_config → build_agent_shared_config sets config.model
 // to turn.model_info().slug), and resume_single_agent_from_rollout
@@ -34,7 +34,7 @@ import (
 // for, and puts a later request of that thread asking for another back on
 // it. Within a V1 thread the model never changes otherwise: a subagent has
 // no /model. Kept on disk (codex-subagents.json, next to the providers) so
-// a subagent resumed after magpie restarted, an update's included, is
+// a subagent resumed after myna restarted, an update's included, is
 // still known. A model set for every subagent (codexSubagentPick) still
 // moves the request after this.
 
@@ -173,7 +173,7 @@ func (c *codexSpawns) save(path string, now time.Time) {
 	if err != nil {
 		return
 	}
-	tmp := path + ".magpie-tmp"
+	tmp := path + ".myna-tmp"
 	if os.WriteFile(tmp, b, 0o600) != nil {
 		return
 	}

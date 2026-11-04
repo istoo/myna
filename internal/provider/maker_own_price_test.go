@@ -5,10 +5,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/istoo/myna/internal/catalog"
 )
 
-// makerOwnCatalog is models.dev's api.json as magpie had it on 2026-10-29,
+// makerOwnCatalog is models.dev's api.json as myna had it on 2026-10-29,
 // these entries byte for byte. DeepSeek sells V4.1 Flash 1017 as
 // deepseek-flash at $0.15/$0.60 and Mistral resells it, by a dashed id, at
 // $0.30/$1.20; Mistral resells Zhipu's GLM-5.2 too. Alibaba lists Qwen3.7

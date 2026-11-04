@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // The editor's looks at what the user set on a provider's models (names,

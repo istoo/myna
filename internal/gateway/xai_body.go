@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // xAI's own API (api.x.ai), wherever a Grok model is served, takes three
@@ -149,7 +149,7 @@ func systemTurnsFolded(body []byte) []byte {
 // required (#3392). xAI validates each tool's schema as a JSON Schema
 // and refuses the null at its root or anywhere nested; a client's wire
 // puts it there where none are required (Anthropic's API takes it). The
-// schemas are found under every shape a body leaves magpie in:
+// schemas are found under every shape a body leaves myna in:
 // input_schema (Anthropic), parameters (Responses) and function's
 // parameters (chat).
 func withoutNullToolRequired(body []byte) []byte {

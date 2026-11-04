@@ -13,9 +13,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/profile"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/profile"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // autoHome is a machine of its own with the setup setUp makes, and the
@@ -85,7 +85,7 @@ func TestAutoBackupOnSchedule(t *testing.T) {
 	tick(t0.Add(-time.Hour), true)
 }
 
-// A magpie that starts again goes by the newest backup in the folder, not
+// A myna that starts again goes by the newest backup in the folder, not
 // a fresh start: no backup at every launch.
 func TestAutoBackupAfterRestartWaits(t *testing.T) {
 	autoHome(t)
@@ -146,7 +146,7 @@ func TestAutoBackupPrunes(t *testing.T) {
 	if err := SaveAuto(AutoConfig{Keep: 3, Dir: dir, Hours: 1}); err != nil {
 		t.Fatal(err)
 	}
-	mine := []string{"notes.txt", "magpie-2026-11-01.magpie-backup", "magpie-20200101-000000-auto.json.bak"}
+	mine := []string{"notes.txt", "myna-2026-11-01.myna-backup", "myna-20200101-000000-auto.json.bak"}
 	for _, f := range mine {
 		if err := os.WriteFile(filepath.Join(dir, f), []byte("mine"), 0o644); err != nil {
 			t.Fatal(err)
@@ -328,15 +328,15 @@ func TestAutoHalfWrittenNeverListed(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	cut := "magpie-20261101-000000-auto.json"
+	cut := "myna-20261101-000000-auto.json"
 	if err := os.WriteFile(filepath.Join(dir, cut), whole[:len(whole)/2], 0o600); err != nil {
 		t.Fatal(err)
 	}
-	changed := "magpie-20261101-000001-auto.json"
+	changed := "myna-20261101-000001-auto.json"
 	if err := os.WriteFile(filepath.Join(dir, changed), []byte(strings.Replace(string(whole), `"theme":"dark"`, `"theme":"pink"`, 1)), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(dir, ".magpie-backup-123.tmp"), whole, 0o600); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, ".myna-backup-123.tmp"), whole, 0o600); err != nil {
 		t.Fatal(err)
 	}
 	if l := autoList(t); len(l) != 1 || l[0].Name != good.Name {

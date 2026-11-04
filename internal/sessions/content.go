@@ -2,7 +2,7 @@ package sessions
 
 // What was said in a call — what the agent was given and what came back —
 // read from the session file the call is in when it is asked for, from the place
-// the call has in it (Call.File, From, To); magpie keeps no copy.
+// the call has in it (Call.File, From, To); myna keeps no copy.
 
 import (
 	"bytes"
@@ -354,7 +354,7 @@ func codexContentOf(c Call, keep func([]byte) bool, add func(input bool, p Part)
 			case "assistant":
 				return add(false, textPart("assistant", words()))
 			}
-		case "reasoning", "magpie_reasoning": // magpie_reasoning: PortCodexRolloutsLeft
+		case "reasoning", "myna_reasoning": // myna_reasoning: PortCodexRolloutsLeft
 			var s []string
 			for _, x := range p.Summary {
 				s = append(s, x.Text)

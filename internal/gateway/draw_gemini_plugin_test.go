@@ -10,7 +10,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // A plugin's model on Gemini's API (@ai-sdk/google) that gives images
@@ -52,7 +52,7 @@ func TestGeminiPluginDraws(t *testing.T) {
 		mu.Lock()
 		paths, bodies = nil, nil
 		mu.Unlock()
-		code, a, raw := postImages(t, s, "/v1/images/generations", "application/json", `{"model":"`+pid+`/`+model+`","prompt":"a magpie"}`)
+		code, a, raw := postImages(t, s, "/v1/images/generations", "application/json", `{"model":"`+pid+`/`+model+`","prompt":"a myna"}`)
 		if code != 200 || len(a.Data) != 1 {
 			t.Fatalf("%s: %d %s", model, code, raw)
 		}
@@ -63,7 +63,7 @@ func TestGeminiPluginDraws(t *testing.T) {
 		if len(paths) != 1 || paths[0] != "/v1/models/"+model+":streamGenerateContent?alt=sse" {
 			t.Fatalf("%s was asked at %v", model, paths)
 		}
-		if !strings.Contains(bodies[0], `"responseModalities":["TEXT","IMAGE"]`) || !strings.Contains(bodies[0], "a magpie") {
+		if !strings.Contains(bodies[0], `"responseModalities":["TEXT","IMAGE"]`) || !strings.Contains(bodies[0], "a myna") {
 			t.Fatalf("%s was sent %s", model, bodies[0])
 		}
 		mu.Unlock()

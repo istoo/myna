@@ -12,9 +12,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // manyEyes is a key of a router listing n models that see, the cheapest a
@@ -76,7 +76,7 @@ func TestAutoVisionDoesNotBuildListsAgain(t *testing.T) {
 
 // What AutoVision keeps is built again when what it was built of changes:
 // a provider saved (its picks), a vendor's list fetched, an account signed
-// in, the settings and the providers' file written by another magpie.
+// in, the settings and the providers' file written by another myna.
 func TestAutoVisionSeesEachChange(t *testing.T) {
 	routerUp(t, "text")
 	if m := AutoVision(); m != "" {
@@ -108,7 +108,7 @@ func TestAutoVisionSeesEachChange(t *testing.T) {
 		t.Fatalf("AutoVision = %q after the list priced Haiku the cheaper", m)
 	}
 
-	// the providers' file written by another magpie (magpie provider
+	// the providers' file written by another myna (myna provider
 	// edit in a terminal): Haiku taken out
 	b, err := os.ReadFile(provider.Path())
 	if err != nil {
@@ -122,7 +122,7 @@ func TestAutoVisionSeesEachChange(t *testing.T) {
 		t.Fatal(err)
 	}
 	if m := AutoVision(); m != "router/google/gemini-3-flash" {
-		t.Fatalf("AutoVision = %q after another magpie took Haiku out", m)
+		t.Fatalf("AutoVision = %q after another myna took Haiku out", m)
 	}
 
 	// a setting saved moves what it is kept by
@@ -179,9 +179,9 @@ func TestAutoVisionKeptListsAskAllowanceEachTime(t *testing.T) {
 
 // A relay's model IDs can carry a namespace colon, cn:deepseek-v4.1-flash
 // and the like (#4359). The pool the small models are picked from leaves
-// IDs with a colon out, as magpie's own effort-suffixed ones have one;
+// IDs with a colon out, as myna's own effort-suffixed ones have one;
 // the user's answer about a model named in full is about one of the
-// vendor's models, not one of magpie's shapes: their "it takes images"
+// vendor's models, not one of myna's shapes: their "it takes images"
 // keeps it in the pool, for AutoVision to pick, and their "it takes
 // none" keeps it out. Without an answer of theirs, it stays out as it
 // was.
@@ -227,7 +227,7 @@ func TestAutoVisionPicksANamespacedIDTheUserSaidSees(t *testing.T) {
 // Only the user's "it sees" lifts the shape guess in the small models'
 // pool (#4359): their "takes no images" says nothing of the ID, so a
 // colon ID they marked so stays out of the searcher's pool too, and an ID
-// of magpie's own shape (a group's, auto's) stays out whatever they said.
+// of myna's own shape (a group's, auto's) stays out whatever they said.
 func TestSmallCandsLiftOnlyWhatTheUserSaidSees(t *testing.T) {
 	fresh(t)
 	p := provider.Provider{ID: "relay", Name: "Relay", Chat: "http://relay.invalid/v1", Key: "k",

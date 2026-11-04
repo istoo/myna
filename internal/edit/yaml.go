@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/tidwall/jsonc"
-	"github.com/yetone/magpie/internal/filememo"
+	"github.com/istoo/myna/internal/filememo"
 	"gopkg.in/yaml.v3"
 )
 
@@ -304,7 +304,7 @@ func loadYAML(path string) (*yaml.Node, error) {
 // and shared by every look (GetYAML, GetYAMLMap, GetYAMLList,
 // GetYAMLText), so read only. Each look parsed the file again: dsh's
 // 80 KB settings.yaml, read per field by every /api/drift poll, was
-// 465 MB of what a live magpie allocated in 37 minutes.
+// 465 MB of what a live myna allocated in 37 minutes.
 func parseYAMLRoot(b []byte) (*yaml.Node, error) {
 	raw := TrimBOM(b)
 	if len(bytes.TrimSpace(raw)) == 0 {
@@ -494,7 +494,7 @@ func blockStyle(n *yaml.Node) {
 // with "- ". BlockList has nothing to do for one, and decoding the whole
 // file to learn so was most of what reading a dsh patch list cost (every
 // /api/drift poll reads each profile's: 444 MB in 37 minutes of a live
-// magpie).
+// myna).
 func blockSequence(raw string) bool {
 	for len(raw) > 0 {
 		line, rest, _ := strings.Cut(raw, "\n")

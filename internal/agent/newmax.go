@@ -9,14 +9,14 @@ package agent
 // list in it, keys in the clear:
 //
 //	{…, "providerId":"default", "model":"default",
-//	 "providers":[…, {"id":"magpie-gateway","name":"magpie",
-//	   "baseUrl":"http://127.0.0.1:3425","apiKey":"magpie-newmax",
-//	   "apiKeys":["magpie-newmax"],"apiKeyRotationEnabled":false,
+//	 "providers":[…, {"id":"myna-gateway","name":"myna",
+//	   "baseUrl":"http://127.0.0.1:3425","apiKey":"myna-newmax",
+//	   "apiKeys":["myna-newmax"],"apiKeyRotationEnabled":false,
 //	   "apiKeyField":"ANTHROPIC_AUTH_TOKEN","apiFormat":"anthropic",
 //	   "models":[…],"enabledModels":[…],"enabled":true,"canDelete":true}],
-//	 "providerOrder":["default","magpie-gateway"], …}
+//	 "providerOrder":["default","myna-gateway"], …}
 //
-// That entry is the one NewMax's own "import from magpie" writes for a
+// That entry is the one NewMax's own "import from myna" writes for a
 // provider of providers.json (mapProvider, applyCcSwitchProviderImport):
 // an Anthropic base URL without /v1 (it posts to baseUrl + /v1/messages,
 // through the Claude Code its SDK runs, as ANTHROPIC_BASE_URL and
@@ -24,17 +24,17 @@ package agent
 // back-ups; it lists enabledModels, the first 20, in its model picker), and
 // the id added to providerOrder. A provider is listed in the model picker
 // whether or not providerOrder has it, so the model is picked there and the
-// field is whether magpie's models are in it (ListsModels). The id is
-// magpie's own: NewMax's built-in "Magpie" preset is "magpie", and the ones
-// its import makes are "magpie-<id>%3A<protocol>", so neither is touched.
+// field is whether myna's models are in it (ListsModels). The id is
+// myna's own: NewMax's built-in "Myna" preset is "myna", and the ones
+// its import makes are "myna-<id>%3A<protocol>", so neither is touched.
 //
 // NewMax reads the row when it starts and writes it whole from what it
-// holds whenever a setting changes, so a change magpie makes while it runs
-// is lost the next time it saves: magpie refuses one then, where it can
+// holds whenever a setting changes, so a change myna makes while it runs
+// is lost the next time it saves: myna refuses one then, where it can
 // tell (Running can't on Windows, where the notice says so instead). The
-// row is edited in place, in one transaction: magpie's entry and its id in
+// row is edited in place, in one transaction: myna's entry and its id in
 // providerOrder go in and out, and the rest of the row stays byte for byte.
-// The user's name for magpie's entry, its on/off and the fields NewMax adds
+// The user's name for myna's entry, its on/off and the fields NewMax adds
 // to it (capabilities it tested) stay through a sync.
 
 import (
@@ -52,17 +52,17 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/sessions"
-	_ "github.com/yetone/magpie/internal/sqlitedb"
+	"github.com/istoo/myna/internal/appdir"
+	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/myna/internal/sessions"
+	_ "github.com/istoo/myna/internal/sqlitedb"
 )
 
 // newMaxApp is NewMax's macOS bundle.
 var newMaxApp = desktopApp{id: "cc.newmax.desktop", names: []string{"NewMax.app"}}
 
-// newMaxID is magpie's provider in NewMax's providers.
-const newMaxID = "magpie-gateway"
+// newMaxID is myna's provider in NewMax's providers.
+const newMaxID = "myna-gateway"
 
 // newMaxMaxModels is how many models NewMax keeps in a provider's picker
 // list (MAX_MODELS).
@@ -74,10 +74,10 @@ const newMaxMaxModels = 20
 // folder named newmax ("cd ~/newmax && …") is not NewMax.
 var newMaxProc = []string{`^([^ ]*/)?(NewMax|newmax)( |$)`, `NewMax\.app/Contents/MacOS/NewMax( |$)`}
 
-var noticeNewMax = newNotice("NewMax keeps its settings in memory while it runs and writes them all back when one changes — quit NewMax before changing this, then open it and pick a magpie model in its model picker.")
+var noticeNewMax = newNotice("NewMax keeps its settings in memory while it runs and writes them all back when one changes — quit NewMax before changing this, then open it and pick a myna model in its model picker.")
 
 // errNewMaxRunning is a change refused while NewMax runs.
-var errNewMaxRunning = errors.New("NewMax writes its settings back over what magpie writes now: quit NewMax, then try again")
+var errNewMaxRunning = errors.New("NewMax writes its settings back over what myna writes now: quit NewMax, then try again")
 
 // errNewMaxNoDB is a change asked for before NewMax made its database.
 var errNewMaxNoDB = errors.New("NewMax hasn't made its settings yet: open NewMax once, quit it, then try again")
@@ -103,7 +103,7 @@ func newMax(home string) *Agent {
 			return ""
 		},
 		// a sync while it runs is written as well: NewMax's next save
-		// puts back what it holds, and the next sync magpie's models
+		// puts back what it holds, and the next sync myna's models
 		Sync: func() error {
 			if !newMaxWired(path) {
 				return nil
@@ -115,7 +115,7 @@ func newMax(home string) *Agent {
 			Key: "provider", Label: "provider",
 			Get: func() string {
 				if newMaxWired(path) {
-					return magpieID
+					return mynaID
 				}
 				return ""
 			},
@@ -126,13 +126,13 @@ func newMax(home string) *Agent {
 				return write(v != "")
 			},
 			Options: func(map[string]string) []Option {
-				return []Option{{Value: magpieID, Label: "magpie", Icon: "magpie", Note: "every magpie model in NewMax's model picker"}}
+				return []Option{{Value: mynaID, Label: "myna", Icon: "myna", Note: "every myna model in NewMax's model picker"}}
 			},
 		}},
 	}
 }
 
-// newMaxRunning says NewMax is open where magpie can tell; on Windows,
+// newMaxRunning says NewMax is open where myna can tell; on Windows,
 // where Running can't, no, and the notice asks to quit it first.
 var newMaxRunning = func() bool {
 	return runtime.GOOS != "windows" && Running(newMaxProc...)
@@ -147,7 +147,7 @@ func newMaxDir(home string) string {
 	return filepath.Join(home, ".newmax")
 }
 
-// newMaxEntry is magpie's provider, in the order NewMax's import writes
+// newMaxEntry is myna's provider, in the order NewMax's import writes
 // one.
 type newMaxEntry struct {
 	ID                    string           `json:"id"`
@@ -165,12 +165,12 @@ type newMaxEntry struct {
 	ModelContextWindows   map[string]int64 `json:"modelContextWindows,omitempty"`
 }
 
-// newMaxEntryFor is magpie's provider for a gateway at gw: its Anthropic
+// newMaxEntryFor is myna's provider for a gateway at gw: its Anthropic
 // Messages, the key that names NewMax, and the models picked for it, each
-// once, at most 20, with the context windows magpie knows.
+// once, at most 20, with the context windows myna knows.
 func newMaxEntryFor(gw string) newMaxEntry {
 	key := agentKeyAt("newmax", gw)
-	e := newMaxEntry{ID: newMaxID, Name: "magpie", BaseURL: gw, APIKey: key, APIKeys: []string{key},
+	e := newMaxEntry{ID: newMaxID, Name: "myna", BaseURL: gw, APIKey: key, APIKeys: []string{key},
 		APIKeyField: "ANTHROPIC_AUTH_TOKEN", APIFormat: "anthropic", Models: []string{}, Enabled: true, CanDelete: true}
 	seen := map[string]bool{}
 	for _, m := range sharedModels("newmax") {
@@ -215,7 +215,7 @@ func newMaxReadApp(path string) (app []byte, had bool, err error) {
 	return []byte(v), true, nil
 }
 
-// newMaxWired says NewMax's settings have magpie's provider.
+// newMaxWired says NewMax's settings have myna's provider.
 func newMaxWired(path string) bool {
 	app, had, err := newMaxReadApp(path)
 	if err != nil || !had {
@@ -226,20 +226,20 @@ func newMaxWired(path string) bool {
 }
 
 // newMaxProviders are the entries of the row's providers as written, and
-// the place of magpie's among them (-1 for none). A row that isn't a JSON
+// the place of myna's among them (-1 for none). A row that isn't a JSON
 // object, or whose providers aren't a list, is an error: NewMax would fall
-// back to its defaults on it, and magpie leaves it alone.
+// back to its defaults on it, and myna leaves it alone.
 func newMaxProviders(app []byte) (list []json.RawMessage, i int, err error) {
 	i = -1
 	if !json.Valid(app) || !gjson.ParseBytes(app).IsObject() {
-		return nil, i, errors.New("NewMax's settings aren't JSON it reads, so magpie leaves them alone")
+		return nil, i, errors.New("NewMax's settings aren't JSON it reads, so myna leaves them alone")
 	}
 	raw := gjson.GetBytes(app, "providers")
 	if !raw.Exists() || raw.Type == gjson.Null {
 		return nil, i, nil
 	}
 	if !raw.IsArray() || json.Unmarshal([]byte(raw.Raw), &list) != nil {
-		return nil, i, errors.New("NewMax's providers aren't a list, so magpie leaves them alone")
+		return nil, i, errors.New("NewMax's providers aren't a list, so myna leaves them alone")
 	}
 	for j, e := range list {
 		if gjson.GetBytes(e, "id").String() == newMaxID {
@@ -305,7 +305,7 @@ func newMaxEdit(path string, fn func(app []byte, had bool) ([]byte, error)) erro
 	return tx.Commit()
 }
 
-// newMaxWire puts magpie's provider into the row app and its id into
+// newMaxWire puts myna's provider into the row app and its id into
 // providerOrder, a row made when there is none (NewMax lays its defaults
 // under what a row has, its preset providers too). An entry there already
 // keeps the name and the on/off the user gave it, and the fields NewMax
@@ -326,7 +326,7 @@ func newMaxWire(app []byte, had bool, want newMaxEntry) ([]byte, error) {
 	if i < 0 {
 		entry = b
 	} else {
-		// what magpie says, over the entry NewMax keeps
+		// what myna says, over the entry NewMax keeps
 		var set []jsonKV
 		gjson.ParseBytes(b).ForEach(func(k, v gjson.Result) bool {
 			switch k.String() {
@@ -363,9 +363,9 @@ func newMaxWire(app []byte, had bool, want newMaxEntry) ([]byte, error) {
 	return app, nil
 }
 
-// newMaxUnwire takes magpie's provider out of the row app, its id out of
+// newMaxUnwire takes myna's provider out of the row app, its id out of
 // providerOrder, and a pick of it back to NewMax's default; a row left
-// with nothing but what magpie made goes.
+// with nothing but what myna made goes.
 func newMaxUnwire(app []byte, had bool) ([]byte, error) {
 	if !had {
 		return nil, nil
@@ -398,7 +398,7 @@ func newMaxUnwire(app []byte, had bool) ([]byte, error) {
 	if gjson.GetBytes(app, "providerId").String() == newMaxID {
 		app = jsonSetKeys(app, []jsonKV{{"providerId", []byte(`"default"`)}, {"model", []byte(`"default"`)}})
 	}
-	// the row magpie made: its empty list and NewMax's default order
+	// the row myna made: its empty list and NewMax's default order
 	var rest map[string]json.RawMessage
 	if json.Unmarshal(app, &rest) == nil && len(rest) == 2 && len(list) == 0 &&
 		sameJSON(string(rest["providerOrder"]), []string{"default"}) {
@@ -417,7 +417,7 @@ func newMaxOrder(app []byte) ([]string, error) {
 	}
 	var order []string
 	if !raw.IsArray() || json.Unmarshal([]byte(raw.Raw), &order) != nil {
-		return nil, errors.New("NewMax's providerOrder isn't a list of names, so magpie leaves it alone")
+		return nil, errors.New("NewMax's providerOrder isn't a list of names, so myna leaves it alone")
 	}
 	return order, nil
 }

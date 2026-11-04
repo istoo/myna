@@ -1,6 +1,6 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // hey_boyce on X: the Sessions page stood on its placeholder rows for a
-// long time on its first open. magpie now answers before it has read a
+// long time on its first open. myna now answers before it has read a
 // long history whole: rows it hasn't read yet come from their files' first
 // lines and say they are pending, and the page asks again until none is.
 // Here the first answer has every row pending and no messages counted; the
@@ -70,7 +70,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, seen));
       await page.clock.install();
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://myna.test/?view=providers");
       await page.locator("#nav").getByRole("button", { name: w.nav, exact: true }).click();
       const view = page.locator("#view-sessions");
       const row = view.locator('.row.sm-sess[data-id="a-1"]');

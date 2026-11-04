@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // hourTurn is a Responses (Codex) turn with a system prompt, a tool call and
@@ -59,7 +59,7 @@ func markTTLs(t *testing.T, b []byte) []string {
 }
 
 // 7eleven (Discord #feedback, 10-28): a Codex turn served by a Claude model
-// on Anthropic's Messages had magpie's cache marks at the default five
+// on Anthropic's Messages had myna's cache marks at the default five
 // minutes, so a thread's prompt was written again after every pause longer
 // than that. A Responses client's marks last an hour, every one of them (a
 // 1h mark after a 5m one is refused), unless the client asked for its

@@ -8,7 +8,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agentenv"
+	"github.com/istoo/myna/internal/agentenv"
 )
 
 // larchsis on X: two GLM Coding Plan keys in one provider, and only one

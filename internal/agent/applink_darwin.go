@@ -7,9 +7,9 @@ package agent
 #cgo LDFLAGS: -framework CoreServices -framework CoreFoundation
 #include <CoreServices/CoreServices.h>
 
-// magpie_link_handler asks Launch Services which app opens link, without
+// myna_link_handler asks Launch Services which app opens link, without
 // opening it: 1 found, 0 none (kLSApplicationNotFoundErr), -1 unknown.
-static int magpie_link_handler(const char *link) {
+static int myna_link_handler(const char *link) {
 	CFURLRef url = CFURLCreateWithBytes(NULL, (const UInt8 *)link, strlen(link), kCFStringEncodingUTF8, NULL);
 	if (url == NULL) return -1;
 	CFErrorRef err = NULL;
@@ -40,7 +40,7 @@ import (
 func systemLinkHandler(scheme string) (string, bool, error) {
 	link := C.CString(scheme + "://x")
 	defer C.free(unsafe.Pointer(link))
-	switch C.magpie_link_handler(link) {
+	switch C.myna_link_handler(link) {
 	case 1:
 		return "", true, nil
 	case 0:

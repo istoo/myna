@@ -105,13 +105,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const context = await browser.newContext({ viewport: { width, height } });
         const page = await context.newPage();
         // the block grid, the look these cells are drawn in (the map is the default)
-        await page.addInitScript(() => { try { localStorage.setItem("magpie.ctxLook", "grid"); } catch {} });
+        await page.addInitScript(() => { try { localStorage.setItem("myna.ctxLook", "grid"); } catch {} });
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve());
-        await page.goto("http://magpie.test/?view=routing");
+        await page.goto("http://myna.test/?view=routing");
         await page.locator(".rt-ctx .ctx-waffle").waitFor();
         await page.waitForTimeout(800);
 

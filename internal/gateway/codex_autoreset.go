@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // autoResetTimeout bounds the look at an account's week and the reset.
@@ -25,7 +25,7 @@ var autoResetTimeout = 20 * time.Second
 // c is, so one of them may spend one after cands'. It says which account it
 // was and what spending did.
 func (s *Server) autoReset(ctx context.Context, cands []candidate, c candidate, held []candidate) (candidate, provider.ResetOutcome, bool) {
-	// spent before a route is begun: a wait magpie knows of (unrouted.go)
+	// spent before a route is begun: a wait myna knows of (unrouted.go)
 	defer noteWait(ctx, "Codex reset")()
 	for _, x := range cands {
 		if x.restKey() == c.restKey() {

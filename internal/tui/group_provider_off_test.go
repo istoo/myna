@@ -4,10 +4,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
-// A group magpie found keeps a member whose provider is switched off
+// A group myna found keeps a member whose provider is switched off
 // (#2671), but its line on the routing page lists only those the gateway
 // can send to, and says how many are off (XYenon on Discord: a provider
 // switched off was still listed in the found group). A group of the user's

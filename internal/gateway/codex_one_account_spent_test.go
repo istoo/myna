@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // spentBackend is the ChatGPT backend turning every turn away as refuse
@@ -55,10 +55,10 @@ func spentAccount(t *testing.T, b *spentBackend, fallback bool) *scripted {
 }
 
 // Codex's one ChatGPT account out of its allowance, the Codex subscription
-// with a fallback set in magpie (the user's own API key, another
+// with a fallback set in myna (the user's own API key, another
 // provider): the turn Codex relays on its sign-in goes on to the fallback,
 // in every shape the backend says the account is out, as a turn through
-// magpie's accounts does (adorable_piglet on Discord: the Plus account's
+// myna's accounts does (adorable_piglet on Discord: the Plus account's
 // quota ran out and Codex was handed the refusal, never the fallback).
 // The account is asked once; the refusal never reaches Codex.
 func TestCodexOneAccountSpentFallsBack(t *testing.T) {

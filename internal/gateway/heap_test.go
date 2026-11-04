@@ -11,7 +11,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // The heap profile is a program's on this computer alone: whatever a
@@ -23,8 +23,8 @@ import (
 // the runtime's numbers beside it.
 func TestHeapProfileOnlyToThisComputer(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
+	t.Setenv("MYNA_ADDR", "")
+	t.Setenv("MYNA_PUBLIC_URL", "")
 	_, secrets := newCaller(t, "Page") // the gateway shared, with a key
 	s := settings.Load()
 	s.CORSOrigins = []string{"https://listed.example"}
@@ -63,7 +63,7 @@ func TestHeapProfileOnlyToThisComputer(t *testing.T) {
 	for _, host := range []string{"127.0.0.1:3425", "localhost:3425", "[::1]:3425"} {
 		w := call(true, "127.0.0.1:50123", host, "User-Agent", "Go-http-client/1.1")
 		if w.Code != http.StatusOK {
-			t.Fatalf("magpie heap at %s: %d %q", host, w.Code, w.Body.String())
+			t.Fatalf("myna heap at %s: %d %q", host, w.Code, w.Body.String())
 		}
 		zr, err := gzip.NewReader(bytes.NewReader(w.Body.Bytes()))
 		if err != nil {

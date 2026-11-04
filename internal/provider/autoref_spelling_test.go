@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/istoo/myna/internal/catalog"
 )
 
 // glmCatalog lists GLM-5.3 Flash as models.dev does: glm-5.3-flash under

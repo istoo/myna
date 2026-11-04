@@ -8,19 +8,19 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // A plugin's browser sign-in that comes back to a port of the plugin's on
 // this machine can be finished from the address the browser ended on, for
-// a magpie on a server or in Docker whose browser is elsewhere (Chicring):
+// a myna on a server or in Docker whose browser is elsewhere (Chicring):
 // only this sign-in's port is taken, a page that sends the browser on is
 // the next page to open, a wrong code fails, the right one signs in.
 func TestPluginSignInTakesAPastedCallback(t *testing.T) {
 	bun := testenv.Bun(t)
 	claudeHome(t)
-	t.Setenv("MAGPIE_BUN", bun)
+	t.Setenv("MYNA_BUN", bun)
 	t.Setenv("FAKE_LOOPBACK", "1")
 	t.Cleanup(plugin.Settle)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
@@ -101,14 +101,14 @@ func TestLoopbackPorts(t *testing.T) {
 }
 
 // Command Code's page posts its key to the plugin's port from script, so
-// a magpie on a server or in Docker has no address to paste. Its sign-in
+// a myna on a server or in Docker has no address to paste. Its sign-in
 // takes a key made on Command Code's keys page in place, through the
 // plugin's API key way, as the built-in's did (#2468): an address is
 // refused, a key signs in, and the plugin keeps it.
 func TestPluginSignInTakesAPastedKey(t *testing.T) {
 	bun := testenv.Bun(t)
 	claudeHome(t)
-	t.Setenv("MAGPIE_BUN", bun)
+	t.Setenv("MYNA_BUN", bun)
 	t.Setenv("FAKE_LOOPBACK", "1")
 	t.Setenv("FAKE_ID", CommandCodePlanID)
 	t.Cleanup(plugin.Settle)

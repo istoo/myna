@@ -10,13 +10,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/usage"
 )
 
-// The Routing page names a group magpie found as agents pick it,
+// The Routing page names a group myna found as agents pick it,
 // auto/<model>, wherever a route names one: the model the agent asked
 // for, the group and the groups in it, the request a search was for and a
 // subagent's pick (未寒 on Discord: the live view still said

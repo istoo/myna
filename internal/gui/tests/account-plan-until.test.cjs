@@ -57,7 +57,7 @@ for (const [engine, browserType] of [["chromium", chromium], ["webkit", webkit]]
       const context = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: "reduce" });
       const page = await context.newPage();
       await page.route("**/*", serve(lang, web));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://myna.test/?view=providers");
       await page.locator(".row.provider", { hasText: "Codex" }).first().click();
       const rows = page.locator(".editor .accts .acc[data-account-id]");
       await rows.nth(1).waitFor();

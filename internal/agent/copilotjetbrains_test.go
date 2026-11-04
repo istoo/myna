@@ -9,7 +9,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/istoo/myna/internal/gateway"
 )
 
 // copilotJBUser is byok.json as the Copilot language server 1.545.1 (in the
@@ -43,10 +43,10 @@ func strictJSON(t *testing.T, raw []byte, v any) {
 	}
 }
 
-// Copilot in JetBrains IDEs takes magpie as a custom endpoint provider in
+// Copilot in JetBrains IDEs takes myna as a custom endpoint provider in
 // the language server's byok.json, written as the server writes its own,
 // beside the user's providers and keys, which stay; a model hidden in the
-// IDE stays hidden through a sync; off takes out magpie's keys alone.
+// IDE stays hidden through a sync; off takes out myna's keys alone.
 func TestCopilotJetBrains(t *testing.T) {
 	home := syncHome(t)
 	path := filepath.Join(home, ".config", "github-copilot", "byok.json")
@@ -61,10 +61,10 @@ func TestCopilotJetBrains(t *testing.T) {
 	if f == nil || f.Get() != "" || a.Wired() || a.Detected() {
 		t.Fatalf("before: %v %v %v", f, a.Wired(), a.Detected())
 	}
-	if err := a.Apply("provider", magpieID); err != nil {
+	if err := a.Apply("provider", mynaID); err != nil {
 		t.Fatal(err)
 	}
-	if f.Get() != magpieID || !a.Wired() || !a.Detected() {
+	if f.Get() != mynaID || !a.Wired() || !a.Detected() {
 		t.Fatalf("after: %q %v %v", f.Get(), a.Wired(), a.Detected())
 	}
 	if d := a.Check(); d != "" {
@@ -90,20 +90,20 @@ func TestCopilotJetBrains(t *testing.T) {
 		GroupName string `json:"groupName"`
 		APIType   string `json:"apiType"`
 	}
-	strictJSON(t, file["magpie-provider-config"], &cfg)
-	if cfg.GroupName != magpieID || cfg.APIType != "chatCompletions" {
-		t.Errorf("provider config: %s", file["magpie-provider-config"])
+	strictJSON(t, file["myna-provider-config"], &cfg)
+	if cfg.GroupName != mynaID || cfg.APIType != "chatCompletions" {
+		t.Errorf("provider config: %s", file["myna-provider-config"])
 	}
 	var key string
-	json.Unmarshal(file["magpie-api-key"], &key)
+	json.Unmarshal(file["myna-api-key"], &key)
 	if key != gateway.TokenFor(copilotJBID) {
 		t.Errorf("key %q", key)
 	}
 	var models map[string]copilotJBModel
-	strictJSON(t, file["magpie-models-config"], &models)
+	strictJSON(t, file["myna-models-config"], &models)
 	m, ok := models["relay/glm-4.6"]
 	if !ok {
-		t.Fatalf("relay/glm-4.6 not listed: %s", file["magpie-models-config"])
+		t.Fatalf("relay/glm-4.6 not listed: %s", file["myna-models-config"])
 	}
 	c := m.ModelCapabilities
 	if m.DeploymentURL != gatewayV1()+"/chat/completions" || m.IsRegistered == nil || !*m.IsRegistered ||
@@ -114,9 +114,9 @@ func TestCopilotJetBrains(t *testing.T) {
 
 	// hidden in the IDE's Manage Models, it stays hidden through a sync
 	var all map[string]map[string]any
-	json.Unmarshal(file["magpie-models-config"], &all)
+	json.Unmarshal(file["myna-models-config"], &all)
 	all["relay/glm-4.6"]["isRegistered"] = false
-	file["magpie-models-config"], _ = json.Marshal(all)
+	file["myna-models-config"], _ = json.Marshal(all)
 	b, _ := json.Marshal(file)
 	os.WriteFile(path, append(b, '\n'), 0o600)
 	if err := a.Sync(); err != nil {
@@ -124,9 +124,9 @@ func TestCopilotJetBrains(t *testing.T) {
 	}
 	json.Unmarshal([]byte(readFile(path)), &file)
 	models = nil
-	strictJSON(t, file["magpie-models-config"], &models)
+	strictJSON(t, file["myna-models-config"], &models)
 	if r := models["relay/glm-4.6"].IsRegistered; r == nil || *r {
-		t.Errorf("a hidden model was shown again: %s", file["magpie-models-config"])
+		t.Errorf("a hidden model was shown again: %s", file["myna-models-config"])
 	}
 
 	// the key changed elsewhere: told
@@ -159,13 +159,13 @@ func TestCopilotJetBrains(t *testing.T) {
 	}
 }
 
-// With no byok.json yet (Copilot never given a key), magpie's makes it as
+// With no byok.json yet (Copilot never given a key), myna's makes it as
 // the server does: private, in a private folder.
 func TestCopilotJetBrainsNewFile(t *testing.T) {
 	home := syncHome(t)
 	path := filepath.Join(home, ".config", "github-copilot", "byok.json")
 	a := copilotJetBrainsAt(path, func() bool { return true })
-	if err := a.Apply("provider", magpieID); err != nil {
+	if err := a.Apply("provider", mynaID); err != nil {
 		t.Fatal(err)
 	}
 	var file map[string]json.RawMessage

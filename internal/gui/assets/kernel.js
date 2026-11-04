@@ -1,16 +1,16 @@
 // The window's plugin kernel (docs/subsystems/plugin-runtime.md, P1). A
 // plugin's page is a part it adds to the "page" slot: its markup, put in the
 // page where index.html's <template data-slot="page"> is, and its hooks,
-// which the shell calls through magpie.call. A hook that throws breaks only
+// which the shell calls through myna.call. A hook that throws breaks only
 // its own page: the page says so, with a Try again, and the other pages go
 // on (the error boundary). ctx.ui is the kit a plugin draws with, and
 // ui.form draws a plugin's settings from the schema the Go side made of
 // them (pluginrt.SchemaOf).
 //
 // Loaded after i18n.js and before the plugins' scripts and app.js. A
-// plugin's words come with it (its i18n.js, magpie.strings). Its scripts
+// plugin's words come with it (its i18n.js, myna.strings). Its scripts
 // register at once, so its page is in the page before app.js looks for
-// it, but run nothing of app.js's then: mount runs at magpie.start, which
+// it, but run nothing of app.js's then: mount runs at myna.start, which
 // app.js calls once it is set up.
 (() => {
   const plugins = new Map(); // id → { id, config, onConfig: [], disposers: [] }
@@ -48,7 +48,7 @@
     main.hidden = true;
     main.dataset.feature = p.id;
     main.innerHTML = part.html || "";
-    window.magpie?.fillSlots?.(main);
+    window.myna?.fillSlots?.(main);
     const anchor = document.querySelector('template[data-slot="page"]');
     if (anchor) anchor.before(main);
     else document.body.append(main);
@@ -60,7 +60,7 @@
   // The error boundary: a hook that throws (or whose promise fails) is
   // caught here, and the page shows what broke instead of what it had.
   function fail(page, hook, args, err) {
-    console.error(`[magpie] ${page.plugin.id}: ${page.part.key}.${hook}`, err);
+    console.error(`[myna] ${page.plugin.id}: ${page.part.key}.${hook}`, err);
     page.broken = { hook, args };
     const card = document.createElement("div");
     card.className = "list slot-error";
@@ -95,7 +95,7 @@
     page.broken = null;
     page.mounted = false;
     page.main.innerHTML = page.part.html || "";
-    window.magpie?.fillSlots?.(page.main);
+    window.myna?.fillSlots?.(page.main);
     window.translateStatic?.();
     if (hook !== "mount") run(page, "mount", [page.main]);
     run(page, hook, args);
@@ -223,7 +223,7 @@
     },
   };
 
-  window.magpie = {
+  window.myna = {
     ui,
     plugin(id, setup) {
       if (plugins.has(id)) throw new Error(`plugin ${id} is registered twice`);
@@ -232,7 +232,7 @@
       try {
         setup(context(p));
       } catch (err) {
-        console.error(`[magpie] ${id}: setup`, err);
+        console.error(`[myna] ${id}: setup`, err);
       }
     },
     // app.js, once it is set up: every page is mounted
@@ -253,7 +253,7 @@
       for (const [lang, words] of Object.entries(dict)) {
         const to = (I18N[lang] ||= {});
         for (const [k, v] of Object.entries(words)) {
-          if (k in to) console.error(`[magpie] ${lang} ${JSON.stringify(k)} is said twice`);
+          if (k in to) console.error(`[myna] ${lang} ${JSON.stringify(k)} is said twice`);
           else to[k] = v;
         }
       }
@@ -267,7 +267,7 @@
       if (JSON.stringify(p.config) === JSON.stringify(config)) return;
       p.config = { ...config };
       for (const fn of p.onConfig) {
-        try { fn(p.config); } catch (err) { console.error(`[magpie] ${id}: config`, err); }
+        try { fn(p.config); } catch (err) { console.error(`[myna] ${id}: config`, err); }
       }
     },
   };

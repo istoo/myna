@@ -9,9 +9,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/claudetui"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/claudetui"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // tuiScriptHarness is a script harness whose runs are the interactive
@@ -21,7 +21,7 @@ func tuiScriptHarness(t *testing.T, script string) *resumeHarness {
 	h := newScriptHarness(t, "ok", script)
 	claudeTUIRuns = true
 	t.Cleanup(func() { claudeTUIRuns = false })
-	helper := filepath.Join(t.TempDir(), "magpie")
+	helper := filepath.Join(t.TempDir(), "myna")
 	testenv.Program(t, helper, `#!/bin/sh
 [ "$1" = "`+claudetui.Command+`" ] || exit 9
 shift; claude=$1; shift

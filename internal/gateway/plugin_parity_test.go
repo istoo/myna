@@ -12,9 +12,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // movedFake is the fake plugin signed in as the built-in id it was moved
@@ -23,7 +23,7 @@ func movedFake(t *testing.T, id string, up http.Handler) {
 	t.Helper()
 	bun := testenv.Bun(t)
 	fresh(t)
-	t.Setenv("MAGPIE_BUN", bun)
+	t.Setenv("MYNA_BUN", bun)
 	t.Setenv("FAKE_ID", id)
 	t.Cleanup(plugin.Settle)
 	testenv.FakeVendor(t, up)

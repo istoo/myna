@@ -5,11 +5,11 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/provider"
 )
 
-// The model lists magpie writes into agents' own files (OpenCode, Pi, …)
+// The model lists myna writes into agents' own files (OpenCode, Pi, …)
 // name models alone once the user wants it (#335), as Codex's catalog
 // does: "Sol", not "Sol · A", and a group "Mix", not "Mix · routing group".
 func TestPlainNamesReachAgents(t *testing.T) {
@@ -27,7 +27,7 @@ func TestPlainNamesReachAgents(t *testing.T) {
 	}
 	names := func() []string {
 		var out []string
-		for _, m := range magpieModels("opencode") {
+		for _, m := range mynaModels("opencode") {
 			out = append(out, m.ID+"="+m.Name)
 		}
 		slices.Sort(out)

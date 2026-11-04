@@ -3,7 +3,7 @@ package gateway
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // cybercaius on Discord: Claude Desktop's chat was on AgentRouter's

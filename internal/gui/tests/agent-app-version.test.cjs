@@ -55,7 +55,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.setDefaultNavigationTimeout(60000);
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", server(lang, clis));
-      await page.goto("http://magpie.test/");
+      await page.goto("http://myna.test/");
       await page.locator(`${row("codex")} .ag-ver`).first().waitFor();
       return page;
     };

@@ -8,7 +8,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // Spending credits first is a fourth way, one of the four an account has:

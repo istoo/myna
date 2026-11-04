@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // zoecats on Discord (10-27): their LAN aggregator's 429, word for word.
@@ -65,7 +65,7 @@ func TestShortResetRestsWhatItSays(t *testing.T) {
 	}
 }
 
-// The reporter's 429, with the Retry-After magpie gives it from its words
+// The reporter's 429, with the Retry-After myna gives it from its words
 // (keepRetry), is waited out within the minute a lone provider waits by
 // default (singlePatience), and asked again when the vendor said: the
 // vendor's whole minute is not a hair past the budget. A time a second and

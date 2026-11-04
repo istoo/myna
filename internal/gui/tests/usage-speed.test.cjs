@@ -116,7 +116,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         p.setDefaultNavigationTimeout(60000);
         p.on("pageerror", (e) => errors.push(e.message));
         await p.route("**/*", server(lang));
-        await p.goto("http://magpie.test/");
+        await p.goto("http://myna.test/");
         assert(await p.evaluate(() => document.body.classList.contains("window")), "the app's window");
         await p.locator('[data-view="usage"]').first().click();
         await p.locator(":is(#usageTab .opt, .nav-s):visible").nth(1).click();

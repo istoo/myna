@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-// Jaxxxxnn on X (magpie 0.1.2669, Claude Code 2.1.316): a saved account's
+// Jaxxxxnn on X (myna 0.1.2669, Claude Code 2.1.316): a saved account's
 // config directory had a .claude.json without hasCompletedOnboarding, so
 // Claude Code's interactive mode asked for a login method beside a sign-in
 // that works, and every run and usage read there ended. The mark is added
@@ -37,7 +37,7 @@ func TestClaudeSavedDirMarksOnboardingDone(t *testing.T) {
 		}
 		return m
 	}
-	// a .claude.json without the mark, as -p or an older magpie left it
+	// a .claude.json without the mark, as -p or an older myna left it
 	stale := `{"numStartups": 3, "firstStartTime": "2026-10-30T01:02:03.000Z", "userID": "abc", "big": 12345678901234567890}`
 
 	// the sign-in not put in yet: the profile file there is kept

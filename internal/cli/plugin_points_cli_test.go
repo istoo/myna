@@ -8,18 +8,18 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/myna/internal/testenv"
 )
 
-// magpie plugin says the tools a plugin gives agents, by their names on
+// myna plugin says the tools a plugin gives agents, by their names on
 // the plugin tools MCP server, and the page it adds to the window with
 // what that page may read: the list had neither, so a plugin with only
 // tools or a page had nothing under it.
 func TestPluginListSaysToolsAndPage(t *testing.T) {
 	bun := testenv.Bun(t)
 	groupsHome(t)
-	t.Setenv("MAGPIE_BUN", bun)
+	t.Setenv("MYNA_BUN", bun)
 	t.Cleanup(plugin.Settle)
 	dir := t.TempDir()
 	tools, page := filepath.Join(dir, "tools"), filepath.Join(dir, "page")

@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/istoo/myna/internal/gateway"
 )
 
 // A restart that hands the gateway over waits only for the bridge's
@@ -52,12 +52,12 @@ func TestHandsOverOnlyWhereItCan(t *testing.T) {
 	}
 	oldExe := startExe
 	t.Cleanup(func() { startExe = oldExe; handoverHost.Store(false) })
-	startExe = "/apps/magpie"
+	startExe = "/apps/myna"
 	handoverHost.Store(true)
 	if handsOver() {
-		t.Fatal("hands over a gateway this magpie doesn't serve")
+		t.Fatal("hands over a gateway this myna doesn't serve")
 	}
-	if beginHandover("", "/apps/magpie", false, "", false) || pending.Load() != nil {
+	if beginHandover("", "/apps/myna", false, "", false) || pending.Load() != nil {
 		t.Fatal("began a handover it can't make")
 	}
 }

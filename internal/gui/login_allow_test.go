@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/autostart"
+	"github.com/istoo/myna/internal/autostart"
 )
 
 // Open at login switched off in System Settings, its launch agent still

@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // an installer that fails says so, and how to install it by hand: Devin's
@@ -98,7 +98,7 @@ func waitPast(t *testing.T, id, state string) SignInState {
 	return SignInState{}
 }
 
-// magpie's Docker image had bash and busybox's wget but no curl, which every
+// myna's Docker image had bash and busybox's wget but no curl, which every
 // vendor's one-liner downloads with: there the native installer is used
 func TestShellInstallerNeedsCurl(t *testing.T) {
 	if runtime.GOOS == "windows" {

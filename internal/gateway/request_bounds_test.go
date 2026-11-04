@@ -15,7 +15,7 @@ import (
 	"time"
 
 	"github.com/klauspost/compress/zstd"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 func TestRequestBodyTooLarge(t *testing.T) {

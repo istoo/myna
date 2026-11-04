@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/sessions"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/sessions"
 )
 
 func sessionHome(t *testing.T) string {

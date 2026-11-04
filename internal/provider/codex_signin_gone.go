@@ -4,10 +4,10 @@ package provider
 // Discord, #4308: revoked, or failed for good). Codex keeps such a
 // sign-in's auth.json as it was and remembers the refusal in memory alone
 // (codex-rs login/src/auth/manager.rs permanent_refresh_failure), so
-// magpie read the file as a sign-in and wired Codex beside it, on its
-// built-in provider. Every turn there, magpie's models too, then failed at
+// myna read the file as a sign-in and wired Codex beside it, on its
+// built-in provider. Every turn there, myna's models too, then failed at
 // Codex's workspace routing discovery (401), and Codex's picker had none of
-// magpie's models. magpie refreshes the sign-in itself (codexTokenRenewing,
+// myna's models. myna refreshes the sign-in itself (codexTokenRenewing,
 // on a usage read), so it hears OpenAI's refusal too: kept here for the
 // refresh token refused, which the agent package reads as no sign-in
 // (CodexSignInGone). A sign-in made again has another refresh token, which
@@ -27,8 +27,8 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/lastgood"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/lastgood"
 )
 
 // codexGoneMu guards the record's file.
@@ -115,7 +115,7 @@ func (e codexRefreshGoneError) Unwrap() error { return e.error }
 // noteCodexSignInGone keeps refresh, the refresh token OpenAI just refused
 // for good, as dead for the Codex home dir: only while the store still
 // holds it. One Codex refreshed meanwhile (its own refresh spent the token
-// magpie sent: refresh_token_reused), or a sign-in made since, is another
+// myna sent: refresh_token_reused), or a sign-in made since, is another
 // token and isn't marked.
 func noteCodexSignInGone(dir, refresh string) {
 	if refresh == "" {
@@ -166,7 +166,7 @@ func setCodexGone(dir, hash string) {
 		return
 	}
 	if hash != "" {
-		log.Printf("codex: OpenAI refused the sign-in in %s for good; magpie takes Codex as signed out until it is signed in again", dir)
+		log.Printf("codex: OpenAI refused the sign-in in %s for good; myna takes Codex as signed out until it is signed in again", dir)
 	}
 	if k == filepath.Clean(codexHome()) {
 		codexWasGone.Store(hash != "")
@@ -194,7 +194,7 @@ var codexWasGone atomic.Bool
 
 // noteCodexGoneNow tells the agents' files when Codex's own sign-in stops
 // being gone: signed in again, in Codex or anywhere else that writes its
-// auth.json, which magpie hears of from no refresh of its own. Run from
+// auth.json, which myna hears of from no refresh of its own. Run from
 // KeepOnAnAccountWithRoom's loop. A read that says nothing changes nothing.
 func noteCodexGoneNow() {
 	dir := codexHome()

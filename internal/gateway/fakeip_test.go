@@ -11,7 +11,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // #2593: with Clash's TUN fake-ip (Clash Verge Rev on Windows, TomXPRIME),
@@ -39,7 +39,7 @@ func answers(t *testing.T, names map[string][]string) {
 	t.Cleanup(func() { lookupIP = was })
 }
 
-// useProxy sets magpie's proxy ("direct" for none) for the test.
+// useProxy sets myna's proxy ("direct" for none) for the test.
 func useProxy(t *testing.T, v string) {
 	t.Helper()
 	was := settings.Load()

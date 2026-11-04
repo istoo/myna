@@ -60,7 +60,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             const errors = [], posted = [];
             page.on("pageerror", (e) => errors.push(e.message));
             await page.route("**/*", server(posted, lang, saved ? { ...relay, balanceMethod: saved } : relay));
-            await page.goto("http://magpie.test/?view=providers");
+            await page.goto("http://myna.test/?view=providers");
             await page.locator(".row.provider", { hasText: "Relay" }).click();
             await page.locator(".editor details.more:not(.advanced) > summary").click();
 

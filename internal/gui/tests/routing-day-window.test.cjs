@@ -7,7 +7,7 @@
 // of them in: its columns are as wide as the widest row of the day, drawn
 // or not, and stay so as it scrolls; a row scrolled to stays where it is
 // as the rows around it are drawn; a row picked far down is marked.
-// MAGPIE_ROUTING_ASSETS points the page at an older asset tree, to watch
+// MYNA_ROUTING_ASSETS points the page at an older asset tree, to watch
 // this go red there.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -15,7 +15,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_ROUTING_ASSETS || path.join(__dirname, "../assets"));
+const assets = path.resolve(process.env.MYNA_ROUTING_ASSETS || path.join(__dirname, "../assets"));
 const iso = (ms) => new Date(ms).toISOString();
 const acct = (n) => ({ id: `acct-${n}`, provider: `prov${n}`, name: `Provider ${n}`, who: `user${n}@example.com`, kind: "account", model: `model-${n}`, known: true, used: 10 * n, plan: "Pro" });
 const agentsOf = ["codex", "claude", "opencode", "kimi"];
@@ -113,7 +113,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang));
         t.after(() => browser.close());
-        await page.goto("http://magpie.test/?view=routing");
+        await page.goto("http://myna.test/?view=routing");
         await page.locator(".rt-req").first().waitFor();
         // a day picked from its pill, or at a narrow width, from the menu
         // the pills past the bar's width go under (#961); picked, the day's
@@ -221,7 +221,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang));
       t.after(() => browser.close());
-      await page.goto("http://magpie.test/?view=routing");
+      await page.goto("http://myna.test/?view=routing");
       await page.locator(".rt-req").first().waitFor();
       await page.locator(".rt-days .rt-day:not(.rt-day-more)").nth(1).dispatchEvent("click");
       await page.waitForFunction(() => [...document.querySelectorAll(".rt-reqs > .rt-req:not(.probe) .m")].some((m) => m.textContent.endsWith("-d16")));

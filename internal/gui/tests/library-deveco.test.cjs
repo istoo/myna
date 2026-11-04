@@ -13,7 +13,7 @@ const { chromium, webkit } = require("playwright");
 const assets = path.resolve(__dirname, "../assets");
 const HOME = "/Users/foobra";
 const library = {
-  dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+  dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
   agents: [{ id: "deveco", name: "DevEco Code", icon: "deveco-color", instructions: `${HOME}/.config/deveco/AGENTS.md` }],
   instructions: {
     shared: "Be brief.",
@@ -62,13 +62,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     for (const lang of Object.keys(note)) {
       await t.test(lang, async () => {
         const ctx = await browser.newContext({ viewport: { width: 980, height: 860 }, reducedMotion: "reduce" });
-        await ctx.addInitScript(() => { try { localStorage.setItem("magpie.libTab", "instructions"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "instructions"); } catch {} });
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang));
-        await page.goto("http://magpie.test/");
+        await page.goto("http://myna.test/");
         await page.locator('button[data-view="library"]').click();
         const row = page.locator(`${view} .lib-row`, { hasText: "DevEco Code" });
         await row.first().click();

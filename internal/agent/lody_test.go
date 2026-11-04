@@ -12,8 +12,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/istoo/myna/internal/access"
+	"github.com/istoo/myna/internal/gateway"
 )
 
 func TestLodyLink(t *testing.T) {
@@ -35,8 +35,8 @@ func TestLodyLink(t *testing.T) {
 				t.Fatal(err)
 			}
 			want := map[string]any{
-				"kind": "custom", "id": "magpie", "name": "Magpie",
-				"auth": map[string]any{"method": "apiKey", "apiKey": "magpie-lody"},
+				"kind": "custom", "id": "myna", "name": "Myna",
+				"auth": map[string]any{"method": "apiKey", "apiKey": "myna-lody"},
 				"endpoints": []any{
 					map[string]any{"protocol": "anthropic-messages", "baseUrl": base, "targets": []any{"claude-code"}, "modelsUrl": base + "/v1/models"},
 					map[string]any{"protocol": "openai-responses", "baseUrl": base + "/v1", "targets": []any{"codex"}, "modelsUrl": base + "/v1/models"},
@@ -164,8 +164,8 @@ func TestLodyBundle(t *testing.T) {
 	}
 }
 
-// Lody's link carries only the public magpie-lody token and a loopback
-// gateway, with LAN sharing on too; with MAGPIE_ADDR pinned beyond
+// Lody's link carries only the public myna-lody token and a loopback
+// gateway, with LAN sharing on too; with MYNA_ADDR pinned beyond
 // loopback, where that token is turned away, there is no link at all
 // rather than one carrying the LAN key.
 func TestLodyLinkCarriesNoSecret(t *testing.T) {
@@ -173,7 +173,7 @@ func TestLodyLinkCarriesNoSecret(t *testing.T) {
 	t.Setenv("HOME", home)
 	t.Setenv("USERPROFILE", home)
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("MYNA_ADDR", "")
 	if err := access.ConfigureLAN(true, false); err != nil {
 		t.Fatal(err)
 	}
@@ -209,8 +209,8 @@ func TestLodyLinkCarriesNoSecret(t *testing.T) {
 	if err := json.Unmarshal(data, &got); err != nil {
 		t.Fatal(err)
 	}
-	if got.Auth.APIKey != gateway.TokenFor("lody") || got.Auth.APIKey != "magpie-lody" {
-		t.Fatalf("key %q, want magpie-lody", got.Auth.APIKey)
+	if got.Auth.APIKey != gateway.TokenFor("lody") || got.Auth.APIKey != "myna-lody" {
+		t.Fatalf("key %q, want myna-lody", got.Auth.APIKey)
 	}
 	if len(got.Endpoints) == 0 {
 		t.Fatal("no endpoints")
@@ -224,10 +224,10 @@ func TestLodyLinkCarriesNoSecret(t *testing.T) {
 		}
 	}
 	for addr, want := range map[string]bool{"172.23.80.1:3425": false, "192.168.1.2:3425": false, "0.0.0.0:3425": true, "127.0.0.1:4567": true, "[::1]:4567": true} {
-		t.Setenv("MAGPIE_ADDR", addr)
+		t.Setenv("MYNA_ADDR", addr)
 		gw := gateway.URL()
 		if got := LodyLink(gw) != ""; got != want {
-			t.Errorf("MAGPIE_ADDR %s (%s): link %v, want %v", addr, gw, got, want)
+			t.Errorf("MYNA_ADDR %s (%s): link %v, want %v", addr, gw, got, want)
 		}
 	}
 }

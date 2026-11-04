@@ -9,9 +9,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // openCounter is a desktop that counts the pages it was asked to open.
@@ -29,17 +29,17 @@ func (w *openCounter) OpenURL(u string) error {
 }
 
 // A plugin's sign-in page opens once. Grok Build's `grok login` opens its
-// page in the browser itself on macOS and Windows, and magpie opened it
+// page in the browser itself on macOS and Windows, and myna opened it
 // again: two pages every time (andyfmyth on X). A plugin that says the page
-// is open already gets none opened by magpie; one that doesn't gets one.
+// is open already gets none opened by myna; one that doesn't gets one.
 func TestPluginSignInPageOpensOnce(t *testing.T) {
 	bun := testenv.Bun(t)
 	dir := t.TempDir()
 	testenv.SetHome(t, dir)
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(dir, "config"))
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(dir, "cache"))
-	t.Setenv("MAGPIE_BUN", bun)
-	t.Setenv("MAGPIE_PLUGIN_MARKET", "off")
+	t.Setenv("MYNA_BUN", bun)
+	t.Setenv("MYNA_PLUGIN_MARKET", "off")
 	t.Cleanup(plugin.Settle)
 	abs, _ := filepath.Abs("../plugin/testdata/fake/index.js")
 	if _, err := plugin.Add(t.Context(), abs); err != nil {

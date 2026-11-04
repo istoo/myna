@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/access"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // The Gateway page lists the models a key can be held to, the routing

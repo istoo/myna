@@ -41,8 +41,8 @@ func TestPrefillAsksNoProviderSwitchedOff(t *testing.T) {
 }
 
 // The plugin providers a listing of the plugins asks nothing are those
-// switched off in magpie, by the plugin's own id: a plugin's provider is
-// magpie's as it is, or with "-plugin" taken off when the id is a
+// switched off in myna, by the plugin's own id: a plugin's provider is
+// myna's as it is, or with "-plugin" taken off when the id is a
 // built-in's. A built-in switched off is no plugin's.
 func TestPluginsOffNamesThePluginsOwnIDs(t *testing.T) {
 	prefillHome(t)
@@ -61,14 +61,14 @@ func TestPluginsOffNamesThePluginsOwnIDs(t *testing.T) {
 	}
 	got := pluginsOff()
 	slices.Sort(got)
-	// "openai-plugin" is both: a plugin's own "openai-plugin" is magpie's
-	// as it is, as its "openai" is magpie's "openai-plugin"
+	// "openai-plugin" is both: a plugin's own "openai-plugin" is myna's
+	// as it is, as its "openai" is myna's "openai-plugin"
 	if want := []string{"fakeco", "openai", "openai-plugin"}; !slices.Equal(got, want) {
 		t.Fatalf("pluginsOff = %v, want %v", got, want)
 	}
 }
 
-// Refreshing every list (the GUI's Refresh, `magpie sync`) asks no
+// Refreshing every list (the GUI's Refresh, `myna sync`) asks no
 // provider switched off, and keeps its list; one on is asked.
 func TestRefreshListsAsksNoProviderSwitchedOff(t *testing.T) {
 	prefillHome(t)

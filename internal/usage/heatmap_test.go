@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/sessions"
+	"github.com/istoo/myna/internal/sessions"
 )
 
 // The heatmap (#1369) is the last 53 weeks from a Monday, a day each by the
@@ -103,7 +103,7 @@ func TestHeatmapOf(t *testing.T) {
 // A live agent writes its session file all the time. The heatmap is kept
 // while only those files change, for heatFresh, so the Requests tab's
 // refresh doesn't work out a year of calls again each time (#3493); a call
-// through magpie is still counted at once, and a session's call once
+// through myna is still counted at once, and a session's call once
 // heatFresh is up.
 func TestHeatmapKeptWhileOnlySessionsChange(t *testing.T) {
 	pageHome(t)
@@ -134,7 +134,7 @@ func TestHeatmapKeptWhileOnlySessionsChange(t *testing.T) {
 	}
 	Append(Record{Time: now.Add(-time.Minute), Agent: "claude-code", Provider: "anthropic", Model: "x", Input: 5, Status: 200})
 	if n := calls(); n != 3 {
-		t.Fatalf("a call through magpie isn't counted at once: %d calls", n)
+		t.Fatalf("a call through myna isn't counted at once: %d calls", n)
 	}
 	writeCodexCall(t, file("c"), "c", "sc", `"vscode"`, "resp-c", "m", "low", now.Add(-time.Hour), 100, 10)
 	old := heatFresh
@@ -145,7 +145,7 @@ func TestHeatmapKeptWhileOnlySessionsChange(t *testing.T) {
 	}
 }
 
-// A call through magpie changes the gateway's log, and the heatmap is
+// A call through myna changes the gateway's log, and the heatmap is
 // worked out again at once: from the sums of the chunks it had, adding up
 // again only those the call changed, not every row of the year (#2278).
 // What it shows is what a cold build shows.
@@ -179,7 +179,7 @@ func TestHeatmapAfterACallAddsUpOnlyWhatChanged(t *testing.T) {
 	Append(Record{Time: now.Add(-time.Minute), Agent: "claude-code", Provider: "anthropic", Model: "x", Input: 5, Status: 200})
 	warm := HeatmapOf(Filter{})
 	if calls(warm) != files+3 {
-		t.Fatalf("a call through magpie isn't counted at once: %d calls", calls(warm))
+		t.Fatalf("a call through myna isn't counted at once: %d calls", calls(warm))
 	}
 	if read > 1 {
 		t.Fatalf("a call added up %d chunks again, want only the one it changed", read)
@@ -192,7 +192,7 @@ func TestHeatmapAfterACallAddsUpOnlyWhatChanged(t *testing.T) {
 	}
 }
 
-// A call through magpie pairs again only the chunks of the last days: the
+// A call through myna pairs again only the chunks of the last days: the
 // days before are the last pairing's of every chunk (#2278). What it shows
 // is what a cold build shows, with calls paired across the days' edge, a
 // session file of old and new calls, and the pairing kept no longer than
@@ -328,7 +328,7 @@ func TestHeatmapAfterACallPairsOnlyTheLastDays(t *testing.T) {
 	}
 }
 
-// A started magpie takes the heatmap's settled days from the last run's
+// A started myna takes the heatmap's settled days from the last run's
 // pairing of every chunk, and pairs only the last days' chunks (#2278):
 // the whole history's pairing was the cold start's peak. A settled file
 // changed since, or another filter, pairs every chunk again.

@@ -4,7 +4,7 @@
 // between them, with no hover before. A row's logo handle began a drag after 4px
 // and swallowed the click that followed, so the tap opened nothing and the
 // reader tapped again. A press let go quickly and close to where it came down
-// is a click; a real drag still moves the row. MAGPIE_ASSETS selects an older
+// is a click; a real drag still moves the row. MYNA_ASSETS selects an older
 // asset directory for a failing comparison. The real trackpad can't be driven
 // from a test. Chromium and WebKit, English and Chinese; the API is faked.
 const assert = require("node:assert/strict");
@@ -13,7 +13,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = process.env.MAGPIE_ASSETS || path.resolve(__dirname, "../assets");
+const assets = process.env.MYNA_ASSETS || path.resolve(__dirname, "../assets");
 
 function fixture(lang) {
   const state = { agents: ["alpha", "beta", "gamma"].map((id) => ({ id, name: id, icon: "generic", path: "/fixture/" + id, fields: [] })), profiles: [], settings: { lang, theme: "light", guideHidden: true } }; // the Get started card put away: these rows are the page, the test reads where they sit
@@ -56,7 +56,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", f.route);
-        await page.goto(`http://magpie.test/?view=agents&mode=${mode}`);
+        await page.goto(`http://myna.test/?view=agents&mode=${mode}`);
         await page.locator("#agents > .row.agent").nth(2).waitFor();
         await page.mouse.move(1, 1);
         const box = await page.locator("#agents > .row.agent").nth(1).locator(".ag-handle").boundingBox();

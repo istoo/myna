@@ -8,11 +8,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/settingsapi"
+	"github.com/istoo/myna/internal/settingsapi"
 )
 
 // The window and the CLI do the same things (#4745). These tests hold the
-// two together: every setting the Settings page saves is one `magpie
+// two together: every setting the Settings page saves is one `myna
 // settings` sets, and every /api route the window's pages call has a
 // command, or is named below as not having one yet, with why. A route or a
 // setting added on one side only fails here.
@@ -82,7 +82,7 @@ func balanced(src string) int {
 	return len(src)
 }
 
-// Every key the pages send POST /api/settings is one `magpie settings`
+// Every key the pages send POST /api/settings is one `myna settings`
 // sets, and every one it sets is one the pages send.
 func TestSettingsCLISetsWhatTheWindowSaves(t *testing.T) {
 	gui := guiSettingsKeys(t)
@@ -90,12 +90,12 @@ func TestSettingsCLISetsWhatTheWindowSaves(t *testing.T) {
 	notKeys := []string{"keep", "change"}
 	for _, k := range gui {
 		if !slices.Contains(notKeys, k) && !settingsapi.Known(k) {
-			t.Errorf("the window saves %q, which `magpie settings` can't set: add it to settingsapi.Keys", k)
+			t.Errorf("the window saves %q, which `myna settings` can't set: add it to settingsapi.Keys", k)
 		}
 	}
 	for _, k := range settingsapi.Keys {
 		if !slices.Contains(gui, k) {
-			t.Errorf("`magpie settings` sets %q, which no page sends", k)
+			t.Errorf("`myna settings` sets %q, which no page sends", k)
 		}
 	}
 }
@@ -113,53 +113,53 @@ const (
 	// P: providers, accounts, sign-ins and plugins past what the
 	// provider, accounts and plugin commands do, stage 2
 	P = "stage 2: providers, accounts and sign-ins"
-	// L: the library past `magpie library`, stage 3
+	// L: the library past `myna library`, stage 3
 	L = "stage 3: the library"
-	// U: usage, sessions, masking records and traces past `magpie
+	// U: usage, sessions, masking records and traces past `myna
 	// usage`, `quota` and `sessions`, stage 3
 	U = "stage 3: usage, sessions and traces"
 	// A: connecting agents and the rest, stage 3
 	A = "stage 3: agents and the rest"
 )
 
-// cliForRoute is the command that does what a route does, as `magpie …`.
+// cliForRoute is the command that does what a route does, as `myna …`.
 var cliForRoute = map[string]string{
-	"GET /api/agent-models/{id}":           "magpie models",
-	"GET /api/settings":                    "magpie settings list",
-	"POST /api/settings":                   "magpie settings set",
-	"POST /api/settings/account-discovery": "magpie accounts discovery",
-	"POST /api/settings/search-api":        "magpie search",
-	"POST /api/settings/search-key":        "magpie search",
-	"POST /api/settings/update-mirror":     "magpie update mirror",
-	"POST /api/sync":                       "magpie sync",
-	"GET /api/davsync":                     "magpie webdav",
-	"POST /api/backup/export":              "magpie backup",
-	"POST /api/backup/import":              "magpie restore",
-	"POST /api/davsync/{action}":           "magpie webdav",
-	"GET /api/caller-keys":                 "magpie gateway-key list",
-	"POST /api/caller-keys/{action}":       "magpie gateway-key",
-	"GET /api/groups":                      "magpie groups",
-	"POST /api/groups/{action}":            "magpie group",
-	"GET /api/import/{id}":                 "magpie import",
-	"GET /api/library":                     "magpie library",
-	"POST /api/library/{what}/{action}":    "magpie library",
-	"GET /api/plugins":                     "magpie plugin",
-	"POST /api/plugins/{op}":               "magpie plugin",
-	"GET /api/login/usage":                 "magpie quota",
-	"GET /api/providers":                   "magpie providers",
-	"POST /api/provider/{action}":          "magpie provider",
-	"GET /api/sessions/reads":              "magpie sessions read",
-	"POST /api/sessions/reads":             "magpie sessions read",
-	"GET /api/sessions":                    "magpie sessions",
-	"POST /api/uninstall":                  "magpie uninstall",
-	"GET /api/usage":                       "magpie usage",
-	"GET /api/usage/quotas":                "magpie quota",
-	"GET /api/usage/quotas/history":        "magpie quota history",
-	"GET /api/usage/requests.csv":          "magpie usage --csv",
-	"POST /api/usage/workbuddy-checkin":    "magpie accounts checkin",
-	"GET /api/update":                      "magpie update check",
-	"POST /api/update/check":               "magpie update check",
-	"POST /api/update/install":             "magpie update",
+	"GET /api/agent-models/{id}":           "myna models",
+	"GET /api/settings":                    "myna settings list",
+	"POST /api/settings":                   "myna settings set",
+	"POST /api/settings/account-discovery": "myna accounts discovery",
+	"POST /api/settings/search-api":        "myna search",
+	"POST /api/settings/search-key":        "myna search",
+	"POST /api/settings/update-mirror":     "myna update mirror",
+	"POST /api/sync":                       "myna sync",
+	"GET /api/davsync":                     "myna webdav",
+	"POST /api/backup/export":              "myna backup",
+	"POST /api/backup/import":              "myna restore",
+	"POST /api/davsync/{action}":           "myna webdav",
+	"GET /api/caller-keys":                 "myna gateway-key list",
+	"POST /api/caller-keys/{action}":       "myna gateway-key",
+	"GET /api/groups":                      "myna groups",
+	"POST /api/groups/{action}":            "myna group",
+	"GET /api/import/{id}":                 "myna import",
+	"GET /api/library":                     "myna library",
+	"POST /api/library/{what}/{action}":    "myna library",
+	"GET /api/plugins":                     "myna plugin",
+	"POST /api/plugins/{op}":               "myna plugin",
+	"GET /api/login/usage":                 "myna quota",
+	"GET /api/providers":                   "myna providers",
+	"POST /api/provider/{action}":          "myna provider",
+	"GET /api/sessions/reads":              "myna sessions read",
+	"POST /api/sessions/reads":             "myna sessions read",
+	"GET /api/sessions":                    "myna sessions",
+	"POST /api/uninstall":                  "myna uninstall",
+	"GET /api/usage":                       "myna usage",
+	"GET /api/usage/quotas":                "myna quota",
+	"GET /api/usage/quotas/history":        "myna quota history",
+	"GET /api/usage/requests.csv":          "myna usage --csv",
+	"POST /api/usage/workbuddy-checkin":    "myna accounts checkin",
+	"GET /api/update":                      "myna update check",
+	"POST /api/update/check":               "myna update check",
+	"POST /api/update/install":             "myna update",
 }
 
 var notYet = map[string]string{
@@ -376,7 +376,7 @@ var notYet = map[string]string{
 	"GET /api/usage/quotas/history/holds":        U,  // usage.go
 	"GET /api/usage/requests":                    U,  // usage.go
 	"GET /api/usage/requests/content":            U,  // usage.go
-	"POST /api/usage/checkin-account":            U,  // usage.go: one account now; `magpie accounts checkin` does every account
+	"POST /api/usage/checkin-account":            U,  // usage.go: one account now; `myna accounts checkin` does every account
 	"POST /api/usage/clear":                      U,  // usage.go
 	"POST /api/usage/codex-reset":                U,  // usage.go
 	"POST /api/usage/deleted":                    U,  // usage.go
@@ -423,7 +423,7 @@ func guiRoutes(t *testing.T) []string {
 
 // Every route the window serves has a command, or is named in notYet;
 // none is in both, and neither names a route that's gone. Every command
-// named is one magpie has.
+// named is one myna has.
 func TestEveryRouteHasACommandOrIsNamed(t *testing.T) {
 	routes := guiRoutes(t)
 	cmds := runCommands(t)
@@ -442,8 +442,8 @@ func TestEveryRouteHasACommandOrIsNamed(t *testing.T) {
 			t.Errorf("cliForRoute names %s, which internal/gui doesn't serve", r)
 		}
 		f := strings.Fields(cmd)
-		if len(f) < 2 || f[0] != "magpie" || !slices.Contains(cmds, f[1]) {
-			t.Errorf("%s: %q isn't a magpie command", r, cmd)
+		if len(f) < 2 || f[0] != "myna" || !slices.Contains(cmds, f[1]) {
+			t.Errorf("%s: %q isn't a myna command", r, cmd)
 		}
 	}
 	for r := range notYet {

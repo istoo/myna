@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // VS Code's Agents window runs `codex app-server` (main at 8fb6054,
@@ -47,13 +47,13 @@ func TestVSCodeAgentHostIsCodex(t *testing.T) {
 }
 
 // One of Codex's own models asked from the Agents window on Codex's
-// magpie provider, which no account in magpie serves, goes on Codex's own
-// sign-in as the Codex CLI's does (TestCodexOwnModelOnMagpieThreadGoesOnSignIn),
-// not 404 "magpie knows no model" (justruman on Discord: 7 of 23 calls
+// myna provider, which no account in myna serves, goes on Codex's own
+// sign-in as the Codex CLI's does (TestCodexOwnModelOnMynaThreadGoesOnSignIn),
+// not 404 "myna knows no model" (justruman on Discord: 7 of 23 calls
 // failed).
 func TestVSCodeAgentHostOwnModelGoesOnSignIn(t *testing.T) {
-	_, models := codexOwnOffMagpieSetup(t, false)
-	req := codexOnMagpieRequest("127.0.0.1:51000")
+	_, models := codexOwnOffMynaSetup(t, false)
+	req := codexOnMynaRequest("127.0.0.1:51000")
 	for k, v := range vscodeAgentHostHeader() {
 		req.Header[k] = v
 	}

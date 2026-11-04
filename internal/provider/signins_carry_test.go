@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
+	"github.com/istoo/myna/internal/plugin"
 )
 
 // Sign-ins in a backup or a sync (qianxunji and curtinp118 on Discord:
@@ -70,7 +70,7 @@ func TestMergeSignInsRemovedOnlyWhenTheOtherSideRemovedIt(t *testing.T) {
 		t.Fatalf("an account renewed here since is taken away: %+v %v", plan.remove, hashes)
 	}
 	// a server file without sign-ins at all (a computer with them off, or
-	// an older magpie): nothing is taken away
+	// an older myna): nothing is taken away
 	if _, plan, _ := MergeSignIns(local, nil, map[string]string{id: h}); len(plan.remove) != 0 {
 		t.Fatalf("a file without sign-ins takes them away here: %+v", plan.remove)
 	}
@@ -88,7 +88,7 @@ func TestMergeSignInsRemovedOnlyWhenTheOtherSideRemovedIt(t *testing.T) {
 // own, Home and Hidden accounts and a plugin's row never go; a file that
 // can't be read is an error, never none (a sync would take them away
 // elsewhere)
-func TestCollectSignInsCarriesMagpiesOwnCopiesOnly(t *testing.T) {
+func TestCollectSignInsCarriesMynasOwnCopiesOnly(t *testing.T) {
 	signIn(t)
 	ls := []savedLogin{
 		geminiLogin("a@x.com", "tok", 2000),

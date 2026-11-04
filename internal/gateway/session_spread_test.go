@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/routes"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/routes"
 )
 
 // connor_yang on Discord: three sessions on a provider with three accounts,

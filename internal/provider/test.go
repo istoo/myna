@@ -21,8 +21,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/probelog"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/probelog"
 )
 
 // Result is what a probe of one endpoint came back with.
@@ -98,7 +98,7 @@ func (p Provider) Test(ctx context.Context) []Result {
 	if len(out) == 0 && p.zenPublic() {
 		out = append(out, Result{Protocol: Chat, Error: zenPublicNone})
 	}
-	if p.IsRemoteMagpie() {
+	if p.IsRemoteMyna() {
 		// The model list already checked its key and named its decisions.
 		if model := p.Jev(); listErr == nil && model != "" {
 			out = append(out, Result{Protocol: "decide", Model: model, OK: true, Status: http.StatusOK})
@@ -352,7 +352,7 @@ func (p Provider) TestModels(ctx context.Context, models []string) []Result {
 func (p Provider) testOne(ctx context.Context, model string) Result {
 	if pat, off := ModelDisabled(p.ID, model); off {
 		// the user disabled it (#1867): not even a test reaches it
-		return Result{Model: model, Error: fmt.Sprintf("model %s/%s is disabled in magpie (it matches %q in Settings › Models › Disabled models)", p.ID, model, pat)}
+		return Result{Model: model, Error: fmt.Sprintf("model %s/%s is disabled in myna (it matches %q in Settings › Models › Disabled models)", p.ID, model, pat)}
 	}
 	if p.DecidesModel(model) && p.AsksDecideModels() {
 		// a decision model is sent the smallest System One question, a
@@ -413,11 +413,11 @@ func (p Provider) testOne(ctx context.Context, model string) Result {
 	if draws {
 		// as the gateway does, one the images API doesn't serve is tried
 		// in chat, and only its answer said when that fails too. Both go
-		// out under the name magpie knows the model by: the gateway builds
+		// out under the name myna knows the model by: the gateway builds
 		// those bodies itself and an upstream name is never written into
 		// one, so asking for the model's own here is what tests a drawing
 		// the way a real one is made — a name the vendor serves drawings
-		// by is not one magpie sends them as
+		// by is not one myna sends them as
 		url, body := tinyDrawing(q, model)
 		r := probe(ctx, q, proto, url, []byte(body), model, drawWait)
 		if !r.OK && ((r.Status == 404 || r.Status == 405) && HostOf(q.Chat) != "openrouter.ai" || r.Status == 400 && catalog.PointsToChat(r.Error)) {
@@ -617,7 +617,7 @@ func AuthHeaders(p Provider, proto Protocol) map[string]string {
 }
 
 // ownRequests is ctx with the requests sent under it written into the
-// request log as magpie's own, of kind (probelog), for p.
+// request log as myna's own, of kind (probelog), for p.
 func (p Provider) ownRequests(ctx context.Context, kind string) context.Context {
 	account := ""
 	if p.Account != nil {
@@ -859,11 +859,11 @@ func streamAnswer(r io.Reader) (msg string, failed bool) {
 	return "", false
 }
 
-// BlockedHint is what a vendor's edge firewall blocking magpie's address
+// BlockedHint is what a vendor's edge firewall blocking myna's address
 // means, in plain words: Alibaba Cloud's (ESA, in front of zcode.z.ai)
 // answers a 405 HTML page, "Sorry, your request has been blocked due to
 // unusual activity", linking errors.aliyun.com. Nothing in the request is
-// at fault and magpie changes nothing about it: the address is.
+// at fault and myna changes nothing about it: the address is.
 const BlockedHint = "the provider's network firewall blocked requests from this IP; wait a while, or switch to another network or proxy"
 
 // edgeBlocked matches such a block page, whoever's firewall served it:
@@ -881,7 +881,7 @@ func EdgeBlocked(b []byte) bool {
 }
 
 // restrictedHinted says an error body is one a plugin already put in
-// magpie's words as an account its vendor restricted: ZCode's Start Plan
+// myna's words as an account its vendor restricted: ZCode's Start Plan
 // 3012 (ZCodeRestrictedHint) keeps ZCode's own "request has been blocked
 // due to unusual activity" in front of the hint, which edgeBlocked reads
 // as a firewall's page. Told as that, the hint was cut, the agent was told
@@ -924,7 +924,7 @@ func APIError(b []byte, fallback string) string {
 var cmdGoNoAPI = regexp.MustCompile(`(?i)\bGo plan doesn.t include API access`)
 
 // CommandCodeGoHint says where a Go plan's key works.
-const CommandCodeGoHint = "a Go plan's key works in magpie through the Command Code plugin (Plugins › Command Code, then sign in with the key), which asks Command Code as its CLI does; a Command Code API-key provider can't use it"
+const CommandCodeGoHint = "a Go plan's key works in myna through the Command Code plugin (Plugins › Command Code, then sign in with the key), which asks Command Code as its CLI does; a Command Code API-key provider can't use it"
 
 // verifyWords is a refusal asking for the account to be verified, put in
 // words rather than as VALIDATION_REQUIRED — or already by VerifyMessage.

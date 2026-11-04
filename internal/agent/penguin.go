@@ -9,13 +9,13 @@ package agent
 // is <root>/<project>/.project_config.toml (projectConfigPath). Its
 // shape (core state/project-config.ts, penguin 0.2.17):
 //
-//	default_model = { provider = "magpie", model_id = "<model>" }
-//	[providers.magpie]
+//	default_model = { provider = "myna", model_id = "<model>" }
+//	[providers.myna]
 //	base_url = "http://127.0.0.1:3425/v1"
 //	client_type = "openai-responses"
-//	api_key = "magpie-penguin"
+//	api_key = "myna-penguin"
 //	[[models]]
-//	provider = "magpie"
+//	provider = "myna"
 //	model_id = "<model>"
 //	display_name = "…"
 //	context_window = …
@@ -34,7 +34,7 @@ package agent
 // which openai-chat leaves out. The server reads the file again whenever
 // its mtime moves (ProjectConfigService), so a change needs no restart;
 // its own Models page and `penguin config model …` write the whole file
-// back (smol-toml), every key magpie writes being one it knows. A
+// back (smol-toml), every key myna writes being one it knows. A
 // default_model naming no entry is refused, so the entries go in before
 // the default and out after it.
 
@@ -49,15 +49,15 @@ import (
 
 	"github.com/pelletier/go-toml/v2"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/edit"
 )
 
 // penguinClient is how Penguin speaks to the gateway: OpenAI Responses,
 // the one of its OpenAI clients that carries a thinking level.
 const penguinClient = "openai-responses"
 
-// penguinConfig is what magpie reads of a Project's .project_config.toml.
+// penguinConfig is what myna reads of a Project's .project_config.toml.
 type penguinConfig struct {
 	DefaultModel *penguinRef `toml:"default_model"`
 	VisionModel  *penguinRef `toml:"vision_model"`
@@ -123,14 +123,14 @@ func penguin(home string) *Agent { return penguinIn(here(home)) }
 func penguinIn(at place) *Agent {
 	root := penguinRoot(at)
 	path := filepath.Join(root, penguinProject(at), ".project_config.toml")
-	providerTable := "providers." + magpieID
+	providerTable := "providers." + mynaID
 	stashKey := at.key("penguin.default")
 	absentKey := at.key("penguin.before.absent")
 	key := func() string { return agentKeyAt("penguin", at.gw()) }
 	get := func() string { c, _ := readPenguin(path); return c.DefaultModel.value() }
-	writeMagpie := func() error {
+	writeMyna := func() error {
 		// Penguin keeps its config private (it holds API keys), so a file
-		// magpie starts is made the same way.
+		// myna starts is made the same way.
 		if _, err := os.Stat(path); os.IsNotExist(err) {
 			if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
 				return err
@@ -155,10 +155,10 @@ func penguinIn(at place) *Agent {
 				return err
 			}
 		}
-		return edit.SetTOMLArrayTables(path, "models", "provider", magpieID, penguinBlocks(magpieModels("penguin")))
+		return edit.SetTOMLArrayTables(path, "models", "provider", mynaID, penguinBlocks(mynaModels("penguin")))
 	}
-	dropMagpie := func() error {
-		if err := edit.SetTOMLArrayTables(path, "models", "provider", magpieID, nil); err != nil {
+	dropMyna := func() error {
+		if err := edit.SetTOMLArrayTables(path, "models", "provider", mynaID, nil); err != nil {
 			return err
 		}
 		return edit.DelTOMLTable(path, providerTable)
@@ -181,7 +181,7 @@ func penguinIn(at place) *Agent {
 			return false
 		}
 		for _, m := range c.Models {
-			if m.Provider != magpieID && m.Provider+"/"+m.ModelID == v {
+			if m.Provider != mynaID && m.Provider+"/"+m.ModelID == v {
 				return true
 			}
 		}
@@ -200,34 +200,34 @@ func penguinIn(at place) *Agent {
 			if err != nil || t == nil {
 				return err
 			}
-			return writeMagpie()
+			return writeMyna()
 		},
 		Check: func() string {
 			c, err := readPenguin(path)
 			if err != nil {
 				return err.Error()
 			}
-			if c.DefaultModel == nil || c.DefaultModel.Provider != magpieID {
+			if c.DefaultModel == nil || c.DefaultModel.Provider != mynaID {
 				return ""
 			}
 			found := false
 			for _, m := range c.Models {
-				found = found || m.Provider == magpieID && m.ModelID == c.DefaultModel.ModelID
+				found = found || m.Provider == mynaID && m.ModelID == c.DefaultModel.ModelID
 			}
 			if !found {
-				return "PenguinHarness's model " + c.DefaultModel.ModelID + " (.project_config.toml) is gone, so it no longer reaches magpie"
+				return "PenguinHarness's model " + c.DefaultModel.ModelID + " (.project_config.toml) is gone, so it no longer reaches myna"
 			}
 			t, err := edit.GetTOMLTable(path, providerTable)
 			if err != nil {
 				return err.Error()
 			}
 			if t == nil {
-				return "PenguinHarness's [" + providerTable + "] (.project_config.toml) is gone, so it no longer reaches magpie"
+				return "PenguinHarness's [" + providerTable + "] (.project_config.toml) is gone, so it no longer reaches myna"
 			}
 			return wiringOff("PenguinHarness", path, func(k string) (string, bool) { v, ok := t[k]; return v, ok },
 				"base_url", at.v1(), "api_key", key())
 		},
-		// a file magpie made is taken away again once nothing is left in it
+		// a file myna made is taken away again once nothing is left in it
 		Restore: func() error {
 			if unstash(absentKey) != "1" {
 				return nil
@@ -251,8 +251,8 @@ func penguinIn(at place) *Agent {
 			Get: get,
 			Set: func(v string) error {
 				cur := get()
-				if ref, ok := strings.CutPrefix(v, magpieID+"/"); ok && isMagpie(ref) {
-					if !usesMagpie(cur) {
+				if ref, ok := strings.CutPrefix(v, mynaID+"/"); ok && isMyna(ref) {
+					if !usesMyna(cur) {
 						kept := map[string]string{stashKey: cur}
 						if t, _ := edit.GetTOMLTable(path, providerTable); t == nil {
 							if _, err := os.Stat(path); errors.Is(err, fs.ErrNotExist) {
@@ -263,7 +263,7 @@ func penguinIn(at place) *Agent {
 						}
 						stash(kept)
 					}
-					if err := writeMagpie(); err != nil {
+					if err := writeMyna(); err != nil {
 						return err
 					}
 					return setRef("default_model", v)
@@ -271,25 +271,25 @@ func penguinIn(at place) *Agent {
 				if v != "" && !strings.Contains(strings.Trim(v, "/"), "/") {
 					return errors.New("expected provider/model_id, got " + strconv.Quote(v))
 				}
-				if v == "" && usesMagpie(cur) {
+				if v == "" && usesMyna(cur) {
 					// back to the default the user had, if Penguin still has it
-					if was := unstash(stashKey); was != "" && !usesMagpie(was) && own(was) {
+					if was := unstash(stashKey); was != "" && !usesMyna(was) && own(was) {
 						v = was
 					}
 				}
 				if err := setRef("default_model", v); err != nil {
 					return err
 				}
-				// a vision model picked among magpie's in Penguin goes with them
-				if c, err := readPenguin(path); err == nil && c.VisionModel != nil && c.VisionModel.Provider == magpieID {
+				// a vision model picked among myna's in Penguin goes with them
+				if c, err := readPenguin(path); err == nil && c.VisionModel != nil && c.VisionModel.Provider == mynaID {
 					if err := setRef("vision_model", ""); err != nil {
 						return err
 					}
 				}
-				return dropMagpie()
+				return dropMyna()
 			},
 			Options: func(cur map[string]string) []Option {
-				return withVia(penguinOwnOptions(path, cur["model"]), "penguin", magpieID+"/")
+				return withVia(penguinOwnOptions(path, cur["model"]), "penguin", mynaID+"/")
 			},
 		}},
 	}, path)
@@ -304,7 +304,7 @@ func penguinOwnOptions(path, cur string) []Option {
 	var out []Option
 	for _, m := range c.Models {
 		v := m.Provider + "/" + m.ModelID
-		if m.Provider == "" || m.ModelID == "" || m.Provider == magpieID || seen[v] {
+		if m.Provider == "" || m.ModelID == "" || m.Provider == mynaID || seen[v] {
 			continue
 		}
 		seen[v] = true
@@ -314,13 +314,13 @@ func penguinOwnOptions(path, cur string) []Option {
 		}
 		out = append(out, o)
 	}
-	if cur != "" && !seen[cur] && !usesMagpie(cur) {
+	if cur != "" && !seen[cur] && !usesMyna(cur) {
 		out = append([]Option{{Value: cur, Icon: modelIcon("", cur)}}, out...)
 	}
 	return group("PenguinHarness", out)
 }
 
-// penguinBlocks are magpie's models as entries of Penguin's [[models]],
+// penguinBlocks are myna's models as entries of Penguin's [[models]],
 // each with what its own Models page records for one: the name, context
 // window, cap on a reply, whether it takes images and its list price.
 func penguinBlocks(ms []catalog.Model) []string {
@@ -329,7 +329,7 @@ func penguinBlocks(ms []catalog.Model) []string {
 		var b strings.Builder
 		line := func(k, v string) { b.WriteString(k + " = " + v + "\n") }
 		b.WriteString("[[models]]\n")
-		line("provider", penguinString(magpieID))
+		line("provider", penguinString(mynaID))
 		line("model_id", penguinString(m.ID))
 		if m.Name != "" && m.Name != m.ID {
 			line("display_name", penguinString(m.Name))

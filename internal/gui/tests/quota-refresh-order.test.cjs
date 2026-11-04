@@ -6,7 +6,7 @@ const path = require("node:path");
 const vm = require("node:vm");
 const { test } = require("node:test");
 
-const source = fs.readFileSync(process.env.MAGPIE_APP_JS || path.resolve(__dirname, "../assets/app.js"), "utf8").replace(/\r\n/g, "\n");
+const source = fs.readFileSync(process.env.MYNA_APP_JS || path.resolve(__dirname, "../assets/app.js"), "utf8").replace(/\r\n/g, "\n");
 function section(start, end) {
   const a = source.indexOf(start), b = source.indexOf(end, a);
   assert(a >= 0 && b > a, `missing ${start}`);
@@ -218,7 +218,7 @@ test("the tray panel keeps the reading it shows, not the older reply a refresh c
   p.answer(post, [card("a@x.com", 32), b]); await refreshing;
   p.answer(get, [old, card("b@x.com", 7)]); await loading;
   assert.deepEqual(plain(p.cards()).map(q => q.windows[0].used), [32, 7], "an older whole-page reply overwrote the refreshed card");
-  const kept = p.saved().filter(([k]) => k === "magpie.panelQuotas").at(-1);
+  const kept = p.saved().filter(([k]) => k === "myna.panelQuotas").at(-1);
   assert(kept, "the panel kept nothing");
   assert.deepEqual(plain(kept[1]).map(q => q.windows[0].used), [32, 7], "the panel kept the older reply, or the list from before the read, for its next open");
 });

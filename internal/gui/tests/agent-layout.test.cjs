@@ -64,7 +64,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(60000);
       await page.route("**/*", (route) => serve(route, lang));
-      await page.goto("http://magpie.test/");
+      await page.goto("http://myna.test/");
       await page.waitForLoadState("networkidle");
 
       await page.locator('.row.agent[data-id="claude"] .ag-conn').waitFor();

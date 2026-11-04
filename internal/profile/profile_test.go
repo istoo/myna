@@ -2,17 +2,17 @@ package profile
 
 import (
 	"encoding/json"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/testenv"
 	"os"
 	"path/filepath"
 	"slices"
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/agentenv"
-	"github.com/yetone/magpie/internal/library"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/agent"
+	"github.com/istoo/myna/internal/agentenv"
+	"github.com/istoo/myna/internal/library"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // sandbox is a home with Claude Code and Codex in it and nothing on PATH.

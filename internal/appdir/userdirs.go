@@ -61,7 +61,7 @@ func userFolderOn(goos, home, kind string) string {
 var knownFolder = osKnownFolder
 
 // windowsFolder is the known folder kind when home is the profile Windows
-// keeps it for. A home magpie was given of its own (USERPROFILE set to
+// keeps it for. A home myna was given of its own (USERPROFILE set to
 // another folder, as a test's or a portable setup's) keeps its own
 // home\kind: the known folder is another home's.
 func windowsFolder(home, kind string) string {

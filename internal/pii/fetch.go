@@ -16,8 +16,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/yetone/magpie/internal/netproxy"
-	"github.com/yetone/magpie/internal/source"
+	"github.com/istoo/myna/internal/netproxy"
+	"github.com/istoo/myna/internal/source"
 )
 
 // dlState is a model's download under way, one at a time.
@@ -35,8 +35,8 @@ var dl dlState
 // client has no timeout: the model takes minutes on a slow line. A
 // download that stops getting bytes is ended by stall instead, and one
 // whose server doesn't answer by the header timeout. It goes through
-// magpie's proxy (netproxy.Func: the one set in magpie, else the
-// system's), like every other request magpie makes: cloned from
+// myna's proxy (netproxy.Func: the one set in myna, else the
+// system's), like every other request myna makes: cloned from
 // http.DefaultTransport when this package loads, before netproxy.Install
 // set its Proxy, it went direct, and in China huggingface.co answered with
 // a *.facebook.com certificate (hh0592821 on Discord).
@@ -53,7 +53,7 @@ var stallAfter = 60 * time.Second
 // Download fetches pf-serve and the model, each checked against its
 // sha256, in the background, and calls done once both are on disk. A
 // download already under way is left to go on. What was fetched of the
-// model before (a download stopped, magpie quit) is taken up where it
+// model before (a download stopped, myna quit) is taken up where it
 // stopped.
 func Download(done func()) error {
 	if !Supported() {
@@ -147,7 +147,7 @@ func ensureServe(ctx context.Context) error {
 var upgrading atomic.Bool
 
 // upgrade fetches serveTag's pf-serve where only an older one is on disk
-// (magpie was updated since the model was downloaded), ends the old one so
+// (myna was updated since the model was downloaded), ends the old one so
 // that the next request starts the new, and deletes the old. One that
 // can't be fetched leaves the old to run, and is tried again on the next
 // start.

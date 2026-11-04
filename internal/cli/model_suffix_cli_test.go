@@ -3,12 +3,12 @@ package cli
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
 )
 
-// magpie model suffix off has the agents' lists name models alone, on
+// myna model suffix off has the agents' lists name models alone, on
 // names them with their providers again (#335), own all but the names the
 // user gave (#92); anything else is refused.
 func TestModelSuffixCmd(t *testing.T) {

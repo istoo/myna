@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/settings"
 )
 
 func overrides(t *testing.T, ms []catalog.Model) map[string]any {
@@ -27,10 +27,10 @@ func overrides(t *testing.T, ms []catalog.Model) map[string]any {
 	return out
 }
 
-// With settings.CodexAutoReview every entry magpie hands Codex — the ChatGPT
-// account's own and magpie's — names that model as
+// With settings.CodexAutoReview every entry myna hands Codex — the ChatGPT
+// account's own and myna's — names that model as
 // auto_review_model_override, which Codex's auto-review runs on (#938); with
-// none set no entry has the field, and one magpie left in Codex's cache is
+// none set no entry has the field, and one myna left in Codex's cache is
 // taken out.
 func TestCodexAutoReviewEntries(t *testing.T) {
 	v1Home(t, `{"etag":"W/\"a\"","models":[{"slug":"gpt-6","base_instructions":"x"},{"slug":"gpt-7","base_instructions":"x","auto_review_model_override":"deepseek/old"},{"slug":"gpt-8","base_instructions":"x","auto_review_model_override":"codex-auto-review"}]}`)
@@ -82,10 +82,10 @@ func TestCodexAutoReviewChecked(t *testing.T) {
 }
 
 // Set to "session" (cybercaius on Discord: left to Codex, a conversation
-// on magpie's model had its auto-review on codex-auto-review through the
-// ChatGPT sign-in), each of magpie's entries names itself, so the review
+// on myna's model had its auto-review on codex-auto-review through the
+// ChatGPT sign-in), each of myna's entries names itself, so the review
 // runs on the session's model; Codex's own entries are left as OpenAI
-// gave them, and one magpie put there before is taken out.
+// gave them, and one myna put there before is taken out.
 func TestCodexAutoReviewFollowsTheSession(t *testing.T) {
 	v1Home(t, `{"etag":"W/\"a\"","models":[{"slug":"gpt-6","base_instructions":"x"},{"slug":"gpt-7","base_instructions":"x","auto_review_model_override":"deepseek/old"},{"slug":"gpt-8","base_instructions":"x","auto_review_model_override":"codex-auto-review"}]}`)
 	s := settings.Load()
@@ -113,7 +113,7 @@ func TestCodexAutoReviewFollowsTheSession(t *testing.T) {
 // cybercaius on Discord: codex-auto-review, kept as the default for being
 // free on a ChatGPT sign-in (#1593), is not free on a Free plan. With
 // nothing picked and Codex signed in to one, the review follows the
-// session; on another plan, or one magpie can't read, it stays Codex's
+// session; on another plan, or one myna can't read, it stays Codex's
 // pick, and a model the user picked is kept on any plan.
 func TestCodexAutoReviewOnAFreePlan(t *testing.T) {
 	v1Home(t, `{"etag":"W/\"a\"","models":[{"slug":"gpt-6","base_instructions":"x"},{"slug":"gpt-8","base_instructions":"x","auto_review_model_override":"codex-auto-review"}]}`)

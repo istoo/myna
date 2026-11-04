@@ -4,11 +4,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
 )
 
-// magpie model id lists a provider's model by an id of the user's, shows
+// myna model id lists a provider's model by an id of the user's, shows
 // it, lists every one under ids and takes it off with --reset; it refuses
 // a flag or a bad id taken as one, and a model the provider doesn't have.
 func TestModelIDCmd(t *testing.T) {
@@ -48,7 +48,7 @@ func TestModelIDCmd(t *testing.T) {
 			t.Fatalf("took %v", bad)
 		}
 	}
-	if out, err = runOut(t, "model", "id", "--help"); err != nil || !strings.Contains(out, "magpie model id <provider/model> <id>") {
+	if out, err = runOut(t, "model", "id", "--help"); err != nil || !strings.Contains(out, "myna model id <provider/model> <id>") {
 		t.Fatalf("--help: %q %v", out, err)
 	}
 	if got := settings.Load().ModelIDs; len(got) != 1 {

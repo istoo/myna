@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // A Copilot account's image model (GPT Image 2.5 Flare in Copilot CLI) is
@@ -85,7 +85,7 @@ func TestCopilotDrawsItsImageModel(t *testing.T) {
 
 	s := New()
 	code, a, raw := postImages(t, s, "/v1/images/generations", "application/json",
-		`{"model":"copilot/gpt-image-2.5-flare","prompt":"a magpie","size":"1024x1024","quality":"high","background":"transparent","output_format":"png"}`)
+		`{"model":"copilot/gpt-image-2.5-flare","prompt":"a myna","size":"1024x1024","quality":"high","background":"transparent","output_format":"png"}`)
 	if code != 200 || len(a.Data) != 1 {
 		t.Fatalf("%d %s", code, raw)
 	}

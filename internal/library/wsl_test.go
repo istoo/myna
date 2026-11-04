@@ -8,12 +8,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agent"
+	"github.com/istoo/myna/internal/agent"
 )
 
 // wslSandbox is sandbox with a running WSL distro, Ubuntu-24.04, whose /
 // is a temp folder and whose user /home/me has Codex, Claude Code, Pi and
-// OmO; it gives back that user's home as magpie opens it.
+// OmO; it gives back that user's home as myna opens it.
 func wslSandbox(t *testing.T) string {
 	t.Helper()
 	sandbox(t)
@@ -36,7 +36,7 @@ const (
 	wslOmO    = "omo@wsl:Ubuntu-24.04"
 )
 
-// The agents magpie found in a WSL distro are the library's to give to
+// The agents myna found in a WSL distro are the library's to give to
 // (#331), each at its own files in the distro's home, not Windows'.
 func TestWSLTargets(t *testing.T) {
 	h := wslSandbox(t)
@@ -61,7 +61,7 @@ func TestWSLTargets(t *testing.T) {
 			}
 			return filepath.Join(h, rel)
 		}
-		if tg.Instructions != at(w[0]) || mcp != at(w[1]) || tg.Skills != at(w[2]) || tg.Copy || tg.Store != at(".local/share/magpie/skills") {
+		if tg.Instructions != at(w[0]) || mcp != at(w[1]) || tg.Skills != at(w[2]) || tg.Copy || tg.Store != at(".local/share/myna/skills") {
 			t.Errorf("%s: %+v (mcp %s)", id, tg, mcp)
 		}
 	}
@@ -76,8 +76,8 @@ func TestWSLTargets(t *testing.T) {
 	}
 }
 
-// A skill reaches the agents in WSL as one copy in the distro, magpie's
-// (~/.local/share/magpie/skills) — a link to a Windows folder is nothing
+// A skill reaches the agents in WSL as one copy in the distro, myna's
+// (~/.local/share/myna/skills) — a link to a Windows folder is nothing
 // they can follow — and each agent there a link the distro makes to it
 // (cutemmuu on X). The copy is made again when the library's changes,
 // and taken away once no agent there has it.
@@ -86,9 +86,9 @@ func TestWSLSkillsLinked(t *testing.T) {
 	src := filepath.Join(home(), "src", "skills")
 	skill(t, filepath.Join(src, "pdf"), "pdf", "Read PDFs")
 	ok(t)(InstallSkills(src, []string{"pdf"}, []string{"claude", wslCodex, wslClaude, wslPi}))
-	store := filepath.Join(h, ".local/share/magpie/skills/pdf")
+	store := filepath.Join(h, ".local/share/myna/skills/pdf")
 	if fi, err := os.Lstat(store); err != nil || !fi.IsDir() || !ours(store, "pdf") || !strings.Contains(read(t, filepath.Join(store, "SKILL.md")), "Read PDFs") {
-		t.Fatalf("no copy of magpie's in the distro: %v %v", fi, err)
+		t.Fatalf("no copy of myna's in the distro: %v %v", fi, err)
 	}
 	for _, d := range []string{".codex/skills/pdf", ".claude/skills/pdf", ".pi/agent/skills/pdf"} {
 		p := filepath.Join(h, d)
@@ -177,7 +177,7 @@ func TestWSLServers(t *testing.T) {
 }
 
 // The shared instructions, and what one WSL agent gets besides, go into
-// its file in the distro; the files magpie keeps of it are named without
+// its file in the distro; the files myna keeps of it are named without
 // the colon Windows can't have in a name.
 func TestWSLInstructions(t *testing.T) {
 	h := wslSandbox(t)
@@ -218,18 +218,18 @@ func TestWSLInstructions(t *testing.T) {
 	}
 }
 
-// magpie's own image server, a Windows program, is given to an agent in
+// myna's own image server, a Windows program, is given to an agent in
 // WSL all the same (#900): by the binary's path in the distro, which WSL's
 // interop starts, told the distro, with the variables it is given named in
 // WSLENV. A distro whose interop is off is told so.
-func TestWSLMagpieImage(t *testing.T) {
+func TestWSLMynaImage(t *testing.T) {
 	h := wslSandbox(t)
 	probed := 0
-	answer := "/mnt/d/tools/Magpie/magpie-windows-amd64.exe\ninterop:on\n"
+	answer := "/mnt/d/tools/Myna/myna-windows-amd64.exe\ninterop:on\n"
 	old := wslProbe
 	wslProbe = func(distro, script string) (string, error) {
 		probed++
-		if distro != "Ubuntu-24.04" || !strings.Contains(script, `wslpath -u 'D:\tools\Magpie\magpie-windows-amd64.exe'`) {
+		if distro != "Ubuntu-24.04" || !strings.Contains(script, `wslpath -u 'D:\tools\Myna\myna-windows-amd64.exe'`) {
 			t.Errorf("probe %s: %s", distro, script)
 		}
 		return answer, nil
@@ -241,22 +241,22 @@ func TestWSLMagpieImage(t *testing.T) {
 	}
 	reset()
 	t.Cleanup(func() { wslProbe = old; reset() })
-	// the Windows magpie this computer runs, as it would on Windows
-	thisMagpie(t, `D:\tools\Magpie\magpie-windows-amd64.exe`)
+	// the Windows myna this computer runs, as it would on Windows
+	thisMyna(t, `D:\tools\Myna\myna-windows-amd64.exe`)
 
-	img := Server{Name: "magpie-image", Transport: "stdio", Command: `D:\tools\Magpie\magpie-windows-amd64.exe`, Args: []string{"mcp", "image"},
-		Env: map[string]string{"MAGPIE_ADDR": "127.0.0.1:4000"}, Agents: []string{wslCodex, wslClaude}}
+	img := Server{Name: "myna-image", Transport: "stdio", Command: `D:\tools\Myna\myna-windows-amd64.exe`, Args: []string{"mcp", "image"},
+		Env: map[string]string{"MYNA_ADDR": "127.0.0.1:4000"}, Agents: []string{wslCodex, wslClaude}}
 	res := ok(t)(SaveServer("", img))
 	if len(res.Problems) != 0 {
 		t.Fatalf("problems: %+v", res.Problems)
 	}
 	s := read(t, filepath.Join(h, ".codex/config.toml"))
-	for _, w := range []string{"[mcp_servers.magpie-image]", `command = "/mnt/d/tools/Magpie/magpie-windows-amd64.exe"`, `"--wsl"`, `"Ubuntu-24.04"`, `WSLENV = "MAGPIE_ADDR"`} {
+	for _, w := range []string{"[mcp_servers.myna-image]", `command = "/mnt/d/tools/Myna/myna-windows-amd64.exe"`, `"--wsl"`, `"Ubuntu-24.04"`, `WSLENV = "MYNA_ADDR"`} {
 		if !strings.Contains(s, w) {
 			t.Errorf("codex@wsl config.toml has no %s:\n%s", w, s)
 		}
 	}
-	if s := read(t, filepath.Join(h, ".claude.json")); !strings.Contains(s, `"/mnt/d/tools/Magpie/magpie-windows-amd64.exe"`) || !strings.Contains(s, `"--wsl"`) {
+	if s := read(t, filepath.Join(h, ".claude.json")); !strings.Contains(s, `"/mnt/d/tools/Myna/myna-windows-amd64.exe"`) || !strings.Contains(s, `"--wsl"`) {
 		t.Errorf("claude@wsl .claude.json:\n%s", s)
 	}
 	// written as it is: the next sync changes nothing, nor asks the distro again
@@ -267,11 +267,11 @@ func TestWSLMagpieImage(t *testing.T) {
 		t.Errorf("the distro was asked %d times", probed)
 	}
 
-	// the hub on: an agent in WSL is given magpie-image itself still, run
+	// the hub on: an agent in WSL is given myna-image itself still, run
 	// in its distro, whose paths it saves to; the hub gives it nothing
 	ok(t)(SetMCPHub(true))
-	if s := read(t, filepath.Join(h, ".codex/config.toml")); !strings.Contains(s, "[mcp_servers.magpie-image]") {
-		t.Errorf("codex@wsl lost magpie-image to the hub:\n%s", s)
+	if s := read(t, filepath.Join(h, ".codex/config.toml")); !strings.Contains(s, "[mcp_servers.myna-image]") {
+		t.Errorf("codex@wsl lost myna-image to the hub:\n%s", s)
 	}
 	if got := hubServers(wslCodex); len(got) != 0 {
 		t.Errorf("the hub gives codex@wsl %v", got)
@@ -280,22 +280,22 @@ func TestWSLMagpieImage(t *testing.T) {
 
 	// drives mounted elsewhere: the server is told where
 	reset()
-	answer = "/win/d/tools/Magpie/magpie-windows-amd64.exe\ninterop:on\n"
+	answer = "/win/d/tools/Myna/myna-windows-amd64.exe\ninterop:on\n"
 	ok(t)(Sync())
-	if s := read(t, filepath.Join(h, ".codex/config.toml")); !strings.Contains(s, `"/win/d/tools/Magpie/magpie-windows-amd64.exe"`) || !strings.Contains(s, `"--mount"`) || !strings.Contains(s, `"/win/"`) {
+	if s := read(t, filepath.Join(h, ".codex/config.toml")); !strings.Contains(s, `"/win/d/tools/Myna/myna-windows-amd64.exe"`) || !strings.Contains(s, `"--mount"`) || !strings.Contains(s, `"/win/"`) {
 		t.Errorf("custom mount:\n%s", s)
 	}
 
 	// interop off: nothing it could start, and why
 	reset()
-	answer = "/mnt/d/tools/Magpie/magpie-windows-amd64.exe\ninterop:off\n"
+	answer = "/mnt/d/tools/Myna/myna-windows-amd64.exe\ninterop:off\n"
 	res, err := Sync()
 	if err != nil || len(res.Problems) == 0 || !strings.Contains(res.Problems[0].Error, "interop") {
 		t.Errorf("interop off: %+v", res.Problems)
 	}
 }
 
-// TJHHHH on Discord: magpie kept starting WSL while they repaired it. An
+// TJHHHH on Discord: myna kept starting WSL while they repaired it. An
 // agent made while its distro ran, which the user then stops (wsl
 // --shutdown), is no target: writing the library there would start it.
 // Giving it something says the distro isn't running.
@@ -333,7 +333,7 @@ func viewOf(t *testing.T, id string) *AgentView {
 
 // cybercaius on Discord: with WSL not started, the MCP page didn't list
 // the distro's agents at all. A stopped distro's agents are listed by
-// what magpie last saw of them there, their ticks as the library has
+// what myna last saw of them there, their ticks as the library has
 // them; a tick is kept, and written into the distro once it runs (Woken).
 // Nothing of the distro is opened or run while it is stopped (#3896).
 func TestWSLStoppedListedAndQueued(t *testing.T) {
@@ -417,7 +417,7 @@ func TestWSLStoppedListedAndQueued(t *testing.T) {
 	}
 }
 
-// An agent the library names in a distro that stopped before magpie ever
+// An agent the library names in a distro that stopped before myna ever
 // saw its places is listed on its rows as one whose ticks can't be shown
 // (Unseen); one it names nothing for isn't listed, and neither can be
 // given anything until the distro runs.
@@ -472,7 +472,7 @@ func instrRow(t *testing.T, id string) *AgentInstructions {
 
 // #4182: the Instructions page left a stopped distro's agents out, so
 // none could be switched on until WSL ran, and a switch on the page sent
-// the agents without them. They are listed at the file magpie last saw
+// the agents without them. They are listed at the file myna last saw
 // them read, switched as the library has them, and a switch is written
 // into the distro once it runs (Woken), on or off. Nothing of the distro
 // is opened or run while it is stopped (#3896): not even its file, whose
@@ -558,7 +558,7 @@ func TestWSLStoppedInstructions(t *testing.T) {
 	}
 }
 
-// One the library switched on in a distro that stopped before magpie
+// One the library switched on in a distro that stopped before myna
 // saw its file is listed as on, unseen, to be kept on; one never seen and
 // not on isn't listed.
 func TestWSLStoppedInstructionsUnseen(t *testing.T) {
@@ -599,8 +599,8 @@ func wslHookAgents(t *testing.T) map[string]HookAgentView {
 }
 
 // #4237: the Hooks page left a stopped distro's agents out, where while
-// it runs it lists them greyed, saying magpie gives no agent in WSL hooks
-// yet. They are listed the same while it is stopped, by what magpie saw
+// it runs it lists them greyed, saying myna gives no agent in WSL hooks
+// yet. They are listed the same while it is stopped, by what myna saw
 // there (their shape), and a hook given one says why, as while it runs.
 // There is nothing to write once the distro runs. Nothing of the distro
 // is opened or run while it is stopped (#3896).
@@ -661,8 +661,8 @@ func wslSubagentAgents(t *testing.T) map[string]SubagentAgentView {
 
 // #4238: the Subagents page left a stopped distro's agents out, where
 // while it runs it lists those that take subagents here (Claude Code and
-// Codex) greyed, saying magpie gives no agent in WSL subagents yet. They
-// are listed the same while it is stopped, by what magpie saw there
+// Codex) greyed, saying myna gives no agent in WSL subagents yet. They
+// are listed the same while it is stopped, by what myna saw there
 // (their shape), and a subagent given one says why, as while it runs.
 // There is nothing to write once the distro runs. Nothing of the distro
 // is opened or run while it is stopped (#3896).

@@ -12,17 +12,17 @@ import (
 
 	"github.com/pelletier/go-toml/v2"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // jiabubu on Discord: Kimi Code's own provider gives K2.8 Preview and
 // K3.1 Pro thinking, always_thinking, image_in, video_in, tool_use and
-// dynamically_loaded_tools, and starts K2.8 on max; through magpie they
+// dynamically_loaded_tools, and starts K2.8 on max; through myna they
 // had thinking, image_in and tool_use, a thinking switch Kimi refuses to
 // turn off, and high. A Kimi Code plan model is now told what Kimi's list
 // says of it (Kimi Code 2.4.1's managed-kimi-code.ts capabilitiesForModel)
-// but video_in, which magpie's gateway can't carry. Another vendor's model
+// but video_in, which myna's gateway can't carry. Another vendor's model
 // is told what it was, and kimi-cli, which knows none of the new words,
 // gets none of them.
 func TestKimiCodePlanCapabilities(t *testing.T) {
@@ -35,7 +35,7 @@ func TestKimiCodePlanCapabilities(t *testing.T) {
 	t.Setenv("KIMI_CODE_HOME", "")
 
 	// Kimi's /coding/v1/models as it answered on 2026-10-31, read the
-	// way magpie reads it, with the levels models.dev's catalog gives
+	// way myna reads it, with the levels models.dev's catalog gives
 	// (Decorate)
 	list, err := os.ReadFile("../catalog/testdata/kimi-code-cn-models-2026-10-31.json")
 	if err != nil {
@@ -95,21 +95,21 @@ func TestKimiCodePlanCapabilities(t *testing.T) {
 	}
 	path := filepath.Join(home, ".kimi-code", "config.toml")
 	writeFile(t, path, "")
-	if err := kimi(home).Field("model").Set("magpie/kimi-code-cn/kimi-for-coding"); err != nil {
+	if err := kimi(home).Field("model").Set("myna/kimi-code-cn/kimi-for-coding"); err != nil {
 		t.Fatal(err)
 	}
 	want := map[string]model{
-		"magpie/kimi-code-cn/kimi-for-coding": {[]string{"thinking", "always_thinking", "image_in", "tool_use", "dynamically_loaded_tools"},
+		"myna/kimi-code-cn/kimi-for-coding": {[]string{"thinking", "always_thinking", "image_in", "tool_use", "dynamically_loaded_tools"},
 			[]string{"low", "high", "max"}, "max"},
 		// its list says it always thinks and loads no tools, with no levels
-		"magpie/kimi-code-cn/kimi-for-coding-highspeed": {[]string{"thinking", "always_thinking", "image_in", "tool_use"}, nil, ""},
-		"magpie/kimi-code-cn/k3.1-pro": {[]string{"thinking", "always_thinking", "image_in", "tool_use", "dynamically_loaded_tools"},
+		"myna/kimi-code-cn/kimi-for-coding-highspeed": {[]string{"thinking", "always_thinking", "image_in", "tool_use"}, nil, ""},
+		"myna/kimi-code-cn/k3.1-pro": {[]string{"thinking", "always_thinking", "image_in", "tool_use", "dynamically_loaded_tools"},
 			[]string{"low", "high", "max"}, "high"},
 		// another vendor's model, video and all, as it was
-		"magpie/relay/gemini-3-pro": {[]string{"thinking", "image_in", "tool_use"}, []string{"low", "high"}, "high"},
-		"magpie/group/top": {[]string{"thinking", "always_thinking", "image_in", "tool_use", "dynamically_loaded_tools"},
+		"myna/relay/gemini-3-pro": {[]string{"thinking", "image_in", "tool_use"}, []string{"low", "high"}, "high"},
+		"myna/group/top": {[]string{"thinking", "always_thinking", "image_in", "tool_use", "dynamically_loaded_tools"},
 			[]string{"low", "high", "max"}, "max"},
-		"magpie/group/mix": {[]string{"thinking", "image_in", "tool_use"}, []string{"low", "high"}, "high"},
+		"myna/group/mix": {[]string{"thinking", "image_in", "tool_use"}, []string{"low", "high"}, "high"},
 	}
 	got := read(path)
 	for k, w := range want {
@@ -122,15 +122,15 @@ func TestKimiCodePlanCapabilities(t *testing.T) {
 	}
 
 	// the user's own pick on K2.8 stays; K3.1 Pro's high, written by a
-	// magpie that kept no record of it, is the vendor's default too
+	// myna that kept no record of it, is the vendor's default too
 	b, _ := os.ReadFile(path)
-	at := strings.Index(string(b), `[models."magpie/kimi-code-cn/kimi-for-coding"]`)
+	at := strings.Index(string(b), `[models."myna/kimi-code-cn/kimi-for-coding"]`)
 	s := string(b[:at]) + strings.Replace(string(b[at:]), `default_effort = "max"`, `default_effort = "low"`, 1)
 	writeFile(t, path, s)
-	if err := kimi(home).Field("model").Set("magpie/kimi-code-cn/kimi-for-coding"); err != nil {
+	if err := kimi(home).Field("model").Set("myna/kimi-code-cn/kimi-for-coding"); err != nil {
 		t.Fatal(err)
 	}
-	if g := read(path)["magpie/kimi-code-cn/kimi-for-coding"].DefaultEffort; g != "low" {
+	if g := read(path)["myna/kimi-code-cn/kimi-for-coding"].DefaultEffort; g != "low" {
 		t.Errorf("the user's default effort on K2.8: %q, want low", g)
 	}
 
@@ -138,16 +138,16 @@ func TestKimiCodePlanCapabilities(t *testing.T) {
 	os.RemoveAll(filepath.Join(home, ".kimi-code"))
 	legacy := filepath.Join(home, ".kimi", "config.toml")
 	writeFile(t, legacy, "")
-	if err := kimi(home).Field("model").Set("magpie/kimi-code-cn/kimi-for-coding"); err != nil {
+	if err := kimi(home).Field("model").Set("myna/kimi-code-cn/kimi-for-coding"); err != nil {
 		t.Fatal(err)
 	}
-	if g := read(legacy)["magpie/kimi-code-cn/kimi-for-coding"]; !reflect.DeepEqual(g.Capabilities, []string{"thinking", "image_in"}) || g.DefaultEffort != "" {
+	if g := read(legacy)["myna/kimi-code-cn/kimi-for-coding"]; !reflect.DeepEqual(g.Capabilities, []string{"thinking", "image_in"}) || g.DefaultEffort != "" {
 		t.Errorf("kimi-cli: %+v", g)
 	}
 }
 
-// A Kimi Code config written by a magpie before this one has high on K2.8
-// with no record that magpie wrote it: it becomes the vendor's max. One
+// A Kimi Code config written by a myna before this one has high on K2.8
+// with no record that myna wrote it: it becomes the vendor's max. One
 // the user picked after a record was kept stays (TestKimiCodePlanCapabilities).
 func TestKimiCodeOldHighBecomesTheVendorsDefault(t *testing.T) {
 	kvs, def := kimiEfforts([]string{"none", "low", "high", "max"}, "max", "high", map[string]string{"display_name": "K2.8 Preview"})

@@ -4,7 +4,7 @@
 // editRedactRule: the rule at n, open to change in its place (nf1qaz2w on
 // Discord: rules could only be removed) — its name, prefix or regex and
 // what to match, laid out as the row that adds one. Save sends it alone,
-// checked as an added rule is: one magpie can't use is said in the row,
+// checked as an added rule is: one myna can't use is said in the row,
 // what was typed kept and every rule as it was. Cancel (or Escape) leaves
 // the rule as it was.
 window.editRedactRule = function (r, n, row) {

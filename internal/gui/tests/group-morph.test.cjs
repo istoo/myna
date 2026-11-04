@@ -60,7 +60,7 @@ const slotMotion = (page) => page.evaluate(() => {
   };
 });
 
-// magpie moves the page only for the reader, so what is out of the window
+// myna moves the page only for the reader, so what is out of the window
 // is wheeled to as a reader would, then clicked
 async function reach(page, loc) {
   const vb = await page.locator("#view-routing").boundingBox();
@@ -93,7 +93,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       let release;
       await page.route("**/*", serve(lang, new Promise((r) => { release = r; })));
-      await page.goto("http://magpie.test/?view=routing");
+      await page.goto("http://myna.test/?view=routing");
       const row = page.locator(".rt-group[data-id=b]");
       await row.waitFor();
       const rowH = (await row.boundingBox()).height;
@@ -155,7 +155,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     page.setDefaultTimeout(5000);
     page.setDefaultNavigationTimeout(60000);
     await page.route("**/*", serve("en", Promise.resolve()));
-    await page.goto("http://magpie.test/?view=routing");
+    await page.goto("http://myna.test/?view=routing");
     await page.locator(".rt-group[data-id=b]").click();
     await page.locator(".rt-gedit").waitFor();
     assert.equal((await slotMotion(page)).from, null, "no height animation opening");

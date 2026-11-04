@@ -6,14 +6,14 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/gwmw"
-	"github.com/yetone/magpie/internal/middleware"
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/pluginrt"
-	"github.com/yetone/magpie/internal/routes"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/testenv"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/istoo/myna/internal/gwmw"
+	"github.com/istoo/myna/internal/middleware"
+	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/myna/internal/pluginrt"
+	"github.com/istoo/myna/internal/routes"
+	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/myna/internal/usage"
 )
 
 func TestMain(m *testing.M) { testenv.Main(m) }

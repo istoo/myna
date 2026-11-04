@@ -9,7 +9,7 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
-const alternateAppJS = process.env.MAGPIE_APP_JS;
+const alternateAppJS = process.env.MYNA_APP_JS;
 
 function serve() {
   const state = { agents: [], profiles: [], settings: { lang: "en", theme: "light" } };
@@ -38,8 +38,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     page.setDefaultTimeout(5000);
     page.setDefaultNavigationTimeout(60000);
     await page.route("**/*", serve());
-    await page.goto("http://magpie.test/?view=providers");
-    await page.waitForFunction(() => typeof window.magpieWindowVisibility === "function");
+    await page.goto("http://myna.test/?view=providers");
+    await page.waitForFunction(() => typeof window.mynaWindowVisibility === "function");
 
     const hidden = await page.evaluate(() => {
       const style = document.createElement("style");
@@ -50,12 +50,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       document.body.append(probe);
       window.__visibilityEvents = 0;
       document.addEventListener("visibilitychange", () => window.__visibilityEvents++);
-      window.magpieWindowVisibility(false);
-      window.magpieWindowVisibility(false);
+      window.mynaWindowVisibility(false);
+      window.mynaWindowVisibility(false);
       return {
         hidden: document.hidden,
         state: document.visibilityState,
-        marked: document.documentElement.classList.contains("magpie-out-of-sight"),
+        marked: document.documentElement.classList.contains("myna-out-of-sight"),
         playState: getComputedStyle(probe).animationPlayState,
         events: window.__visibilityEvents,
       };
@@ -63,12 +63,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     assert.deepEqual(hidden, { hidden: true, state: "hidden", marked: true, playState: "paused", events: 1 });
 
     const shown = await page.evaluate(() => {
-      window.magpieWindowVisibility(true);
-      window.magpieWindowVisibility(true);
+      window.mynaWindowVisibility(true);
+      window.mynaWindowVisibility(true);
       return {
         hidden: document.hidden,
         state: document.visibilityState,
-        marked: document.documentElement.classList.contains("magpie-out-of-sight"),
+        marked: document.documentElement.classList.contains("myna-out-of-sight"),
         playState: getComputedStyle(document.querySelector("#visibilityProbe")).animationPlayState,
         events: window.__visibilityEvents,
       };
@@ -77,9 +77,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
     // a window that takes focus is on screen, whichever path showed it
     const focused = await page.evaluate(() => {
-      window.magpieWindowVisibility(false);
+      window.mynaWindowVisibility(false);
       window.dispatchEvent(new Event("focus"));
-      return { hidden: document.hidden, marked: document.documentElement.classList.contains("magpie-out-of-sight") };
+      return { hidden: document.hidden, marked: document.documentElement.classList.contains("myna-out-of-sight") };
     });
     assert.deepEqual(focused, { hidden: false, marked: false });
   });

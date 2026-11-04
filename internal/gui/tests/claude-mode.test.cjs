@@ -70,7 +70,7 @@ function serve(lang, run, switchOnly, reads) {
     }
     if (url.pathname === "/api/groups") return json({ groups: [], pools: [] });
     if (url.pathname.startsWith("/api/")) return json({});
-    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "magpie.test") return route.fulfill({ status: 404, body: "" });
+    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "myna.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -84,7 +84,7 @@ async function openEditor(browser, lang, run, { id = "claude", width = 900, swit
   const errors = [], reads = { n: 0, saved: [] };
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", serve(lang, run, switchOnly, reads));
-  await page.goto("http://magpie.test/?view=providers");
+  await page.goto("http://myna.test/?view=providers");
   // the first draw waits on the page's first reads: a load's room, not a click's (#4470)
   const row = page.locator(`.row.provider[data-id="${id}"]`);
   await row.waitFor({ timeout: 60000 });
@@ -134,7 +134,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       if (lang !== "en") {
         // every line of the card is in the reader's language
         const text = await tip.textContent();
-        assert(!/magpie opens Claude Code as a person does|Your plan counts|It starts at once|Switched here/.test(text), `English left in the card: ${text}`);
+        assert(!/myna opens Claude Code as a person does|Your plan counts|It starts at once|Switched here/.test(text), `English left in the card: ${text}`);
       }
       await page.mouse.move(5, 5);
       await tip.waitFor({ state: "detached" });

@@ -16,7 +16,7 @@ import (
 
 // Codex keeps one ChatGPT sign-in a folder (codex-rs login/src/auth/
 // storage.rs: $CODEX_HOME/auth.json), so a second account is Codex run
-// with CODEX_HOME=~/.codex-work. phantom3792 on X: magpie read only the
+// with CODEX_HOME=~/.codex-work. phantom3792 on X: myna read only the
 // default folder's account, and an account added from another folder read
 // no quota. This is that layout: ~/.codex signed in to me@example.com (as
 // signIn writes it), ~/.codex-work to work@example.com with an access
@@ -108,7 +108,7 @@ func TestCodexOtherHomeAccountReadsQuota(t *testing.T) {
 	if now, _ := os.ReadFile(filepath.Join(home, ".codex", "auth.json")); string(now) != string(mainAuth) {
 		t.Errorf("~/.codex/auth.json was rewritten: %s", now)
 	}
-	// removed from magpie, ~/.codex-work left as it is
+	// removed from myna, ~/.codex-work left as it is
 	// (TestCodexHeldFolderAccountRemoved)
 	if err := ForgetLogin("codex", "work@example.com"); err != nil {
 		t.Errorf("remove the other folder's account: %v", err)

@@ -9,11 +9,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/myna/internal/gateway"
 )
 
-// mimi001234 on Discord: magpie's Agents page didn't find Antigravity CLI
+// mimi001234 on Discord: myna's Agents page didn't find Antigravity CLI
 // installed in WSL. The probe asks after its folder and its command, and
 // finds it by either; a distro with neither has no agy row.
 func TestWSLAgyFound(t *testing.T) {
@@ -65,7 +65,7 @@ func agyDistro(t *testing.T, mine string) (d distro, dhome string) {
 		Gateway: "172.20.0.1", Running: true}, dhome
 }
 
-// Picking one of magpie's models for agy in a distro puts the function agy
+// Picking one of myna's models for agy in a distro puts the function agy
 // in the distro's shells' profiles — its .bashrc, and the .zshrc of the
 // zsh it logs in to, made — naming the gateway as the distro reaches it
 // under NAT, with the WSL key; this machine's profiles are left alone. A
@@ -81,7 +81,7 @@ func TestWSLAgyPick(t *testing.T) {
 	if a.Typed() != "" || a.Launch() != "" {
 		t.Fatalf("before: %q %q", a.Typed(), a.Launch())
 	}
-	if err := a.Field("model").Set("magpie/relay/glm-4.6"); err != nil {
+	if err := a.Field("model").Set("myna/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	gw := "http://172.20.0.1:" + gateway.Port()
@@ -90,17 +90,17 @@ func TestWSLAgyPick(t *testing.T) {
 		t.Fatalf("key %q", key)
 	}
 	settings := filepath.Join(dhome, ".gemini", "antigravity-cli", "settings.json")
-	if m, _ := edit.GetJSON(settings, "model"); m != "magpie/relay/glm-4.6" {
+	if m, _ := edit.GetJSON(settings, "model"); m != "myna/relay/glm-4.6" {
 		t.Fatalf("settings.json:\n%s", readFile(settings))
 	}
 	for _, p := range []string{bashrc, zshrc} {
 		body := readFile(p)
-		if !strings.Contains(body, "# >>> magpie agy >>>\nfunction agy {\n") || !strings.Contains(body, "GOOGLE_GEMINI_BASE_URL='"+gw+"'") ||
+		if !strings.Contains(body, "# >>> myna agy >>>\nfunction agy {\n") || !strings.Contains(body, "GOOGLE_GEMINI_BASE_URL='"+gw+"'") ||
 			!strings.Contains(body, "GEMINI_API_KEY='"+key+"'") || strings.Contains(body, "127.0.0.1") {
 			t.Fatalf("%s:\n%s", p, body)
 		}
 	}
-	if !strings.HasPrefix(readFile(bashrc), mine+"\n# >>> magpie agy >>>") {
+	if !strings.HasPrefix(readFile(bashrc), mine+"\n# >>> myna agy >>>") {
 		t.Fatalf(".bashrc:\n%s", readFile(bashrc))
 	}
 	if _, err := os.Stat(filepath.Join(dhome, ".config", "fish")); !os.IsNotExist(err) {
@@ -147,7 +147,7 @@ func TestWSLAgyPick(t *testing.T) {
 	if got := readFile(bashrc); got != mine {
 		t.Fatalf(".bashrc:\n%s", got)
 	}
-	if got := readFile(zshrc); strings.Contains(got, "magpie agy") {
+	if got := readFile(zshrc); strings.Contains(got, "myna agy") {
 		t.Fatalf(".zshrc:\n%s", got)
 	}
 	if a.Typed() != "" || a.Launch() != "" {
@@ -156,7 +156,7 @@ func TestWSLAgyPick(t *testing.T) {
 }
 
 // The function in a distro reads settings.json's model itself, there being
-// no magpie there to ask: on magpie's, agy starts with the gateway, key and
+// no myna there to ask: on myna's, agy starts with the gateway, key and
 // --model (none when one is given); off it, as it is. Run in bash and zsh.
 func TestWSLAgyFunctionRuns(t *testing.T) {
 	if runtime.GOOS == "windows" {
@@ -165,7 +165,7 @@ func TestWSLAgyFunctionRuns(t *testing.T) {
 	syncHome(t)
 	d, dhome := agyDistro(t, "")
 	a := wslAgent(wslKindOf("agy"), d)
-	if err := a.Field("model").Set("magpie/relay/glm-4.6"); err != nil {
+	if err := a.Field("model").Set("myna/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	gw := "http://172.20.0.1:" + gateway.Port()
@@ -188,7 +188,7 @@ func TestWSLAgyFunctionRuns(t *testing.T) {
 			}
 			return strings.TrimSpace(string(out))
 		}
-		if got := run("-p 'hi there'"); got != on+" args=--model magpie/relay/glm-4.6 -p hi there" {
+		if got := run("-p 'hi there'"); got != on+" args=--model myna/relay/glm-4.6 -p hi there" {
 			t.Errorf("%s: %s", c.sh, got)
 		}
 		if got := run("--model=own -p hi"); got != on+" args=--model=own -p hi" {
@@ -203,12 +203,12 @@ func TestWSLAgyFunctionRuns(t *testing.T) {
 	cmd := exec.Command("bash", "-c", `. "$HOME/.bashrc"; agy -p hi`)
 	cmd.Env = []string{"HOME=" + dhome, "PATH=" + bin + ":/usr/bin:/bin"}
 	if out, err := cmd.CombinedOutput(); err != nil || strings.TrimSpace(string(out)) != "key= url= args=-p hi" {
-		t.Fatalf("off magpie: %v %s", err, out)
+		t.Fatalf("off myna: %v %s", err, out)
 	}
 }
 
 // A stopped distro's agy is never opened: its model is shown as last seen,
-// its options come from magpie, and a pick starts the distro and writes
+// its options come from myna, and a pick starts the distro and writes
 // the function there.
 func TestWSLAgyStopped(t *testing.T) {
 	syncHome(t)
@@ -233,7 +233,7 @@ func TestWSLAgyStopped(t *testing.T) {
 	var mine, ours bool
 	for _, o := range opts {
 		mine = mine || o.Value == "gemini-3-pro"
-		ours = ours || usesMagpie(o.Value)
+		ours = ours || usesMyna(o.Value)
 	}
 	if !mine || !ours || len(*asked) != 0 || len(*opened) != 0 {
 		t.Fatalf("options %v, asked %v, opened %v", opts, *asked, *opened)
@@ -241,7 +241,7 @@ func TestWSLAgyStopped(t *testing.T) {
 	if es, _ := os.ReadDir(root); len(es) > 0 {
 		t.Fatal("a stopped distro was opened")
 	}
-	if err := a.Field("model").Set("magpie/relay/glm-4.6"); err != nil {
+	if err := a.Field("model").Set("myna/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	if strings.Join(*asked, ",") != "Stopped" {

@@ -14,7 +14,7 @@ import (
 
 // Without their logos the cells are their digits alone: narrower than with
 // them, nothing drawn where the logo was, and a thin line between one card
-// and the next. MAGPIE_TRAY_PREVIEW=<dir> writes them as PNGs to look at.
+// and the next. MYNA_TRAY_PREVIEW=<dir> writes them as PNGs to look at.
 func TestTrayImagePlain(t *testing.T) {
 	bird, err := os.ReadFile("tray.png")
 	if err != nil {
@@ -65,7 +65,7 @@ func TestTrayImagePlain(t *testing.T) {
 		if ink := inkIn(img, image.Rect(gap.Max.X, 0, w, h), dark); ink < 60 {
 			t.Errorf("dark %v: the second card has %d px of ink", dark, ink)
 		}
-		if out := os.Getenv("MAGPIE_TRAY_PREVIEW"); out != "" {
+		if out := os.Getenv("MYNA_TRAY_PREVIEW"); out != "" {
 			bg, _, _ := trayImagePNG(plain, bird, 22, 2, dark, true)
 			if err := os.WriteFile(filepath.Join(out, map[bool]string{false: "plain-light.png", true: "plain-dark.png"}[dark]), bg, 0o644); err != nil {
 				t.Fatal(err)

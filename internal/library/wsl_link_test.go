@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agent"
+	"github.com/istoo/myna/internal/agent"
 )
 
 // wslLinked is sandbox with a running WSL distro, Ubuntu-24.04, whose
@@ -17,7 +17,7 @@ import (
 // isn't there, so — as through \\wsl.localhost — nothing below it can be
 // made, written or read, and a mkdir of it says it exists. Windows' C: is
 // a folder of its own, with the agents' real folders. probe is what the
-// distro answers of the links; it gives back the home as magpie opens it
+// distro answers of the links; it gives back the home as myna opens it
 // and C:\Users\me.
 func wslLinked(t *testing.T, links string) (home, c string) {
 	t.Helper()
@@ -81,7 +81,7 @@ func TestWSLFolderLinkUnresolved(t *testing.T) {
 			got = append(got, p)
 		}
 	}
-	if len(got) != 1 || got[0].What != "wsl" || !strings.Contains(got[0].Error, "~/.codex in WSL Ubuntu-24.04 is a link magpie couldn't follow") {
+	if len(got) != 1 || got[0].What != "wsl" || !strings.Contains(got[0].Error, "~/.codex in WSL Ubuntu-24.04 is a link myna couldn't follow") {
 		t.Fatalf("Codex behind a link not resolved: %+v", r.Problems)
 	}
 	if _, err := os.Stat(filepath.Join(c, ".claude", "skills", "pdf", "SKILL.md")); err != nil {
@@ -136,7 +136,7 @@ func TestRTKWSLFolderLinkUnresolved(t *testing.T) {
 		t.Fatal(err)
 	}
 	_, err := SetRTK(wslClaude, true)
-	if err == nil || !strings.Contains(err.Error(), "~/.claude in WSL Ubuntu-24.04 is a link magpie couldn't follow") {
+	if err == nil || !strings.Contains(err.Error(), "~/.claude in WSL Ubuntu-24.04 is a link myna couldn't follow") {
 		t.Fatalf("RTK behind a link not resolved: %v", err)
 	}
 }

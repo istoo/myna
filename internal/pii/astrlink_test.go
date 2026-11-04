@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/pii/guard"
-	"github.com/yetone/magpie/internal/redact"
+	"github.com/istoo/myna/internal/pii/guard"
+	"github.com/istoo/myna/internal/redact"
 )
 
 // guardSandbox gives AstrLink Guard a folder of the test's own, and
@@ -380,7 +380,7 @@ func (f panicFinder) Find(text string) []guard.Span {
 }
 
 // A model that panics reading one request fails that request, held back
-// as for a model that failed, instead of ending magpie from the read's
+// as for a model that failed, instead of ending myna from the read's
 // goroutine (#4553), and isn't counted as failed for the requests after
 // it, which it reads.
 func TestGuardPanicFailsOnlyItsRequest(t *testing.T) {

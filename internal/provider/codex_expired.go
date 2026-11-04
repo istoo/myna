@@ -4,7 +4,7 @@ package provider
 // time left by its own exp (willz on Discord, #2973: two saved Team
 // accounts, /wham/usage answering 401 "Provided authentication token is
 // expired. Please try refreshing it." until each was signed in again).
-// magpie refreshes a token only as its exp nears, so it kept sending the
+// myna refreshes a token only as its exp nears, so it kept sending the
 // one turned away. Such an answer is mended by one refresh: forced here,
 // and the read made once more with the new token, never more.
 
@@ -43,7 +43,7 @@ func codexExpired(err error) bool {
 }
 
 // errCodexStillExpired is a usage read turned away as expired again with
-// the token refreshed just for it: nothing magpie holds will do.
+// the token refreshed just for it: nothing myna holds will do.
 var errCodexStillExpired = errors.New("ChatGPT turned the refreshed sign-in away too; sign in to this account again")
 
 // codexRevoked says err is the backend calling the sign-in itself gone
@@ -57,7 +57,7 @@ func codexRevoked(err error) bool {
 // a refresh tried for it (charliepu on Discord: an account showing no
 // allowance until it was signed in again): the account is to be marked
 // signed out for tok, the access token turned away, and signed in again
-// in magpie. A refresh refused is told by refreshRefused instead.
+// in myna. A refresh refused is told by refreshRefused instead.
 type codexSignInGone struct {
 	tok string
 	err error

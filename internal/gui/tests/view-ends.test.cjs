@@ -88,7 +88,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           });
           await p.route("**/*", server(lang, shape.theme));
           const view = p.locator("#view-agents");
-          await p.goto("http://magpie.test/?view=agents");
+          await p.goto("http://myna.test/?view=agents");
           await p.locator("#view-agents .ag-lead").first().waitFor();
           await p.waitForFunction(() => { const v = document.getElementById("view-agents"); return v.scrollHeight > v.clientHeight * 3; }).catch(() => {});
           const h = await view.evaluate((v) => ({ over: v.scrollHeight - v.clientHeight, h: v.clientHeight, tall: v.scrollHeight }));

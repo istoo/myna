@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // fallbackToGroup saves a provider "plan" whose key kp answers 429 (out of
@@ -65,7 +65,7 @@ func TestFallbackGroupWithThePrimaryTriesItOnce(t *testing.T) {
 		t.Fatalf("every one failing answered 200")
 	}
 	// every one failing, the request is asked again as many times as
-	// magpie's patience has it; each round asks each model once
+	// myna's patience has it; each round asks each model once
 	if len(plan.tried) == 0 || len(a.tried) != len(plan.tried) || len(b.tried) != len(plan.tried) {
 		t.Fatalf("each tried once a round: plan %v, a %v, b %v", plan.tried, a.tried, b.tried)
 	}
@@ -90,7 +90,7 @@ func TestFallbackGroupSharedModelTriedOnce(t *testing.T) {
 	b.fail = map[string]int{"kb": 500}
 	postAs(t, New(), "", `{"model":"plan/m","messages":[{"role":"user","content":"hi"}]}`)
 	// every one failing, the request is asked again as many times as
-	// magpie's patience has it; each round asks each model once
+	// myna's patience has it; each round asks each model once
 	if len(plan.tried) == 0 || len(a.tried) != len(plan.tried) || len(b.tried) != len(plan.tried) {
 		t.Fatalf("each tried once a round: plan %v, a %v, b %v", plan.tried, a.tried, b.tried)
 	}

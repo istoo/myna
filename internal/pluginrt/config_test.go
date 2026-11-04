@@ -13,7 +13,7 @@ import (
 
 func home(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
-	t.Setenv("MAGPIE_PORTABLE", "")
+	t.Setenv("MYNA_PORTABLE", "")
 }
 
 var three = []Manifest{
@@ -207,7 +207,7 @@ func TestKeepFreshFollowsPluginsYml(t *testing.T) {
 
 	// turned off or on in this process, it follows at once, not on the
 	// next look for another process's writes (#3185: those looks woke an
-	// idle magpie, so they are seconds apart now)
+	// idle myna, so they are seconds apart now)
 	stop()
 	stop = keep(time.Hour)
 	wait(1)

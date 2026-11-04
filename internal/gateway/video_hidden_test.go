@@ -6,13 +6,13 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // axelburks on Discord: a Volcengine Ark key's Seedance models are ticked
 // in its editor as its Seedream ones are. One unticked there
-// (HiddenVideomakers) leaves generate_video's list, another magpie's list
+// (HiddenVideomakers) leaves generate_video's list, another myna's list
 // and Automatic, and still makes its video when named; its image models
 // are left as they were.
 func TestHiddenVideomakerLeavesListsButStillFilms(t *testing.T) {

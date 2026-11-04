@@ -8,18 +8,18 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // TryNet is where a try's time went up to its reply's first byte, as Go's
 // HTTP client saw the request that went out to the vendor last (a
 // sign-in refreshed or a request asked again on the way are Before): what
-// was magpie's, the network's and the vendor's, so a slow turn says
+// was myna's, the network's and the vendor's, so a slow turn says
 // whose it was (Discord, Magic_zero: "网关连接提供商和回复到agent的速度
 // 有点慢"). Each is in ms, to a tenth; absent for a try whose request
 // went out some other way (a plugin's own fetch, an agent's app).
 type TryNet struct {
-	// Own: magpie's, from the try's Start to its request going out, the
+	// Own: myna's, from the try's Start to its request going out, the
 	// queue for a slot (Try.Queued) left out
 	Own float64 `json:"own,omitempty"`
 	// Before: requests made on the way before the last one, from the
@@ -167,10 +167,10 @@ func (n *netTrace) timing(began time.Time, queued int64) *TryNet {
 	return t
 }
 
-// sentBy is what sends a request to p's vendor when magpie's own client
+// sentBy is what sends a request to p's vendor when myna's own client
 // doesn't, which TryNet can't follow: "plugin", its plugin's fetch in the
 // plugin host; "claude", Claude Code's own run (the subscription bridge,
-// attempt); "" for magpie's client. The Routing page says it in place of
+// attempt); "" for myna's client. The Routing page says it in place of
 // where the time went (Discord, lute: some requests had it and some
 // didn't, with nothing said).
 func sentBy(p provider.Provider) string {

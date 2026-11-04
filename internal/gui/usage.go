@@ -13,17 +13,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/sessions"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
-	"github.com/yetone/magpie/internal/usageapi"
+	"github.com/istoo/myna/internal/agent"
+	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/myna/internal/usageapi"
 )
 
 // The Usage page's JSON is built in usageapi, which the gateway's
-// /v1/magpie/usage answers from too.
+// /v1/myna/usage answers from too.
 type (
 	usageGroup = usageapi.Group
 	usageJSON  = usageapi.Usage
@@ -52,20 +52,20 @@ func init() {
 // and the day of now, the moment its rows were read at.
 func csvStamp(p usage.Period, day string, now time.Time) string {
 	if _, err := time.Parse(time.DateOnly, day); err == nil {
-		return "magpie-requests-day-" + day
+		return "myna-requests-day-" + day
 	}
 	if p.IsRange() { // the days picked, which already say when
-		return "magpie-requests-" + strings.Replace(string(p), "..", "-to-", 1)
+		return "myna-requests-" + strings.Replace(string(p), "..", "-to-", 1)
 	}
 	// a rolling window ("last:24h0m0s") without the colon, which Windows
 	// doesn't take in a file name (#2075)
-	return "magpie-requests-" + strings.ReplaceAll(string(p), ":", "-") + "-" + now.Format(time.DateOnly)
+	return "myna-requests-" + strings.ReplaceAll(string(p), ":", "-") + "-" + now.Format(time.DateOnly)
 }
 
 // contentJSON is what was said in a request, or why it can't be told.
 type contentJSON struct {
 	Found bool `json:"found"`
-	// Why not: "session" (the request named none), "agent" (magpie reads the session
+	// Why not: "session" (the request named none), "agent" (myna reads the session
 	// files of Claude Code, Claude Desktop and Codex only), "missing" (the files have no
 	// such call: deleted, moved, or not written yet) or "read" (the file wouldn't read)
 	Why   string `json:"why,omitempty"`
@@ -189,7 +189,7 @@ func usageRoutes(mux *http.ServeMux, w Windows) {
 	}))
 	// what was said in one request, read from the agent's session file when the
 	// row is opened, between two times (the call's own, or a gateway request's
-	// span): magpie keeps no copy
+	// span): myna keeps no copy
 	mux.HandleFunc("GET /api/usage/requests/content", func(rw http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query()
 		from, err1 := time.Parse(time.RFC3339Nano, q.Get("from"))
@@ -206,7 +206,7 @@ func usageRoutes(mux *http.ServeMux, w Windows) {
 		}
 		writeJSON(rw, requestContent(q.Get("agent"), q.Get("session"), from, to, at))
 	})
-	// the same CSV to a browser (magpie web), which saves it itself
+	// the same CSV to a browser (myna web), which saves it itself
 	mux.HandleFunc("GET /api/usage/requests.csv", func(rw http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query()
 		p := periodOf(q.Get("period"))
@@ -266,7 +266,7 @@ func usageRoutes(mux *http.ServeMux, w Windows) {
 		// a WorkBuddy (China) account's card says how its daily check-in
 		// went (#694)
 		qs := provider.InProviderOrder(provider.WithCheckins(provider.Quotas(ctx)))
-		// and what each window holds whole, by what magpie routed in it
+		// and what each window holds whole, by what myna routed in it
 		qs = usage.WithWindowHolds(qs, usage.Clock())
 		// and when each began, for its Pace number (fflake33)
 		qs = provider.WithWindowStarts(qs, usage.Clock())
@@ -298,7 +298,7 @@ func usageRoutes(mux *http.ServeMux, w Windows) {
 		writeJSON(rw, withTrayKinds(provider.WithHeldWindows(provider.WithWindowStarts(usage.WithWindowHolds(provider.InProviderOrder(provider.WithCheckins(provider.Quotas(ctx))), usage.Clock()), usage.Clock()), usage.Clock())))
 	})
 	// WorkBuddy's daily check-in pressed now, from the Usage card, for
-	// each account not in yet today, as `magpie accounts checkin` does; the
+	// each account not in yet today, as `myna accounts checkin` does; the
 	// card is read again after
 	mux.HandleFunc("POST /api/usage/workbuddy-checkin", func(rw http.ResponseWriter, r *http.Request) {
 		ctx, cancel := context.WithTimeout(r.Context(), time.Minute)
@@ -377,7 +377,7 @@ func usageRoutes(mux *http.ServeMux, w Windows) {
 	mux.HandleFunc("GET /api/usage/quotas/history", func(rw http.ResponseWriter, r *http.Request) {
 		days := r.URL.Query().Get("days")
 		hs := provider.QuotaHistories(provider.QuotaHistorySince(days, time.Now()), "", "")
-		// and a remote magpie's, for its cards (office/codex)
+		// and a remote myna's, for its cards (office/codex)
 		ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 		defer cancel()
 		writeJSON(rw, append(hs, provider.RemoteQuotaHistories(ctx, days)...))
@@ -399,8 +399,8 @@ func usageRoutes(mux *http.ServeMux, w Windows) {
 	// spends one of a Codex account's rate-limit resets, which the page
 	// has asked the user about first: the one they chose (Credit, an id
 	// of its resets.each), else the one that runs out first; what it did
-	// comes back. A card from a remote magpie (Provider "office/codex")
-	// has that magpie spend it, on its account (#3850)
+	// comes back. A card from a remote myna (Provider "office/codex")
+	// has that myna spend it, on its account (#3850)
 	mux.HandleFunc("POST /api/usage/codex-reset", func(rw http.ResponseWriter, r *http.Request) {
 		var in struct{ Provider, User, Credit string }
 		if err := json.NewDecoder(r.Body).Decode(&in); err != nil {

@@ -19,20 +19,20 @@ import (
 // its own. Under pagePolicy, served as the app serves it (ownWindow names
 // the scheme), its stylesheet and its scripts load there.
 func TestPluginPageLoadsItsFilesInTheWindow(t *testing.T) {
-	out, err := runAppKit(t, 30*time.Second, []string{"MAGPIE_TEST_PLUGIN_PAGE=1"})
+	out, err := runAppKit(t, 30*time.Second, []string{"MYNA_TEST_PLUGIN_PAGE=1"})
 	if err != nil || !strings.Contains(string(out), "plugin page: styled script") {
 		t.Fatalf("plugin page: %v\n%s", err, out)
 	}
 }
 
 func init() {
-	if os.Getenv("MAGPIE_TEST_PLUGIN_PAGE") != "1" {
+	if os.Getenv("MYNA_TEST_PLUGIN_PAGE") != "1" {
 		return
 	}
 	const tok = "0123456789abcdef0123456789abcdef"
 	seen := make(chan string, 1)
 	app := application.New(application.Options{
-		Name: "magpie plugin page regression",
+		Name: "myna plugin page regression",
 		Mac:  application.MacOptions{ActivationPolicy: application.ActivationPolicyProhibited},
 		Assets: application.AssetOptions{Handler: ownWindow(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			switch r.URL.Path {

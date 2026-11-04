@@ -14,10 +14,10 @@ import (
 	"github.com/pelletier/go-toml/v2"
 	"github.com/pelletier/go-toml/v2/unstable"
 
-	"github.com/yetone/magpie/internal/filememo"
+	"github.com/istoo/myna/internal/filememo"
 )
 
-// Whole TOML tables are treated as units: magpie owns the tables it writes
+// Whole TOML tables are treated as units: myna owns the tables it writes
 // (for example a model provider) and replaces them verbatim, while every
 // other line of the file stays untouched.
 
@@ -785,7 +785,7 @@ type Table struct {
 
 // SetTOMLTables replaces every ordinary or array table whose name begins with
 // one of the prefixes by the given tables, appended at the end in one write: a set of
-// tables magpie owns as a whole (one per model of its catalog), which would
+// tables myna owns as a whole (one per model of its catalog), which would
 // otherwise be rewritten once per table. With no tables it only removes.
 func SetTOMLTables(path string, prefixes []string, tables []Table) error {
 	return SetTOMLTablesMatching(path, nil, prefixes, tables)

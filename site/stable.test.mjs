@@ -114,14 +114,14 @@ globalThis.caches = {
     put: async (req, res) => void store.set(req.url, await res.text()),
   },
 };
-const gh = (r) => ({ tag_name: "v" + r.version, body: r.notes, html_url: "https://github.com/r/v" + r.version, published_at: r.published, draft: false, prerelease: false, assets: [{ name: "magpie-linux-amd64", size: 7, browser_download_url: "https://dl/" + r.version }] });
+const gh = (r) => ({ tag_name: "v" + r.version, body: r.notes, html_url: "https://github.com/r/v" + r.version, published_at: r.published, draft: false, prerelease: false, assets: [{ name: "myna-linux-amd64", size: 7, browser_download_url: "https://dl/" + r.version }] });
 const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 globalThis.fetch = async (u) => {
   u = String(u);
   if (u.startsWith("https://api.github.com/")) {
     asks++;
     if (apiDown) return new Response('{"message":"API rate limit exceeded"}', { status: 403 });
-    const path = u.split("/repos/yetone/magpie-releases/")[1];
+    const path = u.split("/repos/istoo/myna/")[1];
     const tag = path.match(/^releases\/tags\/v(.+)$/);
     if (tag) {
       const r = GITHUB.find((r) => r.version === tag[1]);
@@ -137,12 +137,12 @@ globalThis.fetch = async (u) => {
   if (u.endsWith("/releases.atom")) {
     // the feed: the ten newest, their notes as HTML, the date the last edit's
     const entries = GITHUB.slice(0, 10).map(
-      (r) => `<entry><updated>2030-01-01T00:00:00Z</updated><link rel="alternate" type="text/html" href="https://github.com/yetone/magpie-releases/releases/tag/v${r.version}"/><content type="html">${esc(r.html || `<p>${r.notes} (as the feed has it)</p>`)}</content></entry>`,
+      (r) => `<entry><updated>2030-01-01T00:00:00Z</updated><link rel="alternate" type="text/html" href="https://github.com/istoo/myna/releases/tag/v${r.version}"/><content type="html">${esc(r.html || `<p>${r.notes} (as the feed has it)</p>`)}</content></entry>`,
     );
     return new Response(`<feed>${entries.join("")}</feed>`);
   }
   const sums = u.match(/\/releases\/download\/v([^/]+)\/SHA256SUMS$/);
-  if (sums && GITHUB.some((r) => r.version === sums[1])) return new Response(`sum${sums[1]}  magpie-linux-amd64\n`);
+  if (sums && GITHUB.some((r) => r.version === sums[1])) return new Response(`sum${sums[1]}  myna-linux-amd64\n`);
   return new Response("not found", { status: 404 });
 };
 
@@ -276,7 +276,7 @@ test("keepLedger: a ledger left a day behind is mended past its hole", async () 
 
 const ctx = { waitUntil: (p) => p };
 const ask = async (path, env) => {
-  const res = await worker.fetch(new Request("https://usemagpie.ai" + path), env, ctx);
+  const res = await worker.fetch(new Request("https://github.com/istoo/myna" + path), env, ctx);
   return { status: res.status, body: await res.json() };
 };
 
@@ -298,7 +298,7 @@ test("latest?channel=stable: the week's pick from the ledger; without channel, t
   assert.equal(got.body.channel, "stable");
   assert.equal(got.body.urgent, false);
   assert.equal(got.body.notes, "### Fixes\n\n- stable one");
-  assert.equal(got.body.assets["magpie-linux-amd64"].sha256, "sum0.1.2");
+  assert.equal(got.body.assets["myna-linux-amd64"].sha256, "sum0.1.2");
   assert.equal((await ask("/api/latest?channel=stable&lang=zh", env)).body.notes, "- 稳定的");
   // every other ask is every version, as it was
   for (const q of ["", "?channel=every", "?channel=beta"]) {
@@ -322,14 +322,14 @@ test("latest?channel=stable: the week's pick from the ledger; without channel, t
   assert.equal(got.status, 200);
   assert.equal(got.body.version, "0.1.5");
   assert.match(got.body.notes, /a security hole/);
-  assert.equal(got.body.assets["magpie-linux-amd64"].sha256, "sum0.1.5");
+  assert.equal(got.body.assets["myna-linux-amd64"].sha256, "sum0.1.5");
 });
 
 test("latest?channel=stable: unknown (503, never kept) without a ledger that reaches the cut", async () => {
   const now = Date.now();
   GITHUB = [{ version: "0.1.2", published: iso(now - 3600e3), notes: "- new" }];
   for (const env of [{}, { LEDGER: kv() }]) {
-    const res = await worker.fetch(new Request("https://usemagpie.ai/api/latest?channel=stable"), env, ctx);
+    const res = await worker.fetch(new Request("https://github.com/istoo/myna/api/latest?channel=stable"), env, ctx);
     assert.equal(res.status, 503);
     assert.equal(res.headers.get("Cache-Control"), "no-store");
   }

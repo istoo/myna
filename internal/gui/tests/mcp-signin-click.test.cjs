@@ -4,7 +4,7 @@
 // again. The status says the sign-in is under way and then lists the
 // tools; no dialog opens unless there's something to do in it (the
 // browser didn't open, so the link to open by hand). A server that
-// refused magpie with no sign-in to offer (a key missing from its
+// refused myna with no sign-in to offer (a key missing from its
 // headers) is checked again, as before. Every language, Chromium and
 // WebKit, 1100 and 390 wide. No backend: the API is faked here.
 const assert = require("node:assert/strict");
@@ -21,7 +21,7 @@ const agent = (id, name) => ({ id, name, icon: "", skills: `${HOME}/.${id}/skill
 
 function server(lang, calls, gate) {
   const lib = {
-    dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+    dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
     agents: [agent("claude", "Claude Code")],
     instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [], skills: [],
     servers: [
@@ -89,13 +89,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const w = (s, v) => tr(lang, s, v);
           const calls = [], gate = { done: false };
           const ctx = await browser.newContext({ viewport: { width, height: 800 } });
-          await ctx.addInitScript(() => { try { localStorage.setItem("magpie.libTab", "mcp"); } catch {} });
+          await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "mcp"); } catch {} });
           const page = await ctx.newPage();
           page.setDefaultTimeout(5000);
           page.setDefaultNavigationTimeout(60000);
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", server(lang, calls, gate));
-          await page.goto("http://magpie.test/");
+          await page.goto("http://myna.test/");
           await page.locator('button[data-view="library"]').click();
           const row = (name) => page.locator("#view-library .lib-server", { has: page.locator(`.lib-health[data-server="${name}"]`) });
           const status = (name) => page.locator(`#view-library .lib-health[data-server="${name}"]`);

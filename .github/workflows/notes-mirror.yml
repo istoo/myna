@@ -1,9 +1,9 @@
 # A release's notes are copied here once, when release.yml's mirror-release
-# job publishes it. When DeepSeek turned the notes away, magpie-releases'
+# job publishes it. When DeepSeek turned the notes away, myna-releases'
 # notes.yml writes them again later (each hour, at :23), and this copies
 # them to this repo's release of the same tag: one here still without the
-# <!-- lang:zh --> marker gets magpie-releases' notes once those have it.
-# The app reads magpie-releases (usemagpie.ai's /api/notes), so this is
+# <!-- lang:zh --> marker gets myna-releases' notes once those have it.
+# The app reads myna-releases (github.com/istoo/myna's /api/notes), so this is
 # the GitHub page alone.
 name: notes-mirror
 
@@ -28,8 +28,8 @@ jobs:
           for t in $tags; do
             here=$(gh release view "$t" -R "$GITHUB_REPOSITORY" --json body -q .body) || continue
             if printf '%s' "$here" | grep -qF '<!-- lang:zh -->'; then continue; fi
-            there=$(gh release view "$t" -R yetone/magpie-releases --json body -q .body) || continue
+            there=$(gh release view "$t" -R istoo/myna --json body -q .body) || continue
             if ! printf '%s' "$there" | grep -qF '<!-- lang:zh -->'; then continue; fi
-            { printf '%s' "$there"; printf '\n\n---\nThe same release, and the feed magpie updates from: https://github.com/yetone/magpie-releases/releases/tag/%s\n' "$t"; } > notes.md
+            { printf '%s' "$there"; printf '\n\n---\nThe same release, and the feed myna updates from: https://github.com/istoo/myna/releases/tag/%s\n' "$t"; } > notes.md
             gh release edit "$t" -R "$GITHUB_REPOSITORY" --notes-file notes.md >/dev/null && echo "$t: notes copied"
           done

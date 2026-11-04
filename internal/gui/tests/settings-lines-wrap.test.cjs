@@ -18,12 +18,12 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 const { watchSettingsReads, settingsDrawn, openPart } = require("./reader.cjs");
 
-const assets = path.resolve(process.env.MAGPIE_WRAP_ASSETS || path.join(__dirname, "../assets"));
+const assets = path.resolve(process.env.MYNA_WRAP_ASSETS || path.join(__dirname, "../assets"));
 
 function settings(lang) {
   return {
     theme: "light", lang, tray: "panel", currency: "usd", textSize: 100, proxy: "", proxyNow: "none", proxySource: "none",
-    redact: true, redactPersonal: true, redactWords: [], version: "0.1.400", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425",
+    redact: true, redactPersonal: true, redactWords: [], version: "0.1.400", dir: "~/.config/myna", gateway: "http://127.0.0.1:3425",
     lanURLs: [], searchVendors: [], searchAPIs: [], vision: "", imageGen: "",
     visionModels: [{ id: "codex/gpt-5", name: "GPT-5", provider: "codex", providerName: "Codex" }],
     // a ChatGPT account draws, so Image generation has its second note
@@ -98,7 +98,7 @@ for (const engine of engines) {
       await page.addInitScript(() => Object.defineProperty(navigator, "platform", { get: () => "MacIntel" }));
       await page.route("**/*", serve(lang));
       await watchSettingsReads(page);
-      await page.goto("http://magpie.test/?view=settings&tab=general");
+      await page.goto("http://myna.test/?view=settings&tab=general");
       await settingsDrawn(page);
       const parts = await page.$$eval("[id^=setTab-]", (bs) => bs.filter((b) => !b.hidden).map((b) => b.dataset.set));
       assert.ok(parts.length >= 7, `parts: ${parts}`);
@@ -135,7 +135,7 @@ for (const engine of engines) {
 
       // Plugins › Built-in: the same rows
       // (its tab is the page's own strip's first below 1024 points)
-      await page.goto("http://magpie.test/?view=plugins");
+      await page.goto("http://myna.test/?view=plugins");
       await page.locator("#view-plugins .lib-tabs .opt").first().press("Enter");
       await page.locator("#builtinList .feat-row").first().waitFor();
       const m = await page.evaluate(measure, "#builtinList");

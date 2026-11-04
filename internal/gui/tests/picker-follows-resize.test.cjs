@@ -55,7 +55,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang));
-        await page.goto("http://magpie.test/");
+        await page.goto("http://myna.test/");
         await page.locator(button).click();
         await page.locator("#pop:not([hidden]) #list li").first().waitFor();
         const wide = await where(page);

@@ -2,9 +2,9 @@
 // What WorkBuddy requests cost in the plan's credits (#2512, wwcraft_ on
 // Discord: the Usage page should say the credits spent by model, agent and
 // session). Each reply says it as usage.credit, the figure WorkBuddy's own
-// app shows on a reply as "Credits Consumed"; magpie keeps it on the row and
+// app shows on a reply as "Credits Consumed"; myna keeps it on the row and
 // the Usage page's ranking says the sum on its line of numbers, the
-// Sessions page on the line of where magpie routed the session. A group no
+// Sessions page on the line of where myna routed the session. A group no
 // reply said credits for says none, not 0. Every language, Chromium and
 // WebKit; no backend, the API is faked.
 const assert = require("node:assert/strict");
@@ -56,7 +56,7 @@ const SESSION = {
 // 积分 each account spent, not only its tokens)
 const acct = (id, provider, sub, calls, credits, credited) => ({ id: provider + "@" + id, provider, account: id, name: id, sub, icon: "generic", calls, errors: 0, input: 900 * calls, output: 100 * calls, cache_read: 0, cache_write: 0, cost: 0, ...(credited ? { credits, credited } : {}) });
 const ACCOUNTS = [acct("a@x.com", "workbuddy", "WorkBuddy", 70, 35, 70), acct("b@x.com", "workbuddy", "WorkBuddy", 2, 2.25, 1), acct("c@x.com", "codex", "Codex", 5)];
-const OVERVIEW = { calls: 77, errors: 0, input: 69300, output: 7700, reasoning: 0, unpriced: 77, cost: 0, cache_read: 0, cache_write: 0, credits: 37.25, credited: 71, bucket: "day", series: [], agents: [], models: [], accounts: ACCOUNTS, callerKeys: [], path: "~/.config/magpie/usage.jsonl" };
+const OVERVIEW = { calls: 77, errors: 0, input: 69300, output: 7700, reasoning: 0, unpriced: 77, cost: 0, cache_read: 0, cache_write: 0, credits: 37.25, credited: 71, bucket: "day", series: [], agents: [], models: [], accounts: ACCOUNTS, callerKeys: [], path: "~/.config/myna/usage.jsonl" };
 const EMPTY = { calls: 0, errors: 0, input: 0, output: 0, reasoning: 0, unpriced: 0, cost: 0, bucket: "day", series: [], agents: [], models: [], path: "" };
 
 function server(lang, usage = EMPTY) {
@@ -73,7 +73,7 @@ function server(lang, usage = EMPTY) {
     if (url.pathname === "/api/sessions") return json({ sessions: [SESSION], terminal: true, dirs: ["~/.codex/sessions"] });
     if (url.pathname === "/api/sessions/stats") return json({ from: "", to: "", days: [], agents: {} });
     if (url.pathname === "/api/sessions/manage") {
-      return json({ agents: [{ agent: "codex", count: 1, deletable: true, name: "Codex", icon: "openai" }], agent: "codex", sessions: [{ ...SESSION, size: 4096, messages: 6, files: 1, deletable: true }], terminal: true, trash: [], trashDir: "~/magpie/trash/sessions" });
+      return json({ agents: [{ agent: "codex", count: 1, deletable: true, name: "Codex", icon: "openai" }], agent: "codex", sessions: [{ ...SESSION, size: 4096, messages: 6, files: 1, deletable: true }], terminal: true, trash: [], trashDir: "~/myna/trash/sessions" });
     }
     if (url.pathname === "/api/groups") return json({ groups: [], models: [] });
     if (url.pathname.startsWith("/api/")) return json({});
@@ -124,7 +124,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         p.setDefaultNavigationTimeout(60000);
         p.on("pageerror", (e) => errors.push(e.message));
         await p.route("**/*", server(lang, OVERVIEW));
-        await p.goto("http://magpie.test/?view=usage");
+        await p.goto("http://myna.test/?view=usage");
         await p.locator("#usageAccounts .row").first().waitFor();
         const subs = await p.locator("#usageAccounts .sub").allTextContents();
         assert.equal(subs.length, 3, subs.join(" | "));
@@ -163,7 +163,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         p.setDefaultNavigationTimeout(60000);
         p.on("pageerror", (e) => errors.push(e.message));
         await p.route("**/*", server(lang));
-        await p.goto("http://magpie.test/");
+        await p.goto("http://myna.test/");
         await p.locator('[data-view="usage"]').first().click();
         await p.locator(":is(#usageTab .opt, .nav-s):visible").nth(1).click();
         await p.locator("#ledWrap .led tbody tr").first().waitFor();
@@ -189,7 +189,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await p.setViewportSize({ width: 1100, height: 800 });
 
         // the Sessions page: the routed line of the session says them
-        await p.goto("http://magpie.test/?view=sessions");
+        await p.goto("http://myna.test/?view=sessions");
         const view = p.locator("#view-sessions");
         const r = view.locator('.row.sm-sess[data-id="c-1"]');
         await r.waitFor();
@@ -229,7 +229,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         p.setDefaultNavigationTimeout(60000);
         p.on("pageerror", (e) => errors.push(e.message));
         await p.route("**/*", server(lang));
-        await p.goto("http://magpie.test/");
+        await p.goto("http://myna.test/");
         await p.locator('[data-view="usage"]').first().click();
         await p.locator(":is(#usageTab .opt, .nav-s):visible").nth(1).click();
         const rows = p.locator("#ledWrap .led tbody tr:not(.led-detail)");

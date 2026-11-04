@@ -14,28 +14,28 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/istoo/myna/internal/gateway"
 )
 
 // fakeOlderGateway is the test binary run as another process holding the
-// gateway's port and answering as magpie 0.1.550 would, until it is ended.
-// MAGPIE_TEST_FAKE_VERSION and MAGPIE_TEST_FAKE_SERVES make it another
+// gateway's port and answering as myna 0.1.550 would, until it is ended.
+// MYNA_TEST_FAKE_VERSION and MYNA_TEST_FAKE_SERVES make it another
 // version, started another way: then it also says its pid, streams
 // /stream as an agent's reply (20 lines, 100ms apart) and tells
-// /v1/magpie/concurrency how many of those are in flight, as a magpie
+// /v1/myna/concurrency how many of those are in flight, as a myna
 // since 3b6ca0557 does.
 func fakeOlderGateway(addr string) {
 	ln, err := net.Listen("tcp", addr)
 	if err != nil {
 		os.Exit(3)
 	}
-	version, serves := os.Getenv("MAGPIE_TEST_FAKE_VERSION"), os.Getenv("MAGPIE_TEST_FAKE_SERVES")
+	version, serves := os.Getenv("MYNA_TEST_FAKE_VERSION"), os.Getenv("MYNA_TEST_FAKE_SERVES")
 	var streams atomic.Int32
 	http.Serve(ln, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		switch {
 		case version == "":
-			io.WriteString(w, `{"name":"magpie","version":"0.1.550","models":3}`)
+			io.WriteString(w, `{"name":"myna","version":"0.1.550","models":3}`)
 		case r.URL.Path == "/stream":
 			streams.Add(1)
 			defer streams.Add(-1)
@@ -44,22 +44,22 @@ func fakeOlderGateway(addr string) {
 				w.(http.Flusher).Flush()
 				time.Sleep(100 * time.Millisecond)
 			}
-		case r.URL.Path == "/v1/magpie/concurrency":
+		case r.URL.Path == "/v1/myna/concurrency":
 			fmt.Fprintf(w, `{"object":"concurrency","data":{},"requests":%d,"waiting":0,"tools":0,"active":[]}`, streams.Load())
 		default:
-			fmt.Fprintf(w, `{"name":"magpie","version":%q,"models":3,"pid":%d,"serves":%q}`, version, os.Getpid(), serves)
+			fmt.Fprintf(w, `{"name":"myna","version":%q,"models":3,"pid":%d,"serves":%q}`, version, os.Getpid(), serves)
 		}
 	}))
 }
 
 // The Gateway page's button (leslie_luo on Discord: the page said an older
-// magpie served the gateway, and there was no telling which one to quit).
+// myna served the gateway, and there was no telling which one to quit).
 // It quits the process on the gateway's port only when its program is a
-// magpie, by its pid and path, then serves the gateway here at once; a
-// program of another name answering as magpie is left running and named.
+// myna, by its pid and path, then serves the gateway here at once; a
+// program of another name answering as myna is left running and named.
 // Restart then serves it here again. Both run on a port of the test's own,
 // against copies of the test binary.
-func TestGatewayFixQuitsOnlyAMagpie(t *testing.T) {
+func TestGatewayFixQuitsOnlyAMyna(t *testing.T) {
 	h := t.TempDir()
 	t.Setenv("HOME", h)
 	t.Setenv("USERPROFILE", h)
@@ -67,7 +67,7 @@ func TestGatewayFixQuitsOnlyAMagpie(t *testing.T) {
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(h, ".cache"))
 	port := freePort(t)
 	addr := "127.0.0.1:" + strconv.Itoa(port)
-	t.Setenv("MAGPIE_ADDR", addr)
+	t.Setenv("MYNA_ADDR", addr)
 	was := gateway.Version
 	gateway.Version = "0.1.630"
 	defer func() { gateway.Version = was }()
@@ -95,7 +95,7 @@ func TestGatewayFixQuitsOnlyAMagpie(t *testing.T) {
 		t.Fatal(err)
 	}
 	dir := t.TempDir()
-	// start runs the test binary under name, as the older magpie holding
+	// start runs the test binary under name, as the older myna holding
 	// the port; ended is closed once it has ended
 	start := func(name string) (*exec.Cmd, chan struct{}) {
 		if runtime.GOOS == "windows" {
@@ -115,7 +115,7 @@ func TestGatewayFixQuitsOnlyAMagpie(t *testing.T) {
 			}
 		}
 		cmd := exec.Command(bin, "-test.run=^$")
-		cmd.Env = append(os.Environ(), "MAGPIE_TEST_FAKE_GATEWAY="+addr)
+		cmd.Env = append(os.Environ(), "MYNA_TEST_FAKE_GATEWAY="+addr)
 		if err := cmd.Start(); err != nil {
 			t.Fatal(err)
 		}
@@ -130,15 +130,15 @@ func TestGatewayFixQuitsOnlyAMagpie(t *testing.T) {
 		return cmd, ended
 	}
 
-	// a program that isn't magpie is never ended, however it answers
+	// a program that isn't myna is never ended, however it answers
 	other, otherEnded := start("other-server")
 	out := takeOverGateway()
-	if out.OK || out.Reason != "not-magpie" || out.PID != other.Process.Pid || filepath.Base(out.Path) != filepath.Base(other.Path) {
+	if out.OK || out.Reason != "not-myna" || out.PID != other.Process.Pid || filepath.Base(out.Path) != filepath.Base(other.Path) {
 		t.Fatalf("another program's port: %+v", out)
 	}
 	select {
 	case <-otherEnded:
-		t.Fatal("ended a program that isn't magpie")
+		t.Fatal("ended a program that isn't myna")
 	case <-time.After(300 * time.Millisecond):
 	}
 	if served.Load() != nil {
@@ -147,8 +147,8 @@ func TestGatewayFixQuitsOnlyAMagpie(t *testing.T) {
 	other.Process.Kill()
 	<-otherEnded
 
-	// an older magpie is quit, and this one serves at once
-	old, oldEnded := start("magpie")
+	// an older myna is quit, and this one serves at once
+	old, oldEnded := start("myna")
 	_ = old
 	if g := providersState().Gateway; !g.Older || g.Mine {
 		t.Fatalf("not seen as older: %+v", g)
@@ -160,7 +160,7 @@ func TestGatewayFixQuitsOnlyAMagpie(t *testing.T) {
 	select {
 	case <-oldEnded:
 	case <-time.After(5 * time.Second):
-		t.Fatal("the older magpie is still running")
+		t.Fatal("the older myna is still running")
 	}
 	gw := served.Load()
 	if g := providersState().Gateway; gw == nil || !g.Mine || !g.Running || g.Older {

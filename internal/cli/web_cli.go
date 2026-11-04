@@ -8,17 +8,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/daemon"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/gui"
-	"github.com/yetone/magpie/internal/proc"
-	"github.com/yetone/magpie/internal/stats"
+	"github.com/istoo/myna/internal/daemon"
+	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/myna/internal/gui"
+	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/myna/internal/stats"
 )
 
-// webAddr is where `magpie web` listens unless told: beside the gateway.
+// webAddr is where `myna web` listens unless told: beside the gateway.
 const webAddr = "127.0.0.1:3430"
 
-// webCmd: magpie web [--addr host:port] [--lan] [--no-open] [--gateway]
+// webCmd: myna web [--addr host:port] [--lan] [--no-open] [--gateway]
 // [--tls-cert <file> --tls-key <file>] —
 // the app's window in a browser, for a computer that can't show the app;
 // --gateway shows it in gateway mode (gui.WebGateway) unless Settings says
@@ -44,7 +44,7 @@ func webCmd(args []string) error {
 		case a == "--gateway":
 			gui.WebGateway.Store(true)
 		default:
-			return fmt.Errorf("magpie web: unknown %q · magpie web [--addr host:port] [--lan] [--no-open] [--gateway] [--tls-cert <file> --tls-key <file>], MAGPIE_WEB_KEY to keep one key", a)
+			return fmt.Errorf("myna web: unknown %q · myna web [--addr host:port] [--lan] [--no-open] [--gateway] [--tls-cert <file> --tls-key <file>], MYNA_WEB_KEY to keep one key", a)
 		}
 	}
 	if lan && addr == webAddr {
@@ -55,8 +55,8 @@ func webCmd(args []string) error {
 	// it serves, is the one to open
 	if a, k := daemon.Web(); a != "" && gateway.ServedBy().Running {
 		link := webLink(a, k)
-		fmt.Println(green.Render("●"), "the magpie service serves this page:", bold.Render(link))
-		fmt.Println(muted.Render("  magpie daemon web off turns it off"))
+		fmt.Println(green.Render("●"), "the myna service serves this page:", bold.Render(link))
+		fmt.Println(muted.Render("  myna daemon web off turns it off"))
 		if open {
 			openInBrowser(link)
 		}
@@ -66,7 +66,7 @@ func webCmd(args []string) error {
 	// and sharing › Browser access): its own is the one to open
 	if a, k := gui.AppPage(); a != "" && samePort(a, addr) && answers(a) {
 		link := webLink(a, k)
-		fmt.Println(green.Render("●"), "the magpie app serves this page:", bold.Render(link))
+		fmt.Println(green.Render("●"), "the myna app serves this page:", bold.Render(link))
 		fmt.Println(muted.Render("  Settings › Network and sharing › Browser access turns it off"))
 		if open {
 			openInBrowser(link)
@@ -82,17 +82,17 @@ func webCmd(args []string) error {
 		return err
 	}
 	if !w.ServesGateway() {
-		// another magpie has the gateway (the service, magpie serve, the
+		// another myna has the gateway (the service, myna serve, the
 		// app): this page shows its settings and accounts, read from the
 		// same files, and takes the gateway up when that one stops
 		o := gateway.ServedBy()
-		who := "another magpie"
+		who := "another myna"
 		if o.Version != "" {
 			who += " (" + o.Version + ")"
 		}
 		fmt.Println(muted.Render("  the gateway on " + gateway.URL() + " is served by " + who + "; this page shows the same settings and accounts, and serves the gateway once that one stops"))
 		if st, err := daemon.Get(); err == nil && st.Running {
-			fmt.Println(muted.Render("  to have the service serve this page itself: magpie daemon web on"))
+			fmt.Println(muted.Render("  to have the service serve this page itself: myna daemon web on"))
 		}
 	}
 	printWeb(w)
@@ -125,7 +125,7 @@ func answers(addr string) bool {
 
 // printWeb prints where a started page is, and what its link carries.
 func printWeb(w *gui.Web) {
-	fmt.Println(green.Render("●"), "magpie web on", bold.Render(w.Link))
+	fmt.Println(green.Render("●"), "myna web on", bold.Render(w.Link))
 	if l := tlsLine(); l != "" {
 		fmt.Println(l)
 	}
@@ -145,9 +145,9 @@ func printWeb(w *gui.Web) {
 	} else if l := proxyLink(key); l != "" {
 		fmt.Println(muted.Render("  through your proxy"), l)
 	}
-	carries := "this run's key (MAGPIE_WEB_KEY keeps one across runs)"
-	if os.Getenv("MAGPIE_WEB_KEY") != "" {
-		carries = "MAGPIE_WEB_KEY"
+	carries := "this run's key (MYNA_WEB_KEY keeps one across runs)"
+	if os.Getenv("MYNA_WEB_KEY") != "" {
+		carries = "MYNA_WEB_KEY"
 	}
 	fmt.Println(muted.Render("  the link carries " + carries + " · gateway " + advertisedURL() + " · Ctrl-C to stop"))
 }
@@ -155,9 +155,9 @@ func printWeb(w *gui.Web) {
 // lanWarning is said wherever the page is served on the network.
 func lanWarning() string {
 	if gateway.TLSOn() {
-		return "anyone with the link can change magpie and see its keys"
+		return "anyone with the link can change myna and see its keys"
 	}
-	return "anyone with the link can change magpie and see its keys, and the network carries it unencrypted (--tls-cert and --tls-key serve it over https)"
+	return "anyone with the link can change myna and see its keys, and the network carries it unencrypted (--tls-cert and --tls-key serve it over https)"
 }
 
 // webLink is the link to a page served on addr with key, from this
@@ -180,13 +180,13 @@ func webLink(addr, key string) string {
 }
 
 // proxyLink is the page's link through a reverse proxy in front of a page
-// served on loopback (#1479), with the key: MAGPIE_WEB_URL, the page's own
-// address there (https://magpie.example.com), or else MAGPIE_PUBLIC_URL
+// served on loopback (#1479), with the key: MYNA_WEB_URL, the page's own
+// address there (https://myna.example.com), or else MYNA_PUBLIC_URL
 // with no port of its own, as NetworkLinks takes it (#372). One with a
 // port names a host whose ports are published, not a proxy. "" with
-// neither, or a MAGPIE_WEB_URL that isn't a plain http(s) address.
+// neither, or a MYNA_WEB_URL that isn't a plain http(s) address.
 func proxyLink(key string) string {
-	if v := strings.TrimSpace(os.Getenv("MAGPIE_WEB_URL")); v != "" {
+	if v := strings.TrimSpace(os.Getenv("MYNA_WEB_URL")); v != "" {
 		if !strings.Contains(v, "://") {
 			v = "https://" + v
 		}
@@ -203,9 +203,9 @@ func proxyLink(key string) string {
 	return strings.TrimRight(u.String(), "/") + key
 }
 
-// serveCmd: magpie serve [--web[=host:port]] — the gateway, and with
-// --web magpie web's page from the same process: what the service runs
-// (`magpie daemon install --web`), so the page shows the gateway that
+// serveCmd: myna serve [--web[=host:port]] — the gateway, and with
+// --web myna web's page from the same process: what the service runs
+// (`myna daemon install --web`), so the page shows the gateway that
 // serves the agents, its routing included (HuanCheng on Discord).
 func serveCmd(args []string) error {
 	args, err := tlsFlags(args)
@@ -220,13 +220,13 @@ func serveCmd(args []string) error {
 		case strings.HasPrefix(a, "--web="):
 			web = strings.TrimPrefix(a, "--web=")
 			if _, _, err := net.SplitHostPort(web); err != nil {
-				return fmt.Errorf("magpie serve: --web=%s isn't host:port", web)
+				return fmt.Errorf("myna serve: --web=%s isn't host:port", web)
 			}
 		default:
-			return fmt.Errorf("magpie serve: unknown %q · magpie serve [--web[=host:port]] [--tls-cert <file> --tls-key <file>]", a)
+			return fmt.Errorf("myna serve: unknown %q · myna serve [--web[=host:port]] [--tls-cert <file> --tls-key <file>]", a)
 		}
 	}
-	proc.UserPath() // as magpie web's (#3803)
+	proc.UserPath() // as myna web's (#3803)
 	if web == "" {
 		return serve()
 	}
@@ -236,14 +236,14 @@ func serveCmd(args []string) error {
 		return err
 	}
 	public := advertisedURL()
-	fmt.Println(green.Render("●"), "magpie gateway on", bold.Render(gateway.URL()))
+	fmt.Println(green.Render("●"), "myna gateway on", bold.Render(gateway.URL()))
 	fmt.Println(muted.Render("  OpenAI  "), public+"/v1/chat/completions", muted.Render("·"), public+"/v1/responses")
 	fmt.Println(muted.Render("  Anthropic"), public+"/v1/messages")
 	if l := tlsLine(); l != "" {
 		fmt.Println(l)
 	}
 	if !w.ServesGateway() {
-		fmt.Println(amber.Render("!"), "another magpie serves the gateway there: this one serves it once that one stops")
+		fmt.Println(amber.Render("!"), "another myna serves the gateway there: this one serves it once that one stops")
 	}
 	printWeb(w)
 	return w.Wait()

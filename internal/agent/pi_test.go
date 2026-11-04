@@ -5,8 +5,8 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/usage"
 )
 
 // Every one of Pi's levels is in the map, the model's own mapped and the

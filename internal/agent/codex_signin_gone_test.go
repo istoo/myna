@@ -6,17 +6,17 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // jjt on Discord (#4308): Codex's ChatGPT sign-in revoked, its auth.json
 // left as it was. Wired beside it, every turn failed at Codex's workspace
-// routing discovery (401), magpie's models too, until the user signed in
-// again. A sign-in OpenAI refused to refresh for good is none to magpie:
-// magpie is Codex's provider, without requires_openai_auth, and Codex needs
-// no sign-in for magpie's models. Signed in again (another refresh token),
+// routing discovery (401), myna's models too, until the user signed in
+// again. A sign-in OpenAI refused to refresh for good is none to myna:
+// myna is Codex's provider, without requires_openai_auth, and Codex needs
+// no sign-in for myna's models. Signed in again (another refresh token),
 // the ChatGPT account is back with nothing for the user to do. A record
-// magpie can't read says nothing either way.
+// myna can't read says nothing either way.
 func TestCodexGoneSignInIsNoChatGPT(t *testing.T) {
 	home, read := codexHome(t, `{"tokens":{"access_token":"x","id_token":"x.e30.x","refresh_token":"rt-dead"}}`, "")
 	dir := filepath.Join(home, ".codex")
@@ -29,8 +29,8 @@ func TestCodexGoneSignInIsNoChatGPT(t *testing.T) {
 		t.Fatal(err)
 	}
 	cfg := read()
-	if !strings.Contains(cfg, `model_provider = "magpie"`) {
-		t.Fatalf("revoked sign-in: magpie its provider, not beside it:\n%s", cfg)
+	if !strings.Contains(cfg, `model_provider = "myna"`) {
+		t.Fatalf("revoked sign-in: myna its provider, not beside it:\n%s", cfg)
 	}
 	if strings.Contains(cfg, "requires_openai_auth") {
 		t.Fatalf("revoked sign-in: no requires_openai_auth, or Codex asks the dead sign-in first:\n%s", cfg)

@@ -139,7 +139,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [], posts = [], seen = { starts: [], canceled: [] };
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, posts, seen));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://myna.test/?view=providers");
       await openEditor(page, "Relay", ".editor .proxy-pick .proxy-url");
       const pick = page.locator(".editor .proxy-pick");
       const addr = pick.locator(".proxy-url");
@@ -188,7 +188,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [], posts = [], seen = { starts: [], canceled: [] };
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, posts, seen));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://myna.test/?view=providers");
 
       await openEditor(page, "Codex", ".editor .acct-proxy");
       const me = creds(line(page, "me@example.com"));
@@ -231,7 +231,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [], posts = [], seen = { starts: [], canceled: [] };
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, posts, seen));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://myna.test/?view=providers");
       await page.locator(".row.provider", { hasText: "Claude" }).first().click();
       const bob = page.locator(".editor .accts .acc", { hasText: "bob@example.com" });
       await bob.locator("button", { hasText: w.again }).click();

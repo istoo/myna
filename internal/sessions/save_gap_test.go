@@ -47,7 +47,7 @@ func TestSaveWaitsOutTheGap(t *testing.T) {
 }
 
 // A scan's last save is written at once, not saveGap after the save before
-// it: a magpie quit or updated within that minute kept none of the scan,
+// it: a myna quit or updated within that minute kept none of the scan,
 // and each start read 22 GB of rollouts again. A poll's few files still
 // wait out the gap.
 func TestScanSavedWithoutTheGap(t *testing.T) {

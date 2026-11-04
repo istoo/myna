@@ -6,10 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
-// restartRests is a magpie started again: what restingUntil held is
+// restartRests is a myna started again: what restingUntil held is
 // gone, and the file is read as ListenAndServe reads it.
 func restartRests() {
 	restingUntil.Lock()
@@ -35,7 +35,7 @@ func keyedOpenAI(t *testing.T) candidate {
 	return candidate{p: p, model: "gpt-x", rest: "openai"}
 }
 
-// PaulT on Discord: a restart of magpie started an out-of-credit key's
+// PaulT on Discord: a restart of myna started an out-of-credit key's
 // ladder over at 30 minutes, and lifted its rest. It now rests out what
 // is left, and the next refusal climbs on from its rung.
 func TestKeyCreditRestOutlivesRestart(t *testing.T) {
@@ -66,7 +66,7 @@ func TestKeyCreditRestOutlivesRestart(t *testing.T) {
 	if r := refuse(); r.Failures != 2 {
 		t.Fatalf("refused while resting after a restart: failures %d", r.Failures)
 	}
-	// its rest ended, magpie started again, and refused: a rung up, 8h
+	// its rest ended, myna started again, and refused: a rung up, 8h
 	expire(id)
 	saveRests()
 	restartRests()
@@ -97,7 +97,7 @@ func TestKeyCreditRestOutlivesRestart(t *testing.T) {
 	}
 }
 
-// A key removed while magpie was off is let go, and one ended over a
+// A key removed while myna was off is let go, and one ended over a
 // month ago starts over; a rest that isn't the ladder's isn't kept.
 func TestKeyCreditRestFileForgets(t *testing.T) {
 	fresh(t)

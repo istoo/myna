@@ -7,14 +7,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // sideRoute is the Routing page's route of a request the chat path doesn't
 // carry: an image, a video's start, an embedding, a rerank or a
 // transcription. Each wrote its usage row but began no route, so Usage
 // listed it and Routing never did (zzzkl3994 on Discord: a video the
-// magpie-image MCP made). One route stands for one request, its tries the
+// myna-image MCP made). One route stands for one request, its tries the
 // accounts, keys or group members asked in turn; a video's polls and its
 // download are the same generation and add none, as they add no usage row.
 // A nil sideRoute does nothing, so a caller with none goes on as before.

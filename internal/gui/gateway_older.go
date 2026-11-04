@@ -5,33 +5,33 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/update"
+	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/myna/internal/update"
 )
 
-// A magpie of another version keeping the gateway's port sends every
+// A myna of another version keeping the gateway's port sends every
 // agent's request its own way, while this one writes the agents' settings
 // (matrix0487 on Discord: the app wrote pi a model its older gateway
-// didn't know, and pi said 404 "add a provider in magpie first"). Before,
-// this magpie only logged it and waited for that one to quit, and only
+// didn't know, and pi said 404 "add a provider in myna first"). Before,
+// this myna only logged it and waited for that one to quit, and only
 // the Gateway page said so. Now:
 //
 //   - an older copy of the app (it says it serves as "app" or "tray", a
 //     released version both) is this app's own predecessor: this one
 //     takes the gateway over from it once it has no request in flight
 //     (gateway.ServedBusy), quitting it as the Gateway page's button does
-//     (quitMagpieOnPort: only a magpie of this user's, by its program),
+//     (quitMynaOnPort: only a myna of this user's, by its program),
 //     so no request is cut off; looked at again every gatewayWatch;
-//   - any other (magpie serve, a service, magpie web, a TUI, a newer
-//     magpie, a build of its own) is someone's to quit or update: it is
+//   - any other (myna serve, a service, myna web, a TUI, a newer
+//     myna, a build of its own) is someone's to quit or update: it is
 //     left running and the Agents page says so, with what to do
 //     (gatewayOther, in /api/state).
 
-// gatewaySkew is a magpie of another version serving the gateway, as the
+// gatewaySkew is a myna of another version serving the gateway, as the
 // page is told it.
 type gatewaySkew struct {
 	Version string `json:"version"` // the other's
-	Mine    string `json:"mine"`    // this magpie's
+	Mine    string `json:"mine"`    // this myna's
 	Serves  string `json:"serves,omitempty"`
 	Pid     int    `json:"pid,omitempty"`
 	// Older: it is older than this one; Newer: newer; neither, a build
@@ -47,7 +47,7 @@ type gatewaySkew struct {
 	Stuck string `json:"stuck,omitempty"`
 }
 
-// gatewayOther is the magpie of another version serving the gateway, nil
+// gatewayOther is the myna of another version serving the gateway, nil
 // while none does (this one serves it, or one of the same version).
 var gatewayOther atomic.Pointer[gatewaySkew]
 
@@ -61,12 +61,12 @@ const replaceMost = 3
 // bare is a version without the v a tag has.
 func bare(v string) string { return strings.TrimPrefix(v, "v") }
 
-// skewOf is how the magpie o serving the gateway differs from this one,
+// skewOf is how the myna o serving the gateway differs from this one,
 // nil when it doesn't (the same version, or one that doesn't say).
 func skewOf(o gateway.Served) *gatewaySkew {
 	mine := gateway.Version
 	if o.Version == "" || bare(o.Version) == bare(mine) || !update.Released(mine) {
-		// a build of this magpie's own (make dev) beside the installed
+		// a build of this myna's own (make dev) beside the installed
 		// one is its developer's to know about
 		return nil
 	}
@@ -76,7 +76,7 @@ func skewOf(o gateway.Served) *gatewaySkew {
 	}
 }
 
-// replaceable is whether this magpie takes the gateway over from o by
+// replaceable is whether this myna takes the gateway over from o by
 // itself: this is the app, and o an older release of it.
 func replaceable(o gateway.Served, sk *gatewaySkew) bool {
 	return handoverHost.Load() && sk != nil && sk.Older && update.Released(o.Version) &&
@@ -85,7 +85,7 @@ func replaceable(o gateway.Served, sk *gatewaySkew) bool {
 }
 
 // otherServes, under gatewayMu with this one serving nothing, looks at the
-// magpie o that serves the gateway: what the page is told of it, and, for
+// myna o that serves the gateway: what the page is told of it, and, for
 // an older copy of the app with no request in flight, quits it. True when
 // it was quit and the port is free for this one.
 func otherServes(o gateway.Served) bool {
@@ -105,14 +105,14 @@ func otherServes(o gateway.Served) bool {
 		}
 		sk.Busy = n
 		if n == 0 {
-			log.Printf("gateway: magpie %s (pid %d), an older copy of this app, serves %s with nothing in flight; quitting it for this one (%s) to serve", sk.Version, sk.Pid, gateway.URL(), sk.Mine)
-			out := quitMagpieOnPort(o.Version)
+			log.Printf("gateway: myna %s (pid %d), an older copy of this app, serves %s with nothing in flight; quitting it for this one (%s) to serve", sk.Version, sk.Pid, gateway.URL(), sk.Mine)
+			out := quitMynaOnPort(o.Version)
 			if out.OK {
 				replacedOlder.Add(1)
 				gatewayOther.Store(nil)
 				return true
 			}
-			log.Printf("gateway: magpie %s wasn't quit (%s %s); it keeps the gateway", sk.Version, out.Reason, out.Error)
+			log.Printf("gateway: myna %s wasn't quit (%s %s); it keeps the gateway", sk.Version, out.Reason, out.Error)
 			sk.Replacing, sk.Busy, sk.Stuck = false, 0, out.Reason
 		}
 	}
@@ -128,7 +128,7 @@ func otherServes(o gateway.Served) bool {
 		if sk.Replacing {
 			next = "until this one takes it over, once it has no request in flight"
 		}
-		log.Printf("gateway: magpie %s (%s, pid %d) serves %s, %s (%s); agents' requests go through it %s", sk.Version, sk.Serves, sk.Pid, gateway.URL(), how, sk.Mine, next)
+		log.Printf("gateway: myna %s (%s, pid %d) serves %s, %s (%s); agents' requests go through it %s", sk.Version, sk.Serves, sk.Pid, gateway.URL(), how, sk.Mine, next)
 	}
 	gatewayOther.Store(sk)
 	return false

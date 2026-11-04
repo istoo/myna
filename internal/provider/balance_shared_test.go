@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/agentenv"
+	"github.com/istoo/myna/internal/agentenv"
 )
 
 // mimi on Discord: a sub2api site's keys on the wallet each told its
@@ -105,7 +105,7 @@ func TestKeysOfOneAccountShareItsBalance(t *testing.T) {
 	if got := shared(); got != want {
 		t.Fatalf("after they moved together:\n%s\nwant\n%s", got, want)
 	}
-	// as magpie quota --json and /v1/magpie/quotas tell them
+	// as myna quota --json and /v1/myna/quotas tell them
 	for _, q := range quotaReport(nil, nil, KeyBalances(context.Background()), time.Now()) {
 		if q.User == "2-S009-Plus" && q.SharedBalance != "1-A031-Pro" {
 			t.Fatalf("the report's card: %+v", q)

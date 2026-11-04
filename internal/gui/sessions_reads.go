@@ -6,11 +6,11 @@ import (
 	"slices"
 	"sort"
 
-	"github.com/yetone/magpie/internal/sessions"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/myna/internal/settings"
 )
 
-// Which agents' session history magpie may read (RustCats on X): the
+// Which agents' session history myna may read (RustCats on X): the
 // Sessions page asks once on a fresh install, and Settings changes it per
 // agent later. sessions.Reads is the gate every reader asks.
 

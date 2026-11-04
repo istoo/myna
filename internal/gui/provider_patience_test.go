@@ -6,10 +6,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
-// A provider's Patience, set with `magpie provider set <id> patience=`
+// A provider's Patience, set with `myna provider set <id> patience=`
 // (zoecats on Discord), is not in the editor: the editor's save keeps it.
 func TestProviderSaveKeepsPatience(t *testing.T) {
 	home := t.TempDir()

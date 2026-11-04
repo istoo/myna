@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/access"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // jessyoungyu on X: 「{{百度}}这家公司怎么样」 can't be answered by a model
@@ -185,7 +185,7 @@ func TestMaskRouteTakesOnlyUnmaskedRoutes(t *testing.T) {
 	}
 }
 
-// Only an agent's own turn goes to the model set: magpie's own asks made
+// Only an agent's own turn goes to the model set: myna's own asks made
 // on its behalf (a title, a search stand-in, a picture described) are
 // masked as before, and so is a turn on a gateway key the model set is
 // not one of the key's models.
@@ -204,7 +204,7 @@ func TestMaskRouteOnlyForTheAgentsTurn(t *testing.T) {
 		t.Fatalf("nothing masked: %q", got)
 	}
 	if got := maskRouteFor(turn.WithContext(ownAsk(turn.Context())), hit); got != "" {
-		t.Fatalf("magpie's own ask: %q", got)
+		t.Fatalf("myna's own ask: %q", got)
 	}
 	keyed := func(models ...string) *http.Request {
 		return turn.WithContext(access.WithIdentity(turn.Context(), access.Identity{KeyID: "k1", Models: models}))

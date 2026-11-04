@@ -14,7 +14,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/sessions"
+	"github.com/istoo/myna/internal/sessions"
 )
 
 // HeatmapWeeks is how many weeks the heatmap shows, this one the last.
@@ -146,7 +146,7 @@ func heatmapFrom(since, now time.Time, days []Day) *Heatmap {
 
 // heatOf is heatmapOf of ps's rows f keeps, added up a chunk at a time:
 // cache's sums of a chunk paired as before are taken as they are. A call
-// through magpie changes the gateway's log, and the Requests tab's refresh
+// through myna changes the gateway's log, and the Requests tab's refresh
 // read every row of the year again for it, and paired them: ~4 GB a
 // minute and seconds of CPU a refresh while an agent worked (#2278).
 func (ps *pairedRows) heatOf(since, now time.Time, f Filter, cache *partCache, identities map[string]sessions.CodexIdentity) *Heatmap {
@@ -326,7 +326,7 @@ var heatBefores struct {
 var heatBeforeOpening func(*rowChunk)
 
 // heatSplit is heatOf of the rows of every chunk, paired. A call through
-// magpie changes the gateway's newest block and a session file, and the
+// myna changes the gateway's newest block and a session file, and the
 // heatmap paired a year of calls again for it: ~1.8 s and most of the
 // GC of each refresh of the Usage page while an agent worked (#2278). The
 // days before the last heatRecent are taken from the last pairing of

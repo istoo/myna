@@ -8,7 +8,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // heardHeaders' sibling for a fake vendor: the headers of each request it
@@ -38,7 +38,7 @@ func (s *sentTo) answer(vendor provider.Protocol, status int) http.HandlerFunc {
 }
 
 // the agent's request, carrying a header to pass, one to pass that also
-// has a fixed value, magpie's key in every place an agent puts it, and a
+// has a fixed value, myna's key in every place an agent puts it, and a
 // header nobody lists
 func passRequest(path, body string) *http.Request {
 	r := httptest.NewRequest("POST", path, strings.NewReader(body))
@@ -46,15 +46,15 @@ func passRequest(path, body string) *http.Request {
 	r.Header.Set("X-Route", "route-from-client")
 	r.Header.Set("X-Trace-Token", "trace-secret-0123456789")
 	r.Header.Set("X-Unlisted", "no")
-	r.Header.Set("Authorization", "Bearer magpie-gateway-key")
-	r.Header.Set("X-Api-Key", "magpie-gateway-key")
+	r.Header.Set("Authorization", "Bearer myna-gateway-key")
+	r.Header.Set("X-Api-Key", "myna-gateway-key")
 	return r
 }
 
 // 3jRzfF52Qx on X: a header the provider lists goes to it as the agent
 // sent it, on every API (relayed, translated, count_tokens), standing over
 // the provider's fixed Header of the same name; the fixed one goes when
-// the agent sends none; magpie's key never goes.
+// the agent sends none; myna's key never goes.
 func TestPassHeadersReachTheProvider(t *testing.T) {
 	for _, c := range []struct {
 		name, path, body string
@@ -99,7 +99,7 @@ func TestPassHeadersReachTheProvider(t *testing.T) {
 					t.Errorf("%s = %q sent", k, got)
 				}
 			}
-			if a := h.Get("Authorization") + h.Get("X-Api-Key"); strings.Contains(a, "magpie-gateway-key") || !strings.Contains(a, "sk-upstream-0123456789") {
+			if a := h.Get("Authorization") + h.Get("X-Api-Key"); strings.Contains(a, "myna-gateway-key") || !strings.Contains(a, "sk-upstream-0123456789") {
 				t.Errorf("the vendor's key headers %q, %q", h.Get("Authorization"), h.Get("X-Api-Key"))
 			}
 		})

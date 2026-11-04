@@ -37,7 +37,7 @@ function serve(lang) {
     if (url.pathname === "/api/sessions/manage") {
       return json({
         agents: [{ agent: "claude", count: sessions.length, deletable: true, name: "Claude Code", icon: "claudecode-color" }],
-        agent: "claude", sessions, terminal: true, trash: [], trashDir: "~/Library/Application Support/magpie/trash/sessions",
+        agent: "claude", sessions, terminal: true, trash: [], trashDir: "~/Library/Application Support/myna/trash/sessions",
       });
     }
     if (url.pathname.startsWith("/api/")) return json({});
@@ -66,7 +66,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://myna.test/?view=providers");
       await page.locator("#nav").getByRole("button", { name: nav[lang], exact: true }).click();
       const row = page.locator('#view-sessions .row.sm-sess[data-id="s-1"]');
       await row.waitFor();

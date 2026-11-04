@@ -66,7 +66,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       t.after(() => browser.close());
       const ctx = await browser.newContext({ viewport: { width: 360, height: 560 }, reducedMotion: "no-preference" });
       await ctx.addInitScript(() => {
-        try { localStorage.setItem("magpie.panelTab", "routing"); } catch {}
+        try { localStorage.setItem("myna.panelTab", "routing"); } catch {}
         // the panel's window put away, as WebView2 tells a hidden page
         window.__hid = false;
         Object.defineProperty(Document.prototype, "hidden", { configurable: true, get: () => window.__hid });
@@ -79,7 +79,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(60000);
       await page.route("**/*", serve(lang));
-      await page.goto("http://magpie.test/?mode=panel");
+      await page.goto("http://myna.test/?mode=panel");
       await page.locator("#panelRouting .pr-req").first().waitFor();
       assert(await page.locator("#panelRouting").isVisible());
       // shown, the tab keeps up: its newest request is the one heard last

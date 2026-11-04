@@ -11,8 +11,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/access"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // codexModelInfo is what codex-rs's ModelInfo can't do without
@@ -35,14 +35,14 @@ type codexModelInfo struct {
 	Tools *[]string `json:"experimental_supported_tools"`
 }
 
-// A Codex on another computer that names magpie its model_provider, with a
-// gateway key (#1281), reads magpie's models from /v1/codex/models in
+// A Codex on another computer that names myna its model_provider, with a
+// gateway key (#1281), reads myna's models from /v1/codex/models in
 // Codex's own shape — through the server as it runs, lanGuard and all —
 // and sees only the models its key may use; another computer without a key
 // gets nothing, and /v1/models stays OpenAI's list.
 func TestCodexCatalogForAGatewayKey(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("MYNA_ADDR", "")
 	plan := &fake{t: t, ctype: "application/json", reply: `{}`}
 	spare := &fake{t: t, ctype: "application/json", reply: `{}`}
 	twoProviders(t, plan, spare)

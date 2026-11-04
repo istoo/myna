@@ -9,7 +9,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // commandCodeChat stands in for Command Code's Provider API, which turns a
@@ -56,7 +56,7 @@ const searchedWithCalls = `{"type":"function_call","call_id":"call_1","name":"ex
 // serves on Responses and runs no web search for: the summary request
 // offers no web_search, so it was relayed as Codex sent it, and the
 // provider's chat form of the web_search_call refused the summary.
-// Codex's compaction_trigger (magpie's summary request) and a summary
+// Codex's compaction_trigger (myna's summary request) and a summary
 // request Codex makes itself (tools: [], #1270) each go without the
 // searches; the calls and their outputs go as they were.
 func TestSearchedThreadCompactsOnARelayThatDoesntSearch(t *testing.T) {

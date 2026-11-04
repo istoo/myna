@@ -1,43 +1,43 @@
-// Package appdir decides where magpie keeps its own files: the one place
+// Package appdir decides where myna keeps its own files: the one place
 // every other package asks (#508).
 //
-// Installed, that is ~/.config/magpie ($XDG_CONFIG_HOME/magpie) for what
-// magpie keeps and ~/.cache/magpie ($XDG_CACHE_HOME/magpie) for what it
+// Installed, that is ~/.config/myna ($XDG_CONFIG_HOME/myna) for what
+// myna keeps and ~/.cache/myna ($XDG_CACHE_HOME/myna) for what it
 // can fetch again, as it always was. Portable, when a folder named "data"
-// (or a file named ".portable") sits beside magpie, everything magpie
+// (or a file named ".portable") sits beside myna, everything myna
 // keeps goes into that data folder, its caches into data/cache and the
 // Windows webview's profile into data/webview2 (no Start-menu shortcut or
 // App Paths entry is made either), and
-// nothing of magpie's own is written to the user's profile, the way VS
-// Code's portable mode works. "Beside magpie" is the folder holding the
+// nothing of myna's own is written to the user's profile, the way VS
+// Code's portable mode works. "Beside myna" is the folder holding the
 // executable, with links followed; for a Mac app it is the folder holding
-// Magpie.app (a file put inside the bundle would break its signature), and
+// Myna.app (a file put inside the bundle would break its signature), and
 // for an AppImage the folder holding the .AppImage file, not the folder it
 // is mounted at while it runs.
 //
-// What isn't magpie's own stays where its owner reads it: the agents'
+// What isn't myna's own stays where its owner reads it: the agents'
 // configs (~/.claude, ~/.codex…), the sign-ins they keep in the system
 // keychain, the folders the OS reads for autostart and link handling, and
 // temporary folders.
 //
 // A data folder in a folder every app or download shares (/Applications on
 // a Mac; the home folder, Downloads, Desktop and Documents everywhere) is
-// taken for magpie's own only when it already holds magpie's files and the
+// taken for myna's own only when it already holds myna's files and the
 // installed folder doesn't, or with a ".portable" marker: a "data" folder
 // there is as likely another app's or the user's own. Taking one showed a
-// user who had never asked for portable an empty magpie (#989), and wrote
-// magpie's files into a Downloads\data folder a Windows user's archiver
+// user who had never asked for portable an empty myna (#989), and wrote
+// myna's files into a Downloads\data folder a Windows user's archiver
 // empties, so a provider just added was gone (tangle778 on X). Where the
 // system keeps Downloads, Desktop or Documents off home (moved to D:\ or
 // OneDrive on Windows, ~/下载 on Linux) only a data folder holding none of
-// magpie's files is passed over: before v0.1.2648 those folders weren't
-// judged at all, so a data folder there holding magpie's files is one this
-// user's magpie has been keeping its files in, and an update never moves
+// myna's files is passed over: before v0.1.2648 those folders weren't
+// judged at all, so a data folder there holding myna's files is one this
+// user's myna has been keeping its files in, and an update never moves
 // them back to an installed folder from long ago (jwaitq on Discord).
 //
-// The decision is made once, from the executable as it was when magpie
-// started: an update moving the running copy aside (into .magpie-update on
-// a Mac, to magpie.exe.old on Windows) leaves it running from somewhere
+// The decision is made once, from the executable as it was when myna
+// started: an update moving the running copy aside (into .myna-update on
+// a Mac, to myna.exe.old on Windows) leaves it running from somewhere
 // else, and its files must not move with it.
 package appdir
 
@@ -51,10 +51,10 @@ import (
 )
 
 const (
-	// DataName is the folder beside magpie that makes it portable and
+	// DataName is the folder beside myna that makes it portable and
 	// holds its files.
 	DataName = "data"
-	// MarkerName is a file beside magpie that makes it portable too, its
+	// MarkerName is a file beside myna that makes it portable too, its
 	// files then going into a data folder made beside it.
 	MarkerName = ".portable"
 )
@@ -64,7 +64,7 @@ var (
 	portable string // the data folder, or "" when installed
 )
 
-// Portable is the data folder magpie keeps everything in, or "" when it
+// Portable is the data folder myna keeps everything in, or "" when it
 // isn't portable.
 func Portable() string {
 	once.Do(func() {
@@ -75,15 +75,15 @@ func Portable() string {
 		portable = Resolve(exe)
 		if portable == "" {
 			if data := Passed(exe); data != "" {
-				log.Printf("appdir: %s is beside magpie but not taken for its portable data: it is in a shared folder and %s has magpie's files too; a .portable file beside magpie makes it portable", data, installed())
+				log.Printf("appdir: %s is beside myna but not taken for its portable data: it is in a shared folder and %s has myna's files too; a .portable file beside myna makes it portable", data, installed())
 			}
 		}
 	})
 	return portable
 }
 
-// UseExecutable decides again as if magpie ran from exe ("" for an
-// installed magpie, whatever runs): for tests.
+// UseExecutable decides again as if myna ran from exe ("" for an
+// installed myna, whatever runs): for tests.
 func UseExecutable(exe string) {
 	once.Do(func() {})
 	portable = ""
@@ -92,7 +92,7 @@ func UseExecutable(exe string) {
 	}
 }
 
-// Resolve is the data folder of a magpie run from exe, or "" when it isn't
+// Resolve is the data folder of a myna run from exe, or "" when it isn't
 // portable.
 func Resolve(exe string) string {
 	if real, err := filepath.EvalSymlinks(exe); err == nil {
@@ -109,9 +109,9 @@ func Resolve(exe string) string {
 	return ""
 }
 
-// Passed is the data folder beside a magpie run from exe that holds
-// magpie's files but that Resolve doesn't take for its own, because it is
-// in a shared folder while the installed folder has magpie's files too, or
+// Passed is the data folder beside a myna run from exe that holds
+// myna's files but that Resolve doesn't take for its own, because it is
+// in a shared folder while the installed folder has myna's files too, or
 // "". A data folder holding none of them is someone else's and isn't named.
 func Passed(exe string) string {
 	if real, err := filepath.EvalSymlinks(exe); err == nil {
@@ -125,18 +125,18 @@ func Passed(exe string) string {
 	return ""
 }
 
-// shared says whether the data folder in dir can't be taken for magpie's:
+// shared says whether the data folder in dir can't be taken for myna's:
 // dir is a folder every app or download shares, where a folder named data
 // is as likely another app's or the user's own, and either data holds none
-// of magpie's files or the installed folder holds them too. One who keeps
-// magpie portable there has its files in data and never ran it installed,
+// of myna's files or the installed folder holds them too. One who keeps
+// myna portable there has its files in data and never ran it installed,
 // and keeps it portable; a ".portable" marker beside it makes it portable
 // whatever is there.
 //
 // A data folder in the place the system keeps a user folder moved off home
-// (movedFolder) is passed over only when it holds none of magpie's files.
+// (movedFolder) is passed over only when it holds none of myna's files.
 // Releases before v0.1.2648 took any data folder there, so one holding
-// magpie's files is where this magpie has kept them, maybe for months,
+// myna's files is where this myna has kept them, maybe for months,
 // while an installed folder with files of its own is from before then:
 // judging it as in home\Downloads moved a user back to that old setup on
 // updating (jwaitq on Discord).
@@ -154,7 +154,7 @@ func shared(dir, data string) bool {
 	return false
 }
 
-// hasFiles says whether dir holds magpie's own files.
+// hasFiles says whether dir holds myna's own files.
 func hasFiles(dir string) bool {
 	for _, f := range []string{"providers.json", "logins.json", "settings.json"} {
 		if fi, err := os.Stat(filepath.Join(dir, f)); err == nil && !fi.IsDir() {
@@ -208,31 +208,31 @@ func sameAny(dir string, dirs []string) bool {
 	return false
 }
 
-// installed is the folder an installed magpie keeps its files in, or ""
+// installed is the folder an installed myna keeps its files in, or ""
 // with no home folder.
 func installed() string {
 	if x := os.Getenv("XDG_CONFIG_HOME"); rooted(x) {
-		return filepath.Join(x, "magpie")
+		return filepath.Join(x, "myna")
 	}
 	h, err := Home()
 	if err != nil {
 		return ""
 	}
-	return filepath.Join(h, ".config", "magpie")
+	return filepath.Join(h, ".config", "myna")
 }
 
-// Beside is the folder a portable magpie run from exe keeps its data folder
+// Beside is the folder a portable myna run from exe keeps its data folder
 // in: the executable's own, the one holding the .app on a Mac, the one
 // holding the .AppImage on Linux. APPIMAGE counts only for the AppImage
-// magpie runs from (exe under its mount, APPDIR): every program an
-// AppImage starts inherits both, a magpie started from an AppImage
+// myna runs from (exe under its mount, APPDIR): every program an
+// AppImage starts inherits both, a myna started from an AppImage
 // terminal too.
 func Beside(exe string) string {
 	if img := os.Getenv("APPIMAGE"); img != "" && runtime.GOOS == "linux" && within(exe, os.Getenv("APPDIR")) {
 		return filepath.Dir(img)
 	}
 	dir := filepath.Dir(exe)
-	// …/Magpie.app/Contents/MacOS/magpie
+	// …/Myna.app/Contents/MacOS/myna
 	if filepath.Base(dir) == "MacOS" && filepath.Base(filepath.Dir(dir)) == "Contents" {
 		if app := filepath.Dir(filepath.Dir(dir)); strings.EqualFold(filepath.Ext(app), ".app") {
 			return filepath.Dir(app)
@@ -257,23 +257,33 @@ func absolute(p string) string {
 	return p
 }
 
-// Config is the folder magpie keeps its settings, providers, usage and the
+var migrateConfigOnce sync.Once
+
+// Config is the folder myna keeps its settings, providers, usage and the
 // rest of its own state in.
 func Config() string {
 	if p := Portable(); p != "" {
 		return p
 	}
 	if x := os.Getenv("XDG_CONFIG_HOME"); rooted(x) {
-		return Join(x, "magpie")
+		return Join(x, "myna")
 	}
-	return Join(Join(mustHome(), ".config"), "magpie")
+	p := Join(Join(mustHome(), ".config"), "myna")
+	migrateConfigOnce.Do(func() {
+		if h, err := Home(); err == nil {
+			if src := migrate(legacyConfig(h), p); src != "" {
+				log.Printf("appdir: brought myna's files over from %s", src)
+			}
+		}
+	})
+	return p
 }
 
-// Redirected is the folder magpie keeps its files in when it is opened
-// from the Dock, the Start menu or a desktop launcher (~/.config/magpie),
-// while this magpie reads them from another that XDG_CONFIG_HOME, set in
-// the shell it was run from, names; "" when they are the same, or magpie
-// is portable. A magpie run in such a shell sees none of what the app's
+// Redirected is the folder myna keeps its files in when it is opened
+// from the Dock, the Start menu or a desktop launcher (~/.config/myna),
+// while this myna reads them from another that XDG_CONFIG_HOME, set in
+// the shell it was run from, names; "" when they are the same, or myna
+// is portable. A myna run in such a shell sees none of what the app's
 // window shows.
 func Redirected() string {
 	if Portable() != "" || os.Getenv("XDG_CONFIG_HOME") == "" {
@@ -283,29 +293,39 @@ func Redirected() string {
 	if err != nil {
 		return ""
 	}
-	if def := filepath.Join(h, ".config", "magpie"); filepath.Clean(def) != filepath.Clean(Config()) {
+	if def := filepath.Join(h, ".config", "myna"); filepath.Clean(def) != filepath.Clean(Config()) {
 		return def
 	}
 	return ""
 }
 
-// Cache is the folder for what magpie can fetch again (the models.dev
+var migrateCacheOnce sync.Once
+
+// Cache is the folder for what myna can fetch again (the models.dev
 // catalog, exchange rates, market lists).
 func Cache() string {
 	if p := Portable(); p != "" {
 		return Join(p, "cache")
 	}
 	if x := os.Getenv("XDG_CACHE_HOME"); rooted(x) {
-		return Join(x, "magpie")
+		return Join(x, "myna")
 	}
-	return Join(Join(mustHome(), ".cache"), "magpie")
+	p := Join(Join(mustHome(), ".cache"), "myna")
+	migrateCacheOnce.Do(func() {
+		if h, err := Home(); err == nil {
+			if src := migrate(legacyCache(h), p); src != "" {
+				log.Printf("appdir: brought myna's cache over from %s", src)
+			}
+		}
+	})
+	return p
 }
 
 // Logs is the folder the desktop app writes its log in, where each system
-// keeps an app's logs: ~/Library/Logs/magpie on a Mac (beside the launch
-// agent's serve.log, `magpie daemon install`), %LOCALAPPDATA%\magpie\logs
-// on Windows, and $XDG_STATE_HOME/magpie (~/.local/state/magpie) elsewhere;
-// portable, data/logs. A user asked for magpie's log finds it there
+// keeps an app's logs: ~/Library/Logs/myna on a Mac (beside the launch
+// agent's serve.log, `myna daemon install`), %LOCALAPPDATA%\myna\logs
+// on Windows, and $XDG_STATE_HOME/myna (~/.local/state/myna) elsewhere;
+// portable, data/logs. A user asked for myna's log finds it there
 // (rayem1w on X: the app opened from the Finder had written none).
 func Logs() string {
 	return logsOn(runtime.GOOS)
@@ -318,26 +338,26 @@ func logsOn(goos string) string {
 	}
 	switch goos {
 	case "darwin":
-		return filepath.Join(mustHome(), "Library", "Logs", "magpie")
+		return filepath.Join(mustHome(), "Library", "Logs", "myna")
 	case "windows":
 		local := os.Getenv("LOCALAPPDATA")
 		if !rooted(local) {
 			local = filepath.Join(mustHome(), "AppData", "Local")
 		}
-		return filepath.Join(local, "magpie", "logs")
+		return filepath.Join(local, "myna", "logs")
 	}
 	if x := os.Getenv("XDG_STATE_HOME"); rooted(x) {
-		return filepath.Join(x, "magpie")
+		return filepath.Join(x, "myna")
 	}
-	return filepath.Join(mustHome(), ".local", "state", "magpie")
+	return filepath.Join(mustHome(), ".local", "state", "myna")
 }
 
 // WebView is the folder the Windows webview (WebView2) keeps its profile
 // in — its cache, cookies and the pages' storage — or "" for its own
 // default. Installed, that default is %APPDATA%\<exe name>, as it always
 // was, so nothing kept there is lost; portable, it is data\webview2, so a
-// portable magpie leaves no magpie.exe folder in the user's AppData (#508).
-// A Windows magpie installed from a download under another name
+// portable myna leaves no myna.exe folder in the user's AppData (#508).
+// A Windows myna installed from a download under another name
 // (update.Settle) keeps the profile it had there: the WebViewNote beside
 // it names that folder.
 func WebView() string {
@@ -354,7 +374,7 @@ func WebView() string {
 	return noted(filepath.Join(filepath.Dir(exe), WebViewNote))
 }
 
-// WebViewNote is the file beside an installed Windows magpie naming the
+// WebViewNote is the file beside an installed Windows myna naming the
 // webview profile it keeps, the one it had where it was downloaded.
 const WebViewNote = "webview-profile"
 
@@ -371,8 +391,8 @@ func noted(path string) string {
 	return ""
 }
 
-// SystemCache is the cache folder the OS names for magpie
-// (~/Library/Caches/magpie on a Mac, %LocalAppData%\magpie on Windows),
+// SystemCache is the cache folder the OS names for myna
+// (~/Library/Caches/myna on a Mac, %LocalAppData%\myna on Windows),
 // which a few caches have always used; portable, it is Cache.
 func SystemCache() (string, error) {
 	if p := Portable(); p != "" {
@@ -382,5 +402,5 @@ func SystemCache() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(d, "magpie"), nil
+	return filepath.Join(d, "myna"), nil
 }

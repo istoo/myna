@@ -1,6 +1,6 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // A Claude account's usage is read only when the reader asks (the user:
-// 不要伪造任何的 Claude 请求，能否通过 claude cli 获取): magpie runs Claude
+// 不要伪造任何的 Claude 请求，能否通过 claude cli 获取): myna runs Claude
 // Code's own /usage, and only when the Usage page is opened or Refresh is
 // pressed. Opening the page and Refresh (the header's, which on the Overview
 // is the allowances' too, #486) load usage/quotas?asked=1; the
@@ -57,7 +57,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         asOf: new Date(Date.now() - 72e5).toISOString(),
         windows: [{ name: "5 hours", used: 100, resetsAt: new Date(Date.now() - 36e5).toISOString() }] };
       await page.route("**/*", serve([], { on: false }, [quota], lang));
-      await page.goto("http://magpie.test/?view=usage");
+      await page.goto("http://myna.test/?view=usage");
       const card = page.locator(".subscription-card");
       const reading = card.locator(".quota-read");
       await reading.waitFor();
@@ -86,7 +86,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           windows: [{ name: "5 hours", used: 100, resetsAt: new Date(Date.now() - 36e5).toISOString() }] };
         await page.route("**/*", serve([], { on: false }, [quota], lang, true));
         const open = async () => {
-          await page.goto(surface === "panel" ? "http://magpie.test/?mode=panel" : "http://magpie.test/?view=providers");
+          await page.goto(surface === "panel" ? "http://myna.test/?mode=panel" : "http://myna.test/?view=providers");
           if (surface === "panel") await page.locator('button[data-ptab="usage"]').click();
           else await page.locator(".row.provider", { hasText: "Claude" }).first().click();
         };
@@ -129,7 +129,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         windows: [{ name: "5 hours", used: 40, resetsAt: new Date(Date.now() + 36e5).toISOString() }] };
       const balance = { provider: "deepseek", name: "DeepSeek", kind: "key", asOf, balance: "$10", windows: [] };
       await page.route("**/*", serve([], { on: false }, [quota, balance], lang, true));
-      await page.goto("http://magpie.test/?mode=panel");
+      await page.goto("http://myna.test/?mode=panel");
       await page.locator('button[data-ptab="usage"]').click();
       const card = page.locator(".pq-card:not(.bal)");
       const reading = card.locator(".pq-asof");
@@ -156,7 +156,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     const settle = async (n) => { for (let i = 0; i < 100 && asks.length < n; i++) await page.waitForTimeout(20); await page.waitForTimeout(150); };
 
     // opening the page asks
-    await page.goto("http://magpie.test/?view=usage");
+    await page.goto("http://myna.test/?view=usage");
     await page.locator("#usageReload").waitFor();
     await settle(1);
     assert.equal(asked(), 1, `opening Usage asks once: ${JSON.stringify(asks)}`);

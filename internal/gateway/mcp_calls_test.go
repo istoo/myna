@@ -12,10 +12,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/budget"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/istoo/myna/internal/access"
+	"github.com/istoo/myna/internal/budget"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/usage"
 )
 
 // loggedRows is every row of usage.jsonl, the MCP ones included, which
@@ -57,10 +57,10 @@ func mcpRows(t *testing.T) []usage.Record {
 // counts.
 func TestMCPToolCallIsARequestRow(t *testing.T) {
 	s, _ := easeled(t)
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
+	t.Setenv("MYNA_PUBLIC_URL", "")
 	t.Cleanup(s.imageStore.running.Wait)
 	h := lanGuard(s.Handler())
-	const prompt = "a magpie on a secret-plum-branch"
+	const prompt = "a myna on a secret-plum-branch"
 	m := readImageReply(t, imagePost(h, "127.0.0.1:5000", imageToolCall(GenerateImageTool, map[string]any{"prompt": prompt}), "User-Agent", "claude-cli/2.1.0 (external, cli)"))
 	if m.Result.IsError {
 		t.Fatalf("drawn: %+v", m)
@@ -96,7 +96,7 @@ func TestMCPToolCallIsARequestRow(t *testing.T) {
 // a row too, failed.
 func TestMCPToolCallFailureIsKept(t *testing.T) {
 	s, _ := easeled(t)
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
+	t.Setenv("MYNA_PUBLIC_URL", "")
 	t.Cleanup(s.imageStore.running.Wait)
 	h := lanGuard(s.Handler())
 	readImageReply(t, imagePost(h, "127.0.0.1:5000", imageToolCall(GenerationResultTool, map[string]any{"id": "img_nothing"})))
@@ -114,7 +114,7 @@ func TestMCPToolCallFailureIsKept(t *testing.T) {
 // generation_result is of the model that started the job it waits on.
 func TestMCPGenerationResultNamesTheJobsModel(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
+	t.Setenv("MYNA_PUBLIC_URL", "")
 	gate := make(chan struct{})
 	e := &easel{}
 	up := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -139,7 +139,7 @@ func TestMCPGenerationResultNamesTheJobsModel(t *testing.T) {
 	was := imageMCPWithin
 	t.Cleanup(func() { imageMCPWithin = was })
 	imageMCPWithin = 10 * time.Millisecond
-	m := readImageReply(t, imagePost(h, "127.0.0.1:5000", imageToolCall(GenerateImageTool, map[string]any{"prompt": "a magpie"})))
+	m := readImageReply(t, imagePost(h, "127.0.0.1:5000", imageToolCall(GenerateImageTool, map[string]any{"prompt": "a myna"})))
 	text := m.Result.Content[0].Text
 	i := strings.Index(text, `"img_`)
 	if m.Result.IsError || i < 0 {
@@ -191,7 +191,7 @@ func TestMCPHubCallIsARequestRow(t *testing.T) {
 	}
 }
 
-// The web search server's call is a row of magpie-web-search.
+// The web search server's call is a row of myna-web-search.
 func TestMCPSearchCallIsARequestRow(t *testing.T) {
 	fresh(t)
 	apis := newSearchAPIs(t)
@@ -201,7 +201,7 @@ func TestMCPSearchCallIsARequestRow(t *testing.T) {
 	h := lanGuard(New().Handler())
 	readMCP(t, mcpPost(h, here, mcpSearchCall))
 	rows := mcpRows(t)
-	if len(rows) != 1 || rows[0].Requested != "web_search" || rows[0].Host != "magpie-web-search" || rows[0].Error != "" {
+	if len(rows) != 1 || rows[0].Requested != "web_search" || rows[0].Host != "myna-web-search" || rows[0].Error != "" {
 		t.Fatalf("rows %+v", rows)
 	}
 	if _, text := loggedRows(t); strings.Contains(text, "latest go") {
@@ -209,9 +209,9 @@ func TestMCPSearchCallIsARequestRow(t *testing.T) {
 	}
 }
 
-// The Magpie Image server an agent runs reports each call it answered
+// The Myna Image server an agent runs reports each call it answered
 // (MCPCalledMethod): a row of its tool and model, at "stdio"; a tool not
-// Magpie Image's is turned away.
+// Myna Image's is turned away.
 func TestMCPCalledFromStdioIsARow(t *testing.T) {
 	s, _ := easeled(t)
 	h := lanGuard(s.Handler())

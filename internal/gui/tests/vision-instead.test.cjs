@@ -13,37 +13,37 @@ const { chromium, webkit } = require("playwright");
 const assets = path.resolve(__dirname, "../assets");
 const words = {
   en: {
-    picked: /probe\/eye, the Image recognition model picked in Settings › Models, couldn't describe an image for Codex's zai\/glm-5\.2: 502 upstream closed\. So magpie had other\/bigeye, the next model it can use that sees, describe it in its place\. Not a turn of the conversation\.$/,
-    auto: /probe\/eye, the model magpie picked to describe images, couldn't describe an image for Codex's call to magpie's analyze_image MCP tool: it failed\. So magpie had other\/bigeye/,
+    picked: /probe\/eye, the Image recognition model picked in Settings › Models, couldn't describe an image for Codex's zai\/glm-5\.2: 502 upstream closed\. So myna had other\/bigeye, the next model it can use that sees, describe it in its place\. Not a turn of the conversation\.$/,
+    auto: /probe\/eye, the model myna picked to describe images, couldn't describe an image for Codex's call to myna's analyze_image MCP tool: it failed\. So myna had other\/bigeye/,
   },
   zh: {
-    picked: /probe\/eye 是在 设置 › 模型 里选的识图模型，但它没能为 Codex 的 zai\/glm-5\.2 描述图片：502 upstream closed。所以 magpie 改让下一个可用的识图模型 other\/bigeye 来描述。不属于对话轮次。$/,
-    auto: /probe\/eye 是 magpie 自动选的识图模型，但它没能为 Codex 对 magpie 的 analyze_image MCP 工具的调用 描述图片：它出错了。/,
+    picked: /probe\/eye 是在 设置 › 模型 里选的识图模型，但它没能为 Codex 的 zai\/glm-5\.2 描述图片：502 upstream closed。所以 myna 改让下一个可用的识图模型 other\/bigeye 来描述。不属于对话轮次。$/,
+    auto: /probe\/eye 是 myna 自动选的识图模型，但它没能为 Codex 对 myna 的 analyze_image MCP 工具的调用 描述图片：它出错了。/,
   },
   "zh-TW": {
-    picked: /probe\/eye 是在 設定 › 模型 裡選的識圖模型，但它沒能為 Codex 的 zai\/glm-5\.2 描述圖片：502 upstream closed。所以 magpie 改讓下一個可用的識圖模型 other\/bigeye 來描述。不屬於對話輪次。$/,
-    auto: /probe\/eye 是 magpie 自動選的識圖模型，但它沒能為 Codex 對 magpie 的 analyze_image MCP 工具的呼叫 描述圖片：它出錯了。/,
+    picked: /probe\/eye 是在 設定 › 模型 裡選的識圖模型，但它沒能為 Codex 的 zai\/glm-5\.2 描述圖片：502 upstream closed。所以 myna 改讓下一個可用的識圖模型 other\/bigeye 來描述。不屬於對話輪次。$/,
+    auto: /probe\/eye 是 myna 自動選的識圖模型，但它沒能為 Codex 對 myna 的 analyze_image MCP 工具的呼叫 描述圖片：它出錯了。/,
   },
   ja: {
-    picked: /設定 › モデル で選んだ画像認識モデル probe\/eye は Codex の zai\/glm-5\.2 のための画像を説明できませんでした：502 upstream closed。そのため magpie は次に使える画像を見られるモデル other\/bigeye に代わりに説明させました。会話のターンではありません。$/,
-    auto: /magpie が自動で選んだ画像認識モデル probe\/eye は Codex による magpie の analyze_image MCP ツールの呼び出し のための画像を説明できませんでした：エラーになりました。/,
+    picked: /設定 › モデル で選んだ画像認識モデル probe\/eye は Codex の zai\/glm-5\.2 のための画像を説明できませんでした：502 upstream closed。そのため myna は次に使える画像を見られるモデル other\/bigeye に代わりに説明させました。会話のターンではありません。$/,
+    auto: /myna が自動で選んだ画像認識モデル probe\/eye は Codex による myna の analyze_image MCP ツールの呼び出し のための画像を説明できませんでした：エラーになりました。/,
   },
   de: {
-    picked: /probe\/eye, das unter Einstellungen › Modelle gewählte Bilderkennungsmodell, konnte kein Bild für zai\/glm-5\.2 von Codex beschreiben: 502 upstream closed\. Daher ließ magpie other\/bigeye, das nächste nutzbare Modell, das Bilder sieht, es an seiner Stelle beschreiben\. Keine Runde des Gesprächs\.$/,
-    auto: /probe\/eye, das von magpie gewählte Modell zum Beschreiben von Bildern, konnte kein Bild für den Aufruf von Codex an magpies MCP-Werkzeug analyze_image beschreiben: es ist fehlgeschlagen\./,
+    picked: /probe\/eye, das unter Einstellungen › Modelle gewählte Bilderkennungsmodell, konnte kein Bild für zai\/glm-5\.2 von Codex beschreiben: 502 upstream closed\. Daher ließ myna other\/bigeye, das nächste nutzbare Modell, das Bilder sieht, es an seiner Stelle beschreiben\. Keine Runde des Gesprächs\.$/,
+    auto: /probe\/eye, das von myna gewählte Modell zum Beschreiben von Bildern, konnte kein Bild für den Aufruf von Codex an mynas MCP-Werkzeug analyze_image beschreiben: es ist fehlgeschlagen\./,
   },
 };
 
 const now = new Date();
 const day = [now.getFullYear(), now.getMonth() + 1, now.getDate()].map((n) => String(n).padStart(2, "0")).join("-");
 const route = (id, f) => ({
-  id, seq: id, time: new Date(now.getTime() - id * 60e3).toISOString(), agent: "magpie", model: "other/bigeye", provider: "other",
+  id, seq: id, time: new Date(now.getTime() - id * 60e3).toISOString(), agent: "myna", model: "other/bigeye", provider: "other",
   kind: "vision", for: { agent: "codex", instead: "probe/eye", ...f },
   order: [{ id: "other", provider: "other", name: "Other", who: "a@b.c", kind: "account", model: "bigeye" }],
   tries: [{ id: "other", model: "bigeye", start: new Date(now.getTime() - id * 60e3).toISOString(), done: true, status: 200, ms: 900 }],
   done: true, status: 200, ms: 900, tokens: 1200,
 });
-// newest first: the picked describer that failed, and magpie's own pick
+// newest first: the picked describer that failed, and myna's own pick
 // that failed an agent's analyze_image call with no reason kept
 const routes = [route(1, { model: "zai/glm-5.2", picked: true, why: "502 upstream closed" }), route(2, { mcp: true })];
 
@@ -51,7 +51,7 @@ function serve(lang) {
   const settings = { lang, theme: "light", vision: "probe/eye", gateway: "http://127.0.0.1:3999", port: 3999 };
   const state = {
     agents: [], profiles: [], settings,
-    clients: [{ id: "codex", name: "Codex", icon: "codex" }, { id: "magpie", name: "magpie", icon: "magpie" }],
+    clients: [{ id: "codex", name: "Codex", icon: "codex" }, { id: "myna", name: "myna", icon: "myna" }],
   };
   return async (r) => {
     const url = new URL(r.request().url());
@@ -86,7 +86,7 @@ async function open(t, engine, lang, width) {
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", serve(lang));
-  await page.goto("http://magpie.test/?view=routing");
+  await page.goto("http://myna.test/?view=routing");
   return { page, errors };
 }
 

@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // The standalone CLI's sign-in: who in a JSONC config.json, the token in
@@ -117,9 +117,9 @@ exit 1
 	}
 }
 
-// magpie on Windows, the Copilot CLI signed in inside a WSL distro that
+// myna on Windows, the Copilot CLI signed in inside a WSL distro that
 // runs (#723, jia2): WSL has no keyring, so the CLI kept its token in the
-// distro's ~/.copilot/config.json, which magpie reads over WSL's share.
+// distro's ~/.copilot/config.json, which myna reads over WSL's share.
 func TestCopilotCLIInWSL(t *testing.T) {
 	home := signIn(t)
 	os.Remove(filepath.Join(home, ".config", "github-copilot", "apps.json"))

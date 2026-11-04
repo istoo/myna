@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // spendHome is a home with relay/gpt-9 priced at $1 in and $2 out a
@@ -29,7 +29,7 @@ func spendHome(t *testing.T) {
 	spendMemo.Unlock()
 }
 
-// KeySpent (sparkling_lemur_62868's spend cap) is what magpie's calls on a
+// KeySpent (sparkling_lemur_62868's spend cap) is what myna's calls on a
 // key cost from a start on, at the Usage page's prices: the key's own calls
 // alone, not another key's, not one before the start, not one turned away
 // before it went out nor one an app reported (another computer's calls are

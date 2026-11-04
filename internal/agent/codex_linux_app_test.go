@@ -9,12 +9,12 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/istoo/myna/internal/proc"
 )
 
 // linuxCodexMetadata is resources/linux-package-metadata.json as OpenAI's
 // chatgpt 26.1027.30824 deb installs it (seen in the WSL distro
-// magpie-desktop, Ubuntu 24.04).
+// myna-desktop, Ubuntu 24.04).
 const linuxCodexMetadata = `{
   "codexAppBrand": "chatgpt",
   "codexBuildFlavor": "prod",
@@ -22,7 +22,7 @@ const linuxCodexMetadata = `{
 }
 `
 
-// installLinuxCodexApp puts OpenAI's Linux package's files magpie reads
+// installLinuxCodexApp puts OpenAI's Linux package's files myna reads
 // under the sandbox's /usr/lib/chatgpt, and says where.
 func installLinuxCodexApp(t *testing.T) string {
 	t.Helper()
@@ -46,7 +46,7 @@ func installLinuxCodexApp(t *testing.T) string {
 	return dir
 }
 
-// pota on Discord: magpie had no account sign-in or switch for the
+// pota on Discord: myna had no account sign-in or switch for the
 // ChatGPT desktop app on Linux, which macOS and Windows have. OpenAI's
 // Linux package (chatgpt, in preview since 08-11) installs the app to
 // /usr/lib/chatgpt; the Agents row shows its version, from the package's
@@ -87,7 +87,7 @@ func TestCodexLinuxAppVersion(t *testing.T) {
 	}
 }
 
-// After a switch magpie restarts the app's app-server, and when the app
+// After a switch myna restarts the app's app-server, and when the app
 // starts none it says to quit and open it again, unless the app was quit
 // meanwhile: whether it is open is known on Linux too, from any process of
 // /usr/lib/chatgpt/ChatGPT (the main one and Electron's helpers, as ps
@@ -129,7 +129,7 @@ func TestCodexLinuxAppOpen(t *testing.T) {
 const codexLinuxAppServerCmd = "/usr/lib/chatgpt/resources/codex -c features.code_mode_host=true app-server --analytics-default-enabled"
 
 // The Linux app's codex reads Codex's config as the CLI does: it is one
-// of the readers whose version decides what magpie writes there, read
+// of the readers whose version decides what myna writes there, read
 // from its --version (codex-cli 0.166.0-alpha.5.1 in chatgpt 26.1027).
 func TestCodexLinuxAppReadsTheConfig(t *testing.T) {
 	if runtime.GOOS != "linux" {

@@ -6,14 +6,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // TestMain keeps the package's tests off the Kiro and Copilot CLI sign-ins
 // of whoever runs them: Accounts() reads them, and asks Kiro who the account is. It also
 // gives the package a home of its own (testenv), so what a test leaves
 // behind it — a CLI's answer kept by refresh after the test is over —
-// never lands in the runner's magpie, nor in APPDATA on Windows. And it
+// never lands in the runner's myna, nor in APPDATA on Windows. And it
 // keeps them off the network (testenv.Offline): a test of a sign-in or a
 // key at a vendor's real address asks only what it serves on loopback.
 func TestMain(m *testing.M) {

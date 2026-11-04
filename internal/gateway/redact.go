@@ -11,11 +11,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/gwmw"
-	"github.com/yetone/magpie/internal/masking"
-	"github.com/yetone/magpie/internal/maskrec"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/gwmw"
+	"github.com/istoo/myna/internal/masking"
+	"github.com/istoo/myna/internal/maskrec"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // redacted masks a request's secrets, as the settings say, before it goes
@@ -177,7 +177,7 @@ func (e maskBlocked) Error() string {
 	if e.hit.Head != "" {
 		one = e.hit.Head + "…, " + one
 	}
-	return fmt.Sprintf("magpie held this request back: Settings › Privacy blocks %s, and it has one (%s). Nothing was sent.", e.hit.Kind, one)
+	return fmt.Sprintf("myna held this request back: Settings › Privacy blocks %s, and it has one (%s). Nothing was sent.", e.hit.Kind, one)
 }
 
 // blocked is the error for hits with a value to hold the request back
@@ -343,7 +343,7 @@ func maskedFor(ctx context.Context, p provider.Provider, isGroup bool, ms []prov
 
 // agentTurnKey marks a request an agent sent (serveAgent, count_tokens,
 // a Codex turn on its own sign-in), the ones the user's route for masked
-// requests is for (maskRouteFor); magpie's own asks made on an agent's
+// requests is for (maskRouteFor); myna's own asks made on an agent's
 // context take it off (ownAsk).
 type agentTurnKey struct{}
 
@@ -381,7 +381,7 @@ func MaskRoute(id string) bool {
 // masking changed (h counts a value masked), the request to go there as
 // written instead of masked (jessyoungyu on X); "" leaves it masked: none
 // set, nothing masked (a value only warned of goes as written anyway),
-// magpie's own ask, or a model that can't take it whole now (MaskRoute)
+// myna's own ask, or a model that can't take it whole now (MaskRoute)
 // or that the calling key may not use. Its failures are its own: what it
 // can go on to is only where the user set requests to go unmasked, and
 // the request is never handed back to be masked and sent to a vendor.

@@ -30,7 +30,7 @@ const LINE = "npx " + ARGS.join(" ");
 
 function server(lang, calls) {
   const lib = {
-    dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+    dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
     agents: [agent("claude", "Claude Code")],
     instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [],
     servers: [{ name: "db", transport: "stdio", command: "npx", args: ARGS, env: { DB_TOKEN: "${DB_TOKEN}" }, agents: ["claude"] }],
@@ -51,7 +51,7 @@ function server(lang, calls) {
     if (url.pathname === "/api/library/mcp/check") return route.fulfill({ json: { servers: {} } });
     if (url.pathname === "/api/library/skill") {
       const name = url.searchParams.get("name");
-      return route.fulfill({ json: { file: "SKILL.md", files: ["SKILL.md"], text: "---\nname: " + name + "\n---\n\nWrite it up.\n", path: `${HOME}/.magpie/library/skills/${name}` } });
+      return route.fulfill({ json: { file: "SKILL.md", files: ["SKILL.md"], text: "---\nname: " + name + "\n---\n\nWrite it up.\n", path: `${HOME}/.myna/library/skills/${name}` } });
     }
     if (url.pathname === "/api/library/servers/save") {
       const { old, server: s } = req.postDataJSON();
@@ -93,13 +93,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const calls = [];
           const ctx = await browser.newContext({ viewport: { width, height: 800 } });
           // the MCP tab first; the skills' once the test has picked it
-          await ctx.addInitScript(() => { try { if (!localStorage.getItem("magpie.libTab")) localStorage.setItem("magpie.libTab", "mcp"); } catch {} });
+          await ctx.addInitScript(() => { try { if (!localStorage.getItem("myna.libTab")) localStorage.setItem("myna.libTab", "mcp"); } catch {} });
           const page = await ctx.newPage();
           page.setDefaultTimeout(5000);
           page.setDefaultNavigationTimeout(60000);
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", server(lang, calls));
-          await page.goto("http://magpie.test/");
+          await page.goto("http://myna.test/");
           await page.locator('button[data-view="library"]').click();
           const row = page.locator("#view-library .lib-server", { has: page.locator('.lib-health[data-server="db"]') });
           const ed = page.locator("#modal .lib-editor");
@@ -170,7 +170,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           assert.equal(await row.locator(".sub.mono").count(), 0);
 
           // a skill's note, over its SKILL.md
-          await page.evaluate(() => { try { localStorage.setItem("magpie.libTab", "skills"); } catch {} });
+          await page.evaluate(() => { try { localStorage.setItem("myna.libTab", "skills"); } catch {} });
           await page.reload();
           await page.locator('button[data-view="library"]').click();
           const skill = (name) => page.locator("#view-library .lib-skill", { has: page.locator(".name", { hasText: new RegExp("^" + name + "$") }) });

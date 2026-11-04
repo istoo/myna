@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/update"
+	"github.com/istoo/myna/internal/update"
 )
 
 // xyxyxy_15591 on Discord: an update put in by itself shouldn't put the
@@ -21,9 +21,9 @@ import (
 func TestRestartBySelfComesBackQuietly(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("XDG_CONFIG_HOME", home)
-	mark := filepath.Join(home, "magpie", quietRestartFile)
+	mark := filepath.Join(home, "myna", quietRestartFile)
 
-	exe := filepath.Join(t.TempDir(), "magpie")
+	exe := filepath.Join(t.TempDir(), "myna")
 	os.WriteFile(exe, []byte("old"), 0o755)
 	self, _ := os.Stat(exe)
 	os.WriteFile(exe, []byte("newer"), 0o755) // in already: install has nothing to swap
@@ -66,7 +66,7 @@ func TestRestartBySelfComesBackQuietly(t *testing.T) {
 		}
 	}
 
-	// magpie web restarts in place: nothing to mark
+	// myna web restarts in place: nothing to mark
 	if !restartInto(true, false, "", true) {
 		t.Fatal("web restart failed")
 	}

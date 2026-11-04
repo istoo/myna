@@ -8,13 +8,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/istoo/myna/internal/gateway"
 )
 
-// `magpie agy run`, what the function agy in the user's shells runs
-// (bestony on Discord): the agy on PATH, given magpie's gateway, key and
-// --model while settings.json's model is magpie's, every argument agy's;
-// as it is off magpie.
+// `myna agy run`, what the function agy in the user's shells runs
+// (bestony on Discord): the agy on PATH, given myna's gateway, key and
+// --model while settings.json's model is myna's, every argument agy's;
+// as it is off myna.
 func TestAgyRun(t *testing.T) {
 	home := helpHome(t)
 	settings := filepath.Join(home, ".gemini", "antigravity-cli", "settings.json")
@@ -41,10 +41,10 @@ func TestAgyRun(t *testing.T) {
 		return out
 	}
 
-	os.WriteFile(settings, []byte(`{"model": "magpie/deepseek/pro", "modelProvider": "gemini"}`), 0o644)
+	os.WriteFile(settings, []byte(`{"model": "myna/deepseek/pro", "modelProvider": "gemini"}`), 0o644)
 	for _, c := range []struct{ in, want []string }{
-		{nil, []string{"--model", "magpie/deepseek/pro"}},
-		{[]string{"--help"}, []string{"--model", "magpie/deepseek/pro", "--help"}},
+		{nil, []string{"--model", "myna/deepseek/pro"}},
+		{[]string{"--help"}, []string{"--model", "myna/deepseek/pro", "--help"}},
 		{[]string{"-p", "hi", "--model", "mine"}, []string{"-p", "hi", "--model", "mine"}},
 		{[]string{"--model=mine"}, []string{"--model=mine"}},
 		{[]string{"-model", "mine"}, []string{"-model", "mine"}},
@@ -60,24 +60,24 @@ func TestAgyRun(t *testing.T) {
 		}
 	}
 	out, err := runOut(t, "agy", "env")
-	if want := "GEMINI_API_KEY=" + gateway.TokenFor("agy") + "\nGOOGLE_GEMINI_BASE_URL=" + gateway.URL() + "\nmodel=magpie/deepseek/pro\n"; err != nil || out != want {
+	if want := "GEMINI_API_KEY=" + gateway.TokenFor("agy") + "\nGOOGLE_GEMINI_BASE_URL=" + gateway.URL() + "\nmodel=myna/deepseek/pro\n"; err != nil || out != want {
 		t.Fatalf("agy env: %q %v", out, err)
 	}
 
-	// off magpie: as it is
+	// off myna: as it is
 	os.WriteFile(settings, []byte(`{"model": "mine"}`), 0o644)
 	if _, err := runOut(t, "agy", "run", "-p", "hi"); err != nil {
 		t.Fatal(err)
 	}
 	if !slices.Equal(args, []string{"-p", "hi"}) || !slices.Equal(envOf("GEMINI_API_KEY"), []string{"users-own"}) {
-		t.Fatalf("off magpie: %v %v", args, envOf("GEMINI_API_KEY"))
+		t.Fatalf("off myna: %v %v", args, envOf("GEMINI_API_KEY"))
 	}
 	if out, err := runOut(t, "agy", "env"); err != nil || out != "" {
-		t.Fatalf("agy env off magpie: %q %v", out, err)
+		t.Fatalf("agy env off myna: %q %v", out, err)
 	}
 
 	// what --help and a stray value say
-	if out, _ := runOut(t, "agy", "--help"); !strings.Contains(out, "magpie agy run [args…]") {
+	if out, _ := runOut(t, "agy", "--help"); !strings.Contains(out, "myna agy run [args…]") {
 		t.Fatalf("agy --help:\n%s", out)
 	}
 	if _, err := runOut(t, "agy", "env", "x"); err == nil {

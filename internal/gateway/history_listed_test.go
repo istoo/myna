@@ -3,7 +3,7 @@ package gateway
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/istoo/myna/internal/usage"
 )
 
 // A route kept with a try marked swapped for the name its provider's list

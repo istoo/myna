@@ -18,18 +18,18 @@ func TestParseFamily(t *testing.T) {
 	}
 }
 
-// A process under one picked goes with it, and magpie and what it runs
+// A process under one picked goes with it, and myna and what it runs
 // under are never picked, whatever their command lines say.
 func TestPicks(t *testing.T) {
 	ps := []Kin{
-		{1, 0, "init x"},         // under magpie
+		{1, 0, "init x"},         // under myna
 		{10, 1, "codex x"},       // the agent
 		{11, 10, "cmd /c npx x"}, // the wrapper: picked
 		{12, 11, "npx-cli x"},    // under it: ends with it
 		{13, 12, "node index.js"},
 		{20, 1, "npx-cli x"}, // its wrapper gone: picked
-		{30, 1, "shell x"},   // runs magpie
-		{31, 30, "magpie x"},
+		{30, 1, "shell x"},   // runs myna
+		{31, 30, "myna x"},
 		{40, 40, "loop x"}, // its own parent
 	}
 	match := func(a string) bool { return strings.HasSuffix(a, " x") }
@@ -44,10 +44,10 @@ func TestPicks(t *testing.T) {
 // A helper for TestEndTreesEndsWhatItStarted: the parent starts a child,
 // and both wait.
 func TestFamilyHelper(t *testing.T) {
-	switch os.Getenv("MAGPIE_FAMILY_HELPER") {
+	switch os.Getenv("MYNA_FAMILY_HELPER") {
 	case "parent":
 		cmd := Command(os.Args[0], "-test.run=^TestFamilyHelper$")
-		cmd.Env = append(os.Environ(), "MAGPIE_FAMILY_HELPER=child")
+		cmd.Env = append(os.Environ(), "MYNA_FAMILY_HELPER=child")
 		if err := cmd.Start(); err != nil {
 			t.Fatal(err)
 		}
@@ -64,7 +64,7 @@ func TestFamilyHelper(t *testing.T) {
 func TestEndTreesEndsWhatItStarted(t *testing.T) {
 	mark := fmt.Sprintf("family-%d-%d", os.Getpid(), time.Now().UnixNano())
 	cmd := Command(os.Args[0], "-test.run=^TestFamilyHelper$", mark)
-	cmd.Env = append(os.Environ(), "MAGPIE_FAMILY_HELPER=parent")
+	cmd.Env = append(os.Environ(), "MYNA_FAMILY_HELPER=parent")
 	if err := cmd.Start(); err != nil {
 		t.Fatal(err)
 	}

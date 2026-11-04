@@ -6,12 +6,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/filememo"
+	"github.com/istoo/myna/internal/filememo"
 )
 
 // #1665: a catalog sync holds what was read for its round. A change to the
 // settings made while it holds them is made from settings.json as it is on
-// the disk: what the user or another magpie saved inside the held second
+// the disk: what the user or another myna saved inside the held second
 // stays.
 func TestHeldSettingsAreNotWhatAWriteIsMadeFrom(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
@@ -27,7 +27,7 @@ func TestHeldSettingsAreNotWhatAWriteIsMadeFrom(t *testing.T) {
 	if Load().Theme != "light" {
 		t.Fatal("theme not saved")
 	}
-	// another magpie's save, past the time a stamp can't tell apart
+	// another myna's save, past the time a stamp can't tell apart
 	b, err := os.ReadFile(Path())
 	if err != nil || !bytes.Contains(b, []byte(`"light"`)) {
 		t.Fatalf("%v: %s", err, b)

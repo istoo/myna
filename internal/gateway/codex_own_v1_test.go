@@ -10,21 +10,21 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/access"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
 )
 
-// codexOwnOffMagpieSetup: Codex signed in to ChatGPT, its models cache
-// listing gpt-6.1-sol, and no ChatGPT account in magpie serving it: the
-// sign-in removed from magpie's Providers (hidden), or with discoveryOff
+// codexOwnOffMynaSetup: Codex signed in to ChatGPT, its models cache
+// listing gpt-6.1-sol, and no ChatGPT account in myna serving it: the
+// sign-in removed from myna's Providers (hidden), or with discoveryOff
 // subscription accounts turned off. The ChatGPT backend stands in and
 // notes what it was sent.
-func codexOwnOffMagpieSetup(t *testing.T, discoveryOff bool) (got *http.Header, models *[]string) {
+func codexOwnOffMynaSetup(t *testing.T, discoveryOff bool) (got *http.Header, models *[]string) {
 	t.Helper()
 	codexSignedIn(t)
 	if discoveryOff {
-		t.Setenv("MAGPIE_NO_ACCOUNTS", "1")
+		t.Setenv("MYNA_NO_ACCOUNTS", "1")
 	} else if err := provider.Delete("codex"); err != nil {
 		t.Fatal(err)
 	}
@@ -50,7 +50,7 @@ func codexOwnOffMagpieSetup(t *testing.T, discoveryOff bool) (got *http.Header, 
 	return got, models
 }
 
-func codexOnMagpieRequest(from string) *http.Request {
+func codexOnMynaRequest(from string) *http.Request {
 	req := httptest.NewRequest("POST", "/v1/responses",
 		strings.NewReader(`{"model":"gpt-6.1-sol","stream":true,"input":[{"type":"message","role":"user","content":[{"type":"input_text","text":"ping"}]}]}`))
 	req.RemoteAddr = from
@@ -58,20 +58,20 @@ func codexOnMagpieRequest(from string) *http.Request {
 	req.Header.Set("User-Agent", "codex_cli_rs/0.164.0 (Mac OS 26.2.0; arm64) Terminal")
 	req.Header.Set("Originator", "codex_cli_rs")
 	req.Header.Set("Authorization", "Bearer "+Token)
-	req.Header.Set("X-Openai-Actor-Authorization", "magpie")
+	req.Header.Set("X-Openai-Actor-Authorization", "myna")
 	return req
 }
 
-// A thread Codex started while magpie was its provider keeps sending to
-// magpie's /v1 after Codex is disconnected or set back to ChatGPT; one of
-// Codex's own models picked in it, which no account in magpie serves,
-// goes to the ChatGPT backend on Codex's own sign-in, magpie's key and
-// header left behind, where it was answered 404 "magpie knows no model
+// A thread Codex started while myna was its provider keeps sending to
+// myna's /v1 after Codex is disconnected or set back to ChatGPT; one of
+// Codex's own models picked in it, which no account in myna serves,
+// goes to the ChatGPT backend on Codex's own sign-in, myna's key and
+// header left behind, where it was answered 404 "myna knows no model
 // \"gpt-6.1-sol\"" (iuengei on Discord).
-func TestCodexOwnModelOnMagpieThreadGoesOnSignIn(t *testing.T) {
-	got, models := codexOwnOffMagpieSetup(t, false)
+func TestCodexOwnModelOnMynaThreadGoesOnSignIn(t *testing.T) {
+	got, models := codexOwnOffMynaSetup(t, false)
 	rec := httptest.NewRecorder()
-	New().Handler().ServeHTTP(rec, codexOnMagpieRequest("127.0.0.1:51000"))
+	New().Handler().ServeHTTP(rec, codexOnMynaRequest("127.0.0.1:51000"))
 	if rec.Code != 200 || !strings.Contains(rec.Body.String(), "pong") {
 		t.Fatalf("got %d %s", rec.Code, rec.Body.String())
 	}
@@ -80,31 +80,31 @@ func TestCodexOwnModelOnMagpieThreadGoesOnSignIn(t *testing.T) {
 	}
 	auth := got.Get("Authorization")
 	if auth == "" || strings.Contains(auth, Token) {
-		t.Fatalf("Authorization %q: want Codex's sign-in, not magpie's key", auth)
+		t.Fatalf("Authorization %q: want Codex's sign-in, not myna's key", auth)
 	}
 	if got.Get("Chatgpt-Account-Id") != "acct-1" {
 		t.Fatalf("chatgpt-account-id %q, want acct-1", got.Get("Chatgpt-Account-Id"))
 	}
 	if v := got.Get("X-Openai-Actor-Authorization"); v != "" {
-		t.Fatalf("magpie's provider header went to OpenAI: %q", v)
+		t.Fatalf("myna's provider header went to OpenAI: %q", v)
 	}
 }
 
 // Not for a request from another computer, nor a gateway key held to some
 // models, nor a model that isn't OpenAI's: those are answered as before,
 // nothing sent on Codex's sign-in.
-func TestCodexOwnModelOnMagpieThreadStaysHere(t *testing.T) {
+func TestCodexOwnModelOnMynaThreadStaysHere(t *testing.T) {
 	t.Run("another computer", func(t *testing.T) {
-		_, models := codexOwnOffMagpieSetup(t, false)
+		_, models := codexOwnOffMynaSetup(t, false)
 		rec := httptest.NewRecorder()
-		New().Handler().ServeHTTP(rec, codexOnMagpieRequest("192.0.2.7:51000"))
+		New().Handler().ServeHTTP(rec, codexOnMynaRequest("192.0.2.7:51000"))
 		if len(*models) != 0 {
 			t.Fatalf("a request from another computer went on Codex's sign-in: %d %s", rec.Code, rec.Body.String())
 		}
 	})
 	t.Run("held key", func(t *testing.T) {
-		_, models := codexOwnOffMagpieSetup(t, false)
-		req := codexOnMagpieRequest("127.0.0.1:51000")
+		_, models := codexOwnOffMynaSetup(t, false)
+		req := codexOnMynaRequest("127.0.0.1:51000")
 		req = req.WithContext(access.WithIdentity(req.Context(), access.Identity{KeyID: "k1", Models: []string{"fake/*"}}))
 		rec := httptest.NewRecorder()
 		New().handle(provider.Responses)(rec, req)
@@ -113,10 +113,10 @@ func TestCodexOwnModelOnMagpieThreadStaysHere(t *testing.T) {
 		}
 	})
 	t.Run("not OpenAI's", func(t *testing.T) {
-		_, models := codexOwnOffMagpieSetup(t, false)
+		_, models := codexOwnOffMynaSetup(t, false)
 		req := httptest.NewRequest("POST", "/v1/responses", strings.NewReader(`{"model":"no-such-model-xyz","input":"hi"}`))
 		req.RemoteAddr = "127.0.0.1:51000"
-		req.Header = codexOnMagpieRequest("127.0.0.1:51000").Header
+		req.Header = codexOnMynaRequest("127.0.0.1:51000").Header
 		rec := httptest.NewRecorder()
 		New().Handler().ServeHTTP(rec, req)
 		if len(*models) != 0 || rec.Code != 404 {
@@ -125,18 +125,18 @@ func TestCodexOwnModelOnMagpieThreadStaysHere(t *testing.T) {
 	})
 }
 
-// With subscription accounts off, magpie reads no sign-in, Codex's
+// With subscription accounts off, myna reads no sign-in, Codex's
 // neither: the request is answered why it can't be served and what to do,
-// not with the bare "magpie knows no model".
-func TestCodexOwnModelOnMagpieThreadSaysWhy(t *testing.T) {
-	_, models := codexOwnOffMagpieSetup(t, true)
+// not with the bare "myna knows no model".
+func TestCodexOwnModelOnMynaThreadSaysWhy(t *testing.T) {
+	_, models := codexOwnOffMynaSetup(t, true)
 	rec := httptest.NewRecorder()
-	New().Handler().ServeHTTP(rec, codexOnMagpieRequest("127.0.0.1:51000"))
+	New().Handler().ServeHTTP(rec, codexOnMynaRequest("127.0.0.1:51000"))
 	body := rec.Body.String()
 	if rec.Code != 404 || len(*models) != 0 {
 		t.Fatalf("got %d %s, sent %v", rec.Code, body, *models)
 	}
-	for _, want := range []string{"one of Codex's own models", "started while magpie was Codex's model provider", "subscription accounts are off", "Start a new thread"} {
+	for _, want := range []string{"one of Codex's own models", "started while myna was Codex's model provider", "subscription accounts are off", "Start a new thread"} {
 		if !strings.Contains(body, want) {
 			t.Errorf("answer lacks %q: %s", want, body)
 		}
@@ -144,9 +144,9 @@ func TestCodexOwnModelOnMagpieThreadSaysWhy(t *testing.T) {
 }
 
 // codexOwnSideCall is one of Codex's hidden side calls (a thread's title
-// or description) sent to magpie's own /v1 on one of Codex's own models,
-// as it is when the thread was started while magpie was Codex's provider
-// (model_provider = "magpie", whose base_url is magpie's /v1) and Codex
+// or description) sent to myna's own /v1 on one of Codex's own models,
+// as it is when the thread was started while myna was Codex's provider
+// (model_provider = "myna", whose base_url is myna's /v1) and Codex
 // asks on its own title model, gpt-5.6-luna.
 func codexOwnSideCall(t *testing.T, kind, model string) *httptest.ResponseRecorder {
 	t.Helper()
@@ -175,10 +175,10 @@ func codexOwnSideCall(t *testing.T, kind, model string) *httptest.ResponseRecord
 }
 
 // codexOwnSideCallEnv is shruru's machine for #4590: Codex never signed in
-// to ChatGPT (no ~/.codex/auth.json, on purpose), so magpie can read no
-// sign-in of its; its models cache still lists gpt-5.6-luna, and magpie
+// to ChatGPT (no ~/.codex/auth.json, on purpose), so myna can read no
+// sign-in of its; its models cache still lists gpt-5.6-luna, and myna
 // has no ChatGPT account either. The titles and descriptions settings name
-// a model of magpie's.
+// a model of myna's.
 func codexOwnSideCallEnv(t *testing.T) *fake {
 	t.Helper()
 	fresh(t) // no agent signed in anywhere
@@ -214,10 +214,10 @@ func codexOwnSideCallEnv(t *testing.T) *fake {
 
 // A hidden side call of Codex's that lands on /v1 on one of Codex's own
 // models — a thread's title or description, the thread started while
-// magpie was Codex's provider — is magpie's to answer (codexTitlesTo and
+// myna was Codex's provider — is myna's to answer (codexTitlesTo and
 // codexDescriptionsTo, further down handle), never to put on Codex's
 // ChatGPT sign-in: with no sign-in to be had (no ChatGPT account in
-// magpie, Codex itself never signed in) the request was answered 404 and
+// myna, Codex itself never signed in) the request was answered 404 and
 // Codex named the thread after its first message, whatever the settings
 // said (#4590).
 func TestCodexSideCallOnOwnModelNotPutOnSignIn(t *testing.T) {
@@ -254,13 +254,13 @@ func TestCodexSideCallOnOwnModelNotPutOnSignIn(t *testing.T) {
 
 // With no setting naming where a side call goes, a title asked on one of
 // Codex's own models still goes on Codex's sign-in, as every turn of the
-// thread does: magpie has nothing of its own to answer it with, and
+// thread does: myna has nothing of its own to answer it with, and
 // before #4590 that is where it was answered.
 func TestCodexSideCallOnOwnModelUnsetGoesOnSignIn(t *testing.T) {
-	_, models := codexOwnOffMagpieSetup(t, false)
+	_, models := codexOwnOffMynaSetup(t, false)
 	for _, kind := range []string{"thread_title", "thread_description", "thread_summary", "composer_predictions"} {
 		*models = nil
-		req := codexOnMagpieRequest("127.0.0.1:51000")
+		req := codexOnMynaRequest("127.0.0.1:51000")
 		req.Header.Set("x-codex-turn-metadata", `{"thread_source":"`+kind+`","parent_thread_id":"main-chat"}`)
 		rec := httptest.NewRecorder()
 		New().Handler().ServeHTTP(rec, req)

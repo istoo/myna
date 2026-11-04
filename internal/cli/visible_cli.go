@@ -6,35 +6,35 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/agent"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
 )
 
-// Which models each agent is shown, from the terminal: magpie visible.
+// Which models each agent is shown, from the terminal: myna visible.
 
 const visibleUsage = `usage:
-  magpie visible                          which models each agent is shown
-  magpie visible <agent> <name>[,<name>…] show the agent only these: families (a tag set with
-                                          magpie provider set <id> family=relay, or magpie group set),
+  myna visible                          which models each agent is shown
+  myna visible <agent> <name>[,<name>…] show the agent only these: families (a tag set with
+                                          myna provider set <id> family=relay, or myna group set),
                                           provider ids and group ids
-  magpie visible <agent> all              show the agent every model again, the ones taken out of
+  myna visible <agent> all              show the agent every model again, the ones taken out of
                                           its list one by one too
-  magpie visible <agent> --only-picked    show the agent only the models ticked for it now; a model
+  myna visible <agent> --only-picked    show the agent only the models ticked for it now; a model
                                           that comes later, of any provider, stays off until it is
                                           ticked in its list on the Agents page
-  magpie visible <agent> --show-new       show it the models that come later again (the default)
+  myna visible <agent> --show-new       show it the models that come later again (the default)
 
   An agent not narrowed is shown every model. The gateway's model list and the model lists
-  magpie writes into the agents' files are narrowed alike; a model kept from an agent still
-  answers when the agent asks for it by name. magpie models <agent> shows what it is shown,
+  myna writes into the agents' files are narrowed alike; a model kept from an agent still
+  answers when the agent asks for it by name. myna models <agent> shows what it is shown,
   and why the others aren't. --only-picked and --show-new keep the models shown as they are,
   and keep the providers, families and groups the agent is narrowed to.
 
-  e.g. magpie provider set opencode-go family=ocgo
-       magpie group set gpt-plus-auto family=relay
-       magpie visible zcode relay,ocgo`
+  e.g. myna provider set opencode-go family=ocgo
+       myna group set gpt-plus-auto family=relay
+       myna visible zcode relay,ocgo`
 
 // names is every name a visibility can hold: the families, and the
 // providers' and groups' ids.
@@ -57,7 +57,7 @@ func visibleCmd(args []string) error {
 	s := settings.Load()
 	if len(args) == 0 {
 		if len(s.Visible) == 0 && len(s.PickedModels) == 0 {
-			fmt.Println(muted.Render("  every agent is shown every model · magpie visible <agent> <family>,… narrows one"))
+			fmt.Println(muted.Render("  every agent is shown every model · myna visible <agent> <family>,… narrows one"))
 		}
 		ids := slices.Collect(maps.Keys(s.Visible))
 		for id := range s.PickedModels {
@@ -103,7 +103,7 @@ func visibleCmd(args []string) error {
 	list := splitList(strings.Join(args[1:], ","))
 	if len(list) == 1 && strings.EqualFold(list[0], "all") {
 		delete(s.Visible, id)
-		// all is the recovery the hints point at (magpie models, the
+		// all is the recovery the hints point at (myna models, the
 		// gateway's refusal to name a model): the models taken out of the
 		// agent's list one by one, and the only-picked switch, keep it
 		// shown none or fewer unless these go too (#4587)
@@ -114,7 +114,7 @@ func visibleCmd(args []string) error {
 		for i, n := range list {
 			n = strings.TrimPrefix(provider.CanonicalRef(n), provider.GroupPrefix)
 			if !slices.ContainsFunc(known, func(k string) bool { return strings.EqualFold(k, n) }) {
-				return fmt.Errorf("%s is no family, provider or group (families: %s; magpie provider set <id> family=%s makes one)",
+				return fmt.Errorf("%s is no family, provider or group (families: %s; myna provider set <id> family=%s makes one)",
 					n, orNone(provider.Families()), n)
 			}
 			list[i] = n
@@ -149,17 +149,17 @@ func explainHidden(id string, hidden []provider.Entry) {
 	_, kept := provider.ListedFor(id)
 	if n := len(hidden) - len(kept); n > 0 {
 		if _, only := provider.PickedModels(id); only {
-			fmt.Println(faint.Render("  " + id + " is shown only the models picked for it: " + fmt.Sprint(n) + " not picked, and a new one stays off until it is ticked · magpie visible " + id + " --show-new shows new ones"))
+			fmt.Println(faint.Render("  " + id + " is shown only the models picked for it: " + fmt.Sprint(n) + " not picked, and a new one stays off until it is ticked · myna visible " + id + " --show-new shows new ones"))
 		} else {
 			fmt.Println(faint.Render("  " + fmt.Sprint(n) + " taken out of " + id + "'s list on the Agents page"))
 		}
 	} else if _, only := provider.PickedModels(id); only {
-		fmt.Println(faint.Render("  " + id + " is shown only the models picked for it; a new one stays off until it is ticked · magpie visible " + id + " --show-new shows new ones"))
+		fmt.Println(faint.Render("  " + id + " is shown only the models picked for it; a new one stays off until it is ticked · myna visible " + id + " --show-new shows new ones"))
 	}
 	hidden = kept
 	names, ok := provider.VisibleTo(id)
 	if !ok {
-		fmt.Println(faint.Render("  " + id + " is shown every provider's models · magpie visible " + id + " <family>,… narrows it"))
+		fmt.Println(faint.Render("  " + id + " is shown every provider's models · myna visible " + id + " <family>,… narrows it"))
 		return
 	}
 	fmt.Println(faint.Render("  " + id + " is shown " + strings.Join(names, ", ")))

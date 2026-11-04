@@ -5,13 +5,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/myna/internal/gateway"
 )
 
 // DevEco Code (#1885) keeps OpenCode's config shape in ~/.config/deveco:
 // the first of deveco.jsonc, deveco.json and config.json there is the one
-// it reads last, so the one magpie writes; DEVECO_CONFIG_DIR, read after
+// it reads last, so the one myna writes; DEVECO_CONFIG_DIR, read after
 // all of them, when set to an absolute folder.
 func TestDevEcoConfigAsItFindsIt(t *testing.T) {
 	home := syncHome(t)
@@ -42,13 +42,13 @@ func TestDevEcoConfigAsItFindsIt(t *testing.T) {
 }
 
 // Parts of DevEco Code's code still send OpenCode's own User-Agent
-// (opencode/<version>), so the key magpie writes for it names it: its usage
+// (opencode/<version>), so the key myna writes for it names it: its usage
 // is DevEco Code's, not OpenCode's, whichever it sends. OpenCode's own
 // stays the gateway's plain key.
 func TestDevEcoKeyNamesIt(t *testing.T) {
 	syncHome(t)
 	key := func(id string) any {
-		return magpieProviderJSONFor("opencode", id).(map[string]any)["options"].(map[string]any)["apiKey"]
+		return mynaProviderJSONFor("opencode", id).(map[string]any)["options"].(map[string]any)["apiKey"]
 	}
 	if got := key("deveco"); got != gateway.TokenFor("deveco") {
 		t.Errorf("deveco's key %v", got)
@@ -58,7 +58,7 @@ func TestDevEcoKeyNamesIt(t *testing.T) {
 	}
 }
 
-// Connected, magpie's provider goes in beside the user's own, with
+// Connected, myna's provider goes in beside the user's own, with
 // DevEco Code's own key; its built-in provider, the user's own provider,
 // their small model and the file's $schema stay as they were. Disconnected,
 // the model they were on comes back.
@@ -86,13 +86,13 @@ func TestDevEcoConnectKeepsTheUsersOwn(t *testing.T) {
 		t.Fatal(err)
 	}
 	get := func(k string) string { v, _ := edit.GetJSON(cfg, k); return v }
-	if m := get("model"); !strings.HasPrefix(m, magpieID+"/") {
+	if m := get("model"); !strings.HasPrefix(m, mynaID+"/") {
 		t.Fatalf("model %q after connecting", m)
 	}
-	if k := get("provider.magpie.options.apiKey"); k != gateway.TokenFor("deveco") {
+	if k := get("provider.myna.options.apiKey"); k != gateway.TokenFor("deveco") {
 		t.Fatalf("apiKey %q", k)
 	}
-	if u := get("provider.magpie.options.baseURL"); u != gateway.URL()+"/v1" {
+	if u := get("provider.myna.options.baseURL"); u != gateway.URL()+"/v1" {
 		t.Fatalf("baseURL %q", u)
 	}
 	if k := get("provider.mine.options.apiKey"); k != "sk-own" {
@@ -111,7 +111,7 @@ func TestDevEcoConnectKeepsTheUsersOwn(t *testing.T) {
 		t.Fatalf("check after connecting: %s", c)
 	}
 	// a key that isn't DevEco Code's is told as off
-	if err := edit.SetJSON(cfg, edit.KV{Path: "provider.magpie.options.apiKey", Value: gateway.Token}); err != nil {
+	if err := edit.SetJSON(cfg, edit.KV{Path: "provider.myna.options.apiKey", Value: gateway.Token}); err != nil {
 		t.Fatal(err)
 	}
 	if a.Check() == "" {
@@ -121,7 +121,7 @@ func TestDevEcoConnectKeepsTheUsersOwn(t *testing.T) {
 	if err := a.Sync(); err != nil {
 		t.Fatal(err)
 	}
-	if k := get("provider.magpie.options.apiKey"); k != gateway.TokenFor("deveco") {
+	if k := get("provider.myna.options.apiKey"); k != gateway.TokenFor("deveco") {
 		t.Fatalf("apiKey %q after a sync", k)
 	}
 
@@ -137,7 +137,7 @@ func TestDevEcoConnectKeepsTheUsersOwn(t *testing.T) {
 	if k := get("provider.mine.options.apiKey"); k != "sk-own" {
 		t.Fatalf("own provider %q after disconnecting", k)
 	}
-	if _, ok := edit.GetJSON(cfg, "provider.magpie"); ok {
-		t.Fatalf("magpie's provider left: %s", readFile(cfg))
+	if _, ok := edit.GetJSON(cfg, "provider.myna"); ok {
+		t.Fatalf("myna's provider left: %s", readFile(cfg))
 	}
 }

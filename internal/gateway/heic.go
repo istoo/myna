@@ -15,7 +15,7 @@ import (
 
 	"github.com/gen2brain/h265/heic"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // An iPhone's photos are HEIC, and an agent sends one dragged in as it is
@@ -27,7 +27,7 @@ import (
 // count of its tokens. It goes by the bytes, not the type the request
 // gives them: a HEIC sent as image/jpeg is one too.
 //
-// The decoder is gen2brain/h265's, pure Go (magpie is built without cgo
+// The decoder is gen2brain/h265's, pure Go (myna is built without cgo
 // for every system), so it is the same on every computer, and no system
 // converter need be there.
 //

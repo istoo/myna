@@ -5,14 +5,14 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/istoo/myna/internal/catalog"
 )
 
 // A DeepSeek model's entry says what DeepSeek's own Codex setup says of
 // its models (cdn.deepseek.com/api-docs/codex-deepseek-setup-en.sh, its
 // models.json; Rollkey8 on X): the shell_command tool, low verbosity, no
 // reasoning summary asked for, Codex's agents in V2, an image at its
-// original detail on the one that takes images. Its prompt stays magpie's
+// original detail on the one that takes images. Its prompt stays myna's
 // (never rewritten), and every other vendor's entry, a routing group and
 // a model distilled onto another's base are as they were.
 func TestCodexCatalogDeepSeekAsDeepSeekSays(t *testing.T) {
@@ -46,7 +46,7 @@ func TestCodexCatalogDeepSeekAsDeepSeekSays(t *testing.T) {
 				slug, e["shell_type"], e["support_verbosity"], e["default_verbosity"], e["default_reasoning_summary"], e["multi_agent_version"])
 		}
 		if e["base_instructions"] != Prompt {
-			t.Errorf("%s: base_instructions changed; magpie never rewrites a model's Codex prompt", slug)
+			t.Errorf("%s: base_instructions changed; myna never rewrites a model's Codex prompt", slug)
 		}
 		if e["truncation_policy"].(map[string]any)["limit"] != float64(10000) || e["apply_patch_tool_type"] != "freeform" {
 			t.Errorf("%s: truncation %v, apply_patch %v", slug, e["truncation_policy"], e["apply_patch_tool_type"])
@@ -76,7 +76,7 @@ func TestCodexCatalogDeepSeekAsDeepSeekSays(t *testing.T) {
 
 // default_reasoning_summary is written on DeepSeek's models alone, so a
 // value the user put by hand in another model's entry stays, as it did
-// before magpie wrote the key anywhere; on a DeepSeek model magpie's is
+// before myna wrote the key anywhere; on a DeepSeek model myna's is
 // the one Codex reads (config.toml's model_reasoning_summary still comes
 // before both).
 func TestCodexCatalogKeepsUsersSummary(t *testing.T) {

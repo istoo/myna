@@ -10,12 +10,12 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/yetone/magpie/internal/filememo"
+	"github.com/istoo/myna/internal/filememo"
 )
 
 // Gateway is the asynchronous request-hook entry a package runs in Bun:
-// package.json magpie.hooks, or a *.hooks.{js,mjs,ts,mts} file. Unlike
-// middleware (magpie.middleware/magpie.gateway, *.gateway.js), it can await
+// package.json myna.hooks, or a *.hooks.{js,mjs,ts,mts} file. Unlike
+// middleware (myna.middleware/myna.gateway, *.gateway.js), it can await
 // I/O and observe the completed exchange; the names never overlap, so one
 // file is never loaded as both.
 func Gateway(target string) string {
@@ -34,15 +34,15 @@ func Gateway(target string) string {
 		return ""
 	}
 	var pkg struct {
-		Magpie struct {
+		Myna struct {
 			Hooks string `json:"hooks"`
 		} `json:"magpie"`
 	}
 	b, err := os.ReadFile(filepath.Join(target, "package.json"))
-	if err != nil || json.Unmarshal(b, &pkg) != nil || strings.TrimSpace(pkg.Magpie.Hooks) == "" {
+	if err != nil || json.Unmarshal(b, &pkg) != nil || strings.TrimSpace(pkg.Myna.Hooks) == "" {
 		return ""
 	}
-	return filepath.Join(target, filepath.FromSlash(strings.TrimSpace(pkg.Magpie.Hooks)))
+	return filepath.Join(target, filepath.FromSlash(strings.TrimSpace(pkg.Myna.Hooks)))
 }
 
 // GatewayOnly distinguishes request hooks from packages that also serve a
@@ -80,7 +80,7 @@ func GatewayOnly(target string) bool {
 // GatewayContext contains only the request identity and text, never its
 // authorization headers. Empty fields mean the agent supplied no identity.
 type GatewayContext struct {
-	Origin   string `json:"origin"` // local, remote, magpie-key or gateway-key; empty means unknown
+	Origin   string `json:"origin"` // local, remote, myna-key or gateway-key; empty means unknown
 	Protocol string `json:"protocol"`
 	Model    string `json:"model"`
 	Stream   bool   `json:"stream"`
@@ -126,7 +126,7 @@ func GatewayStates(ctx context.Context) map[string]GatewayState {
 
 // HasGateway avoids starting Bun for users who have no asynchronous hooks.
 // Every request asks it, so the plugins are looked at once a second, and at
-// once after magpie wrote a file of its own (filememo.Gen): reading
+// once after myna wrote a file of its own (filememo.Gen): reading
 // plugins.json and each plugin's package.json took ~1ms a request with 12
 // plugins on Windows (#3725).
 func HasGateway() bool {

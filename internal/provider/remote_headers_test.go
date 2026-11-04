@@ -11,8 +11,8 @@ import (
 	"testing"
 )
 
-// headerPeer is a remote magpie behind a proxy that wants its own
-// headers: it answers every request of magpie's own (cards, a refresh,
+// headerPeer is a remote myna behind a proxy that wants its own
+// headers: it answers every request of myna's own (cards, a refresh,
 // the quota history, a key's limit, the model list) and keeps each one's
 // headers by its path.
 type headerPeer struct {
@@ -27,7 +27,7 @@ func (f *headerPeer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.URL.Path {
 	case RemoteKeyLimitPath:
 		w.Write([]byte(`{"limited":false,"key":"k"}`))
-	case "/v1/magpie/quotas/history":
+	case "/v1/myna/quotas/history":
 		json.NewEncoder(w).Encode(map[string]any{"object": "list", "data": []QuotaHistory{{Provider: "codex"}}})
 	case "/v1/models":
 		w.Write([]byte(`{"object":"list","data":[{"id":"gpt-6","object":"model"}]}`))
@@ -36,14 +36,14 @@ func (f *headerPeer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Yirasumi on Discord: a Remote magpie behind a proxy that asks for a
+// Yirasumi on Discord: a Remote myna behind a proxy that asks for a
 // header of its own answered the chat, but the Usage page's read of its
-// cards went without the provider's Headers. Every request magpie makes
-// to a remote magpie now carries them, ${sessionId} as an id of its own,
+// cards went without the provider's Headers. Every request myna makes
+// to a remote myna now carries them, ${sessionId} as an id of its own,
 // and the key still reaches the remote as x-api-key: a user's
-// Authorization (the proxy's) goes on in place of magpie's Bearer, and a
+// Authorization (the proxy's) goes on in place of myna's Bearer, and a
 // user's x-api-key never replaces the key.
-func TestRemoteMagpieRequestsCarryHeaders(t *testing.T) {
+func TestRemoteMynaRequestsCarryHeaders(t *testing.T) {
 	for _, userAuth := range []bool{false, true} {
 		t.Run(map[bool]string{false: "own auth", true: "user's Authorization"}[userAuth], func(t *testing.T) {
 			peer := &headerPeer{seen: map[string][]http.Header{}}
@@ -56,7 +56,7 @@ func TestRemoteMagpieRequestsCarryHeaders(t *testing.T) {
 			if userAuth {
 				p.Headers["Authorization"] = "Basic cHJveHk6cHc="
 			}
-			p.Keys = []KeyAccount{{Name: "spare", Key: "sk-magpie-spare"}}
+			p.Keys = []KeyAccount{{Name: "spare", Key: "sk-myna-spare"}}
 			if err := Save(*p); err != nil {
 				t.Fatal(err)
 			}
@@ -81,11 +81,11 @@ func TestRemoteMagpieRequestsCarryHeaders(t *testing.T) {
 			}
 			res.Body.Close()
 
-			own := regexp.MustCompile(`^magpie-[a-z0-9]{12}$`)
+			own := regexp.MustCompile(`^myna-[a-z0-9]{12}$`)
 			peer.Lock()
 			defer peer.Unlock()
 			for _, path := range []string{
-				"GET " + RemoteCardsPath, "POST " + RemoteRefreshPath, "GET /v1/magpie/quotas/history",
+				"GET " + RemoteCardsPath, "POST " + RemoteRefreshPath, "GET /v1/myna/quotas/history",
 				"GET " + RemoteKeyLimitPath, "GET /v1/models", "POST /v1/chat/completions",
 			} {
 				hs := peer.seen[path]
@@ -101,8 +101,8 @@ func TestRemoteMagpieRequestsCarryHeaders(t *testing.T) {
 					if s := h.Get("X-Session"); !own.MatchString(s) {
 						t.Errorf("%s: X-Session %q, want an id of its own", path, s)
 					}
-					if v := h.Values("X-Api-Key"); len(v) != 1 || !strings.HasPrefix(v[0], "sk-magpie-") {
-						t.Errorf("%s: x-api-key %q, want magpie's key", path, v)
+					if v := h.Values("X-Api-Key"); len(v) != 1 || !strings.HasPrefix(v[0], "sk-myna-") {
+						t.Errorf("%s: x-api-key %q, want myna's key", path, v)
 					} else {
 						keys[v[0]] = true
 					}
@@ -115,7 +115,7 @@ func TestRemoteMagpieRequestsCarryHeaders(t *testing.T) {
 					}
 				}
 				// each key's limit is read with that key
-				if path == "GET "+RemoteKeyLimitPath && (!keys["sk-magpie-office"] || !keys["sk-magpie-spare"]) {
+				if path == "GET "+RemoteKeyLimitPath && (!keys["sk-myna-office"] || !keys["sk-myna-spare"]) {
 					t.Errorf("key limits read with %v", keys)
 				}
 			}

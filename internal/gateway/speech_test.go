@@ -12,9 +12,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/myna/internal/usage"
 )
 
 // mp3 is audio as a vendor sends it: bytes no text has.
@@ -102,10 +102,10 @@ func postSpeech(t *testing.T, s *Server, path, body string) (int, http.Header, [
 // A speech request goes to the model's provider with only its model
 // rewritten, every other field as sent, and the vendor's audio comes back
 // byte for byte in its own type; it is in the usage ledger. The bare
-// /audio/speech path an SDK given magpie's root posts to works too.
+// /audio/speech path an SDK given myna's root posts to works too.
 func TestSpeechGoesToTheModelsProvider(t *testing.T) {
 	s, sp := speakerUp(t)
-	body := `{"model":"voice/gpt-4o-mini-tts","input":"Hello from the magpie.","voice":"coral","response_format":"mp3","speed":1.25,"instructions":"Speak cheerfully."}`
+	body := `{"model":"voice/gpt-4o-mini-tts","input":"Hello from the myna.","voice":"coral","response_format":"mp3","speed":1.25,"instructions":"Speak cheerfully."}`
 	code, h, got := postSpeech(t, s, "/v1/audio/speech", body)
 	if code != 200 || !bytes.Equal(got, mp3) || h.Get("Content-Type") != "audio/mpeg" {
 		t.Fatalf("%d %q, %d bytes back of %d", code, h.Get("Content-Type"), len(got), len(mp3))
@@ -200,7 +200,7 @@ func TestSpeechVendorRefusalPassedOn(t *testing.T) {
 	}
 }
 
-// A request magpie can't route is told why, and nothing reaches a vendor.
+// A request myna can't route is told why, and nothing reaches a vendor.
 func TestSpeechRefusals(t *testing.T) {
 	s, sp := speakerUp(t)
 	if code, _, got := postSpeech(t, s, "/v1/audio/speech", `not json`); code != 400 || !strings.Contains(string(got), "JSON object") {

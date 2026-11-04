@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-// The people magpie's history credits (credits.mjs), from git and GitHub.
+// The people myna's history credits (credits.mjs), from git and GitHub.
 //
 //   node site/credits-cli.mjs thanks <from>..<to>
 //     the thanks line for a release's notes: English on the first line,
 //     Chinese on the second, nothing when no one is credited. yetone/
-//     magpie-releases' release run calls it for the commits since the last
+//     myna-releases' release run calls it for the commits since the last
 //     tag.
 //   node site/credits-cli.mjs wall [out]
 //     public/contributors.json (or out) from every tag's commits, and the
@@ -75,7 +75,7 @@ export async function authors(refs, { known = {}, fetchImpl = globalThis.fetch, 
       try {
         const res = await fetchImpl("https://api.github.com/graphql", {
           method: "POST",
-          headers: { Authorization: `bearer ${tok}`, "Content-Type": "application/json", "User-Agent": "magpie-credits" },
+          headers: { Authorization: `bearer ${tok}`, "Content-Type": "application/json", "User-Agent": "myna-credits" },
           body: JSON.stringify({ query: q }),
           signal: AbortSignal.timeout(30000),
         });

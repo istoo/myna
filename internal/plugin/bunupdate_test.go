@@ -18,7 +18,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // bunReleases serves Bun's releases as GitHub does: each version's zip for
@@ -66,7 +66,7 @@ func bunReleases(t *testing.T, exe []byte) *atomic.Int32 {
 	return &asked
 }
 
-// bunHome gives the test its own magpie folders, no $MAGPIE_BUN, and Bun's
+// bunHome gives the test its own myna folders, no $MYNA_BUN, and Bun's
 // newest release as given.
 func bunHome(t *testing.T, latest string, published time.Time) {
 	t.Helper()
@@ -76,7 +76,7 @@ func bunHome(t *testing.T, latest string, published time.Time) {
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(dir, "config"))
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(dir, "cache"))
 	t.Setenv("LOCALAPPDATA", filepath.Join(dir, "local"))
-	t.Setenv("MAGPIE_BUN", "")
+	t.Setenv("MYNA_BUN", "")
 	old := bunLatest
 	bunLatest = func(context.Context) (string, time.Time, error) { return latest, published, nil }
 	t.Cleanup(func() { bunLatest = old })
@@ -117,7 +117,7 @@ func TestBunDefaultSums(t *testing.T) {
 }
 
 // The tests' oldest Bun (testenv.Bun skips an older one on PATH) is the
-// oldest magpie runs plugins on. testenv can't import this package, whose
+// oldest myna runs plugins on. testenv can't import this package, whose
 // own tests use it, so it keeps a copy (#1600).
 func TestMinBunIsBunVersion(t *testing.T) {
 	if testenv.MinBun != BunVersion {
@@ -149,7 +149,7 @@ func TestBunTarget(t *testing.T) {
 }
 
 // Windows on ARM downloads Bun's native bun-windows-aarch64 build, with
-// the checksum magpie carries for it, and runs plugins on it: it was
+// the checksum myna carries for it, and runs plugins on it: it was
 // turned away as having no build (#2183, EdwinDigital).
 func TestWindowsOnArmGetsNativeBun(t *testing.T) {
 	bunHome(t, BunVersion, time.Now())

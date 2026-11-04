@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/filememo"
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/filememo"
+	"github.com/istoo/myna/internal/proc"
 )
 
 // A Pi-family agent's built-in providers are the ones its own model

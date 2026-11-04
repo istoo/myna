@@ -1,6 +1,6 @@
 package provider
 
-// A browser sign-in's end pasted where accounts are imported. magpie in
+// A browser sign-in's end pasted where accounts are imported. myna in
 // Docker or on a server sends the browser back to a localhost address that
 // won't load there, and the sign-in takes that address in its own Callback
 // URL field. LuvLetter (Discord, 10-27) pasted it into the Import box beside
@@ -18,7 +18,7 @@ import (
 )
 
 // errSignInAddressOver is a sign-in's end pasted after its sign-in is over,
-// or for none magpie started.
+// or for none myna started.
 var errSignInAddressOver = errors.New("this is the address a sign-in's browser ended on, not an account to import: it finishes only the sign-in that sent the browser there, which isn't waiting any more. Sign in again, and when the page won't load, paste its address into the sign-in's Callback URL field")
 
 // claudePageCode is the code#state Claude's page shows for Claude Code's

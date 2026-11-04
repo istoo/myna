@@ -3,9 +3,9 @@ package gui
 import (
 	"encoding/base64"
 	"encoding/json"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/usage"
 	"net/http"
 	"net/http/httptest"
 	"os"

@@ -21,7 +21,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // shortStall makes the watchdogs short for a test.
@@ -34,7 +34,7 @@ func shortStall(t *testing.T, stall, meta time.Duration) {
 // slowDAV is a WebDAV server on a slow line: the backup goes both ways in
 // chunks of chunk bytes every gap, or stops after stopAt bytes for good. A
 // PUT is answered tail after its body is all in: the time the last of it,
-// handed over by magpie, would take to cross the line.
+// handed over by myna, would take to cross the line.
 type slowDAV struct {
 	chunk  int
 	gap    time.Duration
@@ -109,7 +109,7 @@ func (s *slowDAV) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // line's buffers held small. The system hands a writer room in bursts: Linux wakes it once a third
 // of its send buffer has drained and opens the receiver's window by as much,
 // and with the MBs it tunes both up to on a fast loopback, a body moving at
-// 6.4 MB/s went 150–290 ms between two of magpie's writes, which a test's
+// 6.4 MB/s went 150–290 ms between two of myna's writes, which a test's
 // watchdog of 300 ms didn't always outlast though the line never stopped (at
 // the real 60 s that is a line under ~25 KB/s). Small buffers keep the
 // bursts to a chunk or two; what sits in buffers after the body is handed
@@ -167,7 +167,7 @@ func TestSlowTransferIsNotCutShort(t *testing.T) {
 	// stops, so such a pause is all a shorter watchdog would catch (red
 	// on macOS in run 37693090857, near the end of the GET)
 	shortStall(t, time.Second, time.Second)
-	// the PUT's last bytes cross the line twice the watchdog after magpie
+	// the PUT's last bytes cross the line twice the watchdog after myna
 	// has handed them all over
 	s := &slowDAV{chunk: 64 << 10, gap: 125 * time.Millisecond, tail: 2 * stallAfter}
 	srv, client := narrowLine(t, s)
@@ -180,7 +180,7 @@ func TestSlowTransferIsNotCutShort(t *testing.T) {
 	// fresh buffers half as big as what has come, the watchdog counts that
 	// time too, and beside a full suite on a Linux box a 24 MB backup's GET
 	// went off ("took nothing for 1s (GET)") though the line never stopped.
-	data := bytes.Repeat([]byte("magpie skill "), (2<<20)/13)
+	data := bytes.Repeat([]byte("myna skill "), (2<<20)/13)
 	ctx := context.Background()
 	start := time.Now()
 	if _, err := d.put(ctx, data, ""); err != nil {
@@ -363,7 +363,7 @@ func TestGitHubSlowBlobUploadIsNotCutShort(t *testing.T) {
 	g := githubOn(t, h)
 	// 200 KB of file: about 272 KB of base64 body, ~0.9 s at the line's
 	// 320 KB/s, well over the whole metadata limit.
-	data := bytes.Repeat([]byte("magpie usage "), (200<<10)/13)
+	data := bytes.Repeat([]byte("myna usage "), (200<<10)/13)
 	if _, err := g.put(context.Background(), data, ""); err != nil {
 		t.Fatalf("a slow but live blob POST: %v", err)
 	}

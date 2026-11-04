@@ -12,8 +12,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/routes"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/routes"
 )
 
 // keeyangyy (#3938): a client that sends no session header and opens every
@@ -84,7 +84,7 @@ func openingProtocols() []openingProtocol {
 // before #3938 and still for a conversation that opens in the user's words.
 func openingID(msg string) string {
 	sum := sha256.Sum256([]byte(msg))
-	return "magpie-" + hex.EncodeToString(sum[:12])
+	return "myna-" + hex.EncodeToString(sum[:12])
 }
 
 func TestConversationsOnOneEnvironmentMessageAreApart(t *testing.T) {

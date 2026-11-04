@@ -43,16 +43,16 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       const key = {
-        id: "pool", name: "拼车-自用", masked: "sk-magpie-key-…6fcf81", models: ["a/m", "group/mine"],
+        id: "pool", name: "拼车-自用", masked: "sk-myna-key-…6fcf81", models: ["a/m", "group/mine"],
         limit: { period: "hours", hours: 5, cost: 30 },
         moreLimits: [{ period: "days", days: 7, cost: 153 }, { period: "days", days: 30, tokens: 1e13 }],
       };
-      const keys = [key, { id: "other", name: "其他模型", masked: "sk-magpie-key-…222222" }];
+      const keys = [key, { id: "other", name: "其他模型", masked: "sk-myna-key-…222222" }];
       const spend = (cost, tokens) => { key.usedAll = used(cost, tokens); key.used = key.usedAll[0]; };
       spend(0, 0);
       await page.clock.install();
       await page.route("**/*", fixture(lang, "light", [], { lan: true, keys }));
-      await page.goto("http://magpie.test/?view=gateway");
+      await page.goto("http://myna.test/?view=gateway");
       const lines = page.locator('#gatewayKeys .acc[data-key="pool"] .key-limit');
       await lines.first().waitFor();
       const zero = tr("{used} of {limit} estimated · {left} left", { used: "$0.00", limit: "$30.00", left: "$30.00" });

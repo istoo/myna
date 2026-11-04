@@ -9,11 +9,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/backup"
-	"github.com/yetone/magpie/internal/library"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/appdir"
+	"github.com/istoo/myna/internal/backup"
+	"github.com/istoo/myna/internal/library"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // A providers-only upload must not turn the remote's redacted settings and
@@ -41,7 +41,7 @@ func TestProviderKeysPreserveOtherSecretsSync(t *testing.T) {
 			remote := func() backup.Bundle {
 				t.Helper()
 				f.mu.Lock()
-				data := slices.Clone(f.objects["team x+y/magpie/magpie.magpie-backup"])
+				data := slices.Clone(f.objects["team x+y/myna/myna.myna-backup"])
 				f.mu.Unlock()
 				got, err := backup.Open(data, cfg.Passphrase)
 				if err != nil {
@@ -238,7 +238,7 @@ func TestTakeScopedPartCredentials(t *testing.T) {
 					}
 					if part == "providers" {
 						// the whole-bundle bit follows the providers' own when
-						// this upload carried them, so a magpie that reads no
+						// this upload carried them, so a myna that reads no
 						// per-part ones still keeps the server's keys when it
 						// uploads after a keyed one
 						if (from.Keys || (from.ProvidersKeys != nil && *from.ProvidersKeys)) && (merged.ProvidersKeys != nil && *merged.ProvidersKeys) && !merged.Keys {

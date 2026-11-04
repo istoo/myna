@@ -13,10 +13,10 @@
 package middleware
 
 import (
-	"github.com/yetone/magpie/internal/gwmw"
-	"github.com/yetone/magpie/internal/middleware"
-	"github.com/yetone/magpie/internal/pluginrt"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/istoo/myna/internal/gwmw"
+	"github.com/istoo/myna/internal/middleware"
+	"github.com/istoo/myna/internal/pluginrt"
+	"github.com/istoo/myna/internal/usage"
 )
 
 func init() {

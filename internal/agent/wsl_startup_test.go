@@ -10,7 +10,7 @@ import (
 )
 
 // Every command ran start-up's moves over All(), which lists WSL's
-// distros: on a Windows whose wsl.exe hangs, `magpie version` took 20s,
+// distros: on a Windows whose wsl.exe hangs, `myna version` took 20s,
 // two listings' timeouts. The moves look at this machine's agents only.
 func TestStartUpMovesAskNoWSL(t *testing.T) {
 	syncHome(t)
@@ -59,7 +59,7 @@ func TestWSLListFailsAsksNoRunning(t *testing.T) {
 	}
 }
 
-// A wsl.exe that hung to its timeout is remembered beside magpie's
+// A wsl.exe that hung to its timeout is remembered beside myna's
 // settings: the next command (a new process) doesn't wait on it again,
 // and once a listing answers, it is forgotten.
 func TestWSLHangRememberedAcrossProcesses(t *testing.T) {

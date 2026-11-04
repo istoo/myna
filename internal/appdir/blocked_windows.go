@@ -4,7 +4,7 @@ package appdir
 // command run as Administrator the way sudo leaves ~/.config root's.
 func Blocked() string { return "" }
 
-// Own says whether p is magpie's own folder or inside it.
+// Own says whether p is myna's own folder or inside it.
 func Own(p string) bool { return false }
 
 // Mine says whether this user owns p.

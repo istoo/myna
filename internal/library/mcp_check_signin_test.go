@@ -4,17 +4,17 @@ import (
 	"context"
 	"testing"
 
-	"github.com/yetone/magpie/internal/mcpauth"
-	"github.com/yetone/magpie/internal/mcpauth/mcpauthtest"
+	"github.com/istoo/myna/internal/mcpauth"
+	"github.com/istoo/myna/internal/mcpauth/mcpauthtest"
 )
 
-// A server magpie is signed in to is checked as the gateway relays it: a
+// A server myna is signed in to is checked as the gateway relays it: a
 // token the server ended early is renewed and asked again with, so the row
 // doesn't say "needs sign-in" beside "Signed in" (新v学员 on Discord). A
 // token refused just after it was renewed, or one that can't be renewed,
 // is a sign-in that has run out: the check says so, and the record does,
 // for the tag to read "Sign-in ran out". The check isn't run again for it.
-func TestCheckRenewsMagpiesSignIn(t *testing.T) {
+func TestCheckRenewsMynasSignIn(t *testing.T) {
 	sandbox(t)
 	checked.Lock()
 	checked.m = map[string]checkedServer{}

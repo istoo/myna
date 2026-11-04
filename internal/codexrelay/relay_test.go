@@ -11,9 +11,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/proc"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // The tests run in a home of their own, never the user's real files.
@@ -63,7 +63,7 @@ func waitFor(t *testing.T, what string, ok func() bool) {
 	}
 }
 
-// The next magpie starting tells the relay to leave, and binds the port
+// The next myna starting tells the relay to leave, and binds the port
 // at once; the turn the relay is streaming then goes on to its end
 // rather than being cut, and the relay ends after it.
 func TestLeaveFreesPortAndFinishesStream(t *testing.T) {
@@ -81,7 +81,7 @@ func TestLeaveFreesPortAndFinishesStream(t *testing.T) {
 	})
 	done := make(chan error, 1)
 	go func() { done <- Run(context.Background(), addr, []int{pid}, h) }()
-	// the relay waits for the port the quitting magpie still holds
+	// the relay waits for the port the quitting myna still holds
 	time.Sleep(300 * time.Millisecond)
 	hold.Close()
 	waitFor(t, "state written", func() bool { _, ok := readState(); return ok })
@@ -203,6 +203,6 @@ func TestLeaveNeedsToken(t *testing.T) {
 		t.Fatalf("dead relay's state kept: %v", err)
 	}
 	if !strings.HasPrefix(statePath(), settings.Dir()) {
-		t.Fatal("state outside magpie's folder")
+		t.Fatal("state outside myna's folder")
 	}
 }

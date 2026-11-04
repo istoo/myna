@@ -8,16 +8,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // Claude Code signed in to claude.ai, sending that sign-in as its key, is
-// told a provider's 401 for magpie's credential as a 502 in magpie's words,
+// told a provider's 401 for myna's credential as a 502 in myna's words,
 // so it doesn't renew a sign-in nobody refused, and a 403 the same where it
 // says the OAuth token was revoked; nothing it is told mentions x-api-key,
 // which it reads as "Not logged in" at any status. Recent calls keep the
 // provider's status. Any other error keeps its status, and a request with
-// magpie's key still gets the 401 as the provider said it.
+// myna's key still gets the 401 as the provider said it.
 func TestClaudeSignInNotToldItsSignInFailed(t *testing.T) {
 	f := &fake{t: t, ctype: "application/json", reply: `{"id":"msg","type":"message","role":"assistant","content":[],"usage":{"input_tokens":1,"output_tokens":1}}`}
 	setup(t, provider.Anthropic, f)
@@ -51,15 +51,15 @@ func TestClaudeSignInNotToldItsSignInFailed(t *testing.T) {
 		reply, said      string
 		want, recorded   int
 	}{
-		{"401", "/v1/messages", signIn, 401, badKey, "Fake refused magpie's credential (HTTP 401): invalid API key", 502, 401},
-		{"401 without v1", "/messages", signIn, 401, badKey, "Fake refused magpie's credential (HTTP 401): invalid API key", 502, 401},
-		{"revoked", "/v1/messages", signIn, 403, revoked, "Fake refused magpie's credential (HTTP 403): OAuth token has been revoked", 502, 403},
+		{"401", "/v1/messages", signIn, 401, badKey, "Fake refused myna's credential (HTTP 401): invalid API key", 502, 401},
+		{"401 without v1", "/messages", signIn, 401, badKey, "Fake refused myna's credential (HTTP 401): invalid API key", 502, 401},
+		{"revoked", "/v1/messages", signIn, 403, revoked, "Fake refused myna's credential (HTTP 403): OAuth token has been revoked", 502, 403},
 		{"another 403", "/v1/messages", signIn, 403, denied, "has been disabled", 403, 403},
 		{"403 naming the key", "/v1/messages", signIn, 403, keyDenied, "invalid API key", 403, 403},
 		{"400 naming the key", "/v1/messages", signIn, 400, noKey, "API key header is required", 400, 400},
 		{"429 naming the key", "/v1/messages", signIn, 429, limited, "rate limited for this API key", 429, 429},
-		{"401 counting", "/v1/messages/count_tokens", signIn, 401, badKey, "refused magpie's credential (HTTP 401): invalid API key", 502, 0},
-		{"magpie's key", "/v1/messages", "Bearer " + Token, 401, badKey, "invalid x-api-key", 401, 401},
+		{"401 counting", "/v1/messages/count_tokens", signIn, 401, badKey, "refused myna's credential (HTTP 401): invalid API key", 502, 0},
+		{"myna's key", "/v1/messages", "Bearer " + Token, 401, badKey, "invalid x-api-key", 401, 401},
 		{"an API key", "/v1/messages", "Bearer sk-ant-api03-" + strings.Repeat("b", 24), 401, badKey, "invalid x-api-key", 401, 401},
 	} {
 		code, reply := c.code, c.reply

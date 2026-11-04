@@ -9,20 +9,20 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // lileo0668 on Discord: with Settings → Privacy's subscription accounts
 // off (#1535), OpenCode Zen Free's keyless sign-in went through, the
 // Plugins page said it was signed in, and the providers listed it nowhere
-// ("signed in, but magpie can't list it"). A plugin whose every way in is
+// ("signed in, but myna can't list it"). A plugin whose every way in is
 // keyless holds no account of the user's: it is listed and served with
 // them off. Any other plugin's key is refused then, as its browser
 // sign-in is, rather than saved and listed nowhere.
 func TestPublicPluginListedWithAccountsOff(t *testing.T) {
 	claudeHome(t)
-	t.Setenv("MAGPIE_BUN", "") // nothing here runs a plugin
+	t.Setenv("MYNA_BUN", "") // nothing here runs a plugin
 	write := func(name string, v any) {
 		t.Helper()
 		b, _ := json.Marshal(v)

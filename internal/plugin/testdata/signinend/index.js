@@ -1,6 +1,6 @@
-// A plugin whose sign-ins end in ways magpie must follow (#5016,
+// A plugin whose sign-ins end in ways myna must follow (#5016,
 // plugins#658): a wait on a file a desktop app writes, one that ignores
-// magpie giving up and one that heeds it, and authorize results that fail
+// myna giving up and one that heeds it, and authorize results that fail
 // with no callback to call.
 import { existsSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
@@ -31,9 +31,9 @@ export const SignInEndPlugin = async () => ({
   auth: {
     provider: "signinend",
     methods: [
-      // 0: waits on its own, deaf to magpie giving up
+      // 0: waits on its own, deaf to myna giving up
       { type: "oauth", label: "deaf", authorize: async () => ({ url: "https://signinend.invalid/", instructions: "", method: "auto", callback: async () => wait() }) },
-      // 1: waits on its own, and stops when given magpie's signal
+      // 1: waits on its own, and stops when given myna's signal
       {
         type: "oauth",
         label: "heeds",

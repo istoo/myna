@@ -1,6 +1,6 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // Zachary-wW (#3745): "Some of the Library couldn't be written" had only
-// Try again, and what it listed, Grok Build's AGENTS.md that magpie can't
+// Try again, and what it listed, Grok Build's AGENTS.md that myna can't
 // stat, failed again at every change, since each one writes every agent.
 // Its × now hides what the card lists, on every tab, and sends nothing. A
 // read keeps it hidden, and so does a change that fails only on what was
@@ -25,23 +25,23 @@ const { chromium, webkit } = require("playwright");
 const assets = path.resolve(__dirname, "../assets");
 const HOME = "/Users/me";
 const agent = (id, name, file = "AGENTS.md") => ({ id, name, icon: "", skills: `${HOME}/.${id}/skills`, instructions: `${HOME}/.${id}/${file}` });
-// What magpie's own sync gave for Grok Build in a sandbox HOME, moved to
-// this one: its AGENTS.md a link into a folder magpie can't search (the
+// What myna's own sync gave for Grok Build in a sandbox HOME, moved to
+// this one: its AGENTS.md a link into a folder myna can't search (the
 // report's), its folder read-only, where each write's temp file is named
 // anew (four writes in a row), and its skills folder read-only.
 const grok = { agent: "grok", what: "instructions", error: `stat ${HOME}/.grok/AGENTS.md: permission denied` };
 const temps = [2481177194, 3572372181, 3495008769, 1673008888];
 const grokTemp = (n) => ({ agent: "grok", what: "instructions", error: `open ${HOME}/.grok/.AGENTS.md.${temps[n % temps.length]}.tmp: permission denied` });
-const grokSkill = { agent: "grok", what: "skill:s01", error: `symlink ${HOME}/.config/magpie/library/skills/s01 ${HOME}/.grok/skills/s01: permission denied` };
+const grokSkill = { agent: "grok", what: "skill:s01", error: `symlink ${HOME}/.config/myna/library/skills/s01 ${HOME}/.grok/skills/s01: permission denied` };
 const own = { agent: "claude", what: "skill:impeccable", error: "Claude Code already has a skill of its own called impeccable", own: true };
 const names = ["impeccable", ...Array.from({ length: 12 }, (_, i) => "s" + String(i).padStart(2, "0"))];
 
-// the page as magpie has it: each skill's chips carry the failures that
+// the page as myna has it: each skill's chips carry the failures that
 // stand for it, and each read has a library folder of its own (the number
 // is the test's), which the Library folder button names on every tab, for
 // a test to wait on
 const view = (st) => ({
-  dir: `${HOME}/.config/magpie/library-${st.reads}`, backups: `${HOME}/.config/magpie/backups`, home: HOME,
+  dir: `${HOME}/.config/myna/library-${st.reads}`, backups: `${HOME}/.config/myna/backups`, home: HOME,
   agents: [agent("claude", "Claude Code", "CLAUDE.md"), agent("codex", "Codex"), agent("grok", "Grok Build")],
   instructions: {
     shared: "",
@@ -126,7 +126,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     // after it fails on (the same, unless a test says otherwise)
     const open = async (lang, problems, { width = 980, tab = "skills", web = true, fails } = {}) => {
       const ctx = await browser.newContext({ viewport: { width, height: 700 }, reducedMotion: "reduce" });
-      await ctx.addInitScript((tab) => { try { localStorage.setItem("magpie.libTab", tab); } catch {} }, tab);
+      await ctx.addInitScript((tab) => { try { localStorage.setItem("myna.libTab", tab); } catch {} }, tab);
       const page = await ctx.newPage();
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(60000); // the page's first load, slow on a busy machine (#4470)
@@ -134,8 +134,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // s01 is given to Grok Build too, which its skills folder may refuse
       const st = { last: structuredClone(problems), fails: fails || (() => structuredClone(problems)), reads: 0, syncs: 0, set: "default", agents: Object.fromEntries(names.map((n) => [n, n === "s01" ? ["claude", "codex", "grok"] : ["claude", "codex"]])) };
       const posts = [];
-      await page.route("http://magpie.test/**", server(lang, st, posts, web));
-      await page.goto("http://magpie.test/");
+      await page.route("http://myna.test/**", server(lang, st, posts, web));
+      await page.goto("http://myna.test/");
       // a fresh browser's first page, on a busy machine, can take longer to
       // show than the 5s every other wait here gets
       await page.locator('button[data-view="library"]').click({ timeout: 20000 });

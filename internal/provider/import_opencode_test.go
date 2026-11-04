@@ -14,7 +14,7 @@ import (
 // openCodeAuth is auth.json as OpenCode v1.19.0 writes it
 // (JSON.stringify(data, null, 2), mode 0600), from `opencode auth login`:
 // two keys of its own (Zen and Go), a vendor's key with metadata, a
-// provider magpie has no preset for, Claude Pro/Max and Copilot sign-ins,
+// provider myna has no preset for, Claude Pro/Max and Copilot sign-ins,
 // and an enterprise server's well-known token.
 const openCodeAuth = `{
   "opencode": {
@@ -91,7 +91,7 @@ func openCodeSource(t *testing.T) AppSource {
 	return AppSource{}
 }
 
-// OpenCode's keys come over onto magpie's presets: OpenCode Go's on
+// OpenCode's keys come over onto myna's presets: OpenCode Go's on
 // OpenCode Go, Zen's on OpenCode Zen (not Go, whose host it shares), a
 // vendor's on its own; its sign-ins are listed and never imported.
 // auth.json is only read (@hu_xiaomi on X).
@@ -124,7 +124,7 @@ func TestImportOpenCodeAuth(t *testing.T) {
 	}
 	for _, ref := range []string{"anthropic", "github-copilot", "https://opencode.example.com"} {
 		it := items[ref]
-		if it.Skip != "it is a sign-in, not a key; add the subscription in magpie" || it.Provider.Key != "" || it.Provider.Chat != "" || it.Provider.Anthropic != "" {
+		if it.Skip != "it is a sign-in, not a key; add the subscription in myna" || it.Provider.Key != "" || it.Provider.Chat != "" || it.Provider.Anthropic != "" {
 			t.Fatalf("sign-in %s: %+v", ref, it)
 		}
 	}
@@ -207,7 +207,7 @@ func TestImportOpenCodeAuthUnknown(t *testing.T) {
 	}
 }
 
-// A vendor's key whose OpenCode id is a provider magpie has a preset for
+// A vendor's key whose OpenCode id is a provider myna has a preset for
 // comes in on that preset: the id's host in models.dev's catalog is the
 // preset's own address. Each entry here is api, so a key lands on the
 // preset with no skip, the way openai's or deepseek's does.

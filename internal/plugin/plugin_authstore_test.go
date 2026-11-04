@@ -20,7 +20,7 @@ func authFile(t *testing.T) map[string]map[string]any {
 	return all
 }
 
-// A host stopped (magpie quitting, a plugin updated) while it renews a
+// A host stopped (myna quitting, a plugin updated) while it renews a
 // sign-in lets the renewal end and its new token be saved: the vendor
 // has spent the old refresh token, so a host killed 2 seconds in left
 // the account signed out.
@@ -99,7 +99,7 @@ func TestTwoHostsKeepEachOthersSignIns(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	h2, _, err := startOn(ctx, os.Getenv("MAGPIE_BUN"))
+	h2, _, err := startOn(ctx, os.Getenv("MYNA_BUN"))
 	if err != nil {
 		t.Fatal(err)
 	}

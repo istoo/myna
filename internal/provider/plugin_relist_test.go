@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // zenFree is the opencode-zen-free plugin's provider listing ids.
@@ -23,13 +23,13 @@ func zenFree(fellBack bool, ids ...string) []plugin.Provider {
 	return []plugin.Provider{p}
 }
 
-// A magpie left running asks the plugins for their lists again, by
+// A myna left running asks the plugins for their lists again, by
 // itself: a free model Zen dropped leaves the list and the user's picks,
 // a new one is listed, a pick typed in by hand stays, and a list that
 // couldn't be read changes nothing (Jeremy.Zhou on Discord).
 func TestPluginsListedAgainWhileRunning(t *testing.T) {
 	claudeHome(t)
-	t.Setenv("MAGPIE_BUN", "")
+	t.Setenv("MYNA_BUN", "")
 	write := func(name string, v any) {
 		t.Helper()
 		b, _ := json.Marshal(v)

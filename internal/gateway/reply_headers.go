@@ -16,7 +16,7 @@ import (
 	"net/http"
 	"slices"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 type replySinkKey struct{}

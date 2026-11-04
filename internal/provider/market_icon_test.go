@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
+	"github.com/istoo/myna/internal/plugin"
 )
 
 // registry.json gives Kilo Code, Search1API and PowerContext an https
@@ -19,7 +19,7 @@ import (
 // shown: fetched through FetchIcon's checks and kept, "" until it is in,
 // and never the URL itself, which the page took for a bundled file's
 // name and drew as the generic cube. A bundled name is given as it is,
-// and a picture magpie doesn't take is refused.
+// and a picture myna doesn't take is refused.
 func TestMarketIconURLKept(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
@@ -34,7 +34,7 @@ func TestMarketIconURLKept(t *testing.T) {
 		]}`))
 	}))
 	defer srv.Close()
-	t.Setenv("MAGPIE_PLUGIN_MARKET", srv.URL)
+	t.Setenv("MYNA_PLUGIN_MARKET", srv.URL)
 	plugin.RefreshMarket()
 	t.Cleanup(plugin.RefreshMarket)
 	plugin.Market(context.Background())

@@ -6,14 +6,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/agent"
+	"github.com/istoo/myna/internal/settings"
 )
 
-// A Quit the user chose while agents go through magpie asks first
-// (Aisiverto on X: Codex's 502s after magpie was quit, with nothing to
+// A Quit the user chose while agents go through myna asks first
+// (Aisiverto on X: Codex's 502s after myna was quit, with nothing to
 // say why). The window's Quit reaches AskQuit; the question's own Quit
-// (now=1) quits; a browser's page (magpie web) has no window to ask in
+// (now=1) quits; a browser's page (myna web) has no window to ask in
 // and quits.
 func TestWindowQuitAsksFirst(t *testing.T) {
 	quits := 0
@@ -64,7 +64,7 @@ type askingHost struct {
 
 func (h askingHost) AskQuit() { h.asked <- struct{}{} }
 
-// The question names the agents magpie is in, and only those.
+// The question names the agents myna is in, and only those.
 func TestQuitListsWiredAgents(t *testing.T) {
 	yes := func() bool { return true }
 	got := wiredAgents([]*agent.Agent{
@@ -95,7 +95,7 @@ func TestQuitAPIListsAgents(t *testing.T) {
 	}
 }
 
-// With no gateway served here (another magpie serves it, and goes on
+// With no gateway served here (another myna serves it, and goes on
 // serving the agents) a Quit cuts nobody off.
 func TestQuitAgentsNoneWithoutGateway(t *testing.T) {
 	if served.Load() != nil {

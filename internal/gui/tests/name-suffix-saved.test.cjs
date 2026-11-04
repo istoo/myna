@@ -38,7 +38,7 @@ function serve(lang, saved, { stateDelay = 0 } = {}, posts) {
       if (stateDelay) await new Promise((res) => setTimeout(res, stateDelay));
       return json(state);
     }
-    if (url.pathname === "/api/settings") return json({ ...cur, version: "0.1.1140", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3999" });
+    if (url.pathname === "/api/settings") return json({ ...cur, version: "0.1.1140", dir: "~/.config/myna", gateway: "http://127.0.0.1:3999" });
     if (url.pathname === "/api/plugins") return json({ plugins: [] });
     if (url.pathname === "/api/gateway/trace") {
       if (url.searchParams.get("wait")) return new Promise(() => {});
@@ -96,7 +96,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       test(`${engine} ${lang} ${width}px: Routing opened first shows the saved Off, and Settings and back keep it`, async (t) => {
         const posts = [];
         const { page, errors, tr } = await launch(t, engine, lang, width, OFF, {}, posts);
-        await page.goto("http://magpie.test/?view=routing");
+        await page.goto("http://myna.test/?view=routing");
         await page.locator(".rt-group", { hasText: "Fast" }).waitFor();
         const set = page.locator(".rt-gnames");
         await set.locator(".segs").waitFor();
@@ -119,7 +119,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       test(`${engine} ${lang} ${width}px: Routing drawn before the state comes in follows the saved "Not on names I set"`, async (t) => {
         const posts = [];
         const { page, errors, tr } = await launch(t, engine, lang, width, OWN, { stateDelay: 600 }, posts);
-        await page.goto("http://magpie.test/?view=routing");
+        await page.goto("http://myna.test/?view=routing");
         const set = page.locator(".rt-gnames");
         await set.locator(".segs").waitFor();
         await picked(set.locator(".opt.on"), await tr("Not on names I set"));
@@ -132,7 +132,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const posts = [];
         // the state answering after the editor is drawn: its line follows it
         const { page, errors, tr } = await launch(t, engine, lang, width, OFF, { stateDelay: 600 }, posts);
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://myna.test/?view=providers");
         await page.locator(".row.provider").click();
         if (!(await page.locator(".mnames:not([hidden])").count())) await page.getByRole("button", { name: await tr("Names, prices & levels"), exact: true }).click();
         const sfx = page.locator(".mnames:not([hidden]) .msuffix");

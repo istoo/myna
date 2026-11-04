@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/settingsapi"
+	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/myna/internal/settingsapi"
 )
 
 // settingsHome is a home of its own whose settings.json has the user's
@@ -102,11 +102,11 @@ func TestSettingsRefusesAndWritesNothing(t *testing.T) {
 	} {
 		out, err := runOut(t, args...)
 		if err == nil {
-			t.Errorf("magpie %s: no error (%q)", strings.Join(args, " "), out)
+			t.Errorf("myna %s: no error (%q)", strings.Join(args, " "), out)
 		}
 		after, _ := os.ReadFile(settings.Path())
 		if string(after) != string(before) {
-			t.Fatalf("magpie %s changed settings.json", strings.Join(args, " "))
+			t.Fatalf("myna %s changed settings.json", strings.Join(args, " "))
 		}
 	}
 	_, err := runOut(t, "settings", "set", "them", "dark")

@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/access"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // gateway-key add --read-only and gateway-key access (Steven on Discord: a

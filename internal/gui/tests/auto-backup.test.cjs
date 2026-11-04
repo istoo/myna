@@ -30,17 +30,17 @@ const tr = (lang, k, vars = {}) => {
 const hourAgo = new Date(Date.now() - 3600e3).toISOString();
 const dayAgo = new Date(Date.now() - 86400e3).toISOString();
 const backups = [
-  { name: "magpie-20261102-010000-auto.json", made: hourAgo, reason: "auto", providers: 3, size: 900 },
-  { name: "magpie-20261101-010000-restore.json", made: dayAgo, reason: "restore", providers: 1, size: 700 },
+  { name: "myna-20261102-010000-auto.json", made: hourAgo, reason: "auto", providers: 3, size: 900 },
+  { name: "myna-20261101-010000-restore.json", made: dayAgo, reason: "restore", providers: 1, size: 700 },
 ];
 
 function serve(lang, posts) {
   const settings = {
-    theme: "light", lang, tray: "panel", version: "test", dir: "/tmp/magpie",
+    theme: "light", lang, tray: "panel", version: "test", dir: "/tmp/myna",
     gateway: "http://127.0.0.1:3425", visionModels: [], imageGenModels: [],
     fx: { rate: 7.2, stale: false },
   };
-  let view = { on: true, hours: 24, keep: 7, dir: "~/Library/Application Support/magpie/auto-backups-with-a-long-folder-name-to-wrap", custom: true, backups };
+  let view = { on: true, hours: 24, keep: 7, dir: "~/Library/Application Support/myna/auto-backups-with-a-long-folder-name-to-wrap", custom: true, backups };
   return async (route) => {
     const request = route.request();
     const pathname = new URL(request.url()).pathname;
@@ -62,10 +62,10 @@ function serve(lang, posts) {
         if (body.on !== undefined) view = { ...view, on: body.on };
         if (body.hours) view = { ...view, hours: body.hours };
         if (body.keep) view = { ...view, keep: body.keep };
-        if (body.dir === "") view = { ...view, custom: false, dir: "~/Library/Application Support/magpie/auto-backups" };
+        if (body.dir === "") view = { ...view, custom: false, dir: "~/Library/Application Support/myna/auto-backups" };
       }
       if (action === "restore") {
-        const before = { name: "magpie-20261102-020000-restore.json", made: new Date().toISOString(), reason: "restore", providers: 3, size: 900 };
+        const before = { name: "myna-20261102-020000-restore.json", made: new Date().toISOString(), reason: "restore", providers: 3, size: 900 };
         view = { ...view, backups: [before, ...view.backups] };
         return json({ view, before: before.name, result: { Added: 0, Replaced: 2, Profiles: 1, Agents: 0, Settings: true } });
       }
@@ -98,7 +98,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
 
-        await page.goto("http://magpie.test/");
+        await page.goto("http://myna.test/");
         await page.locator("#prefs").click();
         await openPart(page, "sync");
         const list = page.locator("#syncList");
@@ -204,7 +204,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     });
     page.setDefaultTimeout(5000);
     page.setDefaultNavigationTimeout(60000);
-    await page.goto("http://magpie.test/");
+    await page.goto("http://myna.test/");
     await page.locator("#prefs").click();
     await openPart(page, "sync");
     await page.locator("#syncList .row.pref").first().waitFor({ state: "visible" });

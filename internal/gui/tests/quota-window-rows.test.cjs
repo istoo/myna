@@ -7,7 +7,7 @@
 // subgrid, and at each width, in both engines and every language, the bars
 // of each row of windows start at one y, the names of a window too
 // short to wrap still sit above its bar, and a reset line is as far under
-// its bar as the subgrid put it. MAGPIE_QUOTA_ASSETS points the
+// its bar as the subgrid put it. MYNA_QUOTA_ASSETS points the
 // page at an older asset tree, to watch this go red there.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -15,7 +15,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(__dirname, process.env.MAGPIE_QUOTA_ASSETS || "../assets");
+const assets = path.resolve(__dirname, process.env.MYNA_QUOTA_ASSETS || "../assets");
 const soon = new Date(Date.now() + 3 * 3600e3).toISOString();
 const later = new Date(Date.now() + 4 * 86400e3).toISOString();
 const quotas = [{
@@ -99,7 +99,7 @@ for (const [name, engine] of [["chromium", chromium], ["webkit", webkit]]) {
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, quotas));
-        await page.goto("http://magpie.test/?view=usage");
+        await page.goto("http://myna.test/?view=usage");
         await page.locator(".subscription-card .quota-track").nth(2).waitFor();
         let wrapped = false;
         for (const width of [1100, 700, 390, 1100]) {

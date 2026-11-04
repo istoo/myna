@@ -1,20 +1,20 @@
 {
   "schemaVersion": 1,
-  "id": "usemagpie.magpie",
-  "name": "magpie",
+  "id": "usemyna.myna",
+  "name": "myna",
   "version": "1.0.0",
-  "author": "magpie",
+  "author": "myna",
   "license": "MIT",
-  "description": "magpie's icon in the bar: a click drops down its panel, a right click opens its window.",
+  "description": "myna's icon in the bar: a click drops down its panel, a right click opens its window.",
   "kinds": ["bar-widget"],
   "entryPoints": {
     "barWidget": "Widget.qml"
   },
   "barWidget": {
-    "displayName": "magpie",
-    "description": "Pick every agent's model from the bar: a click drops down magpie's panel, a right click opens its window.",
+    "displayName": "myna",
+    "description": "Pick every agent's model from the bar: a click drops down myna's panel, a right click opens its window.",
     "category": "AI",
-    "aliases": ["magpie"],
+    "aliases": ["myna"],
     "allowMultiple": false,
     "defaultSection": "right"
   }

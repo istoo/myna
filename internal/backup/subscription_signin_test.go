@@ -31,10 +31,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/appdir"
+	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // The credentials in the fixtures below. Each appears only in a sign-in
@@ -69,11 +69,11 @@ const (
 	// offers the subscription at all.
 	//
 	// opencode-zen is a real NoKey preset, so a row with no key on it is a
-	// row magpie stores rather than one this test had to force past Save.
+	// row myna stores rather than one this test had to force past Save.
 	movedProviderID = "opencode-zen"
 )
 
-// signIns writes both sign-in stores the way magpie keeps them after the
+// signIns writes both sign-in stores the way myna keeps them after the
 // user has signed in twice on this machine: two built-in agents in
 // logins.json, and the moved subscription in both stores, one plugin
 // account under its provider's id and a second under id#slot. More than
@@ -296,7 +296,7 @@ func TestCollectCarriesTheRowOfAMovedSubscription(t *testing.T) {
 // TestCollectCarriesTypedKeysOnlyWhenAsked is the control that keeps the
 // policy above from being read as "nothing credential-shaped syncs": a key
 // the user typed is not an agent's sign-in on this machine, it is the one
-// credential magpie's backups have always carried. It goes in when keys are
+// credential myna's backups have always carried. It goes in when keys are
 // asked for and stays out when they are not, on all three of the places a
 // provider holds one.
 func TestCollectCarriesTypedKeysOnlyWhenAsked(t *testing.T) {

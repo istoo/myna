@@ -4,7 +4,7 @@ import (
 	"bytes"
 
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // A Copilot Gemini model is served on chat completions alone, so Codex's

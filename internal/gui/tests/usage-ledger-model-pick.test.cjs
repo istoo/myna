@@ -89,7 +89,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         p.setDefaultNavigationTimeout(60000);
         p.on("pageerror", (e) => errors.push(e.message));
         await p.route("**/*", server(lang, asked));
-        await p.goto("http://magpie.test/");
+        await p.goto("http://myna.test/");
         await p.locator('[data-view="usage"]').first().click();
         await p.locator(":is(#usageTab .opt, .nav-s):visible").nth(1).click();
         await p.locator("#ledWrap .led tbody tr").first().waitFor();
@@ -130,7 +130,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const said = await p.evaluate(() => [t("{n} in", { n: fmtN(5000) }), t("{n} out", { n: fmtN(1000) }), t("{n} cache read", { n: fmtN(200) }), t("{n} cache write", { n: fmtN(20) })]);
         for (const x of said) assert(sum.includes(x), "the model's " + x + " in the sum: " + sum);
         assert(await p.locator("#ledWrap .led tbody tr.led-row").evaluateAll((rs) => rs.every((r) => r.textContent.includes("kimi-k3"))));
-        // the source cells: one through magpie, one not
+        // the source cells: one through myna, one not
         const cells = await p.locator("#ledVia .blk .v").allTextContents();
         assert.equal(cells.length, 3);
         assert.deepEqual(cells.map((c) => parseInt(c, 10)), [2, 1, 1]);

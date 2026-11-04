@@ -5,8 +5,8 @@
 package sessions
 
 import (
-	"github.com/yetone/magpie/internal/pluginrt"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/pluginrt"
+	"github.com/istoo/myna/internal/settings"
 )
 
 func init() {

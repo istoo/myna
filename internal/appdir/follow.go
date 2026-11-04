@@ -5,24 +5,24 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/agentenv"
+	"github.com/istoo/myna/internal/agentenv"
 )
 
 // An agent's variable (agentenv.Vars) on Windows is read as a process
-// started now would get it, not as magpie was started with it. Windows
+// started now would get it, not as myna was started with it. Windows
 // gives a process its variables once, from the registry, and a User or
-// System variable changed after that never reaches it: magpie runs for
+// System variable changed after that never reaches it: myna runs for
 // days in the tray, so a PI_CODING_AGENT_DIR the user moved kept naming
-// the old folder, and magpie wrote Pi's models.json and settings.json into
+// the old folder, and myna wrote Pi's models.json and settings.json into
 // it again after the user had deleted it (bm_rabbit on Discord, 0.1.2405).
 //
 // Only a variable that came from the registry follows it: one whose value
-// in magpie's environment at start was the registry's then (unset in both
-// counts). One the launcher set itself (`$env:CODEX_HOME=…; magpie`, a
-// test's sandbox) is kept, and so is one changed inside magpie since
+// in myna's environment at start was the registry's then (unset in both
+// counts). One the launcher set itself (`$env:CODEX_HOME=…; myna`, a
+// test's sandbox) is kept, and so is one changed inside myna since
 // (os.Setenv, a test's t.Setenv), as it was before. A value followed is
-// set in magpie's environment too, so the programs magpie starts (Pi,
-// Codex's app-server, an agent's CLI) read the folder magpie writes.
+// set in myna's environment too, so the programs myna starts (Pi,
+// Codex's app-server, an agent's CLI) read the folder myna writes.
 
 // regEnv is a variable as the registry gives it to a process started now
 // — the user's value, else the machine's, %…% expanded — and whether it
@@ -43,8 +43,8 @@ var follow struct {
 	vars map[string]*followed
 }
 
-// followed is one variable that follows the registry: the value magpie's
-// environment holds while nothing in magpie has changed it, and the last
+// followed is one variable that follows the registry: the value myna's
+// environment holds while nothing in myna has changed it, and the last
 // registry read.
 type followed struct {
 	env envVal
@@ -55,7 +55,7 @@ type followed struct {
 func init() { followStart() }
 
 // followStart notes which agent variables came from the registry: those
-// whose value in magpie's environment is the registry's now.
+// whose value in myna's environment is the registry's now.
 func followStart() {
 	follow.Lock()
 	defer follow.Unlock()
@@ -85,7 +85,7 @@ func lookupEnv(name string) (string, bool) {
 		return v, ok
 	}
 	if (envVal{v, ok}) != f.env {
-		// changed inside magpie: what was set stands, from now on
+		// changed inside myna: what was set stands, from now on
 		delete(follow.vars, name)
 		return v, ok
 	}

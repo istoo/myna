@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-// A plugin's or an import link's icon is asked for through usemagpie.ai's
+// A plugin's or an import link's icon is asked for through github.com/istoo/myna's
 // icon proxy, so the host its author picked never sees the user's IP.
 func TestFetchIconGoesThroughTheProxy(t *testing.T) {
 	home := t.TempDir()
@@ -25,7 +25,7 @@ func TestFetchIconGoesThroughTheProxy(t *testing.T) {
 		rw.Write(png)
 	}))
 	defer proxy.Close()
-	t.Setenv("MAGPIE_ICON_PROXY", proxy.URL+"/api/icon")
+	t.Setenv("MYNA_ICON_PROXY", proxy.URL+"/api/icon")
 	client := iconClient
 	iconClient = proxy.Client
 	t.Cleanup(func() { iconClient = client })

@@ -5,10 +5,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/settings"
 )
 
-// magpie sessions read (RustCats on X): a fresh install reads no agent's
+// myna sessions read (RustCats on X): a fresh install reads no agent's
 // sessions, so the list is empty and the agents found are off until
 // `read on` allows them; `read off all` turns every one off again. A flag
 // or an unknown agent is refused, never saved.
@@ -53,7 +53,7 @@ func TestSessionsRead(t *testing.T) {
 
 	before := settings.Load().SessionReads
 	for _, bad := range [][]string{{"--help"}, {"on"}, {"on", "--help"}, {"on", "no-such-agent"}, {"maybe", "claude"}} {
-		if _, err := read(bad...); err == nil || !strings.Contains(err.Error(), "usage: magpie sessions read") {
+		if _, err := read(bad...); err == nil || !strings.Contains(err.Error(), "usage: myna sessions read") {
 			t.Errorf("read %v: %v, want the usage", bad, err)
 		}
 	}

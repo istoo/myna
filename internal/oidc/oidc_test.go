@@ -9,10 +9,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/oidc"
-	"github.com/yetone/magpie/internal/oidc/oidctest"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/access"
+	"github.com/istoo/myna/internal/oidc"
+	"github.com/istoo/myna/internal/oidc/oidctest"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 func TestMain(m *testing.M) { testenv.Main(m) }
@@ -58,7 +58,7 @@ func TestMatchEachCheck(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.HasPrefix(r.Audience, "magpie-") || r.Lifetime() != oidc.DefaultTTL {
+	if !strings.HasPrefix(r.Audience, "myna-") || r.Lifetime() != oidc.DefaultTTL {
 		t.Fatalf("defaults: %+v", r)
 	}
 	ctx := context.Background()
@@ -76,7 +76,7 @@ func TestMatchEachCheck(t *testing.T) {
 		"another repository":    is.Sign(t, "k1", claims(is, r.Audience, map[string]any{"repository": "evil/app"})),
 		"a tag, not a branch":   is.Sign(t, "k1", claims(is, r.Audience, map[string]any{"ref": "refs/tags/v1"})),
 		"no ref":                is.Sign(t, "k1", claims(is, r.Audience, map[string]any{"ref": nil})),
-		"another audience":      is.Sign(t, "k1", claims(is, "magpie-other", nil)),
+		"another audience":      is.Sign(t, "k1", claims(is, "myna-other", nil)),
 		"no audience":           is.Sign(t, "k1", claims(is, r.Audience, map[string]any{"aud": nil})),
 		"expired":               is.Sign(t, "k1", claims(is, r.Audience, map[string]any{"exp": now - 120})),
 		"no expiry":             is.Sign(t, "k1", claims(is, r.Audience, map[string]any{"exp": nil})),

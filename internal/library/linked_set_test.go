@@ -32,7 +32,7 @@ func TestLinkedSet(t *testing.T) {
 		t.Error("a linked set has a copy in the library too")
 	}
 
-	// edited outside magpie: the first look notes the file, the next one
+	// edited outside myna: the first look notes the file, the next one
 	// after a change writes it into the agents
 	if res, err := SyncLinked(); err != nil || res != nil {
 		t.Fatalf("first look: %v %v", res, err)
@@ -87,7 +87,7 @@ func TestLinkedSet(t *testing.T) {
 	}
 }
 
-// A set can't be kept in a file magpie writes into, or in the library's
+// A set can't be kept in a file myna writes into, or in the library's
 // own, or in a file another set has.
 func TestLinkRefused(t *testing.T) {
 	h := sandbox(t)
@@ -101,7 +101,7 @@ func TestLinkRefused(t *testing.T) {
 		"a folder":          filepath.Join(h, ".agents"),
 		"an agent's own":    filepath.Join(h, ".codex/AGENTS.md"),
 		"the library's":     filepath.Join(Dir(), "instructions.md"),
-		"magpie's part":     marked,
+		"myna's part":     marked,
 		"another set's":     "~/.agents/AGENTS.md",
 		"another set's too": filepath.Join(h, ".agents/../.agents/AGENTS.md"),
 	} {

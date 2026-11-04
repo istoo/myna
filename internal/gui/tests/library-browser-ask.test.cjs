@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Magpie Browser in the Library's MCP list, connected and given to no
+// Myna Browser in the Library's MCP list, connected and given to no
 // agent: it is added opt-in, so the router offers it to none until one is
 // ticked, and an agent asked to use the browser reached for AppleScript
 // instead. Its row asks which agents may use it, once the extension has
@@ -30,15 +30,15 @@ const ASK = "Connected to your browser. Which agents may use it? They act in you
 function fixture(lang, st) {
   const posts = [];
   const library = () => ({
-    dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
-    mcpHub: true, hubPath: "/mcp/magpie/hub/",
+    dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
+    mcpHub: true, hubPath: "/mcp/myna/hub/",
     agents: [
       { id: "claude", name: "Claude Code", icon: "claudecode-color", mcp: `${HOME}/.claude.json`, skills: `${HOME}/.claude/skills`, hub: "on" },
       { id: "codex", name: "Codex", icon: "codex-color", mcp: `${HOME}/.codex/config.toml`, hub: "on" },
       { id: "zed", name: "Zed", icon: "zed", mcp: `${HOME}/.config/zed/settings.json`, hub: "on" },
     ],
     servers: [
-      { name: "magpie-browser", transport: "stdio", command: "/Applications/magpie.app/Contents/MacOS/magpie", args: ["mcp", "browser"], agents: st.agents },
+      { name: "myna-browser", transport: "stdio", command: "/Applications/myna.app/Contents/MacOS/myna", args: ["mcp", "browser"], agents: st.agents },
       { name: "notes", transport: "stdio", command: "uvx", args: ["notes-mcp"], agents: [] },
       { name: "context7", transport: "http", url: "https://mcp.context7.com/mcp", agents: ["claude", "codex", "zed"] },
     ],
@@ -53,12 +53,12 @@ function fixture(lang, st) {
     if (url.pathname === "/api/plugins") return json({ plugins: [] });
     if (url.pathname === "/api/library") return json(library());
     if (url.pathname === "/api/library/browser") {
-      return json({ dir: `${HOME}/Magpie Browser Extension`, written: true, version: "0.1.0", connected: st.connected, ...(st.connected ? { extension: "0.1.0", browser: "Chrome/156" } : {}) });
+      return json({ dir: `${HOME}/Myna Browser Extension`, written: true, version: "0.1.0", connected: st.connected, ...(st.connected ? { extension: "0.1.0", browser: "Chrome/156" } : {}) });
     }
     if (url.pathname === "/api/library/servers/agents" && req.method() === "POST") {
       const body = req.postDataJSON();
       posts.push(body);
-      if (body.name === "magpie-browser") st.agents = body.agents;
+      if (body.name === "myna-browser") st.agents = body.agents;
       return json({ ...library(), result: { problems: [] } });
     }
     if (url.pathname.startsWith("/api/library/market/")) return json({ items: [] });
@@ -76,7 +76,7 @@ function fixture(lang, st) {
 const wide = (page) => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
-  test(engine + ": a connected Magpie Browser given to no agent asks which agents may use it", async (t) => {
+  test(engine + ": a connected Myna Browser given to no agent asks which agents may use it", async (t) => {
     assert(["chromium", "webkit"].includes(engine), "BROWSER must be chromium or webkit");
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     const shots = [];
@@ -96,9 +96,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", f.route);
-      await page.addInitScript(() => { localStorage.setItem("magpie.libTab", "mcp"); });
-      await page.goto("http://magpie.test/?view=library");
-      const row = page.locator("#view-library .lib-server").filter({ has: page.locator(".name", { hasText: "magpie-browser" }) });
+      await page.addInitScript(() => { localStorage.setItem("myna.libTab", "mcp"); });
+      await page.goto("http://myna.test/?view=library");
+      const row = page.locator("#view-library .lib-server").filter({ has: page.locator(".name", { hasText: "myna-browser" }) });
       await row.waitFor();
       return { f, context, page, errors, row };
     };
@@ -138,7 +138,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
           await ask.locator('.lib-browserask-pick[data-agent="codex"]').click();
           await page.waitForFunction(() => document.querySelector('#view-library .lib-server .lib-agents .lib-ag[data-agent="codex"]')?.getAttribute("aria-pressed") === "true");
-          assert.deepEqual(f.posts, [{ name: "magpie-browser", agents: ["codex"] }]);
+          assert.deepEqual(f.posts, [{ name: "myna-browser", agents: ["codex"] }]);
           // asked and answered: the editor didn't open, and the row asks no more
           assert.equal(await page.locator("#modal .editor").count(), 0);
           assert.equal(await page.locator("#view-library .lib-browserask").count(), 0);

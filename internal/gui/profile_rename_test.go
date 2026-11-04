@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/profile"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/profile"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // Renaming a profile through the page's own call moves its key and keeps the

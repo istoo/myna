@@ -7,7 +7,7 @@ import (
 	"time"
 	"unicode/utf16"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/settings"
 )
 
 func TestParseProbe(t *testing.T) {
@@ -99,7 +99,7 @@ func TestProbeSkipsWindowsOwn(t *testing.T) {
 func TestLinux(t *testing.T) {
 	tool := Tool{Mount: "/mnt/"}
 	for in, want := range map[string]string{
-		`C:\Users\me\magpie\magpie.exe`: "/mnt/c/Users/me/magpie/magpie.exe",
+		`C:\Users\me\myna\myna.exe`: "/mnt/c/Users/me/myna/myna.exe",
 		`D:\`:                           "/mnt/d/",
 		`/already/linux`:                "/already/linux",
 	} {

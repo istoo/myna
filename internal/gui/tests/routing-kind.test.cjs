@@ -70,7 +70,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         }
         await browser.close();
       });
-      await page.goto("http://magpie.test/?view=routing");
+      await page.goto("http://myna.test/?view=routing");
       await page.locator(".rt-days .rt-day").nth(1).click();
       await page.locator(".rt-req").nth(kinds.length - 1).waitFor();
 
@@ -109,11 +109,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.waitForTimeout(300);
       assert.match(await story.textContent(), lang === "zh" ? /设置 › 配置 › 提示词建议/ : /Settings › Configuration › Suggested prompts/);
       // and its composer predictions where Codex turns them off and where
-      // magpie picks their model (#1970)
+      // myna picks their model (#1970)
       await page.locator(".rt-req").nth(kinds.indexOf("composer_predictions")).click();
       await page.waitForTimeout(300);
       assert.match(await story.textContent(), lang === "zh" ? /设置 › 常规 › 显示预测内容/ : /Settings › General › Show predictions/);
-      // magpie's own setting is in Codex's row on the Agents page since
+      // myna's own setting is in Codex's row on the Agents page since
       // f1e4516d, not in Settings › General (#3425, chiperman)
       assert.match(await story.textContent(), lang === "zh" ? /Agent 页 Codex 那一行的设置里/ : /under Settings in Codex's row on the Agents page/);
       assert.doesNotMatch(await story.textContent(), lang === "zh" ? /设置 › 常规 › Codex 输入框预测/ : /Settings › General › Codex composer predictions/);

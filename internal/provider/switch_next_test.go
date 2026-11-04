@@ -9,7 +9,7 @@ import (
 )
 
 // threeAccounts signs agent in to three accounts in a sandbox HOME, all on
-// in magpie, and answers them as `next` takes them: the two the agent
+// in myna, and answers them as `next` takes them: the two the agent
 // isn't on, from the one after the account it is on in their order,
 // wrapping round, then that account.
 func threeAccounts(t *testing.T, agent string) []string {
@@ -24,8 +24,8 @@ func threeAccounts(t *testing.T, agent string) []string {
 }
 
 // pickUpThree has agent sign itself in to three accounts in turn in a
-// sandbox HOME, magpie picking each up, and answers them as threeAccounts
-// does, on or off as magpie left them.
+// sandbox HOME, myna picking each up, and answers them as threeAccounts
+// does, on or off as myna left them.
 func pickUpThree(t *testing.T, agent string) []string {
 	t.Helper()
 	if agent == "codex" {
@@ -104,10 +104,10 @@ func TestNextLoginTakesTheMostRoomWhenAllArePast(t *testing.T) {
 	}
 }
 
-// `magpie accounts switch <agent> next` takes the accounts in order from
+// `myna accounts switch <agent> next` takes the accounts in order from
 // the one after the account the agent is on, wrapping round: the first
 // with room, else the one with the most room left, said to be past its
-// line. One off in magpie is taken as one on is (#4532).
+// line. One off in myna is taken as one on is (#4532).
 func TestNextInOrder(t *testing.T) {
 	for _, agent := range []string{"codex", "claude"} {
 		t.Run(agent, func(t *testing.T) {
@@ -144,7 +144,7 @@ func TestNextInOrder(t *testing.T) {
 					}
 				}
 			}
-			// none read: magpie says so rather than guess
+			// none read: myna says so rather than guess
 			LoginUsageVia(func(context.Context, string) map[string]SubscriptionQuota { return map[string]SubscriptionQuota{} })
 			if to, _, err := NextInOrder(context.Background(), agent); err == nil {
 				t.Errorf("no readings: got %q, want an error", to)
@@ -157,7 +157,7 @@ func TestNextInOrder(t *testing.T) {
 }
 
 // StringKe (#4532): an account the agent signed itself in to (Claude
-// Code's /login, codex login) starts off in magpie, and `switch next`
+// Code's /login, codex login) starts off in myna, and `switch next`
 // passed over it, or said there was no other account when every one came
 // that way. next takes the accounts the agent can be signed in to, on or
 // off, as switching by name does; a lapsed one stays out.

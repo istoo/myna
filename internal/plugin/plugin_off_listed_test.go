@@ -12,8 +12,8 @@ import (
 	"time"
 )
 
-// ChangQiu on Discord: a provider switched off in magpie long ago was
-// still asked. A plugin provider magpie has off (ListingOff) is asked
+// ChangQiu on Discord: a provider switched off in myna long ago was
+// still asked. A plugin provider myna has off (ListingOff) is asked
 // nothing by a listing, its models hook (which reaches its vendor) not
 // run, and keeps the list it told last; switched on again, it is asked.
 func TestOffPluginProviderAskedNoModels(t *testing.T) {

@@ -14,7 +14,7 @@ import (
 )
 
 // Windows draws an app's icon to the edges of its square. Made on the
-// Mac's grid, magpie's tile was 80% of it and looked a size smaller than
+// Mac's grid, myna's tile was 80% of it and looked a size smaller than
 // its neighbours in the taskbar, the tray and Start (dzxx0496). Each
 // picture the exe's icon group lists (the taskbar, the window, Start's
 // shortcut) and each size of the tray's .ico is a tile over at least

@@ -12,7 +12,7 @@ type fakeSystem struct {
 	lnk    string
 	writes int
 	paths  []string // App Paths entries written
-	before bool     // an older magpie registered itself
+	before bool     // an older myna registered itself
 }
 
 func fake(t *testing.T) (*fakeSystem, string) {
@@ -29,7 +29,7 @@ func fake(t *testing.T) (*fakeSystem, string) {
 	}
 	register = func(exe string) { f.paths = append(f.paths, exe) }
 	registered = func() bool { return f.before }
-	return f, filepath.Join(dir, "magpie", StateName)
+	return f, filepath.Join(dir, "myna", StateName)
 }
 
 func exists(p string) bool { _, err := os.Stat(p); return err == nil }
@@ -38,7 +38,7 @@ func exists(p string) bool { _, err := os.Stat(p); return err == nil }
 // and not made again once the user deleted it.
 func TestEnsureOnce(t *testing.T) {
 	f, state := fake(t)
-	exe := `C:\Tools\magpie.exe`
+	exe := `C:\Tools\myna.exe`
 
 	if err := ensure(exe, "", state); err != nil {
 		t.Fatal(err)
@@ -46,7 +46,7 @@ func TestEnsureOnce(t *testing.T) {
 	if f.writes != 1 || !exists(f.lnk) || !exists(state) {
 		t.Fatalf("first start: %d writes, shortcut %v, state %v", f.writes, exists(f.lnk), exists(state))
 	}
-	// still there: kept pointed at this magpie (write leaves a good one be)
+	// still there: kept pointed at this myna (write leaves a good one be)
 	if err := ensure(exe, "", state); err != nil {
 		t.Fatal(err)
 	}
@@ -68,13 +68,13 @@ func TestEnsureOnce(t *testing.T) {
 	}
 }
 
-// A user who deleted the shortcut under a magpie from before the state
+// A user who deleted the shortcut under a myna from before the state
 // file (it registered App Paths at every start) doesn't get it back on
 // updating; one who kept it has it kept.
-func TestEnsureAfterOlderMagpie(t *testing.T) {
+func TestEnsureAfterOlderMyna(t *testing.T) {
 	f, state := fake(t)
 	f.before = true
-	if err := ensure(`C:\Tools\magpie.exe`, "", state); err != nil {
+	if err := ensure(`C:\Tools\myna.exe`, "", state); err != nil {
 		t.Fatal(err)
 	}
 	if exists(f.lnk) || f.writes != 0 || !exists(state) {
@@ -84,7 +84,7 @@ func TestEnsureAfterOlderMagpie(t *testing.T) {
 	f, state = fake(t)
 	f.before = true
 	os.WriteFile(f.lnk, []byte("old"), 0o644)
-	if err := ensure(`C:\Tools\magpie.exe`, "", state); err != nil {
+	if err := ensure(`C:\Tools\myna.exe`, "", state); err != nil {
 		t.Fatal(err)
 	}
 	if f.writes != 1 || !exists(state) {
@@ -92,12 +92,12 @@ func TestEnsureAfterOlderMagpie(t *testing.T) {
 	}
 }
 
-// #508: a portable magpie makes no shortcut, registers nothing and keeps
+// #508: a portable myna makes no shortcut, registers nothing and keeps
 // no state.
 func TestEnsurePortable(t *testing.T) {
 	f, state := fake(t)
 	for i := 0; i < 2; i++ {
-		if err := ensure(`E:\Magpie\magpie.exe`, `E:\Magpie\data`, state); err != nil {
+		if err := ensure(`E:\Myna\myna.exe`, `E:\Myna\data`, state); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -106,11 +106,11 @@ func TestEnsurePortable(t *testing.T) {
 	}
 }
 
-// magpie uninstall takes the Start menu shortcut and the App Paths entry
+// myna uninstall takes the Start menu shortcut and the App Paths entry
 // out, for the exe in place of one an update moved aside.
 func TestRemove(t *testing.T) {
 	dir := t.TempDir()
-	lnk := filepath.Join(dir, "Magpie.lnk")
+	lnk := filepath.Join(dir, "Myna.lnk")
 	if err := os.WriteFile(lnk, []byte("x"), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -119,21 +119,21 @@ func TestRemove(t *testing.T) {
 	startMenu = func() (string, error) { return lnk, nil }
 	var asked string
 	unregister = func(exe string) error { asked = exe; return nil }
-	if err := Remove(`C:\Tools\magpie.exe.old`); err != nil {
+	if err := Remove(`C:\Tools\myna.exe.old`); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := os.Stat(lnk); !os.IsNotExist(err) {
 		t.Error("the shortcut is still there")
 	}
-	if asked != `C:\Tools\magpie.exe` {
+	if asked != `C:\Tools\myna.exe` {
 		t.Errorf("App Paths asked for %q", asked)
 	}
 	// none there, or no Start menu: nothing to say
-	if err := Remove(`C:\Tools\magpie.exe`); err != nil {
+	if err := Remove(`C:\Tools\myna.exe`); err != nil {
 		t.Fatal(err)
 	}
 	startMenu = func() (string, error) { return "", errNoStartMenu }
-	if err := Remove("/usr/local/bin/magpie"); err != nil {
+	if err := Remove("/usr/local/bin/myna"); err != nil {
 		t.Fatal(err)
 	}
 }

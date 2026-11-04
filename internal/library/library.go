@@ -1,6 +1,6 @@
 // Package library keeps what every agent should know, once: the
 // instructions each reads before a conversation, the MCP servers it can
-// call and the skills it can load. magpie writes them into each agent's own
+// call and the skills it can load. myna writes them into each agent's own
 // files in that agent's own format, and takes back only what it wrote —
 // whatever else is in those files stays as it was.
 package library
@@ -15,11 +15,11 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/myna/internal/settings"
 )
 
-// Library is library.json: what magpie keeps, and which agents get it.
+// Library is library.json: what myna keeps, and which agents get it.
 type Library struct {
 	Instructions Instructions `json:"instructions"`
 	MCP          []*Server    `json:"mcp"`
@@ -32,7 +32,7 @@ type Library struct {
 	// Subagents are agents of their own the agents ticked for each can
 	// hand a task to (subagents.go, #2283)
 	Subagents []*Subagent `json:"subagents,omitempty"`
-	// Applied is what magpie wrote into each agent, so that what it takes
+	// Applied is what myna wrote into each agent, so that what it takes
 	// away is only ever its own.
 	Applied map[string]*Applied `json:"applied,omitempty"`
 	// Away are other computers' servers by the name of one kept to this
@@ -52,11 +52,11 @@ type Library struct {
 	CopySkills bool              `json:"copySkills,omitempty"`
 	SkillHow   map[string]string `json:"skillHow,omitempty"`
 	// SharedSkills puts every skill on here in ~/.agents/skills too, as
-	// magpie's link to the library's folder, for every agent and tool
+	// myna's link to the library's folder, for every agent and tool
 	// that reads it (usrname1833, skills_shared.go). This computer's
 	// own: Collect doesn't carry it
 	SharedSkills bool `json:"sharedSkills,omitempty"`
-	// MCPHub gives each agent that can reach it magpie's one MCP server,
+	// MCPHub gives each agent that can reach it myna's one MCP server,
 	// which hands each call on to the library's servers ticked for it, in
 	// place of their own entries (#2679, mcp_hub.go)
 	MCPHub bool `json:"mcpHub,omitempty"`
@@ -75,7 +75,7 @@ type Library struct {
 	// (libHash); one taken from an agent's edit is read again
 	hashes map[string]string
 	// untouched are the agents' copies takeEdits found unchanged since
-	// magpie made them, for the sync not to look through them again
+	// myna made them, for the sync not to look through them again
 	untouched map[string]bool
 	// blockedSkills are copies takeEdits couldn't scan, kept in place for
 	// this sync rather than replaced or removed. Keys are physical paths.
@@ -91,7 +91,7 @@ type Library struct {
 type Instructions struct {
 	Agents []string `json:"agents"` // the agents the shared text is written to
 	// Sets are the named texts to pick the shared one from; with none kept
-	// there is the one magpie always had, "default"
+	// there is the one myna always had, "default"
 	Sets   []InstrSet `json:"sets,omitempty"`
 	Active string     `json:"active,omitempty"` // the set agents get; "" is "default"
 }
@@ -106,31 +106,31 @@ type InstrSet struct {
 	File string `json:"file,omitempty"`
 }
 
-// Applied is what magpie last wrote into one agent.
+// Applied is what myna last wrote into one agent.
 type Applied struct {
 	Instructions bool     `json:"instructions,omitempty"`
 	InstrHash    string   `json:"instrHash,omitempty"` // of the part last written
 	MCP          []string `json:"mcp,omitempty"`
 	Skills       []string `json:"skills,omitempty"`
-	// ToolsOff are, for each server, the tools magpie put in the list its
+	// ToolsOff are, for each server, the tools myna put in the list its
 	// entry has of those the agent leaves out; ToolRules the rules beside
-	// the servers magpie added to leave tools out (Claude Code's deny
+	// the servers myna added to leave tools out (Claude Code's deny
 	// rules, OpenCode's tools keys). Neither holds one the user had.
 	ToolsOff  map[string][]string `json:"toolsOff,omitempty"`
 	ToolRules []string            `json:"toolRules,omitempty"`
-	// Hooks are the entries magpie wrote into the agent's hooks, each
+	// Hooks are the entries myna wrote into the agent's hooks, each
 	// exactly as written: one changed since is the user's (hooks.go)
 	Hooks []HookEntry `json:"hooks,omitempty"`
-	// Subagents are the files magpie wrote for the subagents, each with
+	// Subagents are the files myna wrote for the subagents, each with
 	// the hash of what it wrote: one changed since is the user's
 	Subagents []SubagentFile `json:"subagents,omitempty"`
-	// Startup is, for each server, the startup timeout magpie wrote in its
+	// Startup is, for each server, the startup timeout myna wrote in its
 	// entry (Codex's startup_timeout_sec): one there other than this is
 	// the user's
 	Startup map[string]float64 `json:"startup,omitempty"`
 }
 
-// empty is whether a holds nothing magpie wrote: a sync that only looked
+// empty is whether a holds nothing myna wrote: a sync that only looked
 // at an agent — its hooks, its subagents, its MCP file, with nothing of
 // the library's to give it — makes no record, and a save drops the entry
 // it looked at the agent through (#4247).
@@ -173,7 +173,7 @@ func load() (*Library, error) {
 	if l.Applied == nil {
 		l.Applied = map[string]*Applied{}
 	}
-	l.heal() // magpie's own servers run this computer's magpie (self_here.go)
+	l.heal() // myna's own servers run this computer's myna (self_here.go)
 	return l, nil
 }
 
@@ -189,7 +189,7 @@ func (l *Library) save() error {
 	for _, s := range l.Subagents {
 		s.Agents = orNone(s.Agents)
 	}
-	// an entry with nothing in it is no record of what magpie wrote, and
+	// an entry with nothing in it is no record of what myna wrote, and
 	// is not kept: a sync that only looked at an agent used to leave one
 	// behind, one per agent, and the write its save brought into a file
 	// otherwise unchanged was caught red by a test of the CLI's (#4247)

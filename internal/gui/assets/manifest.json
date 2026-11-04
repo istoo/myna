@@ -1,6 +1,6 @@
 {
-  "name": "magpie",
-  "short_name": "magpie",
+  "name": "myna",
+  "short_name": "myna",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

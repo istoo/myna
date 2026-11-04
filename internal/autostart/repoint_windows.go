@@ -6,7 +6,7 @@ import (
 	"golang.org/x/sys/windows/registry"
 )
 
-// repoint rewrites the magpie Run value when it opens from. Task Manager's
+// repoint rewrites the myna Run value when it opens from. Task Manager's
 // switch for it is kept by the value's name, which stays.
 func repoint(from, to string) error {
 	k, err := openRunKey(registry.CURRENT_USER, runKey, registry.QUERY_VALUE|registry.SET_VALUE)

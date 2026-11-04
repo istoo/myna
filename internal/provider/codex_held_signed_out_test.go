@@ -17,7 +17,7 @@ import (
 // signed in to in another of its folders (C:\Users\charl\.codex-db-backup-
 // 20260803) was refused its refresh. Its row had no Sign in again, and its
 // allowance line said "run CODEX_HOME=… codex login". Now the row says
-// signed out, nothing tells the user to run a command, and magpie's own
+// signed out, nothing tells the user to run a command, and myna's own
 // sign-in writes the new tokens back to that folder, the same account.
 func TestCodexHeldInOtherFolderSignedOutThenSignedInAgain(t *testing.T) {
 	home := signIn(t)
@@ -71,7 +71,7 @@ func TestCodexHeldInOtherFolderSignedOutThenSignedInAgain(t *testing.T) {
 		t.Fatalf("the row isn't signed out, so it has no Sign in again: %q (read %q)", lapsed, q.Error)
 	}
 
-	// Sign in again: magpie's own sign-in (the callback's addLogin)
+	// Sign in again: myna's own sign-in (the callback's addLogin)
 	again, err := codexLogin(idTok, fresh, "r-again", "acct-pro")
 	if err != nil {
 		t.Fatal(err)

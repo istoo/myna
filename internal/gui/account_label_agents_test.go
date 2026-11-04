@@ -4,15 +4,15 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/filememo"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/agent"
+	"github.com/istoo/myna/internal/filememo"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // Each account's row on the Providers page is named for its agent, and
-// agent.Find built every agent magpie knows (about a hundred, each with
+// agent.Find built every agent myna knows (about a hundred, each with
 // its files looked at) again for each row: with the owner's config 58 MB
-// of the 1.4 GB a magpie allocated over 20 window polls. A request builds
+// of the 1.4 GB a myna allocated over 20 window polls. A request builds
 // them once for all its rows.
 func TestAccountLabelsBuildTheAgentsOnce(t *testing.T) {
 	home := t.TempDir()

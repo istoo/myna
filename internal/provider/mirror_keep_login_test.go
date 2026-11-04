@@ -24,7 +24,7 @@ func TestMirrorKeepsKeepLogin(t *testing.T) {
 	}
 	office := Provider{ID: "relay", Name: "Relay renamed", Chat: "https://example.com/v1", Key: "sk-here",
 		KeepLoginAs: "work@example.com", SwitchOnly: true}
-	// and whether the Codex app is restarted for magpie's own switches
+	// and whether the Codex app is restarted for myna's own switches
 	fresh := Provider{ID: "other", Name: "Other", Chat: "https://example.org/v1", Key: "sk-other",
 		KeepLogin: true, KeepLoginAs: "work@example.com"}
 	if err := Mirror([]Provider{office, fresh}, nil); err != nil {

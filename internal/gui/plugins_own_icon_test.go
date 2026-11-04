@@ -7,21 +7,21 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // #1775 (peterroe): a plugin of several providers gives each its own
-// picture in the auth hook and itself one in package.json's magpie.icon.
+// picture in the auth hook and itself one in package.json's myna.icon.
 // Settings → Plugins is told the plugin's own, checked and kept as a
 // listed plugin's is, apart from its providers'; one that gives none, or
-// a picture magpie doesn't take (plain http), is told none.
+// a picture myna doesn't take (plain http), is told none.
 func TestPluginsStateGivesThePluginsOwnIcon(t *testing.T) {
 	h := t.TempDir()
 	t.Setenv("HOME", h)
 	t.Setenv("USERPROFILE", h)
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(h, ".config"))
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(h, ".cache"))
-	t.Setenv("MAGPIE_BUN", "")
+	t.Setenv("MYNA_BUN", "")
 	t.Setenv("PATH", "")
 	const png = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
 	dir := func(name, icon string) string {

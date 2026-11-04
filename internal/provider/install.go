@@ -15,19 +15,19 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/claudecode"
-	"github.com/yetone/magpie/internal/netproxy"
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/istoo/myna/internal/claudecode"
+	"github.com/istoo/myna/internal/netproxy"
+	"github.com/istoo/myna/internal/proc"
 )
 
 // agentCLI is a CLI a subscription runs through: how to find it, and the
 // vendor's install one-liners for a POSIX shell and for PowerShell. native,
 // when there is one, does what the shell one does without a shell, for a
-// magpie with none (its Docker image had no bash, curl or wget until #2834). setup: the
+// myna with none (its Docker image had no bash, curl or wget until #2834). setup: the
 // installer ends by running the CLI's own setup, which asks how to sign in;
-// magpie signs in itself once the CLI is there. manual, when set, is how
+// myna signs in itself once the CLI is there. manual, when set, is how
 // a person installs it, told when the install fails, where a CLI with no
-// one-liner (Claude Code's, which magpie downloads itself) has native only.
+// one-liner (Claude Code's, which myna downloads itself) has native only.
 type agentCLI struct {
 	Name   string
 	find   func() string
@@ -42,9 +42,9 @@ func cliFor(agent string) (agentCLI, bool) {
 	switch agent {
 	case "claude":
 		// Kabubu01 (X): the GUI's Claude sign-in failed with "install
-		// Claude Code first … or run `magpie claude-code install`". The
+		// Claude Code first … or run `myna claude-code install`". The
 		// sign-in now downloads it as that command does: Anthropic's own
-		// build, checked against its manifest, kept in magpie's cache and
+		// build, checked against its manifest, kept in myna's cache and
 		// not put on PATH
 		return agentCLI{Name: "Claude Code", find: func() string {
 			c, ok := findClaudeCLI()
@@ -52,7 +52,7 @@ func cliFor(agent string) (agentCLI, bool) {
 				return "wsl:" + c.wsl.Distro
 			}
 			return c.path
-		}, native: downloadClaudeCode, manual: "magpie claude-code install"}, true
+		}, native: downloadClaudeCode, manual: "myna claude-code install"}, true
 	case "devin":
 		return agentCLI{Name: "Devin CLI", find: func() string { return DevinExecutable() },
 			sh:    "curl -fsSL https://cli.devin.ai/install.sh | bash",
@@ -118,7 +118,7 @@ var installerTail = 5 * time.Second
 // Windows, and ends it, with what it started, installerTail after the CLI
 // is in place. Devin's runs `devin setup`, whose menu asking how to sign in
 // waits for a key on the console, and no one can answer the console an
-// installer gets from magpie (it has no window, and magpie keeps its
+// installer gets from myna (it has no window, and myna keeps its
 // output): the sign-in waited out installTimeout, then went on with
 // `devin setup` still running.
 func runUntilInstalled(ctx context.Context, cmd *exec.Cmd, c agentCLI) ([]byte, error) {
@@ -161,7 +161,7 @@ func runUntilInstalled(ctx context.Context, cmd *exec.Cmd, c agentCLI) ([]byte, 
 	return out.Bytes(), err
 }
 
-// downloadClaudeCode downloads the newest Claude Code into magpie's cache
+// downloadClaudeCode downloads the newest Claude Code into myna's cache
 // (claudecode.Install), where claudecode.Find, and so the sign-in, finds
 // it; a var so tests never reach the network.
 var downloadClaudeCode = func(ctx context.Context) error {
@@ -175,7 +175,7 @@ var downloadClaudeCode = func(ctx context.Context) error {
 
 // shellInstallerRuns is whether a vendor's `curl … | bash` can run here:
 // bash, and curl, which every one-liner (and the scripts behind them)
-// downloads with. magpie's Docker image had none of them, and the install
+// downloads with. myna's Docker image had none of them, and the install
 // failed there with "exec: bash: not found". Since 7bfe3137 it has bash and
 // busybox's wget but still no curl, and the one-liner failed there too.
 // Since #2834 it is Debian with bash and curl, and the CLIs the one-liners
@@ -190,7 +190,7 @@ var shellInstallerRuns = func() bool {
 	return true
 }
 
-// installCLI installs c with its vendor's installer and makes sure magpie
+// installCLI installs c with its vendor's installer and makes sure myna
 // finds it afterwards.
 func installCLI(ctx context.Context, c agentCLI) error {
 	ctx, cancel := context.WithTimeout(ctx, installTimeout)
@@ -222,7 +222,7 @@ func installCLI(ctx context.Context, c agentCLI) error {
 		}
 		return errorf("installing %s failed (%s); install it yourself with `%s`, then sign in again", c.Name, msg, manual)
 	}
-	return errorf("the %s installer finished, but magpie can't find it; install it yourself with `%s`, then sign in again", c.Name, manual)
+	return errorf("the %s installer finished, but myna can't find it; install it yourself with `%s`, then sign in again", c.Name, manual)
 }
 
 // lastLine is the last line of a command's output with something on it,

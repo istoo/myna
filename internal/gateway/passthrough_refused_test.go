@@ -10,12 +10,12 @@ import (
 	"testing"
 
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // passthroughRefusalBody is the ChatGPT backend's 400 in xuanwo's
 // screenshot (on X), the message as it reached the Codex app after
-// magpie's "Codex: ".
+// myna's "Codex: ".
 const passthroughRefusalBody = `{"error":{"code":null,"message":"[ObjectParam] [input[2].internal_chat_message_metadata_passthrough.content_token_count] [unknown_parameter] Unknown parameter: 'input[2].internal_chat_message_metadata_passthrough.content_token_count'.","param":null,"type":"invalid_request_error"}}`
 
 // passthroughTurn is a Codex turn whose items carry the passthrough with

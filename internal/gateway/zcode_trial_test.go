@@ -7,7 +7,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // The ZCode plugin's refusals of a Start Plan trial entry, as it writes them

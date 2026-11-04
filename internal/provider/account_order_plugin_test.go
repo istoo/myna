@@ -7,17 +7,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // A plugin provider's accounts are arranged like a built-in's: the page
-// names them by the provider's id, magpie keeps them as plugin:<id>, and
+// names them by the provider's id, myna keeps them as plugin:<id>, and
 // the gateway tries them in the order dragged.
 func TestAccountOrderPluginAccounts(t *testing.T) {
 	bun := testenv.Bun(t)
 	claudeHome(t)
-	t.Setenv("MAGPIE_BUN", bun)
+	t.Setenv("MYNA_BUN", bun)
 	t.Cleanup(plugin.Settle)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()

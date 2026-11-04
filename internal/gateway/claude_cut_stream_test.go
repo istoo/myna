@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // cutStart is the start of the reporter's first attempt (#726): the whole
@@ -146,8 +146,8 @@ func TestClaudeCutStreamUnstreamedToolCalls(t *testing.T) {
 	t.Cleanup(func() { unstreamedQuiet = was })
 	lines := append(append(append([]string{}, cutAttempt...), cutAttempt...),
 		`{"type":"assistant","message":{"id":"msg_whole","model":"claude-opus-5-5","content":[{"type":"text","text":"calling"}],"stop_reason":"tool_use","usage":{"output_tokens":777}}}`,
-		`{"type":"assistant","message":{"id":"msg_whole","model":"claude-opus-5-5","content":[{"type":"tool_use","id":"toolu_a","name":"mcp__magpie__Read","input":{"p":1}}],"stop_reason":"tool_use","usage":{"output_tokens":777}}}`,
-		`{"type":"assistant","message":{"id":"msg_whole","model":"claude-opus-5-5","content":[{"type":"tool_use","id":"toolu_b","name":"mcp__magpie__Read","input":{"p":2}}],"stop_reason":"tool_use","usage":{"output_tokens":777}}}`,
+		`{"type":"assistant","message":{"id":"msg_whole","model":"claude-opus-5-5","content":[{"type":"tool_use","id":"toolu_a","name":"mcp__myna__Read","input":{"p":1}}],"stop_reason":"tool_use","usage":{"output_tokens":777}}}`,
+		`{"type":"assistant","message":{"id":"msg_whole","model":"claude-opus-5-5","content":[{"type":"tool_use","id":"toolu_b","name":"mcp__myna__Read","input":{"p":2}}],"stop_reason":"tool_use","usage":{"output_tokens":777}}}`,
 	)
 	run := &subscriptionRun{}
 	text, stop, _, _, raw, ended, _ := claudeReply(t, run, lines, true)

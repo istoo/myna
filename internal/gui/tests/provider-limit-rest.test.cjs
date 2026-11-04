@@ -1,6 +1,6 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // zoecats (Discord #feedback, 10-25): a local aggregator answers "quota
-// exhausted" for the moment it switches upstreams, and magpie set its key
+// exhausted" for the moment it switches upstreams, and myna set its key
 // aside for half an hour. A provider the user added has, under Advanced,
 // "Set it aside when out of quota or rate limited", ticked by default and
 // with a note. Unticked and saved, it posts limitRestOff: true; one saved
@@ -81,7 +81,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         const posts = [];
         await page.route("**/*", serve(lang, posts));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://myna.test/?view=providers");
         const w = await page.evaluate(([lang, ks]) => Object.fromEntries(ks.map((k) => [k, (I18N[lang] || {})[k] || k])), [lang, [...strings, "Save"]]);
         await page.locator(".row.provider", { hasText: name }).click();
         await page.locator(".editor .bar").waitFor();

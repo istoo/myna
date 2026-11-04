@@ -51,8 +51,8 @@
     box.replaceChildren(el("span", "pm-mlabel", t("npm registry")));
     if (!editing) {
       box.append(el("code", "pm-reg-url", r.url), el("span", "pm-reg-from", from(r)), el("span", "grow"),
-        button(t("Change"), "text", () => { editing = true; draft = r.from === "magpie" ? r.url : ""; draw(); }));
-      if (r.from === "magpie") {
+        button(t("Change"), "text", () => { editing = true; draft = r.from === "myna" ? r.url : ""; draw(); }));
+      if (r.from === "myna") {
         const def = button(t("Use default"), "text", () => set(""));
         def.title = t("Use the registry your .npmrc, .bunfig.toml or shell names, or npm's own");
         box.append(def);

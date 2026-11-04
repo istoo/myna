@@ -5,7 +5,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // CleanAccounts is a key's account list as kept (#905): each entry

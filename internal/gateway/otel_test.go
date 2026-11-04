@@ -14,11 +14,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/otlp"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/sessions"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/istoo/myna/internal/access"
+	"github.com/istoo/myna/internal/otlp"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/myna/internal/usage"
 )
 
 // fastOTel has the exporter read the agents' transcripts and send what it
@@ -87,11 +87,11 @@ func TestOTelSessionDedupOnlyUnkeyedLoopback(t *testing.T) {
 		io.WriteString(w, `{}`)
 	}))
 	defer collector.Close()
-	t.Setenv("MAGPIE_OTEL_ENABLED", "true")
-	t.Setenv("MAGPIE_OTEL_ENDPOINT", collector.URL)
-	t.Setenv("MAGPIE_OTEL_HEADERS", "")
-	t.Setenv("MAGPIE_OTEL_METRICS", "false")
-	t.Setenv("MAGPIE_OTEL_SESSIONS", "true")
+	t.Setenv("MYNA_OTEL_ENABLED", "true")
+	t.Setenv("MYNA_OTEL_ENDPOINT", collector.URL)
+	t.Setenv("MYNA_OTEL_HEADERS", "")
+	t.Setenv("MYNA_OTEL_METRICS", "false")
+	t.Setenv("MYNA_OTEL_SESSIONS", "true")
 	fastOTel(t)
 	stop := startOTel()
 	t.Cleanup(stop)
@@ -162,8 +162,8 @@ func TestOTelSessionDedupOnlyUnkeyedLoopback(t *testing.T) {
 		{"Docker Desktop unseen session", "127.0.0.1:1234", "", "docker-session", "", "", false},
 		{"visible native overrides routing", "127.0.0.1:1234", "", "session", "routing", "", true},
 		{"unseen native overrides visible routing", "127.0.0.1:1234", "", "wsl-session", "session", "", false},
-		{"visible Magpie session only", "127.0.0.1:1234", "", "", "session", "", true},
-		{"unseen Magpie session only", "127.0.0.1:1234", "", "", "wsl-session", "", false},
+		{"visible Myna session only", "127.0.0.1:1234", "", "", "session", "", true},
+		{"unseen Myna session only", "127.0.0.1:1234", "", "", "wsl-session", "", false},
 		{"keyed visible session", "127.0.0.1:1234", "key", "session", "", "", false},
 		{"title helper shares session", "127.0.0.1:1234", "", "session", "", "thread_title", false},
 	}
@@ -254,11 +254,11 @@ func TestOTelFastRequestTranscriptDiscovery(t *testing.T) {
 				io.WriteString(w, `{}`)
 			}))
 			defer collector.Close()
-			t.Setenv("MAGPIE_OTEL_ENABLED", "true")
-			t.Setenv("MAGPIE_OTEL_ENDPOINT", collector.URL)
-			t.Setenv("MAGPIE_OTEL_HEADERS", "")
-			t.Setenv("MAGPIE_OTEL_SESSIONS", "true")
-			t.Setenv("MAGPIE_OTEL_METRICS", "false")
+			t.Setenv("MYNA_OTEL_ENABLED", "true")
+			t.Setenv("MYNA_OTEL_ENDPOINT", collector.URL)
+			t.Setenv("MYNA_OTEL_HEADERS", "")
+			t.Setenv("MYNA_OTEL_SESSIONS", "true")
+			t.Setenv("MYNA_OTEL_METRICS", "false")
 			fastOTel(t)
 			// The request's cached miss must outlast the request however slow
 			// the machine is (#1811): neither the transcript watcher's poll nor
@@ -305,10 +305,10 @@ func TestOTelExportsGatewayUsageWithoutContent(t *testing.T) {
 		io.WriteString(w, `{}`)
 	}))
 	defer collector.Close()
-	t.Setenv("MAGPIE_OTEL_ENABLED", "true")
-	t.Setenv("MAGPIE_OTEL_ENDPOINT", collector.URL)
-	t.Setenv("MAGPIE_OTEL_HEADERS", "")
-	t.Setenv("MAGPIE_OTEL_METRICS", "false")
+	t.Setenv("MYNA_OTEL_ENABLED", "true")
+	t.Setenv("MYNA_OTEL_ENDPOINT", collector.URL)
+	t.Setenv("MYNA_OTEL_HEADERS", "")
+	t.Setenv("MYNA_OTEL_METRICS", "false")
 	fastOTel(t)
 	stop := startOTel()
 	t.Cleanup(stop)
@@ -319,7 +319,7 @@ func TestOTelExportsGatewayUsageWithoutContent(t *testing.T) {
 	stop()
 	select {
 	case exported := <-received:
-		if strings.Contains(exported, "PRIVATE-") || !strings.Contains(exported, `"magpie.route.id"`) || !strings.Contains(exported, `"intValue":"10"`) {
+		if strings.Contains(exported, "PRIVATE-") || !strings.Contains(exported, `"myna.route.id"`) || !strings.Contains(exported, `"intValue":"10"`) {
 			t.Fatalf("export: %s", exported)
 		}
 	case <-time.After(time.Second):
@@ -351,11 +351,11 @@ func TestOTelExportsBodiesWhenOn(t *testing.T) {
 				io.WriteString(w, `{}`)
 			}))
 			defer collector.Close()
-			t.Setenv("MAGPIE_OTEL_ENABLED", "true")
-			t.Setenv("MAGPIE_OTEL_ENDPOINT", collector.URL)
-			t.Setenv("MAGPIE_OTEL_HEADERS", "")
-			t.Setenv("MAGPIE_OTEL_METRICS", "false")
-			t.Setenv("MAGPIE_OTEL_BODIES", c.bodies)
+			t.Setenv("MYNA_OTEL_ENABLED", "true")
+			t.Setenv("MYNA_OTEL_ENDPOINT", collector.URL)
+			t.Setenv("MYNA_OTEL_HEADERS", "")
+			t.Setenv("MYNA_OTEL_METRICS", "false")
+			t.Setenv("MYNA_OTEL_BODIES", c.bodies)
 			fastOTel(t)
 			stop := startOTel()
 			t.Cleanup(stop)
@@ -425,11 +425,11 @@ func TestOTelWaterfallIncludesUnbilledFallback(t *testing.T) {
 		io.WriteString(w, `{}`)
 	}))
 	defer collector.Close()
-	t.Setenv("MAGPIE_OTEL_ENABLED", "true")
-	t.Setenv("MAGPIE_OTEL_ENDPOINT", collector.URL)
-	t.Setenv("MAGPIE_OTEL_HEADERS", "")
-	t.Setenv("MAGPIE_OTEL_METRICS", "true")
-	t.Setenv("MAGPIE_OTEL_BODIES", "false")
+	t.Setenv("MYNA_OTEL_ENABLED", "true")
+	t.Setenv("MYNA_OTEL_ENDPOINT", collector.URL)
+	t.Setenv("MYNA_OTEL_HEADERS", "")
+	t.Setenv("MYNA_OTEL_METRICS", "true")
+	t.Setenv("MYNA_OTEL_BODIES", "false")
 	fastOTel(t)
 	stop := startOTel()
 	t.Cleanup(stop)
@@ -528,11 +528,11 @@ func TestOTelWaterfallFailureAndCancellation(t *testing.T) {
 				io.WriteString(w, `{}`)
 			}))
 			defer collector.Close()
-			t.Setenv("MAGPIE_OTEL_ENABLED", "true")
-			t.Setenv("MAGPIE_OTEL_ENDPOINT", collector.URL)
-			t.Setenv("MAGPIE_OTEL_HEADERS", "")
-			t.Setenv("MAGPIE_OTEL_METRICS", "false")
-			t.Setenv("MAGPIE_OTEL_BODIES", "false")
+			t.Setenv("MYNA_OTEL_ENABLED", "true")
+			t.Setenv("MYNA_OTEL_ENDPOINT", collector.URL)
+			t.Setenv("MYNA_OTEL_HEADERS", "")
+			t.Setenv("MYNA_OTEL_METRICS", "false")
+			t.Setenv("MYNA_OTEL_BODIES", "false")
 			fastOTel(t)
 			stop := startOTel()
 			t.Cleanup(stop)
@@ -586,12 +586,12 @@ func TestOTelExportsWholeBodiesWhenOn(t *testing.T) {
 				io.WriteString(w, `{}`)
 			}))
 			defer collector.Close()
-			t.Setenv("MAGPIE_OTEL_ENABLED", "true")
-			t.Setenv("MAGPIE_OTEL_ENDPOINT", collector.URL)
-			t.Setenv("MAGPIE_OTEL_HEADERS", "")
-			t.Setenv("MAGPIE_OTEL_METRICS", "false")
-			t.Setenv("MAGPIE_OTEL_BODIES", "true")
-			t.Setenv("MAGPIE_OTEL_BODIES_WHOLE", fmt.Sprintf("%t", c.whole))
+			t.Setenv("MYNA_OTEL_ENABLED", "true")
+			t.Setenv("MYNA_OTEL_ENDPOINT", collector.URL)
+			t.Setenv("MYNA_OTEL_HEADERS", "")
+			t.Setenv("MYNA_OTEL_METRICS", "false")
+			t.Setenv("MYNA_OTEL_BODIES", "true")
+			t.Setenv("MYNA_OTEL_BODIES_WHOLE", fmt.Sprintf("%t", c.whole))
 			fastOTel(t)
 			stop := startOTel()
 			t.Cleanup(stop)
@@ -675,12 +675,12 @@ func TestOTelWholeWaterfallFallback(t *testing.T) {
 		io.WriteString(w, `{}`)
 	}))
 	defer collector.Close()
-	t.Setenv("MAGPIE_OTEL_ENABLED", "true")
-	t.Setenv("MAGPIE_OTEL_ENDPOINT", collector.URL)
-	t.Setenv("MAGPIE_OTEL_HEADERS", "")
-	t.Setenv("MAGPIE_OTEL_METRICS", "false")
-	t.Setenv("MAGPIE_OTEL_BODIES", "true")
-	t.Setenv("MAGPIE_OTEL_BODIES_WHOLE", "true")
+	t.Setenv("MYNA_OTEL_ENABLED", "true")
+	t.Setenv("MYNA_OTEL_ENDPOINT", collector.URL)
+	t.Setenv("MYNA_OTEL_HEADERS", "")
+	t.Setenv("MYNA_OTEL_METRICS", "false")
+	t.Setenv("MYNA_OTEL_BODIES", "true")
+	t.Setenv("MYNA_OTEL_BODIES_WHOLE", "true")
 	fastOTel(t)
 	stop := startOTel()
 	t.Cleanup(stop)
@@ -780,12 +780,12 @@ func TestOTelClaudeMainAndChildDedupRetainsHelper(t *testing.T) {
 				io.WriteString(w, `{}`)
 			}))
 			defer collector.Close()
-			t.Setenv("MAGPIE_OTEL_ENABLED", "true")
-			t.Setenv("MAGPIE_OTEL_ENDPOINT", collector.URL)
-			t.Setenv("MAGPIE_OTEL_HEADERS", "")
-			t.Setenv("MAGPIE_OTEL_SESSIONS", "true")
-			t.Setenv("MAGPIE_OTEL_METRICS", "false")
-			t.Setenv("MAGPIE_OTEL_BODIES", "false")
+			t.Setenv("MYNA_OTEL_ENABLED", "true")
+			t.Setenv("MYNA_OTEL_ENDPOINT", collector.URL)
+			t.Setenv("MYNA_OTEL_HEADERS", "")
+			t.Setenv("MYNA_OTEL_SESSIONS", "true")
+			t.Setenv("MYNA_OTEL_METRICS", "false")
+			t.Setenv("MYNA_OTEL_BODIES", "false")
 			fastOTel(t)
 			stop := startOTel()
 			t.Cleanup(stop)

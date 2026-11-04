@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // optionsHome is a sandbox HOME with the Cursor plugin added, holding a
@@ -22,8 +22,8 @@ func optionsHome(t *testing.T, opts string) {
 	t.Setenv("USERPROFILE", home)
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(home, ".cache"))
-	t.Setenv("MAGPIE_BUN", "")
-	dir := filepath.Join(home, ".config", "magpie")
+	t.Setenv("MYNA_BUN", "")
+	dir := filepath.Join(home, ".config", "myna")
 	if err := os.MkdirAll(dir, 0o700); err != nil {
 		t.Fatal(err)
 	}
@@ -46,7 +46,7 @@ func entryOptions(t *testing.T) map[string]any {
 	return nil
 }
 
-// plugins#550: `magpie plugin options cursor '{"wire_trace": true}'` wrote
+// plugins#550: `myna plugin options cursor '{"wire_trace": true}'` wrote
 // plugins.json, which the Cursor provider never reads; its switches are
 // settings' PluginOptions, as the editor's Plugin options saves them.
 func TestPluginOptionsSetsDeclaredSwitch(t *testing.T) {

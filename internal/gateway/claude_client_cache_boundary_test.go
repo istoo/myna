@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // classifierBody is the shape of Claude Desktop's auto mode classifier
@@ -182,7 +182,7 @@ func TestClaudeClientCacheClassifierWithoutHeader(t *testing.T) {
 }
 
 // A classifier whose marks the bridge can't keep (a 1h mark after a 5m
-// one, which Anthropic refuses) never asked for them through magpie's
+// one, which Anthropic refuses) never asked for them through myna's
 // header, so it is served the default way, as before #3835, not refused.
 func TestClaudeClientCacheClassifierBadMarksServedAsBefore(t *testing.T) {
 	body := classifierBody(t, false)

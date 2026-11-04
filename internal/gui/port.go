@@ -8,10 +8,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/proc"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/agent"
+	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // portJSON is what setting the gateway's port did: the port it is on, the
@@ -32,13 +32,13 @@ var portFree = func(addr string) error {
 	return ln.Close()
 }
 
-// magpieOnPort says whether a magpie program of this user's listens on
+// mynaOnPort says whether a myna program of this user's listens on
 // port: the one serving the gateway is then this computer's, whose port is
 // set there. Not when the program listening is another one answering for
-// a magpie inside a container (OrbStack Helper, docker-proxy) or none this
+// a myna inside a container (OrbStack Helper, docker-proxy) or none this
 // user can see; when the processes can't be listed at all, it is taken to
 // be one.
-func magpieOnPort(port string) bool {
+func mynaOnPort(port string) bool {
 	n, _ := strconv.Atoi(port)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -50,7 +50,7 @@ func magpieOnPort(port string) bool {
 		if pid == os.Getpid() {
 			continue
 		}
-		if path, err := proc.Executable(pid); err == nil && proc.IsMagpie(path) {
+		if path, err := proc.Executable(pid); err == nil && proc.IsMyna(path) {
 			return true
 		}
 	}
@@ -65,19 +65,19 @@ func errPortTaken(p int) error {
 // setPort moves the gateway to port p (0 for the default) — the port in
 // Settings' Gateway address (Magic_zero on Discord: 3425 was taken, and a port of one's
 // own is easier to tell apart): it checks nothing listens there, saves it,
-// moves the gateway this magpie serves (or starts it, when the port it was
-// on was taken), and then every agent connected to magpie, whose configs
-// have the gateway's URL in them. A magpie of this computer's serving the
+// moves the gateway this myna serves (or starts it, when the port it was
+// on was taken), and then every agent connected to myna, whose configs
+// have the gateway's URL in them. A myna of this computer's serving the
 // gateway has it moved there; one out of this one's reach — in a container
-// (leslie_luo on Discord: an old magpie in OrbStack held 3425, so the port
+// (leslie_luo on Discord: an old myna in OrbStack held 3425, so the port
 // could be changed neither there nor here), another user's — is left on
 // its port, and this one serves on the new one.
 func setPort(p int) (portJSON, error) {
 	if err := settings.CheckPort(p); err != nil {
 		return portJSON{}, err
 	}
-	if a := os.Getenv("MAGPIE_ADDR"); a != "" {
-		return portJSON{}, fmt.Errorf("MAGPIE_ADDR=%s sets the gateway's address, which comes before Settings: unset it to set the port here", a)
+	if a := os.Getenv("MYNA_ADDR"); a != "" {
+		return portJSON{}, fmt.Errorf("MYNA_ADDR=%s sets the gateway's address, which comes before Settings: unset it to set the port here", a)
 	}
 	want := p
 	if want == 0 {
@@ -95,8 +95,8 @@ func setPort(p int) (portJSON, error) {
 		return portJSON{Port: want}, nil
 	}
 	gw := served.Load()
-	if gw == nil && gateway.Running() && magpieOnPort(gateway.Port()) {
-		return portJSON{}, fmt.Errorf("another magpie serves the gateway at %s: set its port there, or quit it first", gateway.URL())
+	if gw == nil && gateway.Running() && mynaOnPort(gateway.Port()) {
+		return portJSON{}, fmt.Errorf("another myna serves the gateway at %s: set its port there, or quit it first", gateway.URL())
 	}
 	host := "127.0.0.1"
 	if cur.LAN {

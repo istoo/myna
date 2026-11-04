@@ -138,7 +138,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, data));
-        await page.goto("http://magpie.test/?view=usage");
+        await page.goto("http://myna.test/?view=usage");
         await page.locator("#subscriptionUsage > .subscription-card[data-key]").first().waitFor();
         await settle(page);
         return page;

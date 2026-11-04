@@ -64,7 +64,7 @@ for (const run of runs.filter((r) => !process.env.BROWSER || r.engine === proces
           p.setDefaultNavigationTimeout(60000);
           p.on("pageerror", (e) => errors.push(e.message));
           await p.route("**/*", server(lang, []));
-          await p.goto("http://magpie.test/");
+          await p.goto("http://myna.test/");
           await p.locator('[data-view="usage"]').first().click();
           await p.locator(":is(#usageTab .opt, .nav-s):visible").nth(1).click();
           await p.locator("#ledWrap .led tbody tr").first().waitFor();

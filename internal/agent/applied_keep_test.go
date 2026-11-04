@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-// applied.json holds what magpie last set on every agent. A file that
+// applied.json holds what myna last set on every agent. A file that
 // doesn't parse is read as no record, and the next record writes that
 // over it: every other agent's record is copied aside first.
 func TestUnreadAppliedKeptAside(t *testing.T) {
@@ -17,11 +17,11 @@ func TestUnreadAppliedKeptAside(t *testing.T) {
 	if err := os.MkdirAll(filepath.Dir(p), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	half := `{"claude":{"at":"2026-10-01T00:00:00Z","fields":{"model":"magpie/opus"}},"codex":{"at":"2026-10-01T00:00:00Z","fields":{"model":"magpie/gpt"}}`
+	half := `{"claude":{"at":"2026-10-01T00:00:00Z","fields":{"model":"myna/opus"}},"codex":{"at":"2026-10-01T00:00:00Z","fields":{"model":"myna/gpt"}}`
 	if err := os.WriteFile(p, []byte(half), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	record("pi", "model", "magpie/pi-model")
+	record("pi", "model", "myna/pi-model")
 	kept := keptAside(t, p)
 	if string(kept) != half {
 		t.Fatalf("the file kept aside isn't the one that was there: %s", kept)
@@ -30,16 +30,16 @@ func TestUnreadAppliedKeptAside(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(live), `"magpie/pi-model"`) {
+	if !strings.Contains(string(live), `"myna/pi-model"`) {
 		t.Fatalf("applied.json after the record: %s", live)
 	}
 
 	// a file that parses is written over as before, nothing more kept
-	good := `{"claude":{"at":"2026-10-01T00:00:00Z","fields":{"model":"magpie/opus"}}}`
+	good := `{"claude":{"at":"2026-10-01T00:00:00Z","fields":{"model":"myna/opus"}}}`
 	if err := os.WriteFile(p, []byte(good), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	record("pi", "model", "magpie/pi-model")
+	record("pi", "model", "myna/pi-model")
 	if more, _ := filepath.Glob(p + ".bad-*"); len(more) != 1 {
 		t.Fatalf("kept aside after a good write: %v", more)
 	}
@@ -47,13 +47,13 @@ func TestUnreadAppliedKeptAside(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(live), `"magpie/opus"`) || !strings.Contains(string(live), `"magpie/pi-model"`) {
+	if !strings.Contains(string(live), `"myna/opus"`) || !strings.Contains(string(live), `"myna/pi-model"`) {
 		t.Fatalf("applied.json after a good record: %s", live)
 	}
 }
 
 // JSON that isn't the record map (an array, as a hand edit or another
-// program might leave) is not a record of what magpie set either.
+// program might leave) is not a record of what myna set either.
 func TestUnreadAppliedArrayKeptAside(t *testing.T) {
 	stashHome(t)
 	p := appliedPath()
@@ -64,7 +64,7 @@ func TestUnreadAppliedArrayKeptAside(t *testing.T) {
 	if err := os.WriteFile(p, arr, 0o600); err != nil {
 		t.Fatal(err)
 	}
-	record("pi", "model", "magpie/pi-model")
+	record("pi", "model", "myna/pi-model")
 	if kept := keptAside(t, p); string(kept) != string(arr) {
 		t.Fatalf("the file kept aside isn't the one that was there: %s", kept)
 	}
@@ -81,7 +81,7 @@ func TestUnreadAppliedNotWrittenWhenItCantBeKept(t *testing.T) {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	half := `{"claude":{"at":"2026-10-01T00:00:00Z","fields":{"model":"magpie/opus"}}`
+	half := `{"claude":{"at":"2026-10-01T00:00:00Z","fields":{"model":"myna/opus"}}`
 	if err := os.WriteFile(p, []byte(half), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -93,7 +93,7 @@ func TestUnreadAppliedNotWrittenWhenItCantBeKept(t *testing.T) {
 		f.Close()
 		t.Skip("the filesystem does not enforce the read-only folder")
 	}
-	record("pi", "model", "magpie/pi-model")
+	record("pi", "model", "myna/pi-model")
 	live, err := os.ReadFile(p)
 	if err != nil {
 		t.Fatal(err)
@@ -111,7 +111,7 @@ func TestUnreadWSLConfigKeptAside(t *testing.T) {
 	if err := os.MkdirAll(filepath.Dir(p), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	half := `{"Ubuntu":{"name":"Ubuntu","home":"/home/me","probe":2,"values":{"claude.model":"magpie/opus"}}`
+	half := `{"Ubuntu":{"name":"Ubuntu","home":"/home/me","probe":2,"values":{"claude.model":"myna/opus"}}`
 	if err := os.WriteFile(p, []byte(half), 0o600); err != nil {
 		t.Fatal(err)
 	}

@@ -11,9 +11,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // Devin's own ids models.dev doesn't know (swe-2, gpt-6-1-sol) take images,

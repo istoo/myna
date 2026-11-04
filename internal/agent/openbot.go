@@ -9,36 +9,36 @@ package agent
 // on Linux (src/main/index.ts, application-services.ts; v0.58.0). The file
 // (custom-provider-store.ts, its zod fileSchema):
 //
-//	{"version":1,"providers":[{"id":"magpie","name":"magpie",
+//	{"version":1,"providers":[{"id":"myna","name":"myna",
 //	  "baseUrl":"http://127.0.0.1:3425/v1",
 //	  "models":[{"id":"<model>","name":"<name>","contextWindow":<n>},…],
 //	  "secret":null}]}
 //
 // version must be 1: a file OpenBot can't parse leaves it with no endpoints
-// and refuses every save, so magpie leaves alone a file it can't read the
+// and refuses every save, so myna leaves alone a file it can't read the
 // same way. An entry's key and headers are one ciphertext, secret, sealed
-// with Electron's safeStorage (the Keychain, DPAPI), which magpie doesn't
-// open, so magpie's entry has none: OpenBot hands it to OpenCode keyless
+// with Electron's safeStorage (the Keychain, DPAPI), which myna doesn't
+// open, so myna's entry has none: OpenBot hands it to OpenCode keyless
 // (opencode-config.ts, providerEntry), and the gateway takes a request with
 // no key from this computer. OpenCode sends it, so its requests count as
-// OpenCode's. A secret the user gave magpie's entry in OpenBot stays.
+// OpenCode's. A secret the user gave myna's entry in OpenBot stays.
 //
 // OpenBot's list decoders fail closed: one entry or model it wouldn't accept
 // empties the whole list. So the models are the ones picked for it, at most
 // 64 (CUSTOM_PROVIDER_LIMITS.models), each with an id OpenBot takes as
-// magpie/<id> (isAgentModel: ASCII letters, digits and ._:/[],=-, at most
+// myna/<id> (isAgentModel: ASCII letters, digits and ._:/[],=-, at most
 // 160), and a context window only inside its 1,024 to 100,000,000.
 //
 // OpenBot reads the file once, when it starts, and writes it whole from
 // what it holds only when an endpoint is saved, edited or removed there.
 // So a change shows after a restart, and an endpoint saved in OpenBot
-// before that writes magpie's entry out again: the notice says both. The
-// model is picked in OpenBot's own picker, so what magpie sets is whether
+// before that writes myna's entry out again: the notice says both. The
+// model is picked in OpenBot's own picker, so what myna sets is whether
 // its models are in it. The user's other entries stay as written, and so
-// do the name and harness they give magpie's.
+// do the name and harness they give myna's.
 //
 // MCP servers live in OpenBot's SQLite database (McpServerStore), which
-// magpie doesn't write; magpie's own (/mcp/magpie/…) are added there by
+// myna doesn't write; myna's own (/mcp/myna/…) are added there by
 // hand as HTTP servers.
 
 import (
@@ -52,9 +52,9 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/istoo/myna/internal/appdir"
+	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/myna/internal/gateway"
 )
 
 // openBotFile is the file of OpenBot's custom endpoints in its userData.
@@ -68,7 +68,7 @@ var openBotApp = desktopApp{id: "app.openbot.desktop", names: []string{"OpenBot.
 // (CUSTOM_PROVIDER_LIMITS.models); a list longer than that hides them all.
 const openBotMaxModels = 64
 
-// openBotModelID is a model id OpenBot lists as magpie/<id>
+// openBotModelID is a model id OpenBot lists as myna/<id>
 // (isAgentModel, ipc-agent-identity.ts).
 var openBotModelID = regexp.MustCompile(`^[A-Za-z0-9._:/\[\],=-]+$`)
 
@@ -76,7 +76,7 @@ var openBotModelID = regexp.MustCompile(`^[A-Za-z0-9._:/\[\],=-]+$`)
 // AppImage's openbot.
 var openBotProc = []string{`(^|/)(OpenBot|openbot)( |$)`}
 
-var noticeOpenBot = newNotice("OpenBot reads its custom endpoints at start-up — restart OpenBot to see magpie's models in its model picker, before adding or editing an endpoint there.")
+var noticeOpenBot = newNotice("OpenBot reads its custom endpoints at start-up — restart OpenBot to see myna's models in its model picker, before adding or editing an endpoint there.")
 
 func openBot(home, cfg string) *Agent {
 	dir := openBotDir(home, cfg)
@@ -112,13 +112,13 @@ func openBot(home, cfg string) *Agent {
 			Key: "provider", Label: "provider",
 			Get: func() string {
 				if openBotWired(path) {
-					return magpieID
+					return mynaID
 				}
 				return ""
 			},
 			Set: func(v string) error { return write(v != "") },
 			Options: func(map[string]string) []Option {
-				return []Option{{Value: magpieID, Label: "magpie", Icon: "magpie", Note: "every magpie model in OpenBot's model picker"}}
+				return []Option{{Value: mynaID, Label: "myna", Icon: "myna", Note: "every myna model in OpenBot's model picker"}}
 			},
 		}},
 	}, path)
@@ -187,13 +187,13 @@ type openBotProvider struct {
 	Harness string          `json:"harness,omitempty"`
 }
 
-// openBotEntry is magpie's entry for a gateway at gw: its Chat Completions,
+// openBotEntry is myna's entry for a gateway at gw: its Chat Completions,
 // no key, and the models picked for it that OpenBot would list, at most 64.
 func openBotEntry(gw string) openBotProvider {
 	ms := []openBotModel{}
 	seen := map[string]bool{}
 	for _, m := range sharedModels("openbot") {
-		if m.ID == "" || seen[m.ID] || len(m.ID) > 128 || len(magpieID)+1+len(m.ID) > 160 || !openBotModelID.MatchString(m.ID) {
+		if m.ID == "" || seen[m.ID] || len(m.ID) > 128 || len(mynaID)+1+len(m.ID) > 160 || !openBotModelID.MatchString(m.ID) {
 			continue
 		}
 		seen[m.ID] = true
@@ -210,18 +210,18 @@ func openBotEntry(gw string) openBotProvider {
 			break
 		}
 	}
-	return openBotProvider{ID: magpieID, Name: "magpie", BaseURL: gw + "/v1", Models: ms, Secret: json.RawMessage("null")}
+	return openBotProvider{ID: mynaID, Name: "myna", BaseURL: gw + "/v1", Models: ms, Secret: json.RawMessage("null")}
 }
 
-// openBotWired says the file has magpie's entry.
+// openBotWired says the file has myna's entry.
 func openBotWired(path string) bool {
 	_, i, _ := openBotProviders(path)
 	return i >= 0
 }
 
 // openBotProviders are the entries of the file's providers as written, and
-// the place of magpie's among them (-1 for none). A file that isn't there or
-// holds nothing has none; one OpenBot wouldn't read is an error, so magpie
+// the place of myna's among them (-1 for none). A file that isn't there or
+// holds nothing has none; one OpenBot wouldn't read is an error, so myna
 // leaves it alone.
 func openBotProviders(path string) (list []json.RawMessage, i int, err error) {
 	i = -1
@@ -236,21 +236,21 @@ func openBotProviders(path string) (list []json.RawMessage, i int, err error) {
 		return nil, i, fmt.Errorf("%s isn't JSON OpenBot reads", path)
 	}
 	if v := gjson.GetBytes(b, "version"); v.Type != gjson.Number || v.Raw != "1" {
-		return nil, i, fmt.Errorf("%s says version %s, not the 1 OpenBot reads, so magpie leaves it alone", path, v.Raw)
+		return nil, i, fmt.Errorf("%s says version %s, not the 1 OpenBot reads, so myna leaves it alone", path, v.Raw)
 	}
 	raw := gjson.GetBytes(b, "providers")
 	if !raw.IsArray() || json.Unmarshal([]byte(raw.Raw), &list) != nil {
 		return nil, i, fmt.Errorf("%s: providers is not a list", path)
 	}
 	for j, e := range list {
-		if gjson.GetBytes(e, "id").String() == magpieID {
+		if gjson.GetBytes(e, "id").String() == mynaID {
 			return list, j, nil
 		}
 	}
 	return list, i, nil
 }
 
-// openBotWire puts magpie's entry into the file, made when there is none;
+// openBotWire puts myna's entry into the file, made when there is none;
 // an entry there already keeps the name, harness and secret the user gave
 // it in OpenBot. The file is written only when the entry says something
 // else.
@@ -288,7 +288,7 @@ func openBotWire(path string, want openBotProvider) error {
 	return edit.SetJSON(path, edit.KV{Path: "providers", Value: list})
 }
 
-// openBotUnwire takes magpie's entry out of the file, and the file when
+// openBotUnwire takes myna's entry out of the file, and the file when
 // nothing else is left in it: the version and an empty list are what OpenBot
 // starts without a file on too.
 func openBotUnwire(path string) error {

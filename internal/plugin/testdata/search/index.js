@@ -1,4 +1,4 @@
-// A plugin giving web search APIs (the search hook), which magpie lists
+// A plugin giving web search APIs (the search hook), which myna lists
 // beside Tavily and the rest. No network: each answers from its arguments.
 export default async () => ({
   search: {

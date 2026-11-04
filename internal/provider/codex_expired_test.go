@@ -88,7 +88,7 @@ func codexExpiredFakes(t *testing.T, refused func(tok string) (int, string), ref
 	return home, refreshes, reads
 }
 
-// staleExpired answers every token magpie didn't refresh as expired.
+// staleExpired answers every token myna didn't refresh as expired.
 func staleExpired(tok string) (int, string) {
 	if strings.HasPrefix(tok, "fresh-") {
 		return 0, ""
@@ -145,7 +145,7 @@ func TestCodexUsageExpiredOnce(t *testing.T) {
 		if e := u["me@example.com"].Error; !strings.Contains(e, "add the account again") {
 			t.Fatalf("saved account: %q", e)
 		}
-		// signed in again in magpie, not with codex login (charliepu)
+		// signed in again in myna, not with codex login (charliepu)
 		if e := u["work@example.com"].Error; e != revokedText("work@example.com") {
 			t.Fatalf("Codex's own account: %q", e)
 		}

@@ -9,7 +9,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/yetone/magpie/internal/redact"
+	"github.com/istoo/myna/internal/redact"
 )
 
 // fakeReader is a backend whose model finds "Alice" wherever it is, and

@@ -1,11 +1,11 @@
 package cli
 
-// magpie goroutines: every goroutine of the running magpie, with its stack
-// and how long it has waited, for a report of magpie stuck at something
+// myna goroutines: every goroutine of the running myna, with its stack
+// and how long it has waited, for a report of myna stuck at something
 // while it goes on running (#3362). Killing the app to see would end what
 // was stuck, so the dump is asked of the process itself, through the
 // gateway it serves on this computer (gateway.GoroutinesPath, loopback
-// only, as magpie heap's).
+// only, as myna heap's).
 
 import (
 	"bytes"
@@ -19,41 +19,41 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/istoo/myna/internal/gateway"
 )
 
-const goroutinesUsage = `usage: magpie goroutines [<file>]
-  every goroutine of the magpie serving the gateway on this computer (the app, the menu
-  bar, magpie serve or magpie web), with its stack and how long it has waited, for a
-  report of magpie stuck at something while it runs. magpie keeps running; nothing is
-  stopped. It is written to <file>, else to magpie-goroutines-<date>-<time>.txt in this
-  folder, and never over a file that is there. magpie then prints the file and which
+const goroutinesUsage = `usage: myna goroutines [<file>]
+  every goroutine of the myna serving the gateway on this computer (the app, the menu
+  bar, myna serve or myna web), with its stack and how long it has waited, for a
+  report of myna stuck at something while it runs. myna keeps running; nothing is
+  stopped. It is written to <file>, else to myna-goroutines-<date>-<time>.txt in this
+  folder, and never over a file that is there. myna then prints the file and which
   process it is of: send both. The dump holds function names, source lines and the path of
-  the magpie program, with arguments as numbers only, not keys or messages.
-  It asks the gateway at the port in Settings' Gateway address (or MAGPIE_ADDR) over loopback.`
+  the myna program, with arguments as numbers only, not keys or messages.
+  It asks the gateway at the port in Settings' Gateway address (or MYNA_ADDR) over loopback.`
 
 // goroutinesWait bounds the ask: a dump of thousands of goroutines is
-// written in well under a second, so a magpie that doesn't answer in this
+// written in well under a second, so a myna that doesn't answer in this
 // is stuck where its gateway answers too.
 const goroutinesWait = 30 * time.Second
 
-// goroutinesCmd: magpie goroutines [<file>]
+// goroutinesCmd: myna goroutines [<file>]
 func goroutinesCmd(args []string) error {
 	file := ""
 	for _, a := range args {
 		switch {
 		case strings.HasPrefix(a, "-") && a != "-":
-			return fmt.Errorf("unknown flag %s: nothing was written (magpie goroutines [<file>])", a)
+			return fmt.Errorf("unknown flag %s: nothing was written (myna goroutines [<file>])", a)
 		case a == "-" || strings.TrimSpace(a) == "":
-			return fmt.Errorf("%q is not a file name: nothing was written (magpie goroutines [<file>])", a)
+			return fmt.Errorf("%q is not a file name: nothing was written (myna goroutines [<file>])", a)
 		case file != "":
-			return errors.New("magpie goroutines takes one file: nothing was written (magpie goroutines [<file>])")
+			return errors.New("myna goroutines takes one file: nothing was written (myna goroutines [<file>])")
 		default:
 			file = a
 		}
 	}
 	if file == "" {
-		file = "magpie-goroutines-" + time.Now().Format("20060102-150405") + ".txt"
+		file = "myna-goroutines-" + time.Now().Format("20060102-150405") + ".txt"
 	}
 	dump, stats, err := fetchGoroutines(gateway.URL())
 	if err != nil {
@@ -62,7 +62,7 @@ func goroutinesCmd(args []string) error {
 	f, err := os.OpenFile(file, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o600)
 	if err != nil {
 		if errors.Is(err, os.ErrExist) {
-			return fmt.Errorf("%s is there already: name another file (magpie goroutines <file>)", file)
+			return fmt.Errorf("%s is there already: name another file (myna goroutines <file>)", file)
 		}
 		return err
 	}
@@ -91,7 +91,7 @@ func fetchGoroutines(base string) ([]byte, gateway.GoroutineStats, error) {
 	c := &http.Client{Timeout: goroutinesWait}
 	res, err := c.Get(base + gateway.GoroutinesPath)
 	if err != nil {
-		return nil, st, fmt.Errorf("no magpie answers at %s, so there is nothing to dump: is magpie running? (%v)", base, err)
+		return nil, st, fmt.Errorf("no myna answers at %s, so there is nothing to dump: is myna running? (%v)", base, err)
 	}
 	defer res.Body.Close()
 	body, err := io.ReadAll(res.Body)
@@ -99,7 +99,7 @@ func fetchGoroutines(base string) ([]byte, gateway.GoroutineStats, error) {
 		return nil, st, fmt.Errorf("the dump from %s was cut off: %w", base, err)
 	}
 	if res.StatusCode == http.StatusNotFound {
-		return nil, st, fmt.Errorf("the magpie at %s is older than this one and has no goroutine dump: update it, then run magpie goroutines again", base)
+		return nil, st, fmt.Errorf("the myna at %s is older than this one and has no goroutine dump: update it, then run myna goroutines again", base)
 	}
 	if res.StatusCode != http.StatusOK {
 		var e struct {
@@ -111,25 +111,25 @@ func fetchGoroutines(base string) ([]byte, gateway.GoroutineStats, error) {
 		if json.Unmarshal(body, &e) == nil && e.Error.Message != "" {
 			msg = e.Error.Message
 		}
-		return nil, st, fmt.Errorf("the magpie at %s answered %s: %s", base, res.Status, msg)
+		return nil, st, fmt.Errorf("the myna at %s answered %s: %s", base, res.Status, msg)
 	}
 	if !bytes.HasPrefix(body, []byte("goroutine ")) {
-		return nil, st, fmt.Errorf("what %s answered is not a goroutine dump (%d bytes): is it magpie?", base, len(body))
+		return nil, st, fmt.Errorf("what %s answered is not a goroutine dump (%d bytes): is it myna?", base, len(body))
 	}
 	if err := json.Unmarshal([]byte(res.Header.Get(gateway.GoroutineStatsHeader)), &st); err != nil {
-		return nil, st, fmt.Errorf("the magpie at %s sent no process numbers with its dump: %v", base, err)
+		return nil, st, fmt.Errorf("the myna at %s sent no process numbers with its dump: %v", base, err)
 	}
 	return body, st, nil
 }
 
-// goroutinesSummary is the lines magpie goroutines prints of st.
+// goroutinesSummary is the lines myna goroutines prints of st.
 func goroutinesSummary(st gateway.GoroutineStats) string {
 	var b strings.Builder
 	who := st.Program
 	if st.Window {
 		who += ", with a window"
 	}
-	fmt.Fprintf(&b, "  process     %d (%s) magpie %s, up %s\n", st.PID, who, st.Version, st.Uptime)
+	fmt.Fprintf(&b, "  process     %d (%s) myna %s, up %s\n", st.PID, who, st.Version, st.Uptime)
 	fmt.Fprintf(&b, "  goroutines  %d\n", st.Goroutines)
 	return b.String()
 }

@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/filememo"
+	"github.com/istoo/myna/internal/filememo"
 )
 
 // #1665: a catalog sync holds what was read for its round, so an agent's

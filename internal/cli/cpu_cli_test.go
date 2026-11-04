@@ -13,10 +13,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/istoo/myna/internal/gateway"
 )
 
-// --help and its other forms print magpie cpu's usage, ask nothing and
+// --help and its other forms print myna cpu's usage, ask nothing and
 // write nothing, here or under the home; a flag it doesn't take, "-", a
 // second file, or --seconds out of 5..120 are refused the same way,
 // before the gateway is asked.
@@ -25,12 +25,12 @@ func TestCPUHelpAndBadArgsWriteNothing(t *testing.T) {
 	asked := false
 	gw := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { asked = true }))
 	defer gw.Close()
-	t.Setenv("MAGPIE_ADDR", strings.TrimPrefix(gw.URL, "http://"))
+	t.Setenv("MYNA_ADDR", strings.TrimPrefix(gw.URL, "http://"))
 	before := tree(t, root)
 	for _, args := range [][]string{{"cpu", "--help"}, {"cpu", "-h"}, {"cpu", "help"}, {"cpu", "out.pb.gz", "--help"}, {"cpu", "--seconds", "10", "-h"}} {
 		out, err := runOut(t, args...)
-		if err != nil || !strings.Contains(out, "usage: magpie cpu [<file>] [--seconds N]") {
-			t.Errorf("magpie %s: %v %q", strings.Join(args, " "), err, out)
+		if err != nil || !strings.Contains(out, "usage: myna cpu [<file>] [--seconds N]") {
+			t.Errorf("myna %s: %v %q", strings.Join(args, " "), err, out)
 		}
 	}
 	for _, args := range [][]string{
@@ -39,7 +39,7 @@ func TestCPUHelpAndBadArgsWriteNothing(t *testing.T) {
 		{"cpu", "--seconds", "30s"}, {"cpu", "--seconds=-5"}, {"cpu", "--seconds", "10", "--seconds", "20"}, {"cpu", "x.pb.gz", "--seconds"},
 	} {
 		if _, err := runOut(t, args...); err == nil || !strings.Contains(err.Error(), "nothing was recorded") {
-			t.Errorf("magpie %s: %v", strings.Join(args, " "), err)
+			t.Errorf("myna %s: %v", strings.Join(args, " "), err)
 		}
 	}
 	if asked {
@@ -77,7 +77,7 @@ func TestCPUKeepsAFileThere(t *testing.T) {
 	asked := false
 	gw := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { asked = true }))
 	defer gw.Close()
-	t.Setenv("MAGPIE_ADDR", strings.TrimPrefix(gw.URL, "http://"))
+	t.Setenv("MYNA_ADDR", strings.TrimPrefix(gw.URL, "http://"))
 	file := filepath.Join(dir, "mine.pb.gz")
 	if err := os.WriteFile(file, []byte("mine"), 0o644); err != nil {
 		t.Fatal(err)
@@ -93,7 +93,7 @@ func TestCPUKeepsAFileThere(t *testing.T) {
 	}
 }
 
-// Against a running gateway (its Handler, on loopback), magpie cpu says
+// Against a running gateway (its Handler, on loopback), myna cpu says
 // it records and for how long, then writes the gzipped profile into the
 // working folder and prints its path, the CPU used and the goroutines.
 // It records the 5 seconds asked for.
@@ -101,13 +101,13 @@ func TestCPUWritesTheRunningGatewaysProfile(t *testing.T) {
 	_, dir := heapDir(t)
 	gw := httptest.NewServer(gateway.New().Handler())
 	defer gw.Close()
-	t.Setenv("MAGPIE_ADDR", strings.TrimPrefix(gw.URL, "http://"))
+	t.Setenv("MYNA_ADDR", strings.TrimPrefix(gw.URL, "http://"))
 
 	out, err := runOut(t, "cpu", "--seconds", "5")
 	if err != nil {
 		t.Fatal(err)
 	}
-	m, _ := filepath.Glob(filepath.Join(dir, "magpie-cpu-*.pb.gz"))
+	m, _ := filepath.Glob(filepath.Join(dir, "myna-cpu-*.pb.gz"))
 	if len(m) != 1 {
 		t.Fatalf("no default file: %v", m)
 	}
@@ -132,7 +132,7 @@ func TestCPUWritesTheRunningGatewaysProfile(t *testing.T) {
 	}
 }
 
-// With no magpie answering, magpie cpu says so at once and writes
+// With no myna answering, myna cpu says so at once and writes
 // nothing.
 func TestCPUWithNoGateway(t *testing.T) {
 	_, dir := heapDir(t)
@@ -152,9 +152,9 @@ func TestCPUWithNoGateway(t *testing.T) {
 			c.Close()
 		}
 	}()
-	t.Setenv("MAGPIE_ADDR", ln.Addr().String())
+	t.Setenv("MYNA_ADDR", ln.Addr().String())
 	out, err := runOut(t, "cpu", "x.pb.gz")
-	if err == nil || !strings.Contains(err.Error(), "is magpie running") {
+	if err == nil || !strings.Contains(err.Error(), "is myna running") {
 		t.Fatalf("%v", err)
 	}
 	if strings.Contains(out, "Recording") {

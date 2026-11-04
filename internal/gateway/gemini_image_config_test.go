@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // imageAsk is #3820's request (GuoJinguang): a frame and the words to redraw
@@ -100,7 +100,7 @@ func sameConfig(got, want string) bool {
 }
 
 // A Gemini client's generationConfig.imageConfig reaches a Gemini API as
-// it was sent (#3820, GuoJinguang: imageSize 4K asked through magpie drew
+// it was sent (#3820, GuoJinguang: imageSize 4K asked through myna drew
 // 1024x1024, where their relay asked itself drew 4096x4096). A request
 // asked for one body is translated, and was built again without it; a
 // streamed one is relayed. Beside a Chat API, one asked for one body

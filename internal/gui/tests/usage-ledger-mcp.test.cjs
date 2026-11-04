@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// An agent's call to a tool of magpie's own MCP servers (ferock on
+// An agent's call to a tool of myna's own MCP servers (ferock on
 // Discord) is a row of the Requests tab: an "MCP" badge, the tool's name
 // as the model asked for, the server it is of beside the provider, the
 // model it used, how long it took and whether it worked; its tooltip says
@@ -15,7 +15,7 @@ const { chromium, webkit } = require("playwright");
 const assets = path.resolve(__dirname, "../assets");
 const tot = (calls, tokens, cost) => ({ calls, errors: 0, input: tokens * 0.2, output: tokens * 0.1, cache_write: 0, cache_read: tokens * 0.7, cost });
 const ROW = { t: new Date().toISOString(), agent: "claude", agentName: "Claude Code", icon: "claudecode-color", provider: "anthropic", providerName: "Claude", model: "claude-sonnet-5", in: 2, out: 600, cache_write: 0, cache_read: 3900, ms: 2380, status: 200, cost: 0.08, priced: true };
-const MCP = { ...ROW, provider: "art", providerName: "Art", model: "gpt-image-1", req: "generate_image", host: "magpie-image", in: 0, out: 0, cache_read: 0, ms: 8400, status: 0, cost: 0, priced: false, source: "mcp", kind: "mcp", endpoint: "/v1/magpie/mcp/image" };
+const MCP = { ...ROW, provider: "art", providerName: "Art", model: "gpt-image-1", req: "generate_image", host: "myna-image", in: 0, out: 0, cache_read: 0, ms: 8400, status: 0, cost: 0, priced: false, source: "mcp", kind: "mcp", endpoint: "/v1/myna/mcp/image" };
 const FAILED = { ...MCP, t: new Date(Date.now() - 60000).toISOString(), provider: "", providerName: "", model: "", req: "github__create_issue", host: "github", ms: 40, err: "github is down" };
 
 function page(q, called) {
@@ -37,7 +37,7 @@ function server(lang, theme, called, asked) {
     if (url.pathname === "/api/state") return json({ agents: [], profiles: [], settings: { lang, theme }, fx: { rate: 7.2, at: new Date().toISOString() } });
     if (url.pathname === "/api/usage/requests") { asked.push(url.searchParams); return json(page(url.searchParams, called)); }
     if (url.pathname === "/api/usage/quotas") return json([]);
-    if (url.pathname === "/api/usage") return json({ calls: 1, errors: 0, input: 1, output: 1, cache_read: 0, cache_write: 0, reasoning: 0, unpriced: 0, cost: 1, bucket: "day", series: [], agents: [], models: [], path: "~/.config/magpie/usage.jsonl" });
+    if (url.pathname === "/api/usage") return json({ calls: 1, errors: 0, input: 1, output: 1, cache_read: 0, cache_write: 0, reasoning: 0, unpriced: 0, cost: 1, bucket: "day", series: [], agents: [], models: [], path: "~/.config/myna/usage.jsonl" });
     if (url.pathname === "/api/sessions") return json({ sessions: [], dirs: [] });
     if (url.pathname === "/api/sessions/stats") return json({ from: "", to: "", days: [], agents: {} });
     if (url.pathname === "/api/groups") return json({ groups: [], models: [] });
@@ -75,7 +75,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       p.setDefaultNavigationTimeout(60000);
       p.on("pageerror", (e) => errors.push(e.message));
       await p.route("**/*", server(lang, theme, called, asked));
-      await p.goto("http://magpie.test/");
+      await p.goto("http://myna.test/");
       await p.locator('[data-view="usage"]').first().click();
       await p.locator(":is(#usageTab .opt, .nav-s):visible").nth(1).click();
       await p.locator("#ledVia .blk").first().waitFor();
@@ -92,12 +92,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           assert.equal(await badge.count(), 2);
           assert.equal(await badge.first().textContent(), "MCP");
           const why = await badge.first().getAttribute("title");
-          assert(why.includes(w.why) && why.includes("generate_image") && why.includes("magpie-image") && why.includes("Claude Code"), why);
+          assert(why.includes(w.why) && why.includes("generate_image") && why.includes("myna-image") && why.includes("Claude Code"), why);
           // the model row has none, and neither is a probe
           assert.equal(await p.locator(".led .src.probe").count(), 0);
           const drawn = p.locator(".led tr.led-row", { has: p.locator(".src.mcp") }).first();
           const text = await drawn.textContent();
-          assert(text.includes("generate_image") && text.includes("gpt-image-1") && text.includes("magpie-image"), text);
+          assert(text.includes("generate_image") && text.includes("gpt-image-1") && text.includes("myna-image"), text);
           const failed = p.locator(".led tr.led-row", { hasText: "github__create_issue" });
           {
             assert((await drawn.locator(".st").textContent()).startsWith(w.ok));

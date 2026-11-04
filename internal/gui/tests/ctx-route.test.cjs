@@ -1,7 +1,7 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // Routing: the context window card's head says whose request it is and the
 // model it went to (the owner): the agent's icon and name, then the model's
-// lab icon before its id. A model from a lab magpie doesn't know gets no
+// lab icon before its id. A model from a lab myna doesn't know gets no
 // icon, so a wrong logo never stands for it. In a narrow card the agent's
 // name and the › go first and its icon stays, at the head's 14px; folded, the route is still in
 // the head. Nothing in the head runs past the card. Every GUI language,
@@ -88,13 +88,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const context = await browser.newContext({ viewport: { width: 1100, height: 900 } });
           t.after(() => context.close());
           const page = await context.newPage();
-          await page.addInitScript(() => { try { localStorage.setItem("magpie.ctxShut", "0"); } catch {} });
+          await page.addInitScript(() => { try { localStorage.setItem("myna.ctxShut", "0"); } catch {} });
           page.setDefaultTimeout(5000);
           page.setDefaultNavigationTimeout(60000);
           const errors = [];
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", serve(lang, req(agent, model)));
-          await page.goto("http://magpie.test/?view=routing");
+          await page.goto("http://myna.test/?view=routing");
           await page.locator(".rt-ctx .ctx-head .ctx-route").waitFor();
           const lab$ = await look(page);
           assert.equal(lab$.name, "Claude Code");

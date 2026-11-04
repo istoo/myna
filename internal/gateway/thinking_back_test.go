@@ -7,7 +7,7 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // What api.deepseek.com answered on 2026-11-02, byte for byte, to a tool
@@ -16,7 +16,7 @@ import (
 const (
 	deepseekThinkingBackLive  = `{"error":{"message":"The ` + "`content[].thinking`" + ` in the thinking mode must be passed back to the API. (request_id: cae816b6-d668-4a55-935d-99d1b8ad3686)","type":"invalid_request_error","param":null,"code":"invalid_request_error"}}`
 	deepseekReasoningBackLive = `{"error":{"message":"The ` + "`reasoning_content`" + ` in the thinking mode must be passed back to the API. (request_id: 6360375a-b044-4a13-b51e-548de94677ea)","type":"invalid_request_error","param":null,"code":"invalid_request_error"}}`
-	// qisishiqi's error on Discord (#help, 2026-11-02), as magpie passed it on
+	// qisishiqi's error on Discord (#help, 2026-11-02), as myna passed it on
 	qisishiqiError = `{"code":null,"message":"My Claude: The ` + "`content[].thinking`" + ` in the thinking mode must be passed back to the API.","param":null,"type":"invalid_request_error"}`
 )
 
@@ -61,7 +61,7 @@ func TestThinkingBackRefusalRead(t *testing.T) {
 // subscription to "My Claude", an Anthropic endpoint whose host and
 // model don't say DeepSeek, mid tool loop. DeepSeek's model behind it
 // asked for the call's thinking, which Codex's sealed reasoning can't
-// give. magpie asks once more with a space for it, and from then on
+// give. myna asks once more with a space for it, and from then on
 // sends it at once; a provider that never asked is sent none.
 func TestThinkingBackLearnedBehindAnotherName(t *testing.T) {
 	for _, model := range []string{"claude-sonnet-4-6", "relay-model"} {
@@ -121,7 +121,7 @@ func TestThinkingBackLearnedBehindAnotherName(t *testing.T) {
 
 // The sibling on Chat: DeepSeek's model behind a Chat provider whose host
 // and model don't say so, given Codex's loop, asks for reasoning_content
-// back; magpie asks once more with it, and from then on.
+// back; myna asks once more with it, and from then on.
 func TestReasoningBackLearnedBehindAnotherName(t *testing.T) {
 	f := &fake{t: t, reply: chatStreamOK, refuse: func(b []byte) (int, string) {
 		if code, _ := deepseekRefuseToolTurns(b); code == 400 {

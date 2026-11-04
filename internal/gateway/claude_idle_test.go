@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/istoo/myna/internal/proc"
 )
 
 func idleTestBridge() *subscriptionBridge {
@@ -49,7 +49,7 @@ func TestClaudeIdleReplacementKeepsItsKey(t *testing.T) {
 	}
 }
 
-// X, Sma1lboy: magpie grew to 158 GB in two days. One run under two keys
+// X, Sma1lboy: myna grew to 158 GB in two days. One run under two keys
 // was the oldest on every pass of keepIdle's loop past idleMost, which
 // took out one key only, so the loop never ended and grew its drop list
 // with the bridge's lock held. Run in a child, which the old loop is taken
@@ -57,7 +57,7 @@ func TestClaudeIdleReplacementKeepsItsKey(t *testing.T) {
 // the loop allocates (drop), not on a deadline: the loop that ends is done
 // in microseconds, but a busy machine may take seconds to start the child.
 func TestClaudeIdleEvictionEnds(t *testing.T) {
-	const child = "MAGPIE_TEST_IDLE_EVICTION"
+	const child = "MYNA_TEST_IDLE_EVICTION"
 	if scenario := os.Getenv(child); scenario != "" {
 		idleEvictionChild(t, scenario)
 		return

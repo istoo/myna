@@ -11,12 +11,12 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/agentenv"
-	"github.com/yetone/magpie/internal/library"
-	"github.com/yetone/magpie/internal/profile"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/agent"
+	"github.com/istoo/myna/internal/agentenv"
+	"github.com/istoo/myna/internal/library"
+	"github.com/istoo/myna/internal/profile"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // home is a sandbox: a home of its own with Claude Code and Codex in it,
@@ -151,7 +151,7 @@ func TestRoutingPage(t *testing.T) {
 		t.Fatalf("members %v, mode %d", g.Members, m.mode)
 	}
 
-	// rules, as magpie group rule add takes them
+	// rules, as myna group rule add takes them
 	m = press(t, m, "n")
 	m = typeIn(m, "use=gpt-5.5 tokens=200k")
 	m = press(t, m, "enter")

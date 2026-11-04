@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/provider"
 )
 
-// @NetRozee on X: a custom endpoint given a thousand keys froze magpie.
+// @NetRozee on X: a custom endpoint given a thousand keys froze myna.
 // Every request asked, for each key, whether it serves the model, and
 // each asking read the provider's lists again: a thousand reads of the
 // lists' file a request. The reads are counted, not timed: a request

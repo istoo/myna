@@ -7,11 +7,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
+	"github.com/istoo/myna/internal/plugin"
 )
 
-// A window's runsOutAt reached QuotaWindow, and the card /v1/magpie/quotas
-// and magpie quota --json tell is made of QuotaSpan: quotaReport built each
+// A window's runsOutAt reached QuotaWindow, and the card /v1/myna/quotas
+// and myna quota --json tell is made of QuotaSpan: quotaReport built each
 // span field by field without it, so a WorkBuddy account's credits, which
 // end package by package (a free account's with no reset at all), said
 // nothing there of when they go (#3762, MYCF711).
@@ -51,7 +51,7 @@ func TestCreditsRunningOutReachTheQuotaReport(t *testing.T) {
 
 // Every field of a window that is sent as JSON is carried onto the span the
 // report tells, or is named here as left out on purpose: a field added to
-// QuotaWindow can't again be dropped on the way to /v1/magpie/quotas
+// QuotaWindow can't again be dropped on the way to /v1/myna/quotas
 // without anyone deciding it (#3762 was RunsOutAt).
 func TestQuotaSpanCarriesEveryWindowField(t *testing.T) {
 	leftOut := map[string]string{

@@ -9,9 +9,9 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/oidc"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/access"
+	"github.com/istoo/myna/internal/oidc"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // OIDCKeysPath trades an OIDC token for a short-lived gateway key (#4531):

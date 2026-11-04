@@ -66,7 +66,7 @@ function server(lang, theme, variant, asked) {
       return json({ from: iso(from), to: iso(today), days: variant === "none" ? [] : variant === "few" ? FEW : DAYS });
     }
     if (url.pathname === "/api/usage/quotas") return json([]);
-    if (url.pathname === "/api/usage") return json({ calls: 1, errors: 0, input: 1, output: 1, cache_read: 0, cache_write: 0, reasoning: 0, unpriced: 0, cost: 1, bucket: "day", series: [], agents: [], models: [], path: "~/.config/magpie/usage.jsonl" });
+    if (url.pathname === "/api/usage") return json({ calls: 1, errors: 0, input: 1, output: 1, cache_read: 0, cache_write: 0, reasoning: 0, unpriced: 0, cost: 1, bucket: "day", series: [], agents: [], models: [], path: "~/.config/myna/usage.jsonl" });
     if (url.pathname === "/api/sessions") return json({ sessions: [], dirs: [] });
     if (url.pathname === "/api/groups") return json({ groups: [], models: [] });
     if (url.pathname.startsWith("/api/")) return json({});
@@ -98,7 +98,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       p.setDefaultNavigationTimeout(60000);
       p.on("pageerror", (e) => errors.push(e.message));
       await p.route("**/*", server(lang, theme, variant, asked));
-      await p.goto("http://magpie.test/");
+      await p.goto("http://myna.test/");
       await p.locator('[data-view="usage"]').first().click();
       await p.locator(":is(#usageTab .opt, .nav-s):visible").nth(1).click();
       await p.locator("#ledRank .rk").first().waitFor();
@@ -154,7 +154,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // the pointer on a day: its date and what it had, inside the card
         const busy = DAYS.find((d) => d.date === iso(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 10)));
         const cell = heat.locator(`.heat-grid i[data-date="${busy.date}"]`);
-        // the reader wheels the page to the card (magpie puts back a scroll by
+        // the reader wheels the page to the card (myna puts back a scroll by
         // code), and the pointer then rests on a day
         await p.mouse.move(width / 2, 300);
         for (let i = 0; i < 20; i++) {
@@ -191,7 +191,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal(await cell.getAttribute("class"), "l4");
         assert.notEqual(await cells.last().getAttribute("class"), "l4");
         assert.deepEqual(await p.evaluate(() => [window.scrollY, document.querySelector("#view-usage").scrollTop, document.querySelector("#ledHeatScroll").scrollLeft]), at, "a click scrolled");
-        assert.equal(await p.evaluate(() => localStorage.getItem("magpie.ledHeatMetric")), "calls");
+        assert.equal(await p.evaluate(() => localStorage.getItem("myna.ledHeatMetric")), "calls");
 
         // the filters: no period or day; a model picked in the ranking asks again with it
         assert(asked.length >= 1 && !asked.at(-1).has("period") && !asked.at(-1).has("day"), "asked: " + asked.at(-1));

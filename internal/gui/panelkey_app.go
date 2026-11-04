@@ -8,15 +8,15 @@ import (
 	"strings"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // errPanelKeyFailed is a refusal that isn't another app's hold: a key
 // this keyboard has no code for, or no display to bind on.
-var errPanelKeyFailed = errors.New("magpie couldn't take this shortcut")
+var errPanelKeyFailed = errors.New("myna couldn't take this shortcut")
 
 // startPanelKey binds the saved shortcut once the app has started, and
-// has Settings bind each one recorded after. A magpie this one took over
+// has Settings bind each one recorded after. A myna this one took over
 // from (before, its pid) may hold it until it has quit: refused, it is
 // tried again then.
 func (h *host) startPanelKey(before int) {
@@ -70,7 +70,7 @@ func (h *host) bindPanelKey(s string) error {
 	return nil
 }
 
-// dropPanelKey lets the shortcut go, for a Mac's magpie leaving the menu
+// dropPanelKey lets the shortcut go, for a Mac's myna leaving the menu
 // bar to the version it handed over to.
 func (h *host) dropPanelKey() {
 	h.keyMu.Lock()

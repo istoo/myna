@@ -79,13 +79,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     for (const lang of Object.keys(name)) for (const [width, height] of [[360, 760], [1100, 760]]) {
       await t.test(`${lang}, ${width}x${height}`, async () => {
         const ctx = await browser.newContext({ viewport: { width, height }, reducedMotion: "reduce" });
-        await ctx.addInitScript(() => { try { localStorage.setItem("magpie.usageTab", "context"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("myna.usageTab", "context"); } catch {} });
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang));
-        await page.goto("http://magpie.test/?view=usage");
+        await page.goto("http://myna.test/?view=usage");
         const cards = page.locator(".ctx-agents:not(.ctx-tunes) .ctx-agent");
         await cards.nth(1).waitFor();
         assert.equal(await cards.count(), 2);

@@ -12,11 +12,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/update"
+	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/myna/internal/update"
 )
 
-// following runs u.followReplaced on short ticks as a magpie of version v,
+// following runs u.followReplaced on short ticks as a myna of version v,
 // ended with the test.
 func following(t *testing.T, u *updater, v string) {
 	t.Helper()
@@ -40,7 +40,7 @@ func following(t *testing.T, u *updater, v string) {
 // started from it, whose restart counts.
 func startedFrom(t *testing.T, restarts *atomic.Int32) (*updater, string) {
 	t.Helper()
-	exe := filepath.Join(t.TempDir(), "magpie")
+	exe := filepath.Join(t.TempDir(), "myna")
 	if err := os.WriteFile(exe, []byte("v0.1.1"), 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -60,13 +60,13 @@ func stays(most time.Duration, n *atomic.Int32, want int32) bool {
 	return true
 }
 
-// visamzh on X: the app and magpie web open together, each with its own
+// visamzh on X: the app and myna web open together, each with its own
 // updater over the same program. One restarted to update and put the new
 // version in; the other ran on as the old one, its Update pill still
 // offering the version already in. Now the other sees what is on disk
-// change and restarts into it, as for magpie update's ask, once. On the
+// change and restarts into it, as for myna update's ask, once. On the
 // old code nothing looks, and nothing restarts.
-func TestAnotherMagpiesUpdateRestartsThisOne(t *testing.T) {
+func TestAnotherMynasUpdateRestartsThisOne(t *testing.T) {
 	var restarts atomic.Int32
 	u, exe := startedFrom(t, &restarts)
 	following(t, u, "v0.1.1")
@@ -77,7 +77,7 @@ func TestAnotherMagpiesUpdateRestartsThisOne(t *testing.T) {
 	if err := os.WriteFile(exe, []byte("v0.1.2 is longer"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	eventually(t, "magpie web never restarted into the version the app put in", func() bool { return restarts.Load() == 1 })
+	eventually(t, "myna web never restarted into the version the app put in", func() bool { return restarts.Load() == 1 })
 	if !stays(100*time.Millisecond, &restarts, 1) {
 		t.Fatalf("restarted %d times for one update", restarts.Load())
 	}
@@ -91,7 +91,7 @@ func TestOwnUpdateIsNotFollowedAgain(t *testing.T) {
 	}
 	var restarts atomic.Int32
 	u, exe := startedFrom(t, &restarts)
-	staged := filepath.Join(filepath.Dir(exe), "magpie.new")
+	staged := filepath.Join(filepath.Dir(exe), "myna.new")
 	if err := os.WriteFile(staged, []byte("v0.1.2 is longer"), 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -126,7 +126,7 @@ func TestOwnBuildRebuiltIsNotFollowed(t *testing.T) {
 // the other put in whatever the feed says: here it can't be reached, with
 // nothing downloaded by this one. On the old code the wait ended with
 // nothing to restart into.
-func TestAnotherMagpiesUpdateWaitsForTheGatewayThenRestarts(t *testing.T) {
+func TestAnotherMynasUpdateWaitsForTheGatewayThenRestarts(t *testing.T) {
 	var restarts atomic.Int32
 	u, exe := startedFrom(t, &restarts)
 	busy := &fakeBusy{}
@@ -163,8 +163,8 @@ func TestUpdateClickedOverAnothersIsNotFollowedAgain(t *testing.T) {
 }
 
 // boot.js names the version that served the page, which a browser's page
-// compares with /api/update's current to reload once another magpie, here
-// magpie web restarted into the app's update, answers in its place.
+// compares with /api/update's current to reload once another myna, here
+// myna web restarted into the app's update, answers in its place.
 func TestBootNamesTheVersionThatServedThePage(t *testing.T) {
 	h := t.TempDir()
 	t.Setenv("HOME", h)

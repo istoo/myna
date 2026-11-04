@@ -4,10 +4,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
-// jojonas_xyz on X: an account's allowance ran out and magpie went on to
+// jojonas_xyz on X: an account's allowance ran out and myna went on to
 // another of the user's accounts, where they may have wanted its credits
 // spent. Routed Smart, the default, an account all but used up waits
 // behind every one with room, credits or not; set to spend its credits

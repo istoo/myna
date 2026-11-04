@@ -26,13 +26,13 @@ func sandbox(t *testing.T) string {
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
 	sys := filepath.Join(home, "etc", "xdg")
 	t.Setenv("XDG_CONFIG_DIRS", sys)
-	t.Setenv("APPIMAGE", "/opt/my apps/magpie.AppImage")
+	t.Setenv("APPIMAGE", "/opt/my apps/myna.AppImage")
 	return sys
 }
 
-// shipped is an entry a package puts in a system folder, naming magpie by
+// shipped is an entry a package puts in a system folder, naming myna by
 // the name its package keeps on PATH.
-const shipped = "[Desktop Entry]\nType=Application\nName=magpie\nComment=one place to pick every agent's model\nExec=magpie tray\nTerminal=false\n"
+const shipped = "[Desktop Entry]\nType=Application\nName=myna\nComment=one place to pick every agent's model\nExec=myna tray\nTerminal=false\n"
 
 func writeEntry(t *testing.T, path, body string) {
 	t.Helper()
@@ -44,7 +44,7 @@ func writeEntry(t *testing.T, path, body string) {
 	}
 }
 
-// A record a write cut short is not one that opens magpie at login: the
+// A record a write cut short is not one that opens myna at login: the
 // desktop starts no entry with no Exec, and none at all with nothing in it,
 // so Open at login reads off rather than saying on for a record that never
 // starts anything.
@@ -78,7 +78,7 @@ func TestSetThenTruncatedRecordReadsAsOff(t *testing.T) {
 	}
 	// an Exec key with nothing after it names nothing to run either, and the
 	// desktop starts no entry that names nothing
-	if err := os.WriteFile(p, []byte("[Desktop Entry]\nType=Application\nName=magpie\nExec=\n"), 0o644); err != nil {
+	if err := os.WriteFile(p, []byte("[Desktop Entry]\nType=Application\nName=myna\nExec=\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	if Enabled() != Off {
@@ -86,8 +86,8 @@ func TestSetThenTruncatedRecordReadsAsOff(t *testing.T) {
 	}
 }
 
-// mtul0729, packaging magpie for nixpkgs (#3372): the package's entry in
-// $XDG_CONFIG_DIRS opens magpie at login, and Open at login read off over
+// mtul0729, packaging myna for nixpkgs (#3372): the package's entry in
+// $XDG_CONFIG_DIRS opens myna at login, and Open at login read off over
 // it and couldn't switch it off, as it only ever looked at, and took away,
 // the user's own file. Now it reads the entry the desktop starts, and
 // switches it as the XDG Autostart spec has a user do: off is an entry of
@@ -95,10 +95,10 @@ func TestSetThenTruncatedRecordReadsAsOff(t *testing.T) {
 // no path of this copy's is written over the one the package keeps.
 func TestSystemEntryIsTheOneTheSwitchReaches(t *testing.T) {
 	sys := sandbox(t)
-	pkg := filepath.Join(sys, "autostart", "magpie.desktop")
+	pkg := filepath.Join(sys, "autostart", "myna.desktop")
 	writeEntry(t, pkg, shipped)
 	if got := Enabled(); got != On {
-		t.Fatalf("the package's entry opens magpie at login, and Open at login reads %s", got)
+		t.Fatalf("the package's entry opens myna at login, and Open at login reads %s", got)
 	}
 	for range 2 { // again, and it is no error and changes nothing
 		if err := Set(false); err != nil {
@@ -112,10 +112,10 @@ func TestSystemEntryIsTheOneTheSwitchReaches(t *testing.T) {
 			t.Fatalf("no Hidden entry of the user's stands over the package's (%v):\n%s", err, b)
 		}
 	}
-	// XFCE's Session and Startup lists that entry as magpie, unticked, and
+	// XFCE's Session and Startup lists that entry as myna, unticked, and
 	// ticking it there writes Hidden=false into it: it runs true then, not
-	// magpie, and on (below) takes it away for the package's
-	writeEntry(t, record(), "[Desktop Entry]\nType=Application\nName=magpie\nExec=true\nHidden=false\n")
+	// myna, and on (below) takes it away for the package's
+	writeEntry(t, record(), "[Desktop Entry]\nType=Application\nName=myna\nExec=true\nHidden=false\n")
 	if got := Enabled(); got != Off {
 		t.Fatalf("the entry off wrote, ticked again in XFCE, over the package's: %s", got)
 	}
@@ -135,7 +135,7 @@ func TestSystemEntryIsTheOneTheSwitchReaches(t *testing.T) {
 		t.Fatalf("the package's entry was written to (%v):\n%s", err, b)
 	}
 
-	// an entry magpie wrote before the package came is the user's, and
+	// an entry myna wrote before the package came is the user's, and
 	// counts over the package's; switched on again, it gives way to it
 	if err := os.Remove(pkg); err != nil {
 		t.Fatal(err)
@@ -144,7 +144,7 @@ func TestSystemEntryIsTheOneTheSwitchReaches(t *testing.T) {
 		t.Fatal(err)
 	}
 	mine, err := os.ReadFile(record())
-	if err != nil || !strings.Contains(string(mine), "/opt/my apps/magpie.AppImage") {
+	if err != nil || !strings.Contains(string(mine), "/opt/my apps/myna.AppImage") {
 		t.Fatalf("no entry of the user's without the package's (%v):\n%s", err, mine)
 	}
 	writeEntry(t, pkg, shipped)
@@ -205,14 +205,14 @@ func TestTheEntryThatCountsIsTheDesktops(t *testing.T) {
 		{"the system's alone, Hidden=1", "", shipped + "Hidden=1\n", "", Off},
 		{"the system's alone, in CRLF lines", "", crlf(shipped), "", On},
 		{"the system's alone, in CRLF lines, hidden", "", crlf(hidden), "", Off},
-		{"the system's alone, keys with spaces around =", "", "[Desktop Entry]\nType = Application\nName = magpie\nExec = magpie tray\n", "", On},
-		{"the system's alone, its Exec in a [Desktop Action] only", "", "[Desktop Entry]\nType=Application\nName=magpie\nActions=quit;\n\n[Desktop Action quit]\nName=Quit\nExec=magpie quit\n", "", Off},
+		{"the system's alone, keys with spaces around =", "", "[Desktop Entry]\nType = Application\nName = myna\nExec = myna tray\n", "", On},
+		{"the system's alone, its Exec in a [Desktop Action] only", "", "[Desktop Entry]\nType=Application\nName=myna\nActions=quit;\n\n[Desktop Action quit]\nName=Quit\nExec=myna quit\n", "", Off},
 		{"the system's alone, a link, not an application, though with an Exec", "", linkEntry, "", Off},
 	} {
 		for _, f := range []struct{ path, body string }{
 			{record(), c.user},
-			{filepath.Join(first, "autostart", "magpie.desktop"), c.first},
-			{filepath.Join(second, "autostart", "magpie.desktop"), c.second},
+			{filepath.Join(first, "autostart", "myna.desktop"), c.first},
+			{filepath.Join(second, "autostart", "myna.desktop"), c.second},
 		} {
 			if f.body == "" {
 				if err := os.Remove(f.path); err != nil && !os.IsNotExist(err) {
@@ -237,17 +237,17 @@ func TestTheEntryThatCountsIsTheDesktops(t *testing.T) {
 func TestSystemFoldersAreXDGConfigDirs(t *testing.T) {
 	sys := sandbox(t)
 	t.Setenv("XDG_CONFIG_DIRS", "")
-	if got, want := systemRecords(), []string{"/etc/xdg/autostart/magpie.desktop"}; !slices.Equal(got, want) {
+	if got, want := systemRecords(), []string{"/etc/xdg/autostart/myna.desktop"}; !slices.Equal(got, want) {
 		t.Errorf("XDG_CONFIG_DIRS unset: %q, want %q", got, want)
 	}
-	writeEntry(t, filepath.Join(sys, "autostart", "magpie.desktop"), shipped)
+	writeEntry(t, filepath.Join(sys, "autostart", "myna.desktop"), shipped)
 	t.Chdir(t.TempDir())
 	rel := filepath.Join("etc", "xdg")
-	writeEntry(t, filepath.Join(rel, "autostart", "magpie.desktop"), shipped+"Hidden=true\n")
+	writeEntry(t, filepath.Join(rel, "autostart", "myna.desktop"), shipped+"Hidden=true\n")
 	file := filepath.Join(t.TempDir(), "xdg")
 	writeEntry(t, file, "")
 	shut := filepath.Join(t.TempDir(), "xdg")
-	writeEntry(t, filepath.Join(shut, "autostart", "magpie.desktop"), shipped+"Hidden=true\n")
+	writeEntry(t, filepath.Join(shut, "autostart", "myna.desktop"), shipped+"Hidden=true\n")
 	if err := os.Chmod(filepath.Join(shut, "autostart"), 0); err != nil {
 		t.Fatal(err)
 	}
@@ -272,7 +272,7 @@ func TestSystemFoldersAreXDGConfigDirs(t *testing.T) {
 			t.Errorf("on, %s in XDG_CONFIG_DIRS before the system's entry: %v, %s", c.name, err, Enabled())
 		}
 	}
-	if err := os.Remove(filepath.Join(sys, "autostart", "magpie.desktop")); err != nil {
+	if err := os.Remove(filepath.Join(sys, "autostart", "myna.desktop")); err != nil {
 		t.Fatal(err)
 	}
 	user := filepath.Dir(filepath.Dir(record()))
@@ -302,7 +302,7 @@ func TestSystemFoldersAreXDGConfigDirs(t *testing.T) {
 // (NixOS has no /bin/true).
 func TestOffIsAnEntryEverySessionReads(t *testing.T) {
 	sys := sandbox(t)
-	writeEntry(t, filepath.Join(sys, "autostart", "magpie.desktop"), shipped)
+	writeEntry(t, filepath.Join(sys, "autostart", "myna.desktop"), shipped)
 	if err := Set(false); err != nil {
 		t.Fatal(err)
 	}
@@ -313,7 +313,7 @@ func TestOffIsAnEntryEverySessionReads(t *testing.T) {
 	if !strings.HasPrefix(string(b), "[Desktop Entry]\n") {
 		t.Errorf("does not start with its group, as GLib needs:\n%s", b)
 	}
-	for _, key := range []string{"Type=Application", "Name=magpie", "Hidden=true"} {
+	for _, key := range []string{"Type=Application", "Name=myna", "Hidden=true"} {
 		if !regexp.MustCompile(`(?m)^` + key + `$`).Match(b) {
 			t.Errorf("no %s:\n%s", key, b)
 		}
@@ -332,18 +332,18 @@ func TestOffIsAnEntryEverySessionReads(t *testing.T) {
 
 // linkEntry is an entry of another Type than an application, a link,
 // which no desktop starts at login, though it has an Exec.
-const linkEntry = "[Desktop Entry]\nType=Link\nName=magpie\nURL=https://github.com/yetone/magpie\nExec=magpie tray\n"
+const linkEntry = "[Desktop Entry]\nType=Link\nName=myna\nURL=https://github.com/istoo/myna\nExec=myna tray\n"
 
-// A package's entry that opens magpie on no desktop (Hidden, or not an
+// A package's entry that opens myna on no desktop (Hidden, or not an
 // application) reads off, and so does one GNOME has off
 // (X-GNOME-Autostart-enabled=false), as GNOME's and Cinnamon's sessions
 // read it. On writes the user's own entry over each. Off takes the user's
 // entry away again, but over the one GNOME has off it stands there Hidden:
 // systemd's generator (KDE's, COSMIC's) reads no GNOME key and starts that
-// one, and off left magpie opening there.
+// one, and off left myna opening there.
 func TestAPackagesEntryThatOpensNothingHere(t *testing.T) {
 	sys := sandbox(t)
-	pkg := filepath.Join(sys, "autostart", "magpie.desktop")
+	pkg := filepath.Join(sys, "autostart", "myna.desktop")
 	for _, c := range []struct {
 		name, body string
 		hidden     bool // off hides it
@@ -362,7 +362,7 @@ func TestAPackagesEntryThatOpensNothingHere(t *testing.T) {
 		if err := Set(true); err != nil {
 			t.Fatal(err)
 		}
-		if b, err := os.ReadFile(record()); err != nil || !strings.Contains(string(b), "/opt/my apps/magpie.AppImage") || Enabled() != On {
+		if b, err := os.ReadFile(record()); err != nil || !strings.Contains(string(b), "/opt/my apps/myna.AppImage") || Enabled() != On {
 			t.Errorf("on, over the package's entry %s: %s (%v)\n%s", c.name, Enabled(), err, b)
 		}
 		if err := Set(false); err != nil {
@@ -381,7 +381,7 @@ func TestAPackagesEntryThatOpensNothingHere(t *testing.T) {
 	}
 }
 
-// A link at the user's entry (to magpie's launcher, which install.sh
+// A link at the user's entry (to myna's launcher, which install.sh
 // writes, the usual way to have an app open at login, or into a read-only
 // store) is replaced by the entry, and the file it leads to is left as it
 // was. Written through, off over a package's entry left the launcher
@@ -390,11 +390,11 @@ func TestAPackagesEntryThatOpensNothingHere(t *testing.T) {
 // written through the same way.
 func TestALinkedEntryIsReplacedNotWrittenThrough(t *testing.T) {
 	sys := sandbox(t)
-	pkg := filepath.Join(sys, "autostart", "magpie.desktop")
+	pkg := filepath.Join(sys, "autostart", "myna.desktop")
 	home := os.Getenv("HOME")
-	const launcher = "[Desktop Entry]\nType=Application\nName=magpie\nExec=/home/u/.local/bin/magpie\nIcon=magpie\n"
-	app := filepath.Join(home, ".local", "share", "applications", "magpie.desktop")
-	store := filepath.Join(home, "store", "share", "applications", "magpie.desktop")
+	const launcher = "[Desktop Entry]\nType=Application\nName=myna\nExec=/home/u/.local/bin/myna\nIcon=myna\n"
+	app := filepath.Join(home, ".local", "share", "applications", "myna.desktop")
+	store := filepath.Join(home, "store", "share", "applications", "myna.desktop")
 	writeEntry(t, app, launcher)
 	writeEntry(t, store, launcher)
 	if err := os.Chmod(filepath.Dir(store), 0o555); err != nil {
@@ -452,13 +452,13 @@ func TestALinkedEntryIsReplacedNotWrittenThrough(t *testing.T) {
 // A folder at an entry's path, or a link that leads nowhere or round in a
 // loop, is no entry: systemd's generator and GLib pass over it, and start
 // the package's entry after it. Read as an entry that starts nothing, it
-// held the package's back, and Open at login read off while magpie opened.
+// held the package's back, and Open at login read off while myna opened.
 // Nor is it a read that failed: with no package's entry, it reads off. And
 // on over the package's entry has no entry of the user's to take away, so
 // a folder stays.
 func TestWhatIsNoEntry(t *testing.T) {
 	sys := sandbox(t)
-	pkg := filepath.Join(sys, "autostart", "magpie.desktop")
+	pkg := filepath.Join(sys, "autostart", "myna.desktop")
 	if err := os.MkdirAll(filepath.Dir(record()), 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -518,7 +518,7 @@ func TestAnUnreadableEntry(t *testing.T) {
 		t.Skip("root reads any file")
 	}
 	sys := sandbox(t)
-	pkg := filepath.Join(sys, "autostart", "magpie.desktop")
+	pkg := filepath.Join(sys, "autostart", "myna.desktop")
 	writeEntry(t, pkg, shipped)
 	writeEntry(t, record(), shipped)
 	if err := os.Chmod(record(), 0); err != nil {
@@ -543,7 +543,7 @@ func TestAnUnreadableEntry(t *testing.T) {
 	if err := Set(true); err != nil {
 		t.Fatal(err)
 	}
-	if b, err := os.ReadFile(record()); err != nil || !strings.Contains(string(b), "/opt/my apps/magpie.AppImage") || Enabled() != On {
+	if b, err := os.ReadFile(record()); err != nil || !strings.Contains(string(b), "/opt/my apps/myna.AppImage") || Enabled() != On {
 		t.Errorf("on, the package's entry unreadable: %s (%v)\n%s", Enabled(), err, b)
 	}
 	if err := Set(false); err != nil {
@@ -554,12 +554,12 @@ func TestAnUnreadableEntry(t *testing.T) {
 	}
 }
 
-// A read that fails on magpie's side (out of files, or of memory) says
+// A read that fails on myna's side (out of files, or of memory) says
 // nothing of what the desktop reads at login: Set writes nothing and says
 // why, and Open at login is not taken to read off.
 func TestAFailedReadIsUnknown(t *testing.T) {
 	sys := sandbox(t)
-	writeEntry(t, filepath.Join(sys, "autostart", "magpie.desktop"), shipped)
+	writeEntry(t, filepath.Join(sys, "autostart", "myna.desktop"), shipped)
 	if err := Set(false); err != nil {
 		t.Fatal(err)
 	}

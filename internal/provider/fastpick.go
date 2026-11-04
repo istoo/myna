@@ -6,8 +6,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // An agent's pick of a model may be sent in its vendor's fast mode (#954),
@@ -47,7 +47,7 @@ func UltraPicks(agent string) []string {
 // Ultrafast: a ChatGPT model that one of Codex's accounts lists the tier
 // on (Account.Tiers), or a plugin's model, with fast mode, that the plugin
 // says its vendor serves at ultrafast (serviceTiers, #2514), or another
-// magpie's model its list offers ultrafast on (#1234). A list that
+// myna's model its list offers ultrafast on (#1234). A list that
 // doesn't say tiers offers none.
 func CanUltra(p Provider, model string) bool {
 	return UltraOn(p, model, UltraModels())
@@ -63,8 +63,8 @@ func UltraOn(p Provider, model string, ultra map[string]bool) bool {
 		m, listed := pluginModel(pp, model)
 		return listed && CanFast(p, model) && pluginTierOn(pp.ID, m, "ultrafast")
 	}
-	if p.IsRemoteMagpie() {
-		// another magpie's model it offers Ultrafast on, beside Fast
+	if p.IsRemoteMyna() {
+		// another myna's model it offers Ultrafast on, beside Fast
 		return CanFast(p, model) && slices.Contains(RemoteTiers(p, model), "ultrafast")
 	}
 	return p.Account != nil && p.Account.Agent == "codex" && CanFast(p, model) && ultra[model]
@@ -88,7 +88,7 @@ func UltraModels() map[string]bool {
 }
 
 // SetFastPick sends agent's requests for the entry id fast, or not. Only a
-// model with a fast mode magpie can ask for (CanFast) is switched on.
+// model with a fast mode myna can ask for (CanFast) is switched on.
 func SetFastPick(agent, id string, fast bool) error {
 	tier := ""
 	if fast {
@@ -108,7 +108,7 @@ func SetFastTier(agent, id, tier string) error {
 	switch tier {
 	case "", "priority", "ultrafast":
 	default:
-		return fmt.Errorf("magpie knows no tier %q", tier)
+		return fmt.Errorf("myna knows no tier %q", tier)
 	}
 	if tier != "" {
 		if IsGroupRef(id) {
@@ -116,13 +116,13 @@ func SetFastTier(agent, id, tier string) error {
 		}
 		p, model, ok := Resolve(id)
 		if !ok {
-			return fmt.Errorf("magpie knows no model %q", id)
+			return fmt.Errorf("myna knows no model %q", id)
 		}
 		if p.ID+"/"+model != id {
 			return fmt.Errorf("%s is not a model as <provider>/<model>", id)
 		}
 		if !CanFast(p, model) {
-			return fmt.Errorf("%s has no fast mode magpie can ask for", id)
+			return fmt.Errorf("%s has no fast mode myna can ask for", id)
 		}
 		if tier == "ultrafast" && !CanUltra(p, model) {
 			return fmt.Errorf("no account offers Ultrafast on %s", id)

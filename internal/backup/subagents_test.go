@@ -3,7 +3,7 @@ package backup
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/library"
+	"github.com/istoo/myna/internal/library"
 )
 
 // A backup file carries the library's subagents, and restoring it on
@@ -22,7 +22,7 @@ func TestBackupFileCarriesSubagents(t *testing.T) {
 	data, _ := Seal(b, "pw")
 	old := b
 	lib := *b.Library
-	lib.Subagents = nil // as a magpie before them sealed it
+	lib.Subagents = nil // as a myna before them sealed it
 	old.Library = &lib
 	older, _ := Seal(old, "pw")
 

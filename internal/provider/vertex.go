@@ -48,7 +48,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/yetone/magpie/internal/appdir"
+	"github.com/istoo/myna/internal/appdir"
 )
 
 // VertexPreset is the preset's id.

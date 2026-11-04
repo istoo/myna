@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // Codex puts its own bookkeeping on each input item it sends OpenAI, in

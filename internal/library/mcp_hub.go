@@ -1,23 +1,23 @@
 package library
 
 // The MCP hub (#2679): with the Library's switch on (MCPHub), an agent
-// that can reach a streamable HTTP server is given one, magpie's own, at
+// that can reach a streamable HTTP server is given one, myna's own, at
 // gateway.HubMCPPath<agent>, in place of the library's servers ticked for
 // it; the gateway lists their tools as one server's and hands each call on
 // to the server it is of (gateway/hub_mcp.go). The servers are run here:
 //
 //   - a command is started once, for every agent, as the check starts it
-//     (startServer: in home, with PWD, magpie's environment with the
+//     (startServer: in home, with PWD, myna's environment with the
 //     login shell's PATH, the server's own variables with ${NAME}
 //     expanded), the first time a tool of it is listed or called; it is
 //     ended once no call has used it for hubIdle, and started again when
-//     next used, or when it ended by itself. Its stdin is magpie's: a
-//     magpie that dies without ending it closes it, which ends an MCP
-//     server, and on Windows its job ends with magpie.
-//   - a URL is reached as the check reaches it, with magpie's sign-in
+//     next used, or when it ended by itself. Its stdin is myna's: a
+//     myna that dies without ending it closes it, which ends an MCP
+//     server, and on Windows its job ends with myna.
+//   - a URL is reached as the check reaches it, with myna's sign-in
 //     (httpSession), or over its event stream (SSE).
 //
-// magpie's own image server saves into the calling agent's project, which
+// myna's own image server saves into the calling agent's project, which
 // a server started once for every agent can't ask its client for: the
 // gateway asks the agent for its roots on each call (gateway.HubCaller)
 // and the call carries them to it, in _meta (imageMeta). An agent in WSL
@@ -45,21 +45,21 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/mcpauth"
+	"github.com/istoo/myna/internal/agent"
+	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/myna/internal/mcpauth"
 )
 
 func init() { gateway.MCPHub = theHub{} }
 
 // HubEntry is the name of the one entry the hub is given to an agent by.
-const HubEntry = "magpie"
+const HubEntry = "myna"
 
 // hubIdle is how long a server the hub started is kept with no call.
 var hubIdle = 10 * time.Minute
 
 // SetMCPHub turns the hub on or off: on, each agent that can reach it is
-// given magpie's one entry in place of its servers; off, their own entries
+// given myna's one entry in place of its servers; off, their own entries
 // again, and the servers the hub started are ended.
 func SetMCPHub(on bool) (*Result, error) {
 	res, err := change(func(l *Library) error {
@@ -77,7 +77,7 @@ func SetMCPHub(on bool) (*Result, error) {
 const HubDirect = "direct"
 
 // inHub is whether the hub gives s to agent id: every server but one the
-// user keeps direct (Server.Hub), and magpie's own image server to an
+// user keeps direct (Server.Hub), and myna's own image server to an
 // agent in WSL, which is given it run in its distro (mcpFile.side) for the
 // paths it saves to be the agent's.
 func inHub(s *Server, id string) bool {
@@ -137,15 +137,15 @@ func HubLink(app string) (string, error) {
 		cfg, _ := json.Marshal(map[string]string{"name": HubEntry, "type": "http", "url": u})
 		return "vscode:mcp/install?" + url.QueryEscape(string(cfg)), nil
 	}
-	return "", fmt.Errorf("magpie has no install link for %q", app)
+	return "", fmt.Errorf("myna has no install link for %q", app)
 }
 
 // Why an agent with the hub on keeps each server's own entry (AgentView's
 // HubWhy).
 const (
 	hubNoRemote = "no-remote" // it reaches no server over HTTP (Claude Desktop)
-	hubTaken    = "taken"     // a library server is called magpie
-	hubOwn      = "own"       // the agent has an entry called magpie of its own
+	hubTaken    = "taken"     // a library server is called myna
+	hubOwn      = "own"       // the agent has an entry called myna of its own
 )
 
 // hubFor is the hub's entry for t, or nil and why it isn't given one: the
@@ -264,14 +264,14 @@ func (theHub) Call(ctx context.Context, agentID, server, tool string, args json.
 	ss := hubServers(agentID)
 	i := slices.IndexFunc(ss, func(s *Server) bool { return s.Name == server })
 	if i < 0 && agentID == "" {
-		return nil, errors.New("it isn't in magpie's Library")
+		return nil, errors.New("it isn't in myna's Library")
 	}
 	if i < 0 {
-		return nil, fmt.Errorf("it isn't switched on for %s in magpie's Library", agentID)
+		return nil, fmt.Errorf("it isn't switched on for %s in myna's Library", agentID)
 	}
 	s := ss[i]
 	if slices.Contains(s.DisabledTools, tool) {
-		return nil, errors.New("the tool is turned off in magpie's Library")
+		return nil, errors.New("the tool is turned off in myna's Library")
 	}
 	var meta map[string]any
 	if isSelf(s) {
@@ -290,10 +290,10 @@ func (theHub) Call(ctx context.Context, agentID, server, tool string, args json.
 }
 
 // keepsSession is whether s is told which of the hub's callers a call is
-// from: Magpie Browser, which works in a tab of each caller's own (one
+// from: Myna Browser, which works in a tab of each caller's own (one
 // process serves every agent behind the hub, so its own session would be
-// all of theirs), and another magpie's router, which passes it on to its
-// Magpie Browser. No other server is sent it.
+// all of theirs), and another myna's router, which passes it on to its
+// Myna Browser. No other server is sent it.
 func keepsSession(s *Server) bool {
 	if s.Remote() {
 		u, err := url.Parse(s.URL)
@@ -302,7 +302,7 @@ func keepsSession(s *Server) bool {
 	return len(s.Args) >= 2 && s.Args[0] == "mcp" && s.Args[1] == "browser"
 }
 
-// imageMeta is the _meta a call of magpie's image server is made with:
+// imageMeta is the _meta a call of myna's image server is made with:
 // the calling agent's roots, which it saves into, and its name, which its
 // requests go under.
 func imageMeta(c gateway.HubCaller) map[string]any {
@@ -431,7 +431,7 @@ type backend struct {
 	stopped bool
 }
 
-var errHubStopped = errors.New("magpie stopped it")
+var errHubStopped = errors.New("myna stopped it")
 
 // connect is the connection to the server, made when there is none: a
 // command started, a URL initialized. A start goes on when ctx ends, for
@@ -543,7 +543,7 @@ func (b *backend) done() {
 }
 
 // stop ends the server for good: it was edited, the hub turned off, or
-// magpie is stopping.
+// myna is stopping.
 func (b *backend) stop() {
 	b.mu.Lock()
 	b.stopped = true
@@ -638,7 +638,7 @@ func healthErr(h ServerHealth) error {
 	var s string
 	switch {
 	case h.State == "auth":
-		s = "it asks for a sign-in or a key: sign in to it, or give it its key, in magpie's Library"
+		s = "it asks for a sign-in or a key: sign in to it, or give it its key, in myna's Library"
 	case h.Why == "notfound":
 		s = "its command " + h.Detail + " wasn't found"
 	case h.Why == "start":
@@ -661,7 +661,7 @@ func healthErr(h ServerHealth) error {
 	case h.Why == "refused" || h.Why == "unreachable":
 		s = "it couldn't be reached: " + h.Detail
 	case h.Why == "novar":
-		s = h.Detail + " isn't set where magpie runs"
+		s = h.Detail + " isn't set where myna runs"
 	default:
 		s = h.Detail
 	}
@@ -792,7 +792,7 @@ func (c *streamConn) read(b []byte, changed func()) {
 		if m.Method == "ping" {
 			reply["result"] = map[string]any{}
 		} else {
-			reply["error"] = map[string]any{"code": -32601, "message": "magpie's hub doesn't offer " + m.Method}
+			reply["error"] = map[string]any{"code": -32601, "message": "myna's hub doesn't offer " + m.Method}
 		}
 		out, _ := json.Marshal(reply)
 		go func() {

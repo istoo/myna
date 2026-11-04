@@ -7,10 +7,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/fx"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/fx"
+	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // Settings shows the local address agents use; the Gateway page advertises
@@ -21,8 +21,8 @@ func TestPublicURLInConsole(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(h, ".config"))
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(h, ".cache"))
 	t.Setenv("XDG_DATA_HOME", filepath.Join(h, ".local", "share"))
-	t.Setenv("MAGPIE_ADDR", "0.0.0.0:3425")
-	t.Setenv("MAGPIE_PUBLIC_URL", "https://magpie.example.com/magpie///")
+	t.Setenv("MYNA_ADDR", "0.0.0.0:3425")
+	t.Setenv("MYNA_PUBLIC_URL", "https://myna.example.com/myna///")
 
 	// Seed the rate the Settings page reads, so it needs no network.
 	cache := fx.CachePath()
@@ -39,10 +39,10 @@ func TestPublicURLInConsole(t *testing.T) {
 	fx.Reset()
 	t.Cleanup(fx.Reset)
 
-	if err := settings.Save(settings.Settings{LAN: true, LANKey: "sk-magpie-test"}); err != nil {
+	if err := settings.Save(settings.Settings{LAN: true, LANKey: "sk-myna-test"}); err != nil {
 		t.Fatal(err)
 	}
-	want := "https://magpie.example.com/magpie"
+	want := "https://myna.example.com/myna"
 	if got := settingsState().Gateway; got != gateway.URL() {
 		t.Errorf("Settings: %q, want %q", got, gateway.URL())
 	}
@@ -54,7 +54,7 @@ func TestPublicURLInConsole(t *testing.T) {
 		t.Errorf("LAN addresses: %v, want [%s]", g.LANURLs, want)
 	}
 	if !g.OnNetwork {
-		t.Error("MAGPIE_ADDR 0.0.0.0 not said to be on the network")
+		t.Error("MYNA_ADDR 0.0.0.0 not said to be on the network")
 	}
 	// #1551: Connect starts at the public URL, and Settings shows it
 	if g.PublicURL != want {
@@ -76,7 +76,7 @@ func TestPublicURLInConsole(t *testing.T) {
 	}
 }
 
-// A gateway MAGPIE_ADDR puts on the network (the Docker image) asks other
+// A gateway MYNA_ADDR puts on the network (the Docker image) asks other
 // machines for a gateway key whether or not it is shared, so the Gateway
 // page shows its keys and offers no key-less "this computer" then.
 func TestGatewayOnNetworkInConsole(t *testing.T) {
@@ -85,8 +85,8 @@ func TestGatewayOnNetworkInConsole(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(h, ".config"))
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(h, ".cache"))
 	t.Setenv("XDG_DATA_HOME", filepath.Join(h, ".local", "share"))
-	t.Setenv("MAGPIE_ADDR", "0.0.0.0:3425")
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
+	t.Setenv("MYNA_ADDR", "0.0.0.0:3425")
+	t.Setenv("MYNA_PUBLIC_URL", "")
 	if err := settings.Save(settings.Settings{LAN: false}); err != nil {
 		t.Fatal(err)
 	}
@@ -99,7 +99,7 @@ func TestGatewayOnNetworkInConsole(t *testing.T) {
 	if g := providersState().Gateway; !g.OnNetwork || !g.LAN {
 		t.Errorf("gateway on the network, shared: %+v", g)
 	}
-	t.Setenv("MAGPIE_ADDR", "127.0.0.1:3425")
+	t.Setenv("MYNA_ADDR", "127.0.0.1:3425")
 	if err := settings.Save(settings.Settings{LAN: false}); err != nil {
 		t.Fatal(err)
 	}
@@ -108,7 +108,7 @@ func TestGatewayOnNetworkInConsole(t *testing.T) {
 	}
 }
 
-// #1551: MAGPIE_PUBLIC_URL is offered where other machines are let in,
+// #1551: MYNA_PUBLIC_URL is offered where other machines are let in,
 // and nowhere else: on loopback, not shared, nothing reaches the gateway
 // through it without a key it can't take.
 func TestPublicURLOnlyWhereOffered(t *testing.T) {
@@ -117,8 +117,8 @@ func TestPublicURLOnlyWhereOffered(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(h, ".config"))
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(h, ".cache"))
 	t.Setenv("XDG_DATA_HOME", filepath.Join(h, ".local", "share"))
-	t.Setenv("MAGPIE_PUBLIC_URL", "https://magpie.example.com")
-	t.Setenv("MAGPIE_ADDR", "127.0.0.1:3425")
+	t.Setenv("MYNA_PUBLIC_URL", "https://myna.example.com")
+	t.Setenv("MYNA_ADDR", "127.0.0.1:3425")
 	if err := settings.Save(settings.Settings{LAN: false}); err != nil {
 		t.Fatal(err)
 	}
@@ -131,14 +131,14 @@ func TestPublicURLOnlyWhereOffered(t *testing.T) {
 	if err := settings.Save(settings.Settings{LAN: true}); err != nil {
 		t.Fatal(err)
 	}
-	if g := providersState().Gateway; g.PublicURL != "https://magpie.example.com" {
+	if g := providersState().Gateway; g.PublicURL != "https://myna.example.com" {
 		t.Errorf("shared: Gateway page's public URL %q", g.PublicURL)
 	}
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
+	t.Setenv("MYNA_PUBLIC_URL", "")
 	if g := providersState().Gateway; g.PublicURL != "" {
-		t.Errorf("no MAGPIE_PUBLIC_URL: Gateway page's public URL %q", g.PublicURL)
+		t.Errorf("no MYNA_PUBLIC_URL: Gateway page's public URL %q", g.PublicURL)
 	}
 	if u := settingsState().PublicURL; u != "" {
-		t.Errorf("no MAGPIE_PUBLIC_URL: Settings shows %q", u)
+		t.Errorf("no MYNA_PUBLIC_URL: Settings shows %q", u)
 	}
 }

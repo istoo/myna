@@ -15,7 +15,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
+	"github.com/istoo/myna/internal/access"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/basicfont"

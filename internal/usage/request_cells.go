@@ -10,7 +10,7 @@ import (
 	"time"
 	"unique"
 
-	"github.com/yetone/magpie/internal/sessions"
+	"github.com/istoo/myna/internal/sessions"
 )
 
 // A page's sums are made of each chunk's own: its rows told apart by all a

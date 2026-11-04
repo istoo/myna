@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/appdir"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 func TestMain(m *testing.M) { os.Exit(testenv.RunIn(m, nil)) }
@@ -54,7 +54,7 @@ func TestStartWritesTheLog(t *testing.T) {
 	}
 	log.Println("gateway: a line the app logged")
 	got := read(t, path)
-	for _, want := range []string{"magpie 0.1.test started (app, pid", "this log: " + path, "gateway: a line the app logged"} {
+	for _, want := range []string{"myna 0.1.test started (app, pid", "this log: " + path, "gateway: a line the app logged"} {
 		if !strings.Contains(got, want) {
 			t.Errorf("the log has no %q:\n%s", want, got)
 		}
@@ -131,7 +131,7 @@ func TestRotates(t *testing.T) {
 	}
 }
 
-// Another magpie that rotated the log already (an update's new process
+// Another myna that rotated the log already (an update's new process
 // beside the old) leaves this one to open the new file, not to rotate it
 // again over the old one.
 func TestRotatedByAnother(t *testing.T) {

@@ -5,7 +5,7 @@ package gui
 /*
 #cgo LDFLAGS: -framework AppKit -framework UniformTypeIdentifiers
 #include <stdlib.h>
-char *magpieTerminalAppsJSON(void);
+char *mynaTerminalAppsJSON(void);
 */
 import "C"
 
@@ -18,7 +18,7 @@ import (
 // discoverTerminals asks Launch Services for apps that claim .command files,
 // and adds Rex when its CLI is found (withRex).
 func discoverTerminals() (terminalDiscovery, error) {
-	raw := C.magpieTerminalAppsJSON()
+	raw := C.mynaTerminalAppsJSON()
 	if raw == nil {
 		return terminalDiscovery{}, errors.New("could not find apps for .command files")
 	}

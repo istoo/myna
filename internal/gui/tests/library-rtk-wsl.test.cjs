@@ -1,10 +1,10 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// lex on Discord: Claude Code in WSL couldn't have the RTK of magpie on
+// lex on Discord: Claude Code in WSL couldn't have the RTK of myna on
 // Windows. An agent in a WSL distro is listed, with its distro's own RTK in
 // a card of its own: one not installed there has Install RTK in WSL
 // <distro> (RTK's own Linux installer, run in the distro), and the agent's
 // switch waits for it; a distro that isn't running says so, and its agents'
-// switches are off limits, since magpie never starts it. In every language,
+// switches are off limits, since myna never starts it. In every language,
 // both engines, at a phone's width too. No backend: the API is faked here.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -15,7 +15,7 @@ const { chromium, webkit } = require("playwright");
 const assets = path.resolve(__dirname, "../assets");
 const HOME = "C:\\Users\\lex";
 const lib = () => ({
-  dir: `${HOME}\\.magpie\\library`, backups: `${HOME}\\.magpie\\backups`, home: HOME,
+  dir: `${HOME}\\.myna\\library`, backups: `${HOME}\\.myna\\backups`, home: HOME,
   agents: [{ id: "claude", name: "Claude Code", icon: "", skills: `${HOME}\\.claude\\skills`, mcp: `${HOME}\\.claude.json` }],
   instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [], skills: [], servers: [],
 });
@@ -79,13 +79,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await t.test(`${lang} at ${width}px`, async () => {
         const w = words[lang], calls = [];
         const ctx = await browser.newContext({ viewport: { width, height: 900 } });
-        await ctx.addInitScript(() => { try { localStorage.setItem("magpie.libTab", "rtk"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "rtk"); } catch {} });
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, calls));
-        await page.goto("http://magpie.test/");
+        await page.goto("http://myna.test/");
         await page.locator('button[data-view="library"]').click();
         const v = page.locator("#view-library");
         const cards = v.locator(".lib-rtk-wsl");

@@ -11,15 +11,15 @@ package gui
 // The drag's source: a copy, wherever it is dropped. An object of its
 // own, not the webview, which would take the session for one of its
 // page's drags when it ends.
-@interface MagpieFileDrag : NSObject <NSDraggingSource>
+@interface MynaFileDrag : NSObject <NSDraggingSource>
 @end
-@implementation MagpieFileDrag
+@implementation MynaFileDrag
 - (NSDragOperation)draggingSession:(NSDraggingSession *)session sourceOperationMaskForDraggingContext:(NSDraggingContext)context {
 	return NSDragOperationCopy;
 }
 @end
 
-static MagpieFileDrag *fileDragSource;
+static MynaFileDrag *fileDragSource;
 
 // dragFile starts the system's drag of the file at path from under the
 // mouse, as Finder drags it, while the button the page saw go down is
@@ -32,7 +32,7 @@ static int dragFile(const char *path) {
 		NSWindow *win = [NSApp keyWindow];
 		NSView *view = win.contentView;
 		if (view == nil) return;
-		if (fileDragSource == nil) fileDragSource = [MagpieFileDrag new];
+		if (fileDragSource == nil) fileDragSource = [MynaFileDrag new];
 		NSPoint inWin = [win mouseLocationOutsideOfEventStream];
 		NSPoint at = [view convertPoint:inWin fromView:nil];
 		NSImage *icon = [[NSWorkspace sharedWorkspace] iconForFile:p];
@@ -58,7 +58,7 @@ import "unsafe"
 // canDragFile: the page may hand a file to the system's drag here.
 const canDragFile = true
 
-// dragFile drags the file or folder at path out of magpie's window, onto
+// dragFile drags the file or folder at path out of myna's window, onto
 // whatever takes a file from Finder (a browser's extensions page).
 func dragFile(path string) bool {
 	p := C.CString(path)

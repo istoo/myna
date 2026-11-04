@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // effortTurns are a thread's requests as an agent sends them: the
@@ -94,7 +94,7 @@ var effortReply = sse(
 // up a fraction of the reasoning asked; a thread that keeps its effort
 // goes as the agent sent it.
 func TestEffortChangeKeepsTheCache(t *testing.T) {
-	t.Setenv("MAGPIE_EFFORT_UPDATES", "on")
+	t.Setenv("MYNA_EFFORT_UPDATES", "on")
 	f := &fake{t: t, ctype: "none", reply: effortReply}
 	effortCodexAccount(t, f)
 
@@ -143,7 +143,7 @@ func TestEffortChangeKeepsTheCache(t *testing.T) {
 // #617: an upstream that turns the update away is asked again as the agent
 // sent it, and that account and model aren't sent updates again.
 func TestEffortUpdateRefused(t *testing.T) {
-	t.Setenv("MAGPIE_EFFORT_UPDATES", "on")
+	t.Setenv("MYNA_EFFORT_UPDATES", "on")
 	f := &fake{t: t, ctype: "none", reply: effortReply, refuse: func(b []byte) (int, string) {
 		if strings.Contains(string(b), "configuration_update") {
 			return 400, `{"error":{"message":"Invalid value: 'configuration_update'.","type":"invalid_request_error","param":"input[2].type"}}`
@@ -170,7 +170,7 @@ func TestEffortUpdateRefused(t *testing.T) {
 // #617: only a GPT-6 model through a ChatGPT account or OpenAI's API is
 // sent updates; another vendor's Responses API, and older models, never.
 func TestTakesEffortUpdates(t *testing.T) {
-	t.Setenv("MAGPIE_EFFORT_UPDATES", "on")
+	t.Setenv("MYNA_EFFORT_UPDATES", "on")
 	codex := provider.Provider{ID: "codex", Responses: provider.CodexBase, Account: &provider.Account{Agent: "codex"}}
 	openai := provider.Provider{ID: "openai", Responses: "https://api.openai.com/v1", Key: "k"}
 	other := provider.Provider{ID: "relay", Responses: "https://relay.example.com/v1", Key: "k"}
@@ -195,9 +195,9 @@ func TestTakesEffortUpdates(t *testing.T) {
 		}
 	}
 	for _, v := range []string{"", "off", "1"} {
-		t.Setenv("MAGPIE_EFFORT_UPDATES", v)
+		t.Setenv("MYNA_EFFORT_UPDATES", v)
 		if takesEffortUpdates(codex, "gpt-6-luna") {
-			t.Errorf("MAGPIE_EFFORT_UPDATES=%q still sends updates", v)
+			t.Errorf("MYNA_EFFORT_UPDATES=%q still sends updates", v)
 		}
 	}
 }
@@ -205,7 +205,7 @@ func TestTakesEffortUpdates(t *testing.T) {
 // #617: a Responses provider not OpenAI's gets a thread's effort change as
 // the agent sent it.
 func TestEffortChangeOtherVendor(t *testing.T) {
-	t.Setenv("MAGPIE_EFFORT_UPDATES", "on")
+	t.Setenv("MYNA_EFFORT_UPDATES", "on")
 	effortThreads.Lock()
 	effortThreads.m, effortThreads.no = map[string]*effortThread{}, map[string]time.Time{}
 	effortThreads.Unlock()

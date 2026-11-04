@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/appdir"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // Where a skill came from, for the page to group it with the others from
@@ -104,7 +104,7 @@ const lockSlack = time.Minute
 // lockRepo is the repository the lock names for the skill called name
 // whose folder is dir, when that folder is the one the CLI wrote. The
 // lock is by name, and an entry outlives its skill: one deleted by hand,
-// or from magpie, leaves it (AzheRise on X: a skill from a GitHub
+// or from myna, leaves it (AzheRise on X: a skill from a GitHub
 // repository deleted, another of the same name made in ~/.dsh/skills was
 // filed under that repository once brought in). A folder the CLI wrote
 // has a file at least as old as the entry; one made since, all its files

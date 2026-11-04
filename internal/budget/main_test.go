@@ -3,7 +3,7 @@ package budget
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // The tests run in a home of their own, never the user's real files.

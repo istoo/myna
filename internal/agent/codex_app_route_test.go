@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // The route the Codex app's app-server is restarted on (codex_app_server.go)
@@ -49,14 +49,14 @@ func TestCodexAppRouteFollowsConnectAndDisconnect(t *testing.T) {
 	if err := cx.Disconnect(); err != nil {
 		t.Fatal(err)
 	}
-	// the [model_providers.magpie] table stays, for the threads started
+	// the [model_providers.myna] table stays, for the threads started
 	// on it; openai_base_url goes
 	if r := route(); r == connected {
 		t.Fatalf("disconnect left the route as it was: %q\n%s", r, read())
 	}
 }
 
-// requires_openai_auth on magpie's table decides whether the Codex app
+// requires_openai_auth on myna's table decides whether the Codex app
 // has its ChatGPT account at all (openaiAuth), and the app-server reads it
 // as it starts: the route changes with it, so the app is restarted onto
 // its account when Sync writes it (Qyburn3 on X).
@@ -81,7 +81,7 @@ func TestCodexAppRouteFollowsOpenAIAuth(t *testing.T) {
 
 // #4550: the Codex app's app-server was restarted three times in 20
 // minutes with the user doing nothing, and a slow MCP server took
-// ChatGPT down with each. What magpie writes to Codex's catalog changes
+// ChatGPT down with each. What myna writes to Codex's catalog changes
 // with no change of the user's: a list that fails to fetch drops its
 // models and has them back at the next fetch, the order is re-ranked by
 // the models Codex used last, descriptions and windows follow the
@@ -90,8 +90,8 @@ func TestCodexAppRouteFollowsOpenAIAuth(t *testing.T) {
 // be read now is no change either.
 func TestCodexAppRouteKeepsThroughListFlaps(t *testing.T) {
 	home := syncHome(t)
-	codexCat := filepath.Join(home, ".codex", "magpie-models.json")
-	writeFile(t, filepath.Join(home, ".codex", "config.toml"), "model = \"relay/glm-4.6\"\nmodel_provider = \"magpie\"\nmodel_catalog_json = '"+codexCat+"'\n")
+	codexCat := filepath.Join(home, ".codex", "myna-models.json")
+	writeFile(t, filepath.Join(home, ".codex", "config.toml"), "model = \"relay/glm-4.6\"\nmodel_provider = \"myna\"\nmodel_catalog_json = '"+codexCat+"'\n")
 	writeFile(t, codexCat, `{"models":[]}`)
 	save := func(models ...string) {
 		t.Helper()

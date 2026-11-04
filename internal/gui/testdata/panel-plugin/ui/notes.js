@@ -1,9 +1,9 @@
-// A panel in each provider's editor: magpie.context.provider says which
+// A panel in each provider's editor: myna.context.provider says which
 // provider it is in, and the note is kept in the plugin's own options.
 (async () => {
-  await magpie.ready;
-  const id = magpie.context.provider.id;
-  let opts = await magpie.options.get();
+  await myna.ready;
+  const id = myna.context.provider.id;
+  let opts = await myna.options.get();
   const box = document.getElementById("note");
   box.value = opts.notes?.[id] || "";
   let timer = 0;
@@ -12,7 +12,7 @@
   box.oninput = () => {
     clearTimeout(timer);
     timer = setTimeout(async () => {
-      opts = await magpie.options.set({ ...opts, notes: { ...opts.notes, [id]: box.value } });
+      opts = await myna.options.set({ ...opts, notes: { ...opts.notes, [id]: box.value } });
       document.getElementById("saved").textContent = "Saved";
     }, 1200);
   };

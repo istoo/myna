@@ -2,7 +2,7 @@
 // Two things the Routing page did over and over while it sat in sight,
 // each making garbage WebKit let pile up (#1481):
 //
-// - the arc a flight takes through magpie (via's j) was laid again every
+// - the arc a flight takes through myna (via's j) was laid again every
 //   frame of the flight, a new path string and its control points sixty
 //   times a second, though its ends had not moved. It is laid again only
 //   when an end moves.
@@ -12,7 +12,7 @@
 //   It walks them with for…in.
 //
 // The test counts both while requests come in and fly, and checks the
-// arc is still drawn and the names still hidden. MAGPIE_ROUTING_ASSETS
+// arc is still drawn and the names still hidden. MYNA_ROUTING_ASSETS
 // points the page at an older asset tree, to watch this go red there.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -21,7 +21,7 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 const engines = process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"];
 
-const assets = path.resolve(process.env.MAGPIE_ROUTING_ASSETS || path.join(__dirname, "../assets"));
+const assets = path.resolve(process.env.MYNA_ROUTING_ASSETS || path.join(__dirname, "../assets"));
 const iso = (ms) => new Date(ms).toISOString();
 const acct = (n) => ({ id: `acct-${n}`, provider: `prov${n}`, name: `Provider ${n}`, who: `user${n}@example.com`, kind: "account", model: `model-${n}`, known: true, used: 10 * n, plan: "Pro" });
 const agentsOf = ["codex", "claude", "opencode", "kimi"];
@@ -92,11 +92,11 @@ for (const engine of engines) for (const lang of ["en", "zh"]) {
     page.on("pageerror", (e) => errors.push(e.message));
     const next = [];
     await page.route("**/*", serve(lang, [req(1)], next));
-    await page.goto("http://magpie.test/?view=routing");
+    await page.goto("http://myna.test/?view=routing");
     await page.locator(".rt-req").first().waitFor();
     await page.waitForTimeout(800);
 
-    // a request under way flies through magpie for as long as it is
+    // a request under way flies through myna for as long as it is
     // answered: its arc is drawn, and laid once while nothing moves
     next.push(live(2));
     await page.waitForFunction(() => [...document.querySelectorAll("path.via")].some((p) => p.getAttribute("d")));
@@ -107,7 +107,7 @@ for (const engine of engines) for (const lang of ["en", "zh"]) {
     assert(frames > 10, `the flight drew only ${frames} frames in 800ms: nothing to count arcs over`);
     // laid every frame, it is about as many as the frames; the stage still
     // settling (a column fitted, a row come in) lays it a few times
-    assert(arcs * 4 <= frames, `the arc through magpie was laid ${arcs} times over ${frames} frames, about once a frame`);
+    assert(arcs * 4 <= frames, `the arc through myna was laid ${arcs} times over ${frames} frames, about once a frame`);
 
     // the trace's answers: noteAccounts walks each without Object.entries
     const entries = await page.evaluate(async () => {

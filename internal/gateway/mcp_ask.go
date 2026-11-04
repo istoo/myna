@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-// A request magpie's own MCP server makes of its client while it answers
+// A request myna's own MCP server makes of its client while it answers
 // one of the client's (MCP Streamable HTTP): the POST is answered with an
 // event stream instead of JSON, the request is one event on it, the client
 // POSTs its answer, and the reply ends the stream. The hub asks so for an
@@ -64,7 +64,7 @@ func askClient(ctx context.Context, method string, params any, wait time.Duratio
 	if x == nil || !x.canStream {
 		return mcpMessage{}, errCantAsk
 	}
-	id, _ := json.Marshal("magpie-" + rand.Text())
+	id, _ := json.Marshal("myna-" + rand.Text())
 	ch := make(chan mcpMessage, 1)
 	clientAsked.Store(string(id), ch)
 	defer clientAsked.Delete(string(id))

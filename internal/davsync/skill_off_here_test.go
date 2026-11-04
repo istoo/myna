@@ -7,9 +7,9 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/library"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/appdir"
+	"github.com/istoo/myna/internal/library"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // A skill turned off on one computer (hanslin1666 on Discord) stays off

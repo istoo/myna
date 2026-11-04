@@ -43,7 +43,7 @@ func putJSON(t *testing.T, j string) *Result {
 }
 
 // A subagent goes with the library to another computer, which writes it
-// into its agents; what magpie wrote into the first computer's agents
+// into its agents; what myna wrote into the first computer's agents
 // stays out of the bundle; taking it out on one takes it out on the other.
 func TestCarrySubagents(t *testing.T) {
 	_, carried := carriedSubagent(t)
@@ -59,9 +59,9 @@ func TestCarrySubagents(t *testing.T) {
 		mustJSON(t, got["skills"]) != `["gone","tdd"]` || mustJSON(t, got["mcp"]) != `["github","gone"]` || mustJSON(t, got["agents"]) != `["claude","codex"]` {
 		t.Errorf("the subagent carried: %v", got)
 	}
-	// this computer's own: which files magpie wrote, and their hashes
+	// this computer's own: which files myna wrote, and their hashes
 	if strings.Contains(carried, "applied") || strings.Contains(carried, "reviewer.md") || strings.Contains(carried, "reviewer.toml") || strings.Contains(carried, `"hash"`) {
-		t.Errorf("what magpie wrote here is carried:\n%s", carried)
+		t.Errorf("what myna wrote here is carried:\n%s", carried)
 	}
 
 	h2 := sandbox(t)
@@ -117,7 +117,7 @@ func TestCarrySubagents(t *testing.T) {
 	}
 }
 
-// A bundle from a magpie that didn't carry subagents knows nothing of
+// A bundle from a myna that didn't carry subagents knows nothing of
 // them: the ones here and their files stay.
 func TestCarryOldBundleKeepsSubagents(t *testing.T) {
 	h, carried := carriedSubagent(t)
@@ -161,7 +161,7 @@ func TestCarrySubagentKeepsUsersFiles(t *testing.T) {
 	}
 }
 
-// A newer magpie's bundle: a field this one doesn't know, and an agent it
+// A newer myna's bundle: a field this one doesn't know, and an agent it
 // can't give subagents to, which stays ticked to be carried on as it came.
 // A name that isn't one is refused: it is a file's name in every agent.
 func TestCarryNewerSubagents(t *testing.T) {
@@ -176,7 +176,7 @@ func TestCarryNewerSubagents(t *testing.T) {
 		t.Errorf("not written: %v", err)
 	}
 	if l, _ := load(); len(l.Subagents) != 1 || !strings.Contains(strings.Join(l.Subagents[0].Agents, ","), "kimi") {
-		t.Errorf("the newer magpie's tick went: %+v", l.Subagents)
+		t.Errorf("the newer myna's tick went: %+v", l.Subagents)
 	}
 	var in Bundle
 	json.Unmarshal([]byte(strings.Replace(carried, `"name":"reviewer"`, `"name":"../../evil"`, 1)), &in)

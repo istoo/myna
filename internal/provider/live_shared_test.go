@@ -10,13 +10,13 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/filememo"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/filememo"
 )
 
 // A look at one model of the vendor's list (its APIs, price, tiers), asked
 // for every model a page lists, reads the model as the list has it, not a
-// copy: the copies were 32 MB of a live magpie's 2.6 GB in a minute and a
+// copy: the copies were 32 MB of a live myna's 2.6 GB in a minute and a
 // half. A caller's append is its own, and a model the user gave its own id
 // is still a copy with that id.
 func TestLiveModelReadWithoutACopy(t *testing.T) {

@@ -12,10 +12,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/gui"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/agent"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/gui"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // A routing group or a provider saved answers before the agents' model
@@ -50,12 +50,12 @@ func TestSaveAnswersBeforeTheAgentsSync(t *testing.T) {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	// Pi runs a model of magpie's: connected, so a sync writes its list
-	if err := os.WriteFile(filepath.Join(dir, "settings.json"), []byte(`{"defaultProvider":"magpie","defaultModel":"a/m1"}`), 0o600); err != nil {
+	// Pi runs a model of myna's: connected, so a sync writes its list
+	if err := os.WriteFile(filepath.Join(dir, "settings.json"), []byte(`{"defaultProvider":"myna","defaultModel":"a/m1"}`), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	// Pi as magpie connected it (Connect's connect.was stash): a sync
-	// writes only an agent connected in magpie
+	// Pi as myna connected it (Connect's connect.was stash): a sync
+	// writes only an agent connected in myna
 	if err := os.WriteFile(filepath.Join(filepath.Dir(provider.Path()), "stash.json"), []byte(`{"pi.connect.was":"{}"}`), 0o600); err != nil {
 		t.Fatal(err)
 	}

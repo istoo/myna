@@ -7,10 +7,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
-// A look that only ranges over magpie's models reads the list kept, not a
+// A look that only ranges over myna's models reads the list kept, not a
 // copy: a copy per look was 37 MB of what forty window polls allocated
 // with real accounts, most of it Pi's and Claude Code's thinking levels.
 func TestModelReadersShareTheList(t *testing.T) {
@@ -29,7 +29,7 @@ func TestModelReadersShareTheList(t *testing.T) {
 	}
 
 	// every look that ranges over the list, or counts it, takes it shared
-	reads := regexp.MustCompile(`(range|len\()\s*magpieModels\(`)
+	reads := regexp.MustCompile(`(range|len\()\s*mynaModels\(`)
 	files, _ := filepath.Glob("*.go")
 	for _, f := range files {
 		if strings.HasSuffix(f, "_test.go") {
@@ -40,7 +40,7 @@ func TestModelReadersShareTheList(t *testing.T) {
 			t.Fatal(err)
 		}
 		if m := reads.Find(b); m != nil {
-			t.Errorf("%s reads magpieModels' copy only to range over it: %s", f, m)
+			t.Errorf("%s reads mynaModels' copy only to range over it: %s", f, m)
 		}
 	}
 }

@@ -112,7 +112,7 @@ for (const engine of engines) {
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang));
-        await page.goto("http://magpie.test/?view=routing");
+        await page.goto("http://myna.test/?view=routing");
         const view = page.locator("#view-routing");
         await page.locator("#view-routing .rt-req").nth(39).waitFor();
         // grouped by session, as the reporter's list was
@@ -161,7 +161,7 @@ for (const engine of engines) {
     page.setDefaultTimeout(5000);
     page.setDefaultNavigationTimeout(60000);
     await page.route("**/*", serve("en"));
-    await page.goto("http://magpie.test/?view=routing");
+    await page.goto("http://myna.test/?view=routing");
     const view = page.locator("#view-routing");
     await page.locator("#view-routing .rt-req").nth(39).waitFor();
     await view.evaluate((v, html) => v.insertAdjacentHTML("beforeend", html),
@@ -190,7 +190,7 @@ for (const engine of engines) {
     // wheeled on past them)
     const short = await browser.newPage({ viewport: { width: 900, height: 600 } });
     await short.route("**/*", serve("en"));
-    await short.goto("http://magpie.test/?view=routing");
+    await short.goto("http://myna.test/?view=routing");
     await short.locator("#view-routing .rt-req").nth(39).waitFor();
     await short.locator("#view-routing").evaluate((v, html) => v.insertAdjacentHTML("afterbegin", html), held.mchips);
     const chips = short.locator("#view-routing .mchips");
@@ -280,7 +280,7 @@ for (const engine of engines) {
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(60000);
       await page.route("**/*", serve("en"));
-      await page.goto("http://magpie.test/?view=routing");
+      await page.goto("http://myna.test/?view=routing");
       await page.locator("#view-routing .rt-req").nth(39).waitFor();
       // every stylesheet under assets, added where the page doesn't link it
       const sheets = (await fs.readdir(assets, { recursive: true })).map((f) => f.split(path.sep).join("/")).filter((f) => f.endsWith(".css")).sort();
@@ -355,7 +355,7 @@ for (const engine of engines) {
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(60000);
       await page.route("**/*", serve("en"));
-      await page.goto("http://magpie.test/?view=routing");
+      await page.goto("http://myna.test/?view=routing");
       const view = page.locator("#view-routing");
       await page.locator("#view-routing .rt-req").nth(39).waitFor();
       const list = page.locator("#view-routing .rt-reqs").first();

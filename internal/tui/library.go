@@ -1,6 +1,6 @@
 package tui
 
-// The library page: the instructions, MCP servers and skills magpie gives
+// The library page: the instructions, MCP servers and skills myna gives
 // the agents, which agents get each, what the agents have that the library
 // doesn't, and RTK's hook in each — what the app's Library view does, in
 // the terminal.
@@ -17,9 +17,9 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/library"
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/istoo/myna/internal/agent"
+	"github.com/istoo/myna/internal/library"
+	"github.com/istoo/myna/internal/proc"
 )
 
 // libRow is one line of the page.
@@ -78,7 +78,7 @@ func (m *model) reloadLibrary() {
 		}
 		if s.OffHere {
 			// ticked agents are other computers' too; none gets it here
-			r.about = "off on this computer · magpie library skill on-here " + s.Name
+			r.about = "off on this computer · myna library skill on-here " + s.Name
 		}
 		m.lib = append(m.lib, r)
 	}
@@ -152,7 +152,7 @@ func (m model) updateLibrary(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		case "instructions", "mcp", "skill", "rtk":
 			m.openLibAgents(r)
 		case "found-mcp", "found-skill":
-			m.flash, m.flashOK = "i brings "+r.name+" into the library, for magpie to give it to other agents too", true
+			m.flash, m.flashOK = "i brings "+r.name+" into the library, for myna to give it to other agents too", true
 			if !r.own {
 				m.flash += "; d takes it out of every agent that has it"
 			}
@@ -366,7 +366,7 @@ func (m *model) openLibAdd() {
 					in := newInput("owner/repo, a GitHub or GitLab link, a git address (git@host:group/repo.git), or a folder's full path")
 					in.CharLimit = 400
 					return askMsg{ask{crumbs: []string{"library", "add", "skills"}, input: in,
-						hint:    "magpie looks there for skills, then you pick one",
+						hint:    "myna looks there for skills, then you pick one",
 						onEnter: probeCmd}}
 				}
 				in := newInput("<name> <url | command args…>")
@@ -510,7 +510,7 @@ func editInstructions() tea.Cmd {
 	if err != nil {
 		return func() tea.Msg { return flashMsg{text: err.Error()} }
 	}
-	f, err := os.CreateTemp("", "magpie-instructions-*.md")
+	f, err := os.CreateTemp("", "myna-instructions-*.md")
 	if err != nil {
 		return func() tea.Msg { return flashMsg{text: err.Error()} }
 	}

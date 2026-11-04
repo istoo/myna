@@ -10,18 +10,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/istoo/myna/internal/gateway"
 )
 
 // sameGroup compares two values of a field, one of them read back from the
 // agent's own settings where Claude Code's [1m] mark rides on the group's
-// id: the marked one is the group magpie set, not another group — the
+// id: the marked one is the group myna set, not another group — the
 // gateway serves either (#750's comparison, with the mark on one side).
 func TestSameGroupTakesTheOneMMarkOff(t *testing.T) {
 	for _, pair := range [][2]string{
 		{"group/auto-gpt-5", "group/auto-gpt-5[1m]"},
 		{"group/auto-gpt-5[1m]", "group/auto-gpt-5"},
-		{"group/auto-gpt-5[1m]", "magpie/group/auto-gpt-5"},
+		{"group/auto-gpt-5[1m]", "myna/group/auto-gpt-5"},
 	} {
 		if !sameGroup(pair[0], pair[1]) {
 			t.Errorf("sameGroup(%q, %q) = false", pair[0], pair[1])
@@ -36,7 +36,7 @@ func TestSameGroupTakesTheOneMMarkOff(t *testing.T) {
 }
 
 // Something else rewrote Codex's config: the base URL gone while the model
-// is still magpie's is unwired, and setting it again wires it back.
+// is still myna's is unwired, and setting it again wires it back.
 func TestCodexDriftUnwired(t *testing.T) {
 	home, read := codexHome(t, `{"tokens":{"access_token":"x","id_token":"x.e30.x"}}`, "")
 	cx := codex(home)
@@ -59,7 +59,7 @@ func TestCodexDriftUnwired(t *testing.T) {
 	}
 }
 
-// A magpie model replaced by one of the agent's own is drift; one magpie
+// A myna model replaced by one of the agent's own is drift; one myna
 // model for another (the agent's own picker) isn't. Keep forgets it.
 func TestDriftReplaced(t *testing.T) {
 	home, read := codexHome(t, "", "")
@@ -76,7 +76,7 @@ func TestDriftReplaced(t *testing.T) {
 	if err := cx.Reapply(); err != nil {
 		t.Fatal(err)
 	}
-	if cfg := read(); !strings.Contains(cfg, `model = "fake/m1"`) || !strings.Contains(cfg, `model_provider = "magpie"`) || cx.Drift() != nil {
+	if cfg := read(); !strings.Contains(cfg, `model = "fake/m1"`) || !strings.Contains(cfg, `model_provider = "myna"`) || cx.Drift() != nil {
 		t.Fatalf("reapplied:\n%s", cfg)
 	}
 	os.WriteFile(filepath.Join(home, ".codex", "config.toml"), []byte("model = \"gpt-5.5\"\n"), 0o644)
@@ -86,9 +86,9 @@ func TestDriftReplaced(t *testing.T) {
 	}
 }
 
-// A Codex used since magpie set it, none of whose requests reached the
-// gateway, runs round magpie: bypassed, until a request arrives or it is
-// set again. A use while magpie wasn't up says nothing.
+// A Codex used since myna set it, none of whose requests reached the
+// gateway, runs round myna: bypassed, until a request arrives or it is
+// set again. A use while myna wasn't up says nothing.
 func TestDriftBypassed(t *testing.T) {
 	home, _ := codexHome(t, "", "")
 	cx := codex(home)
@@ -127,11 +127,11 @@ func TestDriftBypassed(t *testing.T) {
 	started = time.Now()
 	prompt(time.Now().Add(-5 * time.Minute))
 	if d := cx.Drift(); d != nil {
-		t.Fatalf("used while magpie was down: %+v", d)
+		t.Fatalf("used while myna was down: %+v", d)
 	}
 }
 
-// A profile that sets its own provider wins over magpie's top level.
+// A profile that sets its own provider wins over myna's top level.
 func TestCodexDriftProfile(t *testing.T) {
 	home, read := codexHome(t, "", "")
 	cx := codex(home)
@@ -144,8 +144,8 @@ func TestCodexDriftProfile(t *testing.T) {
 	}
 }
 
-// Every agent magpie wires through the gateway says when its wiring was
-// taken out behind magpie's back — the gateway's URL swapped for another —
+// Every agent myna wires through the gateway says when its wiring was
+// taken out behind myna's back — the gateway's URL swapped for another —
 // and setting it again puts it back.
 func TestDriftUnwiredEveryAgent(t *testing.T) {
 	home, _ := codexHome(t, "", "")
@@ -173,7 +173,7 @@ func TestDriftUnwiredEveryAgent(t *testing.T) {
 			continue
 		}
 		t.Run(a.ID, func(t *testing.T) {
-			// the field that takes one of magpie's models
+			// the field that takes one of myna's models
 			var f Field
 			want := ""
 			for _, g := range a.Fields {
@@ -183,16 +183,16 @@ func TestDriftUnwiredEveryAgent(t *testing.T) {
 					}
 				}
 			}
-			// or the one that puts it on magpie as a whole (Claude Desktop)
+			// or the one that puts it on myna as a whole (Claude Desktop)
 			for _, g := range a.Fields {
 				for _, o := range g.Options(a.Values()) {
-					if o.Value == magpieID && want == "" {
+					if o.Value == mynaID && want == "" {
 						f, want = g, o.Value
 					}
 				}
 			}
 			if want == "" {
-				t.Fatal("no field takes magpie's models")
+				t.Fatal("no field takes myna's models")
 			}
 			if err := a.Apply(f.Key, want); err != nil {
 				t.Fatal(err)
@@ -232,7 +232,7 @@ func TestDriftUnwiredEveryAgent(t *testing.T) {
 }
 
 // Claude Code's managed settings win over the user's: a base URL there is
-// drift magpie can only point out.
+// drift myna can only point out.
 func TestClaudeDriftManaged(t *testing.T) {
 	home, _ := codexHome(t, "", "")
 	managed := claudeManaged
@@ -249,8 +249,8 @@ func TestClaudeDriftManaged(t *testing.T) {
 }
 
 // The Codex app writes no prompt log, but it logs each model request it
-// opens: one sent elsewhere, or refused because magpie wasn't running, is
-// drift; one that reached magpie isn't.
+// opens: one sent elsewhere, or refused because myna wasn't running, is
+// drift; one that reached myna isn't.
 func TestCodexDriftReached(t *testing.T) {
 	home, _ := codexHome(t, `{"tokens":{"access_token":"x","id_token":"x.e30.x"}}`, "")
 	cx := codex(home)
@@ -285,15 +285,15 @@ func TestCodexDriftReached(t *testing.T) {
 	}
 	log("INFO", "connecting to websocket: "+ws)
 	if d := cx.Drift(); d != nil {
-		t.Fatalf("reached magpie: %+v", d)
+		t.Fatalf("reached myna: %+v", d)
 	}
 }
 
-// A magpie on a port of its own (magpie-dev) runs beside the installed one:
+// A myna on a port of its own (myna-dev) runs beside the installed one:
 // an agent that one wired to its gateway is not drift here, while one wired
 // to neither still is.
-func TestDriftInstalledMagpie(t *testing.T) {
-	t.Setenv("MAGPIE_ADDR", "127.0.0.1:3426")
+func TestDriftInstalledMyna(t *testing.T) {
+	t.Setenv("MYNA_ADDR", "127.0.0.1:3426")
 	home, _ := codexHome(t, "", "")
 	cx := codex(home)
 	if err := cx.Apply("model", "fake/m1"); err != nil {
@@ -302,7 +302,7 @@ func TestDriftInstalledMagpie(t *testing.T) {
 	cfg := filepath.Join(home, ".codex", "config.toml")
 	os.WriteFile(cfg, []byte("openai_base_url = \"http://"+gateway.DefaultAddr+gateway.CodexPath+"\"\nmodel = \"fake/m1\"\n"), 0o644)
 	if d := cx.Drift(); d != nil {
-		t.Fatalf("the installed magpie's wiring taken for drift: %+v", d)
+		t.Fatalf("the installed myna's wiring taken for drift: %+v", d)
 	}
 	os.WriteFile(cfg, []byte("openai_base_url = \"http://127.0.0.1:9999"+gateway.CodexPath+"\"\nmodel = \"fake/m1\"\n"), 0o644)
 	if d := cx.Drift(); d == nil || d.Kind != "unwired" {
@@ -310,11 +310,11 @@ func TestDriftInstalledMagpie(t *testing.T) {
 	}
 }
 
-// Whether the installed magpie wired the agent is looked up in the bytes
+// Whether the installed myna wired the agent is looked up in the bytes
 // already read, not in a copy of the file and two strings of it: each
 // field's drift asked, 5 MB a poll of a Codex config.toml of 1.5 MB.
 func TestInstalledWiringReadsNoCopy(t *testing.T) {
-	t.Setenv("MAGPIE_ADDR", "127.0.0.1:3426")
+	t.Setenv("MYNA_ADDR", "127.0.0.1:3426")
 	home, _ := codexHome(t, "", "")
 	cx := codex(home)
 	var cfg strings.Builder
@@ -329,7 +329,7 @@ func TestInstalledWiringReadsNoCopy(t *testing.T) {
 	old := time.Now().Add(-time.Hour)
 	os.Chtimes(path, old, old)
 	if !cx.theInstalled() {
-		t.Fatal("the installed magpie's wiring not seen")
+		t.Fatal("the installed myna's wiring not seen")
 	}
 	var m0, m1 runtime.MemStats
 	runtime.ReadMemStats(&m0)

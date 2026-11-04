@@ -6,8 +6,8 @@
 package routing
 
 import (
-	"github.com/yetone/magpie/internal/pluginrt"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/pluginrt"
+	"github.com/istoo/myna/internal/provider"
 )
 
 func init() {

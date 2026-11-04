@@ -5,7 +5,7 @@
 // sits under the lists. Each asks first, in an alert that says what goes,
 // that key limits and allowances still count it, and that it can't be
 // undone; Cancel sends nothing, Clear POSTs /api/usage/clear and the page
-// is read again. Every language, a wide window, a narrow one and magpie
+// is read again. Every language, a wide window, a narrow one and myna
 // web on a phone; no backend, the API is faked.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -23,7 +23,7 @@ const usageOf = (models) => {
   const total = models.reduce((n, g) => n + g.input + g.output, 0);
   return {
     calls: 10 * models.length, errors: 0, input: total - 100 * models.length, output: 100 * models.length, reasoning: 0, cache_read: 0, cache_write: 0, unpriced: 0, cost: 0, bucket: "day",
-    series: [], path: "~/.config/magpie/usage.jsonl",
+    series: [], path: "~/.config/myna/usage.jsonl",
     agents: models.length ? [G("pi", "Pi", total)] : [],
     models,
   };
@@ -84,7 +84,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           p.setDefaultNavigationTimeout(60000);
           p.on("pageerror", (e) => errors.push(e.message));
           await p.route("**/*", server(lang, web, saved, posts));
-          await p.goto("http://magpie.test/");
+          await p.goto("http://myna.test/");
           const nav = p.locator('[data-view="usage"]:visible').first();
           if (await nav.count()) await nav.click();
           else await p.evaluate(() => show("usage"));

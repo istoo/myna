@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// A listing's titler asks once whether magpie recorded anything: with
+// A listing's titler asks once whether myna recorded anything: with
 // nothing recorded, each of its many sessions costs nothing, not a Stat and
 // a folder name (#2278). Once something is recorded, a titler made after
 // finds the title as GatewayTitle does.

@@ -13,7 +13,7 @@ import (
 	xdraw "golang.org/x/image/draw"
 	_ "golang.org/x/image/webp"
 
-	"github.com/yetone/magpie/internal/appdir"
+	"github.com/istoo/myna/internal/appdir"
 )
 
 // iconSide is the longest side, in pixels, of a picture the window is sent.

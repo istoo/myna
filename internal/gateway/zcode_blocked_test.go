@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // countAsked is an upstream that counts tokens, noting each time it's asked.
@@ -191,8 +191,8 @@ func TestRelayRefusalSaysWhatItWas(t *testing.T) {
 
 // A custom Chat relay that serves only some agents' clients, sent
 // WorkBuddy's request with the agent's own User-Agent passed on
-// (maralica on Discord, "magpie-grok"): it is asked for its own model id,
-// never one magpie named, with WorkBuddy's User-Agent as sent, and
+// (maralica on Discord, "myna-grok"): it is asked for its own model id,
+// never one myna named, with WorkBuddy's User-Agent as sent, and
 // whatever reason its 403 gives reaches the agent: plain text, JSON, a
 // page with no title, a page's fragment, an XML error.
 func TestChatRelayRefusalSaysWhy(t *testing.T) {
@@ -200,14 +200,14 @@ func TestChatRelayRefusalSaysWhy(t *testing.T) {
 	for _, c := range []struct {
 		name, ct, body, want string
 	}{
-		{"text", "text/plain", "only Claude Code and Codex CLI are allowed", "magpie-grok: 403 Forbidden: only Claude Code and Codex CLI are allowed"},
-		{"json", "application/json", `{"error":{"message":"client WorkBuddy is not allowed","type":"forbidden"}}`, "magpie-grok: client WorkBuddy is not allowed"},
-		{"untitled page", "text/html", "<html><body><h1>403</h1><p>only Claude Code &amp; Codex CLI are allowed</p></body></html>", "magpie-grok: 403 Forbidden: a web page, not an API reply: “403 only Claude Code & Codex CLI are allowed”"},
-		{"fragment", "text/html", "<h1>Forbidden</h1>\n<p>client not allowed</p>", "magpie-grok: 403 Forbidden: Forbidden client not allowed"},
-		{"xml", "application/xml", `<?xml version="1.0"?><Error><Code>ClientNotAllowed</Code><Message>client not allowed</Message></Error>`, "magpie-grok: 403 Forbidden: ClientNotAllowed client not allowed"},
-		{"empty", "", "", "magpie-grok: 403 Forbidden: " + provider.NoDetails},
+		{"text", "text/plain", "only Claude Code and Codex CLI are allowed", "myna-grok: 403 Forbidden: only Claude Code and Codex CLI are allowed"},
+		{"json", "application/json", `{"error":{"message":"client WorkBuddy is not allowed","type":"forbidden"}}`, "myna-grok: client WorkBuddy is not allowed"},
+		{"untitled page", "text/html", "<html><body><h1>403</h1><p>only Claude Code &amp; Codex CLI are allowed</p></body></html>", "myna-grok: 403 Forbidden: a web page, not an API reply: “403 only Claude Code & Codex CLI are allowed”"},
+		{"fragment", "text/html", "<h1>Forbidden</h1>\n<p>client not allowed</p>", "myna-grok: 403 Forbidden: Forbidden client not allowed"},
+		{"xml", "application/xml", `<?xml version="1.0"?><Error><Code>ClientNotAllowed</Code><Message>client not allowed</Message></Error>`, "myna-grok: 403 Forbidden: ClientNotAllowed client not allowed"},
+		{"empty", "", "", "myna-grok: 403 Forbidden: " + provider.NoDetails},
 	} {
-		for _, model := range []string{"magpie-grok/grok-4.7", "group/g"} {
+		for _, model := range []string{"myna-grok/grok-4.7", "group/g"} {
 			t.Run(c.name+" "+model, func(t *testing.T) {
 				fresh(t)
 				var asked, sentUA string
@@ -225,10 +225,10 @@ func TestChatRelayRefusalSaysWhy(t *testing.T) {
 					io.WriteString(w, c.body)
 				}))
 				t.Cleanup(relay.Close)
-				if err := provider.Save(provider.Provider{ID: "magpie-grok", Name: "magpie-grok", Key: "k", Models: []string{"grok-4.7"}, Chat: relay.URL + "/v1", PassUserAgent: true}); err != nil {
+				if err := provider.Save(provider.Provider{ID: "myna-grok", Name: "myna-grok", Key: "k", Models: []string{"grok-4.7"}, Chat: relay.URL + "/v1", PassUserAgent: true}); err != nil {
 					t.Fatal(err)
 				}
-				if err := provider.SaveGroup(provider.Group{Name: "G", Members: []string{"magpie-grok/grok-4.7"}, Routing: provider.Ordered}); err != nil {
+				if err := provider.SaveGroup(provider.Group{Name: "G", Members: []string{"myna-grok/grok-4.7"}, Routing: provider.Ordered}); err != nil {
 					t.Fatal(err)
 				}
 				rec := httptest.NewRecorder()
@@ -276,7 +276,7 @@ func TestZCodeStartPlanBlockRestsRestricted(t *testing.T) {
 	if !s.Unrest(rest.Key) {
 		t.Fatal("its rest can't be lifted")
 	}
-	old := []byte(`{"type":"error","error":{"type":"permission_error","message":"405 Method Not Allowed — ZCode's Start Plan still turned this request away, though magpie sends it as the ZCode app does; it can be a network block of this IP, or ZCode checking for something new. Use an account with a GLM Coding Plan, or add another provider to this group"}}`)
+	old := []byte(`{"type":"error","error":{"type":"permission_error","message":"405 Method Not Allowed — ZCode's Start Plan still turned this request away, though myna sends it as the ZCode app does; it can be a network block of this IP, or ZCode checking for something new. Use an account with a GLM Coding Plan, or add another provider to this group"}}`)
 	if f := failureOf(c, 405, old); f == failRestricted {
 		t.Fatal("0.1.26's words read as restricted")
 	}

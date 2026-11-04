@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/budget"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/access"
+	"github.com/istoo/myna/internal/budget"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // keyRow is a gateway key as the Gateway page lists it, with what it has
@@ -35,7 +35,7 @@ type keyModelJSON struct {
 	Plan         string `json:"plan,omitempty"`    // the account's subscription, for the menu's note
 	// Decides marks a decision model (Jev, Clef…), which no agent lists:
 	// a key held to some models reaches it at /v1/systemone, and another
-	// magpie lists it, only when it is picked (Kautism on Discord)
+	// myna lists it, only when it is picked (Kautism on Discord)
 	Decides bool `json:"decides,omitempty"`
 }
 
@@ -72,7 +72,7 @@ func callerKeyRoutes(mux *http.ServeMux) {
 		accounts := []keyModelJSON{}
 		for _, e := range provider.Catalog() {
 			if e.Group != "" {
-				// by the id magpie keeps it by, group/<id>, as a key held to it
+				// by the id myna keeps it by, group/<id>, as a key held to it
 				// before names it: a found group's auto/<model> passes for it
 				// (gateway's allows), and its name is what the picker shows
 				out = append(out, keyModelJSON{ID: provider.GroupPrefix + e.Group, Name: cmp.Or(e.Name, e.Group), Group: true})
@@ -82,7 +82,7 @@ func callerKeyRoutes(mux *http.ServeMux) {
 		}
 		// the decision models the routing groups' pickers offer, each
 		// after its provider's chat models: the gateway holds a key to
-		// them as to any model (serveSystemOne, and another magpie's list
+		// them as to any model (serveSystemOne, and another myna's list
 		// of them), so a key held to some models had no way to be let use
 		// one but All models (Kautism on Discord: a key held to two
 		// groups, and Clef and Jev listed nowhere)

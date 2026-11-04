@@ -5,11 +5,11 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/library"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/access"
+	"github.com/istoo/myna/internal/appdir"
+	"github.com/istoo/myna/internal/library"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
 )
 
 func TestCollectSettingsKeysCompatibility(t *testing.T) {

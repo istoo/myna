@@ -33,7 +33,7 @@ function server(lang, asked) {
     const url = new URL(route.request().url());
     asked.push(url.href);
     const json = (data) => route.fulfill({ json: data });
-    if (url.host !== "magpie.test") return route.fulfill({ status: 404, body: "" });
+    if (url.host !== "myna.test") return route.fulfill({ status: 404, body: "" });
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:false};` });
     if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (url.pathname === "/api/state") return json({ agents: [], profiles: [], settings: { lang, theme: "light" } });
@@ -65,7 +65,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], asked = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, asked));
-        await page.goto("http://magpie.test/?view=plugins");
+        await page.goto("http://myna.test/?view=plugins");
         const card = (pkg) => page.locator(`#view-plugins .pm-card[data-pkg="${pkg}"] .pm-logo`);
         // the list is drawn again as the market comes in: a card found a
         // moment ago can be gone by the scroll, so the scroll looks again
@@ -99,13 +99,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const dlg = page.locator("#modal .pm-detail");
         await dlg.waitFor();
         assert.equal(await dlg.locator(".pm-dhead .pm-logo .ic.generic").count(), 1, "the page of a URL wears the cube");
-        await page.goto("http://magpie.test/?view=plugins");
+        await page.goto("http://myna.test/?view=plugins");
         await page.locator(`#view-plugins .pm-card[data-pkg="${KILO}"] .pm-name`).first().click();
         await dlg.waitFor();
         assert.equal(await dlg.locator(".pm-dhead .pm-logo img").getAttribute("src"), "/api/icons/kilo.png");
 
         await page.waitForTimeout(0);
-        const wrong = asked.filter((u) => !u.startsWith("http://magpie.test/") || /\/icons\/.*(https?:|s1\.dev)/.test(decodeURIComponent(u)));
+        const wrong = asked.filter((u) => !u.startsWith("http://myna.test/") || /\/icons\/.*(https?:|s1\.dev)/.test(decodeURIComponent(u)));
         assert.deepEqual(wrong, [], "nothing asked of another host, nor a bundled file named by a URL");
         assert.deepEqual(errors, []);
         await ctx.close();

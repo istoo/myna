@@ -19,7 +19,7 @@ func TestSet(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", home+"/.config")
 	// Linux's system folders, a package's entry in them: the test's own
 	t.Setenv("XDG_CONFIG_DIRS", home+"/etc/xdg")
-	t.Setenv("APPIMAGE", "/opt/my apps/magpie.AppImage")
+	t.Setenv("APPIMAGE", "/opt/my apps/myna.AppImage")
 	if Enabled() != Off {
 		t.Fatal("on before it was turned on")
 	}
@@ -38,7 +38,7 @@ func TestSet(t *testing.T) {
 	if runtime.GOOS == "android" {
 		arg = "serve"
 	}
-	for _, want := range []string{"/opt/my apps/magpie.AppImage", arg} {
+	for _, want := range []string{"/opt/my apps/myna.AppImage", arg} {
 		if !strings.Contains(string(b), want) {
 			t.Errorf("%s lacks %q:\n%s", path, want, b)
 		}

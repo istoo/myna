@@ -7,22 +7,22 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/istoo/myna/internal/gateway"
 )
 
-// hentulong (X): Codex routed to WorkBuddy through magpie and back on its
+// hentulong (X): Codex routed to WorkBuddy through myna and back on its
 // own ChatGPT sign-in couldn't go on with the thread ("… unverifiable
 // hidden reasoning state that Rustponses cannot replay"). Disconnect lets
-// Codex go to OpenAI itself, so the reasoning items magpie gave it are
-// written as magpie_reasoning there (sessions.PortCodexRolloutsLeft); a
-// Codex still going through magpie (codexLeft false) keeps them for the
+// Codex go to OpenAI itself, so the reasoning items myna gave it are
+// written as myna_reasoning there (sessions.PortCodexRolloutsLeft); a
+// Codex still going through myna (codexLeft false) keeps them for the
 // models it gets their reasoning back.
-func TestCodexDisconnectRetiresMagpieReasoning(t *testing.T) {
+func TestCodexDisconnectRetiresMynaReasoning(t *testing.T) {
 	base := gateway.URL() + gateway.CodexPath
 	home, read := codexHome(t, `{"tokens":{"access_token":"x","id_token":"x.e30.x"}}`,
 		"model = \"gpt-5.5\"\nopenai_base_url = \""+base+"\"\n")
 	if codexLeft(home) {
-		t.Fatalf("Codex through magpie read as let go:\n%s", read())
+		t.Fatalf("Codex through myna read as let go:\n%s", read())
 	}
 	dir := filepath.Join(home, ".codex")
 	if err := os.MkdirAll(filepath.Join(dir, "thread-writer-locks"), 0o755); err != nil {
@@ -42,10 +42,10 @@ func TestCodexDisconnectRetiresMagpieReasoning(t *testing.T) {
 		t.Fatal(err)
 	}
 	if !codexLeft(home) {
-		t.Fatalf("Codex after Disconnect still read as through magpie:\n%s", read())
+		t.Fatalf("Codex after Disconnect still read as through myna:\n%s", read())
 	}
 	b, _ := os.ReadFile(path)
-	if !strings.Contains(string(b), `"type":"magpie_reasoning"`) || len(b) != len(line) {
+	if !strings.Contains(string(b), `"type":"myna_reasoning"`) || len(b) != len(line) {
 		t.Fatalf("after Disconnect:\n%s", b)
 	}
 }

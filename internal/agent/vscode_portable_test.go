@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/istoo/myna/internal/edit"
 )
 
 // portableVSCode lays VS Code out under home as a portable build is: its
@@ -68,7 +68,7 @@ func installedUserDir(home string) string {
 	return filepath.Join(os.Getenv("XDG_CONFIG_HOME"), "Code", "User")
 }
 
-// YOUIMARK's Windows has Scoop's VS Code, a portable build: magpie showed
+// YOUIMARK's Windows has Scoop's VS Code, a portable build: myna showed
 // the editor, but its Dir stayed %APPDATA%\Code\User, which doesn't exist —
 // code.cmd on PATH was detection enough — so its provider, models and
 // settings.json went where the build never reads (#3260). A portable
@@ -107,7 +107,7 @@ func TestVSCodePortableUserDir(t *testing.T) {
 		t.Fatal(err)
 	}
 	if _, ok := edit.GetJSONItem(lm, vscodeGroup); ok {
-		t.Fatalf("disconnected, magpie's group kept:\n%s", readFile(lm))
+		t.Fatalf("disconnected, myna's group kept:\n%s", readFile(lm))
 	}
 }
 
@@ -287,10 +287,10 @@ func TestVSCodeMacPortableWiring(t *testing.T) {
 	}
 	for _, at := range []string{dir, profile} {
 		if _, ok := edit.GetJSONItem(filepath.Join(at, "chatLanguageModels.json"), vscodeGroup); !ok {
-			t.Errorf("no magpie group in %s", at)
+			t.Errorf("no myna group in %s", at)
 		}
 	}
-	if _, err := DisconnectPreview(a, "no-such-magpie"); err == nil || !strings.Contains(err.Error(), "portable VS Code") {
+	if _, err := DisconnectPreview(a, "no-such-myna"); err == nil || !strings.Contains(err.Error(), "portable VS Code") {
 		t.Fatalf("a preview of the portable build: %v", err)
 	}
 	if err := a.Disconnect(); err != nil {
@@ -301,7 +301,7 @@ func TestVSCodeMacPortableWiring(t *testing.T) {
 			t.Errorf("%s's default model %q, want auto back", at, v)
 		}
 		if _, ok := edit.GetJSONItem(filepath.Join(at, "chatLanguageModels.json"), vscodeGroup); ok {
-			t.Errorf("magpie's group kept in %s", at)
+			t.Errorf("myna's group kept in %s", at)
 		}
 	}
 	if got := readFile(standard); got != `{"editor.fontSize":99}` {
@@ -315,7 +315,7 @@ func TestVSCodeMacPortableWiring(t *testing.T) {
 	if zoo.Path != settings || !zoo.Detected() {
 		t.Fatalf("Zoo Code at %q, detected %v", zoo.Path, zoo.Detected())
 	}
-	if _, err := DisconnectPreview(zoo, "no-such-magpie"); err == nil || !strings.Contains(err.Error(), "portable VS Code") {
+	if _, err := DisconnectPreview(zoo, "no-such-myna"); err == nil || !strings.Contains(err.Error(), "portable VS Code") {
 		t.Fatalf("a preview of Zoo Code in the portable build: %v", err)
 	}
 }
@@ -425,7 +425,7 @@ func TestVSCodePortableProduct(t *testing.T) {
 	}
 	// Scoop's data folder is under home, which a preview copies; the
 	// process it starts would still find the real one through PATH
-	if _, err := DisconnectPreview(vscode(home, cfg), "no-such-magpie"); err == nil || !strings.Contains(err.Error(), "portable VS Code") {
+	if _, err := DisconnectPreview(vscode(home, cfg), "no-such-myna"); err == nil || !strings.Contains(err.Error(), "portable VS Code") {
 		t.Fatalf("a preview of the portable build: %v", err)
 	}
 }

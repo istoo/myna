@@ -18,7 +18,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 func TestProviderListTellsTencentAccessKey(t *testing.T) {

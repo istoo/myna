@@ -152,7 +152,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
       for (const width of [900, 440]) {
         const posts = [];
-        const page = await open("http://magpie.test/?view=usage", { width, height: 760 }, posts);
+        const page = await open("http://myna.test/?view=usage", { width, height: 760 }, posts);
         const row = '.quota-credits[data-user="Me@example.com"]';
         await page.locator(row + " .ar-credits-last").waitFor();
         assert.equal(await text(page.locator(row + " .ar-credits-last")), w.line);
@@ -182,7 +182,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // folded line
       for (const width of [440, 360]) {
         const posts = [];
-        const panel = await open("http://magpie.test/?mode=panel", { width, height: 640 }, posts);
+        const panel = await open("http://myna.test/?mode=panel", { width, height: 640 }, posts);
         const row = '.pq-credits[data-user="Me@example.com"]';
         await panel.locator('#ptabs [data-ptab="usage"]').click();
         await panel.locator(row + " .ar-credits-last").waitFor();
@@ -203,7 +203,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
       // the Routing page says why the account went behind the key, and why
       // the conversation moved
-      const routing = await open("http://magpie.test/?view=routing", { width: 1100, height: 760 }, []);
+      const routing = await open("http://myna.test/?view=routing", { width: 1100, height: 760 }, []);
       await routing.locator(".rt-days .rt-day").nth(1).click();
       await routing.locator(".rt-req").first().click();
       await routing.waitForTimeout(300);

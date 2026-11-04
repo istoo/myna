@@ -18,7 +18,7 @@ import (
 // the account Codex is on, and the others only once that one is spent.
 // It read every saved account at once every five minutes, a burst from one
 // address no official client makes, for a user holding several ChatGPT
-// accounts in magpie with no agent wired (owl on Discord).
+// accounts in myna with no agent wired (owl on Discord).
 func TestCodexLookReadsTheActiveAccountOnly(t *testing.T) {
 	home := signIn(t) // me@example.com, acct-1
 	rememberLogins(true)
@@ -132,7 +132,7 @@ func TestKeepAliveRenewsOneALook(t *testing.T) {
 	}
 }
 
-// Every call magpie makes about a ChatGPT account goes as Codex makes it:
+// Every call myna makes about a ChatGPT account goes as Codex makes it:
 // its originator and User-Agent on /wham/usage, the reset credits and the
 // token endpoint, as on /codex/models and /responses already. They went
 // with Go's "Go-http-client/1.1" and no originator, unlike any request the

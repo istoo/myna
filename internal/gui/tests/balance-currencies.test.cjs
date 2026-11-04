@@ -64,7 +64,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           page.setDefaultNavigationTimeout(60000);
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", serve(lang, theme, fixtures(Date.now())));
-          await page.goto("http://magpie.test/?view=usage");
+          await page.goto("http://myna.test/?view=usage");
           const card = page.locator(".subscription-card", { hasText: "DeepSeek" });
           const curve = card.locator(".balance-curve");
           await curve.waitFor();

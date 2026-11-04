@@ -8,10 +8,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/budget"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/access"
+	"github.com/istoo/myna/internal/budget"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // keyPageGateway is a shared gateway with a plan of two models and two
@@ -20,7 +20,7 @@ import (
 func keyPageGateway(t *testing.T) (http.Handler, []access.Key, []string) {
 	t.Helper()
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("MYNA_ADDR", "")
 	budget.Forget()
 	pinLimitClock(t)
 	up := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -131,7 +131,7 @@ func TestKeyPageTellsAKeyItsOwn(t *testing.T) {
 	}
 }
 
-// No key, a wrong one, one turned off or removed, magpie's own token and
+// No key, a wrong one, one turned off or removed, myna's own token and
 // a key in the address are all told nothing, from another machine and
 // from this one; and a page from elsewhere (Origin null, a *.localhost
 // name, another site, a rebound name) is refused as on every route.
@@ -148,14 +148,14 @@ func TestKeyPageRefusesWithoutItsKey(t *testing.T) {
 		want int
 	}{
 		{"no key", keyPageReq{from: remote}, 401},
-		{"wrong key", keyPageReq{from: remote, header: bearer("sk-magpie-not-a-key")}, 401},
+		{"wrong key", keyPageReq{from: remote, header: bearer("sk-myna-not-a-key")}, 401},
 		{"turned off", keyPageReq{from: remote, header: bearer(secrets[1])}, 401},
 		{"turned off, x-api-key", keyPageReq{from: remote, header: map[string]string{"x-api-key": secrets[1]}}, 401},
 		{"key in the address", keyPageReq{from: remote, path: keyPageData + "?key=" + secrets[0]}, 400},
 		{"here, no key", keyPageReq{from: here}, 401},
-		{"here, wrong key", keyPageReq{from: here, header: bearer("sk-magpie-not-a-key")}, 401},
+		{"here, wrong key", keyPageReq{from: here, header: bearer("sk-myna-not-a-key")}, 401},
 		{"here, turned off", keyPageReq{from: here, header: bearer(secrets[1])}, 401},
-		{"here, magpie's token", keyPageReq{from: here, header: bearer(Token)}, 401},
+		{"here, myna's token", keyPageReq{from: here, header: bearer(Token)}, 401},
 		{"here, key in the address", keyPageReq{from: here, path: keyPageData + "?key=" + secrets[0]}, 400},
 		{"Origin null", keyPageReq{from: here, header: map[string]string{"Origin": "null"}}, 403},
 		{"a localhost subdomain", keyPageReq{from: here, header: map[string]string{"Origin": "http://evil.localhost"}}, 403},
@@ -185,7 +185,7 @@ func TestKeyPageRefusesWithoutItsKey(t *testing.T) {
 }
 
 // The page itself is opened before its key is typed: from another machine
-// without a key while magpie is shared, never framed, loading nothing
+// without a key while myna is shared, never framed, loading nothing
 // from elsewhere and never sending the key in an address. Not shared, it
 // isn't answered at all; a rebound name is refused it here.
 func TestKeyPageOpensWithoutAKey(t *testing.T) {

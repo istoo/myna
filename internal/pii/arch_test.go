@@ -70,8 +70,8 @@ func TestBaseOnlyWhereNeeded(t *testing.T) {
 	})
 }
 
-// rosettaInstall is an Intel magpie's pf-serve of serveTag (pf-v9), as
-// fetched before magpie knew it ran under Rosetta, and from then on under
+// rosettaInstall is an Intel myna's pf-serve of serveTag (pf-v9), as
+// fetched before myna knew it ran under Rosetta, and from then on under
 // Rosetta, Apple silicon's served at want's paths.
 func rosettaInstall(t *testing.T, want map[string][]byte) string {
 	t.Helper()

@@ -13,7 +13,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_ASSETS || path.join(__dirname, "../assets"));
+const assets = path.resolve(process.env.MYNA_ASSETS || path.join(__dirname, "../assets"));
 
 function serve(lang, seen) {
   return async (route) => {
@@ -52,7 +52,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const seen = { state: 0, hold: null };
         await page.clock.install();
         await page.route("**/*", serve(lang, seen));
-        await page.goto(surface === "panel" ? "http://magpie.test/?mode=panel" : "http://magpie.test/");
+        await page.goto(surface === "panel" ? "http://myna.test/?mode=panel" : "http://myna.test/");
         await page.waitForFunction(() => load.done);
         // reads asked for after one of them must come within a moment of it:
         // what counts is that the second never comes, so the wait for it is

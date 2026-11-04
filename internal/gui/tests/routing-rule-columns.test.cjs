@@ -6,7 +6,7 @@
 // → and model start at one x, at each width; a condition typed longer, or
 // shorter again, moves them all. On a phone's width what a rule does goes
 // under its conditions, past nothing. In every language.
-// MAGPIE_ROUTING_ASSETS points the page at an older asset tree, to watch
+// MYNA_ROUTING_ASSETS points the page at an older asset tree, to watch
 // this go red there.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -14,7 +14,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_ROUTING_ASSETS || path.join(__dirname, "../assets"));
+const assets = path.resolve(process.env.MYNA_ROUTING_ASSETS || path.join(__dirname, "../assets"));
 const models = [
   { id: "a/opus", name: "opus", providerName: "A", icon: "generic", context: 1000000, ready: true },
   { id: "b/flash", name: "flash", providerName: "B", icon: "generic", context: 1000000, ready: true },
@@ -134,7 +134,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [], posts = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, posts));
-      await page.goto("http://magpie.test/?view=routing");
+      await page.goto("http://myna.test/?view=routing");
       const ed = await openEditor(page, lang);
       for (const width of [1100, 900, 700]) {
         await page.setViewportSize({ width, height: 1400 });

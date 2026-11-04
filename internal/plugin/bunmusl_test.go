@@ -67,7 +67,7 @@ func TestMuslBunKeptApartFromGlibc(t *testing.T) {
 	if err := writeBunState(bunState{Bad: []string{"9.9.9"}}); err != nil {
 		t.Fatal(err)
 	}
-	if rel, _ := filepath.Rel(filepath.Dir(bunRoot()), glibc); rel != filepath.Join("bun", BunVersion, magpieBun()) {
+	if rel, _ := filepath.Rel(filepath.Dir(bunRoot()), glibc); rel != filepath.Join("bun", BunVersion, mynaBun()) {
 		t.Fatalf("a glibc Bun is kept at %s, not where it was before", glibc)
 	}
 
@@ -117,25 +117,25 @@ func unstartable(t *testing.T, path string) {
 }
 
 // A bun that is there but can't be started is said to be a build for
-// another C library, with MAGPIE_BUN as the way round, not left reading
+// another C library, with MYNA_BUN as the way round, not left reading
 // as a missing file. A bun that really is missing, and any other error,
 // stay as they are.
 func TestCantStartSaysCLibrary(t *testing.T) {
 	bunHome(t, BunVersion, time.Now())
-	bun := filepath.Join(t.TempDir(), "magpie-bun")
+	bun := filepath.Join(t.TempDir(), "myna-bun")
 	unstartable(t, bun)
 	err := exec.Command(bun).Start()
 	if !errors.Is(err, fs.ErrNotExist) {
 		t.Fatalf("starting it: %v, want ENOENT", err)
 	}
 	got := cantStart(bun, err)
-	if msg := got.Error(); !strings.Contains(msg, "C library") || !strings.Contains(msg, "MAGPIE_BUN") || !strings.Contains(msg, bun) || !errors.Is(got, fs.ErrNotExist) {
+	if msg := got.Error(); !strings.Contains(msg, "C library") || !strings.Contains(msg, "MYNA_BUN") || !strings.Contains(msg, bun) || !errors.Is(got, fs.ErrNotExist) {
 		t.Fatalf("cantStart = %v", got)
 	}
 
-	t.Setenv("MAGPIE_BUN", bun)
-	if msg := cantStart(bun, err).Error(); !strings.Contains(msg, "$MAGPIE_BUN") || !strings.Contains(msg, "C library") {
-		t.Fatalf("cantStart of $MAGPIE_BUN = %s", msg)
+	t.Setenv("MYNA_BUN", bun)
+	if msg := cantStart(bun, err).Error(); !strings.Contains(msg, "$MYNA_BUN") || !strings.Contains(msg, "C library") {
+		t.Fatalf("cantStart of $MYNA_BUN = %s", msg)
 	}
 
 	missing := filepath.Join(t.TempDir(), "bun")
@@ -167,7 +167,7 @@ func TestHostOnUnstartableBunSaysCLibrary(t *testing.T) {
 		t.Fatal(err)
 	}
 	_, err := Providers(ctx)
-	if err == nil || !strings.Contains(err.Error(), "C library") || !strings.Contains(err.Error(), "MAGPIE_BUN") {
+	if err == nil || !strings.Contains(err.Error(), "C library") || !strings.Contains(err.Error(), "MYNA_BUN") {
 		t.Fatalf("Providers on an unstartable Bun: %v", err)
 	}
 	if s := readBunState(); s.Current != "9.9.9" || len(s.Bad) != 0 {
@@ -178,10 +178,10 @@ func TestHostOnUnstartableBunSaysCLibrary(t *testing.T) {
 // alpineLoader is what musl's loader printed on a bare Alpine 3.20 when
 // asked to run Bun 1.4.2's musl build (bun --version), cut after a few of
 // its 40 "Error relocating" lines.
-const alpineLoader = `Error loading shared library libstdc++.so.6: No such file or directory (needed by /sbx/.cache/magpie/bun/musl/1.4.2/magpie-bun)
-Error relocating /sbx/.cache/magpie/bun/musl/1.4.2/magpie-bun: _ZSt15get_new_handlerv: symbol not found
-Error relocating /sbx/.cache/magpie/bun/musl/1.4.2/magpie-bun: _ZSt24__throw_out_of_range_fmtPKcz: symbol not found
-Error relocating /sbx/.cache/magpie/bun/musl/1.4.2/magpie-bun: __once_proxy: symbol not found
+const alpineLoader = `Error loading shared library libstdc++.so.6: No such file or directory (needed by /sbx/.cache/myna/bun/musl/1.4.2/myna-bun)
+Error relocating /sbx/.cache/myna/bun/musl/1.4.2/myna-bun: _ZSt15get_new_handlerv: symbol not found
+Error relocating /sbx/.cache/myna/bun/musl/1.4.2/myna-bun: _ZSt24__throw_out_of_range_fmtPKcz: symbol not found
+Error relocating /sbx/.cache/myna/bun/musl/1.4.2/myna-bun: __once_proxy: symbol not found
 `
 
 // lacksLibstdcxx is a bun as Bun's musl build is on a bare Alpine: the
@@ -205,7 +205,7 @@ func lacksLibstdcxx(t *testing.T, path string) {
 // screenful of relocation errors; other output says nothing.
 func TestMissingLibsNamesThem(t *testing.T) {
 	got := missingLibs(alpineLoader)
-	if !strings.Contains(got, "libstdc++.so.6") || !strings.Contains(got, "apk add libstdc++") || !strings.Contains(got, "MAGPIE_BUN") {
+	if !strings.Contains(got, "libstdc++.so.6") || !strings.Contains(got, "apk add libstdc++") || !strings.Contains(got, "MYNA_BUN") {
 		t.Fatalf("missingLibs = %q", got)
 	}
 	if got := missingLibs("error: GET https://registry.npmjs.org/x - 404\n"); got != "" {

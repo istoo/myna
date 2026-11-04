@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // movedPlugin sets up a built-in moved onto its plugin, id's accounts as
@@ -21,7 +21,7 @@ import (
 func movedPlugin(t *testing.T, id string, auths map[string]map[string]any) {
 	t.Helper()
 	claudeHome(t)
-	t.Setenv("MAGPIE_BUN", "")
+	t.Setenv("MYNA_BUN", "")
 	spec := "opencode-" + id + "-auth"
 	write := func(name string, v any) {
 		t.Helper()
@@ -63,7 +63,7 @@ func listed(agent string) string {
 }
 
 // The agent's own account, moved onto its plugin, is still the agent's:
-// named as the agent is signed in now, removed in magpie it is only hidden
+// named as the agent is signed in now, removed in myna it is only hidden
 // (the agent stays signed in), and it shows again once the agent signs in
 // to another account, as the built-in's did.
 func TestMovedOwnAccount(t *testing.T) {
@@ -174,7 +174,7 @@ func TestAllLoginsMoved(t *testing.T) {
 func TestMovedSignInAsBuiltIn(t *testing.T) {
 	bun := testenv.Bun(t)
 	home := claudeHome(t)
-	t.Setenv("MAGPIE_BUN", bun)
+	t.Setenv("MYNA_BUN", bun)
 	t.Cleanup(plugin.Settle)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
@@ -259,7 +259,7 @@ func TestMovedSignInAsBuiltIn(t *testing.T) {
 	}
 }
 
-// magpie accounts lists a moved built-in's accounts where the built-in's
+// myna accounts lists a moved built-in's accounts where the built-in's
 // stood, not after every other: Grok's before Zed's, whichever order the
 // plugins come in.
 func TestAllLoginsMovedKeepTheirPlace(t *testing.T) {

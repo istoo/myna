@@ -54,8 +54,8 @@ function serve(lang, logins, posts, refuse, of = codex) {
 }
 
 const words = {
-  en: { out: "Sign out", remove: "Remove", cancel: "Cancel", ask: "Sign Codex out of me@example.com?", text: /Codex is signed out, as codex logout does/, done: "Codex signed out of me@example.com", refused: /Codex is signed in to me@example\.com now: sign it in to another of its accounts first/, only: /Claude Code is signed in to me@example\.com, the only account in magpie it can be signed in to/ },
-  zh: { out: "退出登录", remove: "移除", cancel: "取消", ask: "让 Codex 退出 me@example.com？", text: /codex logout/, done: "Codex 已退出 me@example.com", refused: /Codex 当前登录的是 me@example\.com：请先在另一个账号上点「使用」/, only: /Claude Code 当前登录的是 me@example\.com，这是 magpie 里它唯一能登录的账号/ },
+  en: { out: "Sign out", remove: "Remove", cancel: "Cancel", ask: "Sign Codex out of me@example.com?", text: /Codex is signed out, as codex logout does/, done: "Codex signed out of me@example.com", refused: /Codex is signed in to me@example\.com now: sign it in to another of its accounts first/, only: /Claude Code is signed in to me@example\.com, the only account in myna it can be signed in to/ },
+  zh: { out: "退出登录", remove: "移除", cancel: "取消", ask: "让 Codex 退出 me@example.com？", text: /codex logout/, done: "Codex 已退出 me@example.com", refused: /Codex 当前登录的是 me@example\.com：请先在另一个账号上点「使用」/, only: /Claude Code 当前登录的是 me@example\.com，这是 myna 里它唯一能登录的账号/ },
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -71,7 +71,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const posts = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, logins, posts, refuse, of));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://myna.test/?view=providers");
       await page.locator(".row.provider", { hasText: of === claude ? "Claude" : "Codex" }).first().click();
       await page.locator(".editor .acc").first().waitFor();
       return { page, errors, posts };
@@ -115,7 +115,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.equal(await page.evaluate(() => document.scrollingElement.scrollTop), top, "the page doesn't move");
       const missing = await page.evaluate(() => [
         "Sign out", "Signs Codex out of this account, as codex logout does", "Sign {agent} out of {user}?",
-        "{agent} is signed out, as codex logout does, and magpie forgets the account. Sign in again to use it; an open {agent} may need quitting and opening again. The account itself is left as it is.",
+        "{agent} is signed out, as codex logout does, and myna forgets the account. Sign in again to use it; an open {agent} may need quitting and opening again. The account itself is left as it is.",
         "{agent} signed out of {user}", "Codex itself is signed out too, as codex logout does.",
         "{agent} is signed in to {user} now: sign it in to another of its accounts first (Use on that account), then remove this one",
       ].filter((k) => !I18N.zh[k] || !I18N.ja[k] || !I18N.de[k]));
@@ -146,7 +146,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await confirm.getByRole("button", { name: w.remove, exact: true }).click();
       await page.waitForFunction(() => document.querySelector("#status")?.textContent.includes("me@example.com"));
       assert.deepEqual(posts, [{ agent: "codex", user: "me@example.com" }]);
-      const missing = await page.evaluate(() => ["{agent} is signed in to another of its accounts, and magpie forgets this one; the account itself is untouched"]
+      const missing = await page.evaluate(() => ["{agent} is signed in to another of its accounts, and myna forgets this one; the account itself is untouched"]
         .filter((k) => !I18N.zh[k] || !I18N.ja[k] || !I18N.de[k]));
       assert.deepEqual(missing, [], "every string has its zh, ja and de");
       assert.deepEqual(errors, []);
@@ -154,7 +154,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
     // StringKe (#4532): Claude Code's account in use is removed as Codex's
     // is, signed in to another first, while it has another it can be
-    // signed in to; a setup-token one isn't that, and magpie never signs
+    // signed in to; a setup-token one isn't that, and myna never signs
     // Claude Code out, so its only one has no Remove
     test(`${engine} ${lang}: Claude Code's account in use has Remove while another can take its place`, async (t) => {
       const { page, errors, posts } = await open(t, [...one, { user: "work@example.com", plan: "MAX", on: true }], false, claude);
@@ -176,8 +176,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const row = page.locator(".editor .acc", { hasText: "me@example.com" });
       await more(row);
       assert.equal(await row.getByRole("button", { name: w.remove, exact: true }).count(), 0);
-      assert.equal(await row.getByRole("button", { name: w.out, exact: true }).count(), 0, "magpie never signs Claude Code out");
-      const missing = await page.evaluate(() => ["{agent} is signed in to {user}, the only account in magpie it can be signed in to, and magpie doesn't sign it out: add another account first, or sign out in {agent} itself, then remove this one"]
+      assert.equal(await row.getByRole("button", { name: w.out, exact: true }).count(), 0, "myna never signs Claude Code out");
+      const missing = await page.evaluate(() => ["{agent} is signed in to {user}, the only account in myna it can be signed in to, and myna doesn't sign it out: add another account first, or sign out in {agent} itself, then remove this one"]
         .filter((k) => !I18N.zh[k] || !I18N["zh-TW"][k] || !I18N.ja[k] || !I18N.de[k]));
       assert.deepEqual(missing, [], "every string has its zh, zh-TW, ja and de");
       assert.deepEqual(errors, []);

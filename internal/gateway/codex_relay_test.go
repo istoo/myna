@@ -10,8 +10,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // relayUp is a fake ChatGPT backend for the relay: what it was sent.
@@ -62,8 +62,8 @@ func relayDo(h http.Handler, method, host, path, body string, hdr map[string]str
 	return rec
 }
 
-// A Codex thread open when magpie quit keeps sending its turns to the
-// gateway's address (idkatbro on X: 503 "Unknown error" until magpie was
+// A Codex thread open when myna quit keeps sending its turns to the
+// gateway's address (idkatbro on X: 503 "Unknown error" until myna was
 // opened again). The relay passes one on Codex's own model to the ChatGPT
 // backend with the caller's own sign-in, and its reply comes back whole.
 func TestCodexRelayPassesOwnTurnOn(t *testing.T) {
@@ -86,12 +86,12 @@ func TestCodexRelayPassesOwnTurnOn(t *testing.T) {
 	}
 }
 
-// What only the running magpie serves is refused with a reason Codex
+// What only the running myna serves is refused with a reason Codex
 // shows at once (a 4xx; a 5xx it retries five times over), and nothing
-// goes to OpenAI: a magpie model, a turn on one of
-// magpie's accounts, and one masking would have masked, never sent
+// goes to OpenAI: a myna model, a turn on one of
+// myna's accounts, and one masking would have masked, never sent
 // unmasked.
-func TestCodexRelayRefusesWhatNeedsMagpie(t *testing.T) {
+func TestCodexRelayRefusesWhatNeedsMyna(t *testing.T) {
 	fresh(t)
 	up := newRelayUp(t)
 	h := CodexRelay()
@@ -102,8 +102,8 @@ func TestCodexRelayRefusesWhatNeedsMagpie(t *testing.T) {
 		mask       bool
 		want       string
 	}{
-		{"magpie model", `{"model":"openrouter/kimi-k2","input":"hi"}`, auth, false, "one of magpie's models"},
-		{"magpie account", `{"model":"gpt-5.5","input":"hi"}`, map[string]string{"Authorization": "Bearer t", AccountHeader: "a@b.c"}, false, "magpie's Codex accounts"},
+		{"myna model", `{"model":"openrouter/kimi-k2","input":"hi"}`, auth, false, "one of myna's models"},
+		{"myna account", `{"model":"gpt-5.5","input":"hi"}`, map[string]string{"Authorization": "Bearer t", AccountHeader: "a@b.c"}, false, "myna's Codex accounts"},
 		{"masking", `{"model":"gpt-5.5","input":"DB_PASSWORD=hunter2"}`, auth, true, "not sent unmasked"},
 	} {
 		if err := settings.Save(settings.Settings{Redact: c.mask}); err != nil {
@@ -114,7 +114,7 @@ func TestCodexRelayRefusesWhatNeedsMagpie(t *testing.T) {
 			Error struct{ Message string } `json:"error"`
 		}
 		json.Unmarshal(rec.Body.Bytes(), &e)
-		if rec.Code != http.StatusBadRequest || !strings.Contains(e.Error.Message, c.want) || !strings.Contains(e.Error.Message, "magpie isn't running") {
+		if rec.Code != http.StatusBadRequest || !strings.Contains(e.Error.Message, c.want) || !strings.Contains(e.Error.Message, "myna isn't running") {
 			t.Errorf("%s: %d %s", c.name, rec.Code, rec.Body.String())
 		}
 	}
@@ -135,7 +135,7 @@ func TestCodexRelayOnlyThisComputer(t *testing.T) {
 		{"127.0.0.1:3425", "null"},
 		{"127.0.0.1:3425", "https://evil.example"},
 		{"evil.example:3425", ""},
-		{"magpie.localhost:3425", ""},
+		{"myna.localhost:3425", ""},
 	} {
 		hdr := map[string]string{"Authorization": "Bearer chatgpt-token"}
 		if c.origin != "" {
@@ -153,12 +153,12 @@ func TestCodexRelayOnlyThisComputer(t *testing.T) {
 	}
 }
 
-// Anything but Codex's turns says magpie isn't running, readably; and
-// the relay's answer at "/" is never taken for magpie's (ServedBy), so
-// the next magpie starting still serves the gateway. An OpenAI that
+// Anything but Codex's turns says myna isn't running, readably; and
+// the relay's answer at "/" is never taken for myna's (ServedBy), so
+// the next myna starting still serves the gateway. An OpenAI that
 // can't be reached is said too, never an empty body Codex shows as
 // "Unknown error".
-func TestCodexRelayIsNotMagpie(t *testing.T) {
+func TestCodexRelayIsNotMyna(t *testing.T) {
 	fresh(t)
 	newRelayUp(t)
 	h := CodexRelay()
@@ -169,7 +169,7 @@ func TestCodexRelayIsNotMagpie(t *testing.T) {
 			Name string `json:"name"`
 		}
 		json.Unmarshal(b, &info)
-		if rec.Code != 503 || info.Name == "magpie" || bytes.Contains(b, []byte(`"magpie"`)) || !strings.Contains(string(b), "magpie isn't running") {
+		if rec.Code != 503 || info.Name == "myna" || bytes.Contains(b, []byte(`"myna"`)) || !strings.Contains(string(b), "myna isn't running") {
 			t.Errorf("%s: %d %s", p, rec.Code, b)
 		}
 	}

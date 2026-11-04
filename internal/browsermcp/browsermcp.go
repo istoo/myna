@@ -1,15 +1,15 @@
-// Package browsermcp is `magpie mcp browser`: the browser MCP server
+// Package browsermcp is `myna mcp browser`: the browser MCP server
 // (gateway.BrowserMCPPath) over stdio, for an agent that starts its MCP
 // servers as commands. Each message is passed to the running gateway and
 // its answer back; the process is one agent session, which goes on in the
 // tab it was working in.
 //
-// `magpie mcp search` is the web search MCP server (gateway.SearchMCPPath)
-// passed on the same way, with no session: the Library's Magpie Web
-// Search, which an agent is given as a command as it is Magpie Browser
+// `myna mcp search` is the web search MCP server (gateway.SearchMCPPath)
+// passed on the same way, with no session: the Library's Myna Web
+// Search, which an agent is given as a command as it is Myna Browser
 // (lutra_fs on Discord: the search was an address in Settings alone).
-// `magpie mcp vision` is image recognition's (gateway.VisionMCPPath), the
-// Library's Magpie Image Recognition (matrix0487 on Discord, #4653).
+// `myna mcp vision` is image recognition's (gateway.VisionMCPPath), the
+// Library's Myna Image Recognition (matrix0487 on Discord, #4653).
 package browsermcp
 
 import (
@@ -27,13 +27,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/istoo/myna/internal/gateway"
 )
 
 // Run serves stdin and stdout until stdin ends.
 func Run(args []string) error {
 	if len(args) > 0 {
-		return fmt.Errorf("magpie mcp browser takes no arguments")
+		return fmt.Errorf("myna mcp browser takes no arguments")
 	}
 	return serve(os.Stdin, os.Stdout, gatewayBase())
 }
@@ -42,7 +42,7 @@ func Run(args []string) error {
 // stdin ends.
 func RunSearch(args []string) error {
 	if len(args) > 0 {
-		return fmt.Errorf("magpie mcp search takes no arguments")
+		return fmt.Errorf("myna mcp search takes no arguments")
 	}
 	return serveSearch(os.Stdin, os.Stdout, gatewayBase())
 }
@@ -51,13 +51,13 @@ func RunSearch(args []string) error {
 // until stdin ends.
 func RunVision(args []string) error {
 	if len(args) > 0 {
-		return fmt.Errorf("magpie mcp vision takes no arguments")
+		return fmt.Errorf("myna mcp vision takes no arguments")
 	}
 	return serveVision(os.Stdin, os.Stdout, gatewayBase())
 }
 
 func gatewayBase() string {
-	base := strings.TrimRight(os.Getenv("MAGPIE_GATEWAY"), "/")
+	base := strings.TrimRight(os.Getenv("MYNA_GATEWAY"), "/")
 	if base == "" {
 		base = gateway.URL()
 	}
@@ -76,13 +76,13 @@ type message struct {
 }
 
 func serve(in io.Reader, out io.Writer, base string) error {
-	return relay(in, &bridge{base: base, path: gateway.BrowserMCPPath, title: "Magpie Browser", session: session(), client: &http.Client{Timeout: 2 * time.Minute}, out: out})
+	return relay(in, &bridge{base: base, path: gateway.BrowserMCPPath, title: "Myna Browser", session: session(), client: &http.Client{Timeout: 2 * time.Minute}, out: out})
 }
 
 // serveSearch passes each line to the gateway's web search server. A
 // search that reads a page through a slow searcher model takes minutes.
 func serveSearch(in io.Reader, out io.Writer, base string) error {
-	return relay(in, &bridge{base: base, path: gateway.SearchMCPPath, title: "Magpie Web Search", client: &http.Client{Timeout: 5 * time.Minute}, out: out})
+	return relay(in, &bridge{base: base, path: gateway.SearchMCPPath, title: "Myna Web Search", client: &http.Client{Timeout: 5 * time.Minute}, out: out})
 }
 
 // serveVision passes each line to the gateway's image recognition server.
@@ -90,7 +90,7 @@ func serveSearch(in io.Reader, out io.Writer, base string) error {
 // (32 MiB), and a look by a slow model takes minutes.
 func serveVision(in io.Reader, out io.Writer, base string) error {
 	wd, _ := os.Getwd()
-	return relay(in, &bridge{base: base, path: gateway.VisionMCPPath, title: "Magpie Image Recognition", client: &http.Client{Timeout: 5 * time.Minute}, out: out,
+	return relay(in, &bridge{base: base, path: gateway.VisionMCPPath, title: "Myna Image Recognition", client: &http.Client{Timeout: 5 * time.Minute}, out: out,
 		most: 32 << 20, fix: func(b []byte) []byte { return imageFrom(b, wd) }})
 }
 
@@ -126,7 +126,7 @@ func imageFrom(b []byte, wd string) []byte {
 }
 
 // callerSession is the browser session a message goes on in: the hub's
-// caller's, which magpie's MCP router names in a call's _meta
+// caller's, which myna's MCP router names in a call's _meta
 // (gateway.HubSessionMeta) since it runs this one process for every agent
 // behind it, else this process's own. Two agents behind the router then
 // work in tabs of their own, as two given this server directly do.
@@ -217,7 +217,7 @@ func (s *bridge) pass(m message, body []byte) {
 	}
 	resp, err := s.client.Do(r)
 	if err != nil {
-		s.fail(m.ID, "magpie isn't running, so "+s.title+" can't be reached: start magpie ("+err.Error()+")")
+		s.fail(m.ID, "myna isn't running, so "+s.title+" can't be reached: start myna ("+err.Error()+")")
 		return
 	}
 	defer resp.Body.Close()
@@ -226,7 +226,7 @@ func (s *bridge) pass(m message, body []byte) {
 		return
 	}
 	if resp.StatusCode != http.StatusOK {
-		s.fail(m.ID, fmt.Sprintf("magpie answered %d: %s", resp.StatusCode, strings.TrimSpace(string(b))))
+		s.fail(m.ID, fmt.Sprintf("myna answered %d: %s", resp.StatusCode, strings.TrimSpace(string(b))))
 		return
 	}
 	s.write(b)

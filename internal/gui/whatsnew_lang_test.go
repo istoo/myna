@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/update"
+	"github.com/istoo/myna/internal/update"
 )
 
 const (
@@ -37,7 +37,7 @@ func TestAskedLang(t *testing.T) {
 func TestWhatsNewInPageLang(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("XDG_CONFIG_HOME", home)
-	dir := filepath.Join(home, "magpie")
+	dir := filepath.Join(home, "myna")
 	os.MkdirAll(dir, 0o755)
 	os.WriteFile(filepath.Join(dir, lastRunFile), []byte("0.1.603\n"), 0o644)
 	var mu sync.Mutex
@@ -49,8 +49,8 @@ func TestWhatsNewInPageLang(t *testing.T) {
 		json.NewEncoder(w).Encode(map[string]any{"releases": []update.Note{{Version: "0.1.604", Notes: notesBoth}}})
 	}))
 	defer srv.Close()
-	t.Setenv("MAGPIE_NOTES_FEED", srv.URL)
-	t.Setenv("MAGPIE_UPDATE_FEED", "http://127.0.0.1:1/")
+	t.Setenv("MYNA_NOTES_FEED", srv.URL)
+	t.Setenv("MYNA_UPDATE_FEED", "http://127.0.0.1:1/")
 	old := Version
 	defer func() { Version = old }()
 	Version = "0.1.604"
@@ -85,7 +85,7 @@ func TestUpdateNotesInPageLang(t *testing.T) {
 		json.NewEncoder(w).Encode(update.Release{Version: "0.1.605", Notes: notesBoth})
 	}))
 	defer srv.Close()
-	t.Setenv("MAGPIE_UPDATE_FEED", srv.URL)
+	t.Setenv("MYNA_UPDATE_FEED", srv.URL)
 	u := &updater{state: "ready", latest: &update.Release{Version: "0.1.605", Notes: notesEn}, notesIn: "en"}
 	if j := u.jsonIn("en"); j.Notes != notesEn {
 		t.Fatalf("en: %q", j.Notes)
@@ -112,14 +112,14 @@ func TestUpdateNotesInPageLang(t *testing.T) {
 
 // Notes the release workflow couldn't translate yet (DeepSeek out of
 // credit, #2260) come in English though asked in Chinese; once
-// magpie-releases' notes.yml writes the Chinese, What's new shows it
+// myna-releases' notes.yml writes the Chinese, What's new shows it
 // without a restart (yuu003348 on Discord: every release's notes in
 // English). Notes all in Chinese, or asked in English, are kept for the
 // run, and a failed ask again keeps the English had.
 func TestWhatsNewAsksAgainForTranslation(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("XDG_CONFIG_HOME", home)
-	dir := filepath.Join(home, "magpie")
+	dir := filepath.Join(home, "myna")
 	os.MkdirAll(dir, 0o755)
 	os.WriteFile(filepath.Join(dir, lastRunFile), []byte("0.1.603\n"), 0o644)
 	var mu sync.Mutex
@@ -144,8 +144,8 @@ func TestWhatsNewAsksAgainForTranslation(t *testing.T) {
 		}})
 	}))
 	defer srv.Close()
-	t.Setenv("MAGPIE_NOTES_FEED", srv.URL)
-	t.Setenv("MAGPIE_UPDATE_FEED", "http://127.0.0.1:1/")
+	t.Setenv("MYNA_NOTES_FEED", srv.URL)
+	t.Setenv("MYNA_UPDATE_FEED", "http://127.0.0.1:1/")
 	old, oldNow := Version, notesNow
 	defer func() { Version, notesNow = old, oldNow }()
 	now := time.Date(2026, 11, 2, 8, 0, 0, 0, time.UTC)

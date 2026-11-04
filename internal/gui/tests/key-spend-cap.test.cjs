@@ -1,6 +1,6 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // A key's spend cap (sparkling_lemur_62868 on Discord: a team's OpenAI key
-// with credits other services spend from too, and magpie to stop at a
+// with credits other services spend from too, and myna to stop at a
 // share of them). Each key's row has a pill: what it spent of its cap
 // today, this month or in all, else No spend cap (hover-only, as the
 // row's other unset pills). A key at its cap is marked, with a line under
@@ -88,7 +88,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         const posts = [];
         await page.route("**/*", serve(lang, posts));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://myna.test/?view=providers");
         await page.locator(".row.provider", { hasText: "Relay" }).first().click();
         await page.locator(".editor .accts .acc .aspend").first().waitFor({ state: "attached" });
         await page.waitForTimeout(300);

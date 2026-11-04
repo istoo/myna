@@ -3,7 +3,7 @@ package gateway
 import (
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // A ChatGPT account's backend refuses a tool name outside

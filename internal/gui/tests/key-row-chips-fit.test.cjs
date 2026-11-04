@@ -1,6 +1,6 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // A key's row keeps every chip and button whole (young02036 on Discord, a
-// Remote magpie's keys on Windows): hovered, a key with a protocol pick, its
+// Remote myna's keys on Windows): hovered, a key with a protocol pick, its
 // models chip, its limit and Switch off, Remove and Make first showed its
 // models chip as one character, "全", the rest of 全部模型 cut off. Only the
 // key's name and its masked key give way; what doesn't fit beside them then
@@ -16,8 +16,8 @@ const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(process.env.ASSET_DIR || path.resolve(__dirname, "../assets"));
 const remote = () => ({
-  id: "remote", name: "Remote magpie", preset: "remote-magpie", icon: "generic",
-  chat: "https://magpie.example.com/v1", responses: "https://magpie.example.com/v1", anthropic: "https://magpie.example.com", catalog: "",
+  id: "remote", name: "Remote myna", preset: "remote-myna", icon: "generic",
+  chat: "https://myna.example.com/v1", responses: "https://myna.example.com/v1", anthropic: "https://myna.example.com", catalog: "",
   models: [{ id: "glm-5", name: "", on: true }, { id: "claude-opus-5", name: "", on: true }, { id: "gpt-6", name: "", on: true }],
   agents: [], fallback: [], headers: {}, routing: "",
   key: { set: true, masked: "sk-m…a1b2" }, balanceToken: { takes: false, set: false }, proxy: "",
@@ -86,8 +86,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, web));
-        await page.goto("http://magpie.test/?view=providers");
-        await page.locator(".row.provider", { hasText: "Remote magpie" }).first().click();
+        await page.goto("http://myna.test/?view=providers");
+        await page.locator(".row.provider", { hasText: "Remote myna" }).first().click();
         await page.locator('.editor .accts.keys .acc[data-account-id="bbbbbbbbbb"] .proto').waitFor({ state: "attached" });
 
         const check = async (id, hovered) => {

@@ -58,7 +58,7 @@ async function open(engine, lang, width, opts = {}) {
   const errors = [], fetched = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", serve(lang, opts.theme || "light", fetched, opts.settings, opts.boot));
-  await page.goto("http://magpie.test/?view=masking");
+  await page.goto("http://myna.test/?view=masking");
   await page.locator("#mdRow").waitFor();
   return { browser, page, errors, fetched };
 }
@@ -71,7 +71,7 @@ async function until(ok, ms = 8000, page) {
   }
 }
 
-const english = ["How masking works", "Little Magpie", "Over the network", "notebook", "Model service", "Letter to the provider", "Your computer",
+const english = ["How masking works", "Little Myna", "Over the network", "notebook", "Model service", "Letter to the provider", "Your computer",
   "Sign in to github.com", "Signed in to github.com", "Nothing in it yet", "Signing in on your computer", "on your computer", "placeholders"];
 const wide = (page) => page.evaluate(() => {
   const over = [...document.querySelectorAll("#view-masking *")].filter((n) => n.getClientRects().length && n.getBoundingClientRect().right > innerWidth + 1).map((n) => n.className?.baseVal ?? n.className);

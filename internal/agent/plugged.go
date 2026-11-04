@@ -2,12 +2,12 @@ package agent
 
 // An agent a plugin adds (internal/agentplug) is wired as a built-in one
 // that keeps its model in a file is: its model field picks among the
-// agent's own models and magpie's, and a model through magpie writes the
+// agent's own models and myna's, and a model through myna writes the
 // model, as the plugin spells it, and the keys the plugin's connect
 // returns (where the gateway is, its key). What the user had under every
-// key magpie writes is stashed first and put back when magpie steps out,
+// key myna writes is stashed first and put back when myna steps out,
 // so a plugin needs no code for that. The plugin says only where things
-// go; magpie does every write, to the one file the plugin names.
+// go; myna does every write, to the one file the plugin names.
 
 import (
 	"encoding/json"
@@ -19,17 +19,17 @@ import (
 
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/jsonc"
-	"github.com/yetone/magpie/internal/agentplug"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/istoo/myna/internal/agentplug"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/usage"
 )
 
 func init() {
-	// the agents plugins add come and go, unlike magpie's own; one whose
+	// the agents plugins add come and go, unlike myna's own; one whose
 	// id is a built-in's is the built-in's, which the gateway asks first
 	usage.PluginAgents = func() []usage.Known {
 		list, _ := agentplug.List()
@@ -41,16 +41,16 @@ func init() {
 	}
 }
 
-// pluggedStash is what magpie keeps of an agent plugin's file while it is
+// pluggedStash is what myna keeps of an agent plugin's file while it is
 // wired: what was under each key it wrote (absent where there was nothing,
 // as the file spells it), the model it wrote, and the key whose value is
-// the gateway's key, which says the wiring is still magpie's.
+// the gateway's key, which says the wiring is still myna's.
 type pluggedStash struct {
 	Had   map[string]string `json:"had"`
 	Ref   string            `json:"ref"`
 	Mark  string            `json:"mark,omitempty"`
 	Value string            `json:"value,omitempty"`
-	// Wrote are the strings magpie wrote, by key, for Check to tell
+	// Wrote are the strings myna wrote, by key, for Check to tell
 	// one changed since
 	Wrote map[string]string `json:"wrote,omitempty"`
 	// Spec and Format are the plugin's and its file's, so what the user
@@ -92,7 +92,7 @@ func pluggedAgents(home string, builtin []*Agent, errs map[string]string) []*Age
 	if len(list) == 0 {
 		return nil
 	}
-	taken := map[string]bool{magpieID: true}
+	taken := map[string]bool{mynaID: true}
 	for _, a := range append(builtin, others...) {
 		taken[a.ID] = true
 		for _, al := range a.Aliases {
@@ -103,7 +103,7 @@ func pluggedAgents(home string, builtin []*Agent, errs map[string]string) []*Age
 	for _, p := range list {
 		if taken[p.Desc.ID] {
 			if errs != nil {
-				errs[p.Spec] = fmt.Sprintf("agent id %q is magpie's own agent's", p.Desc.ID)
+				errs[p.Spec] = fmt.Sprintf("agent id %q is myna's own agent's", p.Desc.ID)
 			}
 			continue
 		}
@@ -213,8 +213,8 @@ func (f pluggedFile) del(keys []string) error {
 	return edit.DelEnvFile(f.path, keys...)
 }
 
-// wired says the agent id's file is still as magpie wired it, by st: the
-// gateway's key magpie wrote is there.
+// wired says the agent id's file is still as myna wired it, by st: the
+// gateway's key myna wrote is there.
 func (f pluggedFile) wired(id string, st pluggedStash) bool {
 	if st.Mark == "" {
 		return true
@@ -223,7 +223,7 @@ func (f pluggedFile) wired(id string, st pluggedStash) bool {
 	return v == st.Value || ourKey(v) || v == gateway.TokenFor(id)
 }
 
-// restore puts back what the user had under every key magpie wrote, as st
+// restore puts back what the user had under every key myna wrote, as st
 // stashed it under key, and forgets it.
 func (f pluggedFile) restore(key string, st pluggedStash) error {
 	var del []string
@@ -261,15 +261,15 @@ func plugged(home string, p *agentplug.Agent) *Agent {
 		b, _ := json.Marshal(st)
 		stash(map[string]string{key: string(b)})
 	}
-	// onMagpie: magpie wrote the file, and the gateway's key it wrote is
+	// onMyna: myna wrote the file, and the gateway's key it wrote is
 	// still there
-	onMagpie := func() (pluggedStash, bool) {
+	onMyna := func() (pluggedStash, bool) {
 		st, ok := saved()
 		return st, ok && f.wired(id, st)
 	}
 	restore := func(st pluggedStash) error { return f.restore(key, st) }
 	// only: the agent picks its model itself among those connect writes
-	// (#2374), so magpie writes no model, and the switch is its one field
+	// (#2374), so myna writes no model, and the switch is its one field
 	only := d.Model == ""
 	// wire writes ref and connect's keys, stashing what each key had; a
 	// connect-only agent's ref is ""
@@ -332,7 +332,7 @@ func plugged(home string, p *agentplug.Agent) *Agent {
 				}
 			}
 		}
-		st, was := onMagpie()
+		st, was := onMyna()
 		if !was {
 			st = pluggedStash{Had: map[string]string{}}
 		}
@@ -348,7 +348,7 @@ func plugged(home string, p *agentplug.Agent) *Agent {
 				st.Had[kv.Path] = "\x00"
 			}
 		}
-		// a key magpie wrote before that connect no longer returns gets
+		// a key myna wrote before that connect no longer returns gets
 		// what the user had back
 		var del []string
 		for _, k := range sortedKeys(st.Had) {
@@ -375,8 +375,8 @@ func plugged(home string, p *agentplug.Agent) *Agent {
 	}
 	get := func() string {
 		v, _ := f.get(d.Model)
-		if st, ok := onMagpie(); ok && v == d.Prefix+st.Ref {
-			return magpieID + "/" + st.Ref
+		if st, ok := onMyna(); ok && v == d.Prefix+st.Ref {
+			return mynaID + "/" + st.Ref
 		}
 		return v
 	}
@@ -388,7 +388,7 @@ func plugged(home string, p *agentplug.Agent) *Agent {
 		Plugin: p.Spec,
 		Notice: func() string { return d.Notice },
 		Check: func() string {
-			st, ok := onMagpie()
+			st, ok := onMyna()
 			if !ok {
 				return ""
 			}
@@ -406,10 +406,10 @@ func plugged(home string, p *agentplug.Agent) *Agent {
 			Key: "model", Label: "model",
 			Get: get,
 			Set: func(v string) error {
-				if ref, ok := strings.CutPrefix(v, magpieID+"/"); ok && isMagpie(ref) {
+				if ref, ok := strings.CutPrefix(v, mynaID+"/"); ok && isMyna(ref) {
 					return wire(ref)
 				}
-				if st, ok := onMagpie(); ok {
+				if st, ok := onMyna(); ok {
 					if err := restore(st); err != nil {
 						return err
 					}
@@ -420,12 +420,12 @@ func plugged(home string, p *agentplug.Agent) *Agent {
 				return f.set([]edit.KV{{Path: d.Model, Value: v}})
 			},
 			Options: func(cur map[string]string) []Option {
-				return withVia(ownOptions("", cur["model"]), id, magpieID+"/")
+				return withVia(ownOptions("", cur["model"]), id, mynaID+"/")
 			},
 		}},
 		// the catalog changed: what connect writes for the model may too
 		Sync: func() error {
-			if st, ok := onMagpie(); ok {
+			if st, ok := onMyna(); ok {
 				if v, _ := f.get(d.Model); only || v == d.Prefix+st.Ref {
 					return wire(st.Ref)
 				}
@@ -433,34 +433,34 @@ func plugged(home string, p *agentplug.Agent) *Agent {
 			return nil
 		},
 		Unwire: func() error {
-			if st, ok := onMagpie(); ok {
+			if st, ok := onMyna(); ok {
 				return restore(st)
 			}
 			return nil
 		},
 	}
 	if only {
-		// magpie as its provider, on or off: the models are the agent's
+		// myna as its provider, on or off: the models are the agent's
 		// to pick, in the list connect writes
 		a.Fields = []Field{{
 			Key: "provider", Label: "provider",
 			Get: func() string {
-				if _, ok := onMagpie(); ok {
-					return magpieID
+				if _, ok := onMyna(); ok {
+					return mynaID
 				}
 				return ""
 			},
 			Set: func(v string) error {
-				if v == magpieID {
+				if v == mynaID {
 					return wire("")
 				}
-				if st, ok := onMagpie(); ok {
+				if st, ok := onMyna(); ok {
 					return restore(st)
 				}
 				return nil
 			},
 			Options: func(map[string]string) []Option {
-				return []Option{{Value: magpieID, Label: "magpie", Icon: "magpie"}}
+				return []Option{{Value: mynaID, Label: "myna", Icon: "myna"}}
 			},
 		}}
 	}
@@ -471,7 +471,7 @@ func plugged(home string, p *agentplug.Agent) *Agent {
 }
 
 // pluggedIcon is the picture the plugin gives its agent, else the one the
-// plugin market gives the plugin, else magpie's generic one.
+// plugin market gives the plugin, else myna's generic one.
 func pluggedIcon(p *agentplug.Agent) string {
 	if ic := provider.PluginOwnIcon(p.Desc.Icon); ic != "" {
 		return ic
@@ -479,7 +479,7 @@ func pluggedIcon(p *agentplug.Agent) string {
 	if ic := provider.MarketIcon(plugin.Icon(p.Spec, p.Desc.ID)); ic != "" {
 		return ic
 	}
-	// magpie's glyph for one it has no picture of, not an empty square
+	// myna's glyph for one it has no picture of, not an empty square
 	return "generic"
 }
 

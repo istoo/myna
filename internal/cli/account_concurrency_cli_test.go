@@ -3,12 +3,12 @@ package cli
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
-// magpie provider account-concurrency gives a key its own limit on
+// myna provider account-concurrency gives a key its own limit on
 // requests at once (by its name or id), off for none, default for the
-// provider's again; magpie provider queue bounds the queue past it. A
+// provider's again; myna provider queue bounds the queue past it. A
 // key the provider hasn't, or a number out of range, is an error.
 func TestAccountConcurrencyCmd(t *testing.T) {
 	home := t.TempDir()
@@ -84,7 +84,7 @@ func TestAccountConcurrencyCmd(t *testing.T) {
 	}
 }
 
-// magpie provider rpm sets how many requests each key sends in a minute
+// myna provider rpm sets how many requests each key sends in a minute
 // (coeo91 on Discord), off for none; a number out of range is an error.
 func TestRPMCmd(t *testing.T) {
 	home := t.TempDir()
@@ -128,7 +128,7 @@ func TestRPMCmd(t *testing.T) {
 	}
 }
 
-// magpie provider at-once sets how many of a provider's keys take requests
+// myna provider at-once sets how many of a provider's keys take requests
 // at the same time (01huadalang on Discord, ZCode), off for no limit and
 // default for the plugin's; a number out of range is an error.
 func TestAtOnceCmd(t *testing.T) {

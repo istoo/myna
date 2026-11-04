@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/codexcat"
+	"github.com/istoo/myna/internal/codexcat"
 )
 
 // Two providers both called Codex, each serving GPT-6.1-Sol (nb5p on
@@ -27,11 +27,11 @@ func TestCodexPickerNamesSameNamesApart(t *testing.T) {
 	}, func(string) []Member { return nil }, true)
 	type shown struct{ name, desc string }
 	want := []shown{
-		{"GPT-6.1-Sol · Codex · codex", "GPT-6.1-Sol · Codex via magpie"},
-		{"GPT-6.1-Sol · Codex · codex-b", "GPT-6.1-Sol · Codex via magpie"},
-		{"GLM-5.3 · Relay · relay/glm-5.3", "GLM-5.3 · Relay via magpie"},
-		{"GLM-5.3 · Relay · relay/glm-5.3-old", "GLM-5.3 · Relay via magpie"},
-		{"Kimi K3 · Relay", "Kimi K3 · Relay via magpie"},
+		{"GPT-6.1-Sol · Codex · codex", "GPT-6.1-Sol · Codex via myna"},
+		{"GPT-6.1-Sol · Codex · codex-b", "GPT-6.1-Sol · Codex via myna"},
+		{"GLM-5.3 · Relay · relay/glm-5.3", "GLM-5.3 · Relay via myna"},
+		{"GLM-5.3 · Relay · relay/glm-5.3-old", "GLM-5.3 · Relay via myna"},
+		{"Kimi K3 · Relay", "Kimi K3 · Relay via myna"},
 	}
 	es := codexcat.Entries(ms, 0)
 	if len(es) != len(want) {
@@ -45,12 +45,12 @@ func TestCodexPickerNamesSameNamesApart(t *testing.T) {
 		}
 		json.Unmarshal(b, &got)
 		// the text-only note is beside the point here
-		got.Desc = strings.Replace(got.Desc, " (text only: Accepts images is in its provider's Names & levels in magpie)", "", 1)
+		got.Desc = strings.Replace(got.Desc, " (text only: Accepts images is in its provider's Names & levels in myna)", "", 1)
 		if (shown{got.Name, got.Desc}) != want[i] {
 			t.Errorf("%s: shown as %q, %q; want %q, %q", ms[i].ID, got.Name, got.Desc, want[i].name, want[i].desc)
 		}
 		// what goes upstream in spawn_agent's list (spawnChoices) is Name
-		if ms[i].Name != strings.TrimSuffix(want[i].desc, " via magpie") {
+		if ms[i].Name != strings.TrimSuffix(want[i].desc, " via myna") {
 			t.Errorf("%s: Name %q changed", ms[i].ID, ms[i].Name)
 		}
 	}

@@ -6,19 +6,19 @@ import (
 	"os"
 	"time"
 
-	"github.com/yetone/magpie/internal/sessions"
+	"github.com/istoo/myna/internal/sessions"
 )
 
-// A Codex conversation magpie compacted can't go on once Codex talks to
+// A Codex conversation myna compacted can't go on once Codex talks to
 // OpenAI itself, unless its rollout is written portable
-// (sessions.PortCodexRollouts, LukeMa on X): done while magpie runs, for
-// the threads no Codex has open, and again as magpie lets Codex go (quit,
+// (sessions.PortCodexRollouts, LukeMa on X): done while myna runs, for
+// the threads no Codex has open, and again as myna lets Codex go (quit,
 // Disconnect), for those it has just let go. Once Codex no longer goes
-// through magpie, magpie's reasoning items are written so too
+// through myna, myna's reasoning items are written so too
 // (sessions.PortCodexRolloutsLeft): OpenAI won't take a thread holding
 // one as the base of its next turn (hentulong on X).
 
-// codexPortEvery is how often a running magpie makes the rollouts written
+// codexPortEvery is how often a running myna makes the rollouts written
 // since portable; codexPortAfter how long after it starts it first does.
 var codexPortEvery, codexPortAfter = 10 * time.Minute, 2 * time.Minute
 
@@ -27,7 +27,7 @@ var codexPortEvery, codexPortAfter = 10 * time.Minute, 2 * time.Minute
 const codexPortUnwire = 3 * time.Second
 
 // portCodexHome makes the rollouts of the Codex home dir portable, for
-// up to d; left says Codex no longer goes through magpie.
+// up to d; left says Codex no longer goes through myna.
 func portCodexHome(dir string, d time.Duration, left bool) {
 	ctx, cancel := context.WithTimeout(context.Background(), d)
 	defer cancel()
@@ -45,14 +45,14 @@ func portCodexHome(dir string, d time.Duration, left bool) {
 }
 
 // PortCodexRollouts makes this machine's Codex rollouts portable, for up
-// to d: as magpie quits.
+// to d: as myna quits.
 func PortCodexRollouts(d time.Duration) {
 	if home, err := os.UserHomeDir(); err == nil {
 		portCodexHome(here(home).codexHome(), d, codexLeft(home))
 	}
 }
 
-// codexLeft says this machine's Codex doesn't go through magpie: neither
+// codexLeft says this machine's Codex doesn't go through myna: neither
 // routed to it nor failing over by it.
 func codexLeft(home string) bool {
 	a := codex(home)

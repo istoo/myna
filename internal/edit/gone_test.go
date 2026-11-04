@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/appdir"
+	"github.com/istoo/myna/internal/appdir"
 )
 
 // bm_rabbit on Discord: Pi's AgentDir moved and the old one deleted, yet
@@ -16,7 +16,7 @@ import (
 func TestWriteNeverMakesANamedFolderAgain(t *testing.T) {
 	gone := filepath.Join(t.TempDir(), "piData", ".pi", "agent")
 	t.Setenv("PI_CODING_AGENT_DIR", gone)
-	err := SetJSON(filepath.Join(gone, "models.json"), KV{Path: "providers.magpie.baseUrl", Value: "http://127.0.0.1:3425/v1"})
+	err := SetJSON(filepath.Join(gone, "models.json"), KV{Path: "providers.myna.baseUrl", Value: "http://127.0.0.1:3425/v1"})
 	var g *appdir.GoneError
 	if !errors.As(err, &g) || g.Var != "PI_CODING_AGENT_DIR" {
 		t.Errorf("writing into the gone folder: %v, want a GoneError naming PI_CODING_AGENT_DIR", err)

@@ -13,29 +13,29 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/sessions"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/access"
+	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/myna/internal/settings"
 )
 
-// The MCP hub (#2679): with the Library's switch on, magpie is the one MCP
+// The MCP hub (#2679): with the Library's switch on, myna is the one MCP
 // server an agent is given, at HubMCPPath<agent>, and it hands each call
 // on to the Library server behind it, as Composio does. Its tools are
 // those of the Library servers ticked for that agent, each named
 // <server>__<tool>; the servers themselves (a command started once for
-// every agent, a URL reached with magpie's sign-in) are the library's to
+// every agent, a URL reached with myna's sign-in) are the library's to
 // run (library/mcp_hub.go), which sets MCPHub. It is guarded as
-// magpie's other MCP servers are (serveMCP), and each call is held to the
+// myna's other MCP servers are (serveMCP), and each call is held to the
 // calling gateway key's limit (reserveFor). Tools only, for now: no
 // resources or prompts.
 
 // HubMCPPath is where the hub is served, the agent's id after it.
-const HubMCPPath = "/mcp/magpie/hub/"
+const HubMCPPath = "/mcp/myna/hub/"
 
 // HubMCPAll is the hub for any other app (Cursor, VS Code, a script): one
 // address with every server in the Library, ticked for an agent or not.
 // It is the agent "" to Hub.
-const HubMCPAll = "/mcp/magpie/hub"
+const HubMCPAll = "/mcp/myna/hub"
 
 // HubTool is one tool a Library server lists, as the hub gives it.
 type HubTool struct {
@@ -45,7 +45,7 @@ type HubTool struct {
 	// inputSchema and the rest go to the agent as they are, its name
 	// replaced
 	Spec map[string]json.RawMessage
-	// Roots: the server writes into the agent's project (magpie-image),
+	// Roots: the server writes into the agent's project (myna-image),
 	// so a call is made with the agent's folders (HubCaller)
 	Roots bool
 }
@@ -56,27 +56,27 @@ type HubTool struct {
 // server's own requests go under.
 //
 // Session is which of the hub's callers the call is from (hubSession), for
-// a server that keeps something per caller: Magpie Browser's tab, which
+// a server that keeps something per caller: Myna Browser's tab, which
 // two agents behind one router would otherwise share, the router running
-// one `magpie mcp browser` for all of them.
+// one `myna mcp browser` for all of them.
 type HubCaller struct {
 	Roots   []string
 	Client  string
 	Session string
 }
 
-// The _meta keys a call of magpie's image server carries its caller in:
+// The _meta keys a call of myna's image server carries its caller in:
 // the roots, a list of file URIs (an empty one when the agent has none
 // here), and the client; and the one its result says the model it drew
 // with in (provider/model), for the hub's row of the call.
 const (
-	HubRootsMeta  = "magpie/roots"
-	HubClientMeta = "magpie/client"
-	HubModelMeta  = "magpie/model"
+	HubRootsMeta  = "myna/roots"
+	HubClientMeta = "myna/client"
+	HubModelMeta  = "myna/model"
 	// HubSessionMeta is the _meta key a call carries its caller's session
-	// in (HubCaller.Session), to Magpie Browser and to another magpie's
+	// in (HubCaller.Session), to Myna Browser and to another myna's
 	// router, which passes it on as its own caller's
-	HubSessionMeta = "magpie/session"
+	HubSessionMeta = "myna/session"
 )
 
 type hubCallerKey struct{}
@@ -102,7 +102,7 @@ type Hub interface {
 	// server that couldn't be reached by ctx's end is left out
 	Tools(ctx context.Context, agent string) []HubTool
 	// Servers are the servers behind agent's tools, by name, each with
-	// what it is for where magpie knows it; it starts none of them
+	// what it is for where myna knows it; it starts none of them
 	Servers(agent string) []HubServer
 	// Call runs one tool of server for agent, and is its result as the
 	// server gave it; an error is why it couldn't be run
@@ -111,20 +111,20 @@ type Hub interface {
 	Stop()
 	// Prune ends each server the hub started that the Library no longer
 	// gives: the switch turned off, the server removed or edited, here or
-	// by another magpie (the window, the CLI)
+	// by another myna (the window, the CLI)
 	Prune()
 }
 
 // HubServer is a server behind the hub as an agent is told of it: About
-// is what it is for, "" when magpie doesn't know.
+// is what it is for, "" when myna doesn't know.
 type HubServer struct {
 	Name, About string
 	// Title is the name the server gives itself (initialize's
-	// serverInfo.title), "" when it gives none: another magpie's router
-	// says "Magpie MCP hub · <its name>"
+	// serverInfo.title), "" when it gives none: another myna's router
+	// says "Myna MCP hub · <its name>"
 	Title string
 	// Tools are its tools as it last listed them, each with what its
-	// description says first; Known is whether magpie has listed them for
+	// description says first; Known is whether myna has listed them for
 	// the server as it is now
 	Tools []HubToolNote
 	Known bool
@@ -149,11 +149,11 @@ var (
 
 const hubBody = 4 << 20
 
-const errHubOff = "magpie's MCP hub is off, so it runs no server's tools: turn it on in magpie's Library → MCP"
+const errHubOff = "myna's MCP hub is off, so it runs no server's tools: turn it on in myna's Library → MCP"
 
 func (s *Server) hubMCP(w http.ResponseWriter, r *http.Request) {
 	agent := r.PathValue("agent")
-	serveMCP(w, r, "magpie's MCP hub", "magpie", hubBody, func(r *http.Request, m mcpMessage) (any, map[string]any) {
+	serveMCP(w, r, "myna's MCP hub", "myna", hubBody, func(r *http.Request, m mcpMessage) (any, map[string]any) {
 		return s.hubMCPCall(r, agent, m)
 	})
 }
@@ -226,7 +226,7 @@ func hubAbout(ss []HubServer, here, tail string) string {
 	return out + hubDetails(ss, hubSayMax-runeLen(out)-runeLen(tail)) + tail
 }
 
-// hubDetails is a line for each server that magpie knows anything of,
+// hubDetails is a line for each server that myna knows anything of,
 // within max characters in all: its name, its own title, what it is for,
 // and its tools, each with the first clause of its description. A line
 // too long for its share says its tools by name only, then as many of
@@ -259,7 +259,7 @@ func hubDetails(ss []HubServer, max int) string {
 }
 
 // hubServerLine is s's line in at most room characters: "- name (title):
-// what it is for. Tools: a (what a does), b.", "" when magpie knows
+// what it is for. Tools: a (what a does), b.", "" when myna knows
 // nothing of it or not even its name fits.
 func hubServerLine(s HubServer, room int) string {
 	head := "- " + s.Name
@@ -348,7 +348,7 @@ func HubLine(ss []HubServer) string {
 	const room = hubLineMax - len(".")
 	short := make([]string, len(ss))
 	for i, s := range ss {
-		// another magpie's router says "Tools of a (…), b.": the line
+		// another myna's router says "Tools of a (…), b.": the line
 		// says "Tools of" once
 		short[i] = hubClause(strings.TrimPrefix(oneLine(s.About), head))
 	}
@@ -396,7 +396,7 @@ func HubLine(ss []HubServer) string {
 
 // hubClause is the first part of a description: up to its first comma,
 // colon, semicolon or full stop outside brackets, on one line, so another
-// magpie's "Tools of a (what a is for, …), b." isn't cut inside a's.
+// myna's "Tools of a (what a is for, …), b." isn't cut inside a's.
 func hubClause(s string) string {
 	s = oneLine(s)
 	depth := 0
@@ -429,14 +429,14 @@ func hubCut(s string, n int) string {
 func runeLen(s string) int { return len([]rune(s)) }
 
 // hubDescribeWait is how long initialize waits for the tools of servers
-// magpie hasn't listed yet (one just added, edited or signed in to), to
+// myna hasn't listed yet (one just added, edited or signed in to), to
 // name them in its instructions: the agent's tools/list, which comes next,
 // waits for the same servers anyway. One not listed by then is named
 // without its tools, and with them to the next agent that connects.
 var hubDescribeWait = 5 * time.Second
 
 // hubServersFor are the servers behind agent's tools, as the instructions
-// describe them, their tools listed first when magpie hasn't yet.
+// describe them, their tools listed first when myna hasn't yet.
 func hubServersFor(ctx context.Context, agent string) []HubServer {
 	ss := MCPHub.Servers(agent)
 	if !MCPHub.On() || !slices.ContainsFunc(ss, func(s HubServer) bool { return !s.Known }) {
@@ -451,11 +451,11 @@ func hubServersFor(ctx context.Context, agent string) []HubServer {
 func (s *Server) hubMCPCall(r *http.Request, agent string, m mcpMessage) (any, map[string]any) {
 	switch m.Method {
 	case "initialize":
-		say := "The tools of the MCP servers in magpie's Library that are switched on for this agent, each named <server>__<tool>. Add servers, or switch them on for an agent, in magpie's Library → MCP."
+		say := "The tools of the MCP servers in myna's Library that are switched on for this agent, each named <server>__<tool>. Add servers, or switch them on for an agent, in myna's Library → MCP."
 		if agent == "" {
-			say = "The tools of every MCP server in magpie's Library, each named <server>__<tool>. Add servers in magpie's Library → MCP."
+			say = "The tools of every MCP server in myna's Library, each named <server>__<tool>. Add servers in myna's Library → MCP."
 		}
-		title, here := "Magpie MCP hub", ""
+		title, here := "Myna MCP hub", ""
 		if w := hubWhere(r); w != "" {
 			here = "This router: " + w + ". Each of its tools' descriptions starts with [" + w + "]; when another MCP server gives the same tools, choose between them by this."
 			title += " · " + w
@@ -471,7 +471,7 @@ func (s *Server) hubMCPCall(r *http.Request, agent string, m mcpMessage) (any, m
 		return map[string]any{
 			"protocolVersion": mcpVersion(m),
 			"capabilities":    map[string]any{"tools": map[string]any{}},
-			"serverInfo":      map[string]any{"name": "magpie", "title": title, "version": Version},
+			"serverInfo":      map[string]any{"name": "myna", "title": title, "version": Version},
 			"instructions":    say,
 		}, nil
 	case "ping":
@@ -523,9 +523,9 @@ func (s *Server) hubMCPCall(r *http.Request, agent string, m mcpMessage) (any, m
 			return s.hubMCPRun(r, agent, t, p.Arguments), nil
 		}
 		if agent == "" {
-			return nil, map[string]any{"code": -32602, "message": "unknown tool " + p.Name + ": no MCP server in magpie's Library gives it"}
+			return nil, map[string]any{"code": -32602, "message": "unknown tool " + p.Name + ": no MCP server in myna's Library gives it"}
 		}
-		return nil, map[string]any{"code": -32602, "message": "unknown tool " + p.Name + ": no MCP server switched on for " + agent + " in magpie's Library gives it"}
+		return nil, map[string]any{"code": -32602, "message": "unknown tool " + p.Name + ": no MCP server switched on for " + agent + " in myna's Library gives it"}
 	}
 	return nil, map[string]any{"code": -32601, "message": "method not found: " + m.Method}
 }
@@ -533,7 +533,7 @@ func (s *Server) hubMCPCall(r *http.Request, agent string, m mcpMessage) (any, m
 // hubToolNamed is the tool name calls: one ts lists, or else a tool of a
 // server switched on for agent that its name starts with, <server>__<tool>,
 // which the server itself is asked for. An agent lists the tools once, and
-// a server's list can change after: magpie updated, Magpie Browser's
+// a server's list can change after: myna updated, Myna Browser's
 // browser_tabs became the browser tool's tabs action, and it still takes
 // the old name (7e201ce20). A server whose list failed just now is asked
 // the same way, and either says why it can't run the tool.
@@ -592,11 +592,11 @@ func (s *Server) hubMCPRun(r *http.Request, agent string, t hubTool, args json.R
 		return toolResult("The MCP server "+t.Server+" couldn't run "+t.Tool+": "+why, true)
 	}
 	if t.Roots {
-		// magpie's image server draws through the gateway on its own
+		// myna's image server draws through the gateway on its own
 		// connection, so its result names the model for this call's row
 		var m struct {
 			Meta struct {
-				Model string `json:"magpie/model"`
+				Model string `json:"myna/model"`
 			} `json:"_meta"`
 		}
 		json.Unmarshal(res, &m)
@@ -610,16 +610,16 @@ func (s *Server) hubMCPRun(r *http.Request, agent string, t hubTool, args json.R
 // (the git repositories it works in, keyed by their folder).
 type hubCallMeta struct {
 	ThreadID string `json:"threadId"`
-	// Session is the caller's session as another magpie's router passed
+	// Session is the caller's session as another myna's router passed
 	// it on (HubSessionMeta)
-	Session string `json:"magpie/session"`
+	Session string `json:"myna/session"`
 	Turn    struct {
 		Workspaces map[string]json.RawMessage `json:"workspaces"`
 	} `json:"x-codex-turn-metadata"`
 }
 
 // hubSession is which caller of the hub r is: the session another
-// magpie's router names, which is its own caller's (that router reaches
+// myna's router names, which is its own caller's (that router reaches
 // this one on one connection for all of them), else the session this
 // client was given at initialize (serveMCP), else none, and the server
 // then keeps one thing for every caller, as before clients were told
@@ -635,9 +635,9 @@ func hubSession(r *http.Request, agent string, meta hubCallMeta) string {
 	return ""
 }
 
-// newMCPSession is a session id for a client of one of magpie's MCP
+// newMCPSession is a session id for a client of one of myna's MCP
 // servers.
-func newMCPSession() string { return "magpie-" + rand.Text() }
+func newMCPSession() string { return "myna-" + rand.Text() }
 
 // hubWhere is what the router says of itself to the agent of r, for an
 // agent given the same tools by two routers (one in China, one in Los
@@ -740,7 +740,7 @@ func keepHubPruned(ctx context.Context) {
 	}
 }
 
-// StopHub ends the servers the hub started: magpie is stopping.
+// StopHub ends the servers the hub started: myna is stopping.
 func StopHub() {
 	if MCPHub != nil {
 		MCPHub.Stop()

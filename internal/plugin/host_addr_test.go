@@ -7,19 +7,19 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/settings"
 )
 
-// A plugin with a service of its own is told where magpie's gateway is:
-// Magiczerowxy/magpie-chat's chat server asks MAGPIE_ADDR, then 3425, so
+// A plugin with a service of its own is told where myna's gateway is:
+// Magiczerowxy/myna-chat's chat server asks MYNA_ADDR, then 3425, so
 // with the port set in Settings its model list was empty and every
-// message failed (yuesh1_ on X, Magiczerowxy/magpie-chat#1). The host is
-// told Settings' port, started again when it moves, and a MAGPIE_ADDR
-// magpie runs under, on loopback when it listens on every interface.
+// message failed (yuesh1_ on X, Magiczerowxy/myna-chat#1). The host is
+// told Settings' port, started again when it moves, and a MYNA_ADDR
+// myna runs under, on loopback when it listens on every interface.
 func TestHostToldTheGatewayAddress(t *testing.T) {
 	sandbox(t)
-	t.Setenv("MAGPIE_ADDR", "")
-	os.Unsetenv("MAGPIE_ADDR")
+	t.Setenv("MYNA_ADDR", "")
+	os.Unsetenv("MYNA_ADDR")
 	was := proxyLookNone
 	proxyLookNone = 0
 	t.Cleanup(func() { proxyLookNone = was })
@@ -34,9 +34,9 @@ func TestHostToldTheGatewayAddress(t *testing.T) {
 	}
 	files := map[string]string{
 		"package.json": `{"name": "addr-probe", "version": "0.0.1", "type": "module", "main": "./index.mjs"}`,
-		// as magpie-chat's index.mjs, which starts its server on import
+		// as myna-chat's index.mjs, which starts its server on import
 		"index.mjs": `import { writeFileSync } from "node:fs"
-writeFileSync(process.env.ADDR_PROBE_OUT, process.env.MAGPIE_ADDR ?? "unset")
+writeFileSync(process.env.ADDR_PROBE_OUT, process.env.MYNA_ADDR ?? "unset")
 export default { id: "addr-probe", server: async () => ({}) }
 `,
 	}
@@ -70,17 +70,17 @@ export default { id: "addr-probe", server: async () => ({}) }
 		t.Fatal(err)
 	}
 	if got := told(); got != "127.0.0.1:3591" {
-		t.Fatalf("with Settings' port 3591 the plugin was told MAGPIE_ADDR=%s", got)
+		t.Fatalf("with Settings' port 3591 the plugin was told MYNA_ADDR=%s", got)
 	}
 	// the port moves in Settings: the page opened next has a host told so
 	setPort(3592)
 	if got := told(); got != "127.0.0.1:3592" {
-		t.Errorf("after the port moved to 3592 the plugin was told MAGPIE_ADDR=%s", got)
+		t.Errorf("after the port moved to 3592 the plugin was told MYNA_ADDR=%s", got)
 	}
-	// magpie's own MAGPIE_ADDR comes first, reached on loopback
-	t.Setenv("MAGPIE_ADDR", "0.0.0.0:4999")
+	// myna's own MYNA_ADDR comes first, reached on loopback
+	t.Setenv("MYNA_ADDR", "0.0.0.0:4999")
 	Restart()
 	if got := told(); got != "127.0.0.1:4999" {
-		t.Errorf("under MAGPIE_ADDR=0.0.0.0:4999 the plugin was told MAGPIE_ADDR=%s", got)
+		t.Errorf("under MYNA_ADDR=0.0.0.0:4999 the plugin was told MYNA_ADDR=%s", got)
 	}
 }

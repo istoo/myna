@@ -8,12 +8,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // An agent plugin with no model key is connect only (#2374, a Raycast
-// plugin): its row is magpie as its provider, on or off, with no model to
+// plugin): its row is myna as its provider, on or off, with no model to
 // pick, connect is called without a model and writes the gateway and the
 // model list, the list follows the catalog, and switching it off puts back
 // what the user had. Its id is one no built-in has: Raycast is built in
@@ -23,15 +23,15 @@ func TestPluggedConnectOnly(t *testing.T) {
 export const agent = { id: "launcher", name: "Launcher", config: "~/.launcher/providers.json" };
 export function connect({ gateway, model, models }) {
   return {
-    "providers.magpie.base": gateway.v1,
-    "providers.magpie.key": gateway.key,
-    "providers.magpie.models": models.map((m) => m.id),
-    "providers.magpie.given": typeof model,
+    "providers.myna.base": gateway.v1,
+    "providers.myna.key": gateway.key,
+    "providers.myna.models": models.map((m) => m.id),
+    "providers.myna.given": typeof model,
   };
 }`)
 	path := filepath.Join(home, ".launcher", "providers.json")
 	os.MkdirAll(filepath.Dir(path), 0o755)
-	os.WriteFile(path, []byte(`{"theme":"dark","providers":{"magpie":{"key":"mine"}}}`), 0o644)
+	os.WriteFile(path, []byte(`{"theme":"dark","providers":{"myna":{"key":"mine"}}}`), 0o644)
 	read := func() (map[string]any, map[string]any) {
 		t.Helper()
 		var c map[string]any
@@ -40,7 +40,7 @@ export function connect({ gateway, model, models }) {
 			t.Fatalf("%v: %s", err, b)
 		}
 		ps, _ := c["providers"].(map[string]any)
-		m, _ := ps["magpie"].(map[string]any)
+		m, _ := ps["myna"].(map[string]any)
 		return c, m
 	}
 
@@ -52,7 +52,7 @@ export function connect({ gateway, model, models }) {
 		t.Fatalf("fields %+v, lists models %v", a.Fields, a.ListsModels)
 	}
 	f := a.Field("provider")
-	if opts := f.Options(nil); len(opts) != 1 || opts[0].Value != magpieID {
+	if opts := f.Options(nil); len(opts) != 1 || opts[0].Value != mynaID {
 		t.Fatalf("a model is offered to pick: %+v", opts)
 	}
 	if f.Get() != "" || a.Wired() {
@@ -64,7 +64,7 @@ export function connect({ gateway, model, models }) {
 		t.Fatal(err)
 	}
 	c, m := read()
-	if how.How != "magpie" || m["base"] != gateway.URL()+"/v1" || m["key"] != gateway.TokenFor("launcher") || m["given"] != "undefined" || c["theme"] != "dark" {
+	if how.How != "myna" || m["base"] != gateway.URL()+"/v1" || m["key"] != gateway.TokenFor("launcher") || m["given"] != "undefined" || c["theme"] != "dark" {
 		t.Fatalf("connected %+v: %v", how, c)
 	}
 	if _, ok := c["model"]; ok {
@@ -81,7 +81,7 @@ export function connect({ gateway, model, models }) {
 	if !slices.Contains(ids(), "deepseek/pro") || !slices.Contains(ids(), "deepseek/flash") {
 		t.Fatalf("models: %v", ids())
 	}
-	if f.Get() != magpieID || !a.Wired() || a.Check() != "" {
+	if f.Get() != mynaID || !a.Wired() || a.Check() != "" {
 		t.Fatalf("get %q, wired %v, check %q", f.Get(), a.Wired(), a.Check())
 	}
 
@@ -115,7 +115,7 @@ export function connect({ gateway, model, models }) {
 
 // A connect-only module needs a connect, and one that writes something:
 // with neither a model key nor keys of connect's, the row would say
-// connected while nothing in the agent's file was magpie's.
+// connected while nothing in the agent's file was myna's.
 func TestPluggedConnectOnlyWritesSomething(t *testing.T) {
 	pluggedHome(t,
 		`export const agent = { id: "bare", config: "~/.bare.json" };`,

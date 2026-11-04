@@ -15,7 +15,7 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 const { reach } = require("./reader.cjs");
 
-const assets = process.env.MAGPIE_ZOOM_ASSETS || path.resolve(__dirname, "../assets");
+const assets = process.env.MYNA_ZOOM_ASSETS || path.resolve(__dirname, "../assets");
 const H = 3600e3;
 const iso = (ms) => new Date(ms).toISOString();
 
@@ -93,7 +93,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, fixtures(Date.now())));
-        await page.goto("http://magpie.test/?view=usage");
+        await page.goto("http://myna.test/?view=usage");
         for (const [key, cls] of [["codex", ".quota-curve:not(.balance-curve)"], ["deepseek", ".balance-curve"]]) {
           const card = page.locator(`.subscription-card[data-key="${key}"]`);
           const curve = card.locator(cls).first();

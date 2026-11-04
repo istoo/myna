@@ -8,11 +8,11 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/yetone/magpie/internal/browserext"
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/istoo/myna/internal/browserext"
+	"github.com/istoo/myna/internal/gateway"
 )
 
-// Magpie Browser's extension, as the Library page sets it up: written to a
+// Myna Browser's extension, as the Library page sets it up: written to a
 // folder the user can see, in their home folder, which they drop on their
 // own browser's chrome://extensions (or choose with Load unpacked), and
 // connected or not as the gateway says.
@@ -38,7 +38,7 @@ func browserState(ctx context.Context) browserJSON {
 	for _, dir := range []string{out.Dir, browserExtOldDir()} {
 		if _, err := os.Stat(filepath.Join(dir, "manifest.json")); err == nil {
 			out.Written = out.Written || dir == out.Dir
-			// kept as this magpie has it, and pointed at its gateway: the
+			// kept as this myna has it, and pointed at its gateway: the
 			// browser reads the folder again when it starts
 			browserext.Write(dir, gateway.URL())
 		}

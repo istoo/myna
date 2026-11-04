@@ -35,11 +35,11 @@ import (
 
 	"github.com/MoeForge/moejs"
 
-	"github.com/yetone/magpie/internal/beat"
-	"github.com/yetone/magpie/internal/filememo"
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/routes"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/istoo/myna/internal/beat"
+	"github.com/istoo/myna/internal/filememo"
+	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/myna/internal/routes"
+	"github.com/istoo/myna/internal/usage"
 )
 
 var (
@@ -412,8 +412,8 @@ func (o *observer) Serve() (stop func()) {
 	go func() {
 		defer wg.Done()
 		// a plugin turned on here is seen once saved (Written); every
-		// OthersEvery only catches one the CLI or a second magpie turned on
-		// (#3185: a 1s tick woke an idle magpie every second)
+		// OthersEvery only catches one the CLI or a second myna turned on
+		// (#3185: a 1s tick woke an idle myna every second)
 		for {
 			select {
 			case <-done:

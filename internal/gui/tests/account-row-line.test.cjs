@@ -9,7 +9,7 @@
 // and closes; one that is set stays on the first line. The sheet's two
 // edges match in the app, its scroll bar counted in. Every row of the accounts box is
 // ruled off from the one above. In every language, at the window's
-// narrowest and in a phone's browser. MAGPIE_ACC_ASSETS runs it on older
+// narrowest and in a phone's browser. MYNA_ACC_ASSETS runs it on older
 // assets.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -17,7 +17,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_ACC_ASSETS || path.resolve(__dirname, "../assets"));
+const assets = path.resolve(process.env.MYNA_ACC_ASSETS || path.resolve(__dirname, "../assets"));
 const claude = () => ({
   id: "claude", name: "Claude Code", icon: "claude-color", chat: "", responses: "", anthropic: "", catalog: "", routing: "",
   models: [{ id: "claude-opus-5-5", name: "Claude Opus 5.5", on: true }], agents: [], fallback: [], headers: {}, keyList: [],
@@ -72,7 +72,7 @@ for (const [engine, browserType] of [["chromium", chromium], ["webkit", webkit]]
       const context = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: "reduce" });
       const page = await context.newPage();
       await page.route("**/*", serve(lang, web));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://myna.test/?view=providers");
       await page.locator(".row.provider", { hasText: "Claude Code" }).first().click();
       const rows = page.locator(".editor .accts .acc[data-account-id]");
       await rows.nth(2).waitFor();
@@ -112,7 +112,7 @@ for (const [engine, browserType] of [["chromium", chromium], ["webkit", webkit]]
       assert.deepEqual(unruled, [], `${at}: every row is ruled off`);
 
       // the sheet doesn't scroll sideways, and in the app, whose scroll bar
-      // magpie draws, its edges match (a phone's bar takes no room)
+      // myna draws, its edges match (a phone's bar takes no room)
       const m = await page.evaluate(() => {
         const body = document.querySelector(".modal .ebody"), b = body.getBoundingClientRect(), cs = getComputedStyle(body);
         return { wide: body.scrollWidth - body.clientWidth, left: parseFloat(cs.paddingLeft), right: b.right - body.getBoundingClientRect().left - body.clientWidth - parseFloat(cs.borderLeftWidth) + parseFloat(cs.paddingRight), bar: body.offsetWidth - body.clientWidth };

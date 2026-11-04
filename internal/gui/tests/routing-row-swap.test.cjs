@@ -62,7 +62,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     page.on("pageerror", (e) => errors.push(e.message));
     const feed = { next: null };
     await page.route("**/*", serve(feed));
-    await page.goto("http://magpie.test/?view=routing");
+    await page.goto("http://myna.test/?view=routing");
     await page.locator(".rt-req").nth(first.length - 1).waitFor();
     await page.waitForTimeout(800);
     await page.evaluate(() => {

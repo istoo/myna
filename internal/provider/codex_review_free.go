@@ -13,7 +13,7 @@ const CodexAutoReview = "codex-auto-review"
 // #1593, hywang1230; thsottiaux's "Day 2.1"), but not on a Free plan,
 // where cybercaius on Discord measured it spending the allowance. A
 // review run on another model (one that follows the session, or a stand-in
-// magpie routes it to), or through an API key, is a call like any other.
+// myna routes it to), or through an API key, is a call like any other.
 func ChatGPTReviewFree(model, plan string) bool {
 	return strings.EqualFold(strings.TrimSpace(model), CodexAutoReview) && !strings.EqualFold(strings.TrimSpace(plan), "free")
 }
@@ -22,7 +22,7 @@ func ChatGPTReviewFree(model, plan string) bool {
 // p is the Codex subscription, which only ever holds ChatGPT sign-ins (an
 // API key's auth.json is no account of it, codexAccount), and the call is
 // one ChatGPTReviewFree. The plan is the one Codex is signed in to now; a
-// Codex magpie can't read the plan of, or one signed out since the call,
+// Codex myna can't read the plan of, or one signed out since the call,
 // is taken as a paid plan, as the gateway's caps take it (capHeld). The
 // ChatGPT API subscription (chatgpt-api) is not covered: OpenAI said it of
 // Codex's own sign-in, not of its API.

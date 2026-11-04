@@ -9,7 +9,7 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
-const options = [{ value: "m1", label: "m1" }, { value: "relay/m1", label: "m1", ref: "relay/m1", note: "Relay · via magpie" }];
+const options = [{ value: "m1", label: "m1" }, { value: "relay/m1", label: "m1", ref: "relay/m1", note: "Relay · via myna" }];
 const state = () => ({
   agents: [
     { id: "mimo", name: "MiMo Code", icon: "generic", path: "/fixture/mimo", source: "providers:1", fields: [{ key: "model", label: "model", value: "m1", options }] },
@@ -53,7 +53,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang));
-        await page.goto("http://magpie.test/?view=agents");
+        await page.goto("http://myna.test/?view=agents");
         await page.locator(`${row("mimo")} .ag-st`).waitFor();
         const tr = (k) => page.evaluate(([k, lang]) => (lang === "en" ? k : I18N[lang]?.[k]), [k, lang]);
         for (const k of [one, many]) assert.ok(await tr(k), `${lang} has ${k}`);

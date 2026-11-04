@@ -68,7 +68,7 @@ function serve(lang, log) {
 const KEYS = [
   "Search sessions", "Searching what was said…", "Searched what was said in the latest {n} of {total} sessions.",
   "Couldn't search what was said: {error}",
-  "{agent}'s own files of its sessions can't be read here, so only what magpie recorded through the gateway is searched.",
+  "{agent}'s own files of its sessions can't be read here, so only what myna recorded through the gateway is searched.",
 ];
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -87,7 +87,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("requestfailed", (r) => { if (r.url().includes("/api/sessions/search")) aborted.push(new URL(r.url()).searchParams.get("q")); });
         const log = [];
         await page.route("**/*", serve(lang, log));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://myna.test/?view=providers");
         await page.locator('#nav [data-view="sessions"]').first().click();
         const view = page.locator("#view-sessions");
         const row = (id) => view.locator(`.row.sm-sess[data-id="${id}"]`);

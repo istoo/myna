@@ -3,10 +3,10 @@ package cli
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
-// magpie group pick / pick= route a group manually (#317): every request
+// myna group pick / pick= route a group manually (#317): every request
 // to the model picked, stored with the group, the others left aside.
 func TestGroupPick(t *testing.T) {
 	groupsHome(t)

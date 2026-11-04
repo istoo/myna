@@ -1,19 +1,19 @@
 // A community plugin's own page in the window (docs/subsystems/
-// plugin-runtime.md, P4): package.json's magpie.page, in a tab of the
+// plugin-runtime.md, P4): package.json's myna.page, in a tab of the
 // sidebar's Plugins group, after the built-in pages. The page runs in a
 // frame sandboxed to scripts alone, in an origin of its own: it has no
-// way to the window, to magpie's API (apiFramed) or to the network (its
+// way to the window, to myna's API (apiFramed) or to the network (its
 // policy, pluginpage.go). What it asks of the window comes by message,
 // from that frame only, and the window answers only what the page may:
 // the theme, its own options, and the reads its package declared
-// (magpie.permissions), which /api/plugin-pages/read checks again.
+// (myna.permissions), which /api/plugin-pages/read checks again.
 // A page that throws, or never says hello, shows the kernel's "This
 // page stopped working" with its Try again.
 //
-// Panels (magpie.panels, P5) are framed the same way in a page's
+// Panels (myna.panels, P5) are framed the same way in a page's
 // .plugin-slot, as tall as they draw, and one that breaks says so in its
-// place. A page may take a built-in one's place (magpie.page.replaces),
-// and its actions (magpie.actions, P6) are row menu items that open it:
+// place. A page may take a built-in one's place (myna.page.replaces),
+// and its actions (myna.actions, P6) are row menu items that open it:
 // plugin-runtime.md says the rest.
 (() => {
   if (mode !== "window") return;
@@ -21,16 +21,16 @@
   const HELLO_MS = 10e3;
   // how long a page the reader left keeps its frame: one left longer is
   // let go, and loads again the next time it is opened, unless its
-  // package keeps it (magpie.page.keepAlive)
+  // package keeps it (myna.page.keepAlive)
   const IDLE_MS = 10 * 60e3;
   const pages = new Map(); // key → { entry, frame, hello, timer, shown, idle }
   const panels = new Map(); // frame → { entry, frame, context, hello, timer, body }
   let panelList = []; // /api/plugin-panels: every panel of a plugin on
   let ctx = null;
-  // a built-in page → the plugin's page in its place (magpie.page.replaces)
+  // a built-in page → the plugin's page in its place (myna.page.replaces)
   let replaced = new Map();
-  magpie.replacing = (v) => replaced.get(v) || v;
-  magpie.plugin("plugin-pages", (c) => { ctx = c; });
+  myna.replacing = (v) => replaced.get(v) || v;
+  myna.plugin("plugin-pages", (c) => { ctx = c; });
 
   const TOKENS = ["bg", "card", "fg", "fg-2", "muted", "faint", "line", "accent", "accent-soft", "accent-fg", "green", "red", "amber", "font", "code"];
   function theme() {
@@ -42,7 +42,7 @@
     return { dark, lang: locale, tokens };
   }
 
-  function post(win, msg) { win?.postMessage({ magpie: 1, ...msg }, "*"); }
+  function post(win, msg) { win?.postMessage({ myna: 1, ...msg }, "*"); }
 
   // the theme or the language changed: every page open is told
   function pushTheme() {
@@ -55,7 +55,7 @@
   function broke(key, why) { ctx?.broke(key, new Error(why)); }
 
   // a page's or a panel's title in the window's language: its titles
-  // (magpie.page.titles, {"zh": "…"}) by the language, then by its first
+  // (myna.page.titles, {"zh": "…"}) by the language, then by its first
   // part (zh for zh-TW), else its title
   function titled(e) {
     const m = e.titles || {};
@@ -63,7 +63,7 @@
   }
 
   // a page is told when the reader leaves it and comes back
-  // (magpie.onVisibility): a frame in a hidden view isn't hidden to itself
+  // (myna.onVisibility): a frame in a hidden view isn't hidden to itself
   function seen(p, visible) {
     if (p.shown === visible) return;
     p.shown = visible;
@@ -162,7 +162,7 @@
     }
     if (!p) return;
     const m = ev.data;
-    if (!m || typeof m !== "object" || m.magpie !== 1 || typeof m.method !== "string") return;
+    if (!m || typeof m !== "object" || m.myna !== 1 || typeof m.method !== "string") return;
     if (m.method === "error") {
       const why = String(m.params?.message || t("The page hit an error"));
       if (p.context) panelBroke(p, why); else broke(key, why);
@@ -251,7 +251,7 @@
       }
       p.gone = false;
       p.entry = e;
-      const part = magpie.page(e.key);
+      const part = myna.page(e.key);
       if (part) part.title = titled(e);
       let b = nav.querySelector(`button[data-plugin-page][data-view="${e.key}"]`);
       if (!b) b = tab(e);
@@ -276,7 +276,7 @@
     if (view === "agents" && !opened) {
       opened = true;
       let want = params.get("view") || "";
-      if (!want) { try { want = localStorage.getItem("magpie.lastView") || ""; } catch { /* none kept */ } }
+      if (!want) { try { want = localStorage.getItem("myna.lastView") || ""; } catch { /* none kept */ } }
       if (pages.has(want)) show(want);
     }
   }
@@ -286,7 +286,7 @@
 
   // the row menu's items for menu ("provider", "agent"), each told
   // context: { provider: { id, name } } or { agent: { id, name } }
-  magpie.actions = (menu, context) => {
+  myna.actions = (menu, context) => {
     const items = [];
     for (const [key, p] of pages) {
       if (p.gone) continue;
@@ -324,7 +324,7 @@
     again.onclick = () => panelFrame(p.entry, p.context, p.body);
     card.append(again);
     p.body.replaceChildren(card);
-    console.error(`[magpie] ${p.entry.name}: panel ${p.entry.key}: ${why}`);
+    console.error(`[myna] ${p.entry.name}: panel ${p.entry.key}: ${why}`);
   }
 
   // a panel's frame in body, told context once it says hello
@@ -370,7 +370,7 @@
 
   // a slot app.js draws, with what its panels are told (a provider's
   // editor: { provider: { id, name } })
-  magpie.slot = (name, context) => {
+  myna.slot = (name, context) => {
     const box = document.createElement("div");
     box.className = "plugin-slot";
     box.dataset.slot = name;
@@ -382,7 +382,7 @@
 
   // a page's markup written after the panels came (a built-in page
   // registered late, or put back by Try again): its slots filled now
-  magpie.fillSlots = (root) => { for (const box of root.querySelectorAll(".plugin-slot[data-slot]")) fill(box); };
+  myna.fillSlots = (root) => { for (const box of root.querySelectorAll(".plugin-slot[data-slot]")) fill(box); };
 
   async function loadPanels() {
     let list;

@@ -6,12 +6,12 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
 )
 
-// modelID is `magpie model id`: the id a provider's model is listed,
-// routed and counted by in magpie, while the provider is asked for it by
+// modelID is `myna model id`: the id a provider's model is listed,
+// routed and counted by in myna, while the provider is asked for it by
 // its own (provider.SetModelID).
 func modelID(args []string) error {
 	if len(args) == 0 || len(args) > 2 {
@@ -61,7 +61,7 @@ func modelID(args []string) error {
 		fmt.Println(muted.Render("  " + replaced + " had that id: it is listed by its own again"))
 	}
 	if n := strings.TrimSpace(settings.Load().ModelWires[p.ID+"/"+id]); n != "" {
-		fmt.Println(muted.Render("  a wire name of yours is set for " + p.ID + "/" + id + ": it is asked for as " + n + " (magpie model wire --reset takes it off)"))
+		fmt.Println(muted.Render("  a wire name of yours is set for " + p.ID + "/" + id + ": it is asked for as " + n + " (myna model wire --reset takes it off)"))
 	}
 	return nil
 }
@@ -76,7 +76,7 @@ func localOf(p *provider.Provider, own string) (string, bool) {
 	return "", false
 }
 
-// modelIDs is `magpie model ids`: every model listed by an id the user
+// modelIDs is `myna model ids`: every model listed by an id the user
 // gave it, with the provider's own.
 func modelIDs() error {
 	ids := settings.Load().ModelIDs
@@ -95,7 +95,7 @@ func modelIDs() error {
 		fmt.Printf("%-*s  %s\n", w, k, muted.Render("is asked for as ")+own)
 	}
 	if n == 0 {
-		fmt.Println(muted.Render("no model is listed by an id of yours yet · magpie model id <provider/model> <id>"))
+		fmt.Println(muted.Render("no model is listed by an id of yours yet · myna model id <provider/model> <id>"))
 	}
 	return nil
 }

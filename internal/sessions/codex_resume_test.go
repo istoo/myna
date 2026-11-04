@@ -11,8 +11,8 @@ import (
 
 // Codex 0.166 resumes a thread only on the provider it was saved with:
 // `codex resume <id>` of a session CC Switch's "custom" made, with Codex
-// on magpie now, stopped at modelProviderMismatch ("This chat uses custom,
-// but your current provider is magpie", mrten_95615 on Discord). Opening
+// on myna now, stopped at modelProviderMismatch ("This chat uses custom,
+// but your current provider is myna", mrten_95615 on Discord). Opening
 // it from Sessions names its own provider while config.toml has it, and
 // moves the thread to the provider Codex is on when config.toml has it no
 // longer, which nothing else gets Codex to resume.
@@ -29,11 +29,11 @@ func TestCodexResumeOnItsProvider(t *testing.T) {
 	os.Chtimes(main, old, old)
 	db := codexStateDB(t, codex, mgCX, "custom")
 	cfg := filepath.Join(codex, "config.toml")
-	magpie := "model = \"gpt-5.5\"\nmodel_provider = \"magpie\"\n\n[model_providers.magpie]\nname = \"magpie\"\nbase_url = \"http://127.0.0.1:1/v1\"\n"
+	myna := "model = \"gpt-5.5\"\nmodel_provider = \"myna\"\n\n[model_providers.myna]\nname = \"myna\"\nbase_url = \"http://127.0.0.1:1/v1\"\n"
 	custom := "\n[model_providers.custom]\nname = \"custom\"\nbase_url = \"http://127.0.0.1:2/v1\"\n"
 
 	// custom still in config.toml: resumed on it, nothing moved
-	os.WriteFile(cfg, []byte(magpie+custom), 0o644)
+	os.WriteFile(cfg, []byte(myna+custom), 0o644)
 	s, ok := Find("codex", mgCX)
 	if !ok || !strings.HasSuffix(s.Resume, "codex resume "+mgCX) {
 		t.Fatalf("listed %v, resume %q", ok, s.Resume)
@@ -47,29 +47,29 @@ func TestCodexResumeOnItsProvider(t *testing.T) {
 	}
 
 	// Codex on custom itself: as listed
-	os.WriteFile(cfg, []byte(strings.Replace(magpie, `model_provider = "magpie"`, `model_provider = "custom"`, 1)+custom), 0o644)
+	os.WriteFile(cfg, []byte(strings.Replace(myna, `model_provider = "myna"`, `model_provider = "custom"`, 1)+custom), 0o644)
 	if got := ResumeNow(s); got != s.Resume {
 		t.Fatalf("on its own provider %q, want %q", got, s.Resume)
 	}
 
-	// custom gone: the thread moves to magpie and resumes there
-	os.WriteFile(cfg, []byte(magpie), 0o644)
+	// custom gone: the thread moves to myna and resumes there
+	os.WriteFile(cfg, []byte(myna), 0o644)
 	if got := ResumeNow(s); got != s.Resume {
 		t.Fatalf("resume %q, want %q", got, s.Resume)
 	}
-	if b, _ := os.ReadFile(main); !bytes.Contains(b, []byte(`"model_provider":"magpie"`)) || bytes.Contains(b, []byte(`"model_provider":"custom"`)) {
-		t.Fatal("the thread's rollout wasn't moved to magpie")
+	if b, _ := os.ReadFile(main); !bytes.Contains(b, []byte(`"model_provider":"myna"`)) || bytes.Contains(b, []byte(`"model_provider":"custom"`)) {
+		t.Fatal("the thread's rollout wasn't moved to myna")
 	}
-	if p, _, _ := threadProvider(t, db, mgCX); p != "magpie" {
-		t.Fatalf("thread row %q, want magpie", p)
+	if p, _, _ := threadProvider(t, db, mgCX); p != "myna" {
+		t.Fatalf("thread row %q, want myna", p)
 	}
 	if p, _, _ := threadProvider(t, db, "other"); p != "custom" {
 		t.Errorf("another thread became %q", p)
 	}
 
 	// the row is what Codex reads first: a row on custom over a file
-	// naming magpie still takes the override
-	os.WriteFile(cfg, []byte(magpie+custom), 0o644)
+	// naming myna still takes the override
+	os.WriteFile(cfg, []byte(myna+custom), 0o644)
 	if _, err := moveCodexThread(db, mgCX, "custom"); err != nil {
 		t.Fatal(err)
 	}

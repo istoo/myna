@@ -65,7 +65,7 @@ const words = {
 };
 const strings = [
   "Both", "Key header",
-  "Which header the API key goes in on the Anthropic API. Most services take both; pick one for a service that refuses the two together. magpie also switches to one by itself when a service says so.",
+  "Which header the API key goes in on the Anthropic API. Most services take both; pick one for a service that refuses the two together. myna also switches to one by itself when a service says so.",
 ];
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -87,7 +87,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       const posts = [];
       await page.route("**/*", serve(lang, posts));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://myna.test/?view=providers");
       await page.locator(".row.provider", { hasText: name }).first().click();
       await unfold(page);
       await page.locator(".editor .bar").waitFor();

@@ -15,25 +15,25 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/istoo/myna/internal/proc"
 )
 
-// The Codex app greys its Send for every model, magpie's too, while the
+// The Codex app greys its Send for every model, myna's too, while the
 // ChatGPT account it is signed in to is used up (its composer's gate,
 // XP in ChatGPT.app 26.1013's app-primary: authMethod "chatgpt" and
 // rate_limit.allowed false). It reads authMethod from its app-server's
-// account/read, which answers no account once magpie is Codex's provider
+// account/read, which answers no account once myna is Codex's provider
 // (requires_openai_auth false), but it asks only as the app-server
-// starts. So when magpie becomes Codex's provider for the used-up
+// starts. So when myna becomes Codex's provider for the used-up
 // account (the agent package's AppOut), and again when it puts Codex
-// back on the account after its reset, magpie ends the app's own
+// back on the account after its reset, myna ends the app's own
 // app-server, the one it started with: the app starts another at once,
 // reads account/read again, and sends (tried in ChatGPT.app 26.1013 on
 // macOS; its window, threads and drafts stay). It does that on every
 // system the app runs on, with nothing for the user to do, once no Codex
-// turn is running: none through magpie, none open in Codex's sessions.
+// turn is running: none through myna, none open in Codex's sessions.
 //
-// The same holds for every change magpie makes to where Codex sends its
+// The same holds for every change myna makes to where Codex sends its
 // requests: a Disconnect that takes openai_base_url out, a Connect that
 // puts it in, failover, the gateway moved to another port. The app-server
 // read config.toml as it started, and a Codex app left running kept
@@ -50,8 +50,8 @@ import (
 // other exit as a crash and shows it.
 
 // CodexAppRoute is set by the agent package: what in Codex's config the
-// app-server reads as it starts and magpie writes (its provider and base
-// URL: route, compared, never parsed), and whether magpie is Codex's
+// app-server reads as it starts and myna writes (its provider and base
+// URL: route, compared, never parsed), and whether myna is Codex's
 // provider for its used-up ChatGPT account (out, AppOut); known false
 // when Codex's config can't be read. Nothing the Codex app writes itself
 // (its model or effort pick) and not the model list is in route, or a
@@ -60,7 +60,7 @@ var CodexAppRoute func() (route string, out, known bool)
 
 // CodexNoAccount is set by the agent package: whether the provider Codex's
 // config names takes no ChatGPT account at all (a [model_providers] table
-// without requires_openai_auth = true, such as magpie's with the user's
+// without requires_openai_auth = true, such as myna's with the user's
 // own requires_openai_auth = false; danzi002 on Discord). Such a provider
 // sends its own key, and the app-server answers account/read with no
 // account for it (codex-rs ModelProviderInfo::account_state and
@@ -85,13 +85,13 @@ func codexNoAccount() bool {
 // opened again (蛋仔 on Discord, 10-30; reproduced on the Windows box
 // with codex 0.164's app-server and an MCP server that outlived it: its
 // stdout ended only when the MCP server did). So once the ones ended are
-// gone, magpie waits codexAppBackWait for a new one; when none comes
+// gone, myna waits codexAppBackWait for a new one; when none comes
 // while the app still runs, it has the agent package reopen the app
 // (CodexAppReopen), and says it is stuck when that can't be done.
 //
 // CodexAppOpen, set by the agent package, says whether the Codex desktop
 // app runs here; known false when that can't be told. CodexAppReopen
-// quits it and opens it again, erring where magpie doesn't (macOS, where
+// quits it and opens it again, erring where myna doesn't (macOS, where
 // a reopen opens a new window: the user does it).
 var (
 	CodexAppOpen   func(ctx context.Context) (open, known bool)
@@ -115,10 +115,10 @@ func codexAppGotNone(ctx context.Context) (stuck bool) {
 		return true
 	}
 	if err := CodexAppReopen(ctx); err != nil {
-		log.Printf("codex: the Codex app started no app-server in place of the one magpie ended; reopening it: %v", err)
+		log.Printf("codex: the Codex app started no app-server in place of the one myna ended; reopening it: %v", err)
 		return true
 	}
-	log.Printf("codex: the Codex app started no app-server in place of the one magpie ended; reopened it")
+	log.Printf("codex: the Codex app started no app-server in place of the one myna ended; reopened it")
 	return false
 }
 
@@ -131,9 +131,9 @@ func codexAppOpenNow(ctx context.Context) (open, known bool) {
 }
 
 // codexAppEvery is how often KeepCodexAppOnItsProvider looks; codexAppIdle
-// how long after Codex's last request through magpie a turn counts ended
+// how long after Codex's last request through myna a turn counts ended
 // (a tool runs between two of a turn's requests); codexAppTries how often
-// one app-server is ended before magpie says it can't.
+// one app-server is ended before myna says it can't.
 var (
 	codexAppEvery = 3 * time.Second
 	codexAppIdle  = 10 * time.Second
@@ -147,7 +147,7 @@ const codexTurnWindow = 30 * time.Minute
 
 // codexTurnStuckAfter is how long a turn left open on an app-server whose
 // account was used up has to have written nothing to Codex's sessions,
-// with no Codex request through magpie either, before it counts stuck and
+// with no Codex request through myna either, before it counts stuck and
 // the app-server is restarted past it. Such a turn can't go on: its next
 // request is refused on that account, and when quota ran out mid-turn
 // the app sat on it and greyed every thread until restarted (蛋仔 on
@@ -255,7 +255,7 @@ var codexApp struct {
 	sync.Mutex
 	seen  bool
 	route string
-	// out: whether the route last seen was magpie as Codex's provider for
+	// out: whether the route last seen was myna as Codex's provider for
 	// its used-up account (CodexAppRoute's out)
 	out bool
 	// stale: the app-servers started before Codex's provider last changed,
@@ -266,13 +266,13 @@ var codexApp struct {
 	// switched: Codex's ChatGPT account changed since the app-servers were
 	// last listed (codexAppAccountSwitched)
 	switched bool
-	// auto: every switch since then magpie made by itself
+	// auto: every switch since then myna made by itself
 	// (SwitchWhenSpent), none the user made
 	auto bool
 	// spent: the app-servers are on an account used up, so a turn they
 	// left open can't be served by them any more: Codex was switched off
 	// it (SwitchWhenSpent, or by hand off one known held, noteCodexSwitch),
-	// or magpie became Codex's provider for it (out)
+	// or myna became Codex's provider for it (out)
 	spent bool
 	// ended: the app-servers ended and no new one seen since, and by when
 	// one has to start (codexAppBackWait after the last end)
@@ -285,7 +285,7 @@ var codexApp struct {
 }
 
 // CodexAppStuck is whether a Codex app is left on the provider it started
-// with, which magpie couldn't restart: the user quits and opens it.
+// with, which myna couldn't restart: the user quits and opens it.
 func CodexAppStuck() bool {
 	c := &codexApp
 	c.Lock()
@@ -318,20 +318,20 @@ func codexAppAccountSwitched() { codexAppSwitched(false, false) }
 func codexAppSpentSwitch() { codexAppSwitched(true, false) }
 
 // codexAppSwitched notes a switch of Codex's account: spent, off one used
-// up; byMagpie, made by magpie itself (SwitchWhenSpent). magpie's switch
+// up; byMyna, made by myna itself (SwitchWhenSpent). myna's switch
 // back restarts the app only with RestartApp on; its switch off a spent
 // account, and one the user made among them, restart it all the same.
-func codexAppSwitched(spent, byMagpie bool) {
+func codexAppSwitched(spent, byMyna bool) {
 	c := &codexApp
 	c.Lock()
 	defer c.Unlock()
-	c.auto = byMagpie && (!c.switched || c.auto)
+	c.auto = byMyna && (!c.switched || c.auto)
 	c.switched, c.spent = true, c.spent || spent
 }
 
 // KeepCodexAppOnItsProvider runs codexAppStep every codexAppEvery till
 // ctx ends. busy says how many of Codex's requests are in flight through
-// magpie and when the last ended.
+// myna and when the last ended.
 func KeepCodexAppOnItsProvider(ctx context.Context, busy func() (int, time.Time)) {
 	t := time.NewTicker(codexAppEvery)
 	defer t.Stop()
@@ -346,9 +346,9 @@ func KeepCodexAppOnItsProvider(ctx context.Context, busy func() (int, time.Time)
 }
 
 // codexAppStep notes the app-servers running as Codex's route changes
-// (magpie becomes Codex's provider for the used-up account, or stops being
+// (myna becomes Codex's provider for the used-up account, or stops being
 // it; Codex is connected or disconnected), and ends each of them once no
-// Codex turn is running. Started with magpie on, the app may
+// Codex turn is running. Started with myna on, the app may
 // have opened before: its app-servers are ended too. It says which pids it
 // ended.
 func codexAppStep(ctx context.Context, now time.Time, busy func() (int, time.Time)) []int {
@@ -375,32 +375,32 @@ func codexAppStep(ctx context.Context, now time.Time, busy func() (int, time.Tim
 	}
 	c.Lock()
 	// at the first look only a used-up account's app-servers are ended:
-	// what the others read before magpie started isn't known
+	// what the others read before myna started isn't known
 	changed := !c.seen && out || c.seen && c.route != route || c.switched
-	// magpie becoming Codex's provider for the used-up account: the
+	// myna becoming Codex's provider for the used-up account: the
 	// app-servers are on that account, and a turn left open on it when
 	// quota ran out mid-turn would hold their restart, and the app's grey
 	// Send, for up to codexTurnWindow (xiaoq6285 on Discord)
 	into := changed && out && (!c.seen || !c.out)
-	// what changed magpie changed by itself and the app works without:
+	// what changed myna changed by itself and the app works without:
 	// the switch back once the account has room, and the takeover out at
 	// the reset. The ChatGPT app shows the end of its app-server as an
 	// error and relaunches (#4550), so that waits for the user to restart
-	// it unless they asked magpie to (RestartApp; atom0964 on Discord: both
-	// of Codex's sign-in ticks off, and magpie still restarted the app to
+	// it unless they asked myna to (RestartApp; atom0964 on Discord: both
+	// of Codex's sign-in ticks off, and myna still restarted the app to
 	// switch accounts). A switch the user made, a Connect or a Disconnect
 	// is theirs, and restarts it. So does whatever leaves the app-server on
 	// a used-up account: the takeover in, the first look on one and a
 	// switch off one. The app greys Send for every model while that
 	// account's rate limit says not allowed and reads the account only as
-	// its app-server starts (8b0132b3d), so nothing magpie serves would
+	// its app-server starts (8b0132b3d), so nothing myna serves would
 	// reach it until a restart.
 	byHand := c.switched && !c.auto || c.seen && c.route != route && c.out == out
 	needed := into || c.switched && c.spent
 	if changed && !byHand && !needed && !codexRestartsApp() {
-		why := "magpie switched Codex's ChatGPT account back"
+		why := "myna switched Codex's ChatGPT account back"
 		if !c.switched {
-			why = "magpie gave Codex back its ChatGPT account after the reset"
+			why = "myna gave Codex back its ChatGPT account after the reset"
 		}
 		log.Printf("codex: %s; the Codex app's app-server is left running (Restart the Codex app to follow is off), and the app follows once it is restarted", why)
 		c.switched, c.auto = false, false
@@ -424,7 +424,7 @@ func codexAppStep(ctx context.Context, now time.Time, busy func() (int, time.Tim
 		case c.switched:
 			c.why = "Codex's ChatGPT account was switched"
 		case into:
-			c.why = "Codex's account is used up, so magpie serves it"
+			c.why = "Codex's account is used up, so myna serves it"
 		default:
 			c.why = "where Codex's config sends it changed"
 		}
@@ -736,8 +736,8 @@ func codexAppBack(ctx context.Context, list func(context.Context) ([]int, error)
 	}
 }
 
-// RestartCodexAppWhenIdle ends the Codex app's own app-servers once, for a magpie
-// that won't be running to watch them (magpie uninstall): the app starts
+// RestartCodexAppWhenIdle ends the Codex app's own app-servers once, for a myna
+// that won't be running to watch them (myna uninstall): the app starts
 // a new one, which reads Codex's config as it is now. It waits up to wait
 // for a running Codex turn to end, and cuts none short: left says an
 // app-server was still on the old config when it gave up, or couldn't be

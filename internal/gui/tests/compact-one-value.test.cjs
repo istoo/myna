@@ -23,7 +23,7 @@ const curve = (lo, hi, best) => {
 const facts = { calls: 900, streams: 20, compacts: 40, peak: 380000, after: 57000, growth: 4000, rework: 4700 };
 
 function serve(lang, posts) {
-  let settings = { theme: "light", lang, tray: "panel", currency: "usd", version: "0.1.900", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425", proxyNow: "none", proxySource: "none", visionModels: [], imageGenModels: [], titleModels: [], workbuddyCheckins: [], lanURLs: [], redactWords: [], trayUsageEvery: 3, compactAt: 0, fullContext: false };
+  let settings = { theme: "light", lang, tray: "panel", currency: "usd", version: "0.1.900", dir: "~/.config/myna", gateway: "http://127.0.0.1:3425", proxyNow: "none", proxySource: "none", visionModels: [], imageGenModels: [], titleModels: [], workbuddyCheckins: [], lanURLs: [], redactWords: [], trayUsageEvery: 3, compactAt: 0, fullContext: false };
   let ours = 0; // the window tune put in, as the gateway's stash keeps it
   const window = () => settings.fullContext ? 0 : settings.compactAt || 272000;
   const tune = () => {
@@ -94,7 +94,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     for (const [lang, w] of Object.entries(words)) {
       await t.test(lang, async () => {
         const ctx = await browser.newContext({ viewport: { width: 1100, height: 760 }, reducedMotion: "reduce" });
-        await ctx.addInitScript(() => { try { localStorage.setItem("magpie.usageTab", "context"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("myna.usageTab", "context"); } catch {} });
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
@@ -102,13 +102,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, posts));
         await watchSettingsReads(page);
-        await page.goto("http://magpie.test/?view=usage");
+        await page.goto("http://myna.test/?view=usage");
         const row = page.locator(".ctx-tune-row").first();
         await row.waitFor();
         // the card says where its window is kept
         assert.equal(await row.locator(".ctx-tune-src").innerText(), w.long);
         await row.locator("button.primary").click();
-        // put in by magpie: Undo, and still the one value
+        // put in by myna: Undo, and still the one value
         await row.getByRole("button", { name: w.undo, exact: true }).waitFor();
         assert.equal(await row.locator(".ctx-tune-src").innerText(), w.long);
         assert.deepEqual(posts.map((p) => [p.path, p.body.agent, p.body.value]), [["/api/tune/apply", "codex", "400000"]]);

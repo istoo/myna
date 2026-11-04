@@ -3,7 +3,7 @@ package provider
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/update"
+	"github.com/istoo/myna/internal/update"
 )
 
 // Qoder's plugin before 0.2.52 read a model list with every paid model off

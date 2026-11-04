@@ -110,7 +110,7 @@ function renderOTel(s, keep) {
   section("Export scope");
   row("otelMetricsRow", "Export metrics", t("Also send duration and token histograms. Leave off for a traces-only service such as Langfuse"),
     segs([["off", t("Off")], ["on", t("On")]], config.metrics ? "on" : "off", (v) => save({ metrics: v === "on" })));
-  row("otelSessionsRow", "Trace agent conversations", t("Reads all local sessions from Codex, Pi, Oh My Pi, Claude Code, Cowork, OpenCode and Gemini CLI, including calls not routed through Magpie. When content is included below, exports prompts, replies, tool arguments and tool output (including file contents and command output), with secrets masked"),
+  row("otelSessionsRow", "Trace agent conversations", t("Reads all local sessions from Codex, Pi, Oh My Pi, Claude Code, Cowork, OpenCode and Gemini CLI, including calls not routed through Myna. When content is included below, exports prompts, replies, tool arguments and tool output (including file contents and command output), with secrets masked"),
     segs([["off", t("Off")], ["on", t("On")]], config.sessions ? "on" : "off", (v) => save({ sessions: v === "on" })));
   section("Trace content");
   const mode = !config.bodies ? "metadata" : config.bodiesWhole ? "full" : "limited";

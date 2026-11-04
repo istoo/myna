@@ -35,7 +35,7 @@ const penguinAppPlist = `<?xml version="1.0" encoding="UTF-8"?>
 `
 
 // rankyurky_80676 on Discord (2026-10-27): PenguinHarness's desktop app on
-// a Mac, and magpie didn't detect it. The app needs no penguin CLI (it
+// a Mac, and myna didn't detect it. The app needs no penguin CLI (it
 // links one only when the user lets it), so ~/.penguin with no CLI was
 // taken for a leftover, and an app not opened yet had no ~/.penguin at
 // all. With the app installed it is listed, its version shown, and no CLI
@@ -53,7 +53,7 @@ func TestPenguinDesktopAppDetected(t *testing.T) {
 	t.Cleanup(func() { appFolders = was })
 	a := penguin(home)
 	// a name no machine has: proc.FindTool also looks where users' tools go
-	a.Bin = "magpie-test-gone-penguin"
+	a.Bin = "myna-test-gone-penguin"
 	offered := func() bool {
 		for _, x := range installsOf([]*Agent{a}, "darwin", true) {
 			if x.ID == "penguin" {

@@ -8,10 +8,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/yetone/magpie/internal/uninstall"
+	"github.com/istoo/myna/internal/uninstall"
 )
 
-// fakeUninstall puts fakes in for what Settings › Uninstall magpie does,
+// fakeUninstall puts fakes in for what Settings › Uninstall myna does,
 // and returns the order they ran in
 func fakeUninstall(t *testing.T, agentErr string) *[]string {
 	t.Helper()
@@ -37,7 +37,7 @@ func postTo(mux http.Handler, path string) *httptest.ResponseRecorder {
 }
 
 // Uninstall from the app disconnects every agent after the service is
-// gone, and says what it did; magpie's files go only on Finish, once the
+// gone, and says what it did; myna's files go only on Finish, once the
 // app quits, never with the agents.
 func TestUninstallFromTheApp(t *testing.T) {
 	ran := fakeUninstall(t, "")
@@ -102,7 +102,7 @@ func TestUninstallFinishThatCantStartStays(t *testing.T) {
 	}
 }
 
-// magpie web never uninstalls: the page is on another computer, or a
+// myna web never uninstalls: the page is on another computer, or a
 // browser on this one that isn't the app.
 func TestUninstallNeverFromABrowser(t *testing.T) {
 	ran := fakeUninstall(t, "")

@@ -4,8 +4,8 @@ package agent
 // kirocrew CLI, its web dashboard and the Gateway they share; Vincent on
 // Discord) is a persistent agent that runs each session on a harness: an
 // ACP agent it starts and talks to. It has no model provider of its own
-// to point at magpie; its models are its harness's. So what magpie sets is
-// which harness it runs: one already connected to magpie, whose own config
+// to point at myna; its models are its harness's. So what myna sets is
+// which harness it runs: one already connected to myna, whose own config
 // then sends its requests to the gateway.
 //
 // Its settings are one JSON file in its home, $KIROCREW_HOME (made
@@ -23,26 +23,26 @@ package agent
 // The Gateway reloads the files when they change; a session already open
 // keeps its harness.
 //
-// The harnesses magpie offers are those it wires itself, through the files
+// The harnesses myna offers are those it wires itself, through the files
 // the harness reads under Crew too: Codex (codex-acp reads ~/.codex, or
 // CODEX_HOME), Claude Code (claude-agent-acp runs the user's claude, which
 // reads ~/.claude), OpenCode (opencode acp), Pi (pi-acp runs pi) and Goose
 // (goose acp). Not deepseek: Crew runs it as dsh --profile acp, a profile
-// of its own that magpie's dsh wiring doesn't reach. Codex, Claude Code
+// of its own that myna's dsh wiring doesn't reach. Codex, Claude Code
 // and Pi are reached through an npm adapter Crew doesn't ship
-// (agent_sdk/backend_install.py); magpie looks for it where Crew does and
+// (agent_sdk/backend_install.py); myna looks for it where Crew does and
 // says how to install it when it isn't there, and installs nothing.
 //
 // Connecting keeps the harness Kiro Crew is set to when it is one of
-// these, and connects that agent to magpie too when it isn't yet (Crew's
+// these, and connects that agent to myna too when it isn't yet (Crew's
 // first run picks one, Claude Code on a Windows without kiro-cli: wuping9525
 // on Discord had to connect it by hand first). Disconnect takes that agent
-// off magpie again only when this connect is what put it on, and the user
-// hasn't disconnected it since. On a harness magpie doesn't wire (KAS,
-// kiro-cli, deepseek) it picks the first harness connected to magpie
+// off myna again only when this connect is what put it on, and the user
+// hasn't disconnected it since. On a harness myna doesn't wire (KAS,
+// kiro-cli, deepseek) it picks the first harness connected to myna
 // (Codex, Claude Code, OpenCode, Pi, Goose), one whose adapter is here
 // first. It keeps what the two keys said before, which Disconnect puts
-// back. A harness set in config.local.json is the user's: magpie writes
+// back. A harness set in config.local.json is the user's: myna writes
 // none over it.
 
 import (
@@ -53,8 +53,8 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/istoo/myna/internal/appdir"
+	"github.com/istoo/myna/internal/edit"
 )
 
 // kiroCrewOS is the system Kiro Crew's files are looked for as; a var so
@@ -64,8 +64,8 @@ var kiroCrewOS = runtime.GOOS
 // kiroCrewApp is Kiro Crew's macOS bundle.
 var kiroCrewApp = desktopApp{id: "com.amazon.kiro.crew", names: []string{"KiroCrew.app", "Kiro Crew.app"}}
 
-// kiroCrewHarness is one harness magpie can set: Crew's backend id, the
-// magpie agent that is it, and the adapter Crew runs it through, with the
+// kiroCrewHarness is one harness myna can set: Crew's backend id, the
+// myna agent that is it, and the adapter Crew runs it through, with the
 // variable that names the adapter's path and the npm package it comes in
 // ("" for one that is the agent's own binary).
 type kiroCrewHarness struct {
@@ -75,7 +75,7 @@ type kiroCrewHarness struct {
 	dispatch              bool // can run crew members (member_acp_backend)
 }
 
-// kiroCrewHarnesses are the harnesses magpie offers, in the order it picks
+// kiroCrewHarnesses are the harnesses myna offers, in the order it picks
 // one by itself.
 var kiroCrewHarnesses = []kiroCrewHarness{
 	{id: "codex", agent: "codex", name: "Codex", icon: "codex-color", adapter: "codex-acp", env: "CODEX_ACP_BIN", npm: "@agentclientprotocol/codex-acp", dispatch: true},
@@ -97,36 +97,36 @@ func kiroCrewHarnessOf(id string) (kiroCrewHarness, bool) {
 const (
 	kiroCrewBackend = "agent.acp_backend"
 	kiroCrewMember  = "agent.member_acp_backend"
-	// the stash: what the two keys said before magpie set them, and what
-	// magpie wrote (there while magpie has set the harness)
+	// the stash: what the two keys said before myna set them, and what
+	// myna wrote (there while myna has set the harness)
 	kiroCrewWasKey   = "kirocrew.was"
 	kiroCrewWroteKey = "kirocrew.wrote"
-	// the harness agent magpie connected along with Kiro Crew, for
+	// the harness agent myna connected along with Kiro Crew, for
 	// Disconnect to take off again (kiroCrewJoin)
 	kiroCrewJoinedKey = "kirocrew.joined"
 )
 
 var (
 	noticeKiroCrew        = newNotice("Kiro Crew takes the new harness for new sessions; sessions already open keep theirs.")
-	noticeKiroCrewAdapter = newNotice("Kiro Crew runs {harness} through {adapter}, which magpie didn't find here: install it with {install}, then start a new session.")
-	noticeKiroCrewPinned  = newNotice("Kiro Crew's config.local.json sets its harness (agent.acp_backend), and that wins over config.json, so magpie leaves it alone: set it there to a harness connected to magpie.")
-	noticeKiroCrewJoined  = newNotice("Kiro Crew runs on {harness}, so magpie connected {harness} too; turning Kiro Crew off disconnects it again.")
+	noticeKiroCrewAdapter = newNotice("Kiro Crew runs {harness} through {adapter}, which myna didn't find here: install it with {install}, then start a new session.")
+	noticeKiroCrewPinned  = newNotice("Kiro Crew's config.local.json sets its harness (agent.acp_backend), and that wins over config.json, so myna leaves it alone: set it there to a harness connected to myna.")
+	noticeKiroCrewJoined  = newNotice("Kiro Crew runs on {harness}, so myna connected {harness} too; turning Kiro Crew off disconnects it again.")
 )
 
-// the provider's note: how magpie is its provider, or that its harness is
+// the provider's note: how myna is its provider, or that its harness is
 // the user's in config.local.json
 const (
-	kiroCrewNote       = "its harness, an agent connected to magpie, runs on magpie's models"
-	kiroCrewPinnedNote = "its harness is set in config.local.json, which magpie leaves alone"
+	kiroCrewNote       = "its harness, an agent connected to myna, runs on myna's models"
+	kiroCrewPinnedNote = "its harness is set in config.local.json, which myna leaves alone"
 )
 
 var (
-	errKiroCrewNoHarness = errors.New("Kiro Crew runs on a harness: connect Codex, Claude Code, OpenCode, Pi or Goose to magpie first, then connect Kiro Crew")
-	errKiroCrewPinned    = errors.New("Kiro Crew's config.local.json sets its harness, and that wins over config.json: magpie leaves it alone. Change agent.acp_backend there, or take it out, then connect again")
-	errKiroCrewHarness   = errors.New("that harness isn't connected to magpie: connect it first")
+	errKiroCrewNoHarness = errors.New("Kiro Crew runs on a harness: connect Codex, Claude Code, OpenCode, Pi or Goose to myna first, then connect Kiro Crew")
+	errKiroCrewPinned    = errors.New("Kiro Crew's config.local.json sets its harness, and that wins over config.json: myna leaves it alone. Change agent.acp_backend there, or take it out, then connect again")
+	errKiroCrewHarness   = errors.New("that harness isn't connected to myna: connect it first")
 )
 
-// kiroCrewAgent is the magpie agent of a harness, nil for none.
+// kiroCrewAgent is the myna agent of a harness, nil for none.
 func kiroCrewAgent(id string) *Agent {
 	home, cfg := homes()
 	switch id {
@@ -144,14 +144,14 @@ func kiroCrewAgent(id string) *Agent {
 	return nil
 }
 
-// kiroCrewWired says whether the magpie agent id is connected to magpie;
+// kiroCrewWired says whether the myna agent id is connected to myna;
 // a var so tests can say.
 var kiroCrewWired = func(id string) bool {
 	a := kiroCrewAgent(id)
 	return a != nil && a.Wired()
 }
 
-// kiroCrewJoined is the harness agent magpie connected along with Kiro
+// kiroCrewJoined is the harness agent myna connected along with Kiro
 // Crew, and whether the user had disconnected it before that.
 type kiroCrewJoined struct {
 	Agent string `json:"agent"`
@@ -164,7 +164,7 @@ func kiroCrewJoinedNow() (kiroCrewJoined, bool) {
 	return j, s != "" && json.Unmarshal([]byte(s), &j) == nil && j.Agent != ""
 }
 
-// kiroCrewJoin connects the harness agent id to magpie for Kiro Crew, and
+// kiroCrewJoin connects the harness agent id to myna for Kiro Crew, and
 // says whether it could: false, with no error, for one not installed here.
 var kiroCrewJoin = func(id string) (bool, error) {
 	a := kiroCrewAgent(id)
@@ -180,8 +180,8 @@ var kiroCrewJoin = func(id string) (bool, error) {
 	return true, nil
 }
 
-// kiroCrewLeave takes the harness agent magpie connected along with Kiro
-// Crew off magpie again, the user's own disconnect of it, from before,
+// kiroCrewLeave takes the harness agent myna connected along with Kiro
+// Crew off myna again, the user's own disconnect of it, from before,
 // kept as it was.
 var kiroCrewLeave = func() error {
 	j, ok := kiroCrewJoinedNow()
@@ -202,7 +202,7 @@ var kiroCrewLeave = func() error {
 	return nil
 }
 
-// kiroCrewUserLeft forgets that magpie connected the agent id along with
+// kiroCrewUserLeft forgets that myna connected the agent id along with
 // Kiro Crew once the user disconnects it themselves: connected again
 // after, it is theirs, and Kiro Crew's Disconnect leaves it on.
 func kiroCrewUserLeft(id string) {
@@ -220,7 +220,7 @@ var kiroCrewHasAdapter = func(h kiroCrewHarness) bool {
 
 // kiroCrewFinds looks for h's adapter where Crew looks for it
 // (acp/launch.py, env.py augmented_path): the path its variable names,
-// magpie's PATH, the folders Crew adds to its own (~/.local/bin, npm's,
+// myna's PATH, the folders Crew adds to its own (~/.local/bin, npm's,
 // mise's shims, Volta's, Homebrew's), and every node version mise, asdf,
 // nvm and fnm keep. A harness with no adapter is its own binary.
 func kiroCrewFinds(h kiroCrewHarness, home string, getenv func(string) string) bool {
@@ -322,7 +322,7 @@ func kiroCrewUnsafe(p string) bool {
 	return false
 }
 
-// kiroCrewWas is what a key said before magpie set it: whether it was
+// kiroCrewWas is what a key said before myna set it: whether it was
 // there, and its JSON as written.
 type kiroCrewWas struct {
 	Set bool            `json:"set"`
@@ -332,10 +332,10 @@ type kiroCrewWas struct {
 type kiroCrewStash struct {
 	Backend kiroCrewWas `json:"backend"`
 	Member  kiroCrewWas `json:"member"`
-	Made    bool        `json:"made,omitempty"` // magpie made config.json
+	Made    bool        `json:"made,omitempty"` // myna made config.json
 }
 
-// kiroCrewWrote is what magpie last wrote in the two keys ("" for a key it
+// kiroCrewWrote is what myna last wrote in the two keys ("" for a key it
 // left alone).
 type kiroCrewWrote struct {
 	Backend string `json:"backend"`
@@ -372,8 +372,8 @@ func kiroCrew(home string) *Agent {
 		_, ok := edit.GetJSON(local, kiroCrewBackend)
 		return ok
 	}
-	// connected: magpie set the harness, and the one it runs is connected
-	// to magpie
+	// connected: myna set the harness, and the one it runs is connected
+	// to myna
 	on := func() string {
 		if _, ok := kiroCrewWroteNow(); !ok {
 			return ""
@@ -430,7 +430,7 @@ func kiroCrew(home string) *Agent {
 		stash(map[string]string{kiroCrewWroteKey: string(b)})
 		return nil
 	}
-	// unwire puts back what the keys said before magpie set them, a key the
+	// unwire puts back what the keys said before myna set them, a key the
 	// user has changed since left as they set it
 	unwire := func() error {
 		w, ok := kiroCrewWroteNow()
@@ -469,7 +469,7 @@ func kiroCrew(home string) *Agent {
 					return err
 				}
 			}
-			// a file magpie made that holds nothing else now
+			// a file myna made that holds nothing else now
 			if s.Made {
 				if raw, ok := edit.GetJSONRaw(path, "agent"); ok && strings.TrimSpace(strings.Join(strings.Fields(raw), "")) == "{}" {
 					if err := edit.DelJSON(path, "agent"); err != nil {
@@ -485,8 +485,8 @@ func kiroCrew(home string) *Agent {
 		return kiroCrewLeave()
 	}
 	// pick is the harness to run: the one Kiro Crew is set to, when it is
-	// one of magpie's, connected to magpie now if it isn't yet (joined);
-	// else the first connected to magpie
+	// one of myna's, connected to myna now if it isn't yet (joined);
+	// else the first connected to myna
 	pick := func() (h kiroCrewHarness, joined bool, err error) {
 		if h, ok := kiroCrewHarnessOf(backend()); ok {
 			if kiroCrewWired(h.agent) {
@@ -544,7 +544,7 @@ func kiroCrew(home string) *Agent {
 			Key: "provider", Label: "provider",
 			Get: func() string {
 				if on() != "" {
-					return magpieID
+					return mynaID
 				}
 				return ""
 			},
@@ -555,7 +555,7 @@ func kiroCrew(home string) *Agent {
 				if pinned() {
 					return errKiroCrewPinned
 				}
-				// on a harness of magpie's already: it stays
+				// on a harness of myna's already: it stays
 				if id := on(); id != "" {
 					return nil
 				}
@@ -576,7 +576,7 @@ func kiroCrew(home string) *Agent {
 				if pinned() && on() == "" {
 					note = kiroCrewPinnedNote
 				}
-				return []Option{{Value: magpieID, Label: "magpie", Icon: "magpie", Note: note}}
+				return []Option{{Value: mynaID, Label: "myna", Icon: "myna", Note: note}}
 			},
 		}, {
 			Key: "harness", Label: "harness", Quiet: true,

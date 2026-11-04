@@ -9,16 +9,16 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/settings"
 )
 
-// A restart magpie makes by itself (Settings' AutoRestart, or `magpie
+// A restart myna makes by itself (Settings' AutoRestart, or `myna
 // update` run in a terminal) brings the app back as it was, and leaves
 // the user where they were. Its window comes back only if it was up
 // (#2096); now it also takes no focus (xyxyxy_15591 on Discord: "自动更新
 // 安装更新之后，不跳出界面"). The window came up in front of the app the
 // user was typing in and took the keyboard, for a restart nobody asked
-// for: the Mac's open brought magpie to the front, its Dock icon joining
+// for: the Mac's open brought myna to the front, its Dock icon joining
 // activated it, and the window's Focus did on every system.
 //
 // The old version writes quietRestartFile before it starts the new one;
@@ -26,7 +26,7 @@ import (
 // its window, if it was up, without Focus or activating (quietShow). The
 // Mac's open is -g as well (update.Relaunch's quiet).
 
-// quietRestartFile, in magpie's folder, holds when (Unix seconds) a
+// quietRestartFile, in myna's folder, holds when (Unix seconds) a
 // restart by itself began.
 const quietRestartFile = "restart-quiet"
 

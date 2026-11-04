@@ -15,7 +15,7 @@ import (
 // (a custom provider, Atria-Dawn, tim072844 on Discord) answered DeepSeek
 // Harness, whose pi-ai sends every user message as such a list, with a
 // validation error per message ("Input should be a valid string", 238 of
-// them), and every turn failed. magpie's own Chat requests, built from
+// them), and every turn failed. myna's own Chat requests, built from
 // another API, already send text as a string (buildChat).
 //
 // Only a list of text parts with nothing else in them is joined, with a

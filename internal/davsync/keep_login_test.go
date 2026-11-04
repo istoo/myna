@@ -3,8 +3,8 @@ package davsync
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/backup"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/backup"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // Which account an agent is kept signed in to is this computer's own

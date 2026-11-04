@@ -10,8 +10,8 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // Stats is what every session spent, day by day: all of them, not only the
@@ -30,7 +30,7 @@ type Stats struct {
 	// line — and a session whose last line is a setting or a fork's seed,
 	// written long after its last call, was listed but not counted.
 	Keys []string `json:"keys"`
-	// gateway are the sessions magpie knows only from the gateway's
+	// gateway are the sessions myna knows only from the gateway's
 	// records (MergeExternalStats), the most recently active first. They
 	// are kept apart from Sessions, which the merge copied whole to add
 	// them: ~10 MB over a full history beside the Sessions it was copied
@@ -94,8 +94,8 @@ type Summary struct {
 	ParentSession string        `json:"parent_session,omitempty"`
 	RootSession   string        `json:"root_session,omitempty"`
 	ModelEffort   []ModelEffort `json:"model_effort,omitempty"`
-	// Gateway: magpie knows the session only from the gateway's records
-	// (MergeExternalStats). The agent left no file magpie reads, so it has
+	// Gateway: myna knows the session only from the gateway's records
+	// (MergeExternalStats). The agent left no file myna reads, so it has
 	// no folder, and no prompt unless gateway conversations were recorded
 	// (#2285: a Pi subagent's DeepSeek turns read as "(no prompt)").
 	Gateway bool `json:"gateway,omitempty"`
@@ -196,7 +196,7 @@ func StatsAt(days int, now time.Time) Stats { return statsAt(days, now) }
 
 // StatsAndNative is StatsFor, and the agent|id of every session List would
 // list, with no limit: what tells a gateway session the agent keeps too
-// from one only magpie saw. Both come of one pass over the files, as the
+// from one only myna saw. Both come of one pass over the files, as the
 // overview asks for both on every poll (#2776).
 func StatsAndNative(days int) (Stats, map[string]bool) {
 	st, native := StatsAndNativeAll([]int{days})

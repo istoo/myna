@@ -29,7 +29,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const events = [], errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", fixture(lang, "light", events, { lan: true, groups: true, deciders: true, limits: { server: { models: ["group/fast", "group/coding"] } } }));
-        await page.goto("http://magpie.test/?view=gateway");
+        await page.goto("http://myna.test/?view=gateway");
         const badge = page.locator('#gatewayKeys .acc[data-key="server"] .key-models');
         await badge.waitFor();
         await badge.click();

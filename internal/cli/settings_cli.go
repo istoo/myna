@@ -9,14 +9,14 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/settingsapi"
+	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/myna/internal/settingsapi"
 )
 
-const settingsUsage = `  magpie settings [list] [--json]          every setting the window's Settings saves: its value now and its default
-  magpie settings get <key> [--json]       one setting's value
-  magpie settings set <key> <value>        set one, checked and saved as the window saves it
-  magpie settings reset <key>              one back to its default
+const settingsUsage = `  myna settings [list] [--json]          every setting the window's Settings saves: its value now and its default
+  myna settings get <key> [--json]       one setting's value
+  myna settings set <key> <value>        set one, checked and saved as the window saves it
+  myna settings reset <key>              one back to its default
 
   a value is on|off (or true|false) for a switch, a number, words, a list as a,b,c
   (or a JSON array), and JSON for an object; a key with a closed set lists its choices.
@@ -24,7 +24,7 @@ const settingsUsage = `  magpie settings [list] [--json]          every setting 
   app's Dock, fonts and tray menu follow a change made here when it starts next.
 `
 
-// settingsCmd is `magpie settings …` (#4745): the settings POST
+// settingsCmd is `myna settings …` (#4745): the settings POST
 // /api/settings saves, read and written through settingsapi, the same
 // save the window's Settings makes.
 func settingsCmd(args []string) error {
@@ -47,22 +47,22 @@ func settingsCmd(args []string) error {
 	switch rest[0] {
 	case "list", "ls":
 		if len(rest) != 1 {
-			return fmt.Errorf("usage: magpie settings list [--json]")
+			return fmt.Errorf("usage: myna settings list [--json]")
 		}
 		return settingsList(asJSON)
 	case "get":
 		if len(rest) != 2 {
-			return fmt.Errorf("usage: magpie settings get <key> [--json]")
+			return fmt.Errorf("usage: myna settings get <key> [--json]")
 		}
 		return settingsGet(rest[1], asJSON)
 	case "set":
 		if len(rest) != 3 {
-			return fmt.Errorf("usage: magpie settings set <key> <value>: nothing was changed")
+			return fmt.Errorf("usage: myna settings set <key> <value>: nothing was changed")
 		}
 		return settingsSet(rest[1], rest[2], false)
 	case "reset":
 		if len(rest) != 2 {
-			return fmt.Errorf("usage: magpie settings reset <key>: nothing was changed")
+			return fmt.Errorf("usage: myna settings reset <key>: nothing was changed")
 		}
 		return settingsSet(rest[1], "", true)
 	}
@@ -74,7 +74,7 @@ func isNumber(s string) bool {
 	return err == nil
 }
 
-// settingRow is one setting as `magpie settings list --json` gives it.
+// settingRow is one setting as `myna settings list --json` gives it.
 type settingRow struct {
 	Key     string   `json:"key"`
 	Type    string   `json:"type"`
@@ -202,7 +202,7 @@ func knownSetting(key string) error {
 	if len(near) > 0 {
 		msg += ": did you mean " + strings.Join(near, ", ") + "?"
 	}
-	return fmt.Errorf("%s (magpie settings list names them all): nothing was changed", msg)
+	return fmt.Errorf("%s (myna settings list names them all): nothing was changed", msg)
 }
 
 // settingValue is text as the JSON a setting of type t is saved as.

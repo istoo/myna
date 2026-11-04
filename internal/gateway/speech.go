@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // speak serves OpenAI's text-to-speech API: POST /v1/audio/speech. The
@@ -35,7 +35,7 @@ func (s *Server) speak(w http.ResponseWriter, r *http.Request) {
 	var asked string
 	json.Unmarshal(req["model"], &asked)
 	if asked == "" {
-		writeError(w, provider.Chat, 400, "name the model: \"model\" is a magpie model id, provider/model (openai/gpt-4o-mini-tts, groq/playai-tts)")
+		writeError(w, provider.Chat, 400, "name the model: \"model\" is a myna model id, provider/model (openai/gpt-4o-mini-tts, groq/playai-tts)")
 		return
 	}
 	s.serveRetrieval(w, r, "/audio/speech", "speech", start, asked, &speechRequest{req: req})

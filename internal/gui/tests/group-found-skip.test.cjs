@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// A provider can be kept out of the groups magpie finds (chenxiang0010 on
+// A provider can be kept out of the groups myna finds (chenxiang0010 on
 // Discord: "自动创建路由组的这里能否设置跳过某个供应商"). Under the found
 // groups' switch, a text button says which are left out; it opens the app's
 // menu of providers, each ticked or not, and as the menu closes the page
@@ -86,7 +86,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], posts = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, posts));
-        await page.goto("http://magpie.test/?view=routing");
+        await page.goto("http://myna.test/?view=routing");
         const card = page.locator(".rt-group", { hasText: "Model M" });
         await card.waitFor();
         const pick = page.locator(".rt-gsec .rt-gfound .rt-skip-pick");

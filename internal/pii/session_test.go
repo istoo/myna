@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/redact"
+	"github.com/istoo/myna/internal/redact"
 )
 
 // sessionBody is turn n of an agent's Chat Completions session, as a

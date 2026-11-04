@@ -16,7 +16,7 @@ func TestPluginsCheckRoute(t *testing.T) {
 	t.Setenv("USERPROFILE", dir)
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
-	t.Setenv("MAGPIE_PLUGIN_MARKET", "off")
+	t.Setenv("MYNA_PLUGIN_MARKET", "off")
 	mux := http.NewServeMux()
 	pluginRoutes(mux, nil)
 	rec := httptest.NewRecorder()

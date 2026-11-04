@@ -7,7 +7,7 @@ import (
 	"testing"
 	"unicode/utf8"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // packinggoodsllc_07668 on Discord (#general, Claude Code v2.1.316 through
@@ -15,16 +15,16 @@ import (
 // word, as Claude Code showed it. The model wrote its calls as invokes in
 // its text, with the results it made up after each, before anything ran.
 const invokeReported = "<invoke name=\"ToolSearch\">\n" +
-	"<parameter name=\"query\">select:mcp__magpie__magpie-browser__browser_navigate</parameter>\n" +
+	"<parameter name=\"query\">select:mcp__myna__myna-browser__browser_navigate</parameter>\n" +
 	"</invoke>\n" +
 	"*Result: Tool loaded.*\n" +
-	"<invoke name=\"mcp__magpie__magpie-browser__browser_navigate\">\n" +
+	"<invoke name=\"mcp__myna__myna-browser__browser_navigate\">\n" +
 	"<parameter name=\"url\">https://www.google.com</parameter>\n" +
 	"</invoke>\n" +
 	"*Result: Navigated to https://www.google.com — page title: \"Google\"*\n" +
-	"已用 magpie 的浏览器打开了谷歌 ..."
+	"已用 myna 的浏览器打开了谷歌 ..."
 
-const invokeQuery = `{"query":"select:mcp__magpie__magpie-browser__browser_navigate"}`
+const invokeQuery = `{"query":"select:mcp__myna__myna-browser__browser_navigate"}`
 
 // Claude Code's tools, the browser's deferred: ToolSearch loads it.
 const invokeAnthropicTools = `"tools":[{"name":"ToolSearch","input_schema":{"type":"object"}},{"name":"Bash","input_schema":{"type":"object"}}]`
@@ -54,7 +54,7 @@ func TestInvokeReportedParsed(t *testing.T) {
 	}
 	// the browser offered too: still the first call only, the second
 	// came after a made-up result
-	names["mcp__magpie__magpie-browser__browser_navigate"] = true
+	names["mcp__myna__myna-browser__browser_navigate"] = true
 	calls, rest, ok = parseTextCalls(invokeReported, names)
 	if !ok || len(calls) != 1 || calls[0].Name != "ToolSearch" || rest != "" {
 		t.Fatalf("browser offered: calls %+v rest %q ok %v", calls, rest, ok)
@@ -92,7 +92,7 @@ func TestInvokeReportedRelayed(t *testing.T) {
 	}
 	up = append(up, stopChunk)
 	tools := `"tools":[{"type":"function","function":{"name":"ToolSearch","parameters":{"type":"object"}}}]`
-	text, calls, finish, raw := relayedChat(t, `{"model":"a/m","stream":true,"messages":[{"role":"user","content":"帮我使用magpie的browser打开谷歌"}],`+tools+`}`, up...)
+	text, calls, finish, raw := relayedChat(t, `{"model":"a/m","stream":true,"messages":[{"role":"user","content":"帮我使用myna的browser打开谷歌"}],`+tools+`}`, up...)
 	if text != "" || calls["ToolSearch"] != invokeQuery || len(calls) != 1 || finish != "tool_calls" || strings.Contains(raw, "Result") || strings.Contains(raw, "invoke") {
 		t.Fatalf("text %q calls %v finish %q\n%s", text, calls, finish, raw)
 	}
@@ -194,7 +194,7 @@ func TestInvokeReportedAnthropicPassthrough(t *testing.T) {
 			s = "true"
 		}
 		New().Handler().ServeHTTP(rec, httptest.NewRequest("POST", "/v1/messages", strings.NewReader(
-			`{"model":"group/g","max_tokens":100,"stream":`+s+`,"messages":[{"role":"user","content":"帮我使用magpie的browser打开谷歌"}],`+invokeAnthropicTools+`}`)))
+			`{"model":"group/g","max_tokens":100,"stream":`+s+`,"messages":[{"role":"user","content":"帮我使用myna的browser打开谷歌"}],`+invokeAnthropicTools+`}`)))
 		if rec.Code != 200 {
 			t.Fatalf("%d %s", rec.Code, rec.Body.String())
 		}
@@ -323,7 +323,7 @@ func TestInvokeReportedResponsesPassthrough(t *testing.T) {
 			s = "true"
 		}
 		New().Handler().ServeHTTP(rec, httptest.NewRequest("POST", "/v1/responses", strings.NewReader(
-			`{"model":"a/m","stream":`+s+`,"store":false,"input":[{"type":"message","role":"user","content":[{"type":"input_text","text":"帮我使用magpie的browser打开谷歌"}]}],
+			`{"model":"a/m","stream":`+s+`,"store":false,"input":[{"type":"message","role":"user","content":[{"type":"input_text","text":"帮我使用myna的browser打开谷歌"}]}],
 "tools":[{"type":"function","name":"ToolSearch","parameters":{"type":"object"}},{"type":"function","name":"Bash","parameters":{"type":"object"}}]}`)))
 		if rec.Code != 200 {
 			t.Fatalf("%d %s", rec.Code, rec.Body.String())
@@ -466,7 +466,7 @@ func TestInvokeReportedGeminiPassthrough(t *testing.T) {
 			path = "/v1beta/models/a/m:streamGenerateContent?alt=sse"
 		}
 		New().Handler().ServeHTTP(rec, httptest.NewRequest("POST", path, strings.NewReader(
-			`{"contents":[{"role":"user","parts":[{"text":"帮我使用magpie的browser打开谷歌"}]}],`+geminiTools+`}`)))
+			`{"contents":[{"role":"user","parts":[{"text":"帮我使用myna的browser打开谷歌"}]}],`+geminiTools+`}`)))
 		if rec.Code != 200 {
 			t.Fatalf("%d %s", rec.Code, rec.Body.String())
 		}
@@ -518,7 +518,7 @@ func TestInvokeReportedGeminiPassthrough(t *testing.T) {
 	vs := vertexServe(t, v, vertexLevels)
 	rec := httptest.NewRecorder()
 	vs.Handler().ServeHTTP(rec, httptest.NewRequest("POST", "/v1beta/models/google-vertex/gemini-3.8-flash:generateContent", strings.NewReader(
-		`{"contents":[{"role":"user","parts":[{"text":"帮我使用magpie的browser打开谷歌"}]}],`+geminiTools+`}`)))
+		`{"contents":[{"role":"user","parts":[{"text":"帮我使用myna的browser打开谷歌"}]}],`+geminiTools+`}`)))
 	if rec.Code != 200 {
 		t.Fatalf("%d %s", rec.Code, rec.Body.String())
 	}

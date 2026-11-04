@@ -106,7 +106,7 @@ func npmHasNothing(t *testing.T) {
 	t.Setenv("BUN_CONFIG_REGISTRY", npmRegistry+"/")
 }
 
-// A plugin merged into the community repo reaches magpie before npm has
+// A plugin merged into the community repo reaches myna before npm has
 // it: its first npm version waits for an owner's 2FA, which kept reviewed
 // plugins unmerged (magpie-community/plugins#84, Open Design). The market
 // shows its version and README, and adding it installs the dist branch's
@@ -231,7 +231,7 @@ func TestDistTarballTheLockNamesStays(t *testing.T) {
 	// files Bun writes, the lock's workspaces as package.json (the issue
 	// says they were)
 	reported := `{
-  "name": "magpie-plugins",
+  "name": "myna-plugins",
   "private": true,
   "dependencies": {
     "@magpie-community/opencode-autoclaw-auth": "./dist/magpie-community-opencode-autoclaw-auth-0.2.6.tgz",
@@ -245,7 +245,7 @@ func TestDistTarballTheLockNamesStays(t *testing.T) {
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "magpie-plugins",
+      "name": "myna-plugins",
       "dependencies": {
         "@magpie-community/opencode-autoclaw-auth": "./dist/magpie-community-opencode-autoclaw-auth-0.2.6.tgz",
         "@magpie-community/opencode-cloudflare-workers-ai-auth": "./dist/magpie-community-opencode-cloudflare-workers-ai-auth-0.0.3.tgz",
@@ -265,7 +265,7 @@ func TestDistTarballTheLockNamesStays(t *testing.T) {
 	// `bun add ./dist/<0.2.6>` over 0.2.1: Bun 1.4.2 writes package.json
 	// so, Bun 1.4.0 with the package twice, and both write the lock below
 	once := `{
-  "name": "magpie-plugins",
+  "name": "myna-plugins",
   "private": true,
   "dependencies": {
     "@magpie-community/opencode-autoclaw-auth": "./dist/magpie-community-opencode-autoclaw-auth-0.2.6.tgz"
@@ -273,7 +273,7 @@ func TestDistTarballTheLockNamesStays(t *testing.T) {
 }
 `
 	twice := `{
-  "name": "magpie-plugins",
+  "name": "myna-plugins",
   "private": true,
   "dependencies": {
     "@magpie-community/opencode-autoclaw-auth": "./dist/magpie-community-opencode-autoclaw-auth-0.2.6.tgz",
@@ -286,7 +286,7 @@ func TestDistTarballTheLockNamesStays(t *testing.T) {
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "magpie-plugins",
+      "name": "myna-plugins",
       "dependencies": {
         "@magpie-community/opencode-autoclaw-auth": "./dist/magpie-community-opencode-autoclaw-auth-0.2.6.tgz",
         "@magpie-community/opencode-autoclaw-auth": "./dist/magpie-community-opencode-autoclaw-auth-0.2.1.tgz",
@@ -558,7 +558,7 @@ func TestDistWanted(t *testing.T) {
 // object still is.
 func TestDistLockTailIsntRead(t *testing.T) {
 	const pj = `{
-  "name": "magpie-plugins",
+  "name": "myna-plugins",
   "private": true,
   "dependencies": {
     "@magpie-community/opencode-autoclaw-auth": "./dist/magpie-community-opencode-autoclaw-auth-0.2.6.tgz"

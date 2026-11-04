@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// refeccd on Discord: skills handed over to magpie from ~/.agents/skills
+// refeccd on Discord: skills handed over to myna from ~/.agents/skills
 // could no longer be edited, and their SKILL.md showed as raw text. A
 // skill's row opens its SKILL.md drawn as Markdown, its front matter as
 // rows; Edit gives its text to change, ⌘S or Save sends skills/save with
@@ -15,11 +15,11 @@ const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
 const HOME = "/Users/refeccd";
-const DIR = `${HOME}/.magpie/library/skills/writer`;
+const DIR = `${HOME}/.myna/library/skills/writer`;
 const agent = (id, name) => ({ id, name, icon: "", skills: `${HOME}/.${id}/skills` });
 const SKILL = "---\nname: writer\ndescription: >\n  Write release notes\n  people read\n---\n\n# Writer\n\nUse **short** lines.\n\n## Steps\n\n- Read the `diff`\n- Write it\n\n```sh\ngit log -1\n```\n";
 const lib = () => ({
-  dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+  dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
   agents: [agent("claude", "Claude Code"), agent("codex", "Codex")],
   instructions: { agents: [] }, servers: [], foundServers: [], projects: [], foundSkills: [], newSkills: [],
   skills: [{ name: "writer", description: "Write release notes people read", kind: "folder", source: DIR, agents: ["claude", "codex"] }],
@@ -85,13 +85,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const w = words[lang], posts = [];
         const files = { "SKILL.md": SKILL, "refs/style.md": "# Style\n", "scripts/run.sh": "echo hi\n" };
         const ctx = await browser.newContext({ viewport: { width, height: 900 } });
-        await ctx.addInitScript(() => { try { localStorage.setItem("magpie.libTab", "skills"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "skills"); } catch {} });
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, posts, files));
-        await page.goto("http://magpie.test/");
+        await page.goto("http://myna.test/");
         await page.locator('button[data-view="library"]').click();
         const row = page.locator("#view-library .lib-skill", { has: page.locator(".name", { hasText: /^writer/ }) });
         await row.waitFor();

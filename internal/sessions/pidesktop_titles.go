@@ -9,14 +9,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/appdir"
+	"github.com/istoo/myna/internal/appdir"
 )
 
 // PI-Desktop (vastsa/PI-Desktop) keeps its chats as its own jsonl, not
 // Pi's, and their names only in its index database: pi.sqlite's sessions
 // table (id, title, deleted_at; its crates/host-core/src/db/schema.rs). A
-// chat it sends through magpie with X-Magpie-Session is a gateway session
-// with no file magpie reads, so it went by its id (#1967, dgmico); these
+// chat it sends through myna with X-Magpie-Session is a gateway session
+// with no file myna reads, so it went by its id (#1967, dgmico); these
 // are the names it goes by instead.
 
 // PIDesktopDir is where PI-Desktop keeps its data: $PI_DESKTOP_DATA_DIR,

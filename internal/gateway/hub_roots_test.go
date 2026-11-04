@@ -12,16 +12,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/istoo/myna/internal/usage"
 )
 
-// rootsHub is a hub with magpie's image server (a Roots tool) and another,
+// rootsHub is a hub with myna's image server (a Roots tool) and another,
 // each call's caller kept.
 func rootsHub(t *testing.T) (*fakeHub, chan HubCaller) {
 	t.Helper()
 	got := make(chan HubCaller, 8)
 	f := &fakeHub{on: true, tools: map[string][]HubTool{"claude": {
-		{Server: "magpie-image", Tool: "generate_image", Spec: hubSpec("generate_image"), Roots: true},
+		{Server: "myna-image", Tool: "generate_image", Spec: hubSpec("generate_image"), Roots: true},
 		{Server: "fs", Tool: "read", Spec: hubSpec("read")},
 	}}}
 	f.call = func(ctx context.Context, server, tool string) (json.RawMessage, error) {
@@ -80,7 +80,7 @@ func hubPostTo(t *testing.T, url, body, accept, ua string) *http.Response {
 
 const bothAccept = "application/json, text/event-stream"
 
-// magpie-image behind the hub saves into the calling agent's project: a
+// myna-image behind the hub saves into the calling agent's project: a
 // call of it asks the agent roots/list on the call's own event stream
 // (Claude Code answers so), and the image server is called with the
 // file roots the agent answered and the agent's name. A tool that
@@ -93,7 +93,7 @@ func TestHubAsksTheAgentItsRoots(t *testing.T) {
 	t.Cleanup(srv.Close)
 	url := srv.URL + HubMCPPath + "claude"
 
-	res := hubPostTo(t, url, toolsCall("magpie-image__generate_image", `{"prompt":"a magpie"}`), bothAccept, "claude-code/2.1.314 (sdk-cli)")
+	res := hubPostTo(t, url, toolsCall("myna-image__generate_image", `{"prompt":"a myna"}`), bothAccept, "claude-code/2.1.314 (sdk-cli)")
 	if res.StatusCode != 200 || !strings.HasPrefix(res.Header.Get("Content-Type"), "text/event-stream") {
 		t.Fatalf("%d %s", res.StatusCode, res.Header.Get("Content-Type"))
 	}
@@ -107,7 +107,7 @@ func TestHubAsksTheAgentItsRoots(t *testing.T) {
 		t.Fatalf("the answer: %d", ans.StatusCode)
 	}
 	done := nextEvent(t, ev, "the call's result")
-	if string(done.ID) != "3" || !strings.Contains(string(done.Result), "ran magpie-image") {
+	if string(done.ID) != "3" || !strings.Contains(string(done.Result), "ran myna-image") {
 		t.Fatalf("result %s %s", done.ID, done.Result)
 	}
 	c := <-got
@@ -127,7 +127,7 @@ func TestHubAsksTheAgentItsRoots(t *testing.T) {
 
 // An agent that takes no event stream back isn't asked, and one that
 // doesn't answer holds the call no longer than hubRootsWait: the image
-// server is called with no roots (it saves into ~/Pictures/Magpie then).
+// server is called with no roots (it saves into ~/Pictures/Myna then).
 func TestHubRootsUnasked(t *testing.T) {
 	fresh(t)
 	_, got := rootsHub(t)
@@ -137,7 +137,7 @@ func TestHubRootsUnasked(t *testing.T) {
 	srv := httptest.NewServer(lanGuard(New().Handler()))
 	t.Cleanup(srv.Close)
 	url := srv.URL + HubMCPPath + "claude"
-	call := toolsCall("magpie-image__generate_image", `{}`)
+	call := toolsCall("myna-image__generate_image", `{}`)
 
 	res := hubPostTo(t, url, call, "application/json", "some-client/1")
 	if !strings.HasPrefix(res.Header.Get("Content-Type"), "application/json") {
@@ -152,7 +152,7 @@ func TestHubRootsUnasked(t *testing.T) {
 	if m := nextEvent(t, ev, "roots/list"); m.Method != "roots/list" {
 		t.Fatalf("asked %+v", m)
 	}
-	if m := nextEvent(t, ev, "the call's result"); !strings.Contains(string(m.Result), "ran magpie-image") {
+	if m := nextEvent(t, ev, "the call's result"); !strings.Contains(string(m.Result), "ran myna-image") {
 		t.Fatalf("result %s", m.Result)
 	}
 	if c := <-got; len(c.Roots) != 0 {
@@ -181,7 +181,7 @@ func TestHubRootsOfACodexThread(t *testing.T) {
 	f.tools["codex"] = f.tools["claude"]
 	srv := httptest.NewServer(lanGuard(New().Handler()))
 	t.Cleanup(srv.Close)
-	call := `{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"magpie-image__generate_image","arguments":{},"_meta":{"threadId":"` + id + `"}}}`
+	call := `{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"myna-image__generate_image","arguments":{},"_meta":{"threadId":"` + id + `"}}}`
 
 	ev := hubEvents(t, hubPostTo(t, srv.URL+HubMCPPath+"codex", call, bothAccept, "codex-mcp-client/0.165.0"))
 	ask := nextEvent(t, ev, "roots/list")
@@ -193,7 +193,7 @@ func TestHubRootsOfACodexThread(t *testing.T) {
 
 	// in a git repository Codex names it in the turn's metadata, which is
 	// read before any rollout (a thread this computer has none of here)
-	inRepo := `{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"magpie-image__generate_image","arguments":{},"_meta":{"threadId":"019a0000-0000-7000-8000-000000000000","x-codex-turn-metadata":{"workspaces":{"/work/repo":{"has_changes":false},"relative":{}}}}}}`
+	inRepo := `{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"myna-image__generate_image","arguments":{},"_meta":{"threadId":"019a0000-0000-7000-8000-000000000000","x-codex-turn-metadata":{"workspaces":{"/work/repo":{"has_changes":false},"relative":{}}}}}}`
 	ev = hubEvents(t, hubPostTo(t, srv.URL+HubMCPPath+"codex", inRepo, bothAccept, "codex-mcp-client/0.165.0"))
 	ask = nextEvent(t, ev, "roots/list")
 	hubPostTo(t, srv.URL+HubMCPPath+"codex", `{"jsonrpc":"2.0","id":`+string(ask.ID)+`,"result":{"roots":[]}}`, bothAccept, "codex-mcp-client/0.165.0")
@@ -224,10 +224,10 @@ func TestFileURI(t *testing.T) {
 	}
 }
 
-// magpie's image server draws through the gateway on a connection of its
+// myna's image server draws through the gateway on a connection of its
 // own, so the hub's row of its call learns the model from the result's
 // _meta, as the server's own report gave it before the hub. Another
-// server's _meta names nothing: only magpie's own tools say a model.
+// server's _meta names nothing: only myna's own tools say a model.
 func TestHubRowNamesTheImageModel(t *testing.T) {
 	fresh(t)
 	f, _ := rootsHub(t)
@@ -237,7 +237,7 @@ func TestHubRowNamesTheImageModel(t *testing.T) {
 	srv := httptest.NewServer(lanGuard(New().Handler()))
 	t.Cleanup(srv.Close)
 	url := srv.URL + HubMCPPath + "claude"
-	hubPostTo(t, url, toolsCall("magpie-image__generate_image", `{}`), "application/json", "claude-code/2.1.314 (sdk-cli)")
+	hubPostTo(t, url, toolsCall("myna-image__generate_image", `{}`), "application/json", "claude-code/2.1.314 (sdk-cli)")
 	hubPostTo(t, url, toolsCall("fs__read", `{}`), "application/json", "claude-code/2.1.314 (sdk-cli)")
 	var rows []usage.Record
 	for end := time.Now().Add(10 * time.Second); time.Now().Before(end) && len(rows) < 2; time.Sleep(5 * time.Millisecond) {
@@ -247,7 +247,7 @@ func TestHubRowNamesTheImageModel(t *testing.T) {
 	for _, r := range rows {
 		got[r.Requested] = r.Provider + "/" + r.Model
 	}
-	if got["magpie-image__generate_image"] != "art/painter-magpie-image" || got["fs__read"] != "/" {
+	if got["myna-image__generate_image"] != "art/painter-myna-image" || got["fs__read"] != "/" {
 		t.Fatalf("rows name %v", got)
 	}
 }

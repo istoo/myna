@@ -16,7 +16,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // noisePNG is a real PNG of w×h random pixels: it doesn't compress, so its
@@ -127,7 +127,7 @@ func BenchmarkImageRequest(b *testing.B) {
 // that a client sends as previous_response_id and its new text alone
 // (kevinzhow on X), against the whole conversation sent again (whole):
 // to a provider that keeps responses, which is sent the new input after
-// its own id (kept), and to one on Chat, which magpie gives the whole
+// its own id (kept), and to one on Chat, which myna gives the whole
 // conversation (chat). up-MB/req is what went upstream.
 func BenchmarkPreviousResponseTurn(b *testing.B) {
 	for _, tc := range []struct {

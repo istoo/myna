@@ -10,13 +10,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // Volcengine Ark's Responses API runs web_search itself, on each of its
 // preset's regions (the plans and pay-as-you-go share its host): Codex's
-// tool goes to it rather than to magpie's search (axelburks on Discord).
+// tool goes to it rather than to myna's search (axelburks on Discord).
 // Its Chat and Anthropic APIs are left as they were.
 func TestArkSearchesOnResponses(t *testing.T) {
 	pre, err := provider.FromPreset("volcengine")
@@ -56,9 +56,9 @@ const arkSearchReply = "event: response.created\ndata: {\"type\":\"response.crea
 // tool, in the shape Ark's docs give: external_web_access, which Ark
 // doesn't name, is left out, and a location keeps Ark's members. Before,
 // Ark was taken for a provider that doesn't search, and the tool was
-// taken out for magpie's. Zhipu's Responses API, which searches too, is
+// taken out for myna's. Zhipu's Responses API, which searches too, is
 // sent Codex's tool as it was; a relay that doesn't search is still given
-// magpie's search in its place.
+// myna's search in its place.
 func TestArkGetsCodexWebSearch(t *testing.T) {
 	f := &fake{t: t, reply: arkSearchReply}
 	setup(t, provider.Responses, f)
@@ -135,7 +135,7 @@ func TestArkGetsCodexWebSearch(t *testing.T) {
 			t.Errorf("Zhipu wasn't sent Codex's web_search as it was: %s", f.got)
 		}
 	})
-	t.Run("relay given magpie's", func(t *testing.T) {
+	t.Run("relay given myna's", func(t *testing.T) {
 		post(t, "relay/doubao-seed-2-1-pro")
 		if ws := hosted(tools(t)); ws != nil {
 			t.Errorf("a relay that doesn't search was sent the hosted web_search: %s", f.got)

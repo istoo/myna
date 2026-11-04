@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // kimiRefusePairs answers as api.kimi.com/coding/v1 did on 2026-10-26 a

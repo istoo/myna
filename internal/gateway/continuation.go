@@ -30,7 +30,7 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // streamRetries is how many times a cut reply is asked to go on before it
@@ -486,7 +486,7 @@ func (s *Server) streamTranslated(w http.ResponseWriter, r *http.Request, p prov
 	see := zenSee(zen, emit)
 	alive := func() {
 		// the provider's keepalives aren't events to translate: while it
-		// is heard from, the client hears from magpie (#436)
+		// is heard from, the client hears from myna (#436)
 		if failed == "" && sw.quiet() >= keepaliveGap {
 			enc.keepalive()
 		}

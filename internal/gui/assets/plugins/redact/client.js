@@ -13,7 +13,7 @@
 // hooks are what the shell asks of it: open, refresh (the window came
 // back), reload (Refresh in the sidebar), leave, and focus (a masked
 // call's badge opens its request).
-magpie.plugin("redact", (ctx) => {
+myna.plugin("redact", (ctx) => {
   ctx.slots.add("page", {
     key: "masking",
     title: "Masking",
@@ -22,7 +22,7 @@ magpie.plugin("redact", (ctx) => {
   <section class="msk-demo" id="maskDemo" data-no-pii>
     <button type="button" class="md-row" id="mdRow" aria-expanded="false" aria-controls="mdBody">
       <span class="md-thumb" aria-hidden="true"></span>
-      <span class="md-words"><span class="md-name" data-t>How masking works</span><span class="md-sub" data-t>Little Magpie walks one request through: passwords become placeholders before it leaves, and come back on your computer with the answer</span></span>
+      <span class="md-words"><span class="md-name" data-t>How masking works</span><span class="md-sub" data-t>Little Myna walks one request through: passwords become placeholders before it leaves, and come back on your computer with the answer</span></span>
       <span class="md-len">0:27</span>
       <svg class="md-chev" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="m6 3.5 4.5 4.5L6 12.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>

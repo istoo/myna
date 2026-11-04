@@ -7,10 +7,10 @@ import (
 )
 
 // However many servers and tools there are, the instructions stay within
-// hubSayMax with the tail whole, and every server magpie knows anything
+// hubSayMax with the tail whole, and every server myna knows anything
 // of is named on a line of its own.
 func TestHubAboutBounded(t *testing.T) {
-	const tail = "The tools of every MCP server in magpie's Library, each named <server>__<tool>."
+	const tail = "The tools of every MCP server in myna's Library, each named <server>__<tool>."
 	for _, n := range []int{1, 3, 12, 40} {
 		for _, tools := range []int{0, 2, 30, 200} {
 			ss := make([]HubServer, n)
@@ -40,13 +40,13 @@ func TestHubAboutBounded(t *testing.T) {
 
 // A server's line names its tools with the first clause of each; a
 // router's "[name] " before a description is left out, and a server
-// magpie knows nothing of has no line.
+// myna knows nothing of has no line.
 func TestHubServerLine(t *testing.T) {
-	s := HubServer{Name: "la", Title: "Magpie MCP hub · Los Angeles", Tools: []HubToolNote{
+	s := HubServer{Name: "la", Title: "Myna MCP hub · Los Angeles", Tools: []HubToolNote{
 		{Name: "fetch__fetch", About: "[Los Angeles] Fetches a URL, and more."},
 		{Name: "x", About: ""},
 	}}
-	if got, want := hubServerLine(s, 1000), "- la (Magpie MCP hub · Los Angeles): Tools: fetch__fetch (Fetches a URL), x."; got != want {
+	if got, want := hubServerLine(s, 1000), "- la (Myna MCP hub · Los Angeles): Tools: fetch__fetch (Fetches a URL), x."; got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
 	if got := hubServerLine(HubServer{Name: "bare"}, 1000); got != "" {
@@ -57,7 +57,7 @@ func TestHubServerLine(t *testing.T) {
 	}
 }
 
-// Another magpie's first line keeps each server's words in brackets, so
+// Another myna's first line keeps each server's words in brackets, so
 // its clause isn't cut inside them.
 func TestHubClauseBrackets(t *testing.T) {
 	for in, want := range map[string]string{
@@ -71,7 +71,7 @@ func TestHubClauseBrackets(t *testing.T) {
 	}
 }
 
-// Another magpie's router says "Tools of a (…), b." of itself; the first
+// Another myna's router says "Tools of a (…), b." of itself; the first
 // line names it with what follows, not "Tools of" twice.
 func TestHubLineOfARouter(t *testing.T) {
 	got := HubLine([]HubServer{{Name: "la", About: "Tools of notes (Notes the team keeps), time."}})

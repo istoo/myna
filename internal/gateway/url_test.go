@@ -9,14 +9,14 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 func TestPublicURL(t *testing.T) {
-	t.Setenv("MAGPIE_ADDR", "0.0.0.0:3499")
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
-	if err := os.Unsetenv("MAGPIE_PUBLIC_URL"); err != nil {
+	t.Setenv("MYNA_ADDR", "0.0.0.0:3499")
+	t.Setenv("MYNA_PUBLIC_URL", "")
+	if err := os.Unsetenv("MYNA_PUBLIC_URL"); err != nil {
 		t.Fatal(err)
 	}
 	if got := PublicURL(); got != "" {
@@ -24,31 +24,31 @@ func TestPublicURL(t *testing.T) {
 	}
 	for _, c := range []struct{ public, want string }{
 		{"", ""},
-		{"https://magpie.example.com", "https://magpie.example.com"},
-		{"https://magpie.example.com/", "https://magpie.example.com"},
-		{"https://magpie.example.com/magpie///", "https://magpie.example.com/magpie"},
-		{"http://magpie.example.com:3425/", "http://magpie.example.com:3425"},
+		{"https://myna.example.com", "https://myna.example.com"},
+		{"https://myna.example.com/", "https://myna.example.com"},
+		{"https://myna.example.com/myna///", "https://myna.example.com/myna"},
+		{"http://myna.example.com:3425/", "http://myna.example.com:3425"},
 		{"http://[::1]:3425/", "http://[::1]:3425"},
-		{"magpie.example.com", "http://magpie.example.com"},
+		{"myna.example.com", "http://myna.example.com"},
 		{"nas.lan:3425///", "http://nas.lan:3425"},
 		{"[fd00::20]:3425", "http://[fd00::20]:3425"},
 		{"///", ""},
-		{"ftp://magpie.example.com", ""},
-		{"//magpie.example.com", ""},
-		{"https:///magpie", ""},
+		{"ftp://myna.example.com", ""},
+		{"//myna.example.com", ""},
+		{"https:///myna", ""},
 		{"http://", ""},
 		{"https:///", ""},
 		{"ftp://", ""},
-		{"https://magpie.example.com:bad", ""},
-		{"https://magpie.example.com/%zz", ""},
-		{" https://magpie.example.com", "https://magpie.example.com"},
-		{"\thttps://magpie.example.com/magpie/ ", "https://magpie.example.com/magpie"},
-		{"https://magpie.example.com/magpie?x=1", ""},
-		{"https://magpie.example.com/magpie#frag", ""},
-		{"https://user:pass@magpie.example.com", ""},
+		{"https://myna.example.com:bad", ""},
+		{"https://myna.example.com/%zz", ""},
+		{" https://myna.example.com", "https://myna.example.com"},
+		{"\thttps://myna.example.com/myna/ ", "https://myna.example.com/myna"},
+		{"https://myna.example.com/myna?x=1", ""},
+		{"https://myna.example.com/myna#frag", ""},
+		{"https://user:pass@myna.example.com", ""},
 	} {
 		t.Run(c.public, func(t *testing.T) {
-			t.Setenv("MAGPIE_PUBLIC_URL", c.public)
+			t.Setenv("MYNA_PUBLIC_URL", c.public)
 			if got := PublicURL(); got != c.want {
 				t.Errorf("%q, want %q", got, c.want)
 			}
@@ -95,27 +95,27 @@ func TestPublicURLWarningOnce(t *testing.T) {
 	writer := log.Writer()
 	log.SetOutput(&logs)
 	t.Cleanup(func() { log.SetOutput(writer) })
-	t.Setenv("MAGPIE_ADDR", "127.0.0.1:3499")
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
+	t.Setenv("MYNA_ADDR", "127.0.0.1:3499")
+	t.Setenv("MYNA_PUBLIC_URL", "")
 	PublicURL()
 	if logs.Len() != 0 {
 		t.Fatalf("unset URL warned: %q", logs.String())
 	}
-	t.Setenv("MAGPIE_PUBLIC_URL", "nas.lan:3425")
+	t.Setenv("MYNA_PUBLIC_URL", "nas.lan:3425")
 	PublicURL()
 	if logs.Len() != 0 {
 		t.Fatalf("valid URL warned: %q", logs.String())
 	}
-	t.Setenv("MAGPIE_PUBLIC_URL", "ftp://nas.lan")
+	t.Setenv("MYNA_PUBLIC_URL", "ftp://nas.lan")
 	if got := PublicURL(); got != "" {
 		t.Fatalf("invalid URL: %q, want no public URL", got)
 	}
-	if got := strings.Count(logs.String(), "ignoring invalid MAGPIE_PUBLIC_URL"); got != 1 {
+	if got := strings.Count(logs.String(), "ignoring invalid MYNA_PUBLIC_URL"); got != 1 {
 		t.Fatalf("first invalid URL: %q, want exactly one warning", logs.String())
 	}
 	logs.Reset()
-	for _, u := range []string{"ftp://nas.lan", "https:///magpie", "https://nas.lan:bad"} {
-		t.Setenv("MAGPIE_PUBLIC_URL", u)
+	for _, u := range []string{"ftp://nas.lan", "https:///myna", "https://nas.lan:bad"} {
+		t.Setenv("MYNA_PUBLIC_URL", u)
 		for range 3 {
 			PublicURL()
 			PublicHost()
@@ -128,7 +128,7 @@ func TestPublicURLWarningOnce(t *testing.T) {
 	}
 }
 
-// OnNetwork: MAGPIE_ADDR puts the gateway beyond loopback, shared or not,
+// OnNetwork: MYNA_ADDR puts the gateway beyond loopback, shared or not,
 // so callers from elsewhere need a gateway key — the console says so, as
 // keyNote does.
 func TestOnNetwork(t *testing.T) {
@@ -152,7 +152,7 @@ func TestOnNetwork(t *testing.T) {
 		{"10.0.0.5:3425", false, true},
 		{"10.0.0.5:3425", true, true},
 	} {
-		t.Setenv("MAGPIE_ADDR", c.addr)
+		t.Setenv("MYNA_ADDR", c.addr)
 		if err := settings.Save(settings.Settings{LAN: c.lan}); err != nil {
 			t.Fatal(err)
 		}

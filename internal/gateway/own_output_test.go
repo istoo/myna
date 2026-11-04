@@ -13,11 +13,11 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/provider"
 )
 
-// ownOutputUpstream answers every API magpie may ask on, whole, and keeps
+// ownOutputUpstream answers every API myna may ask on, whole, and keeps
 // each body it was sent. A Chat body naming max_tokens past refuseOver is
 // turned away as a vendor whose limit is lower than its list says does.
 type ownOutputUpstream struct {
@@ -130,7 +130,7 @@ func TestShortDefaultAsksTheModelsOutput(t *testing.T) {
 		}
 		field := c.field
 		if field == "" {
-			// translated: whichever API magpie spoke
+			// translated: whichever API myna spoke
 			for _, k := range []string{"max_tokens", "max_completion_tokens", "max_output_tokens"} {
 				if _, ok := got[0][k]; ok {
 					field = k

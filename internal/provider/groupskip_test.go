@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-// A provider can be kept out of the groups magpie finds (chenxiang0010 on
+// A provider can be kept out of the groups myna finds (chenxiang0010 on
 // Discord: auto/kimi-k3.1-pro took in a provider they didn't want there):
 // its models are in no found group, a model one other provider serves is
 // no group, a request still naming that group goes to the model from a

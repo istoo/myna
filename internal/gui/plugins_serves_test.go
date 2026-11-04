@@ -4,12 +4,12 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/plugin"
+	"github.com/istoo/myna/internal/plugin"
 )
 
 // TestPluginServesItsProviders: the Plugins row's "Serves" chip names the
 // providers a plugin registers, not only the built-ins moved onto it
-// (#3902): a plugin magpie never had as a built-in, signing in to two
+// (#3902): a plugin myna never had as a built-in, signing in to two
 // sites of one vendor, names both; a lone provider says nothing beside the
 // row's title; a moved built-in is named once, by the page.
 func TestPluginServesItsProviders(t *testing.T) {

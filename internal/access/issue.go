@@ -10,7 +10,7 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // Short-lived keys (xazaj on X, moving off an enterprise LLM gateway: an
@@ -30,7 +30,7 @@ const (
 
 // expiredKept is how long an expired key stays in the store after it
 // expires, so a client still sending it is told it expired rather than
-// that magpie doesn't know it; Prune removes it after that.
+// that myna doesn't know it; Prune removes it after that.
 const expiredKept = time.Hour
 
 // Refused is why Check turned away a key it knows: expired, or bounded by
@@ -116,7 +116,7 @@ func IssueKey(in Issue) (Issued, error) {
 		}
 		p := keys[i]
 		if !p.Issues || p.Issuer != "" {
-			return Issued{}, errors.New("This gateway key can't issue keys: turn it on with magpie gateway-key issuer <id> on")
+			return Issued{}, errors.New("This gateway key can't issue keys: turn it on with myna gateway-key issuer <id> on")
 		}
 		if !p.Expires.IsZero() && expires.After(p.Expires) {
 			expires = p.Expires // never outlives its issuer

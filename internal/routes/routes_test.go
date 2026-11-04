@@ -128,7 +128,7 @@ func TestLeastUsedAndOrdered(t *testing.T) {
 // quota sat idle (#4535). It goes after those whose share was told and has
 // room, and before those running low or spent, as Smart and Pace keep the
 // unknown; a learning account still goes first, once. Of the shareless, a
-// wallet goes by what it has left and a key by what magpie sent it lately.
+// wallet goes by what it has left and a key by what myna sent it lately.
 func TestLeastUsedSeatsWithNoShare(t *testing.T) {
 	now := time.Now()
 	sub := func(key string, used float64) Seat {

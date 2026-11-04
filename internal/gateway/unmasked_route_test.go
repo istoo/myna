@@ -8,11 +8,11 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/yetone/magpie/internal/gwmw"
-	"github.com/yetone/magpie/internal/masking"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/istoo/myna/internal/gwmw"
+	"github.com/istoo/myna/internal/masking"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/myna/internal/usage"
 )
 
 // countedMasker is the built-in masker, counting the bodies it is asked
@@ -33,7 +33,7 @@ func (c countedMasker) Writer(w http.ResponseWriter) (http.ResponseWriter, func(
 
 // wangbinyq (#3973): a request that goes only to a local model set to go
 // unmasked was masked all the same before it was routed, and the masked
-// body thrown away, up to minutes of magpie's own time for each. Now it
+// body thrown away, up to minutes of myna's own time for each. Now it
 // isn't masked at all, a chat or a token count, and the log has it as it
 // went; one that goes to a vendor, or an unknown model's, is masked as
 // before. With the request archive on it was masked all the same (#3973,

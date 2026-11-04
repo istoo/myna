@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/agent"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // Setting Desktop's subagent model on the Agents page says nothing of
@@ -16,7 +16,7 @@ import (
 // a tier, which Desktop reads at start-up, still says it.
 func TestDesktopSubagentModelNotice(t *testing.T) {
 	testenv.SetHome(t, t.TempDir())
-	// magpie's own files (the providers, the settings, Desktop's tiers)
+	// myna's own files (the providers, the settings, Desktop's tiers)
 	// live in the XDG config folder, which SetHome doesn't move; a run
 	// that leaves the tier pick there wires Desktop for the next run
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())

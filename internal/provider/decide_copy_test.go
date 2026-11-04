@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/istoo/myna/internal/catalog"
 )
 
 // Each of a provider's models is asked whether it decides, and each ask
@@ -44,8 +44,8 @@ func TestDecidesModelCopiesNoList(t *testing.T) {
 		t.Fatalf("an ask took %d bytes, the list %d", n, listed)
 	}
 
-	// a remote magpie's: the models its list marks
-	r := normalize(Provider{ID: "office", Preset: RemoteMagpiePreset, Chat: "http://127.0.0.1:1/typesafe"})
+	// a remote myna's: the models its list marks
+	r := normalize(Provider{ID: "office", Preset: RemoteMynaPreset, Chat: "http://127.0.0.1:1/typesafe"})
 	ms = ms[:0]
 	for i := range 2000 {
 		ms = append(ms, catalog.Model{ID: fmt.Sprintf("m-%d", i), Decides: i%2 == 0})
@@ -55,11 +55,11 @@ func TestDecidesModelCopiesNoList(t *testing.T) {
 	}
 	fetchedEarlier(t, catalog.LivePath(r.ID))
 	if !r.DecidesModel("m-1998") || r.DecidesModel("m-1999") || r.DecidesModel("m-x") {
-		t.Fatal("a remote magpie's decision models are not the ones its list marks")
+		t.Fatal("a remote myna's decision models are not the ones its list marks")
 	}
 	listed = bytesPer(func() { r.decideListed() })
 	if n := bytesPer(func() { r.DecidesModel("m-1998") }); n*20 > listed {
-		t.Fatalf("a remote magpie's ask took %d bytes, the list %d", n, listed)
+		t.Fatalf("a remote myna's ask took %d bytes, the list %d", n, listed)
 	}
 }
 

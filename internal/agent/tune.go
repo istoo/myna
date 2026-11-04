@@ -7,7 +7,7 @@ package agent
 // variable that takes precedence over the setting is told of, never
 // written over.
 //
-// Where Codex compacts, and Claude Code wherever magpie's own window is
+// Where Codex compacts, and Claude Code wherever myna's own window is
 // what it runs at, is one value: Long conversations (settings.CompactAt,
 // FullContext), which Sync writes into each agent's config. Tune reads and
 // sets that value, so the Usage page and the agents' settings never show
@@ -23,9 +23,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // The settings tune knows.
@@ -44,7 +44,7 @@ type TuneSetting struct {
 	Value string `json:"value,omitempty"` // "" when nothing sets it
 	// Where Value comes from: settings (the agent's own config file),
 	// model (Claude Code's modelSettings for the model), env, or long
-	// (TuneLong: magpie's Long conversations, "" under Full window)
+	// (TuneLong: myna's Long conversations, "" under Full window)
 	Source string `json:"source,omitempty"`
 	// Locked names the variable that takes precedence over the setting,
 	// which tune leaves as it is: putting the advice in would change nothing
@@ -53,12 +53,12 @@ type TuneSetting struct {
 	Ours bool `json:"ours,omitempty"`
 }
 
-// TuneLong is the Source of a window that is magpie's Long conversations,
-// which Apply and Undo change in magpie's settings, not in the agent's file.
+// TuneLong is the Source of a window that is myna's Long conversations,
+// which Apply and Undo change in myna's settings, not in the agent's file.
 const TuneLong = "long"
 
 // codexCompactKey is the key tune wrote Codex's window to before it went
-// to Long conversations; one the user wrote comes before magpie's window.
+// to Long conversations; one the user wrote comes before myna's window.
 const codexCompactKey = "model_auto_compact_token_limit"
 
 // tuneLongKey is the stash of Long conversations as it was before tune
@@ -96,7 +96,7 @@ func longOurs(s settings.Settings) bool {
 }
 
 // longApply puts n in Long conversations, what it was kept the first time
-// for Undo. Sync then writes it into every agent magpie routes.
+// for Undo. Sync then writes it into every agent myna routes.
 func longApply(n int) error {
 	s := settings.Load()
 	st, ok := tuneLongStashed()
@@ -114,7 +114,7 @@ func longApply(n int) error {
 func longUndo() error {
 	st, ok := tuneLongStashed()
 	if !ok {
-		return fmt.Errorf("magpie didn't set Long conversations")
+		return fmt.Errorf("myna didn't set Long conversations")
 	}
 	defer forget(tuneLongKey)
 	if !longOurs(settings.Load()) {
@@ -128,7 +128,7 @@ func longUndo() error {
 
 // tuneMigrateCodex moves a model_auto_compact_token_limit tune wrote into
 // Codex's config.toml before (tune.codex.compact) into Long conversations,
-// and puts back what the file had. Long conversations at magpie's default
+// and puts back what the file had. Long conversations at myna's default
 // takes it, as the user's own choice; one the user set takes it only when
 // it is lower, which is where Codex compacted (it stops at the lesser of
 // the limit and the window it is told), so nothing changes for them. A
@@ -201,7 +201,7 @@ func tuneWhere(home, agent, knob, model string) (tunePlace, error) {
 		case TuneCompact:
 			n := claudeName(model)
 			if n == "" {
-				return tunePlace{}, fmt.Errorf("%q is no Claude model: Claude Code's window for it is magpie's own, under Settings", model)
+				return tunePlace{}, fmt.Errorf("%q is no Claude model: Claude Code's window for it is myna's own, under Settings", model)
 			}
 			return tunePlace{path: path, key: "modelSettings." + n + ".autoCompactWindow", env: []string{claudeCompactEnv}, number: true}, nil
 		case TuneCache:
@@ -227,7 +227,7 @@ func (p tunePlace) get() (string, bool) {
 }
 
 // envOf is a variable Claude Code starts with: in settings.json's env, or
-// magpie's own, which a terminal it is run from most likely has too.
+// myna's own, which a terminal it is run from most likely has too.
 func (p tunePlace) envOf(k string) string {
 	if v, _ := edit.GetJSON(p.path, "env."+k); v != "" {
 		return v
@@ -249,7 +249,7 @@ func TuneRead(home, agent, knob, model string) (TuneSetting, error) {
 		var s TuneSetting
 		if v, ok := p.get(); ok {
 			// the user's own limit: Codex stops at it before the window
-			// magpie tells it
+			// myna tells it
 			s.Value, s.Source, s.Locked = strings.Trim(v, `"'`), "settings", codexCompactKey
 			return s, nil
 		}
@@ -280,7 +280,7 @@ func TuneRead(home, agent, knob, model string) (TuneSetting, error) {
 			}
 		} else if agent == "claude" && knob == TuneCompact {
 			// the top-level window serves every model with none of its
-			// own: magpie's Long conversations where magpie wrote it
+			// own: myna's Long conversations where myna wrote it
 			if v, ok := edit.GetJSON(p.path, "autoCompactWindow"); ok && v != "auto" {
 				if claudeLongWindow(p.path, "autoCompactWindow", "claude.compact_default") {
 					st := settings.Load()
@@ -298,7 +298,7 @@ func TuneRead(home, agent, knob, model string) (TuneSetting, error) {
 }
 
 // claudeLongEnv says the CLAUDE_CODE_AUTO_COMPACT_WINDOW Claude Code has
-// is the one magpie wrote in settings.json from Long conversations
+// is the one myna wrote in settings.json from Long conversations
 // (writeCompact), not a provider's Compact at for the main model or the
 // user's own.
 func claudeLongEnv(path, v string) bool {
@@ -308,7 +308,7 @@ func claudeLongEnv(path, v string) bool {
 }
 
 // claudeLongWindow says the window at key in Claude Code's settings.json
-// is the one magpie wrote there (its stash under stashKey) from Long
+// is the one myna wrote there (its stash under stashKey) from Long
 // conversations, not a provider's Compact at for the main model or the
 // user's own.
 func claudeLongWindow(path, key, stashKey string) bool {
@@ -401,7 +401,7 @@ func TuneUndo(home, agent, knob, model string) error {
 	}
 	st, ok := tuneStashed(agent, knob, model)
 	if !ok {
-		return fmt.Errorf("magpie didn't set %s", p.key)
+		return fmt.Errorf("myna didn't set %s", p.key)
 	}
 	defer forget(tuneKey(agent, knob, model))
 	if v, _ := p.get(); strings.Trim(v, `"'`) != st.Set {
@@ -514,7 +514,7 @@ func asyncApply(home, value string) error {
 		return fmt.Errorf("Codex compacts in the background past 1 to 100%% of a model's window, not %q", value)
 	}
 	if own := codexAsyncOwn(home); own != "" {
-		return fmt.Errorf("Codex's config.toml sets %s, which comes before magpie's: take it out first", own)
+		return fmt.Errorf("Codex's config.toml sets %s, which comes before myna's: take it out first", own)
 	}
 	s := settings.Load()
 	st, ok := asyncStashed()
@@ -532,7 +532,7 @@ func asyncApply(home, value string) error {
 func asyncUndo() error {
 	st, ok := asyncStashed()
 	if !ok {
-		return fmt.Errorf("magpie didn't set Codex's background compaction")
+		return fmt.Errorf("myna didn't set Codex's background compaction")
 	}
 	defer forget(tuneAsyncKey)
 	if !asyncOurs(settings.Load()) {

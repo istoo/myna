@@ -23,10 +23,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/filelock"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/access"
+	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/myna/internal/filelock"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // GitHub is GitHub Actions' issuer, a rule's when it names none.
@@ -44,11 +44,11 @@ var githubScopes = []string{"repository", "repository_owner", "repository_id", "
 type Rule struct {
 	ID string `json:"id"`
 	// Key is the id of the gateway key the keys are issued under; it must
-	// be let issue keys (magpie gateway-key issuer <id> on).
+	// be let issue keys (myna gateway-key issuer <id> on).
 	Key    string `json:"key"`
 	Issuer string `json:"issuer"`
 	// Audience is the token's aud the rule takes: by default
-	// "magpie-<id>", so a token asked for one rule opens no other.
+	// "myna-<id>", so a token asked for one rule opens no other.
 	Audience string `json:"audience"`
 	// Claims each name a claim and the value it must have: exact, or a
 	// glob as path.Match reads it ("refs/heads/release/*").
@@ -138,10 +138,10 @@ func Add(r Rule) (Rule, error) {
 	}
 	i := slices.IndexFunc(keys, func(k access.Key) bool { return k.ID == r.Key })
 	if i < 0 {
-		return Rule{}, fmt.Errorf("no gateway key has the id %q (magpie gateway-key list)", r.Key)
+		return Rule{}, fmt.Errorf("no gateway key has the id %q (myna gateway-key list)", r.Key)
 	}
 	if !keys[i].Issues || keys[i].Issuer != "" {
-		return Rule{}, fmt.Errorf("the gateway key %s can't issue keys: let it with magpie gateway-key issuer %s on", keys[i].Name, r.Key)
+		return Rule{}, fmt.Errorf("the gateway key %s can't issue keys: let it with myna gateway-key issuer %s on", keys[i].Name, r.Key)
 	}
 	b := make([]byte, 6)
 	if _, err := rand.Read(b); err != nil {
@@ -150,7 +150,7 @@ func Add(r Rule) (Rule, error) {
 	r.ID = hex.EncodeToString(b)
 	r.Audience = strings.TrimSpace(r.Audience)
 	if r.Audience == "" {
-		r.Audience = "magpie-" + r.ID
+		r.Audience = "myna-" + r.ID
 	}
 	mu.Lock()
 	defer mu.Unlock()
@@ -171,7 +171,7 @@ func Remove(id string) error {
 	}
 	i := slices.IndexFunc(rules, func(r Rule) bool { return r.ID == id })
 	if i < 0 {
-		return fmt.Errorf("no rule has the id %q (magpie gateway-key oidc list)", id)
+		return fmt.Errorf("no rule has the id %q (myna gateway-key oidc list)", id)
 	}
 	return save(slices.Delete(rules, i, i+1))
 }

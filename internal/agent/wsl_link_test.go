@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/sessions"
+	"github.com/istoo/myna/internal/sessions"
 )
 
 // The probe asks the distro where each agent folder that is a link leads
@@ -41,7 +41,7 @@ func TestWSLProbeLinks(t *testing.T) {
 	}
 }
 
-// What the probe says of links and drives, and where magpie opens a path
+// What the probe says of links and drives, and where myna opens a path
 // below each: a link to Windows' C: on C: itself, one elsewhere in the
 // distro through its root, and one it couldn't resolve not at all. The
 // agent is told the path through the link, as it knows it.
@@ -69,7 +69,7 @@ func TestWSLOpenThroughLinks(t *testing.T) {
 		{filepath.Join(h, ".claude", "settings.json"), d.local("/data/claude/settings.json"), ""},
 		{filepath.Join(h, ".codexx", "a"), filepath.Join(h, ".codexx", "a"), ""},
 		{filepath.Join(h, ".omo", "agent"), filepath.Join(h, ".omo", "agent"), ""},
-		{filepath.Join(h, ".pi", "agent", "x"), "", "~/.pi in WSL U is a link magpie couldn't follow"},
+		{filepath.Join(h, ".pi", "agent", "x"), "", "~/.pi in WSL U is a link myna couldn't follow"},
 	} {
 		got, err := d.open(tc.in)
 		if tc.err != "" {
@@ -175,7 +175,7 @@ func TestWSLAgentFolderIsALink(t *testing.T) {
 func TestWSLAgentFolderLinkUnresolved(t *testing.T) {
 	_, c := linkedDistro(t, "link:.codex\nlink:.claude /mnt/c/Users/me/.claude\n")
 	a := wslAgentByID(t, "codex@wsl:Ubuntu")
-	const why = "~/.codex in WSL Ubuntu is a link magpie couldn't follow"
+	const why = "~/.codex in WSL Ubuntu is a link myna couldn't follow"
 	if err := a.Unreached(); err == nil || !strings.Contains(err.Error(), why) || a.Notice == nil || !strings.Contains(a.Notice(), why) {
 		t.Fatalf("Codex behind a link not resolved: %v", err)
 	}

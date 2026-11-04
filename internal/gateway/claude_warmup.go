@@ -19,11 +19,11 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/yetone/magpie/internal/claudetui"
-	"github.com/yetone/magpie/internal/netproxy"
-	"github.com/yetone/magpie/internal/proc"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/redact"
+	"github.com/istoo/myna/internal/claudetui"
+	"github.com/istoo/myna/internal/netproxy"
+	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/redact"
 	"golang.org/x/text/unicode/norm"
 )
 
@@ -57,7 +57,7 @@ func askClaude(ctx context.Context, configDir, model string) error {
 	if claudeTUIOn() {
 		return askClaudeTUI(ctx, binary, configDir, model)
 	}
-	tmp, err := os.MkdirTemp("", "magpie-claude-")
+	tmp, err := os.MkdirTemp("", "myna-claude-")
 	if err != nil {
 		return err
 	}
@@ -112,7 +112,7 @@ func askClaudeTUI(ctx context.Context, binary claudeCLI, configDir, model string
 	if err != nil {
 		return err
 	}
-	// the folder is magpie's own: asked whether to trust it, say yes
+	// the folder is myna's own: asked whether to trust it, say yes
 	env = append(env, claudetui.TrustEnv+"=1")
 	env = append(env, helperDeadline(ctx)...)
 	cmd.Env = binary.tuiEnv(binary.env(binary.asRoot(env), configDir), configDir)
@@ -192,7 +192,7 @@ func claudeUsage(ctx context.Context, configDir string) (string, error) {
 	if claudeTUIOn() {
 		return claudeUsageTUI(ctx, binary, configDir)
 	}
-	tmp, err := os.MkdirTemp("", "magpie-claude-")
+	tmp, err := os.MkdirTemp("", "myna-claude-")
 	if err != nil {
 		return "", err
 	}
@@ -266,7 +266,7 @@ func claudeUsageTUI(ctx context.Context, binary claudeCLI, configDir string) (st
 	if err != nil {
 		return "", err
 	}
-	// the folder is magpie's own: asked whether to trust it, say yes
+	// the folder is myna's own: asked whether to trust it, say yes
 	env = append(env, claudetui.TrustEnv+"=1")
 	env = append(env, helperDeadline(ctx)...)
 	cmd.Env = binary.tuiEnv(binary.env(binary.asRoot(env), configDir), configDir)
@@ -296,18 +296,18 @@ func claudeUsageTUI(ctx context.Context, binary claudeCLI, configDir string) (st
 }
 
 // oneOffDir is the folder a one-off interactive run (a test, a /usage)
-// works in: magpie's own, the one the bridge's runs work in
+// works in: myna's own, the one the bridge's runs work in
 // (claudeWorkDir). Claude Code asks whether to trust a folder once for
 // each of its state files, and keeps the answer there: a folder of each
 // run's own was asked again every time, and left one more trusted
 // project in the state file each time (#4830, mydosu: 67 of them). done
-// removes a folder of the run's own, made only when magpie's can't be
+// removes a folder of the run's own, made only when myna's can't be
 // used.
 func oneOffDir() (dir string, done func(), err error) {
 	if dir, err := claudeWorkDir(); err == nil {
 		return dir, func() {}, nil
 	}
-	tmp, err := os.MkdirTemp("", "magpie-claude-")
+	tmp, err := os.MkdirTemp("", "myna-claude-")
 	if err != nil {
 		return "", nil, err
 	}
@@ -316,7 +316,7 @@ func oneOffDir() (dir string, done func(), err error) {
 
 // trustWork records, in a saved account's config directory (configDir,
 // "" for the account Claude Code is signed in to, whose ~/.claude.json
-// magpie never writes), that Claude Code may work in magpie's own folder
+// myna never writes), that Claude Code may work in myna's own folder
 // work, before a run there: asked whether to trust it, a run of that
 // account waited out its caller's time on the question (#4830, mydosu).
 // A folder of the run's own (oneOffDir's fallback) is not recorded, so
@@ -329,7 +329,7 @@ func trustWork(binary claudeCLI, configDir, work string) {
 		return
 	}
 	if err := provider.ClaudeTrustFolder(configDir, claudeTrustKeys(binary, work)...); err != nil {
-		log.Printf("claude: magpie's work folder not recorded as trusted for %s: %v", configDir, err)
+		log.Printf("claude: myna's work folder not recorded as trusted for %s: %v", configDir, err)
 	}
 }
 
@@ -339,7 +339,7 @@ var trustGOOS = runtime.GOOS
 // claudeTrustKeys are the projects keys Claude Code looks a trusted folder
 // up by when it runs in work (2.1.316, its trust check): the folder's path
 // in NFC, on Windows with forward slashes ("C:/Users/<me>/AppData/Local/
-// Temp/magpie-claude-work"), and the path its links lead to, which is the
+// Temp/myna-claude-work"), and the path its links lead to, which is the
 // one a Mac's getcwd says (/private/var/… for /var/…). One in WSL runs in
 // the distro's mount of it.
 func claudeTrustKeys(binary claudeCLI, work string) []string {
@@ -360,7 +360,7 @@ func claudeTrustKeys(binary claudeCLI, work string) []string {
 }
 
 // dropOneOff removes the session a one-off interactive run left in
-// magpie's folder, by its id (sid, "" when it told none): a test's "hi"
+// myna's folder, by its id (sid, "" when it told none): a test's "hi"
 // keeps its transcript there. A folder of the run's own goes whole.
 func dropOneOff(binary claudeCLI, configDir, work, sid string) {
 	if binary.wsl != nil || sid == "" {
@@ -393,7 +393,7 @@ func oneOffErr(ctx context.Context, stderr string, runErr error) error {
 		return errors.New("Claude Code: " + clip(msg))
 	}
 	if ctx.Err() != nil {
-		return fmt.Errorf("Claude Code's interactive mode said nothing before magpie stopped waiting for it (%v)", ctx.Err())
+		return fmt.Errorf("Claude Code's interactive mode said nothing before myna stopped waiting for it (%v)", ctx.Err())
 	}
 	if runErr != nil {
 		return runErr
@@ -451,10 +451,10 @@ func logSafe(s string) string {
 
 // runClaudeTree runs a one-off Claude Code (a test, a /usage) and ends,
 // with it, whatever it started: its context ending kills only the
-// process magpie started, and on Windows that is cmd.exe running npm's
+// process myna started, and on Windows that is cmd.exe running npm's
 // claude.cmd, whose node went on running with nobody waiting for it
 // (#1894). In a tree, a job on Windows and a session elsewhere, what is
-// left once the head is gone is ended with it, and on Windows when magpie
+// left once the head is gone is ended with it, and on Windows when myna
 // exits mid-run.
 func runClaudeTree(ctx context.Context, cmd *exec.Cmd, what string) error {
 	room, err := claudeRoom.take(ctx, what)

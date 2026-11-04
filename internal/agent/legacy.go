@@ -6,19 +6,19 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/myna/internal/provider"
 )
 
-// legacyID is what agents knew the gateway by before magpie was called magpie.
+// legacyID is what agents knew the gateway by before myna was called myna.
 const legacyID = "dial"
 
 // RenameLegacy rewrites what an older dial left in the agents' files so it
-// says magpie: a model spelled dial/… becomes magpie/… (which also writes
-// the magpie provider entry the agent needs), and then the dial entry,
+// says myna: a model spelled dial/… becomes myna/… (which also writes
+// the myna provider entry the agent needs), and then the dial entry,
 // Codex's table and catalog file, and Claude Code's token go. It runs at
 // start-up; once nothing says dial any more it changes nothing. Errors are
-// swallowed on purpose — a file magpie cannot rewrite is one the user can
+// swallowed on purpose — a file myna cannot rewrite is one the user can
 // still fix from the picker.
 func RenameLegacy() {
 	for _, a := range local() {
@@ -27,9 +27,9 @@ func RenameLegacy() {
 		}
 		if a.ID == "codex" {
 			// Set() would stash "dial" as the provider to go back to; say
-			// magpie first so it sees a config that is already routed.
+			// myna first so it sees a config that is already routed.
 			if v, _ := edit.GetTOMLTop(a.Path, "model_provider"); v == legacyID {
-				_ = edit.SetTOMLTop(a.Path, edit.KV{Path: "model_provider", Value: magpieID})
+				_ = edit.SetTOMLTop(a.Path, edit.KV{Path: "model_provider", Value: mynaID})
 				if f := a.Field("model"); f != nil {
 					_ = f.Set(f.Get())
 				}
@@ -38,9 +38,9 @@ func RenameLegacy() {
 		for i := range a.Fields {
 			f := &a.Fields[i]
 			if rest, ok := strings.CutPrefix(f.Get(), legacyID+"/"); ok {
-				// dial/… is what magpie wrote under its old name: magpie set
+				// dial/… is what myna wrote under its old name: myna set
 				// the agent up (setUp)
-				if f.Set(magpieID+"/"+rest) == nil {
+				if f.Set(mynaID+"/"+rest) == nil {
 					record(a.ID, f.Key, f.Get())
 				}
 			}
@@ -66,7 +66,7 @@ func RenameLegacy() {
 }
 
 // MoveCursorEfforts moves an agent set to one of Cursor's ids at an effort
-// (cursor/grok-4.7-low), from before magpie offered each family as one
+// (cursor/grok-4.7-low), from before myna offered each family as one
 // model, to that model (cursor/grok-4.7) spelled the same way, and — when
 // the agent's effort is unset and it has that one — to the effort the id
 // was at. A model the picker doesn't offer is left: the gateway still takes
@@ -94,12 +94,12 @@ func moveEfforts(pid string, base func(string) (string, string, bool)) {
 			}
 			v := f.Get()
 			pre, rest := "", v
-			if r, ok := strings.CutPrefix(v, magpieID+"/"); ok {
+			if r, ok := strings.CutPrefix(v, mynaID+"/"); ok {
 				if a.handWired() {
-					// the user's own provider named magpie: not ours to move
+					// the user's own provider named myna: not ours to move
 					continue
 				}
-				pre, rest = magpieID+"/", r
+				pre, rest = mynaID+"/", r
 			}
 			id, ok := strings.CutPrefix(rest, pid+"/")
 			if !ok {

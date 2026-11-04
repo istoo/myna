@@ -4,11 +4,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // beamReasoning400 is Command Code's reflection/beam:free turning a second
-// turn away (EDwinpzy on Discord, magpie 0.1.2717): the reporter's words,
+// turn away (EDwinpzy on Discord, myna 0.1.2717): the reporter's words,
 // "Missing required parameter: 'messages[N].reasoning_content'", in the
 // OpenAI error shape the Provider API answers in.
 const beamReasoning400 = `{"error":{"message":"Missing required parameter: 'messages[1].reasoning_content'.","type":"invalid_request_error","param":"messages[1].reasoning_content","code":"missing_required_parameter"}}`

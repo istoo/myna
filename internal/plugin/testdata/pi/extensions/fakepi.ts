@@ -1,7 +1,7 @@
 // A pi extension as pi's own examples write one (custom-provider-anthropic):
 // a provider with its own stream and an OAuth sign-in that asks as it goes,
 // first on pi's terminal UI as pi-provider-kiro does, another signed in to
-// with a key, a command and a tool, which magpie leaves unused, and a
+// with a key, a command and a tool, which myna leaves unused, and a
 // session_start that adds a model once it is signed in. Its stream tells
 // what pi handed it.
 import { spawn } from "node:child_process"

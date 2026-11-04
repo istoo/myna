@@ -14,25 +14,25 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
-const ref = (value) => ({ value, label: value, ref: value, note: "via magpie" });
-const options = [ref("magpie/minimax-cn/MiniMax-M3"), ref("magpie/relay/glm-4.6")];
+const ref = (value) => ({ value, label: value, ref: value, note: "via myna" });
+const options = [ref("myna/minimax-cn/MiniMax-M3"), ref("myna/relay/glm-4.6")];
 const roles = ["fast", "standard", "deep", "visual"];
-// as magpie reads an Aside: the model it talks and its level beside it, the
+// as myna reads an Aside: the model it talks and its level beside it, the
 // model it draws with, and the four tasks it picks a model by hand
 const state = {
   agents: [{
     id: "aside", name: "Aside", icon: "aside", path: "/fixture/aside", wired: true,
     fields: [
-      { key: "model", label: "model", value: "magpie/minimax-cn/MiniMax-M3", options },
+      { key: "model", label: "model", value: "myna/minimax-cn/MiniMax-M3", options },
       { key: "effort", label: "thinking", value: "high", options: ["low", "medium", "high"].map((value) => ({ value })) },
-      { key: "image", label: "image", value: "magpie/agnes-image-2.1-flash", options },
+      { key: "image", label: "image", value: "myna/agnes-image-2.1-flash", options },
       ...roles.map((key) => ({ key, label: key, value: "", options })),
     ],
   }, {
     id: "cursor-local", name: "Cursor Private Inference", icon: "cursor", path: "/fixture/cursor", wired: true,
     models: { shown: 1, listed: 1, by: [{ name: "Relay", icon: "generic", n: 1 }] },
     fields: [
-      { key: "model", label: "model", value: "magpie/relay/glm-4.6", options },
+      { key: "model", label: "model", value: "myna/relay/glm-4.6", options },
       { key: "effort", label: "thinking", value: "high", options: ["low", "medium", "high"].map((value) => ({ value })) },
     ],
   }],
@@ -84,7 +84,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", server(lang));
-      await page.goto("http://magpie.test/");
+      await page.goto("http://myna.test/");
       await page.locator(row).waitFor();
       await page.locator(`${row} .ag-link`).click();
       await page.locator(`${row} .ag-exp`).waitFor();
@@ -93,7 +93,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const got = await page.evaluate(pills, `${row} .ag-exp .ag-vl`);
       assert.deepEqual(got, [
         [ "effort", w.thinking, w.high ],
-        [ "image", w.image, "magpie/agnes-image-2.1-flash" ],
+        [ "image", w.image, "myna/agnes-image-2.1-flash" ],
         [ "fast", w.fast, w.unset ],
         [ "standard", w.standard, w.unset ],
         [ "deep", w.deep, w.unset ],
@@ -113,7 +113,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", server(lang));
-      await page.goto("http://magpie.test/?mode=panel");
+      await page.goto("http://myna.test/?mode=panel");
       await page.locator(row).waitFor();
       await page.locator(`${row} .ag-sum`).click();
       await page.locator(`${row} .ag-open .field`).first().waitFor();
@@ -139,7 +139,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", server(lang));
-      await page.goto("http://magpie.test/");
+      await page.goto("http://myna.test/");
       const cursor = '.row.agent[data-id="cursor-local"]';
       await page.locator(cursor).waitFor();
       await page.locator(`${cursor} .ag-link`).click();

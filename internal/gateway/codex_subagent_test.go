@@ -10,8 +10,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/access"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // chatgptSeen stands in for the ChatGPT backend, noting each request's
@@ -28,7 +28,7 @@ func (c *chatgptSeen) asked() []string {
 }
 
 // codexSubagentSetup is Codex signed in to ChatGPT with another account on
-// in magpie, both serving gpt-5.5 and gpt-6-astra, and the ChatGPT backend
+// in myna, both serving gpt-5.5 and gpt-6-astra, and the ChatGPT backend
 // a fake noting what it was asked.
 func codexSubagentSetup(t *testing.T) *chatgptSeen {
 	t.Helper()
@@ -167,7 +167,7 @@ func TestCodexSubagentModelLeavesOtherRequests(t *testing.T) {
 	}
 }
 
-// The model set no longer served by a ChatGPT account in magpie (its
+// The model set no longer served by a ChatGPT account in myna (its
 // account signed out, or the model gone from its plan): a subagent goes on
 // the model its lead asked for, and the trace says why it wasn't put on
 // the one set. One of Codex's own bare names can't be set at all.
@@ -190,7 +190,7 @@ func TestCodexSubagentModelNotServedKeepsTheAsked(t *testing.T) {
 		t.Fatalf("ChatGPT was asked for %v, not the model asked", got)
 	}
 	r := lastRoute(s)
-	if r.Subagent == nil || r.Subagent.To != "codex/gpt-9" || r.Subagent.Kept != "no ChatGPT account on in magpie serves it" {
+	if r.Subagent == nil || r.Subagent.To != "codex/gpt-9" || r.Subagent.Kept != "no ChatGPT account on in myna serves it" {
 		t.Fatalf("trace: %+v", r.Subagent)
 	}
 }

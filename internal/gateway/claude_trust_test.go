@@ -11,14 +11,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/claudetui"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/testenv"
-	"github.com/yetone/magpie/internal/wslrun"
+	"github.com/istoo/myna/internal/claudetui"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/myna/internal/wslrun"
 )
 
 // savedClaudeDir is a saved Claude account's config directory, as
-// magpie keeps one (provider's claudeAccountDir), in a home of the
+// myna keeps one (provider's claudeAccountDir), in a home of the
 // test's own.
 func savedClaudeDir(t *testing.T) string {
 	t.Helper()
@@ -29,7 +29,7 @@ func savedClaudeDir(t *testing.T) string {
 	if err := os.MkdirAll(dir, 0o700); err != nil {
 		t.Fatal(err)
 	}
-	// a saved account as magpie writes it: onboarded, no projects
+	// a saved account as myna writes it: onboarded, no projects
 	if err := os.WriteFile(filepath.Join(dir, ".claude.json"), []byte(`{"hasCompletedOnboarding": true}`), 0o600); err != nil {
 		t.Fatal(err)
 	}
@@ -62,12 +62,12 @@ func trustedIn(t *testing.T, b []byte) []string {
 func claudeKey(work string) string { return filepath.ToSlash(evalSymlinks(work)) }
 
 // mydosu's saved account (#4830, Windows, Claude Code 2.1.316) was asked
-// whether to trust magpie's folder on every /usage read and every test,
+// whether to trust myna's folder on every /usage read and every test,
 // and each waited out its caller's time on the question. Before either
 // runs, the account's .claude.json says the folder is trusted, under the
 // path Claude Code runs in, which a Mac's getcwd gives with its links
 // resolved (/private/var/… for /var/…).
-func TestClaudeOneOffTrustsMagpiesFolder(t *testing.T) {
+func TestClaudeOneOffTrustsMynasFolder(t *testing.T) {
 	for _, c := range []struct {
 		name string
 		run  func(ctx context.Context, cfg string) error
@@ -83,7 +83,7 @@ func TestClaudeOneOffTrustsMagpiesFolder(t *testing.T) {
 			t.Setenv("TMPDIR", t.TempDir())
 			cfg := savedClaudeDir(t)
 			seen := filepath.Join(t.TempDir(), "seen")
-			helper := filepath.Join(t.TempDir(), "magpie")
+			helper := filepath.Join(t.TempDir(), "myna")
 			// what the account's file says as Claude Code starts
 			testenv.Program(t, helper, `#!/bin/sh
 [ "$1" = "`+claudetui.Command+`" ] || exit 9
@@ -108,7 +108,7 @@ cat > /dev/null
 			}
 			got := trustedIn(t, b)
 			if !slices.Contains(got, claudeKey(work)) {
-				t.Fatalf("Claude Code started with %v trusted, not magpie's folder %s: %s", got, claudeKey(work), b)
+				t.Fatalf("Claude Code started with %v trusted, not myna's folder %s: %s", got, claudeKey(work), b)
 			}
 			if !strings.Contains(string(b), `"hasCompletedOnboarding": true`) {
 				t.Fatalf("the account's other keys went: %s", b)
@@ -118,10 +118,10 @@ cat > /dev/null
 }
 
 // The account Claude Code is signed in to (configDir "") keeps its own
-// ~/.claude.json, which magpie never writes, and a folder of the run's
-// own, made when magpie's can't be used, isn't recorded: each would
+// ~/.claude.json, which myna never writes, and a folder of the run's
+// own, made when myna's can't be used, isn't recorded: each would
 // leave one more trusted project behind.
-func TestClaudeTrustWorkOnlyMagpiesFolderInSavedAccounts(t *testing.T) {
+func TestClaudeTrustWorkOnlyMynasFolderInSavedAccounts(t *testing.T) {
 	tmp := t.TempDir()
 	for _, v := range []string{"TMPDIR", "TMP", "TEMP"} {
 		t.Setenv(v, tmp)
@@ -148,20 +148,20 @@ func TestClaudeTrustWorkOnlyMagpiesFolderInSavedAccounts(t *testing.T) {
 	trustWork(claudeCLI{}, cfg, work)
 	b, _ = os.ReadFile(filepath.Join(cfg, ".claude.json"))
 	if got := trustedIn(t, b); !slices.Contains(got, claudeKey(work)) {
-		t.Errorf("magpie's folder wasn't recorded: %v", got)
+		t.Errorf("myna's folder wasn't recorded: %v", got)
 	}
 }
 
 // Claude Code 2.1.316 keys a project on Windows by its path with forward
-// slashes (C:/Users/<me>/AppData/Local/Temp/magpie-claude-work): an entry
+// slashes (C:/Users/<me>/AppData/Local/Temp/myna-claude-work): an entry
 // under the backslashed path is never found, and the question is asked.
 func TestClaudeTrustKeysAsClaudeCodeKeys(t *testing.T) {
 	old := trustGOOS
 	t.Cleanup(func() { trustGOOS = old })
 	trustGOOS = "windows"
 	// mydosu's folder, a name in NFD as a file system may give it
-	got := claudeTrustKeys(claudeCLI{}, "C:\\Users\\Me\u0301\\AppData\\Local\\Temp\\magpie-claude-work")
-	if want := "C:/Users/M\u00e9/AppData/Local/Temp/magpie-claude-work"; !slices.Contains(got, want) {
+	got := claudeTrustKeys(claudeCLI{}, "C:\\Users\\Me\u0301\\AppData\\Local\\Temp\\myna-claude-work")
+	if want := "C:/Users/M\u00e9/AppData/Local/Temp/myna-claude-work"; !slices.Contains(got, want) {
 		t.Errorf("keys %q, want %q among them", got, want)
 	}
 	for _, k := range got {
@@ -175,16 +175,16 @@ func TestClaudeTrustKeysAsClaudeCodeKeys(t *testing.T) {
 			t.Errorf("a backslash in a Unix name was changed: %v", got)
 		}
 	}
-	got = claudeTrustKeys(claudeCLI{wsl: &wslrun.Tool{Mount: "/mnt/"}}, `C:\Users\me\AppData\Local\Temp\magpie-claude-work`)
-	if len(got) != 1 || got[0] != "/mnt/c/Users/me/AppData/Local/Temp/magpie-claude-work" {
+	got = claudeTrustKeys(claudeCLI{wsl: &wslrun.Tool{Mount: "/mnt/"}}, `C:\Users\me\AppData\Local\Temp\myna-claude-work`)
+	if len(got) != 1 || got[0] != "/mnt/c/Users/me/AppData/Local/Temp/myna-claude-work" {
 		t.Errorf("Claude Code in WSL runs in its mount of the folder, keys %v", got)
 	}
 }
 
-// A saved account's bridge run in magpie's folder starts with the folder
+// A saved account's bridge run in myna's folder starts with the folder
 // trusted too: the bridge's runs work there whenever the caller's own
 // folder isn't one here.
-func TestClaudeBridgeTrustsMagpiesFolderForSavedAccount(t *testing.T) {
+func TestClaudeBridgeTrustsMynasFolderForSavedAccount(t *testing.T) {
 	h := tuiScriptHarness(t, `cat "$CLAUDE_CONFIG_DIR/.claude.json" > $log.seen`)
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(os.Getenv("HOME"), ".config"))
 	cfg := filepath.Join(filepath.Dir(provider.Path()), "claude-accounts", "0123456789abcdef")
@@ -214,6 +214,6 @@ func TestClaudeBridgeTrustsMagpiesFolderForSavedAccount(t *testing.T) {
 		t.Fatal(err)
 	}
 	if got := trustedIn(t, b); !slices.Contains(got, claudeKey(work)) {
-		t.Fatalf("the run started with %v trusted, not magpie's folder %s", got, claudeKey(work))
+		t.Fatalf("the run started with %v trusted, not myna's folder %s", got, claudeKey(work))
 	}
 }

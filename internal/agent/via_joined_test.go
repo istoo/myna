@@ -8,7 +8,7 @@ import (
 	"testing"
 	"unsafe"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // A model field's list is its own models then the catalog's: the append
@@ -21,18 +21,18 @@ func TestWithViaKeepsTheJoinedList(t *testing.T) {
 		t.Fatal(err)
 	}
 	own := func(v string) []Option { return []Option{{Value: v, Note: "own"}} }
-	want := func(o []Option) []Option { return append(slices.Clone(o), viaMagpieShared("pi", magpieID+"/")...) }
+	want := func(o []Option) []Option { return append(slices.Clone(o), viaMynaShared("pi", mynaID+"/")...) }
 	equal := func(a, b []Option) bool { return slices.EqualFunc(a, b, sameOption) }
 
-	first := withVia(own("m1"), "pi", magpieID+"/")
+	first := withVia(own("m1"), "pi", mynaID+"/")
 	if len(first) < 3 || !equal(first, want(own("m1"))) {
 		t.Fatalf("the joined list is not own then the catalog: %+v", first)
 	}
-	again := withVia(own("m1"), "pi", magpieID+"/")
+	again := withVia(own("m1"), "pi", mynaID+"/")
 	if &again[0] != &first[0] {
 		t.Fatal("the same own models joined the catalog again")
 	}
-	if n := testing.AllocsPerRun(20, func() { withVia(own("m1"), "pi", magpieID+"/") }); n > 60 {
+	if n := testing.AllocsPerRun(20, func() { withVia(own("m1"), "pi", mynaID+"/") }); n > 60 {
 		t.Fatalf("a list already joined took %.0f allocations", n)
 	}
 	if cap(again) != len(again) {
@@ -42,10 +42,10 @@ func TestWithViaKeepsTheJoinedList(t *testing.T) {
 	// own models that read otherwise, an icon among them, are joined anew
 	changed := own("m1")
 	changed[0].Icons = []string{"x"}
-	if got := withVia(changed, "pi", magpieID+"/"); &got[0] == &first[0] || !equal(got, want(changed)) {
+	if got := withVia(changed, "pi", mynaID+"/"); &got[0] == &first[0] || !equal(got, want(changed)) {
 		t.Fatalf("own models changed since are not what is listed: %+v", got[0])
 	}
-	if got := withVia(own("m2"), "pi", magpieID+"/"); got[0].Value != "m2" || !equal(got, want(own("m2"))) {
+	if got := withVia(own("m2"), "pi", mynaID+"/"); got[0].Value != "m2" || !equal(got, want(own("m2"))) {
 		t.Fatalf("own models changed since are not what is listed: %+v", got[0])
 	}
 
@@ -54,12 +54,12 @@ func TestWithViaKeepsTheJoinedList(t *testing.T) {
 	if err := provider.Save(provider.Provider{ID: "nb", Name: "NB", Key: "k", Chat: "http://127.0.0.1:1/v1", Models: []string{"x"}}); err != nil {
 		t.Fatal(err)
 	}
-	got := withVia(own("m2"), "pi", magpieID+"/")
-	if !slices.ContainsFunc(got, func(o Option) bool { return o.Value == magpieID+"/nb/x" }) || !equal(got, want(own("m2"))) {
+	got := withVia(own("m2"), "pi", mynaID+"/")
+	if !slices.ContainsFunc(got, func(o Option) bool { return o.Value == mynaID+"/nb/x" }) || !equal(got, want(own("m2"))) {
 		t.Fatalf("a provider saved since is not listed: %d options", len(got))
 	}
 
-	if got := withVia(nil, "pi", magpieID+"/"); !sameList(got, viaMagpieShared("pi", magpieID+"/")) {
+	if got := withVia(nil, "pi", mynaID+"/"); !sameList(got, viaMynaShared("pi", mynaID+"/")) {
 		t.Fatal("with no own models the catalog's list is not the one kept")
 	}
 }
@@ -108,7 +108,7 @@ func TestClaudeModelFieldKeepsTheJoinedList(t *testing.T) {
 		t.Fatal("the model field doesn't offer oa's models")
 	}
 	if again := field.Options(map[string]string{}); &again[0] != &first[0] {
-		t.Fatal("Claude Code's own models joined its list from magpie again")
+		t.Fatal("Claude Code's own models joined its list from myna again")
 	}
 	if err := provider.Save(provider.Provider{ID: "nb", Name: "NB", Key: "k", Chat: "http://127.0.0.1:1/v1", Models: []string{"y"}}); err != nil {
 		t.Fatal(err)

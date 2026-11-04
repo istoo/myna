@@ -52,7 +52,7 @@ test("Grok account pills preserve known plans and leave absent plans unnamed", a
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang));
       // When: the real Providers page renders its account pills.
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://myna.test/?view=providers");
       await page.locator(".row.provider .key.acct").first().waitFor();
       const labels = await page.locator(".row.provider .key.acct > span").allTextContents();
       // Then: no plan is invented; other agents retain their labels.

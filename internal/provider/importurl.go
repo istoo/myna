@@ -10,12 +10,12 @@ import (
 
 // Import links let a vendor or a relay hand its users a ready-made provider:
 //
-//	magpie://import?preset=deepseek&key=sk-…
-//	magpie://import?name=My%20Relay&chat=https://relay.example/v1&key=sk-…
+//	myna://import?preset=deepseek&key=sk-…
+//	myna://import?name=My%20Relay&chat=https://relay.example/v1&key=sk-…
 //
 // Parameters (every value URL-encoded):
 //
-//	preset     a preset id (magpie presets); the preset's endpoints are used.
+//	preset     a preset id (myna presets); the preset's endpoints are used.
 //	           Not google-vertex, asked at the user's own Google Cloud project
 //	region     with a preset that has regions, which one
 //	name       the provider's name; required without a preset
@@ -35,21 +35,21 @@ import (
 // A link never saves anything by itself: the app shows what it would add
 // and the user says yes.
 
-// Scheme is the URL scheme magpie registers with the system.
-const Scheme = "magpie"
+// Scheme is the URL scheme myna registers with the system.
+const Scheme = "myna"
 
 // ParseImport reads an import link into the provider it describes.
 func ParseImport(link string) (Provider, error) {
 	u, err := url.Parse(strings.TrimSpace(link))
 	if err != nil || !strings.EqualFold(u.Scheme, Scheme) {
-		return Provider{}, errors.New("not a magpie:// link")
+		return Provider{}, errors.New("not a myna:// link")
 	}
 	action := u.Host
-	if action == "" { // magpie:import?… or magpie:///import?…
+	if action == "" { // myna:import?… or myna:///import?…
 		action = strings.Trim(u.Opaque+u.Path, "/")
 	}
 	if action != "import" {
-		return Provider{}, errorf("magpie://%s is not something magpie knows; links start magpie://import?", action)
+		return Provider{}, errorf("myna://%s is not something myna knows; links start myna://import?", action)
 	}
 	q := u.Query()
 	get := func(k string) string { return strings.TrimSpace(q.Get(k)) }
@@ -62,7 +62,7 @@ func ParseImport(link string) (Provider, error) {
 		if p.IsVertex() {
 			// asked at the user's own Google Cloud project, with their
 			// own credentials: nothing a link could hand over
-			return Provider{}, errorf("%s is added with your own Google Cloud project, not from a link: magpie provider add %s project=<id>, or Add in the app", p.Name, VertexPreset)
+			return Provider{}, errorf("%s is added with your own Google Cloud project, not from a link: myna provider add %s project=<id>, or Add in the app", p.Name, VertexPreset)
 		}
 		if r := get("region"); r != "" {
 			found := false
@@ -122,8 +122,8 @@ func ParseImport(link string) (Provider, error) {
 	if p.ID == "" {
 		return Provider{}, errors.New("the link's name has no letters or digits to make an id from")
 	}
-	if p.ID == "magpie" {
-		return Provider{}, errors.New(`"magpie" is what agents call the gateway itself; the link needs another id`)
+	if p.ID == "myna" {
+		return Provider{}, errors.New(`"myna" is what agents call the gateway itself; the link needs another id`)
 	}
 	if subscriptionID(p.ID) {
 		// named as a subscription is (claude, kiro): a provider of its own
@@ -195,7 +195,7 @@ func page(raw string) string {
 // iconURL accepts the picture a link names: an https URL on a public host,
 // which the app fetches only after the user confirms the import. A plain
 // http or a bare host is rejected rather than guessed at, since this is the
-// one parameter that makes magpie reach out on the link's behalf.
+// one parameter that makes myna reach out on the link's behalf.
 func iconURL(raw string) (string, error) {
 	u, err := url.Parse(raw)
 	if err != nil || u.Host == "" || u.User != nil || u.Fragment != "" {

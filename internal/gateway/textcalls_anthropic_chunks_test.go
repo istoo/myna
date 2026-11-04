@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // nativeAnthropicToolStream is a Messages reply whose text block is followed
@@ -424,7 +424,7 @@ func (b *sseChunkBody) Read(p []byte) (int, error) {
 
 func (b *sseChunkBody) Close() error { return nil }
 
-// The same chunk boundaries through magpie's Messages relay: the reply the
+// The same chunk boundaries through myna's Messages relay: the reply the
 // agent reads is the stream the upstream sent, with each event complete and
 // one data value each, not an event whose header went in an earlier write or
 // whose data values were joined.

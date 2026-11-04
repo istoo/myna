@@ -29,7 +29,7 @@ function server(lang, calls) {
       calls.push(action + " " + JSON.stringify(body));
       if (action === "rename") {
         if (profiles.some((p) => p.name === body.to)) return route.fulfill({ status: 400, json: { error: `a profile named "${body.to}" already exists` } });
-        await new Promise((r) => setTimeout(r, 300)); // magpie reading every agent again
+        await new Promise((r) => setTimeout(r, 300)); // myna reading every agent again
         profiles = profiles.map((p) => (p.name === body.name ? { ...p, name: body.to } : p)).sort((a, b) => (a.name < b.name ? -1 : 1));
       }
       return route.fulfill({ json: state() });
@@ -68,7 +68,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, calls));
-        await page.goto("http://magpie.test/" + (panel ? "?mode=panel" : ""));
+        await page.goto("http://myna.test/" + (panel ? "?mode=panel" : ""));
         const chip = (name) => page.locator("#profiles .chip", { hasText: new RegExp("^✓?" + name) });
         await chip("work").waitFor({ state: "attached" });
         if (panel) {
@@ -99,7 +99,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await field.fill("  team ");
         await field.press("Enter");
         await chip("team").waitFor({ state: "attached" });
-        assert.deepEqual(await names(), ["home", "team"], "renamed before magpie answered");
+        assert.deepEqual(await names(), ["home", "team"], "renamed before myna answered");
         assert.match(await chip("team").getAttribute("class"), /pending/);
         await page.waitForFunction(() => !document.querySelector("#profiles .chip.pending"));
         assert.deepEqual(calls, ['rename {"name":"work","to":"team"}']);

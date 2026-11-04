@@ -4,7 +4,7 @@ package cli
 
 import "syscall"
 
-// agyExecOS runs agy in magpie's place: the terminal's signals and exit
+// agyExecOS runs agy in myna's place: the terminal's signals and exit
 // code are agy's own.
 func agyExecOS(bin string, args, env []string) error {
 	return syscall.Exec(bin, append([]string{"agy"}, args...), env)

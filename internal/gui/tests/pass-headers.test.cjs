@@ -2,7 +2,7 @@
 // A provider's Request headers to pass (3jRzfF52Qx on X: the agent's own
 // header values, not a fixed one), right after Reply headers: the editor
 // shows the saved list, a Save sends what is typed as a list, refuses a
-// name that carries magpie's key or the connection's own (Authorization,
+// name that carries myna's key or the connection's own (Authorization,
 // x-api-key, Host, Content-*, a name that isn't one) and says why, and an
 // emptied box clears it ([]). It fits a narrow window. In English,
 // Chinese, Traditional Chinese, Japanese and German, Chromium and WebKit.
@@ -45,10 +45,10 @@ function serve(lang, calls) {
 
 const words = {
   en: { label: "Request headers to pass", reply: "Reply headers", save: "Save", never: "carries a key", name: "isn't a header name" },
-  zh: { label: "透传请求头", reply: "透传响应头", save: "保存", never: "带着 magpie 的密钥", name: "不是有效的头名称" },
-  "zh-TW": { label: "透傳請求頭", reply: "透傳回應標頭", save: "儲存", never: "帶著 magpie 的金鑰", name: "不是有效的標頭名稱" },
-  ja: { label: "引き継ぐリクエストヘッダー", reply: "レスポンスヘッダー", save: "保存", never: "magpie のキーを運ぶ", name: "ヘッダー名ではありません" },
-  de: { label: "Weiterzugebende Anfrage-Header", reply: "Antwort-Header", save: "Speichern", never: "trägt magpies Schlüssel", name: "ist kein Header-Name" },
+  zh: { label: "透传请求头", reply: "透传响应头", save: "保存", never: "带着 myna 的密钥", name: "不是有效的头名称" },
+  "zh-TW": { label: "透傳請求頭", reply: "透傳回應標頭", save: "儲存", never: "帶著 myna 的金鑰", name: "不是有效的標頭名稱" },
+  ja: { label: "引き継ぐリクエストヘッダー", reply: "レスポンスヘッダー", save: "保存", never: "myna のキーを運ぶ", name: "ヘッダー名ではありません" },
+  de: { label: "Weiterzugebende Anfrage-Header", reply: "Antwort-Header", save: "Speichern", never: "trägt mynas Schlüssel", name: "ist kein Header-Name" },
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -64,7 +64,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       const calls = [];
       await page.route("**/*", serve(lang, calls));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://myna.test/?view=providers");
       const open = async () => {
         await page.locator(".row.provider", { hasText: "Relay" }).click();
         const ed = page.locator(".editor");

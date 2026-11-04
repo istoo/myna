@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // aiStudioGrounded is a Gemini API stream that searched with googleSearch:
@@ -215,7 +215,7 @@ func TestGeminiKeySearchesScope(t *testing.T) {
 
 // An AI Studio key that searches by googleSearch is a searcher like a
 // Google sign-in (cocoasoda on Discord: 代搜索供应商 had no Gemini): Settings
-// lists it, its own models first (Own), and magpie picks it by itself to
+// lists it, its own models first (Own), and myna picks it by itself to
 // search for another provider's model, which can't, on the user's key.
 func TestAIStudioKeySearchesForOthers(t *testing.T) {
 	s, calls := aiStudio(t, nil)

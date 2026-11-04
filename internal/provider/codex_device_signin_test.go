@@ -89,7 +89,7 @@ func waitSignIn(t *testing.T, id string) SignInState {
 	return st
 }
 
-// curtinp118 on Discord: magpie on a VPS, its web UI in a browser at home.
+// curtinp118 on Discord: myna on a VPS, its web UI in a browser at home.
 // The browser sign-in ends on localhost:1455, which is the home machine.
 // A device code entered on ChatGPT's page signs in with nothing to bring
 // back, and nothing listens on this computer for it.

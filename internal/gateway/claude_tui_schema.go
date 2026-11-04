@@ -13,9 +13,9 @@ import (
 
 // Claude Code's interactive mode takes --json-schema and does nothing with
 // it (2.1.316: its StructuredOutput tool is -p's alone), so a request with
-// a JSON schema is given an answer tool of magpie's, through the bridge's
+// a JSON schema is given an answer tool of myna's, through the bridge's
 // MCP server like the client's tools: its input schema is the request's,
-// magpie checks each call against it, and the answer is the input of the
+// myna checks each call against it, and the answer is the input of the
 // call that fits, told when the turn's result comes. A call that doesn't
 // fit is told why and made again, as -p's is; a turn that ends with no
 // call is asked for one once.
@@ -59,7 +59,7 @@ func compileAnswerSchema(raw json.RawMessage) (*jsonschema.Schema, error) {
 	c := jsonschema.NewCompiler()
 	c.DefaultDraft(jsonschema.Draft7)
 	c.UseLoader(noSchemaLoads{})
-	const loc = "magpie:answer.json"
+	const loc = "myna:answer.json"
 	if err := c.AddResource(loc, doc); err != nil {
 		return nil, fmt.Errorf("the JSON schema can't be used: %v", err)
 	}

@@ -13,7 +13,7 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // ferock's refusal, as Command Code's plugin passed it on (Discord,
@@ -22,7 +22,7 @@ const boundRefusalText = `messages.3.content.20: Invalid signature in thinking b
 
 // boundClaude answers as Claude does a conversation it signed only part
 // of: the first thinking block whose signature is in foreign is refused,
-// named where it is, in Anthropic's error body (magpie's reply puts the
+// named where it is, in Anthropic's error body (myna's reply puts the
 // provider's name before it: "Command Code: {...}"); any other request is
 // answered. said is what Claude refuses with (%d %d: message, block).
 type boundClaude struct {
@@ -136,7 +136,7 @@ func TestBoundRefusalRead(t *testing.T) {
 }
 
 // ferock on Discord: Claude refused message 3's block 20 as bound to
-// another conversation. magpie asks again without it and without the
+// another conversation. myna asks again without it and without the
 // thinking after it, keeps the blocks before it, and sends the next turn
 // so the first time.
 func TestBoundThinkingLeftOut(t *testing.T) {

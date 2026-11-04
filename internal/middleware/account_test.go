@@ -8,12 +8,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/gwmw"
+	"github.com/istoo/myna/internal/appdir"
+	"github.com/istoo/myna/internal/gwmw"
 )
 
 // forgetRefKeys makes the next ref read its key from the file again, as a
-// new start of magpie does.
+// new start of myna does.
 func forgetRefKeys() {
 	refKeys.Lock()
 	clear(refKeys.m)
@@ -37,7 +37,7 @@ func triedAfter(t *testing.T, r *Run, a gwmw.Account) (skip bool, by string, got
 }
 
 // onAccount is told a ref for the account, never its email, the same on
-// every request and after magpie starts again, and a different one for
+// every request and after myna starts again, and a different one for
 // each middleware; {skip: true} passes the account over, naming the
 // middleware, and anything else, a throw and null among them, uses it.
 func TestOnAccount(t *testing.T) {
@@ -88,7 +88,7 @@ export function onProvider(body, ctx) { body.b = ctx.account === undefined ? "no
 	if refA == refB {
 		t.Fatalf("two middlewares told one ref %s", refA)
 	}
-	// another request, and magpie started again: the same refs
+	// another request, and myna started again: the same refs
 	if a2, b2 := refs(); a2 != refA || b2 != refB {
 		t.Fatalf("refs changed between requests: %s %s, then %s %s", refA, refB, a2, b2)
 	}

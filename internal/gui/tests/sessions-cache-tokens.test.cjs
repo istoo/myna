@@ -1,6 +1,6 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // #2591 (Usage › Sessions): the token totals count the cache the way the
-// Overview's have since #2378 (magpie.usageWithCache), once the reader has
+// Overview's have since #2378 (myna.usageWithCache), once the reader has
 // asked for it there: the tokens tile with its label pop-up, a session's row
 // in the list, the projects and models bars, the day chart and the top
 // sessions (whose order follows the count shown); a pick made on the
@@ -103,12 +103,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // the Overview's pick, made before the page loads, is the only thing
       // that changes the Sessions tab's counts
       await page.addInitScript(() => {
-        localStorage.setItem("magpie.usageTab", "sessions");
-        localStorage.setItem("magpie.sessRange", "all");
-        if (!localStorage.getItem("magpie.usageWithCache")) localStorage.setItem("magpie.usageWithCache", "1");
+        localStorage.setItem("myna.usageTab", "sessions");
+        localStorage.setItem("myna.sessRange", "all");
+        if (!localStorage.getItem("myna.usageWithCache")) localStorage.setItem("myna.usageWithCache", "1");
       });
       t.after(async () => await browser.close());
-      await page.goto("http://magpie.test/?view=usage");
+      await page.goto("http://myna.test/?view=usage");
       await page.locator("#sessGrid:not([hidden])").waitFor();
       await page.waitForFunction(() => !document.querySelector("#sessStats .kpi.stale") && document.querySelectorAll("#sessTop .sess-top").length === 2);
       const fmt = (n) => page.evaluate((n) => fmtN(n), n);
@@ -143,7 +143,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.deepEqual(await menu.locator(".pm-name").allTextContents(), [want[lang].without, want[lang].with]);
       await menu.locator(".pm-item").first().click();
       await page.waitForTimeout(150);
-      assert.equal(await page.evaluate(() => localStorage.getItem("magpie.usageWithCache")), "0");
+      assert.equal(await page.evaluate(() => localStorage.getItem("myna.usageWithCache")), "0");
       assert(await page.locator("#sessStats").isVisible(), "still on the Sessions tab");
       assert.equal((await tile.locator("b").textContent()).trim(), await fmt(57000), "the tile's tokens");
       assert.equal((await tile.locator(".kpi-pick").textContent()).trim(), want[lang].tokens, "the tile's label");

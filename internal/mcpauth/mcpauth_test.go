@@ -13,9 +13,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/mcpauth"
-	"github.com/yetone/magpie/internal/mcpauth/mcpauthtest"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/mcpauth"
+	"github.com/istoo/myna/internal/mcpauth/mcpauthtest"
+	"github.com/istoo/myna/internal/settings"
 )
 
 func home(t *testing.T) {
@@ -26,7 +26,7 @@ func home(t *testing.T) {
 }
 
 // Signing in finds the authorization server from the server's 401 (its
-// resource metadata, then the server's metadata), registers magpie as a
+// resource metadata, then the server's metadata), registers myna as a
 // client sent back to a loopback address, and trades the code for tokens
 // with the PKCE verifier; the tokens are kept where only the user can read
 // them.
@@ -45,7 +45,7 @@ func TestSignIn(t *testing.T) {
 	if len(redirect) != 1 || !strings.HasPrefix(redirect[0].(string), "http://127.0.0.1:") || !strings.HasSuffix(redirect[0].(string), "/callback") {
 		t.Errorf("redirect_uris = %v", reg["redirect_uris"])
 	}
-	if reg["token_endpoint_auth_method"] != "none" || reg["client_name"] != "Magpie" {
+	if reg["token_endpoint_auth_method"] != "none" || reg["client_name"] != "Myna" {
 		t.Errorf("registration = %v", reg)
 	}
 	r, ok := mcpauth.Get("neon")
@@ -217,7 +217,7 @@ func TestRenewRefusedForGood(t *testing.T) {
 // is registered with and signed in to by client_secret_basic, whatever it
 // lists first (RFC 8414's list has no order of preference): one listing
 // private_key_jwt or tls_client_auth before it was asked to register
-// magpie for that, which it can't do, and turned the sign-in away.
+// myna for that, which it can't do, and turned the sign-in away.
 func TestSignInBySecretBasic(t *testing.T) {
 	home(t)
 	for _, methods := range [][]string{
@@ -244,7 +244,7 @@ func TestSignInBySecretBasic(t *testing.T) {
 	}
 }
 
-// A server that registers magpie for a method magpie can't send — RFC
+// A server that registers myna for a method myna can't send — RFC
 // 7591's registration response lets it assign another of the methods it
 // supports than the one asked for — is said no at the registration,
 // before the browser is opened, not at the code exchange after it.
@@ -256,15 +256,15 @@ func TestSignInRefusesAssignedSecretJWT(t *testing.T) {
 	st, err := mcpauth.Start(t.Context(), "neon", f.URL)
 	if err != nil {
 		if !strings.Contains(err.Error(), "can't do") {
-			t.Fatalf("signing in to a server that registered magpie for client_secret_jwt: %v", err)
+			t.Fatalf("signing in to a server that registered myna for client_secret_jwt: %v", err)
 		}
 		return
 	}
 	mcpauth.Cancel(st.ID)
-	t.Fatalf("the sign-in page was opened for a client magpie can't authenticate as: %s", st.URL)
+	t.Fatalf("the sign-in page was opened for a client myna can't authenticate as: %s", st.URL)
 }
 
-// An assignment magpie can do is taken, both ways round (#1490): a client
+// An assignment myna can do is taken, both ways round (#1490): a client
 // that asked none and was given a secret for basic or post sends it as
 // assigned, and one that asked for a secret method and was registered
 // public, with no secret, sends none; at the code exchange and at a
@@ -297,7 +297,7 @@ func TestSignInTakesAnAssignedMethodItCanDo(t *testing.T) {
 
 // An authorization server that is an OpenID provider, as Vercel's is, gives
 // a refresh token only to a sign-in that asks for offline_access, while the
-// server names only "openid": magpie asks for it too when the authorization
+// server names only "openid": myna asks for it too when the authorization
 // server offers it, so the hour-long token is renewed rather than the
 // sign-in running out (#615).
 func TestSignInAsksForOfflineAccess(t *testing.T) {

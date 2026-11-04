@@ -18,7 +18,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/istoo/myna/internal/proc"
 )
 
 // envRef is a reference as the library writes one: ${NAME}.
@@ -51,7 +51,7 @@ const (
 type envSyntax struct{ headers, env refSyntax }
 
 // refsOf is how each agent reads a reference, as its own source or docs
-// say. A refNone is an agent magpie found no reference in, so a server
+// say. A refNone is an agent myna found no reference in, so a server
 // that has one is left out for it.
 func (f *mcpFile) refsOf() envSyntax {
 	if f.Literal {
@@ -310,7 +310,7 @@ func gooseKeys(headers, env map[string]string) []string {
 }
 
 // refKeys are the keys of an agent's entry that name the variables the
-// server references, magpie's to write only while it references one there.
+// server references, myna's to write only while it references one there.
 func (f *mcpFile) refKeys(s *Server) []string {
 	switch f.Format {
 	case fmtCodex:
@@ -567,17 +567,17 @@ func codexEnvVars(v any) []string {
 	return out
 }
 
-// loginVars is the reader of what a terminal has for variables magpie's
+// loginVars is the reader of what a terminal has for variables myna's
 // own environment lacks (proc.LoginVars); a var for tests.
 var loginVars = proc.LoginVars
 
 // expandAll is m with every reference replaced by the variable's value,
-// for magpie to reach the server itself, and the variables set nowhere,
-// sorted. A variable is magpie's own, else the login shell's (the
-// registry's on Windows): a magpie opened from the Finder has none of the
+// for myna to reach the server itself, and the variables set nowhere,
+// sorted. A variable is myna's own, else the login shell's (the
+// registry's on Windows): a myna opened from the Finder has none of the
 // profile's, and a server whose token was exported in .zshrc showed no
 // tools (Cyrus on Discord). The value is only in what is returned: never
-// in library.json, an agent's file, magpie's environment or a log.
+// in library.json, an agent's file, myna's environment or a log.
 func expandAll(m map[string]string) (map[string]string, []string) {
 	vals := map[string]string{}
 	var missing []string

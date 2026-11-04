@@ -3,7 +3,7 @@ package provider
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/update"
+	"github.com/istoo/myna/internal/update"
 )
 
 // Qoder's plugin before 0.2.61 left the model out of a request's business

@@ -11,7 +11,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/yetone/magpie/internal/steady"
+	"github.com/istoo/myna/internal/steady"
 )
 
 type entry struct {
@@ -46,7 +46,7 @@ var (
 	mu   sync.Mutex
 	seen = map[memoKey]entry{}
 	// holds is how many requests hold what was read (Hold); gen is moved
-	// on by every write magpie makes (Forget)
+	// on by every write myna makes (Forget)
 	holds int
 	gen   uint64
 	// gone is the files found not there last time looked at, not waited
@@ -90,7 +90,7 @@ func Hold() (release func()) {
 	})
 }
 
-// Forget has every file looked at again on its next read: magpie wrote
+// Forget has every file looked at again on its next read: myna wrote
 // one.
 func Forget() {
 	mu.Lock()
@@ -125,11 +125,11 @@ func endWaits() {
 // waits again.
 var written chan struct{}
 
-// Written is closed by the next write magpie makes (Forget), or by
-// another process's that Watch is told of: a loop that follows magpie's
+// Written is closed by the next write myna makes (Forget), or by
+// another process's that Watch is told of: a loop that follows myna's
 // files waits on it, and looks at them only every so often (OthersEvery)
 // for what another process wrote, rather than polling each second for its
-// own writes too (#3185: those polls woke an idle magpie ~12 times a
+// own writes too (#3185: those polls woke an idle myna ~12 times a
 // second). No loop may take it inside a synctest bubble: a channel made
 // there is the bubble's and outlives it, and its next use from outside
 // the bubble (a write's close, a loop's select) is fatal, in whichever
@@ -151,7 +151,7 @@ var gens atomic.Uint64
 func Gen() uint64 { return gens.Load() }
 
 // Look has the file at path looked at on its next read, even while a
-// request holds what was read (Hold): another magpie may have written it,
+// request holds what was read (Hold): another myna may have written it,
 // which Forget, moved on by this one's writes alone, can't know of.
 func Look(path string) {
 	mu.Lock()

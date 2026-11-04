@@ -11,9 +11,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agentenv"
-	"github.com/yetone/magpie/internal/davsync"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/agentenv"
+	"github.com/istoo/myna/internal/davsync"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // webdavHome is a machine of its own: no agent on it, no gateway at the
@@ -33,7 +33,7 @@ func webdavHome(t *testing.T) {
 	t.Setenv("LOCALAPPDATA", "")
 	t.Setenv("CLAUDE_CONFIG_DIR", filepath.Join(home, ".claude"))
 	t.Setenv("CODEX_HOME", filepath.Join(home, ".codex"))
-	t.Setenv("MAGPIE_ADDR", "127.0.0.1:1")
+	t.Setenv("MYNA_ADDR", "127.0.0.1:1")
 	piped(t)
 }
 
@@ -88,7 +88,7 @@ func (d *davServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (d *davServer) file() []byte {
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	return d.files["/dav/magpie/magpie.magpie-backup"]
+	return d.files["/dav/myna/myna.myna-backup"]
 }
 
 func (d *davServer) passwords() []string {

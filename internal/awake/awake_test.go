@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/beat"
-	"github.com/yetone/magpie/internal/filememo"
+	"github.com/istoo/myna/internal/beat"
+	"github.com/istoo/myna/internal/filememo"
 )
 
 func TestWant(t *testing.T) {

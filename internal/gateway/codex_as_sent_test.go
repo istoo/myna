@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // asSentRequest is a Responses Lite request with what a relay checking
@@ -77,7 +77,7 @@ func TestCodexAsSent(t *testing.T) {
 }
 
 // Codex offers web_search on every turn, and a request offering it to a
-// model that doesn't search by itself was translated for magpie's search
+// model that doesn't search by itself was translated for myna's search
 // before anything else: the developer messages merged into instructions,
 // web_search left out, max_output_tokens added. A relay set codex=as-sent
 // got that shape all the same (maralica on Discord). It now gets Codex's
@@ -125,7 +125,7 @@ func TestCodexAsSentWebSearch(t *testing.T) {
 
 	ask()
 	if bytes.Contains(f.got, []byte(`{"type":"web_search"`)) || !bytes.Contains(f.got, []byte(`"max_output_tokens"`)) {
-		t.Fatalf("by default the turn is translated for magpie's search: %.400s", f.got)
+		t.Fatalf("by default the turn is translated for myna's search: %.400s", f.got)
 	}
 
 	p, err := provider.Find("fake")

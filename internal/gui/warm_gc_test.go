@@ -183,7 +183,7 @@ func TestSteadyGCKeepsTheUsersGOGC(t *testing.T) {
 	debug.SetGCPercent(200)
 	steadyGCStart()
 	if got := gcPercent(); got != 200 {
-		t.Fatalf("GOGC=200 set by the user, magpie runs under %d", got)
+		t.Fatalf("GOGC=200 set by the user, myna runs under %d", got)
 	}
 	tightGC.Lock()
 	steady := tightGC.steady

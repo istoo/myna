@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/usage"
 )
 
 // SubagentPick is a subagent's request put on the model the user set for
@@ -87,7 +87,7 @@ func (s *Server) codexSubagentPick(r *http.Request, agent, kind, asked string, b
 	if _, off := idOff(to); off {
 		// the user disabled it (#1867): the subagent stays on its lead's
 		// model, itself refused when it is disabled too
-		pick.Kept = "it is disabled in magpie"
+		pick.Kept = "it is disabled in myna"
 		return pick
 	}
 	if why := provider.CodexSubagentUnserved(to); why != "" {

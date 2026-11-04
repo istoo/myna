@@ -5,12 +5,12 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/yetone/magpie/internal/codexsummary"
+	"github.com/istoo/myna/internal/codexsummary"
 )
 
 // A rollout written portable (sessions.PortCodexRollouts) holds, in place
-// of magpie's compaction item, the message the gateway sends for it: what
-// reaches the model through magpie is the same either way, for a magpie
+// of myna's compaction item, the message the gateway sends for it: what
+// reaches the model through myna is the same either way, for a myna
 // model and for Codex's own, natively compacted or not.
 func TestPortedCompactionReadsTheSame(t *testing.T) {
 	enc := codexsummary.Encrypted("Progress: done.\nNext: tests.")
@@ -20,16 +20,16 @@ func TestPortedCompactionReadsTheSame(t *testing.T) {
 			userMessage("fix the build"), item, userMessage("go on")}})
 		return b
 	}
-	before := body(map[string]any{"type": "compaction", "id": "cmp_magpie_1", "encrypted_content": enc})
+	before := body(map[string]any{"type": "compaction", "id": "cmp_myna_1", "encrypted_content": enc})
 	after := body(msg)
-	for _, c := range []struct{ magpieModel, native bool }{{true, false}, {true, true}, {false, false}} {
-		a, _ := codexInputAs(before, c.magpieModel, c.native)
-		b, _ := codexInputAs(after, c.magpieModel, c.native)
+	for _, c := range []struct{ mynaModel, native bool }{{true, false}, {true, true}, {false, false}} {
+		a, _ := codexInputAs(before, c.mynaModel, c.native)
+		b, _ := codexInputAs(after, c.mynaModel, c.native)
 		var x, y any
 		json.Unmarshal(a, &x)
 		json.Unmarshal(b, &y)
 		if !reflect.DeepEqual(x, y) {
-			t.Errorf("%+v: magpie's item sent as\n%s\nthe ported message as\n%s", c, a, b)
+			t.Errorf("%+v: myna's item sent as\n%s\nthe ported message as\n%s", c, a, b)
 		}
 	}
 }

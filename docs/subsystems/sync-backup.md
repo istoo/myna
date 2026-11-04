@@ -1,6 +1,6 @@
 # Sync and backup
 
-`internal/backup` collects magpie's portable setup into a passphrase-sealed
+`internal/backup` collects myna's portable setup into a passphrase-sealed
 bundle. `internal/davsync` keeps that bundle in a WebDAV folder, an S3 bucket
 or a GitHub repository. It merges changes between computers; it does not
 clone a working tree or synchronize arbitrary files.
@@ -10,7 +10,7 @@ clone a working tree or synchronize arbitrary files.
 - [`Config`, `Configure`, `Status` and `syncOnce`](../../internal/davsync/davsync.go)
   keep the active server in `sync.json`, and the last local/remote hashes,
   versions, notices and undo file in `sync-state.json`. These files live beside
-  magpie's settings. Secrets are local, never in the status response.
+  myna's settings. Secrets are local, never in the status response.
 - The [`remote`](../../internal/davsync/dav.go) interface reads a version and
   conditionally replaces it. WebDAV and S3 use ETags; GitHub uses the file's
   blob SHA. S3's conditions (`If-Match`, `If-None-Match`) go outside the
@@ -40,12 +40,12 @@ an Undo or a backup file brings settings in, and `hashes` blanks them, so
 changing one is no change to push. They are: the window's size and whether it
 was maximised, the fonts, the proxy, the gateway's port, sharing on the local
 network (`LAN`) and the addresses let in to it (`AllowIPs`), the private
-hosts magpie may download from (`FetchPrivate`), the Dock, gateway
+hosts myna may download from (`FetchPrivate`), the Dock, gateway
 mode, keeping awake, lightweight windows, WSL lookups, account discovery, when
 allowances are read, recording gateway conversations, the Mac terminal a
 session resumes in (`SessionTerminal`) and what the menu bar shows. Launch at
 login is the system's own setting (`internal/autostart`) and the listen
-address is `MAGPIE_ADDR`, so neither is in a bundle.
+address is `MYNA_ADDR`, so neither is in a bundle.
 
 The Usage page's clears (`usageCleared`, see
 [gateway sessions](gateway-sessions.md)) are a preference, not a computer's
@@ -126,7 +126,7 @@ When a remote file is empty, damaged or another app's format, sync stops and
 describes it through `ServerFile`. Settings and the backend's `upload` command
 can replace it with this computer's setup, keeping the old file first.
 HTML and XML are not offered for replacement. GitHub diagnostics name the
-repository and `magpie github upload`, rather than WebDAV's recovery path.
+repository and `myna github upload`, rather than WebDAV's recovery path.
 
 A local file that is there but can't be read is unknown, never empty or the
 defaults. `backup.Collect` stops on an unreadable providers.json (with its groups
@@ -161,8 +161,8 @@ clock.
 - **Content:** `Collect(false, app)`, the manual export without keys, with
   the proxy settings blanked too, since nothing seals it: no passphrase is
   there on a schedule. Files are 0600 in a 0700 folder.
-- **Format:** `magpie-YYYYMMDD-HHMMSS[-n]-{auto,restore}.json`, holding the
-  bundle and its sha256. Each is written to a `.magpie-backup-*.tmp` and
+- **Format:** `myna-YYYYMMDD-HHMMSS[-n]-{auto,restore}.json`, holding the
+  bundle and its sha256. Each is written to a `.myna-backup-*.tmp` and
   renamed into place. A file whose sum doesn't match, a temp file or a name
   that doesn't match is never listed, restored or pruned.
 - **Schedule:** a backup is due `Hours` after the newest, so a restart
@@ -194,7 +194,7 @@ file has them only when it was made with them. Each place says beside the
 switch that anyone with the file and the passphrase can use those accounts.
 
 - **What goes:** [`provider.CollectSignIns`](../../internal/provider/signins_carry.go)
-  takes magpie's own copies only (`carried`): not an agent's own account
+  takes myna's own copies only (`carried`): not an agent's own account
   (`own`), not one in an agent's own home (`Home`), not a hidden row, not a
   `plugin:` row, not a retired built-in. Codex's live auth.json goes as its
   own record. Plugins' sign-ins come from [`plugin.CarriedAuth`](../../internal/plugin/carry.go).
@@ -215,7 +215,7 @@ switch that anyone with the file and the passphrase can use those accounts.
   was renewed later. Nothing here is removed. Before writing over a row it
   finds every row that could be the same account (same login, same refresh
   token, same id): with none it adds, with more than one it keeps them all,
-  and with one it keeps it when it isn't magpie's own copy, is held, or is
+  and with one it keeps it when it isn't myna's own copy, is held, or is
   the account the agent itself is signed in with. Codex's auth.json is
   written (temp and rename, 0600) only where Codex is signed out
   (`TestRestoreSignInsNeverWritesAnOlderTokenOver`,
@@ -242,11 +242,11 @@ switch that anyone with the file and the passphrase can use those accounts.
   every sealed version to anyone to guess the passphrase against
   (`TestGitHubPublicRepositoryRefused`). In an empty repository, the first encrypted
   backup initializes its default branch through the Contents API. When that
-  API refuses it as too large, a short `README.md` in magpie's folder makes
+  API refuses it as too large, a short `README.md` in myna's folder makes
   the first commit and the backup follows as the second. A selected
   branch other than the default must already exist. The token needs repository
   Contents read and write.
-- Backups are `<prefix>/magpie/magpie.magpie-backup`; optional usage files
+- Backups are `<prefix>/myna/myna.myna-backup`; optional usage files
   live beside them under `usage/`. Each write or removal is one commit, and
   unchanged setup does not create another backup commit.
 - A repository with commits is written through the Git Data API: a blob
@@ -264,9 +264,9 @@ switch that anyone with the file and the passphrase can use those accounts.
   large to process" (Zhang-Wei, Discord), while a 19 MB file's Contents
   PUT (about 25 MB of body) went through; GitHub documents no request
   size. So a backup over 16 MiB (`githubPart`) goes up in parts, in the
-  same one commit: `magpie.magpie-backup.parts/1`, `/2`, … beside it, and
+  same one commit: `myna.myna-backup.parts/1`, `/2`, … beside it, and
   at the backup's own path a short list of them (`githubParts`: format
-  `magpie-backup`, version 2, `split: github-parts`, the total size and
+  `myna-backup`, version 2, `split: github-parts`, the total size and
   each part's blob SHA and size). The list's blob SHA is the version, and
   it names each part by blob SHA, so one version pins one whole set; a
   read downloads each part by that SHA, checks it, and returns the backup
@@ -275,11 +275,11 @@ switch that anyone with the file and the passphrase can use those accounts.
   the list at the head named and the new backup doesn't use, in the same
   commit, so going back to one file leaves no part behind. Backups up to
   16 MiB stay one file, as before.
-- A magpie from before parts opens the list as a backup with version 2
-  and no key derivation, and stops with "made by a newer magpie; update
-  magpie" — not `ErrCorrupt` or `ErrNotBackup`, so it neither rebuilds
+- A myna from before parts opens the list as a backup with version 2
+  and no key derivation, and stops with "made by a newer myna; update
+  myna" — not `ErrCorrupt` or `ErrNotBackup`, so it neither rebuilds
   over it nor offers to replace it. A backup in one file, from any
-  magpie, still reads.
+  myna, still reads.
 - Tokens are separate from the library's GitHub token, sent only to
   `https://api.github.com`, and must differ from the encryption passphrase.
   Repository history retains older encrypted versions.
@@ -327,7 +327,7 @@ The library part carries the library's subagents (`library.Bundle.Subagents`,
 see [library](library.md)), by sync and backup file alike: the receiving
 computer writes them into its agents when it puts the library, and records
 what it wrote there itself, so `Applied` never travels and a file the user
-edited stays theirs. A bundle from a magpie before subagents were carried
+edited stays theirs. A bundle from a myna before subagents were carried
 has no list and keeps this computer's; an empty list takes them out. A
 library with none hashes as it did before, so upgrading syncs nothing
 (`TestSyncSubagents`, `TestNoSubagentsHashAsBefore`,
@@ -352,8 +352,8 @@ update, and `TestGitHubEmptyRepositoryLargeBackup` a large first backup.
 a blob over 24 MiB, as four parts in one commit, reads it back byte for
 byte, then goes to two parts and back to one file with no part left.
 `TestGitHubOneFileBackupStillReads` reads a 30 MB backup in one file and
-replaces it with parts; `TestGitHubPartsOlderMagpie` checks the list stops
-an older magpie as a newer magpie's backup; `TestGitHubPartsDamaged`,
+replaces it with parts; `TestGitHubPartsOlderMyna` checks the list stops
+an older myna as a newer myna's backup; `TestGitHubPartsDamaged`,
 `TestGitHubPartsBranchMovedMeanwhile` and
 `TestGitHubEmptyRepositoryPartsBackup` cover a bad list or part, a moved
 head (each blob sent once) and an empty repository;

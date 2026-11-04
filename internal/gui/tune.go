@@ -16,11 +16,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/sessions"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/tune"
+	"github.com/istoo/myna/internal/agent"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/myna/internal/tune"
 )
 
 type tuneAdvice struct {
@@ -169,7 +169,7 @@ func adviseOf(by map[string][]tune.Call, days int, home string) tuneState {
 			st := settings.Load()
 			window, told, own, apart := codexWindow(calls, st, provider.Catalog(), provider.GroupFinder())
 			// Long conversations' value is the setting; where Codex runs
-			// now is that as magpie tells it for these models (their
+			// now is that as myna tells it for these models (their
 			// windows, a provider's own Compact at)
 			cur, _ := strconv.Atoi(s.Value)
 			if cur == 0 || s.Source == agent.TuneLong {
@@ -198,9 +198,9 @@ func adviseOf(by map[string][]tune.Call, days int, home string) tuneState {
 }
 
 // codexWindow is the window Codex runs the calls' models to, and where
-// magpie has it compact them when its config.toml says nothing (told: the
-// largest of the models Long conversations moves, 0 when magpie tells it
-// none). A model outside the catalog, or one whose window magpie doesn't
+// myna has it compact them when its config.toml says nothing (told: the
+// largest of the models Long conversations moves, 0 when myna tells it
+// none). A model outside the catalog, or one whose window myna doesn't
 // know, leaves told to the others: it once made told 0 for the whole
 // range, so "Now" was guessed from the prompts instead, and the same
 // setting read 380K over 7 days and 430K today (hoobnn on Discord).
@@ -215,13 +215,13 @@ func adviseOf(by map[string][]tune.Call, days int, home string) tuneState {
 // it. A window the user typed is not one of these: it gives way to a size
 // tune puts in Long conversations (CompactFor's rule).
 //
-// A model of magpie's catalog has the window it is listed with, one the
+// A model of myna's catalog has the window it is listed with, one the
 // user typed or the vendor's, and is told the threshold the user set on
 // it, else Settings › Long conversations (provider.CompactFor, as
-// codexcat writes it). One whose window magpie doesn't know caps nothing
+// codexcat writes it). One whose window myna doesn't know caps nothing
 // (window 0): the largest prompt it had been sent was taken for its
 // window, and a 1M model set to compact at 750K was offered no more than
-// 412K (zhemu on Discord). Codex's own models, outside magpie's catalog,
+// 412K (zhemu on Discord). Codex's own models, outside myna's catalog,
 // run to 272K or the largest prompt seen, as before.
 func codexWindow(calls []tune.Call, st settings.Settings, entries []provider.Entry, find func(string) (provider.Group, []provider.Member, bool)) (window, told int, own string, apart []tuneOwn) {
 	byID := make(map[string]provider.Entry, len(entries))
@@ -234,7 +234,7 @@ func codexWindow(calls []tune.Call, st settings.Settings, entries []provider.Ent
 	}
 	unknown, moved, held := false, false, 0
 	for m, p := range peak {
-		e, ok := byID[strings.TrimPrefix(m, "magpie/")]
+		e, ok := byID[strings.TrimPrefix(m, "myna/")]
 		switch {
 		case !ok:
 			window = max(window, 272000, p)

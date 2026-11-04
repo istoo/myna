@@ -209,7 +209,7 @@ func textCallAt(s string) (at, tail int) {
 //
 // Text after a call read out of it, other than tags, ends the calls, and
 // it and all after it go (packinggoodsllc_07668: "*Result: Tool loaded.*"
-// after an invoke, then the next invoke, then "已用 magpie 的浏览器打开了
+// after an invoke, then the next invoke, then "已用 myna 的浏览器打开了
 // 谷歌"): the model went on as if its call had run and wrote the result
 // itself, before anything ran. The call runs, and the model reads its
 // real result.

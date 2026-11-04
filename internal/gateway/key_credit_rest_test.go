@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // Out-of-money refusals as vendors send them. OpenAI's: its legacy body
@@ -16,7 +16,7 @@ import (
 // credit_balance_exhausted, organization_/project_spend_limit_exceeded,
 // organization_usage_limit_exceeded, each a 429 whose type is still
 // insufficient_quota; the page gives the cause, not the message, so the
-// message here is the cause it gives). The others are the bodies magpie's
+// message here is the cause it gives). The others are the bodies myna's
 // tests already hold from their reporters.
 const (
 	openAIQuotaLegacy = `{"error":{"message":"You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.","type":"insufficient_quota","param":null,"code":"insufficient_quota"}}`
@@ -145,7 +145,7 @@ func TestKeyCreditSoonDoesNotClimb(t *testing.T) {
 }
 
 // What doesn't climb: a subscription account other than ChatGPT's, and
-// another computer's magpie, whose model rests for its own provider there.
+// another computer's myna, whose model rests for its own provider there.
 func TestCreditLadderIsKeysOnly(t *testing.T) {
 	near := func(d, want time.Duration) bool { return d > want-time.Minute && d <= want }
 	fresh(t)
@@ -162,10 +162,10 @@ func TestCreditLadderIsKeysOnly(t *testing.T) {
 	for range 3 {
 		r := s.restAfter(remote, http.StatusPaymentRequired, h, []byte(deepSeekNoBalance))
 		if r.Failures != 0 || !near(time.Until(r.Until), creditRest) {
-			t.Fatalf("remote magpie: %v failures %d", time.Until(r.Until).Round(time.Second), r.Failures)
+			t.Fatalf("remote myna: %v failures %d", time.Until(r.Until).Round(time.Second), r.Failures)
 		}
 		if !strings.Contains(r.Key, "/") {
-			t.Fatalf("remote magpie rests %q, not its model", r.Key)
+			t.Fatalf("remote myna rests %q, not its model", r.Key)
 		}
 		expire(r.Key)
 	}

@@ -63,7 +63,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang));
       t.after(() => browser.close());
-      await page.goto("http://magpie.test/?view=routing");
+      await page.goto("http://myna.test/?view=routing");
       await page.locator(".rt-act", { hasText: "dan@example.com" }).waitFor();
 
       // the account rows' boxes: how many share the first one's line

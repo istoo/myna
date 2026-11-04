@@ -15,7 +15,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(__dirname, process.env.MAGPIE_SESS_ASSETS || "../assets");
+const assets = path.resolve(__dirname, process.env.MYNA_SESS_ASSETS || "../assets");
 const iso = (d) => [d.getFullYear(), d.getMonth() + 1, d.getDate()].map((n) => String(n).padStart(2, "0")).join("-");
 const to = new Date(2026, 8, 28);
 const back = (i) => { const d = new Date(to); d.setDate(d.getDate() - i); return d; };
@@ -114,7 +114,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang));
-      await page.addInitScript(() => { localStorage.setItem("magpie.usageTab", "sessions"); localStorage.setItem("magpie.sessRange", "all"); });
+      await page.addInitScript(() => { localStorage.setItem("myna.usageTab", "sessions"); localStorage.setItem("myna.sessRange", "all"); });
       t.after(async () => {
         if (process.env.ARTIFACT_DIR) {
           await fs.mkdir(process.env.ARTIFACT_DIR, { recursive: true });
@@ -122,7 +122,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         }
         await browser.close();
       });
-      await page.goto("http://magpie.test/?view=usage");
+      await page.goto("http://myna.test/?view=usage");
       await page.locator("#sessGrid:not([hidden])").waitFor();
       await page.waitForFunction(() => document.querySelector("#sessSkills .sess-skill") && document.querySelector("#sessTools .sess-bar.tool") && document.querySelectorAll("#sessModels .sess-bar").length === 2);
 

@@ -59,7 +59,7 @@ type KeyInfo struct {
 	Spend *KeySpend `json:"spend,omitempty"`
 }
 
-// KeySpend is a key's spend cap as its row tells it: the cap, what magpie
+// KeySpend is a key's spend cap as its row tells it: the cap, what myna
 // counted spent in its period, when that renews (none for a cap in all),
 // and whether routing holds the key at it now.
 type KeySpend struct {

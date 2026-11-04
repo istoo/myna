@@ -7,19 +7,19 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/myna/internal/gateway"
 )
 
-// While a model is picked for one of Claude Desktop's tiers, magpie's
+// While a model is picked for one of Claude Desktop's tiers, myna's
 // profile carries inferenceModels (gateway.DesktopInferenceModels): the
 // list Desktop's Code tab hands Claude Code each pick's behavesAs from,
 // so a pick runs with the prompt of the Claude model of its tier
-// (moer2831). Without a pick there is none, and Desktop finds magpie's
-// models on its own as before. The list is magpie's only while it is what
-// magpie wrote: desktopModelsMark keeps the hash of each list magpie
+// (moer2831). Without a pick there is none, and Desktop finds myna's
+// models on its own as before. The list is myna's only while it is what
+// myna wrote: desktopModelsMark keeps the hash of each list myna
 // wrote (the one before a write too, until the write is done), and a list
-// with any other hash is the user's, which magpie never writes over or
+// with any other hash is the user's, which myna never writes over or
 // takes away. Desktop reads its profile at start-up only.
 const desktopModelsMark = "claude-desktop.models"
 
@@ -34,8 +34,8 @@ func desktopModelsHash(raw []byte) string {
 	return hex.EncodeToString(sum[:])
 }
 
-// desktopSyncModels writes p's inferenceModels as magpie lists them now,
-// takes away the one magpie wrote when nothing is picked, and leaves the
+// desktopSyncModels writes p's inferenceModels as myna lists them now,
+// takes away the one myna wrote when nothing is picked, and leaves the
 // user's own alone.
 func desktopSyncModels(p desktopPaths) error {
 	if !desktopWired(p) {
@@ -73,7 +73,7 @@ func desktopSyncModels(p desktopPaths) error {
 		stash(map[string]string{key: h})
 		return nil
 	}
-	// marked before it is written: a write cut short leaves a list magpie
+	// marked before it is written: a write cut short leaves a list myna
 	// still knows for its own
 	stash(map[string]string{key: strings.Join(append(marks, h), " ")})
 	if err := edit.SetJSON(p.prof, edit.KV{Path: "inferenceModels", Value: json.RawMessage(next)}); err != nil {

@@ -9,14 +9,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // antigravityUser is ~/.antigravity/settings.json with a gateway of the
 // user's own (Google's example, on genai), a default model, a model list
-// and a key magpie never writes.
+// and a key myna never writes.
 const antigravityUser = `{
   "gateway": {
     "enabled": true,
@@ -53,7 +53,7 @@ func antigravityFile(t *testing.T, path string) map[string]json.RawMessage {
 }
 
 // Antigravity's app takes a gateway from ~/.antigravity/settings.json
-// (Google's Antigravity Enterprise Gateway, ryougi_hachi on X): magpie
+// (Google's Antigravity Enterprise Gateway, ryougi_hachi on X): myna
 // writes its own, on the openai wire protocol with a key naming the app,
 // and the model it starts on; the user's own gateway, default model and
 // model list come back when it is turned off, and what else the file holds
@@ -78,10 +78,10 @@ func TestAntigravityGateway(t *testing.T) {
 		t.Errorf("a notice while on the user's own gateway: %q", a.Notice())
 	}
 
-	if err := f.Set("magpie/anth/claude-sonnet-5"); err != nil {
+	if err := f.Set("myna/anth/claude-sonnet-5"); err != nil {
 		t.Fatal(err)
 	}
-	if got := f.Get(); got != "magpie/anth/claude-sonnet-5" {
+	if got := f.Get(); got != "myna/anth/claude-sonnet-5" {
 		t.Fatalf("get after set: %q", got)
 	}
 	file := antigravityFile(t, path)
@@ -104,12 +104,12 @@ func TestAntigravityGateway(t *testing.T) {
 		t.Error("no notice to restart the app")
 	}
 	opts := f.Options(map[string]string{"model": f.Get()})
-	if !slices.ContainsFunc(opts, func(o Option) bool { return o.Value == "magpie/anth/claude-sonnet-5" }) {
-		t.Errorf("magpie's model not offered: %v", opts)
+	if !slices.ContainsFunc(opts, func(o Option) bool { return o.Value == "myna/anth/claude-sonnet-5" }) {
+		t.Errorf("myna's model not offered: %v", opts)
 	}
 
-	// another magpie model, then off: the user's as they were
-	if err := f.Set("magpie/anth/claude-sonnet-5"); err != nil {
+	// another myna model, then off: the user's as they were
+	if err := f.Set("myna/anth/claude-sonnet-5"); err != nil {
 		t.Fatal(err)
 	}
 	if err := f.Set(""); err != nil {
@@ -126,7 +126,7 @@ func TestAntigravityGateway(t *testing.T) {
 	}
 }
 
-// With no file of the user's, turning magpie on and off leaves nothing of
+// With no file of the user's, turning myna on and off leaves nothing of
 // it: no gateway, no models.
 func TestAntigravityGatewayFromNothing(t *testing.T) {
 	home := antigravityHome(t)
@@ -135,10 +135,10 @@ func TestAntigravityGatewayFromNothing(t *testing.T) {
 	if f.Get() != "" {
 		t.Fatalf("get: %q", f.Get())
 	}
-	if err := f.Set("magpie/anth/claude-sonnet-5"); err != nil {
+	if err := f.Set("myna/anth/claude-sonnet-5"); err != nil {
 		t.Fatal(err)
 	}
-	if got := f.Get(); got != "magpie/anth/claude-sonnet-5" {
+	if got := f.Get(); got != "myna/anth/claude-sonnet-5" {
 		t.Fatalf("get: %q", got)
 	}
 	if err := f.Set(""); err != nil {
@@ -149,7 +149,7 @@ func TestAntigravityGatewayFromNothing(t *testing.T) {
 	}
 }
 
-// Picking a model of the user's own while on magpie gives their gateway
+// Picking a model of the user's own while on myna gives their gateway
 // back and sets that model.
 func TestAntigravityOwnModelBack(t *testing.T) {
 	home := antigravityHome(t)
@@ -157,7 +157,7 @@ func TestAntigravityOwnModelBack(t *testing.T) {
 	os.MkdirAll(filepath.Dir(path), 0o755)
 	os.WriteFile(path, []byte(antigravityUser), 0o600)
 	f := antigravity(home).Field("model")
-	if err := f.Set("magpie/anth/claude-sonnet-5"); err != nil {
+	if err := f.Set("myna/anth/claude-sonnet-5"); err != nil {
 		t.Fatal(err)
 	}
 	if err := f.Set("gemini-3.1-pro-preview"); err != nil {
@@ -178,7 +178,7 @@ func TestAntigravityOwnModelBack(t *testing.T) {
 }
 
 // A sync brings the gateway's address and key up to date and keeps what
-// the user added to the block; a gateway that isn't magpie's is left alone.
+// the user added to the block; a gateway that isn't myna's is left alone.
 func TestAntigravitySync(t *testing.T) {
 	home := antigravityHome(t)
 	path := filepath.Join(home, ".antigravity", "settings.json")
@@ -191,7 +191,7 @@ func TestAntigravitySync(t *testing.T) {
 	if !sameJSON(readFile(path), json.RawMessage(antigravityUser)) {
 		t.Fatalf("the user's gateway synced:\n%s", readFile(path))
 	}
-	if err := a.Field("model").Set("magpie/anth/claude-sonnet-5"); err != nil {
+	if err := a.Field("model").Set("myna/anth/claude-sonnet-5"); err != nil {
 		t.Fatal(err)
 	}
 	b := strings.Replace(readFile(path), gateway.URL(), "http://127.0.0.1:1", 1)
@@ -210,7 +210,7 @@ func TestAntigravitySync(t *testing.T) {
 		t.Errorf("the user's headers lost: %s", file["gateway"])
 	}
 	// set again (a moved port, Reconnect): the headers stay too
-	if err := a.Field("model").Set("magpie/anth/claude-sonnet-5"); err != nil {
+	if err := a.Field("model").Set("myna/anth/claude-sonnet-5"); err != nil {
 		t.Fatal(err)
 	}
 	file = antigravityFile(t, path)
@@ -222,11 +222,11 @@ func TestAntigravitySync(t *testing.T) {
 }
 
 // An organisation's admin_settings.json, or AGY_LLM_GATEWAY_URL, wins over
-// the user's file, so the row says it doesn't reach magpie.
+// the user's file, so the row says it doesn't reach myna.
 func TestAntigravityAdminWins(t *testing.T) {
 	home := antigravityHome(t)
 	a := antigravity(home)
-	if err := a.Field("model").Set("magpie/anth/claude-sonnet-5"); err != nil {
+	if err := a.Field("model").Set("myna/anth/claude-sonnet-5"); err != nil {
 		t.Fatal(err)
 	}
 	if c := a.Check(); c != "" {
@@ -282,8 +282,8 @@ func TestAntigravityDetected(t *testing.T) {
 
 // Antigravity's picker lists the gateway's models by id, with no level of
 // its own to pick (MDX-Tom, #4838): its effort is picked in its row among
-// the levels the models it lists have, the default first, kept in magpie
-// for the gateway to ask, and offered only while it is on magpie.
+// the levels the models it lists have, the default first, kept in myna
+// for the gateway to ask, and offered only while it is on myna.
 func TestAntigravityEffort(t *testing.T) {
 	home := antigravityHome(t)
 	path := filepath.Join(home, ".antigravity", "settings.json")
@@ -310,7 +310,7 @@ func TestAntigravityEffort(t *testing.T) {
 	if got := values(); got != nil {
 		t.Fatalf("offered %q while on the user's own gateway", got)
 	}
-	if err := a.Field("model").Set("magpie/think/gemini-3.8-flash"); err != nil {
+	if err := a.Field("model").Set("myna/think/gemini-3.8-flash"); err != nil {
 		t.Fatal(err)
 	}
 	if got := values(); !slices.Equal(got, []string{"", "low", "high"}) {

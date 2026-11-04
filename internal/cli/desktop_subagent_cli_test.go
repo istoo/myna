@@ -4,11 +4,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agent"
+	"github.com/istoo/myna/internal/agent"
 )
 
-// magpie claude-desktop subagent_model prints no restart advice once
-// Desktop is on magpie; the pick that connects it, and a tier, do.
+// myna claude-desktop subagent_model prints no restart advice once
+// Desktop is on myna; the pick that connects it, and a tier, do.
 func TestDesktopSubagentModelNotice(t *testing.T) {
 	cliHome(t)
 	a, err := agent.Find("claude-desktop")

@@ -12,8 +12,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // takebackClaude stands in for Claude Code as rewindClaude does, and calls
@@ -63,7 +63,7 @@ while read -r line; do
     *) start; text "pid $$ turn $n"; finish; continue;;
   esac
   start
-  echo '{"type":"stream_event","event":{"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"toolu_T'$$'_'$n'","name":"mcp__magpie__read"}}}'
+  echo '{"type":"stream_event","event":{"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"toolu_T'$$'_'$n'","name":"mcp__myna__read"}}}'
   echo '{"type":"stream_event","event":{"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"{}"}}}'
   echo '{"type":"stream_event","event":{"type":"content_block_stop","index":0}}'
   echo '{"type":"stream_event","event":{"type":"message_delta","delta":{"stop_reason":"tool_use"},"usage":{"output_tokens":3}}}'
@@ -97,7 +97,7 @@ func TestClaudeToolResultsGivenUpOnAreTakenBack(t *testing.T) {
 	srv := httptest.NewServer(s.Handler())
 	t.Cleanup(srv.Close)
 	t.Cleanup(s.subscription.abortAll) // before srv.Close: a run's MCP call holds a request open
-	t.Setenv("MAGPIE_ADDR", srv.Listener.Addr().String())
+	t.Setenv("MYNA_ADDR", srv.Listener.Addr().String())
 
 	first := h.ask(`[` + rmsg("user", "first-words") + `]`)
 	pid := pidOf(t, first)

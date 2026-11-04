@@ -15,7 +15,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_ASSETS || path.join(__dirname, "../assets"));
+const assets = path.resolve(process.env.MYNA_ASSETS || path.join(__dirname, "../assets"));
 const own = [{ value: "sonnet", label: "Sonnet" }];
 const agents = (claudeWired) => [
   { id: "claude", name: "Claude Code", icon: "generic", path: "/fixture/claude", source: "sub", wired: claudeWired, fields: [{ key: "model", label: "model", value: "sonnet", options: own }] },
@@ -93,7 +93,7 @@ async function open(browser, lang, width, w) {
   const errors = [], log = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", server(lang, w, log));
-  await page.goto("http://magpie.test/?mode=panel");
+  await page.goto("http://myna.test/?mode=panel");
   await page.locator(`${row("claude")} .ag-sum`).waitFor();
   const tr = async (k, vars = {}) => {
     const s = await page.evaluate(([k, lang]) => (lang === "en" ? k : I18N[lang]?.[k]), [k, lang]);

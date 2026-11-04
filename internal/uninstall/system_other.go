@@ -2,7 +2,7 @@
 
 package uninstall
 
-// unregisterScheme: the Mac reads magpie:// from the app's Info.plist.
+// unregisterScheme: the Mac reads myna:// from the app's Info.plist.
 func unregisterScheme(string) error { return nil }
 
 // webData: the Mac's webview keeps the app's pages by its bundle id, in

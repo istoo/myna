@@ -7,14 +7,14 @@
 // provider/accountweight. Hidden under the other routings. Each line stays
 // one line, with nothing past the sheet's edge, at the window's narrowest
 // and in a phone's browser, in every language, without the page scrolling.
-// MAGPIE_ACC_ASSETS runs it on older assets.
+// MYNA_ACC_ASSETS runs it on older assets.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_ACC_ASSETS || path.resolve(__dirname, "../assets"));
+const assets = path.resolve(process.env.MYNA_ACC_ASSETS || path.resolve(__dirname, "../assets"));
 const claude = () => ({
   id: "claude", name: "Claude Code", icon: "claude-color", chat: "", responses: "", anthropic: "", catalog: "", routing: "",
   models: [{ id: "claude-opus-5-5", name: "Claude Opus 5.5", on: true }], agents: [], fallback: [], headers: {}, keyList: [],
@@ -76,7 +76,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       const posts = [];
       await page.route("**/*", serve(lang, web, posts));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://myna.test/?view=providers");
       await page.locator(".row.provider", { hasText: "Claude Code" }).first().click();
       await page.locator('.editor .acc[data-account-id="off@example.com"]').waitFor();
       const chip = (id) => page.locator(`.editor .acc[data-account-id="${id}"] .key-weight`);

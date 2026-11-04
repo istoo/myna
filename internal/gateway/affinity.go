@@ -39,9 +39,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/steady"
+	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/steady"
 )
 
 const (
@@ -187,7 +187,7 @@ var sticks = struct {
 	// conversations spreads rather than all going to the one holding the
 	// fewest a moment before (#1342)
 	opening map[string]stick
-	// the file as last read or written: another magpie's writes (the one
+	// the file as last read or written: another myna's writes (the one
 	// handing over to this one) are read again when a conversation is missed
 	from string
 	mod  time.Time
@@ -219,7 +219,7 @@ var sticksFlush struct {
 }
 
 // noteSticks has the file written within sticksFlushAfter: what this
-// magpie answered is in memory at once.
+// myna answered is in memory at once.
 func noteSticks() {
 	if sticksFlushAfter <= 0 {
 		saveSticks()
@@ -237,10 +237,10 @@ func noteSticks() {
 }
 
 // flushSticks writes what noteSticks has waiting: the gateway calls it as
-// it ends, so the magpie it hands over to, or the next start, reads it.
+// it ends, so the myna it hands over to, or the next start, reads it.
 func flushSticks() { flushSticksAt(sticksPath()) }
 
-// FlushSticks is flushSticks, for magpie ending on a signal before the
+// FlushSticks is flushSticks, for myna ending on a signal before the
 // gateway's own end.
 func FlushSticks() { flushSticks() }
 
@@ -284,7 +284,7 @@ func sticksPath() string { return filepath.Join(filepath.Dir(provider.Path()), "
 
 // stickOf is who answered key last, read from the file again when it isn't
 // known here and the file changed since: after a restart, or written by
-// the magpie that handed over. Called with sticks held.
+// the myna that handed over. Called with sticks held.
 func stickOf(key string) (stick, bool) {
 	if st, ok := sticks.m[key]; ok {
 		return st, true
@@ -358,7 +358,7 @@ func saveSticks() {
 	if err != nil {
 		return
 	}
-	tmp := path + ".magpie-tmp"
+	tmp := path + ".myna-tmp"
 	if os.WriteFile(tmp, b, 0o600) != nil {
 		return
 	}
@@ -368,7 +368,7 @@ func saveSticks() {
 	}
 	if fi, err := os.Stat(path); err == nil {
 		sticks.Lock()
-		// what this magpie wrote isn't read back as another's
+		// what this myna wrote isn't read back as another's
 		sticks.from, sticks.mod = sticksPath(), fi.ModTime()
 		sticks.Unlock()
 	}
@@ -553,7 +553,7 @@ func affine(scope, mode string, rotate, spread, inOrder bool, in http.Header, fr
 	// Sonnet both on one Claude account, a rule sending the turn to Opus,
 	// had the turn's next request kept to the account and so to Sonnet,
 	// its first member there; the account alone when the model is gone,
-	// and behind a remote magpie the provider there alone (sameVendor)
+	// and behind a remote myna the provider there alone (sameVendor)
 	at := -1
 	for _, same := range []func(candidate) bool{
 		func(c candidate) bool { return c.who() == st.who && c.model == st.model && c.effort == st.effort },
@@ -1064,7 +1064,7 @@ type sealedItem struct {
 
 // sealedKinds are the input items a vendor seals for itself: its
 // reasoning, and the compaction a conversation's earlier turns were
-// folded into (OpenAI's, when Codex compacts on its own models; magpie's
+// folded into (OpenAI's, when Codex compacts on its own models; myna's
 // own is text by the time a request is sent). Refused, they go whole;
 // any other item loses its sealed copy alone (withoutItemSeal).
 var sealedKinds = map[string]bool{"reasoning": true, "compaction": true, "compaction_summary": true}

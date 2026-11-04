@@ -8,9 +8,9 @@ import (
 	"time"
 )
 
-// A plugin reports its models' loads through input.magpie.load (axelburks
+// A plugin reports its models' loads through input.myna.load (axelburks
 // on Discord: an in-house vendor's busy models queue requests), when it
-// likes, from its own timer: magpie keeps each, a percent from 0 up, past
+// likes, from its own timer: myna keeps each, a percent from 0 up, past
 // 100 for a vendor that queues (axelburks again: 200% happens), capped at
 // LoadMost,
 // matched by id whatever its case, and a null clears one. What isn't a
@@ -28,11 +28,11 @@ func TestPluginReportsModelLoad(t *testing.T) {
 	src := `export default async (input) => {
   let threw = 0
   for (const bad of [[5, {}], ["loadco", null], ["loadco", [1]], ["", {}]]) {
-    try { input.magpie.load(...bad) } catch (e) { if (e instanceof TypeError) threw++ }
+    try { input.myna.load(...bad) } catch (e) { if (e instanceof TypeError) threw++ }
   }
-  const n = input.magpie.load("loadco", { Big: 87.5, small: 0, over: 250, huge: 1e9, under: -3, word: "busy", nan: NaN, inf: Infinity, threw })
-  input.magpie.load("loadco", { taken: n })
-  setTimeout(() => input.magpie.load("loadco", { small: null, later: 12 }), 50)
+  const n = input.myna.load("loadco", { Big: 87.5, small: 0, over: 250, huge: 1e9, under: -3, word: "busy", nan: NaN, inf: Infinity, threw })
+  input.myna.load("loadco", { taken: n })
+  setTimeout(() => input.myna.load("loadco", { small: null, later: 12 }), 50)
   return {}
 }
 `

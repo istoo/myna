@@ -7,12 +7,12 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // LoginVars reads any variable the login shell exports, set-but-empty
 // apart from unset, never one it doesn't export, and never sets one in
-// magpie's environment. An answer is kept, so a second ask doesn't run
+// myna's environment. An answer is kept, so a second ask doesn't run
 // the shell again; another SHELL asks again.
 func TestLoginVars(t *testing.T) {
 	home := t.TempDir()
@@ -43,7 +43,7 @@ func TestLoginVars(t *testing.T) {
 		}
 	}
 	if _, ok := os.LookupEnv("LV_TOKEN"); ok {
-		t.Error("LV_TOKEN set in magpie's environment")
+		t.Error("LV_TOKEN set in myna's environment")
 	}
 	b, _ := os.ReadFile(runs)
 	n := len(b)

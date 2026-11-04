@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/backup"
-	"github.com/yetone/magpie/internal/library"
+	"github.com/istoo/myna/internal/backup"
+	"github.com/istoo/myna/internal/library"
 )
 
 // filled is n bytes that differ from seed to seed and part to part.
@@ -25,9 +25,9 @@ func filled(n int, seed uint32) []byte {
 	return b
 }
 
-const backupAt = "main|team/magpie/" + file
+const backupAt = "main|team/myna/" + file
 
-func partAt(i int) string { return "main|team/magpie/" + file + ".parts/" + strconv.Itoa(i) }
+func partAt(i int) string { return "main|team/myna/" + file + ".parts/" + strconv.Itoa(i) }
 
 // parts is how many part files the branch holds beside the backup.
 func (f *githubFixture) parts() int {
@@ -106,7 +106,7 @@ func TestGitHubSplitBackup(t *testing.T) {
 	}
 }
 
-// A backup an older magpie wrote as one file, large or small, still reads,
+// A backup an older myna wrote as one file, large or small, still reads,
 // and a backup in parts can replace it.
 func TestGitHubOneFileBackupStillReads(t *testing.T) {
 	f := newGithubFixture(t)
@@ -115,7 +115,7 @@ func TestGitHubOneFileBackupStillReads(t *testing.T) {
 		t.Fatal(err)
 	}
 	ctx := context.Background()
-	for _, old := range [][]byte{[]byte(`{"format":"magpie-backup","version":1}`), filled(30<<20, 3)} {
+	for _, old := range [][]byte{[]byte(`{"format":"myna-backup","version":1}`), filled(30<<20, 3)} {
 		f.objects[backupAt] = old
 		f.advance("main")
 		b, v, err := g.get(ctx, version{})
@@ -133,9 +133,9 @@ func TestGitHubOneFileBackupStillReads(t *testing.T) {
 	}
 }
 
-// A magpie from before parts reads the list as a newer magpie's backup and
+// A myna from before parts reads the list as a newer myna's backup and
 // stops: never a damaged file to rebuild, nor one offered for replacing.
-func TestGitHubPartsOlderMagpie(t *testing.T) {
+func TestGitHubPartsOlderMyna(t *testing.T) {
 	f := newGithubFixture(t)
 	g, err := newGitHub(githubConfig())
 	if err != nil {
@@ -145,8 +145,8 @@ func TestGitHubPartsOlderMagpie(t *testing.T) {
 		t.Fatal(err)
 	}
 	_, err = backup.Open(f.objects[backupAt], githubConfig().Passphrase)
-	if err == nil || errors.Is(err, backup.ErrCorrupt) || errors.Is(err, backup.ErrNotBackup) || !strings.Contains(err.Error(), "newer magpie") {
-		t.Fatalf("an older magpie must read the list as a newer magpie's: %v", err)
+	if err == nil || errors.Is(err, backup.ErrCorrupt) || errors.Is(err, backup.ErrNotBackup) || !strings.Contains(err.Error(), "newer myna") {
+		t.Fatalf("an older myna must read the list as a newer myna's: %v", err)
 	}
 	if _, ok := described(githubConfig(), f.objects[backupAt], err).(*notBackup); ok {
 		t.Fatal("the list must not be offered for replacing")
@@ -203,8 +203,8 @@ func TestGitHubPartsDamaged(t *testing.T) {
 		f, g, m := setup(t)
 		m.Split = "github-parts-2"
 		write(f, m)
-		if _, _, err := g.get(context.Background(), version{}); err == nil || !strings.Contains(err.Error(), "newer magpie") {
-			t.Fatalf("a newer magpie's parts: %v", err)
+		if _, _, err := g.get(context.Background(), version{}); err == nil || !strings.Contains(err.Error(), "newer myna") {
+			t.Fatalf("a newer myna's parts: %v", err)
 		}
 	})
 }
@@ -229,7 +229,7 @@ func TestGitHubPartsBranchMovedMeanwhile(t *testing.T) {
 		f, g, v := setup(t)
 		f.beforeRef = func() {
 			f.beforeRef = nil
-			f.objects["main|team/magpie/usage/other.magpie-usage"] = []byte("other computer")
+			f.objects["main|team/myna/usage/other.myna-usage"] = []byte("other computer")
 			f.advance("main")
 		}
 		f.requests = nil
@@ -242,7 +242,7 @@ func TestGitHubPartsBranchMovedMeanwhile(t *testing.T) {
 				posts++
 			}
 		}
-		if posts != 4 || f.parts() != 3 || string(f.objects["main|team/magpie/usage/other.magpie-usage"]) != "other computer" {
+		if posts != 4 || f.parts() != 3 || string(f.objects["main|team/myna/usage/other.myna-usage"]) != "other computer" {
 			t.Fatalf("both commits on the branch, each blob sent once: posts %d, parts %d", posts, f.parts())
 		}
 		if b, _, err := g.get(context.Background(), version{}); err != nil || !bytesEqual(b, big) {
@@ -280,11 +280,11 @@ func TestGitHubEmptyRepositoryPartsBackup(t *testing.T) {
 	if err != nil {
 		t.Fatalf("a first backup in parts: %v", err)
 	}
-	if f.writes != 2 || len(f.objects["main|team/magpie/README.md"]) == 0 || f.parts() != 2 {
+	if f.writes != 2 || len(f.objects["main|team/myna/README.md"]) == 0 || f.parts() != 2 {
 		t.Fatalf("a note, then the backup: commits %d, parts %d", f.writes, f.parts())
 	}
 	puts := slices.DeleteFunc(slices.Clone(f.requests), func(r string) bool { return !strings.HasPrefix(r, "PUT ") })
-	if !slices.Equal(puts, []string{"PUT /repos/alice/private/contents/team/magpie/README.md"}) {
+	if !slices.Equal(puts, []string{"PUT /repos/alice/private/contents/team/myna/README.md"}) {
 		t.Fatalf("only the note goes through the Contents API: %v", puts)
 	}
 	if b, got, err := g.get(ctx, version{}); err != nil || got != v || !bytesEqual(b, big) {

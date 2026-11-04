@@ -76,7 +76,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             const errors = [];
             page.on("pageerror", (e) => errors.push(e.message));
             await page.route("**/*", serve(lang));
-            await page.goto("http://magpie.test/?view=routing");
+            await page.goto("http://myna.test/?view=routing");
             const row = (w) => page.locator(`.rt-accts > li[title^="${w.id}"]`).first();
             await row(paid).locator("em").filter({ hasText: /\S/ }).waitFor();
             const look = (w) => row(w).evaluate((li) => ({ st: li.querySelector("em").textContent, bar: getComputedStyle(li.querySelector(".bar")).display !== "none", low: li.classList.contains("low") }));

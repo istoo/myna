@@ -8,19 +8,19 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // 7up6666 on X: a routing group of image models, picked in Settings ›
-// Images, is what a request naming no model draws with, the Magpie Image
+// Images, is what a request naming no model draws with, the Myna Image
 // MCP's included: on its members in its routing's order, the next asked
 // while one fails. A group with no member that draws is no pick (it shows
 // as missing, and Automatic draws in its place), nor is one whose members
 // are all gone.
 func TestImageGroupPickedInSettingsDraws(t *testing.T) {
 	s, e := easeled(t)
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
+	t.Setenv("MYNA_PUBLIC_URL", "")
 	t.Cleanup(s.imageStore.running.Wait)
 	var brokeAsked atomic.Int32
 	broke := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -65,14 +65,14 @@ func TestImageGroupPickedInSettingsDraws(t *testing.T) {
 	if Drawer() != "group/painters" || DrawerMissing() != "" {
 		t.Fatalf("the group pick isn't what draws: %q missing %q", Drawer(), DrawerMissing())
 	}
-	code, a, raw := postImages(t, s, "/v1/images/generations", "application/json", `{"prompt":"a magpie"}`)
+	code, a, raw := postImages(t, s, "/v1/images/generations", "application/json", `{"prompt":"a myna"}`)
 	if code != 200 || len(a.Data) != 1 || a.Model != "art/gpt-image-2.5-flare" || brokeAsked.Load() == 0 {
 		t.Fatalf("drawn with no model named: %d %s (first member asked %d)", code, raw, brokeAsked.Load())
 	}
 	// the MCP draws with the pick too
 	h := lanGuard(s.Handler())
 	before := len(e.got("/v1/images/generations"))
-	m := readImageReply(t, imagePost(h, "127.0.0.1:5000", imageToolCall(GenerateImageTool, map[string]any{"prompt": "a magpie"})))
+	m := readImageReply(t, imagePost(h, "127.0.0.1:5000", imageToolCall(GenerateImageTool, map[string]any{"prompt": "a myna"})))
 	if m.Result.IsError || len(e.got("/v1/images/generations")) != before+1 || !strings.Contains(m.Result.Content[0].Text, "art/gpt-image-2.5-flare") {
 		t.Fatalf("MCP: %+v", m)
 	}

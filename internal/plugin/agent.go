@@ -7,8 +7,8 @@ import (
 	"strings"
 )
 
-// Agent is the agent a plugin at target adds magpie's wiring for: the
-// file its package.json's magpie.agent names, or the file itself for a
+// Agent is the agent a plugin at target adds myna's wiring for: the
+// file its package.json's myna.agent names, or the file itself for a
 // path to a *.agent.js (or .mjs). only is whether it is nothing else: no
 // OpenCode plugin for the host to load (no main, no exports).
 func Agent(target string) (file string, only bool) {
@@ -30,21 +30,21 @@ func Agent(target string) (file string, only bool) {
 	var pkg struct {
 		Main    string          `json:"main"`
 		Exports json.RawMessage `json:"exports"`
-		Magpie  struct {
+		Myna  struct {
 			Agent string `json:"agent"`
 		} `json:"magpie"`
 	}
-	if json.Unmarshal(b, &pkg) != nil || strings.TrimSpace(pkg.Magpie.Agent) == "" {
+	if json.Unmarshal(b, &pkg) != nil || strings.TrimSpace(pkg.Myna.Agent) == "" {
 		return "", false
 	}
-	file = filepath.Join(target, filepath.FromSlash(strings.TrimSpace(pkg.Magpie.Agent)))
+	file = filepath.Join(target, filepath.FromSlash(strings.TrimSpace(pkg.Myna.Agent)))
 	return file, pkg.Main == "" && len(pkg.Exports) == 0
 }
 
-// InMagpieOnly is whether everything a plugin at target has runs in
-// magpie's own process, its gateway middleware, its agent and what it adds
+// InMynaOnly is whether everything a plugin at target has runs in
+// myna's own process, its gateway middleware, its agent and what it adds
 // to the window, so the host has nothing of it to load.
-func InMagpieOnly(target string) bool {
+func InMynaOnly(target string) bool {
 	if Gateway(target) != "" {
 		return false
 	}

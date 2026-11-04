@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/maskrec"
+	"github.com/istoo/myna/internal/maskrec"
 )
 
 // The notification that masking swapped a value (Must2333 on X: "我还希望

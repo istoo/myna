@@ -17,7 +17,7 @@ import (
 
 // Bundle is the library as a backup carries it to another computer: the
 // instruction sets and the one on, what each agent gets besides, the MCP
-// servers, the skills with their files and the subagents. What magpie
+// servers, the skills with their files and the subagents. What myna
 // wrote into each agent (Applied, the subagents' files among it) is this
 // computer's own and stays out. It is made the
 // same way every time — no times, everything in order — so two computers
@@ -29,7 +29,7 @@ type Bundle struct {
 	MCP          []*Server         `json:"mcp"`
 	Skills       []*CarriedSkill   `json:"skills"`
 	Icons        map[string]string `json:"icons,omitempty"`
-	// Subagents are nil in a bundle from a magpie before they were
+	// Subagents are nil in a bundle from a myna before they were
 	// carried, which knew nothing of this computer's: Put keeps them. Collect
 	// always sets it, empty too, so taking the last one out is carried.
 	Subagents *[]*Subagent `json:"subagents,omitempty"`
@@ -95,7 +95,7 @@ func Collect() (*Bundle, error) {
 	// a server kept to this computer stays out; another computer's by its
 	// name, which a sync brought, goes on as it came (mcp_local.go)
 	for _, s := range sorted(l.carriedServers(), func(s *Server) string { return s.Name }) {
-		c := *carried(s) // magpie's own by name, each computer's own binary
+		c := *carried(s) // myna's own by name, each computer's own binary
 		c.Agents = orNone(slices.Sorted(slices.Values(s.Agents)))
 		b.MCP = append(b.MCP, &c)
 	}
@@ -253,7 +253,7 @@ func (b *Bundle) check() error {
 				return fmt.Errorf("an empty subagent")
 			}
 			// the name is the file's in every agent's folder; the agents
-			// are left as they come, as a skill's are: one a newer magpie
+			// are left as they come, as a skill's are: one a newer myna
 			// gives subagents to is no target here and gets nothing
 			if !subagentNameRe.MatchString(s.Name) || slices.Contains(reservedSubagents, s.Name) {
 				return fmt.Errorf("the subagent name %q", s.Name)
@@ -345,13 +345,13 @@ func filled(m, have map[string]string, secret func(string) bool) map[string]stri
 
 // Put makes the library what b says — its instructions, servers and
 // skills in place of the ones here — and writes it into the agents, which
-// keep whatever of theirs isn't magpie's. The skills are written aside
+// keep whatever of theirs isn't myna's. The skills are written aside
 // first, and only once all of them are there does any go in; a skill
 // replaced or taken out is kept with the backups, and so is an
 // instructions file that changes. A skill that comes linked to a folder
 // this computer has too is linked to it; else it comes as its files. A
 // skill whose files are as they are here is left alone. The subagents
-// replace the ones here too, unless b is from a magpie that didn't carry
+// replace the ones here too, unless b is from a myna that didn't carry
 // them.
 func Put(b *Bundle) (*Result, error) {
 	if err := b.check(); err != nil {
@@ -490,7 +490,7 @@ func Put(b *Bundle) (*Result, error) {
 
 		l.putServers(b.MCP)
 		l.Icons = maps.Clone(b.Icons)
-		// the agents are written on the sync change runs: what magpie
+		// the agents are written on the sync change runs: what myna
 		// wrote here (Applied) decides, file by file, what is its own
 		if b.Subagents != nil {
 			subs := []*Subagent{}

@@ -8,8 +8,8 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/yetone/magpie/internal/gwmw"
-	"github.com/yetone/magpie/internal/maskrec"
+	"github.com/istoo/myna/internal/gwmw"
+	"github.com/istoo/myna/internal/maskrec"
 )
 
 // Masked is what masking swapped in a request, for the Routing page and
@@ -28,7 +28,7 @@ type Masked struct {
 
 // OnMasked is told of each request's record as masking makes it, for the
 // notification that a value was masked (Must2333 on X); set by the app,
-// nil (magpie serve, the CLI) for none. It is on the request's way, so it
+// nil (myna serve, the CLI) for none. It is on the request's way, so it
 // only takes the record: which of its values are new is asked later
 // (maskrec.Fresh). The record holds no value and no text around one.
 var OnMasked func(maskrec.Record)

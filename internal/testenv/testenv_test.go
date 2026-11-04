@@ -73,7 +73,7 @@ func TestIsolate(t *testing.T) {
 	}
 }
 
-// wsl.exe, which magpie runs by that name to list and open the WSL
+// wsl.exe, which myna runs by that name to list and open the WSL
 // distros, is a failing stand-in under Isolate: the distros' homes lie
 // outside the test home, and a Windows test read the real one's Codex
 // sessions (#4177).

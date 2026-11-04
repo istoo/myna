@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // A plugin's sign-in is followed like a built-in one: the page, then the
@@ -21,7 +21,7 @@ import (
 func TestPluginSignIn(t *testing.T) {
 	bun := testenv.Bun(t)
 	claudeHome(t)
-	t.Setenv("MAGPIE_BUN", bun)
+	t.Setenv("MYNA_BUN", bun)
 	t.Cleanup(plugin.Settle)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
@@ -103,7 +103,7 @@ func TestPluginSignIn(t *testing.T) {
 func TestPluginAccounts(t *testing.T) {
 	bun := testenv.Bun(t)
 	claudeHome(t)
-	t.Setenv("MAGPIE_BUN", bun)
+	t.Setenv("MYNA_BUN", bun)
 	t.Cleanup(plugin.Settle)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
@@ -236,7 +236,7 @@ func TestPluginAccounts(t *testing.T) {
 func TestPluginKeylessSingleIdentity(t *testing.T) {
 	bun := testenv.Bun(t)
 	claudeHome(t)
-	t.Setenv("MAGPIE_BUN", bun)
+	t.Setenv("MYNA_BUN", bun)
 	t.Setenv("FAKE_KEYLESS", "1")
 	t.Cleanup(plugin.Settle)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
@@ -270,7 +270,7 @@ func TestPluginKeylessSingleIdentity(t *testing.T) {
 // a plain API method, or one of another plugin, still asks for the key.
 func TestPluginEmptyKeyOnlyKeyless(t *testing.T) {
 	claudeHome(t)
-	t.Setenv("MAGPIE_BUN", "")
+	t.Setenv("MYNA_BUN", "")
 	spec := "@example/opencode-acme-auth"
 	os.MkdirAll(settings.Dir(), 0o700)
 	if err := os.WriteFile(filepath.Join(settings.Dir(), "plugins.json"), []byte(`{"plugins":[{"spec":"`+spec+`"}]}`), 0o600); err != nil {

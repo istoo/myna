@@ -17,7 +17,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
         t.after(() => browser.close());
         const page = await (await browser.newContext({ viewport: { width, height: 800 }, reducedMotion: "reduce" })).newPage();
-        await page.addInitScript(() => { try { localStorage.setItem("magpie.gwConnectFolded", "0"); } catch {} }); // Connect opened, as a user who reads it
+        await page.addInitScript(() => { try { localStorage.setItem("myna.gwConnectFolded", "0"); } catch {} }); // Connect opened, as a user who reads it
         page.setDefaultTimeout(6000);
         page.setDefaultNavigationTimeout(60000);
         const errors = [];
@@ -31,7 +31,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         };
         const shown = (sel) => page.locator(sel).textContent();
         const open = async () => {
-          await page.goto("http://magpie.test/?view=gateway");
+          await page.goto("http://myna.test/?view=gateway");
           await page.locator("#connect .val code").first().waitFor();
         };
 

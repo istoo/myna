@@ -14,8 +14,8 @@ import (
 // themselves, and there the panel is also shown by Wails' ToggleWindow,
 // which would never tell the page it is back (#4293).
 const (
-	pageHiddenJS = "window.magpieWindowVisibility?.(false)"
-	pageShownJS  = "window.magpieWindowVisibility?.(true)"
+	pageHiddenJS = "window.mynaWindowVisibility?.(false)"
+	pageShownJS  = "window.mynaWindowVisibility?.(true)"
 )
 
 func hideWebview(w *application.WebviewWindow) {

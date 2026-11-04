@@ -6,15 +6,15 @@ import (
 	"sort"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // A summary is two passes over the log: the first finds what tells a
 // provider's calls apart (the hosts they went to, the accounts that
 // answered), the second counts each call into its groups by that. Each new
 // call to the log made the Usage page's periods count every call of the
-// month again, ~10% of magpie's CPU while a window was open and calls came
+// month again, ~10% of myna's CPU while a window was open and calls came
 // in (#2278). The log's full blocks never change, so a period keeps its
 // counts up to the last block but one (summaryPrefix) and counts only the
 // blocks after it, as long as the calls are told apart as they were.
@@ -237,7 +237,7 @@ func (c *summaryCounts) add(u *summaryRun, k *summaryKeying, r Record) {
 	if i >= 0 && i < len(c.series) {
 		c.series[i].add(r, pr)
 	}
-	id := ReportedAs(r.Agent) // one kept before magpie knew the agent by name
+	id := ReportedAs(r.Agent) // one kept before myna knew the agent by name
 	c.agents.at(id, func() Group { return Group{ID: id} }).add(r, pr)
 	model := r.Model
 	if u.alias != nil {

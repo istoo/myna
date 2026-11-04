@@ -60,8 +60,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const page = await browser.newPage({ viewport: { width, height: 760 } });
           const errors = [], asked = { n: 0 };
           page.on("pageerror", (e) => errors.push(e.message));
-          await page.route("http://magpie.test/**", serve(lang, asked));
-          await page.goto("http://magpie.test/");
+          await page.route("http://myna.test/**", serve(lang, asked));
+          await page.goto("http://myna.test/");
           await page.locator('#nav [data-view="agents"]').click();
           const field = page.locator('#agents [data-key="model"]').first();
           await field.locator(".badge.load").waitFor();

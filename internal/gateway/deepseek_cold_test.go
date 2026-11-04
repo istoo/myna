@@ -5,12 +5,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // A Claude Code conversation on one of two DeepSeek keys stays on it
 // across a pause DeepSeek still has it cached through (on X: "Claude code
-// 通过 Magpie 链接 DeepSeek 缓存命中率只有 50%"). DeepSeek clears an unused
+// 通过 Myna 链接 DeepSeek 缓存命中率只有 50%"). DeepSeek clears an unused
 // cache after hours, and a real conversation read 98–99% back after 7 and
 // 26 minutes idle, but five minutes was its cold, so routing moved the
 // conversation to the other key, which read none of it from cache.

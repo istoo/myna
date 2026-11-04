@@ -1,6 +1,6 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// EchoChan314 (#3685) had github:mu-zi-lee/magpie-our-free-model installed,
-// and the card of Gyarados4157's repository, tagged magpie-plugin and naming
+// EchoChan314 (#3685) had github:mu-zi-lee/myna-our-free-model installed,
+// and the card of Gyarados4157's repository, tagged myna-plugin and naming
 // the same package, read Installed too. plugins/ holds one package of a name,
 // so a plugin installed from another source of an installed plugin's package
 // takes its place, with its options, Off and sign-ins (plugin.Add).
@@ -31,8 +31,8 @@ const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
 
-const PKG = "magpie-our-free-model";
-const repo = (owner, name, pkg, stars) => ({ spec: "github:" + owner + "/" + name, repo: owner + "/" + name, url: "https://github.com/" + owner + "/" + name, owner, description: "Free models for magpie", stars, license: "MIT", pushed: "2026-10-20T08:00:00Z", package: pkg, version: "0.1.0" });
+const PKG = "myna-our-free-model";
+const repo = (owner, name, pkg, stars) => ({ spec: "github:" + owner + "/" + name, repo: owner + "/" + name, url: "https://github.com/" + owner + "/" + name, owner, description: "Free models for myna", stars, license: "MIT", pushed: "2026-10-20T08:00:00Z", package: pkg, version: "0.1.0" });
 const NAMESAKE = repo("Gyarados4157", PKG, PKG, 3);
 const OTHER = repo("keli-wen", "agy-staff", "agy-staff", 723);
 const MINE = "github:mu-zi-lee/" + PKG;
@@ -56,7 +56,7 @@ function server(lang, setup, asked) {
     if (url.pathname === "/api/plugins") return json(state());
     if (url.pathname === "/api/plugins/listings") return json({ listings: [] });
     if (url.pathname === "/api/plugins/npm") return json({ npm: {} });
-    if (url.pathname === "/api/plugins/github") return json({ repos: setup.repos, topic: "magpie-plugin" });
+    if (url.pathname === "/api/plugins/github") return json({ repos: setup.repos, topic: "myna-plugin" });
     if (url.pathname === "/api/plugins/search") return json({ hits: setup.hits || [] });
     if (url.pathname === "/api/plugins/updates") return json({ waiting: [], updated: [] });
     if (url.pathname === "/api/plugins/add") {
@@ -75,7 +75,7 @@ function server(lang, setup, asked) {
       return json(state());
     }
     if (url.pathname.startsWith("/api/")) return json({});
-    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "magpie.test") return route.fulfill({ status: 404, body: "" });
+    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "myna.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -102,7 +102,7 @@ function counting() {
     return r;
   };
   window.asking = () => n;
-  try { localStorage.setItem("magpie.pluginTab", "discover"); } catch {}
+  try { localStorage.setItem("myna.pluginTab", "discover"); } catch {}
 }
 
 const says = (pkg, old, now) => ({
@@ -138,7 +138,7 @@ const press = async (page, loc) => {
   const b = await loc.boundingBox();
   await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2);
 };
-// a reader scrolls to it with the wheel: magpie puts back a scroll nobody
+// a reader scrolls to it with the wheel: myna puts back a scroll nobody
 // asked for, so Playwright's own wouldn't do (at 440px in ja and de the
 // field's Install is below the fold). WebKit's wheel goes on scrolling
 // after the event, so it is done when the view holds still for five
@@ -184,7 +184,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
               const errors = [];
               page.on("pageerror", (e) => errors.push(e.message));
               await page.route("**/*", server(lang, setup, asked));
-              await page.goto("http://magpie.test/?view=plugins", { timeout: 30000 });
+              await page.goto("http://myna.test/?view=plugins", { timeout: 30000 });
               await page.locator("#view-plugins").waitFor({ state: "visible" });
               return { page, errors };
             };
@@ -314,7 +314,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
               const errors = [];
               page.on("pageerror", (e) => errors.push(e.message));
               await page.route("**/*", server(lang, { installed: [{ spec, package: PKG }], repos: [OWN, NAMESAKE] }, asked));
-              await page.goto("http://magpie.test/?view=plugins", { timeout: 30000 });
+              await page.goto("http://myna.test/?view=plugins", { timeout: 30000 });
               const sec = page.locator("#view-plugins .pm-sec", { has: page.locator("h3", { hasText: w.section }) });
               const own = sec.locator(".pm-card", { has: page.locator(".pm-by", { hasText: "mu-zi-lee" }) });
               const theirs = sec.locator(".pm-card", { has: page.locator(".pm-by", { hasText: "Gyarados4157" }) });
@@ -363,7 +363,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
                 installed: [{ spec: OWN.spec, package: PKG }], repos: [OWN, NAMESAKE, NPMS],
                 hits: [HIT, { package: NPMS.spec, version: "2.2.1", description: "Claude for OpenCode", publisher: "griffinmartin", weekly: 9000 }],
               }, []));
-              await page.goto("http://magpie.test/?view=plugins", { timeout: 30000 });
+              await page.goto("http://myna.test/?view=plugins", { timeout: 30000 });
               const view = page.locator("#view-plugins");
               await view.waitFor({ state: "visible" });
               await settled(page);

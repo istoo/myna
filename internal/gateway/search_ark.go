@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // arkHost is Volcengine Ark's (火山方舟) API host. Its Responses API runs
@@ -38,7 +38,7 @@ var arkLocationFields = map[string]bool{"type": true, "country": true, "region":
 // file_search_call.results, message.input_image.image_url,
 // computer_call_output.output.image_url, code_interpreter_call.outputs and
 // message.output_text.logprobs (axelburks on Discord: every search on Ark
-// failed over the sources magpie asked for).
+// failed over the sources myna asked for).
 var arkIncludes = map[string]bool{"reasoning.encrypted_content": true}
 
 // includeTaken is whether a Responses request built for host may ask for

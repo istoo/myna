@@ -49,7 +49,7 @@ func keepRelease(t *testing.T, latestV string) (asked, downloads *atomic.Int32) 
 	return asked, downloads
 }
 
-// downloaded puts a Claude Code of version v where magpie keeps its own.
+// downloaded puts a Claude Code of version v where myna keeps its own.
 func downloaded(t *testing.T, v string) string {
 	t.Helper()
 	dir := filepath.Join(Root(), v)
@@ -63,7 +63,7 @@ func downloaded(t *testing.T, v string) string {
 	return p
 }
 
-func TestKeepCurrentUpdatesMagpiesDownload(t *testing.T) {
+func TestKeepCurrentUpdatesMynasDownload(t *testing.T) {
 	asked, downloads := keepRelease(t, "2.1.287\n")
 	old := downloaded(t, "2.1.200")
 
@@ -94,7 +94,7 @@ func TestKeepCurrentUpdatesMagpiesDownload(t *testing.T) {
 	}
 }
 
-func TestKeepCurrentLeavesWhatIsntMagpiesToUpdate(t *testing.T) {
+func TestKeepCurrentLeavesWhatIsntMynasToUpdate(t *testing.T) {
 	for name, set := range map[string]func(t *testing.T){
 		"nothing downloaded": func(t *testing.T) {},
 		"the machine's own": func(t *testing.T) {

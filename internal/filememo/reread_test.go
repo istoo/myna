@@ -12,7 +12,7 @@ import (
 
 // A file written just now is read again on each read and compared with
 // the bytes parsed, into a buffer kept for it: a new one each time was
-// most of what magpie allocated as it started, the 1.5 MB config.toml
+// most of what myna allocated as it started, the 1.5 MB config.toml
 // Codex's sync had just written read 150 times over (226 MB). A write of
 // the same size and time is still seen.
 func TestRecentFileReadAgainIntoOneBuffer(t *testing.T) {

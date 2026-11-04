@@ -5,32 +5,32 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/yetone/magpie/internal/masking"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/masking"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // CodexRelay is what serves Codex's own ChatGPT sign-in at the gateway's
-// address once magpie has quit, for the Codex threads still open then
-// (codexrelay). magpie takes the failover base URL out of Codex's config
+// address once myna has quit, for the Codex threads still open then
+// (codexrelay). myna takes the failover base URL out of Codex's config
 // at quit (agent.EndCodexFailover), but a thread open in the Codex app,
 // and the app-server holding it, keep the URL they started with: every
 // turn after went to a port nobody listened on, and a system proxy in
-// between answered 503 "Unknown error" until magpie was opened again
+// between answered 503 "Unknown error" until myna was opened again
 // (idkatbro on X). The relay passes those turns on to the ChatGPT backend
 // as the gateway does a turn on one of Codex's own models, signed by the
 // caller's own Authorization; it adds no credential of its own. What only
-// the running magpie could do is refused with a reason Codex shows: a
-// magpie model, a turn on one of magpie's accounts, masking (Settings ›
+// the running myna could do is refused with a reason Codex shows: a
+// myna model, a turn on one of myna's accounts, masking (Settings ›
 // Privacy) that would have masked it. Its answer at "/" never says it is
-// magpie (ServedBy), so the next magpie starting asks it to leave.
+// myna (ServedBy), so the next myna starting asks it to leave.
 func CodexRelay() http.Handler {
 	client := &http.Client{Transport: upstreamTransport()}
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !loopbackHost(r.Host) || r.Header.Get("Origin") != "" {
 			// as the gateway's corsGuard: a rebound or foreign page, or
 			// a frame's null, never reaches the sign-in Codex sends
-			relayError(w, http.StatusForbidden, "magpie's Codex relay serves Codex on this computer only")
+			relayError(w, http.StatusForbidden, "myna's Codex relay serves Codex on this computer only")
 			return
 		}
 		if !strings.HasPrefix(r.URL.Path, CodexPath+"/") {
@@ -38,7 +38,7 @@ func CodexRelay() http.Handler {
 			return
 		}
 		if strings.EqualFold(r.Header.Get("Upgrade"), "websocket") {
-			http.Error(w, "magpie speaks HTTP", http.StatusUpgradeRequired)
+			http.Error(w, "myna speaks HTTP", http.StatusUpgradeRequired)
 			return
 		}
 		rest := strings.TrimPrefix(r.URL.Path, CodexPath)
@@ -81,7 +81,7 @@ func CodexRelay() http.Handler {
 		provider.CodexCompressed(req, body)
 		res, err := client.Do(req)
 		if err != nil {
-			relayError(w, http.StatusBadGateway, "OpenAI can't be reached ("+err.Error()+"). magpie isn't running, so this thread goes to OpenAI on Codex's own sign-in.")
+			relayError(w, http.StatusBadGateway, "OpenAI can't be reached ("+err.Error()+"). myna isn't running, so this thread goes to OpenAI on Codex's own sign-in.")
 			return
 		}
 		defer res.Body.Close()
@@ -109,21 +109,21 @@ func CodexRelay() http.Handler {
 }
 
 // relayGone is the relay's answer to anything but Codex's own turns.
-const relayGone = "magpie isn't running: only Codex threads open when it quit are passed on, on Codex's own ChatGPT sign-in. Open magpie for everything else."
+const relayGone = "myna isn't running: only Codex threads open when it quit are passed on, on Codex's own ChatGPT sign-in. Open myna for everything else."
 
-// relayRefuses says why a turn can't be passed on with magpie gone, ""
+// relayRefuses says why a turn can't be passed on with myna gone, ""
 // when it can: what only the running gateway serves, and a turn masking
 // would have masked, which never goes unmasked.
 func relayRefuses(r *http.Request, body []byte) string {
 	model := modelOf(body)
 	if strings.Contains(model, "/") {
-		return model + " is one of magpie's models, and magpie isn't running. Open magpie to go on with this thread, or pick one of Codex's own models."
+		return model + " is one of myna's models, and myna isn't running. Open myna to go on with this thread, or pick one of Codex's own models."
 	}
 	if r.Header.Get(AccountHeader) != "" {
-		return AccountHeader + " names one of magpie's Codex accounts, and magpie isn't running. Open magpie to go on with this thread."
+		return AccountHeader + " names one of myna's Codex accounts, and myna isn't running. Open myna to go on with this thread."
 	}
 	if masking.Wanted(settings.Load()) {
-		return "magpie isn't running, and Settings › Privacy masks what is sent: this turn is not sent unmasked. Open magpie to go on with this thread."
+		return "myna isn't running, and Settings › Privacy masks what is sent: this turn is not sent unmasked. Open myna to go on with this thread."
 	}
 	return ""
 }

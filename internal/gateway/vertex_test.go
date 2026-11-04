@@ -16,8 +16,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // vertexSSE is a streamGenerateContent reply as Vertex AI sends it: each
@@ -959,7 +959,7 @@ func TestVertexPartnerModel(t *testing.T) {
 
 // Claude on Vertex AI (claude-sonnet-5-5, claude-sonnet-4-5@20250929) is
 // asked on Anthropic's Messages API at the project, as Anthropic's Vertex
-// SDK asks it, from every client magpie serves (Chat, Responses,
+// SDK asks it, from every client myna serves (Chat, Responses,
 // Anthropic's Messages, Gemini), streamed or not, with nothing set beyond
 // the project: at publishers/anthropic/models/<model>:streamRawPredict
 // when it streams and :rawPredict when it doesn't, signed with the same

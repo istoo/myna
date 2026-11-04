@@ -13,14 +13,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/filememo"
-	"github.com/yetone/magpie/internal/lastgood"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/steady"
+	"github.com/istoo/myna/internal/filememo"
+	"github.com/istoo/myna/internal/lastgood"
+	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/myna/internal/steady"
 )
 
 // Tool is a tool a plugin gives: OpenCode's tool hook ({tool: {name:
-// tool({description, args, execute})}}), which magpie offers every agent
+// tool({description, args, execute})}}), which myna offers every agent
 // through its plugin tools MCP server (internal/gateway/tools_mcp.go).
 type Tool struct {
 	Name        string `json:"name"`

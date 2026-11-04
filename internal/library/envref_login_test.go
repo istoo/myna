@@ -12,11 +12,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // loginToken gives the test a login shell that exports CYRUS_TOKEN, as
-// a .zshrc would, while magpie's own environment hasn't it, as a magpie
+// a .zshrc would, while myna's own environment hasn't it, as a myna
 // opened from the Finder hasn't (Cyrus on Discord). The token is returned.
 func loginToken(t *testing.T, home string) string {
 	t.Helper()
@@ -31,7 +31,7 @@ func loginToken(t *testing.T, home string) string {
 	return tok
 }
 
-// A ${NAME} only the login shell exports reaches the server magpie starts
+// A ${NAME} only the login shell exports reaches the server myna starts
 // or calls itself, for the tool list (a command's environment and a URL's
 // header) and for the router, and is never written anywhere: not into
 // library.json, not into an agent's file. One set nowhere is named.
@@ -45,7 +45,7 @@ func TestEnvRefsFromLoginShell(t *testing.T) {
 	}
 
 	t.Run("command", func(t *testing.T) {
-		s := fakeStdio(t, "ok", map[string]string{"MAGPIE_FAKE_MCP_TOKEN": "${CYRUS_TOKEN}", "MAGPIE_FAKE_MCP_WANT": tok})
+		s := fakeStdio(t, "ok", map[string]string{"MYNA_FAKE_MCP_TOKEN": "${CYRUS_TOKEN}", "MYNA_FAKE_MCP_WANT": tok})
 		if hl := CheckServer(context.Background(), s); hl.State != "ok" || hl.Tools != 3 {
 			t.Fatalf("got %+v, want ok with 3 tools", hl)
 		}
@@ -56,7 +56,7 @@ func TestEnvRefsFromLoginShell(t *testing.T) {
 		}
 		c.close()
 		// and runs it so for Codex
-		if spec, ok := specOf(s); !ok || spec.Env["MAGPIE_FAKE_MCP_TOKEN"] != tok {
+		if spec, ok := specOf(s); !ok || spec.Env["MYNA_FAKE_MCP_TOKEN"] != tok {
 			t.Fatalf("Codex's run: %v %+v", ok, spec.Env)
 		}
 	})
@@ -82,11 +82,11 @@ func TestEnvRefsFromLoginShell(t *testing.T) {
 		c.close()
 	})
 	t.Run("set nowhere", func(t *testing.T) {
-		hl := CheckServer(context.Background(), fakeStdio(t, "ok", map[string]string{"MAGPIE_FAKE_MCP_TOKEN": "${CYRUS_NOWHERE}"}))
+		hl := CheckServer(context.Background(), fakeStdio(t, "ok", map[string]string{"MYNA_FAKE_MCP_TOKEN": "${CYRUS_NOWHERE}"}))
 		if hl.Why != "novar" || hl.Detail != "CYRUS_NOWHERE" {
 			t.Fatalf("got %+v, want novar naming CYRUS_NOWHERE", hl)
 		}
-		if _, ok := specOf(fakeStdio(t, "ok", map[string]string{"MAGPIE_FAKE_MCP_TOKEN": "${CYRUS_NOWHERE}"})); ok {
+		if _, ok := specOf(fakeStdio(t, "ok", map[string]string{"MYNA_FAKE_MCP_TOKEN": "${CYRUS_NOWHERE}"})); ok {
 			t.Fatal("Codex is run a server with a variable set nowhere")
 		}
 	})
@@ -110,7 +110,7 @@ func TestEnvRefsFromLoginShell(t *testing.T) {
 			return nil
 		})
 		if os.Getenv("CYRUS_TOKEN") != "" {
-			t.Error("the token was set in magpie's own environment")
+			t.Error("the token was set in myna's own environment")
 		}
 	})
 }

@@ -96,7 +96,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         try { return route.fulfill({ body: await fs.readFile(file), contentType: { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml" }[path.extname(file)] }); }
         catch { return route.fulfill({ status: 404, body: "" }); }
       });
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://myna.test/?view=providers");
       await page.locator('#nav button[data-view="sessions"]').click();
       const sw = page.locator(".sm-record .sm-record-switch[role=switch]");
       await sw.waitFor();
@@ -138,7 +138,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // A transcript read started before clearing must not restore old content.
       holdNextTranscript = true;
       const readStarted = page.waitForRequest((r) => new URL(r.url()).pathname === "/api/sessions/transcript");
-      await page.evaluate(() => magpie.call("sessions", "open"));
+      await page.evaluate(() => myna.call("sessions", "open"));
       await readStarted;
       await assertRecordCard(page);
       assert.equal(await page.locator(".sm-record .sm-record-clear").count(), 1, "kept text can be deleted from the card");
@@ -198,7 +198,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         try { return route.fulfill({ body: await fs.readFile(file), contentType: { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml" }[path.extname(file)] }); }
         catch { return route.fulfill({ status: 404, body: "" }); }
       });
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://myna.test/?view=providers");
       await page.locator('#nav button[data-view="sessions"]').click();
       await page.locator("#view-sessions .row.sm-folder").first().waitFor();
       assert.equal(await page.locator(".sm-recording, .sm-record-label").count(), 0, "no bare checkbox bar under the tabs");

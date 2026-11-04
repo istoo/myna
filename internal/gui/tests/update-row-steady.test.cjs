@@ -26,7 +26,7 @@ const words = {
 function server(lang, ctl) {
   const settings = {
     theme: "light", lang, tray: "panel", quotaLeft: false, currency: "usd", proxy: "", redact: false, redactWords: [],
-    version: "0.1.400", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425", proxyNow: "none", proxySource: "none",
+    version: "0.1.400", dir: "~/.config/myna", gateway: "http://127.0.0.1:3425", proxyNow: "none", proxySource: "none",
     visionModels: [], imageGenModels: [], workbuddyCheckins: [], lanURLs: [], fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
   };
   return async (route) => {
@@ -43,7 +43,7 @@ function server(lang, ctl) {
     if (url.pathname === "/api/usage/quotas") return json([]);
     if (url.pathname === "/api/groups") return json({ groups: [], models: [] });
     if (url.pathname.startsWith("/api/")) return json({});
-    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "magpie.test") return route.fulfill({ status: 404, body: "" });
+    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "myna.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -89,7 +89,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await t.test(lang + ": opened cold, the row keeps its line for the answer", async () => {
         let release;
         const ctl = { hold: new Promise((go) => (release = go)) };
-        const { page, errors } = await open(browser, lang, ctl, 900, "http://magpie.test/?view=settings&tab=about");
+        const { page, errors } = await open(browser, lang, ctl, 900, "http://myna.test/?view=settings&tab=about");
         await settingsDrawn(page);
         await page.waitForFunction(() => window.__rows.length > 20);
         release();
@@ -106,7 +106,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
       await t.test(lang + ": a state read a minute ago isn't drawn before the answer", async () => {
         const ctl = {};
-        const { page, errors } = await open(browser, lang, ctl, 900, "http://magpie.test/?view=settings&tab=about");
+        const { page, errors } = await open(browser, lang, ctl, 900, "http://myna.test/?view=settings&tab=about");
         await settingsDrawn(page);
         const row = versionRow(page, lang);
         await row.locator(".sub", { hasText: w.latest }).waitFor();
@@ -140,7 +140,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
       await t.test(lang + ": the Update pill opens from nothing, the search beside the sidebar sliding with it", async () => {
         const ctl = {};
-        const { page, errors } = await open(browser, lang, ctl, 1200, "http://magpie.test/?view=settings&tab=about");
+        const { page, errors } = await open(browser, lang, ctl, 1200, "http://myna.test/?view=settings&tab=about");
         await settingsDrawn(page);
         await versionRow(page, lang).locator(".sub", { hasText: w.latest }).waitFor();
         assert.ok(await page.evaluate(() => document.body.classList.contains("side-nav")), "a sidebar at 1200px");

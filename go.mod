@@ -1,4 +1,4 @@
-module github.com/yetone/magpie
+module github.com/istoo/myna
 
 go 1.26.8
 

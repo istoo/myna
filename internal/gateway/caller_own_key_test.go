@@ -8,16 +8,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/budget"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/istoo/myna/internal/access"
+	"github.com/istoo/myna/internal/budget"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/myna/internal/usage"
 )
 
 // A key given its own value — one clients already send, from another
 // gateway (love1sbug on X) — is that key from another computer and from
-// this one, as a sk-magpie- key is: counted as it, and never sent on.
+// this one, as a sk-myna- key is: counted as it, and never sent on.
 func TestOwnKeyValueIsTheKey(t *testing.T) {
 	fresh(t)
 	up := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -79,7 +79,7 @@ func TestOwnKeyValueIsTheKey(t *testing.T) {
 	}
 }
 
-// A key magpie made, rotated to a value of the user's own (isaac_bai on
+// A key myna made, rotated to a value of the user's own (isaac_bai on
 // Discord), is still that key: from another computer and from this one
 // it is let in, counted as it and held to its limit, and its old value
 // is refused.

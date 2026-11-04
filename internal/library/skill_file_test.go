@@ -10,7 +10,7 @@ import (
 )
 
 // refeccd on Discord: skills kept in ~/.agents/skills, handed over to
-// magpie, could no longer be edited where they had been. A file saved
+// myna, could no longer be edited where they had been. A file saved
 // from the page goes into the library's folder, reaches the agent linked
 // to it and the one given a copy, and stays through the syncs after.
 func TestSavedSkillFileReachesEveryAgent(t *testing.T) {
@@ -50,7 +50,7 @@ func TestSavedSkillFileReachesEveryAgent(t *testing.T) {
 			}
 		}
 		if !ours(cx, "writer") {
-			t.Fatal("codex's copy isn't magpie's any more")
+			t.Fatal("codex's copy isn't myna's any more")
 		}
 		ok(t)(Sync())
 	}
@@ -91,7 +91,7 @@ func TestSkillFileSaveRefusesAChangedFile(t *testing.T) {
 }
 
 // Only the skill's own files: no way out of its folder, through .. or a
-// link, and none of what magpie leaves aside.
+// link, and none of what myna leaves aside.
 func TestSkillFileStaysInTheSkill(t *testing.T) {
 	h := sandbox(t)
 	src := filepath.Join(h, "src/skills")
@@ -103,7 +103,7 @@ func TestSkillFileStaysInTheSkill(t *testing.T) {
 	symlink(t, filepath.Join(h, "secret.txt"), filepath.Join(dir, "link.txt"))
 	symlink(t, filepath.Join(h, "outside"), filepath.Join(dir, "out"))
 	write(t, filepath.Join(dir, "node_modules/x/README.md"), "dep\n")
-	for _, bad := range []string{"../../secret.txt", "/etc/hosts", "link.txt", "out/notes.md", "node_modules/x/README.md", ".magpie", "scripts", ""} {
+	for _, bad := range []string{"../../secret.txt", "/etc/hosts", "link.txt", "out/notes.md", "node_modules/x/README.md", ".myna", "scripts", ""} {
 		if _, err := SaveSkillFile("pdf", bad, "x", ""); err == nil {
 			t.Errorf("saved %q", bad)
 		}

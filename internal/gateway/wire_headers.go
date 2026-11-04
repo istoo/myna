@@ -2,7 +2,7 @@ package gateway
 
 // A call's headers, both ways (usrname1833 on Discord: 查看原始请求和原始响应的
 // http头, for debugging what a capture would show): the client's request
-// as it reached magpie, and each request magpie sent upstream for it —
+// as it reached myna, and each request myna sent upstream for it —
 // its method and address, the headers it went with, and the status,
 // protocol and headers that came back. Recent calls and the Routing page
 // open them beside the bodies, and the request archive keeps them.
@@ -23,8 +23,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/redact"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/redact"
 )
 
 // headerTriesMost is how many upstream requests a call keeps the headers
@@ -122,21 +122,21 @@ func init() {
 
 // CallHeaders is a call's headers both ways, every secret taken out.
 type CallHeaders struct {
-	// Request: the client's, as it reached magpie
+	// Request: the client's, as it reached myna
 	Request map[string][]string `json:"request"`
-	// Upstream: each request magpie sent for it, in order
+	// Upstream: each request myna sent for it, in order
 	Upstream []UpstreamHeaders `json:"upstream"`
 	// More: the upstream requests past the first headerTriesMost, not kept
 	More int `json:"more,omitempty"`
 }
 
-// UpstreamHeaders is one request magpie sent upstream, and its answer's
+// UpstreamHeaders is one request myna sent upstream, and its answer's
 // head.
 type UpstreamHeaders struct {
 	Method string `json:"method"`
 	URL    string `json:"url"`
 	// Plugin: the plugin it was handed to, which sends it on to its
-	// vendor itself, with headers of its own magpie doesn't see
+	// vendor itself, with headers of its own myna doesn't see
 	Plugin   string              `json:"plugin,omitempty"`
 	Request  map[string][]string `json:"request"`
 	Millis   int64               `json:"ms"`
@@ -147,7 +147,7 @@ type UpstreamHeaders struct {
 }
 
 // Headers is c's headers both ways, masked, nil when none were kept (a
-// call from before this, or one magpie made for itself).
+// call from before this, or one myna made for itself).
 func (c Call) Headers() *CallHeaders {
 	return c.headers.masked()
 }

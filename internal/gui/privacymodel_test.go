@@ -9,9 +9,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/pii"
-	"github.com/yetone/magpie/internal/redact"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/pii"
+	"github.com/istoo/myna/internal/redact"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // The local masking model is on only once it is on disk: turned on where

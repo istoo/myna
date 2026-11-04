@@ -36,11 +36,11 @@ func fakeWSLNet(t *testing.T, cidrs ...string) {
 // with the WSL key is served as one from this computer, its key the
 // gateway's token (with the agent's id when the key has one); without the
 // key, from elsewhere, or at another of this computer's addresses, it is
-// judged as one from another machine and refused while magpie isn't
+// judged as one from another machine and refused while myna isn't
 // shared.
 func TestWSLCallerServedWithSharingOff(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("MYNA_ADDR", "")
 	fakeWSLNet(t, "172.17.32.1/20")
 	key := WSLKey()
 	if !strings.HasPrefix(key, wslKeyPrefix) || strings.HasPrefix(key, Token) {
@@ -112,7 +112,7 @@ func TestServeWSLListensBesideLoopback(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { ln.Close() })
-	t.Setenv("MAGPIE_ADDR", ln.Addr().String())
+	t.Setenv("MYNA_ADDR", ln.Addr().String())
 	if l6, err := net.Listen("tcp6", "[::1]:0"); err != nil {
 		t.Skip("no IPv6 loopback")
 	} else {

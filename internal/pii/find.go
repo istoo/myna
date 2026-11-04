@@ -15,7 +15,7 @@ import (
 	"sync/atomic"
 	"unicode/utf8"
 
-	"github.com/yetone/magpie/internal/redact"
+	"github.com/istoo/myna/internal/redact"
 )
 
 // Find is redact's Model: what the model finds in each of texts. A
@@ -284,7 +284,7 @@ func (b *backend) find(ctx context.Context, texts []string) ([][]redact.Found, e
 
 // classifySafely is classify(texts), with a panic in it this request's
 // error: it runs on a goroutine of the request's find, where a panic
-// would end magpie and every request it serves (#4553, a stray byte in
+// would end myna and every request it serves (#4553, a stray byte in
 // an embeddings input on Windows). The request is held back, as for a
 // model that failed, and the model isn't counted as failed for the
 // requests after it.

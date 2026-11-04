@@ -43,7 +43,7 @@ var holding atomic.Pointer[held]
 func fakeGitHub(t *testing.T, up *atomic.Bool, asked *atomic.Int32) {
 	t.Helper()
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
-	t.Setenv("MAGPIE_PLUGIN_MARKET", "")
+	t.Setenv("MYNA_PLUGIN_MARKET", "")
 	b, err := os.ReadFile("testdata/github/search.json")
 	if err != nil {
 		t.Fatal(err)
@@ -71,7 +71,7 @@ func fakeGitHub(t *testing.T, up *atomic.Bool, asked *atomic.Int32) {
 		like("someone/page-gone", nil),
 		like("alfaoz/opencode-see-image", nil),
 		like("someone/flaky-entry", map[string]any{"license": map[string]any{"key": "other", "spdx_id": "NOASSERTION"}}),
-		like("cyberElar/magpie-x-search", nil),
+		like("cyberElar/myna-x-search", nil),
 		like("forker/opencode-claude-auth", map[string]any{"fork": true}),
 		like("old/opencode-old", map[string]any{"archived": true}),
 		like("magpie-community/plugins", nil))
@@ -104,7 +104,7 @@ func fakeGitHub(t *testing.T, up *atomic.Bool, asked *atomic.Int32) {
 		}
 		if q.URL.Path == "/search/repositories" {
 			asked.Add(1)
-			if got := q.URL.Query().Get("q"); got != "topic:magpie-plugin archived:false fork:false" {
+			if got := q.URL.Query().Get("q"); got != "topic:myna-plugin archived:false fork:false" {
 				t.Errorf("searched %q", got)
 			}
 			w.Write(search(q.URL.Query()))
@@ -143,7 +143,7 @@ func fakeGitHub(t *testing.T, up *atomic.Bool, asked *atomic.Int32) {
 	t.Cleanup(func() { githubAPI, githubRaw, npmRegistry = api, raw, reg; forget() })
 }
 
-// Repositories tagged magpie-plugin: each with what its package.json says,
+// Repositories tagged myna-plugin: each with what its package.json says,
 // in GitHub's order; forks, archived ones and magpie-community's left out.
 // Asked once in six hours; with GitHub down, what it said last.
 // Every page of the search is read: with a page short of what is tagged,
@@ -191,7 +191,7 @@ func TestTaggedRepos(t *testing.T) {
 	}
 	// iPolloWork and learn-opencode (a workspace and a course) have no
 	// index.js to load, nor see-image its dist: installed from GitHub,
-	// none would load. magpie-x-search (real, #1327) is on npm from its
+	// none would load. myna-x-search (real, #1327) is on npm from its
 	// repository, but a command alone, an MCP server: npm's copy names no
 	// file to load, and it has no index.js
 	want := "rynfar/meridian griffinmartin/opencode-claude-auth slkiser/opencode-quota someone/word-guard someone/agent-aider someone/page-glance someone/flaky-entry"
@@ -216,20 +216,20 @@ func TestTaggedRepos(t *testing.T) {
 	if x := byRepo["someone/page-glance"]; x.License != "" {
 		t.Fatalf("NOASSERTION and no package.json license: %+v", x)
 	}
-	// its own picture, package.json's magpie.icon, as an installed
+	// its own picture, package.json's myna.icon, as an installed
 	// plugin's provider has it; none when it gives none
 	if x := byRepo["someone/flaky-entry"]; !strings.HasPrefix(x.Icon, "data:image/svg+xml;base64,") {
-		t.Fatalf("magpie.icon: %q", x.Icon)
+		t.Fatalf("myna.icon: %q", x.Icon)
 	}
 	if c.Icon != "" {
-		t.Fatalf("no magpie.icon, yet %q", c.Icon)
+		t.Fatalf("no myna.icon, yet %q", c.Icon)
 	}
 	if x := byRepo["someone/agent-aider"]; x.Kind != "agent" || x.Spec != "github:someone/agent-aider" {
 		t.Fatalf("an agent alone: %+v", x)
 	}
-	// a page alone: no module, magpie.page's file in the repository; one
+	// a page alone: no module, myna.page's file in the repository; one
 	// whose file isn't there would show nothing, and isn't listed
-	if x := byRepo["someone/page-glance"]; x.Kind != "page" || x.Spec != "github:someone/page-glance" || x.Package != "magpie-usage-glance" {
+	if x := byRepo["someone/page-glance"]; x.Kind != "page" || x.Spec != "github:someone/page-glance" || x.Package != "myna-usage-glance" {
 		t.Fatalf("a page alone: %+v", x)
 	}
 	if x := byRepo["someone/word-guard"]; x.Kind != "middleware" || x.Package != "@magpie-community/middleware-word-guard" || x.License != "MIT" {
@@ -321,7 +321,7 @@ func TestTaggedRepos(t *testing.T) {
 
 	// off: GitHub never asked
 	up.Store(true)
-	t.Setenv("MAGPIE_PLUGIN_MARKET", "off")
+	t.Setenv("MYNA_PLUGIN_MARKET", "off")
 	taggedMu.Lock()
 	taggedL = nil
 	taggedMu.Unlock()
@@ -345,7 +345,7 @@ func TestTaggedReposSlowRead(t *testing.T) {
 		t.Fatalf("%d repos", len(l))
 	}
 
-	// magpie started again eleven minutes on, word-guard's package.json
+	// myna started again eleven minutes on, word-guard's package.json
 	// slow to come
 	wait, retry := taggedWait, taggedRetry
 	taggedWait, taggedRetry = 300*time.Millisecond, time.Second
@@ -390,7 +390,7 @@ func TestTaggedReposSlowRead(t *testing.T) {
 	if until.Before(cutAsked.Add(taggedRetry)) || until.After(cutDone.Add(taggedRetry)) {
 		t.Fatalf("a list cut short held till %v, asked between %v and %v", until, cutAsked, cutDone)
 	}
-	// nor is the list cut short kept ten minutes by a magpie started again
+	// nor is the list cut short kept ten minutes by a myna started again
 	if fi, err := os.Stat(taggedCache()); err != nil || time.Since(fi.ModTime()) < taggedTTL-taggedRetry-time.Second {
 		t.Fatalf("the copy on disk stands till %v", fi.ModTime().Add(taggedTTL))
 	}
@@ -613,7 +613,7 @@ type soonFake struct {
 func fakeSoon(t *testing.T) *soonFake {
 	t.Helper()
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
-	t.Setenv("MAGPIE_PLUGIN_MARKET", "")
+	t.Setenv("MYNA_PLUGIN_MARKET", "")
 	f := &soonFake{}
 	f.pj.Store("")
 	var items []map[string]any

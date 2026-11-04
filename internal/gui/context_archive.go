@@ -3,7 +3,7 @@ package gui
 // The context window card's text, and the reply beside it, read from the
 // request archive once a request's body has left memory (wangbinyq on
 // Discord: with the archive on, the card still said the text was gone, as
-// magpie keeps only the last 10 requests' bodies in memory). The archive
+// myna keeps only the last 10 requests' bodies in memory). The archive
 // keeps the body as the agent sent it and the reply as the agent got it,
 // their secrets taken out; gateway.ArchivedPromptText and
 // gateway.ReplyPieces mask them as the body in memory is, so the archive
@@ -20,9 +20,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/davsync"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/davsync"
+	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // ctxGone says why a request's text can't be shown, for the card to say:

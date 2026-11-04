@@ -21,7 +21,7 @@ const S3 = { kind: "s3", url: "s3://bkt/team", user: "AKID", endpoint: "https://
 
 function serve(lang, posts) {
   const settings = {
-    theme: "light", lang, tray: "panel", version: "test", dir: "/tmp/magpie",
+    theme: "light", lang, tray: "panel", version: "test", dir: "/tmp/myna",
     gateway: "http://127.0.0.1:3425", visionModels: [], imageGenModels: [],
     fx: { rate: 7.2, stale: false },
   };
@@ -89,7 +89,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(60000);
 
-      await page.goto("http://magpie.test/");
+      await page.goto("http://myna.test/");
       await page.locator("#prefs").click();
       await openPart(page, "sync");
       const list = page.locator("#syncList");

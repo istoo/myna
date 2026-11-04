@@ -13,7 +13,7 @@ import (
 	"testing"
 
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // daybreakBackend stands in for the ChatGPT backend as OpenAI's Daybreak
@@ -82,7 +82,7 @@ func daybreak(t *testing.T) *daybreakBackend {
 	return d
 }
 
-// magpie-releases#18 (NonMirror, OpenCode): a client's access_programs, the
+// myna-releases#18 (NonMirror, OpenCode): a client's access_programs, the
 // Daybreak program Codex CLI sends the ChatGPT backend on each turn it was
 // picked for (codex-rs ResponsesApiRequest.access_programs), reaches the
 // backend on a Codex account's model on every path that asks it: Responses
@@ -174,12 +174,12 @@ func TestCodexAccessProgramsReachBackend(t *testing.T) {
 	}
 }
 
-// magpie-releases#18: the extraBody written for the built-in codex
+// myna-releases#18: the extraBody written for the built-in codex
 // provider (by hand: its editor has no box for it) goes on its requests,
 // as a key provider's does — filling in what the client left out, a
 // "!name" replacing it — on every API the request came in on. What Codex
 // CLI's request needs to be answered at all (store false, tool_choice
-// auto, its sealed reasoning asked back) stays magpie's.
+// auto, its sealed reasoning asked back) stays myna's.
 func TestCodexAccountTakesExtraBody(t *testing.T) {
 	codexSignedIn(t)
 	d := daybreak(t)

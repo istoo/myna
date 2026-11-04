@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/istoo/myna/internal/usage"
 )
 
 // Speed lately, for Speed first (routes.Fastest): of each account or key

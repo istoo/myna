@@ -9,9 +9,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // t3Overrides is the -c overrides in launchArgs, key to raw TOML value.
@@ -56,11 +56,11 @@ func t3CodexRead(t *testing.T, path string) (t3CodexEnvelope, bool) {
 	return e, true
 }
 
-// karissasel_ on X: T3 Code through magpie ran Claude Code only. magpie
-// gives T3 a Codex instance too, so a magpie model can be picked under
-// either harness: Codex made to use magpie as its provider by its own -c
+// karissasel_ on X: T3 Code through myna ran Claude Code only. myna
+// gives T3 a Codex instance too, so a myna model can be picked under
+// either harness: Codex made to use myna as its provider by its own -c
 // overrides in the instance's launch arguments, as T3 tokenizes them, with
-// magpie's catalog for T3 as Codex's, and T3's own Codex's binary and home
+// myna's catalog for T3 as Codex's, and T3's own Codex's binary and home
 // carried over. ~/.codex is never written.
 func TestT3CodeCodexInstance(t *testing.T) {
 	home := syncHome(t)
@@ -75,7 +75,7 @@ func TestT3CodeCodexInstance(t *testing.T) {
 	os.WriteFile(path, []byte(`{"providerInstances":{"codex":{"driver":"codex","config":{"binaryPath":"/opt/codex","homePath":"~/.codex-t3"}}}}`), 0o600)
 	a := t3code(home)
 	f := a.Field("provider")
-	if err := f.Set(magpieID); err != nil {
+	if err := f.Set(mynaID); err != nil {
 		t.Fatal(err)
 	}
 	e, ok := t3CodexRead(t, path)
@@ -85,15 +85,15 @@ func TestT3CodeCodexInstance(t *testing.T) {
 	if e.Config.BinaryPath != "/opt/codex" || e.Config.HomePath != "~/.codex-t3" {
 		t.Errorf("T3's Codex not carried over: %+v", e.Config)
 	}
-	cat := filepath.Join(base, "userdata", "magpie-codex-models.json")
+	cat := filepath.Join(base, "userdata", "myna-codex-models.json")
 	str := func(v string) string { return t3TOML(v) }
 	want := map[string]string{
-		"model_provider":                                   str(magpieID),
-		"model_providers.magpie.name":                      str("magpie"),
-		"model_providers.magpie.base_url":                  str(gateway.URL() + "/v1"),
-		"model_providers.magpie.wire_api":                  str("responses"),
-		"model_providers.magpie.experimental_bearer_token": str(gateway.Token),
-		"model_providers.magpie.http_headers":              `{"x-openai-actor-authorization"="magpie"}`,
+		"model_provider":                                   str(mynaID),
+		"model_providers.myna.name":                      str("myna"),
+		"model_providers.myna.base_url":                  str(gateway.URL() + "/v1"),
+		"model_providers.myna.wire_api":                  str("responses"),
+		"model_providers.myna.experimental_bearer_token": str(gateway.Token),
+		"model_providers.myna.http_headers":              `{"x-openai-actor-authorization"="myna"}`,
 		"model_catalog_json":                               str(cat),
 	}
 	if got := t3Overrides(t, e.Config.LaunchArgs); !maps.Equal(got, want) {
@@ -154,9 +154,9 @@ func TestT3CodeCodexInstance(t *testing.T) {
 	}
 }
 
-// An older magpie wrote its Claude Code instance alone: the next sync adds
+// An older myna wrote its Claude Code instance alone: the next sync adds
 // the Codex one. One the user then removed in T3 stays removed through
-// syncs, and turning magpie on again brings it back. The name and on/off
+// syncs, and turning myna on again brings it back. The name and on/off
 // the user gave it stay.
 func TestT3CodeCodexInstanceAddedOnce(t *testing.T) {
 	home := syncHome(t)
@@ -174,13 +174,13 @@ func TestT3CodeCodexInstanceAddedOnce(t *testing.T) {
 		t.Fatalf("not added by a sync: %s", readFile(path))
 	}
 
-	if err := edit.SetJSON(path, edit.KV{Path: t3CodexInstance + ".displayName", Value: "Codex via magpie"}, edit.KV{Path: t3CodexInstance + ".enabled", Value: false}); err != nil {
+	if err := edit.SetJSON(path, edit.KV{Path: t3CodexInstance + ".displayName", Value: "Codex via myna"}, edit.KV{Path: t3CodexInstance + ".enabled", Value: false}); err != nil {
 		t.Fatal(err)
 	}
 	if err := a.Sync(); err != nil {
 		t.Fatal(err)
 	}
-	if e, _ := t3CodexRead(t, path); e.DisplayName != "Codex via magpie" || e.Enabled == nil || *e.Enabled {
+	if e, _ := t3CodexRead(t, path); e.DisplayName != "Codex via myna" || e.Enabled == nil || *e.Enabled {
 		t.Errorf("the user's name or off lost: %+v", e)
 	}
 
@@ -195,21 +195,21 @@ func TestT3CodeCodexInstanceAddedOnce(t *testing.T) {
 	if _, ok := t3CodexRead(t, path); ok {
 		t.Fatal("a sync brought back the instance the user removed")
 	}
-	if a.Field("provider").Get() != magpieID {
-		t.Fatal("magpie off with its Claude Code instance there")
+	if a.Field("provider").Get() != mynaID {
+		t.Fatal("myna off with its Claude Code instance there")
 	}
-	if err := a.Field("provider").Set(magpieID); err != nil {
+	if err := a.Field("provider").Set(mynaID); err != nil {
 		t.Fatal(err)
 	}
 	if _, ok := t3CodexRead(t, path); !ok {
-		t.Fatal("turning magpie on didn't bring the Codex instance back")
+		t.Fatal("turning myna on didn't bring the Codex instance back")
 	}
 
-	// the Claude Code instance removed in T3, the Codex one keeps magpie on
+	// the Claude Code instance removed in T3, the Codex one keeps myna on
 	if err := edit.DelJSON(path, t3Instance); err != nil {
 		t.Fatal(err)
 	}
-	if a.Field("provider").Get() != magpieID || a.Check() != "" {
+	if a.Field("provider").Get() != mynaID || a.Check() != "" {
 		t.Errorf("Codex instance alone: %q %q", a.Field("provider").Get(), a.Check())
 	}
 }

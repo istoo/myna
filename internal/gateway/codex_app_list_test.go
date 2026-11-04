@@ -10,15 +10,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/codexcat"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/istoo/myna/internal/codexcat"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/usage"
 )
 
 // The Codex app and its VS Code extension show the first 100 of Codex's
 // model list by priority, hidden ones counted, and never ask for the rest
-// (@ZhenLuoTTAWDTT on X: with magpie's models in it, the ones past that
-// couldn't be shown or chosen). The list magpie hands Codex puts the
+// (@ZhenLuoTTAWDTT on X: with myna's models in it, the ones past that
+// couldn't be shown or chosen). The list myna hands Codex puts the
 // account's hidden models last and brings the ones the user used into the
 // first 100; its ETag changes when Codex uses another, so Codex asks again.
 func TestCodexModelListKeepsUsedModelsInTheAppsHundred(t *testing.T) {
@@ -121,11 +121,11 @@ func TestCodexCatalogKeepsTheKeysUsedModelsFirst(t *testing.T) {
 	}
 }
 
-// maiya (Discord): after an update the Codex app showed magpie's models
+// maiya (Discord): after an update the Codex app showed myna's models
 // and none of Codex's own GPT ones. With an order of Codex's models set on
 // the Agents page while its list had no Codex section (the codex provider
 // kept for routing groups before a3ee00c05, Codex not signed in yet, or a
-// GPT model OpenAI added since), the order names 100 or more of magpie's
+// GPT model OpenAI added since), the order names 100 or more of myna's
 // and none of the account's, so Order put every own one after them, past
 // the 100 the Codex app reads. The account's own listed models are kept
 // in the first 100, wherever the order put them; a hidden one stays last.
@@ -179,7 +179,7 @@ func TestCodexModelListKeepsOwnModelsInTheAppsHundred(t *testing.T) {
 	if order2[len(order2)-1] != "codex-auto-review" {
 		t.Errorf("the hidden codex-auto-review is at %d of %d", slices.Index(order2, "codex-auto-review")+1, len(order2))
 	}
-	// the user's order holds for the rest: magpie's first 98 as they put them
+	// the user's order holds for the rest: myna's first 98 as they put them
 	if !slices.Equal(first[:98], order[:98]) {
 		t.Errorf("the first 98: %v", first[:98])
 	}

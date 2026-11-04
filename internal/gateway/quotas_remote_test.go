@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // remoteOnly leaves out the remote's keys' own cards (#1547).
@@ -27,15 +27,15 @@ func remoteOnly(cs []provider.SubscriptionQuota) []provider.SubscriptionQuota {
 	return out
 }
 
-// A remote magpie's quotas (莫 on Discord), between a gateway and a
-// magpie that has it as its provider: the cards it is shown are the
+// A remote myna's quotas (莫 on Discord), between a gateway and a
+// myna that has it as its provider: the cards it is shown are the
 // gateway's as last read, and asking for them asks no vendor, however
 // often; a card's refresh reads it there once, and again no sooner than
-// remoteRefreshGap; a card the gateway has from a third magpie isn't read
+// remoteRefreshGap; a card the gateway has from a third myna isn't read
 // for it; another machine without the gateway's key gets nothing.
-func TestRemoteMagpieQuotas(t *testing.T) {
+func TestRemoteMynaQuotas(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("MYNA_ADDR", "")
 	provider.ForgetBalances()
 	t.Cleanup(provider.ForgetBalances)
 	var reads atomic.Int32
@@ -50,7 +50,7 @@ func TestRemoteMagpieQuotas(t *testing.T) {
 	}
 	gw := httptest.NewServer(lanGuard(New().Handler()))
 	defer gw.Close()
-	if err := provider.Save(provider.Provider{ID: "office", Name: "Office", Preset: provider.RemoteMagpiePreset, Key: "sk-magpie-office", Chat: gw.URL}); err != nil {
+	if err := provider.Save(provider.Provider{ID: "office", Name: "Office", Preset: provider.RemoteMynaPreset, Key: "sk-myna-office", Chat: gw.URL}); err != nil {
 		t.Fatal(err)
 	}
 	ctx := context.Background()
@@ -106,10 +106,10 @@ func TestRemoteMagpieQuotas(t *testing.T) {
 		return w.Code
 	}
 	if c := post("127.0.0.1:5000", "?provider=home/codex", ""); c != http.StatusBadRequest {
-		t.Errorf("a third magpie's card: %d", c)
+		t.Errorf("a third myna's card: %d", c)
 	}
 	if c := post("127.0.0.1:5000", "?provider=office", ""); c != http.StatusBadRequest {
-		t.Errorf("a remote magpie's own card: %d", c)
+		t.Errorf("a remote myna's own card: %d", c)
 	}
 	if c := post("192.168.1.9:5000", "?provider=bal", ""); c == http.StatusOK {
 		t.Error("another machine without a key had a card read")
@@ -128,15 +128,15 @@ func TestRemoteMagpieQuotas(t *testing.T) {
 	}
 }
 
-// #1313 (jorben): a magpie in a container serves only other magpies, so
+// #1313 (jorben): a myna in a container serves only other mynas, so
 // nobody opens its Usage page, while its Codex account's usage is read
 // behind the requests (the account switching, CodexUsedUp). A GUI on
-// another computer with that magpie as its provider is shown the
+// another computer with that myna as its provider is shown the
 // reading on the account's card, through the gateway, and asking for the
 // cards asks ChatGPT nothing.
-func TestRemoteMagpieShowsBackgroundReadings(t *testing.T) {
+func TestRemoteMynaShowsBackgroundReadings(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("MYNA_ADDR", "")
 	home := os.Getenv("HOME")
 	jwt := func(m map[string]any) string {
 		b, _ := json.Marshal(m)
@@ -168,7 +168,7 @@ func TestRemoteMagpieShowsBackgroundReadings(t *testing.T) {
 
 	gw := httptest.NewServer(lanGuard(New().Handler()))
 	defer gw.Close()
-	if err := provider.Save(provider.Provider{ID: "office", Name: "Office", Preset: provider.RemoteMagpiePreset, Key: "sk-magpie-office", Chat: gw.URL}); err != nil {
+	if err := provider.Save(provider.Provider{ID: "office", Name: "Office", Preset: provider.RemoteMynaPreset, Key: "sk-myna-office", Chat: gw.URL}); err != nil {
 		t.Fatal(err)
 	}
 	ctx := context.Background()

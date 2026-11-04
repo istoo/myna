@@ -11,14 +11,14 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/source"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/myna/internal/source"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // registryHome is a home of its own with no registry anywhere: none in
 // the environment, the login shell's, a bunfig or an .npmrc, the 「国内镜像」
-// switch off and nothing set in magpie.
+// switch off and nothing set in myna.
 func registryHome(t *testing.T) (home string, shell map[string]string) {
 	t.Helper()
 	home = t.TempDir()
@@ -47,7 +47,7 @@ func writeFile(t *testing.T, path, body string) {
 }
 
 // Each place a registry can be named, each before the ones after it:
-// magpie's own setting, the environment, the login shell, a bunfig, an
+// myna's own setting, the environment, the login shell, a bunfig, an
 // .npmrc, the 「国内镜像」 switch, npm's own (timwangdev on X). The switch
 // never comes before a registry the user named.
 func TestRegistryPrecedence(t *testing.T) {
@@ -69,10 +69,10 @@ func TestRegistryPrecedence(t *testing.T) {
 	want("https://shell.example", FromShell)
 	t.Setenv("BUN_CONFIG_REGISTRY", "https://env.example")
 	want("https://env.example", FromEnv)
-	if _, err := SetRegistry("https://magpie.example/npm/"); err != nil {
+	if _, err := SetRegistry("https://myna.example/npm/"); err != nil {
 		t.Fatal(err)
 	}
-	want("https://magpie.example/npm", FromMagpie)
+	want("https://myna.example/npm", FromMagpie)
 	if _, err := SetRegistry("default"); err != nil {
 		t.Fatal(err)
 	}
@@ -105,7 +105,7 @@ func TestSetRegistryRefusesWhatIsntOne(t *testing.T) {
 	}
 }
 
-// bun is told the registry where it wouldn't find it itself: magpie's
+// bun is told the registry where it wouldn't find it itself: myna's
 // setting, over the environment's; the login shell's; npmmirror with the
 // switch on. A registry in the user's .npmrc or bunfig is bun's to read,
 // and the switch's mirror is never put over it.
@@ -136,15 +136,15 @@ func TestBunTakesTheUsersRegistry(t *testing.T) {
 	if r := reg(); r != "" {
 		t.Fatalf("the environment's own is bun's to read: %q", r)
 	}
-	if _, err := SetRegistry("https://magpie.example"); err != nil {
+	if _, err := SetRegistry("https://myna.example"); err != nil {
 		t.Fatal(err)
 	}
-	if r := reg(); r != "https://magpie.example/" {
-		t.Fatalf("magpie's setting: %q", r)
+	if r := reg(); r != "https://myna.example/" {
+		t.Fatalf("myna's setting: %q", r)
 	}
 }
 
-// magpie asks npm's questions (a package's newest version, its README,
+// myna asks npm's questions (a package's newest version, its README,
 // the search) of the user's registry, with the token their .npmrc keeps
 // for that host and for no other; a scope's own registry is asked of its
 // packages. npm's own is never asked, with the switch on or off.

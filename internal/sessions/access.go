@@ -8,10 +8,10 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/settings"
 )
 
-// Which agents' session files magpie may read (RustCats on X: a new
+// Which agents' session files myna may read (RustCats on X: a new
 // install showed every agent's history before anyone agreed to it). Reads
 // is the one gate: every lister asks it before it lists an agent's
 // folder, the listings are filtered by it again, and so are the readers
@@ -20,8 +20,8 @@ import (
 // Sessions page's consent, or Settings, allows an agent; an install that
 // already read sessions keeps reading them all.
 
-// ErrNotRead: the session's agent is one magpie may not read.
-var ErrNotRead = errors.New("magpie is not allowed to read this agent's sessions (Settings, Sessions)")
+// ErrNotRead: the session's agent is one myna may not read.
+var ErrNotRead = errors.New("myna is not allowed to read this agent's sessions (Settings, Sessions)")
 
 // settled is the decision SettleReads made this run, so a fresh install
 // that couldn't save it (settings.json unreadable) still reads nothing,
@@ -37,7 +37,7 @@ var settled struct {
 // tests of the gate turn it off.
 var readsAllInTests = testing.Testing()
 
-// Reads is whether magpie may read agent's own session files.
+// Reads is whether myna may read agent's own session files.
 func Reads(agent string) bool {
 	return currentReads().Reads(agent)
 }
@@ -147,7 +147,7 @@ func SetReads(all *bool, agents map[string]bool) error {
 	return nil
 }
 
-// allowed is fs without the files of agents magpie may not read.
+// allowed is fs without the files of agents myna may not read.
 func allowed(fs []file) []file {
 	r := currentReads()
 	// most polls read every agent: fs as it is then, not a copy of each

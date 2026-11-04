@@ -5,7 +5,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 const { watchSettingsReads, settingsDrawn } = require("./reader.cjs");
-const assets = process.env.MAGPIE_FONT_ASSETS || path.resolve(__dirname, "../assets");
+const assets = process.env.MYNA_FONT_ASSETS || path.resolve(__dirname, "../assets");
 const face = (family, name = "Regular", weight = 400, style = "normal", stretch = 100) => ({ family, name, weight, style, stretch });
 const harmony = [face("HarmonyOS Sans SC"), face("HarmonyOS Sans SC", "Medium", 500), face("HarmonyOS Sans SC", "Bold", 700)];
 const mono = [face("Consolas"), face("Consolas", "Italic", 400, "italic")];
@@ -68,13 +68,13 @@ async function open(browser, lang = "en", options = {}) {
   });
   if (options.init) await page.addInitScript(options.init, options.arg);
   await watchSettingsReads(page);
-  await page.goto("http://magpie.test/?view=settings&tab=general");
+  await page.goto("http://myna.test/?view=settings&tab=general");
   await settingsDrawn(page); // rows found are the ones that stay (#1659)
   await page.locator("#themeSegs .opt").first().waitFor({ state: "attached" });
   // A real assertion, also usable against the original assets, rather than
   // a timeout or a compile error as the negative-control result.
   assert.equal(await page.locator("#uiFontRow").count(), 1, "Settings must offer an interface font picker");
-  // (a row left hidden, as before 10-28 in a nogui magpie's tab, fails at its assertion, not here)
+  // (a row left hidden, as before 10-28 in a nogui myna's tab, fails at its assertion, not here)
   await page.waitForFunction(() => fontList !== null || fontListError || document.getElementById("uiFontRow").hidden);
   await page.evaluate(async () => {
     await document.fonts.ready;
@@ -331,12 +331,12 @@ for (const [engine, runtime] of engines) {
   });
 
   // Norcleeh again, after v0.1.1788: on a refresh a row "flashed and went".
-  // A nogui magpie (Docker, magpie-cli) has no boot `fonts`, so the font
+  // A nogui myna (Docker, myna-cli) has no boot `fonts`, so the font
   // rows never showed, and Text size painted until the settings hid it.
   // The tab's rows show whatever the server can read, with System default
   // when the browser draws none of its families, and stay through every
   // later settings read; the app's own rows never paint at all.
-  for (const lang of ["en", "zh"]) test(`${engine} ${lang}: a browser tab's font rows show on a nogui magpie and nothing flashes`, async () => {
+  for (const lang of ["en", "zh"]) test(`${engine} ${lang}: a browser tab's font rows show on a nogui myna and nothing flashes`, async () => {
     const browser = await runtime.launch();
     try {
       for (const fonts of [[{ name: "Georgia", styles: [face("Georgia"), face("Georgia", "Bold", 700)] }, { name: "No Such Family Here", styles: [face("No Such Family Here")] }], []]) {
@@ -368,7 +368,7 @@ for (const [engine, runtime] of engines) {
     } finally { await browser.close(); }
   });
 
-  // Norcleeh (magpie in Docker, its web GUI): the tab listed the server's
+  // Norcleeh (myna in Docker, its web GUI): the tab listed the server's
   // fonts, the container's, never the ones on his own computer. Where the
   // browser has the Local Font Access API, the press that opens a family
   // menu asks for them, once; they are offered with their real styles.

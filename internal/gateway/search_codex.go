@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // A ChatGPT account searches the web for a model that can't by the ChatGPT

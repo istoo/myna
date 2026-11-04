@@ -1,7 +1,7 @@
 package provider
 
 // Keeping the plugins' sign-ins alive while nothing uses them (#5080). A
-// plugin that renews its sign-ins through magpie (auth.refresh) had each
+// plugin that renews its sign-ins through myna (auth.refresh) had each
 // renewed only when something used the account: a request, its models,
 // its usage or its check-in, within the plugin's refreshLead of expiry.
 // An account left idle past its token's life lapsed, and for a vendor
@@ -9,11 +9,11 @@ package provider
 // OrcaTerm's WeChat token lives two hours, and its refresh after that
 // answers SESSION_EXPIRED for good (orinsid, plugins#675).
 //
-// So the magpie serving the gateway renews each such sign-in as it comes
+// So the myna serving the gateway renews each such sign-in as it comes
 // due, on a timer, through the host's own renewal (plugin.KeepSignedIn):
 // the one a request would make, once at a time per account whoever asks
 // (a request arriving meanwhile waits for the same one) and under the
-// lock file every magpie process renews under. Only the accounts switched
+// lock file every myna process renews under. Only the accounts switched
 // on are kept, of a plugin provider not switched off, not hidden and not
 // being moved; one the vendor turned away (Lapsed) waits for the user to
 // sign in again. A plugin that would rather not (a renewal that costs the
@@ -22,7 +22,7 @@ package provider
 //
 // Nothing is asked until an account is due: a look reads plugin-auth.json
 // (parsed once per change, filememo) and sleeps until the next account
-// comes due, no longer than keepAliveLookMost, so an idle magpie with no
+// comes due, no longer than keepAliveLookMost, so an idle myna with no
 // account due starts no plugin host. A renewal that fails is tried again
 // later and later (keepAliveBackoff), for that sign-in only, and never
 // marks the account: a renewal that couldn't reach its vendor says
@@ -35,7 +35,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
+	"github.com/istoo/myna/internal/plugin"
 )
 
 var (
@@ -67,7 +67,7 @@ func keepAliveBackoff(n int) time.Duration {
 }
 
 // pluginSignIn is a plugin account kept alive: its provider, its key in
-// plugin-auth.json, the account as magpie lists it (for its proxy) and
+// plugin-auth.json, the account as myna lists it (for its proxy) and
 // when it comes due.
 type pluginSignIn struct {
 	ID, Key, User string
@@ -76,7 +76,7 @@ type pluginSignIn struct {
 
 // pluginSignInsKept are the plugins' sign-ins kept alive in the
 // background, each with when it is next due: of the plugins that renew
-// through magpie and keep alive (plugin.Provider.Renews), the accounts
+// through myna and keep alive (plugin.Provider.Renews), the accounts
 // switched on and not refused, of a provider neither switched off, hidden
 // nor being moved. Tests replace it.
 var pluginSignInsKept = func() []pluginSignIn {
@@ -167,7 +167,7 @@ func (k *signInKeeper) look(ctx context.Context, now time.Time) time.Duration {
 		}
 		switch {
 		case err != nil && ctx.Err() != nil:
-			// magpie is stopping: nothing is known of the sign-in
+			// myna is stopping: nothing is known of the sign-in
 		case err != nil || r.Due && !r.Renewed:
 			f := k.held[d]
 			f.n++
@@ -193,7 +193,7 @@ func (k *signInKeeper) look(ctx context.Context, now time.Time) time.Duration {
 }
 
 // KeepPluginsSignedIn renews the plugins' sign-ins as they come due, in
-// the magpie serving the gateway, while nothing uses them (#5080).
+// the myna serving the gateway, while nothing uses them (#5080).
 func KeepPluginsSignedIn(ctx context.Context) {
 	var k signInKeeper
 	t := time.NewTimer(keepAliveLookFirst)

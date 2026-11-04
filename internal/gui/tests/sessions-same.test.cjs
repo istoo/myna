@@ -78,8 +78,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       const back = { sessions: [session("s1", "first session")], asks: [], bodies: 0, deltas: 0, sent: new Map() };
       await page.route("**/*", serve(lang, back));
-      await page.addInitScript(() => { try { localStorage.setItem("magpie.usageTab", "sessions"); localStorage.setItem("magpie.sessRange", "all"); } catch {} });
-      await page.goto("http://magpie.test/?view=usage");
+      await page.addInitScript(() => { try { localStorage.setItem("myna.usageTab", "sessions"); localStorage.setItem("myna.sessRange", "all"); } catch {} });
+      await page.goto("http://myna.test/?view=usage");
       await page.waitForFunction(() => typeof sessions !== "undefined" && sessions?.sessions?.length === 1 && sessStats);
       assert.equal(back.bodies, 2, "the first read is sent whole");
 

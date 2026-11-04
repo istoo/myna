@@ -7,10 +7,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/testenv"
 )
 
-// magpie daemon: status before an install says how to install; start
+// myna daemon: status before an install says how to install; start
 // says to install first; a word it doesn't take prints its usage; and a
 // `go test` or `go run` build, which Go deletes, is never installed as the
 // service. None of them runs the system's service tool.
@@ -29,13 +29,13 @@ func TestDaemonCmd(t *testing.T) {
 	daemonWait = 0
 	t.Cleanup(func() { daemonWait = prev })
 	out, err := runOut(t, "daemon")
-	if err != nil || !strings.Contains(out, "isn't installed") || !strings.Contains(out, "magpie daemon install") {
+	if err != nil || !strings.Contains(out, "isn't installed") || !strings.Contains(out, "myna daemon install") {
 		t.Errorf("status: %q, %v", out, err)
 	}
 	if _, err := runOut(t, "daemon", "start"); err == nil || !strings.Contains(err.Error(), "isn't installed") {
 		t.Errorf("start: %v", err)
 	}
-	if _, err := runOut(t, "daemon", "bogus"); err == nil || !strings.Contains(err.Error(), "usage: magpie daemon") {
+	if _, err := runOut(t, "daemon", "bogus"); err == nil || !strings.Contains(err.Error(), "usage: myna daemon") {
 		t.Errorf("bogus: %v", err)
 	}
 	if _, err := runOut(t, "daemon", "install"); err == nil || !strings.Contains(err.Error(), "go run") {
@@ -46,7 +46,7 @@ func TestDaemonCmd(t *testing.T) {
 	}
 }
 
-// magpie daemon's words for the page the service serves beside the
+// myna daemon's words for the page the service serves beside the
 // gateway (HuanCheng on Discord): --web on loopback by default, --lan on
 // every interface, --addr where told; a command that says nothing of it
 // leaves it as it is, and one that contradicts itself is refused.
@@ -96,7 +96,7 @@ func TestParseDaemon(t *testing.T) {
 }
 
 // The page's key stays what it was across installs, so a browser stays
-// signed in: MAGPIE_WEB_KEY when the shell has one, else the service's
+// signed in: MYNA_WEB_KEY when the shell has one, else the service's
 // own, else a new one; installed again with nothing said, the service
 // keeps its page and key; turned off, neither is kept.
 func TestWebOptions(t *testing.T) {
@@ -122,11 +122,11 @@ func TestWebOptions(t *testing.T) {
 		t.Errorf("off: %+v %v", o, err)
 	}
 	if _, err := webOptions(on, "", "", "short"); err == nil {
-		t.Error("a MAGPIE_WEB_KEY too short to stand between the network and the keys was taken")
+		t.Error("a MYNA_WEB_KEY too short to stand between the network and the keys was taken")
 	}
 }
 
-// magpie daemon status and magpie daemon web print the page's link, with
+// myna daemon status and myna daemon web print the page's link, with
 // the key, read from the service's file, and say the page is open to
 // anyone with the link when it is served on the network.
 func TestDaemonStatusPrintsPage(t *testing.T) {
@@ -139,13 +139,13 @@ func TestDaemonStatusPrintsPage(t *testing.T) {
 		testenv.Program(t, filepath.Join(dir, name), "#!/bin/sh\nexit 0\n")
 	}
 	t.Setenv("PATH", dir+string(os.PathListSeparator)+os.Getenv("PATH"))
-	t.Setenv("MAGPIE_ADDR", "127.0.0.1:1") // no gateway answers
+	t.Setenv("MYNA_ADDR", "127.0.0.1:1") // no gateway answers
 	const key = "0123456789abcdef0123456789abcdef"
-	file := filepath.Join(home, ".config", "systemd", "user", "magpie.service")
-	text := "ExecStart=\"/usr/bin/magpie\" serve \"--web=0.0.0.0:3430\"\nEnvironment=\"MAGPIE_WEB_KEY=" + key + "\"\n"
+	file := filepath.Join(home, ".config", "systemd", "user", "myna.service")
+	text := "ExecStart=\"/usr/bin/myna\" serve \"--web=0.0.0.0:3430\"\nEnvironment=\"MYNA_WEB_KEY=" + key + "\"\n"
 	if runtime.GOOS == "darwin" {
-		file = filepath.Join(home, "Library", "LaunchAgents", "com.yetone.magpie.serve.plist")
-		text = "<array><string>/usr/bin/magpie</string><string>serve</string><string>--web=0.0.0.0:3430</string></array>\n<key>MAGPIE_WEB_KEY</key><string>" + key + "</string>\n"
+		file = filepath.Join(home, "Library", "LaunchAgents", "com.istoo.myna.serve.plist")
+		text = "<array><string>/usr/bin/myna</string><string>serve</string><string>--web=0.0.0.0:3430</string></array>\n<key>MYNA_WEB_KEY</key><string>" + key + "</string>\n"
 	}
 	os.MkdirAll(filepath.Dir(file), 0o755)
 	if err := os.WriteFile(file, []byte(text), 0o600); err != nil {
@@ -159,12 +159,12 @@ func TestDaemonStatusPrintsPage(t *testing.T) {
 	}
 }
 
-// magpie serve takes --web and --web=host:port alone; anything else is
+// myna serve takes --web and --web=host:port alone; anything else is
 // refused before a gateway is started.
 func TestServeArgs(t *testing.T) {
 	helpHome(t)
 	for _, args := range [][]string{{"serve", "--lan"}, {"serve", "--web=3430"}, {"serve", "web"}} {
-		if _, err := runOut(t, args...); err == nil || !strings.Contains(err.Error(), "magpie serve") {
+		if _, err := runOut(t, args...); err == nil || !strings.Contains(err.Error(), "myna serve") {
 			t.Errorf("%q: %v", args, err)
 		}
 	}

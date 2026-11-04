@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // Models write a whole number in a tool call's arguments with a fraction
@@ -31,7 +31,7 @@ import (
 // the same arguments whether they come whole or in deltas cut anywhere:
 // what the deltas of a call add up to is what its done events say.
 
-// grokModel is whether id, the model as magpie or its upstream names it, is
+// grokModel is whether id, the model as myna or its upstream names it, is
 // one of Grok's, under whatever vendor prefix a relay or router gives it
 // (xai/grok-4.5, x-ai/grok-4). Grok's schema quirks (grok_schema.go) are
 // still Grok's alone; whole floats in calls' arguments are every model's.

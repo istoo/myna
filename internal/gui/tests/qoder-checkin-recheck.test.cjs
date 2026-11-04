@@ -1,6 +1,6 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // #2696 (LoKi, mufanmu): a Qoder campaign can open later in the Beijing day,
-// so magpie asks Qoder's check-in again, the built-in's and the Qoder and
+// so myna asks Qoder's check-in again, the built-in's and the Qoder and
 // Qoder CN plugins', on a press. A Qoder account whose check-in found no
 // campaign (inactive) today keeps Check in now on its card, built-in
 // (checkinBy "qoder") and plugin ("plugin:qoder-cn") alike, and a press
@@ -68,7 +68,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, asked));
         await watchSettingsReads(page);
-        await page.goto("http://magpie.test/?view=usage");
+        await page.goto("http://myna.test/?view=usage");
         await settingsDrawn(page);
         const of = (name) => page.locator(".subscription-card", { hasText: name });
         // each card by its account: "Qoder" is in Qoder CN's name too

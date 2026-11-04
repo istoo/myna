@@ -46,7 +46,7 @@ function server(lang, fetched, opened = null, updates = {}) {
     if (url.pathname === "/api/window/main" && opened) { opened.push(url.search); return route.fulfill({ status: 204 }); }
     if (url.pathname === "/api/plugins/updates" && updates.waiting) { await json({ waiting: updates.waiting, updated: [] }); return told(); }
     if (url.pathname.startsWith("/api/")) return json({});
-    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "magpie.test") { fetched.push(url.href); return route.fulfill({ status: 404, body: "" }); }
+    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "myna.test") { fetched.push(url.href); return route.fulfill({ status: 404, body: "" }); }
     if (url.pathname === "/start.js" && updates.waiting) await known;
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
@@ -92,7 +92,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           assert.equal(await view.locator("#builtinList").count(), 0, why);
         };
 
-        await page.goto("http://magpie.test/?view=plugins");
+        await page.goto("http://myna.test/?view=plugins");
         for (const [last, name] of [["builtin", w.builtin], ["installed", w.installed]]) {
           // a tab of Plugins other than Discover, then back to Providers
           await view.locator(".lib-tabs").waitFor();
@@ -121,7 +121,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         panel.on("pageerror", (e) => errors.push(e.message));
         const opened = [];
         await panel.route("**/*", server(lang, fetched, opened));
-        await panel.goto("http://magpie.test/?mode=panel");
+        await panel.goto("http://myna.test/?mode=panel");
         await panel.evaluate(() => show("providers"));
         await panel.locator("#addSheet .tile.more-plugins").click();
         for (let i = 0; i < 250 && opened.length < 1; i++) await panel.waitForTimeout(20);
@@ -135,7 +135,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // with Installed the tab visited last: Discover, with what was looked
         // for, and the address gives it up, so a reload opens Installed again
         for (const [q, find] of [["fake+co%26x", "fake co&x"], ["", ""]]) {
-          await page.goto("http://magpie.test/?view=plugins&q=" + q);
+          await page.goto("http://myna.test/?view=plugins&q=" + q);
           await expectDiscover("the window the panel opened, q " + JSON.stringify(q), find);
           assert.equal(await page.evaluate(() => location.search), "?view=plugins");
         }
@@ -145,9 +145,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // with a plugin's update waiting, Plugins opens on Installed, where
         // it is (show); the window the panel opened shows Discover still
         updates.waiting = [{ package: "@magpie-community/opencode-zed-auth", latest: "0.2.0" }];
-        await page.goto("http://magpie.test/?view=plugins");
+        await page.goto("http://myna.test/?view=plugins");
         await page.waitForFunction((n) => document.querySelector("#view-plugins .lib-tabs .opt[aria-pressed=true]")?.textContent.startsWith(n), w.installed);
-        await page.goto("http://magpie.test/?view=plugins&q=");
+        await page.goto("http://myna.test/?view=plugins&q=");
         await expectDiscover("the window the panel opened, an update waiting");
 
         assert.deepEqual(fetched, [], "nothing fetched from elsewhere");

@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // A rate window (#2463) holds a time of day, and a window that crosses
@@ -263,7 +263,7 @@ func TestRateAtZeroTimeIsTheBase(t *testing.T) {
 	}
 }
 
-// The prices magpie writes into an agent's own model file (Pi's, omp's)
+// The prices myna writes into an agent's own model file (Pi's, omp's)
 // leave a rate window out: nothing rewrites the file as a window opens or
 // closes, so a price taken in one would stay on outside it. /v1/models,
 // read at each request, prices now.

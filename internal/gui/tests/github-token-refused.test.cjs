@@ -12,7 +12,7 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 const { watchSettingsReads, settingsDrawn } = require("./reader.cjs");
 
-const assets = path.resolve(process.env.MAGPIE_REFUSED_ASSETS || path.resolve(__dirname, "../assets"));
+const assets = path.resolve(process.env.MYNA_REFUSED_ASSETS || path.resolve(__dirname, "../assets"));
 const W = {
   en: { remove: "Remove", row: "GitHub refused this token: it may have expired or been revoked. Requests go without one (60 an hour) until it is replaced." },
   zh: { remove: "移除", row: "GitHub 拒绝了这个令牌：它可能已过期或被撤销。在换成新令牌之前，请求改为不带令牌发出（每小时 60 次）。" },
@@ -31,7 +31,7 @@ function serve(lang, refused) {
     if (url.pathname === "/api/groups") return json({ models: [], groups: [], pools: [] });
     if (url.pathname === "/api/plugins") return json({ plugins: [] });
     if (url.pathname.startsWith("/api/")) return json({});
-    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "magpie.test") return r.fulfill({ status: 404, body: "" });
+    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "myna.test") return r.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await r.fulfill({ body: await fs.readFile(file), contentType }); } catch { await r.fulfill({ status: 404, body: "" }); }
@@ -57,7 +57,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
             // Settings: the token still shown, masked, and said refused
             await watchSettingsReads(page);
-            await page.goto("http://magpie.test/?view=settings&tab=network");
+            await page.goto("http://myna.test/?view=settings&tab=network");
             await settingsDrawn(page);
             const row = page.locator("#githubList .row.github-token");
             await row.waitFor();

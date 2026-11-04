@@ -1,6 +1,6 @@
 package provider
 
-// Claude Code on its own login asks Anthropic itself, so magpie learns the
+// Claude Code on its own login asks Anthropic itself, so myna learns the
 // account it is on is out only from a /usage run, which unasked comes
 // claudeUsageWait (5 to 15 minutes) after the last, and the switch looked
 // only every loginSwitchEvery. An account burnt from 4% left to its limit
@@ -83,7 +83,7 @@ const claudeScanTail = 1 << 20
 // scanClaudeLimits reads what Claude Code wrote to its sessions (each
 // project's *.jsonl) since the last scan and keeps the time of the latest
 // rate_limit refusal in claudeLimitHit. The first scan only marks where the
-// sessions end: what was refused before magpie looked is the startup
+// sessions end: what was refused before myna looked is the startup
 // read's to tell. Its cost is a stat of each session and a read of what
 // was added to the ones written to.
 func scanClaudeLimits() {

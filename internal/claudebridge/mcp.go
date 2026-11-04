@@ -1,6 +1,6 @@
-// Package claudebridge contains the small stdio MCP helper used by magpie's
+// Package claudebridge contains the small stdio MCP helper used by myna's
 // Claude Subscription bridge. The helper is launched by the genuine Claude
-// Code binary; tool execution is handed back to the parent magpie process.
+// Code binary; tool execution is handed back to the parent myna process.
 package claudebridge
 
 import (
@@ -55,11 +55,11 @@ var listWait = 5 * time.Second
 // JSON path, and for Claude Code's interactive mode a file written once
 // Claude Code has listed the tools, which its first message waits for
 // (claudetui.MCPCommand); or, for an agent whose MCP servers are set once for every run
-// (Grok), MAGPIE_MCP_CALLBACK and MAGPIE_MCP_TOOLS in the environment it
+// (Grok), MYNA_MCP_CALLBACK and MYNA_MCP_TOOLS in the environment it
 // hands down. It intentionally implements only the MCP methods Claude Code needs.
 func RunMCP(args []string) error {
-	if len(args) == 0 && os.Getenv("MAGPIE_MCP_CALLBACK") != "" {
-		args = []string{os.Getenv("MAGPIE_MCP_CALLBACK"), os.Getenv("MAGPIE_MCP_TOOLS")}
+	if len(args) == 0 && os.Getenv("MYNA_MCP_CALLBACK") != "" {
+		args = []string{os.Getenv("MYNA_MCP_CALLBACK"), os.Getenv("MYNA_MCP_TOOLS")}
 	}
 	if len(args) != 2 && len(args) != 3 {
 		return errors.New("claude MCP helper expects callback URL and tools file")
@@ -73,7 +73,7 @@ func RunMCP(args []string) error {
 		}
 	}
 	if !strings.HasPrefix(callbackURL, "http://") && !strings.HasPrefix(callbackURL, "https://") {
-		// the file magpie wrote it in, which keeps its token off the
+		// the file myna wrote it in, which keeps its token off the
 		// command line
 		b, err := os.ReadFile(callbackURL)
 		if err != nil {
@@ -91,8 +91,8 @@ func RunMCP(args []string) error {
 	}
 
 	// a tools/call intentionally blocks until the agent returns its result.
-	// The callback is magpie on this computer, never through a proxy: the
-	// agent hands down the *_PROXY magpie gave it for its vendor, and a
+	// The callback is myna on this computer, never through a proxy: the
+	// agent hands down the *_PROXY myna gave it for its vendor, and a
 	// gateway on a LAN or Tailscale address isn't in its NO_PROXY, so the
 	// call went to the proxy, which reset it or couldn't reach back, and
 	// the tool call never reached the run (#2440).
@@ -145,7 +145,7 @@ func RunMCP(args []string) error {
 				result = map[string]any{
 					"protocolVersion": "2025-06-18",
 					"capabilities":    map[string]any{"tools": map[string]any{"listChanged": true}},
-					"serverInfo":      map[string]any{"name": "magpie", "version": "1"},
+					"serverInfo":      map[string]any{"name": "myna", "version": "1"},
 				}
 			case "tools/list":
 				toolsMu.Lock()

@@ -10,31 +10,31 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/davsync"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/davsync"
+	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // WebDAV, S3 and GitHub sync from the terminal: what Settings › Sync does, through
 // the same davsync.Configure, Now, Off and Dismiss. One backend is on at a time.
 
 const webdavUsage = `usage:
-  magpie webdav                           whether sync is on, where to, and how the last sync went
-  magpie webdav on <address> [user=…] [keys=no] [agents=no] [library=no]
+  myna webdav                           whether sync is on, where to, and how the last sync went
+  myna webdav on <address> [user=…] [keys=no] [agents=no] [library=no]
                                           keep providers, settings, profiles, agents' models and the library
                                           the same on every computer through a WebDAV folder (a folder named
-                                          magpie is made in it), and sync at once; asks for the password
+                                          myna is made in it), and sync at once; asks for the password
                                           (with a user) and the passphrase
-  magpie webdav set k=v…                  change it: address, user, keys, agents, library, usage, sign-ins (yes|no);
+  myna webdav set k=v…                  change it: address, user, keys, agents, library, usage, sign-ins (yes|no);
                                           password= and passphrase= ask for a new one
-  magpie webdav now                       sync now (the gateway also syncs by itself while it runs: see auto)
-  magpie webdav auto off|3|15|30|60       how often the gateway syncs by itself, in minutes; off: only when asked
-  magpie webdav restore                   make this computer's setup the server's; what is here is kept first
-  magpie webdav undo                      put back what the last restore replaced
-  magpie webdav upload                    put this computer's setup over a server file that isn't a backup
+  myna webdav now                       sync now (the gateway also syncs by itself while it runs: see auto)
+  myna webdav auto off|3|15|30|60       how often the gateway syncs by itself, in minutes; off: only when asked
+  myna webdav restore                   make this computer's setup the server's; what is here is kept first
+  myna webdav undo                      put back what the last restore replaced
+  myna webdav upload                    put this computer's setup over a server file that isn't a backup
                                           (empty, cut short, another app's); the server's is kept first
-  magpie webdav dismiss                   clear what the last sync said it replaced
-  magpie webdav off                       turn it off; the file on the server stays
+  myna webdav dismiss                   clear what the last sync said it replaced
+  myna webdav off                       turn it off; the file on the server stays
 
   passphrase  the same on every computer: the file is sealed with it on this one, and the server only
               ever sees it sealed. Keep it: without it the file can't be opened. Never the password:
@@ -51,36 +51,36 @@ const webdavUsage = `usage:
               set. Anyone with the passphrase and the server's file can use those accounts. An account
               used on two computers may be signed out on one when the other renews it
   first sync  on a computer that had its own setup, each part that differs becomes the server's; what
-              was here is kept in the sync folder beside magpie's files, and magpie webdav says so
-  moving      magpie webdav on with S3 sync on moves sync to the folder; the bucket, endpoint, access key
-              and secret are kept, and magpie s3 on alone moves back to them
+              was here is kept in the sync folder beside myna's files, and myna webdav says so
+  moving      myna webdav on with S3 sync on moves sync to the folder; the bucket, endpoint, access key
+              and secret are kept, and myna s3 on alone moves back to them
 
   Piped in, the password (when asked) is the first line of stdin and the passphrase the next.
-  An S3-compatible bucket instead: magpie s3 help.
+  An S3-compatible bucket instead: myna s3 help.
 
-  e.g. magpie webdav on https://dav.jianguoyun.com/dav/ user=me@example.com
-       magpie webdav set agents=no library=no
+  e.g. myna webdav on https://dav.jianguoyun.com/dav/ user=me@example.com
+       myna webdav set agents=no library=no
 `
 
 const s3Usage = `usage:
-  magpie s3                               whether sync is on, where to, and how the last sync went
-  magpie s3 on s3://<bucket>[/<prefix>] access-key-id=… [endpoint=…] [region=…] [path-style=yes]
+  myna s3                               whether sync is on, where to, and how the last sync went
+  myna s3 on s3://<bucket>[/<prefix>] access-key-id=… [endpoint=…] [region=…] [path-style=yes]
                [keys=no] [agents=no] [library=no]
                                           keep providers, settings, profiles, agents' models and the library
                                           the same on every computer through an S3-compatible bucket (AWS S3,
-                                          Cloudflare R2, Backblaze B2, MinIO, a NAS…), in <prefix>/magpie/,
+                                          Cloudflare R2, Backblaze B2, MinIO, a NAS…), in <prefix>/myna/,
                                           and sync at once; asks for the secret and the passphrase
-  magpie s3 set k=v…                      change it: address, bucket, prefix, endpoint, region, access-key-id,
+  myna s3 set k=v…                      change it: address, bucket, prefix, endpoint, region, access-key-id,
                                           path-style, keys, agents, library, usage, sign-ins (yes|no); secret= and
                                           passphrase= ask for a new one
-  magpie s3 now                           sync now (the gateway also syncs by itself while it runs: see auto)
-  magpie s3 auto off|3|15|30|60           how often the gateway syncs by itself, in minutes; off: only when asked
-  magpie s3 restore                       make this computer's setup the server's; what is here is kept first
-  magpie s3 undo                          put back what the last restore replaced
-  magpie s3 upload                        put this computer's setup over a bucket file that isn't a backup
+  myna s3 now                           sync now (the gateway also syncs by itself while it runs: see auto)
+  myna s3 auto off|3|15|30|60           how often the gateway syncs by itself, in minutes; off: only when asked
+  myna s3 restore                       make this computer's setup the server's; what is here is kept first
+  myna s3 undo                          put back what the last restore replaced
+  myna s3 upload                        put this computer's setup over a bucket file that isn't a backup
                                           (empty, cut short, another app's); the bucket's is kept first
-  magpie s3 dismiss                       clear what the last sync said it replaced
-  magpie s3 off                           turn it off; the file in the bucket stays
+  myna s3 dismiss                       clear what the last sync said it replaced
+  myna s3 off                           turn it off; the file in the bucket stays
 
   endpoint    the server, https://…; none is AWS. R2: https://<account>.r2.cloudflarestorage.com
   region      none is us-east-1, or auto on R2; AWS says which when it is another
@@ -98,28 +98,28 @@ const s3Usage = `usage:
               passphrase, so a computer that syncs is signed in without signing in again. Off unless
               set. Anyone with the passphrase and the server's file can use those accounts. An account
               used on two computers may be signed out on one when the other renews it
-  moving      magpie s3 on with WebDAV sync on moves sync to the bucket; the WebDAV address, user and
-              password are kept, and magpie webdav on alone moves back to them
+  moving      myna s3 on with WebDAV sync on moves sync to the bucket; the WebDAV address, user and
+              password are kept, and myna webdav on alone moves back to them
 
   Piped in, the secret (when asked) is the first line of stdin and the passphrase the next.
-  A WebDAV folder instead: magpie webdav help.
+  A WebDAV folder instead: myna webdav help.
 
-  e.g. magpie s3 on s3://my-bucket/magpie endpoint=https://<account>.r2.cloudflarestorage.com access-key-id=…
-       magpie s3 on s3://backups endpoint=http://nas.local:9000 path-style=yes access-key-id=…
+  e.g. myna s3 on s3://my-bucket/myna endpoint=https://<account>.r2.cloudflarestorage.com access-key-id=…
+       myna s3 on s3://backups endpoint=http://nas.local:9000 path-style=yes access-key-id=…
 `
 
 const githubUsage = `usage:
-  magpie github                           whether sync is on, where to, and how the last sync went
-  magpie github on github://owner/repo[/folder] [branch=…] [keys=no] [agents=no] [library=no]
+  myna github                           whether sync is on, where to, and how the last sync went
+  myna github on github://owner/repo[/folder] [branch=…] [keys=no] [agents=no] [library=no]
                                           keep the encrypted setup in an existing GitHub repository; asks for a token and passphrase
-  magpie github set k=v…                  change it: address, branch, keys, agents, library, usage, sign-ins (yes|no)
-  magpie github now                       sync now
-  magpie github auto off|3|15|30|60       how often the gateway syncs by itself, in minutes
-  magpie github restore                   make this computer's setup the repository's; what is here is kept first
-  magpie github undo                       put back what the last restore replaced
-  magpie github upload                     put this computer's setup over a repository file that isn't a backup; the old file is kept first
-  magpie github dismiss                   clear what the last sync said it replaced
-  magpie github off                       turn it off; the encrypted file and its commit history stay
+  myna github set k=v…                  change it: address, branch, keys, agents, library, usage, sign-ins (yes|no)
+  myna github now                       sync now
+  myna github auto off|3|15|30|60       how often the gateway syncs by itself, in minutes
+  myna github restore                   make this computer's setup the repository's; what is here is kept first
+  myna github undo                       put back what the last restore replaced
+  myna github upload                     put this computer's setup over a repository file that isn't a backup; the old file is kept first
+  myna github dismiss                   clear what the last sync said it replaced
+  myna github off                       turn it off; the encrypted file and its commit history stay
 
   token      asked for, unechoed, and saved only for this repository. It needs
              Contents read and write permission. The repository must already
@@ -131,7 +131,7 @@ const githubUsage = `usage:
              passphrase. Off unless set
 `
 
-// syncKind is magpie webdav's, magpie s3's or magpie github's server.
+// syncKind is myna webdav's, myna s3's or myna github's server.
 type syncKind struct {
 	name, cmd, usage string
 }
@@ -144,21 +144,21 @@ var (
 
 func (k syncKind) turnOn() string {
 	if k.cmd == "s3" {
-		return "magpie s3 on s3://<bucket>[/<prefix>] access-key-id=… [endpoint=…] turns it on"
+		return "myna s3 on s3://<bucket>[/<prefix>] access-key-id=… [endpoint=…] turns it on"
 	}
 	if k.cmd == "github" {
-		return "magpie github on github://<owner>/<repo>[/<folder>] turns it on"
+		return "myna github on github://<owner>/<repo>[/<folder>] turns it on"
 	}
-	return "magpie webdav on <address> [user=…] turns it on"
+	return "myna webdav on <address> [user=…] turns it on"
 }
 
-// webdavCmd is magpie webdav ….
+// webdavCmd is myna webdav ….
 func webdavCmd(args []string) error { return syncCmd(webdavKind, args) }
 
-// s3Cmd is magpie s3 ….
+// s3Cmd is myna s3 ….
 func s3Cmd(args []string) error { return syncCmd(s3Kind, args) }
 
-// githubCmd is magpie github ….
+// githubCmd is myna github ….
 func githubCmd(args []string) error { return syncCmd(githubKind, args) }
 
 func syncCmd(k syncKind, args []string) error {
@@ -174,12 +174,12 @@ func syncCmd(k syncKind, args []string) error {
 		return syncNow(k)
 	case "auto":
 		if len(args) != 2 {
-			return fmt.Errorf("magpie %s auto off|3|15|30|60", k.cmd)
+			return fmt.Errorf("myna %s auto off|3|15|30|60", k.cmd)
 		}
 		m := davsync.Manual
 		if args[1] != "off" {
 			if _, err := fmt.Sscan(args[1], &m); err != nil {
-				return fmt.Errorf("magpie %s auto off|3|15|30|60, not %q", k.cmd, args[1])
+				return fmt.Errorf("myna %s auto off|3|15|30|60, not %q", k.cmd, args[1])
 			}
 		}
 		if err := davsync.SetAuto(m); err != nil {
@@ -203,7 +203,7 @@ func syncCmd(k syncKind, args []string) error {
 		if len(parts) == 0 {
 			fmt.Println("nothing differed: nothing was replaced")
 		} else if args[0] == "restore" {
-			fmt.Printf("restored from the server: %s; what was here is kept, and magpie %s undo puts it back\n", strings.Join(parts, ", "), k.cmd)
+			fmt.Printf("restored from the server: %s; what was here is kept, and myna %s undo puts it back\n", strings.Join(parts, ", "), k.cmd)
 		} else {
 			fmt.Printf("put back: %s\n", strings.Join(parts, ", "))
 		}
@@ -225,7 +225,7 @@ func syncCmd(k syncKind, args []string) error {
 	case "off":
 		// the other's is turned off by its own command, not by a slip
 		if c, ok := davsync.Load(); ok && c.Kind() != k.name {
-			return fmt.Errorf("%s sync is on, not %s: magpie %s off turns it off", c.Kind(), k.name, strings.ToLower(c.Kind()))
+			return fmt.Errorf("%s sync is on, not %s: myna %s off turns it off", c.Kind(), k.name, strings.ToLower(c.Kind()))
 		}
 		if err := davsync.Off(); err != nil {
 			return err
@@ -253,7 +253,7 @@ func syncSet(k syncKind, args []string, on bool) error {
 	c, was := davsync.Load()
 	if was && c.Kind() != k.name {
 		if !on {
-			return fmt.Errorf("%s sync is on, not %s: magpie %s set changes it; %s", c.Kind(), k.name, strings.ToLower(c.Kind()), k.turnOn())
+			return fmt.Errorf("%s sync is on, not %s: myna %s set changes it; %s", c.Kind(), k.name, strings.ToLower(c.Kind()), k.turnOn())
 		}
 		next := davsync.Config{Passphrase: c.Passphrase, Keys: c.Keys, Agents: c.Agents, Library: c.Library, Usage: c.Usage, SignIns: c.SignIns}
 		if o, ok := c.Kept(k.name); ok { // its server, as it was kept when sync moved from it
@@ -360,9 +360,9 @@ func syncSet(k syncKind, args []string, on bool) error {
 			return fmt.Errorf("%q is not a GitHub address (github://owner/repo or github://owner/repo/folder)", c.URL)
 		}
 		if c.GitHub() {
-			return fmt.Errorf("%q is not a WebDAV address (https://...): magpie github on %s for a GitHub repository", c.URL, c.URL)
+			return fmt.Errorf("%q is not a WebDAV address (https://...): myna github on %s for a GitHub repository", c.URL, c.URL)
 		}
-		return fmt.Errorf("%q is not a WebDAV address (https://…): magpie s3 on %s for an S3 bucket", c.URL, c.URL)
+		return fmt.Errorf("%q is not a WebDAV address (https://…): myna s3 on %s for an S3 bucket", c.URL, c.URL)
 	}
 	if err := davsync.Check(c); err != nil {
 		return err
@@ -398,7 +398,7 @@ func syncSet(k syncKind, args []string, on bool) error {
 	}
 	// and sync at once, so a wrong address or password shows now
 	if err := syncNow(k); err != nil {
-		fmt.Fprintln(os.Stderr, muted.Render(fmt.Sprintf("It is on: magpie %s set k=v… changes it, magpie %s off turns it off.", k.cmd, k.cmd)))
+		fmt.Fprintln(os.Stderr, muted.Render(fmt.Sprintf("It is on: myna %s set k=v… changes it, myna %s off turns it off.", k.cmd, k.cmd)))
 		return err
 	}
 	return nil
@@ -437,11 +437,11 @@ func syncShow(k syncKind) error {
 	if !v.On {
 		fmt.Println(k.name + " sync is off")
 		if k.cmd == "s3" {
-			fmt.Println(muted.Render("magpie s3 on s3://<bucket> keeps providers, settings, profiles, agents' models and the library the same on every computer (magpie s3 help)"))
+			fmt.Println(muted.Render("myna s3 on s3://<bucket> keeps providers, settings, profiles, agents' models and the library the same on every computer (myna s3 help)"))
 		} else if k.cmd == "github" {
-			fmt.Println(muted.Render("magpie github on github://<owner>/<repo>[/<folder>] keeps providers, settings, profiles, agents' models and the library in an encrypted GitHub file (magpie github help)"))
+			fmt.Println(muted.Render("myna github on github://<owner>/<repo>[/<folder>] keeps providers, settings, profiles, agents' models and the library in an encrypted GitHub file (myna github help)"))
 		} else {
-			fmt.Println(muted.Render("magpie webdav on <address> keeps providers, settings, profiles, agents' models and the library the same on every computer (magpie webdav help)"))
+			fmt.Println(muted.Render("myna webdav on <address> keeps providers, settings, profiles, agents' models and the library the same on every computer (myna webdav help)"))
 		}
 		return nil
 	}
@@ -507,11 +507,11 @@ func syncShow(k syncKind) error {
 	fmt.Println("  syncs", strings.Join(what, ", "))
 	if o := v.Other; o != nil {
 		if o.Kind == "s3" {
-			fmt.Println(muted.Render("  S3 " + o.URL + " is kept, not synced to: magpie s3 on moves back to it"))
+			fmt.Println(muted.Render("  S3 " + o.URL + " is kept, not synced to: myna s3 on moves back to it"))
 		} else if o.Kind == "github" {
-			fmt.Println(muted.Render("  GitHub " + o.URL + " is kept, not synced to: magpie github on moves back to it"))
+			fmt.Println(muted.Render("  GitHub " + o.URL + " is kept, not synced to: myna github on moves back to it"))
 		} else {
-			fmt.Println(muted.Render("  WebDAV " + o.URL + " is kept, not synced to: magpie webdav on moves back to it"))
+			fmt.Println(muted.Render("  WebDAV " + o.URL + " is kept, not synced to: myna webdav on moves back to it"))
 		}
 	}
 
@@ -527,11 +527,11 @@ func syncShow(k syncKind) error {
 		fmt.Println("  couldn't share usage:", v.UsageError)
 	}
 	if len(v.SignIn) > 0 {
-		fmt.Println("  synced settings use these, not signed in on this computer (sync carries settings, not sign-ins, unless sign-ins=yes; to use one here: magpie accounts add <id>):", strings.Join(v.SignIn, ", "))
+		fmt.Println("  synced settings use these, not signed in on this computer (sync carries settings, not sign-ins, unless sign-ins=yes; to use one here: myna accounts add <id>):", strings.Join(v.SignIn, ", "))
 	}
 	if n := v.Notice; n != nil && n.Restored {
 		fmt.Println("  Restored from the server:", partNames(n.Here))
-		fmt.Println(muted.Render("  This computer's setup from before is kept in " + tilde(n.Saved) + " (magpie " + cmd + " undo puts it back; magpie " + cmd + " dismiss clears this)"))
+		fmt.Println(muted.Render("  This computer's setup from before is kept in " + tilde(n.Saved) + " (myna " + cmd + " undo puts it back; myna " + cmd + " dismiss clears this)"))
 	} else if n != nil {
 		if len(n.Here) > 0 {
 			fmt.Println("  Replaced here by newer ones from another computer:", partNames(n.Here))
@@ -543,15 +543,15 @@ func syncShow(k syncKind) error {
 		if dir == "" {
 			dir = filepath.Join(settings.Dir(), "sync")
 		}
-		fmt.Println(muted.Render("  The copies replaced are kept in " + tilde(dir) + " (magpie restore opens one; magpie " + cmd + " dismiss clears this)"))
+		fmt.Println(muted.Render("  The copies replaced are kept in " + tilde(dir) + " (myna restore opens one; myna " + cmd + " dismiss clears this)"))
 	}
 	switch {
 	case v.Auto == 0:
-		fmt.Println(muted.Render("  Syncs only when asked: magpie " + cmd + " now syncs once (magpie " + cmd + " auto 3 syncs by itself again)"))
+		fmt.Println(muted.Render("  Syncs only when asked: myna " + cmd + " now syncs once (myna " + cmd + " auto 3 syncs by itself again)"))
 	case !gateway.Running():
-		fmt.Println(muted.Render(fmt.Sprintf("  No gateway runs here: nothing syncs by itself until one does (the app, magpie web or magpie serve), every %d minutes; magpie %s now syncs once", v.Auto, cmd)))
+		fmt.Println(muted.Render(fmt.Sprintf("  No gateway runs here: nothing syncs by itself until one does (the app, myna web or myna serve), every %d minutes; myna %s now syncs once", v.Auto, cmd)))
 	default:
-		fmt.Println(muted.Render(fmt.Sprintf("  Syncs by itself every %d minutes (magpie %s auto changes it)", v.Auto, cmd)))
+		fmt.Println(muted.Render(fmt.Sprintf("  Syncs by itself every %d minutes (myna %s auto changes it)", v.Auto, cmd)))
 	}
 	return nil
 }

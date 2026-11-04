@@ -5,14 +5,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // Gemini on a Google sign-in searches by itself, googleSearch, for a
 // request with no function tools; Antigravity refuses googleSearch beside
-// them, so one with tools is given magpie's search instead (#757).
+// them, so one with tools is given myna's search instead (#757).
 func TestCodeAssistSearchesWithoutTools(t *testing.T) {
 	ag := provider.Provider{ID: "antigravity", Account: &provider.Account{Agent: "antigravity", User: "u"}}
 	plain := &Request{WebSearch: true, Messages: []Message{{Role: "user", Parts: []Part{{Kind: Text, Text: "news?"}}}}}

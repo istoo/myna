@@ -3,7 +3,7 @@ package agent
 import "testing"
 
 // Drift asked a field's options up to three times, once a field to find
-// the one on magpie and twice to compare it with magpie's record, and
+// the one on myna and twice to compare it with myna's record, and
 // Claude Code's were made anew each time (35 MB of forty polls with real
 // accounts). They are made once a look now.
 func TestDriftMakesAFieldsOptionsOnce(t *testing.T) {
@@ -22,12 +22,12 @@ func TestDriftMakesAFieldsOptionsOnce(t *testing.T) {
 	if err := a.Apply("model", "nowhere-relay/m1"); err != nil {
 		t.Fatal(err)
 	}
-	// another of magpie's models, picked in the agent: not drift, and every
+	// another of myna's models, picked in the agent: not drift, and every
 	// comparison read the options
 	v = "nowhere-relay/m2"
 	made = 0
 	if d := a.Drift(); d != nil {
-		t.Fatalf("one magpie model for another drifted: %+v", d)
+		t.Fatalf("one myna model for another drifted: %+v", d)
 	}
 	if made != 1 {
 		t.Fatalf("one Drift made the field's options %d times, want once", made)

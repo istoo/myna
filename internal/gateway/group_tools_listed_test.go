@@ -6,7 +6,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // psikent on Discord: an SSH client matches what a model can do by what

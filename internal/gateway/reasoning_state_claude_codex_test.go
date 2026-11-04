@@ -9,11 +9,11 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/claudeseal"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/claudeseal"
+	"github.com/istoo/myna/internal/provider"
 )
 
-// Codex calling a Claude model through magpie (mysterious_dove_96933 on
+// Codex calling a Claude model through myna (mysterious_dove_96933 on
 // Discord): Claude's thinking is signed, and a redacted_thinking block is
 // sealed whole, and Anthropic wants both back intact on the next request
 // of a tool loop. Codex keeps only what a reply's reasoning items carry,
@@ -212,7 +212,7 @@ func claudeConversation() string {
 
 // Claude's blocks are Claude's: a Responses API (a relay here, the
 // ChatGPT backend for Codex's own models) is sent each item as it was
-// before magpie carried them, its summary alone or nothing, and never the
+// before myna carried them, its summary alone or nothing, and never the
 // envelope, which OpenAI would refuse as invalid_encrypted_content. What
 // OpenAI sealed goes on untouched.
 func TestClaudeBlocksNeverGoToAResponsesAPI(t *testing.T) {

@@ -8,7 +8,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // deepseekBodyCap is what DeepSeek's API answered a Codex user's long
@@ -109,7 +109,7 @@ const cappedMost = 256 << 10
 // failure. Codex's remote compaction has no way to shrink it (it trims
 // only by its token estimate against the catalog's 1M window, and asks
 // nothing smaller on context_length_exceeded), so every compaction failed
-// the same way and the session could neither compact nor go on. magpie
+// the same way and the session could neither compact nor go on. myna
 // asks again with the conversation as text, its images left out and its
 // long outputs cut, and Codex installs the model's summary.
 func TestCodexCompactTooLargeAsksSmaller(t *testing.T) {
@@ -151,7 +151,7 @@ func TestCodexCompactTooLargeAsksSmaller(t *testing.T) {
 	}
 }
 
-// When the conversation as text is refused too, magpie compacts without a
+// When the conversation as text is refused too, myna compacts without a
 // model, so Codex still goes on.
 func TestCodexCompactTooLargeCompactsLocally(t *testing.T) {
 	up := &capped{proto: provider.Chat, most: 0, status: 413, ctype: "text/plain; charset=utf-8", body: deepseekBodyCap}

@@ -9,7 +9,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // Lucy on Discord (v0.1.1676, Codex, group/auto-deepseek-v4-1-flash):

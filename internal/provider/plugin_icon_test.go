@@ -10,11 +10,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
+	"github.com/istoo/myna/internal/plugin"
 )
 
 // Lemon on Discord: can a plugin give its provider its own icon? The auth
-// hook's icon (or package.json's magpie.icon) is a data:image URI, kept
+// hook's icon (or package.json's myna.icon) is a data:image URI, kept
 // at once as a picture given by hand is, or an https URL, fetched in the
 // background through FetchIcon's checks; it comes before the market's,
 // and anything else is refused.
@@ -24,7 +24,7 @@ func TestPluginOwnIcon(t *testing.T) {
 	t.Setenv("USERPROFILE", home)
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(home, ".cache"))
-	t.Setenv("MAGPIE_PLUGIN_MARKET", "off")
+	t.Setenv("MYNA_PLUGIN_MARKET", "off")
 
 	png := []byte("\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR")
 	var fetched atomic.Int32

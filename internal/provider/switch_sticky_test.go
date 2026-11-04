@@ -9,10 +9,10 @@ import (
 // hxy920830 on X: "use an account to 98%, switch, then keep using the
 // next account to 98% — not switch right back as soon as the other
 // account resets". Where the sign-in alone spends the accounts (Claude
-// Code; Codex whose sign-in alone magpie switches), magpie stays on the
+// Code; Codex whose sign-in alone myna switches), myna stays on the
 // account it moved to till that is spent too, and the one it moved off
 // isn't said to come first again. In order still goes back to the first,
-// as its note says; Codex through magpie goes back too
+// as its note says; Codex through myna goes back too
 // (TestCodexSwitchedBackWhenItHasRoom), its sign-in following Smart.
 func TestSignInStaysOnTheAccountMovedTo(t *testing.T) {
 	for _, c := range []struct {

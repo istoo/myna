@@ -9,7 +9,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // loomy is iFlytek's Loomy gateway (#4913): an OpenAI model list naming
@@ -70,7 +70,7 @@ func TestLoomyPluginDraws(t *testing.T) {
 		t.Fatalf("drawers %v, want %v", drawers, want)
 	}
 	s := New()
-	code, a, raw := postImages(t, s, "/v1/images/generations", "application/json", `{"model":"`+pid+`/Hy-Image-3.5-preview","prompt":"a magpie","size":"1024x1024"}`)
+	code, a, raw := postImages(t, s, "/v1/images/generations", "application/json", `{"model":"`+pid+`/Hy-Image-3.5-preview","prompt":"a myna","size":"1024x1024"}`)
 	if code != 200 || len(a.Data) != 1 {
 		t.Fatalf("%d %s", code, raw)
 	}

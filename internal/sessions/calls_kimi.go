@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/yetone/magpie/internal/appdir"
+	"github.com/istoo/myna/internal/appdir"
 )
 
 // Kimi Code's calls (#1607, infinitr0us: its direct calls to api.kimi.com
@@ -37,9 +37,9 @@ import (
 // llm.request; 1.4 and the 1.5 builds before late August write no agentId.
 // The record alone carries everything a call needs.
 //
-// A call Kimi made through magpie's own entry (internal/agent's kimi.go
-// writes it as the provider "magpie", its model tables keyed
-// "magpie/<provider>/<model>") is the gateway's to count: it logged the
+// A call Kimi made through myna's own entry (internal/agent's kimi.go
+// writes it as the provider "myna", its model tables keyed
+// "myna/<provider>/<model>") is the gateway's to count: it logged the
 // call itself, with the provider and account that answered.
 //
 // kimi fork copies the parent's records into the new session unchanged,
@@ -60,8 +60,8 @@ func KimiCodeDir() string {
 
 func kimiSessions() string { return filepath.Join(KimiCodeDir(), "sessions") }
 
-// kimiGateway is how the model of a call to magpie's entry begins.
-const kimiGateway = "magpie/"
+// kimiGateway is how the model of a call to myna's entry begins.
+const kimiGateway = "myna/"
 
 // kimiCallFiles are every agent's wire.jsonl of every session. A session
 // migrated from the Python kimi-cli (a ses_* folder) is read too: one Kimi

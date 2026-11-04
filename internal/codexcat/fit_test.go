@@ -7,7 +7,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/istoo/myna/internal/catalog"
 )
 
 // The Codex app and its VS Code extension read the first AppList of
@@ -26,7 +26,7 @@ func TestFitKeepsUsedModelsWhereTheCodexAppReads(t *testing.T) {
 		}
 		entries = append(entries, map[string]any{"slug": s, "priority": float64(i + 1), "visibility": v})
 	}
-	// magpie's 150, after them
+	// myna's 150, after them
 	for i := range 150 {
 		entries = append(entries, map[string]any{"slug": fmt.Sprintf("many/model-%03d", i), "priority": 106 + i, "visibility": "list"})
 	}
@@ -51,7 +51,7 @@ func TestFitKeepsUsedModelsWhereTheCodexAppReads(t *testing.T) {
 	if !slices.Contains(first, "many/model-140") {
 		t.Errorf("the used many/model-140 is at %d, past the first %d the Codex app reads", pri["many/model-140"], AppList)
 	}
-	// 2 of Codex's own listed and 98 of magpie's: 97 from the top, then the used one
+	// 2 of Codex's own listed and 98 of myna's: 97 from the top, then the used one
 	if want := append([]string{"gpt-6", "gpt-6-mini"}, order[2:99]...); !slices.Equal(first[:99], want) || order[98] != "many/model-096" || order[99] != "many/model-140" || order[100] != "many/model-097" {
 		t.Errorf("the first 101: %v", order[:101])
 	}
@@ -74,7 +74,7 @@ func TestFitLeavesAShortListsOrder(t *testing.T) {
 	}
 }
 
-// The model_catalog_json magpie writes Fits the same way.
+// The model_catalog_json myna writes Fits the same way.
 func TestCatalogUsedFits(t *testing.T) {
 	t.Setenv("HOME", t.TempDir())
 	t.Setenv("USERPROFILE", os.Getenv("HOME"))
@@ -110,7 +110,7 @@ func TestUsedTagIsTheSet(t *testing.T) {
 
 // Codex's own models are kept in the first AppList wherever an order put
 // them, ahead of the used ones; a hidden one of them still goes last
-// (maiya on Discord: an order naming only magpie's put every GPT model
+// (maiya on Discord: an order naming only myna's put every GPT model
 // past the 100 the Codex app reads).
 func TestFitOwnKeepsCodexsOwnInTheAppsHundred(t *testing.T) {
 	var entries []any
@@ -139,13 +139,13 @@ func TestFitOwnKeepsCodexsOwnInTheAppsHundred(t *testing.T) {
 	if order[len(order)-1] != "codex-auto-review" {
 		t.Errorf("the hidden codex-auto-review is at %d", slices.Index(order, "codex-auto-review")+1)
 	}
-	// the rest in the order they stood: 97 of magpie's from the top
+	// the rest in the order they stood: 97 of myna's from the top
 	if order[0] != "many/model-000" || order[96] != "many/model-096" || order[100] != "many/model-097" {
 		t.Errorf("the first 101: %v", order[:101])
 	}
 }
 
-// The model_catalog_json magpie writes keeps a ChatGPT account's own
+// The model_catalog_json myna writes keeps a ChatGPT account's own
 // (codex/…) models in the first AppList the same way.
 func TestCatalogUsedKeepsChatGPTOwn(t *testing.T) {
 	t.Setenv("HOME", t.TempDir())

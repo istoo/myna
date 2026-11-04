@@ -97,7 +97,7 @@ func TestBrowserRecordsAGIF(t *testing.T) {
 	srv, site := realBrowser(t)
 	call, ok := browserCaller(t, srv, "rec")
 	ok("browser", map[string]any{"action": "record_start"}, "Recording")
-	page := ok("browser", map[string]any{"action": "navigate", "url": site.URL}, "Magpie fixture")
+	page := ok("browser", map[string]any{"action": "navigate", "url": site.URL}, "Myna fixture")
 	name := regexp.MustCompile(`textbox "Name"[^\n]*\[ref=(e\d+)\]`).FindStringSubmatch(page)
 	if name == nil {
 		t.Fatalf("no Name field in:\n%s", page)

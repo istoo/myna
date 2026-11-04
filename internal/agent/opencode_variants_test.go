@@ -9,9 +9,9 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/myna/internal/provider"
 )
 
 func TestOpenCodeVariants(t *testing.T) {
@@ -75,7 +75,7 @@ func variantOrder(t *testing.T, b []byte) []string {
 // TestOpenCodeVariantsInOrder: opencode.json lists a model's variants weakest
 // first, as OpenCode and OpenChamber show them in the file's order; they
 // were alphabetical — high, low, max, medium, ultra, xhigh (#713). A file an
-// older magpie wrote so is put in order by the next sync, and one in order
+// older myna wrote so is put in order by the next sync, and one in order
 // is left alone.
 func TestOpenCodeVariantsInOrder(t *testing.T) {
 	home := t.TempDir()
@@ -97,7 +97,7 @@ func TestOpenCodeVariantsInOrder(t *testing.T) {
 	path := filepath.Join(home, ".config", "opencode", "opencode.json")
 	writeFile(t, path, "{\n  \"theme\": \"dark\"\n}\n")
 	oc := opencode(home, filepath.Join(home, ".config"))
-	if err := oc.Field("model").Set("magpie/think/deep"); err != nil {
+	if err := oc.Field("model").Set("myna/think/deep"); err != nil {
 		t.Fatal(err)
 	}
 	b, _ := os.ReadFile(path)
@@ -105,12 +105,12 @@ func TestOpenCodeVariantsInOrder(t *testing.T) {
 		t.Fatalf("written: %v, want %v\n%s", got, want, b)
 	}
 
-	// as an older magpie wrote it: the same block from a map, keys sorted
+	// as an older myna wrote it: the same block from a map, keys sorted
 	var block map[string]any
-	if err := json.Unmarshal([]byte(mustJSON(t, magpieProviderJSON("opencode"))), &block); err != nil {
+	if err := json.Unmarshal([]byte(mustJSON(t, mynaProviderJSON("opencode"))), &block); err != nil {
 		t.Fatal(err)
 	}
-	if err := edit.SetJSON(path, edit.KV{Path: "provider.magpie", Value: block}); err != nil {
+	if err := edit.SetJSON(path, edit.KV{Path: "provider.myna", Value: block}); err != nil {
 		t.Fatal(err)
 	}
 	b, _ = os.ReadFile(path)
@@ -132,13 +132,13 @@ func TestOpenCodeVariantsInOrder(t *testing.T) {
 	}
 }
 
-// modelKeys are the ids of magpie's models in an opencode config at path,
+// modelKeys are the ids of myna's models in an opencode config at path,
 // in the order the file's bytes list them.
 func modelKeys(t *testing.T, path string) []string {
 	t.Helper()
-	raw, ok := edit.GetJSON(path, "provider.magpie.models")
+	raw, ok := edit.GetJSON(path, "provider.myna.models")
 	if !ok {
-		t.Fatalf("no models of magpie's in %s", path)
+		t.Fatalf("no models of myna's in %s", path)
 	}
 	var out []string
 	for _, p := range objectPairs([]byte(raw)) {
@@ -147,7 +147,7 @@ func modelKeys(t *testing.T, path string) []string {
 	return out
 }
 
-// TestOpenCodeModelsInOrder: opencode.json lists magpie's models in the
+// TestOpenCodeModelsInOrder: opencode.json lists myna's models in the
 // order the user dragged them to on the Agents page (#4575); they were
 // alphabetical — the models were a map, whose keys marshal sorted, and a
 // pure re-ordering wasn't even written, the file and the new block sorting
@@ -155,13 +155,13 @@ func modelKeys(t *testing.T, path string) []string {
 func TestOpenCodeModelsInOrder(t *testing.T) {
 	home := syncHome(t)
 	// a provider the catalog lists after relay's, whose models sort before:
-	// magpie's own order and the alphabetical one differ
+	// myna's own order and the alphabetical one differ
 	if err := provider.Save(provider.Provider{ID: "aaa", Name: "AAA", Key: "k", Chat: "http://127.0.0.1:1/v1", Models: []string{"m1"}}); err != nil {
 		t.Fatal(err)
 	}
 	path := filepath.Join(home, ".config", "opencode", "opencode.json")
 	writeFile(t, path, `{"theme":"dark"}`)
-	if err := opencode(home, filepath.Join(home, ".config")).Field("model").Set("magpie/relay/glm-4.6"); err != nil {
+	if err := opencode(home, filepath.Join(home, ".config")).Field("model").Set("myna/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	want := []string{"relay/glm-4.6", "aaa/m1"}
@@ -204,7 +204,7 @@ func mustJSON(t *testing.T, v any) string {
 	return string(b)
 }
 
-// TestOpenCodeWritesVariants: each model of magpie's in opencode.json names
+// TestOpenCodeWritesVariants: each model of myna's in opencode.json names
 // the reasoning levels it has as variants — OpenCode 2 otherwise offers low,
 // medium and high for every one — and the rest of the entry is as before.
 func TestOpenCodeWritesVariants(t *testing.T) {
@@ -228,7 +228,7 @@ func TestOpenCodeWritesVariants(t *testing.T) {
 	}
 	path := filepath.Join(home, ".config", "opencode", "opencode.json")
 	writeFile(t, path, `{"theme":"dark"}`)
-	if err := opencode(home, filepath.Join(home, ".config")).Field("model").Set("magpie/think/deep"); err != nil {
+	if err := opencode(home, filepath.Join(home, ".config")).Field("model").Set("myna/think/deep"); err != nil {
 		t.Fatal(err)
 	}
 	b, err := os.ReadFile(path)
@@ -246,10 +246,10 @@ func TestOpenCodeWritesVariants(t *testing.T) {
 	if err := json.Unmarshal(b, &cfg); err != nil {
 		t.Fatal(err)
 	}
-	if cfg.Theme != "dark" || cfg.Model != "magpie/think/deep" {
+	if cfg.Theme != "dark" || cfg.Model != "myna/think/deep" {
 		t.Fatalf("config: %s", b)
 	}
-	p := cfg.Provider["magpie"]
+	p := cfg.Provider["myna"]
 	if p.NPM != "@ai-sdk/openai-compatible" {
 		t.Fatalf("npm %q", p.NPM)
 	}
@@ -328,7 +328,7 @@ func TestOpenCodeNoResellerLevelsForSwitchModel(t *testing.T) {
 	}
 	path := filepath.Join(home, ".config", "opencode", "opencode.json")
 	writeFile(t, path, `{}`)
-	if err := opencode(home, filepath.Join(home, ".config")).Field("model").Set("magpie/xiaomi/mimo-v2.6-flash"); err != nil {
+	if err := opencode(home, filepath.Join(home, ".config")).Field("model").Set("myna/xiaomi/mimo-v2.6-flash"); err != nil {
 		t.Fatal(err)
 	}
 	b, err := os.ReadFile(path)
@@ -345,14 +345,14 @@ func TestOpenCodeNoResellerLevelsForSwitchModel(t *testing.T) {
 	if err := json.Unmarshal(b, &cfg); err != nil {
 		t.Fatal(err)
 	}
-	ms := cfg.Provider["magpie"].Models
+	ms := cfg.Provider["myna"].Models
 	for id, want := range map[string]int{"xiaomi/mimo-v2.6-flash": 0, "relay/mimo-v2.6-flash": 0, "relay/open-model": 3} {
 		m, ok := ms[id]
 		if !ok || m.Variants == nil || len(m.Variants) != want {
 			t.Errorf("%s: variants %v (listed %v), want %d", id, m.Variants, ok, want)
 		}
 	}
-	pi, _ := json.Marshal(magpieProviderJSON("pi"))
+	pi, _ := json.Marshal(mynaProviderJSON("pi"))
 	var piCfg struct {
 		Models []struct {
 			ID        string         `json:"id"`
@@ -377,7 +377,7 @@ func TestOpenCodeNoResellerLevelsForSwitchModel(t *testing.T) {
 				t.Errorf("pi %s: reasoning %v, levels %v", m.ID, m.Reasoning, m.Levels)
 			}
 		case "relay/mystery-model":
-			// levels magpie doesn't know: Pi's own, as before
+			// levels myna doesn't know: Pi's own, as before
 			seen++
 			if m.Reasoning || m.Levels != nil {
 				t.Errorf("pi %s: reasoning %v, levels %v", m.ID, m.Reasoning, m.Levels)
@@ -392,7 +392,7 @@ func TestOpenCodeNoResellerLevelsForSwitchModel(t *testing.T) {
 // TestOpenCodeZenModelReasons: an OpenCode Zen model that thinks with no
 // levels to pick (mimo-v2.6-flash-free, models.dev: reasoning true, no
 // reasoning_options) is marked reasoning in opencode.json, which OpenCode's
-// model tooltip showed as 不支持推理 through magpie (#725); so is one whose
+// model tooltip showed as 不支持推理 through myna (#725); so is one whose
 // levels hold OpenCode's own low, medium and high. One with fewer levels
 // isn't (OpenCode would add the levels it lacks), nor one that doesn't think.
 func TestOpenCodeZenModelReasons(t *testing.T) {
@@ -421,7 +421,7 @@ func TestOpenCodeZenModelReasons(t *testing.T) {
 	}
 	path := filepath.Join(home, ".config", "opencode", "opencode.json")
 	writeFile(t, path, `{}`)
-	if err := opencode(home, filepath.Join(home, ".config")).Field("model").Set("magpie/opencode-zen/mimo-v2.6-flash-free"); err != nil {
+	if err := opencode(home, filepath.Join(home, ".config")).Field("model").Set("myna/opencode-zen/mimo-v2.6-flash-free"); err != nil {
 		t.Fatal(err)
 	}
 	b, err := os.ReadFile(path)
@@ -439,7 +439,7 @@ func TestOpenCodeZenModelReasons(t *testing.T) {
 	if err := json.Unmarshal(b, &cfg); err != nil {
 		t.Fatal(err)
 	}
-	ms := cfg.Provider["magpie"].Models
+	ms := cfg.Provider["myna"].Models
 	for id, want := range map[string]bool{"mimo-v2.6-flash-free": true, "laguna-s-2.1-free": true,
 		"deepseek-v4-flash-free": false, "ling-2.6-flash-free": false} {
 		m, ok := ms["opencode-zen/"+id]

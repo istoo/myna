@@ -1,7 +1,7 @@
 package agent
 
 // Codex reads a model_context_window or model_auto_compact_token_limit in
-// its config.toml before the window and threshold magpie's catalog gives
+// its config.toml before the window and threshold myna's catalog gives
 // each model (codexcat: context_window, auto_compact_token_limit, from
 // Long conversations): the first becomes every model's window, and Codex
 // compacts at 90% of it; the second is where it compacts, whatever the
@@ -9,7 +9,7 @@ package agent
 // for a third-party model that puts model_context_window = 128000 there
 // kept every Codex conversation compacting near 128K while Long
 // conversations said 544K (zgjfjfl on Discord, 10-31). The value is the
-// user's, so magpie never takes it out on its own: Long conversations
+// user's, so myna never takes it out on its own: Long conversations
 // names it, and takes it out when the user asks (DropCodexCompactHolds).
 
 import (
@@ -18,7 +18,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/istoo/myna/internal/edit"
 )
 
 // codexCompactKeys are the config keys Codex reads before the catalog's
@@ -72,7 +72,7 @@ func DropCodexCompactHolds(home string) error {
 	return nil
 }
 
-// CodexModel is the magpie model this machine's Codex config runs (home ""
+// CodexModel is the myna model this machine's Codex config runs (home ""
 // is the user's): the profile's the config picks, else the top-level one,
 // as Codex reads them; "" when Codex runs a model of its own provider.
 // Long conversations can't compact past that model's own window: Codex
@@ -85,7 +85,7 @@ func CodexModel(home string) string {
 		t, _ := edit.GetTOMLTable(path, "profiles."+tomlQuoted(name))
 		m, p = cmp.Or(t["model"], m), cmp.Or(t["model_provider"], p)
 	}
-	if p != magpieID {
+	if p != mynaID {
 		return ""
 	}
 	return m

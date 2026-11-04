@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/istoo/myna/internal/usage"
 )
 
 // usageRows waits for n usage rows of op, and answers those there are.
@@ -64,14 +64,14 @@ func oneSideRoute(t *testing.T, s *Server, op string) (Route, usage.Record) {
 	return tr, rows[0]
 }
 
-// zzzkl3994 on Discord: a video the magpie-image MCP made was in Usage's
-// requests and not on Routing's. Every request magpie sends is listed on
+// zzzkl3994 on Discord: a video the myna-image MCP made was in Usage's
+// requests and not on Routing's. Every request myna sends is listed on
 // Routing: an image, a video's start (once, however often it is polled
 // and fetched) and an embedding, as a chat is, with its one usage row.
 func TestImageIsOnRouting(t *testing.T) {
 	s, _ := easeled(t)
 	rec := httptest.NewRecorder()
-	req := httptest.NewRequest("POST", "/v1/images/generations", strings.NewReader(`{"model":"art/gpt-image-1","prompt":"a magpie"}`))
+	req := httptest.NewRequest("POST", "/v1/images/generations", strings.NewReader(`{"model":"art/gpt-image-1","prompt":"a myna"}`))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("User-Agent", "claude-code/2.1.0 "+DrawAgent)
 	req.Header.Set("X-Magpie-Session", "draw-session")

@@ -13,8 +13,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // What Claude Code hands a statusLine command on stdin (code.claude.com
@@ -48,15 +48,15 @@ func statuslineGateway(t *testing.T, now time.Time) *httptest.Server {
 		{Provider: "deepseek", Name: "DeepSeek", Kind: "balance", Balance: "¥12.00", LastServedAt: at(-time.Minute), Windows: []provider.QuotaSpan{}},
 	}
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /v1/magpie/quotas", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("GET /v1/myna/quotas", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Query().Get("kept") != "1" {
-			t.Errorf("statusline asked %s: that reads the vendors, not what magpie kept", r.URL)
+			t.Errorf("statusline asked %s: that reads the vendors, not what myna kept", r.URL)
 			http.Error(w, "vendor read", 500)
 			return
 		}
 		json.NewEncoder(w).Encode(map[string]any{"object": "list", "data": quotas})
 	})
-	mux.HandleFunc("GET /v1/magpie/route", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("GET /v1/myna/route", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Query().Get("session") != "6f1d2c3a-9b8e-4a7f-8c1d-2e3f4a5b6c7d" {
 			json.NewEncoder(w).Encode(map[string]any{"route": nil})
 			return
@@ -105,7 +105,7 @@ func TestStatuslineGatewayOff(t *testing.T) {
 
 // A Claude Code on another computer than the gateway asks the gateway for
 // the line (curl, steven_4422's Docker): the real gateway's answer is the
-// line `magpie statusline` prints from the same gateway, every account and
+// line `myna statusline` prints from the same gateway, every account and
 // with one named.
 func TestStatuslineEndpointIsTheCLIsLine(t *testing.T) {
 	home := t.TempDir()
@@ -113,7 +113,7 @@ func TestStatuslineEndpointIsTheCLIsLine(t *testing.T) {
 	t.Setenv("USERPROFILE", home)
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("MYNA_ADDR", "")
 	// plan cards are the keys of a provider with a plan source (Ollama
 	// Cloud's base); nothing here is called
 	for _, p := range []provider.Provider{
@@ -149,7 +149,7 @@ func TestStatuslineEndpointIsTheCLIsLine(t *testing.T) {
 	for _, only := range [][]string{nil, {"beta"}} {
 		want := statusline(strings.NewReader(""), only, gw.URL, time.Now())
 		if want == "" || (only == nil && !strings.Contains(want, "alpha") && !strings.Contains(want, "beta")) {
-			t.Fatalf("magpie statusline %v printed %q: the fixture shows no account", only, want)
+			t.Fatalf("myna statusline %v printed %q: the fixture shows no account", only, want)
 		}
 		target := gw.URL + gateway.StatuslinePath
 		if len(only) > 0 {
@@ -162,7 +162,7 @@ func TestStatuslineEndpointIsTheCLIsLine(t *testing.T) {
 		got, _ := io.ReadAll(res.Body)
 		res.Body.Close()
 		if res.StatusCode != 200 || strings.TrimSuffix(string(got), "\n") != want {
-			t.Errorf("%s: %d %q, `magpie statusline %v` prints %q", target, res.StatusCode, got, only, want)
+			t.Errorf("%s: %d %q, `myna statusline %v` prints %q", target, res.StatusCode, got, only, want)
 		}
 	}
 }

@@ -61,8 +61,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang));
-        await page.addInitScript(() => { try { localStorage.setItem("magpie.usageTab", "usage"); localStorage.setItem("magpie.sessRange", "all"); } catch {} });
-        await page.goto("http://magpie.test/?view=usage");
+        await page.addInitScript(() => { try { localStorage.setItem("myna.usageTab", "usage"); localStorage.setItem("myna.sessRange", "all"); } catch {} });
+        await page.goto("http://myna.test/?view=usage");
         await page.waitForSelector(".subscription-account .user");
 
         // the reporter's steps: Usage, Hide accounts on, then Sessions

@@ -5,7 +5,7 @@ import (
 	"sync"
 )
 
-// joins are the paths Join has made, by what they were made of. magpie
+// joins are the paths Join has made, by what they were made of. myna
 // names its files from these folders on every read of them, and a look
 // at the providers reads them for each provider and model: the joins
 // were 70 MB of the 1.4 GB twenty window polls allocated.
@@ -27,7 +27,7 @@ func JoinFile(dir, name, ext string) string {
 	if p, ok := joins.by[k]; ok {
 		return p
 	}
-	// a bound, for folders that change under a test, not a magpie
+	// a bound, for folders that change under a test, not a myna
 	if joins.by == nil || len(joins.by) >= 4096 {
 		joins.by = map[[3]string]string{}
 	}

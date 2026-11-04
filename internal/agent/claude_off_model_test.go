@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // claudeOffHome is a sandbox HOME with a provider serving Claude models,
@@ -59,9 +59,9 @@ func claudeStartsOn(t *testing.T, path string) (base string, models map[string]s
 	return s.Env["ANTHROPIC_BASE_URL"], models
 }
 
-// noMagpieOnAnthropic fails when Claude Code, on Anthropic's own endpoint,
-// would ask for one of magpie's provider/model names.
-func noMagpieOnAnthropic(t *testing.T, path, when string) {
+// noMynaOnAnthropic fails when Claude Code, on Anthropic's own endpoint,
+// would ask for one of myna's provider/model names.
+func noMynaOnAnthropic(t *testing.T, path, when string) {
 	t.Helper()
 	base, models := claudeStartsOn(t, path)
 	if base != "" {
@@ -74,16 +74,16 @@ func noMagpieOnAnthropic(t *testing.T, path, when string) {
 	}
 }
 
-// roswellcsy on X (v0.1.2846): Claude Code switched off magpie, on its own
+// roswellcsy on X (v0.1.2846): Claude Code switched off myna, on its own
 // sign-in, and every session said "There's an issue with the selected
 // model (claude/claude-opus-5-5)" while settings.json's model was the
-// bare claude-opus-5-5. A model name of magpie's left in Claude Code's env
+// bare claude-opus-5-5. A model name of myna's left in Claude Code's env
 // outranks or stands in for that model, and Anthropic has no such model.
 // None is ever left there, given back from the stash, or kept as the
-// user's own; one already there goes when magpie next looks.
-func TestClaudeOffLeavesNoMagpieModel(t *testing.T) {
-	// what the user's settings.json held: the bare model, and magpie's
-	// names in the env with no endpoint of magpie's beside them
+// user's own; one already there goes when myna next looks.
+func TestClaudeOffLeavesNoMynaModel(t *testing.T) {
+	// what the user's settings.json held: the bare model, and myna's
+	// names in the env with no endpoint of myna's beside them
 	const stray = `{"model": "claude-opus-5-5", "env": {
 		"ANTHROPIC_MODEL": "relay/claude-opus-5-5",
 		"ANTHROPIC_DEFAULT_OPUS_MODEL": "relay/claude-opus-5-5[1m]",
@@ -93,17 +93,17 @@ func TestClaudeOffLeavesNoMagpieModel(t *testing.T) {
 		"ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-sonnet-4-6",
 		"MY_OWN": "x"}}`
 
-	t.Run("magpie's start takes them out", func(t *testing.T) {
+	t.Run("myna's start takes them out", func(t *testing.T) {
 		a, path := claudeOffHome(t, stray)
 		SyncCatalog()
-		noMagpieOnAnthropic(t, path, "after a start")
+		noMynaOnAnthropic(t, path, "after a start")
 		get := func(k string) string { v, _ := edit.GetJSON(path, k); return v }
 		// the user's own stay as they are
 		if get("model") != "claude-opus-5-5" || get("env.ANTHROPIC_DEFAULT_SONNET_MODEL") != "claude-sonnet-4-6" || get("env.MY_OWN") != "x" {
 			t.Fatalf("the user's own values went:\n%s", readFile(path))
 		}
 		if a.Wired() {
-			t.Fatalf("taking magpie's names out connected Claude Code:\n%s", readFile(path))
+			t.Fatalf("taking myna's names out connected Claude Code:\n%s", readFile(path))
 		}
 	})
 
@@ -118,19 +118,19 @@ func TestClaudeOffLeavesNoMagpieModel(t *testing.T) {
 		if err := a.Disconnect(); err != nil {
 			t.Fatal(err)
 		}
-		noMagpieOnAnthropic(t, path, "after Disconnect")
-		// and again: nothing of magpie's was kept to come back
+		noMynaOnAnthropic(t, path, "after Disconnect")
+		// and again: nothing of myna's was kept to come back
 		if err := a.Connect(); err != nil {
 			t.Fatal(err)
 		}
 		if err := a.Disconnect(); err != nil {
 			t.Fatal(err)
 		}
-		noMagpieOnAnthropic(t, path, "after a second Disconnect")
+		noMynaOnAnthropic(t, path, "after a second Disconnect")
 	})
 
-	t.Run("kept by an older magpie", func(t *testing.T) {
-		// a stash an older magpie wrote, holding magpie's names as the
+	t.Run("kept by an older myna", func(t *testing.T) {
+		// a stash an older myna wrote, holding myna's names as the
 		// user's own: never given back
 		a, path := claudeOffHome(t, `{"model": "claude-opus-5-5"}`)
 		if err := a.Connect(); err != nil {
@@ -145,7 +145,7 @@ func TestClaudeOffLeavesNoMagpieModel(t *testing.T) {
 		if err := a.Disconnect(); err != nil {
 			t.Fatal(err)
 		}
-		noMagpieOnAnthropic(t, path, "after Disconnect")
+		noMynaOnAnthropic(t, path, "after Disconnect")
 	})
 
 	t.Run("the user's own model comes back", func(t *testing.T) {
@@ -163,8 +163,8 @@ func TestClaudeOffLeavesNoMagpieModel(t *testing.T) {
 	})
 
 	t.Run("an older gateway address", func(t *testing.T) {
-		// magpie's wiring at an address it no longer serves (a port
-		// changed): its key, so magpie's, and all of it goes
+		// myna's wiring at an address it no longer serves (a port
+		// changed): its key, so myna's, and all of it goes
 		a, path := claudeOffHome(t, `{"model": "relay/claude-opus-5-5", "env": {
 			"ANTHROPIC_BASE_URL": "http://127.0.0.1:1",
 			"ANTHROPIC_AUTH_TOKEN": "`+gateway.Token+`",
@@ -173,14 +173,14 @@ func TestClaudeOffLeavesNoMagpieModel(t *testing.T) {
 		if err := a.Disconnect(); err != nil {
 			t.Fatal(err)
 		}
-		noMagpieOnAnthropic(t, path, "after Disconnect")
+		noMynaOnAnthropic(t, path, "after Disconnect")
 		if v, has := edit.GetJSON(path, "env.ANTHROPIC_AUTH_TOKEN"); has {
-			t.Fatalf("magpie's key left: %q\n%s", v, readFile(path))
+			t.Fatalf("myna's key left: %q\n%s", v, readFile(path))
 		}
 	})
 
 	t.Run("another endpoint's names are its own", func(t *testing.T) {
-		// a relay of the user's own may name its models so: magpie
+		// a relay of the user's own may name its models so: myna
 		// leaves them
 		const own = `{"env": {"ANTHROPIC_BASE_URL": "https://mine.example", "ANTHROPIC_AUTH_TOKEN": "sk-mine", "ANTHROPIC_MODEL": "relay/claude-opus-5-5"}}`
 		_, path := claudeOffHome(t, own)

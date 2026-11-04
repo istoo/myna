@@ -16,7 +16,7 @@ import (
 )
 
 // Ark's System One answers, as ark.cn-beijing.volces.com gave them on
-// 2026-11-01 to an Ark API key: magpie's smallest question (AskSystemOne's)
+// 2026-11-01 to an Ark API key: myna's smallest question (AskSystemOne's)
 // answered, and the replies for a model that doesn't serve System One and
 // for a request without the beta header (a bare 404).
 const (

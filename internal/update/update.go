@@ -1,5 +1,5 @@
-// Package update keeps magpie current. Builds are published as GitHub
-// releases of yetone/magpie-releases; usemagpie.ai/api/latest describes the
+// Package update keeps myna current. Builds are published as GitHub
+// releases of istoo/myna; github.com/istoo/myna/api/latest describes the
 // newest one: its version, notes, and every file with its SHA-256.
 //
 // The macOS app replaces its own bundle: the new zip is downloaded, checked
@@ -32,22 +32,32 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/netproxy"
-	"github.com/yetone/magpie/internal/proc"
-	"github.com/yetone/magpie/internal/source"
+	"github.com/istoo/myna/internal/appdir"
+	"github.com/istoo/myna/internal/netproxy"
+	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/myna/internal/source"
 )
 
-// Site is magpie's home; its /api/latest is the update feed.
-const Site = "https://usemagpie.ai"
+// Site is myna's own GitHub repository: releases published there are the
+// only ones this build installs.
+const Site = "https://github.com/istoo/myna"
 
-// Feed is where the newest release is described. MAGPIE_UPDATE_FEED points
+// feedAsset is the file each release carries describing itself, and
+// notesAsset the release notes the app shows after an update. Both are
+// release assets, so "latest" serves the newest without a server of our
+// own.
+const (
+	feedAsset  = "latest.json"
+	notesAsset = "notes.json"
+)
+
+// Feed is where the newest release is described. MYNA_UPDATE_FEED points
 // it elsewhere, for testing an update against a local server.
 func Feed() string {
-	if f := os.Getenv("MAGPIE_UPDATE_FEED"); f != "" {
+	if f := os.Getenv("MYNA_UPDATE_FEED"); f != "" {
 		return f
 	}
-	return Site + "/api/latest"
+	return Site + "/releases/latest/download/" + feedAsset
 }
 
 // Release is one published version.
@@ -66,7 +76,7 @@ type Asset struct {
 }
 
 // client asks the feed and downloads a release through the proxy the rest
-// of magpie's requests take — Settings' Proxy, else the environment's, else
+// of myna's requests take — Settings' Proxy, else the environment's, else
 // the system's (#294) — on a transport of its own, whatever the process has
 // done to http.DefaultTransport.
 var client = &http.Client{Timeout: 10 * time.Minute, Transport: proxied()}
@@ -200,11 +210,11 @@ func parse(v string) *semver {
 var GUI bool
 
 // AppAsset and BinaryAsset name the files this machine would install.
-func AppAsset() string { return "magpie-darwin-" + runtime.GOARCH + ".zip" }
+func AppAsset() string { return "myna-darwin-" + runtime.GOARCH + ".zip" }
 func BinaryAsset() string {
-	name := "magpie-cli-" + runtime.GOOS + "-" + runtime.GOARCH
+	name := "myna-cli-" + runtime.GOOS + "-" + runtime.GOARCH
 	if GUI && runtime.GOOS != "darwin" {
-		name = "magpie-" + runtime.GOOS + "-" + runtime.GOARCH
+		name = "myna-" + runtime.GOOS + "-" + runtime.GOARCH
 	}
 	if runtime.GOOS == "windows" {
 		name += ".exe"
@@ -222,7 +232,7 @@ func Bundle() string {
 	if err != nil {
 		return ""
 	}
-	// …/magpie.app/Contents/MacOS/magpie
+	// …/myna.app/Contents/MacOS/myna
 	app := filepath.Dir(filepath.Dir(filepath.Dir(exe)))
 	if filepath.Ext(app) != ".app" || filepath.Base(filepath.Dir(exe)) != "MacOS" {
 		return ""
@@ -230,11 +240,11 @@ func Bundle() string {
 	return app
 }
 
-// Homebrew is whether exe was installed by Homebrew (brew install magpie),
+// Homebrew is whether exe was installed by Homebrew (brew install myna),
 // which keeps it in its Cellar and has to be the one to upgrade it: a
 // binary replaced under it leaves brew thinking the old version is there.
 func Homebrew(exe string) bool {
-	return strings.Contains(filepath.ToSlash(exe), "/Cellar/magpie/")
+	return strings.Contains(filepath.ToSlash(exe), "/Cellar/myna/")
 }
 
 // Executable is the running binary, symlinks resolved.
@@ -246,9 +256,9 @@ func Executable() (string, error) {
 	return filepath.EvalSymlinks(exe)
 }
 
-// Writable reports whether magpie may replace what lives in dir.
+// Writable reports whether myna may replace what lives in dir.
 func Writable(dir string) bool {
-	f, err := os.CreateTemp(dir, ".magpie-update-*")
+	f, err := os.CreateTemp(dir, ".myna-update-*")
 	if err != nil {
 		return false
 	}
@@ -281,10 +291,10 @@ func Stage(ctx context.Context, rel *Release, bundle string) (string, error) {
 		return "", fmt.Errorf("unzip: %v: %s", err, b)
 	}
 	os.Remove(zip)
-	// the zip holds magpie.app, which leaves that name at once: a folder
+	// the zip holds myna.app, which leaves that name at once: a folder
 	// ending in .app beside the installed one is taken by LaunchServices
-	// for a second magpie, and Spotlight lists it after it is gone (#3965)
-	unzipped := filepath.Join(out, "magpie.app")
+	// for a second myna, and Spotlight lists it after it is gone (#3965)
+	unzipped := filepath.Join(out, "myna.app")
 	app := filepath.Join(dir, stagedName)
 	if err := os.Rename(unzipped, app); err != nil {
 		os.RemoveAll(dir)
@@ -324,7 +334,7 @@ func team(ctx context.Context, app string) string {
 
 // stagedName is what the new app is unpacked as in stageDir, and asideName
 // what the installed one is moved to while they are swapped. Neither ends
-// in .app, so LaunchServices never registers either as a second magpie
+// in .app, so LaunchServices never registers either as a second myna
 // (#3965); the renames don't need the name, and stay on one volume.
 const (
 	stagedName = "payload"
@@ -332,7 +342,7 @@ const (
 )
 
 // stageDir is where an update is unpacked: beside what it replaces, so
-// installing it is a rename on one volume, or, where magpie may not write,
+// installing it is a rename on one volume, or, where myna may not write,
 // in its cache, to be moved in with the administrator's password.
 func stageDir(dir string) string {
 	if !Writable(dir) {
@@ -340,12 +350,12 @@ func stageDir(dir string) string {
 			return filepath.Join(cache, "update")
 		}
 	}
-	return filepath.Join(dir, ".magpie-update")
+	return filepath.Join(dir, ".myna-update")
 }
 
 // Install swaps the staged app in for bundle. The running copy keeps going
 // until it quits; the next launch is the new one. Where the folder is not
-// magpie's to change the error is a permission one (NeedsAdmin), and
+// myna's to change the error is a permission one (NeedsAdmin), and
 // InstallAsAdmin can do it instead.
 func Install(staged, bundle string) error {
 	old := filepath.Join(filepath.Dir(staged), asideName)
@@ -357,7 +367,7 @@ func Install(staged, bundle string) error {
 		os.Rename(old, bundle) // put it back
 		return err
 	}
-	os.RemoveAll(filepath.Dir(staged)) // .magpie-update
+	os.RemoveAll(filepath.Dir(staged)) // .myna-update
 	return nil
 }
 
@@ -375,8 +385,8 @@ func InstallAsAdmin(staged, bundle string) error {
 // Relaunch opens bundle again once this process (pid) has exited: with its
 // window when window is set, else only its menu bar icon (`tray`, as a
 // login launch), which a restart by itself uses while no window was up.
-// Each try, and what it came to, is written to relaunch.log in magpie's
-// own folder. quiet, the restart is one magpie made by itself: the app
+// Each try, and what it came to, is written to relaunch.log in myna's
+// own folder. quiet, the restart is one myna made by itself: the app
 // opens in the background (open -g), as it does too with no window, so it
 // takes no focus from the app the user is in (relaunchOpen).
 func Relaunch(bundle string, window, quiet bool) error {
@@ -384,20 +394,20 @@ func Relaunch(bundle string, window, quiet bool) error {
 }
 
 // openWaits are the pauses, in seconds, between tries of the relaunch's
-// open: about 13s in all. Just after magpie exits, LaunchServices can
+// open: about 13s in all. Just after myna exits, LaunchServices can
 // still hold it as running and send the open to the process that is gone,
 // and open fails (-600, procNotFound; seen with the screen locked). Tried
-// once, nothing started magpie again until the user did, nine hours later.
+// once, nothing started myna again until the user did, nine hours later.
 var openWaits = []string{"0.5", "1", "1", "2", "2", "3", "4"}
 
-// relaunchLogName is the file in magpie's folder the relaunch writes each
+// relaunchLogName is the file in myna's folder the relaunch writes each
 // try of its open to, and the start it falls back to: the shell that runs
-// them has no output anyone sees, and a magpie that never came back left
+// them has no output anyone sees, and a myna that never came back left
 // only the system log to say why.
 const relaunchLogName = "relaunch.log"
 
 // relaunchLog is the relaunch's log file, made ready to append to; once it
-// is past 64KB the last one is kept as relaunch.log.old. "" when magpie's
+// is past 64KB the last one is kept as relaunch.log.old. "" when myna's
 // folder can't be made: the tries then go unwritten.
 func relaunchLog() string {
 	h, err := appdir.Home()
@@ -415,10 +425,10 @@ func relaunchLog() string {
 	return p
 }
 
-// relaunchCommand is the shell command Relaunch runs once magpie has
+// relaunchCommand is the shell command Relaunch runs once myna has
 // exited: open, tried again while it fails, and, when it never worked,
 // the bundle's own executable run straight, as the login launch agent
-// runs it. With the screen locked, magpie stayed closed after an update
+// runs it. With the screen locked, myna stayed closed after an update
 // even with the 13s of tries (molvqingtai, after fb23bca5c): LaunchServices
 // can go on refusing the open for as long as the session is locked, and a
 // program run by its path needs nothing from it to start.
@@ -441,7 +451,7 @@ func relaunchScript(bundle string, window, quiet bool, log string, waits []strin
 	b.WriteString(`note() { echo "$(date '+%Y-%m-%d %H:%M:%S %z') $*" >> "$log" 2>/dev/null; }; `)
 	// open's own exit status and what it said, on one line
 	b.WriteString(`try() { n=$((n+1)); e=$(` + relaunchOpen(bundle, window, quiet) + ` 2>&1 >/dev/null); s=$?; note "open try $n: exit $s $(printf '%s' "$e" | tr '\n' ' ')"; return $s; }; `)
-	b.WriteString("n=0; note " + shellQuote("magpie has exited; opening "+bundle) + "; ")
+	b.WriteString("n=0; note " + shellQuote("myna has exited; opening "+bundle) + "; ")
 	b.WriteString(retried("try", waits))
 	b.WriteString(" || { note \"open gave up after $n tries; starting \"" + shellQuote(run) + "; ")
 	b.WriteString("[ -x " + shellQuote(exe) + " ] || { note \"no executable at \"" + shellQuote(exe) + "; exit 1; }; ")
@@ -454,7 +464,7 @@ var bundleExecutableKey = regexp.MustCompile(`<key>CFBundleExecutable</key>\s*<s
 
 // bundleExecutable is the name of the program in bundle's Contents/MacOS:
 // the one its Info.plist names, else this one's own when it runs from
-// that bundle, else magpie.
+// that bundle, else myna.
 func bundleExecutable(bundle string) string {
 	if b, err := os.ReadFile(filepath.Join(bundle, "Contents", "Info.plist")); err == nil {
 		if m := bundleExecutableKey.FindSubmatch(b); m != nil {
@@ -466,7 +476,7 @@ func bundleExecutable(bundle string) string {
 	if exe, err := Executable(); err == nil && filepath.Dir(exe) == filepath.Join(bundle, "Contents", "MacOS") {
 		return filepath.Base(exe)
 	}
-	return "magpie"
+	return "myna"
 }
 
 // retried is a shell command that runs command until it succeeds, sleeping
@@ -480,11 +490,11 @@ func retried(command string, waits []string) string {
 
 // runAfterExit starts a shell that runs command once pid has exited. The
 // shell is in a session of its own: launchd ends the process group of a
-// job whose process exits, so one left in magpie's group was killed as
-// magpie quit and the new version never opened. That is the launch agent
+// job whose process exits, so one left in myna's group was killed as
+// myna quit and the new version never opened. That is the launch agent
 // of Open at login without AbandonProcessGroup (ee16c657), and, on macOS
 // 13 at least, the job LaunchServices runs an app in when it is opened from
-// the Dock or Finder, which magpie can't set that key on (#2362).
+// the Dock or Finder, which myna can't set that key on (#2362).
 func runAfterExit(pid int, command string) error {
 	script := fmt.Sprintf(`while kill -0 %d 2>/dev/null; do sleep 0.2; done; %s`, pid, command)
 	cmd := proc.Command("/bin/sh", "-c", script)
@@ -495,19 +505,19 @@ func runAfterExit(pid int, command string) error {
 
 // relaunchOpen is the open command Relaunch runs for bundle. -n asks
 // LaunchServices for a new instance: without it, open looks the app up
-// among those running first, and just after magpie exits LaunchServices
-// can still have the gone process registered as magpie. open then sends
+// among those running first, and just after myna exits LaunchServices
+// can still have the gone process registered as myna. open then sends
 // it a reopen Apple event (aevt/rapp) rather than launching the bundle,
 // and fails with -600, procNotFound ("Specified target process … does
 // not exist", "LAUNCH: Launch failed in CSUI"; Linka's log on Discord,
-// macOS 27.0.1, v0.1.1308), as often as it is tried. A magpie that is in
+// macOS 27.0.1, v0.1.1308), as often as it is tried. A myna that is in
 // fact up still has the one instance: the new process finds the instance
 // lock held and hands over to it (runningAlready in internal/gui).
 //
 // -g opens it in the background, unless it comes back with its window on
-// a restart the user asked for. Without it, LaunchServices brings magpie
+// a restart the user asked for. Without it, LaunchServices brings myna
 // to the front as it starts: a restart into an update with only the menu
-// bar icon to come back, or one magpie made by itself (Settings'
+// bar icon to come back, or one myna made by itself (Settings'
 // AutoRestart), took the focus from the app the user was typing in
 // (xyxyxy_15591 on Discord).
 func relaunchOpen(bundle string, window, quiet bool) string {
@@ -577,20 +587,20 @@ func stageBinaryFor(ctx context.Context, a Asset, exe string) (string, error) {
 
 // The GUI downloads an update when it is out and swaps it in at the next
 // restart, which may be days later. It was downloaded beside the program
-// as magpie.exe.new, so a magpie kept on the Desktop showed the download
+// as myna.exe.new, so a myna kept on the Desktop showed the download
 // there, and deleted, it came back with the next check (nianshou5 on
-// Discord). It is downloaded to magpie's cache now, in a folder of this
+// Discord). It is downloaded to myna's cache now, in a folder of this
 // program's own, whenever a rename from there reaches the program's
 // folder, which is what puts it in; else (the cache on another volume)
-// into a hidden .magpie-update folder beside the program. Where magpie may
+// into a hidden .myna-update folder beside the program. Where myna may
 // not write beside the program, it goes to the cache as before, to be
 // moved in with the administrator's password.
 
 // besideStage is the hidden folder beside the program an update is
 // downloaded into when no rename from the cache reaches the program.
-const besideStage = ".magpie-update"
+const besideStage = ".myna-update"
 
-// stageCache is magpie's cache folder; tests set it.
+// stageCache is myna's cache folder; tests set it.
 var stageCache = appdir.SystemCache
 
 // binaryStage is the file StageBinary downloads exe's new build to, its
@@ -636,7 +646,7 @@ func freshStage(d, name string) (string, error) {
 }
 
 // cacheStage is exe's own folder in the cache for its downloads, "" with
-// no cache: two copies of magpie (a portable one and the installed one)
+// no cache: two copies of myna (a portable one and the installed one)
 // never share one.
 func cacheStage(exe string) string {
 	cache, err := stageCache()
@@ -650,7 +660,7 @@ func cacheStage(exe string) string {
 // renamesInto says whether a file in from can be renamed into dir: the
 // same volume, which a move that can't fail half way needs.
 func renamesInto(from, dir string) bool {
-	f, err := os.CreateTemp(from, ".magpie-update-*")
+	f, err := os.CreateTemp(from, ".myna-update-*")
 	if err != nil {
 		return false
 	}
@@ -717,7 +727,7 @@ func InstallBinaryAside(staged, exe string) (string, error) {
 			if err := tryStart(staged); heldOpen(err) {
 				// held, not refused: kept, for a restart to try again
 				// once whatever holds it lets go
-				return "", &saidError{"couldn't start the new version to check it: another program still has the download open (often an antivirus checking it); restart to update again in a minute, or let magpie through it", err}
+				return "", &saidError{"couldn't start the new version to check it: another program still has the download open (often an antivirus checking it); restart to update again in a minute, or let myna through it", err}
 			} else if err != nil {
 				os.Remove(staged)
 				dropStage(staged)
@@ -727,7 +737,7 @@ func InstallBinaryAside(staged, exe string) (string, error) {
 		}
 		// A running .exe cannot be overwritten, but it can be moved aside.
 		// What the last update moved aside may still be running too (a
-		// `magpie serve` started before it), and can't be removed or
+		// `myna serve` started before it), and can't be removed or
 		// replaced then: this one goes beside it, under a name of its own.
 		// The download is kept, for another try.
 		RemoveOld(exe)
@@ -740,7 +750,7 @@ func InstallBinaryAside(staged, exe string) (string, error) {
 		if heldOpen(err) {
 			// the reason and what to do, shown as is in the version row
 			// and the Update pill's tooltip, without the paths
-			err = &saidError{fmt.Sprintf("couldn't put the new version in place of %s: another program still has the download open (often an antivirus checking it): let magpie through it and restart to update again, or download the new version and put it in place of this one", filepath.Base(exe)), err}
+			err = &saidError{fmt.Sprintf("couldn't put the new version in place of %s: another program still has the download open (often an antivirus checking it): let myna through it and restart to update again, or download the new version and put it in place of this one", filepath.Base(exe)), err}
 		}
 		if old != "" {
 			if restoreErr := moveIn(old, exe); restoreErr != nil {
@@ -909,9 +919,9 @@ func moveAside(exe string) (string, error) {
 	var hint string
 	switch {
 	case heldOpen(err):
-		hint = "another program has it open (often an antivirus or OneDrive): let magpie through it and restart to update again, or download the new version and put it in place of this one"
+		hint = "another program has it open (often an antivirus or OneDrive): let myna through it and restart to update again, or download the new version and put it in place of this one"
 	case errors.Is(err, fs.ErrPermission):
-		hint = "Windows doesn't let magpie change files in " + filepath.Dir(exe) + " (an antivirus' folder protection, or the folder's permissions): let magpie through, or download the new version and put it in place of this one"
+		hint = "Windows doesn't let myna change files in " + filepath.Dir(exe) + " (an antivirus' folder protection, or the folder's permissions): let myna through, or download the new version and put it in place of this one"
 	default:
 		hint = "download the new version and put it in place of this one"
 	}
@@ -941,7 +951,7 @@ func RemoveOld(exe string) {
 }
 
 // Replaced reports whether exe is no longer the binary that was there when
-// this process looked (started, from os.Stat): another magpie installed an
+// this process looked (started, from os.Stat): another myna installed an
 // update over it, and this one runs from where it was moved aside.
 func Replaced(exe string, started os.FileInfo) bool {
 	now, err := os.Stat(exe)
@@ -949,9 +959,9 @@ func Replaced(exe string, started os.FileInfo) bool {
 }
 
 // RemoveStaleNew removes a download of exe's next build (stagedFiles)
-// that is no newer than exe: exe over again (the update a magpie left
+// that is no newer than exe: exe over again (the update a myna left
 // running from before it downloaded once more), or an older version a
-// swap never put in. A newer one, which a magpie still running may yet
+// swap never put in. A newer one, which a myna still running may yet
 // put in, stays.
 func RemoveStaleNew(exe string) {
 	mine := fileVersion(exe)
@@ -1006,7 +1016,7 @@ func InstallBinaryAsAdmin(staged, exe string) error {
 // one then runs on rather than quitting.
 func RelaunchBinary(exe, old string, window bool, view string) error {
 	args := RelaunchArgs(window, view)
-	env := append(os.Environ(), "MAGPIE_REPLACES="+strconv.Itoa(os.Getpid()))
+	env := append(os.Environ(), "MYNA_REPLACES="+strconv.Itoa(os.Getpid()))
 	if old != "" {
 		return startChecked(exe, old, args, env)
 	}
@@ -1014,7 +1024,7 @@ func RelaunchBinary(exe, old string, window bool, view string) error {
 	return err
 }
 
-// RelaunchArgs is what RelaunchBinary starts magpie with: `gui [view]` for
+// RelaunchArgs is what RelaunchBinary starts myna with: `gui [view]` for
 // the window, `tray` for the tray icon alone.
 func RelaunchArgs(window bool, view string) []string {
 	switch {
@@ -1026,12 +1036,12 @@ func RelaunchArgs(window bool, view string) []string {
 	return []string{"gui"}
 }
 
-// AwaitPredecessor blocks, for a while at most, until the magpie that
+// AwaitPredecessor blocks, for a while at most, until the myna that
 // relaunched this one has exited.
 func AwaitPredecessor() {
 	reportStarted() // first: the one that started this waits for it
-	pid, err := strconv.Atoi(os.Getenv("MAGPIE_REPLACES"))
-	os.Unsetenv("MAGPIE_REPLACES")
+	pid, err := strconv.Atoi(os.Getenv("MYNA_REPLACES"))
+	os.Unsetenv("MYNA_REPLACES")
 	if err != nil || pid <= 0 {
 		return
 	}
@@ -1297,7 +1307,7 @@ func openBeside(bundle string, window, quiet bool) string {
 
 // StartBeside starts exe now, beside this process, as RelaunchBinary's
 // args say: the new version of a restart that hands the gateway over. It
-// isn't told to wait for this one (MAGPIE_REPLACES): it takes the gateway
+// isn't told to wait for this one (MYNA_REPLACES): it takes the gateway
 // from it while it runs.
 func StartBeside(exe string, window bool, view string) error {
 	_, _, err := launch(exe, RelaunchArgs(window, view), os.Environ())

@@ -8,19 +8,19 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/access"
+	"github.com/istoo/myna/internal/provider"
 )
 
-// #1981 (321sssrt-bit): magpie shared on the local network with a gateway
+// #1981 (321sssrt-bit): myna shared on the local network with a gateway
 // key held to a budget, models or accounts, and that key still read every
-// account's quota and balance from /v1/magpie/quotas. A held key is
-// someone else's to use: it is told none of this magpie's accounts, from
+// account's quota and balance from /v1/myna/quotas. A held key is
+// someone else's to use: it is told none of this myna's accounts, from
 // this computer or another, only its own limit and the routes of its own
 // requests. A key held to nothing is told what it was told before.
 func TestHeldKeyToldNoAccounts(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("MYNA_ADDR", "")
 	up := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		io.WriteString(w, `{"choices":[{"message":{"role":"assistant","content":"ok"},"finish_reason":"stop"}],"usage":{"prompt_tokens":30,"completion_tokens":5}}`)
@@ -70,15 +70,15 @@ func TestHeldKeyToldNoAccounts(t *testing.T) {
 		}
 	}
 	told := []struct{ method, path string }{
-		{"GET", "/v1/magpie/quotas"},
-		{"GET", "/v1/magpie/quotas/history"},
+		{"GET", "/v1/myna/quotas"},
+		{"GET", "/v1/myna/quotas/history"},
 		{"GET", provider.RemoteCardsPath},
 		{"POST", provider.RemoteRefreshPath},
-		{"GET", "/v1/magpie/concurrency"},
+		{"GET", "/v1/myna/concurrency"},
 	}
 	route := func(from, secret, session string) any {
 		t.Helper()
-		c, b := do("GET", "/v1/magpie/route?session="+session, from, secret)
+		c, b := do("GET", "/v1/myna/route?session="+session, from, secret)
 		var out map[string]any
 		if c != 200 || json.Unmarshal([]byte(b), &out) != nil {
 			t.Fatal("route:", c, b)
@@ -100,7 +100,7 @@ func TestHeldKeyToldNoAccounts(t *testing.T) {
 					t.Errorf("%s from %s: %s %s: %d %s", name, from, x.method, x.path, c, b)
 				}
 			}
-			if c, b := do("GET", "/v1/magpie/limit", from, s); c != 200 {
+			if c, b := do("GET", "/v1/myna/limit", from, s); c != 200 {
 				t.Errorf("%s from %s: its own limit: %d %s", name, from, c, b)
 			}
 			if route(from, s, "sess-"+name) == nil {
@@ -112,7 +112,7 @@ func TestHeldKeyToldNoAccounts(t *testing.T) {
 			}
 			// the whole trace (#2606), every key's routes: this computer
 			// alone, and never a held key, even from here
-			c, b := do("GET", "/v1/magpie/trace", from, s)
+			c, b := do("GET", "/v1/myna/trace", from, s)
 			if want := i == 0 && from == "127.0.0.1:5000"; want != (c == 200) {
 				t.Errorf("%s from %s: the trace: %d %s", name, from, c, b)
 			} else if i > 0 && from == "127.0.0.1:5000" && !strings.Contains(b, provider.KeyHeldCode) {

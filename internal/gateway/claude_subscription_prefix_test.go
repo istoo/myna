@@ -14,9 +14,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/claudetui"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/claudetui"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // prefixHarness is a gateway whose Claude subscription runs a stand-in
@@ -95,13 +95,13 @@ while read -r line; do
   case "$line" in *CALLTOOL*)
     m=$((m+1))
     echo '{"type":"stream_event","event":{"type":"message_start","message":{"id":"m'$$'-'$m'","model":"claude-opus-5-5","usage":{"input_tokens":1}}}}'
-    echo '{"type":"stream_event","event":{"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"toolu_R'$$'_'$n'","name":"mcp__magpie__read"}}}'
+    echo '{"type":"stream_event","event":{"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"toolu_R'$$'_'$n'","name":"mcp__myna__read"}}}'
     echo '{"type":"stream_event","event":{"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"{}"}}}'
     echo '{"type":"stream_event","event":{"type":"content_block_stop","index":0}}'
     echo '{"type":"stream_event","event":{"type":"message_delta","delta":{"stop_reason":"tool_use"},"usage":{"output_tokens":3}}}'
     echo '{"type":"stream_event","event":{"type":"message_stop"}}'
-    echo '{"type":"assistant","uuid":"a'$$'-'$m'","sessionId":"'$sid'","message":{"role":"assistant","content":[{"type":"tool_use","id":"toolu_R'$$'_'$n'","name":"mcp__magpie__read","input":{}}]}}' >> "$f"
-    echo '{"type":"assistant","uuid":"a'$$'-'$m'","message":{"id":"m'$$'-'$m'","model":"claude-opus-5-5","content":[{"type":"tool_use","id":"toolu_R'$$'_'$n'","name":"mcp__magpie__read","input":{}}]}}'
+    echo '{"type":"assistant","uuid":"a'$$'-'$m'","sessionId":"'$sid'","message":{"role":"assistant","content":[{"type":"tool_use","id":"toolu_R'$$'_'$n'","name":"mcp__myna__read","input":{}}]}}' >> "$f"
+    echo '{"type":"assistant","uuid":"a'$$'-'$m'","message":{"id":"m'$$'-'$m'","model":"claude-opus-5-5","content":[{"type":"tool_use","id":"toolu_R'$$'_'$n'","name":"mcp__myna__read","input":{}}]}}'
     got=$(curl --noproxy '*' -s -m 20 -X POST -H 'Content-Type: application/json' --data '{"tool_call_id":"toolu_R'$$'_'$n'","name":"read","arguments":{}}' "$cb")
     case "$got" in *"No tool can be used"*) got=refused ;; *) got=answered ;; esac
     say "pid $$ had $had turn $n call $got"
@@ -120,7 +120,7 @@ done
 	srv := httptest.NewServer(s.Handler())
 	t.Cleanup(srv.Close)
 	t.Cleanup(s.subscription.abortAll) // before srv.Close: a run's MCP call holds a request open
-	t.Setenv("MAGPIE_ADDR", srv.Listener.Addr().String())
+	t.Setenv("MYNA_ADDR", srv.Listener.Addr().String())
 	return &prefixHarness{t: t, s: s, srv: srv, logs: logs, config: config}
 }
 
@@ -298,7 +298,7 @@ func (h *prefixHarness) interactive() {
 	h.t.Helper()
 	claudeTUIRuns = true
 	h.t.Cleanup(func() { claudeTUIRuns = false })
-	helper := filepath.Join(h.t.TempDir(), "magpie")
+	helper := filepath.Join(h.t.TempDir(), "myna")
 	testenv.Program(h.t, helper, `#!/bin/sh
 [ "$1" = "`+claudetui.Command+`" ] || exit 9
 shift; claude=$1; shift

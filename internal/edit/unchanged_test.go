@@ -17,10 +17,10 @@ func TestUnchangedWriteKeepsFile(t *testing.T) {
 		set        func(string, any) error
 	}{
 		{"toml table", "config.toml", func(p string, v any) error {
-			return SetTOMLTable(p, "providers.magpie", KV{Path: "base_url", Value: v})
+			return SetTOMLTable(p, "providers.myna", KV{Path: "base_url", Value: v})
 		}},
 		{"toml key", "config.toml", func(p string, v any) error {
-			return SetTOMLKey(p, "providers.magpie", "base_url", v)
+			return SetTOMLKey(p, "providers.myna", "base_url", v)
 		}},
 		{"toml top", "config.toml", func(p string, v any) error {
 			return SetTOMLTop(p, KV{Path: "model", Value: v})

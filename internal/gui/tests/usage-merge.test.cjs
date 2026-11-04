@@ -13,7 +13,7 @@ const path = require("node:path");
 const vm = require("node:vm");
 const { test } = require("node:test");
 
-const source = fs.readFileSync(process.env.MAGPIE_APP_JS || path.resolve(__dirname, "../assets/app.js"), "utf8").replace(/\r\n/g, "\n");
+const source = fs.readFileSync(process.env.MYNA_APP_JS || path.resolve(__dirname, "../assets/app.js"), "utf8").replace(/\r\n/g, "\n");
 function section(start, end) {
   const a = source.indexOf(start), b = source.indexOf(end, a);
   assert(a >= 0 && b > a, `missing ${start}`);

@@ -15,7 +15,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_ASSETS || path.join(__dirname, "../assets"));
+const assets = path.resolve(process.env.MYNA_ASSETS || path.join(__dirname, "../assets"));
 
 function serve(lang, acct) {
   return async (route) => {
@@ -55,7 +55,7 @@ async function open(browser, t, surface, lang) {
   page.on("pageerror", (e) => errors.push(e.message));
   await page.clock.install();
   await page.route("**/*", serve(lang, acct));
-  await page.goto(surface === "panel" ? "http://magpie.test/?mode=panel" : "http://magpie.test/");
+  await page.goto(surface === "panel" ? "http://myna.test/?mode=panel" : "http://myna.test/");
   const card = surface === "panel" ? ".pq-card" : ".subscription-card";
   // what the page shows once the reads on their way are in
   const shows = (n) => page.waitForFunction(([s, n]) => !quotasLoading && document.querySelector(s)?.textContent.includes(n + "%"), [card, n]);

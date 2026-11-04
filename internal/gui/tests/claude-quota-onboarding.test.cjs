@@ -10,15 +10,15 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = process.env.MAGPIE_QUOTA_ASSETS || path.resolve(__dirname, "../assets");
+const assets = process.env.MYNA_QUOTA_ASSETS || path.resolve(__dirname, "../assets");
 const user = "current@example.invalid", other = "saved@example.invalid";
 // The error the helper ends a read with when a first-run screen stays
 // (claudetui's onboard), the screen's text after it cut short; and the
 // one the reporter's gateway returned before it went through them
-// (#4817), as an older remote magpie still says it.
+// (#4817), as an older remote myna still says it.
 const error = "Claude Code: claude-tui: Claude Code's interactive mode stays on its first-run screens, its onboarding not done; run Claude Code once in a terminal and go through them: Security notes:";
 const olderError = "Claude Code: claude-tui: Claude Code's interactive mode shows its first-run notes, its onboarding not done: Security notes:";
-const advice = "Finish Claude Code's first-run setup, then refresh. Run magpie claude-code to find its executable.";
+const advice = "Finish Claude Code's first-run setup, then refresh. Run myna claude-code to find its executable.";
 const provider = { id: "claude", name: "Claude Code", icon: "claude", models: [], agents: [], key: {},
   account: { agent: "claude", agentName: "Claude Code", user, logins: [
     { user, plan: "pro", active: true, on: true }, { user: other, plan: "pro", active: false, on: true },
@@ -47,7 +47,7 @@ function serve(lang, state) {
       assert.equal(route.request().method(), "GET", `unexpected mutation: ${url.pathname}`);
       return json({});
     }
-    if (url.host !== "magpie.test" || !/^\/[\w./-]*$/.test(url.pathname)) return route.fulfill({ status: 404, body: "" });
+    if (url.host !== "myna.test" || !/^\/[\w./-]*$/.test(url.pathname)) return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -68,7 +68,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       ] };
       page.on("pageerror", e => errors.push(e.message));
       await page.route("**/*", serve(lang, state));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://myna.test/?view=providers");
       const providerRow = page.locator('.row.provider[data-id="claude"]');
       await providerRow.waitFor({ timeout: 60000 });
       await providerRow.click();
@@ -100,18 +100,18 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       }), state.cards[0]);
       for (const text of Object.values(siblings)) assert.ok(text.includes(want), text);
       assert.equal(await page.evaluate(() => quotaError("network is unreachable")), await page.evaluate(() => t("Allowance unavailable — hover for why")), "unrelated errors keep their classification");
-      assert.equal(await page.evaluate(e => quotaError(e), olderError), want, "an older magpie's words are read too");
+      assert.equal(await page.evaluate(e => quotaError(e), olderError), want, "an older myna's words are read too");
       // any other reason the helper gave, and a run that said none before
-      // magpie stopped waiting, are said on the card, not "unavailable"
+      // myna stopped waiting, are said on the card, not "unavailable"
       // alone (#4830); the last screen after the reason stays for the
       // tooltip
       for (const [err, why] of [
         ["Claude Code: claude-tui: Claude Code showed no prompt in the 16.9s its caller waits for it: Do you trust this folder? ❯ No, exit",
           "Claude Code showed no prompt in the 16.9s its caller waits for it"],
-        ["Claude Code: claude-tui: Claude Code asks whether to trust the folder, which only its user answers\nmagpie: Claude Code's interactive mode didn't run: Claude Code asks whether to trust the folder, which only its user answers",
+        ["Claude Code: claude-tui: Claude Code asks whether to trust the folder, which only its user answers\nmyna: Claude Code's interactive mode didn't run: Claude Code asks whether to trust the folder, which only its user answers",
           "Claude Code asks whether to trust the folder, which only its user answers"],
-        ["Claude Code's interactive mode said nothing before magpie stopped waiting for it (context deadline exceeded)",
-          "Claude Code's interactive mode said nothing before magpie stopped waiting for it"],
+        ["Claude Code's interactive mode said nothing before myna stopped waiting for it (context deadline exceeded)",
+          "Claude Code's interactive mode said nothing before myna stopped waiting for it"],
       ]) {
         const said = await page.evaluate(([e, w]) => [quotaError(e), t("Allowance unavailable: {why}", { why: w })], [err, why]);
         assert.equal(said[0], said[1], err);

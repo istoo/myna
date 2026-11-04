@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // openWatch turns each path into a FIFO and records every open of one for
@@ -229,25 +229,25 @@ func TestAccountDiscoveryOffReadsNoSignIn(t *testing.T) {
 	}
 }
 
-// MAGPIE_NO_ACCOUNTS turns discovery off for the process, and never on
+// MYNA_NO_ACCOUNTS turns discovery off for the process, and never on
 // what the user saved off; a sync or a restored backup keeps this
 // computer's own choice (KeepOwn).
 func TestAccountDiscoverySetting(t *testing.T) {
 	limitsHome(t)
-	t.Setenv("MAGPIE_NO_ACCOUNTS", "")
+	t.Setenv("MYNA_NO_ACCOUNTS", "")
 	if settings.AccountDiscoveryOff() {
 		t.Fatal("off by default")
 	}
 	for v, off := range map[string]bool{"1": true, "true": true, "yes": true, "0": false, "false": false, "FALSE": false} {
-		t.Setenv("MAGPIE_NO_ACCOUNTS", v)
+		t.Setenv("MYNA_NO_ACCOUNTS", v)
 		if got := settings.AccountDiscoveryOff(); got != off {
-			t.Errorf("MAGPIE_NO_ACCOUNTS=%s: off %v, want %v", v, got, off)
+			t.Errorf("MYNA_NO_ACCOUNTS=%s: off %v, want %v", v, got, off)
 		}
 	}
 	if err := settings.Save(settings.Settings{NoAccountDiscovery: true}); err != nil {
 		t.Fatal(err)
 	}
-	t.Setenv("MAGPIE_NO_ACCOUNTS", "0")
+	t.Setenv("MYNA_NO_ACCOUNTS", "0")
 	if !settings.AccountDiscoveryOff() {
 		t.Error("the environment turned on what the user saved off")
 	}
@@ -256,7 +256,7 @@ func TestAccountDiscoverySetting(t *testing.T) {
 	if !restored.NoAccountDiscovery {
 		t.Error("a restored backup turned discovery back on")
 	}
-	if err := SwitchLogin("codex", "x@example.com"); err == nil || !strings.Contains(err.Error(), "magpie accounts discovery on") {
+	if err := SwitchLogin("codex", "x@example.com"); err == nil || !strings.Contains(err.Error(), "myna accounts discovery on") {
 		t.Errorf("the refusal says how to turn it back on: %v", err)
 	}
 }

@@ -16,25 +16,25 @@ import (
 	"github.com/wailsapp/wails/v3/pkg/events"
 )
 
-// A closed NSWindow keeps its WKWebView's document visible unless magpie
+// A closed NSWindow keeps its WKWebView's document visible unless myna
 // says otherwise. The page here records what it saw as it was hidden, and
 // reports that record once it is shown again; without hideWebview's signal
 // it remains a visible page with running animations.
 func TestClosingWindowMarksPageOutOfSight(t *testing.T) {
-	out, err := runAppKit(t, 30*time.Second, []string{"MAGPIE_TEST_WINDOW_VISIBILITY=1"})
+	out, err := runAppKit(t, 30*time.Second, []string{"MYNA_TEST_WINDOW_VISIBILITY=1"})
 	if err != nil || !strings.Contains(string(out), "window visibility: ok") {
 		t.Fatalf("window visibility: %v\n%s", err, out)
 	}
 }
 
 func init() {
-	if os.Getenv("MAGPIE_TEST_WINDOW_VISIBILITY") != "1" {
+	if os.Getenv("MYNA_TEST_WINDOW_VISIBILITY") != "1" {
 		return
 	}
 	ready := make(chan struct{}, 1)
 	reports := make(chan url.Values, 1)
 	app := application.New(application.Options{
-		Name: "magpie window visibility regression",
+		Name: "myna window visibility regression",
 		Mac:  application.MacOptions{ActivationPolicy: application.ActivationPolicyProhibited},
 		Assets: application.AssetOptions{Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			switch r.URL.Path {
@@ -42,11 +42,11 @@ func init() {
 				w.Header().Set("Content-Type", "text/html")
 				fmt.Fprint(w, `<!doctype html><script type="module">import "/wails/runtime.js";</script><style>
 #probe{animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(1turn)}}
-html.magpie-out-of-sight #probe{animation-play-state:paused!important}
+html.myna-out-of-sight #probe{animation-play-state:paused!important}
 </style><i id="probe"></i><script>
 const probe = document.querySelector("#probe");
-window.magpieWindowVisibility = (visible) => {
-  document.documentElement.classList.toggle("magpie-out-of-sight", !visible);
+window.mynaWindowVisibility = (visible) => {
+  document.documentElement.classList.toggle("myna-out-of-sight", !visible);
   document.dispatchEvent(new Event("visibilitychange"));
 };
 document.addEventListener("visibilitychange", () => {
@@ -54,7 +54,7 @@ document.addEventListener("visibilitychange", () => {
     localStorage.setItem("hiddenProbe", JSON.stringify({
       hidden: document.hidden,
       state: document.visibilityState,
-      marked: document.documentElement.classList.contains("magpie-out-of-sight"),
+      marked: document.documentElement.classList.contains("myna-out-of-sight"),
       play: getComputedStyle(probe).animationPlayState,
     }));
   }

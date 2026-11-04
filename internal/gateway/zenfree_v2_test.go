@@ -11,11 +11,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // #3491 (laomao04_65777 on Discord): Zen's free models answered 429 "Free
-// usage limit reached. Free models work in OpenCode" to magpie while real
+// usage limit reached. Free models work in OpenCode" to myna while real
 // OpenCode on the same machine was served. A free model is now asked as
 // OpenCode 2.2.5 asked it (../provider/testdata/opencode-2.2.5-chat.json),
 // on every protocol: at its v2 path, with only the headers it sends (none
@@ -129,7 +129,7 @@ func TestZenFreeAsOpenCode225(t *testing.T) {
 		}
 	}
 
-	// OpenCode's own request through magpie: its block and project as it
+	// OpenCode's own request through myna: its block and project as it
 	// sent them, nothing added
 	got = nil
 	own := provider.OpenCodeEnvironment("/somewhere/else")

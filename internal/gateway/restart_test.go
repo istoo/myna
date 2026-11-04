@@ -7,19 +7,19 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/settings"
 )
 
-// gaubeebangeel on X: `magpie update`, run by an agent magpie serves,
-// asks the magpie serving the gateway to restart into the version it put
+// gaubeebangeel on X: `myna update`, run by an agent myna serves,
+// asks the myna serving the gateway to restart into the version it put
 // in. Only a program on this computer may (the heap profile's callers),
 // never another machine with a key, a page, or another Host; the
-// restarter isn't called for them. Without a restarter (magpie serve)
+// restarter isn't called for them. Without a restarter (myna serve)
 // the answer says so.
 func TestRestartAskedOnlyFromThisComputer(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
+	t.Setenv("MYNA_ADDR", "")
+	t.Setenv("MYNA_PUBLIC_URL", "")
 	_, secrets := newCaller(t, "Page")
 	s := settings.Load()
 	s.CORSOrigins = []string{"https://listed.example"}
@@ -62,7 +62,7 @@ func TestRestartAskedOnlyFromThisComputer(t *testing.T) {
 	w := call(true, "127.0.0.1:50123", "127.0.0.1:3425", "User-Agent", "Go-http-client/1.1")
 	var got RestartReply
 	if err := json.Unmarshal(w.Body.Bytes(), &got); w.Code != http.StatusOK || err != nil {
-		t.Fatalf("magpie update's ask: %d %q", w.Code, w.Body.String())
+		t.Fatalf("myna update's ask: %d %q", w.Code, w.Body.String())
 	}
 	if got.State != "restarting" || !got.Handover || got.Version != Version || len(asked) != 1 || asked[0] != "v0.1.9999" {
 		t.Fatalf("answered %+v, restarter asked %v", got, asked)

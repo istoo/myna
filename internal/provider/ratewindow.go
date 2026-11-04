@@ -112,7 +112,7 @@ func RateAt(ws []RateWindow, t time.Time) float64 {
 		return 0
 	}
 	// t's own zone is whatever wrote it: a call reported to
-	// /v1/magpie/usage as "…Z" parses in UTC, and its hour read there
+	// /v1/myna/usage as "…Z" parses in UTC, and its hour read there
 	// missed a window by the zone's offset
 	t = t.Local()
 	m := t.Hour()*60 + t.Minute()

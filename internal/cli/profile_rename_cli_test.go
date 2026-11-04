@@ -4,10 +4,10 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/profile"
+	"github.com/istoo/myna/internal/profile"
 )
 
-// magpie rename moves a profile's name; a flag or a missing or extra word
+// myna rename moves a profile's name; a flag or a missing or extra word
 // is no name to write, and leaves the profiles as they were (#2721).
 func TestRenameCommand(t *testing.T) {
 	helpHome(t)
@@ -23,16 +23,16 @@ func TestRenameCommand(t *testing.T) {
 	}
 	for _, args := range [][]string{{"rename"}, {"rename", "work"}, {"rename", "work", "-x"}, {"rename", "work", "a", "b"}} {
 		if _, err := runOut(t, args...); err == nil {
-			t.Errorf("magpie %v went through", args)
+			t.Errorf("myna %v went through", args)
 		}
 		if got := names(); !slices.Equal(got, []string{"work"}) {
-			t.Fatalf("magpie %v: %v", args, got)
+			t.Fatalf("myna %v: %v", args, got)
 		}
 	}
 	if _, err := runOut(t, "rename", "work", "desk"); err != nil {
 		t.Fatal(err)
 	}
 	if got := names(); !slices.Equal(got, []string{"desk"}) {
-		t.Fatalf("after magpie rename work desk: %v", got)
+		t.Fatalf("after myna rename work desk: %v", got)
 	}
 }

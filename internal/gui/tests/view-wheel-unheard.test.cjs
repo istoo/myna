@@ -15,7 +15,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = process.env.MAGPIE_UNHEARD_ASSETS || path.resolve(__dirname, "../assets");
+const assets = process.env.MYNA_UNHEARD_ASSETS || path.resolve(__dirname, "../assets");
 const AGENTS = Array.from({ length: 14 }, (_, i) => ({
   id: "a" + i, name: "Agent " + i, path: "/t/a" + i + ".json", icon: "generic", wired: true,
   fields: [{ key: "model", label: "model", value: "m", options: [{ value: "m", label: "M", ref: "a/m" }] }],
@@ -69,7 +69,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await p.addInitScript(DEAF);
         await p.route("**/*", server(lang));
         const view = p.locator("#view-agents");
-        await p.goto("http://magpie.test/?view=agents");
+        await p.goto("http://myna.test/?view=agents");
         await p.locator("#view-agents .ag-lead").first().waitFor();
         await rested(p, view);
         const over = await view.evaluate((v) => v.scrollHeight - v.clientHeight);

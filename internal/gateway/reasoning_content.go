@@ -8,14 +8,14 @@ import (
 
 // OpenAI takes a reasoning item sent back to it only with its content
 // empty ("Invalid 'input[n].content': array too long", #1411) and cannot
-// open a seal that is not its own. A client stores what magpie hands it
-// and replays it when the conversation goes back to OpenAI, on magpie or
+// open a seal that is not its own. A client stores what myna hands it
+// and replays it when the conversation goes back to OpenAI, on myna or
 // off it: an item another vendor wrote with its text in it would stick the
 // conversation there (#2855, the reporter's rollout: 25 reasoning items a
 // DeepSeek phase had left, each with its text in content parts and a
 // 38-character encrypted_content of the vendor's own, against the
 // thread's own GPT-phase items, which carry none). So an item that carries
-// its text goes to the client as one magpie makes: the text a summary,
+// its text goes to the client as one myna makes: the text a summary,
 // nothing sealed.
 
 // reasoningWithText is whether a Responses reasoning item carries its
@@ -29,13 +29,13 @@ func reasoningWithText(item map[string]any) bool {
 	return len(parts) > 0
 }
 
-// magpieMadeReasoning is the reasoning item magpie makes of one a
+// mynaMadeReasoning is the reasoning item myna makes of one a
 // Responses upstream wrote with its text in it, nil of one that carries no
 // content, which goes as it came. Its text (else its summaries) becomes
-// one summary of magpie's; its content and its seal go, the text kept, so
+// one summary of myna's; its content and its seal go, the text kept, so
 // an upstream that wants its reasoning back is sent it (withReasoningText).
 // Its own id is kept, the events of a stream naming the item by it.
-func magpieMadeReasoning(item map[string]any) map[string]any {
+func mynaMadeReasoning(item map[string]any) map[string]any {
 	if !reasoningWithText(item) {
 		return nil
 	}
@@ -71,15 +71,15 @@ func magpieMadeReasoning(item map[string]any) map[string]any {
 		"summary": []map[string]any{{"type": "summary_text", "text": said}}}
 }
 
-// magpieMadeReasoningRaw is the item's bytes, made over when the item
+// mynaMadeReasoningRaw is the item's bytes, made over when the item
 // carries its text; id, when not empty, is the id the item's events have
 // already carried, which its done event must keep.
-func magpieMadeReasoningRaw(raw json.RawMessage, id string) json.RawMessage {
+func mynaMadeReasoningRaw(raw json.RawMessage, id string) json.RawMessage {
 	var it map[string]any
 	if decodeJSON(raw, &it) != nil {
 		return raw
 	}
-	made := magpieMadeReasoning(it)
+	made := mynaMadeReasoning(it)
 	if made == nil {
 		return raw
 	}
@@ -94,7 +94,7 @@ func magpieMadeReasoningRaw(raw json.RawMessage, id string) json.RawMessage {
 }
 
 // reasoningTidy makes a Responses upstream's reasoning items that carry
-// their text in it into the items magpie makes, in a reply relayed as it
+// their text in it into the items myna makes, in a reply relayed as it
 // came, its events' sequence numbers and every other line kept as the
 // upstream wrote them. A reply that isn't a stream is gone through whole.
 type reasoningTidy struct {
@@ -157,7 +157,7 @@ func (t *reasoningTidy) lines(b []byte) []byte {
 }
 
 // event is an SSE event's data, or a whole reply, with its reasoning items
-// that carry their text made into magpie's, and whether one was.
+// that carry their text made into myna's, and whether one was.
 func (t *reasoningTidy) event(data []byte) ([]byte, bool) {
 	dec := json.NewDecoder(bytes.NewReader(data))
 	dec.UseNumber()
@@ -189,10 +189,10 @@ func (t *reasoningTidy) event(data []byte) ([]byte, bool) {
 }
 
 // madeOver makes item, a reasoning item with its text in it, one of
-// magpie's, in place, and reports whether it was.
+// myna's, in place, and reports whether it was.
 func madeOver(item any) bool {
 	im, _ := item.(map[string]any)
-	made := magpieMadeReasoning(im)
+	made := mynaMadeReasoning(im)
 	if made == nil {
 		return false
 	}

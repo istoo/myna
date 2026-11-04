@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 func TestMain(m *testing.M) { testenv.Main(m) }
@@ -75,7 +75,7 @@ func sample(t reflect.Type, key string, was reflect.Value) reflect.Value {
 // more and no fewer: each field of settings.Settings is sent changed, on
 // its own, and the ones the save takes are compared with Keys. A field
 // added to Settings that the save takes (or carries) without Keys knowing
-// fails here, and so `magpie settings` can't fall behind the window
+// fails here, and so `myna settings` can't fall behind the window
 // (#4745).
 func TestKeysAreWhatTheSaveWrites(t *testing.T) {
 	cur := settings.Defaults()
@@ -240,7 +240,7 @@ func TestQuitNoAskKeptUnlessSent(t *testing.T) {
 // What a reply's model name says is replyModel (ZoeCats on Discord). The
 // page sends it; a page from before it sends memberModel, which changes
 // it only when that page's switch was moved, so its save keeps a vendor
-// name it can't show; and `magpie settings reset replyModel` (Body over
+// name it can't show; and `myna settings reset replyModel` (Body over
 // a file with memberModel written beside it) is the model asked for.
 func TestReplyModelSaves(t *testing.T) {
 	for _, c := range []struct {

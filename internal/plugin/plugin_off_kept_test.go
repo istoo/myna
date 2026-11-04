@@ -9,15 +9,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // pkg is the package these tests add: an npm one, so add installs it
 // through the fake bun.
 const pkg = "@magpie-community/opencode-zed-auth"
 
-// offSandbox gives the test its own magpie folders and a Bun that installs
-// nothing real: $MAGPIE_BUN is this test binary, which stands in for bun as
+// offSandbox gives the test its own myna folders and a Bun that installs
+// nothing real: $MYNA_BUN is this test binary, which stands in for bun as
 // the git plugin's test has it do (fakeBun), so no Bun is downloaded and npm
 // is never asked.
 func offSandbox(t *testing.T) string {
@@ -34,22 +34,22 @@ func offSandbox(t *testing.T) string {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// bunCommand is stubbed rather than $MAGPIE_BUN set, as the git
+	// bunCommand is stubbed rather than $MYNA_BUN set, as the git
 	// plugin's test does it: the environment a test sets reaches the
 	// other tests in the package only through what they read, and
-	// $MAGPIE_BUN set here made another test's Add run this binary too
+	// $MYNA_BUN set here made another test's Add run this binary too
 	// (TestLoadConcurrentWithSavesAndEdits renames plugins.json under
 	// load, and lost it to "Access is denied" on Windows).
-	// $MAGPIE_BUN is set as well, so Bun answers at once instead of
+	// $MYNA_BUN is set as well, so Bun answers at once instead of
 	// downloading one: what it answers with is never run, since
 	// bunCommand below is what install uses.
-	t.Setenv("MAGPIE_BUN", self)
+	t.Setenv("MYNA_BUN", self)
 	log := filepath.Join(dir, "bun.log")
 	orig := bunCommand
 	bunCommand = func(ctx context.Context, bun, dir string, args ...string) *exec.Cmd {
 		cmd := exec.CommandContext(ctx, self, args...)
 		cmd.Dir = dir
-		cmd.Env = append(os.Environ(), "MAGPIE_FAKE_BUN=1", "MAGPIE_FAKE_BUN_LOG="+log)
+		cmd.Env = append(os.Environ(), "MYNA_FAKE_BUN=1", "MYNA_FAKE_BUN_LOG="+log)
 		return cmd
 	}
 	t.Cleanup(func() { bunCommand = orig })

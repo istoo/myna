@@ -12,12 +12,12 @@ import (
 	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/wailsapp/wails/v3/pkg/events"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/myna/internal/usage"
 )
 
-// watchTrayUsage keeps the tray's cards up to date, and magpie's name over
+// watchTrayUsage keeps the tray's cards up to date, and myna's name over
 // today's total in the tooltip while there are none (trayIdleTip).
 func (h *host) watchTrayUsage() {
 	wake := make(chan struct{}, 1)
@@ -47,7 +47,7 @@ func (h *host) watchTrayUsage() {
 		for {
 			ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 			s := settings.Load()
-			// in magpie's language, as the tray menu is (yi_time)
+			// in myna's language, as the tray menu is (yi_time)
 			lang := trayLang(s.Lang, systemLang)
 			cells, label, tip := trayCardsView(lang, trayUsageCards(ctx, lang, s.TrayUsages), time.Now(), s.QuotaLeft, s.TrayPace, s.TrayWindows)
 			cancel()

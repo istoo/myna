@@ -81,7 +81,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         let name = label;
         const tip = async (row) => {
           // each editor opened from a fresh list
-          await page.goto("http://magpie.test/?view=providers");
+          await page.goto("http://myna.test/?view=providers");
           name ||= await page.evaluate(() => t("Test models"));
           await page.locator(".row.provider", { hasText: row }).first().click();
           await page.locator(".editor .mchips .mchip").first().waitFor();

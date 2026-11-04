@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-// A market icon is asked for through usemagpie.ai's icon proxy, never from
+// A market icon is asked for through github.com/istoo/myna's icon proxy, never from
 // the host its author picked, which would see the user's IP.
 func TestIconGoesThroughTheProxy(t *testing.T) {
 	h := sandbox(t)
@@ -20,7 +20,7 @@ func TestIconGoesThroughTheProxy(t *testing.T) {
 		rw.Write(png)
 	}))
 	defer proxy.Close()
-	t.Setenv("MAGPIE_ICON_PROXY", proxy.URL+"/api/icon")
+	t.Setenv("MYNA_ICON_PROXY", proxy.URL+"/api/icon")
 
 	// a server the registry showed, its icon on its author's host; .invalid
 	// never resolves, so reaching it straight fails the test

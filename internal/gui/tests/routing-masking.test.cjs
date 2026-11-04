@@ -4,7 +4,7 @@
 // while it was masked): its row says masking while the gateway's route for
 // it has the "redact" phase, and routing once that is over and no try is
 // out yet. Once answered, the time masking took is the first part of where
-// its first try's time went, magpie's. Both engines, a narrow window, every
+// its first try's time went, myna's. Both engines, a narrow window, every
 // language. The API is faked.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -19,9 +19,9 @@ const key = { id: "deepseek", provider: "deepseek", name: "DeepSeek", kind: "pro
 const net = { own: 2.4, asks: 1, send: 0.6, wait: 900, head: 950 };
 const routes = [
   // held, being masked: the route that shows it while it isn't routed
-  { id: 203, seq: 203, time: at(20), agent: "claude", model: "deepseek/deepseek-flash", provider: "magpie", phase: "redact", order: [], tries: [], done: false, status: 0 },
+  { id: 203, seq: 203, time: at(20), agent: "claude", model: "deepseek/deepseek-flash", provider: "myna", phase: "redact", order: [], tries: [], done: false, status: 0 },
   // held, masked, not yet routed
-  { id: 202, seq: 202, time: at(40), agent: "claude", model: "deepseek/deepseek-chat", provider: "magpie", order: [], tries: [], done: false, status: 0 },
+  { id: 202, seq: 202, time: at(40), agent: "claude", model: "deepseek/deepseek-chat", provider: "myna", order: [], tries: [], done: false, status: 0 },
   // answered, after 2.3 s of masking
   { id: 201, seq: 201, time: at(90), agent: "claude", model: "deepseek/deepseek-flash", provider: "deepseek", order: [key],
     tries: [{ id: key.id, model: "deepseek-flash", start: at(87), done: true, status: 200, ms: 3000, ttft: 1200, net }],
@@ -46,7 +46,7 @@ function serve(lang) {
     if (url.pathname === "/api/plugins") return json({ plugins: [] });
     if (url.pathname === "/api/usage/requests") return json({ period: url.searchParams.get("period"), rows: [], offset: 0, total: 0, calls: 0, errors: 0, input: 0, output: 0, cache_read: 0, cache_write: 0, reasoning: 0, cost: 0, unpriced: 0, agents: [] });
     if (url.pathname === "/api/usage/quotas") return json([]);
-    if (url.pathname === "/api/usage") return json({ calls: 0, errors: 0, input: 0, output: 0, cache_read: 0, cache_write: 0, reasoning: 0, unpriced: 0, cost: 0, bucket: "day", series: [], agents: [], models: [], path: "~/.config/magpie/usage.jsonl" });
+    if (url.pathname === "/api/usage") return json({ calls: 0, errors: 0, input: 0, output: 0, cache_read: 0, cache_write: 0, reasoning: 0, unpriced: 0, cost: 0, bucket: "day", series: [], agents: [], models: [], path: "~/.config/myna/usage.jsonl" });
     if (url.pathname === "/api/sessions") return json({ sessions: [], dirs: [] });
     if (url.pathname === "/api/sessions/stats") return json({ from: "", to: "", days: [], agents: {} });
     if (url.pathname.startsWith("/api/")) return json({});
@@ -82,7 +82,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         }
         await browser.close();
       });
-      await page.goto("http://magpie.test/?view=routing");
+      await page.goto("http://myna.test/?view=routing");
       const rows = page.locator(".rt-req");
       await rows.nth(routes.length - 1).waitFor({ timeout: 15000 });
       const said = await rows.evaluateAll((bs) => bs.map((b) => b.textContent));
@@ -92,12 +92,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert(said[1].includes(want[lang].routing) && !said[1].includes(want[lang].masking), said[1]);
       assert(!said[2].includes(want[lang].masking), said[2]);
 
-      // the answered one: masking is magpie's first part of its try's time
+      // the answered one: masking is myna's first part of its try's time
       await rows.nth(2).click();
       const box = page.locator(".rt-steps li.time .rt-time");
       await box.waitFor();
       const parts = await box.evaluate((b) => [...b.querySelectorAll(".rt-time-parts li")].map((li) => [li.className, li.querySelector(".k").textContent, li.querySelector(".v").textContent]));
-      assert.equal(parts[0][0], "magpie");
+      assert.equal(parts[0][0], "myna");
       assert.equal(parts[0][1], want[lang].part);
       assert.match(parts[0][2], /2[.,]3/);
       assert.equal(parts.filter((p) => p[1] === want[lang].part).length, 1);

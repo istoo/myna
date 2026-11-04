@@ -57,7 +57,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serveAs(lang, theme));
-      await page.goto("http://magpie.test/?view=gateway");
+      await page.goto("http://myna.test/?view=gateway");
       await page.locator("#gwModels .row.model .minfo .mi-img").first().waitFor();
       const rows = await page.locator("#gwModels .row.model .minfo").evaluateAll((boxes) => boxes.map((box) =>
         [...box.querySelectorAll(".badge")].filter((b) => b.offsetParent).map((b) => {

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // The Kiro plugin's real replies (opencode-kiro-auth 0.1.16 against
@@ -81,7 +81,7 @@ func TestCacheCountedIsNotUnknown(t *testing.T) {
 	}
 }
 
-// what Claude Code is told is Anthropic's usage: magpie never adds the
+// what Claude Code is told is Anthropic's usage: myna never adds the
 // field to a reply it writes itself
 func TestCacheUnknownNotTold(t *testing.T) {
 	u := aUsage{InputTokens: 5, OutputTokens: 1, CacheUnknown: true}.usage()
@@ -93,8 +93,8 @@ func TestCacheUnknownNotTold(t *testing.T) {
 // The Trae plugin's replies (opencode-trae-auth 0.2.26) to a token_usage
 // naming no cache field, chansee97's real one in plugins#455
 // ({"prompt_tokens":1717,"completion_tokens":2,"total_tokens":1719}): a
-// Chat usage saying magpie_cache_unknown, which magpie read as a counted
-// 0% miss on every Trae CN call (yetone/magpie#3991, #3979).
+// Chat usage saying magpie_cache_unknown, which myna read as a counted
+// 0% miss on every Trae CN call (istoo/myna#3991, #3979).
 const (
 	traeStream = `data: {"id":"chatcmpl-1","object":"chat.completion.chunk","model":"deepseek-v3.1","choices":[{"index":0,"delta":{"role":"assistant","content":"OK"},"finish_reason":null}]}` + "\n\n" +
 		`data: {"id":"chatcmpl-1","object":"chat.completion.chunk","model":"deepseek-v3.1","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}` + "\n\n" +

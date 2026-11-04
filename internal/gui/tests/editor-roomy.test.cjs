@@ -4,7 +4,7 @@
 // meters, cap pill, switches and option rows, stayed a 600px box in the
 // middle, cramped). From a 1071px window it grows with the window, 56% of
 // its width, up to 880px, as a Mac sheet takes the room its content needs;
-// narrower it is 600px as before, and in magpie web on a phone (390px) it
+// narrower it is 600px as before, and in myna web on a phone (390px) it
 // fits the window with nothing across it cut off or scrolled sideways. A
 // question that takes the editor's place in the same dialog (Sign out's)
 // stays 600px. Chromium and WebKit, every language, the API faked.
@@ -15,8 +15,8 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 const { strings } = require("./strings.cjs");
 
-// MAGPIE_ROOMY_ASSETS: an older asset directory, to see this fail on it
-const assets = path.resolve(process.env.MAGPIE_ROOMY_ASSETS || path.join(__dirname, "../assets"));
+// MYNA_ROOMY_ASSETS: an older asset directory, to see this fail on it
+const assets = path.resolve(process.env.MYNA_ROOMY_ASSETS || path.join(__dirname, "../assets"));
 const { I18N } = strings();
 const tr = (lang, k) => (lang === "en" ? k : I18N[lang]?.[k] || k);
 
@@ -39,7 +39,7 @@ function serve(lang, { web = false, one = false } = {}) {
     if (url.pathname === "/api/login/usage") return json(usage());
     if (url.pathname === "/api/groups") return json({ groups: [], pools: [] });
     if (url.pathname.startsWith("/api/")) return json({});
-    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "magpie.test") return route.fulfill({ status: 404, body: "" });
+    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "myna.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -47,7 +47,7 @@ function serve(lang, { web = false, one = false } = {}) {
 }
 
 // the window, the width the editor's dialog takes in it, and whether it is
-// magpie web (a phone's is the narrowest; the app's window is 560 at least)
+// myna web (a phone's is the narrowest; the app's window is 560 at least)
 const SIZES = [[2560, 1440, 880], [1440, 900, 806.4], [1100, 800, 616], [1024, 768, 600], [800, 600, 600], [560, 420, 512], [390, 844, 374, true]];
 
 const measure = (page) => page.evaluate(() => {
@@ -84,7 +84,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, { web }));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://myna.test/?view=providers");
         await page.locator('.row.provider[data-id="codex"]').click();
         await page.locator("#modal .ebody").waitFor();
         // the allowances drawn in, the dialog settled
@@ -112,7 +112,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, { one: true }));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://myna.test/?view=providers");
       await page.locator('.row.provider[data-id="codex"]').click();
       await page.locator("#modal .acc .aq .skeleton").first().waitFor({ state: "detached" });
       await page.waitForFunction(() => !document.querySelector("#modal .dialog").getAnimations().length);

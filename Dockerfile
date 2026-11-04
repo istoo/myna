@@ -9,7 +9,7 @@ COPY . .
 
 ARG VERSION=dev
 RUN CGO_ENABLED=0 go build -tags nogui -trimpath \
-      -ldflags "-s -w -X main.version=${VERSION}" -o /out/magpie . \
+      -ldflags "-s -w -X main.version=${VERSION}" -o /out/myna . \
     && mkdir -p /config/home /config/cache /config/data /config/state
 
 # Debian, not distroless: a subscription's CLI is installed with its
@@ -28,30 +28,30 @@ RUN apt-get update \
     && groupadd -g 65532 nonroot \
     && useradd -u 65532 -g nonroot -d /config/home -s /bin/bash nonroot
 
-COPY --from=build /out/magpie /magpie
-# magpie on PATH, so `magpie accounts add …` works in that terminal
-RUN ln -s /magpie /usr/local/bin/magpie
+COPY --from=build /out/myna /myna
+# myna on PATH, so `myna accounts add …` works in that terminal
+RUN ln -s /myna /usr/local/bin/myna
 USER nonroot
 COPY --from=build --chown=65532:65532 /config /config
 
-# Everything magpie and the sign-ins it manages write goes into the volume:
-# its own files (/config/magpie), sign-ins kept where an agent keeps them
+# Everything myna and the sign-ins it manages write goes into the volume:
+# its own files (/config/myna), sign-ins kept where an agent keeps them
 # (~/.codex, ~/.claude…, under HOME), and the cache holding Bun and the
-# model catalog. magpie makes the folders a volume from an older image
+# model catalog. myna makes the folders a volume from an older image
 # lacks.
 ENV HOME=/config/home \
     XDG_CONFIG_HOME=/config \
     XDG_CACHE_HOME=/config/cache \
     XDG_DATA_HOME=/config/data \
     XDG_STATE_HOME=/config/state \
-    MAGPIE_ADDR=0.0.0.0:3425
+    MYNA_ADDR=0.0.0.0:3425
 
 VOLUME /config
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD ["/magpie", "healthcheck"]
+    CMD ["/myna", "healthcheck"]
 
 EXPOSE 3425 3430
 
-ENTRYPOINT ["/magpie"]
+ENTRYPOINT ["/myna"]
 CMD ["serve"]

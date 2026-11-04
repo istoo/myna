@@ -21,7 +21,7 @@ const agents = [{ id: "claude", name: "Claude Code", icon: "", skills: `${HOME}/
 
 function server(lang, calls) {
   const lib = {
-    dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+    dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
     agents,
     instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [], skills: [],
     servers: [{ name: "mine", transport: "stdio", command: "/opt/mine/mcp", agents: ["claude"] }],
@@ -68,13 +68,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           if (lang !== "en") for (const s of ["Sync to your other computers", "Not synced", "Sync never carries it to your other computers", "Off keeps it on this computer: sync never carries it to your other computers, and a sync from them neither removes it nor puts theirs in its place"]) assert.ok(I18N[lang][s], `${lang}: ${s}`);
           const calls = [];
           const ctx = await browser.newContext({ viewport: { width, height: 800 } });
-          await ctx.addInitScript(() => { try { localStorage.setItem("magpie.libTab", "mcp"); } catch {} });
+          await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "mcp"); } catch {} });
           const page = await ctx.newPage();
           page.setDefaultTimeout(5000);
           page.setDefaultNavigationTimeout(60000);
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", server(lang, calls));
-          await page.goto("http://magpie.test/");
+          await page.goto("http://myna.test/");
           await page.locator('button[data-view="library"]').click();
           const row = page.locator("#view-library .lib-server", { has: page.locator('.lib-health[data-server="mine"]') });
           const ed = page.locator("#modal .lib-editor");

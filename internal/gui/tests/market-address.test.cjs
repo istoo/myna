@@ -19,7 +19,7 @@ const someone = { id: "io.github.someone/postgres-mcp", name: "postgres", title:
 
 function serve(lang, asked) {
   const view = {
-    dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+    dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
     agents: [agent("claude", "Claude Code", "claudecode-color"), agent("codex", "Codex", "codex-color")],
     instructions: { agents: [], sets: [] }, servers: [], foundServers: [], projects: [], foundSkills: [], skills: [], problems: [],
   };
@@ -65,9 +65,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [], asked = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, asked));
-      await page.addInitScript(() => { localStorage.setItem("magpie.libTab", "mcp"); });
+      await page.addInitScript(() => { localStorage.setItem("myna.libTab", "mcp"); });
       t.after(() => browser.close());
-      await page.goto("http://magpie.test/?view=library");
+      await page.goto("http://myna.test/?view=library");
       const view = page.locator("#view-library");
       const box = view.locator('.mk[data-market="mcp"]');
       const search = box.locator('input[data-lib="market-mcp"]');

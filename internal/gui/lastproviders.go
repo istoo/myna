@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/istoo/myna/internal/appdir"
+	"github.com/istoo/myna/internal/edit"
 )
 
 // The last-known providers list (#1519, fatkun): the Providers page asked

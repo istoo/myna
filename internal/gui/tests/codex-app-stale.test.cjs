@@ -1,11 +1,11 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// The Codex app reads the sign-in only when it opens. After magpie switches
+// The Codex app reads the sign-in only when it opens. After myna switches
 // Codex to another account it stays on the one before, shows that account's
 // limits and, once they are spent, sends in no thread (CavillZhang on X).
 // Codex's accounts say so, with the account the app is on and what moves it
 // (quit and open it again), until the app reopens or "Got it" is clicked.
-// Its Restart (nb5p_hQ on X) asks first in magpie's own dialog, then has
-// magpie restart the app's app-server; one that fails says why in the
+// Its Restart (nb5p_hQ on X) asks first in myna's own dialog, then has
+// myna restart the app's app-server; one that fails says why in the
 // reader's language. In every language, Chromium and WebKit, wide and narrow.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -79,7 +79,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], posted = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, posted));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://myna.test/?view=providers");
         await page.locator(".row.provider", { hasText: "Codex" }).first().click();
         const box = page.locator(".editor .signing.daemon");
         await box.waitFor();
@@ -113,7 +113,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], posted = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, posted));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://myna.test/?view=providers");
         await page.locator(".row.provider", { hasText: "Codex" }).first().click();
         const box = page.locator(".editor .signing.daemon");
         await box.waitFor();
@@ -145,7 +145,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [], posted = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, posted, true));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://myna.test/?view=providers");
       await page.locator(".row.provider", { hasText: "Codex" }).first().click();
       const box = page.locator(".editor .signing.daemon");
       await box.waitFor();

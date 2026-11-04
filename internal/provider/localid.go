@@ -7,19 +7,19 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // A model can be listed at its provider by an id the user gives it
 // (settings' ModelIDs), for a provider that serves one model under ids of
 // its own (zeewell on X: deepseek-v4.1-flash-1017 at one relay,
-// grok-4.6@500k at another). Everything magpie lists, picks, groups, finds
+// grok-4.6@500k at another). Everything myna lists, picks, groups, finds
 // routing groups by, limits a gateway key to and records usage under is
 // that id; a request for it goes out under the provider's own, through
 // the same wire names (settings' Wires) a ModelWires name goes out by.
-// It is ModelWires turned round: a wire keeps magpie's id and changes the
-// one sent, this keeps the one sent and changes magpie's.
+// It is ModelWires turned round: a wire keeps myna's id and changes the
+// one sent, this keeps the one sent and changes myna's.
 //
 // An account's and a plugin's provider take one too (zeewell on X:
 // SuperGrok's grok-4.6@500k as grok-4.6, Cursor's, Devin's and
@@ -212,7 +212,7 @@ func checkModelID(id string) error {
 // it is listed by now or by the provider's own, by id instead, and says
 // which of its models had the id before (replaced) and whether anything
 // changed: what
-// magpie lists, picks, groups, routes and records it by, while the
+// myna lists, picks, groups, routes and records it by, while the
 // provider is still asked for it by its own id. A blank id, or the
 // provider's own, lists it by its own again.
 //
@@ -256,7 +256,7 @@ func setModelID(ref, id string) (string, bool, error) {
 		if local, ok := ids.local[model]; ok {
 			cur = local
 		} else if !raw[model] {
-			return "", false, fmt.Errorf("%s has no model %s (magpie provider %s lists them)", p.ID, model, p.ID)
+			return "", false, fmt.Errorf("%s has no model %s (myna provider %s lists them)", p.ID, model, p.ID)
 		}
 	}
 	if id == "" {
@@ -352,8 +352,8 @@ func moveModelRefs(pid, from, to string, account bool) error {
 	}
 	ref := func(m string) string {
 		pre, rest := "", m
-		if r, ok := strings.CutPrefix(m, "magpie/"); ok {
-			pre, rest = "magpie/", r
+		if r, ok := strings.CutPrefix(m, "myna/"); ok {
+			pre, rest = "myna/", r
 		}
 		if rest == pid+"/"+from {
 			return pre + pid + "/" + to

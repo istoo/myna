@@ -5,12 +5,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // tongzhenbao on X: an image to Volcengine Ark's Coding Plan took 100+s to
 // the first token. The plan's /models lists none of its models, and
-// models.dev's resellers disagree on doubao-seed-2.1-pro, so magpie took
+// models.dev's resellers disagree on doubao-seed-2.1-pro, so myna took
 // it for text-only and had another model describe every image before Ark
 // was asked. Ark's own list says it sees: its image goes to it as sent, and
 // the describer isn't asked. A plan model that is text-only

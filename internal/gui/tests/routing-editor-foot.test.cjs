@@ -61,7 +61,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const errors = [];
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", serve(lang, web));
-          await page.goto("http://magpie.test/?view=routing");
+          await page.goto("http://myna.test/?view=routing");
           await page.locator(".rt-group").nth(15).waitFor();
           await page.locator(".rt-newgroup:visible").first().click();
           await page.locator(".rt-gedit").waitFor();

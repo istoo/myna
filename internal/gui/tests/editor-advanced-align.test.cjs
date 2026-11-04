@@ -12,7 +12,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_GUI_ASSETS || path.resolve(__dirname, "../assets"));
+const assets = path.resolve(process.env.MYNA_GUI_ASSETS || path.resolve(__dirname, "../assets"));
 const claude = () => ({
   id: "claude", name: "Claude Code", icon: "claude-color", chat: "", responses: "", anthropic: "", catalog: "", routing: "",
   models: [{ id: "claude-opus-5-5", name: "Claude Opus 5.5", on: true }], agents: [], fallback: [], headers: {}, keyList: [],
@@ -64,7 +64,7 @@ for (const [engine, browserType] of [["chromium", chromium], ["webkit", webkit]]
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, web));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://myna.test/?view=providers");
       await page.locator(".row.provider", { hasText: "Claude Code" }).first().click();
       const adv = page.locator(".editor details.advanced");
       await adv.locator("summary").waitFor();

@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/sessions"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // sessionsHome puts the sessions package's fixtures where Claude Code and
@@ -287,7 +287,7 @@ func TestSessionsNotAskedSaysHow(t *testing.T) {
 	if n := len(m.sessShown()); n != 0 {
 		t.Fatalf("not asked, %d sessions read", n)
 	}
-	if v := m.View(); !strings.Contains(v, "magpie sessions read on all") {
+	if v := m.View(); !strings.Contains(v, "myna sessions read on all") {
 		t.Errorf("the empty page doesn't say how to allow an agent:\n%s", v)
 	}
 }

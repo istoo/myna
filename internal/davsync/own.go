@@ -5,9 +5,9 @@ import (
 	"maps"
 	"slices"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/backup"
-	"github.com/yetone/magpie/internal/profile"
+	"github.com/istoo/myna/internal/agent"
+	"github.com/istoo/myna/internal/backup"
+	"github.com/istoo/myna/internal/profile"
 )
 
 // An agent's field that sync wrote over a value picked on this computer,

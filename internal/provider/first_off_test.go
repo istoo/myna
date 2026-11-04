@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-// Rime_Nan on X: the first account of a subscription magpie's gateway
+// Rime_Nan on X: the first account of a subscription myna's gateway
 // serves could be ticked off only after dragging it down the list ("put
 // another account first"). First is only the gateway's order there, so
 // ticked off it hands first to the next ticked account; with no other
@@ -49,7 +49,7 @@ func TestFirstTickedOffHandsFirstOn(t *testing.T) {
 }
 
 // The editors' own Copilot account is first with no account marked so;
-// ticked off, the next ticked one of magpie's is first, and the own one
+// ticked off, the next ticked one of myna's is first, and the own one
 // is listed off, not first again.
 func TestOwnFirstCopilotTickedOff(t *testing.T) {
 	signIn(t)

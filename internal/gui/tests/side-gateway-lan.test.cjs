@@ -31,7 +31,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const tip = () => page.locator("#sideGw").getAttribute("title");
       const says = (host) => page.waitForFunction((h) => document.querySelector("#sideGw span")?.textContent.includes(h), host);
 
-      await page.goto("http://magpie.test/?view=settings");
+      await page.goto("http://myna.test/?view=settings");
       await page.locator("#sideGw").waitFor();
       assert.match(await line(), /192\.168\.1\.10:3999/);
       assert.doesNotMatch(await line(), /127\.0\.0\.1/);
@@ -76,7 +76,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     await page.route("**/*", fixture("en", "light", [], { lanURLs, bootGateway: true }));
     // past the providers' read, which says the same
     const read = page.waitForResponse((r) => r.url().endsWith("/api/providers"));
-    await page.goto("http://magpie.test/?view=settings");
+    await page.goto("http://myna.test/?view=settings");
     await page.locator("#sideGw").waitFor();
     await read;
     await page.evaluate(() => new Promise(requestAnimationFrame));

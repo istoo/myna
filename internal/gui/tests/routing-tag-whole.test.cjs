@@ -101,7 +101,7 @@ for (const engine of engines) for (const lang of langs) for (const width of widt
       }
       await browser.close();
     });
-    await page.goto("http://magpie.test/?view=routing");
+    await page.goto("http://myna.test/?view=routing");
     await page.locator(".rt-accts li.tagged").waitFor({ timeout: 15000 });
     const word = await page.evaluate((lang) => (lang !== "en" && I18N[lang]?.["slow to start"]) || "slow to start", lang);
     assert.equal(await page.locator(".rt-accts li.tagged .tag").textContent(), `504 · ${word}`);

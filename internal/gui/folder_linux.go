@@ -4,7 +4,7 @@ package gui
 
 import (
 	"github.com/wailsapp/wails/v3/pkg/application"
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/istoo/myna/internal/proc"
 )
 
 // openFolder starts the desktop's opener and leaves the file manager to open;

@@ -7,7 +7,7 @@ import (
 	"slices"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // didNotStream is in the error for an upstream that answered a stream
@@ -34,7 +34,7 @@ const didNotStream = "did not stream"
 // singlePatience is how long a request to one provider, not a group, is
 // kept once it has failed in a way that passes and the same-one retries
 // (passing) are spent: as long as a group that sets no Patience waits
-// (zoecats on Discord), unless the provider sets its own Patience (magpie
+// (zoecats on Discord), unless the provider sets its own Patience (myna
 // provider set <id> patience=), which wins. A group's, set or not, is the
 // group's.
 var singlePatience = provider.PatienceDefault * time.Second

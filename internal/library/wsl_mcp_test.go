@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agent"
+	"github.com/istoo/myna/internal/agent"
 )
 
 // A Pi in a WSL distro is offered MCP servers, written where the Pi there
@@ -85,7 +85,7 @@ func TestWSLPiMCP(t *testing.T) {
 	}
 }
 
-// Every other agent this machine's MCP servers reach that magpie finds in a
+// Every other agent this machine's MCP servers reach that myna finds in a
 // WSL distro is given them there too, in its own file under the distro's
 // home and never a Windows program: Gemini CLI, Antigravity CLI, Crush,
 // Cline, CodeBuddy Code, Kimi Code and Goose (each was set up in WSL but

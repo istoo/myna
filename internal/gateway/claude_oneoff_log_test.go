@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/claudetui"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/claudetui"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // A one-off interactive run that fails says why in app.log: the reason
@@ -35,9 +35,9 @@ func TestClaudeOneOffFailureLogged(t *testing.T) {
 			token := "sk-ant-oat01-" + strings.Repeat("Q7x", 20)
 			// the helper's reason, as it says it at its caller's deadline,
 			// with a long last screen that ends on what Claude Code drew last
-			screen := "Do you trust this folder? " + strings.Repeat("─", 400) + " C:\\Users\\mydosu\\AppData\\Local\\Temp\\magpie-claude-work token " + token + " ❯ No, exit END-OF-SCREEN"
-			reason := "claude-tui: Claude Code asked whether to trust " + filepath.Join(home, "AppData", "magpie-claude-work") + ", not answered in the 16.8s its caller waits for it: " + screen
-			helper := filepath.Join(t.TempDir(), "magpie")
+			screen := "Do you trust this folder? " + strings.Repeat("─", 400) + " C:\\Users\\mydosu\\AppData\\Local\\Temp\\myna-claude-work token " + token + " ❯ No, exit END-OF-SCREEN"
+			reason := "claude-tui: Claude Code asked whether to trust " + filepath.Join(home, "AppData", "myna-claude-work") + ", not answered in the 16.8s its caller waits for it: " + screen
+			helper := filepath.Join(t.TempDir(), "myna")
 			testenv.Program(t, helper, `#!/bin/sh
 [ "$1" = "`+claudetui.Command+`" ] || exit 9
 printf '%s\n' '`+reason+`' >&2

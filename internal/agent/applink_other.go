@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/istoo/myna/internal/appdir"
+	"github.com/istoo/myna/internal/proc"
 )
 
 // systemLinkHandler asks xdg-mime which desktop entry opens scheme's

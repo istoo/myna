@@ -1,6 +1,6 @@
 // Rotating a gateway key can give it a value of the user's own in place of
-// the one magpie makes (isaac_bai on Discord: one easy to remember and
-// pass on), typed hidden, checked as a new key's is; left empty, magpie
+// the one myna makes (isaac_bai on Discord: one easy to remember and
+// pass on), typed hidden, checked as a new key's is; left empty, myna
 // makes one as before.
 const assert = require("node:assert/strict");
 const { test } = require("node:test");
@@ -8,11 +8,11 @@ const { chromium, webkit } = require("playwright");
 const { fixture, keyAction } = require("./fixtures/caller-keys.cjs");
 
 const words = {
-  en: { rotate: "Rotate key", own: "Gateway key value", placeholder: "Your own key (optional)", label: "Gateway key", changed: "Gateway key changed. Clients that send this key reach magpie now.", rotated: "Gateway key rotated. Update clients on other computers.", short: "Use a key between 8 and 256 characters" },
-  zh: { rotate: "轮换密钥", own: "网关密钥的值", placeholder: "自定义密钥（可选）", label: "网关密钥", changed: "网关密钥已修改，发送这个密钥的客户端现在就能连接 magpie。", rotated: "网关密钥已轮换，请更新其他电脑上的客户端。", short: "密钥长度需在 8 到 256 个字符之间" },
-  "zh-TW": { rotate: "輪換金鑰", own: "閘道金鑰的值", placeholder: "自定義金鑰（可選）", label: "閘道金鑰", changed: "閘道金鑰已修改，傳送這個金鑰的用戶端現在就能連線 magpie。", rotated: "閘道金鑰已輪換，請更新其他電腦上的用戶端。", short: "金鑰長度需在 8 到 256 個字元之間" },
-  ja: { rotate: "キーを再発行", own: "ゲートウェイキーの値", placeholder: "独自のキー（任意）", label: "ゲートウェイキー", changed: "ゲートウェイキーを変更しました。このキーを送るクライアントはそのまま magpie に接続できます。", rotated: "ゲートウェイキーを更新しました。他のコンピュータのクライアントを更新してください。", short: "キーは 8〜256 文字にしてください" },
-  de: { rotate: "Schlüssel erneuern", own: "Wert des Zugangsschlüssels", placeholder: "Eigener Schlüssel (optional)", label: "Zugangsschlüssel", changed: "Zugangsschlüssel geändert. Clients, die diesen Schlüssel senden, erreichen magpie jetzt.", rotated: "Zugangsschlüssel erneuert. Aktualisieren Sie die Clients auf anderen Computern.", short: "Der Schlüssel muss 8 bis 256 Zeichen lang sein" },
+  en: { rotate: "Rotate key", own: "Gateway key value", placeholder: "Your own key (optional)", label: "Gateway key", changed: "Gateway key changed. Clients that send this key reach myna now.", rotated: "Gateway key rotated. Update clients on other computers.", short: "Use a key between 8 and 256 characters" },
+  zh: { rotate: "轮换密钥", own: "网关密钥的值", placeholder: "自定义密钥（可选）", label: "网关密钥", changed: "网关密钥已修改，发送这个密钥的客户端现在就能连接 myna。", rotated: "网关密钥已轮换，请更新其他电脑上的客户端。", short: "密钥长度需在 8 到 256 个字符之间" },
+  "zh-TW": { rotate: "輪換金鑰", own: "閘道金鑰的值", placeholder: "自定義金鑰（可選）", label: "閘道金鑰", changed: "閘道金鑰已修改，傳送這個金鑰的用戶端現在就能連線 myna。", rotated: "閘道金鑰已輪換，請更新其他電腦上的用戶端。", short: "金鑰長度需在 8 到 256 個字元之間" },
+  ja: { rotate: "キーを再発行", own: "ゲートウェイキーの値", placeholder: "独自のキー（任意）", label: "ゲートウェイキー", changed: "ゲートウェイキーを変更しました。このキーを送るクライアントはそのまま myna に接続できます。", rotated: "ゲートウェイキーを更新しました。他のコンピュータのクライアントを更新してください。", short: "キーは 8〜256 文字にしてください" },
+  de: { rotate: "Schlüssel erneuern", own: "Wert des Zugangsschlüssels", placeholder: "Eigener Schlüssel (optional)", label: "Zugangsschlüssel", changed: "Zugangsschlüssel geändert. Clients, die diesen Schlüssel senden, erreichen myna jetzt.", rotated: "Zugangsschlüssel erneuert. Aktualisieren Sie die Clients auf anderen Computern.", short: "Der Schlüssel muss 8 bis 256 Zeichen lang sein" },
 };
 
 const said = (page, m) => page.waitForFunction((m) => document.body.textContent.includes(m), m);
@@ -30,7 +30,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const events = [], errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", fixture(lang, "light", events, { lan: true }));
-        await page.goto("http://magpie.test/?view=gateway");
+        await page.goto("http://myna.test/?view=gateway");
         const row = page.locator('#gatewayKeys .acc[data-key="laptop"]');
         await row.waitFor();
         await keyAction(page, row, w.rotate);
@@ -58,7 +58,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await said(page, w.changed);
         await page.waitForFunction(() => document.querySelector('#gatewayKeys .acc[data-key="laptop"]')?.textContent.includes("…hare"));
         assert.doesNotMatch(await page.locator("#gatewayKeys").textContent(), /family-easy/);
-        // the next rotation starts empty: magpie makes the key
+        // the next rotation starts empty: myna makes the key
         await keyAction(page, row, w.rotate);
         assert.equal(await own.inputValue(), "");
         await modal.getByRole("button", { name: w.rotate, exact: true }).click();

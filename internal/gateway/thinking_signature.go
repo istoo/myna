@@ -14,11 +14,11 @@ import (
 // "Couldn't read the response: serialization error: missing field
 // `signature`" (uk.jent on Discord, minimax-code-global/MiniMax-M3.1-Flash).
 //
-// A thinking block magpie writes for a Messages client therefore carries
+// A thinking block myna writes for a Messages client therefore carries
 // one: the encoder's (anthropicEncoder.thinking, renderAnthropic), the
 // whole-to-stream path's (whole_stream.go), and, through sigFieldTidy, a
 // block another vendor's Messages endpoint wrote without one, relayed as it
-// came. The signature magpie adds is always empty, never made up: an empty
+// came. The signature myna adds is always empty, never made up: an empty
 // signature is no signature to every path that sends history on.
 // anthropicBody leaves an unsigned thinking block out for Anthropic and
 // keeps its text only where the upstream wants reasoning back (DeepSeek,

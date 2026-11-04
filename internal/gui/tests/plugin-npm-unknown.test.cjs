@@ -33,7 +33,7 @@ function server(lang, asks) {
   return async (route) => {
     const url = new URL(route.request().url());
     const json = (data) => route.fulfill({ json: data });
-    if (url.host !== "magpie.test") return route.fulfill({ status: 404, body: "" });
+    if (url.host !== "myna.test") return route.fulfill({ status: 404, body: "" });
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:false};` });
     if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (url.pathname === "/api/state") return json({ agents: [], profiles: [], settings: { lang, theme: "light" } });
@@ -72,7 +72,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         await page.clock.install();
         await page.route("**/*", server(lang, asks));
-        await page.goto("http://magpie.test/?view=plugins");
+        await page.goto("http://myna.test/?view=plugins");
         const act = (pkg) => page.locator(`#view-plugins .pm-card[data-pkg="${pkg}"] .pm-act`);
         await act(PC).waitFor();
         // npm's first answer, with nothing of PowerContext, has come

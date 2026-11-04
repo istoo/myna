@@ -73,7 +73,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         }
         await browser.close();
       });
-      await page.goto("http://magpie.test/?view=routing");
+      await page.goto("http://myna.test/?view=routing");
       await page.locator(".rt-days .rt-day").nth(1).click();
       await page.locator(".rt-req").first().click();
       await page.locator(".rt-steps li.ok").waitFor();
@@ -150,7 +150,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         { ...live, tries: [t429, { id: gpt.id, model: gpt.model, start: live.time, done: true, status: 200, ms: 900 }], done: true, status: 200, ms: 1300, tokens: 300 },
       ]));
       t.after(() => browser.close());
-      await page.goto("http://magpie.test/?view=routing");
+      await page.goto("http://myna.test/?view=routing");
       await page.locator(".rt-steps li.wait").waitFor();
       // mark each logo and line as first drawn
       const first = await page.locator(".rt-steps").evaluate((s) => {

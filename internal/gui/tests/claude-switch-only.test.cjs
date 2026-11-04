@@ -1,7 +1,7 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // myduso on Discord: under Claude's accounts a tick keeps them to Claude
-// Code, magpie only switching its own sign-in and serving no request on
-// them. It shows with one account too: what it stops is magpie serving
+// Code, myna only switching its own sign-in and serving no request on
+// them. It shows with one account too: what it stops is myna serving
 // them, not a switch between them. Ticking it posts provider/switchonly,
 // and the redraw keeps it ticked; unticking posts it off. The page doesn't
 // move. In English, Chinese, Japanese and German, Chromium and WebKit, at
@@ -56,9 +56,9 @@ const label = {
 };
 const strings = [
   "Only switch {agent}'s sign-in",
-  "magpie moves {agent}'s own sign-in to the next account with room when one is used up, and keeps it there till that one is used up too. Nothing on these accounts is served through magpie.",
-  "magpie serves no requests on these accounts",
-  "magpie serves requests on these accounts again",
+  "myna moves {agent}'s own sign-in to the next account with room when one is used up, and keeps it there till that one is used up too. Nothing on these accounts is served through myna.",
+  "myna serves no requests on these accounts",
+  "myna serves requests on these accounts again",
 ];
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -73,7 +73,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], posts = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, claude(opts), posts));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://myna.test/?view=providers");
         // the first draw waits on the page's first reads: a load's room, not a click's (#4470)
         const row = page.locator(".row.provider", { hasText: "Claude" }).first();
         await row.waitFor({ timeout: 60000 });

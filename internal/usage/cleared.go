@@ -5,8 +5,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // Clearing the Usage page's figures (CrazyMouse_TT on X: a local model
@@ -16,7 +16,7 @@ import (
 // keeps every call, so a key's spending limit (package budget), the
 // allowances' window holds and the gateway's own reads of it (Visit) still
 // count the calls cleared, and the agents' session files and other
-// computers' shared days, which magpie can't rewrite, are cleared the same
+// computers' shared days, which myna can't rewrite, are cleared the same
 // way as its own log.
 
 // clearSet is the user's clears as last read, the usage aliases a model's

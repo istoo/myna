@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/filememo"
+	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/myna/internal/filememo"
 )
 
 // TestLoadReadOnceARequest: every Providers page poll asked Load, and

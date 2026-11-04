@@ -15,7 +15,7 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // servedTierAt is the served tier a reply from host says, as the log keeps

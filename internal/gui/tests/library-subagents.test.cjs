@@ -6,7 +6,7 @@
 // which agents it is given to can't bind its skills or servers (only
 // Claude Code binds skills; Claude Code and Droid bind servers), that
 // Cursor's cursor-agent command reads only a project's .cursor/agents,
-// and which agents magpie can't write one for (an agent in WSL), whose
+// and which agents myna can't write one for (an agent in WSL), whose
 // chip is greyed, says why, and posts nothing. A row's chip posts
 // subagents/agents. Add opens the editor: the prompt's Enter is a new
 // line, not a save; an input method's Enter saves nothing; the skills and
@@ -35,10 +35,10 @@ const SUB_AGENTS = [
   { id: "cursor", dir: `${HOME}/.cursor/agents` },
   { id: "droid", dir: `${HOME}/.factory/droids`, mcp: true },
   { id: "opencode", dir: `${HOME}/.config/opencode/agents` },
-  { id: WSL, wsl: true, no: "magpie gives no subagents to an agent in WSL yet" },
+  { id: WSL, wsl: true, no: "myna gives no subagents to an agent in WSL yet" },
 ];
 const lib = (subagents) => ({
-  dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+  dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
   agents: [agent("claude", "Claude Code"), agent("codex", "Codex"), agent("cursor", "Cursor"), agent("droid", "Droid"), agent("opencode", "OpenCode"), agent(WSL, "Claude Code (Ubuntu)")],
   instructions: { agents: [] }, servers: [{ name: "github", transport: "stdio", command: "npx", agents: ["claude"] }],
   skills: [{ name: "tdd", agents: ["claude"] }], foundServers: [], projects: [], foundSkills: [], problems: [],
@@ -77,7 +77,7 @@ function server(lang, state, posts) {
     if (url.pathname === "/api/groups") return json({ groups: [] });
     if (url.pathname === "/api/providers") return json({ providers: [], gateway: { running: true } });
     if (url.pathname.startsWith("/api/")) return json({});
-    if (url.host !== "magpie.test") return route.fulfill({ status: 404, body: "" });
+    if (url.host !== "myna.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -125,14 +125,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const posts = [], errors = [];
         const open = async (width) => {
           const ctx = await browser.newContext({ viewport: { width, height: 1000 }, reducedMotion: "reduce" });
-          await ctx.addInitScript(() => { try { localStorage.setItem("magpie.libTab", "subagents"); } catch {} });
+          await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "subagents"); } catch {} });
           const page = await ctx.newPage();
           page.setDefaultTimeout(5000);
           page.setDefaultNavigationTimeout(60000);
           page.on("pageerror", (e) => errors.push(e.message));
           page.on("dialog", (d) => { errors.push("a browser dialog: " + d.message()); d.dismiss(); });
           await page.route("**/*", server(lang, state, posts));
-          await page.goto("http://magpie.test/");
+          await page.goto("http://myna.test/");
           await page.locator('button[data-view="library"]').click();
           await page.locator("#view-library .lib-subagent").first().waitFor();
           return { ctx, page };
@@ -174,13 +174,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // neither; Claude Code both, so it isn't named
         await v.locator(".lib-subagents-noskills").filter({ hasText: w("{agents} can't bind skills to a subagent: theirs gets its prompt, and every skill the agent has.", { agents: "Codex" }) }).waitFor();
         await v.locator(".lib-subagents-nomcp").filter({ hasText: w("{agents} can't bind MCP servers to a subagent: theirs gets its prompt, and every server the agent has.", { agents: "Codex" }) }).waitFor();
-        await v.locator(".lib-subagents-no").filter({ hasText: w("magpie can't give subagents to {agents} yet: their chips are greyed, and say why.", { agents: "Claude Code (Ubuntu)" }) }).waitFor();
+        await v.locator(".lib-subagents-no").filter({ hasText: w("myna can't give subagents to {agents} yet: their chips are greyed, and say why.", { agents: "Claude Code (Ubuntu)" }) }).waitFor();
         assert.equal(await v.locator(".lib-subagents-cursor").count(), 0, "the Cursor aside with no subagent given to Cursor");
 
         // the agent in WSL: greyed, says why, and a click posts nothing
         const wsl = row("reviewer").locator(`.lib-ag[data-agent="${WSL}"]`);
         assert.equal(await wsl.getAttribute("aria-disabled"), "true");
-        assert.equal(await wsl.getAttribute("title"), w("magpie gives subagents only to agents on this computer, not yet to {agent} in WSL", { agent: "Claude Code (Ubuntu)" }));
+        assert.equal(await wsl.getAttribute("title"), w("myna gives subagents only to agents on this computer, not yet to {agent} in WSL", { agent: "Claude Code (Ubuntu)" }));
         await press(page, wsl);
         await page.waitForTimeout(150);
         assert.deepEqual(posts, [], "a greyed chip posted");

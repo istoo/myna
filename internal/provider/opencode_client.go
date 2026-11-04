@@ -22,10 +22,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/istoo/myna/internal/catalog"
 )
 
-// OpenCodeVersion is the oldest OpenCode release magpie says it is to
+// OpenCodeVersion is the oldest OpenCode release myna says it is to
 // OpenCode's gateway: 2.2.5, npm's latest @opencode/cli on 2026-11-01.
 // Since 2026-10-26 Zen's free tier answers 429 FreeUsageLimitError ("Free
 // models work in OpenCode") to OpenCode 1.19.0's User-Agent whatever the
@@ -333,7 +333,7 @@ func OpenCodeHasEnvironment(system string) bool {
 // serves a request as OpenCode's own only when a system message carries
 // one; without it a request gets a small allowance a day, then 429
 // FreeUsageLimitError ("Free models work in OpenCode"), and fixed text in
-// it that only magpie would send (a directory "unknown") is a fingerprint.
+// it that only myna would send (a directory "unknown") is a fingerprint.
 func OpenCodeEnvironment(dir string) string {
 	if dir == "" {
 		dir, _ = os.UserHomeDir()

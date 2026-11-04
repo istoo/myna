@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // effortModels is a provider whose models take the levels models.dev gives
@@ -39,7 +39,7 @@ func TestCodexNewSessionEffortLastsModelSwitch(t *testing.T) {
 	cx := codex(home)
 	defaults := func() map[string]string {
 		t.Helper()
-		b, _ := os.ReadFile(filepath.Join(home, ".codex", "magpie-models.json"))
+		b, _ := os.ReadFile(filepath.Join(home, ".codex", "myna-models.json"))
 		var cat struct {
 			Models []struct {
 				Slug    string  `json:"slug"`
@@ -88,7 +88,7 @@ func TestCodexNewSessionEffortLastsModelSwitch(t *testing.T) {
 	if d := defaults(); d["volc/all-five"] != "medium" || d["volc/lo-hi-max"] != "high" {
 		t.Fatalf("catalog defaults for Default: %v", d)
 	}
-	// picked in magpie, a model without the level settles on the nearest
+	// picked in myna, a model without the level settles on the nearest
 	if err := cx.Fields[1].Set("xhigh"); err != nil {
 		t.Fatal(err)
 	}
@@ -115,7 +115,7 @@ func TestCodexEffortPickKeepsTheAppRunning(t *testing.T) {
 	if err := cx.Fields[0].Set("volc/all-five"); err != nil {
 		t.Fatal(err)
 	}
-	cat := filepath.Join(home, ".codex", "magpie-models.json")
+	cat := filepath.Join(home, ".codex", "myna-models.json")
 	listed, _ := os.ReadFile(cat)
 	before, _, known := codexAppRoute()
 	if !known {
@@ -148,13 +148,13 @@ func TestGrokNewSessionEffortLastsModelSwitch(t *testing.T) {
 	os.MkdirAll(filepath.Dir(path), 0o755)
 	os.WriteFile(path, []byte("[models]\ndefault = \"grok-4.6\"\ndefault_reasoning_effort = \"xhigh\"\n"), 0o644)
 	a := grok(home)
-	if err := a.Field("model").Set("magpie/volc/all-five"); err != nil {
+	if err := a.Field("model").Set("myna/volc/all-five"); err != nil {
 		t.Fatal(err)
 	}
 	if v := a.Field("effort").Get(); v != "xhigh" {
 		t.Fatalf("xhigh on a model that takes it: %q", v)
 	}
-	if err := a.Field("model").Set("magpie/volc/lo-hi-max"); err != nil {
+	if err := a.Field("model").Set("myna/volc/lo-hi-max"); err != nil {
 		t.Fatal(err)
 	}
 	if v := a.Field("effort").Get(); v != "max" {

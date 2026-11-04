@@ -1,12 +1,12 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // Hermes keeps more than one profile (hermes -p <name>), each with its own
-// config.yaml, and magpie's Hermes row picked the model of one of them only
+// config.yaml, and myna's Hermes row picked the model of one of them only
 // (dongshanfengdongshizhcn on Discord). Each other profile comes as a field
 // keyed "profile:<name>": connected, the opened row has an Other profiles
 // section with one line per profile (its name, its model picker, the
 // command that runs it), and no square of the row's own. A click opens the
 // app's model picker with Default first, noted as putting back what the
-// profile had before magpie; a model picked is posted for that profile
+// profile had before myna; a model picked is posted for that profile
 // alone. With one profile only there is no section. No click scrolls the
 // page. In every language, at a normal and a narrow width, in both engines.
 // No backend: the API is faked here.
@@ -17,12 +17,12 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
-const models = [{ value: "magpie/v/glm", label: "GLM", ref: "v/glm" }, { value: "magpie/v/flash", label: "Flash", ref: "v/flash" }];
+const models = [{ value: "myna/v/glm", label: "GLM", ref: "v/glm" }, { value: "myna/v/flash", label: "Flash", ref: "v/flash" }];
 const hermes = (id, bots) => ({
   id, name: "Hermes", path: "/test/.hermes/config.yaml", icon: "hermes", wired: true,
   fields: [
-    { key: "model", label: "model", value: "magpie/v/glm", options: models },
-    ...bots.map((b) => ({ key: "profile:" + b, label: b, value: b === "coder" ? "kimi-k3.5" : "magpie/v/glm", quiet: true, options: [{ value: "kimi-k3.5" }, ...models] })),
+    { key: "model", label: "model", value: "myna/v/glm", options: models },
+    ...bots.map((b) => ({ key: "profile:" + b, label: b, value: b === "coder" ? "kimi-k3.5" : "myna/v/glm", quiet: true, options: [{ value: "kimi-k3.5" }, ...models] })),
   ],
 });
 const fresh = () => ({ agents: [hermes("hermes", ["a-profile-with-a-long-name", "coder"]), hermes("hermes-one", [])], profiles: [] });
@@ -55,11 +55,11 @@ function server(lang, sets) {
 
 // the words as i18n.js has them
 const W = {
-  en: { head: "Other profiles", def: "Default", note: "put back what Hermes had before magpie" },
-  zh: { head: "其他 profile", def: "默认", note: "还原 Hermes 接入 magpie 之前的设置" },
-  "zh-TW": { head: "其他 profile", def: "預設", note: "還原 Hermes 接入 magpie 之前的設定" },
-  ja: { head: "ほかのプロファイル", def: "デフォルト", note: "Hermes を magpie 接続前の設定に戻す" },
-  de: { head: "Weitere Profile", def: "Standard", note: "Stand von Hermes vor magpie wiederherstellen" },
+  en: { head: "Other profiles", def: "Default", note: "put back what Hermes had before myna" },
+  zh: { head: "其他 profile", def: "默认", note: "还原 Hermes 接入 myna 之前的设置" },
+  "zh-TW": { head: "其他 profile", def: "預設", note: "還原 Hermes 接入 myna 之前的設定" },
+  ja: { head: "ほかのプロファイル", def: "デフォルト", note: "Hermes を myna 接続前の設定に戻す" },
+  de: { head: "Weitere Profile", def: "Standard", note: "Stand von Hermes vor myna wiederherstellen" },
 };
 
 const row = '.row.agent[data-id="hermes"]';
@@ -84,7 +84,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           }
           await browser.close();
         });
-        await page.goto("http://magpie.test/");
+        await page.goto("http://myna.test/");
         await page.locator(row).waitFor();
         // no profile picker in the row itself
         assert.equal(await page.locator(`${row} > * .field[data-key^="profile:"]`).count(), 0);
@@ -120,7 +120,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.ok(first.includes(w.def) && first.includes(w.note), first);
         await page.locator("#pop #list li", { hasText: "Flash" }).first().click();
         await page.waitForFunction(() => document.querySelector('.row.agent[data-id="hermes"] .ag-exp .field[data-key="profile:coder"] .v')?.textContent === "Flash");
-        assert.deepEqual(sets, [{ agent: "hermes", field: "profile:coder", value: "magpie/v/flash" }]);
+        assert.deepEqual(sets, [{ agent: "hermes", field: "profile:coder", value: "myna/v/flash" }]);
         assert.deepEqual(errors, []);
       });
     }

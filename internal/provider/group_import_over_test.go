@@ -24,7 +24,7 @@ func TestImportGroupOverReplacesSameID(t *testing.T) {
 	if err := SwitchGroup("one", false); err != nil {
 		t.Fatal(err)
 	}
-	text, _ := json.Marshal(SharedGroup{Magpie: ShareMark, Version: ShareVersion, Group: Group{
+	text, _ := json.Marshal(SharedGroup{Myna: ShareMark, Version: ShareVersion, Group: Group{
 		ID: "one", Name: "Three", Members: []string{"a/y", "a/x"}, Routing: Rotate}})
 	before := len(Groups())
 	res, err := ImportGroupOver(string(text))
@@ -53,7 +53,7 @@ func TestImportGroupOverReplacesSameID(t *testing.T) {
 	}
 
 	// no group of that id: added, as ImportGroup does
-	text, _ = json.Marshal(SharedGroup{Magpie: ShareMark, Version: ShareVersion, Group: Group{
+	text, _ = json.Marshal(SharedGroup{Myna: ShareMark, Version: ShareVersion, Group: Group{
 		ID: "elsewhere", Name: "Elsewhere", Members: []string{"a/y"}}})
 	res, err = ImportGroupOver(string(text))
 	if err != nil || res.Replaced || len(Groups()) != before+1 {
@@ -61,7 +61,7 @@ func TestImportGroupOverReplacesSameID(t *testing.T) {
 	}
 
 	// without asking to replace, the same id adds another group
-	text, _ = json.Marshal(SharedGroup{Magpie: ShareMark, Version: ShareVersion, Group: Group{
+	text, _ = json.Marshal(SharedGroup{Myna: ShareMark, Version: ShareVersion, Group: Group{
 		ID: "one", Name: "One", Members: []string{"a/y"}}})
 	res, err = ImportGroup(string(text))
 	if err != nil || res.Replaced || res.ID == "one" {

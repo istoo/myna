@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/backup"
-	"github.com/yetone/magpie/internal/library"
+	"github.com/istoo/myna/internal/backup"
+	"github.com/istoo/myna/internal/library"
 )
 
 // A subagent made on one computer is written into the other's agents by
@@ -69,7 +69,7 @@ func TestSyncSubagents(t *testing.T) {
 }
 
 // A library with no subagents hashes as it did before they were carried,
-// so a magpie that starts carrying them doesn't see a change to sync.
+// so a myna that starts carrying them doesn't see a change to sync.
 func TestNoSubagentsHashAsBefore(t *testing.T) {
 	none := []*library.Subagent{}
 	with := backup.Bundle{Library: &library.Bundle{MCP: []*library.Server{}, Skills: []*library.CarriedSkill{}, Subagents: &none}}

@@ -7,21 +7,21 @@ import (
 
 	"golang.org/x/sys/windows"
 
-	"github.com/yetone/magpie/internal/appdir"
+	"github.com/istoo/myna/internal/appdir"
 )
 
-// installPath is %LOCALAPPDATA%\Programs\magpie\magpie.exe: the user's own
+// installPath is %LOCALAPPDATA%\Programs\myna\myna.exe: the user's own
 // programs folder (FOLDERID_UserProgramFiles), where per-user installers
 // put their apps, which needs no administrator.
 func installPath() string {
 	local := appdir.Getenv("LOCALAPPDATA")
 	if local == "" {
 		if p, err := windows.KnownFolderPath(windows.FOLDERID_UserProgramFiles, 0); err == nil && p != "" {
-			return filepath.Join(p, "magpie", "magpie.exe")
+			return filepath.Join(p, "myna", "myna.exe")
 		}
 		return ""
 	}
-	return filepath.Join(local, "Programs", "magpie", "magpie.exe")
+	return filepath.Join(local, "Programs", "myna", "myna.exe")
 }
 
 // isDownloadFolder: Downloads and Desktop, where they are kept (the
@@ -72,7 +72,7 @@ func exeVersion(path string) uint64 {
 }
 
 // webViewDefault is where WebView2 keeps the profile of the program at
-// exe when magpie names none: %APPDATA%\<exe name> (Wails' default).
+// exe when myna names none: %APPDATA%\<exe name> (Wails' default).
 func webViewDefault(exe string) string {
 	a := os.Getenv("AppData")
 	if a == "" {

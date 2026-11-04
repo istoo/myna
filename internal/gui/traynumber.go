@@ -24,7 +24,7 @@ import (
 // first card's figure, its digits alone ("42" for 42% used, or left as
 // Settings has it), in the taskbar's own text colour on transparency, as
 // a battery or a clock in that row is; the tooltip spells out every card.
-// A card with no percentage (a balance, magpie's totals) can't be read in
+// A card with no percentage (a balance, myna's totals) can't be read in
 // so small a square: the next card's is drawn, and with none the icon
 // stays the bird. Settings › Tray icon number (settings.TrayNoNumber)
 // keeps the bird.

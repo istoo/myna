@@ -5,10 +5,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/access"
+	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/myna/internal/provider"
 )
 
 func TestClaudeTiers(t *testing.T) {
@@ -79,7 +79,7 @@ func TestClaudeTiers(t *testing.T) {
 
 // Claude Code's subagents can have a model of their own (#468):
 // CLAUDE_CODE_SUBAGENT_MODEL, the model a subagent runs on when neither the
-// call nor its definition names one. Unset, magpie writes it as before;
+// call nor its definition names one. Unset, myna writes it as before;
 // set, it outlives a tier of its own and a new main model.
 func TestClaudeSubagentModel(t *testing.T) {
 	home := t.TempDir()
@@ -181,7 +181,7 @@ func TestClaudeEffortMax(t *testing.T) {
 }
 
 // #2545: a key made under Gateway keys, put in Claude Code's
-// ANTHROPIC_AUTH_TOKEN in place of magpie's, goes through magpie all the
+// ANTHROPIC_AUTH_TOKEN in place of myna's, goes through myna all the
 // same, so a model pick keeps it, as a sync keeps one. A key the gateway
 // doesn't take is still wired over.
 func TestClaudePickKeepsAGatewayKeyOfTheUsers(t *testing.T) {
@@ -236,15 +236,15 @@ func TestClaudePickKeepsAGatewayKeyOfTheUsers(t *testing.T) {
 	}
 }
 
-// #2545's review: the sharing key magpie itself made is never the user's.
-// Claude Code is wired to an address beyond loopback (MAGPIE_ADDR), where
-// magpie writes the sharing key while sharing is on and gateway.Token when
+// #2545's review: the sharing key myna itself made is never the user's.
+// Claude Code is wired to an address beyond loopback (MYNA_ADDR), where
+// myna writes the sharing key while sharing is on and gateway.Token when
 // it is off; a pick kept the sharing key, which still authenticates (it
 // stays enabled in caller-keys.json with sharing off), so sharing off
 // never brought gateway.Token back. Claude has no WSL twin: the address is
 // how its writeTiers reaches the sharing key, as a distro is Codex's.
 func TestClaudeSharingOffWiresGatewayTokenBack(t *testing.T) {
-	t.Setenv("MAGPIE_ADDR", "192.0.2.10:3425")
+	t.Setenv("MYNA_ADDR", "192.0.2.10:3425")
 	home := t.TempDir()
 	t.Setenv("HOME", home)
 	t.Setenv("USERPROFILE", home)
@@ -266,7 +266,7 @@ func TestClaudeSharingOffWiresGatewayTokenBack(t *testing.T) {
 	}
 	if tok, _ := edit.GetJSON(path, "env.ANTHROPIC_AUTH_TOKEN"); tok != gateway.Token {
 		b, _ := os.ReadFile(path)
-		t.Fatalf("wired with sharing off: key %q, want magpie's own\n%s", tok, b)
+		t.Fatalf("wired with sharing off: key %q, want myna's own\n%s", tok, b)
 	}
 	if err := access.ConfigureLAN(true, false); err != nil {
 		t.Fatal(err)

@@ -9,11 +9,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/sessions"
+	"github.com/istoo/myna/internal/sessions"
 )
 
 // The log's full blocks are kept on disk between runs (log-v1.bin). A
-// started magpie parsed the whole log again, a record at a time, before
+// started myna parsed the whole log again, a record at a time, before
 // its first page: a long history's 109 MB took ~620 MB of allocations in
 // the first seconds, the start's largest part, and its collections (#2278).
 // The file stands for the log's first bytes while their SHA-256 is the
@@ -21,7 +21,7 @@ import (
 // start reads the blocks from it and parses only the lines after them, as
 // a parse continues the snapshot before it.
 
-const logDiskMagic = "magpie-log-v1\n"
+const logDiskMagic = "myna-log-v1\n"
 
 func logDiskPath() string {
 	return filepath.Join(filepath.Dir(sessions.CachePath()), "log-v1.bin")

@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// #694: a subscription removed from magpie sat under "Removed from magpie —
+// #694: a subscription removed from myna sat under "Removed from myna —
 // still signed in" with Add it back as its only way out, so its account
 // could never go: added back, the old account came with it. Its row now
 // has Add it back and Sign out… side by side (mintonight: no menu to open
@@ -18,7 +18,7 @@ const assets = path.resolve(__dirname, "../assets");
 
 const qoderCN = { id: "qoder-cn", name: "Qoder CN", icon: "qoder", models: [], agents: [], key: {}, account: { agent: "qoder-cn", agentName: "Qoder CN", agentIcon: "qoder", user: "b@q", logins: [{ user: "b@q", active: true, on: true }] } };
 // the removed Qoder, named by its provider as the backend now names it
-const removed = (quiet) => ({ agent: "plugin", provider: "qoder-plugin", name: "Qoder", why: "You removed it from magpie.", quiet, agentName: "Qoder", agentIcon: "qoder" });
+const removed = (quiet) => ({ agent: "plugin", provider: "qoder-plugin", name: "Qoder", why: "You removed it from myna.", quiet, agentName: "Qoder", agentIcon: "qoder" });
 
 function server(lang, asked, quiet, fail) {
   let gone = false;
@@ -46,8 +46,8 @@ function server(lang, asked, quiet, fail) {
 }
 
 const L = {
-  en: { back: "Add it back", out: "Sign out…", ask: "Sign Qoder out of magpie?", go: "Sign out", line: "Sign out" },
-  zh: { back: "加回来", out: "退出登录…", ask: "在 magpie 里退出 Qoder？", go: "退出登录", line: "退出登录" },
+  en: { back: "Add it back", out: "Sign out…", ask: "Sign Qoder out of myna?", go: "Sign out", line: "Sign out" },
+  zh: { back: "加回来", out: "退出登录…", ask: "在 myna 里退出 Qoder？", go: "退出登录", line: "退出登录" },
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -63,7 +63,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], asked = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, asked, true));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://myna.test/?view=providers");
         await page.locator("#addProvider").click();
         const sheet = page.locator("#addSheet");
         const row = sheet.locator(`.tile[data-pick="removed:qoder-plugin"]`);
@@ -106,7 +106,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         const asked = [];
         await page.route("**/*", server(lang, asked, false, "the vendor said no"));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://myna.test/?view=providers");
         await page.locator("#excluded .excluded button.link", { hasText: new RegExp("^" + w.line + "$") }).click();
         const ask = page.locator("#modal .forget-ask");
         await ask.waitFor();
@@ -127,7 +127,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         const asked = [];
         await page.route("**/*", server(lang, asked, true));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://myna.test/?view=providers");
         await page.locator("#addProvider").click();
         const row = page.locator(`#addSheet .tile[data-pick="removed:qoder-plugin"]`);
         await row.locator("button", { hasText: new RegExp("^" + w.back + "$") }).click();
@@ -143,7 +143,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         const asked = [];
         await page.route("**/*", server(lang, asked, false));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://myna.test/?view=providers");
         const line = page.locator("#excluded .excluded");
         await line.waitFor();
         assert.match(await line.innerText(), /Qoder/);

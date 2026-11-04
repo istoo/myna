@@ -2,7 +2,7 @@
 // A call's HTTP headers both ways (usrname1833 on Discord: 查看原始请求和原始
 // 响应的http头, to debug what a capture would show): folded under its bodies
 // on the Gateway page's recent calls and on the Routing page, the client's
-// headers, then each request magpie sent upstream and the head of its
+// headers, then each request myna sent upstream and the head of its
 // answer, an error in place of one that had none, a plugin's hand-off said
 // as one, and the tries not kept counted. The request archive's copy shows
 // what went upstream too. Opening the bodies doesn't open them; the bodies'
@@ -115,7 +115,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     const w = want[lang];
     test(`${engine} ${lang}: a recent call's HTTP headers fold open under its bodies`, async (t) => {
       const { page, errors } = await open(engine, lang, t, lang === "en" ? 1100 : 380);
-      await page.goto("http://magpie.test/?view=gateway");
+      await page.goto("http://myna.test/?view=gateway");
       const item = page.locator("#activity .call-item").first();
       await item.waitFor();
       await item.locator(".call").click();
@@ -147,7 +147,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const [x, y] = await loc.evaluate((e) => { const r = e.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; });
         await page.mouse.click(x, y);
       };
-      await page.goto("http://magpie.test/?view=routing");
+      await page.goto("http://myna.test/?view=routing");
       await page.locator(".rt-day").nth(1).waitFor({ state: "visible", timeout: 15000 });
       await page.locator(".rt-day").nth(1).click();
       await page.locator(".rt-req").nth(routes.length - 1).waitFor();

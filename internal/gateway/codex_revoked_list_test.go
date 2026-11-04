@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // revokedBody is what the ChatGPT backend answered a request on a revoked
@@ -21,8 +21,8 @@ const revokedBody = `{"error":{"message":"Encountered invalidated oauth token fo
 // A Codex whose ChatGPT sign-in was revoked asks for its model list beside
 // it (jjt on Discord, #4308). The backend's 401 went to Codex, whose one
 // refresh fails for good for such a sign-in, and Codex kept its bundled
-// list: none of magpie's models until the user signed in again. Now the
-// list is Codex's last of its own and magpie's. A 401 that says the token
+// list: none of myna's models until the user signed in again. Now the
+// list is Codex's last of its own and myna's. A 401 that says the token
 // expired is still Codex's to refresh, and a sign-in made again has the
 // backend's list on the next ask: nothing of the revoked one is kept.
 func TestCodexModelListRevokedSignIn(t *testing.T) {
@@ -53,7 +53,7 @@ func TestCodexModelListRevokedSignIn(t *testing.T) {
 	h := New().Handler()
 
 	if code, has := codexListAsk(h); code != 200 || !has["fake/m1"] || !has["gpt-5.5"] {
-		t.Fatalf("revoked sign-in: %d %v, want 200 with magpie's models and Codex's last list", code, has)
+		t.Fatalf("revoked sign-in: %d %v, want 200 with myna's models and Codex's last list", code, has)
 	}
 	codexLists.asking.Wait()
 
@@ -65,13 +65,13 @@ func TestCodexModelListRevokedSignIn(t *testing.T) {
 
 	say.Store("ok")
 	if code, has := codexListAsk(h); code != 200 || !has["gpt-new"] || !has["fake/m1"] {
-		t.Fatalf("signed in again: %d %v, want the backend's list with magpie's", code, has)
+		t.Fatalf("signed in again: %d %v, want the backend's list with myna's", code, has)
 	}
 }
 
 // The Codex app's file list (CodexDesktopCatalog) for a sign-in the
 // backend calls revoked, with no list of the backend's from before: Codex's
-// last list of its own and magpie's models, told as a change for the file
+// last list of its own and myna's models, told as a change for the file
 // to be written. A network error after it says nothing either way, and a
 // sign-in made again brings the backend's list back.
 func TestCodexDesktopCatalogRevokedSignIn(t *testing.T) {

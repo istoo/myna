@@ -1,6 +1,6 @@
 // Sessions: every session of an agent on this computer, by the folder it
-// ran in, to pick up again or to delete. A delete asks first, in magpie's
-// own dialog, and moves the session's files into magpie's trash; the Trash
+// ran in, to pick up again or to delete. A delete asks first, in myna's
+// own dialog, and moves the session's files into myna's trash; the Trash
 // lists them, each with a Restore and a Delete forever, and can be emptied;
 // erasing for good asks in the same dialog, and is only ever done when the
 // reader asks for it. A session written to in the last minute
@@ -11,15 +11,15 @@
 // A page the Sessions plugin adds to the window (kernel.js), its words in
 // i18n.js beside this file. Classic script, loaded before app.js: what
 // runs as it loads touches neither the page nor app.js. mount, at
-// magpie.start, is handed the page; open loads it, relang draws it again
+// myna.start, is handed the page; open loads it, relang draws it again
 // in a new language, and reveal is the Usage page's way in.
-magpie.plugin("sessions", (ctx) => {
+myna.plugin("sessions", (ctx) => {
   let page = null;
 
   let data = null;        // /api/sessions/manage
   let failed = "";
   let agent = "";
-  try { agent = localStorage.getItem("magpie.sessionsAgent") || ""; } catch {}
+  try { agent = localStorage.getItem("myna.sessionsAgent") || ""; } catch {}
   let query = "";
   // The filter also finds a session by what was said in it: the server
   // reads the agent's conversations a moment after the last keystroke, and
@@ -81,7 +81,7 @@ magpie.plugin("sessions", (ctx) => {
   const FOLDERS = "\x00folders";
   const OTHERS = "\x00others";
 
-  // A session seen only through magpie's gateway has no folder magpie knows
+  // A session seen only through myna's gateway has no folder myna knows
   // (its agent's files are on another computer, in a container or under
   // another config folder): such sessions are grouped by that, not under
   // "No folder" with the agent's own (lc on Discord).
@@ -166,7 +166,7 @@ magpie.plugin("sessions", (ctx) => {
   function reveal(s, e) {
     if (s.agent && s.agent !== agent) {
       agent = s.agent;
-      try { localStorage.setItem("magpie.sessionsAgent", agent); } catch {}
+      try { localStorage.setItem("myna.sessionsAgent", agent); } catch {}
       picked.clear();
       if (data) data = { ...data, agent, sessions: null };
     }
@@ -243,7 +243,7 @@ magpie.plugin("sessions", (ctx) => {
     let text = "";
     if (f.busy) text = t("Searching what was said…");
     else if (f.error) text = t("Couldn't search what was said: {error}", { error: f.error });
-    else if (f.unread) text = t("{agent}'s own files of its sessions can't be read here, so only what magpie recorded through the gateway is searched.", { agent: current()?.name || f.agent });
+    else if (f.unread) text = t("{agent}'s own files of its sessions can't be read here, so only what myna recorded through the gateway is searched.", { agent: current()?.name || f.agent });
     else if (f.cut) text = t("Searched what was said in the latest {n} of {total} sessions.", { n: f.searched, total: f.total });
     if (!text) return null;
     const p = el("p", "usage-note sm-note sm-search-note", text);
@@ -293,7 +293,7 @@ magpie.plugin("sessions", (ctx) => {
     trashOn = false;
     selecting = false;
     agent = name;
-    try { localStorage.setItem("magpie.sessionsAgent", name); } catch {}
+    try { localStorage.setItem("myna.sessionsAgent", name); } catch {}
     picked.clear();
     detail = "";
     data = { ...data, agent: name, sessions: null };
@@ -305,7 +305,7 @@ magpie.plugin("sessions", (ctx) => {
   // only where it applies — when this agent has sessions seen through the
   // gateway, in gateway mode, or once recording is on or text is kept. A
   // switch that says what it keeps and where, and, while there is kept
-  // text, a delete that says what it deletes and asks first in magpie's own
+  // text, a delete that says what it deletes and asks first in myna's own
   // dialog (lee on Discord: a bare checkbox and a lone trash icon under the
   // tabs read as stray controls).
   const recordingApplies = () => typeof data?.recording === "boolean"
@@ -361,7 +361,7 @@ magpie.plugin("sessions", (ctx) => {
 
   // The consent (RustCats on X: a new install showed every agent's history
   // before anyone agreed to it). Until the reader says which agents'
-  // sessions magpie may read (data.reads.asked), it reads none of them and
+  // sessions myna may read (data.reads.asked), it reads none of them and
   // this card comes first: the agents found here, each with its own
   // switch, off; Allow selected reads those picked, and Allow all every
   // agent, those found later too. Settings › Privacy changes it later.
@@ -374,7 +374,7 @@ magpie.plugin("sessions", (ctx) => {
     title.id = "smConsentTitle";
     card.setAttribute("role", "group");
     card.setAttribute("aria-labelledby", title.id);
-    card.append(title, el("p", "sm-consent-sub", t("magpie reads no agent's session history until you allow it. Pick the agents whose sessions this page may show; what magpie's gateway served is counted either way. You can change this in Settings › Privacy.")));
+    card.append(title, el("p", "sm-consent-sub", t("myna reads no agent's session history until you allow it. Pick the agents whose sessions this page may show; what myna's gateway served is counted either way. You can change this in Settings › Privacy.")));
     if (found.length) {
       const list = el("div", "list sm-consent-list");
       for (const x of found) {
@@ -527,16 +527,16 @@ magpie.plugin("sessions", (ctx) => {
       const key = locked.some((s) => s.read_only)
         ? canResume
           ? "Some {agent} sessions are read only and cannot be deleted."
-          : "These {agent} sessions are read only; magpie can list them, but cannot resume or delete them."
+          : "These {agent} sessions are read only; myna can list them, but cannot resume or delete them."
         : canResume
-          ? "magpie can list {agent}'s sessions and resume them, but not delete them: they aren't kept as files of their own."
-          : "magpie can list {agent}'s sessions, but cannot resume or delete them.";
+          ? "myna can list {agent}'s sessions and resume them, but not delete them: they aren't kept as files of their own."
+          : "myna can list {agent}'s sessions, but cannot resume or delete them.";
       box.append(el("p", "usage-note sm-note", t(key, { agent: a.name })));
     }
     if (a && data.sessions.some((s) => s.gateway)) {
       box.append(el("p", "usage-note sm-note sm-gw-note", t(data.sessions.every((s) => s.gateway)
-        ? "These {agent} sessions were seen only through magpie's gateway: {agent}'s own files of them aren't on this computer (it may run on another one, in a container or with another config folder), so they can't be resumed here. Delete takes one off this list and moves any conversation magpie recorded of it to its trash; Usage keeps what it spent."
-        : "Sessions under \"Seen through the gateway\" have no {agent} files on this computer, so they can't be resumed here. Delete takes one off this list and moves any conversation magpie recorded of it to its trash; Usage keeps what it spent.", { agent: a.name })));
+        ? "These {agent} sessions were seen only through myna's gateway: {agent}'s own files of them aren't on this computer (it may run on another one, in a container or with another config folder), so they can't be resumed here. Delete takes one off this list and moves any conversation myna recorded of it to its trash; Usage keeps what it spent."
+        : "Sessions under \"Seen through the gateway\" have no {agent} files on this computer, so they can't be resumed here. Delete takes one off this list and moves any conversation myna recorded of it to its trash; Usage keeps what it spent.", { agent: a.name })));
     }
     const prov = providerBar();
     if (prov) box.append(prov);
@@ -649,7 +649,7 @@ magpie.plugin("sessions", (ctx) => {
     }
     sync();
     ed.append(names);
-    ed.append(el("p", "lib-confirm", t("Only the provider each one names is changed, in its files and in Codex's database: its messages, id, title and archive stay as they are. A copy of its files is kept in magpie's trash folder first, and Undo moves them back. A session written to in the last minute is left alone.")));
+    ed.append(el("p", "lib-confirm", t("Only the provider each one names is changed, in its files and in Codex's database: its messages, id, title and archive stay as they are. A copy of its files is kept in myna's trash folder first, and Undo moves them back. A session written to in the last minute is left alone.")));
     const bar = el("div", "bar");
     go.type = "button";
     go.onclick = async (e) => {
@@ -968,7 +968,7 @@ magpie.plugin("sessions", (ctx) => {
     const who = el("div", "who");
     who.append(el("div", "name", s.title || t("(no prompt)")));
     const sub = el("div", "sub", [ago(s.last), sessModelsText(s), s.messages ? t(s.messages === 1 ? "{n} message" : "{n} messages", { n: s.messages }) : "",
-      // a gateway session's size is the conversation magpie recorded of it,
+      // a gateway session's size is the conversation myna recorded of it,
       // and none is said when it recorded none; its title is its id already
       s.gateway ? (s.size ? t("{size} recorded", { size: fmtBytes(s.size) }) : "") : fmtBytes(s.size),
       s.title === s.id ? "" : s.id.slice(0, 8)].filter(Boolean).join(" · "));
@@ -1187,7 +1187,7 @@ magpie.plugin("sessions", (ctx) => {
   }
 
   // exportBtn saves a session's whole conversation as Markdown (#1276),
-  // read from the agent's own file by the server: in magpie web the browser
+  // read from the agent's own file by the server: in myna web the browser
   // downloads it, in the app it goes to Downloads and the status says where.
   function exportBtn(s) {
     const b = el("button", "text sess-export", t("Export Markdown"));
@@ -1312,7 +1312,7 @@ magpie.plugin("sessions", (ctx) => {
       out.push(ledSaid(p, model));
     }
     if (got.tr?.cut) out.push(el("p", "cx-none", t("There was more than is shown here")));
-    out.push(el("p", "cx-src", t(got.tr?.source === "gateway" ? "Recorded gateway traffic only; earlier, expired or uncaptured content may be missing" : "Read from the agent's session file; magpie keeps no copy")));
+    out.push(el("p", "cx-src", t(got.tr?.source === "gateway" ? "Recorded gateway traffic only; earlier, expired or uncaptured content may be missing" : "Read from the agent's session file; myna keeps no copy")));
     box.replaceChildren(...out);
   }
 
@@ -1379,7 +1379,7 @@ magpie.plugin("sessions", (ctx) => {
     input.focus({ preventScroll: true });
   }
 
-  // askDelete asks in magpie's dialog before the sessions go to its trash;
+  // askDelete asks in myna's dialog before the sessions go to its trash;
   // folder (a cwd, "" for none) when they are every session of one folder
   function askDelete(ids, folder) {
     const byID = new Map((data?.sessions || []).map((s) => [s.id, s]));
@@ -1403,8 +1403,8 @@ magpie.plugin("sessions", (ctx) => {
     if (list.length > 5) names.append(el("li", "more", t("+{n} more", { n: list.length - 5 })));
     ed.append(names);
     // a gateway session has no files of its agent's here: say what goes
-    if (list.some((s) => !s.gateway)) ed.append(el("p", "lib-confirm", t("Their files are moved to magpie's trash ({dir}), not erased: Trash puts them back. A session written to in the last minute is left alone, as {agent} may still be running it.", { dir: data.trashDir, agent: a.name })));
-    if (list.some((s) => s.gateway)) ed.append(el("p", "lib-confirm sm-gw-confirm", t("A session seen only through the gateway leaves this list, and any conversation magpie recorded of it is moved to magpie's trash ({dir}): Trash puts it back. {agent}'s own files elsewhere are not touched, and Usage keeps what it spent. One with a request in the last minute is left alone.", { dir: data.trashDir, agent: a.name })));
+    if (list.some((s) => !s.gateway)) ed.append(el("p", "lib-confirm", t("Their files are moved to myna's trash ({dir}), not erased: Trash puts them back. A session written to in the last minute is left alone, as {agent} may still be running it.", { dir: data.trashDir, agent: a.name })));
+    if (list.some((s) => s.gateway)) ed.append(el("p", "lib-confirm sm-gw-confirm", t("A session seen only through the gateway leaves this list, and any conversation myna recorded of it is moved to myna's trash ({dir}): Trash puts it back. {agent}'s own files elsewhere are not touched, and Usage keeps what it spent. One with a request in the last minute is left alone.", { dir: data.trashDir, agent: a.name })));
     const bar = el("div", "bar");
     const go = el("button", "text primary danger-fill", t("Delete"));
     go.type = "button";
@@ -1429,7 +1429,7 @@ magpie.plugin("sessions", (ctx) => {
         status(active.length ? t(active.length === 1 ? "{title} is still being written to; close it in {agent} and try again in a minute" : "{n} sessions are still being written to; close them in {agent} and try again in a minute", { title: s?.title || first.id, n: active.length, agent: a.name })
           : (s?.title || first.id) + ": " + first.error, "err");
       } else {
-        status(t(out.deleted.length === 1 ? "Moved to magpie's trash" : "{n} sessions moved to magpie's trash", { n: out.deleted.length }), "ok");
+        status(t(out.deleted.length === 1 ? "Moved to myna's trash" : "{n} sessions moved to myna's trash", { n: out.deleted.length }), "ok");
       }
       await load();
     };
@@ -1444,19 +1444,19 @@ magpie.plugin("sessions", (ctx) => {
     cancel.focus({ preventScroll: true });
   }
 
-  // askPurge asks in magpie's dialog before trashed sessions are erased for
+  // askPurge asks in myna's dialog before trashed sessions are erased for
   // good: the ones listed, or the whole trash (all)
   function askPurge(list, all) {
     if (!list.length) return;
     const ed = el("div", "editor sm-ask sm-ask-purge");
     const h = el("div", "ehead");
-    h.append(svg(TRASH, 15, 1.4), el("b", "", all ? t("Empty magpie's trash?") : t("Delete this session forever?")));
+    h.append(svg(TRASH, 15, 1.4), el("b", "", all ? t("Empty myna's trash?") : t("Delete this session forever?")));
     ed.append(h);
     const names = el("ul", "sm-ask-list");
     for (const x of list.slice(0, 5)) names.append(el("li", "", x.title || x.id));
     if (list.length > 5) names.append(el("li", "more", t("+{n} more", { n: list.length - 5 })));
     ed.append(names);
-    ed.append(el("p", "lib-confirm", all ? t("Every session in magpie's trash is erased for good: it can't be restored.") : t("Its files are erased for good: it can't be restored.")));
+    ed.append(el("p", "lib-confirm", all ? t("Every session in myna's trash is erased for good: it can't be restored.") : t("Its files are erased for good: it can't be restored.")));
     const bar = el("div", "bar");
     const go = el("button", "text primary danger-fill", all ? t("Empty trash") : t("Delete forever"));
     go.type = "button";
@@ -1507,7 +1507,7 @@ magpie.plugin("sessions", (ctx) => {
     }
     if (!items.length) {
       const e = el("div", "empty-state");
-      e.append(el("b", "", t("Trash is empty")), el("span", "", t("Sessions deleted here wait in magpie's trash, to be restored.")));
+      e.append(el("b", "", t("Trash is empty")), el("span", "", t("Sessions deleted here wait in myna's trash, to be restored.")));
       out.push(e);
     } else {
       const l = el("div", "list sm-group sm-trash");
@@ -1548,9 +1548,9 @@ magpie.plugin("sessions", (ctx) => {
       }
       out.push(l);
     }
-    out.push(el("p", "usage-note", t("Deleted sessions are kept in {dir} until you erase them here; magpie never erases them by itself.", { dir: data.trashDir })));
+    out.push(el("p", "usage-note", t("Deleted sessions are kept in {dir} until you erase them here; myna never erases them by itself.", { dir: data.trashDir })));
     // the recording's promise holds in the trash too
-    if (items.some((x) => x.gateway)) out.push(el("p", "usage-note sm-gw-trash-note", t("Conversations magpie recorded through the gateway still expire after 7 days here, and Delete saved conversations… erases them too.")));
+    if (items.some((x) => x.gateway)) out.push(el("p", "usage-note sm-gw-trash-note", t("Conversations myna recorded through the gateway still expire after 7 days here, and Delete saved conversations… erases them too.")));
     return out;
   }
 

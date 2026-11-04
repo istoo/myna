@@ -47,7 +47,7 @@ for (const engine of process.env.BROWSER ? [process.env.BROWSER] : ["chromium", 
             if (url.pathname.endsWith(".css")) return route.fulfill({ contentType: "text/css", body: await fs.readFile(path.join(assets, url.pathname)) });
             return route.fulfill({ status: 404, body: "" });
           });
-          await p.goto("http://magpie.test/");
+          await p.goto("http://myna.test/");
           await p.evaluate(() => document.fonts.ready);
 
           for (let i = 0; i < PAIRS.length; i++) {

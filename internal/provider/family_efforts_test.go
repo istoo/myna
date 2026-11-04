@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/codexcat"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/codexcat"
 )
 
 // newModelCatalog is models.dev as it listed gpt-6.1-sol the day it was

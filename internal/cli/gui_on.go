@@ -5,9 +5,9 @@ package cli
 import (
 	"log"
 
-	"github.com/yetone/magpie/internal/applog"
-	"github.com/yetone/magpie/internal/gui"
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/istoo/myna/internal/applog"
+	"github.com/istoo/myna/internal/gui"
+	"github.com/istoo/myna/internal/proc"
 )
 
 const hasGUI = true

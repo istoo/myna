@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
 )
 
 func tuneSandbox(t *testing.T) string {
@@ -106,7 +106,7 @@ func TestTuneUserValueKept(t *testing.T) {
 		t.Fatalf("undo wrote over the user's change:\n%s", got)
 	}
 	if err := TuneUndo(home, "claude", TuneCache, ""); err == nil {
-		t.Fatal("undo with nothing of magpie's to put back")
+		t.Fatal("undo with nothing of myna's to put back")
 	}
 	if err := TuneApply(home, "claude", TuneCache, "", "2h"); err == nil {
 		t.Fatal("took a lifetime Claude Code has no use for")
@@ -163,7 +163,7 @@ func TestTuneCodexCompact(t *testing.T) {
 	if s.Value != "150000" || s.Source != TuneLong || !s.Ours {
 		t.Fatalf("read after apply %+v", s)
 	}
-	// the Claude Code card reads the same value where magpie's window is
+	// the Claude Code card reads the same value where myna's window is
 	// what Claude Code runs at
 	if err := TuneUndo(home, "codex", TuneCompact, ""); err != nil {
 		t.Fatal(err)
@@ -206,7 +206,7 @@ func TestTuneCodexCompact(t *testing.T) {
 }
 
 // TestTuneCodexOwnLimit: a model_auto_compact_token_limit the user wrote
-// in config.toml stops Codex before magpie's window, so the card says so
+// in config.toml stops Codex before myna's window, so the card says so
 // and Use changes nothing.
 func TestTuneCodexOwnLimit(t *testing.T) {
 	home := tuneSandbox(t)
@@ -227,7 +227,7 @@ func TestTuneCodexOwnLimit(t *testing.T) {
 	}
 }
 
-// TestTuneCodexMigrate: a limit an older magpie's tune wrote into
+// TestTuneCodexMigrate: a limit an older myna's tune wrote into
 // config.toml goes into Long conversations and the file gets back what
 // it had; one the user set in the sheet is kept unless tune's was lower,
 // and a limit the user changed since is theirs and stays.
@@ -304,7 +304,7 @@ func TestTuneCodexMigrate(t *testing.T) {
 	})
 }
 
-// TestTuneClaudeLong: the window magpie wrote into Claude Code's env from
+// TestTuneClaudeLong: the window myna wrote into Claude Code's env from
 // Long conversations is that value, not a variable that locks the card:
 // Use sets Long conversations; a window the user wrote there, or one
 // from a provider's Compact at, still locks it.
@@ -355,7 +355,7 @@ func TestTuneClaudeLong(t *testing.T) {
 	if s, _ := TuneRead(home, "claude", TuneCompact, "claude-opus-5-5"); s.Locked != "CLAUDE_CODE_AUTO_COMPACT_WINDOW" {
 		t.Fatalf("the user's env read %+v", s)
 	}
-	// magpie's, from a provider's Compact at, not Long conversations
+	// myna's, from a provider's Compact at, not Long conversations
 	tuneWrite(t, path, `{"env": {"CLAUDE_CODE_AUTO_COMPACT_WINDOW": "150000"}}`)
 	stash(map[string]string{"claude.compact_window": "150000"})
 	forget("claude.compact_long")
@@ -364,7 +364,7 @@ func TestTuneClaudeLong(t *testing.T) {
 	}
 }
 
-// TestTuneCodexMigrateOnSync: the move happens when magpie writes Codex's
+// TestTuneCodexMigrateOnSync: the move happens when myna writes Codex's
 // config, without the Usage page opened, so Codex runs at the one window.
 func TestTuneCodexMigrateOnSync(t *testing.T) {
 	home, read := codexHome(t, "", "model_auto_compact_token_limit = 150000\n")
@@ -450,8 +450,8 @@ func TestTuneCodexAsync(t *testing.T) {
 }
 
 // TestTuneCodexAsyncOwn: background compaction the user set in Codex's
-// config.toml comes before magpie's, so the card says so and Use changes
-// nothing; a table magpie wrote itself is not the user's.
+// config.toml comes before myna's, so the card says so and Use changes
+// nothing; a table myna wrote itself is not the user's.
 func TestTuneCodexAsyncOwn(t *testing.T) {
 	for _, c := range []struct{ name, file, key string }{
 		{"own share", "[features.async_compaction]\nenabled = true\nmodel_async_compact_threshold_percent = 80\n", codexAsyncTable + "." + codexAsyncPercent},
@@ -478,7 +478,7 @@ func TestTuneCodexAsyncOwn(t *testing.T) {
 			}
 		})
 	}
-	t.Run("magpie's own table", func(t *testing.T) {
+	t.Run("myna's own table", func(t *testing.T) {
 		home := tuneSandbox(t)
 		path := filepath.Join(home, ".codex", "config.toml")
 		tuneWrite(t, path, "[features.async_compaction]\nenabled = true\nmodel_async_compact_threshold_percent = 40\n")
@@ -486,7 +486,7 @@ func TestTuneCodexAsyncOwn(t *testing.T) {
 		stash(map[string]string{here(tuneHome(home)).key("codex.async"): string(b)})
 		setAsyncCompact(t, true, 40)
 		if s := asyncRead(home); s.Locked != "" || s.Value != "40" {
-			t.Fatalf("read %+v: magpie's own table counted as the user's", s)
+			t.Fatalf("read %+v: myna's own table counted as the user's", s)
 		}
 	})
 }

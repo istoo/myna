@@ -4,10 +4,10 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
-// magpie provider fallback takes a routing group's id ("group/<id>") as a
+// myna provider fallback takes a routing group's id ("group/<id>") as a
 // fallback beside models (01huadalang on Discord); a group that isn't
 // there is an error, as a model none serves is.
 func TestFallbackCmdTakesGroup(t *testing.T) {

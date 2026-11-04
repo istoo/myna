@@ -4,7 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/yetone/magpie/internal/appdir"
+	"github.com/istoo/myna/internal/appdir"
 )
 
 // Raft (the slock app, raft-computer) runs its agents each in a workspace
@@ -15,7 +15,7 @@ import (
 // buildPiSessionDir, SessionManager.create). They are read as Pi's, as
 // agent "raft". The handoff notes in <slock>/runtime-sessions are not
 // sessions. Raft's Pi reads the user's own Pi agent folder, so one sent
-// through magpie is the gateway's "pi" session of the same id too
+// through myna is the gateway's "pi" session of the same id too
 // (GatewayKeys).
 
 // SlockDir is Raft's folder: $SLOCK_HOME, else ~/.slock

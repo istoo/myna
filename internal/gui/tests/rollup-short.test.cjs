@@ -89,7 +89,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           page.setDefaultNavigationTimeout(60000);
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", serve(lang));
-          await page.goto("http://magpie.test/");
+          await page.goto("http://myna.test/");
           const more = page.locator(".agent-more");
           await more.waitFor();
           await page.waitForTimeout(400);

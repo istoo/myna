@@ -40,7 +40,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         const events = [];
         await page.route("**/*", fixture(locale, "dark", events));
-        await page.goto("http://magpie.test/?view=gateway");
+        await page.goto("http://myna.test/?view=gateway");
         const lanBox = page.locator("#gatewayLan");
         await lanBox.locator(".gw-share").waitFor();
 

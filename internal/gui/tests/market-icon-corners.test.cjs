@@ -33,7 +33,7 @@ function serve(lang) {
     if (url.pathname === "/api/plugins") return json({ plugins: [] });
     if (url.pathname === "/api/library") {
       return json({
-        dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+        dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
         agents: [{ id: "claude", name: "Claude Code", icon: "claudecode-color", skills: `${HOME}/.claude/skills`, mcp: `${HOME}/.claude.json` }],
         instructions: { agents: [], sets: [] }, servers: [], foundServers: [], projects: [], foundSkills: [], skills: [], problems: [],
       });
@@ -91,9 +91,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang));
-      await page.addInitScript(() => { localStorage.setItem("magpie.libTab", "skills"); });
+      await page.addInitScript(() => { localStorage.setItem("myna.libTab", "skills"); });
       t.after(() => browser.close());
-      await page.goto("http://magpie.test/?view=library");
+      await page.goto("http://myna.test/?view=library");
       const view = page.locator("#view-library");
       const icon = (id) => view.locator(`.mk[data-market="skills"] .mk-card[data-id="${id}"] .mk-icon`);
       for (const id of ["linear/mcp", "acme/mcp"]) {

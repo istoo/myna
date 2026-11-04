@@ -9,8 +9,8 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // The Agents page's Install another agent says Plugins has more agents
@@ -33,7 +33,7 @@ func TestPluginAgentsNotInstalled(t *testing.T) {
 		]}`))
 	}))
 	defer srv.Close()
-	t.Setenv("MAGPIE_PLUGIN_MARKET", srv.URL)
+	t.Setenv("MYNA_PLUGIN_MARKET", srv.URL)
 	plugin.RefreshMarket()
 	t.Cleanup(plugin.RefreshMarket)
 	dir := settings.Dir()

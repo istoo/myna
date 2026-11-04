@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // vendorDeveloper400 is what a chat-role upstream answers a request
@@ -18,7 +18,7 @@ const vendorDeveloper400 = `{"error":{"code":"invalid_parameter_error","message"
 // one of ['system', 'assistant', 'user', 'tool', 'function']" while the
 // turns around it passed, and Codex retried each five times. The summary
 // request is relayed as it came, and the compaction carries a developer
-// message its turns don't. The summary ask magpie makes itself goes to a
+// message its turns don't. The summary ask myna makes itself goes to a
 // provider that isn't OpenAI's with its developer messages as the system
 // ones they are, where they stand: what Zed's cloud is given (ZedBody),
 // and what a Chat Completions upstream is given (developerAsSystem).
@@ -60,7 +60,7 @@ func TestCodexCompactDeveloperAsSystemOnAVendorRelay(t *testing.T) {
 }
 
 // A turn on the same provider goes as it came, developer message and all:
-// only magpie's own summary ask is fitted, never Codex's own turn, whose
+// only myna's own summary ask is fitted, never Codex's own turn, whose
 // shape a relay may be checking (#350, #1758).
 func TestVendorRelayTurnKeepsItsDeveloperMessage(t *testing.T) {
 	f := &fake{t: t, reply: sse(

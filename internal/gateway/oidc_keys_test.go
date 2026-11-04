@@ -6,21 +6,21 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/budget"
-	"github.com/yetone/magpie/internal/oidc"
-	"github.com/yetone/magpie/internal/oidc/oidctest"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/access"
+	"github.com/istoo/myna/internal/budget"
+	"github.com/istoo/myna/internal/oidc"
+	"github.com/istoo/myna/internal/oidc/oidctest"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // #4531 (xazaj on X): a GitHub Actions job trades its OIDC token for a
 // short-lived key from another machine, with no gateway key of its own.
 // The key is issued under the rule's key, lives no longer than the rule
 // says, and works; a token no rule takes, a refused one past the burst,
-// and any token while magpie isn't shared get nothing.
+// and any token while myna isn't shared get nothing.
 func TestOIDCTokenTradedForKey(t *testing.T) {
 	fresh(t)
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("MYNA_ADDR", "")
 	budget.Forget()
 	limitedUpstream(t, 0)
 	resetAuthThrottle()
@@ -40,7 +40,7 @@ func TestOIDCTokenTradedForKey(t *testing.T) {
 		return is.Sign(t, "k1", c)
 	}
 
-	if w := keysCall(h, "POST", OIDCKeysPath, fromThere, token("magpie-x", nil), ""); w.Code != http.StatusUnauthorized || !strings.Contains(w.Body.String(), "no rule") {
+	if w := keysCall(h, "POST", OIDCKeysPath, fromThere, token("myna-x", nil), ""); w.Code != http.StatusUnauthorized || !strings.Contains(w.Body.String(), "no rule") {
 		t.Fatal("no rule:", w.Code, w.Body.String())
 	}
 	if _, err := access.Update("issuer-key", access.Change{Key: keys[0].ID, Issues: true}); err != nil {

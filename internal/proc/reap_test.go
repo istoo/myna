@@ -11,11 +11,11 @@ import (
 	"testing"
 )
 
-// TestEveryStartedCommandIsWaited: a command magpie starts is waited for,
+// TestEveryStartedCommandIsWaited: a command myna starts is waited for,
 // in the function that starts it: Wait is what reaps it on Unix, and
-// one not waited for stays a <defunct> child of magpie until magpie quits
-// (acezan on Discord: 57 magpie-bun after 47 hours). Process.Release
-// doesn't reap on Unix, so it is no way out: a command magpie leaves
+// one not waited for stays a <defunct> child of myna until myna quits
+// (acezan on Discord: 57 myna-bun after 47 hours). Process.Release
+// doesn't reap on Unix, so it is no way out: a command myna leaves
 // running goes through StartReaped. The check is by name: in each
 // function, every x.Start() needs an x.Wait() (or x handed to a waiter,
 // as Output's Start is, or kept in a struct whose stop waits) beside it.

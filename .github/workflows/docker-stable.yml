@@ -1,6 +1,6 @@
 name: Docker stable
 
-# ghcr.io/yetone/magpie:stable is the image of the desktop app's Stable
+# ghcr.io/istoo/myna:stable is the image of the desktop app's Stable
 # release (Settings › Update channel › Stable; jorbenzhu on Discord). Which
 # release that is, is decided in one place only, site/worker.js's stableOf
 # (a weekly pick out three days, or an urgent release at once), and served
@@ -23,12 +23,12 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  IMAGE: ghcr.io/${{ github.repository_owner }}/magpie
-  FEED: https://usemagpie.ai/api/latest?channel=stable
+  IMAGE: ghcr.io/${{ github.repository_owner }}/myna
+  FEED: https://github.com/istoo/myna/api/latest?channel=stable
 
 jobs:
   stable:
-    if: github.repository == 'yetone/magpie' && (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
+    if: github.repository == 'istoo/myna' && (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-24.04
     permissions:
       contents: read

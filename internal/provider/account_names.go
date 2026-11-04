@@ -6,7 +6,7 @@ package provider
 // providers.json beside the account's other settings (AccountNames), by
 // the account's name in lower case; the vendor's or plugin's sign-in is
 // never written to. It is shown wherever the account is: the Usage page,
-// the menu bar, magpie accounts, magpie quota and /v1/magpie/quotas
+// the menu bar, myna accounts, myna quota and /v1/myna/quotas
 // (SubscriptionQuota.Alias, Quota.Alias), the Usage page's Accounts and
 // the request log's Account filter, a gateway key's accounts, and the
 // Routing page (which reads accountNames from /api/providers).
@@ -68,7 +68,7 @@ func (p Provider) AccountName(user string) string {
 // the user named ref (AccountNameOf, compared without case), "" when none
 // is: an alias picks an account wherever its email does (#4532). It is an
 // error when the name is two accounts', or another account's email or
-// name as magpie lists it, which would then pick one of them by guess.
+// name as myna lists it, which would then pick one of them by guess.
 func AccountByName(id string, users []string, ref string) (string, error) {
 	ref = cleanAccountName(ref)
 	if ref == "" {
@@ -85,12 +85,12 @@ func AccountByName(id string, users []string, ref string) (string, error) {
 		return "", nil
 	case 1:
 	default:
-		return "", fmt.Errorf("%q is the name of %d accounts, %q: name one by its email, or give them names apart (magpie accounts alias)", ref, len(named), named)
+		return "", fmt.Errorf("%q is the name of %d accounts, %q: name one by its email, or give them names apart (myna accounts alias)", ref, len(named), named)
 	}
 	for _, u := range users {
 		email, _, _ := strings.Cut(u, " · ")
 		if !strings.EqualFold(u, named[0]) && (strings.EqualFold(u, ref) || strings.EqualFold(strings.TrimSpace(email), ref)) {
-			return "", fmt.Errorf("%q is the name of %s and the email of %s: name it by its email, or give %s another name (magpie accounts alias)", ref, named[0], u, named[0])
+			return "", fmt.Errorf("%q is the name of %s and the email of %s: name it by its email, or give %s another name (myna accounts alias)", ref, named[0], u, named[0])
 		}
 	}
 	return named[0], nil
@@ -155,7 +155,7 @@ func labelProvider(id string) string {
 // PluginUserOf is the name a plugin's usage gives its account user
 // (usage().user, a masked phone) where that isn't user itself, "" for
 // none or one not read. A plugin's accountId is the account's key in
-// magpie (its own name, proxy and gateway key are kept by it), so
+// myna (its own name, proxy and gateway key are kept by it), so
 // codearts keeps an IAM id there, iam::<domain>:user:<name>, and tells
 // the phone only in usage (#4416). It is shown, never kept: what was read
 // this run, else the last reading quotas.json has, so a read that fails

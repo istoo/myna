@@ -8,10 +8,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/plugin"
+	"github.com/istoo/myna/internal/plugin"
 )
 
-// An install goes on though the page's connection goes: on magpie web
+// An install goes on though the page's connection goes: on myna web
 // behind Cloudflare the tunnel gives up after 100 seconds and answers the
 // page with its own 524 page (precisionz installing Zed, #2032), and bun
 // stopped halfway leaves plugins/ half-written. So do a remove, an update
@@ -22,7 +22,7 @@ func TestPluginOpsOutliveRequest(t *testing.T) {
 	t.Setenv("USERPROFILE", home)
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(home, ".cache"))
-	t.Setenv("MAGPIE_PLUGIN_MARKET", "off")
+	t.Setenv("MYNA_PLUGIN_MARKET", "off")
 	t.Setenv("PATH", t.TempDir())
 	oldAdd, oldRemove, oldUpdate, oldUpgrade := addPlugin, removePlugin, updatePlugins, upgradePlugin
 	t.Cleanup(func() {

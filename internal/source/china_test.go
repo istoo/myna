@@ -11,7 +11,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // the 「国内镜像」 switch is off in every test but those that turn it on,
@@ -58,7 +58,7 @@ func TestChinaFirst(t *testing.T) {
 }
 
 func TestChinaComesFirst(t *testing.T) {
-	t.Setenv("MAGPIE_MIRRORS", "")
+	t.Setenv("MYNA_MIRRORS", "")
 	raw := "https://registry.npmjs.org/pkg"
 	if got := URLs(raw); len(got) != 1 {
 		t.Fatalf("switch off: URLs = %q", got)
@@ -68,8 +68,8 @@ func TestChinaComesFirst(t *testing.T) {
 		t.Fatalf("switch on: URLs = %q", got)
 	}
 	// with the fallback mirrors too, npmmirror once, first
-	t.Setenv("MAGPIE_MIRRORS", "on")
-	t.Setenv("MAGPIE_NPM_REGISTRY", "")
+	t.Setenv("MYNA_MIRRORS", "on")
+	t.Setenv("MYNA_NPM_REGISTRY", "")
 	if got := strings.Join(URLs(raw), " "); got != "https://registry.npmmirror.com/pkg "+raw {
 		t.Fatalf("switch and fallback on: URLs = %q", got)
 	}
@@ -141,8 +141,8 @@ func TestChinaMirrorsMissIsAskedOfficially(t *testing.T) {
 
 // the plugin list goes to jsDelivr with the switch, never to a proxy
 func TestDoFaithful(t *testing.T) {
-	t.Setenv("MAGPIE_MIRRORS", "on")
-	t.Setenv("MAGPIE_GITHUB_MIRROR", "https://gh.invalid")
+	t.Setenv("MYNA_MIRRORS", "on")
+	t.Setenv("MYNA_GITHUB_MIRROR", "https://gh.invalid")
 	var asked []string
 	c := &http.Client{Transport: roundTrip(func(r *http.Request) (*http.Response, error) {
 		asked = append(asked, r.URL.String())
@@ -186,11 +186,11 @@ type roundTrip func(*http.Request) (*http.Response, error)
 func (f roundTrip) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
 
 // The masking models' files, pinned by sha256, have hf-mirror after
-// Hugging Face with the switch off and no MAGPIE_MIRRORS (hh0592821 on
+// Hugging Face with the switch off and no MYNA_MIRRORS (hh0592821 on
 // Discord: huggingface.co poisoned in China); before it with the switch
 // on, once. Nothing else of Hugging Face's has.
 func TestModelMirrorWithoutTheSwitch(t *testing.T) {
-	t.Setenv("MAGPIE_MIRRORS", "")
+	t.Setenv("MYNA_MIRRORS", "")
 	raw := "https://huggingface.co/QuantumNous/astrlink-guard/resolve/7216b6a/int8/tokenizer.json"
 	mirror := "https://hf-mirror.com/QuantumNous/astrlink-guard/resolve/7216b6a/int8/tokenizer.json"
 	if got := strings.Join(URLs(raw), " "); got != raw+" "+mirror {
@@ -214,7 +214,7 @@ func TestModelMirrorWithoutTheSwitch(t *testing.T) {
 // Hugging Face's address failing as it does where it is poisoned, the
 // file is asked of hf-mirror.
 func TestModelFallsToTheMirror(t *testing.T) {
-	t.Setenv("MAGPIE_MIRRORS", "")
+	t.Setenv("MYNA_MIRRORS", "")
 	var asked atomic.Int32
 	mirror := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		asked.Add(1)

@@ -1,6 +1,6 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // A request that is over doesn't look called on the Routing page (#2386,
-// Moody-Sin: magpie on a server, the agent long stopped, and the page and
+// Moody-Sin: myna on a server, the agent long stopped, and the page and
 // the app still showed the account that answered the last request as being
 // called, however often reloaded). The row that answered the request shown
 // stays lit (its dot filled, its wire drawn in the agent's colour), but
@@ -89,7 +89,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           flowing: document.querySelectorAll(".rt-wires path.live[d]").length,
           lit: document.querySelectorAll(".rt-wires path.lit[d]").length,
         }));
-        await page.goto("http://magpie.test/?view=routing");
+        await page.goto("http://myna.test/?view=routing");
         await row.waitFor();
         await page.waitForFunction(() => document.querySelector(".rt-accts li.on em")?.textContent.trim());
 

@@ -21,21 +21,21 @@ import (
 	toml "github.com/pelletier/go-toml/v2"
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/filelock"
-	"github.com/yetone/magpie/internal/filememo"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/steady"
+	"github.com/istoo/myna/internal/appdir"
+	"github.com/istoo/myna/internal/filelock"
+	"github.com/istoo/myna/internal/filememo"
+	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/myna/internal/steady"
 )
 
 // Codex lists, in its history and its resume picker, only the sessions made
 // with the provider it uses now: a rollout's session_meta names its
 // model_provider, and so does the thread's row in Codex's state database
 // (state_<n>.sqlite). Sessions made through CC Switch ("custom") are gone
-// from that list once Codex uses magpie, though their files are all there
+// from that list once Codex uses myna, though their files are all there
 // (#887). MoveCodexProvider changes a session's provider, in its files and
 // in that row, and nothing else: its messages, id, title and archive stay as
-// they were. A copy of each file as it was is kept in magpie's trash folder
+// they were. A copy of each file as it was is kept in myna's trash folder
 // first, and moving it back to the provider it had is the undo.
 
 // codexProviderRe is what a provider id may be: a key of config.toml's
@@ -193,7 +193,7 @@ func codexProviders(out []Managed, groups map[string][]file) {
 // Codex's state database. A session written to in the last minute is left
 // as it is (ErrActive), as Codex may be running it, and so is one a Codex
 // has open (holdCodexThread). Each file is copied to
-// <magpie dir>/trash/codex-provider/ before it is changed, and rewritten
+// <myna dir>/trash/codex-provider/ before it is changed, and rewritten
 // whole into a file beside it that then takes its place, keeping its time.
 func MoveCodexProvider(id, to string) (CodexMove, error) {
 	if !safeID.MatchString(id) {
@@ -454,10 +454,10 @@ func codexThreadsOn(home, p string) []string {
 // MoveCodexThreads moves every thread of a Codex folder its state database
 // keeps on the provider from to the provider to, each as MoveCodexProvider
 // moves one: its files' session_meta and its row, a copy of the files kept
-// in magpie's trash first. Codex lists only the threads of the provider it
+// in myna's trash first. Codex lists only the threads of the provider it
 // is on (app-server thread/list, the TUI's resume picker), so the threads
-// started while magpie was Codex's provider were gone from Codex's lists
-// once Codex was off magpie (kaizaoji on X: "the context doesn't exist").
+// started while myna was Codex's provider were gone from Codex's lists
+// once Codex was off myna (kaizaoji on X: "the context doesn't exist").
 // A thread written to in the last minute, or one a Codex has open, is left
 // for the next call, and so is one whose files can't be found; it says
 // what it moved and the first error it met, having gone on past it.
@@ -576,7 +576,7 @@ func rewriteCodexProvider(path, to string) (bool, error) {
 		return false, err
 	}
 	defer in.Close()
-	tmp, err := os.CreateTemp(filepath.Dir(path), ".magpie-"+filepath.Base(path)+"-*")
+	tmp, err := os.CreateTemp(filepath.Dir(path), ".myna-"+filepath.Base(path)+"-*")
 	if err != nil {
 		return false, err
 	}
@@ -678,21 +678,22 @@ func moveCodexThread(path, id, to string) (bool, error) {
 }
 
 // RelabelCodexThreads moves the threads of a Codex folder its state
-// databases keep on the provider from to the provider to, where that can
-// be done in place: ids of one length (Codex's "openai" and magpie's
-// "magpie"), and a rollout Codex keeps as plain lines. The id in the
-// first line's session_meta, which Codex's thread/list and resume picker
-// filter on, is written over byte for byte, the file's time kept, and the
-// thread's row follows. Nothing else of the file is read or written, so a
-// history of thousands of threads moves in moments where MoveCodexThreads
-// would copy and rewrite every one of them; moving it back is the undo,
-// and no copy is kept. Rollouts Codex has packed (.zst, a week after
-// their last turn) are left on from, and so is a thread written to in the
-// last minute, one whose file names another provider, and one outside the
+// databases keep on the provider from to the provider to, and a rollout
+// Codex keeps as plain lines. The id in the first line's session_meta,
+// which Codex's thread/list and resume picker filter on, is written over,
+// the file's time kept, and the thread's row follows. Nothing else of the
+// file is read or written when the ids are one length (Codex's "openai"
+// and upstream's "magpie"), so a history of thousands of threads moves in
+// moments where MoveCodexThreads would copy and rewrite every one of them;
+// a shorter or longer id (myna's "myna") leaves one file rewritten whole,
+// atomically, for that thread alone. Moving it back is the undo, and no
+// copy is kept. Rollouts Codex has packed (.zst, a week after their last
+// turn) are left on from, and so is a thread written to in the last
+// minute, one whose file names another provider, and one outside the
 // folder's sessions. It says the ids it moved and the first error it met,
 // having gone on past it.
 func RelabelCodexThreads(home, from, to string) ([]string, error) {
-	if !codexProviderRe.MatchString(from) || !codexProviderRe.MatchString(to) || from == to || len(from) != len(to) {
+	if !codexProviderRe.MatchString(from) || !codexProviderRe.MatchString(to) || from == to {
 		return nil, fmt.Errorf("can't relabel Codex's threads from %q to %q", from, to)
 	}
 	type row struct{ db, id, path string }
@@ -808,7 +809,33 @@ func relabelHead(path, from, to string, mod time.Time) (bool, error) {
 		return false, nil
 	}
 	val, _ := json.Marshal(to)
-	if _, err := f.WriteAt(val, int64(r.Index)); err != nil {
+	out := make([]byte, 0, len(line))
+	out = append(out, line[:r.Index]...)
+	out = append(out, val...)
+	out = append(out, line[r.Index+len(r.Raw):]...)
+	if len(out) > len(line) {
+		// A longer id moves every byte after it: the rollout is rewritten
+		// whole, atomically. One paginated, which names its places by
+		// byte, is left as it is.
+		if paginated(line) {
+			f.Close()
+			return false, nil
+		}
+		if err := f.Close(); err != nil {
+			return false, err
+		}
+		if err := rewriteHead(path, line, out, mod); err != nil {
+			return false, err
+		}
+		return true, nil
+	}
+	if len(out) < len(line) {
+		// The line keeps its length: a paginated rollout names its places
+		// by byte, and Codex refuses one whose session_meta moved them.
+		// The id is padded with spaces, as fitLine does for every rewrite.
+		out = padLine(line, out)
+	}
+	if _, err := f.WriteAt(out, 0); err != nil {
 		f.Close()
 		return false, err
 	}
@@ -816,6 +843,56 @@ func relabelHead(path, from, to string, mod time.Time) (bool, error) {
 		return false, err
 	}
 	return true, os.Chtimes(path, mod, mod)
+}
+
+// padLine is out padded with spaces to line's length, its newline kept.
+func padLine(line, out []byte) []byte {
+	fit := make([]byte, 0, len(line))
+	fit = append(fit, out...)
+	fit = append(fit, bytes.Repeat([]byte{' '}, len(line)-len(out))...)
+	return fit
+}
+
+// rewriteHead writes the rollout at path again with its first line, was,
+// replaced by now: a provider id longer than the one it replaces moves
+// every byte after it. The file's mode and time are kept, and the write
+// is atomic (a temporary file beside it, renamed into place).
+func rewriteHead(path string, was, now []byte, mod time.Time) error {
+	fi, err := os.Stat(path)
+	if err != nil {
+		return err
+	}
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	if !bytes.HasPrefix(b, was) {
+		return fmt.Errorf("%s's first line changed under the move", filepath.Base(path))
+	}
+	out := make([]byte, 0, len(b)-len(was)+len(now))
+	out = append(out, now...)
+	out = append(out, b[len(was):]...)
+	tmp, err := os.CreateTemp(filepath.Dir(path), ".myna-codex-*")
+	if err != nil {
+		return err
+	}
+	name := tmp.Name()
+	defer os.Remove(name)
+	if _, err := tmp.Write(out); err != nil {
+		tmp.Close()
+		return err
+	}
+	if err := tmp.Chmod(fi.Mode().Perm()); err != nil {
+		tmp.Close()
+		return err
+	}
+	if err := tmp.Close(); err != nil {
+		return err
+	}
+	if err := os.Rename(name, path); err != nil {
+		return err
+	}
+	return os.Chtimes(path, mod, mod)
 }
 
 // sameDir says whether a and b are one folder, however spelled: a Codex

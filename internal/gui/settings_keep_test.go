@@ -11,9 +11,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agentenv"
-	"github.com/yetone/magpie/internal/redact"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/agentenv"
+	"github.com/istoo/myna/internal/redact"
+	"github.com/istoo/myna/internal/settings"
 )
 
 func TestSettingsSaveKeepsCorruptFile(t *testing.T) {

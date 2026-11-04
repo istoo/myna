@@ -80,7 +80,7 @@ async function open(t, engine, lang, width = 1100) {
   const live = { pending: [], queued: [], seq: 1 };
   await page.route("**/*", serve(lang, live));
   const ready = async () => {
-    await page.goto("http://magpie.test/?view=routing");
+    await page.goto("http://myna.test/?view=routing");
     await page.locator(".rt-accts li.rt-sub").first().waitFor();
     await page.waitForFunction(() => document.querySelector(".rt-accts li.rt-fold em")?.textContent.trim());
   };

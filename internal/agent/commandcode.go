@@ -2,9 +2,9 @@ package agent
 
 // Command Code (commandcode.ai) keeps its settings in ~/.commandcode/
 // settings.json, the model as "provider/model", and takes providers of the
-// user's own in ~/.commandcode/providers.json. magpie adds itself there as
-// the provider "magpie", keyless, with the catalog as its models; a model
-// through magpie is "magpie/<provider>/<model>", which Command Code splits
+// user's own in ~/.commandcode/providers.json. myna adds itself there as
+// the provider "myna", keyless, with the catalog as its models; a model
+// through myna is "myna/<provider>/<model>", which Command Code splits
 // at the first "/". Command Code still wants its own sign-in for these.
 
 import (
@@ -15,7 +15,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/istoo/myna/internal/edit"
 )
 
 // ccEfforts are the reasoning levels Command Code knows.
@@ -32,11 +32,11 @@ func commandCodeIn(at place) *Agent {
 	path := filepath.Join(dir, "settings.json")
 	providers := filepath.Join(dir, "providers.json")
 	get := func(k string) string { v, _ := edit.GetJSON(path, k); return v }
-	dropMagpie := func() error {
+	dropMyna := func() error {
 		if _, err := os.Stat(providers); err != nil {
 			return nil
 		}
-		return edit.DelJSON(providers, "provider."+magpieID)
+		return edit.DelJSON(providers, "provider."+mynaID)
 	}
 	return &Agent{
 		ID: "commandcode", Name: "Command Code", Icon: "commandcode", Aliases: []string{"command-code", "cmd"}, Spelled: prefixed,
@@ -44,7 +44,7 @@ func commandCodeIn(at place) *Agent {
 		Bin: "command-code", Dir: dir, Path: path,
 		ListOnly: true,
 		Sync: func() error {
-			return syncJSON(providers, "provider."+magpieID, theirsKept(providers, "provider."+magpieID, ccProviderJSON, "models"))
+			return syncJSON(providers, "provider."+mynaID, theirsKept(providers, "provider."+mynaID, ccProviderJSON, "models"))
 		},
 		Notice: func() string {
 			notes := []string{noticeCommandcode1.String()}
@@ -54,13 +54,13 @@ func commandCodeIn(at place) *Agent {
 			return strings.Join(notes, " ")
 		},
 		Check: func() string {
-			if !usesMagpie(get("model")) {
+			if !usesMyna(get("model")) {
 				return ""
 			}
-			if p := get("modelProvider"); p != magpieID {
-				return "Command Code's modelProvider (settings.json) is " + orDefault(p) + ", so it no longer asks magpie"
+			if p := get("modelProvider"); p != mynaID {
+				return "Command Code's modelProvider (settings.json) is " + orDefault(p) + ", so it no longer asks myna"
 			}
-			return wiringOff("Command Code", providers, func(k string) (string, bool) { return edit.GetJSON(providers, "provider."+magpieID+"."+k) },
+			return wiringOff("Command Code", providers, func(k string) (string, bool) { return edit.GetJSON(providers, "provider."+mynaID+"."+k) },
 				"baseURL", at.v1())
 		},
 		Fields: []Field{{
@@ -69,21 +69,21 @@ func commandCodeIn(at place) *Agent {
 			Set: func(v string) error {
 				if v == "" {
 					keys := []string{"model"}
-					if get("modelProvider") == magpieID {
+					if get("modelProvider") == mynaID {
 						keys = append(keys, "modelProvider")
 					}
 					if err := edit.DelJSON(path, keys...); err != nil {
 						return err
 					}
-					return dropMagpie()
+					return dropMyna()
 				}
-				if ref, ok := strings.CutPrefix(v, magpieID+"/"); ok && isMagpie(ref) {
-					if err := edit.SetJSON(providers, edit.KV{Path: "provider." + magpieID, Value: theirsKept(providers, "provider."+magpieID, ccProviderJSON, "models")()}); err != nil {
+				if ref, ok := strings.CutPrefix(v, mynaID+"/"); ok && isMyna(ref) {
+					if err := edit.SetJSON(providers, edit.KV{Path: "provider." + mynaID, Value: theirsKept(providers, "provider."+mynaID, ccProviderJSON, "models")()}); err != nil {
 						return err
 					}
-					return edit.SetJSON(path, edit.KV{Path: "model", Value: v}, edit.KV{Path: "modelProvider", Value: magpieID})
+					return edit.SetJSON(path, edit.KV{Path: "model", Value: v}, edit.KV{Path: "modelProvider", Value: mynaID})
 				}
-				if get("modelProvider") == magpieID {
+				if get("modelProvider") == mynaID {
 					if err := edit.DelJSON(path, "modelProvider"); err != nil {
 						return err
 					}
@@ -91,14 +91,14 @@ func commandCodeIn(at place) *Agent {
 				if err := edit.SetJSON(path, edit.KV{Path: "model", Value: v}); err != nil {
 					return err
 				}
-				return dropMagpie()
+				return dropMyna()
 			},
 			Options: func(cur map[string]string) []Option {
 				var out []Option
-				if v := cur["model"]; v != "" && !usesMagpie(v) {
+				if v := cur["model"]; v != "" && !usesMyna(v) {
 					out = append(out, Option{Value: v, Icon: modelIcon("", v)})
 				}
-				return withVia(out, "commandcode", magpieID+"/")
+				return withVia(out, "commandcode", mynaID+"/")
 			},
 		}, {
 			// settings.json's reasoningEffort keeps an effort for each model
@@ -123,7 +123,7 @@ func commandCodeIn(at place) *Agent {
 				return edit.SetJSON(path, edit.KV{Path: "reasoningEffort", Value: efforts})
 			},
 			Options: func(cur map[string]string) []Option {
-				if ref, ok := strings.CutPrefix(cur["model"], magpieID+"/"); ok {
+				if ref, ok := strings.CutPrefix(cur["model"], mynaID+"/"); ok {
 					for _, m := range sharedModels("commandcode") {
 						if m.ID != ref {
 							continue
@@ -145,7 +145,7 @@ func commandCodeIn(at place) *Agent {
 	}
 }
 
-// ccProviderJSONAt is magpie's entry in providers.json, for a Command Code
+// ccProviderJSONAt is myna's entry in providers.json, for a Command Code
 // reaching the gateway's /v1 at v1. The key is false: the gateway takes
 // any, and Command Code refuses one written out.
 func ccProviderJSONAt(v1 string) any {
@@ -158,7 +158,7 @@ func ccProviderJSONAt(v1 string) any {
 				efforts = append(efforts, x)
 			}
 		}
-		// a model that thinks with no levels magpie knows (Trae CN's
+		// a model that thinks with no levels myna knows (Trae CN's
 		// kimi-k3-max, #2380) is marked reasoning alone, which Command
 		// Code takes for low, medium and high (its BYOK reference); the
 		// gateway fits them to the model
@@ -171,7 +171,7 @@ func ccProviderJSONAt(v1 string) any {
 		}
 		ms[m.ID] = e
 	}
-	return map[string]any{"name": "magpie", "api": "openai-completions", "baseURL": v1, "apiKey": false, "models": ms}
+	return map[string]any{"name": "myna", "api": "openai-completions", "baseURL": v1, "apiKey": false, "models": ms}
 }
 
 // ccEffortMap is settings.json's reasoningEffort, model id to effort.
@@ -197,6 +197,6 @@ func ccEffortMap(path string) map[string]string {
 
 // what commandcode says after a change (notice.go)
 var (
-	noticeCommandcode1 = newNotice("Command Code wants its own sign-in (cmd login) even for models through magpie.")
+	noticeCommandcode1 = newNotice("Command Code wants its own sign-in (cmd login) even for models through myna.")
 	noticeCommandcode2 = newNotice("It reads its settings at start-up — restart open Command Code sessions to use this.")
 )

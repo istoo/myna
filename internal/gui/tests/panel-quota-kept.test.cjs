@@ -4,13 +4,13 @@
 // storage and drawn at once, each card's refresh turning until the read
 // lands, and the read is asked for beside the state, not after it. Real
 // page, isolated responses: no vendor, account or installed app is used.
-// MAGPIE_QUOTA_ASSETS points at older assets to see it fail.
+// MYNA_QUOTA_ASSETS points at older assets to see it fail.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
-const assets = process.env.MAGPIE_QUOTA_ASSETS || path.resolve(__dirname, "../assets");
+const assets = process.env.MYNA_QUOTA_ASSETS || path.resolve(__dirname, "../assets");
 const iso = n => new Date(n).toISOString();
 function fixtures(used) {
   const now = Date.now(), readAt = iso(now - 60000), resetsAt = iso(now + 2 * 3600000);
@@ -62,12 +62,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           try {
             if (sessionStorage.getItem("seeded")) return;
             sessionStorage.setItem("seeded", "1");
-            localStorage.setItem("magpie.panelTab", "usage");
-            localStorage.setItem("magpie.panelQuotas", JSON.stringify(kept));
+            localStorage.setItem("myna.panelTab", "usage");
+            localStorage.setItem("myna.panelQuotas", JSON.stringify(kept));
           } catch {}
         }, fixtures(50));
         await page.route("**/*", serve(lang, data));
-        await page.goto("http://magpie.test/?mode=panel");
+        await page.goto("http://myna.test/?mode=panel");
 
         // the state and the read both held: the kept card is drawn, turning
         await page.locator(`${card} .pq-dial b`, { hasText: "50%" }).waitFor();
@@ -80,7 +80,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         giveQuotas();
         await page.locator(`${card} .pq-dial b`, { hasText: "75%" }).waitFor();
         await page.locator("#panelQuota .quota-refresh.reading").waitFor({ state: "detached" });
-        const kept = await page.evaluate(() => JSON.parse(localStorage.getItem("magpie.panelQuotas")));
+        const kept = await page.evaluate(() => JSON.parse(localStorage.getItem("myna.panelQuotas")));
         assert.equal(kept[0].windows[0].used, 75, "the read is kept for the next open");
         assert.deepEqual(errors, []);
       });

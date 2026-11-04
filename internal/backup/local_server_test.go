@@ -3,7 +3,7 @@ package backup
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/library"
+	"github.com/istoo/myna/internal/library"
 )
 
 func libServer(t *testing.T, name string) *library.Server {

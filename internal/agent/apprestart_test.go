@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // restartSandbox is a home with a provider in it and WorkBuddy found by its
@@ -66,7 +66,7 @@ func macApp(t *testing.T, dir, name, id, exe string) string {
 }
 
 // WorkBuddy on a Mac: its row offers a Restart only while WorkBuddy.app
-// runs on a models.json older than magpie's last write of it, and the
+// runs on a models.json older than myna's last write of it, and the
 // Restart quits it as ⌘Q does, waits for it to end, and opens it again.
 // One that doesn't end is said and not opened a second time.
 func TestWorkBuddyRestartOnMac(t *testing.T) {
@@ -96,14 +96,14 @@ func TestWorkBuddyRestartOnMac(t *testing.T) {
 	a := workbuddy(home)
 
 	if a.AppBehind() != nil {
-		t.Fatal("offered a Restart for WorkBuddy not connected to magpie")
+		t.Fatal("offered a Restart for WorkBuddy not connected to myna")
 	}
-	if err := a.Field("provider").Set("magpie"); err != nil {
+	if err := a.Field("provider").Set("myna"); err != nil {
 		t.Fatal(err)
 	}
 	got := a.AppBehind()
 	if got == nil {
-		t.Fatalf("no Restart for WorkBuddy started an hour before magpie wrote its models (asked %q)", pats)
+		t.Fatalf("no Restart for WorkBuddy started an hour before myna wrote its models (asked %q)", pats)
 	}
 	if d := time.Since(got.Since); d < 59*time.Minute || d > 61*time.Minute {
 		t.Fatalf("since %v ago", d)
@@ -194,7 +194,7 @@ func TestWorkBuddyRestartOnWindows(t *testing.T) {
 		return nil
 	}
 	a := workbuddy(home)
-	if err := a.Field("provider").Set("magpie"); err != nil {
+	if err := a.Field("provider").Set("myna"); err != nil {
 		t.Fatal(err)
 	}
 	got := a.AppBehind()
@@ -274,7 +274,7 @@ func TestRestartEndsAppInTrayAtOnce(t *testing.T) {
 				return nil
 			}
 			a := workbuddy(home)
-			if err := a.Field("provider").Set("magpie"); err != nil {
+			if err := a.Field("provider").Set("myna"); err != nil {
 				t.Fatal(err)
 			}
 			began := time.Now()
@@ -363,8 +363,8 @@ func TestChangedAtWithoutAWrite(t *testing.T) {
 // local models the computer can't run, and writes the file even when none
 // were): JSON.stringify's two-space indent with no trailing newline, and
 // on Windows 5.6 the apiKey encrypted. That write is WorkBuddy's, not a
-// change of magpie's, so after a restart the row says nothing more; a
-// change of magpie's models still asks for one (Sac2333o on X: the row
+// change of myna's, so after a restart the row says nothing more; a
+// change of myna's models still asks for one (Sac2333o on X: the row
 // kept saying "已连接 · 重启 WorkBuddy 后生效" after every restart).
 func TestWorkBuddyOwnSaveAfterStartIsNoChange(t *testing.T) {
 	for _, osName := range []string{"darwin", "windows"} {
@@ -393,29 +393,29 @@ func TestWorkBuddyOwnSaveAfterStartIsNoChange(t *testing.T) {
 				}
 			}
 			a := workbuddy(home)
-			if err := a.Field("provider").Set("magpie"); err != nil {
+			if err := a.Field("provider").Set("myna"); err != nil {
 				t.Fatal(err)
 			}
 			wrote := time.Now().Add(-30 * time.Minute)
 			os.Chtimes(a.Path, wrote, wrote)
 			if a.AppBehind() == nil {
-				t.Fatal("no Restart for WorkBuddy started half an hour before magpie wrote its models")
+				t.Fatal("no Restart for WorkBuddy started half an hour before myna wrote its models")
 			}
 
 			// restarted: WorkBuddy starts, then saves models.json 4s later
 			start = time.Now().Add(-10 * time.Second)
 			workbuddySaves(t, a.Path, osName == "windows", start.Add(4*time.Second))
 			if got := a.AppBehind(); got != nil {
-				t.Fatalf("WorkBuddy's own save after its start read as magpie's change: behind since %v", got.Since)
+				t.Fatalf("WorkBuddy's own save after its start read as myna's change: behind since %v", got.Since)
 			}
-			// magpie's next sync writes the same models again
+			// myna's next sync writes the same models again
 			if err := workbuddyWrite(a.Path, true); err != nil {
 				t.Fatal(err)
 			}
 			if got := a.AppBehind(); got != nil {
-				t.Fatalf("magpie's rewrite of the same models read as a change: behind since %v", got.Since)
+				t.Fatalf("myna's rewrite of the same models read as a change: behind since %v", got.Since)
 			}
-			// a model magpie adds is a change WorkBuddy hasn't read
+			// a model myna adds is a change WorkBuddy hasn't read
 			if err := provider.Save(provider.Provider{ID: "deepseek", Name: "DeepSeek", Chat: "https://api.deepseek.com/v1", Key: "k", Models: []string{"pro", "flash"}}); err != nil {
 				t.Fatal(err)
 			}
@@ -423,7 +423,7 @@ func TestWorkBuddyOwnSaveAfterStartIsNoChange(t *testing.T) {
 				t.Fatal(err)
 			}
 			if a.AppBehind() == nil {
-				t.Fatal("no Restart after magpie added a model WorkBuddy started without")
+				t.Fatal("no Restart after myna added a model WorkBuddy started without")
 			}
 		})
 	}
@@ -447,7 +447,7 @@ func workbuddySaves(t *testing.T, path string, encrypt bool, at time.Time) {
 		s = regexp.MustCompile(`"apiKey": "[^"]*"`).ReplaceAllString(s, `"apiKey": "WBEF1:bm90LXRoZS1rZXk="`)
 	}
 	if s == string(b) {
-		t.Fatal("WorkBuddy's save came out as magpie's bytes; the test proves nothing")
+		t.Fatal("WorkBuddy's save came out as myna's bytes; the test proves nothing")
 	}
 	if err := os.WriteFile(path, []byte(s), 0o600); err != nil {
 		t.Fatal(err)

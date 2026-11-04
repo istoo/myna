@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/istoo/myna/internal/usage"
 )
 
 // A Sessions or Usage page's poll reads every session file's listing and

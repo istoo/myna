@@ -73,7 +73,7 @@ for (const engine of process.env.BROWSER ? [process.env.BROWSER] : ["chromium", 
         let rs;
         await page.route("**/*", serve(lang, () => rs, now));
         const story = async () => {
-          await page.goto("http://magpie.test/?view=routing");
+          await page.goto("http://myna.test/?view=routing");
           await page.waitForFunction(() => /\d/.test(document.body.innerText) && document.querySelector(".rt-cap")?.textContent);
           return page.evaluate(() => document.body.innerText + "\n" + document.querySelector(".rt-cap").textContent);
         };

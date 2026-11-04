@@ -3,7 +3,7 @@
 // example plugin (testdata/page-plugin) gets a tab in the sidebar's
 // Plugins group and draws in a frame sandboxed to scripts, with the
 // window's theme, its own options and the read it declared. The frame
-// can't reach magpie's API: its policy stops the fetch, and with the
+// can't reach myna's API: its policy stops the fetch, and with the
 // policy gone the request it would send carries Origin: null, which
 // apiFramed turns away (TestPluginPageNoAPI). A read it didn't declare is
 // refused, and a message from another frame is nothing. A page that
@@ -24,16 +24,16 @@ const bridge = path.resolve(__dirname, "../pagebridge.js");
 const GLANCE = "a".repeat(32), PROBE = "b".repeat(32), OPEN = "c".repeat(32), BROKEN = "d".repeat(32);
 const entry = (tok, name, title, reads, file = "index.html") => ({
   spec: "/x/" + name, name, key: "plugin-" + name, title, reads,
-  url: `/_magpie/plugin/${tok}/${file}`, icon: name === "glance" ? `/_magpie/plugin/${tok}/icon.svg` : "",
+  url: `/_myna/plugin/${tok}/${file}`, icon: name === "glance" ? `/_myna/plugin/${tok}/icon.svg` : "",
 });
-// the example's title by language (magpie.page.titles); none in German,
+// the example's title by language (myna.page.titles); none in German,
 // which reads its title
 const TITLES = { zh: "用量速览", "zh-TW": "用量速覽", ja: "使用量の概要" };
 const pages = [
   { ...entry(GLANCE, "glance", "Usage glance", ["usage:summary"]), titles: TITLES },
-  // a page with a local service (magpie.page.service), as /api/plugin-pages
+  // a page with a local service (myna.page.service), as /api/plugin-pages
   // lists it to a browser: relative to the page's address
-  { ...entry(PROBE, "probe", "Probe", []), service: "_magpie/service/" },
+  { ...entry(PROBE, "probe", "Probe", []), service: "_myna/service/" },
   entry(OPEN, "open", "Probe without a policy", []),
   entry(BROKEN, "broken", "Broken", []),
 ];
@@ -41,7 +41,7 @@ const pages = [
 // what pluginpage.go's pagePolicy sends a browser, for this host: the
 // page's folder under https and http (ownSources, #4198)
 const policy = (tok) => {
-  const dir = `magpie.test/_magpie/plugin/${tok}/`;
+  const dir = `myna.test/_myna/plugin/${tok}/`;
   const own = `https://${dir} http://${dir}`;
   return [
     "sandbox allow-scripts", "default-src 'none'", `script-src ${own}`, `style-src ${own} 'unsafe-inline'`,
@@ -51,24 +51,24 @@ const policy = (tok) => {
 };
 
 // a page that tries every way out it has, and tells the window what came
-// of each (its message has no magpie:1, so the window's bridge ignores it)
-const PROBE_HTML = `<!doctype html><meta charset="utf-8"><script src="_magpie/bridge.js"></script><script src="probe.js"></script><style>.own { border-radius: 2px; }</style><h1>probe</h1><p id="p">probe</p><button id="b">b</button><button class="own">o</button>`;
+// of each (its message has no myna:1, so the window's bridge ignores it)
+const PROBE_HTML = `<!doctype html><meta charset="utf-8"><script src="_myna/bridge.js"></script><script src="probe.js"></script><style>.own { border-radius: 2px; }</style><h1>probe</h1><p id="p">probe</p><button id="b">b</button><button class="own">o</button>`;
 const PROBE_JS = `(async () => {
   const out = {};
-  await magpie.ready;
-  out.service = magpie.service;
+  await myna.ready;
+  out.service = myna.service;
   try { const r = await fetch("/api/state?probe=1"); out.fetch = "status " + r.status; } catch (e) { out.fetch = "refused"; }
   try { out.storage = typeof localStorage.length; } catch (e) { out.storage = "refused"; }
   try { out.cookie = document.cookie; } catch (e) { out.cookie = "refused"; }
   try { out.top = String(parent.document.title); } catch (e) { out.top = "refused"; }
-  try { await magpie.read("usage:summary"); out.read = "given"; } catch (e) { out.read = e.message; }
-  try { await magpie.read("providers:list"); out.read2 = "given"; } catch (e) { out.read2 = e.message; }
-  // what the page left unstyled is magpie's; what it styled is its own
+  try { await myna.read("usage:summary"); out.read = "given"; } catch (e) { out.read = e.message; }
+  try { await myna.read("providers:list"); out.read2 = "given"; } catch (e) { out.read2 = e.message; }
+  // what the page left unstyled is myna's; what it styled is its own
   const cs = (q) => getComputedStyle(document.querySelector(q));
   out.look = { bg: cs("html").backgroundColor, fg: cs("body").color, font: cs("body").fontFamily, h1: cs("h1").fontSize, button: cs("#b").borderRadius, own: cs(".own").borderRadius };
   parent.postMessage({ probe: out }, "*");
 })();`;
-const BROKEN_HTML = `<!doctype html><meta charset="utf-8"><script src="_magpie/bridge.js"></script><script src="app.js"></script><p id="ok">drawn</p>`;
+const BROKEN_HTML = `<!doctype html><meta charset="utf-8"><script src="_myna/bridge.js"></script><script src="app.js"></script><p id="ok">drawn</p>`;
 
 function server(lang, seen, plugins) {
   return async (route) => {
@@ -101,14 +101,14 @@ function server(lang, seen, plugins) {
     if (url.pathname === "/api/plugins/market") return json({ listings: [], state: plugins });
     if (url.pathname === "/api/plugins/listings") return json({ listings: [] });
     if (url.pathname.startsWith("/api/")) return json({});
-    const m = url.pathname.match(/^\/_magpie\/plugin\/([0-9a-f]{32})\/(.+)$/);
+    const m = url.pathname.match(/^\/_myna\/plugin\/([0-9a-f]{32})\/(.+)$/);
     if (m) {
       const [, tok, rel] = m;
       const headers = { "X-Content-Type-Options": "nosniff", "Referrer-Policy": "no-referrer", "Cache-Control": "no-cache" };
       if (tok !== OPEN) headers["Content-Security-Policy"] = policy(tok);
       const type = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml" }[path.extname(rel)];
       let body;
-      if (rel === "_magpie/bridge.js") body = await fs.readFile(bridge);
+      if (rel === "_myna/bridge.js") body = await fs.readFile(bridge);
       else if (tok === GLANCE) body = await fs.readFile(path.join(example, rel)).catch(() => null);
       else if ((tok === PROBE || tok === OPEN) && rel === "index.html") body = PROBE_HTML;
       else if ((tok === PROBE || tok === OPEN) && rel === "probe.js") body = PROBE_JS;
@@ -117,7 +117,7 @@ function server(lang, seen, plugins) {
       if (body == null) return route.fulfill({ status: 404, body: "" });
       return route.fulfill({ status: 200, headers: { ...headers, "Content-Type": type }, body });
     }
-    if (url.host !== "magpie.test") return route.fulfill({ status: 404, body: "" });
+    if (url.host !== "myna.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -125,8 +125,8 @@ function server(lang, seen, plugins) {
 }
 
 const plugins = { bun: true, bunVersion: "1.3.0", plugins: [
-  { spec: "/x/magpie-usage-glance", providers: [], moved: [], inMagpieOnly: true, page: { title: "Usage glance", reads: ["usage:summary", "providers:list"] } },
-  { spec: "/x/quiet-page", off: true, providers: [], moved: [], inMagpieOnly: true, page: { title: "Quiet", reads: [] } },
+  { spec: "/x/myna-usage-glance", providers: [], moved: [], inMynaOnly: true, page: { title: "Usage glance", reads: ["usage:summary", "providers:list"] } },
+  { spec: "/x/quiet-page", off: true, providers: [], moved: [], inMynaOnly: true, page: { title: "Quiet", reads: [] } },
 ] };
 
 const frameOf = (page, tok) => page.frames().find((f) => f.url().includes(tok));
@@ -151,7 +151,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         const seen = { api: [], reads: [], options: [] };
         await page.route("**/*", server(lang, seen, plugins));
-        await page.goto("http://magpie.test/");
+        await page.goto("http://myna.test/");
 
         // the sidebar's Plugins group, after the built-in pages
         const head = page.locator("#nav .nav-gl[data-plugin-pages]");
@@ -160,7 +160,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const tabs = page.locator("#nav button[data-plugin-page]");
         assert.equal(await tabs.count(), 4, where);
         assert.equal(await page.evaluate(() => { const h = document.querySelector("#nav .nav-gl[data-plugin-pages]"); return [...h.parentElement.children].indexOf(h) > [...h.parentElement.querySelectorAll("button[data-view='plugins']")].map((b) => [...b.parentElement.children].indexOf(b))[0]; }), true, `${where}: after the built-in pages`);
-        assert.equal(await tabs.first().locator("img.nav-ic").getAttribute("src"), `/_magpie/plugin/${GLANCE}/icon.svg`, where);
+        assert.equal(await tabs.first().locator("img.nav-ic").getAttribute("src"), `/_myna/plugin/${GLANCE}/icon.svg`, where);
         // titled in the window's language, else by its title
         assert.equal(await tabs.first().locator("span").textContent(), TITLES[lang] || "Usage glance", `${where}: the tab's title`);
         if (lang === "de") {
@@ -184,7 +184,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal(await glance.evaluate(() => document.documentElement.dataset.theme), "light", where);
         await page.evaluate(() => { document.documentElement.dataset.theme = "dark"; });
         await glance.waitForFunction(() => document.documentElement.dataset.theme === "dark");
-        assert.ok((await glance.evaluate(() => document.documentElement.style.getPropertyValue("--magpie-bg"))).length > 0, `${where}: the tokens`);
+        assert.ok((await glance.evaluate(() => document.documentElement.style.getPropertyValue("--myna-bg"))).length > 0, `${where}: the tokens`);
         await glance.locator("#hide").click();
         await glance.waitForFunction(() => document.getElementById("cost")?.textContent === "");
         assert.deepEqual(seen.options.map((o) => [o.spec, o.options.hideCost]), [["/x/glance", true]], `${where}: its own options`);
@@ -207,7 +207,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           assert.equal(seen.reads.length, 1, `${where}: an undeclared read never reached the server`);
           // its service, where the window's server serves it: an absolute
           // address under the page's own
-          assert.match(probe.service, new RegExp(`^https?://[^/]+/_magpie/plugin/${PROBE}/_magpie/service/$`), `${where}: magpie.service`);
+          assert.match(probe.service, new RegExp(`^https?://[^/]+/_myna/plugin/${PROBE}/_myna/service/$`), `${where}: myna.service`);
           // a page with no stylesheet of its own reads as part of the window
           const win = await page.evaluate(() => {
             const d = document.createElement("div");
@@ -221,8 +221,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           assert.equal(probe.look.bg, win.bg, `${where}: the window's background`);
           assert.equal(probe.look.fg, win.fg, `${where}: the window's text colour`);
           assert.match(probe.look.font, /apple-system|SF Pro|system-ui/, `${where}: the window's font, not a serif`);
-          assert.equal(probe.look.h1, "20px", `${where}: magpie's heading`);
-          assert.equal(probe.look.button, "6px", `${where}: magpie's button`);
+          assert.equal(probe.look.h1, "20px", `${where}: myna's heading`);
+          assert.equal(probe.look.button, "6px", `${where}: myna's button`);
           assert.equal(probe.look.own, "2px", `${where}: the page's own rule wins`);
 
           // with the policy gone, what the frame's fetch would send is what
@@ -233,14 +233,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           assert.equal(open.fetch.startsWith("status") || open.fetch === "refused", true, where);
           assert.equal(seen.api.length, 1, `${where}: the fetch went out`);
           assert.equal(seen.api[0].origin, "null", `${where}: as Origin: null`);
-          assert.equal(open.service, "", `${where}: a page with no service has no magpie.service`);
+          assert.equal(open.service, "", `${where}: a page with no service has no myna.service`);
           assert.ok(!seen.api[0].cookie, `${where}: without a cookie`);
 
           // a message from another frame naming a page is nothing
           const before = seen.reads.length;
           await page.evaluate(() => {
             const f = document.createElement("iframe");
-            f.srcdoc = `<script>parent.postMessage({magpie:1,id:1,method:"read",params:{name:"usage:summary"}},"*")<\/script>`;
+            f.srcdoc = `<script>parent.postMessage({myna:1,id:1,method:"read",params:{name:"usage:summary"}},"*")<\/script>`;
             document.body.append(f);
           });
           await page.waitForTimeout(300);
@@ -289,7 +289,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       seen.pages = () => quiet.off ? [] : [entry(PROBE, "quiet-page", "Quiet", [])];
       seen.off = (b) => { quiet.off = b.off; seen.slow = 4000; return mine; };
       await page.route("**/*", server(lang, seen, mine));
-      await page.goto("http://magpie.test/?view=plugins");
+      await page.goto("http://myna.test/?view=plugins");
       const view = page.locator("#view-plugins");
       const installed = await page.evaluate(() => t("Installed"));
       await page.locator(":is(.lib-tabs .opt, .nav-s):visible", { hasText: installed }).first().click();
@@ -322,12 +322,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, { api: [], reads: [], options: [] }, plugins));
-        await page.goto("http://magpie.test/?view=plugins");
+        await page.goto("http://myna.test/?view=plugins");
         const view = page.locator("#view-plugins");
         const installed = await page.evaluate(() => t("Installed"));
         await page.locator(":is(.lib-tabs .opt, .nav-s):visible", { hasText: installed }).first().click();
         const row = (name) => view.locator(".pm-row").filter({ has: page.locator(".name", { hasText: name }) });
-        const glance = row("magpie-usage-glance");
+        const glance = row("myna-usage-glance");
         await glance.waitFor();
         const tr = (k, v) => page.evaluate(([k, v]) => t(k, v), [k, v]);
         assert.deepEqual((await glance.locator(".pm-chip.kind").allInnerTexts()).map((x) => x.trim()), [await tr("Page")], where);
@@ -336,7 +336,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         if (lang !== "en") assert.ok(!(await glance.locator(".pm-page").innerText()).includes("Adds a page"), `${where}: translated`);
         // one switched off still says it
         const quiet = row("quiet-page");
-        assert.equal((await quiet.locator(".pm-page").innerText()).trim(), await tr("Adds a page to the sidebar, which reads nothing of magpie's"), where);
+        assert.equal((await quiet.locator(".pm-page").innerText()).trim(), await tr("Adds a page to the sidebar, which reads nothing of myna's"), where);
         assert.ok(await view.evaluate((v) => v.scrollWidth <= v.clientWidth + 1), `${where}: fits`);
         // nothing drawn with a coloured left border
         const borders = await view.locator(".pm-row *").evaluateAll((els) => els.filter((e) => { const s = getComputedStyle(e); return parseFloat(s.borderLeftWidth) > 0 && s.borderLeftStyle !== "none" && parseFloat(s.borderRightWidth) === 0; }).length);

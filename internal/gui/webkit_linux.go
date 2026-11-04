@@ -65,7 +65,7 @@ func renderNodeOpens(nodes []string, open func(string) error) bool {
 // from gst-plugins-good; where that isn't installed (stock Omarchy has only
 // -base and -bad) it gets none, and its web process aborts a moment after
 // the video starts loading, which leaves the window blank. GStreamer keeps
-// the element in libgstautodetect.so. A system with no plugin folder magpie
+// the element in libgstautodetect.so. A system with no plugin folder myna
 // knows of says nothing either way, and plays.
 var webkitPlaysVideo = sync.OnceValue(func() bool {
 	return gstAutodetect(gstPluginDirs(os.Getenv), func(p string) bool { _, err := os.Stat(p); return err == nil })

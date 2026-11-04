@@ -14,7 +14,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_ROUTING_ASSETS || path.resolve(__dirname, "../assets"));
+const assets = path.resolve(process.env.MYNA_ROUTING_ASSETS || path.resolve(__dirname, "../assets"));
 const now = Date.now();
 const iso = (ms) => new Date(ms).toISOString();
 const H = 3600e3;
@@ -86,7 +86,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
               const errors = [];
               page.on("pageerror", (e) => errors.push(e.message));
               await page.route("**/*", serve(lang, routeOf(affinity)));
-              await page.goto("http://magpie.test/?view=routing");
+              await page.goto("http://myna.test/?view=routing");
               const od = rowText(page, "od@example.com");
               await od.waitFor();
               await page.waitForFunction((w) => [...document.querySelectorAll(".rt-accts > li")].some((l) => l.textContent.includes(w)), words[lang][i], { timeout: 4000 }).catch(() => {});

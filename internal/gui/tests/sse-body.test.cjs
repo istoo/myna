@@ -113,7 +113,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await browser.close();
       });
 
-      await page.goto("http://magpie.test/?view=gateway");
+      await page.goto("http://myna.test/?view=gateway");
       const rows = page.locator("#activity .call-item");
       await rows.first().waitFor();
       const body = (i) => rows.nth(i).locator(".call-body").nth(1);

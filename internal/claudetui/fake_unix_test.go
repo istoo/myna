@@ -17,5 +17,5 @@ func fakeRaw() {
 // fakeScript is a script in dir that runs the test binary exe as the fake
 // Claude Code, and its path.
 func fakeScript(dir, exe string) (string, string) {
-	return dir + "/claude", "#!/bin/sh\nMAGPIE_TUI_TEST=claude exec '" + exe + "' \"$@\"\n"
+	return dir + "/claude", "#!/bin/sh\nMYNA_TUI_TEST=claude exec '" + exe + "' \"$@\"\n"
 }

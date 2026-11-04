@@ -78,7 +78,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         };
 
         // Usage
-        const page = await open("http://magpie.test/?view=usage");
+        const page = await open("http://myna.test/?view=usage");
         await page.locator(".subscription-account .quota-alias").first().waitFor();
         await page.evaluate(() => {
           const d = document.createElement("div");
@@ -141,7 +141,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         for (const id of ["Google", RAW]) assert.equal(await login(id).locator(".plan").textContent(), PLAN);
 
         // the tray panel follows the window's switch
-        const panel = await open("http://magpie.test/?mode=panel");
+        const panel = await open("http://myna.test/?mode=panel");
         await panel.evaluate(() => setPanelTab("usage"));
         await panel.locator("#panelQuota .pq-user").first().waitFor();
         const more = panel.locator('#panelQuota .pq-more:not(.pq-arrange)[aria-expanded="false"]');

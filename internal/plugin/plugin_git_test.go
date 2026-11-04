@@ -55,13 +55,13 @@ func TestIsGit(t *testing.T) {
 	}
 }
 
-// The test binary stands in for bun when MAGPIE_FAKE_BUN is set: add,
+// The test binary stands in for bun when MYNA_FAKE_BUN is set: add,
 // update and remove as bun does them — a git spec fetched from local
-// repositories ($MAGPIE_FAKE_GITHUB/owner/repo.git for GitHub's), and, like
+// repositories ($MYNA_FAKE_GITHUB/owner/repo.git for GitHub's), and, like
 // bun, keeping the commit its lock has when a spec is added again; an npm
 // one put at node_modules/<its name>, at the version its spec names.
 func init() {
-	if os.Getenv("MAGPIE_FAKE_BUN") == "1" {
+	if os.Getenv("MYNA_FAKE_BUN") == "1" {
 		if err := fakeBun(os.Args[1:]); err != nil {
 			fmt.Fprintln(os.Stderr, "fake bun:", err)
 			os.Exit(1)
@@ -71,7 +71,7 @@ func init() {
 }
 
 func fakeBun(args []string) error {
-	if f, err := os.OpenFile(os.Getenv("MAGPIE_FAKE_BUN_LOG"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644); err == nil {
+	if f, err := os.OpenFile(os.Getenv("MYNA_FAKE_BUN_LOG"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644); err == nil {
 		fmt.Fprintln(f, strings.Join(args, " "))
 		f.Close()
 	}
@@ -129,7 +129,7 @@ func fakeBun(args []string) error {
 		}
 		deps[name], lock[name] = spec, commit
 	case "update":
-		if os.Getenv("MAGPIE_FAKE_BUN_STUCK") == "1" {
+		if os.Getenv("MYNA_FAKE_BUN_STUCK") == "1" {
 			return nil // as bun whose cache's clone of the repository is stale: the lock's commit stays (#2954)
 		}
 		for _, n := range args[2:] {
@@ -170,7 +170,7 @@ func fakeFetch(spec string) (name, commit string, err error) {
 		url = strings.TrimPrefix(s, "git+")
 	case strings.HasPrefix(s, "github:"), strings.HasPrefix(s, "https://github.com/"), IsGit(s) && !strings.Contains(s, ":"):
 		ghRepo = strings.TrimSuffix(strings.TrimPrefix(strings.TrimPrefix(s, "github:"), "https://github.com/"), ".git")
-		url = filepath.Join(os.Getenv("MAGPIE_FAKE_GITHUB"), filepath.FromSlash(ghRepo)+".git")
+		url = filepath.Join(os.Getenv("MYNA_FAKE_GITHUB"), filepath.FromSlash(ghRepo)+".git")
 	default:
 		return "", "", fmt.Errorf("fetches only git, not %s", spec)
 	}
@@ -326,7 +326,7 @@ func gitSandbox(t *testing.T) (github, log string) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Setenv("MAGPIE_BUN", self) // never downloaded
+	t.Setenv("MYNA_BUN", self) // never downloaded
 	github = filepath.Join(dir, "github")
 	log = filepath.Join(dir, "bun.log")
 	orig := bunCommand
@@ -336,7 +336,7 @@ func gitSandbox(t *testing.T) (github, log string) {
 		}
 		cmd := exec.CommandContext(ctx, self, args...)
 		cmd.Dir = dir
-		cmd.Env = append(os.Environ(), "MAGPIE_FAKE_BUN=1", "MAGPIE_FAKE_GITHUB="+github, "MAGPIE_FAKE_BUN_LOG="+log)
+		cmd.Env = append(os.Environ(), "MYNA_FAKE_BUN=1", "MYNA_FAKE_GITHUB="+github, "MYNA_FAKE_BUN_LOG="+log)
 		return cmd
 	}
 	t.Cleanup(func() { bunCommand = orig })

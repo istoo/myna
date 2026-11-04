@@ -65,7 +65,7 @@ func TestDayTalliesFoldOnlyWhatWasAdded(t *testing.T) {
 		t.Errorf("a tally handed out changed after: tried %d, fails %v", held.Tried, held.Fails)
 	}
 
-	// half a line, as another magpie writing it leaves it: not counted
+	// half a line, as another myna writing it leaves it: not counted
 	// until its end is there, and then counted once
 	b, _ := json.Marshal(route(102, "B", 200))
 	path := filepath.Join(HistoryDir(), now.Format(dayForm)+".jsonl")

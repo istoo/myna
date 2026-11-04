@@ -11,8 +11,8 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // qwenpawConfig is a config.json as QwenPaw 2.2.2 writes it (config.py's
@@ -123,7 +123,7 @@ func qwenpawFixture(t *testing.T, home string) string {
 	return work
 }
 
-// qwenpawHome is a sandbox HOME with QwenPaw's files and magpie with a
+// qwenpawHome is a sandbox HOME with QwenPaw's files and myna with a
 // provider of two models.
 func qwenpawHome(t *testing.T) (home, work string) {
 	t.Helper()
@@ -169,15 +169,15 @@ func qwenpawFind(t *testing.T, id string) *Agent {
 	return a
 }
 
-// Connecting QwenPaw writes magpie's provider where QwenPaw keeps its own
+// Connecting QwenPaw writes myna's provider where QwenPaw keeps its own
 // (an OpenAI Chat provider at the gateway, with a key naming QwenPaw and
-// magpie's models) and sets the default agent's active_model to one of
-// magpie's; Disconnect puts back the model it was on, byte for byte, and
+// myna's models) and sets the default agent's active_model to one of
+// myna's; Disconnect puts back the model it was on, byte for byte, and
 // takes the provider out.
 func TestQwenPawConnect(t *testing.T) {
 	_, work := qwenpawHome(t)
 	path := filepath.Join(work, "workspaces", "default", "agent.json")
-	prov := filepath.Join(work+".secret", "providers", "custom", "magpie.json")
+	prov := filepath.Join(work+".secret", "providers", "custom", "myna.json")
 	before := readFile(path)
 	a := qwenpawFind(t, "qwenpaw")
 	if a.Path != path {
@@ -193,7 +193,7 @@ func TestQwenPawConnect(t *testing.T) {
 	for _, o := range a.Fields[0].Options(a.Values()) {
 		values = append(values, o.Value)
 	}
-	for _, want := range []string{"deepseek/deepseek-chat", "magpie/kimi/k2", "magpie/kimi/k2-vision"} {
+	for _, want := range []string{"deepseek/deepseek-chat", "myna/kimi/k2", "myna/kimi/k2-vision"} {
 		if !slices.Contains(values, want) {
 			t.Errorf("options %v lack %s", values, want)
 		}
@@ -202,11 +202,11 @@ func TestQwenPawConnect(t *testing.T) {
 	if slices.Contains(values, "deepseek/deepseek-reasoner") {
 		t.Errorf("a model the user removed is offered: %v", values)
 	}
-	if err := a.Apply("model", "magpie/kimi/k2"); err != nil {
+	if err := a.Apply("model", "myna/kimi/k2"); err != nil {
 		t.Fatal(err)
 	}
 	j := qwenpawJSON(t, path)
-	if j.Get("active_model.provider_id").String() != "magpie" || j.Get("active_model.model").String() != "kimi/k2" {
+	if j.Get("active_model.provider_id").String() != "myna" || j.Get("active_model.model").String() != "kimi/k2" {
 		t.Fatalf("active_model: %s", j.Get("active_model").Raw)
 	}
 	for _, k := range []string{"fallback_models.0.model", "language", "running.max_iters", "name"} {
@@ -215,7 +215,7 @@ func TestQwenPawConnect(t *testing.T) {
 		}
 	}
 	p := qwenpawJSON(t, prov)
-	for k, want := range map[string]string{"id": "magpie", "name": "magpie", "base_url": gatewayV1(),
+	for k, want := range map[string]string{"id": "myna", "name": "myna", "base_url": gatewayV1(),
 		"api_key": agentKeyAt("qwenpaw", gatewayV1()), "chat_model": "OpenAIChatModel", "is_custom": "true", "enabled": "true"} {
 		if got := p.Get(k).String(); got != want {
 			t.Errorf("provider %s = %q, want %q", k, got, want)
@@ -247,7 +247,7 @@ func TestQwenPawConnect(t *testing.T) {
 		t.Errorf("Disconnect left\n%s\nwant\n%s", got, before)
 	}
 	if isFile(prov) {
-		t.Error("magpie's provider is still in QwenPaw after Disconnect")
+		t.Error("myna's provider is still in QwenPaw after Disconnect")
 	}
 	if a.Wired() {
 		t.Fatal("wired after Disconnect")
@@ -256,10 +256,10 @@ func TestQwenPawConnect(t *testing.T) {
 
 // Each of QwenPaw's agents on its own backend is a row of its own, named
 // as QwenPaw names it; one on an ACP backend, or switched off, isn't.
-// magpie's provider stays while any agent still names it.
+// myna's provider stays while any agent still names it.
 func TestQwenPawAgentsAreRows(t *testing.T) {
 	_, work := qwenpawHome(t)
-	prov := filepath.Join(work+".secret", "providers", "custom", "magpie.json")
+	prov := filepath.Join(work+".secret", "providers", "custom", "myna.json")
 	var ids []string
 	for _, a := range All() {
 		if strings.HasPrefix(a.ID, "qwenpaw") {
@@ -273,13 +273,13 @@ func TestQwenPawAgentsAreRows(t *testing.T) {
 	if writer.Path != filepath.Join(work, "workspaces", "writer", "agent.json") {
 		t.Fatalf("writer's path: %s", writer.Path)
 	}
-	if err := def.Apply("model", "magpie/kimi/k2"); err != nil {
+	if err := def.Apply("model", "myna/kimi/k2"); err != nil {
 		t.Fatal(err)
 	}
-	if err := writer.Apply("model", "magpie/kimi/k2-vision"); err != nil {
+	if err := writer.Apply("model", "myna/kimi/k2-vision"); err != nil {
 		t.Fatal(err)
 	}
-	if def.Fields[0].Get() != "magpie/kimi/k2" || writer.Fields[0].Get() != "magpie/kimi/k2-vision" {
+	if def.Fields[0].Get() != "myna/kimi/k2" || writer.Fields[0].Get() != "myna/kimi/k2-vision" {
 		t.Fatalf("default %q, writer %q", def.Fields[0].Get(), writer.Fields[0].Get())
 	}
 	if err := writer.Disconnect(); err != nil {
@@ -300,29 +300,29 @@ func TestQwenPawAgentsAreRows(t *testing.T) {
 	// the ACP agent is refused, not rewritten
 	coder := qwenpawAt(here(os.Getenv("HOME")), work, qwenpawProfile{"coder", filepath.Join(work, "workspaces", "coder")})
 	before := readFile(coder.Path)
-	if err := coder.Apply("model", "magpie/kimi/k2"); err == nil || !strings.Contains(err.Error(), "claude_code") {
-		t.Fatalf("an ACP agent took magpie's model: %v", err)
+	if err := coder.Apply("model", "myna/kimi/k2"); err == nil || !strings.Contains(err.Error(), "claude_code") {
+		t.Fatalf("an ACP agent took myna's model: %v", err)
 	}
 	if readFile(coder.Path) != before {
 		t.Fatal("the ACP agent's agent.json was written")
 	}
 }
 
-// QwenPaw encrypts the key magpie wrote at its next start: a sync keeps
-// it while it is the key magpie wrote, and keeps what the user changed in
+// QwenPaw encrypts the key myna wrote at its next start: a sync keeps
+// it while it is the key myna wrote, and keeps what the user changed in
 // QwenPaw's console (headers, a model's window they set), while a new key
 // is written again in plain text.
 func TestQwenPawSyncKeepsWhatQwenPawChanged(t *testing.T) {
 	_, work := qwenpawHome(t)
-	prov := filepath.Join(work+".secret", "providers", "custom", "magpie.json")
+	prov := filepath.Join(work+".secret", "providers", "custom", "myna.json")
 	a := qwenpawFind(t, "qwenpaw")
-	if err := a.Apply("model", "magpie/kimi/k2"); err != nil {
+	if err := a.Apply("model", "myna/kimi/k2"); err != nil {
 		t.Fatal(err)
 	}
 	// as QwenPaw saves it after its start and an edit in its console
 	var m map[string]any
 	json.Unmarshal([]byte(readFile(prov)), &m)
-	m["api_key"] = "ENC:gAAAAABmagpie"
+	m["api_key"] = "ENC:gAAAAABmyna"
 	m["custom_headers"] = map[string]any{"X-Team": "a"}
 	for _, e := range m["extra_models"].([]any) {
 		e := e.(map[string]any)
@@ -341,7 +341,7 @@ func TestQwenPawSyncKeepsWhatQwenPawChanged(t *testing.T) {
 		t.Fatal(err)
 	}
 	p := qwenpawJSON(t, prov)
-	if p.Get("api_key").String() != "ENC:gAAAAABmagpie" {
+	if p.Get("api_key").String() != "ENC:gAAAAABmyna" {
 		t.Errorf("the encrypted key was written over: %s", p.Get("api_key"))
 	}
 	if p.Get("custom_headers.X-Team").String() != "a" {
@@ -351,7 +351,7 @@ func TestQwenPawSyncKeepsWhatQwenPawChanged(t *testing.T) {
 	if k2.Get("max_input_length").Int() != 50000 || k2.Get("generate_kwargs.temperature").Float() != 0.3 {
 		t.Errorf("the user's settings of kimi/k2 lost: %s", k2.Raw)
 	}
-	// another key than the one magpie wrote: written again
+	// another key than the one myna wrote: written again
 	stash(map[string]string{"qwenpaw.key": "an-older-key"})
 	if err := a.Sync(); err != nil {
 		t.Fatal(err)
@@ -361,14 +361,14 @@ func TestQwenPawSyncKeepsWhatQwenPawChanged(t *testing.T) {
 	}
 }
 
-// Check says what took QwenPaw off magpie: the provider's address
+// Check says what took QwenPaw off myna: the provider's address
 // changed, the provider switched off or removed, the agent moved to an
 // ACP backend.
 func TestQwenPawCheck(t *testing.T) {
 	_, work := qwenpawHome(t)
-	prov := filepath.Join(work+".secret", "providers", "custom", "magpie.json")
+	prov := filepath.Join(work+".secret", "providers", "custom", "myna.json")
 	a := qwenpawFind(t, "qwenpaw")
-	if err := a.Apply("model", "magpie/kimi/k2"); err != nil {
+	if err := a.Apply("model", "myna/kimi/k2"); err != nil {
 		t.Fatal(err)
 	}
 	good := readFile(prov)
@@ -404,7 +404,7 @@ func TestQwenPawNotStartedYet(t *testing.T) {
 	os.RemoveAll(work)
 	os.RemoveAll(work + ".secret")
 	a := qwenpawFind(t, "qwenpaw")
-	if err := a.Apply("model", "magpie/kimi/k2"); err == nil || !strings.Contains(err.Error(), "start QwenPaw once") {
+	if err := a.Apply("model", "myna/kimi/k2"); err == nil || !strings.Contains(err.Error(), "start QwenPaw once") {
 		t.Fatalf("err %v", err)
 	}
 	if isDir(filepath.Join(home, ".qwenpaw.secret")) {
@@ -451,13 +451,13 @@ func TestQwenPawFolders(t *testing.T) {
 	}
 }
 
-// A model of the user's own after magpie's is theirs: the row isn't on
-// magpie, and magpie's provider stays in QwenPaw's list until Disconnect.
-func TestQwenPawOwnModelAfterMagpies(t *testing.T) {
+// A model of the user's own after myna's is theirs: the row isn't on
+// myna, and myna's provider stays in QwenPaw's list until Disconnect.
+func TestQwenPawOwnModelAfterMynas(t *testing.T) {
 	_, work := qwenpawHome(t)
-	prov := filepath.Join(work+".secret", "providers", "custom", "magpie.json")
+	prov := filepath.Join(work+".secret", "providers", "custom", "myna.json")
 	a := qwenpawFind(t, "qwenpaw")
-	if err := a.Apply("model", "magpie/kimi/k2"); err != nil {
+	if err := a.Apply("model", "myna/kimi/k2"); err != nil {
 		t.Fatal(err)
 	}
 	if err := a.Apply("model", "deepseek/deepseek-chat"); err != nil {
@@ -467,27 +467,27 @@ func TestQwenPawOwnModelAfterMagpies(t *testing.T) {
 		t.Fatal("wired on its own model")
 	}
 	if !isFile(prov) {
-		t.Fatal("magpie's provider went with a pick of the user's own")
+		t.Fatal("myna's provider went with a pick of the user's own")
 	}
 	if got := qwenpawJSON(t, a.Path).Get("active_model").Raw; !strings.Contains(got, `"deepseek-chat"`) {
 		t.Fatalf("active_model %s", got)
 	}
 }
 
-// QwenPaw saves magpie's provider again at its start with every field of
-// its own filled in (a window it detected for a model magpie knows none
+// QwenPaw saves myna's provider again at its start with every field of
+// its own filled in (a window it detected for a model myna knows none
 // of, nulls, the models it discovered at the gateway): a sync after that
 // writes nothing, as it does on QwenPaw 2.2.2.
 func TestQwenPawSyncAfterQwenPawSaved(t *testing.T) {
 	_, work := qwenpawHome(t)
-	prov := filepath.Join(work+".secret", "providers", "custom", "magpie.json")
+	prov := filepath.Join(work+".secret", "providers", "custom", "myna.json")
 	a := qwenpawFind(t, "qwenpaw")
-	if err := a.Apply("model", "magpie/kimi/k2"); err != nil {
+	if err := a.Apply("model", "myna/kimi/k2"); err != nil {
 		t.Fatal(err)
 	}
 	var m map[string]any
 	json.Unmarshal([]byte(readFile(prov)), &m)
-	m["api_key"] = "ENC:gAAAAABmagpie"
+	m["api_key"] = "ENC:gAAAAABmyna"
 	m["support_model_discovery"] = true
 	m["model_count"] = nil
 	m["discovered_models"] = []any{map[string]any{"id": "kimi/k2", "source": "discovered"}}
@@ -495,7 +495,7 @@ func TestQwenPawSyncAfterQwenPawSaved(t *testing.T) {
 		e := e.(map[string]any)
 		e["availability_status"], e["config_overrides"], e["thinking_budget"] = "unverified", []any{}, nil
 		if e["id"] == "kimi/k2-vision" {
-			// magpie knows no window for it: QwenPaw's own
+			// myna knows no window for it: QwenPaw's own
 			e["max_input_length"], e["max_input_length_configured"], e["max_output_length"] = 131072, false, nil
 		}
 	}
@@ -523,7 +523,7 @@ func TestQwenPawNullModelRestored(t *testing.T) {
 `
 	writeFile(t, path, body)
 	a := qwenpawFind(t, "qwenpaw")
-	if err := a.Apply("model", "magpie/kimi/k2"); err != nil {
+	if err := a.Apply("model", "myna/kimi/k2"); err != nil {
 		t.Fatal(err)
 	}
 	if err := a.Disconnect(); err != nil {
@@ -535,17 +535,17 @@ func TestQwenPawNullModelRestored(t *testing.T) {
 }
 
 // QwenPaw applies an agent's thinking level only to a model whose card
-// says how it thinks (Pkh on Discord: magpie's cards said nothing, so
+// says how it thinks (Pkh on Discord: myna's cards said nothing, so
 // thinking_param_style was null and resolve_thinking dropped the level).
-// A model of magpie's with reasoning levels is declared "effort" with the
+// A model of myna's with reasoning levels is declared "effort" with the
 // levels QwenPaw names, none and ultra left out; one without says
-// nothing. A style the user set in QwenPaw stays, and one magpie said
+// nothing. A style the user set in QwenPaw stays, and one myna said
 // before is taken back once the model has no levels.
 func TestQwenPawModelsDeclareThinking(t *testing.T) {
 	_, work := qwenpawHome(t)
-	prov := filepath.Join(work+".secret", "providers", "custom", "magpie.json")
+	prov := filepath.Join(work+".secret", "providers", "custom", "myna.json")
 	a := qwenpawFind(t, "qwenpaw")
-	if err := a.Apply("model", "magpie/kimi/k2"); err != nil {
+	if err := a.Apply("model", "myna/kimi/k2"); err != nil {
 		t.Fatal(err)
 	}
 	p := qwenpawJSON(t, prov)
@@ -565,7 +565,7 @@ func TestQwenPawModelsDeclareThinking(t *testing.T) {
 		t.Errorf("a model with no levels declares some: %s", vision.Raw)
 	}
 
-	// the user's style for k2-vision, and magpie's for k2, whose levels go
+	// the user's style for k2-vision, and myna's for k2, whose levels go
 	var m map[string]any
 	json.Unmarshal([]byte(readFile(prov)), &m)
 	for _, e := range m["extra_models"].([]any) {
@@ -616,7 +616,7 @@ func TestQwenPawEffortField(t *testing.T) {
 	if got := a.Field("effort").Get(); got != "budget" {
 		t.Fatalf("effort read %q", got)
 	}
-	if err := a.Apply("model", "magpie/kimi/k2"); err != nil {
+	if err := a.Apply("model", "myna/kimi/k2"); err != nil {
 		t.Fatal(err)
 	}
 	if err := a.Apply("effort", "high"); err != nil {
@@ -626,7 +626,7 @@ func TestQwenPawEffortField(t *testing.T) {
 	if j.Get("thinking_level").String() != "high" || j.Get("thinking_budget").Exists() {
 		t.Fatalf("agent.json after effort high: %s", j.Raw)
 	}
-	if j.Get("active_model.provider_id").String() != "magpie" || j.Get("fallback_models.0.model").String() != "deepseek-reasoner" {
+	if j.Get("active_model.provider_id").String() != "myna" || j.Get("fallback_models.0.model").String() != "deepseek-reasoner" {
 		t.Errorf("other keys changed: %s", j.Raw)
 	}
 	if err := a.Sync(); err != nil {

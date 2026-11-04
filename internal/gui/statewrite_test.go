@@ -8,7 +8,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agent"
+	"github.com/istoo/myna/internal/agent"
 )
 
 // sinkWriter is a ResponseWriter that keeps what is written, or only

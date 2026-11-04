@@ -28,7 +28,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // reSigningCA is a root as an HTTPS-scanning antivirus or a company proxy
@@ -42,7 +42,7 @@ func reSigningCA(t *testing.T) (caPEM []byte, url string) {
 		t.Fatal(err)
 	}
 	caTpl := &x509.Certificate{
-		SerialNumber: big.NewInt(1), Subject: pkix.Name{CommonName: "magpie test HTTPS scan root"},
+		SerialNumber: big.NewInt(1), Subject: pkix.Name{CommonName: "myna test HTTPS scan root"},
 		NotBefore: time.Now().Add(-time.Hour), NotAfter: time.Now().Add(time.Hour),
 		IsCA: true, BasicConstraintsValid: true, KeyUsage: x509.KeyUsageCertSign | x509.KeyUsageCRLSign,
 	}
@@ -66,7 +66,7 @@ func reSigningCA(t *testing.T) (caPEM []byte, url string) {
 		t.Fatal(err)
 	}
 
-	const pkg = "magpie-ca-probe"
+	const pkg = "myna-ca-probe"
 	var tgz bytes.Buffer
 	gz := gzip.NewWriter(&tgz)
 	tw := tar.NewWriter(gz)
@@ -110,7 +110,7 @@ func reSigningCA(t *testing.T) (caPEM []byte, url string) {
 //
 // The system's store is put in place without touching the machine's:
 // on Linux through SSL_CERT_DIR, which Bun reads as the system's store
-// and which magpie's own copy of the roots (the distribution's bundle)
+// and which myna's own copy of the roots (the distribution's bundle)
 // never took in. macOS and Windows have no such variable, so there only
 // the user's file and the refusal are tried.
 func TestBunTrustsTheSystemsStore(t *testing.T) {
@@ -155,7 +155,7 @@ func TestBunTrustsTheSystemsStore(t *testing.T) {
 		if got := err == nil && strings.Contains(out, "through"); got != want {
 			t.Errorf("Bun's fetch got through: %v, want %v (%v)\n%s", got, want, err, out)
 		}
-		out, err = run("add", "--ignore-scripts", "magpie-ca-probe")
+		out, err = run("add", "--ignore-scripts", "myna-ca-probe")
 		if got := err == nil; got != want {
 			t.Errorf("bun add got through: %v, want %v (%v)\n%s", got, want, err, out)
 		}

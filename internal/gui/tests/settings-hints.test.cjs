@@ -25,7 +25,7 @@ const assets = path.resolve(__dirname, "../assets");
 function settings(lang) {
   return {
     theme: "light", lang, tray: "panel", currency: "usd", textSize: 100, proxy: "", proxyNow: "none", proxySource: "none",
-    redact: true, redactPersonal: true, redactWords: [], version: "0.1.400", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425",
+    redact: true, redactPersonal: true, redactWords: [], version: "0.1.400", dir: "~/.config/myna", gateway: "http://127.0.0.1:3425",
     lanURLs: [], searchVendors: [], searchAPIs: [],
     // the picked model is gone: Image recognition says so, in red
     vision: "zz/gone", visionMissing: "zz/gone", visionAuto: "codex/gpt-5",
@@ -81,7 +81,7 @@ for (const engine of engines) {
         await page.addInitScript(() => Object.defineProperty(navigator, "platform", { get: () => "MacIntel" }));
         await page.route("**/*", serve(lang));
         await watchSettingsReads(page);
-        await page.goto("http://magpie.test/?view=settings&tab=models");
+        await page.goto("http://myna.test/?view=settings&tab=models");
         await settingsDrawn(page);
         await openPart(page, "models");
         const mcp = page.locator("#visionMcpRow");

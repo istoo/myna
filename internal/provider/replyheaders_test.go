@@ -8,7 +8,7 @@ import (
 )
 
 // #4145: the list is kept canonical and once each, never with a header
-// magpie doesn't pass on; matching ignores case.
+// myna doesn't pass on; matching ignores case.
 func TestReplyHeadersList(t *testing.T) {
 	got := cleanReplyHeaders([]string{" x-oneapi-request-id ", "X-OneAPI-Request-ID", "set-cookie", "content-length", "access-control-allow-origin", "x-magpie-rest", "bad name", "", "x-trace"})
 	if want := []string{"X-Oneapi-Request-Id", "X-Trace"}; !slices.Equal(got, want) {
@@ -39,7 +39,7 @@ func TestReplyHeadersList(t *testing.T) {
 }
 
 // A provider's request headers to pass are kept canonical and once each,
-// never one that carries magpie's key or the connection's own (3jRzfF52Qx
+// never one that carries myna's key or the connection's own (3jRzfF52Qx
 // on X).
 func TestRequestHeadersList(t *testing.T) {
 	got := cleanRequestHeaders([]string{" x-tenant ", "X-TENANT", "authorization", "x-api-key", "host", "content-length", "x-magpie-agent", "bad name", "", "x-trace"})
@@ -58,10 +58,10 @@ func TestRequestHeadersList(t *testing.T) {
 }
 
 // Sign passes on what the provider lists, the agent's over the fixed
-// Header, to that provider alone, and never magpie's key, even listed in a
+// Header, to that provider alone, and never myna's key, even listed in a
 // file written by hand (3jRzfF52Qx on X).
 func TestSignPassesClientHeaders(t *testing.T) {
-	in := http.Header{"X-Tenant": {"t1"}, "Authorization": {"Bearer magpie-key"}, "X-Api-Key": {"magpie-key"}, "x-route": {"r1"}}
+	in := http.Header{"X-Tenant": {"t1"}, "Authorization": {"Bearer myna-key"}, "X-Api-Key": {"myna-key"}, "x-route": {"r1"}}
 	p := Provider{ID: "fake", Key: "sk-up", Chat: "https://up.example/v1", Headers: map[string]string{"X-Route": "fixed", "X-Only": "o"},
 		PassHeaders: []string{"X-Tenant", "Authorization", "X-Api-Key", "X-Route"}}
 	sign := func(p Provider, ctx context.Context) http.Header {
@@ -75,8 +75,8 @@ func TestSignPassesClientHeaders(t *testing.T) {
 	if h.Get("X-Tenant") != "t1" || h.Get("X-Route") != "r1" || h.Get("X-Only") != "o" || len(h.Values("X-Route")) != 1 {
 		t.Errorf("sent %v", h)
 	}
-	if h.Get("Authorization") != "Bearer sk-up" || h.Get("X-Api-Key") == "magpie-key" {
-		t.Errorf("magpie's key passed on: %v", h)
+	if h.Get("Authorization") != "Bearer sk-up" || h.Get("X-Api-Key") == "myna-key" {
+		t.Errorf("myna's key passed on: %v", h)
 	}
 	// the agent's headers carried for another provider
 	h = sign(p, WithClientHeaders(context.Background(), "other", in))

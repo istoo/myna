@@ -76,7 +76,7 @@ async function open(t, engine, lang, width, keys) {
   page.on("pageerror", (e) => errors.push(e.message));
   const st = { keys, posts: [] };
   await page.route("**/*", serve(lang, st));
-  await page.goto("http://magpie.test/?view=providers");
+  await page.goto("http://myna.test/?view=providers");
   const say = (key) => page.evaluate(([lang, key]) => (lang !== "en" && I18N[lang]?.[key]) || key, [lang, key]);
   return { page, errors, say, st };
 }
@@ -140,7 +140,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     await page.locator(".row.provider", { hasText: "Volc" }).first().click();
     await page.locator(`.editor .accts.keys .acc[data-account-id="aaaaaaaaaa"]`).waitFor();
     assert.equal(await page.locator(".editor .accts.keys button.proto", { hasText: "Coding Plan" }).count(), 0);
-    await page.goto("http://magpie.test/?view=providers");
+    await page.goto("http://myna.test/?view=providers");
     await page.locator(".row.provider", { hasText: "Relay" }).first().click();
     await page.locator(`.editor .accts.keys .acc[data-account-id="rrrrrrrrr1"]`).waitFor();
     assert.equal(await page.locator(".editor .accts.keys button.proto", { hasText: "Pay as you go" }).count(), 0);

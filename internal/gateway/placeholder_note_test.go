@@ -13,17 +13,17 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/redact"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/redact"
+	"github.com/istoo/myna/internal/settings"
 )
 
-// The note goes to the vendor: it names neither magpie, nor a vendor, nor
-// a client (LESSONS: text magpie adds to a prompt), and its example is no
+// The note goes to the vendor: it names neither myna, nor a vendor, nor
+// a client (LESSONS: text myna adds to a prompt), and its example is no
 // placeholder masking writes, so it is never put back as one.
 func TestPlaceholderNoteIsNeutral(t *testing.T) {
 	low := strings.ToLower(placeholderNote)
-	for _, w := range []string{"magpie", "codex", "claude", "anthropic", "openai", "chatgpt", "gpt", "gemini", "google", "deepseek", "kimi", "qwen", "grok", "vendor", "provider", "gateway", "redact", "privacy", "proxy"} {
+	for _, w := range []string{"myna", "codex", "claude", "anthropic", "openai", "chatgpt", "gpt", "gemini", "google", "deepseek", "kimi", "qwen", "grok", "vendor", "provider", "gateway", "redact", "privacy", "proxy"} {
 		if strings.Contains(low, w) {
 			t.Errorf("the note names %q: %s", w, placeholderNote)
 		}

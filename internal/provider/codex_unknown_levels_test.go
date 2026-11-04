@@ -7,13 +7,13 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/codexcat"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/codexcat"
 )
 
 // ccdcn on X: the Codex app's picker offered no reasoning effort for the
 // models of a provider the user added (model-code, model-work and
-// model-test of their XJAI), which nothing magpie reads knows. Codex sent
+// model-test of their XJAI), which nothing myna reads knows. Codex sent
 // them an effort anyway (its chip said 中) and the gateway passed it on,
 // but with supported_reasoning_levels [] it couldn't be changed. A model
 // nothing says anything about is offered low, medium and high; one known
@@ -25,7 +25,7 @@ func TestCodexOffersLevelsForUnknownModels(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	cache := t.TempDir()
 	t.Setenv("XDG_CACHE_HOME", cache)
-	os.MkdirAll(filepath.Join(cache, "magpie"), 0o755)
+	os.MkdirAll(filepath.Join(cache, "myna"), 0o755)
 	if err := os.WriteFile(catalog.CachePath(), []byte(`{
 	  "deepseek": {"models": {"deepseek-v4-pro": {"id":"deepseek-v4-pro","name":"DeepSeek V4 Pro","reasoning":true,
 	    "reasoning_options":[{"type":"toggle"},{"type":"effort","values":["low","high","max"]}],"limit":{"context":1000000}}}},

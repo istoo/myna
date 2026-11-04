@@ -25,7 +25,7 @@ const revisionEntries = 8192
 // budget. Its index holds every call (about six entries each), so a session
 // over ~1,400 calls lost it, and every append (each turn, each poll that
 // read it) parsed the whole rollout again from its first line: a full core
-// while Codex ran (yetone/magpie-releases#24). The full parse built the same
+// while Codex ran (istoo/myna#24). The full parse built the same
 // index each time anyway, so keeping it costs no more at its peak. At most
 // revisionActiveFiles such windows, each up to revisionActiveEntries, and
 // only while the file changed in the last revisionIdle.

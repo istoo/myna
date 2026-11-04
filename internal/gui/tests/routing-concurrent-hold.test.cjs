@@ -2,7 +2,7 @@
 // qiang2040 on Discord ("狂闪", a screen recording): with several Codex
 // conversations sending at once, one on group/glm-5.3-flash-free and one on
 // group/deepseek-v4.1-flash, the Routing page's top card jumped between
-// them on every trace update, and to "magpie hasn't routed this request
+// them on every trace update, and to "myna hasn't routed this request
 // yet" for each new request before it was routed. The card followed the
 // newest request. It now stays on the request it tells of until that one
 // is done, and a newer request routing hasn't picked for yet doesn't take
@@ -31,7 +31,7 @@ let seq = 10;
 function req(id, g, step) {
   const at = t0 - (200 - id) * 1000, done = step === "done", routed = step !== "held";
   return {
-    id, seq: ++seq, time: iso(at), agent: "codex", session: "conv-" + g, model: "group/" + GROUPS[g].id, provider: "magpie", group: GROUPS[g],
+    id, seq: ++seq, time: iso(at), agent: "codex", session: "conv-" + g, model: "group/" + GROUPS[g].id, provider: "myna", group: GROUPS[g],
     order: routed ? [SEAT[g]] : [],
     tries: routed ? [{ id: SEAT[g].id, model: SEAT[g].model, start: iso(at), done, ...(done ? { status: 200, ms: 3000 } : {}) }] : [],
     done, ...(done ? { status: 200, ms: 3000, tokens: 900 } : {}),
@@ -63,7 +63,7 @@ function serve(lang, feed) {
   };
 }
 
-const NOT_ROUTED = "magpie hasn't routed this request yet, so who takes it isn't picked yet.";
+const NOT_ROUTED = "myna hasn't routed this request yet, so who takes it isn't picked yet.";
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   test(`${engine}: the routing card stays on one request while others come at once`, async (t) => {
@@ -80,7 +80,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         const feed = { next: null };
         await page.route("**/*", serve(lang, feed));
-        await page.goto("http://magpie.test/?view=routing");
+        await page.goto("http://myna.test/?view=routing");
         await page.locator(".rt-req").first().waitFor();
         await page.locator(".rt-what b").waitFor();
         const notRouted = await page.evaluate(([l, s]) => (l === "en" ? s : I18N[l]?.[s]), [lang, NOT_ROUTED]);

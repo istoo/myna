@@ -9,7 +9,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // relayUpstream plays a Responses relay in front of OpenAI as #1044's
@@ -74,7 +74,7 @@ func (u *relayUpstream) asked() [][]map[string]any {
 
 // bareConversation is the shape of the reporter's old conversation: messages,
 // function calls, Codex's apply_patch as custom tool calls, and reasoning
-// items with nothing sealed in them (one with a summary, as magpie gives
+// items with nothing sealed in them (one with a summary, as myna gives
 // Codex in a translated reply; one with an id alone), beside one sealed.
 const bareConversation = `{"type":"message","role":"developer","content":[{"type":"input_text","text":"<permissions instructions>"}]},
   {"type":"message","role":"user","content":[{"type":"input_text","text":"fix the login bug"}]},
@@ -179,7 +179,7 @@ func TestBareReasoningLeftOutWhereRefused(t *testing.T) {
 }
 
 // #3062: a Codex thread behind a Responses passthrough relay collects
-// reasoning ids the relay can't resolve — ones magpie minted in a
+// reasoning ids the relay can't resolve — ones myna minted in a
 // translated reply, or the relay's own whose seal lapsed after a resume
 // gap — and Codex replays them on every turn. The relay answers 400 in
 // its own words, naming no input ("OpenCode Go: Referenced reasoning item

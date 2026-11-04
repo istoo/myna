@@ -9,11 +9,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // axelburks's list (Discord, 11-03): what Ark's own API takes and answers
-// that magpie's OpenAI-shaped routes dropped, changed or turned away, each
+// that myna's OpenAI-shaped routes dropped, changed or turned away, each
 // checked against Ark's docs (82379/1520757 create, 1521309 query,
 // 1541523 images).
 
@@ -114,9 +114,9 @@ func TestOnlyArkTakesItsOwnVideoAsks(t *testing.T) {
 	minimaxProvider(t, "minimax", "minimax", up)
 	s := New()
 	for _, body := range []string{
-		`{"model":"minimax/MiniMax-H3-Lite","prompt":"a magpie","seconds":"-1"}`,
+		`{"model":"minimax/MiniMax-H3-Lite","prompt":"a myna","seconds":"-1"}`,
 		`{"model":"minimax/MiniMax-H3-Lite","input_reference":"data:image/png;base64,iVBORw0KGgo="}`,
-		`{"model":"minimax/MiniMax-H3-Lite","prompt":"a magpie","input_reference":"asset://asset-1"}`,
+		`{"model":"minimax/MiniMax-H3-Lite","prompt":"a myna","input_reference":"asset://asset-1"}`,
 	} {
 		code, obj, raw, _ := request(t, s, http.MethodPost, "/v1/videos", "application/json", body)
 		if code != 400 || errorOf(obj) == "" {
@@ -190,7 +190,7 @@ func TestArkVideoFieldTypes(t *testing.T) {
 }
 
 // A finished task's own fields (the last frame, usage, resolution, ratio,
-// frames per second, seed…) are in the video magpie answers.
+// frames per second, seed…) are in the video myna answers.
 func TestArkVideoAnswersItsOwnFields(t *testing.T) {
 	st := videoState{Status: "succeeded"}
 	if err := json.Unmarshal([]byte(volcengineVideoSucceededResponse), &st.Ark); err != nil {
@@ -205,7 +205,7 @@ func TestArkVideoAnswersItsOwnFields(t *testing.T) {
 		t.Fatalf("answered %v", obj)
 	}
 	if obj["id"] != "video_ark.x" || obj["status"] != "completed" || obj["model"] != "ark/doubao-seedance-2-0-260128" {
-		t.Fatalf("Ark's fields took magpie's place: %v", obj)
+		t.Fatalf("Ark's fields took myna's place: %v", obj)
 	}
 
 	// Ark's expired is a task that ran out of time

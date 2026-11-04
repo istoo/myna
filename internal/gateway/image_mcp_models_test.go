@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/access"
+	"github.com/istoo/myna/internal/access"
 )
 
 // mcpModelProp is the model argument tools/list gives tool, for the key
@@ -61,13 +61,13 @@ func TestImageMCPDrawsWithTheModelAsked(t *testing.T) {
 		t.Fatalf("description %q", desc)
 	}
 	// left out: the default, at the images API
-	m := readImageReply(t, imagePost(h, here, imageToolCall(GenerateImageTool, map[string]any{"prompt": "a magpie"})))
+	m := readImageReply(t, imagePost(h, here, imageToolCall(GenerateImageTool, map[string]any{"prompt": "a myna"})))
 	if m.Result.IsError || len(e.got("/v1/images/generations")) != 1 || len(e.got("/v1/chat/completions")) != 0 {
 		t.Fatalf("default: %+v %v", m, e.got("/v1/chat/completions"))
 	}
 	// asked by its whole id, then by its bare one: drawn with it
 	for i, model := range []string{"art/painter-image-preview", "painter-image-preview"} {
-		m = readImageReply(t, imagePost(h, here, imageToolCall(GenerateImageTool, map[string]any{"prompt": "a magpie", "model": model})))
+		m = readImageReply(t, imagePost(h, here, imageToolCall(GenerateImageTool, map[string]any{"prompt": "a myna", "model": model})))
 		if sent := e.got("/v1/chat/completions"); m.Result.IsError || len(sent) != i+1 || !strings.Contains(sent[i], "painter-image-preview") || !strings.Contains(m.Result.Content[0].Text, "art/painter-image-preview") {
 			t.Fatalf("%s: %+v, sent %v", model, m, sent)
 		}
@@ -77,7 +77,7 @@ func TestImageMCPDrawsWithTheModelAsked(t *testing.T) {
 	}
 	// unknown, or not an image model: an error naming those there are
 	for _, model := range []string{"art/nope", "art/text", "nope"} {
-		m = readImageReply(t, imagePost(h, here, imageToolCall(GenerateImageTool, map[string]any{"prompt": "a magpie", "model": model})))
+		m = readImageReply(t, imagePost(h, here, imageToolCall(GenerateImageTool, map[string]any{"prompt": "a myna", "model": model})))
 		if txt := m.Result.Content[0].Text; !m.Result.IsError || !strings.Contains(txt, `"`+model+`"`) || !strings.Contains(txt, "art/gpt-image-1") || !strings.Contains(txt, "art/painter-image-preview") {
 			t.Fatalf("%s: %+v", model, m)
 		}
@@ -133,11 +133,11 @@ func TestImageMCPModelHeldToTheKey(t *testing.T) {
 	if enum, _ := mcpModelProp(t, h, there, GenerateImageTool, auth...); len(enum) != 1 || enum[0] != Drawer() {
 		t.Fatalf("the key's enum %v", enum)
 	}
-	m := readImageReply(t, imagePost(h, there, imageToolCall(GenerateImageTool, map[string]any{"prompt": "a magpie", "model": "art/painter-image-preview"}), auth...))
+	m := readImageReply(t, imagePost(h, there, imageToolCall(GenerateImageTool, map[string]any{"prompt": "a myna", "model": "art/painter-image-preview"}), auth...))
 	if txt := m.Result.Content[0].Text; !m.Result.IsError || !strings.Contains(txt, "may not use") || !strings.Contains(txt, `"Narrow"`) {
 		t.Fatalf("a model the key may not use: %+v", m)
 	}
-	m = readImageReply(t, imagePost(h, there, imageToolCall(GenerateImageTool, map[string]any{"prompt": "a magpie", "model": "art/nope"}), auth...))
+	m = readImageReply(t, imagePost(h, there, imageToolCall(GenerateImageTool, map[string]any{"prompt": "a myna", "model": "art/nope"}), auth...))
 	if txt := m.Result.Content[0].Text; !m.Result.IsError || !strings.Contains(txt, Drawer()) || strings.Contains(txt, "painter") {
 		t.Fatalf("unknown, for the key: %+v", m)
 	}
@@ -145,7 +145,7 @@ func TestImageMCPModelHeldToTheKey(t *testing.T) {
 		t.Fatalf("drew %d times", n)
 	}
 	// the one it may use draws
-	m = readImageReply(t, imagePost(h, there, imageToolCall(GenerateImageTool, map[string]any{"prompt": "a magpie", "model": Drawer()}), auth...))
+	m = readImageReply(t, imagePost(h, there, imageToolCall(GenerateImageTool, map[string]any{"prompt": "a myna", "model": Drawer()}), auth...))
 	if m.Result.IsError || len(e.got("/v1/images/generations")) != 1 {
 		t.Fatalf("the key's model: %+v", m)
 	}
@@ -175,7 +175,7 @@ func TestImageMCPVideoModelAsked(t *testing.T) {
 	if sent := g.body("/v1/videos/generations", 0); m.Result.IsError || !strings.Contains(sent, `"model":"`+id+`"`) {
 		t.Fatalf("video %s: %+v, sent %s", enum[0], m, sent)
 	}
-	// a newer model of the family Grok serves, before magpie lists it
+	// a newer model of the family Grok serves, before myna lists it
 	m = readImageReply(t, imagePost(h, here, imageToolCall(GenerateVideoTool, map[string]any{"prompt": "a kite", "model": "grok/grok-imagine-video-9"})))
 	if sent := g.body("/v1/videos/generations", 1); m.Result.IsError || !strings.Contains(sent, `"model":"grok-imagine-video-9"`) {
 		t.Fatalf("a newer video model: %+v, sent %s", m, sent)

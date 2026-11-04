@@ -67,7 +67,7 @@ for (const [name, engine] of [["chromium", chromium], ["webkit", webkit]]) {
             page.setDefaultTimeout(5000);
             page.setDefaultNavigationTimeout(60000);
             await page.route("**/*", serve(lang, quotaLeft));
-            await page.goto("http://magpie.test/?view=usage");
+            await page.goto("http://myna.test/?view=usage");
             await page.locator(".subscription-card .quota-n").nth(3).waitFor();
             await page.waitForTimeout(200);
             const rows = await page.evaluate(() => [...document.querySelectorAll(".subscription-card .quota")].map((q) => {

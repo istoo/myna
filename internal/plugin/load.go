@@ -7,7 +7,7 @@ import (
 )
 
 // LoadFresh is how long a model's load counts from the plugin's call that
-// reported it (magpie.load in host.js). Past it the load is unknown: a
+// reported it (myna.load in host.js). Past it the load is unknown: a
 // plugin that stopped reporting says nothing of how busy the vendor is
 // now, and routing never takes its silence for idle.
 const LoadFresh = 5 * time.Minute
@@ -92,7 +92,7 @@ func ModelLoad(provider, model string, now time.Time) (pct float64, at time.Time
 
 // FreshLoads is every load reported less than LoadFresh before now, by
 // plugin provider id and then the model id lowercased, as ModelLoad
-// answers each: nil when none is (a magpie with no plugin reporting).
+// answers each: nil when none is (a myna with no plugin reporting).
 func FreshLoads(now time.Time) map[string]map[string]float64 {
 	loads.Lock()
 	defer loads.Unlock()

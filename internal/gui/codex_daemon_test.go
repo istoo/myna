@@ -11,11 +11,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // The Restart button runs `codex app-server daemon restart` with the codex
-// magpie finds, for the Codex home it switches, the user's CODEX_HOME when
+// myna finds, for the Codex home it switches, the user's CODEX_HOME when
 // that is set; a stand-in codex writes
 // down how it was run, since the real one would restart the user's daemon.
 func TestCodexDaemonRestartRoute(t *testing.T) {

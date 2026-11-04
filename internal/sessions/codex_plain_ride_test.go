@@ -134,7 +134,7 @@ func TestPlainRolloutReadOnceForSessionsAndCalls(t *testing.T) {
 	}
 	same("an append", got)
 
-	// grown while magpie was closed: neither read keeps its window on
+	// grown while myna was closed: neither read keeps its window on
 	// disk, so both read it from its first line, on one pass
 	forget()
 	run()

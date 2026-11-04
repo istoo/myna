@@ -26,7 +26,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // resetLead is how long before a reset runs out it is spent: the user's

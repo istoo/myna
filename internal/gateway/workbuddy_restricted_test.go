@@ -11,9 +11,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // wbRestrictedBody is WorkBuddy's 403 for an account it restricted, byte
@@ -134,7 +134,7 @@ func TestPluginRestrictedAccountSkipped(t *testing.T) {
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			fresh(t)
-			t.Setenv("MAGPIE_BUN", bun)
+			t.Setenv("MYNA_BUN", bun)
 			t.Cleanup(plugin.Settle)
 			var mu sync.Mutex
 			var tried []string

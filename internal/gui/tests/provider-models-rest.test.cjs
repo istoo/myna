@@ -59,7 +59,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://myna.test/?view=providers");
       const editor = page.locator("#modal:not([hidden]) .editor");
       await page.locator(".row.provider", { hasText: "Zen" }).click();
       await editor.locator(".mchips .mchip").first().waitFor();

@@ -61,7 +61,7 @@ func TestFnmWinBins(t *testing.T) {
 	}
 }
 
-// With no default alias a terminal's fnm has no Node of its own; magpie
+// With no default alias a terminal's fnm has no Node of its own; myna
 // takes the highest installed, as it does for nvm. A default that leads
 // nowhere is fnm's "system" alias (Z:\_fnm_\...): the system's Node, which
 // PATH has already, so none.

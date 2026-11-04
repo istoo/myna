@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // dshModelOf is the model id of a route as dshPiProviders parsed it.
@@ -31,7 +31,7 @@ func dshModelOf(t *testing.T, ps map[string]dshPiRoute, key, id string) *dshPiMo
 // every property is required, so a tool's optional parameters came back
 // filled. pi-ai says strict: false on an ordinary tool only when the
 // model's compat says supportsStrictMode, which it takes as false where
-// the compat is left out — as magpie's routes were. magpie now says it on
+// the compat is left out — as myna's routes were. myna now says it on
 // every model of a route whose api stands as openai-responses (the one a
 // user picked in dsh's Models page kept), and on none of a Chat or
 // Messages route.
@@ -40,20 +40,20 @@ func TestDshTellsAResponsesToolsStrictIsOff(t *testing.T) {
 	dshKeyFixture(dir)
 	os.WriteFile(web, []byte("# Your patch layer for this dsh profile.\n"), 0o644)
 	a := dsh(home)
-	if err := a.Field("model").Set("magpie/resp/gpt-5.5"); err != nil {
+	if err := a.Field("model").Set("myna/resp/gpt-5.5"); err != nil {
 		t.Fatal(err)
 	}
 	ps := dshPiProviders(t, web)
-	if m := dshModelOf(t, ps, "magpie-responses", "resp/gpt-5.5"); m.Compat == nil || !m.Compat.SupportsStrictMode {
+	if m := dshModelOf(t, ps, "myna-responses", "resp/gpt-5.5"); m.Compat == nil || !m.Compat.SupportsStrictMode {
 		t.Fatalf("a model asked on Responses isn't told strict is off: %+v", m)
 	}
-	if m := dshModelOf(t, ps, "magpie", "deepseek/pro"); m.Compat != nil && m.Compat.SupportsStrictMode {
+	if m := dshModelOf(t, ps, "myna", "deepseek/pro"); m.Compat != nil && m.Compat.SupportsStrictMode {
 		t.Fatalf("a Chat model was told strict is off: %+v", m)
 	}
-	if dshModelOf(t, ps, "magpie", "deepseek/flash").Compat != nil {
+	if dshModelOf(t, ps, "myna", "deepseek/flash").Compat != nil {
 		t.Fatal("a Chat model took a compat of its own")
 	}
-	if m := dshModelOf(t, ps, "magpie-anthropic", "anth/claude-sonnet-5"); m.Compat == nil || !m.Compat.ForceAdaptiveThinking || m.Compat.SupportsStrictMode {
+	if m := dshModelOf(t, ps, "myna-anthropic", "anth/claude-sonnet-5"); m.Compat == nil || !m.Compat.ForceAdaptiveThinking || m.Compat.SupportsStrictMode {
 		t.Fatalf("a Claude on Messages: %+v", m)
 	}
 
@@ -65,25 +65,25 @@ func TestDshTellsAResponsesToolsStrictIsOff(t *testing.T) {
 	}
 
 	// the api a user picked for a route in dsh's Models page decides, not
-	// the route's name: magpie's first route on Responses tells its Chat
-	// models strict is off and keeps a key of theirs beside magpie's; the
+	// the route's name: myna's first route on Responses tells its Chat
+	// models strict is off and keeps a key of theirs beside myna's; the
 	// responses route on Chat tells its model nothing there
 	os.WriteFile(web, []byte("# Your patch layer for this dsh profile.\n"+
-		"- id: llm-pi-ai # magpie\n  name: \"@deepseek-ai/dsh-llm-pi-ai\"\n  config:\n    providers:\n"+
-		"      magpie:\n        displayName: Magpie\n        apiKeyEnv: "+dshKeyRef+"\n        api: openai-responses\n        baseURL: "+gatewayV1()+"\n        models:\n"+
+		"- id: llm-pi-ai # myna\n  name: \"@deepseek-ai/dsh-llm-pi-ai\"\n  config:\n    providers:\n"+
+		"      myna:\n        displayName: Myna\n        apiKeyEnv: "+dshKeyRef+"\n        api: openai-responses\n        baseURL: "+gatewayV1()+"\n        models:\n"+
 		"          - id: deepseek/pro\n            compat:\n              maxTokensField: max_tokens\n"+
-		"      magpie-responses:\n        displayName: Magpie · Responses\n        apiKeyEnv: "+dshKeyRef+"\n        api: openai-completions\n        baseURL: "+gatewayV1()+"\n        models:\n"+
+		"      myna-responses:\n        displayName: Myna · Responses\n        apiKeyEnv: "+dshKeyRef+"\n        api: openai-completions\n        baseURL: "+gatewayV1()+"\n        models:\n"+
 		"          - id: resp/gpt-5.5\n"), 0o644)
 	if err := a.Sync(); err != nil {
 		t.Fatal(err)
 	}
 	b, _ := os.ReadFile(web)
-	_, compat := dshRouteCompat(t, web, "magpie")
+	_, compat := dshRouteCompat(t, web, "myna")
 	c := compat["deepseek/pro"]
 	if c["supportsStrictMode"] != true || c["maxTokensField"] != "max_tokens" {
 		t.Fatalf("a Chat model on a route switched to Responses: %v\n%s", c, b)
 	}
-	_, compat = dshRouteCompat(t, web, "magpie-responses")
+	_, compat = dshRouteCompat(t, web, "myna-responses")
 	if c = compat["resp/gpt-5.5"]; c != nil && c["supportsStrictMode"] == true {
 		t.Fatalf("a model on a route switched to Chat was told strict is off: %v\n%s", c, b)
 	}
@@ -102,13 +102,13 @@ func TestPiTellsAResponsesToolsStrictIsOff(t *testing.T) {
 		t.Fatal(err)
 	}
 	piModels := filepath.Join(home, ".pi", "agent", "models.json")
-	// the provider block as magpie wrote it before this provider was, with
+	// the provider block as myna wrote it before this provider was, with
 	// a key of pi-cache-optimizer's in it
 	writeFile(t, piModels, `{
   "providers": {
-    "magpie": {
+    "myna": {
       "api": "openai-completions",
-      "apiKey": "magpie",
+      "apiKey": "myna",
       "baseUrl": "http://127.0.0.1:3425/v1",
       "compat": {
         "sendSessionAffinityHeaders": true
@@ -119,14 +119,14 @@ func TestPiTellsAResponsesToolsStrictIsOff(t *testing.T) {
           "name": "Old"
         }
       ],
-      "name": "magpie"
+      "name": "myna"
     }
   }
 }
 `)
-	// the models.json the test writes is one magpie wrote while Pi was
+	// the models.json the test writes is one myna wrote while Pi was
 	// connected: a sync only tends a ListOnly agent's file while it
-	// reads as connected (Connect), and a block magpie never set up is
+	// reads as connected (Connect), and a block myna never set up is
 	// the user's and is left alone
 	if err := pi(home).Connect(); err != nil {
 		t.Fatal(err)
@@ -138,27 +138,27 @@ func TestPiTellsAResponsesToolsStrictIsOff(t *testing.T) {
 	}
 	var f struct {
 		Providers struct {
-			Magpie struct {
+			Myna struct {
 				Models []struct {
 					ID     string         `json:"id"`
 					API    string         `json:"api"`
 					Compat map[string]any `json:"compat"`
 				} `json:"models"`
-			} `json:"magpie"`
+			} `json:"myna"`
 		} `json:"providers"`
 	}
 	if err := json.Unmarshal(b, &f); err != nil {
 		t.Fatalf("%v:\n%s", err, b)
 	}
 	strict := map[string]bool{}
-	for _, m := range f.Providers.Magpie.Models {
+	for _, m := range f.Providers.Myna.Models {
 		if m.API == "openai-responses" && m.Compat["supportsStrictMode"] != true {
 			t.Fatalf("%s is asked on Responses and isn't told strict is off:\n%s", m.ID, b)
 		}
 		strict[m.ID] = m.Compat["supportsStrictMode"] == true
 	}
 	if !strict["resp/gpt-5.5"] {
-		t.Fatalf("no responses model of magpie's carries supportsStrictMode:\n%s", b)
+		t.Fatalf("no responses model of myna's carries supportsStrictMode:\n%s", b)
 	}
 	if strict["relay/glm-4.6"] {
 		t.Fatalf("a Chat model was told strict is off:\n%s", b)

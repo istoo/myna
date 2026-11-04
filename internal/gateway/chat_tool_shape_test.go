@@ -5,11 +5,11 @@ import (
 	"testing"
 
 	"github.com/tidwall/gjson"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // zcodeAsking is jinyue806's reproduction of #2622 as they sent it to
-// magpie, with tool standing in for its tools[0]. The tools are the
+// myna, with tool standing in for its tools[0]. The tools are the
 // shapes the report tried, each of which SenseNova turned away.
 const zcodeAsking = `{
     "model": "sensenova/kimi-k3",

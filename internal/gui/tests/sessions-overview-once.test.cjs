@@ -60,8 +60,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, seen, held));
       await page.clock.install();
-      await page.addInitScript(() => { localStorage.setItem("magpie.usageTab", "sessions"); localStorage.setItem("magpie.sessRange", "today"); });
-      await page.goto("http://magpie.test/?view=usage");
+      await page.addInitScript(() => { localStorage.setItem("myna.usageTab", "sessions"); localStorage.setItem("myna.sessRange", "today"); });
+      await page.goto("http://myna.test/?view=usage");
       await page.locator("#sessAgent").click();
       await page.locator('.sess-menu .pm-item[title="codex"]').click();
       for (let i = 0; i < 100 && !held.length; i++) await new Promise((r) => setTimeout(r, 20));

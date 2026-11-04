@@ -13,7 +13,7 @@ package gateway
 // reasons less on an update than on the same effort at the top, so only a
 // lower effort goes as one: a higher one starts the thread again at it.
 //
-// The agent's own history has no such items, so magpie keeps, for each
+// The agent's own history has no such items, so myna keeps, for each
 // thread on each account and model, the effort it started at and where it
 // put each update, and puts them back on every later request. A history
 // that isn't the last one with more after it (compacted, edited, another
@@ -31,10 +31,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
-// effortThread is a thread's reasoning as magpie sends it.
+// effortThread is a thread's reasoning as myna sends it.
 type effortThread struct {
 	base    string         // the effort at the top, the thread's first
 	updates []effortUpdate // in order of where they go
@@ -69,11 +69,11 @@ var effortThreads = struct {
 const effortThreadKeep = 24 * time.Hour
 
 // takesEffortUpdates: a GPT-6 model, through a ChatGPT account or
-// OpenAI's own API, asked in Responses, with MAGPIE_EFFORT_UPDATES=on — a
+// OpenAI's own API, asked in Responses, with MYNA_EFFORT_UPDATES=on — a
 // preview until it is seen on the real backends: one that took the item
 // and ignored it would leave an effort change doing nothing, unseen.
 func takesEffortUpdates(p provider.Provider, model string) bool {
-	if os.Getenv("MAGPIE_EFFORT_UPDATES") != "on" || p.Base(provider.Responses) == "" {
+	if os.Getenv("MYNA_EFFORT_UPDATES") != "on" || p.Base(provider.Responses) == "" {
 		return false
 	}
 	if !(p.Account != nil && p.Account.Agent == "codex" || p.Account == nil && strings.HasSuffix(p.Host(), "openai.com")) {
@@ -274,7 +274,7 @@ func updateEffort(it []byte) string {
 }
 
 // withEffortUpdated is a Responses request whose last configuration_update
-// asks for effort, the rest as it came: magpie's own pick for the request
+// asks for effort, the rest as it came: myna's own pick for the request
 // goes where the agent's last change of effort went, so the upstream
 // that reads the items isn't asked another by them, and the thread's
 // prefix stays as it was. The body as it is when it has none.

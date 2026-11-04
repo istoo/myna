@@ -26,7 +26,7 @@ func cursorTempDir(t *testing.T) {
 
 func cursorTempCopies(t *testing.T) []string {
 	t.Helper()
-	d, _ := filepath.Glob(filepath.Join(os.TempDir(), "magpie-cursor-*"))
+	d, _ := filepath.Glob(filepath.Join(os.TempDir(), "myna-cursor-*"))
 	return d
 }
 
@@ -157,7 +157,7 @@ func TestCursorEditorCopiedOncePerChange(t *testing.T) {
 // written since the last copy. The store is read where it is, as one more
 // of the readers Cursor's own processes are: nothing is copied, a row
 // Cursor writes is read at once, and Cursor can still write after it. A
-// copy an older magpie left is still swept.
+// copy an older myna left is still swept.
 func TestCursorEditorReadInPlaceWhileLive(t *testing.T) {
 	cursorSetup(t)
 	cursorTempDir(t)
@@ -165,8 +165,8 @@ func TestCursorEditorReadInPlaceWhileLive(t *testing.T) {
 	cursorSnapMin = 0
 	t.Cleanup(func() { cursorSnapMin = minWas })
 
-	// a copy an older magpie left, from before reads were in place
-	left := filepath.Join(os.TempDir(), "magpie-cursor-left")
+	// a copy an older myna left, from before reads were in place
+	left := filepath.Join(os.TempDir(), "myna-cursor-left")
 	if err := os.MkdirAll(left, 0700); err != nil {
 		t.Fatal(err)
 	}
@@ -207,12 +207,12 @@ func TestCursorEditorReadInPlaceWhileLive(t *testing.T) {
 	}
 }
 
-// A copy left by a magpie that was killed mid-read is removed; one a
-// running magpie made a moment ago is not.
+// A copy left by a myna that was killed mid-read is removed; one a
+// running myna made a moment ago is not.
 func TestCursorLeftCopiesSwept(t *testing.T) {
 	cursorTempDir(t)
-	left := filepath.Join(os.TempDir(), "magpie-cursor-left")
-	fresh := filepath.Join(os.TempDir(), "magpie-cursor-fresh")
+	left := filepath.Join(os.TempDir(), "myna-cursor-left")
+	fresh := filepath.Join(os.TempDir(), "myna-cursor-fresh")
 	for _, d := range []string{left, fresh} {
 		if err := os.MkdirAll(d, 0700); err != nil {
 			t.Fatal(err)

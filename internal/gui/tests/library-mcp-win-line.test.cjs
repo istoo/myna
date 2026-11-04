@@ -20,7 +20,7 @@ const servers = [
   { name: "spaced", transport: "stdio", command: "C:\\Program Files\\nodejs\\node.exe", args: ["say \"hi\"", ""], agents: ["claude"] },
 ];
 const fixture = (servers) => ({
-  dir: `${HOME}\\.magpie\\library`, backups: `${HOME}\\.magpie\\backups`, home: HOME,
+  dir: `${HOME}\\.myna\\library`, backups: `${HOME}\\.myna\\backups`, home: HOME,
   agents: [{ id: "claude", name: "Claude Code", icon: "claudecode-color", skills: `${HOME}\\.claude\\skills`, mcp: `${HOME}\\.claude.json` }],
   instructions: { agents: [], sets: [] }, foundServers: [], foundSkills: [], skills: [], projects: [], servers,
 });
@@ -80,15 +80,15 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const ctx = await browser.newContext({ viewport: { width: 980, height: 500 } });
         await ctx.addInitScript((p) => {
           Object.defineProperty(Navigator.prototype, "platform", { get: () => p });
-          try { localStorage.setItem("magpie.libTab", "mcp"); } catch {}
+          try { localStorage.setItem("myna.libTab", "mcp"); } catch {}
         }, platform);
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         const saves = [];
-        await page.route("http://magpie.test/**", server(saves));
-        await page.goto("http://magpie.test/");
+        await page.route("http://myna.test/**", server(saves));
+        await page.goto("http://myna.test/");
         await page.locator('button[data-view="library"]').click();
         await page.locator("#view-library .lib-body:not(.lib-skel) .lib-row").first().waitFor();
         const lines = await page.locator("#view-library .lib-row .sub.mono").evaluateAll((els) => els.map((e) => [e.textContent, e.title]));

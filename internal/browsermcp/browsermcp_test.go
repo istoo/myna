@@ -13,7 +13,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/istoo/myna/internal/gateway"
 )
 
 // Each line goes to the gateway's browser server with this process's
@@ -63,14 +63,14 @@ func TestBridgePassesLinesWithItsSession(t *testing.T) {
 	if err := serve(strings.NewReader(`{"jsonrpc":"2.0","id":7,"method":"tools/list"}`+"\n"), &out, srv.URL); err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(out.String(), `"id":7`) || !strings.Contains(out.String(), "magpie isn't running") {
+	if !strings.Contains(out.String(), `"id":7`) || !strings.Contains(out.String(), "myna isn't running") {
 		t.Fatalf("gateway gone: %q", out.String())
 	}
 }
 
-// `magpie mcp search` passes each line to the gateway's web search server,
+// `myna mcp search` passes each line to the gateway's web search server,
 // with no browser session, and a gateway that can't be reached names
-// Magpie Web Search.
+// Myna Web Search.
 func TestSearchBridgePassesLines(t *testing.T) {
 	var mu sync.Mutex
 	var paths, sessions []string
@@ -98,7 +98,7 @@ func TestSearchBridgePassesLines(t *testing.T) {
 	defer srv.Close()
 	in := strings.NewReader(`{"jsonrpc":"2.0","id":1,"method":"initialize"}` + "\n" +
 		`{"jsonrpc":"2.0","method":"notifications/initialized"}` + "\n" +
-		`{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"web_search","arguments":{"query":"magpie"}}}` + "\n")
+		`{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"web_search","arguments":{"query":"myna"}}}` + "\n")
 	var out bytes.Buffer
 	if err := serveSearch(in, &out, srv.URL); err != nil {
 		t.Fatal(err)
@@ -115,12 +115,12 @@ func TestSearchBridgePassesLines(t *testing.T) {
 	if err := serveSearch(strings.NewReader(`{"jsonrpc":"2.0","id":7,"method":"tools/list"}`+"\n"), &out, srv.URL); err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(out.String(), `"id":7`) || !strings.Contains(out.String(), "Magpie Web Search can't be reached") {
+	if !strings.Contains(out.String(), `"id":7`) || !strings.Contains(out.String(), "Myna Web Search can't be reached") {
 		t.Fatalf("gateway gone: %q", out.String())
 	}
 }
 
-// magpie mcp vision relays each line to the gateway's image recognition
+// myna mcp vision relays each line to the gateway's image recognition
 // server, a relative image path made the agent's folder's on the way
 // (the gateway can't know where the agent runs), and says so by id when
 // the gateway can't be reached (matrix0487 on Discord).
@@ -178,7 +178,7 @@ func TestVisionBridgePassesLines(t *testing.T) {
 	if err := serveVision(strings.NewReader(`{"jsonrpc":"2.0","id":7,"method":"tools/list"}`+"\n"), &out, srv.URL); err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(out.String(), `"id":7`) || !strings.Contains(out.String(), "Magpie Image Recognition can't be reached") {
+	if !strings.Contains(out.String(), `"id":7`) || !strings.Contains(out.String(), "Myna Image Recognition can't be reached") {
 		t.Fatalf("gateway gone: %q", out.String())
 	}
 	if err := RunVision([]string{"extra"}); err == nil {
@@ -223,17 +223,17 @@ func TestImageFromLeavesTheRest(t *testing.T) {
 	}
 }
 
-// Behind magpie's MCP router this one process serves every agent, so a
+// Behind myna's MCP router this one process serves every agent, so a
 // call that names its caller's session in _meta goes on in that session,
 // each caller in a tab of its own; every other message, and a call with
 // no such session, goes in this process's own.
 func TestBridgeTakesTheRoutersCaller(t *testing.T) {
 	own := "stdio-abc"
 	for _, c := range []struct{ body, want string }{
-		{`{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"browser_tabs","_meta":{"magpie/session":"hub-claude-1"}}}`, "hub:hub-claude-1"},
-		{`{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"browser_tabs","_meta":{"magpie/session":" "}}}`, own},
+		{`{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"browser_tabs","_meta":{"myna/session":"hub-claude-1"}}}`, "hub:hub-claude-1"},
+		{`{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"browser_tabs","_meta":{"myna/session":" "}}}`, own},
 		{`{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"browser_tabs"}}`, own},
-		{`{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{"_meta":{"magpie/session":"hub-claude-1"}}}`, own},
+		{`{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{"_meta":{"myna/session":"hub-claude-1"}}}`, own},
 		{`not json`, own},
 	} {
 		if got := callerSession([]byte(c.body), own); got != c.want {

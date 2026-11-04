@@ -16,9 +16,9 @@ import (
 // a process, with the environment of the first call, so the check runs in
 // a child of its own that makes that call here.
 func TestKnownFolderIsExplorers(t *testing.T) {
-	if os.Getenv("MAGPIE_KNOWN_FOLDER_CHILD") != "1" {
+	if os.Getenv("MYNA_KNOWN_FOLDER_CHILD") != "1" {
 		cmd := exec.Command(os.Args[0], "-test.run=^TestKnownFolderIsExplorers$", "-test.v")
-		cmd.Env = append(os.Environ(), "MAGPIE_KNOWN_FOLDER_CHILD=1")
+		cmd.Env = append(os.Environ(), "MYNA_KNOWN_FOLDER_CHILD=1")
 		out, err := cmd.CombinedOutput()
 		t.Logf("%s", out)
 		if err != nil {

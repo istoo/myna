@@ -35,10 +35,10 @@ func TestPanelOpensTheWindowFromTheEdgeNearestTheTray(t *testing.T) {
 			t.Errorf("%s: %q, want %q", c.name, got, c.want)
 		}
 	}
-	if js := panelOpenAtJS("foot"); !strings.Contains(js, `magpiePanelOpenAt("foot")`) {
+	if js := panelOpenAtJS("foot"); !strings.Contains(js, `mynaPanelOpenAt("foot")`) {
 		t.Errorf("foot: %s", js)
 	}
-	if js := panelOpenAtJS(`x");alert(1);("`); !strings.Contains(js, `magpiePanelOpenAt("head")`) {
+	if js := panelOpenAtJS(`x");alert(1);("`); !strings.Contains(js, `mynaPanelOpenAt("head")`) {
 		t.Errorf("only head or foot reach the page: %s", js)
 	}
 }
@@ -64,7 +64,7 @@ func TestPanelToldItsSideWhenShown(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(page), "window.magpiePanelOpenAt = (side)") {
-		t.Error("app.js has no magpiePanelOpenAt")
+	if !strings.Contains(string(page), "window.mynaPanelOpenAt = (side)") {
+		t.Error("app.js has no mynaPanelOpenAt")
 	}
 }

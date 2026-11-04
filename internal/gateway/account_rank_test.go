@@ -3,8 +3,8 @@ package gateway
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // The trace tells each key's place in its provider's own list, as dragged,

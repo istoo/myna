@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/fx"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/fx"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // The Settings page's currency row, and any cost shown before it's ever

@@ -11,10 +11,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/sessions"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/testenv"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/myna/internal/usage"
 )
 
 func TestSessionTraceWirePrivacyAndTokenOwnership(t *testing.T) {
@@ -22,7 +22,7 @@ func TestSessionTraceWirePrivacyAndTokenOwnership(t *testing.T) {
 	secret := "sk-ant-api03-" + strings.Repeat("Q7x", 30)
 	for _, bodies := range []bool{false, true} {
 		cfg := settings.OTel{Bodies: bodies}
-		model := sessions.TraceSpan{Agent: "pi", Session: "session", Turn: "turn", ID: "1111111111111111", Parent: "2222222222222222", Name: "model m", Kind: "generation", Model: "m", Provider: "magpie", Start: at, End: at.Add(time.Second), Input: `{"api_key":"` + secret + `","prompt":"PRIVATE-PROMPT"}`, Tokens: sessions.Tokens{Input: 10, Output: 5}}
+		model := sessions.TraceSpan{Agent: "pi", Session: "session", Turn: "turn", ID: "1111111111111111", Parent: "2222222222222222", Name: "model m", Kind: "generation", Model: "m", Provider: "myna", Start: at, End: at.Add(time.Second), Input: `{"api_key":"` + secret + `","prompt":"PRIVATE-PROMPT"}`, Tokens: sessions.Tokens{Input: 10, Output: 5}}
 		tool := model
 		tool.ID = "3333333333333333"
 		tool.Kind = "tool"
@@ -118,8 +118,8 @@ func TestOTelSessionWatcherExportsNewInteractionWithoutGatewayDuplicates(t *test
 	}))
 	defer collector.Close()
 	otelConfig(t, settings.OTel{Endpoint: collector.URL})
-	t.Setenv("MAGPIE_OTEL_SESSIONS", "true")
-	t.Setenv("MAGPIE_OTEL_BODIES", "false")
+	t.Setenv("MYNA_OTEL_SESSIONS", "true")
+	t.Setenv("MYNA_OTEL_BODIES", "false")
 	stop := StartOTel()
 	t.Cleanup(stop)
 	now := time.Now()
@@ -129,7 +129,7 @@ func TestOTelSessionWatcherExportsNewInteractionWithoutGatewayDuplicates(t *test
 	}
 	for _, o := range []map[string]any{
 		{"type": "message", "id": "new-user", "timestamp": now, "message": map[string]any{"role": "user", "content": "PRIVATE-NEW"}},
-		{"type": "message", "id": "assistant", "parentId": "new-user", "timestamp": now.Add(time.Millisecond), "message": map[string]any{"role": "assistant", "timestamp": now.UnixMilli(), "model": "model", "provider": "magpie", "stopReason": "stop", "content": "PRIVATE-REPLY", "usage": map[string]int{"input": 10, "output": 5}}},
+		{"type": "message", "id": "assistant", "parentId": "new-user", "timestamp": now.Add(time.Millisecond), "message": map[string]any{"role": "assistant", "timestamp": now.UnixMilli(), "model": "model", "provider": "myna", "stopReason": "stop", "content": "PRIVATE-REPLY", "usage": map[string]int{"input": 10, "output": 5}}},
 		{"type": "custom", "parentId": "assistant", "customType": "timing-final", "timestamp": now.Add(2 * time.Millisecond), "data": map[string]any{"totalMs": 2, "endAt": now.Add(2 * time.Millisecond).UnixMilli()}},
 	} {
 		b, _ := json.Marshal(o)
@@ -200,7 +200,7 @@ func TestSessionTracingRetainsRemoteGatewayTraces(t *testing.T) {
 	}))
 	defer collector.Close()
 	otelConfig(t, settings.OTel{Endpoint: collector.URL})
-	t.Setenv("MAGPIE_OTEL_SESSIONS", "true")
+	t.Setenv("MYNA_OTEL_SESSIONS", "true")
 	stop := StartOTel()
 	t.Cleanup(stop)
 	usage.Append(Record{Time: time.Now(), Agent: "pi", Via: "office", Model: "remote-model", Input: 10, Status: 200})
@@ -217,7 +217,7 @@ func TestSessionTracingRetainsRemoteGatewayTraces(t *testing.T) {
 
 func TestSessionTracingSuppressesSupportedLocalClientsOnly(t *testing.T) {
 	otelConfig(t, settings.OTel{Endpoint: "http://localhost:4318"})
-	t.Setenv("MAGPIE_OTEL_SESSIONS", "true")
+	t.Setenv("MYNA_OTEL_SESSIONS", "true")
 	e := newOTelExporter()
 	previous := otel.Swap(e)
 	defer func() { otel.Store(previous); e.cancel() }()
@@ -306,7 +306,7 @@ func TestSessionObservationUpdatesDoNotDuplicateMetrics(t *testing.T) {
 
 func TestSessionTracingMatchesNativeConversation(t *testing.T) {
 	otelConfig(t, settings.OTel{Endpoint: "http://localhost:4318"})
-	t.Setenv("MAGPIE_OTEL_SESSIONS", "true")
+	t.Setenv("MYNA_OTEL_SESSIONS", "true")
 	e := newOTelExporter()
 	previous := otel.Swap(e)
 	defer func() { otel.Store(previous); e.cancel() }()
@@ -359,7 +359,7 @@ func TestSessionTracingMatchesNativeConversation(t *testing.T) {
 
 func TestSessionTracingRetainsUnrepresentedCalls(t *testing.T) {
 	otelConfig(t, settings.OTel{Endpoint: "http://localhost:4318"})
-	t.Setenv("MAGPIE_OTEL_SESSIONS", "true")
+	t.Setenv("MYNA_OTEL_SESSIONS", "true")
 	e := newOTelExporter()
 	previous := otel.Swap(e)
 	defer func() { otel.Store(previous); e.cancel() }()

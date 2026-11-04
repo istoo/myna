@@ -5,12 +5,12 @@ import (
 	"os"
 	"testing"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/settings"
 )
 
 func TestReadOnlyLANMigrationDoesNotBlockSettingsOrKeys(t *testing.T) {
 	sandboxHome(t)
-	s := settings.Settings{LAN: true, LANKey: "sk-magpie-fixture-readonly"}
+	s := settings.Settings{LAN: true, LANKey: "sk-myna-fixture-readonly"}
 	if err := settings.Save(s); err != nil {
 		t.Fatal(err)
 	}

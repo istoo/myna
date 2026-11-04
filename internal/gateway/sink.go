@@ -12,7 +12,7 @@ package gateway
 // the accounts, where without Sink it goes back to the first each time
 // that one's rest ends.
 //
-// What sank is remembered in memory, until magpie restarts — or until it
+// What sank is remembered in memory, until myna restarts — or until it
 // sinks again, which sends it to the back once more, or its rest is
 // lifted by hand (Unrest), which puts it back in its place. Nothing else changes:
 // a resting one still waits behind every one ready (restLast), an account
@@ -25,7 +25,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 type sinking struct {
@@ -69,7 +69,7 @@ func unsinkAll(key string) {
 }
 
 // sunkAt is when a candidate sank, if it did: its model alone, as
-// another magpie's model rate limited there sinks (remoteModelRest,
+// another myna's model rate limited there sinks (remoteModelRest,
 // #2167), or its whole key or account.
 func sunkAt(c candidate) (sinking, bool) {
 	sunk.Lock()

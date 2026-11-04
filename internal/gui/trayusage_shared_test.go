@@ -6,10 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
-// antigravityStarter is an Antigravity Starter account's card as magpie
+// antigravityStarter is an Antigravity Starter account's card as myna
 // read it (quotas.json, 10-31, the account renamed): a window for each
 // model, and the two pools' 7 days, which routing sets aside; no window
 // over the whole account.

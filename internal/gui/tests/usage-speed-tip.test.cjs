@@ -12,7 +12,7 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 const reader = require("./reader.cjs");
 
-const assets = process.env.MAGPIE_SPEED_TIP_ASSETS || path.resolve(__dirname, "../assets");
+const assets = process.env.MYNA_SPEED_TIP_ASSETS || path.resolve(__dirname, "../assets");
 const now = Date.now();
 const H = 3600e3;
 const hour = (i) => new Date(Math.floor(now / H) * H - i * H).toISOString();
@@ -77,7 +77,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         p.setDefaultNavigationTimeout(60000);
         p.on("pageerror", (e) => errors.push(e.message));
         await p.route("**/*", server(lang));
-        await p.goto("http://magpie.test/");
+        await p.goto("http://myna.test/");
         await p.locator('[data-view="usage"]').first().click();
         await p.locator(":is(#usageTab .opt, .nav-s):visible").nth(1).click();
         await p.locator("#ledWrap .led tbody tr").first().waitFor();

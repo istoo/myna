@@ -1,6 +1,6 @@
 // Package settingsapi is what the Settings page's save writes: the fields
 // POST /api/settings takes from the page, how a value is checked, and the
-// save itself. The window's handler and `magpie settings` both save through
+// save itself. The window's handler and `myna settings` both save through
 // Apply, so a value the CLI sets is checked and kept exactly as one the
 // page sets (#4745).
 package settingsapi
@@ -14,14 +14,14 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // Keys are the settings POST /api/settings saves from what it is sent, by
-// their JSON names, in the order `magpie settings list` shows them. Every
+// their JSON names, in the order `myna settings list` shows them. Every
 // other field of settings.Settings is carried from the file (Merge), set
 // by a route of its own or kept by settings.Save. TestKeysAreWhatTheSaveWrites
 // fails when a field the save writes is missing here, or one here isn't
@@ -53,7 +53,7 @@ var Keys = []string{
 }
 
 // Choices are the values a setting with a closed set takes, for
-// `magpie settings list` to name: settings' own lists, which settings.Save
+// `myna settings list` to name: settings' own lists, which settings.Save
 // checks a saved value against (a value outside them is refused there,
 // from the window as from the CLI). A setting's "" is its default.
 var Choices = map[string][]string{
@@ -215,7 +215,7 @@ func Merge(body []byte, cur settings.Settings, web bool) (settings.Settings, err
 	if _, sent := fields["noBird"]; !sent {
 		in.NoBird = cur.NoBird
 	}
-	// nor whether a Quit asks first while agents go through magpie
+	// nor whether a Quit asks first while agents go through myna
 	// (zhujiu on Discord), which the Quit question sets too
 	if _, sent := fields["quitNoAsk"]; !sent {
 		in.QuitNoAsk = cur.QuitNoAsk
@@ -271,7 +271,7 @@ func Merge(body []byte, cur settings.Settings, web bool) (settings.Settings, err
 	in.ProxyCustom = cur.ProxyCustom                   // set by settings.Save from the proxy, never by the page
 	in.RequestArchive = cur.RequestArchive             // the Gateway page's, set on its own
 	in.RequestArchiveMaxMB = cur.RequestArchiveMaxMB   // in settings.json only
-	in.ClaudeRunsMost = cur.ClaudeRunsMost             // magpie claude-code runs, or settings.json (#2956)
+	in.ClaudeRunsMost = cur.ClaudeRunsMost             // myna claude-code runs, or settings.json (#2956)
 	in.GatewayConversations = cur.GatewayConversations // Sessions' explicit recording consent
 	in.RedactRules = cur.RedactRules                   // the masking rules, set on their own
 	in.RedactModel = cur.RedactModel                   // set on its own (privacy-model)
@@ -296,7 +296,7 @@ func Merge(body []byte, cur settings.Settings, web bool) (settings.Settings, err
 	in.UsageAgentsHidden = cur.UsageAgentsHidden
 	// and the allowance cards the Usage page's Overview leaves out, set there
 	in.UsageCardsHidden = cur.UsageCardsHidden
-	// and the names models' usage is counted under (magpie model alias)
+	// and the names models' usage is counted under (myna model alias)
 	in.UsageAliases = cur.UsageAliases
 	// and the clears of usage made on the Usage page
 	in.UsageCleared = cur.UsageCleared
@@ -350,7 +350,7 @@ func Merge(body []byte, cur settings.Settings, web bool) (settings.Settings, err
 	in.DockSettled = cur.DockSettled
 	// the version the Update pill was hidden for, set from the pill
 	in.UpdateSkip = cur.UpdateSkip
-	// the GitHub mirror updates come through, set by magpie update mirror
+	// the GitHub mirror updates come through, set by myna update mirror
 	in.UpdateMirror = cur.UpdateMirror
 	// gateway mode, set on its own (gateway-mode)
 	in.GatewayMode = cur.GatewayMode

@@ -14,25 +14,25 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/pii"
-	"github.com/yetone/magpie/internal/redact"
+	"github.com/istoo/myna/internal/pii"
+	"github.com/istoo/myna/internal/redact"
 )
 
 // TestLiveHistoryCost measures what the default's local model (AstrLink
 // Guard) costs on a long Codex history: CPU seconds and wall time per
 // request, background work included. It needs the model's files, in the
-// folder MAGPIE_GUARD_FILES names (model_int8.onnx, model_int8.onnx_data,
+// folder MYNA_GUARD_FILES names (model_int8.onnx, model_int8.onnx_data,
 // tokenizer.json), and is skipped without; nothing is downloaded.
 func TestLiveHistoryCost(t *testing.T) {
-	src := os.Getenv("MAGPIE_GUARD_FILES")
+	src := os.Getenv("MYNA_GUARD_FILES")
 	if src == "" {
-		t.Skip("MAGPIE_GUARD_FILES names no folder with AstrLink Guard's files")
+		t.Skip("MYNA_GUARD_FILES names no folder with AstrLink Guard's files")
 	}
 	// testenv's sandbox: the model's folder there, never the user's
 	if os.Getenv("XDG_CACHE_HOME") == "" {
 		t.Fatal("no sandbox XDG_CACHE_HOME")
 	}
-	dst := filepath.Join(os.Getenv("XDG_CACHE_HOME"), "magpie", "astrlink-guard", "7216b6a3b897")
+	dst := filepath.Join(os.Getenv("XDG_CACHE_HOME"), "myna", "astrlink-guard", "7216b6a3b897")
 	if err := os.MkdirAll(dst, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -132,7 +132,7 @@ func liveTurns(t *testing.T, n int) []liveTurn {
 			b = b[:12000]
 		}
 		rel, _ := filepath.Rel(root, f)
-		tu := liveTurn{cmd: fmt.Sprintf(`{"command":["bash","-lc","sed -n 1,400p %s"],"workdir":"/home/dev/magpie"}`, rel),
+		tu := liveTurn{cmd: fmt.Sprintf(`{"command":["bash","-lc","sed -n 1,400p %s"],"workdir":"/home/dev/myna"}`, rel),
 			output: string(b), answer: paras[i%len(paras)]}
 		if len(tu.answer) > 3000 {
 			tu.answer = tu.answer[:3000]
@@ -148,7 +148,7 @@ func liveTurns(t *testing.T, n int) []liveTurn {
 // codexBody is a Responses request with turns as its history.
 func codexBody(turns []liveTurn) []byte {
 	var in []any
-	in = append(in, map[string]any{"type": "message", "role": "user", "content": []any{map[string]any{"type": "input_text", "text": "<environment_context>\n  <cwd>/home/dev/magpie</cwd>\n  <shell>bash</shell>\n</environment_context>"}}})
+	in = append(in, map[string]any{"type": "message", "role": "user", "content": []any{map[string]any{"type": "input_text", "text": "<environment_context>\n  <cwd>/home/dev/myna</cwd>\n  <shell>bash</shell>\n</environment_context>"}}})
 	for i, tu := range turns {
 		if tu.user != "" {
 			in = append(in, map[string]any{"type": "message", "role": "user", "content": []any{map[string]any{"type": "input_text", "text": tu.user}}})

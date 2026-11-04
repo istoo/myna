@@ -8,9 +8,9 @@ import (
 )
 
 // A routing group shared as text (laincatx on X): one group's routing,
-// rules and members, copied from one magpie and pasted into another. It
+// rules and members, copied from one myna and pasted into another. It
 // says what it is (ShareMark) and in which format (ShareVersion), so a
-// magpie can tell it from any other text and one made by a newer magpie
+// myna can tell it from any other text and one made by a newer myna
 // from one it can read.
 const (
 	ShareMark    = "routing-group"
@@ -19,12 +19,12 @@ const (
 
 // SharedGroup is the text a group is shared as.
 type SharedGroup struct {
-	Magpie  string `json:"magpie"`
+	Myna  string `json:"magpie"`
 	Version int    `json:"version"`
 	Group   Group  `json:"group"`
 }
 
-// ShareGroup is group id as text to paste into another magpie: its
+// ShareGroup is group id as text to paste into another myna: its
 // members as it names them, its patterns, routing, rules, classifier,
 // effort, context, levels, fast and off members. A group holds no key or
 // account of its own, only provider/model ids, so nothing secret goes with
@@ -52,15 +52,15 @@ func ShareGroup(id string) (string, error) {
 	g.Members, g.Match = ownMembers(g)
 	g.Matched = nil
 	g.Auto, g.Hidden, g.Disabled = false, false, false
-	g.Accounts = nil // this magpie's accounts: another has its own
+	g.Accounts = nil // this myna's accounts: another has its own
 	g.Rules = slices.DeleteFunc(g.Rules, Rule.ByFolder)
-	out, err := json.Marshal(SharedGroup{Magpie: ShareMark, Version: ShareVersion, Group: g})
+	out, err := json.Marshal(SharedGroup{Myna: ShareMark, Version: ShareVersion, Group: g})
 	return string(out), err
 }
 
 // ShareError is why a text can't be imported as a group, by Why, for the
 // GUI to say in the reader's language: "not_shared" (no group shared from
-// magpie), "newer" (a format past ShareVersion, in Format), "no_format",
+// myna), "newer" (a format past ShareVersion, in Format), "no_format",
 // "unreadable" (Err), "none_here" (none of its models here, in Models).
 type ShareError struct {
 	Why    string
@@ -72,15 +72,15 @@ type ShareError struct {
 func (e *ShareError) Error() string {
 	switch e.Why {
 	case "newer":
-		return fmt.Sprintf("this group was shared from a newer magpie (format %d): update magpie to import it", e.Format)
+		return fmt.Sprintf("this group was shared from a newer myna (format %d): update myna to import it", e.Format)
 	case "no_format":
 		return "this shared group says no format it is in: copy it again with Copy to share"
 	case "unreadable":
 		return fmt.Sprintf("this shared group can't be read: %v", e.Err)
 	case "none_here":
-		return "none of the group's models is in your magpie: " + strings.Join(e.Models, ", ")
+		return "none of the group's models is in your myna: " + strings.Join(e.Models, ", ")
 	}
-	return "this is not a routing group shared from magpie: copy one with Copy to share in a group's menu"
+	return "this is not a routing group shared from myna: copy one with Copy to share in a group's menu"
 }
 
 func (e *ShareError) Unwrap() error { return e.Err }
@@ -89,10 +89,10 @@ func (e *ShareError) Unwrap() error { return e.Err }
 type Imported struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
-	// Missing are the models and groups the text names that this magpie
+	// Missing are the models and groups the text names that this myna
 	// has none of, left out of the group: members, and the classifier.
 	Missing []string `json:"missing,omitempty"`
-	// Instead are the members this magpie has under another provider: the
+	// Instead are the members this myna has under another provider: the
 	// same model (AutoGroupOf), "shared → here".
 	Instead []string `json:"instead,omitempty"`
 	// Rules is how many of the group's rules were left out with the
@@ -114,11 +114,11 @@ func ReadShared(text string) (SharedGroup, error) {
 		return s, notOne
 	}
 	var probe struct {
-		Magpie  string          `json:"magpie"`
+		Myna  string          `json:"magpie"`
 		Version int             `json:"version"`
 		Group   json.RawMessage `json:"group"`
 	}
-	if err := json.Unmarshal([]byte(text[start:end+1]), &probe); err != nil || probe.Magpie != ShareMark {
+	if err := json.Unmarshal([]byte(text[start:end+1]), &probe); err != nil || probe.Myna != ShareMark {
 		return s, notOne
 	}
 	switch {
@@ -130,21 +130,21 @@ func ReadShared(text string) (SharedGroup, error) {
 	if err := json.Unmarshal(probe.Group, &s.Group); err != nil {
 		return s, &ShareError{Why: "unreadable", Err: err}
 	}
-	s.Magpie, s.Version = probe.Magpie, probe.Version
+	s.Myna, s.Version = probe.Myna, probe.Version
 	return s, nil
 }
 
 // ImportGroup adds the group a shared text holds as a group of the
 // user's, named as it was shared and numbered past a name or id in use,
 // so it never replaces a group there is. It is listed last. A member this
-// magpie has no provider of is the same model under one it has, where it
+// myna has no provider of is the same model under one it has, where it
 // serves it (Instead), else left out (Missing), and with it the rules that
 // send to it and its place among the fast and off members. Nothing is
 // added when none of its members is left.
 func ImportGroup(text string) (Imported, error) { return importGroup(text, false) }
 
 // ImportGroupOver is ImportGroup that, when the text's group id is a group
-// of the user's own (not one magpie found, not one removed), replaces that
+// of the user's own (not one myna found, not one removed), replaces that
 // group by what the text holds, in its place in the list, rather than
 // adding another. Only that group changes. What the text can't carry stays
 // as the user has it: the group's accounts, its rules that hold by a
@@ -158,7 +158,7 @@ func importGroup(text string, over bool) (Imported, error) {
 		return Imported{}, err
 	}
 	g := s.Group
-	g.Accounts = nil // another magpie's accounts, never this one's
+	g.Accounts = nil // another myna's accounts, never this one's
 	entries := providerEntries()
 	all := Groups()
 	var res Imported
@@ -221,13 +221,13 @@ func importGroup(text string, over bool) (Imported, error) {
 	in := append(slices.Clone(g.Members), matchesIn(entries, g)...)
 	var rules []Rule
 	for _, r := range g.Rules {
-		// each model it sends to as this magpie has it; one it hasn't is
+		// each model it sends to as this myna has it; one it hasn't is
 		// left out of the rule, and a rule left with none goes
 		r.MapUses(func(u string) string {
 			use := here[strings.TrimSpace(u)]
 			if _, named := here[strings.TrimSpace(u)]; !named && !IsPattern(u) {
 				// a rule may send to a model a pattern matches: one this
-				// magpie has, or none
+				// myna has, or none
 				use = memberHere(entries, all, u)
 			}
 			if !slices.Contains(in, use) {
@@ -288,12 +288,12 @@ func importGroup(text string, over bool) (Imported, error) {
 	return res, nil
 }
 
-// memberHere is what member m of a shared group is in this magpie: m
+// memberHere is what member m of a shared group is in this myna: m
 // itself when it has the provider (or the group), else the same model
 // (AutoGroupOf) under the first provider here that serves it, in the
 // Providers order; "" when none does. A member's own effort goes with it.
 func memberHere(entries []Entry, all []Group, m string) string {
-	m = CanonicalRef(strings.TrimPrefix(strings.TrimSpace(m), "magpie/"))
+	m = CanonicalRef(strings.TrimPrefix(strings.TrimSpace(m), "myna/"))
 	model, effort := memberEffortIn(entries, m)
 	if gid, ok := strings.CutPrefix(model, GroupPrefix); ok {
 		if slices.ContainsFunc(all, func(g Group) bool { return g.ID == gid && !g.Hidden }) {

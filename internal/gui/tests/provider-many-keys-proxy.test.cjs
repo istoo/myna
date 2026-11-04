@@ -1,6 +1,6 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // A provider with hundreds of keys (@NetRozee on X: a thousand keys on a
-// custom endpoint froze magpie): its editor's per-key proxy lines fold as
+// custom endpoint froze myna): its editor's per-key proxy lines fold as
 // its Accounts list does. Folded, the first five and the keys with a proxy
 // of their own, and All 300 keys; opened, a filter and a page of 50 lines
 // and how many more. A key picked in the filter keeps its pick folded
@@ -70,7 +70,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       const posts = [];
       await page.route("**/*", serve(lang, posts));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://myna.test/?view=providers");
       await page.locator(".row.provider", { hasText: "Relay" }).first().click();
       // Proxy is under Advanced, open already when one is set
       { const adv = page.locator(".editor details.advanced"); await adv.waitFor({ state: "attached" }); if (!(await adv.evaluate((d) => d.open))) await adv.locator(":scope > summary").click(); }

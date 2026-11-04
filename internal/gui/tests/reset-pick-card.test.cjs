@@ -25,7 +25,7 @@ const quotas = [
     resets: { count: 3, until: soon, each: [{ until: soon, id: "cr-soon" }, { until: late, id: "cr-late" }, { id: "cr-never" }] } },
   { provider: "codex", name: "Codex", icon: "codex-color", user: "one@example.com", plan: "Plus", windows,
     resets: { count: 1, until: soon, each: [{ until: soon, id: "cr-only" }] } },
-  // resets counted, not listed with their ids (an older magpie's reading)
+  // resets counted, not listed with their ids (an older myna's reading)
   { provider: "codex", name: "Codex", icon: "codex-color", user: "old@example.com", plan: "Plus", windows,
     resets: { count: 2, until: soon, each: [{ until: soon }, { until: late }] } },
 ];
@@ -164,8 +164,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         }
       };
 
-      for (const width of [900, 390]) await run("http://magpie.test/?view=usage", { width, height: 800 }, ".quota-resets button");
-      await run("http://magpie.test/?mode=panel", { width: 440, height: 700 }, ".pq-use");
+      for (const width of [900, 390]) await run("http://myna.test/?view=usage", { width, height: 800 }, ".quota-resets button");
+      await run("http://myna.test/?mode=panel", { width: 440, height: 700 }, ".pq-use");
       assert.deepEqual(errors, []);
     });
   }

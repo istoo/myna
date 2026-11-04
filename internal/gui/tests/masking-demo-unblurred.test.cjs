@@ -56,7 +56,7 @@ async function open(engine, lang, width, opts = {}) {
   const errors = [], fetched = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", serve(lang, opts.theme || "light", fetched, opts.settings, opts.boot));
-  await page.goto("http://magpie.test/?view=masking");
+  await page.goto("http://myna.test/?view=masking");
   await page.locator("#mdRow").waitFor();
   return { browser, page, errors, fetched };
 }

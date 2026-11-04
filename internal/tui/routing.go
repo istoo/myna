@@ -4,7 +4,7 @@ package tui
 // go in, how requests spread over them and how long a conversation stays,
 // and the rules that send a turn to one of them first, with the classifier
 // that tells a message's intent. What the app's Routing view does, in the
-// terminal; the rules are typed as magpie group rule add takes them.
+// terminal; the rules are typed as myna group rule add takes them.
 
 import (
 	"fmt"
@@ -14,8 +14,8 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/agent"
+	"github.com/istoo/myna/internal/provider"
 )
 
 func (m *model) reloadGroups() {
@@ -41,7 +41,7 @@ func (m *model) reloadGroups() {
 }
 
 // memberOff is whether a member of a group is a model of a provider
-// switched off: the group keeps it (one magpie found too, #2671) and the
+// switched off: the group keeps it (one myna found too, #2671) and the
 // gateway skips it until the provider is on again.
 func (m model) memberOff(id string) bool {
 	if provider.IsGroupRef(id) {
@@ -51,7 +51,7 @@ func (m model) memberOff(id string) bool {
 	return ok && m.provOff[pid]
 }
 
-// listedMembers are the members a group's line lists: of a group magpie
+// listedMembers are the members a group's line lists: of a group myna
 // found, those its providers being on lets it send to (XYenon on Discord:
 // a provider switched off was still listed in it), as every model list
 // leaves a provider switched off out, and how many it left out; all of
@@ -118,7 +118,7 @@ func staysName(v string) string {
 	return "stays auto"
 }
 
-// saveGroup changes one group and saves it: one magpie found becomes the
+// saveGroup changes one group and saves it: one myna found becomes the
 // user's.
 func saveGroup(id string, change func(*provider.Group) error, done string) tea.Cmd {
 	return func() tea.Msg {
@@ -228,7 +228,7 @@ func (m model) updateGroups(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 // one with its first model.
 type pickMsg struct{ group, newGroup string }
 
-// memberOptions is every model and group magpie has, but those in skip.
+// memberOptions is every model and group myna has, but those in skip.
 func memberOptions(skip []string, self string) []agent.Option {
 	var out []agent.Option
 	// a group is of decision models alone, asked at /v1/systemone, or of
@@ -265,11 +265,11 @@ func memberOptions(skip []string, self string) []agent.Option {
 func (m *model) openMemberPicker(p pickMsg) {
 	var skip []string
 	crumbs := []string{"routing", p.newGroup, "first model"}
-	empty := "magpie has no models yet · add a provider first"
+	empty := "myna has no models yet · add a provider first"
 	if p.group != "" {
 		g, _ := findGroup(p.group)
 		skip, crumbs = g.Members, []string{"routing", g.Name, "add a model"}
-		empty = "every model magpie has is in it"
+		empty = "every model myna has is in it"
 	}
 	m.pk = picker{
 		crumbs: crumbs,
@@ -322,7 +322,7 @@ func (m *model) openClassifier(g provider.Group) {
 		input:  newInput("filter models · best a small fast one without reasoning"),
 		items:  list(),
 		relist: list,
-		empty:  "magpie has no models yet · add a provider first",
+		empty:  "myna has no models yet · add a provider first",
 		onPick: func(id string) tea.Cmd {
 			return saveGroup(g.ID, func(g *provider.Group) error { g.Classifier = id; return nil }, g.Name+" classifies with "+id)
 		},
@@ -486,7 +486,7 @@ func (m model) updateGroup(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		in := newInput("a tag, e.g. relay")
 		in.SetValue(g.Family)
 		m.openAsk(ask{crumbs: []string{"routing", g.Name, "family"}, input: in, empty: true,
-			hint: "agents can be shown only some families: magpie visible <agent> <family>",
+			hint: "agents can be shown only some families: myna visible <agent> <family>",
 			onEnter: func(v string) tea.Cmd {
 				return saveGroup(g.ID, func(g *provider.Group) error { g.Family = v; return nil }, g.Name+" family "+dash(v))
 			}})
@@ -617,7 +617,7 @@ func (m model) viewGroups() string {
 	for i := start; i < min(len(m.groups), start+visible); i++ {
 		g := m.groups[i]
 		if i == m.shown {
-			b.WriteString("\n" + pad + "  " + sFaint.Render("removed · found by magpie, taken away: u brings one back") + "\n")
+			b.WriteString("\n" + pad + "  " + sFaint.Render("removed · found by myna, taken away: u brings one back") + "\n")
 		}
 		marker, name := "  ", sName.Render(padRight(dash(g.Name), nameW))
 		if g.Hidden {
@@ -677,7 +677,7 @@ func (m model) viewGroup() string {
 		head = append(head, "family "+g.Family)
 	}
 	if g.Auto {
-		head = append(head, "found by magpie: a change makes it yours")
+		head = append(head, "found by myna: a change makes it yours")
 	}
 	b.WriteString(pad + "  " + sMuted.Render(strings.Join(head, " · ")) + "\n\n")
 	b.WriteString(pad + "  " + sFaint.Render("models · the first that can take a request gets it") + "\n")

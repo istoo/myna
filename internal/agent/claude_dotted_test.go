@@ -6,8 +6,8 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/myna/internal/provider"
 )
 
 func claudeDottedHome(t *testing.T, p provider.Provider, settings string) (string, string) {
@@ -29,9 +29,9 @@ func claudeDottedHome(t *testing.T, p provider.Provider, settings string) (strin
 // misteer_ti. on Discord: Claude Code 2.1.296 reads a relay's
 // relay/claude-opus-4.6-us as Claude Opus 4 (retired, budget thinking,
 // 32000 output, no effort), and reads relay/claude-opus-4-6-us as Opus 4.6.
-// So every model magpie writes into Claude Code's settings (the main model,
+// So every model myna writes into Claude Code's settings (the main model,
 // the tiers, the small fast model, the subagents, /model's picker) names a
-// dotted Claude version with dashes; magpie reads that spelling back as the
+// dotted Claude version with dashes; myna reads that spelling back as the
 // model it serves, so the page shows the model picked, and another vendor's
 // id and the user's own values are as they are.
 func TestClaudeDottedVersionsGoInDashed(t *testing.T) {
@@ -47,7 +47,7 @@ func TestClaudeDottedVersionsGoInDashed(t *testing.T) {
 			t.Fatalf("%s=%s: %v", key, v, err)
 		}
 	}
-	// no model magpie wrote has a dotted Claude version
+	// no model myna wrote has a dotted Claude version
 	noDots := func() {
 		t.Helper()
 		vals := []string{model()}
@@ -67,7 +67,7 @@ func TestClaudeDottedVersionsGoInDashed(t *testing.T) {
 		}
 	}
 
-	// as the page applies it, so it is the model magpie knows it set
+	// as the page applies it, so it is the model myna knows it set
 	if err := a.Apply("model", "relay/claude-opus-4.6-us"); err != nil {
 		t.Fatal(err)
 	}
@@ -80,7 +80,7 @@ func TestClaudeDottedVersionsGoInDashed(t *testing.T) {
 		t.Fatalf("read back: %v", v)
 	}
 	if d := a.Drift(); d != nil {
-		t.Fatalf("drift after magpie's own write: %v", d)
+		t.Fatalf("drift after myna's own write: %v", d)
 	}
 	// /model lists them as Claude Code takes them, another vendor's as it is
 	var picker struct{ Options []struct{ Model string } }
@@ -141,7 +141,7 @@ func TestClaudeDottedVersionsGoInDashed(t *testing.T) {
 	}
 	set("model", "relay/claude-opus-4.6-us")
 
-	// what an older magpie wrote dotted goes in dashed at the next look
+	// what an older myna wrote dotted goes in dashed at the next look
 	if err := edit.SetJSON(path, edit.KV{Path: "model", Value: "relay/claude-opus-4.6-us"},
 		edit.KV{Path: "env.ANTHROPIC_DEFAULT_OPUS_MODEL", Value: "relay/claude-opus-4.6-us"}); err != nil {
 		t.Fatal(err)
@@ -150,7 +150,7 @@ func TestClaudeDottedVersionsGoInDashed(t *testing.T) {
 		t.Fatal(err)
 	}
 	if model() != "relay/claude-opus-4-6-us" || env("ANTHROPIC_DEFAULT_OPUS_MODEL") != "relay/claude-opus-4-6-us" {
-		t.Fatalf("an older magpie's dotted ids:\n%s", readFile(path))
+		t.Fatalf("an older myna's dotted ids:\n%s", readFile(path))
 	}
 	noDots()
 

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/istoo/myna/internal/edit"
 )
 
 // claudeStatusAt makes the status line written run exe.
@@ -17,7 +17,7 @@ func claudeStatusAt(t *testing.T, exe string) {
 }
 
 // steven_4422 on Discord: the 5h and 7d use in Claude Code. The Agents
-// page's switch writes settings.json's statusLine to run this magpie's
+// page's switch writes settings.json's statusLine to run this myna's
 // statusline by its full path, beside what else is there, and takes it
 // out again; nothing else in the file moves.
 func TestClaudeStatusLineSwitch(t *testing.T) {
@@ -27,7 +27,7 @@ func TestClaudeStatusLineSwitch(t *testing.T) {
 }
 `
 	home, path := claudeSettings(t, before)
-	claudeStatusAt(t, "/Applications/Magpie.app/Contents/MacOS/magpie")
+	claudeStatusAt(t, "/Applications/Myna.app/Contents/MacOS/myna")
 	a := claude(home)
 	f := a.Field("statusline")
 	if f == nil {
@@ -43,7 +43,7 @@ func TestClaudeStatusLineSwitch(t *testing.T) {
 		t.Fatal(err)
 	}
 	get := func(k string) string { v, _ := edit.GetJSON(path, k); return v }
-	if get("statusLine.type") != "command" || get("statusLine.command") != "/Applications/Magpie.app/Contents/MacOS/magpie statusline" ||
+	if get("statusLine.type") != "command" || get("statusLine.command") != "/Applications/Myna.app/Contents/MacOS/myna statusline" ||
 		get("model") != "opus" || get("env.FOO") != "1" {
 		t.Fatalf("on:\n%s", readFile(path))
 	}
@@ -74,11 +74,11 @@ func TestClaudeStatusLineLeavesTheUsers(t *testing.T) {
 }
 `
 	home, path := claudeSettings(t, theirs)
-	claudeStatusAt(t, "/usr/local/bin/magpie")
+	claudeStatusAt(t, "/usr/local/bin/myna")
 	a := claude(home)
 	f := a.Field("statusline")
 	if f.Get() != "" {
-		t.Fatalf("the user's read as magpie's: %q", f.Get())
+		t.Fatalf("the user's read as myna's: %q", f.Get())
 	}
 	if opts := f.Options(nil); opts != nil {
 		t.Fatalf("offered over the user's own: %+v", opts)
@@ -97,18 +97,18 @@ func TestClaudeStatusLineLeavesTheUsers(t *testing.T) {
 	}
 }
 
-// Disconnect takes magpie's status line out with the rest of magpie.
+// Disconnect takes myna's status line out with the rest of myna.
 func TestClaudeStatusLineGoesOnDisconnect(t *testing.T) {
-	home, path := claudeSettings(t, `{"statusLine": {"type": "command", "command": "magpie statusline"}, "model": "opus"}`)
+	home, path := claudeSettings(t, `{"statusLine": {"type": "command", "command": "myna statusline"}, "model": "opus"}`)
 	a := claude(home)
 	if a.Field("statusline").Get() != "on" {
-		t.Fatal("the reference's hand-written `magpie statusline` isn't read as magpie's")
+		t.Fatal("the reference's hand-written `myna statusline` isn't read as myna's")
 	}
 	if err := a.Unwire(); err != nil {
 		t.Fatal(err)
 	}
 	if _, ok := edit.GetJSONRaw(path, "statusLine"); ok {
-		t.Fatalf("magpie's status line left after Disconnect:\n%s", readFile(path))
+		t.Fatalf("myna's status line left after Disconnect:\n%s", readFile(path))
 	}
 }
 
@@ -127,39 +127,39 @@ func TestClaudeStatusLineUnreadable(t *testing.T) {
 
 func TestClaudeStatusCommand(t *testing.T) {
 	for _, c := range []struct{ exe, goos, want string }{
-		{"/Applications/Magpie.app/Contents/MacOS/magpie", "darwin", "/Applications/Magpie.app/Contents/MacOS/magpie statusline"},
-		{"/home/me/Jo's Apps/Magpie-x86_64.AppImage", "linux", `'/home/me/Jo'\''s Apps/Magpie-x86_64.AppImage' statusline`},
-		{`C:\Users\Me Too\AppData\Local\Programs\magpie\magpie.exe`, "windows", `'C:/Users/Me Too/AppData/Local/Programs/magpie/magpie.exe' statusline`},
-		{`C:\Users\me\magpie.exe`, "windows", `C:/Users/me/magpie.exe statusline`},
+		{"/Applications/Myna.app/Contents/MacOS/myna", "darwin", "/Applications/Myna.app/Contents/MacOS/myna statusline"},
+		{"/home/me/Jo's Apps/Myna-x86_64.AppImage", "linux", `'/home/me/Jo'\''s Apps/Myna-x86_64.AppImage' statusline`},
+		{`C:\Users\Me Too\AppData\Local\Programs\myna\myna.exe`, "windows", `'C:/Users/Me Too/AppData/Local/Programs/myna/myna.exe' statusline`},
+		{`C:\Users\me\myna.exe`, "windows", `C:/Users/me/myna.exe statusline`},
 	} {
 		got := claudeStatusCommand(c.exe, c.goos)
 		if got != c.want {
 			t.Errorf("claudeStatusCommand(%q, %s) = %q, want %q", c.exe, c.goos, got, c.want)
 		}
 		if !claudeStatusOurs(got) {
-			t.Errorf("%q, written by magpie, isn't read as magpie's", got)
+			t.Errorf("%q, written by myna, isn't read as myna's", got)
 		}
 	}
 	for cmd, want := range map[string]bool{
-		"magpie statusline":              true,
-		"magpie statusline claude":       true,
-		`"C:/x/magpie.exe" statusline`:   true,
-		"magpie-darwin-arm64 statusline": true,
-		"magpie":                         false,
-		"magpie status":                  false,
-		"magpie statuslinex":             false,
-		"notmagpie statusline":           false,
+		"myna statusline":              true,
+		"myna statusline claude":       true,
+		`"C:/x/myna.exe" statusline`:   true,
+		"myna-darwin-arm64 statusline": true,
+		"myna":                         false,
+		"myna status":                  false,
+		"myna statuslinex":             false,
+		"notmyna statusline":           false,
 		"~/.claude/statusline.sh":        false,
-		"bash -c 'magpie statusline'":    false,
-		`'/x/magpie`:                     false,
+		"bash -c 'myna statusline'":    false,
+		`'/x/myna`:                     false,
 		"":                               false,
-		`/x/my\ apps/magpie statusline`:  true,
-		"magpie statusline; rm -rf ~":    false,
-		"magpie;statusline":              false,
-		"magpie statusline && echo hi":   false,
-		"magpie statusline | tr a b":     false,
-		"$(which magpie) statusline":     false,
-		"'/x/magpie' 'statusline'":       true,
+		`/x/my\ apps/myna statusline`:  true,
+		"myna statusline; rm -rf ~":    false,
+		"myna;statusline":              false,
+		"myna statusline && echo hi":   false,
+		"myna statusline | tr a b":     false,
+		"$(which myna) statusline":     false,
+		"'/x/myna' 'statusline'":       true,
 	} {
 		if got := claudeStatusOurs(cmd); got != want {
 			t.Errorf("claudeStatusOurs(%q) = %v, want %v", cmd, got, want)
@@ -167,8 +167,8 @@ func TestClaudeStatusCommand(t *testing.T) {
 	}
 }
 
-// A WSL distro's Claude Code isn't offered magpie's status line, running
-// or stopped (a stopped one's fields fall back to magpie's models), and on
+// A WSL distro's Claude Code isn't offered myna's status line, running
+// or stopped (a stopped one's fields fall back to myna's models), and on
 // is refused there.
 func TestWSLClaudeNoStatusLine(t *testing.T) {
 	root, _ := claudeDistroHome(t, `{}`)

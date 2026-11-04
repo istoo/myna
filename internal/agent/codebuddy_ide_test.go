@@ -44,7 +44,7 @@ const codebuddyIDEPlist = `<?xml version="1.0" encoding="UTF-8"?>
 // codebuddyIntlPlist is the same for codebuddy.ai's CodeBuddy.app.
 var codebuddyIntlPlist = strings.NewReplacer("CodeBuddy CN", "CodeBuddy", "com.tencent.codebuddycn", "com.tencent.codebuddy").Replace(codebuddyIDEPlist)
 
-// bjzhangwn on X: magpie listed CodeBuddy only as its CLI, not the IDE.
+// bjzhangwn on X: myna listed CodeBuddy only as its CLI, not the IDE.
 // The CodeBuddy IDE, either build, reads the CLI's ~/.codebuddy/models.json
 // and needs no CLI, so with only the IDE installed CodeBuddy is listed,
 // with the IDE's version and no "CLI not found", and its CLI isn't offered.
@@ -58,7 +58,7 @@ func TestCodeBuddyIDEIsCodeBuddy(t *testing.T) {
 	t.Cleanup(func() { appFolders = was })
 	a := codebuddy(home)
 	// a name no machine has: proc.FindTool also looks where users' tools go
-	a.Bin = "magpie-test-gone-codebuddy"
+	a.Bin = "myna-test-gone-codebuddy"
 	if a.Name != "CodeBuddy" {
 		t.Fatalf("the row is %q, not the CLI's and the IDE's both", a.Name)
 	}
@@ -101,14 +101,14 @@ func TestCodeBuddyIDEIsCodeBuddy(t *testing.T) {
 	}
 }
 
-// With only the IDE, connecting writes magpie's models where the IDE reads
+// With only the IDE, connecting writes myna's models where the IDE reads
 // them, in the form its loader takes: genie's CustomModelsProductProvider
 // (4.12.2's extensions/genie/out/extension/index.js) reads
 // <home>/.codebuddy/models.json's "models", keeps an entry only with a
 // non-blank string id and url, and takes "availableModels", when it has
 // any, as a whitelist of the models it shows (AvailableModelsFilterProvider;
 // none is no filter).
-func TestCodeBuddyIDEReadsMagpieModels(t *testing.T) {
+func TestCodeBuddyIDEReadsMynaModels(t *testing.T) {
 	home := codebuddyHome(t)
 	t.Setenv("PATH", t.TempDir())
 	apps := t.TempDir()
@@ -117,8 +117,8 @@ func TestCodeBuddyIDEReadsMagpieModels(t *testing.T) {
 	t.Cleanup(func() { appFolders = was })
 	installApp(t, apps, "CodeBuddy CN.app", codebuddyIDEPlist)
 	a := codebuddy(home)
-	a.Bin = "magpie-test-gone-codebuddy"
-	if err := a.Field("model").Set("magpie/deepseek/pro"); err != nil {
+	a.Bin = "myna-test-gone-codebuddy"
+	if err := a.Field("model").Set("myna/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	b, err := os.ReadFile(filepath.Join(home, ".codebuddy", "models.json"))

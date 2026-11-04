@@ -43,7 +43,7 @@ function serve(lang) {
     if (url.pathname === "/api/plugins") return json({ plugins: [] });
     if (url.pathname === "/api/library") {
       return json({
-        dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+        dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
         agents: [{ id: "claude", name: "Claude Code", icon: "claudecode-color", skills: `${HOME}/.claude/skills`, mcp: `${HOME}/.claude.json` }],
         instructions: { agents: [], sets: [] }, servers: [], foundServers: [], projects: [], foundSkills: [], skills: [], problems: [],
       });
@@ -91,9 +91,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang));
-      await page.addInitScript(() => { if (!localStorage.getItem("magpie.libTab")) localStorage.setItem("magpie.libTab", "skills"); });
+      await page.addInitScript(() => { if (!localStorage.getItem("myna.libTab")) localStorage.setItem("myna.libTab", "skills"); });
       t.after(() => browser.close());
-      await page.goto("http://magpie.test/?view=library");
+      await page.goto("http://myna.test/?view=library");
       const box = page.locator('#view-library .mk[data-market="skills"]');
       await box.waitFor();
 
@@ -127,7 +127,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.equal(await box.locator(".mk-card:not(.mk-skel)").count(), 1);
 
       // MCP servers: the registry not answering beside the featured ones
-      await page.evaluate(() => { localStorage.setItem("magpie.libTab", "mcp"); });
+      await page.evaluate(() => { localStorage.setItem("myna.libTab", "mcp"); });
       await page.reload();
       const mcp = page.locator('#view-library .mk[data-market="mcp"]');
       await mcp.waitFor();

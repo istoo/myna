@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-// While the first reading of the accounts' allowances since magpie started
+// While the first reading of the accounts' allowances since myna started
 // is still out, routing goes by what each said last, kept on disk — not by
 // none, which counts every account unused and put the first in order
 // first, until the reading came back and put the other first again
@@ -90,7 +90,7 @@ func TestAllowancesBeforeFirstReading(t *testing.T) {
 
 // Under Unwaited, the first ask answers from what was last known without
 // waiting firstWait for the vendor: each agent's model list asks whether a
-// model sees images, and each first ask held magpie's start for firstWait.
+// model sees images, and each first ask held myna's start for firstWait.
 func TestUnwaitedAllowancesDontWait(t *testing.T) {
 	signIn(t)
 	rememberLogins(true)

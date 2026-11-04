@@ -1,7 +1,7 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // A provider's Reply headers (#4145, codex-cn: a relay's X-OneAPI-Request-ID
 // lost on the way to the agent): the editor shows the saved list, a Save
-// sends what is typed as a list, refuses a name magpie never passes on
+// sends what is typed as a list, refuses a name myna never passes on
 // (Set-Cookie, Content-*, a name that isn't one) and says why, and an
 // emptied box clears it ([]). It fits a narrow window. In English,
 // Chinese, Traditional Chinese, Japanese and German, Chromium and WebKit.
@@ -63,7 +63,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       const calls = [];
       await page.route("**/*", serve(lang, calls));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://myna.test/?view=providers");
       const open = async () => {
         await page.locator(".row.provider", { hasText: "Relay" }).click();
         const ed = page.locator(".editor");

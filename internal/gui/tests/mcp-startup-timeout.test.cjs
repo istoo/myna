@@ -1,6 +1,6 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // #3168 (miaomiaozi on Discord): a slow-starting MCP server couldn't be
-// given a longer startup timeout in magpie. The server's editor has a
+// given a longer startup timeout in myna. The server's editor has a
 // "Startup timeout" in seconds, shown only when an agent that takes one
 // (Codex, startup_timeout_sec) is here, digits only, saved with the
 // server as startupTimeout and shown again; emptied, it saves 0 (the
@@ -21,7 +21,7 @@ const agent = (id, name) => ({ id, name, icon: "", skills: `${HOME}/.${id}/skill
 
 function server(lang, calls, agents) {
   const lib = {
-    dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+    dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
     agents,
     instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [], skills: [],
     servers: [{ name: "slow", transport: "stdio", command: "npx", args: ["-y", "slow-mcp"], agents: agents.map((a) => a.id) }],
@@ -68,13 +68,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const go = async (agents) => {
             const calls = [];
             const ctx = await browser.newContext({ viewport: { width, height: 800 } });
-            await ctx.addInitScript(() => { try { localStorage.setItem("magpie.libTab", "mcp"); } catch {} });
+            await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "mcp"); } catch {} });
             const page = await ctx.newPage();
             page.setDefaultTimeout(5000);
             page.setDefaultNavigationTimeout(60000);
             page.on("pageerror", (e) => errors.push(e.message));
             await page.route("**/*", server(lang, calls, agents));
-            await page.goto("http://magpie.test/");
+            await page.goto("http://myna.test/");
             await page.locator('button[data-view="library"]').click();
             const row = page.locator("#view-library .lib-server", { has: page.locator('.lib-health[data-server="slow"]') });
             const ed = page.locator("#modal .lib-editor");

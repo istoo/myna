@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/applog"
+	"github.com/istoo/myna/internal/applog"
 )
 
 // The desktop app, its window and its panel each write their log to

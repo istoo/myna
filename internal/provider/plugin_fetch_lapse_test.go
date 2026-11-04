@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // A plugin's fetch hook that throws on its sign-in (the vendor turned the
@@ -18,7 +18,7 @@ import (
 func TestPluginFetchSignInExpiredLapses(t *testing.T) {
 	bun := testenv.Bun(t)
 	claudeHome(t)
-	t.Setenv("MAGPIE_BUN", bun)
+	t.Setenv("MYNA_BUN", bun)
 	t.Setenv("FAKE_BASE", "http://127.0.0.1:9/v1")
 	t.Cleanup(plugin.Settle)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
@@ -63,7 +63,7 @@ func TestPluginFetchSignInExpiredLapses(t *testing.T) {
 }
 
 // Signing in again takes the mark off by the account alone, when the
-// providers' list is empty too: it is, while another magpie's change to
+// providers' list is empty too: it is, while another myna's change to
 // plugins.json is read again, and a sign-in finished then left the
 // account saying "sign in again" (#2748).
 func TestPluginSignInClearsLapseWithoutTheList(t *testing.T) {

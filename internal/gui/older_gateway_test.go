@@ -6,14 +6,14 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/istoo/myna/internal/gateway"
 )
 
-// An older magpie keeping the gateway's port sends every agent's request
+// An older myna keeping the gateway's port sends every agent's request
 // its own way (#506: a Factory 403 worded as v0.1.550 words it, to people
 // on v0.1.630). The Gateway page says which version serves and that it is
-// older; a newer or the same one is just another magpie.
-func TestGatewayServedByAnOlderMagpie(t *testing.T) {
+// older; a newer or the same one is just another myna.
+func TestGatewayServedByAnOlderMyna(t *testing.T) {
 	h := t.TempDir()
 	t.Setenv("HOME", h)
 	t.Setenv("USERPROFILE", h)
@@ -24,7 +24,7 @@ func TestGatewayServedByAnOlderMagpie(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Setenv("MAGPIE_ADDR", ln.Addr().String())
+	t.Setenv("MYNA_ADDR", ln.Addr().String())
 	var answer string
 	other := &http.Server{Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -41,10 +41,10 @@ func TestGatewayServedByAnOlderMagpie(t *testing.T) {
 		answer, version string
 		older, window   bool
 	}{
-		{`{"name":"magpie","version":"0.1.550","models":3,"window":true,"apis":[]}`, "0.1.550", true, true},
-		{`{"name":"magpie","version":"0.1.630","models":3,"window":false}`, "0.1.630", false, false},
-		{`{"name":"magpie","version":"0.1.640","models":3}`, "0.1.640", false, false},
-		{`{"name":"magpie","models":3}`, "", false, false}, // one that doesn't say
+		{`{"name":"myna","version":"0.1.550","models":3,"window":true,"apis":[]}`, "0.1.550", true, true},
+		{`{"name":"myna","version":"0.1.630","models":3,"window":false}`, "0.1.630", false, false},
+		{`{"name":"myna","version":"0.1.640","models":3}`, "0.1.640", false, false},
+		{`{"name":"myna","models":3}`, "", false, false}, // one that doesn't say
 	} {
 		answer = c.answer
 		g := providersState().Gateway

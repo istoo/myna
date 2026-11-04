@@ -13,9 +13,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // wbExhausted is WorkBuddy's 429 for credits used up, as the WorkBuddy
@@ -51,7 +51,7 @@ func TestCreditsExhaustedIsOutOfCredit(t *testing.T) {
 func TestOutOfCreditLeavesFreeModels(t *testing.T) {
 	bun := testenv.Bun(t)
 	fresh(t)
-	t.Setenv("MAGPIE_BUN", bun)
+	t.Setenv("MYNA_BUN", bun)
 	t.Setenv("FAKE_DEEPSEEK", "1")
 	t.Cleanup(plugin.Settle)
 	old := allowances

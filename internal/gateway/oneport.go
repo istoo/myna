@@ -8,7 +8,7 @@ import (
 )
 
 // Front is what the gateway's own listener serves: Handler behind
-// lanGuard, built once. `magpie web`'s port hands the gateway's client
+// lanGuard, built once. `myna web`'s port hands the gateway's client
 // routes (ClientPath) to it too, so a request there is judged exactly as
 // one on the gateway's port: the allow list, a key from another machine
 // or through a proxy, a rebound page's Host, and corsGuard's Origin rules.
@@ -33,12 +33,12 @@ var clientPrefixes = []string{
 	KeyPagePath,
 }
 
-// ClientPath: p is one of the gateway's client routes, which `magpie web`
+// ClientPath: p is one of the gateway's client routes, which `myna web`
 // answers on its own port too by handing it to the gateway, so one address
 // (one reverse-proxy location) serves the page and the agents (zgcwkj on
 // Discord). The page's own routes keep its key: /api/* is the page's, so
 // the Ollama and Claude Desktop routes there, and the Claude helper's
-// callbacks under /_magpie/, stay on the gateway's port alone. A path that
+// callbacks under /_myna/, stay on the gateway's port alone. A path that
 // isn't clean (a "..", a "//") is none, and stays behind the page's key.
 func ClientPath(p string) bool {
 	if p == "" || path.Clean(p) != strings.TrimSuffix(p, "/") && p != "/" {
@@ -52,14 +52,14 @@ func ClientPath(p string) bool {
 	return false
 }
 
-// PagePortHeader marks a request `magpie web`'s page port handed to the
+// PagePortHeader marks a request `myna web`'s page port handed to the
 // gateway (FromPagePort). The page's port is the one put behind a proxy
 // or a forward, and a raw TCP forward (frp's tcp, ssh -R, socat) or a
 // proxy that adds no forwarding header reaches it from loopback with
 // nothing to tell it from an agent here. So no request through it is
 // local: each is judged as one from another machine, answered only while
-// magpie is shared and with an enabled gateway key, whatever peer, Host
-// or browser marks it has, and MAGPIE_TRUST_PROXY doesn't change that
+// myna is shared and with an enabled gateway key, whatever peer, Host
+// or browser marks it has, and MYNA_TRUST_PROXY doesn't change that
 // (reported privately by Coffemon). Agents here call the gateway's own
 // port, which needs no key from loopback, as before the page's port
 // answered client routes. The header only ever takes a request's
@@ -78,7 +78,7 @@ func FromPagePort(r *http.Request) *http.Request {
 	return r
 }
 
-// viaPagePort: r came through `magpie web`'s page port (FromPagePort).
+// viaPagePort: r came through `myna web`'s page port (FromPagePort).
 func viaPagePort(r *http.Request) bool {
 	ok, _ := r.Context().Value(pagePort{}).(bool)
 	return ok || r.Header.Get(PagePortHeader) != ""

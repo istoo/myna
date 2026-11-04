@@ -16,10 +16,10 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/middleware"
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/middleware"
+	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // A gateway middleware sees an agent's request before routing and its
@@ -189,7 +189,7 @@ func onMiddleware(t *testing.T, src string) string {
 	return mw
 }
 
-// A request's images, each described by the model that sees, are magpie's
+// A request's images, each described by the model that sees, are myna's
 // own asks and go without the agent's middleware. Up to four are asked at
 // once, and ran the request's onProvider on its one runtime from as many
 // goroutines: the gateway died of "concurrent map read and map write" in
@@ -229,7 +229,7 @@ export function onProvider(body, ctx) {
 	}
 }
 
-// The same for a web search magpie makes for a model that can't search:
+// The same for a web search myna makes for a model that can't search:
 // it is asked beside the reply the agent is streamed through the
 // middleware's onEvent, so one search is enough to share the runtime, and
 // a round's searches beside each other (#3695). A hook that throws lets a

@@ -1,9 +1,9 @@
 package agent
 
-// The agents magpie knows that aren't on this machine, with the commands
+// The agents myna knows that aren't on this machine, with the commands
 // their vendors give to install them (#727): on a new computer the Agents
 // page said only "Install Claude Code, Codex, Gemini CLI, OpenCode…", and
-// which command installs each was left to be looked up. magpie shows the
+// which command installs each was left to be looked up. myna shows the
 // commands to copy and run in a terminal; it doesn't run them itself, as an
 // install needs what a new machine may not have yet (Node.js for npm,
 // Homebrew), and a global npm prefix that may want sudo.
@@ -23,7 +23,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/istoo/myna/internal/proc"
 )
 
 // InstallCmd is one way to install an agent's CLI.
@@ -99,7 +99,7 @@ var vendorInstall = map[string]func(goos string) []InstallCmd{
 // installCommands is how to install the agent with the given id on goos:
 // the vendor's installer first, then npm's package, the one cliSpecs
 // updates, after Node.js's own install when node is false; nil for one
-// magpie knows no command for.
+// myna knows no command for.
 func installCommands(id, goos string, node bool) []InstallCmd {
 	var out []InstallCmd
 	if only := cliSpecs[id].only; len(only) > 0 && !slices.Contains(only, goos) {
@@ -182,7 +182,7 @@ func npmIn(dirs []string, goos string) bool {
 	})
 }
 
-// Installs is every agent magpie knows a command for that isn't on this
+// Installs is every agent myna knows a command for that isn't on this
 // machine, in the Agents page's order.
 func Installs() []Install {
 	node := nodeHere()
@@ -277,8 +277,8 @@ var cliShared = map[string]bool{"codex": true, "claude": true, "gemini": true, "
 // editor extension, no IDE. That is an uninstall that left ~/.dsh (#843),
 // ~/.claude (#2177) or ~/.hermes/config.yaml (#2173) behind. The Agents
 // page shows it as gone, with none of its settings, and Install another
-// agent offers it again where magpie knows how. Only for an agent that is
-// its CLI: one magpie knows an install command for, or cliOnly; never one
+// agent offers it again where myna knows how. Only for an agent that is
+// its CLI: one myna knows an install command for, or cliOnly; never one
 // detected its own way (detect), but for Goose, whose is its folder or its
 // program.
 func (a *Agent) CLIMissing() bool {

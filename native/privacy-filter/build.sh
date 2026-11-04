@@ -10,7 +10,7 @@
 # darwin-arm64's pf-serve uses Metal. Each x86 target also gets
 # pf-serve-base, built for SSE4.2 alone: pf-serve's AVX2, FMA, F16C and
 # BMI2 end it with SIGILL on a CPU without them (a Celeron, a Pentium, a
-# Mac before Haswell) and under Rosetta before macOS 15, and magpie runs
+# Mac before Haswell) and under Rosetta before macOS 15, and myna runs
 # pf-serve-base there (internal/pii's fullX86).
 set -euo pipefail
 

@@ -12,12 +12,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/netproxy"
-	"github.com/yetone/magpie/internal/wslrun"
+	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/myna/internal/netproxy"
+	"github.com/istoo/myna/internal/wslrun"
 )
 
-// An agent pointed at magpie by an address other than this machine's
+// An agent pointed at myna by an address other than this machine's
 // loopback — this machine's Codex at Windows as WSL sees it or a forward of
 // the user's (#816), an agent in a WSL distro under NAT — is connected by
 // its config alone; whether anything answers there is another matter
@@ -45,45 +45,45 @@ func realReachProbe(base string) bool {
 	return true
 }
 
-// magpieProbe says whether base answers as a magpie gateway: GET base/ is
-// 200 with {"name":"magpie"} (the gateway's info), as it is through a
+// mynaProbe says whether base answers as a myna gateway: GET base/ is
+// 200 with {"name":"myna"} (the gateway's info), as it is through a
 // reverse proxy that forwards base to it. A var for tests.
-var magpieProbe = realMagpieProbe
+var mynaProbe = realMynaProbe
 
-func realMagpieProbe(base string) bool {
+func realMynaProbe(base string) bool {
 	c := &http.Client{Timeout: 3 * time.Second}
 	res, err := c.Get(strings.TrimSuffix(base, "/") + "/")
 	if err != nil {
 		return false
 	}
-	return answersAsMagpie(res)
+	return answersAsMyna(res)
 }
 
-// answersAsMagpie: res, closed here, is the gateway's info (GET /).
-func answersAsMagpie(res *http.Response) bool {
+// answersAsMyna: res, closed here, is the gateway's info (GET /).
+func answersAsMyna(res *http.Response) bool {
 	defer res.Body.Close()
 	var info struct {
 		Name string `json:"name"`
 	}
-	return res.StatusCode == http.StatusOK && json.NewDecoder(res.Body).Decode(&info) == nil && info.Name == "magpie"
+	return res.StatusCode == http.StatusOK && json.NewDecoder(res.Body).Decode(&info) == nil && info.Name == "myna"
 }
 
-// magpieAt is whether base answers as magpie (magpieProbe), and whether
+// mynaAt is whether base answers as myna (mynaProbe), and whether
 // that is known yet: the last probe's answer, a new one started in the
 // background as reachable does, never waited for. A var for tests, which
 // are told no without a probe.
-var magpieAt = func(base string) (ok, known bool) {
-	return probed("magpie "+base, func() bool { return magpieProbe(base) })
+var mynaAt = func(base string) (ok, known bool) {
+	return probed("myna "+base, func() bool { return mynaProbe(base) })
 }
 
-// proxyBase is v, the address an agent's config names where magpie wrote
+// proxyBase is v, the address an agent's config names where myna wrote
 // want, with want's path (/v1 where want has it) cut off its end, when
-// that can be another way to magpie: a URL on another machine or a name,
+// that can be another way to myna: a URL on another machine or a name,
 // such as a company's reverse proxy in front of the gateway (davisjiahao,
-// #1985: https://ai.corp.example/magpie forwarding to 127.0.0.1:3425), or
-// one on this machine's loopback with a path of its own before magpie's (a
+// #1985: https://ai.corp.example/myna forwarding to 127.0.0.1:3425), or
+// one on this machine's loopback with a path of its own before myna's (a
 // compliance proxy's http://127.0.0.1:8788/claude-code-anthropic/<route>).
-// One on loopback with none is magpie's own on an older port, never
+// One on loopback with none is myna's own on an older port, never
 // another way to it.
 func proxyBase(v, want string) (string, bool) {
 	w, err := url.Parse(want)
@@ -111,40 +111,40 @@ func loopbackWithPath(base string) bool {
 	return strings.Trim(u.Path, "/") != ""
 }
 
-// reachesMagpie says v reaches magpie another way (proxyBase) whose root
-// answers as magpie. Until it has been tried it is taken as reaching
-// magpie, as an address not yet tried isn't unreachable either: telling
+// reachesMyna says v reaches myna another way (proxyBase) whose root
+// answers as myna. Until it has been tried it is taken as reaching
+// myna, as an address not yet tried isn't unreachable either: telling
 // drift first would offer Reconnect, which writes the proxy away.
-func reachesMagpie(v, want string) bool {
+func reachesMyna(v, want string) bool {
 	base, ok := proxyBase(v, want)
 	if !ok {
 		return false
 	}
-	ok, known := magpieAt(base)
+	ok, known := mynaAt(base)
 	return ok || !known
 }
 
-// surelyMagpie is reachesMagpie once magpie has answered there: what a
-// write that keeps the address waits for (magpieAsked), so a relay not yet
-// tried never gets magpie's model or key.
-func surelyMagpie(v, want string) bool {
+// surelyMyna is reachesMyna once myna has answered there: what a
+// write that keeps the address waits for (mynaAsked), so a relay not yet
+// tried never gets myna's model or key.
+func surelyMyna(v, want string) bool {
 	base, ok := proxyBase(v, want)
 	if !ok {
 		return false
 	}
-	ok, known := magpieAt(base)
+	ok, known := mynaAt(base)
 	return ok && known
 }
 
-// magpieAsked is magpieAt waited for, for a write: base, not asked yet, is
+// mynaAsked is mynaAt waited for, for a write: base, not asked yet, is
 // asked now (probedNow, as codexProxyOK asks a proxy), so what the write
-// reads after is magpie's answer there. Unasked, surelyMagpie is no, and
-// the first write in a magpie just started, the CLI's, took a proxy to
-// magpie for the user's own endpoint (#1985). One answered before, at any
+// reads after is myna's answer there. Unasked, surelyMyna is no, and
+// the first write in a myna just started, the CLI's, took a proxy to
+// myna for the user's own endpoint (#1985). One answered before, at any
 // age, is what the write goes by, as the reads do.
-func magpieAsked(base string) {
-	if _, known := magpieAt(base); !known {
-		probedNow("magpie "+base, func() bool { return magpieProbe(base) })
+func mynaAsked(base string) {
+	if _, known := mynaAt(base); !known {
+		probedNow("myna "+base, func() bool { return mynaProbe(base) })
 	}
 }
 
@@ -260,21 +260,21 @@ func (a *Agent) unreachable(on Field, now string) *Drift {
 	d := &Drift{Kind: "unreachable", Field: on.Key, Now: now, Want: now, Addr: addr}
 	host := strings.TrimPrefix(strings.TrimPrefix(addr, "http://"), "https://")
 	if inside {
-		// magpie listens there itself (gateway/wsl.go): what keeps WSL out
+		// myna listens there itself (gateway/wsl.go): what keeps WSL out
 		// is Windows' firewall
-		d.Detail = a.Name + " is pointed at magpie at " + addr + ", where magpie listens for WSL, but nothing answers there from WSL " + a.WSL + ": Windows' firewall keeps WSL out. " +
-			"Allow magpie in when Windows asks, or, in PowerShell as administrator: " + wslFirewallCommand() + ". " +
-			"On Windows 11, networkingMode=mirrored under [wsl2] in %UserProfile%\\.wslconfig lets WSL reach magpie at 127.0.0.1 instead."
+		d.Detail = a.Name + " is pointed at myna at " + addr + ", where myna listens for WSL, but nothing answers there from WSL " + a.WSL + ": Windows' firewall keeps WSL out. " +
+			"Allow myna in when Windows asks, or, in PowerShell as administrator: " + wslFirewallCommand() + ". " +
+			"On Windows 11, networkingMode=mirrored under [wsl2] in %UserProfile%\\.wslconfig lets WSL reach myna at 127.0.0.1 instead."
 		return d
 	}
-	d.Detail = a.Name + " is pointed at magpie at " + addr + ", where nothing answers from this computer, though magpie answers at " + gateway.URL() + ". "
+	d.Detail = a.Name + " is pointed at myna at " + addr + ", where nothing answers from this computer, though myna answers at " + gateway.URL() + ". "
 	if a.WSL != "" || runtime.GOOS == "windows" {
-		d.Detail += "Under WSL's NAT networking, Windows as WSL sees it reaches magpie only while something listens on " + host +
-			": magpie itself with Settings › Network and sharing › Share on local network on (it then listens on every address, and asks other computers for a gateway key), or a forward of your own (netsh interface portproxy, which may need setting up again after Windows restarts). " +
+		d.Detail += "Under WSL's NAT networking, Windows as WSL sees it reaches myna only while something listens on " + host +
+			": myna itself with Settings › Network and sharing › Share on local network on (it then listens on every address, and asks other computers for a gateway key), or a forward of your own (netsh interface portproxy, which may need setting up again after Windows restarts). " +
 			"Once it answers here and WSL still can't connect, Windows' firewall may be keeping WSL out: allow the port " + gateway.Port() + " for the WSL network. " +
-			"On Windows 11, networkingMode=mirrored under [wsl2] in %UserProfile%\\.wslconfig lets WSL reach magpie at 127.0.0.1 instead."
+			"On Windows 11, networkingMode=mirrored under [wsl2] in %UserProfile%\\.wslconfig lets WSL reach myna at 127.0.0.1 instead."
 	} else {
-		d.Detail += "Whatever forwarded " + host + " to magpie isn't listening now; start it again, or point " + a.Name + " at " + gateway.URL() + "."
+		d.Detail += "Whatever forwarded " + host + " to myna isn't listening now; start it again, or point " + a.Name + " at " + gateway.URL() + "."
 	}
 	if to, distro := wslMovedFrom(addr); to != "" {
 		d.Move = to
@@ -283,16 +283,16 @@ func (a *Agent) unreachable(on Field, now string) *Drift {
 	return d
 }
 
-// wslFirewallCommand lets magpie in from WSL's networks through Windows'
+// wslFirewallCommand lets myna in from WSL's networks through Windows'
 // firewall, for an administrator's PowerShell. WSL's network is a Public
 // one, so a rule for Private networks only (what Windows' own prompt
 // offers ticked) doesn't do.
 func wslFirewallCommand() string {
 	exe, err := os.Executable()
 	if err != nil || exe == "" {
-		exe = "magpie.exe"
+		exe = "myna.exe"
 	}
-	return "New-NetFirewallRule -DisplayName 'magpie (WSL)' -Direction Inbound -Action Allow -Profile Any -InterfaceAlias 'vEthernet (WSL*)' -Program '" + strings.ReplaceAll(exe, "'", "''") + "'"
+	return "New-NetFirewallRule -DisplayName 'myna (WSL)' -Direction Inbound -Action Allow -Profile Any -InterfaceAlias 'vEthernet (WSL*)' -Program '" + strings.ReplaceAll(exe, "'", "''") + "'"
 }
 
 // wslMovedFrom is the address a WSL distro reaches Windows at now, when

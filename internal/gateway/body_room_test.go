@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 func roomOf(room int64) *bodyRoomT { return &bodyRoomT{room: room, why: "test", sized: true} }
@@ -213,7 +213,7 @@ func TestBodyRoomTakesNothingItCantGiveBack(t *testing.T) {
 	}
 }
 
-// The room is a thirty-second of the memory magpie may use, 64 MiB at
+// The room is a thirty-second of the memory myna may use, 64 MiB at
 // least: jihuayu's 1,670 MiB server serves one ~45 MiB body at a time.
 func TestBodyRoomSize(t *testing.T) {
 	root := t.TempDir()

@@ -8,15 +8,15 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/proc"
+	"github.com/istoo/myna/internal/proc"
 )
 
-// Packaged is the package manager that installed a magpie binary, which
-// then has to be the one to update it. magpie replacing a file a package
-// owns (pkexec over /usr/bin/magpie from the AUR's magpie-bin, shuhai on
+// Packaged is the package manager that installed a myna binary, which
+// then has to be the one to update it. myna replacing a file a package
+// owns (pkexec over /usr/bin/myna from the AUR's myna-bin, shuhai on
 // Discord) leaves the manager's database naming an older version and a
 // file that no longer matches it, and the manager's next upgrade, which
-// can be a version older than the one magpie put in, writes over it again.
+// can be a version older than the one myna put in, writes over it again.
 type Packaged struct {
 	Manager string `json:"manager"`           // pacman, dpkg, rpm, homebrew or nix
 	Package string `json:"package,omitempty"` // the package's name, when known
@@ -36,13 +36,13 @@ func (p *Packaged) Name() string {
 }
 
 // Command is what updates the package, "" when there is no one command
-// (Nix: a profile or a system configuration). magpie is in no distribution's
+// (Nix: a profile or a system configuration). myna is in no distribution's
 // own repository, so a pacman package is the AUR's, which pacman alone
 // doesn't upgrade: its AUR helper does.
 func (p *Packaged) Command() string {
 	pkg := p.Package
 	if pkg == "" {
-		pkg = "magpie"
+		pkg = "myna"
 	}
 	switch p.Manager {
 	case "pacman":
@@ -57,13 +57,13 @@ func (p *Packaged) Command() string {
 	return ""
 }
 
-// Say is the sentence a terminal is told: who updates this magpie, and how.
+// Say is the sentence a terminal is told: who updates this myna, and how.
 func (p *Packaged) Say() string {
-	s := "this magpie was installed with " + p.Name()
+	s := "this myna was installed with " + p.Name()
 	if p.Package != "" {
 		s += " (package " + p.Package + ")"
 	}
-	s += ", which updates it, not magpie"
+	s += ", which updates it, not myna"
 	if c := p.Command(); c != "" {
 		s += ": " + c
 		if p.Manager == "pacman" {
@@ -151,12 +151,12 @@ func aliases(p string) []string {
 	return out
 }
 
-// magpieFirst orders names with those starting "magpie" first: the package
-// owning magpie is all but always one of them (magpie-bin, magpie-cli-bin,
-// magpie-git), so the rest are read only when none is.
-func magpieFirst(names []string) []string {
+// mynaFirst orders names with those starting "myna" first: the package
+// owning myna is all but always one of them (myna-bin, myna-cli-bin,
+// myna-git), so the rest are read only when none is.
+func mynaFirst(names []string) []string {
 	slices.SortStableFunc(names, func(a, b string) int {
-		ma, mb := strings.HasPrefix(a, "magpie"), strings.HasPrefix(b, "magpie")
+		ma, mb := strings.HasPrefix(a, "myna"), strings.HasPrefix(b, "myna")
 		switch {
 		case ma && !mb:
 			return -1
@@ -187,7 +187,7 @@ func pacmanOwner(root, p string) (string, bool) {
 	for i := range want {
 		want[i] = strings.TrimPrefix(want[i], "/")
 	}
-	for _, n := range magpieFirst(names) {
+	for _, n := range mynaFirst(names) {
 		if listed(filepath.Join(dir, n, "files"), want) {
 			return pacmanName(filepath.Join(dir, n), n), true
 		}
@@ -230,7 +230,7 @@ func dpkgOwner(root, p string) (string, bool) {
 		}
 	}
 	want := aliases(p)
-	for _, n := range magpieFirst(names) {
+	for _, n := range mynaFirst(names) {
 		if listed(filepath.Join(dir, n), want) {
 			name, _, _ := strings.Cut(strings.TrimSuffix(n, ".list"), ":")
 			return name, true

@@ -15,14 +15,14 @@ import (
 	"time"
 )
 
-// TLS: `magpie serve --tls-cert <file> --tls-key <file>` (or
-// MAGPIE_TLS_CERT and MAGPIE_TLS_KEY) serves the gateway, and `magpie
-// web`'s page, over HTTPS to other computers (RoderickZH on Discord: magpie
+// TLS: `myna serve --tls-cert <file> --tls-key <file>` (or
+// MYNA_TLS_CERT and MYNA_TLS_KEY) serves the gateway, and `myna
+// web`'s page, over HTTPS to other computers (RoderickZH on Discord: myna
 // on a server as a relay, reached over the internet). The certificate is
 // read again when its files change, so a certbot renewal is served without
 // a restart. A connection from this computer itself (loopback, or this
 // computer calling its own address) may still speak plain HTTP on the same
-// port: the agents, MCP servers and status checks magpie wires here call
+// port: the agents, MCP servers and status checks myna wires here call
 // http://127.0.0.1, which no certificate for a server's name covers, and
 // their requests never leave the machine. Every other peer gets TLS alone;
 // plain HTTP from it is answered 400 by net/http.
@@ -30,8 +30,8 @@ import (
 // TLSCertEnv and TLSKeyEnv name the PEM certificate (its chain after it)
 // and private key files the flags set.
 const (
-	TLSCertEnv = "MAGPIE_TLS_CERT"
-	TLSKeyEnv  = "MAGPIE_TLS_KEY"
+	TLSCertEnv = "MYNA_TLS_CERT"
+	TLSKeyEnv  = "MYNA_TLS_KEY"
 )
 
 // TLSFiles are the certificate and key files set, "" for none.
@@ -202,7 +202,7 @@ func ServeTLS(ln net.Listener) (net.Listener, error) {
 
 // fromThisComputer: the connection's peer is this computer — loopback, or
 // this computer calling one of its own addresses, which the kernel answers
-// without the network (a MAGPIE_ADDR on one interface's address, which
+// without the network (a MYNA_ADDR on one interface's address, which
 // the agents wired here then call). A var for the tests, which have no
 // other computer to call from.
 var fromThisComputer = func(c net.Conn) bool {

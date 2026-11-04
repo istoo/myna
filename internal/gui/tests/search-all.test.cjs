@@ -1,10 +1,10 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // Settings › Models › Web search (cybercaius on Discord: "能否强制支持联网搜索的
 // 供应商模型走代搜 API"): "Models that search by themselves" picks their
-// provider's own search, as before, or magpie's, as every other model has.
+// provider's own search, as before, or myna's, as every other model has.
 // A click sets searchAll on its own (POST /api/settings/search-all), a save
 // of the rest of the page doesn't send it (the server keeps it), and the
-// page isn't moved. With nothing magpie
+// page isn't moved. With nothing myna
 // can search with the row is there, dimmed, and says why. With provider search off and
 // searchAll on, the searcher's note no longer says a provider's own search
 // is unchanged. In every language, wide and narrow.
@@ -17,11 +17,11 @@ const { watchSettingsReads, settingsDrawn, reach } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const words = {
-  en: { name: "Models that search by themselves", own: "Their own", magpie: "magpie's", apis: "Search APIs", every: "for every model", unchanged: "unchanged", none: "add a Search API" },
-  zh: { name: "自带联网搜索的模型", own: "自带搜索", magpie: "magpie 代搜", apis: "搜索 API", every: "所有模型", unchanged: "不受影响", none: "添加搜索 API" },
-  "zh-TW": { name: "自帶聯網搜尋的模型", own: "內建搜尋", magpie: "magpie 代搜", apis: "搜尋 API", every: "所有模型", unchanged: "不受影響", none: "新增搜尋 API" },
-  ja: { name: "自分でウェブ検索するモデル", own: "ネイティブ検索", magpie: "magpie の検索", apis: "検索 API", every: "どのモデルにも", unchanged: "影響しません", none: "検索 API を追加" },
-  de: { name: "Modelle, die selbst suchen", own: "Eigene Suche", magpie: "Von magpie", apis: "Such-APIs", every: "für jedes Modell", unchanged: "unverändert", none: "Such-API hinzu" },
+  en: { name: "Models that search by themselves", own: "Their own", myna: "myna's", apis: "Search APIs", every: "for every model", unchanged: "unchanged", none: "add a Search API" },
+  zh: { name: "自带联网搜索的模型", own: "自带搜索", myna: "myna 代搜", apis: "搜索 API", every: "所有模型", unchanged: "不受影响", none: "添加搜索 API" },
+  "zh-TW": { name: "自帶聯網搜尋的模型", own: "內建搜尋", myna: "myna 代搜", apis: "搜尋 API", every: "所有模型", unchanged: "不受影響", none: "新增搜尋 API" },
+  ja: { name: "自分でウェブ検索するモデル", own: "ネイティブ検索", myna: "myna の検索", apis: "検索 API", every: "どのモデルにも", unchanged: "影響しません", none: "検索 API を追加" },
+  de: { name: "Modelle, die selbst suchen", own: "Eigene Suche", myna: "Von myna", apis: "Such-APIs", every: "für jedes Modell", unchanged: "unverändert", none: "Such-API hinzu" },
 };
 
 function serve(lang, saved, all, { provider = true, apis = true, searcher = "ds", searchAll = false } = {}) {
@@ -68,7 +68,7 @@ async function open(engine, t, lang, saved, opts, width = 1100, all = []) {
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", serve(lang, saved, all, opts));
   await watchSettingsReads(page);
-  await page.goto(`http://magpie.test/?view=settings&tab=models&lang=${lang}`);
+  await page.goto(`http://myna.test/?view=settings&tab=models&lang=${lang}`);
   await settingsDrawn(page); // rows found are the ones that stay (#1659)
   return { page, errors };
 }
@@ -82,14 +82,14 @@ async function press(page, locator) {
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   for (const [lang, w] of Object.entries(words)) {
     for (const width of [1100, 560]) {
-      test(`${engine} ${lang} ${width}px: a model that searches by itself can be given magpie's search`, async (t) => {
+      test(`${engine} ${lang} ${width}px: a model that searches by itself can be given myna's search`, async (t) => {
         const saved = [], all = [];
         const { page, errors } = await open(engine, t, lang, saved, {}, width, all);
         const row = page.locator("#searchList #searchAllRow");
         await reach(page, row);
         assert.equal(await row.locator(".name").textContent(), w.name);
         const own = row.locator(".segs button", { hasText: w.own });
-        const mine = row.locator(".segs button", { hasText: w.magpie });
+        const mine = row.locator(".segs button", { hasText: w.myna });
         assert(await own.evaluate((b) => b.classList.contains("on")), "their own search at first");
         assert(!await mine.evaluate((b) => b.classList.contains("on")));
         // the row fits the window: nothing wider than the page
@@ -107,7 +107,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.deepEqual(all, [{ on: true }], "set once, on its own");
         assert.equal(saved.length, 0, "the rest of the settings not written");
         await page.waitForFunction(() => prefsBusy === 0);
-        await page.locator("#searchAllRow .segs button.on", { hasText: w.magpie }).waitFor();
+        await page.locator("#searchAllRow .segs button.on", { hasText: w.myna }).waitFor();
         assert.deepEqual(await page.evaluate(() => [scrollX, scrollY, document.scrollingElement.scrollTop]), before, "the click moved nothing");
 
         // another choice saved on the page keeps it
@@ -115,7 +115,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         for (let i = 0; i < 50 && saved.length < 1; i++) await page.waitForTimeout(50);
         assert.equal(saved.at(-1).searchFirst, "api");
         await page.waitForFunction(() => prefsBusy === 0);
-        await page.locator("#searchAllRow .segs button.on", { hasText: w.magpie }).waitFor();
+        await page.locator("#searchAllRow .segs button.on", { hasText: w.myna }).waitFor();
 
         // and back
         await press(page, page.locator("#searchAllRow .segs button", { hasText: w.own }));
@@ -125,7 +125,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       });
     }
 
-    test(`${engine} ${lang}: with nothing magpie can search with the row says why and can't be chosen`, async (t) => {
+    test(`${engine} ${lang}: with nothing myna can search with the row says why and can't be chosen`, async (t) => {
       // cybercaius turned the search APIs off and couldn't find the row
       // ("开关在哪个位置"): it stays, dimmed, and says where to add a search
       const all = [];
@@ -137,7 +137,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.equal(await row.locator(".segs button:disabled").count(), 2, "both choices can't be picked");
       assert(await row.evaluate((r) => r.classList.contains("off")));
       assert(await page.evaluate(() => document.scrollingElement.scrollWidth <= innerWidth), "the page scrolls sideways");
-      await row.locator(".segs button", { hasText: w.magpie }).click({ force: true });
+      await row.locator(".segs button", { hasText: w.myna }).click({ force: true });
       await page.waitForTimeout(200);
       assert.deepEqual(all, [], "a dimmed choice saved nothing");
     });

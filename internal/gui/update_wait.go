@@ -3,8 +3,8 @@ package gui
 import (
 	"time"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // A restart to update ends the gateway this process serves, and with it
@@ -26,7 +26,7 @@ var (
 )
 
 // gatewayBusy is what the gateway this process serves has in flight;
-// nothing when another magpie serves it, which a restart here leaves be.
+// nothing when another myna serves it, which a restart here leaves be.
 var gatewayBusy = func() gateway.Busy {
 	if gw := served.Load(); gw != nil {
 		return gw.Busy()
@@ -127,7 +127,7 @@ func (u *updater) waitFor(gen int) {
 			continue
 		}
 		u.mu.Lock()
-		// another magpie put the update in (restartBeside): that is what
+		// another myna put the update in (restartBeside): that is what
 		// the restart goes into, whatever the feed answers now
 		in := u.replaced()
 		u.mu.Unlock()

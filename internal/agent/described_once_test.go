@@ -4,10 +4,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
-// Every agent's list asks whether magpie describes images to a model that
+// Every agent's list asks whether myna describes images to a model that
 // can't see them; the gateway answers by ranking every provider's models
 // that see, so it is asked once for all the lists built while nothing
 // changed, and again once something did.

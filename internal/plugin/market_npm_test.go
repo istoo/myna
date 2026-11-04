@@ -36,7 +36,7 @@ func npmAnswer(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(`{"version":"1.2.3","description":"` + name + `","_npmUser":{"name":"me"}}`))
 }
 
-// What npm said is kept on disk: a magpie started again shows it at once,
+// What npm said is kept on disk: a myna started again shows it at once,
 // before asking, and when npm is down it is what the page shows.
 func TestNPMInfoKeptOnDisk(t *testing.T) {
 	up := atomic.Bool{}
@@ -152,7 +152,7 @@ func TestNPMInfoAtOnce(t *testing.T) {
 }
 
 // yetone: 这里的 agent plugin 为什么没有 logo. The picture a package gives
-// in package.json's magpie.icon comes with what npm says of it, so a
+// in package.json's myna.icon comes with what npm says of it, so a
 // listing the market gives no icon shows it; anything but an https URL or
 // a data:image URI is left out.
 func TestNPMInfoGivesIcon(t *testing.T) {
@@ -186,7 +186,7 @@ func TestNPMInfoGivesIcon(t *testing.T) {
 
 // The update check asks npm now, not what it said within the hour: a
 // community fix published a few minutes after the page last asked reaches
-// a magpie started since at its first look (ysm119 on Discord).
+// a myna started since at its first look (ysm119 on Discord).
 func TestUpdateCheckAsksNPMNow(t *testing.T) {
 	var version atomic.Value
 	version.Store("1.2.3")

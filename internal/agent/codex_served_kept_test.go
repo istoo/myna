@@ -10,10 +10,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
-// Which of Codex's own models magpie serves on the user's ChatGPT account
+// Which of Codex's own models myna serves on the user's ChatGPT account
 // is kept while nothing the catalog is built from changed: Codex's
 // options, asked per field of its Drift on every drift poll, built
 // Codex's whole catalog each time for these few names. A provider saved
@@ -43,7 +43,7 @@ func TestCodexServedKeptWhileCatalogStays(t *testing.T) {
 	os.Chtimes(provider.Path(), old, old)
 
 	served := func(model string) bool {
-		return codexInMagpie([]Option{{Value: model}})[0].Served
+		return codexInMyna([]Option{{Value: model}})[0].Served
 	}
 	if !served("gpt-5.5") {
 		t.Fatalf("gpt-5.5 on the user's account not marked served: %v", codexServedModels())

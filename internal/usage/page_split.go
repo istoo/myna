@@ -11,7 +11,7 @@ import (
 	"time"
 	"unique"
 
-	"github.com/yetone/magpie/internal/sessions"
+	"github.com/istoo/myna/internal/sessions"
 )
 
 // A page's cells of the rows before its last few days are kept as the

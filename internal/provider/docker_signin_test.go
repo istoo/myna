@@ -16,11 +16,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/myna/internal/testenv"
 )
 
-// magpie in Docker (xugui on Discord: "docker版登不上grok和command code"):
+// myna in Docker (xugui on Discord: "docker版登不上grok和command code"):
 // its image has no bash, curl or wget, so Grok Build's installer couldn't
 // run and Grok's sign-in never began. Grok Build is then installed as its
 // installer installs it, from the same place, without a shell.
@@ -129,7 +129,7 @@ func TestGrokInstallWithoutShellFails(t *testing.T) {
 func TestGrokPluginSignInInstallsCLI(t *testing.T) {
 	bun := testenv.Bun(t)
 	home := claudeHome(t)
-	t.Setenv("MAGPIE_BUN", bun)
+	t.Setenv("MYNA_BUN", bun)
 	t.Cleanup(plugin.Settle)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
@@ -212,7 +212,7 @@ export const P = async () => ({
 	}
 }
 
-// The command line's plugin sign-in (`magpie plugin login grok`) installs
+// The command line's plugin sign-in (`myna plugin login grok`) installs
 // Grok Build through InstallPluginCLI, as the window's does; it said
 // "install Grok Build first: curl … | bash" in Docker, which has no curl
 // (#2223, evier12345). Only a plugin that signs in with a vendor's CLI

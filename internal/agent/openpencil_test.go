@@ -10,8 +10,8 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // openPencilUser is settings.json as OpenPencil saves it
@@ -66,7 +66,7 @@ const openPencilUser = `{
 `
 
 // openPencilEntryDoc is a builtin_agents entry with OpenPencil's fields
-// alone (BuiltinAgentPayload on main), so a field of magpie's own fails to
+// alone (BuiltinAgentPayload on main), so a field of myna's own fails to
 // decode.
 type openPencilEntryDoc struct {
 	ID          *string  `json:"id"`
@@ -80,11 +80,11 @@ type openPencilEntryDoc struct {
 	Enabled     *bool    `json:"enabled"`
 }
 
-// openPencilRead is settings.json's magpie entry, checked as OpenPencil
+// openPencilRead is settings.json's myna entry, checked as OpenPencil
 // reads one: the required fields there, nothing else, a kind it knows, and
 // the model list in its own form (at most 64, the first as model, models
 // only for two or more); and the user's entries, as written.
-func openPencilRead(t *testing.T, path string) (magpie openPencilEntryDoc, others []json.RawMessage) {
+func openPencilRead(t *testing.T, path string) (myna openPencilEntryDoc, others []json.RawMessage) {
 	t.Helper()
 	b, err := os.ReadFile(path)
 	if err != nil {
@@ -108,33 +108,33 @@ func openPencilRead(t *testing.T, path string) (magpie openPencilEntryDoc, other
 		if e.ID == nil || e.DisplayName == nil || e.Kind == nil || e.BaseURL == nil || e.Enabled == nil {
 			t.Fatalf("entry without a required field: %s", raw)
 		}
-		if *e.ID != magpieID {
+		if *e.ID != mynaID {
 			others = append(others, raw)
 			continue
 		}
 		if found {
-			t.Fatalf("two entries of magpie's: %s", b)
+			t.Fatalf("two entries of myna's: %s", b)
 		}
-		found, magpie = true, e
+		found, myna = true, e
 	}
 	if !found {
-		t.Fatalf("no entry of magpie's: %s", b)
+		t.Fatalf("no entry of myna's: %s", b)
 	}
-	if !slices.Contains([]string{"anthropic", "openai", "openai-compat", "openai_compat"}, *magpie.Kind) {
-		t.Errorf("kind %q", *magpie.Kind)
+	if !slices.Contains([]string{"anthropic", "openai", "openai-compat", "openai_compat"}, *myna.Kind) {
+		t.Errorf("kind %q", *myna.Kind)
 	}
 	switch {
-	case len(magpie.Models) == 1, len(magpie.Models) > openPencilMaxModels:
-		t.Errorf("models: %d, OpenPencil writes two to 64 or none", len(magpie.Models))
-	case len(magpie.Models) > 1 && magpie.Model != magpie.Models[0]:
-		t.Errorf("model %q is not the first of %v", magpie.Model, magpie.Models)
+	case len(myna.Models) == 1, len(myna.Models) > openPencilMaxModels:
+		t.Errorf("models: %d, OpenPencil writes two to 64 or none", len(myna.Models))
+	case len(myna.Models) > 1 && myna.Model != myna.Models[0]:
+		t.Errorf("model %q is not the first of %v", myna.Model, myna.Models)
 	}
-	return magpie, others
+	return myna, others
 }
 
 // OpenPencil (ZSeven-W/openpencil) lists builtin agents of the user's own in
 // its chat's model picker, from settings.json in the platform's config
-// folder. magpie adds itself as the entry "magpie" on the gateway's Chat
+// folder. myna adds itself as the entry "myna" on the gateway's Chat
 // Completions, keeps the user's entries and settings as they were and the
 // name and on/off they give its entry, writes nothing when nothing changed,
 // and off takes only its own entry out.
@@ -161,20 +161,20 @@ func TestOpenPencilProvider(t *testing.T) {
 	if f.Get() != "" {
 		t.Fatalf("get: %q", f.Get())
 	}
-	if err := f.Set(magpieID); err != nil {
+	if err := f.Set(mynaID); err != nil {
 		t.Fatal(err)
 	}
-	if f.Get() != magpieID {
+	if f.Get() != mynaID {
 		t.Fatalf("get after set: %q", f.Get())
 	}
 
 	gw := gateway.URL()
 	e, others := openPencilRead(t, path)
-	if *e.Kind != "openai-compat" || *e.BaseURL != gw+"/v1" || e.APIKey != agentKeyAt("openpencil", gw) || *e.Preset != "custom" || !*e.Enabled || *e.DisplayName != "magpie" {
+	if *e.Kind != "openai-compat" || *e.BaseURL != gw+"/v1" || e.APIKey != agentKeyAt("openpencil", gw) || *e.Preset != "custom" || !*e.Enabled || *e.DisplayName != "myna" {
 		t.Errorf("entry: %+v", e)
 	}
 	var want []string
-	for _, m := range magpieModels("openpencil") {
+	for _, m := range mynaModels("openpencil") {
 		want = append(want, m.ID)
 	}
 	if len(want) < 2 || !slices.Equal(e.Models, want) {
@@ -203,7 +203,7 @@ func TestOpenPencilProvider(t *testing.T) {
 	if err := a.Sync(); err != nil {
 		t.Fatal(err)
 	}
-	if err := f.Set(magpieID); err != nil {
+	if err := f.Set(mynaID); err != nil {
 		t.Fatal(err)
 	}
 	if b2, _ := os.ReadFile(path); !bytes.Equal(b, b2) {
@@ -218,8 +218,8 @@ func TestOpenPencilProvider(t *testing.T) {
 	var doc map[string]any
 	json.Unmarshal(b, &doc)
 	for _, x := range doc["builtin_agents"].([]any) {
-		if m := x.(map[string]any); m["id"] == magpieID {
-			m["display_name"], m["enabled"] = "My magpie", false
+		if m := x.(map[string]any); m["id"] == mynaID {
+			m["display_name"], m["enabled"] = "My myna", false
 			m["models"] = slices.DeleteFunc(m["models"].([]any), func(v any) bool { return v == want[1] })
 		}
 	}
@@ -230,14 +230,14 @@ func TestOpenPencilProvider(t *testing.T) {
 		t.Fatal(err)
 	}
 	e, _ = openPencilRead(t, path)
-	if *e.DisplayName != "My magpie" || *e.Enabled {
+	if *e.DisplayName != "My myna" || *e.Enabled {
 		t.Errorf("the user's name and off not kept: %+v", e)
 	}
 	if !slices.Equal(e.Models, want) {
 		t.Errorf("models after sync %v, want %v", e.Models, want)
 	}
 
-	// off: only magpie's entry goes, the file stays
+	// off: only myna's entry goes, the file stays
 	if err := f.Set(""); err != nil {
 		t.Fatal(err)
 	}
@@ -265,7 +265,7 @@ func TestOpenPencilProvider(t *testing.T) {
 	}
 }
 
-// OpenPencil not run yet: magpie makes settings.json with the version 1
+// OpenPencil not run yet: myna makes settings.json with the version 1
 // OpenPencil needs (a file without it is set aside as corrupt), with one
 // model as model alone; off takes the file away again.
 func TestOpenPencilMakesItsFile(t *testing.T) {
@@ -276,13 +276,13 @@ func TestOpenPencilMakesItsFile(t *testing.T) {
 	if err := provider.Save(provider.Provider{ID: "solo", Name: "Solo", Chat: "https://api.example/v1", Key: "k", Models: []string{"one"}}); err != nil {
 		t.Fatal(err)
 	}
-	if n := len(magpieModels("openpencil")); n != 1 {
+	if n := len(mynaModels("openpencil")); n != 1 {
 		t.Fatalf("fixture: %d models", n)
 	}
 	t.Cleanup(func() { openPencilRunning = func() bool { return false } })
 	openPencilRunning = func() bool { return false }
 	a := openPencil(home, filepath.Join(home, ".config"))
-	if err := a.Field("provider").Set(magpieID); err != nil {
+	if err := a.Field("provider").Set(mynaID); err != nil {
 		t.Fatal(err)
 	}
 	e, others := openPencilRead(t, a.Path)
@@ -299,13 +299,13 @@ func TestOpenPencilMakesItsFile(t *testing.T) {
 		t.Fatal(err)
 	}
 	if _, err := os.Stat(a.Path); !os.IsNotExist(err) {
-		t.Errorf("magpie's own file left behind: %v", err)
+		t.Errorf("myna's own file left behind: %v", err)
 	}
 }
 
 // A file OpenPencil wouldn't read as its own — a version it doesn't know,
 // none, a list that isn't one — is left as it is, and so is the file while
-// OpenPencil runs, as it writes its settings back over magpie's when it
+// OpenPencil runs, as it writes its settings back over myna's when it
 // quits.
 func TestOpenPencilLeavesAlone(t *testing.T) {
 	home := syncHome(t)
@@ -322,7 +322,7 @@ func TestOpenPencilLeavesAlone(t *testing.T) {
 		`{"version": 1,`,
 	} {
 		os.WriteFile(a.Path, []byte(s), 0o600)
-		if err := a.Field("provider").Set(magpieID); err == nil {
+		if err := a.Field("provider").Set(mynaID); err == nil {
 			t.Errorf("%s: set", s)
 		}
 		if b, _ := os.ReadFile(a.Path); string(b) != s {
@@ -332,21 +332,21 @@ func TestOpenPencilLeavesAlone(t *testing.T) {
 
 	os.WriteFile(a.Path, []byte(openPencilUser), 0o600)
 	running = true
-	if err := a.Field("provider").Set(magpieID); err != errOpenPencilRunning {
+	if err := a.Field("provider").Set(mynaID); err != errOpenPencilRunning {
 		t.Errorf("set while it runs: %v", err)
 	}
 	if b, _ := os.ReadFile(a.Path); string(b) != openPencilUser {
 		t.Errorf("written while it runs: %s", b)
 	}
 	running = false
-	if err := a.Field("provider").Set(magpieID); err != nil {
+	if err := a.Field("provider").Set(mynaID); err != nil {
 		t.Fatal(err)
 	}
 	running = true
 	if err := a.Field("provider").Set(""); err != errOpenPencilRunning {
 		t.Errorf("off while it runs: %v", err)
 	}
-	if a.Field("provider").Get() != magpieID {
+	if a.Field("provider").Get() != mynaID {
 		t.Error("taken out while it runs")
 	}
 }
@@ -372,7 +372,7 @@ func TestOpenPencilDirPerOS(t *testing.T) {
 }
 
 // OpenPencil keeps 64 models of an entry and drops the rest when it next
-// saves; magpie writes the first 64, so what it wrote and what OpenPencil
+// saves; myna writes the first 64, so what it wrote and what OpenPencil
 // saves back agree.
 func TestOpenPencilModelCap(t *testing.T) {
 	syncHome(t)
@@ -383,7 +383,7 @@ func TestOpenPencilModelCap(t *testing.T) {
 	if err := provider.Save(provider.Provider{ID: "many", Name: "Many", Chat: "https://api.example/v1", Key: "k", Models: ms}); err != nil {
 		t.Fatal(err)
 	}
-	if n := len(magpieModels("openpencil")); n <= openPencilMaxModels {
+	if n := len(mynaModels("openpencil")); n <= openPencilMaxModels {
 		t.Fatalf("fixture: %d models", n)
 	}
 	e := openPencilEntry(gateway.URL())

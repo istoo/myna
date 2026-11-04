@@ -25,7 +25,7 @@ function settingsPayload(over) {
     dock: false, dockWindow: false, proxy: "", redact: false, redactPersonal: false, redactWords: [],
     codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", workbuddyCheckin: false, noStats: false,
     trayUsage: "claude|a@b.c", trayUsages: ["claude|a@b.c"], trayUsageEvery: 3, vision: "", imageGen: "",
-    version: "0.1.400", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425",
+    version: "0.1.400", dir: "~/.config/myna", gateway: "http://127.0.0.1:3425",
     proxyNow: "none", proxySource: "none", login: false,
     visionModels: [], imageGenModels: [], workbuddyCheckins: [], lanURLs: [],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
@@ -68,7 +68,7 @@ async function open(browser, lang, posts, platform, over) {
   page.setDefaultTimeout(5000);
   page.setDefaultNavigationTimeout(60000);
   await page.route("**/*", server(lang, posts, over));
-  await page.goto("http://magpie.test/?view=usage");
+  await page.goto("http://myna.test/?view=usage");
   await page.locator("#prefs").click();
   await openPart(page, "usage");
   await page.locator("#trayUsagePick button").waitFor();

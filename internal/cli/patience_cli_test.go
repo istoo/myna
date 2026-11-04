@@ -3,7 +3,7 @@ package cli
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // patience= sets how long a request to the provider alone is kept while it

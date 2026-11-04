@@ -3,7 +3,7 @@ package access
 import (
 	"strings"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // A key held to a provider's model is held to it under the id it is

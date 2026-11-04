@@ -4,20 +4,20 @@ import "testing"
 
 // The Windows app installed itself from Downloads (update.Settle): the Run
 // value opening the download opens the installed copy, with its arguments;
-// one opening anything else, or written by hand without a path magpie
+// one opening anything else, or written by hand without a path myna
 // knows, is left.
 func TestRepointed(t *testing.T) {
-	from := `C:\Users\u\Downloads\magpie-windows-amd64.exe`
-	to := `C:\Users\u\AppData\Local\Programs\magpie\magpie.exe`
+	from := `C:\Users\u\Downloads\myna-windows-amd64.exe`
+	to := `C:\Users\u\AppData\Local\Programs\myna\myna.exe`
 	for _, c := range []struct {
 		v, want string
 		ok      bool
 	}{
 		{`"` + from + `" tray`, `"` + to + `" tray`, true},
-		{`"C:\USERS\U\DOWNLOADS\MAGPIE-WINDOWS-AMD64.EXE" tray`, `"` + to + `" tray`, true},
+		{`"C:\USERS\U\DOWNLOADS\MYNA-WINDOWS-AMD64.EXE" tray`, `"` + to + `" tray`, true},
 		{`"` + from + `"`, `"` + to + `"`, true},
 		{from + ` tray --x`, `"` + to + `" tray --x`, true},
-		{`"C:\Tools\magpie.exe" tray`, "", false},
+		{`"C:\Tools\myna.exe" tray`, "", false},
 		{`"` + from, "", false},
 		{``, "", false},
 	} {

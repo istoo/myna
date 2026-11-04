@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/library"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/appdir"
+	"github.com/istoo/myna/internal/library"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // A server kept to one computer (huhuy72219405 on X: "有些mcp属于本地的，

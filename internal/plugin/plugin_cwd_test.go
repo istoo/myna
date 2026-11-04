@@ -10,15 +10,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/settings"
 )
 
-// jiakun_zhao on 𝕏 found page_<hash>.html and magpie_*.md files after
+// jiakun_zhao on 𝕏 found page_<hash>.html and myna_*.md files after
 // using the chat page plugin, which starts the user's MCP servers from
 // the plugin host and runs their tools for a model. A program a plugin
-// starts with no folder of its own ran in the host's, magpie's config
+// starts with no folder of its own ran in the host's, myna's config
 // folder, so a tool's file saved by a relative name went beside
-// settings.json, and one named providers.json would write over magpie's.
+// settings.json, and one named providers.json would write over myna's.
 // It runs in plugin-work under that folder, with PWD to match; a folder
 // the plugin gives is kept.
 func TestPluginProgramsRunInTheirOwnFolder(t *testing.T) {

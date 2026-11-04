@@ -14,14 +14,14 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
-const models = [{ value: "magpie/v/glm", label: "GLM", ref: "v/glm" }, { value: "magpie/v/flash", label: "Flash", ref: "v/flash" }];
+const models = [{ value: "myna/v/glm", label: "GLM", ref: "v/glm" }, { value: "myna/v/flash", label: "Flash", ref: "v/flash" }];
 const levels = ["low", "medium", "high"].map((value) => ({ value }));
 const tiers = ["opus", "sonnet", "haiku", "fable"];
 const claude = (id, wsl) => ({
   id, name: "Claude Code", path: wsl ? "\\\\wsl.localhost\\Ubuntu\\home\\me\\.claude\\settings.json" : "/test/settings.json", icon: "claudecode-color", wired: true,
   ...(wsl ? { wsl } : {}),
   fields: [
-    { key: "model", label: "model", value: "magpie/v/glm", options: models },
+    { key: "model", label: "model", value: "myna/v/glm", options: models },
     { key: "effort", label: "effort", value: "high", options: levels },
     ...tiers.map((tier) => ({ key: tier, label: tier, value: "", options: models })),
     ...tiers.map((tier) => ({ key: tier + "_effort", label: tier + " effort", value: "", options: levels })),
@@ -89,7 +89,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           }
           await browser.close();
         });
-        await page.goto("http://magpie.test/");
+        await page.goto("http://myna.test/");
         await page.locator(row(WSL)).waitFor();
 
         const win = await card(page, "claude");

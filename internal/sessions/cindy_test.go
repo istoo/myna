@@ -94,13 +94,13 @@ func TestCindyPiSessions(t *testing.T) {
 		t.Fatalf("prompts %q in %+v", said, tr.Parts)
 	}
 
-	// its calls are Cindy's on the Usage page, those through magpie the
+	// its calls are Cindy's on the Usage page, those through myna the
 	// gateway's
 	by, relay := map[string]int{}, 0
 	for _, c := range Calls(time.Time{}) {
 		by[c.Agent]++
-		if c.Agent == "cindy" && (c.Upstream == "magpie" || c.Upstream == "dead") {
-			t.Errorf("a call through magpie or one that failed: %+v", c)
+		if c.Agent == "cindy" && (c.Upstream == "myna" || c.Upstream == "dead") {
+			t.Errorf("a call through myna or one that failed: %+v", c)
 		}
 		if c.Agent == "cindy" && (c.Session == raftParent || c.Session == raftFork) && c.Upstream == "relay" {
 			relay++
@@ -144,25 +144,25 @@ func TestCindyGatewaySessionListedOnce(t *testing.T) {
 	}
 }
 
-// TestCindyGatewayCallsCountedOnce: Cindy imports magpie's link as the
-// provider "magpie-<8 hex>" (its import parser adds eight hex digits of a
+// TestCindyGatewayCallsCountedOnce: Cindy imports myna's link as the
+// provider "myna-<8 hex>" (its import parser adds eight hex digits of a
 // new UUID to the link's id), and its Pi writes that id on each reply. A
 // reply through it is the gateway's, already counted there with the
 // account that answered; read again here it was listed and priced twice
 // (jealousy03888 on Discord: ZCode's GLM-5.3 in Cindy, one gateway row and
 // one "local session" row of the same 135/37/84,736 tokens). A provider
-// of the user's own whose name only begins with magpie stays Cindy's.
+// of the user's own whose name only begins with myna stays Cindy's.
 func TestCindyGatewayCallsCountedOnce(t *testing.T) {
 	global, _ := cindySetup(t)
 	const id = "019a4c2e-5b1d-7f3a-9c6e-2d8f0a1b3c4d"
 	lines := []string{
 		`{"type":"session","version":3,"id":"` + id + `","timestamp":"2026-11-03T09:30:52.410Z","cwd":"/work/app"}`,
-		`{"type":"model_change","id":"a1b2c3d4","parentId":null,"timestamp":"2026-11-03T09:30:52.611Z","provider":"magpie-beedee1a","modelId":"zcode/GLM-5.3"}`,
+		`{"type":"model_change","id":"a1b2c3d4","parentId":null,"timestamp":"2026-11-03T09:30:52.611Z","provider":"myna-beedee1a","modelId":"zcode/GLM-5.3"}`,
 		`{"type":"thinking_level_change","id":"b2c3d4e5","parentId":"a1b2c3d4","timestamp":"2026-11-03T09:30:52.611Z","thinkingLevel":"high"}`,
 		`{"type":"message","id":"c3d4e5f6","parentId":"b2c3d4e5","timestamp":"2026-11-03T09:30:57.802Z","message":{"role":"user","content":[{"type":"text","text":"hi"}],"timestamp":1793611857800}}`,
-		`{"type":"message","id":"d4e5f6a7","parentId":"c3d4e5f6","timestamp":"2026-11-03T09:31:03.122Z","message":{"role":"assistant","content":[{"type":"text","text":"Hello!"}],"api":"openai-completions","provider":"magpie-beedee1a","model":"zcode/GLM-5.3","usage":{"input":135,"output":37,"cacheRead":84736,"cacheWrite":0,"reasoning":0,"totalTokens":84908,"cost":{"input":0,"output":0,"cacheRead":0,"cacheWrite":0,"total":0}},"stopReason":"stop","timestamp":1793611857830,"responseId":"chatcmpl-5d2e","durationMs":5292,"thinkingLevel":"high"}}`,
+		`{"type":"message","id":"d4e5f6a7","parentId":"c3d4e5f6","timestamp":"2026-11-03T09:31:03.122Z","message":{"role":"assistant","content":[{"type":"text","text":"Hello!"}],"api":"openai-completions","provider":"myna-beedee1a","model":"zcode/GLM-5.3","usage":{"input":135,"output":37,"cacheRead":84736,"cacheWrite":0,"reasoning":0,"totalTokens":84908,"cost":{"input":0,"output":0,"cacheRead":0,"cacheWrite":0,"total":0}},"stopReason":"stop","timestamp":1793611857830,"responseId":"chatcmpl-5d2e","durationMs":5292,"thinkingLevel":"high"}}`,
 		`{"type":"message","id":"e5f6a7b8","parentId":"d4e5f6a7","timestamp":"2026-11-03T09:32:10.001Z","message":{"role":"user","content":[{"type":"text","text":"again"}],"timestamp":1793611930000}}`,
-		`{"type":"message","id":"f6a7b8c9","parentId":"e5f6a7b8","timestamp":"2026-11-03T09:32:12.500Z","message":{"role":"assistant","content":[{"type":"text","text":"ok"}],"api":"openai-completions","provider":"magpie-relay","model":"glm-5","usage":{"input":40,"output":5,"cacheRead":0,"cacheWrite":0,"reasoning":0,"totalTokens":45,"cost":{"input":0,"output":0,"cacheRead":0,"cacheWrite":0,"total":0}},"stopReason":"stop","timestamp":1793611930010,"responseId":"chatcmpl-6e3f","durationMs":2400,"thinkingLevel":"high"}}`,
+		`{"type":"message","id":"f6a7b8c9","parentId":"e5f6a7b8","timestamp":"2026-11-03T09:32:12.500Z","message":{"role":"assistant","content":[{"type":"text","text":"ok"}],"api":"openai-completions","provider":"myna-relay","model":"glm-5","usage":{"input":40,"output":5,"cacheRead":0,"cacheWrite":0,"reasoning":0,"totalTokens":45,"cost":{"input":0,"output":0,"cacheRead":0,"cacheWrite":0,"total":0}},"stopReason":"stop","timestamp":1793611930010,"responseId":"chatcmpl-6e3f","durationMs":2400,"thinkingLevel":"high"}}`,
 	}
 	p := filepath.Join(global, "2026-11-03T09-30-52-410Z_"+id+".jsonl")
 	if err := os.WriteFile(p, []byte(strings.Join(lines, "\n")+"\n"), 0o600); err != nil {
@@ -176,23 +176,23 @@ func TestCindyGatewayCallsCountedOnce(t *testing.T) {
 		if c.Session != id {
 			continue
 		}
-		if c.Upstream == "magpie-beedee1a" {
-			t.Errorf("a call through magpie's link in Cindy counted as Cindy's own: %+v", c)
+		if c.Upstream == "myna-beedee1a" {
+			t.Errorf("a call through myna's link in Cindy counted as Cindy's own: %+v", c)
 		}
-		if c.Upstream == "magpie-relay" && c.Agent == "cindy" && c.Tokens == (Tokens{Input: 40, Output: 5}) {
+		if c.Upstream == "myna-relay" && c.Agent == "cindy" && c.Tokens == (Tokens{Input: 40, Output: 5}) {
 			own++
 		}
 	}
 	if own != 1 {
-		t.Fatalf("the call on the user's own magpie-relay counted %d times, want 1", own)
+		t.Fatalf("the call on the user's own myna-relay counted %d times, want 1", own)
 	}
 	// Pi's own files name providers the user chose: the shape is Cindy's alone
-	if piGateway("pi", "magpie-beedee1a") || !piGateway("pi", "magpie") || !piGateway("cindy", "magpie-beedee1a") {
+	if piGateway("pi", "myna-beedee1a") || !piGateway("pi", "myna") || !piGateway("cindy", "myna-beedee1a") {
 		t.Fatal("piGateway's scope")
 	}
-	for _, s := range []string{"magpie-2", "magpie-BEEDEE1A", "magpie-beedee1", "magpie-beedee1a0", "magpie-beedee1g"} {
+	for _, s := range []string{"myna-2", "myna-BEEDEE1A", "myna-beedee1", "myna-beedee1a0", "myna-beedee1g"} {
 		if cindyGatewayProvider(s) {
-			t.Errorf("%q taken for magpie's link", s)
+			t.Errorf("%q taken for myna's link", s)
 		}
 	}
 }

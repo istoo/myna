@@ -81,7 +81,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://myna.test/?view=providers");
 
       const editor = page.locator("#modal:not([hidden]) .editor");
       await page.locator(".row.provider", { hasText: "Our Free Model" }).click();
@@ -137,12 +137,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
       // the Routing page's card of a group of two alike says each one's source
       await page.evaluate(() => document.querySelector("#tellAnchor")?.remove());
-      await page.goto("http://magpie.test/?view=routing");
+      await page.goto("http://myna.test/?view=routing");
       const mem = page.locator("#view-routing .mem", { hasText: "DeepSeek-V4.1-Flash" }).first();
       await mem.waitFor();
       const said = await mem.textContent();
       assert.ok(said.includes("DeepSeek-V4.1-Flash · buddy") && said.includes("DeepSeek-V4.1-Flash · cline"), said);
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://myna.test/?view=providers");
       await page.locator(".row.provider", { hasText: "Our Free Model" }).click();
       await editor.locator(".mchips .mchip").first().waitFor();
 

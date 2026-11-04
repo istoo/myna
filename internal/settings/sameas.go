@@ -7,7 +7,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/yetone/magpie/internal/catalog"
+	"github.com/istoo/myna/internal/catalog"
 )
 
 // The catalog hears what the user said a model is the same as

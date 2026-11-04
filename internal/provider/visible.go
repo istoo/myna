@@ -6,15 +6,15 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // Which of the catalog an agent is shown. Settings' Visible names, for an
 // agent, the families its lists hold: a family is the tag providers and
-// groups are given (magpie provider set <id> family=relay), and a
+// groups are given (myna provider set <id> family=relay), and a
 // provider's or group's id names it alone. The gateway's model list and
-// what magpie writes into the agents' files both come from CatalogFor, so
+// what myna writes into the agents' files both come from CatalogFor, so
 // the two never differ.
 
 // Names are what an entry answers to in a visibility: its family, and its
@@ -54,7 +54,7 @@ func Shows(names []string, e Entry) bool {
 // Described is set by the gateway: whether an image sent to a model that
 // can't see is described to it by one that can (Settings › Vision). Agents
 // are then told every model takes images; told a model is text-only, they
-// turn the user's image away before magpie is asked (Codex: "does not
+// turn the user's image away before myna is asked (Codex: "does not
 // support image input").
 var Described func() bool
 
@@ -297,13 +297,13 @@ func SetHiddenModels(agent string, ids []string) error {
 }
 
 // OwnModelsHidden reports whether agent's pickers leave out the models it
-// reaches on its own, offering magpie's alone (#1642).
+// reaches on its own, offering myna's alone (#1642).
 func OwnModelsHidden(agent string) bool {
 	return slices.Contains(heldSettings().OwnModelsHidden, strings.ToLower(strings.TrimSpace(agent)))
 }
 
 // SetOwnModelsHidden switches agent's pickers between offering its own
-// models beside magpie's and offering magpie's alone.
+// models beside myna's and offering myna's alone.
 func SetOwnModelsHidden(agent string, on bool) error {
 	agent = strings.ToLower(strings.TrimSpace(agent))
 	if agent == "" {
@@ -360,7 +360,7 @@ func ModelOrder(agent string) []string {
 
 // SetModelOrder lists agent's models in this order, by entry id: the ones
 // it names first, as it names them, then every other as before; none puts
-// them back in magpie's own order. Only agent's lists follow it.
+// them back in myna's own order. Only agent's lists follow it.
 func SetModelOrder(agent string, ids []string) error {
 	agent = strings.ToLower(strings.TrimSpace(agent))
 	if agent == "" {
@@ -394,7 +394,7 @@ func SetModelOrder(agent string, ids []string) error {
 // InOrder is es in agent's order: the entries ModelOrder names first, as it
 // names them, then the rest as they come — a model added since goes after.
 // Codex's own, a ChatGPT account's models, lead the rest, as Codex's list
-// has them before magpie's.
+// has them before myna's.
 func InOrder(agent string, es []Entry) []Entry {
 	order := ModelOrder(agent)
 	if len(order) == 0 {

@@ -69,7 +69,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           // in a browser tab the window opens a page itself
           await page.exposeFunction("__opened", (u) => opens.push(u));
           await page.addInitScript(() => { window.open = (u) => { window.__opened(String(u)); return {}; }; });
-          await page.goto("http://magpie.test/?view=providers");
+          await page.goto("http://myna.test/?view=providers");
           await page.locator("#addProvider").click();
           const sheet = page.locator("#addSheet");
           await sheet.locator('.tile[data-pick="FakeCo"]').click();

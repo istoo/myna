@@ -6,7 +6,7 @@
 // with Unhide; the line itself is legible, not the page's faintest grey;
 // and a hidden card a menu bar cell showed (usagePeek) offers "Show in
 // Overview" in its menu, not Hide again. Every language, both engines, a
-// wide window, a narrow one and magpie web on a phone; no backend, the API
+// wide window, a narrow one and myna web on a phone; no backend, the API
 // is faked.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -27,7 +27,7 @@ const G = (id, name, tokens, icon) => ({ id, name, icon: icon || "generic", call
 const AGENTS = [G("pi", "Pi", 900000, "pi"), G("curl", "curl", 40000)];
 const USAGE = {
   calls: 20, errors: 0, input: 939800, output: 200, reasoning: 0, cache_read: 0, cache_write: 0, unpriced: 0, cost: 0, bucket: "day",
-  series: [], path: "~/.config/magpie/usage.jsonl", agents: AGENTS, models: [{ ...G("m", "glm-5", 940000), model: "glm-5" }],
+  series: [], path: "~/.config/myna/usage.jsonl", agents: AGENTS, models: [{ ...G("m", "glm-5", 940000), model: "glm-5" }],
 };
 
 function server(lang, web, saved) {
@@ -97,7 +97,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             p.setDefaultNavigationTimeout(60000);
             p.on("pageerror", (e) => errors.push(e.message));
             await p.route("**/*", server(lang, web, saved));
-            await p.goto("http://magpie.test/?view=usage" + query);
+            await p.goto("http://myna.test/?view=usage" + query);
             // the first load of the whole app, on a busy machine
             await p.locator("#subscriptionUsage .subscription-card").first().waitFor({ timeout: 20000 });
             await p.locator("#usageAgents .row.stat").first().waitFor({ timeout: 20000 });

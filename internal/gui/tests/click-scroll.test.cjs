@@ -73,7 +73,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     // go below and the bar scrolls away first
     async function reset(width = 1100) {
       await page.setViewportSize({ width, height: 640 });
-      await page.goto("http://magpie.test/?view=routing");
+      await page.goto("http://myna.test/?view=routing");
       await dayButtons.nth(1).waitFor();
     }
     // the reader scrolls the view till sel is y under its top, or less
@@ -338,7 +338,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     // put back, as it does at once.
     await t.test("a wheel heard after the wait for unheard wheels is still the reader's", async () => {
       await reset();
-      await page.evaluate(() => localStorage.setItem("magpie.unheardWheels", "1"));
+      await page.evaluate(() => localStorage.setItem("myna.unheardWheels", "1"));
       await reset();
       await page.locator(view).evaluate((v) => { const s = document.createElement("div"); s.style.cssText = "flex:none;height:1600px"; v.append(s); });
       await page.evaluate(() => { window.__lateWheel = true; window.__lateBy = 250; });
@@ -350,7 +350,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.waitForFunction((n) => window.__wheelsHeard > n, n);
       await page.waitForFunction(() => performance.now() >= purposeUntil);
       assert((await scrollTop()) > was + 100, "the wheel heard 250ms late must scroll the view");
-      await page.evaluate(() => { window.__lateWheel = false; window.__lateBy = 0; localStorage.removeItem("magpie.unheardWheels"); });
+      await page.evaluate(() => { window.__lateWheel = false; window.__lateBy = 0; localStorage.removeItem("myna.unheardWheels"); });
     });
 
     assert.deepEqual(errors, [], "page runtime errors");

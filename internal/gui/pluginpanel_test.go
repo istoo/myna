@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // copyTree copies a testdata folder to to.
@@ -46,7 +46,7 @@ func panelPlugins(t *testing.T) (on, off, first, second string) {
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(h, ".config"))
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(h, ".cache"))
 	t.Setenv("XDG_DATA_HOME", filepath.Join(h, ".local", "share"))
-	t.Setenv("MAGPIE_BUN", "")
+	t.Setenv("MYNA_BUN", "")
 	t.Setenv("PATH", "")
 	on, off = filepath.Join(h, "src", "notes"), filepath.Join(h, "src", "notes-off")
 	first, second = filepath.Join(h, "src", "usage-a"), filepath.Join(h, "src", "usage-b")
@@ -84,9 +84,9 @@ func TestPluginPanelsServedShutIn(t *testing.T) {
 		t.Fatalf("panels: %s %v", w.Body, err)
 	}
 	want := []struct{ slot, title, key string }{
-		{"provider", "Notes", "plugin-magpie-provider-notes-0"},
-		{"usage", "Top models today", "plugin-magpie-provider-notes-1"},
-		{"settings", "Provider notes", "plugin-magpie-provider-notes-2"},
+		{"provider", "Notes", "plugin-myna-provider-notes-0"},
+		{"usage", "Top models today", "plugin-myna-provider-notes-1"},
+		{"settings", "Provider notes", "plugin-myna-provider-notes-2"},
 	}
 	toks := map[string]bool{}
 	for i, p := range panels {

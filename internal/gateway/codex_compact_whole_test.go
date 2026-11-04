@@ -5,10 +5,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
-// #2274 (huangzuomin): Codex compacting through magpie on
+// #2274 (huangzuomin): Codex compacting through myna on
 // antigravity/gemini-3.8-flash asked for 1169 summaries in 6 hours. Each
 // summary's stream was let through at its first words, so Antigravity
 // cutting it short ("the reply ended before it was complete"), or a 429
@@ -116,7 +116,7 @@ func TestCodexCompactCutSummaryFailsOver(t *testing.T) {
 // With nobody left, a summary that failed or ended incomplete is no
 // summary: Codex is told why, and not handed the words before the failure
 // as the conversation's summary. (One whose stream merely broke off is
-// followed by magpie's own summary, TestCodexCompactCutAloneCompactsLocally.)
+// followed by myna's own summary, TestCodexCompactCutAloneCompactsLocally.)
 func TestCodexCompactCutSummaryIsNoSummary(t *testing.T) {
 	for name, cut := range cutReplies(provider.Responses) {
 		if name == "cut" {
@@ -126,7 +126,7 @@ func TestCodexCompactCutSummaryIsNoSummary(t *testing.T) {
 			f := &fake{t: t, reply: cut}
 			setup(t, provider.Responses, f)
 			code, body := codexPost(t, compact404Request)
-			if code < 400 || strings.Contains(body, magpieCompaction) {
+			if code < 400 || strings.Contains(body, mynaCompaction) {
 				t.Fatalf("%d %s", code, body)
 			}
 		})
@@ -134,7 +134,7 @@ func TestCodexCompactCutSummaryIsNoSummary(t *testing.T) {
 }
 
 // With nobody left to fail over to, a summary stream the candidate cut
-// short is followed by magpie's own summary, as when no model can be asked
+// short is followed by myna's own summary, as when no model can be asked
 // at all (#3526): Codex, told a 502, asked the same huge summary over three
 // times and the guard then held the conversation, unable to compact or go
 // on. The words before the cut are never the summary, and the cut summary
@@ -169,7 +169,7 @@ func TestCodexCompactCutAloneCompactsLocally(t *testing.T) {
 // clears the count.
 func TestCodexCompactKeepsFailingIsHeld(t *testing.T) {
 	// a summary that ended incomplete still fails: only one whose stream
-	// merely broke off is magpie's own now (#3526)
+	// merely broke off is myna's own now (#3526)
 	f := &fake{t: t, reply: cutReplies(provider.Responses)["incomplete"]}
 	setup(t, provider.Responses, f)
 	s := New()
@@ -210,7 +210,7 @@ func TestCodexCompactKeepsFailingIsHeld(t *testing.T) {
 // The same cut reaches codexCompact in two more shapes (Edward4226 on
 // #3526): an error event saying it, and a 502 whose message is it — a
 // translated reply serve held whole and found cut, or a relay in front
-// passing that on. Each is followed by magpie's own summary too, never
+// passing that on. Each is followed by myna's own summary too, never
 // asked again as text; a 502 saying anything else stays Codex's failure.
 func TestCodexCompactCutShapesCompactLocally(t *testing.T) {
 	cut := "fake: " + errEndedShort.Error()
@@ -243,7 +243,7 @@ func TestCodexCompactCutShapesCompactLocally(t *testing.T) {
 	t.Run("HTTP 502 saying more", func(t *testing.T) {
 		f := &fake{t: t, code: 502, ctype: "application/json", reply: `{"error":{"message":"` + cut + `; and the relay is down"}}`}
 		setup(t, provider.Responses, f)
-		if code, body := codexPost(t, compact404Request); code != 502 || strings.Contains(body, magpieCompaction) {
+		if code, body := codexPost(t, compact404Request); code != 502 || strings.Contains(body, mynaCompaction) {
 			t.Fatalf("%d %s", code, body)
 		}
 	})

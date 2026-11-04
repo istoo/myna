@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // pluginMarksBody is a non-stream Messages ask of the shape Claude Code's
@@ -163,13 +163,13 @@ func TestPluginWholeAskedMentioningMarksIsMarkedAsBefore(t *testing.T) {
 	}
 	last := wire.Messages[len(wire.Messages)-1].Content
 	if cc, ok := last[len(last)-1]["cache_control"].(map[string]any); !ok || cc["ttl"] != nil {
-		t.Errorf("the tail is %v, want magpie's five-minute mark", last[len(last)-1]["cache_control"])
+		t.Errorf("the tail is %v, want myna's five-minute mark", last[len(last)-1]["cache_control"])
 	}
 	if len(wire.System) != 1 {
 		t.Fatalf("system %v", wire.System)
 	}
 	if cc, ok := wire.System[0]["cache_control"].(map[string]any); !ok || cc["ttl"] != nil {
-		t.Errorf("the system is %v, want magpie's five-minute mark", wire.System[0]["cache_control"])
+		t.Errorf("the system is %v, want myna's five-minute mark", wire.System[0]["cache_control"])
 	}
 }
 

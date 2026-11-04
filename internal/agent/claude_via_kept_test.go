@@ -7,14 +7,14 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
-// Claude Code's magpie list is kept as viaMagpie is: its model and tier
+// Claude Code's myna list is kept as viaMyna is: its model and tier
 // fields asked it each poll, for the picker and again for Drift, built
 // anew each time (30 MB of forty polls with real accounts). Each caller
 // still has a copy of its own, and a provider saved since is offered.
-func TestClaudeViaMagpieKept(t *testing.T) {
+func TestClaudeViaMynaKept(t *testing.T) {
 	syncHome(t)
 	models := []string{"claude-opus-5-5", "gpt-5.4"}
 	for i := range 100 {
@@ -25,7 +25,7 @@ func TestClaudeViaMagpieKept(t *testing.T) {
 	}
 	values := func() map[string]bool {
 		out := map[string]bool{}
-		for _, o := range claudeViaMagpie(false) {
+		for _, o := range claudeViaMyna(false) {
 			out[o.Value] = true
 		}
 		return out
@@ -34,11 +34,11 @@ func TestClaudeViaMagpieKept(t *testing.T) {
 		t.Fatalf("oa's models not offered: %v", got)
 	}
 	built := testing.AllocsPerRun(5, func() { buildClaudeVia(false) })
-	kept := testing.AllocsPerRun(20, func() { claudeViaMagpie(false) })
+	kept := testing.AllocsPerRun(20, func() { claudeViaMyna(false) })
 	if kept > 20 || kept*5 > built {
 		t.Fatalf("Claude Code's options already built took %.0f allocations, building them %.0f", kept, built)
 	}
-	mine := claudeViaMagpie(false)
+	mine := claudeViaMyna(false)
 	for i := range mine {
 		mine[i].Value = "x"
 	}
@@ -57,12 +57,12 @@ func TestClaudeViaMagpieKept(t *testing.T) {
 		field[i].Value = "x"
 	}
 	for _, fold := range []bool{false, true} {
-		if slices.ContainsFunc(claudeViaMagpie(fold), func(o Option) bool { return o.Value == "x" }) {
+		if slices.ContainsFunc(claudeViaMyna(fold), func(o Option) bool { return o.Value == "x" }) {
 			t.Fatalf("a write to the model field's options reached the options kept (folded %v)", fold)
 		}
 	}
 	// folded and not are kept apart
-	for _, o := range claudeViaMagpie(true) {
+	for _, o := range claudeViaMyna(true) {
 		if o.Value == "x" {
 			t.Fatal("the folded list is the other one")
 		}

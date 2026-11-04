@@ -5,11 +5,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // postAs sends body to path with agent's own token, as the agent wired to
-// magpie does.
+// myna does.
 func postFrom(t *testing.T, s *Server, agent, path, body string) Route {
 	t.Helper()
 	rec := httptest.NewRecorder()

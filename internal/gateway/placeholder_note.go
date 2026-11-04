@@ -8,16 +8,16 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/redact"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/redact"
 )
 
 // placeholderNote tells a model that the placeholders masking put in a
 // request stand for real values that are put back before anything runs,
 // so it uses them as written: a less able model refused to search with
 // one, asked to verify it, or wrote it as "an example name" (treeMan on
-// Discord). It goes to the vendor, so it names neither magpie nor any
-// vendor or client (LESSONS: text magpie adds to a prompt), and it is the
+// Discord). It goes to the vendor, so it names neither myna nor any
+// vendor or client (LESSONS: text myna adds to a prompt), and it is the
 // same on every turn, so a cached prefix stays cached. Its example isn't
 // a placeholder masking writes (a 1 isn't in its alphabet), so it is
 // never taken for one or put back.

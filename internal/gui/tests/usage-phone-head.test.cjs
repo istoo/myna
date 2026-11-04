@@ -97,9 +97,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
-        await page.addInitScript(() => { localStorage.setItem("magpie.usageTab", "requests"); localStorage.setItem("magpie.usageEvery", "5"); });
+        await page.addInitScript(() => { localStorage.setItem("myna.usageTab", "requests"); localStorage.setItem("myna.usageEvery", "5"); });
         await page.route("**/*", serve(lang, true));
-        await page.goto("http://magpie.test/?view=usage");
+        await page.goto("http://myna.test/?view=usage");
         await page.waitForFunction(() => document.querySelector("table.led tbody tr") && document.querySelector("#usageRangeMenu").offsetWidth);
         await page.waitForTimeout(200);
         const h = await page.evaluate(HEAD);
@@ -168,9 +168,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     t.after(() => browser.close());
     const page = await (await browser.newContext({ viewport: { width: 1100, height: 800 } })).newPage();
-    await page.addInitScript(() => localStorage.setItem("magpie.usageTab", "requests"));
+    await page.addInitScript(() => localStorage.setItem("myna.usageTab", "requests"));
     await page.route("**/*", serve("en", false));
-    await page.goto("http://magpie.test/?view=usage");
+    await page.goto("http://myna.test/?view=usage");
     await page.waitForFunction(() => document.querySelector("#period .opt"));
     const h = await page.evaluate(HEAD);
     assert.ok(h.period, "the strip shows");

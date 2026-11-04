@@ -68,13 +68,13 @@ func TestHeadersTakeTheConversation(t *testing.T) {
 		switch s.path {
 		case "POST /v1/responses":
 			asked++
-			if !strings.HasPrefix(s.session, "magpie-test-") || s.session != s.key || s.route != "s="+s.key+";t="+s.key {
+			if !strings.HasPrefix(s.session, "myna-test-") || s.session != s.key || s.route != "s="+s.key+";t="+s.key {
 				t.Errorf("a test's header isn't its body's session: %+v", s)
 			}
 			tests[s.session] = true
 		case "GET /v1/models":
 			listed++
-			if !strings.HasPrefix(s.session, "magpie-") || strings.HasPrefix(s.session, "magpie-test-") || s.route != "s="+s.session+";t="+s.session {
+			if !strings.HasPrefix(s.session, "myna-") || strings.HasPrefix(s.session, "myna-test-") || s.route != "s="+s.session+";t="+s.session {
 				t.Errorf("a list's header: %+v", s)
 			}
 		}
@@ -104,7 +104,7 @@ func TestSentHeaders(t *testing.T) {
 		t.Errorf("no thread: %q", h)
 	}
 	a, b := p.SentHeaders(context.Background()), p.SentHeaders(context.Background())
-	if !strings.HasPrefix(a["X-S"], "magpie-") || len(a["X-S"]) != len("magpie-")+12 || a["X-T"] != a["X-S"] || a["X-S"] == b["X-S"] {
+	if !strings.HasPrefix(a["X-S"], "myna-") || len(a["X-S"]) != len("myna-")+12 || a["X-T"] != a["X-S"] || a["X-S"] == b["X-S"] {
 		t.Errorf("own ids %q %q", a, b)
 	}
 	plain := Provider{Headers: map[string]string{"X-P": "v"}}

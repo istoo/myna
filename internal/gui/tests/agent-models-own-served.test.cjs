@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Codex's own models that magpie's list shows it too, a ChatGPT account's
+// Codex's own models that myna's list shows it too, a ChatGPT account's
 // (served), stay in its model picker when its own models are switched off
 // in its list (shiqi_40904 on Discord: with a routing group on, Codex's
 // picker was the group alone). The picker drops the others at once on
@@ -16,7 +16,7 @@ const { chromium, webkit } = require("playwright");
 const assets = path.resolve(__dirname, "../assets");
 
 const served = ["gpt-5.5", "gpt-5.4", "gpt-5.4-mini"].map((v) => ({ value: v, note: "", group: "OpenAI", icon: "openai", via: true, served: true }));
-// one Codex lists that magpie doesn't serve: the switch's to take out
+// one Codex lists that myna doesn't serve: the switch's to take out
 const lone = { value: "gpt-oss-lone", note: "", group: "OpenAI", icon: "openai", via: true };
 const grp = { value: "group/mygpt", label: "MyGPT", ref: "group/mygpt", note: "routing group", group: "Routing groups", icons: ["codex-color"] };
 const list = [
@@ -98,7 +98,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           }
           await browser.close();
         });
-        await page.goto("http://magpie.test/?view=agents");
+        await page.goto("http://myna.test/?view=agents");
         await page.locator(row).waitFor();
         const pop = page.locator(".am-pop:not(.leaving)");
         const picked = async () => {

@@ -14,7 +14,7 @@ import (
 // once, and keeps every other agent's shards.
 func TestCallParseVersionRaiseReadsThatAgentAlone(t *testing.T) {
 	d := setupCalls(t)
-	// from a magpie whose agents' calls are all at 0, whatever they are now
+	// from a myna whose agents' calls are all at 0, whatever they are now
 	before := callParseVersions
 	callParseVersions = map[string]int{}
 	t.Cleanup(func() { callParseVersions = before })

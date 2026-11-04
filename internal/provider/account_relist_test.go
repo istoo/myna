@@ -11,10 +11,10 @@ import (
 	"time"
 )
 
-// A model the vendor adds to a signed-in account's plan reaches magpie
-// without Refresh: the gateway's magpie asks for the account's list again
+// A model the vendor adds to a signed-in account's plan reaches myna
+// without Refresh: the gateway's myna asks for the account's list again
 // once it is accountListAge old (cliff_26651 on Discord: GPT-6.1 Terra,
-// served to ChatGPT accounts on 10-26, missing from Codex through magpie,
+// served to ChatGPT accounts on 10-26, missing from Codex through myna,
 // whose list of the account was fetched on 10-12). A list still fresh
 // isn't asked for, and one that can't be had keeps the last.
 func TestAccountListFollowsTheVendor(t *testing.T) {
@@ -65,7 +65,7 @@ func TestAccountListFollowsTheVendor(t *testing.T) {
 		t.Fatalf("FetchNew: asked %d, serves %v", n, served())
 	}
 
-	// OpenAI adds a model; the list magpie has is a minute old
+	// OpenAI adds a model; the list myna has is a minute old
 	added.Store(true)
 	ctx := context.Background()
 	if got := relistAccounts(ctx, time.Now()); len(got) != 0 || asked.Load() != 1 {

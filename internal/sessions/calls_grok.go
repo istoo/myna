@@ -13,7 +13,7 @@ import (
 	toml "github.com/pelletier/go-toml/v2"
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/filememo"
+	"github.com/istoo/myna/internal/filememo"
 )
 
 // Grok Build's own calls (#4423, liubing0806: its direct calls to x.ai
@@ -26,18 +26,18 @@ import (
 // fork counts the lines written from its created_at on: what it copied
 // from its source is older, and was counted where it was first written.
 //
-// A turn asked through magpie's gateway is the gateway's to count, and is
+// A turn asked through myna's gateway is the gateway's to count, and is
 // left out here. Matching it to the gateway's records can't be relied on:
 // a turn_completed sums every request of the turn per model (modelCalls 4
 // on a real one, 7 and 17 in liubing0806's), the gateway logs each request,
 // and the model the sum is keyed by is the one the reply named
-// (moonshotai/Kimi-K3 for a turn asked on magpie's group/auto-kimi-k3), so
+// (moonshotai/Kimi-K3 for a turn asked on myna's group/auto-kimi-k3), so
 // gatewayMatches would leave such a turn in Local session beside the
 // gateway's own rows. Which model a turn was asked on is in its prompt's
 // user_message_chunk (_meta.modelId: "group/auto-kimi-k3" for the
-// [model."magpie/group/auto-kimi-k3"] table magpie writes in config.toml,
+// [model."myna/group/auto-kimi-k3"] table myna writes in config.toml,
 // "grok-4.7" for Grok's own), so a turn is the gateway's when that model
-// is one of magpie's tables (grokGateway). Anything not told apart that
+// is one of myna's tables (grokGateway). Anything not told apart that
 // way still goes through gatewayMatches as the others' calls do.
 //
 // Grok Build only appends to updates.jsonl, a line an event, so a file
@@ -145,13 +145,13 @@ func grokCallLine(st *callFile, b []byte) {
 	}
 }
 
-// grokGateway is whether a turn asked on model went through magpie's
-// gateway: the model is one of the [model."magpie/…"] tables magpie writes
+// grokGateway is whether a turn asked on model went through myna's
+// gateway: the model is one of the [model."myna/…"] tables myna writes
 // in Grok Build's config.toml (internal/agent's grok.go), by the table's
 // name or its model (Grok names the turn's model by the latter), or names
-// magpie's prefix itself. A config.toml that can't be read tells nothing
-// more than the prefix: magpie writes its tables there, so a Grok Build
-// wired to magpie has one to read.
+// myna's prefix itself. A config.toml that can't be read tells nothing
+// more than the prefix: myna writes its tables there, so a Grok Build
+// wired to myna has one to read.
 func grokGateway(model string) bool {
 	if model == "" {
 		return false
@@ -162,9 +162,9 @@ func grokGateway(model string) bool {
 	return grokGatewayModels()[model]
 }
 
-const grokGatewayPrefix = "magpie/"
+const grokGatewayPrefix = "myna/"
 
-// grokGatewayModels are the models of magpie's tables in Grok Build's
+// grokGatewayModels are the models of myna's tables in Grok Build's
 // config.toml, read again only when it changes. What it gives is shared
 // and must not be changed.
 func grokGatewayModels() map[string]bool {

@@ -74,7 +74,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.setDefaultNavigationTimeout(60000);
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", f.route);
-      await page.goto("http://magpie.test/?view=providers&edit=relay");
+      await page.goto("http://myna.test/?view=providers&edit=relay");
       await name(page).waitFor();
       return { page, f, errors };
     };

@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // viaLists is what the gateway sent each session's calls to, and when each

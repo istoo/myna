@@ -13,7 +13,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // Note is one release's notes, as the app shows them after an update.
@@ -25,19 +25,20 @@ type Note struct {
 	Pending bool `json:"pending,omitempty"`
 }
 
-// NotesFeed is where the notes of past releases are listed: beside the
-// update feed, on magpie's site. MAGPIE_NOTES_FEED points it elsewhere.
+// NotesFeed is where the notes of past releases are listed: notesAsset in
+// the newest release of myna's own repository. MYNA_NOTES_FEED points it
+// elsewhere.
 func NotesFeed() string {
-	if f := os.Getenv("MAGPIE_NOTES_FEED"); f != "" {
+	if f := os.Getenv("MYNA_NOTES_FEED"); f != "" {
 		return f
 	}
-	return Site + "/api/notes"
+	return Site + "/releases/latest/download/" + notesAsset
 }
 
 // ReleasePage is version's page on GitHub, where its notes are when the
 // site can't give them (#661).
 func ReleasePage(version string) string {
-	return "https://github.com/yetone/magpie-releases/releases/tag/v" + strings.TrimPrefix(strings.TrimSpace(version), "v")
+	return "https://github.com/istoo/myna/releases/tag/v" + strings.TrimPrefix(strings.TrimSpace(version), "v")
 }
 
 // NotesBetween asks the site for the notes of every release after after
@@ -145,7 +146,7 @@ func withLang(feed, lang string) string {
 	return u.String()
 }
 
-// MaxNotes is how many releases' notes are shown at most: magpie releases
+// MaxNotes is how many releases' notes are shown at most: myna releases
 // often, and a long-unopened one would have pages of them.
 const MaxNotes = 40
 
@@ -166,7 +167,7 @@ func MostNotes() int {
 // Stable is whether Settings' Update channel is Stable: the update feed is
 // asked for a version a week, the newest that had been out three days as
 // the week began (Monday 00:00 UTC), or an urgent one (a security hole, a
-// ban risk, lost data) as soon as it is out. usemagpie.ai chooses it from
+// ban risk, lost data) as soon as it is out. github.com/istoo/myna chooses it from
 // the release list (site/worker.js, "The Stable channel"); a release is
 // urgent when a line of its notes starts with "**Urgent release:**".
 func Stable() bool { return settings.Load().UpdateChannel == settings.UpdateStable }
@@ -266,7 +267,7 @@ var heading = regexp.MustCompile(`^(#{1,6})\s+(.*?)\s*#*\s*$`)
 var installHeadings = []string{"Install", "安装", "安裝", "インストール"}
 
 // StripInstall takes a release's "Install" section (in any language) out of
-// its notes: the download links, which mean nothing to a magpie that just
+// its notes: the download links, which mean nothing to a myna that just
 // updated itself.
 // The section runs to the next heading of its level or above.
 func StripInstall(md string) string {
@@ -289,11 +290,11 @@ func StripInstall(md string) string {
 	return strings.TrimSpace(strings.Join(out, "\n"))
 }
 
-// ShowNotes decides, as magpie starts on current having last run as last
+// ShowNotes decides, as myna starts on current having last run as last
 // ("" when it never said), whether to show what changed since, and from
 // which version on (exclusive). Only an upgrade between releases shows:
 // not a fresh install, the same version again, a downgrade, or a build
-// from source. A magpie from before versions were kept has no last; when
+// from source. A myna from before versions were kept has no last; when
 // it was already in use (existed) its own version's notes are shown, from
 // "", which Between takes as upto's alone.
 func ShowNotes(last, current string, existed bool) (after string, show bool) {

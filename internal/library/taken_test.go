@@ -7,8 +7,8 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/agent"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // A file where an agent keeps its folder (~/.dsh, another tool's) is not

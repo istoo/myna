@@ -3,7 +3,7 @@ package gui
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/sessions"
+	"github.com/istoo/myna/internal/sessions"
 )
 
 // usage.CodexModelEffort's answer is shared by every ask: a session or a

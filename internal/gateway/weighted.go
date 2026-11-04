@@ -19,8 +19,8 @@ package gateway
 // it is one member, planned by its own.
 
 import (
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/routes"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/routes"
 )
 
 // keyWeight is a candidate's weight: its account's (provider.AccountWeights,

@@ -52,7 +52,7 @@ func TestStageStepsRoundAFileHeldOpen(t *testing.T) {
 	f.asset = asset(srv.URL, f.body)
 	d := cacheStage(f.exe)
 	os.MkdirAll(d, 0o755)
-	left := filepath.Join(d, "magpie.exe.new")
+	left := filepath.Join(d, "myna.exe.new")
 	os.WriteFile(left, f.body, 0o755) // the whole of it, as the reporter's
 	holdWritable(t, left)
 	if os.Remove(left) == nil {
@@ -86,8 +86,8 @@ func TestTrialWaitsForAHeldDownload(t *testing.T) {
 	t.Cleanup(func() { asideWaits, heldFor = waits, held })
 
 	dir := t.TempDir()
-	exe := filepath.Join(dir, "magpie.exe")
-	staged := filepath.Join(dir, "magpie.exe.new")
+	exe := filepath.Join(dir, "myna.exe")
+	staged := filepath.Join(dir, "myna.exe.new")
 	os.WriteFile(exe, []byte("old version"), 0o755)
 	os.WriteFile(staged, body, 0o755)
 	letGo := holdWritable(t, staged)
@@ -114,8 +114,8 @@ func TestTrialHeldForGoodIsNotBlocked(t *testing.T) {
 	shortWaits(t)
 
 	dir := t.TempDir()
-	exe := filepath.Join(dir, "magpie.exe")
-	staged := filepath.Join(dir, "magpie.exe.new")
+	exe := filepath.Join(dir, "myna.exe")
+	staged := filepath.Join(dir, "myna.exe.new")
 	os.WriteFile(exe, []byte("old version"), 0o755)
 	os.WriteFile(staged, body, 0o755)
 	letGo := holdWritable(t, staged)

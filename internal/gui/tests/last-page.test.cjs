@@ -15,7 +15,7 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
-const BASE = "http://magpie.test/";
+const BASE = "http://myna.test/";
 
 function server({ web = false, gateway = false } = {}) {
   return async (route) => {
@@ -52,7 +52,7 @@ async function open(page, url, want, where) {
   assert.deepEqual(await shown(page), { views: [want], on: want, scrolled: false }, where);
 }
 
-const keep = (page, v) => page.evaluate((x) => localStorage.setItem("magpie.lastView", x), v);
+const keep = (page, v) => page.evaluate((x) => localStorage.setItem("myna.lastView", x), v);
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   test(`${engine}: the window opens on the page last left`, async (t) => {
@@ -100,7 +100,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.deepEqual(errors, [], where);
       await context.close();
 
-      // magpie web in gateway mode: Agents and Library aren't there
+      // myna web in gateway mode: Agents and Library aren't there
       const gw = await browser.newContext({ viewport: { width, height: 640 }, reducedMotion: "reduce" });
       const gp = await gw.newPage();
       gp.setDefaultTimeout(5000);

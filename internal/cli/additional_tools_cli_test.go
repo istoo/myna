@@ -3,7 +3,7 @@ package cli
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // additional-tools=on has a provider's Responses API sent a tool Claude
@@ -14,7 +14,7 @@ func TestAdditionalToolsPair(t *testing.T) {
 	if err := applyPairs(&p, []string{"additional-tools=on"}); err != nil || !p.AdditionalTools {
 		t.Fatalf("on: %v %v", err, p.AdditionalTools)
 	}
-	// off turns magpie's own default off too (a ChatGPT account's, #4738)
+	// off turns myna's own default off too (a ChatGPT account's, #4738)
 	if err := applyPairs(&p, []string{"additional-tools=off"}); err != nil || p.AdditionalTools || !p.AdditionalToolsOff {
 		t.Fatalf("off: %v %v %v", err, p.AdditionalTools, p.AdditionalToolsOff)
 	}

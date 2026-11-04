@@ -10,7 +10,7 @@ import (
 // change saved is seen on the next ask.
 func TestAccountDiscoveryOffParsedOnce(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
-	t.Setenv("MAGPIE_NO_ACCOUNTS", "")
+	t.Setenv("MYNA_NO_ACCOUNTS", "")
 	s := Load()
 	s.NoAccountDiscovery = true
 	if err := Save(s); err != nil {

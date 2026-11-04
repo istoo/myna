@@ -83,14 +83,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang));
-      await page.addInitScript(() => { localStorage.setItem("magpie.usageTab", "sessions"); localStorage.setItem("magpie.sessRange", "all"); });
+      await page.addInitScript(() => { localStorage.setItem("myna.usageTab", "sessions"); localStorage.setItem("myna.sessRange", "all"); });
       const shot = async (name) => {
         if (!process.env.ARTIFACT_DIR) return;
         await fs.mkdir(process.env.ARTIFACT_DIR, { recursive: true });
         await page.locator("#sessChart").screenshot({ path: path.join(process.env.ARTIFACT_DIR, `${engine}-${lang}-calendar-${name}.png`) });
       };
       t.after(() => browser.close());
-      await page.goto("http://magpie.test/?view=usage");
+      await page.goto("http://myna.test/?view=usage");
       await page.locator("#sessChart .sess-cal i").first().waitFor();
 
       await t.test("a wide window: the weeks before fill the card", async () => {

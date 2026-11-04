@@ -12,12 +12,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/agentenv"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/agentenv"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/testenv"
 )
 
-// magpie quota refresh <provider> reads that card again, as its refresh
+// myna quota refresh <provider> reads that card again, as its refresh
 // button on the Usage page does, and shows it alone: the other providers'
 // vendors aren't asked, and a second run within 30 seconds asks nobody and
 // shows what was read (#2104).

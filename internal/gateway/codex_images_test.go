@@ -23,7 +23,7 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // The sizes Codex's own client gives images, from openai/codex's tests
@@ -229,7 +229,7 @@ func TestCodexImagesOnlyForChatGPT(t *testing.T) {
 }
 
 // An agent other than Codex — Pi's openai-codex, as ylorn's — asking a
-// ChatGPT account through magpie: the backend gets the screenshot at
+// ChatGPT account through myna: the backend gets the screenshot at
 // Codex's size, which takes the turn from past 1 MiB to under it.
 func TestCodexAccountGetsScreenshotAtCodexSize(t *testing.T) {
 	codexSignedIn(t, "spare@example.com")

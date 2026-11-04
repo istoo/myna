@@ -3,7 +3,7 @@ package gui
 import (
 	"strings"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // The main window opens as it was last left: at the size it was last given

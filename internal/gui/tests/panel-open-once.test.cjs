@@ -62,7 +62,7 @@ async function open(engine, lang, platform, t) {
   if (platform) await page.addInitScript((p) => Object.defineProperty(Navigator.prototype, "platform", { get: () => p }), platform);
   const calls = [];
   await page.route("**/*", handler(lang, calls));
-  await page.goto("http://magpie.test/?mode=panel");
+  await page.goto("http://myna.test/?mode=panel");
   await page.locator("#agents .row.agent").first().waitFor();
   return { page, calls, errors };
 }
@@ -98,7 +98,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.deepEqual((await footRow(page)).ids, ["profBtn", "quit"], "the foot's buttons");
       assert.equal((await page.locator(".foot #quit").textContent()).trim(), QUITS[lang]);
       // the app placed it above the tray (a bottom bar on Linux): the foot's
-      await page.evaluate(() => window.magpiePanelOpenAt("foot"));
+      await page.evaluate(() => window.mynaPanelOpenAt("foot"));
       assert.deepEqual(await openers(page), [["foot", name]], "moved to the foot as the app says");
       assert.deepEqual(errors, []);
     });
@@ -114,9 +114,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.equal((await page.locator(".foot #quit").textContent()).trim(), QUITS[lang]);
       await clicked(page, calls, ".foot #openMain");
       // a taskbar moved to the top: the app says head
-      await page.evaluate(() => window.magpiePanelOpenAt("head"));
+      await page.evaluate(() => window.mynaPanelOpenAt("head"));
       assert.deepEqual(await openers(page), [["head", name]], "back to the header as the app says");
-      await page.evaluate(() => window.magpiePanelOpenAt("sideways"));
+      await page.evaluate(() => window.mynaPanelOpenAt("sideways"));
       assert.deepEqual(await openers(page), [["head", name]], "an unknown side changes nothing");
       assert.deepEqual(errors, []);
     });

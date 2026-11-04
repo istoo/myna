@@ -17,7 +17,7 @@ const words = { en: { version: "Version", latest: "Up to date", check: "Check" }
 function server(lang, ctl) {
   const settings = {
     theme: "light", lang, tray: "panel", quotaLeft: false, currency: "usd", proxy: "", redact: false, redactWords: [],
-    version: "0.1.400", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425", proxyNow: "none", proxySource: "none",
+    version: "0.1.400", dir: "~/.config/myna", gateway: "http://127.0.0.1:3425", proxyNow: "none", proxySource: "none",
     visionModels: [], imageGenModels: [], workbuddyCheckins: [], lanURLs: [], fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
   };
   return async (route) => {
@@ -53,7 +53,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => { if (!/^ResizeObserver loop completed with undelivered notifications/.test(e.message)) errors.push(e.message); });
       await page.route("**/*", server(lang, ctl));
       await watchSettingsReads(page);
-      await page.goto("http://magpie.test/?view=settings&tab=about");
+      await page.goto("http://myna.test/?view=settings&tab=about");
       await settingsDrawn(page);
       const row = page.locator("#about .row.pref", { has: page.locator(".name", { hasText: w.version }) }).first();
       await row.locator(".sub", { hasText: w.latest }).waitFor();

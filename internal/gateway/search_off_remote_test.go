@@ -3,14 +3,14 @@ package gateway
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
 )
 
-// With provider search Off, this magpie's model list no longer tells
-// another magpie that a Kimi Code plan's models are searched for by it:
+// With provider search Off, this myna's model list no longer tells
+// another myna that a Kimi Code plan's models are searched for by it:
 // without a search API it adds no search tool to them (#1483).
-func TestSearchProviderOffTellsRemoteMagpie(t *testing.T) {
+func TestSearchProviderOffTellsRemoteMyna(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
 	setHome(t, t.TempDir())
@@ -21,8 +21,8 @@ func TestSearchProviderOffTellsRemoteMagpie(t *testing.T) {
 		t.Fatal(err)
 	}
 	e := provider.Entry{Provider: p, Model: "kimi-for-coding"}
-	if got := webSearchOf(e, canSearch()); got != searchMagpie {
-		t.Fatalf("automatic: %q, want %q", got, searchMagpie)
+	if got := webSearchOf(e, canSearch()); got != searchMyna {
+		t.Fatalf("automatic: %q, want %q", got, searchMyna)
 	}
 	st := settings.Load()
 	st.Searcher = "off"

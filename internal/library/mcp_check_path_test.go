@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/proc"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // #2685: a bare npx the check's PATH lacks is the one a terminal would run
@@ -24,7 +24,7 @@ func TestStdioProgramFindsWhatPathLacks(t *testing.T) {
 	t.Setenv("PATH", t.TempDir())
 	proc.Forget()
 	bin := filepath.Join(home, ".local", "bin")
-	name := "magpie-fake-npx"
+	name := "myna-fake-npx"
 	file := name
 	if runtime.GOOS == "windows" {
 		file += ".cmd"
@@ -38,7 +38,7 @@ func TestStdioProgramFindsWhatPathLacks(t *testing.T) {
 	if prog, found := stdioProgram(abs); prog != abs || found != "" {
 		t.Fatalf("a path: stdioProgram = %q, %q; want it as it is", prog, found)
 	}
-	if prog, found := stdioProgram("magpie-no-such-tool"); prog != "magpie-no-such-tool" || found != "" {
+	if prog, found := stdioProgram("myna-no-such-tool"); prog != "myna-no-such-tool" || found != "" {
 		t.Fatalf("nowhere: stdioProgram = %q, %q; want the name, for notfound", prog, found)
 	}
 	t.Setenv("PATH", bin)

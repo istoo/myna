@@ -2,7 +2,7 @@
 // Codex's "Codex thread descriptions" (#1198, congee949): Codex's
 // thread_description requests go where this says, apart from the titles'
 // setting. By default the session's model (cybercaius); the app's menu (no native
-// select) offers Off, as the titles' (cybercaius again), and magpie's models; a pick posts settings/codex-descriptions
+// select) offers Off, as the titles' (cybercaius again), and myna's models; a pick posts settings/codex-descriptions
 // on its own, the titles' setting untouched, its button shows the choice
 // under a name with no line of its own (as the titles' row, 1ooogle on X),
 // and no click scrolls the Agents page, where Codex's row holds it.
@@ -22,7 +22,7 @@ function settingsPayload(over) {
     dock: false, dockWindow: false, proxy: "", redact: false, redactPersonal: false, redactWords: [],
     codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", workbuddyCheckin: false, noStats: false,
     trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "",
-    version: "0.1.400", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425",
+    version: "0.1.400", dir: "~/.config/myna", gateway: "http://127.0.0.1:3425",
     proxyNow: "none", proxySource: "none", login: false,
     visionModels: [], imageGenModels: [], workbuddyCheckins: [], lanURLs: [],
     titleModels: [
@@ -93,7 +93,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await browser.close();
       });
       await watchSettingsReads(page);
-      await page.goto("http://magpie.test/?view=agents");
+      await page.goto("http://myna.test/?view=agents");
       await openAgentSettings(page); // on Codex's opened row, not in Settings (the owner, 10-20)
       const row = page.locator("#codexDescriptionsRow");
       const pick = page.locator("#codexDescriptionsPick button");
@@ -111,7 +111,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const before = await view(page);
       assert(before > 0, "the agents list must scroll to the row");
 
-      // the app's menu: the session's, Off and magpie's models
+      // the app's menu: the session's, Off and myna's models
       await pick.click();
       await page.locator("#pop:not([hidden]) #list li").first().waitFor();
       const items = (await page.locator("#list li:not(.group)").allTextContents()).join("|");
@@ -119,7 +119,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.keyboard.press("Escape");
       await page.locator("#pop:not([hidden])").waitFor({ state: "hidden" });
 
-      // a model of magpie's
+      // a model of myna's
       await pick.click();
       await page.locator("#pop:not([hidden]) #list li").first().waitFor();
       await page.locator("#list li:not(.group)").filter({ hasText: "DeepSeek V4 Flash" }).first().click();

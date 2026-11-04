@@ -16,9 +16,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // freshRoom gives the test a claudeRoom of its own, at most runs at once
@@ -245,13 +245,13 @@ func memFixture(t *testing.T, files map[string]string) string {
 }
 
 // The reporter's service (#2956): systemd's MemoryMax=512M on
-// magpie.service, cgroup v2, on a machine of 987728 kB. It holds 2.
+// myna.service, cgroup v2, on a machine of 987728 kB. It holds 2.
 func TestClaudeMemRunsFromTheCgroup(t *testing.T) {
 	root := memFixture(t, map[string]string{
 		"proc/meminfo":     "MemTotal:         987728 kB\nMemFree:           81200 kB\n",
-		"proc/self/cgroup": "0::/system.slice/magpie.service\n",
-		"sys/fs/cgroup/system.slice/magpie.service/memory.max":  "536870912\n",
-		"sys/fs/cgroup/system.slice/magpie.service/memory.high": "max\n",
+		"proc/self/cgroup": "0::/system.slice/myna.service\n",
+		"sys/fs/cgroup/system.slice/myna.service/memory.max":  "536870912\n",
+		"sys/fs/cgroup/system.slice/myna.service/memory.high": "max\n",
 		"sys/fs/cgroup/system.slice/memory.max":                 "max\n",
 	})
 	limit, why := memLimit("linux", root)
@@ -300,8 +300,8 @@ func TestClaudeMemRunsFromTheCgroup(t *testing.T) {
 // and read \memory.max forever, holding the whole suite (#4113).
 func TestClaudeMemWalkEndsAtRoot(t *testing.T) {
 	root := memFixture(t, map[string]string{
-		"proc/self/cgroup": "0::/system.slice/magpie.service\n",
-		"sys/fs/cgroup/system.slice/magpie.service/memory.max": "536870912\n",
+		"proc/self/cgroup": "0::/system.slice/myna.service\n",
+		"sys/fs/cgroup/system.slice/myna.service/memory.max": "536870912\n",
 	})
 	done := make(chan struct{})
 	var limit int64
@@ -315,7 +315,7 @@ func TestClaudeMemWalkEndsAtRoot(t *testing.T) {
 	case <-time.After(time.Minute):
 		t.Fatal("the cgroup walk never ended at \"/\"")
 	}
-	if limit != 536870912 || !strings.Contains(why, "system.slice/magpie.service") {
+	if limit != 536870912 || !strings.Contains(why, "system.slice/myna.service") {
 		t.Fatalf("limit %d (%s)", limit, why)
 	}
 }
@@ -353,8 +353,8 @@ func TestClaudeRunsMostTheUsersOwn(t *testing.T) {
 	oldGOOS, oldRoot := memGOOS, memRoot
 	memGOOS, memRoot = "linux", memFixture(t, map[string]string{
 		"proc/meminfo":     "MemTotal:         987728 kB\n",
-		"proc/self/cgroup": "0::/system.slice/magpie.service\n",
-		"sys/fs/cgroup/system.slice/magpie.service/memory.max": "536870912\n",
+		"proc/self/cgroup": "0::/system.slice/myna.service\n",
+		"sys/fs/cgroup/system.slice/myna.service/memory.max": "536870912\n",
 	})
 	t.Cleanup(func() { memGOOS, memRoot = oldGOOS, oldRoot })
 	if n, why := claudeRunsMost(); n != 2 || !strings.Contains(why, "512 MiB") {

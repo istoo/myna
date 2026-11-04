@@ -7,12 +7,12 @@ import (
 
 	"golang.org/x/sys/windows/registry"
 
-	"github.com/yetone/magpie/internal/appdir"
+	"github.com/istoo/myna/internal/appdir"
 )
 
-const schemeKey = `Software\Classes\magpie`
+const schemeKey = `Software\Classes\myna`
 
-// unregisterScheme takes out the magpie:// handler the app registered
+// unregisterScheme takes out the myna:// handler the app registered
 // while it opens exe, or an exe that is gone.
 func unregisterScheme(exe string) error {
 	k, err := registry.OpenKey(registry.CURRENT_USER, schemeKey+`\shell\open\command`, registry.QUERY_VALUE)
@@ -23,7 +23,7 @@ func unregisterScheme(exe string) error {
 	k.Close()
 	if run, _, ok := strings.Cut(strings.TrimPrefix(v, `"`), `"`); ok && !strings.EqualFold(filepath.Clean(run), filepath.Clean(exe)) {
 		if _, err := os.Stat(run); err == nil {
-			return nil // another magpie's
+			return nil // another myna's
 		}
 	}
 	for _, sub := range []string{`\shell\open\command`, `\shell\open`, `\shell`, `\DefaultIcon`, ``} {
@@ -34,8 +34,8 @@ func unregisterScheme(exe string) error {
 	return nil
 }
 
-// webData is WebView2's profile of an installed magpie: %APPDATA%\<exe
-// name>, and the one a magpie installed from a download keeps under the
+// webData is WebView2's profile of an installed myna: %APPDATA%\<exe
+// name>, and the one a myna installed from a download keeps under the
 // download's name (appdir.WebView, update.Settle). Portable, it is in the
 // data folder already.
 func webData() []string {

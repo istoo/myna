@@ -8,20 +8,20 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/access"
+	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/myna/internal/provider"
 )
 
-// synced runs an agent's sync, which brings magpie's models in its files up
-// to date, not where they are reached: a file whose magpie the user pointed
-// at a magpie on another machine (a NAS's, or this one's LAN address, coeo91
+// synced runs an agent's sync, which brings myna's models in its files up
+// to date, not where they are reached: a file whose myna the user pointed
+// at a myna on another machine (a NAS's, or this one's LAN address, coeo91
 // on Discord) keeps that address and its key, as ZCode's and WorkBuddy's
 // writers do on their own (zcodeAddress). Without it, every start and
-// update of magpie (SyncCatalog) put the agent back on 127.0.0.1.
+// update of myna (SyncCatalog) put the agent back on 127.0.0.1.
 //
-// What the filter (kept.away) needs of this magpie (the gateway's address, the LAN key)
+// What the filter (kept.away) needs of this myna (the gateway's address, the LAN key)
 // is read here, before the filter is on, never by the filter: every file
 // written through edit while it is on passes through it, on whichever
 // goroutine and under whichever lock wrote it. settings.Save, the window's
@@ -31,13 +31,13 @@ func synced(sync func() error) error {
 	return edit.Filtered(keeping().away, sync)
 }
 
-// kept is what kept.away knows of this magpie, read before a sync's writes:
+// kept is what kept.away knows of this myna, read before a sync's writes:
 // the gateway's address (gateway.URL) and the LAN sharing key.
 type kept struct{ gateway, lan string }
 
 func keeping() kept { return kept{gateway.URL(), access.LANSecret()} }
 
-// ours says v, with any "Bearer " before it, is a key magpie gives an
+// ours says v, with any "Bearer " before it, is a key myna gives an
 // agent: gateway.Token, one that names the agent (gateway.TokenFor), or the
 // LAN sharing key (ourKey's, as read before).
 func (k kept) ours(v string) bool {
@@ -45,12 +45,12 @@ func (k kept) ours(v string) bool {
 	return v == gateway.Token || v != "" && v == k.lan || strings.HasPrefix(v, gateway.Token+"-")
 }
 
-// magpieFile says path, a file edit is about to write (a link's target,
-// edit.Target), is in magpie's own folder, as it is named or where its
+// mynaFile says path, a file edit is about to write (a link's target,
+// edit.Target), is in myna's own folder, as it is named or where its
 // links lead: with ~/.config a link into a dotfiles repo, settings.json is
 // written at the repo's path (ylorn on Discord). A file not there yet has
 // its folder's links followed.
-func magpieFile(path string) bool {
+func mynaFile(path string) bool {
 	sep := string(filepath.Separator)
 	dir := filepath.Dir(provider.Path())
 	dirs := []string{dir}
@@ -81,7 +81,7 @@ var originRE = regexp.MustCompile(`https?://[A-Za-z0-9.\-_\[\]:%]+`)
 var keyLineRE = regexp.MustCompile(`(["']?)([A-Za-z0-9_\-]+)(["']?)[ \t]*[:=][ \t]*(?:"((?:[^"\\\n]|\\.)*)"|'([^'\n]*)'|([^\s"',{}\[\]#][^\n"',}\]#]*))`)
 
 // keyName says a key of that name holds what an agent sends the gateway to
-// be let in: apiKey, api_key, MAGPIE_QWEN_API_KEY, experimental_bearer_token,
+// be let in: apiKey, api_key, MYNA_QWEN_API_KEY, experimental_bearer_token,
 // Authorization (not max_tokens).
 func keyName(name string) bool {
 	n := strings.ToLower(strings.NewReplacer("_", "", "-", "").Replace(name))
@@ -111,23 +111,23 @@ func keyValues(b []byte) []keyValue {
 	return out
 }
 
-// away is data, a sync's write of the file at path, with magpie kept
+// away is data, a sync's write of the file at path, with myna kept
 // where the file had it on another machine. That is a file without the
 // gateway's own address (gateway.URL), with an address on another machine
-// and none a WSL distro was seen at (a distro's way to Windows is magpie's
+// and none a WSL distro was seen at (a distro's way to Windows is myna's
 // to move, wslMovedFrom). Where the write brings the gateway's address in
-// place of one on another machine, that one stays; where it brings magpie's
-// own key in place of another, in a file that had none of magpie's keys,
-// the other stays, with the path every URL there had before magpie's (a
-// reverse proxy's /magpie). An address on this machine's loopback
-// (another port, localhost) is magpie's own and follows the gateway, but
+// place of one on another machine, that one stays; where it brings myna's
+// own key in place of another, in a file that had none of myna's keys,
+// the other stays, with the path every URL there had before myna's (a
+// reverse proxy's /myna). An address on this machine's loopback
+// (another port, localhost) is myna's own and follows the gateway, but
 // for a local proxy's route, one with a path of its own where nothing but
-// magpie has answered (#1985); with more than one
+// myna has answered (#1985); with more than one
 // address or key gone, which went where can't be told, and the write is
-// left as it is. magpie's own files are never the user's pointing
-// (magpieFile). It takes no lock a writer may hold: k is read before.
+// left as it is. myna's own files are never the user's pointing
+// (mynaFile). It takes no lock a writer may hold: k is read before.
 func (k kept) away(path string, data []byte) []byte {
-	if magpieFile(path) {
+	if mynaFile(path) {
 		return data
 	}
 	g := k.gateway
@@ -161,13 +161,13 @@ func (k kept) away(path string, data []byte) []byte {
 		}
 		p := awayPath(was, data, g, away)
 		// on this machine, a local proxy's route (#1985): one with a path
-		// of its own before magpie's, where magpie answers or hasn't been
-		// asked yet; without one it is magpie's own on an older port
+		// of its own before myna's, where myna answers or hasn't been
+		// asked yet; without one it is myna's own on an older port
 		if !onAnotherMachine(away) {
 			if !loopbackWithPath(away + p) {
 				return data
 			}
-			if ok, known := magpieAt(away + p); known && !ok {
+			if ok, known := mynaAt(away + p); known && !ok {
 				return data
 			}
 		}
@@ -176,7 +176,7 @@ func (k kept) away(path string, data []byte) []byte {
 		return data
 	}
 
-	// the key: the one that went with the address, in place of magpie's
+	// the key: the one that went with the address, in place of myna's
 	theirs, before, after := "", keyCounts(was), keyCounts(out)
 	for v, n := range before {
 		if k.ours(v) {
@@ -210,9 +210,9 @@ func (k kept) away(path string, data []byte) []byte {
 // urlRE is an http(s) URL with its path, as it is written in a file.
 var urlRE = regexp.MustCompile(`https?://[^\s"'<>,{}\[\]\\]+`)
 
-// awayPath is the path before magpie's own that the address away keeps in
+// awayPath is the path before myna's own that the address away keeps in
 // was, the file before a sync wrote data with the gateway's address g: the
-// /magpie of https://ai.corp.example/magpie/v1, a reverse proxy's (#1985),
+// /myna of https://ai.corp.example/myna/v1, a reverse proxy's (#1985),
 // where data has g/v1. It is the shortest that every one of was's URLs at
 // away starts with; "" when one is at away itself, or none fits.
 func awayPath(was, data []byte, g, away string) string {

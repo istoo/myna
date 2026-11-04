@@ -1,10 +1,10 @@
 //go:build ignore
 
-// Icon generator. Everything magpie shows is drawn from one bird: a round
-// little magpie in profile, tail cocked, black and white, on a 44-unit grid.
-// magpie.svg is the full drawing, its belly, shoulder and the slits in its
+// Icon generator. Everything myna shows is drawn from one bird: a round
+// little myna in profile, tail cocked, black and white, on a 44-unit grid.
+// myna.svg is the full drawing, its belly, shoulder and the slits in its
 // tail cut out of the black; the app tile uses it from 64px up.
-// magpie-small.svg drops the eye, which would only be a speck; the tray and
+// myna-small.svg drops the eye, which would only be a speck; the tray and
 // the smaller tiles use it, and so does the header in
 // internal/gui/assets/index.html.
 //
@@ -13,7 +13,7 @@
 //	go run build/icon/gen.go app 64 internal/gui/icon.png   # app icon at a given size
 //	go run build/icon/gen.go win 256 build/windows/icon-256.png # the Windows tile, filling its square
 //	go run build/icon/gen.go win-ico internal/gui/icon-windows.ico # it at the tray's sizes, one .ico
-//	make icons                                              # regenerates all of them plus magpie.icns
+//	make icons                                              # regenerates all of them plus myna.icns
 package main
 
 import (
@@ -32,9 +32,9 @@ import (
 )
 
 var (
-	//go:embed magpie.svg
+	//go:embed myna.svg
 	fullSVG string
-	//go:embed magpie-small.svg
+	//go:embed myna-small.svg
 	smallSVG string
 )
 

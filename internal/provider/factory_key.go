@@ -21,7 +21,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/plugin"
+	"github.com/istoo/myna/internal/plugin"
 )
 
 // factoryKeyPrefix is droid's Uh: what a Factory API key starts with.

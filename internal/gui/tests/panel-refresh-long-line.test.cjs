@@ -14,7 +14,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = process.env.MAGPIE_QUOTA_ASSETS || path.resolve(__dirname, "../assets");
+const assets = process.env.MYNA_QUOTA_ASSETS || path.resolve(__dirname, "../assets");
 const LANGS = ["en", "zh", "zh-TW", "ja", "de"];
 const H = 3600e3;
 const iso = (ms) => new Date(ms).toISOString();
@@ -80,7 +80,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], data = fixtures(Date.now());
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, data));
-        await page.goto("http://magpie.test/?mode=panel");
+        await page.goto("http://myna.test/?mode=panel");
         await page.locator('#ptabs [data-ptab="usage"]').click();
         const pace = page.locator('.pq-card[data-card="codex|pace@example.com"]');
         await pace.locator(".pq-pace").waitFor();

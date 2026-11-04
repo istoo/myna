@@ -55,7 +55,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     page.on("pageerror", (e) => errors.push(e.message));
     await page.route("**/*", serve);
     t.after(() => browser.close());
-    await page.goto("http://magpie.test/?view=routing");
+    await page.goto("http://myna.test/?view=routing");
     const rows = page.locator(".rt-req");
     await rows.nth(routes.length - 1).waitFor();
     const steps = page.locator(".rt-steps");

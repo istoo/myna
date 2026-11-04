@@ -1,6 +1,6 @@
-// Package browserext is Magpie Browser, the browser extension through which
-// the agents magpie serves use the user's own browser: their tabs, signed
-// in to the sites they use (gateway/browser.go relays the calls). magpie
+// Package browserext is Myna Browser, the browser extension through which
+// the agents myna serves use the user's own browser: their tabs, signed
+// in to the sites they use (gateway/browser.go relays the calls). myna
 // writes it to a folder of its own, pointed at its gateway, for the user to
 // load in chrome://extensions.
 package browserext
@@ -15,7 +15,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // ID is the extension's ID in every Chromium browser, fixed by the public
@@ -40,11 +40,11 @@ func Version() string {
 	return string(v)
 }
 
-// File is one of the extension's files as magpie has it.
+// File is one of the extension's files as myna has it.
 func File(name string) ([]byte, error) { return files.ReadFile("ext/" + name) }
 
 // Write puts the extension in dir, pointed at the gateway at gatewayURL
-// (http://127.0.0.1:3425), replacing what an older magpie wrote there.
+// (http://127.0.0.1:3425), replacing what an older myna wrote there.
 // A file is written only when it changed, so a browser that has the folder
 // loaded sees no change it has to reload for.
 func Write(dir, gatewayURL string) error {
@@ -65,7 +65,7 @@ func Write(dir, gatewayURL string) error {
 		}
 		name := strings.TrimPrefix(p, "ext/")
 		if name == "config.js" {
-			b = fmt.Appendf(nil, "// The gateway this extension talks to, written by magpie.\nexport const GATEWAY = %q;\n", ws)
+			b = fmt.Appendf(nil, "// The gateway this extension talks to, written by myna.\nexport const GATEWAY = %q;\n", ws)
 		}
 		to := filepath.Join(dir, filepath.FromSlash(name))
 		if old, err := os.ReadFile(to); err == nil && bytes.Equal(old, b) {
@@ -86,14 +86,14 @@ func Dir() string {
 	if err != nil {
 		return OldDir()
 	}
-	return filepath.Join(home, "Magpie Browser Extension")
+	return filepath.Join(home, "Myna Browser Extension")
 }
 
 // OldDir is where v0.1.2442 wrote it, a hidden folder no one could find;
 // a browser that loaded it from there keeps it.
 func OldDir() string { return filepath.Join(settings.Dir(), "browser-extension") }
 
-// Refresh writes this magpie's extension over every folder an older one
+// Refresh writes this myna's extension over every folder an older one
 // was written to, so a browser that reloads it gets this version. A folder
 // never written stays unwritten. It says whether any folder has it.
 func Refresh(gatewayURL string) bool {
@@ -107,7 +107,7 @@ func Refresh(gatewayURL string) bool {
 }
 
 // Older says whether version a (0.1.3) is before b: a newer extension's
-// folder is never written over with an older magpie's.
+// folder is never written over with an older myna's.
 func Older(a, b string) bool {
 	as, bs := strings.Split(a, "."), strings.Split(b, ".")
 	for i := 0; i < len(as) || i < len(bs); i++ {

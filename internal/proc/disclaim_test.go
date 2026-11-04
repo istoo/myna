@@ -33,10 +33,10 @@ func startsLeft(t *testing.T, run func(*exec.Cmd) ([]byte, error)) int {
 	return pid
 }
 
-// What a command magpie leaves running asks macOS's privacy prompts in
-// its own name, not magpie's (reformed9448 on Discord: the first codex in
-// ~/Desktop, attached to the Codex daemon magpie had restarted, had macOS
-// say magpie wants the Desktop folder).
+// What a command myna leaves running asks macOS's privacy prompts in
+// its own name, not myna's (reformed9448 on Discord: the first codex in
+// ~/Desktop, attached to the Codex daemon myna had restarted, had macOS
+// say myna wants the Desktop folder).
 func TestCombinedOutputOwnAnswersForItself(t *testing.T) {
 	if runtime.GOOS != "darwin" {
 		t.Skip("macOS's responsibility for a process")
@@ -67,8 +67,8 @@ func noShell(t *testing.T) {
 func TestCombinedOutputOwnRuns(t *testing.T) {
 	noShell(t)
 	dir := t.TempDir()
-	cmd := Command("/bin/sh", "-c", "pwd; echo \"$MAGPIE_T\"; echo err >&2; if [ -p /dev/stdin ]; then echo pipe; else echo other; fi; exit 3")
-	cmd.Env = append(os.Environ(), "MAGPIE_T=v")
+	cmd := Command("/bin/sh", "-c", "pwd; echo \"$MYNA_T\"; echo err >&2; if [ -p /dev/stdin ]; then echo pipe; else echo other; fi; exit 3")
+	cmd.Env = append(os.Environ(), "MYNA_T=v")
 	cmd.Dir = dir
 	out, err := CombinedOutputOwn(context.Background(), cmd)
 	if err == nil || err.Error() != "exit status 3" {
@@ -82,7 +82,7 @@ func TestCombinedOutputOwnRuns(t *testing.T) {
 	if out, err := CombinedOutputOwn(context.Background(), Command("/bin/sh", "-c", "echo ok")); err != nil || string(out) != "ok\n" {
 		t.Errorf("%q, %v", out, err)
 	}
-	if _, err := CombinedOutputOwn(context.Background(), Command("/nonexistent/magpie-x")); err == nil {
+	if _, err := CombinedOutputOwn(context.Background(), Command("/nonexistent/myna-x")); err == nil {
 		t.Error("a missing program ran")
 	}
 }

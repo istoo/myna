@@ -6,17 +6,17 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // The Codex app on Windows with its agent in WSL reads Windows'
 // config.toml from WSL (cjyrainbow, #816): a C:\ catalog path is no file
 // there, and 127.0.0.1 is the distro's own. The user names the catalog
 // relative to config.toml and the gateway by Windows' address as WSL sees
-// it; magpie took that for a config changed away from it ("Codex 已不经过
-// magpie") and Reconnect wrote the two back. Now it is connected so, and
+// it; myna took that for a config changed away from it ("Codex 已不经过
+// myna") and Reconnect wrote the two back. Now it is connected so, and
 // a model picked again, a sync and a reconnect keep both.
 func TestCodexWSLAppAddressKept(t *testing.T) {
 	home, read := codexHome(t, `{"OPENAI_API_KEY":"sk-x"}`, "")
@@ -27,8 +27,8 @@ func TestCodexWSLAppAddressKept(t *testing.T) {
 	if err := cx.Fields[0].Set("fake/m1"); err != nil {
 		t.Fatal(err)
 	}
-	// on Windows magpie names the catalog as the app's WSL agent can read it
-	if c, _ := edit.GetTOMLTop(cx.Path, "model_catalog_json"); runtime.GOOS == "windows" && c != "magpie-models.json" {
+	// on Windows myna names the catalog as the app's WSL agent can read it
+	if c, _ := edit.GetTOMLTop(cx.Path, "model_catalog_json"); runtime.GOOS == "windows" && c != "myna-models.json" {
 		t.Fatalf("catalog named %q", c)
 	}
 	if c := cx.Check(); c != "" {
@@ -37,10 +37,10 @@ func TestCodexWSLAppAddressKept(t *testing.T) {
 
 	// the user's edit: Windows as WSL reaches it, the catalog by its name
 	wsl := "http://172.28.96.1:" + gateway.Port()
-	if err := edit.SetTOMLTop(cx.Path, edit.KV{Path: "model_catalog_json", Value: "magpie-models.json"}, edit.KV{Path: "openai_base_url", Value: wsl + gateway.CodexPath}); err != nil {
+	if err := edit.SetTOMLTop(cx.Path, edit.KV{Path: "model_catalog_json", Value: "myna-models.json"}, edit.KV{Path: "openai_base_url", Value: wsl + gateway.CodexPath}); err != nil {
 		t.Fatal(err)
 	}
-	if err := edit.SetTOMLKey(cx.Path, "model_providers."+magpieID, "base_url", wsl+"/v1"); err != nil {
+	if err := edit.SetTOMLKey(cx.Path, "model_providers."+mynaID, "base_url", wsl+"/v1"); err != nil {
 		t.Fatal(err)
 	}
 	cx = codex(home)
@@ -69,22 +69,22 @@ func TestCodexWSLAppAddressKept(t *testing.T) {
 		t.Fatal(err)
 	}
 	keep("sync")
-	if _, err := os.Stat(home + "/.codex/magpie-models.json"); err != nil {
+	if _, err := os.Stat(home + "/.codex/myna-models.json"); err != nil {
 		t.Fatal(err)
 	}
 
-	// taken out, the address goes with magpie
+	// taken out, the address goes with myna
 	if err := cx.Unwire(); err != nil {
 		t.Fatal(err)
 	}
-	if cfg := read(); strings.Contains(cfg, "openai_base_url") || strings.Contains(cfg, "model_catalog_json") || strings.Contains(cfg, `model_provider = "magpie"`) {
+	if cfg := read(); strings.Contains(cfg, "openai_base_url") || strings.Contains(cfg, "model_catalog_json") || strings.Contains(cfg, `model_provider = "myna"`) {
 		t.Fatalf("unwired:\n%s", cfg)
 	}
 }
 
-// Another server's address is not taken for magpie's: a relay's base URL
-// is not the Codex path, and magpie's own address stays 127.0.0.1.
-func TestCodexKeptGatewayOnlyMagpies(t *testing.T) {
+// Another server's address is not taken for myna's: a relay's base URL
+// is not the Codex path, and myna's own address stays 127.0.0.1.
+func TestCodexKeptGatewayOnlyMynas(t *testing.T) {
 	home, _ := codexHome(t, "", "openai_base_url = \"https://relay.example/v1\"\n")
 	if got := codexKeptGateway(home + "/.codex/config.toml"); got != gateway.URL() {
 		t.Fatalf("kept %q", got)

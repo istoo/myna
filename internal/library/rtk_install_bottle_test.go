@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/proc"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // What brew info rtk printed on an Apple silicon Mac (macOS 27), and with

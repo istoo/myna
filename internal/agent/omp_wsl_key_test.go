@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/access"
+	"github.com/istoo/myna/internal/testenv"
 	"gopkg.in/yaml.v3"
 )
 

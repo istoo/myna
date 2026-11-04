@@ -1,13 +1,13 @@
 package library
 
 // What the router tells an agent of each server behind it
-// (packinggoodsllc_07668 on Discord runs magpies that only share MCP
+// (packinggoodsllc_07668 on Discord runs mynas that only share MCP
 // servers, and an agent given several routers knew each by its name
 // alone): the server's own title and first words, and its tools with the
 // first clause of each description, as it last listed them. They are kept
 // in a file of their own, so a router started again describes its servers
 // before it has run any of them; they are what the servers said, not
-// magpie's words, and no model writes them.
+// myna's words, and no model writes them.
 
 import (
 	"crypto/sha256"
@@ -19,8 +19,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/yetone/magpie/internal/gateway"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/myna/internal/settings"
 )
 
 // hubCard is what the router last learnt of one server, for the server as

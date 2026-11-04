@@ -63,9 +63,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
-        await page.addInitScript(() => { try { localStorage.setItem("magpie.gwModelsFolded", "1"); } catch {} });
+        await page.addInitScript(() => { try { localStorage.setItem("myna.gwModelsFolded", "1"); } catch {} });
         await page.route("**/*", serve(lang, web));
-        await page.goto("http://magpie.test/?view=gateway");
+        await page.goto("http://myna.test/?view=gateway");
         await page.locator("#modelsCount").filter({ hasText: String(models.length) }).waitFor();
         const fold = page.locator("#foldModels");
         assert.equal(await fold.getAttribute("aria-expanded"), "false", "the models start folded");

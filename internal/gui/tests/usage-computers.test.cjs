@@ -45,13 +45,13 @@ function server(lang, shared, asked, contents, posts) {
     const json = (data) => route.fulfill({ json: data });
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:false};` });
     if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
-    if (url.pathname === "/api/state") return json({ agents: [], profiles: [], settings: { lang, theme: "light", tray: "panel", version: "test", dir: "/tmp/magpie", visionModels: [], imageGenModels: [], fx: { rate: 7.2, stale: false } } });
+    if (url.pathname === "/api/state") return json({ agents: [], profiles: [], settings: { lang, theme: "light", tray: "panel", version: "test", dir: "/tmp/myna", visionModels: [], imageGenModels: [], fx: { rate: 7.2, stale: false } } });
     if (url.pathname === "/api/providers") return json({ providers: [], gateway: { running: true, window: true, mine: true, groups: [], calls: [] } });
     if (url.pathname === "/api/plugins") return json({ plugins: [] });
     if (url.pathname === "/api/usage/requests") { asked.push(url.searchParams); return json(ledger(url.searchParams, shared)); }
     if (url.pathname === "/api/usage/requests/content") { contents.push(url.search); return json({ found: false, why: "read" }); }
     if (url.pathname === "/api/usage/quotas") return json([]);
-    if (url.pathname === "/api/usage") return json({ calls: 2, errors: 0, input: 600, output: 80, cache_read: 0, cache_write: 0, reasoning: 0, unpriced: 0, cost: 0.02, bucket: "day", series: [], agents: [], models: [], path: "~/.config/magpie/usage.jsonl" });
+    if (url.pathname === "/api/usage") return json({ calls: 2, errors: 0, input: 600, output: 80, cache_read: 0, cache_write: 0, reasoning: 0, unpriced: 0, cost: 0.02, bucket: "day", series: [], agents: [], models: [], path: "~/.config/myna/usage.jsonl" });
     if (url.pathname === "/api/sessions") return json({ sessions: [], dirs: [] });
     if (url.pathname === "/api/sessions/stats") return json({ from: "", to: "", days: [], agents: {} });
     if (url.pathname === "/api/groups") return json({ groups: [], models: [] });
@@ -104,11 +104,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       };
 
       await t.test(`${lang}: no other computer's usage, no Computer filter`, async () => {
-        const { p, errors } = await open("http://magpie.test/", { width: 1180, height: 640 }, false);
+        const { p, errors } = await open("http://myna.test/", { width: 1180, height: 640 }, false);
         await requests(p);
         assert.equal(await p.locator(".led tbody tr.led-row").count(), 2);
         assert(await p.locator("#ledComputer").isHidden(), "no Computer pick");
-        const q = await open("http://magpie.test/?mode=panel", { width: 440, height: 340 }, false);
+        const q = await open("http://myna.test/?mode=panel", { width: 440, height: 340 }, false);
         await q.p.locator('[data-ptab="stats"]').click();
         await q.p.locator("#panelUsage .pu-tot").waitFor();
         assert.equal(await q.p.locator("#panelUsage .sess-pick").count(), 1, "the provider pick alone");
@@ -117,7 +117,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
       await t.test(`${lang}: a Computer filter, and another computer's row`, async () => {
         const asked = [], contents = [];
-        const { p, errors } = await open("http://magpie.test/", { width: 1180, height: 640 }, true, asked, contents);
+        const { p, errors } = await open("http://myna.test/", { width: 1180, height: 640 }, true, asked, contents);
         await requests(p);
         const pick = p.locator("#ledComputer");
         await pick.waitFor();
@@ -160,7 +160,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
       await t.test(`${lang}: the panel's Computer pick`, async () => {
         const asked = [];
-        const { p, errors } = await open("http://magpie.test/?mode=panel", { width: 440, height: 400 }, true, asked);
+        const { p, errors } = await open("http://myna.test/?mode=panel", { width: 440, height: 400 }, true, asked);
         await p.locator('[data-ptab="stats"]').click();
         await p.locator("#panelUsage .pu-tot").waitFor();
         const pick = p.locator("#panelUsage .sess-pick", { hasText: w.all });
@@ -176,7 +176,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
       await t.test(`${lang}: the sync form's Usage tick`, async () => {
         const posts = [];
-        const { p, errors } = await open("http://magpie.test/", { width: 900, height: 420 }, false, [], [], posts);
+        const { p, errors } = await open("http://myna.test/", { width: 900, height: 420 }, false, [], [], posts);
         await p.locator("#prefs").click();
         await reader.openPart(p, "sync");
         const first = p.locator("#syncList .row.pref").first();

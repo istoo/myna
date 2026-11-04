@@ -10,11 +10,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // A recent call keeps its HTTP headers both ways (usrname1833 on Discord:
-// 查看原始请求和原始响应的http头): the client's, what magpie sent upstream,
+// 查看原始请求和原始响应的http头): the client's, what myna sent upstream,
 // and the head of what came back, every secret taken out by what the
 // header is, the rest as it went.
 func TestRecentCallHeadersBothWays(t *testing.T) {
@@ -35,12 +35,12 @@ func TestRecentCallHeadersBothWays(t *testing.T) {
 		t.Fatal("no headers kept")
 	}
 	data, _ := json.Marshal(h)
-	for _, secret := range []string{upKey, "magpie-gateway-key", "another-secret", "cookie-secret", "abc123"} {
+	for _, secret := range []string{upKey, "myna-gateway-key", "another-secret", "cookie-secret", "abc123"} {
 		if strings.Contains(string(data), secret) {
 			t.Errorf("%s shown:\n%s", secret, data)
 		}
 	}
-	// the client's, as it reached magpie
+	// the client's, as it reached myna
 	if got := h.Request["User-Agent"]; len(got) != 1 || got[0] != "claude-cli/2.1.0" {
 		t.Errorf("client's User-Agent %v", got)
 	}
@@ -92,7 +92,7 @@ func TestRecentCallHeadersEachTry(t *testing.T) {
 
 // A request handed to a plugin is kept as handed, under the plugin's name;
 // past headerTriesMost, only counted; and a call whose context keeps no
-// log (magpie's own) keeps nothing.
+// log (myna's own) keeps nothing.
 func TestPluginHandOffHeaders(t *testing.T) {
 	l := &headerLog{in: http.Header{"Cookie": {"a=b"}}}
 	ctx := t.Context()

@@ -1,9 +1,9 @@
-/magpie
-/magpie.exe
-/magpie.app/
+/myna
+/myna.exe
+/myna.app/
 /dist/
-/magpie-dev
+/myna-dev
 /rsrc_windows_*.syso
-/magpie-dev-backend
-/magpie-dev.new
+/myna-dev-backend
+/myna-dev.new
 /internal/update/launcher-*.com

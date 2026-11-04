@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // 墨雨藏锋 / mycf_711 (#3950): SuperMagic's accounts are prepaid wallets of

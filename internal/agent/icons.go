@@ -3,7 +3,7 @@ package agent
 import (
 	"strings"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // Every model in a picker carries its vendor's real logo. A models.dev

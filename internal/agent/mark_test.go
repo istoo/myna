@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/myna/internal/gateway"
 )
 
 // commentable says whether an agent reads path as TOML, YAML or dotenv,
@@ -40,11 +40,11 @@ func modTimes(home string) map[string]time.Time {
 	return m
 }
 
-// Every agent magpie writes into a TOML, YAML or dotenv config gets a
-// comment line over each line that points at the gateway, saying magpie
-// wrote it and how to undo it: Jevik_AI on X deleted magpie's folders by hand and
+// Every agent myna writes into a TOML, YAML or dotenv config gets a
+// comment line over each line that points at the gateway, saying myna
+// wrote it and how to undo it: Jevik_AI on X deleted myna's folders by hand and
 // was left with a Codex config naming a gateway that no longer ran, and
-// nothing in it naming magpie. Disconnect takes each note with its line.
+// nothing in it naming myna. Disconnect takes each note with its line.
 func TestMarkedLinesEveryAgent(t *testing.T) {
 	home, _ := codexHome(t, "", "")
 	edit.Mark = lineNote
@@ -110,7 +110,7 @@ func TestMarkedLinesEveryAgent(t *testing.T) {
 			}
 			for p, b := range agentFiles(t, home) {
 				for _, l := range strings.Split(b, "\n") {
-					if strings.Contains(l, "# "+edit.MarkTag) && !strings.Contains(l, "Codex threads started on magpie") {
+					if strings.Contains(l, "# "+edit.MarkTag) && !strings.Contains(l, "Codex threads started on myna") {
 						t.Errorf("%s: a note outlived Disconnect: %q", p, l)
 					}
 				}
@@ -122,7 +122,7 @@ func TestMarkedLinesEveryAgent(t *testing.T) {
 	}
 }
 
-// Codex's own keys that name magpie get a note on how to undo them by
+// Codex's own keys that name myna get a note on how to undo them by
 // hand, not only the base URL.
 func TestCodexMarkedLines(t *testing.T) {
 	codexHome(t, "", "model = \"gpt-5.5\"\n")
@@ -135,9 +135,9 @@ func TestCodexMarkedLines(t *testing.T) {
 	b, _ := os.ReadFile(a.Path)
 	got := string(b)
 	for _, want := range []string{
-		"# magpie: Codex on magpie's local gateway; Disconnect in magpie or `magpie uninstall` undoes it, or delete this line and the model line\nmodel_provider = \"magpie\"\n",
-		"# magpie: magpie's model list for Codex; " + undo + ", or delete this line\nmodel_catalog_json = ",
-		"# magpie: for Codex threads started on magpie; unused while model_provider doesn't name magpie\nbase_url = \"" + gateway.URL() + "/v1\"\n",
+		"# myna: Codex on myna's local gateway; Disconnect in myna or `myna uninstall` undoes it, or delete this line and the model line\nmodel_provider = \"myna\"\n",
+		"# myna: myna's model list for Codex; " + undo + ", or delete this line\nmodel_catalog_json = ",
+		"# myna: for Codex threads started on myna; unused while model_provider doesn't name myna\nbase_url = \"" + gateway.URL() + "/v1\"\n",
 	} {
 		if !strings.Contains(got, want) {
 			t.Errorf("missing %q in:\n%s", want, got)

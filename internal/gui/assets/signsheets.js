@@ -48,7 +48,7 @@ window.claudeTokenSheet = function () {
   const flow = signing;
   const label = t("Add a Claude account by setup-token");
   tt.append(el("span", "n", label),
-    el("span", "s", t("Paste the token {cmd} printed. magpie gives it to Claude Code for this account's requests only; Claude Code itself stays signed in as it is.", { cmd: "claude setup-token" })),
+    el("span", "s", t("Paste the token {cmd} printed. myna gives it to Claude Code for this account's requests only; Claude Code itself stays signed in as it is.", { cmd: "claude setup-token" })),
     el("span", "s", t("A setup-token can't tell its email or allowance: the account is named by the token, and its allowance shows once a reply tells it.")));
   const form = el("form", "callback-form");
   const inp = input(flow.token || "", "sk-ant-oat01-…", "password");

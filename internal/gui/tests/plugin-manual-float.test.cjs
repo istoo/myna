@@ -35,10 +35,10 @@ function server(lang) {
     if (url.pathname === "/api/plugins") return json(state);
     if (url.pathname === "/api/plugins/listings") return json({ listings });
     if (url.pathname === "/api/plugins/market") return json({ listings, state });
-    if (url.pathname === "/api/plugins/github") return json({ repos: [], topic: "magpie-plugin" });
+    if (url.pathname === "/api/plugins/github") return json({ repos: [], topic: "myna-plugin" });
     if (url.pathname === "/api/plugins/search") return json({ hits: [] });
     if (url.pathname.startsWith("/api/")) return json({});
-    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "magpie.test") return route.fulfill({ status: 404, body: "" });
+    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "myna.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -73,7 +73,7 @@ function where() {
   };
 }
 
-// the reader's wheel takes the view to a share of its scroll (magpie puts
+// the reader's wheel takes the view to a share of its scroll (myna puts
 // back a scroll no reader asked for), and waits for it to stop there
 async function scrollTo(page, f) {
   const v = page.locator("#view-plugins");
@@ -107,7 +107,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang));
-        await page.goto("http://magpie.test/?view=plugins");
+        await page.goto("http://myna.test/?view=plugins");
         const view = page.locator("#view-plugins");
         await view.locator(".pm-manual").waitFor();
         await page.waitForFunction((n) => document.querySelectorAll("#view-plugins .pm-card").length >= n, listings.length);

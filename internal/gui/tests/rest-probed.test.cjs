@@ -12,7 +12,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MAGPIE_REST_PROBED_ASSETS || path.join(__dirname, "../assets"));
+const assets = path.resolve(process.env.MYNA_REST_PROBED_ASSETS || path.join(__dirname, "../assets"));
 const now = new Date();
 const day = [now.getFullYear(), now.getMonth() + 1, now.getDate()].map((n) => String(n).padStart(2, "0")).join("-");
 const start = new Date(now.getTime() - 60e3).toISOString();
@@ -95,7 +95,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           }
           await browser.close();
         });
-        await page.goto("http://magpie.test/?view=" + view);
+        await page.goto("http://myna.test/?view=" + view);
         return { page, errors };
       };
 

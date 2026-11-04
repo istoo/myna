@@ -11,8 +11,8 @@ import (
 // private ones first, and the public ones are named. Loopback, link-local
 // and IPv6 are not offered.
 func TestLANHostsKeepAPublicAddress(t *testing.T) {
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("MYNA_PUBLIC_URL", "")
+	t.Setenv("MYNA_ADDR", "")
 	was := hostIPs
 	t.Cleanup(func() { hostIPs = was })
 	hostIPs = func() []net.IP {
@@ -47,8 +47,8 @@ func TestLANHostsKeepAPublicAddress(t *testing.T) {
 // 192.168.110.x other devices reach (coeo91 on Discord). A home network's
 // address comes before Tailscale's carrier-grade NAT one.
 func TestLANHostsLeaveOutAProxysTUN(t *testing.T) {
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
-	t.Setenv("MAGPIE_ADDR", "")
+	t.Setenv("MYNA_PUBLIC_URL", "")
+	t.Setenv("MYNA_ADDR", "")
 	was := hostIPs
 	t.Cleanup(func() { hostIPs = was })
 	hostIPs = func() []net.IP {

@@ -12,13 +12,13 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/yetone/magpie/internal/access"
-	"github.com/yetone/magpie/internal/gwtool"
-	"github.com/yetone/magpie/internal/plugin"
+	"github.com/istoo/myna/internal/access"
+	"github.com/istoo/myna/internal/gwtool"
+	"github.com/istoo/myna/internal/plugin"
 )
 
 // The tools the user's plugins give (OpenCode's tool hook: {tool: {name:
-// tool({description, args, execute})}}) are an MCP server of magpie's
+// tool({description, args, execute})}}) are an MCP server of myna's
 // own, so every agent that takes an MCP server can call them, not only
 // OpenCode: Streamable HTTP at ToolsMCPPath, guarded as the search MCP
 // server is (serveMCP), each call held to the calling gateway key's limit
@@ -31,7 +31,7 @@ import (
 // request is.
 
 // ToolsMCPPath is where the plugin tools MCP server is served.
-const ToolsMCPPath = "/mcp/magpie/tools"
+const ToolsMCPPath = "/mcp/myna/tools"
 
 // toolsMCPBody is the longest body the server takes: a tool's arguments
 // may carry a file's text.
@@ -45,10 +45,10 @@ var (
 )
 
 // errToolsOff is what a call is answered while plugins/tools is off.
-const errToolsOff = "magpie's Plugin tools plugin is off, so no plugin's tool runs; turn it on in magpie's Settings → Plugins"
+const errToolsOff = "myna's Plugin tools plugin is off, so no plugin's tool runs; turn it on in myna's Settings → Plugins"
 
 func (s *Server) toolsMCP(w http.ResponseWriter, r *http.Request) {
-	serveMCP(w, r, "magpie's plugin tools", "magpie-tools", toolsMCPBody, s.toolsMCPCall)
+	serveMCP(w, r, "myna's plugin tools", "myna-tools", toolsMCPBody, s.toolsMCPCall)
 }
 
 // mcpTool is one plugin tool as the server names it.
@@ -151,7 +151,7 @@ func (s *Server) toolsMCPCall(r *http.Request, m mcpMessage) (any, map[string]an
 
 // ToolsMCPOne is where one plugin's tools are served, each by its own
 // name, the plugin's short name (ToolPrefix) after it: the address of the
-// Library server magpie gives each plugin with tools
+// Library server myna gives each plugin with tools
 // (library/plugin_tools.go), so it can be switched on per agent and put
 // behind the MCP hub like any other.
 const ToolsMCPOne = ToolsMCPPath + "/"
@@ -162,7 +162,7 @@ func ToolPrefix(spec string) string { return toolPrefix(spec) }
 
 func (s *Server) toolsMCPOne(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue("plugin")
-	serveMCP(w, r, "magpie's plugin tools", "magpie-tools", toolsMCPBody, func(r *http.Request, m mcpMessage) (any, map[string]any) {
+	serveMCP(w, r, "myna's plugin tools", "myna-tools", toolsMCPBody, func(r *http.Request, m mcpMessage) (any, map[string]any) {
 		return s.toolsMCPServe(r, m, name, func(ctx context.Context) ([]mcpTool, error) {
 			spec, ts, err := pluginToolsBy(ctx, func(spec string) bool { return toolPrefix(spec) == name })
 			out := make([]mcpTool, 0, len(ts))
@@ -210,10 +210,10 @@ func RunPluginToolOf(ctx context.Context, name, tool string, args json.RawMessag
 	}
 	spec, ts, err := pluginToolsBy(ctx, func(spec string) bool { return plugin.Name(spec) == name })
 	if err != nil {
-		return "", fmt.Errorf("magpie couldn't load its plugins: %w", err)
+		return "", fmt.Errorf("myna couldn't load its plugins: %w", err)
 	}
 	if !slices.ContainsFunc(ts, func(t plugin.Tool) bool { return t.Name == tool }) {
-		return "", fmt.Errorf("the plugin %s isn't on in magpie, or gives no tool %s", name, tool)
+		return "", fmt.Errorf("the plugin %s isn't on in myna, or gives no tool %s", name, tool)
 	}
 	return runPluginTool(ctx, spec, tool, args, agent)
 }
@@ -223,14 +223,14 @@ func RunPluginToolOf(ctx context.Context, name, tool string, args json.RawMessag
 func (s *Server) toolsMCPServe(r *http.Request, m mcpMessage, one string, servedTools func(context.Context) ([]mcpTool, error)) (any, map[string]any) {
 	switch m.Method {
 	case "initialize":
-		say := "The tools the plugins added to magpie give, each named <plugin>_<tool>. Add or switch plugins in magpie's Settings → Plugins."
+		say := "The tools the plugins added to myna give, each named <plugin>_<tool>. Add or switch plugins in myna's Settings → Plugins."
 		if one != "" {
-			say = "The tools magpie's plugin " + one + " gives. Add or switch plugins in magpie's Settings → Plugins."
+			say = "The tools myna's plugin " + one + " gives. Add or switch plugins in myna's Settings → Plugins."
 		}
 		return map[string]any{
 			"protocolVersion": mcpVersion(m),
 			"capabilities":    map[string]any{"tools": map[string]any{}},
-			"serverInfo":      map[string]any{"name": "magpie-tools", "title": "Magpie Plugin Tools", "version": Version},
+			"serverInfo":      map[string]any{"name": "myna-tools", "title": "Myna Plugin Tools", "version": Version},
 			"instructions":    say,
 		}, nil
 	case "ping":
@@ -238,7 +238,7 @@ func (s *Server) toolsMCPServe(r *http.Request, m mcpMessage, one string, served
 	case "tools/list":
 		ts, err := servedTools(r.Context())
 		if err != nil {
-			return nil, map[string]any{"code": -32603, "message": "magpie couldn't load its plugins: " + err.Error()}
+			return nil, map[string]any{"code": -32603, "message": "myna couldn't load its plugins: " + err.Error()}
 		}
 		list := make([]any, 0, len(ts))
 		for _, t := range ts {
@@ -266,7 +266,7 @@ func (s *Server) toolsMCPServe(r *http.Request, m mcpMessage, one string, served
 		}
 		ts, err := servedTools(r.Context())
 		if err != nil {
-			return toolResult("magpie couldn't load its plugins: "+err.Error(), true), nil
+			return toolResult("myna couldn't load its plugins: "+err.Error(), true), nil
 		}
 		for _, t := range ts {
 			if t.name == p.Name {
@@ -278,7 +278,7 @@ func (s *Server) toolsMCPServe(r *http.Request, m mcpMessage, one string, served
 			}
 		}
 		if one != "" {
-			return nil, map[string]any{"code": -32602, "message": "unknown tool " + p.Name + ": the plugin " + one + " isn't on in magpie, or gives no such tool"}
+			return nil, map[string]any{"code": -32602, "message": "unknown tool " + p.Name + ": the plugin " + one + " isn't on in myna, or gives no such tool"}
 		}
 		return nil, map[string]any{"code": -32602, "message": "unknown tool " + p.Name + ": no plugin that is on gives it"}
 	}

@@ -10,8 +10,8 @@
   "interactive": false,
   "provider": "openai-compatible",
   "model": "auto/claude-haiku-4-5",
-  "cwd": "/private/tmp/claude-501/-Users-yetone-workspace-projects-magpie/4c056ab3-f2e6-4918-b774-da5c713ce1e3/scratchpad/cap/cline/work",
-  "workspace_root": "/private/tmp/claude-501/-Users-yetone-workspace-projects-magpie/4c056ab3-f2e6-4918-b774-da5c713ce1e3/scratchpad/cap/cline/work",
+  "cwd": "/private/tmp/claude-501/-Users-yetone-workspace-projects-myna/4c056ab3-f2e6-4918-b774-da5c713ce1e3/scratchpad/cap/cline/work",
+  "workspace_root": "/private/tmp/claude-501/-Users-yetone-workspace-projects-myna/4c056ab3-f2e6-4918-b774-da5c713ce1e3/scratchpad/cap/cline/work",
   "team_name": "team-Anows",
   "enable_tools": true,
   "enable_spawn": true,
@@ -40,5 +40,5 @@
       "totalCost": 0
     }
   },
-  "messages_path": "/private/tmp/claude-501/-Users-yetone-workspace-projects-magpie/4c056ab3-f2e6-4918-b774-da5c713ce1e3/scratchpad/cap/cline/home/.cline/data/sessions/1793329916934_dkxa7/1793329916934_dkxa7.messages.json"
+  "messages_path": "/private/tmp/claude-501/-Users-yetone-workspace-projects-myna/4c056ab3-f2e6-4918-b774-da5c713ce1e3/scratchpad/cap/cline/home/.cline/data/sessions/1793329916934_dkxa7/1793329916934_dkxa7.messages.json"
 }

@@ -1,7 +1,7 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // plugins#304 (ReneXiong): Qoder's plugin read this machine's own device
 // identity, sent it, and was offered no daily credits; it said why in its
-// message, and magpie showed a bare "No check-in event now". An inactive or
+// message, and myna showed a bare "No check-in event now". An inactive or
 // ineligible check-in now shows the plugin's (or vendor's) message beside
 // the label, on the account's Usage card, wrapped rather than cut off, and
 // in Settings' check-in line; one without a message reads as before.
@@ -74,7 +74,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang));
         await watchSettingsReads(page);
-        await page.goto("http://magpie.test/?view=usage");
+        await page.goto("http://myna.test/?view=usage");
         await settingsDrawn(page);
         const of = (user) => page.locator(".wb-checkin").nth(checkins.findIndex((c) => c.user === user));
         await page.locator(".wb-checkin").nth(2).waitFor();
@@ -91,7 +91,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), "no sideways scroll on Usage");
 
         // Settings' check-in line under the plugin's switch says it too
-        await page.goto("http://magpie.test/?view=settings&tab=usage");
+        await page.goto("http://myna.test/?view=settings&tab=usage");
         await settingsDrawn(page);
         const tab = page.locator("#warmTab-plugins");
         await tab.waitFor();

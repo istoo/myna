@@ -9,10 +9,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/plugin"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/settings"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // An account's sign-in page is left out of the default browser when the
@@ -27,8 +27,8 @@ func TestSignInLinkOnlyOpensNothing(t *testing.T) {
 	testenv.SetHome(t, dir)
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(dir, "config"))
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(dir, "cache"))
-	t.Setenv("MAGPIE_BUN", bun)
-	t.Setenv("MAGPIE_PLUGIN_MARKET", "off")
+	t.Setenv("MYNA_BUN", bun)
+	t.Setenv("MYNA_PLUGIN_MARKET", "off")
 	t.Cleanup(plugin.Settle)
 	abs, _ := filepath.Abs("../plugin/testdata/fake/index.js")
 	if _, err := plugin.Add(t.Context(), abs); err != nil {

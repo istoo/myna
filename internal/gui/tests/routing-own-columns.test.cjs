@@ -6,7 +6,7 @@
 // minute under traffic). No rule of the list's rows says subgrid, and the
 // rows still line up as they did: each column starts at one x down the
 // list, as wide as its widest row's, in every layout the list takes.
-// MAGPIE_ROUTING_ASSETS points the page at an older asset tree, to watch
+// MYNA_ROUTING_ASSETS points the page at an older asset tree, to watch
 // this go red there.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -14,7 +14,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assetsDir = path.resolve(process.env.MAGPIE_ROUTING_ASSETS || path.join(__dirname, "../assets"));
+const assetsDir = path.resolve(process.env.MYNA_ROUTING_ASSETS || path.join(__dirname, "../assets"));
 const now = new Date();
 const at = (i) => new Date(now.getTime() - (i + 1) * 60e3).toISOString();
 const renew = new Date(now.getTime() + 3 * 864e5).toISOString();
@@ -90,7 +90,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang));
       t.after(() => browser.close());
-      await page.goto("http://magpie.test/?view=routing");
+      await page.goto("http://myna.test/?view=routing");
       await page.locator(".rt-reqs > .rt-req").first().waitFor();
       for (const width of [1440, 1100, 940, 700]) {
         await page.setViewportSize({ width, height: 1400 });

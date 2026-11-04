@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/sessions"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/myna/internal/usage"
 )
 
 // YOU on Discord: a session the gateway recorded is listed as ses_…, and the

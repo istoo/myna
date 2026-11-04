@@ -51,7 +51,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
         t.after(() => browser.close());
         const context = await browser.newContext({ viewport: { width, height: 800 }, reducedMotion: "reduce" });
-        await context.addInitScript((v) => { try { if (!localStorage.getItem("seeded")) { if (v[0] !== null) localStorage.setItem("magpie.maskEmails", v[0]); if (v[1] !== null) localStorage.setItem("magpie.maskProviders", v[1]); localStorage.setItem("seeded", "1"); } } catch {} }, stored);
+        await context.addInitScript((v) => { try { if (!localStorage.getItem("seeded")) { if (v[0] !== null) localStorage.setItem("myna.maskEmails", v[0]); if (v[1] !== null) localStorage.setItem("myna.maskProviders", v[1]); localStorage.setItem("seeded", "1"); } } catch {} }, stored);
         const errors = [];
         const open = async (url) => {
           const page = await context.newPage();
@@ -79,13 +79,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
       test(`${engine} ${lang} ${width}: Hide accounts is one switch on every page`, async (t) => {
         const { open, errors } = await launch(t);
-        const page = await open("http://magpie.test/?view=routing");
+        const page = await open("http://myna.test/?view=routing");
         await page.locator("#rtMask").waitFor();
         await page.evaluate((m) => { const d = document.createElement("div"); d.id = "sample"; d.textContent = "Codex as " + m; document.querySelector("#view-routing").append(d); }, MAIL);
         // a second window on the same storage, on Providers, and the panel
-        const other = await open("http://magpie.test/?view=providers");
+        const other = await open("http://myna.test/?view=providers");
         await listed(other);
-        const panel = await open("http://magpie.test/?mode=panel");
+        const panel = await open("http://myna.test/?mode=panel");
         await panel.evaluate(() => setPanelTab("usage"));
         await panel.waitForFunction((m) => document.querySelector("#panelQuota")?.innerText.includes(m), MAIL);
 
@@ -133,8 +133,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await listed(page);
         await page.waitForFunction(() => document.querySelector("#view-providers .pii"));
         await says(page, true, "after a reload");
-        assert.equal(await page.evaluate(() => localStorage.getItem("magpie.maskEmails")), "1");
-        assert.equal(await page.evaluate(() => localStorage.getItem("magpie.maskProviders")), null);
+        assert.equal(await page.evaluate(() => localStorage.getItem("myna.maskEmails")), "1");
+        assert.equal(await page.evaluate(() => localStorage.getItem("myna.maskProviders")), null);
 
         // placed as Routing's: in the page's head row, at its right end
         const box = await page.locator("#pvMask").boundingBox(), q = await page.locator("#pvQ").boundingBox();
@@ -154,7 +154,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       for (const [stored, on] of [[[null, "1"], true], [["0", "1"], true], [["1", "0"], true], [["1", null], true], [["0", "0"], false], [["0", null], false]]) {
         test(`${engine} ${lang} ${width}: stored ${JSON.stringify(stored)} before the update is ${on ? "hidden" : "shown"} on every page`, async (t) => {
           const { open, errors } = await launch(t, stored);
-          const page = await open("http://magpie.test/?view=providers");
+          const page = await open("http://myna.test/?view=providers");
           await listed(page);
           await page.locator("#pvMask").waitFor();
           if (on) await page.waitForFunction(() => document.querySelector("#view-providers .pii"));
@@ -163,8 +163,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           await says(page, on, "on Providers");
           await page.evaluate(() => show("routing"));
           await says(page, on, "on Routing");
-          assert.equal(await page.evaluate(() => localStorage.getItem("magpie.maskEmails")), on ? "1" : "0");
-          assert.equal(await page.evaluate(() => localStorage.getItem("magpie.maskProviders")), null);
+          assert.equal(await page.evaluate(() => localStorage.getItem("myna.maskEmails")), on ? "1" : "0");
+          assert.equal(await page.evaluate(() => localStorage.getItem("myna.maskProviders")), null);
           await page.evaluate((v) => hideAccounts.follow(v), !on);
           await says(page, on, "after Mask personal data changed: a default never turns the user's choice");
           assert.deepEqual(errors, []);

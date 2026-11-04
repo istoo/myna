@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/istoo/myna/internal/agent"
+	"github.com/istoo/myna/internal/edit"
 )
 
 // Defaults survive encryption and restore, while a legacy backup's

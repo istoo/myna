@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-// skillsCounted says, for every agent whose sessions magpie reads, how
+// skillsCounted says, for every agent whose sessions myna reads, how
 // Sessions' Skills card learns of its skills: a test in this package that
 // counts them from that agent's own transcripts, or an agent that reads
 // with the same parser as one that has such a test. An agent left out

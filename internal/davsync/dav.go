@@ -14,13 +14,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/backup"
+	"github.com/istoo/myna/internal/backup"
 )
 
 // folder and file are where the backup lives under the address given.
 const (
-	folder = "magpie"
-	file   = "magpie.magpie-backup"
+	folder = "myna"
+	file   = "myna.myna-backup"
 )
 
 // errChanged is a PUT the server refused because the file changed since it
@@ -85,9 +85,9 @@ type rateLimited struct {
 
 func (e *rateLimited) Error() string {
 	if e.status == http.StatusTooManyRequests {
-		return fmt.Sprintf("the %s server is limiting how often magpie may reach it (HTTP 429 Too Many Requests): sync waits longer before trying again", e.kind)
+		return fmt.Sprintf("the %s server is limiting how often myna may reach it (HTTP 429 Too Many Requests): sync waits longer before trying again", e.kind)
 	}
-	return fmt.Sprintf("the %s server is busy, or limiting how often magpie may reach it (HTTP %d): sync waits longer before trying again", e.kind, e.status)
+	return fmt.Sprintf("the %s server is busy, or limiting how often myna may reach it (HTTP %d): sync waits longer before trying again", e.kind, e.status)
 }
 
 // limited is the error for an answer that says the server is limiting
@@ -202,7 +202,7 @@ var errLogin = errors.New("the WebDAV server refused the user name or password (
 // forbidden says why a 403 was: servers answer it for a folder that isn't
 // there as much as for one the account may not use — a Synology does for a
 // shared folder not made — so the folder in the address is looked at first,
-// and then magpie's own folder inside it, where the write went.
+// and then myna's own folder inside it, where the write went.
 func (d *dav) forbidden(ctx context.Context) error {
 	dir := d.base.Path
 	if dir == "" {
@@ -223,13 +223,13 @@ func (d *dav) forbidden(ctx context.Context) error {
 				return fmt.Errorf("there is no folder %s on the WebDAV server (HTTP 403): make it there first, or leave it out of the address", dir)
 			case res.StatusCode >= 200 && res.StatusCode < 300:
 				// the address's folder lists fine, so the refusal is about
-				// magpie's own folder inside it, where the write went: the
+				// myna's own folder inside it, where the write went: the
 				// server may have kept the account from making it, or, with
 				// it there, from changing files in it — 坚果云 (Nutstore)'s
 				// free tier refuses writes with 403 once the account's
 				// upload quota is used up (#4927)
 				if !d.there(ctx, d.url(folder)+"/") {
-					return fmt.Errorf("the WebDAV server doesn't let magpie make its folder %s (HTTP 403): make the folder %s there first, or put an existing folder in the address", pathpkg.Join(dir, folder), folder)
+					return fmt.Errorf("the WebDAV server doesn't let myna make its folder %s (HTTP 403): make the folder %s there first, or put an existing folder in the address", pathpkg.Join(dir, folder), folder)
 				}
 				return fmt.Errorf("the WebDAV server doesn't let this account change files in %s (HTTP 403): check the account may change files in that folder, and the account's storage quota is not used up", pathpkg.Join(dir, folder))
 			}
@@ -283,7 +283,7 @@ func (d *dav) get(ctx context.Context, have version) (data []byte, v version, er
 		return nil, have, errNotModified
 	}
 	// a Synology answers 403, not 404, for a file in a folder that isn't
-	// there: before the first sync, magpie's folder isn't
+	// there: before the first sync, myna's folder isn't
 	if res.StatusCode == http.StatusForbidden {
 		if !d.there(ctx, d.url(folder)+"/") {
 			return nil, version{}, nil
@@ -323,7 +323,7 @@ func (d *dav) get(ctx context.Context, have version) (data []byte, v version, er
 
 // put writes the backup, only over the version read (etag) when there was
 // one, making the folder if the server has none. Relays and tunnels cut
-// long writes short, and the half that lands reads back as "not a magpie
+// long writes short, and the half that lands reads back as "not a myna
 // backup" on every sync after, so what a write kept is read back and
 // compared; a short write is tried again and told as itself in the end.
 func (d *dav) put(ctx context.Context, data []byte, etag string) (version, error) {
@@ -380,7 +380,7 @@ func (d *dav) put(ctx context.Context, data []byte, etag string) (version, error
 
 // check says so when the server kept less than what was sent: relays and
 // tunnels cut long writes short, and the half that lands reads back as
-// "not a magpie backup" on every sync after. The size is enough — a short
+// "not a myna backup" on every sync after. The size is enough — a short
 // file is the whole failure — so no download rides on a write. It gives
 // back the ETag it saw, for a retry to match the file as the short write
 // left it. A HEAD that can't be done — an error, or not a 200 — leaves the

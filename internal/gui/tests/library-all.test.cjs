@@ -17,7 +17,7 @@ const assets = path.resolve(__dirname, "../assets");
 const HOME = "/Users/loosheng";
 const agent = (id, name, icon, more = {}) => ({ id, name, icon, skills: `${HOME}/.${id}/skills`, mcp: `${HOME}/.${id}/mcp.json`, ...more });
 const base = () => ({
-  dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+  dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
   // Pi has no MCP file, Droid no skills folder; Codex and Droid no SSE
   agents: [
     agent("claude", "Claude Code", "claudecode-color"),
@@ -98,13 +98,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     });
     const open = async (lang, tab, posts, fail, { width = 980, fixture } = {}) => {
       const ctx = await browser.newContext({ viewport: { width, height: 800 } }); // the MCP tab fits, its "In projects" too
-      await ctx.addInitScript((tab) => { try { localStorage.setItem("magpie.libTab", tab); } catch {} }, tab);
+      await ctx.addInitScript((tab) => { try { localStorage.setItem("myna.libTab", tab); } catch {} }, tab);
       const page = await ctx.newPage();
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(60000);
       page.on("pageerror", (e) => errors.push(e.message));
-      await page.route("http://magpie.test/**", server(lang, posts, fail, fixture));
-      await page.goto("http://magpie.test/");
+      await page.route("http://myna.test/**", server(lang, posts, fail, fixture));
+      await page.goto("http://myna.test/");
       await page.locator('button[data-view="library"]').click();
       await page.locator("#view-library .lib-body:not(.lib-skel) .lib-row").first().waitFor();
       return page;

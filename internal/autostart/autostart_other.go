@@ -10,24 +10,24 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/yetone/magpie/internal/appdir"
-	"github.com/yetone/magpie/internal/edit"
+	"github.com/istoo/myna/internal/appdir"
+	"github.com/istoo/myna/internal/edit"
 )
 
-// record is the user's own autostart entry, the one magpie writes.
+// record is the user's own autostart entry, the one myna writes.
 func record() string {
 	dir := appdir.Getenv("XDG_CONFIG_HOME")
 	if dir == "" {
 		home, _ := os.UserHomeDir()
 		dir = filepath.Join(home, ".config")
 	}
-	return filepath.Join(dir, "autostart", "magpie.desktop")
+	return filepath.Join(dir, "autostart", "myna.desktop")
 }
 
 // systemRecords are the system's entries of the same name, one in each
 // folder of $XDG_CONFIG_DIRS (/etc/xdg when it is unset), the most
 // important first: a package ships its entry there (mtul0729 packaging
-// magpie for nixpkgs, #3372). As the XDG Autostart spec has it, the user's
+// myna for nixpkgs, #3372). As the XDG Autostart spec has it, the user's
 // entry stands over them, and of the entries of one name only the most
 // important counts, its Hidden holding back every other.
 func systemRecords() []string {
@@ -47,7 +47,7 @@ func systemRecords() []string {
 		if fi, err := os.Stat(dir); err == nil && ownErr == nil && os.SameFile(fi, own) {
 			continue
 		}
-		out = append(out, filepath.Join(dir, "magpie.desktop"))
+		out = append(out, filepath.Join(dir, "myna.desktop"))
 	}
 	return out
 }
@@ -80,7 +80,7 @@ func isFalse(v string) bool { return v == "false" || v == "0" }
 // with something to run, not Hidden. An entry that runs true opens nothing
 // either: the one off writes over a package's is that, and a desktop that
 // switches it back on itself (XFCE's Session and Startup writes
-// Hidden=false into it) runs true, not magpie, so it still reads off and
+// Hidden=false into it) runs true, not myna, so it still reads off and
 // on takes it away.
 func runs(k map[string]string) bool {
 	return k["Type"] == "Application" && k["Exec"] != "" && k["Exec"] != "true" && !isTrue(k["Hidden"])
@@ -95,7 +95,7 @@ func starts(k map[string]string) bool {
 }
 
 // readEntry reads an entry's file. A var for the tests, which can't run
-// magpie out of files.
+// myna out of files.
 var readEntry = os.ReadFile
 
 // entryAt is the entry at p as the desktop finds it, and whether there is
@@ -105,7 +105,7 @@ var readEntry = os.ReadFile
 // generator and GLib pass over.
 // One there that can't be read counts all the same, and starts nothing,
 // as systemd's generator has it (GLib passes over it, so GNOME's session
-// starts the next folder's). Any other failure, magpie out of files or
+// starts the next folder's). Any other failure, myna out of files or
 // memory, says nothing of what the desktop reads at login: an error.
 func entryAt(p string) (map[string]string, bool, error) {
 	fi, err := os.Stat(p)
@@ -155,7 +155,7 @@ func system() (map[string]string, error) {
 }
 
 // an XDG autostart entry, which the desktop starts at login. When the
-// system's own entry starts magpie, the user's could only hold it back: it
+// system's own entry starts myna, the user's could only hold it back: it
 // goes, and no path of this copy's is written over the one the system's
 // entry names, which its package keeps current.
 func enable(exe string) error {
@@ -168,11 +168,11 @@ func enable(exe string) error {
 	}
 	// the Exec key's quoting: in double quotes, \ " ` $ escaped
 	q := strings.NewReplacer(`\`, `\\`, `"`, `\"`, "`", "\\`", `$`, `\$`).Replace(exe)
-	return writeRecord("[Desktop Entry]\nType=Application\nName=magpie\nComment=one place to pick every agent's model\n" +
+	return writeRecord("[Desktop Entry]\nType=Application\nName=myna\nComment=one place to pick every agent's model\n" +
 		"Exec=\"" + q + "\" " + Arg + "\nTerminal=false\nX-GNOME-Autostart-enabled=true\n")
 }
 
-// off: the user's entry goes. When the system's own entry starts magpie
+// off: the user's entry goes. When the system's own entry starts myna
 // on some desktop, that would leave it starting, so the user's entry
 // stands over it Hidden instead, as the spec has a user switch a system's
 // entry off. That includes one switched off GNOME's way, which systemd's
@@ -194,11 +194,11 @@ func disable() error {
 // main branch, no Name either), or whose Exec names a program they can't
 // find, such as a store path collected since; MATE's passes over one with
 // no Exec. true is on every system, and COSMIC's session without systemd,
-// which reads no Hidden, starts it in magpie's place.
-const hiddenEntry = "[Desktop Entry]\nType=Application\nName=magpie\nExec=true\nHidden=true\n"
+// which reads no Hidden, starts it in myna's place.
+const hiddenEntry = "[Desktop Entry]\nType=Application\nName=myna\nExec=true\nHidden=true\n"
 
 // writeRecord writes the user's entry where the desktop reads it. A link
-// there (to magpie's launcher, the usual way to have an app open at
+// there (to myna's launcher, the usual way to have an app open at
 // login, or into a read-only store), or a file under another name too, is
 // replaced, not written through, so the file it leads to stays as it was.
 func writeRecord(body string) error {
@@ -238,7 +238,7 @@ func removeRecord() error {
 	return nil
 }
 
-// refresh: nothing an older magpie wrote here needs writing again
+// refresh: nothing an older myna wrote here needs writing again
 func refresh() error { return nil }
 
 // heldBack: nothing here is switched off apart from the record itself

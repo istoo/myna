@@ -74,7 +74,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const errors = [];
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", serve(lang));
-          await page.goto("http://magpie.test/?view=routing");
+          await page.goto("http://myna.test/?view=routing");
           // the busy account is in no request the gateway keeps, and is
           // on the page all the same, with its day and its failures
           const busy = page.locator(".rt-act", { hasText: "busy@example.com" }).first();

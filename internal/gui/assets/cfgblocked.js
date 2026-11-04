@@ -1,6 +1,6 @@
-// The Repair dialog for a folder on the way to magpie's own that isn't the
+// The Repair dialog for a folder on the way to myna's own that isn't the
 // user's, most often a ~/.config a command run with sudo made root's
-// (YouWhat on Discord: adding a provider said "mkdir ~/.config/magpie:
+// (YouWhat on Discord: adding a provider said "mkdir ~/.config/myna:
 // permission denied"). app.js imports this only when /api/state names such
 // a folder or a save fails for it (configBlockedAsk), so it weighs nothing
 // on the core. Repair makes the folder the user's again, after the system's
@@ -11,8 +11,8 @@ window.cfgBlockedAsk = function (path) {
   configBlockedAsked = true;
   const m = $("#modal"), under = !m.hidden && !m.classList.contains("out") && !confirmAsk && m.firstElementChild.firstElementChild;
   const ed = el("div", "editor cfg-blocked"), head = el("div", "ehead"), bar = el("div", "bar");
-  head.append(el("b", "", t("magpie can't save its settings")));
-  ed.append(head, el("p", "lib-confirm", t("{path} belongs to another user, often after a command was run with sudo, so magpie can't save providers or settings there. Repair makes it yours again; the system may ask for your password.", { path })));
+  head.append(el("b", "", t("myna can't save its settings")));
+  ed.append(head, el("p", "lib-confirm", t("{path} belongs to another user, often after a command was run with sudo, so myna can't save providers or settings there. Repair makes it yours again; the system may ask for your password.", { path })));
   const later = el("button", "text", t("Not now")), go = el("button", "text primary", t("Repair"));
   later.onclick = cancelAsk;
   go.onclick = async (e) => {
@@ -22,7 +22,7 @@ window.cfgBlockedAsk = function (path) {
       if ((await api("config/repair", {}))?.canceled) return;
       if (state) state.configBlocked = "";
       closeConfirmAsk();
-      status(t("Repaired: magpie can save again"), "ok");
+      status(t("Repaired: myna can save again"), "ok");
     } catch (err) {
       status(err.message, "err", 12000);
     } finally {

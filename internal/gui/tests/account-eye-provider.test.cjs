@@ -59,7 +59,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang));
-        await page.goto("http://magpie.test/?view=usage");
+        await page.goto("http://myna.test/?view=usage");
         await page.locator(".subscription-account").nth(3).waitFor();
         const row = (provider, user) => page.locator(`.subscription-account[data-card="${provider}|${user}"]`);
         const hidden = (provider, user) => row(provider, user).evaluate((e) => e.querySelectorAll(".pii").length > 0 && !e.textContent.includes(e.dataset.card.split("|")[1]));

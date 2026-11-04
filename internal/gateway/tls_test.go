@@ -73,7 +73,7 @@ func serveTLSGateway(t *testing.T, other bool) (addr string) {
 	}
 	s := New()
 	s.tls = cfg
-	t.Setenv("MAGPIE_ADDR", "127.0.0.1:0")
+	t.Setenv("MYNA_ADDR", "127.0.0.1:0")
 	ln, err := s.listen("127.0.0.1:0")
 	if err != nil {
 		t.Fatal(err)
@@ -235,8 +235,8 @@ func TestCheckTLS(t *testing.T) {
 
 // The addresses printed for other computers are https:// with TLS on.
 func TestTLSAddressesForOtherComputers(t *testing.T) {
-	t.Setenv("MAGPIE_PUBLIC_URL", "")
-	t.Setenv("MAGPIE_ADDR", "10.1.2.3:3425")
+	t.Setenv("MYNA_PUBLIC_URL", "")
+	t.Setenv("MYNA_ADDR", "10.1.2.3:3425")
 	if got := LANURLs(); len(got) != 1 || got[0] != "http://10.1.2.3:3425" {
 		t.Fatalf("without TLS: %v", got)
 	}
@@ -245,13 +245,13 @@ func TestTLSAddressesForOtherComputers(t *testing.T) {
 	if got := LANURLs(); len(got) != 1 || got[0] != "https://10.1.2.3:3425" {
 		t.Errorf("with TLS: %v", got)
 	}
-	t.Setenv("MAGPIE_PUBLIC_URL", "relay.example:3425")
+	t.Setenv("MYNA_PUBLIC_URL", "relay.example:3425")
 	if got := PublicURL(); got != "https://relay.example:3425" {
-		t.Errorf("MAGPIE_PUBLIC_URL with no scheme: %q", got)
+		t.Errorf("MYNA_PUBLIC_URL with no scheme: %q", got)
 	}
-	t.Setenv("MAGPIE_PUBLIC_URL", "http://relay.example")
+	t.Setenv("MYNA_PUBLIC_URL", "http://relay.example")
 	if got := PublicURL(); got != "http://relay.example" {
-		t.Errorf("MAGPIE_PUBLIC_URL's own scheme: %q", got)
+		t.Errorf("MYNA_PUBLIC_URL's own scheme: %q", got)
 	}
 }
 
@@ -276,7 +276,7 @@ func TestTLSRelistenKeepsTLS(t *testing.T) {
 	free, _ := net.Listen("tcp", "127.0.0.1:0")
 	to := free.Addr().String()
 	free.Close()
-	t.Setenv("MAGPIE_ADDR", to)
+	t.Setenv("MYNA_ADDR", to)
 	if err := s.Relisten(); err != nil {
 		t.Fatal(err)
 	}

@@ -12,7 +12,7 @@ import (
 // A ChatGPT account OpenAI signed out (charliepu on Discord: an account
 // showing no allowance until it was signed in again) reads as signed out
 // on its row once its usage read says so, with a refresh tried first, and
-// a sign-in anew in magpie gives it back. A read that fails for anything
+// a sign-in anew in myna gives it back. A read that fails for anything
 // else marks nothing.
 
 // revokedUsageBody is ChatGPT's 401 for a sign-in it revoked (#1793).
@@ -91,7 +91,7 @@ func TestCodexUsageRevokedRefreshedFirst(t *testing.T) {
 
 // Revoked and its refresh refused: both accounts' rows say to sign in
 // again, Codex's own too, which used to say "run codex login" on its
-// allowance line and nothing on its row. Signed in again in magpie, the
+// allowance line and nothing on its row. Signed in again in myna, the
 // account is back, its tokens replaced, not a second one added.
 func TestCodexUsageRevokedSignedOutTillSignedInAgain(t *testing.T) {
 	d := &deadTokens{}
@@ -120,7 +120,7 @@ func TestCodexUsageRevokedSignedOutTillSignedInAgain(t *testing.T) {
 		t.Fatal("the gateway would still send the refused sign-in")
 	}
 
-	// signed in again through magpie's own sign-in: the same account, its
+	// signed in again through myna's own sign-in: the same account, its
 	// tokens replaced where Codex keeps them
 	exp := float64(time.Now().Add(time.Hour).Unix())
 	again, err := codexLogin(fakeJWT(map[string]any{"email": "work@example.com", "https://api.openai.com/auth": map[string]any{"chatgpt_plan_type": "plus"}}),

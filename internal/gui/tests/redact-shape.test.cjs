@@ -55,7 +55,7 @@ async function open(engine, lang, width, saved, redact) {
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", serve(lang, saved, redact));
   await watchSettingsReads(page);
-  await page.goto("http://magpie.test/?view=settings&tab=privacy");
+  await page.goto("http://myna.test/?view=settings&tab=privacy");
   await page.locator("#redactList .row").first().waitFor();
   await settingsDrawn(page);
   return { browser, page, errors };

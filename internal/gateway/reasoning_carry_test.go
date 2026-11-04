@@ -11,7 +11,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // grokReasonedCall is a real Grok reply (Grok Build 1.0.67's session title
@@ -265,7 +265,7 @@ func TestSealedReasoningAskedOfGrokAlone(t *testing.T) {
 	}
 }
 
-// An id whose kept reasoning magpie no longer has goes back as the call's
+// An id whose kept reasoning myna no longer has goes back as the call's
 // own, with no reasoning; one a client cut short, or any other id, goes as
 // it came.
 func TestReasonedIDWithoutItsReasoning(t *testing.T) {

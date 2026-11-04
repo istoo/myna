@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/agent"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/agent"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // fakeDistroRTK stands in for wsl.exe -d <distro> -e sh -lc <script> on the

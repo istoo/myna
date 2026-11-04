@@ -12,7 +12,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/yetone/magpie/internal/pii/guard/coreml"
+	"github.com/istoo/myna/internal/pii/guard/coreml"
 )
 
 // On a Mac the encoder runs on CoreML, which puts it on the Neural Engine

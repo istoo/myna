@@ -13,24 +13,24 @@ import (
 	"time"
 )
 
-// The Bun magpie downloads is kept as magpie-bun, the name a proxy app's
+// The Bun myna downloads is kept as myna-bun, the name a proxy app's
 // PROCESS-NAME rule sees (#1048).
-func TestBunDownloadedAsMagpieBun(t *testing.T) {
+func TestBunDownloadedAsMynaBun(t *testing.T) {
 	bunHome(t, BunVersion, time.Now())
 	asked := bunReleases(t, []byte("bun"))
 	exe, err := Bun(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
-	if filepath.Base(exe) != magpieBun() || asked.Load() != 1 {
-		t.Fatalf("Bun = %s after %d downloads, want one named %s", exe, asked.Load(), magpieBun())
+	if filepath.Base(exe) != mynaBun() || asked.Load() != 1 {
+		t.Fatalf("Bun = %s after %d downloads, want one named %s", exe, asked.Load(), mynaBun())
 	}
 	if _, err := os.Stat(filepath.Join(filepath.Dir(exe), bunExe())); !os.IsNotExist(err) {
-		t.Fatalf("a bun beside magpie-bun: %v", err)
+		t.Fatalf("a bun beside myna-bun: %v", err)
 	}
 }
 
-// A Bun downloaded before is renamed magpie-bun, not downloaded again.
+// A Bun downloaded before is renamed myna-bun, not downloaded again.
 func TestBunDownloadedBeforeTakesTheName(t *testing.T) {
 	bunHome(t, BunVersion, time.Now())
 	asked := bunReleases(t, []byte("new download"))
@@ -48,7 +48,7 @@ func TestBunDownloadedBeforeTakesTheName(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if b, _ := os.ReadFile(exe); filepath.Base(exe) != magpieBun() || string(b) != "downloaded before" || asked.Load() != 0 {
+	if b, _ := os.ReadFile(exe); filepath.Base(exe) != mynaBun() || string(b) != "downloaded before" || asked.Load() != 0 {
 		t.Fatalf("Bun = %s holding %q after %d downloads", exe, b, asked.Load())
 	}
 	if _, err := os.Stat(old); !os.IsNotExist(err) {
@@ -56,16 +56,16 @@ func TestBunDownloadedBeforeTakesTheName(t *testing.T) {
 	}
 }
 
-// The plugin host runs as magpie-bun: the process name the system reports
-// for it is magpie-bun, not bun.
-func TestHostRunsAsMagpieBun(t *testing.T) {
+// The plugin host runs as myna-bun: the process name the system reports
+// for it is myna-bun, not bun.
+func TestHostRunsAsMynaBun(t *testing.T) {
 	real, err := exec.LookPath("bun")
 	if err != nil {
 		t.Skip("no bun on PATH")
 	}
 	bunHome(t, BunVersion, time.Now())
 	t.Cleanup(Settle)
-	// a real Bun as magpie downloaded it before, at the old name: a hard
+	// a real Bun as myna downloaded it before, at the old name: a hard
 	// link, not a symlink (whose process would take the target's name)
 	old := filepath.Join(bunDirOf(BunVersion), bunExe())
 	if err := os.MkdirAll(filepath.Dir(old), 0o755); err != nil {
@@ -88,7 +88,7 @@ func TestHostRunsAsMagpieBun(t *testing.T) {
 	if h == nil || h.cmd.Process == nil {
 		t.Fatal("no host running")
 	}
-	if got := filepath.Base(h.cmd.Path); got != magpieBun() {
+	if got := filepath.Base(h.cmd.Path); got != mynaBun() {
 		t.Fatalf("the host runs %s", h.cmd.Path)
 	}
 	if runtime.GOOS == "windows" {
@@ -98,7 +98,7 @@ func TestHostRunsAsMagpieBun(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := filepath.Base(strings.TrimSpace(string(out))); got != "magpie-bun" {
+	if got := filepath.Base(strings.TrimSpace(string(out))); got != "myna-bun" {
 		t.Fatalf("ps says the host is %q", got)
 	}
 }

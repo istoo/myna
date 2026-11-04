@@ -54,7 +54,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], posts = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, posts));
-        await page.goto("http://magpie.test/?view=providers");
+        await page.goto("http://myna.test/?view=providers");
         const w = await page.evaluate((lang) => Object.fromEntries(["API key", "Accounts", "Save"].map((k) => [k, lang === "en" ? k : I18N[lang][k]])), lang);
         assert.deepEqual(Object.entries(w).filter(([, v]) => !v).map(([k]) => k), []);
         const ed = page.locator(".editor");

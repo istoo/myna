@@ -26,9 +26,9 @@ import (
 	"time"
 
 	"github.com/MoeForge/moejs"
-	"github.com/yetone/magpie/internal/filememo"
-	"github.com/yetone/magpie/internal/jsmod"
-	"github.com/yetone/magpie/internal/plugin"
+	"github.com/istoo/myna/internal/filememo"
+	"github.com/istoo/myna/internal/jsmod"
+	"github.com/istoo/myna/internal/plugin"
 )
 
 // How long a hook may run before it is stopped and its input kept as it
@@ -94,7 +94,7 @@ var (
 
 // current is the middleware in force, loaded again when plugins.json or a
 // middleware's file changed, which is looked at once a second, and at
-// once after magpie wrote a file of its own.
+// once after myna wrote a file of its own.
 func current() *set {
 	s := cur.Load()
 	now := time.Now().UnixNano()
@@ -383,7 +383,7 @@ func (in *inst) console() map[string]any {
 }
 
 // linesAMinute is how many lines a middleware may log a minute, so one
-// that logs every event doesn't fill magpie's log.
+// that logs every event doesn't fill myna's log.
 const linesAMinute = 60
 
 func (m *mw) say(level, msg string) {

@@ -3,8 +3,8 @@ package gui
 import (
 	"testing"
 
-	"github.com/yetone/magpie/internal/sessions"
-	"github.com/yetone/magpie/internal/usage"
+	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/myna/internal/usage"
 )
 
 // A list, a manage page and a detail never read a gateway session's days,

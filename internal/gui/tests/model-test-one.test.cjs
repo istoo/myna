@@ -86,7 +86,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       const tests = [];
       await page.route("**/*", serve(lang, tests));
-      await page.goto("http://magpie.test/?view=providers");
+      await page.goto("http://myna.test/?view=providers");
       await page.locator(".row.provider", { hasText: "Relay" }).click();
       await page.locator(".editor .mchips .mchip").first().waitFor();
       const chip = (id) => page.locator(".editor .mchips .mchip", { hasText: id });

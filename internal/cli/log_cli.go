@@ -1,6 +1,6 @@
 package cli
 
-// magpie log: where magpie's logs are, and the app's last lines. The app
+// myna log: where myna's logs are, and the app's last lines. The app
 // opened from the Finder, the Dock or the Start menu writes its log to a
 // file (applog), which a user asked for it finds here or in Settings ›
 // About › Log (rayem1w on X had been told of serve.log, which only the
@@ -18,21 +18,21 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yetone/magpie/internal/applog"
-	"github.com/yetone/magpie/internal/daemon"
-	"github.com/yetone/magpie/internal/tui"
+	"github.com/istoo/myna/internal/applog"
+	"github.com/istoo/myna/internal/daemon"
+	"github.com/istoo/myna/internal/tui"
 )
 
-const logUsage = `usage: magpie log [--path] [-n N] [-f]
-  where magpie's logs are on this computer: the app's own (the app, the menu bar and the
+const logUsage = `usage: myna log [--path] [-n N] [-f]
+  where myna's logs are on this computer: the app's own (the app, the menu bar and the
   panel write it, wherever they were opened from), the one before it, and the logs of
-  magpie serve as a service (magpie daemon) or left running by magpie tui, when there are.
+  myna serve as a service (myna daemon) or left running by myna tui, when there are.
   --path  the app's log alone, its path only
   -n N    the app log's last N lines (100 with -f)
   -f      the app log's last lines, then each line as it is written, until Ctrl+C
-  Send the app's log with a report. It holds what magpie did, not your keys, prompts or replies.`
+  Send the app's log with a report. It holds what myna did, not your keys, prompts or replies.`
 
-// logCmd: magpie log [--path] [-n N] [-f]
+// logCmd: myna log [--path] [-n N] [-f]
 func logCmd(args []string) error {
 	pathOnly, follow, lines := false, false, -1
 	for i := 0; i < len(args); i++ {
@@ -43,16 +43,16 @@ func logCmd(args []string) error {
 			follow = true
 		case a == "-n" || a == "--lines":
 			if i+1 == len(args) {
-				return errors.New("-n takes a number of lines (magpie log -n 200)")
+				return errors.New("-n takes a number of lines (myna log -n 200)")
 			}
 			i++
 			n, err := strconv.Atoi(args[i])
 			if err != nil || n < 0 {
-				return fmt.Errorf("-n takes a number of lines, not %q (magpie log -n 200)", args[i])
+				return fmt.Errorf("-n takes a number of lines, not %q (myna log -n 200)", args[i])
 			}
 			lines = n
 		default:
-			return fmt.Errorf("unknown argument %s (magpie log [--path] [-n N] [-f])", a)
+			return fmt.Errorf("unknown argument %s (myna log [--path] [-n N] [-f])", a)
 		}
 	}
 	path := applog.Path()
@@ -72,7 +72,7 @@ func logCmd(args []string) error {
 	return nil
 }
 
-// logsHere says where each of magpie's logs is: the app's, always, and
+// logsHere says where each of myna's logs is: the app's, always, and
 // the others that are there.
 func logsHere(path string) string {
 	var b strings.Builder
@@ -80,16 +80,16 @@ func logsHere(path string) string {
 	if _, err := os.Stat(path); err != nil {
 		fmt.Fprintf(&b, "  the app's log: nothing yet; the app writes it once it is opened\n")
 	} else {
-		fmt.Fprintf(&b, "  the app's log (Settings › About › Log); magpie log -f follows it\n")
+		fmt.Fprintf(&b, "  the app's log (Settings › About › Log); myna log -f follows it\n")
 	}
 	if old := filepath.Join(filepath.Dir(path), applog.OldName); exists(old) {
 		fmt.Fprintf(&b, "%s\n  the app's log before it, kept once it reached %d MiB\n", old, applog.Limit>>20)
 	}
 	if st, err := daemon.Get(); err == nil && st.Installed && st.Logs != "" {
-		fmt.Fprintf(&b, "%s\n  magpie serve as a service (magpie daemon)\n", st.Logs)
+		fmt.Fprintf(&b, "%s\n  myna serve as a service (myna daemon)\n", st.Logs)
 	}
 	if bg := tui.BackgroundLog(); exists(bg) {
-		fmt.Fprintf(&b, "%s\n  magpie serve left running by magpie tui as it quit\n", bg)
+		fmt.Fprintf(&b, "%s\n  myna serve left running by myna tui as it quit\n", bg)
 	}
 	return b.String()
 }
@@ -101,12 +101,12 @@ func exists(p string) bool {
 
 // tailLog writes the last n lines of the log at path to w, then, with
 // follow, what is written to it after, until stop is closed (nil: until
-// magpie is ended). A log rotated meanwhile is read again from its start.
+// myna is ended). A log rotated meanwhile is read again from its start.
 func tailLog(w io.Writer, path string, n int, follow bool, stop <-chan struct{}) error {
 	f, err := os.Open(path)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) && follow {
-			fmt.Fprintf(os.Stderr, "magpie: %s isn't there yet: waiting for the app to write it\n", path)
+			fmt.Fprintf(os.Stderr, "myna: %s isn't there yet: waiting for the app to write it\n", path)
 		} else if errors.Is(err, os.ErrNotExist) {
 			return fmt.Errorf("%s isn't there yet: the app writes it once it is opened", path)
 		} else {

@@ -8,11 +8,11 @@ import (
 )
 
 // The report's lines (Zhenzhen on Discord, Claude Desktop 3.1623.0 on
-// "Fable 5.1 High", magpie 0.1.1327): the model wrote its calls in the
+// "Fable 5.1 High", myna 0.1.1327): the model wrote its calls in the
 // form a conversation told as text gives past calls, ids made up.
 const (
-	reportedPlanCall = `[tool call mcp__magpie__mcp__ccd_turn__update_plan id=toolu_0Validate args={"advance":true}]`
-	reportedBashCall = `[tool call mcp__magpie__Bash id=toolu_0Validate bash args={"command":"cd /Users/... && git diff --check ..."}]`
+	reportedPlanCall = `[tool call mcp__myna__mcp__ccd_turn__update_plan id=toolu_0Validate args={"advance":true}]`
+	reportedBashCall = `[tool call mcp__myna__Bash id=toolu_0Validate bash args={"command":"cd /Users/... && git diff --check ..."}]`
 )
 
 // textCallTurn is a streamed reply whose words are chunks, ended as Claude
@@ -38,7 +38,7 @@ func textCallTurn(id string, chunks ...string) []string {
 // through the run's MCP helper, as Claude Code tells it.
 var realCallTurn = []string{
 	`{"type":"stream_event","event":{"type":"message_start","message":{"id":"msg_real","model":"claude-fable-5-1","usage":{"input_tokens":3,"output_tokens":1}}}}`,
-	`{"type":"stream_event","event":{"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"toolu_01RealCall","name":"mcp__magpie__mcp__ccd_turn__update_plan","input":{}}}}`,
+	`{"type":"stream_event","event":{"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"toolu_01RealCall","name":"mcp__myna__mcp__ccd_turn__update_plan","input":{}}}}`,
 	`{"type":"stream_event","event":{"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"{\"advance\":true}"}}}`,
 	`{"type":"stream_event","event":{"type":"content_block_stop","index":0}}`,
 	`{"type":"stream_event","event":{"type":"message_delta","delta":{"stop_reason":"tool_use"},"usage":{"output_tokens":20}}}`,
@@ -93,8 +93,8 @@ func TestClaudeTextToolCallsAreMadeForReal(t *testing.T) {
 	told := stdinOf(t, run)
 	lines := append(textCallTurn("msg_text",
 		"Plan advanced; now validating.\n",
-		"[tool", " call mcp__magpie__mcp__ccd_turn__update_plan id=toolu_0Valid",
-		strings.TrimPrefix(reportedPlanCall, "[tool call mcp__magpie__mcp__ccd_turn__update_plan id=toolu_0Valid")+"\n",
+		"[tool", " call mcp__myna__mcp__ccd_turn__update_plan id=toolu_0Valid",
+		strings.TrimPrefix(reportedPlanCall, "[tool call mcp__myna__mcp__ccd_turn__update_plan id=toolu_0Valid")+"\n",
 		reportedBashCall+"\n[tool result id=toolu_0Validate]\nok"),
 		realCallTurn...)
 	text, stop, _, _, raw, ended, ok := claudeReply(t, run, lines, true)
@@ -124,10 +124,10 @@ func TestClaudeTextToolCallsAreMadeForReal(t *testing.T) {
 		len(ask.Message.Content) != 1 || ask.Message.Content[0].Text != textCallsAsk {
 		t.Fatalf("the run was told %s", asks[0])
 	}
-	// the ask names neither magpie nor the vendor
-	for _, w := range []string{"magpie", "Claude", "Anthropic"} {
+	// the ask names neither myna nor the vendor
+	for _, w := range []string{"myna", "Claude", "Anthropic"} {
 		if strings.Contains(textCallsAsk, w) || strings.Contains(pastCallsNote, w) {
-			t.Fatalf("the text magpie adds names %s", w)
+			t.Fatalf("the text myna adds names %s", w)
 		}
 	}
 }
@@ -210,7 +210,7 @@ func TestClaudePromptSaysPastCallsAreARecord(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := all(blocks); !strings.HasSuffix(got, pastCallsNote+"\n\n</current_turn>") || !strings.Contains(got, "[tool call mcp__magpie__Bash id=toolu_01") {
+	if got := all(blocks); !strings.HasSuffix(got, pastCallsNote+"\n\n</current_turn>") || !strings.Contains(got, "[tool call mcp__myna__Bash id=toolu_01") {
 		t.Fatalf("started anew:\n%s", got)
 	}
 	if got := all(renderClaudeTurn(msgs[1:3], tools)); !strings.HasSuffix(got, "\n\n"+pastCallsNote) {
@@ -246,7 +246,7 @@ func TestClaudeTextToolCallsUnstreamed(t *testing.T) {
 func TestClaudeTextInvokeCallsAreMadeForReal(t *testing.T) {
 	for _, written := range []string{
 		invokeReported,
-		"<function_calls>\n" + `<invoke name="ToolSearch"><parameter name="query">select:mcp__magpie__magpie-browser__browser_navigate</parameter></invoke>` + "\n</function_calls>",
+		"<function_calls>\n" + `<invoke name="ToolSearch"><parameter name="query">select:mcp__myna__myna-browser__browser_navigate</parameter></invoke>` + "\n</function_calls>",
 	} {
 		run := &subscriptionRun{}
 		told := stdinOf(t, run)

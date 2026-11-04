@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// The repositories tagged magpie-plugin on GitHub are many and of every
+// The repositories tagged myna-plugin on GitHub are many and of every
 // kind (the owner: 这里应该有分类以及搜索框方便用户筛选), so their section
 // has its kinds to pick from, each with how many there are, and a field of
 // its own that narrows them by name, author or description as it is typed.
@@ -26,7 +26,7 @@ const GH = require("./fixtures/plugins-github-31.json");
 // two of them already here, a provider and a middleware, installed by the
 // spec the page would send for each: the strip says both sides of it, and
 // the kinds narrow it either way
-const HERE = ["mu-zi-lee/magpie-our-free-model", "ezdemo/magpie-haiku55-thinking"];
+const HERE = ["mu-zi-lee/myna-our-free-model", "ezdemo/myna-haiku55-thinking"];
 const INSTALLED = HERE
   .map((repo) => GH.repos.find((r) => r.repo === repo))
   .map((r) => ({ spec: r.spec, package: r.package, providers: [], version: "1.0.0", moved: [] }));
@@ -48,7 +48,7 @@ function server(lang, fetched, installed = INSTALLED) {
     if (url.pathname === "/api/plugins/github") return json(GH);
     if (url.pathname === "/api/plugins/search") return json({ hits: [] });
     if (url.pathname.startsWith("/api/")) return json({});
-    if (url.host !== "magpie.test" || !/^\/[\w./-]*$/.test(url.pathname)) { fetched.push(url.href); return route.fulfill({ status: 404, body: "" }); }
+    if (url.host !== "myna.test" || !/^\/[\w./-]*$/.test(url.pathname)) { fetched.push(url.href); return route.fulfill({ status: 404, body: "" }); }
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -78,7 +78,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", server("en", fetched, []));
       try {
-        await page.goto("http://magpie.test/?view=plugins");
+        await page.goto("http://myna.test/?view=plugins");
         const sec = page.locator("#view-plugins .pm-ghsec");
         await sec.locator(".pm-card").first().waitFor();
         assert.equal(await sec.locator(".pm-ghkinds").count(), 1);
@@ -99,7 +99,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, fetched));
         try {
-          await page.goto("http://magpie.test/?view=plugins");
+          await page.goto("http://myna.test/?view=plugins");
           const sec = page.locator("#view-plugins .pm-ghsec");
           const cards = sec.locator(".pm-card");
           await cards.first().waitFor();

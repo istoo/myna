@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/gateway"
+	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/myna/internal/gateway"
 )
 
 // providers is providers.json at path, parsed.
@@ -37,25 +37,25 @@ func copilotSandbox(t *testing.T) (*Agent, string) {
 	return copilot(home), filepath.Join(home, ".copilot", "providers.json")
 }
 
-// Connecting Copilot CLI to magpie's model writes the provider Copilot reads
+// Connecting Copilot CLI to myna's model writes the provider Copilot reads
 // from providers.json (BYOK, no GitHub sign-in) and picks it in settings.json
 // as <provider>/<model>, the way Copilot's /model does (tony9759 on Discord).
 func TestCopilotModelWritesProvidersJSON(t *testing.T) {
 	cp, provs := copilotSandbox(t)
-	if err := cp.Pick("model", "magpie/deepseek/pro"); err != nil {
+	if err := cp.Pick("model", "myna/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
-	if got := cp.Field("model").Get(); got != "magpie/deepseek/pro" {
+	if got := cp.Field("model").Get(); got != "myna/deepseek/pro" {
 		t.Fatalf("model reads %q", got)
 	}
 	ps, ms, _ := copilotParsed(t, provs)
-	if len(ps) != 1 || ps[0]["name"] != "magpie" || ps[0]["type"] != "openai" ||
+	if len(ps) != 1 || ps[0]["name"] != "myna" || ps[0]["type"] != "openai" ||
 		ps[0]["baseUrl"] != gateway.URL()+"/v1" || ps[0]["apiKey"] != agentKey("copilot") {
 		t.Fatalf("provider: %v", ps)
 	}
 	found := map[string]bool{}
 	for _, m := range ms {
-		if m["provider"] != "magpie" {
+		if m["provider"] != "myna" {
 			t.Fatalf("model of another provider: %v", m)
 		}
 		found[m["id"].(string)] = true
@@ -72,9 +72,9 @@ func TestCopilotModelWritesProvidersJSON(t *testing.T) {
 }
 
 // What the user keeps in providers.json, a provider of theirs, a model of
-// theirs, a key magpie doesn't know, is left as it was by connect, by sync
+// theirs, a key myna doesn't know, is left as it was by connect, by sync
 // and by disconnect; their own model in settings.json is not touched until
-// magpie's is picked, and Disconnect puts it back.
+// myna's is picked, and Disconnect puts it back.
 func TestCopilotKeepsTheUsersOwn(t *testing.T) {
 	cp, provs := copilotSandbox(t)
 	writeFile(t, provs, `{"theme":"x","providers":[{"name":"mine","type":"openai","baseUrl":"https://mine.example/v1","apiKey":"K"}],`+
@@ -83,7 +83,7 @@ func TestCopilotKeepsTheUsersOwn(t *testing.T) {
 	if err := cp.Connect(); err != nil {
 		t.Fatal(err)
 	}
-	if v := cp.Field("model").Get(); !strings.HasPrefix(v, "magpie/") {
+	if v := cp.Field("model").Get(); !strings.HasPrefix(v, "myna/") {
 		t.Fatalf("connect left the model on %q", v)
 	}
 	ps, ms, top := copilotParsed(t, provs)
@@ -115,11 +115,11 @@ func TestCopilotKeepsTheUsersOwn(t *testing.T) {
 }
 
 // A providers.json that isn't JSON is the user's, however it got that way:
-// magpie says so and writes nothing.
+// myna says so and writes nothing.
 func TestCopilotUnreadableProvidersJSONIsNotWrittenOver(t *testing.T) {
 	cp, provs := copilotSandbox(t)
 	writeFile(t, provs, `{"providers": [oops`)
-	if err := cp.Field("model").Set("magpie/deepseek/pro"); err == nil {
+	if err := cp.Field("model").Set("myna/deepseek/pro"); err == nil {
 		t.Fatal("no error for a file that does not parse")
 	}
 	if got := readFile(provs); got != `{"providers": [oops` {
@@ -134,9 +134,9 @@ func TestCopilotUnreadableProvidersJSONIsNotWrittenOver(t *testing.T) {
 // COPILOT_HOME move the files as they move Copilot's.
 func TestCopilotSyncCheckAndEnv(t *testing.T) {
 	cp, provs := copilotSandbox(t)
-	cp.Field("model").Set("magpie/deepseek/pro")
+	cp.Field("model").Set("myna/deepseek/pro")
 	// a model dropped by hand comes back with the sync; the user's pick stays
-	edit.WriteAtomic(provs, []byte(`{"providers":[{"name":"magpie","type":"openai","baseUrl":"http://127.0.0.1:1/v1","apiKey":"x"}],"models":[]}`))
+	edit.WriteAtomic(provs, []byte(`{"providers":[{"name":"myna","type":"openai","baseUrl":"http://127.0.0.1:1/v1","apiKey":"x"}],"models":[]}`))
 	if cp.Check() == "" {
 		t.Fatal("a provider pointing elsewhere is not told")
 	}
@@ -152,7 +152,7 @@ func TestCopilotSyncCheckAndEnv(t *testing.T) {
 	t.Setenv("COPILOT_PROVIDERS_CONFIG", other)
 	home := t.TempDir()
 	cp2 := copilot(home)
-	if err := cp2.Field("model").Set("magpie/deepseek/flash"); err != nil {
+	if err := cp2.Field("model").Set("myna/deepseek/flash"); err != nil {
 		t.Fatal(err)
 	}
 	if _, ms, _ := copilotParsed(t, other); len(ms) < 2 {

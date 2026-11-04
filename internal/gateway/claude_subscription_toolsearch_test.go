@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // Claude Code with ENABLE_TOOL_SEARCH loads a deferred tool by a ToolSearch

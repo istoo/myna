@@ -26,7 +26,7 @@ func TestReasonixPlannerNativeSelections(t *testing.T) {
 	t.Run("return", func(t *testing.T) {
 		a, _ := reasonixFixture(t, original)
 		f := a.Field("planner")
-		if err := f.Set("magpie/a/pro"); err != nil {
+		if err := f.Set("myna/a/pro"); err != nil {
 			t.Fatal(err)
 		}
 		if !slices.ContainsFunc(f.Options(a.Values()), func(o Option) bool { return o.Value == "deepseek-pro" }) {
@@ -36,7 +36,7 @@ func TestReasonixPlannerNativeSelections(t *testing.T) {
 			t.Fatalf("the original native planner cannot be reselected: %v", err)
 		}
 		cfg, err := readReasonix(a.Path)
-		if err != nil || cfg.Agent.Planner == nil || *cfg.Agent.Planner != "deepseek-pro" || cfg.magpie().Name != "" {
+		if err != nil || cfg.Agent.Planner == nil || *cfg.Agent.Planner != "deepseek-pro" || cfg.myna().Name != "" {
 			t.Fatalf("native planner restoration left a managed provider: %+v %v", cfg, err)
 		}
 	})

@@ -13,9 +13,9 @@ package gateway
 // answered with the images in output.choices[*].message.content[*].image,
 // each a URL kept for 24 hours (docs.qwencloud.com, "Qwen-Image text-to-
 // image" and the Token Plan's "Integrate multimodal generation"), the only
-// API documented for them. magpie sent them to the OpenAI images API at
+// API documented for them. myna sent them to the OpenAI images API at
 // /compatible-mode/v1, and on its 404 to chat completions, whose answer has
-// no image magpie reads: "qwen-image-3.0-pro drew nothing" (judi0713 on
+// no image myna reads: "qwen-image-3.0-pro drew nothing" (judi0713 on
 // Discord; which of the two answered is not seen from here).
 
 import (
@@ -26,7 +26,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 // dashScopeDraws is whether model draws on DashScope's multimodal-

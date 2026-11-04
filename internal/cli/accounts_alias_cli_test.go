@@ -9,12 +9,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
-// #1515: `magpie accounts alias` names an account for the user, as
-// magpie keeps it (providers.json): the agent's own sign-in is left as it
-// is, and `magpie accounts` and `magpie quota` show the name first.
+// #1515: `myna accounts alias` names an account for the user, as
+// myna keeps it (providers.json): the agent's own sign-in is left as it
+// is, and `myna accounts` and `myna quota` show the name first.
 func TestAccountsAlias(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)

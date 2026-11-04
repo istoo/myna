@@ -13,7 +13,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 func TestMain(m *testing.M) { testenv.Main(m) }

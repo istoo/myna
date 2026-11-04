@@ -5,10 +5,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/pluginrt"
-	"github.com/yetone/magpie/internal/provider"
-	"github.com/yetone/magpie/internal/routes"
-	"github.com/yetone/magpie/internal/testenv"
+	"github.com/istoo/myna/internal/pluginrt"
+	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/routes"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 func TestMain(m *testing.M) { testenv.Main(m) }

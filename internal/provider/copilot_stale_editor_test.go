@@ -29,7 +29,7 @@ func staleEditor(t *testing.T, cliUser string) (string, *atomic.Int32, *atomic.I
 	var served, refused atomic.Int32
 	api := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
-		case r.Header.Get("Authorization") == "Bearer tid_magpie" && r.Header.Get("Copilot-Integration-Id") == "vscode-chat":
+		case r.Header.Get("Authorization") == "Bearer tid_myna" && r.Header.Get("Copilot-Integration-Id") == "vscode-chat":
 		case r.Header.Get("Authorization") == "Bearer gho_cli" && r.Header.Get("Copilot-Integration-Id") == "copilot-developer-cli":
 			served.Add(1)
 		default:
@@ -41,8 +41,8 @@ func staleEditor(t *testing.T, cliUser string) (string, *atomic.Int32, *atomic.I
 	t.Cleanup(api.Close)
 	// the editors' exchange: the stale token is refused as GitHub refuses it
 	exchange := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Header.Get("Authorization") == "token gho_magpie" {
-			json.NewEncoder(w).Encode(map[string]any{"token": "tid_magpie", "expires_at": time.Now().Add(time.Hour).Unix(), "endpoints": map[string]string{"api": api.URL}})
+		if r.Header.Get("Authorization") == "token gho_myna" {
+			json.NewEncoder(w).Encode(map[string]any{"token": "tid_myna", "expires_at": time.Now().Add(time.Hour).Unix(), "endpoints": map[string]string{"api": api.URL}})
 			return
 		}
 		refused.Add(1)
@@ -117,19 +117,19 @@ func TestCopilotStaleEditorNotAnotherAccount(t *testing.T) {
 	}
 }
 
-// Signed in again from magpie, the same account as the editors' refused
+// Signed in again from myna, the same account as the editors' refused
 // sign-in is kept and used, not let go as the editors' own (#1238: "Repeating
-// the Magpie device login still leaves the editor credential selected").
+// the Myna device login still leaves the editor credential selected").
 func TestCopilotSignInKeptOverStaleEditor(t *testing.T) {
 	staleEditor(t, "nobody")
 	os.RemoveAll(copilotCLIHome()) // no CLI sign-in
 	copilotLoginList()             // the editors' own octocat, remembered
 	copilotProbeEditor(context.Background(), "octocat", "")
-	if err := addCopilotLogin("octocat", "Business", "gho_magpie", ""); err != nil {
+	if err := addCopilotLogin("octocat", "Business", "gho_myna", ""); err != nil {
 		t.Fatal(err)
 	}
 	ls := copilotLogins(copilotConfigDir())
-	if len(ls) != 1 || ls[0].User != "octocat" || ls[0].app.Token != "gho_magpie" {
+	if len(ls) != 1 || ls[0].User != "octocat" || ls[0].app.Token != "gho_myna" {
 		t.Fatalf("accounts: %+v", ls)
 	}
 	p, ok := find(All(), "copilot")
@@ -137,11 +137,11 @@ func TestCopilotSignInKeptOverStaleEditor(t *testing.T) {
 		t.Fatal("no copilot")
 	}
 	if _, err := p.Fetch(context.Background()); err != nil {
-		t.Fatalf("fetch with magpie's sign-in: %v", err)
+		t.Fatalf("fetch with myna's sign-in: %v", err)
 	}
 }
 
-// The editors' sign-in still taken, a sign-in from magpie of the same
+// The editors' sign-in still taken, a sign-in from myna of the same
 // account is let go as before: the editors' own stands for it.
 func TestCopilotSignInSameAsWorkingEditor(t *testing.T) {
 	staleEditor(t, "nobody")
@@ -153,7 +153,7 @@ func TestCopilotSignInSameAsWorkingEditor(t *testing.T) {
 	CopilotTokenURL = exchange.URL
 	copilotLoginList()
 	copilotProbeEditor(context.Background(), "octocat", "")
-	if err := addCopilotLogin("octocat", "Business", "gho_magpie", ""); err != nil {
+	if err := addCopilotLogin("octocat", "Business", "gho_myna", ""); err != nil {
 		t.Fatal(err)
 	}
 	ls := copilotLogins(copilotConfigDir())

@@ -8,9 +8,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/yetone/magpie/internal/agentenv"
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/settings"
+	"github.com/istoo/myna/internal/agentenv"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/settings"
 )
 
 func TestEntryForUsesImageSettingsSnapshot(t *testing.T) {
@@ -274,7 +274,7 @@ func TestFetchPlanWithoutList(t *testing.T) {
 
 // A model its vendor lists with no name is called by its id, in the
 // catalog and so in every agent's list (#955: an unnamed one showed as
-// magpie/antigravity/gemini-3.6-flash-tiered); a name the user gave it
+// myna/antigravity/gemini-3.6-flash-tiered); a name the user gave it
 // still wins, its vendor's then being the id.
 func TestEntryForUnnamedModel(t *testing.T) {
 	p := Provider{ID: "acme", Name: "Acme"}

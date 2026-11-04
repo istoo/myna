@@ -1,11 +1,11 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Settings → Version and the Update pill, for a magpie that can't replace
-// itself where it runs: a magpie.exe kept at C:\ (#1277) said only that a new
+// Settings → Version and the Update pill, for a myna that can't replace
+// itself where it runs: a myna.exe kept at C:\ (#1277) said only that a new
 // version was out, and its Download opened the release page with nothing
-// saying why. Both now say the folder magpie may not write to, in English,
+// saying why. Both now say the folder myna may not write to, in English,
 // Chinese, Japanese and German, at a narrow window too. In a container (the
-// Docker image's /magpie, run as nonroot) they say to pull the new image
-// rather than to move magpie to another folder. No backend, the API is
+// Docker image's /myna, run as nonroot) they say to pull the new image
+// rather than to move myna to another folder. No backend, the API is
 // faked here.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -17,30 +17,30 @@ const assets = path.resolve(__dirname, "../assets");
 const DIR = "C:\\";
 
 const words = {
-  en: { version: "Version", why: "magpie can't write to the folder it runs from (C:\\), so it can't update itself; move it to a folder you can write to and open it from there." },
-  zh: { version: "版本", why: "magpie 无法写入它所在的文件夹（C:\\），所以无法自动更新；请把它移到你有写入权限的文件夹，再从那里打开。" },
-  ja: { why: "magpie は実行中のフォルダ（C:\\）に書き込めないため、自動アップデートできません。書き込み可能なフォルダに移動し、そこから開いてください。" },
-  de: { why: "magpie kann nicht in den Ordner schreiben, aus dem es läuft (C:\\), und kann sich daher nicht selbst aktualisieren; verschieben Sie es in einen Ordner mit Schreibrechten und öffnen Sie es von dort." },
+  en: { version: "Version", why: "myna can't write to the folder it runs from (C:\\), so it can't update itself; move it to a folder you can write to and open it from there." },
+  zh: { version: "版本", why: "myna 无法写入它所在的文件夹（C:\\），所以无法自动更新；请把它移到你有写入权限的文件夹，再从那里打开。" },
+  ja: { why: "myna は実行中のフォルダ（C:\\）に書き込めないため、自動アップデートできません。書き込み可能なフォルダに移動し、そこから開いてください。" },
+  de: { why: "myna kann nicht in den Ordner schreiben, aus dem es läuft (C:\\), und kann sich daher nicht selbst aktualisieren; verschieben Sie es in einen Ordner mit Schreibrechten und öffnen Sie es von dort." },
 };
 
-const folder = { state: "available", current: "0.1.400", latest: "0.1.401", url: "https://github.com/yetone/magpie-releases/releases/tag/v0.1.401", stuck: "not-writable", stuckDir: DIR };
-const container = { state: "available", current: "0.1.400", latest: "0.1.401", url: "https://github.com/yetone/magpie-releases/releases/tag/v0.1.401", stuck: "container" };
+const folder = { state: "available", current: "0.1.400", latest: "0.1.401", url: "https://github.com/istoo/myna/releases/tag/v0.1.401", stuck: "not-writable", stuckDir: DIR };
+const container = { state: "available", current: "0.1.400", latest: "0.1.401", url: "https://github.com/istoo/myna/releases/tag/v0.1.401", stuck: "container" };
 const pull = {
-  en: "magpie runs in a container, so it can't update itself; pull the new image (docker pull ghcr.io/yetone/magpie:latest) and recreate the container.",
-  zh: "magpie 运行在容器里，无法自动更新；请拉取新镜像（docker pull ghcr.io/yetone/magpie:latest）并重新创建容器。",
-  "zh-TW": "magpie 在容器中執行，無法自動更新；請拉取新映像（docker pull ghcr.io/yetone/magpie:latest）並重新建立容器。",
-  ja: "magpie はコンテナで実行されているため、自動アップデートできません。新しいイメージを取得し（docker pull ghcr.io/yetone/magpie:latest）、コンテナを作り直してください。",
-  de: "magpie läuft in einem Container und kann sich daher nicht selbst aktualisieren; laden Sie das neue Image (docker pull ghcr.io/yetone/magpie:latest) und erstellen Sie den Container neu.",
+  en: "myna runs in a container, so it can't update itself; pull the new image (docker pull ghcr.io/istoo/myna:latest) and recreate the container.",
+  zh: "myna 运行在容器里，无法自动更新；请拉取新镜像（docker pull ghcr.io/istoo/myna:latest）并重新创建容器。",
+  "zh-TW": "myna 在容器中執行，無法自動更新；請拉取新映像（docker pull ghcr.io/istoo/myna:latest）並重新建立容器。",
+  ja: "myna はコンテナで実行されているため、自動アップデートできません。新しいイメージを取得し（docker pull ghcr.io/istoo/myna:latest）、コンテナを作り直してください。",
+  de: "myna läuft in einem Container und kann sich daher nicht selbst aktualisieren; laden Sie das neue Image (docker pull ghcr.io/istoo/myna:latest) und erstellen Sie den Container neu.",
 };
 const cases = [
-  { name: "a magpie that can't write to its folder says why it can't update", update: folder, langs: ["en", "zh", "ja", "de"], why: (lang) => words[lang].why },
-  { name: "a magpie in a container says to pull the new image", update: container, langs: ["en", "zh", "zh-TW", "ja", "de"], why: (lang) => pull[lang] },
+  { name: "a myna that can't write to its folder says why it can't update", update: folder, langs: ["en", "zh", "ja", "de"], why: (lang) => words[lang].why },
+  { name: "a myna in a container says to pull the new image", update: container, langs: ["en", "zh", "zh-TW", "ja", "de"], why: (lang) => pull[lang] },
 ];
 
 function server(lang, ctl, update) {
   const settings = {
     theme: "light", lang, tray: "panel", quotaLeft: false, currency: "usd",
-    version: "0.1.400", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3999",
+    version: "0.1.400", dir: "~/.config/myna", gateway: "http://127.0.0.1:3999",
     proxyNow: "none", proxySource: "none", login: false, redactWords: [],
     visionModels: [], imageGenModels: [], workbuddyCheckins: [], lanURLs: [],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
@@ -77,7 +77,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           page.setDefaultNavigationTimeout(60000);
           page.on("pageerror", (e) => { if (!/^ResizeObserver loop completed with undelivered notifications/.test(e.message)) errors.push(e.message); });
           await page.route("**/*", server(lang, ctl, c.update));
-          await page.goto("http://magpie.test/?view=settings&tab=about");
+          await page.goto("http://myna.test/?view=settings&tab=about");
           const want = c.why(lang);
           // the Version row: the version out, then why it can't be put in here
           // (the row is drawn again as the answer is read, so it is found
@@ -99,21 +99,21 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
   });
 }
 
-// A magpie a package manager installed (the AUR's magpie-bin, shuhai on
+// A myna a package manager installed (the AUR's myna-bin, shuhai on
 // Discord) leaves its updates to the manager: the Version row says the
 // version is out and the command that updates the package, with no
 // Download (the release's binary isn't for this install) and no Update
 // pill (the package can come days after the release).
-const packaged = { state: "available", current: "0.1.400", latest: "0.1.401", url: "https://github.com/yetone/magpie-releases/releases/tag/v0.1.401", stuck: "package", packaged: { manager: "pacman", package: "magpie-bin", command: "yay -S magpie-bin" } };
+const packaged = { state: "available", current: "0.1.400", latest: "0.1.401", url: "https://github.com/istoo/myna/releases/tag/v0.1.401", stuck: "package", packaged: { manager: "pacman", package: "myna-bin", command: "yay -S myna-bin" } };
 const byManager = {
-  en: "pacman installed magpie (magpie-bin), so pacman updates it, not magpie: yay -S magpie-bin",
-  zh: "pacman 安装了 magpie（magpie-bin），所以由 pacman 更新它，而不是 magpie 自己：yay -S magpie-bin",
-  "zh-TW": "pacman 安裝了 magpie（magpie-bin），所以由 pacman 更新它，而不是 magpie 自己：yay -S magpie-bin",
-  ja: "magpie は pacman でインストールされている（magpie-bin）ため、magpie ではなく pacman がアップデートします：yay -S magpie-bin",
-  de: "pacman hat magpie installiert (magpie-bin), daher aktualisiert pacman es, nicht magpie: yay -S magpie-bin",
+  en: "pacman installed myna (myna-bin), so pacman updates it, not myna: yay -S myna-bin",
+  zh: "pacman 安装了 myna（myna-bin），所以由 pacman 更新它，而不是 myna 自己：yay -S myna-bin",
+  "zh-TW": "pacman 安裝了 myna（myna-bin），所以由 pacman 更新它，而不是 myna 自己：yay -S myna-bin",
+  ja: "myna は pacman でインストールされている（myna-bin）ため、myna ではなく pacman がアップデートします：yay -S myna-bin",
+  de: "pacman hat myna installiert (myna-bin), daher aktualisiert pacman es, nicht myna: yay -S myna-bin",
 };
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
-  test(engine + ": a packaged magpie names its package manager's command", async (t) => {
+  test(engine + ": a packaged myna names its package manager's command", async (t) => {
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     t.after(() => browser.close());
     for (const lang of ["en", "zh", "zh-TW", "ja", "de"]) {
@@ -126,7 +126,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           page.setDefaultNavigationTimeout(60000);
           page.on("pageerror", (e) => { if (!/^ResizeObserver loop completed with undelivered notifications/.test(e.message)) errors.push(e.message); });
           await page.route("**/*", server(lang, ctl, packaged));
-          await page.goto("http://magpie.test/?view=settings&tab=about");
+          await page.goto("http://myna.test/?view=settings&tab=about");
           const want = byManager[lang];
           const sub = await (await page.waitForFunction((w) => [...document.querySelectorAll("#about .row.pref .sub")].find((s) => s.textContent.includes(w))?.textContent, want)).jsonValue();
           assert.ok(sub.includes("0.1.401"), sub);

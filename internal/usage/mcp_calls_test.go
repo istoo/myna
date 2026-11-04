@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// ferock on Discord: an agent's call to a tool of magpie's MCP servers
+// ferock on Discord: an agent's call to a tool of myna's MCP servers
 // (generate_image) is a row of the request log of its own, apart from
 // the model requests, picked by the MCP tool purpose, naming the tool,
 // its server, the provider and model it used, how long it took and how it
@@ -18,9 +18,9 @@ func TestMCPCallRowsListedNotCounted(t *testing.T) {
 	now := time.Now().Add(-time.Hour)
 	Append(Record{Time: now, Agent: "claude", Provider: "openai", Host: "api.openai.com", Model: "gpt-image-2", Requested: "gpt-image-2", Operation: "generate_content", Endpoint: "/v1/images/generations", Status: 200, Millis: 9000})
 	Append(Record{Time: now.Add(time.Second), Agent: "claude", Operation: "execute_tool", Provider: "openai", Model: "gpt-image-2", Requested: "generate_image",
-		Host: "magpie-image", Millis: 9100, Endpoint: "/mcp/magpie/image", Kind: KindMCP, Source: SourceMCP})
+		Host: "myna-image", Millis: 9100, Endpoint: "/mcp/myna/image", Kind: KindMCP, Source: SourceMCP})
 	Append(Record{Time: now.Add(2 * time.Second), Agent: "claude", Operation: "execute_tool", Requested: "github__create_issue",
-		Host: "github", Millis: 40, Error: "it didn't answer", Endpoint: "/mcp/magpie/hub/claude", Kind: KindMCP, Source: SourceMCP})
+		Host: "github", Millis: 40, Error: "it didn't answer", Endpoint: "/mcp/myna/hub/claude", Kind: KindMCP, Source: SourceMCP})
 
 	page := QueryPage(All, Filter{}, 0, 50)
 	if page.Total != 3 || len(page.Rows) != 3 {
@@ -31,7 +31,7 @@ func TestMCPCallRowsListedNotCounted(t *testing.T) {
 		t.Fatalf("hub row %+v", hub)
 	}
 	if image.Source != SourceMCP || image.Requested != "generate_image" || image.Provider != "openai" || image.Model != "gpt-image-2" ||
-		image.Host != "magpie-image" || image.Millis != 9100 || image.Failed() || image.Endpoint != "/mcp/magpie/image" {
+		image.Host != "myna-image" || image.Millis != 9100 || image.Failed() || image.Endpoint != "/mcp/myna/image" {
 		t.Fatalf("image row %+v", image)
 	}
 	if page.Sum.Calls != 1 || page.Sum.Errors != 0 || page.Through.Calls != 1 {
@@ -63,7 +63,7 @@ func TestMCPCallRowsListedNotCounted(t *testing.T) {
 	}
 	// a tool call's server is no provider's host: a probe on the host is
 	// not listed under the provider the tool used
-	if hosts := readLogSnapshot().hosts; hosts["magpie-image"] != "" || hosts["github"] != "" {
+	if hosts := readLogSnapshot().hosts; hosts["myna-image"] != "" || hosts["github"] != "" {
 		t.Fatalf("hosts %v", hosts)
 	}
 }

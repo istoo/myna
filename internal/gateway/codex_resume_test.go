@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/provider"
 )
 
 const workerAsk = `{"type":"message","role":"user","content":[{"type":"input_text","text":"go on"}]}`
@@ -55,7 +55,7 @@ func TestCodexResumedSubagentKeepsItsSpawnModel(t *testing.T) {
 			t.Fatalf("step %d (%s asking %s) went on %s, want %s", i, st.thread, st.model, got[len(got)-1], st.want)
 		}
 	}
-	// a magpie started afresh still knows worker-1
+	// a myna started afresh still knows worker-1
 	if rec := codexThreadAsks(New(), "gpt-5.5", "worker-1", "root-1"); rec.Code != 200 {
 		t.Fatalf("after a restart: %d %s", rec.Code, rec.Body.String())
 	}

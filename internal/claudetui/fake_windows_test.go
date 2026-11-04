@@ -24,5 +24,5 @@ func fakeRaw() {
 // fakeScript is a batch file in dir that runs the test binary exe as the
 // fake Claude Code, and its text: a .cmd, as npm installs Claude Code.
 func fakeScript(dir, exe string) (string, string) {
-	return filepath.Join(dir, "claude.cmd"), "@set MAGPIE_TUI_TEST=claude\r\n@\"" + exe + "\" %*\r\n"
+	return filepath.Join(dir, "claude.cmd"), "@set MYNA_TUI_TEST=claude\r\n@\"" + exe + "\" %*\r\n"
 }

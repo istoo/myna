@@ -103,7 +103,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           page.setDefaultNavigationTimeout(60000);
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", serve(lang, feed));
-          await page.goto("http://magpie.test/?view=routing");
+          await page.goto("http://myna.test/?view=routing");
           const head = page.locator(".rt-log-head");
           const headSays = (s, why) => page.waitForFunction((s) => document.querySelector(".rt-log-head")?.textContent.includes(s), s)
             .catch(async () => assert.fail(why + ": " + await head.textContent()));

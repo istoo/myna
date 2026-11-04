@@ -18,7 +18,7 @@ const assets = path.resolve(__dirname, "../assets");
 const HOME = "/Users/aimer";
 const agent = (id, name) => ({ id, name, icon: "", skills: `${HOME}/.${id}/skills`, mcp: `${HOME}/.${id}/mcp.json` });
 const lib = {
-  dir: `${HOME}/.magpie/library`, backups: `${HOME}/.magpie/backups`, home: HOME,
+  dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
   agents: [agent("codex", "Codex"), agent("pi", "Pi")],
   instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [], skills: [],
   servers: Array.from({ length: 30 }, (_, i) => ({ name: `server-${i + 1}`, transport: "stdio", command: "npx", args: ["fs-mcp"], agents: ["codex"] })),
@@ -28,7 +28,7 @@ const settings = (lang) => ({
   dock: false, dockWindow: false, proxy: "", redact: false, redactPersonal: false, redactWords: [],
   codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", workbuddyCheckin: false, noStats: false,
   trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "",
-  version: "0.1.400", dir: "~/.config/magpie", gateway: "http://127.0.0.1:3425",
+  version: "0.1.400", dir: "~/.config/myna", gateway: "http://127.0.0.1:3425",
   proxyNow: "none", proxySource: "none", login: false,
   visionModels: [], imageGenModels: [], workbuddyCheckins: [], lanURLs: [],
   fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
@@ -107,7 +107,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     const open = async (lang, width, layout) => {
       const context = await browser.newContext({ viewport: { width, height: 400 }, reducedMotion: "reduce" });
       await context.addInitScript((layout) => {
-        try { localStorage.setItem("magpie.settingsTab", "about"); localStorage.setItem("magpie.libTab", "mcp"); localStorage.setItem("magpie.navLayout", layout); } catch {}
+        try { localStorage.setItem("myna.settingsTab", "about"); localStorage.setItem("myna.libTab", "mcp"); localStorage.setItem("myna.navLayout", layout); } catch {}
       }, layout);
       const page = await context.newPage();
       page.setDefaultTimeout(5000);
@@ -115,7 +115,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.errors = [];
       page.on("pageerror", (e) => page.errors.push(e.message));
       await page.route("**/*", server(lang));
-      await page.goto("http://magpie.test/");
+      await page.goto("http://myna.test/");
       await page.waitForSelector("#nav button.on");
       return page;
     };

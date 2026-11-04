@@ -10,18 +10,18 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yetone/magpie/internal/catalog"
-	"github.com/yetone/magpie/internal/edit"
-	"github.com/yetone/magpie/internal/provider"
+	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/myna/internal/provider"
 )
 
-// magpie's provider under providers says what OpenCode 2 reads magpie's
+// myna's provider under providers says what OpenCode 2 reads myna's
 // provider under provider as: want is what OpenCode 2.1.4's opencode debug
-// config printed under providers.magpie for this block in an opencode.json
+// config printed under providers.myna for this block in an opencode.json
 // (its apiKey, shown there as ***, put back), levels, fast variants, an
 // image model and one without levels.
 func TestOpenCodeNativeIsOpenCode2s(t *testing.T) {
-	block := map[string]any{"npm": "@ai-sdk/openai-compatible", "name": "magpie",
+	block := map[string]any{"npm": "@ai-sdk/openai-compatible", "name": "myna",
 		"options": map[string]any{"baseURL": "http://127.0.0.1:3425/v1", "apiKey": "mk-test"},
 		"models": orderedJSON{
 			{"think/deep", map[string]any{"name": "Deep", "modalities": map[string]any{"input": []string{"text", "image"}, "output": []string{"text"}},
@@ -29,7 +29,7 @@ func TestOpenCodeNativeIsOpenCode2s(t *testing.T) {
 			{"think/plain", map[string]any{"name": "Plain", "variants": openCodeVariants(nil, false)}},
 			{"gpt/fast", map[string]any{"name": "Fast", "variants": openCodeVariants(nil, true)}},
 		}}
-	const want = `{"name":"magpie","package":"aisdk:@ai-sdk/openai-compatible","settings":{"apiKey":"mk-test","baseURL":"http://127.0.0.1:3425/v1"},"models":{` +
+	const want = `{"name":"myna","package":"aisdk:@ai-sdk/openai-compatible","settings":{"apiKey":"mk-test","baseURL":"http://127.0.0.1:3425/v1"},"models":{` +
 		`"gpt/fast":{"name":"Fast","variants":[{"id":"fast","settings":{"extraBody":{"service_tier":"priority"}},"body":{"service_tier":"priority"}}]},` +
 		`"think/deep":{"name":"Deep","capabilities":{"tools":true,"input":["text","image"],"output":["text"]},"variants":[` +
 		`{"id":"none","settings":{"reasoningEffort":"none"}},{"id":"high","settings":{"reasoningEffort":"high"}},{"id":"max","settings":{"reasoningEffort":"max"}},` +
@@ -64,13 +64,13 @@ func thinkCatalog(t *testing.T) {
 // form does to a provider it saves (config-v2.js, writeSectionEntry): the
 // one under provider goes, and the block under providers is the form's,
 // from before think/new: a stale baseURL and key, a header and a setting
-// of the user's own, magpie's variants (some of levels deep no longer has,
+// of the user's own, myna's variants (some of levels deep no longer has,
 // one in OpenChamber's split), one the user wrote over and one of their
 // own, a modelID, as #3883's block has, and a model the catalog no longer
 // has.
 func openChamberSaved(t *testing.T, path string) {
 	t.Helper()
-	const stale = `{"name":"magpie","package":"aisdk:@ai-sdk/openai-compatible",
+	const stale = `{"name":"myna","package":"aisdk:@ai-sdk/openai-compatible",
 		"settings":{"baseURL":"http://127.0.0.1:1/v1","apiKey":"old","timeout":600000},
 		"headers":{"X-Mine":"1"},
 		"models":{
@@ -81,7 +81,7 @@ func openChamberSaved(t *testing.T, path string) {
 				{"id":"high-fast","settings":{"reasoningEffort":"high","service_tier":"priority","extraBody":{"service_tier":"priority"}}},
 				{"id":"mine","settings":{"reasoningEffort":"low"},"body":{"top_k":5}}]},
 			"think/old":{"name":"Old","variants":[]}}}`
-	if err := edit.DelJSON(path, "provider."+magpieID); err != nil {
+	if err := edit.DelJSON(path, "provider."+mynaID); err != nil {
 		t.Fatal(err)
 	}
 	if err := edit.SetJSON(path, edit.KV{Path: openCodeNativeKey, Value: json.RawMessage(stale)}); err != nil {
@@ -89,7 +89,7 @@ func openChamberSaved(t *testing.T, path string) {
 	}
 }
 
-// providersCurrent checks that magpie's provider under providers in the
+// providersCurrent checks that myna's provider under providers in the
 // OpenCode config at path says what the one under provider says, with what
 // openChamberSaved left of the user's kept.
 func providersCurrent(t *testing.T, path string) {
@@ -114,7 +114,7 @@ func providersCurrent(t *testing.T, path string) {
 	var v1 struct {
 		Models map[string]json.RawMessage `json:"models"`
 	}
-	if raw1, _ := edit.GetJSON(path, "provider."+magpieID); json.Unmarshal([]byte(raw1), &v1) != nil {
+	if raw1, _ := edit.GetJSON(path, "provider."+mynaID); json.Unmarshal([]byte(raw1), &v1) != nil {
 		t.Fatalf("provider: %s", raw1)
 	}
 	// think/old, gone from the catalog, goes; think/new is there
@@ -122,12 +122,12 @@ func providersCurrent(t *testing.T, path string) {
 	if !slices.Contains(ids, "think/new") || !reflect.DeepEqual(ids, want) {
 		t.Fatalf("models %v, provider's %v: %s", ids, want, raw)
 	}
-	// in the order magpie lists them under provider (#4575)
+	// in the order myna lists them under provider (#4575)
 	if order, v1order := jsonKeyOrder(t, raw, "models"), jsonKeyOrder(t, raw1Of(path), "models"); !slices.Equal(order, v1order) {
 		t.Fatalf("models in the order %v, provider's %v", order, v1order)
 	}
-	base, _ := edit.GetJSON(path, "provider."+magpieID+".options.baseURL")
-	key, _ := edit.GetJSON(path, "provider."+magpieID+".options.apiKey")
+	base, _ := edit.GetJSON(path, "provider."+mynaID+".options.baseURL")
+	key, _ := edit.GetJSON(path, "provider."+mynaID+".options.apiKey")
 	if base == "" || got.Settings["baseURL"] != base || got.Settings["apiKey"] != key || got.Package != "aisdk:@ai-sdk/openai-compatible" {
 		t.Fatalf("settings %v, package %q; provider's %s %s", got.Settings, got.Package, base, key)
 	}
@@ -135,7 +135,7 @@ func providersCurrent(t *testing.T, path string) {
 		t.Fatalf("the user's setting or header is gone: %s", raw)
 	}
 	deep := got.Models["think/deep"]
-	if name, _ := edit.GetJSON(path, "provider."+magpieID+".models.think/deep.name"); deep.Name != name {
+	if name, _ := edit.GetJSON(path, "provider."+mynaID+".models.think/deep.name"); deep.Name != name {
 		t.Fatalf("deep's name %q, provider's %q", deep.Name, name)
 	}
 	if in, _ := deep.Capabilities["input"].([]any); !slices.Contains(in, any("image")) {
@@ -157,16 +157,16 @@ func providersCurrent(t *testing.T, path string) {
 	}
 }
 
-// #3883: once OpenChamber's form had saved magpie's provider under
-// providers, which OpenCode 2 reads instead of provider, magpie's sync put
+// #3883: once OpenChamber's form had saved myna's provider under
+// providers, which OpenCode 2 reads instead of provider, myna's sync put
 // its provider back under provider and OpenCode 2 never saw think/new.
-// The sync brings the block under providers up to magpie's models too;
+// The sync brings the block under providers up to myna's models too;
 // a config without one doesn't get one.
 func TestOpenCodeProvidersKeptCurrent(t *testing.T) {
 	home, _ := codexHome(t, "", "")
 	thinkCatalog(t)
 	oc := opencode(home, filepath.Join(home, ".config"))
-	if err := oc.Apply("model", "magpie/think/deep"); err != nil {
+	if err := oc.Apply("model", "myna/think/deep"); err != nil {
 		t.Fatal(err)
 	}
 	if err := oc.Sync(); err != nil {
@@ -190,22 +190,22 @@ func TestOpenCodeProvidersKeptCurrent(t *testing.T) {
 	}
 	// a model picked again writes it there as well
 	openChamberSaved(t, oc.Path)
-	if err := oc.Apply("model", "magpie/think/new"); err != nil {
+	if err := oc.Apply("model", "myna/think/new"); err != nil {
 		t.Fatal(err)
 	}
 	providersCurrent(t, oc.Path)
-	// stepped off magpie, its provider goes under both
+	// stepped off myna, its provider goes under both
 	if err := oc.Apply("model", ""); err != nil {
 		t.Fatal(err)
 	}
-	for _, k := range []string{"provider." + magpieID, openCodeNativeKey} {
+	for _, k := range []string{"provider." + mynaID, openCodeNativeKey} {
 		if v, ok := edit.GetJSON(oc.Path, k); ok {
 			t.Fatalf("%s left: %s", k, v)
 		}
 	}
 }
 
-// OpenChamber, magpie's agent for the OpenCode it runs, writes magpie's
+// OpenChamber, myna's agent for the OpenCode it runs, writes myna's
 // provider into the same config: its sync, model and step off reach the
 // block under providers as well.
 func TestOpenChamberProvidersKeptCurrent(t *testing.T) {
@@ -213,7 +213,7 @@ func TestOpenChamberProvidersKeptCurrent(t *testing.T) {
 	thinkCatalog(t)
 	writeFile(t, filepath.Join(home, ".config", "openchamber", "settings.json"), `{"defaultModel":"anthropic/claude-sonnet-5"}`)
 	ch := openChamber(home, filepath.Join(home, ".config"))
-	if err := ch.Apply("model", "magpie/think/deep"); err != nil {
+	if err := ch.Apply("model", "myna/think/deep"); err != nil {
 		t.Fatal(err)
 	}
 	path := opencode(home, filepath.Join(home, ".config")).Path
@@ -223,32 +223,32 @@ func TestOpenChamberProvidersKeptCurrent(t *testing.T) {
 	}
 	providersCurrent(t, path)
 	openChamberSaved(t, path)
-	if err := ch.Apply("model", "magpie/think/new"); err != nil {
+	if err := ch.Apply("model", "myna/think/new"); err != nil {
 		t.Fatal(err)
 	}
 	providersCurrent(t, path)
 	if err := ch.Apply("model", ""); err != nil {
 		t.Fatal(err)
 	}
-	for _, k := range []string{"provider." + magpieID, openCodeNativeKey} {
+	for _, k := range []string{"provider." + mynaID, openCodeNativeKey} {
 		if v, ok := edit.GetJSON(path, k); ok {
 			t.Fatalf("%s left: %s", k, v)
 		}
 	}
 }
 
-// What says whether OpenCode reaches magpie reads the block under
+// What says whether OpenCode reaches myna reads the block under
 // providers too, which OpenCode 2 sends by: one at another address is off
 // until a sync brings it back.
 func TestOpenCodeCheckReadsProviders(t *testing.T) {
 	home, _ := codexHome(t, "", "")
 	thinkCatalog(t)
 	oc := opencode(home, filepath.Join(home, ".config"))
-	if err := oc.Apply("model", "magpie/think/deep"); err != nil {
+	if err := oc.Apply("model", "myna/think/deep"); err != nil {
 		t.Fatal(err)
 	}
 	if off := oc.Check(); off != "" {
-		t.Fatalf("off on magpie's own: %s", off)
+		t.Fatalf("off on myna's own: %s", off)
 	}
 	if err := edit.SetJSON(oc.Path, edit.KV{Path: openCodeNativeKey, Value: map[string]any{
 		"settings": map[string]any{"baseURL": "http://127.0.0.1:1/v1", "apiKey": "old"}}}); err != nil {
@@ -266,7 +266,7 @@ func TestOpenCodeCheckReadsProviders(t *testing.T) {
 }
 
 func raw1Of(path string) string {
-	raw, _ := edit.GetJSON(path, "provider."+magpieID)
+	raw, _ := edit.GetJSON(path, "provider."+mynaID)
 	return raw
 }
 
@@ -297,11 +297,11 @@ func jsonKeyOrder(t *testing.T, raw, key string) []string {
 	return keys
 }
 
-// magpie's models go under providers in the order magpie lists them, as
+// myna's models go under providers in the order myna lists them, as
 // under provider (#4575), and a model's cost in OpenCode 2's words: a list
 // of tiers, its cache prices under cache (migrateModel's costs at v2.2.5).
 func TestOpenCodeNativeKeepsOrderAndCost(t *testing.T) {
-	block := map[string]any{"name": "magpie", "npm": "@ai-sdk/openai-compatible", "models": orderedJSON{
+	block := map[string]any{"name": "myna", "npm": "@ai-sdk/openai-compatible", "models": orderedJSON{
 		{"zeta/z", map[string]any{"name": "Z", "cost": map[string]any{"input": 1.0, "output": 2.0, "cache_read": 0.1, "cache_write": 1.25}}},
 		{"alpha/a", map[string]any{"name": "A"}},
 	}}
