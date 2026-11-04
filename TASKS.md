@@ -22,3 +22,13 @@
 - dsh 的 `magpie*` 路由名：旧会话归类。
 
 验证方式：`go vet ./...`、`go test ./...`、`make app` 后 `codesign --verify --deep --strict`、本地起 feed 服务走完一次自更新、网关 200。
+## 后续架构任务（审计遗留，需真实环境验证，不能盲改）
+
+- [ ] 插件隔离：每个插件独立 Bun 子进程 + `input.client` RPC 代理。
+      理由：同一 JS realm 下 `globalThis.fetch`、`Bun.fetch`、`node:http` 均可跨插件改写；
+      冻结 `globalThis.fetch` 会让 Pi 兼容层 `watchFetch` 加载即失败（实测）。
+      验证：在真实 grok/cursor/workbuddy 插件上逐家跑 sign-in、models、usage、请求。
+- [ ] 回环对端 OS 用户检查：macOS `sysctl net.inet.tcp.pcblist` 解析 `xsocket.so_uid`，
+      Linux `/proc/net/tcp` 的 uid 列，Windows `GetExtendedTcpTable` + token SID；
+      命中对端连接后与 `os.Getuid()` 比较，仅对管理/文件/执行类路由拒绝。
+      验证：真实双用户机器，另一用户进程连 127.0.0.1:3425 应 403。
