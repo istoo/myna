@@ -2857,6 +2857,11 @@ func (a *keptAlive) tooQuiet(d time.Duration) bool {
 // comment is no event in any protocol, so another account may still answer
 // after it, its stream going on in the same response (pass).
 func (h *holdWriter) keepAlive() {
+	if h.ctx != nil && keepsNothingAlive(h.ctx) {
+		// myna's own ask: nothing waits on it, and its status must still
+		// be the vendor's when it answers (noKeepAliveKey)
+		return
+	}
 	a := h.alive
 	// a Gemini stream has none, as geminiEncoder.keepalive: agy fails on
 	// the comment ("invalid stream chunk: : keepalive", #934)

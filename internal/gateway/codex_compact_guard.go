@@ -137,9 +137,23 @@ func asksCompaction(ctx context.Context) bool {
 }
 
 func askCompaction(r *http.Request) *http.Request {
-	return r.WithContext(context.WithValue(r.Context(), compactionAskKey{}, true))
+	ctx := context.WithValue(r.Context(), compactionAskKey{}, true)
+	return r.WithContext(context.WithValue(ctx, noKeepAliveKey{}, true))
 }
 
 func askWhole(r *http.Request) *http.Request {
 	return r.WithContext(context.WithValue(r.Context(), wholeReplyKey{}, true))
+}
+
+// noKeepAliveKey marks a request whose reply no client waits on — myna's
+// own summary ask for a compaction. A keepalive commits the reply's status
+// before the vendor has answered, and the byte cap it answers with is read
+// from that status: under -race the 40 MB upload outlasts keepHeldAfter,
+// and the compaction got a 200 with a keepalive where the vendor's 400 was
+// (TestCompactionOverByteCapEveryTime).
+type noKeepAliveKey struct{}
+
+func keepsNothingAlive(ctx context.Context) bool {
+	v, _ := ctx.Value(noKeepAliveKey{}).(bool)
+	return v
 }

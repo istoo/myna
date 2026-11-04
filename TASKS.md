@@ -61,3 +61,8 @@
       的瞬间取到空屏（ubuntu CI 的 `TestShimNeverPrints/failed_start`）。
       验证：`go test ./internal/claudetui -count=1` 48 通过；
       `TestShimNeverPrints -count=5` 通过；全量除 #3 的环境项外全绿。
+- [x] 压缩请求不被 keepalive 提前提交 200：`askCompaction` 标记
+      `noKeepAliveKey`，`holdWriter.keepAlive` 跳过；字节上限的 400 不再
+      变成“200 + 流内错误”，`codexCompact` 能继续剥图并本地摘要。
+      验证：四个相关测试 `-race -count=3` 24 通过（改动前 4 红）；
+      网关整包 `-race`（1291s）除 #3 环境项外全绿。
