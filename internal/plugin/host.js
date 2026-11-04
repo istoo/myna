@@ -636,7 +636,14 @@ function whileSigningIn(input, init) {
   return [input, { ...init, signal: own ? AbortSignal.any([own, signal]) : signal }]
 }
 
-globalThis.fetch = Object.assign(function fetch(input, init) {
+// Plugins share this realm, so a fetch is resolved through the plugin a
+// call starts in: a plugin that replaces fetch gets its own, never another
+// plugin's requests. The Pi loader is part of the host, not a plugin: its
+// fetch is the fallback, so the packages it loads keep working.
+const PI_LOADER = "pi-loader"
+const pluginALS = new AsyncLocalStorage()
+const pluginFetches = new Map()
+const hostFetch = Object.assign(function fetch(input, init) {
   ;[input, init] = unsaid(input, init)
   ;[input, init] = whileSigningIn(input, init)
   const r = reach.getStore()
@@ -649,6 +656,18 @@ globalThis.fetch = Object.assign(function fetch(input, init) {
     },
   )
 }, bunFetch)
+Object.defineProperty(globalThis, "fetch", {
+  configurable: true,
+  enumerable: true,
+  get() {
+    const spec = pluginALS.getStore()
+    return (spec && pluginFetches.get(spec)) || pluginFetches.get(PI_LOADER) || hostFetch
+  },
+  set(fn) {
+    const spec = pluginALS.getStore()
+    if (spec && typeof fn === "function") pluginFetches.set(spec, fn)
+  },
+})
 
 // An HTTP/2 session a plugin opens itself goes through the proxy its
 // fetches take, as a built-in's requests on Go's transport did. Cursor's
@@ -1354,7 +1373,7 @@ async function loadPlugins(list) {
   const pis = pi ? list.filter((p) => pi.isPi(p.target)) : []
   if (pis.length) {
     const h = { readAuth: authCopy, changeAuth, keyFor, send, directory }
-    const got = await pi.load(h, pis).catch((e) => pis.map((p) => ({ spec: p.spec, error: String(e?.stack ?? e) })))
+    const got = await pluginALS.run(PI_LOADER, () => pi.load(h, pis)).catch((e) => pis.map((p) => ({ spec: p.spec, error: String(e?.stack ?? e) })))
     for (const r of got) {
       for (const x of r.hooks ?? []) hooks.push(x)
       loaded.push(r.error ? { spec: r.spec, error: r.error } : { spec: r.spec })
@@ -1386,7 +1405,7 @@ async function loadPlugins(list) {
   const results = await Promise.all(list.map((p) => {
     const isPi = pis.includes(p)
     if (isPi && !p.gateway) return null
-    return inTime(() => one(p, isPi), loadWait, "the plugin's load").then((r) => ({ p, isPi, ...r }), (e) => ({ p, isPi, e }))
+    return inTime(() => pluginALS.run(p.spec, () => one(p, isPi)), loadWait, "the plugin's load").then((r) => ({ p, isPi, ...r }), (e) => ({ p, isPi, e }))
   }))
   for (const r of results) {
     if (!r) continue
@@ -1409,7 +1428,7 @@ async function loadPlugins(list) {
     if (typeof h.hooks.config !== "function") continue
     try {
       // one at a time, as each may build on the last, but none for long
-      await inTime(() => h.hooks.config(config), loadWait, "config hook")
+      await inTime(() => pluginALS.run(h.spec, () => h.hooks.config(config)), loadWait, "config hook")
     } catch (e) {
       send({ event: "log", level: "error", message: `${h.spec}: config hook: ${e?.message ?? e}` })
     }
@@ -1731,7 +1750,7 @@ async function runTool({ spec, name, args, ms, agent }) {
     metadata() {},
   }
   const out = await Promise.race([
-    Promise.resolve().then(() => def.execute(args, ctx)),
+    Promise.resolve().then(() => pluginALS.run(spec, () => def.execute(args, ctx))),
     new Promise((_, reject) => abort.addEventListener("abort", () => reject(new Error(`${name} took longer than ${took(ms || 60_000)}`)), { once: true })),
   ])
   if (typeof out === "string") return { text: out }
@@ -1986,7 +2005,7 @@ async function info(id, key, strict, limit, quiet) {
     try {
       const given = JSON.parse(JSON.stringify(out))
       const l = { tried: false, lastOk: false }
-      const ask = () => listing.run(l, () => inScope(id, k, () => ph.models(given, { auth: authCopy(k) })))
+      const ask = () => pluginALS.run(h.spec, () => listing.run(l, () => inScope(id, k, () => ph.models(given, { auth: authCopy(k) }))))
       const next = limit > 0 ? await inTime(ask, Math.max(limit - (Date.now() - began), 0), "the plugin's model list") : await ask()
       // a hook that asked its vendor, got no list and gave back the one it
       // was given fell back: myna keeps the list it had, as a built-in
