@@ -34,7 +34,9 @@ case "$1" in
 find-generic-password) cat '`+item+`' ;;
 add-generic-password)
 	while [ $# -gt 0 ]; do
-		if [ "$1" = -w ]; then printf '%s\n' "$2" > '`+item+`'; fi
+		if [ "$1" = -w ]; then
+			if [ $# -gt 1 ]; then printf '%s\n' "$2" > '`+item+`'; else read pw; read pw2; printf '%s\n' "$pw" > '`+item+`'; fi
+		fi
 		shift
 	done ;;
 *) exit 1 ;;

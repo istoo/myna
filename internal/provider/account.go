@@ -695,13 +695,8 @@ func writeClaudeCredential(loc claudeCredentialLocation, c claudeCredentials) er
 			return err
 		}
 	} else {
-		args := []string{"add-generic-password", "-U", "-s", claudeHomeService()}
-		if loc.account != "" {
-			args = append(args, "-a", loc.account)
-		}
-		args = append(args, "-w", string(b))
-		if out, err := proc.Command("security", args...).CombinedOutput(); err != nil {
-			return fmt.Errorf("save Claude Code credentials: %v: %s", err, strings.TrimSpace(string(out)))
+		if err := keychainPut(context.Background(), claudeHomeService(), loc.account, b); err != nil {
+			return fmt.Errorf("save Claude Code credentials: %v", err)
 		}
 	}
 	return nil

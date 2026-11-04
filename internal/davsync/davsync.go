@@ -369,7 +369,7 @@ func Configure(c Config) error {
 			return err
 		}
 		os.MkdirAll(settings.Dir(), 0o700)
-		if err := edit.WriteAtomic(path("sync.json"), b); err != nil {
+		if err := edit.WriteAtomicMode(path("sync.json"), b, 0o600); err != nil {
 			return err
 		}
 		return os.Chmod(path("sync.json"), 0o600)
@@ -658,7 +658,7 @@ func keepAside(data []byte, tag string, n int) error {
 		return err
 	}
 	name := filepath.Join(dir, time.Now().Format("2006-01-02-150405")+"-"+tag+backup.Ext)
-	if err := edit.WriteAtomic(name, data); err != nil {
+	if err := edit.WriteAtomicMode(name, data, 0o600); err != nil {
 		return err
 	}
 	os.Chmod(name, 0o600)

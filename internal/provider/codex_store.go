@@ -131,7 +131,7 @@ func keychainMdat(out []byte) (string, error) {
 func (securityKeychain) Put(service, account string, secret []byte) error {
 	ctx, cancel := context.WithTimeout(context.Background(), keychainWait)
 	defer cancel()
-	if err := proc.CommandContext(ctx, "security", "add-generic-password", "-U", "-s", service, "-a", account, "-w", string(secret)).Run(); err != nil {
+	if err := keychainPut(ctx, service, account, secret); err != nil {
 		return errors.New("the keychain didn't take the sign-in")
 	}
 	return nil

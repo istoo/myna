@@ -196,7 +196,9 @@ find-generic-password)
 	*) exit 1 ;;
 	esac ;;
 add-generic-password)
-	echo "$*" >> '`+added+`' ;;
+	line="$*"
+	case "$*" in *" -w "*) ;; *) read pw; read pw2; line="$line -w $pw" ;; esac
+	echo "$line" >> '`+added+`' ;;
 *) exit 1 ;;
 esac
 `)
@@ -264,7 +266,9 @@ find-generic-password)
 	*) exit 1 ;;
 	esac ;;
 add-generic-password)
-	echo "$*" >> '`+added+`' ;;
+	line="$*"
+	case "$*" in *" -w "*) ;; *) read pw; read pw2; line="$line -w $pw" ;; esac
+	echo "$line" >> '`+added+`' ;;
 *) exit 1 ;;
 esac
 `)
@@ -307,7 +311,9 @@ find-generic-password)
 	*) exit 1 ;;
 	esac ;;
 add-generic-password)
-	echo "$*" >> '`+added+`' ;;
+	line="$*"
+	case "$*" in *" -w "*) ;; *) read pw; read pw2; line="$line -w $pw" ;; esac
+	echo "$line" >> '`+added+`' ;;
 *) exit 1 ;;
 esac
 `)

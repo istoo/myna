@@ -10,6 +10,12 @@
 Switch any of them from the menu bar. One local gateway serves them all,<br>
 and when a quota runs out, it quietly moves on to your next account.
 
+> **myna is a secondary development of [yetone/magpie](https://github.com/yetone/magpie).**
+> It is a derived distribution: the plugin ecosystem and contracts (`magpie` plugin key,
+> `@magpie-community/*`, `X-Magpie-*` headers) are kept, while branding, the update feed and
+> network dependencies are maintained independently. The original project's copyright and
+> MIT license are retained.
+
 [![Release](https://img.shields.io/github/v/release/istoo/myna?label=release&color=111111)](https://github.com/istoo/myna/releases/latest) [![Stars](https://img.shields.io/github/stars/istoo/myna?style=flat&color=111111)](https://github.com/istoo/myna/stargazers) [![Discord](https://img.shields.io/badge/Discord-join-5865F2?logo=discord&logoColor=white)](https://discord.gg/vGSnD3ZKQF) [![License](https://img.shields.io/badge/license-MIT-111111)](LICENSE)<br>
 ![macOS](https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=white) ![Windows](https://img.shields.io/badge/Windows-0078D4?logo=windows&logoColor=white) ![Linux](https://img.shields.io/badge/Linux-FCC624?logo=linux&logoColor=black) ![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white) ![Termux](https://img.shields.io/badge/Termux-000000?logo=android&logoColor=white)
 

@@ -10,6 +10,10 @@
 在菜单栏一点就能切换。所有 Agent 共用一个本地网关，<br>
 额度用完时，它会悄悄切到你的下一个账号。
 
+> **myna 基于 [yetone/magpie](https://github.com/yetone/magpie) 二次开发。**
+> 它是 magpie 的衍生发行版：保留原有插件生态与协议（`magpie` 插件键、`@magpie-community/*`、`X-Magpie-*` 请求头），
+> 品牌、更新链路与网络依赖由本项目独立维护。原项目及其贡献者的版权与 MIT 许可证一并保留。
+
 [![Release](https://img.shields.io/github/v/release/istoo/myna?label=release&color=111111)](https://github.com/istoo/myna/releases/latest) [![Stars](https://img.shields.io/github/stars/istoo/myna?style=flat&color=111111)](https://github.com/istoo/myna/stargazers) [![Discord](https://img.shields.io/badge/Discord-加入社区-5865F2?logo=discord&logoColor=white)](https://discord.gg/vGSnD3ZKQF) [![License](https://img.shields.io/badge/license-MIT-111111)](LICENSE)<br>
 ![macOS](https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=white) ![Windows](https://img.shields.io/badge/Windows-0078D4?logo=windows&logoColor=white) ![Linux](https://img.shields.io/badge/Linux-FCC624?logo=linux&logoColor=black) ![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white) ![Termux](https://img.shields.io/badge/Termux-000000?logo=android&logoColor=white)
 

@@ -16,10 +16,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/tidwall/jsonc"
 	"github.com/istoo/myna/internal/appdir"
 	"github.com/istoo/myna/internal/filememo"
 	"github.com/istoo/myna/internal/steady"
+	"github.com/tidwall/jsonc"
 )
 
 // Read returns the file contents, or (nil, nil) when the file does not exist.
@@ -129,7 +129,18 @@ func Filtered(f func(path string, data []byte) []byte, fn func() error) error {
 // file it points at is written and the link stays; a file with other hard
 // links is written in place, see writeInPlace. Once written, temp files
 // earlier writes of path left behind go, see removeStaleTemps.
+// WriteAtomicMode is WriteAtomic for a file whose contents are secret: a new
+// file is made perm, and an existing one is narrowed to it, before the
+// temp file is renamed in (no 0644 window a caller then chmods away).
+func WriteAtomicMode(path string, data []byte, perm fs.FileMode) error {
+	return writeAtomic(path, data, &perm)
+}
+
 func WriteAtomic(path string, data []byte) error {
+	return writeAtomic(path, data, nil)
+}
+
+func writeAtomic(path string, data []byte, explicit *fs.FileMode) error {
 	path, err := Target(path)
 	if err != nil {
 		return err
@@ -166,9 +177,15 @@ func WriteAtomic(path string, data []byte) error {
 		}
 	}
 	mode := fs.FileMode(0o644)
+	if explicit != nil {
+		mode = *explicit
+	}
 	st, statErr := os.Stat(path)
 	if statErr == nil {
 		mode = st.Mode().Perm()
+	}
+	if explicit != nil {
+		mode = *explicit
 	}
 	dir := filepath.Dir(path)
 	// a folder an agent's variable names is never made again once gone

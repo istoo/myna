@@ -146,10 +146,10 @@ func SaveAuto(c AutoConfig) error {
 	autoMu.Lock()
 	defer autoMu.Unlock()
 	autoChecked = time.Time{} // a new folder or interval is looked at anew
-	if err := edit.WriteAtomic(autoPath(), append(data, '\n')); err != nil {
+	if err := edit.WriteAtomicMode(autoPath(), append(data, '\n'), 0o600); err != nil {
 		return err
 	}
-	return os.Chmod(autoPath(), 0o600) // the passphrase is in it
+	return nil // made 0600 by WriteAtomicMode: the passphrase is in it
 }
 
 // AutoBackup is one backup in the folder.
