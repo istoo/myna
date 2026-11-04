@@ -370,6 +370,12 @@ export const FakePlugin = async ({ client }) => ({
       // the vendor unreachable: the list kept, as Zed's plugin keeps it
       if (auth?.refresh === "r-unreachable") await fetch("http://127.0.0.1:9/models").catch(() => {})
       if (auth?.type === "oauth" && auth.refresh?.startsWith("rot-")) {
+        // $FAKE_MODELS_HOLD: a listing still in flight while its account
+        // is taken waits here before saving the rotated token
+        if (process.env.FAKE_MODELS_HOLD) {
+          const { existsSync } = await import("node:fs")
+          while (!existsSync(process.env.FAKE_MODELS_HOLD)) await new Promise((r) => setTimeout(r, 5))
+        }
         await client.auth.set({ path: { id: ID }, body: { ...auth, refresh: auth.refresh + "+" } })
       }
       // fake-1 costs the plan nothing, as a WorkBuddy model of x0.00

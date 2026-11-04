@@ -146,3 +146,59 @@ func TestTwoHostsKeepEachOthersSignIns(t *testing.T) {
 		t.Fatalf("the lock is left behind: %v", err)
 	}
 }
+
+// A listing in flight when its account is taken does not sign it back in:
+// the token it read was read before the account was signed out. A move's
+// rollback (TestMoveCutShort, internal/provider) found the account it had
+// just taken back under load only, when the models hook's client.auth.set
+// ran after Take.
+func TestTakenAccountNotSignedBackInByALateListing(t *testing.T) {
+	sandbox(t)
+	t.Setenv("FAKE_BASE", "http://127.0.0.1:1/v1")
+	release := filepath.Join(t.TempDir(), "release")
+	t.Setenv("FAKE_MODELS_HOLD", release)
+	asked := filepath.Join(t.TempDir(), "asked")
+	t.Setenv("FAKE_MODELS_LOG", asked)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
+	abs, _ := filepath.Abs("testdata/fake/index.js")
+	if _, err := Add(ctx, abs); err != nil {
+		t.Fatal(err)
+	}
+	key, err := Import(ctx, "fakeco", map[string]any{"type": "oauth", "refresh": "rot-a", "access": "a", "expires": 9e15, "accountId": "a@fake"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if key != "fakeco" {
+		t.Fatalf("the account's key is %q", key)
+	}
+
+	// the listing reads the sign-in and holds before saving its rotation
+	done := make(chan error, 1)
+	go func() {
+		_, err := Check(ctx, "fakeco", key)
+		done <- err
+	}()
+	for deadline := time.Now().Add(20 * time.Second); ; time.Sleep(10 * time.Millisecond) {
+		if b, _ := os.ReadFile(asked); strings.Contains(string(b), "asked") {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("the listing never began")
+		}
+	}
+	// the move takes the account the listing read
+	if _, err := Take(ctx, "fakeco", []string{key}); err != nil {
+		t.Fatal(err)
+	}
+	if a := Auths("fakeco"); len(a) != 0 {
+		t.Fatalf("the account taken is still there: %v", a)
+	}
+	if err := os.WriteFile(release, nil, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	<-done
+	if a := Auths("fakeco"); len(a) != 0 {
+		t.Fatalf("a listing still in flight signed the taken account back in: %v", a)
+	}
+}

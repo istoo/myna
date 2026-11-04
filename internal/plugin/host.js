@@ -626,6 +626,11 @@ function unsaid(input, init) {
 // fetch made for it fails once myna has given the sign-in up.
 const signInSignal = new AsyncLocalStorage()
 
+// authSignIn marks the steps of a sign-in, which may create the account
+// they are for (client.auth.set): a request's steps may not, as the
+// account a request is for was signed in already.
+const authSignIn = new AsyncLocalStorage()
+
 // whileSigningIn gives a fetch made for a sign-in that sign-in's signal
 // beside its own, so a sign-in myna gave up on stops polling its vendor
 // (#5016).
@@ -1234,7 +1239,15 @@ function makeClient() {
           // tokens over the old; nothing is merged. It goes to the
           // account the request is for.
           const key = keyFor(id)
+          const s = scope.getStore()
           const kept = await changeAuth((all) => {
+            // The account a request is for, signed out or taken while the
+            // request ran (the user's, a move's), is not signed back in by
+            // the token that request read: it was read before they said
+            // so. A sign-in creates the account it is for, and a plugin's
+            // own record of another provider (a card of two records) is
+            // not this account.
+            if (!(key in all) && s?.provider === id && !authSignIn.getStore()) return false
             if (JSON.stringify(all[key]) === JSON.stringify(body)) return false
             all[key] = body
           })
@@ -2515,7 +2528,7 @@ function abortedSignIn() {
 // signingIn runs a plugin's sign-in step fn for key under proxy and
 // signal; it ends when signal aborts, whether fn does or not.
 function signingIn(signal, proxy, provider, key, fn) {
-  const step = via.run(proxy, () => inScope(provider, key, () => signInSignal.run(signal, fn)))
+  const step = via.run(proxy, () => inScope(provider, key, () => signInSignal.run(signal, () => authSignIn.run(true, fn))))
   return signal ? bounded(Promise.resolve(step), signal) : step
 }
 
