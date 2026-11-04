@@ -119,6 +119,13 @@ jobs:
         if: runner.os == 'Windows'
         run: go test -v -count=1 -timeout 2m ./internal/library -run '^(TestNetHealth|TestCheckHTTP)$'
 
+      # The gateway asks Windows who owns a loopback connection's socket
+      # (peeruid), so another user's process isn't answered as this one's.
+      # That read is native: run it here, not only compile it.
+      - name: Windows peer identity
+        if: runner.os == 'Windows'
+        run: go test -v -count=1 -timeout 2m ./internal/gateway/peeruid -run '^TestSameOwnConnection$'
+
       # Usage isolates USERPROFILE and the agent homes; execute its native
       # ChangeTime checks rather than only cross-compiling the Windows API.
       - name: Windows usage cache

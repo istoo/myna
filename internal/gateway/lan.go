@@ -790,15 +790,16 @@ func refusedKey(key string) string {
 }
 
 // local is a request from this computer: one that reached the gateway on
-// loopback, wasn't passed on by a proxy or tunnel running here, and didn't
-// come through `myna web`'s page port (viaPagePort).
+// loopback, from a process of this user (sameOSUser), wasn't passed on by
+// a proxy or tunnel running here, and didn't come through `myna web`'s
+// page port (viaPagePort).
 func local(r *http.Request) bool {
 	host, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {
 		return false
 	}
 	ip := net.ParseIP(host)
-	return ip != nil && ip.IsLoopback() && !proxied(r) && !viaPagePort(r)
+	return ip != nil && ip.IsLoopback() && !proxied(r) && !viaPagePort(r) && sameOSUser(r)
 }
 
 // forwardHeaders are what a proxy or tunnel adds to a request it passes

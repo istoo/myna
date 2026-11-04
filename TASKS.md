@@ -28,7 +28,12 @@
       理由：同一 JS realm 下 `globalThis.fetch`、`Bun.fetch`、`node:http` 均可跨插件改写；
       冻结 `globalThis.fetch` 会让 Pi 兼容层 `watchFetch` 加载即失败（实测）。
       验证：在真实 grok/cursor/workbuddy 插件上逐家跑 sign-in、models、usage、请求。
-- [ ] 回环对端 OS 用户检查：macOS `sysctl net.inet.tcp.pcblist` 解析 `xsocket.so_uid`，
-      Linux `/proc/net/tcp` 的 uid 列，Windows `GetExtendedTcpTable` + token SID；
-      命中对端连接后与 `os.Getuid()` 比较，仅对管理/文件/执行类路由拒绝。
-      验证：真实双用户机器，另一用户进程连 127.0.0.1:3425 应 403。
+- [x] 回环对端 OS 用户检查（`internal/gateway/peeruid`、`peeruser.go`）：
+      macOS `sysctl net.inet.tcp.pcblist` 的 `xsocket.so_uid`，Linux/Android
+      `/proc/net/tcp[6]` 的 uid 列，Windows `GetExtendedTcpTable` + token SID；
+      每连接在 `ConnContext` 读一次，结果并入 `local()`，另一 OS 用户
+      的回环请求按“另一台机器”处理。
+      验证：macOS 实机 `TestSameOwnConnection` 通过；Linux/aarch64 实车
+      （5.15 内核）上整包测试通过，含 `setuid(65534)` 子进程的
+      `TestSameRefusesAnotherUser`；Windows 交叉编译 + vet，CI 新增
+      windows-latest 运行 `TestSameOwnConnection` 的步骤。
