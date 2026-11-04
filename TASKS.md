@@ -13,7 +13,7 @@
 - [x] 8. CI：tag 触发构建、签名、打包、生成 latest.json/notes.json 并发布
 - [x] 9. 构建 + go test 全量验证（gateway 单跑 601s 通过；lane/SOCKS 为环境性失败，已分别证实）
 - [x] 10. 安装最终版 Myna，验证网关与自动更新可用（0.1.2892 → 0.1.2896 真机更新通过）
-- [ ] 11. 清理旧 magpie（app、LaunchAgent、Dock/登录项、旧 MCP 子进程）
+- [x] 11. 清理旧 magpie（应用、LaunchAgent、登录项已移除；旧 MCP 子进程等客户端重启后换新）
 
 兼容性边界（有意保留 magpie 字样）：
 - 插件 package.json 的 `magpie` 键与 `@magpie-community` 生态：第三方插件契约。
