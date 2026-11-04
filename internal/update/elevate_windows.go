@@ -56,7 +56,18 @@ func RunElevated(ctx context.Context, dir string, env []string, argv ...string) 
 	if len(argv) == 0 {
 		return nil, errors.New("nothing to run")
 	}
-	tmp, err := os.MkdirTemp("", "myna-elevated-*")
+	// under the user's own cache, not %TEMP%: the folder inherits that
+	// folder's ACL (the user, SYSTEM and Administrators), where %TEMP% may be
+	// writable by another local user, who could replace run.cmd between the
+	// write and the elevated cmd.exe opening it (#4135)
+	base, berr := os.UserCacheDir()
+	if berr != nil || base == "" {
+		base = os.TempDir()
+	}
+	tmp, err := os.MkdirTemp(base, "myna-elevated-*")
+	if err != nil {
+		tmp, err = os.MkdirTemp("", "myna-elevated-*")
+	}
 	if err != nil {
 		return nil, err
 	}

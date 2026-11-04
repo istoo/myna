@@ -12,6 +12,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"slices"
 	"strings"
@@ -158,6 +159,19 @@ func (s *Server) serveDecideTries(w http.ResponseWriter, r *http.Request, body [
 	// Routing page reads it once Recent calls has let it go
 	capture := &captureResponseWriter{ResponseWriter: w}
 	w = capture
+	// a decision model is asked the user's own text (state.message,
+	// previous_user_message), and this path doesn't go through serve:
+	// secrets go as placeholders here too, and come back in the answer
+	// (redactedHits, as serve does; #4130)
+	plain := body
+	rw, maskedBody, unmask, hits, merr := redactedHits(r.Context(), capture.ResponseWriter, body)
+	if merr != nil { // fails closed: never sent unmasked
+		log.Printf("gateway: %v", merr)
+		writeError(w, provider.Chat, maskStatus(merr), merr.Error())
+		return
+	}
+	capture.ResponseWriter, body = rw, maskedBody
+	defer unmask()
 	call := Call{Time: start, From: provider.Chat, To: provider.Chat, Model: asked, Provider: cs[0].p.ID, Agent: who.agent, Via: who.via,
 		wire: archiving(r, capture, start, body), headers: headerLogOf(r.Context())}
 	call.RequestBody, call.RequestTruncated = captureRequestBody(body)
@@ -165,6 +179,9 @@ func (s *Server) serveDecideTries(w http.ResponseWriter, r *http.Request, body [
 	tr := s.trace.beginFor(r, Route{Time: start, Agent: who.agent, Session: sessionOf(r.Header), Model: asked, Provider: cs[0].p.ID,
 		Group: group, Order: pl.order, Left: pl.left, Archive: call.archiveName()})
 	call.Route = tr.ID
+	if hits.n > 0 || len(hits.hits) > 0 {
+		noteMasked(r, "decide", hits, sentOf(hits, plain), tr.ID, cs[0].p.ID, asked)
+	}
 	defer func() {
 		call.ResponseBody, call.ResponseTruncated = capture.body.text(), capture.body.truncated
 		call.Millis = time.Since(start).Milliseconds()

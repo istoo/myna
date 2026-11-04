@@ -16,6 +16,7 @@ func TestChunkFrameReadsWithoutJSON(t *testing.T) {
 	for i := range raw {
 		raw[i] = byte(i * 31)
 	}
+	h := &host{nonce: "testnonce"}
 	for _, tc := range []struct {
 		id   int64
 		data string
@@ -28,12 +29,13 @@ func TestChunkFrameReadsWithoutJSON(t *testing.T) {
 			ID    int64  `json:"id"`
 			Event string `json:"event"`
 			Data  string `json:"data"`
-		}{tc.id, "chunk", tc.data})
+			N     string `json:"n"`
+		}{tc.id, "chunk", tc.data, h.nonce})
 		if err != nil {
 			t.Fatal(err)
 		}
 		for _, line := range []string{string(b) + "\n", string(b), string(b) + "\r\n"} {
-			got, ok := chunkFrame([]byte(line))
+			got, ok := h.chunkFrame([]byte(line))
 			if !ok {
 				t.Fatalf("a chunk frame as host.js writes it (%.60q…) went through encoding/json", line)
 			}
@@ -59,7 +61,7 @@ func TestChunkFrameReadsWithoutJSON(t *testing.T) {
 		`{"id":12345678901234567890,"event":"chunk","data":"QUFB"}`,
 		`{"event":"chunk","id":1,"data":"QUFB"}`,
 	} {
-		if m, ok := chunkFrame([]byte(line)); ok {
+		if m, ok := h.chunkFrame([]byte(line)); ok {
 			t.Fatalf("%s read as a chunk frame %+v, want it left to encoding/json", line, m)
 		}
 	}

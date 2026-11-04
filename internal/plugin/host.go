@@ -4,7 +4,9 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"crypto/rand"
 	"crypto/sha256"
+	"crypto/subtle"
 	_ "embed"
 	"encoding/base64"
 	"encoding/hex"
@@ -53,6 +55,11 @@ type message struct {
 	Status  int               `json:"status"`
 	Headers map[string]string `json:"headers"`
 	Data    string            `json:"data"`
+	// N proves the line came from the host module itself, not from a
+	// plugin writing to fd 1: the host's nonce lives in its module
+	// scope and is removed from the environment before any plugin
+	// loads (#4136)
+	N string `json:"n"`
 	// raw is Data decoded, filled by push so the body reads it without
 	// decoding the same frame a second time. It is never on the wire.
 	raw      []byte
@@ -492,6 +499,10 @@ type host struct {
 	proxyAt time.Time
 	// addr is the gateway's address the host was told (hostAddr)
 	addr string
+	// nonce is what every line the host writes carries (message.N): a
+	// plugin that writes to fd 1 itself doesn't have it
+	nonce     string
+	unauthLog atomic.Bool
 	// output is the child's stdout and stderr, read apart from its Wait,
 	// and waited gives what that Wait said; both are nil in the tests'
 	// fake hosts, which have no child
@@ -1075,6 +1086,11 @@ func startOn(ctx context.Context, bun string) (*host, bool, error) {
 	cmd := bunCommand(context.Background(), bun, settings.Dir(), "run", js)
 	addr := hostAddr(cmd.Env)
 	cmd.Env = hostEnv(cmd.Env)
+	nonce := newHostNonce()
+	if nonce == "" {
+		return nil, false, errors.New("no random source for the plugin host's nonce")
+	}
+	cmd.Env = append(cmd.Env, "MYNA_HOST_NONCE="+nonce)
 	in, err := cmd.StdinPipe()
 	if err != nil {
 		return nil, false, err
@@ -1112,6 +1128,7 @@ func startOn(ctx context.Context, bun string) (*host, bool, error) {
 		proxy:    proxy,
 		proxyAt:  time.Now(),
 		addr:     addr,
+		nonce:    nonce,
 		output:   output,
 		waited:   waited,
 	}
@@ -1210,10 +1227,16 @@ func (h *host) read(out io.Reader) {
 	for {
 		line, err := readLine(r, h.lineLimit())
 		if len(line) > 0 {
-			if m, ok := chunkFrame(line); ok {
+			var m message // a new one each line: no field of the line before may stand in for one of this one's
+			if cm, ok := h.chunkFrame(line); ok {
+				h.dispatch(cm)
+			} else if json.Unmarshal(line, &m) == nil && h.accepts(m) {
 				h.dispatch(m)
-			} else if json.Unmarshal(line, &m) == nil {
-				h.dispatch(m)
+			} else if json.Valid(line) {
+				// a plugin wrote to fd 1 itself: told first, then ignored
+				if h.unauthLog.CompareAndSwap(false, true) {
+					log.Printf("plugin: a line the host didn't send was ignored (a plugin writing to stdout itself)")
+				}
 			}
 		}
 		if errors.Is(err, errLineTooLong) {
@@ -1245,7 +1268,7 @@ var (
 // and encoding/json scanned every base64 byte of each, several times what
 // decoding them costs. Any other line is not one, and is unmarshalled; push
 // checks the data is base64 of a frame's size either way.
-func chunkFrame(line []byte) (message, bool) {
+func (h *host) chunkFrame(line []byte) (message, bool) {
 	line = bytes.TrimSuffix(bytes.TrimSuffix(line, []byte("\n")), []byte("\r"))
 	rest, ok := bytes.CutPrefix(line, chunkHead)
 	if !ok {
@@ -1266,7 +1289,7 @@ func chunkFrame(line []byte) (message, bool) {
 	if !ok {
 		return message{}, false
 	}
-	data, ok = bytes.CutSuffix(data, []byte(`"}`))
+	data, ok = bytes.CutSuffix(data, []byte(`","n":"`+h.nonce+`"}`))
 	if !ok || bytes.IndexByte(data, '"') >= 0 || bytes.IndexByte(data, '\\') >= 0 {
 		return message{}, false
 	}
@@ -2149,4 +2172,25 @@ func (b *body) giveUp() {
 		}
 		b.c.settle(why)
 	})
+}
+
+// newHostNonce is the value every line this host writes carries.
+func newHostNonce() string {
+	var b [32]byte
+	if _, err := rand.Read(b[:]); err != nil {
+		return ""
+	}
+	return hex.EncodeToString(b[:])
+}
+
+// accepts says m carries this host's nonce: a line a plugin wrote to fd 1
+// itself doesn't, so it reaches no sign-in, usage record or log (#4136).
+func (h *host) accepts(m message) bool {
+	if h.nonce == "" {
+		// a host a test made, whose stdout the test writes itself; the
+		// one a real child is started for always has one (newHost refuses
+		// to start it otherwise)
+		return true
+	}
+	return subtle.ConstantTimeCompare([]byte(m.N), []byte(h.nonce)) == 1
 }

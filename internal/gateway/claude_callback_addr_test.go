@@ -83,7 +83,16 @@ func TestClaudeToolCallbackOnANonLoopbackAddress(t *testing.T) {
 		t.Fatalf("no call: %s\n%s", rec.Body, h.read())
 	}
 	id := res.Content[len(res.Content)-1].ID
-	for deadline := time.Now().Add(10 * time.Second); ; {
+	// the helper is a process of its own, started on a busy machine later
+	// than here: wait as long as the run's own deadline leaves, not a
+	// fixed 10 seconds (a full gateway run went red on 11-04)
+	wait := 10 * time.Second
+	if d, ok := t.Deadline(); ok {
+		if room := time.Until(d) / 2; room > wait {
+			wait = min(room, 60*time.Second)
+		}
+	}
+	for deadline := time.Now().Add(wait); ; {
 		s.subscription.mu.Lock()
 		waits := s.subscription.calls[id] != nil
 		s.subscription.mu.Unlock()

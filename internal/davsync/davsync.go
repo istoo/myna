@@ -368,7 +368,7 @@ func Configure(c Config) error {
 		if err != nil {
 			return err
 		}
-		os.MkdirAll(settings.Dir(), 0o755)
+		os.MkdirAll(settings.Dir(), 0o700)
 		if err := edit.WriteAtomic(path("sync.json"), b); err != nil {
 			return err
 		}
@@ -626,7 +626,7 @@ func remember(data []byte) {
 	if b, err := os.ReadFile(path(cacheName)); err == nil && sum(b) == sum(data) {
 		return
 	}
-	os.MkdirAll(settings.Dir(), 0o755)
+	os.MkdirAll(settings.Dir(), 0o700)
 	if edit.WriteAtomic(path(cacheName), data) == nil {
 		os.Chmod(path(cacheName), 0o600)
 	}

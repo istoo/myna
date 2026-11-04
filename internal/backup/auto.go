@@ -140,7 +140,7 @@ func SaveAuto(c AutoConfig) error {
 	if err != nil {
 		return err
 	}
-	if err := os.MkdirAll(settings.Dir(), 0o755); err != nil {
+	if err := os.MkdirAll(settings.Dir(), 0o700); err != nil {
 		return err
 	}
 	autoMu.Lock()

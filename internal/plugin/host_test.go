@@ -34,6 +34,12 @@ func newFakeHost(t *testing.T) *fakeHost {
 // too-long-line case. The cap is per host, so no test mutates a shared value
 // while another test's reader is running.
 func newFakeHostLine(t *testing.T, maxLine int) *fakeHost {
+	return newFakeHostNonce(t, maxLine, "")
+}
+
+// newFakeHostNonce is newFakeHostLine with the host's nonce set, for the
+// tests of what a line without it does.
+func newFakeHostNonce(t *testing.T, maxLine int, nonce string) *fakeHost {
 	t.Helper()
 	pr, pw := io.Pipe()
 	hctx, hcancel := context.WithCancel(context.Background())
@@ -49,6 +55,7 @@ func newFakeHostLine(t *testing.T, maxLine int) *fakeHost {
 		ctx:      hctx,
 		cancel:   hcancel,
 		maxLine:  maxLine,
+		nonce:    nonce,
 	}
 	f := &fakeHost{host: h, pw: pw}
 	go h.read(pr)
@@ -1586,5 +1593,41 @@ func TestHostEnqueueWaitsForRoom(t *testing.T) {
 				t.Fatal("enqueue did not wake after room or failure")
 			}
 		})
+	}
+}
+
+// A line a plugin writes to fd 1 itself carries no nonce, so it is no
+// sign-in, usage record or log: and a line's nonce never stands in for the
+// next line's (#4136).
+func TestHostIgnoresLinesWithoutItsNonce(t *testing.T) {
+	f := newFakeHostNonce(t, 0, "testnonce")
+	var mu sync.Mutex
+	got := 0
+	OnUsage(func(string, string, OwnCall) { mu.Lock(); got++; mu.Unlock() })
+	t.Cleanup(func() { OnUsage(nil) })
+	line := func(nonce string) {
+		m := map[string]any{"id": 0, "event": "usage", "provider": "p", "account": "a", "usage": map[string]any{}}
+		if nonce != "" {
+			m["n"] = nonce
+		}
+		f.line(m)
+	}
+	count := func() int { mu.Lock(); defer mu.Unlock(); return got }
+	line("")          // a plugin writing to fd 1
+	line("testnonce") // the host's own
+	for deadline := time.Now().Add(2 * time.Second); time.Now().Before(deadline); {
+		if count() > 0 {
+			break
+		}
+		time.Sleep(time.Millisecond)
+	}
+	if n := count(); n != 1 {
+		t.Fatalf("handled %d usage events, want only the host's own (1)", n)
+	}
+	// the field of the accepted line stays out of the next one
+	line("")
+	time.Sleep(50 * time.Millisecond)
+	if n := count(); n != 1 {
+		t.Fatalf("a line with no nonce of its own was handled: %d", n)
 	}
 }

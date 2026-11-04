@@ -125,7 +125,7 @@ func scienceTurn(asked string, body []byte) string {
 	}
 	if asked != picked && hasTools(body) {
 		sciencePicked.model = asked
-		if os.MkdirAll(settings.Dir(), 0o755) == nil {
+		if os.MkdirAll(settings.Dir(), 0o700) == nil {
 			os.WriteFile(sciencePickedPath(), []byte(asked+"\n"), 0o600)
 		}
 	}

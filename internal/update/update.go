@@ -10,6 +10,7 @@
 package update
 
 import (
+	"archive/zip"
 	"cmp"
 	"context"
 	"crypto/sha256"
@@ -282,6 +283,12 @@ func Stage(ctx context.Context, rel *Release, bundle string) (string, error) {
 	}
 	zip := filepath.Join(dir, AppAsset())
 	if err := download(ctx, a, zip); err != nil {
+		os.RemoveAll(dir)
+		return "", err
+	}
+	// ditto writes before the signature below is checked: an entry whose
+	// name leaves the folder would be written outside it first
+	if err := zipSafe(zip); err != nil {
 		os.RemoveAll(dir)
 		return "", err
 	}
@@ -1312,4 +1319,24 @@ func openBeside(bundle string, window, quiet bool) string {
 func StartBeside(exe string, window bool, view string) error {
 	_, _, err := launch(exe, RelaunchArgs(window, view), os.Environ())
 	return err
+}
+
+// zipSafe refuses a download with an entry that leaves the folder it is
+// unpacked into: ditto writes the bundle before sameSigner checks it, so
+// ../x or an absolute name would be written first (#4134).
+func zipSafe(path string) error {
+	z, err := zip.OpenReader(path)
+	if err != nil {
+		return fmt.Errorf("the download isn't a zip: %w", err)
+	}
+	defer z.Close()
+	for _, f := range z.File {
+		name := f.Name
+		slash := strings.ReplaceAll(name, `\`, "/")
+		if name == "" || filepath.IsAbs(name) || slash == ".." ||
+			strings.HasPrefix(slash, "../") || strings.Contains(slash, "/../") {
+			return fmt.Errorf("the download has an entry outside it: %q", name)
+		}
+	}
+	return nil
 }

@@ -153,6 +153,12 @@ func (l *Library) syncProjectMCP(p *Project, fail func(what string, err error)) 
 			continue
 		}
 		abs := filepath.Join(p.Dir, filepath.FromSlash(rel))
+		if linkedPath(abs) {
+			// a project's repository can hold .mcp.json -> ~/.ssh/config,
+			// and the write would go through it, outside the project
+			fail(rel, fmt.Errorf("%s is a symbolic link; myna writes none of its own through one", rel))
+			continue
+		}
 		f := &mcpFile{Path: abs, Format: format}
 		had := p.Wrote[rel]
 		was := p.Startup[rel]

@@ -2256,7 +2256,9 @@ func saveOwn(s Settings, recording, reads bool) error {
 	if err := lastgood.Keep(Path(), validSettings, 0o600); err != nil {
 		return err
 	}
-	if err := os.MkdirAll(Dir(), 0o755); err != nil {
+	// 0700: the folder holds settings, logins and library.json, whose MCP
+	// entries carry credentials (#4131)
+	if err := os.MkdirAll(Dir(), 0o700); err != nil {
 		return err
 	}
 	b, err := json.MarshalIndent(s, "", "  ")

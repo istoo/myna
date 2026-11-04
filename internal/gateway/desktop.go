@@ -359,7 +359,7 @@ func SetDesktopTier(tier, id string) error {
 		return nil
 	}
 	b, _ := json.MarshalIndent(tiers, "", "  ")
-	if err := os.MkdirAll(settings.Dir(), 0o755); err != nil {
+	if err := os.MkdirAll(settings.Dir(), 0o700); err != nil {
 		return err
 	}
 	return os.WriteFile(desktopTiersPath(), append(b, '\n'), 0o600)
@@ -675,7 +675,7 @@ func desktopMoveTo(asked string, body []byte, byClaudeCode, bySubagent bool) (st
 	}
 	if tools && !bySubagent {
 		desktopPicked.model, desktopPicked.at = asked, time.Now()
-		if os.MkdirAll(settings.Dir(), 0o755) == nil {
+		if os.MkdirAll(settings.Dir(), 0o700) == nil {
 			os.WriteFile(desktopPickedPath(), []byte(asked+"\n"), 0o600)
 		}
 	}

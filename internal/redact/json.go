@@ -34,16 +34,30 @@ var kept = map[string]bool{
 // Lark grammar's rule name ("pd" in update_hunk) left a grammar the vendor
 // turned away with 400 "Invalid lark grammar" (#1911).
 func keepIn(path, key, s string, args, defs []string) bool {
-	if strings.HasPrefix(s, "data:") {
-		return true
-	}
 	if under(path, args) {
-		return false
+		// the keys are the tool's, so only encoded bytes are kept, and
+		// only ones that are data: URLs: "data:" on its own is a word
+		// the agent or the user wrote, not an image
+		return isDataURL(s)
+	}
+	if isDataURL(s) {
+		return true
 	}
 	if under(path, defs) {
 		return key != "description"
 	}
 	return kept[key] || isID(key)
+}
+
+// isDataURL says s is a data: URL carrying encoded bytes (an image, an
+// audio clip), which no rule can read and which a vendor needs whole. A
+// string that only begins with "data:" is someone's text.
+func isDataURL(s string) bool {
+	if !strings.HasPrefix(s, "data:") {
+		return false
+	}
+	comma := strings.IndexByte(s, ',')
+	return comma > 0 && strings.Contains(s[:comma], ";base64")
 }
 
 // isID says a key holds an identifier the vendor matches against another:
@@ -69,20 +83,20 @@ var signatureKeys = []string{"signature", "thoughtSignature", "thought_signature
 // response, the structured result the tool gave; nothing in them counts
 // as sealed. defs are what the agent defines for the vendor rather than
 // says to the model (definitions).
-func scan(body []byte) (signed, args, defs []string) {
+func scan(body []byte) (signed, args, defs, textDocs []string) {
 	found := false
-	for _, k := range append(signatureKeys, "tool_use", "functionCall", "function_call", "functionResponse", "function_response") {
+	for _, k := range append(signatureKeys, "tool_use", "mcp_tool_use", "functionCall", "function_call", "functionResponse", "function_response", "document") {
 		found = found || bytes.Contains(body, []byte(`"`+k+`"`))
 	}
 	for _, k := range defKeys {
 		found = found || bytes.Contains(body, []byte(`"`+k+`"`))
 	}
 	if !found {
-		return nil, nil, nil
+		return nil, nil, nil, nil
 	}
 	var v any
 	if json.Unmarshal(body, &v) != nil {
-		return nil, nil, nil
+		return nil, nil, nil, nil
 	}
 	defs = definitions(v)
 	var visit func(path, key string, v any)
@@ -94,8 +108,16 @@ func scan(body []byte) (signed, args, defs []string) {
 				return
 			}
 			t, _ := x["type"].(string)
+			// Anthropic's document block carries its text in source.data
+			// when source.type is "text": that is the user's document, not
+			// an image's encoded bytes, so it is masked like any text.
+			if t == "text" {
+				if _, ok := x["data"]; ok {
+					textDocs = append(textDocs, join(path, "data"))
+				}
+			}
 			for k, c := range x {
-				if k == "input" && (t == "tool_use" || t == "server_tool_use") ||
+				if k == "input" && (t == "tool_use" || t == "server_tool_use" || t == "mcp_tool_use") ||
 					k == "args" && (key == "functionCall" || key == "function_call") ||
 					k == "response" && (key == "functionResponse" || key == "function_response") {
 					args = append(args, join(path, k))
@@ -110,7 +132,7 @@ func scan(body []byte) (signed, args, defs []string) {
 		}
 	}
 	visit("", "", v)
-	return signed, args, defs
+	return signed, args, defs, textDocs
 }
 
 // defKeys are the request's own keys whose values the agent defines for the
@@ -398,8 +420,13 @@ func namedSecret(key, s string) bool {
 // Anthropic answers 400 "Invalid `signature` in `thinking` block".
 func MaskJSON(body []byte, o Options) ([]byte, int) {
 	o.sent = true
-	signed, args, defs := scan(body)
+	signed, args, defs, textDocs := scan(body)
 	masked := func(path, key, s string) bool {
+		// a plain-text document's data is the user's own text, whatever
+		// its key is named
+		if under(path, textDocs) {
+			return signed == nil || !under(path, signed)
+		}
 		return !keepIn(path, key, s, args, defs) && (signed == nil || !under(path, signed))
 	}
 	// What the agent defines (its tools' and schemas' descriptions) is
@@ -434,7 +461,7 @@ func MaskJSON(body []byte, o Options) ([]byte, int) {
 	// the definitions after the rest, so a value the model found in what
 	// is said is masked in them too, as known
 	out, ok := walk(body, func(path, key, s string) string {
-		if strings.HasPrefix(s, "data:") || signed != nil && under(path, signed) {
+		if isDataURL(s) || signed != nil && under(path, signed) {
 			return s
 		}
 		if o.Secrets && under(path, args) && namedSecret(key, s) {

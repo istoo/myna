@@ -39,6 +39,24 @@ import { pathToFileURL } from "node:url"
 
 const rpcWrite = process.stdout.write.bind(process.stdout)
 
+// Every line this module writes carries hostNonce, which Go checks: a
+// plugin writing to fd 1 itself (fs.writeSync(1, …)) has no way to know
+// it. It lives here, and is taken out of the environment as soon as it is
+// read, before any plugin is imported. stringify is kept here too: a
+// plugin that replaces JSON.stringify sees nothing this module sends.
+const hostNonce = (() => {
+  try {
+    const env = globalThis.process?.env
+    const n = env?.MYNA_HOST_NONCE || ""
+    if (env) delete env.MYNA_HOST_NONCE
+    return n
+  } catch {
+    return ""
+  }
+})()
+const stringify = JSON.stringify
+const withNonce = (msg) => hostNonce ? { ...msg, n: hostNonce } : msg
+
 // Everything the child writes goes through one ordered queue: a line goes out
 // only when the stream can take it, so a parent that stops reading bounds what
 // Bun buffers instead of it growing without bound. A caller may cancel its own
@@ -110,16 +128,16 @@ function queueLine(line) {
 }
 
 // send queues one message, ignoring whether it was written.
-const send = (msg) => queueLine(JSON.stringify(msg) + "\n").promise
+const send = (msg) => queueLine(stringify(withNonce(msg)) + "\n").promise
 
 // sendCancelable is send, with a way to give the wait up. A string is a
 // line made already (chunkLine).
-const sendCancelable = (msg) => queueLine(typeof msg === "string" ? msg : JSON.stringify(msg) + "\n")
+const sendCancelable = (msg) => queueLine(typeof msg === "string" ? msg : stringify(withNonce(msg)) + "\n")
 
 // chunkLine is JSON.stringify({id, event: "chunk", data}) + "\n", made by
 // joining: base64 has nothing JSON escapes, and stringify scanning every
 // byte of it for something to escape cost more than the base64 itself.
-const chunkLine = (id, data) => '{"id":' + JSON.stringify(id) + ',"event":"chunk","data":"' + data + '"}\n'
+const chunkLine = (id, data) => '{"id":' + JSON.stringify(id) + ',"event":"chunk","data":"' + data + '"' + (hostNonce ? ',"n":"' + hostNonce + '"' : "") + '}\n'
 
 // A host cancellation suppresses the answer; a local abort still owes Go
 // its error. The record, rather than the signal, owns pending wire output.
@@ -3060,6 +3078,22 @@ async function fetchAs(id, record, key, params) {
     await sendForFetch(record, { id, result: null })
   } catch (e) {
     transitionFetch(record, "finishing")
+    // a proxy's own 502 to a CONNECT (myna's SOCKS bridge, when its proxy
+    // is down) is the proxy's answer, as it is over HTTP; Bun reports it as
+    // an error, so it goes on as the 502 whose body is the bridge's words,
+    // which the gateway reads as the proxy's failure, not the account's
+    const said = String(e?.message ?? e)
+    const proxy502 = /^proxyconnect tcp: 502 Bad Gateway: ([\s\S]*)$/.exec(said)
+    if (proxy502 && record.state !== "cancelled" && record.state !== "finished") {
+      await sendForFetch(record, { id, event: "head", status: 502, headers: {} })
+      const body = Buffer.from(proxy502[1], "utf8")
+      for (let off = 0; off < body.length; off += MAX_FRAME) {
+        const data = body.subarray(off, Math.min(off + MAX_FRAME, body.length)).toString("base64")
+        await sendForFetch(record, chunkLine(id, data))
+      }
+      await sendForFetch(record, { id, result: null })
+      return
+    }
     // a fetch hook that threw on its sign-in (a refresh the vendor turned
     // away) marks the account, as a built-in's refused refresh marked it
     if (["expired", "kept", "renewed"].includes(e?.signIn) && key) send({ event: "signIn", provider, account: key, said: e.signIn })
@@ -3226,6 +3260,13 @@ const gatewayInflight = new Map() // RPC id -> AbortController
 const signInSteps = new Set(["authorize", "callback", "apiKey"])
 const signInInflight = new Map() // RPC id -> AbortController
 const rl = readline.createInterface({ input: process.stdin, terminal: false })
+// readline holds the real stdin; what plugins see is an empty stream, so
+// one reading it gets none of the requests myna sends the host (and every
+// other plugin) (#4136)
+try {
+  const empty = new Duplex({ read() {}, write(_chunk, _enc, cb) { cb?.() } })
+  Object.defineProperty(process, "stdin", { value: empty, writable: false, configurable: false })
+} catch {}
 rl.on("line", (line) => {
   if (!line.trim()) return
   let msg

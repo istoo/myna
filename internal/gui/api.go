@@ -97,7 +97,7 @@ func cliQuiet() bool {
 
 // setCLIQuiet dismisses the advice until the next version.
 func setCLIQuiet() error {
-	if err := os.MkdirAll(settings.Dir(), 0o755); err != nil {
+	if err := os.MkdirAll(settings.Dir(), 0o700); err != nil {
 		return err
 	}
 	return os.WriteFile(filepath.Join(settings.Dir(), cliQuietFile), []byte(Version+"\n"), 0o644)

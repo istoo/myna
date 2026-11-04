@@ -255,8 +255,19 @@ func (p *Project) tidy() {
 // writeIgnore keeps the project's .gitignore listing what myna placed,
 // between its two lines; the rest of the file is the user's and stays.
 // A .gitignore myna made is taken away once nothing's left in it.
+// linkedPath says path itself is a symbolic link. A project's repository
+// can hold one (.mcp.json -> ~/.ssh/config), and edit.WriteAtomic follows
+// it, so myna would write outside the project (#4132).
+func linkedPath(path string) bool {
+	fi, err := os.Lstat(path)
+	return err == nil && fi.Mode()&os.ModeSymlink != 0
+}
+
 func (p *Project) writeIgnore() error {
 	f := filepath.Join(p.Dir, ".gitignore")
+	if linkedPath(f) {
+		return fmt.Errorf("%s is a symbolic link; myna writes none of its own through one", f)
+	}
 	b, err := os.ReadFile(f)
 	if err != nil && !os.IsNotExist(err) {
 		return err

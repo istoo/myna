@@ -23,7 +23,7 @@ var ErrBusy = errors.New("another myna is syncing: try again in a moment")
 // ends, so none is ever left behind. The file stays: taken away, one
 // myna could hold the lock on it while another took one on a new file.
 func lock(ctx context.Context) (unlock func(), err error) {
-	os.MkdirAll(settings.Dir(), 0o755)
+	os.MkdirAll(settings.Dir(), 0o700)
 	f, err := os.OpenFile(path("sync.lock"), os.O_CREATE|os.O_RDWR, 0o600)
 	if err != nil {
 		return func() {}, nil // no lock to be had here: sync as before there was one

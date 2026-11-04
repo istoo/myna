@@ -67,8 +67,14 @@ func (l launchd) install(exe string, args, env []string) error {
 	if err := os.MkdirAll(filepath.Dir(l.file()), 0o755); err != nil {
 		return err
 	}
-	if err := os.MkdirAll(filepath.Dir(logFile()), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(logFile()), 0o700); err != nil {
 		return err
+	}
+	// launchd opens StandardOutPath itself, with the user's umask (0644);
+	// made here first, it writes into myna's own 0600 file, whose lines
+	// applog scrubbed nothing of (#4133)
+	if f, err := os.OpenFile(logFile(), os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o600); err == nil {
+		f.Close()
 	}
 	if err := private(l.file(), []byte(plist(exe, args, env))); err != nil {
 		return err

@@ -341,7 +341,7 @@ func (a *autoResets) save() {
 		}
 	}
 	b, _ := json.MarshalIndent(a.spent, "", "  ")
-	_ = os.MkdirAll(settings.Dir(), 0o755)
+	_ = os.MkdirAll(settings.Dir(), 0o700)
 	if err := steady.WriteFile(a.path, append(b, '\n'), 0o644); err != nil {
 		log.Printf("writing what a week's auto-use spent to %s: %v", a.path, err)
 	}

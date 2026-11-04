@@ -100,7 +100,7 @@ func noteResetUsed(user, why string, out ResetOutcome) {
 		us = us[len(us)-resetsUsedMost:]
 	}
 	b, _ := json.MarshalIndent(us, "", "  ")
-	_ = os.MkdirAll(settings.Dir(), 0o755)
+	_ = os.MkdirAll(settings.Dir(), 0o700)
 	_ = steady.WriteFile(resetsUsedPath(), append(b, '\n'), 0o600)
 }
 

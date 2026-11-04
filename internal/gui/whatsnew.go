@@ -143,7 +143,7 @@ func setQuietToday(on bool) error {
 		}
 		return nil
 	}
-	if err := os.MkdirAll(settings.Dir(), 0o755); err != nil {
+	if err := os.MkdirAll(settings.Dir(), 0o700); err != nil {
 		return err
 	}
 	return os.WriteFile(f, []byte(today()+"\n"), 0o644)

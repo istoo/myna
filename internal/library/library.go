@@ -8,6 +8,7 @@ package library
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"path/filepath"
 	"regexp"
 	"slices"
@@ -215,7 +216,25 @@ func (l *Library) save() error {
 	if err != nil {
 		return err
 	}
-	return edit.WriteAtomic(path(), append(b, '\n'))
+	if err := os.MkdirAll(settings.Dir(), 0o700); err != nil {
+		return err
+	}
+	if err := edit.WriteAtomic(path(), append(b, '\n')); err != nil {
+		return err
+	}
+	// 0600: an MCP server's env and headers hold its credentials (a
+	// TAVILY_API_KEY, an Authorization header), and a plain write left
+	// the file 0644 in a directory myna may have made 0755 (#4131). A
+	// library.json linked in from a dotfiles repo (#323) is written
+	// through, so the target is what is restricted.
+	target, err := edit.Target(path())
+	if err != nil {
+		target = path()
+	}
+	if fi, err := os.Stat(target); err == nil && fi.Mode().Perm()&0o077 != 0 {
+		return os.Chmod(target, fi.Mode().Perm()&0o700)
+	}
+	return nil
 }
 
 func (l *Library) applied(agent string) *Applied {
