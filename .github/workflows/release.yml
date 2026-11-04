@@ -8,6 +8,11 @@ name: Release
 # There is no Developer ID here: the app is signed ad hoc, which is what
 # the updater requires (a signature that verifies, by the same "team" as
 # the installed app, which ad-hoc builds share).
+#
+# The Linux desktop app links GTK 3 and WebKitGTK 4.1 through cgo, so it
+# is built natively on an Ubuntu runner, in a job of its own, and the
+# release waits for it: the installer's desktop path looks for
+# myna-linux-<arch> among the release's assets.
 
 on:
   push:
@@ -24,17 +29,12 @@ permissions:
   contents: write
 
 jobs:
-  release:
-    runs-on: macos-14
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+      tag: ${{ steps.v.outputs.tag }}
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-
       - name: Version
         id: v
         env:
@@ -50,8 +50,45 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
 
+  linux:
+    needs: version
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Install GTK and WebKitGTK
+        timeout-minutes: 15
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev
+      - name: Build the Linux desktop app
+        run: make release-linux VERSION=${{ needs.version.outputs.version }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: myna-linux
+          path: dist/myna-linux-*
+
+  release:
+    needs: [version, linux]
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: myna-linux
+          path: dist
+
       - name: Build the app
-        run: make app VERSION=${{ steps.v.outputs.version }}
+        run: make app VERSION=${{ needs.version.outputs.version }}
 
       - name: Package the app
         run: ditto -c -k --keepParent myna.app myna-darwin-arm64.zip
@@ -69,13 +106,13 @@ jobs:
             [ "$os" = windows ] && ext=.exe
             echo "  $os/$arch"
             CGO_ENABLED=0 GOOS=$os GOARCH=$arch go build -tags nogui -trimpath \
-              -ldflags="-s -w -X main.version=${{ steps.v.outputs.version }}" \
+              -ldflags="-s -w -X main.version=${{ needs.version.outputs.version }}" \
               -o "dist/myna-cli-$os-$arch$ext" . || exit 1
           done
 
       - name: Notes
         run: |
-          TAG="${{ steps.v.outputs.tag }}"
+          TAG="${{ needs.version.outputs.tag }}"
           PREV=$(git describe --tags --abbrev=0 "$TAG^" 2>/dev/null || true)
           if [ -n "$PREV" ]; then
             git log --no-merges --pretty='- %s' "$PREV..$TAG" > NOTES.md
@@ -89,21 +126,21 @@ jobs:
           gh release download --repo "$GITHUB_REPOSITORY" --pattern notes.json --dir prev 2>/dev/null || true
           python3 scripts/release_feed.py \
             --repo "$GITHUB_REPOSITORY" \
-            --version "${{ steps.v.outputs.version }}" \
+            --version "${{ needs.version.outputs.version }}" \
             --notes NOTES.md \
             --out dist \
             --previous prev/notes.json \
-            myna-darwin-arm64.zip dist/myna-cli-*
+            myna-darwin-arm64.zip dist/myna-cli-* dist/myna-linux-*
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ steps.v.outputs.tag }}
+          TAG: ${{ needs.version.outputs.tag }}
         run: |
           gh release create "$TAG" \
             --repo "$GITHUB_REPOSITORY" \
             --title "Myna $TAG" \
             --notes-file NOTES.md \
-            myna-darwin-arm64.zip dist/myna-cli-* dist/latest.json dist/notes.json dist/install.sh
+            myna-darwin-arm64.zip dist/myna-cli-* dist/myna-linux-* dist/latest.json dist/notes.json dist/install.sh
