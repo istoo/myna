@@ -60,8 +60,15 @@ func TestCCListingKeepsItsNames(t *testing.T) {
 	if !reflect.DeepEqual(again, first) {
 		t.Fatal("an unchanged folder listed otherwise")
 	}
-	// a path and a key a file made again are 2n more
-	if m := after.Mallocs - before.Mallocs; m > 3*n {
+	// a path and a key a file made again are 2n more. Linux's own file
+	// calls allocate more per entry (a runner measured ~4n), so the bound
+	// there has room for that; a listing that makes every name again is
+	// 2n on top of either.
+	bound := uint64(3 * n)
+	if runtime.GOOS == "linux" {
+		bound = 5 * n
+	}
+	if m := after.Mallocs - before.Mallocs; m > bound {
 		t.Fatalf("listing %d unchanged files took %d allocations", n, m)
 	}
 
