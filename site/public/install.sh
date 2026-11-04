@@ -1,5 +1,5 @@
 #!/bin/sh
-# myna installer: curl -fsSL https://github.com/istoo/myna/install.sh | sh
+# myna installer: curl -fsSL https://github.com/istoo/myna/releases/latest/download/install.sh | sh
 #
 # macOS: puts myna.app in /Applications (~/Applications when that is not
 # writable) and links the myna command into ~/.local/bin.
@@ -14,7 +14,7 @@
 # Termux: installs the Android terminal build into $PREFIX/bin.
 # Every download is checked against the release's SHA-256.
 #
-# Options (curl -fsSL https://github.com/istoo/myna/install.sh | sh -s -- --proxy …):
+# Options (curl -fsSL https://github.com/istoo/myna/releases/latest/download/install.sh | sh -s -- --proxy …):
 #   --proxy <url>      a proxy for every download: http://, https://,
 #                      socks5:// or socks5h:// (MYNA_PROXY= does the same;
 #                      without either, curl's own https_proxy / HTTPS_PROXY /
@@ -41,6 +41,8 @@
 set -eu
 
 site=https://github.com/istoo/myna
+raw=https://raw.githubusercontent.com/istoo/myna/main
+install=$site/releases/latest/download/install.sh
 bin="${MYNA_BIN_DIR:-$HOME/.local/bin}"
 proxy="${MYNA_PROXY:-}"
 mirror="${MYNA_MIRROR:-}"
@@ -63,8 +65,8 @@ while [ $# -gt 0 ]; do
     --gui) build=gui; shift ;;
     --tui|--cli) build=tui; shift ;;
     -h|--help)
-      printf '%s\n' "usage: curl -fsSL $site/install.sh | sh -s -- [--gui | --tui] [--proxy <url>] [--mirror <prefix>]" \
-        "       curl -fsSL $site/install.sh | sh -s -- --uninstall [--purge]" \
+      printf '%s\n' "usage: curl -fsSL $install | sh -s -- [--gui | --tui] [--proxy <url>] [--mirror <prefix>]" \
+        "       curl -fsSL $install | sh -s -- --uninstall [--purge]" \
         "  --proxy <url>      http://, https://, socks5:// or socks5h:// proxy for the downloads (or MYNA_PROXY=)" \
         "  --mirror <prefix>  GitHub download mirror put before the release's github.com URL (or MYNA_MIRROR=);" \
         "                     the SHA-256 is still checked against $site's" \
@@ -348,14 +350,23 @@ tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 
 # the release list and its checksums: always from the site, never a mirror
-feed=$(get "$site/api/latest") || die "could not reach $site${proxy:+ through $proxy}"
+feed=$(get "$site/releases/latest/download/latest.json") || die "could not reach $site${proxy:+ through $proxy}"
 # The feed is one line of JSON; pull this file's url and hash out of it.
 entry=$(printf '%s' "$feed" | sed -n "s/.*\"$file\":{\([^}]*\)}.*/\1/p")
 url=$(printf '%s' "$entry" | sed -n 's/.*"url":"\([^"]*\)".*/\1/p')
 sum=$(printf '%s' "$entry" | sed -n 's/.*"sha256":"\([^"]*\)".*/\1/p')
 version=$(printf '%s' "$feed" | sed -n 's/.*"version":"\([^"]*\)".*/\1/p')
 if [ "$os" = android ] && { [ -z "$url" ] || [ -z "$sum" ]; }; then
-  die "the newest release has no $file; build in Termux with go build -tags nogui (see $site/docs/start)"
+  die "the newest release has no $file; build in Termux with go build -tags nogui (see $site/blob/main/docs/start.md)"
+fi
+# a release without the desktop app still installs the terminal build,
+# when the user didn't ask for --gui
+if [ -z "$url" ] && [ -z "$build" ] && [ "$os" != darwin ] && [ "$file" = "myna-linux-$arch" ]; then
+  file="myna-cli-linux-$arch"
+  say "this release has no Linux desktop build; installing the terminal build"
+  entry=$(printf '%s' "$feed" | sed -n "s/.*\"$file\":{\([^}]*\)}.*/\1/p")
+  url=$(printf '%s' "$entry" | sed -n 's/.*"url":"\([^"]*\)".*/\1/p')
+  sum=$(printf '%s' "$entry" | sed -n 's/.*"sha256":"\([^"]*\)".*/\1/p')
 fi
 [ -n "$url" ] && [ -n "$sum" ] || die "the newest release has no $file"
 
@@ -390,7 +401,7 @@ else
   install -m 755 "$tmp/$file" "$bin/myna"
   if [ "$file" = "myna-linux-$arch" ]; then
     mkdir -p "$share/applications" "$share/icons/hicolor/256x256/apps"
-    get -o "$share/icons/hicolor/256x256/apps/myna.png" "$site/img/icon-256.png" || true
+    get -o "$share/icons/hicolor/256x256/apps/myna.png" "$raw/site/public/img/icon-256.png" || true
     cat > "$share/applications/myna.desktop" <<EOF
 [Desktop Entry]
 Type=Application
@@ -439,6 +450,6 @@ elif [ -n "${nolibs:-}" ]; then
   else say "this computer has a desktop, but the desktop app needs GTK 3 and WebKitGTK 4.1, which aren't installed,"; fi
   say "so the terminal build was installed. For the desktop app, install them and run this again:"
   say "  ${hint:-install WebKitGTK 4.1 (webkit2gtk 4.1) from your distribution}"
-  say "  curl -fsSL $site/install.sh | sh"
-  say "or install the desktop app now and the libraries after: curl -fsSL $site/install.sh | sh -s -- --gui"
+  say "  curl -fsSL $install | sh"
+  say "or install the desktop app now and the libraries after: curl -fsSL $install | sh -s -- --gui"
 fi

@@ -180,8 +180,12 @@ jobs:
         if: matrix.goos == 'linux'
         with:
           node-version: 22
+      # The installer and the credits page are still used; the Cloudflare
+      # worker that served the old site is not deployed for this fork,
+      # which updates and installs from GitHub Releases (worker.test.mjs
+      # and stable.test.mjs cover it, and are left as they are).
       - name: Test the site and installer
         if: matrix.goos == 'linux'
         run: |
           sh -n site/public/install.sh
-          node --test site/*.test.mjs
+          node --test site/install.test.mjs site/credits.test.mjs

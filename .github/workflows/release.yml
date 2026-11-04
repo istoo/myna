@@ -56,6 +56,11 @@ jobs:
       - name: Package the app
         run: ditto -c -k --keepParent myna.app myna-darwin-arm64.zip
 
+      - name: The install script
+        run: |
+          mkdir -p dist
+          cp site/public/install.sh dist/install.sh
+
       - name: Build the command-line builds
         run: |
           mkdir -p dist
@@ -101,4 +106,4 @@ jobs:
             --repo "$GITHUB_REPOSITORY" \
             --title "Myna $TAG" \
             --notes-file NOTES.md \
-            myna-darwin-arm64.zip dist/myna-cli-* dist/latest.json dist/notes.json
+            myna-darwin-arm64.zip dist/myna-cli-* dist/latest.json dist/notes.json dist/install.sh

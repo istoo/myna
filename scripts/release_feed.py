@@ -56,8 +56,10 @@ def main():
         "assets": assets,
     }
     os.makedirs(a.out, exist_ok=True)
+    # one line: install.sh reads an asset's url and hash out of it with
+    # sed, which can't follow a pretty-printed object across lines
     with open(os.path.join(a.out, "latest.json"), "w", encoding="utf-8") as f:
-        json.dump(feed, f, ensure_ascii=False, indent=2)
+        json.dump(feed, f, ensure_ascii=False, separators=(",", ":"))
 
     releases = []
     if a.previous and os.path.exists(a.previous):

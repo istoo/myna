@@ -50,10 +50,10 @@ Runs on macOS, Windows and Linux (menu bar app, window, TUI, web UI and CLI), in
 **1 · Install.** Download the app from **[github.com/istoo/myna](https://github.com/istoo/myna)**, or run:
 
 ```sh
-curl -fsSL https://github.com/istoo/myna/install.sh | sh
+curl -fsSL https://github.com/istoo/myna/releases/latest/download/install.sh | sh
 ```
 
-<sub>Mac builds are signed and notarised, and every build updates itself. On Linux the script installs the desktop app, and on a desktop without WebKitGTK 4.1 installs it first with your package manager (sudo asks for your password); with no desktop, or no terminal to ask at, it installs the terminal build and says which package to add. `--gui` or `--tui` chooses. Behind a firewall, use `--proxy` or `--mirror`. Or `go install github.com/istoo/myna@latest`, or the [Docker image](https://github.com/istoo/myna/blob/main/docs/docker). Remove what the script installed with `curl -fsSL https://github.com/istoo/myna/install.sh | sh -s -- --uninstall`; your settings in `~/.config/myna` stay unless you add `--purge`, which disconnects your agents and deletes them too.</sub>
+<sub>Mac builds are signed and notarised, and every build updates itself. On Linux the script installs the desktop app, and on a desktop without WebKitGTK 4.1 installs it first with your package manager (sudo asks for your password); with no desktop, or no terminal to ask at, it installs the terminal build and says which package to add. `--gui` or `--tui` chooses. Behind a firewall, use `--proxy` or `--mirror`. Or `go install github.com/istoo/myna@latest`, or the [Docker image](https://github.com/istoo/myna/blob/main/docs/docker). Remove what the script installed with `curl -fsSL https://github.com/istoo/myna/releases/latest/download/install.sh | sh -s -- --uninstall`; your settings in `~/.config/myna` stay unless you add `--purge`, which disconnects your agents and deletes them too.</sub>
 
 **2 · Add a provider.** Open myna and go to **Providers → Add provider**. Pick a preset and paste a key, or sign in with a subscription.
 

@@ -53,10 +53,10 @@
 **1 · 安装**。从 **[github.com/istoo/myna](https://github.com/istoo/myna/releases/latest)** 下载应用，或者运行：
 
 ```sh
-curl -fsSL https://github.com/istoo/myna/install.sh | sh
+curl -fsSL https://github.com/istoo/myna/releases/latest/download/install.sh | sh
 ```
 
-<sub>Mac 版已签名并公证，每个版本都会自动更新。Linux 上脚本装桌面版，桌面上没装 WebKitGTK 4.1 时会先用系统的包管理器装上（sudo 会要密码）；没有桌面或没有终端可问时装终端版，并告诉你该装哪个包。用 `--gui` 或 `--tui` 可以自己选。网络受限时可用 `--proxy` 或 `--mirror`。也可以 `go install github.com/istoo/myna@latest`，或者用 [Docker 镜像](https://github.com/istoo/myna/blob/main/docs/zh/docker)。 用 `curl -fsSL https://github.com/istoo/myna/install.sh | sh -s -- --uninstall` 卸载脚本装上的东西；`~/.config/myna` 里的设置会保留，加 `--purge` 才会断开 Agent 并一起删除。</sub>
+<sub>Mac 版已签名并公证，每个版本都会自动更新。Linux 上脚本装桌面版，桌面上没装 WebKitGTK 4.1 时会先用系统的包管理器装上（sudo 会要密码）；没有桌面或没有终端可问时装终端版，并告诉你该装哪个包。用 `--gui` 或 `--tui` 可以自己选。网络受限时可用 `--proxy` 或 `--mirror`。也可以 `go install github.com/istoo/myna@latest`，或者用 [Docker 镜像](https://github.com/istoo/myna/blob/main/docs/zh/docker)。 用 `curl -fsSL https://github.com/istoo/myna/releases/latest/download/install.sh | sh -s -- --uninstall` 卸载脚本装上的东西；`~/.config/myna` 里的设置会保留，加 `--purge` 才会断开 Agent 并一起删除。</sub>
 
 **2 · 添加 provider**。打开 myna，进入 **Providers → 添加 provider**。选一个预设、粘贴 key，或者登录一个订阅。
 

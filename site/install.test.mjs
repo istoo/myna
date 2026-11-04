@@ -100,7 +100,7 @@ const url = args.at(-1);
 fs.appendFileSync(process.env.INSTALL_REQUESTS, url + String.fromCharCode(10));
 fs.appendFileSync(process.env.INSTALL_ARGS, JSON.stringify(args) + String.fromCharCode(10));
 const tamper = process.env.INSTALL_TAMPER;
-if (url.endsWith("/api/latest")) process.stdout.write(process.env.INSTALL_FEED);
+if (url.endsWith("/releases/latest/download/latest.json")) process.stdout.write(process.env.INSTALL_FEED);
 else fs.writeFileSync(args[args.indexOf("-o") + 1], tamper && url.startsWith(tamper) ? "changed by the mirror" : process.env.INSTALL_PAYLOAD);
 `, { mode: 0o755 });
   const env = {
@@ -230,7 +230,7 @@ test("--mirror fetches the file through the mirror, the feed and its checksum fr
   const r = install(t, { termux: false, github: true, args: ["--mirror", "https://gh.mirror.example"] });
   assert.equal(r.status, 0, r.stderr);
   const [feed, file] = r.requests.trim().split("\n");
-  assert.equal(feed, "https://github.com/istoo/myna/api/latest");
+  assert.equal(feed, "https://github.com/istoo/myna/releases/latest/download/latest.json");
   assert.equal(file, "https://gh.mirror.example/https://github.com/istoo/myna/releases/download/vtest/myna-cli-linux-arm64");
   assert.equal(readFileSync(join(r.bin, "myna"), "utf8"), r.payload);
   assert.match(r.stdout, /through https:\/\/gh\.mirror\.example\//);
