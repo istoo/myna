@@ -235,8 +235,9 @@ func init() {
 			run.Drawn.Main, run.Drawn.Toolbar = windowshape.Of(main.NativeWindow()), windowshape.Of(wins[2].NativeWindow())
 		})
 		measure("a new system appearance")
-		// The app may not activate, so the windows are never the key one
+		// Another app is in front, so none of these windows is the key one
 		for _, y := range []float64{20, 40, 60, 70} {
+			application.InvokeSync(func() { windowshape.Deactivate() })
 			var d [3]int
 			each(func(i int, w *application.WebviewWindow) { d[i] = windowshape.FirstPress(w.NativeWindow(), 200, y) })
 			run.Presses = append(run.Presses, struct {

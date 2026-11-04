@@ -50,11 +50,12 @@ window.mynaWindowVisibility = (visible) => {
   document.dispatchEvent(new Event("visibilitychange"));
 };
 document.addEventListener("visibilitychange", () => {
-  if (document.hidden) {
+  const marked = document.documentElement.classList.contains("myna-out-of-sight");
+  if (document.hidden || marked) {
     localStorage.setItem("hiddenProbe", JSON.stringify({
       hidden: document.hidden,
       state: document.visibilityState,
-      marked: document.documentElement.classList.contains("myna-out-of-sight"),
+      marked,
       play: getComputedStyle(probe).animationPlayState,
     }));
   }
@@ -128,7 +129,11 @@ fetch("/ready");
 			if err := json.Unmarshal([]byte(report.Get("probe")), &probe); err != nil {
 				fail("the page's hidden event is %q: %v", report.Get("probe"), err)
 			}
-			if !probe.Hidden || probe.State != "hidden" || !probe.Marked || probe.Play != "paused" {
+			// myna's signal marks the page out of sight and pauses its
+			// animations. Whether the webview also calls the document
+			// hidden is the OS's, and macOS 26.6 doesn't when a window is
+			// ordered out; where it does, its state is hidden too.
+			if !probe.Marked || probe.Play != "paused" || probe.Hidden != (probe.State == "hidden") {
 				fail("while hidden the page saw hidden=%v state=%q marked=%v play=%q", probe.Hidden, probe.State, probe.Marked, probe.Play)
 			}
 			fmt.Println("window visibility: ok")

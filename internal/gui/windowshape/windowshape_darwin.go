@@ -49,6 +49,8 @@ static void endSheet(void *p, void *s) {
 static BOOL moreContrast;
 static BOOL increaseContrast(id self, SEL _cmd) { return moreContrast; }
 
+static void deactivate(void) { [NSApplication.sharedApplication deactivate]; }
+
 static void flipIncreaseContrast(void) {
 	static BOOL answered;
 	if (!answered) {
@@ -130,6 +132,11 @@ func EndSheet(w, sheet unsafe.Pointer) { C.endSheet(w, sheet) }
 func FirstPress(w unsafe.Pointer, x, y float64) int {
 	return int(C.firstPress(w, C.double(x), C.double(y)))
 }
+
+// Deactivate asks the app to resign active, so none of its windows is the
+// key one; FirstPress needs that to press as when another app is in front.
+// Call it on the main thread.
+func Deactivate() { C.deactivate() }
 
 // FlipIncreaseContrast turns Increase contrast, for this process alone, to
 // the opposite of what System Settings has, and back on the next call:

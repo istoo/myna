@@ -20,6 +20,9 @@ func TestLaneLimitRoutes(t *testing.T) {
 	t.Setenv("USERPROFILE", home)
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
+	// no gateway here: a myna running on this computer must not answer
+	// /api/lanes through its own address
+	t.Setenv("MYNA_ADDR", "127.0.0.1:0")
 	p := provider.Provider{ID: "lane-test", Name: "Lane", Chat: "https://example.invalid/v1", Key: "primary", Keys: []provider.KeyAccount{{Key: "second"}}}
 	if err := provider.Save(p); err != nil {
 		t.Fatal(err)
