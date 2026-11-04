@@ -6,9 +6,6 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"os"
-	"path/filepath"
-	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -134,6 +131,29 @@ func TestHeldThinkingKeepsTheAgentAlive(t *testing.T) {
 	}
 }
 
+// saysWhen is a ResponseWriter that closes seen once its reply holds
+// what: the agent goes away mid-reply, so the reply has begun, whatever
+// the machine's load (the first version waited 200ms after the run
+// started, and CI's runner had the run ended before it said anything).
+type saysWhen struct {
+	http.ResponseWriter
+	what string
+	mu   sync.Mutex
+	saw  bool
+	seen chan struct{}
+}
+
+func (w *saysWhen) Write(b []byte) (int, error) {
+	n, err := w.ResponseWriter.Write(b)
+	w.mu.Lock()
+	if !w.saw && strings.Contains(string(b), w.what) {
+		w.saw = true
+		close(w.seen)
+	}
+	w.mu.Unlock()
+	return n, err
+}
+
 // A stream's last event written after the agent went away reached nobody:
 // the reply isn't whole, and the request is recorded as canceled (499), not
 // as a 200 done (#751, a Claude Code run stopped by Alma's timeout).
@@ -152,24 +172,23 @@ func TestClientGoneRecordedAsCanceled(t *testing.T) {
 	// Claude Code's run stopped mid-reply, written to the holdWriter the
 	// gateway gives it: relay still ends the stream it was encoding
 	// (message_stop), which isn't the reply made whole
-	dir := fakeClaudeCalling(t)
+	fakeClaudeCalling(t)
 	s := New()
 	t.Cleanup(s.subscription.abortAll)
 	ctx, cancel = context.WithCancel(context.Background())
 	defer cancel()
+	rec := httptest.NewRecorder()
+	w := &saysWhen{ResponseWriter: rec, what: "thinking it over", seen: make(chan struct{})}
+	h = newHoldWriter(w, false)
+	h.ctx = ctx
+	// the agent goes away once its reply has begun, not after a wait
 	go func() {
-		for deadline := time.Now().Add(3 * time.Second); time.Now().Before(deadline); time.Sleep(10 * time.Millisecond) {
-			b, _ := os.ReadFile(filepath.Join(dir, "hang.pid"))
-			if pid, _ := strconv.Atoi(strings.TrimSpace(string(b))); pid != 0 {
-				time.Sleep(200 * time.Millisecond) // its reply under way
-				break
-			}
+		select {
+		case <-w.seen:
+		case <-time.After(10 * time.Second):
 		}
 		cancel()
 	}()
-	rec := httptest.NewRecorder()
-	h = newHoldWriter(rec, false)
-	h.ctx = ctx
 	p := provider.Provider{ID: "claude", Account: &provider.Account{Agent: "claude", User: "u"}}
 	body := `{"model":"claude-sonnet-5","max_tokens":100,"stream":true,"messages":[{"role":"user","content":"hang on"}]}`
 	var u Usage
