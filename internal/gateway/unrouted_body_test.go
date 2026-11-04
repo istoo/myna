@@ -9,6 +9,7 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"sync"
 	"testing"
@@ -182,6 +183,23 @@ func TestUnroutedBodyRoomWaitNot408(t *testing.T) {
 	res.Body.Close()
 	if res.StatusCode == http.StatusRequestTimeout || strings.Contains(string(b), "its body was still arriving") {
 		t.Fatalf("a request waiting for myna's body room was answered %d %s", res.StatusCode, b)
+	}
+	// the report is saved after the answer: wait for it, so the test's
+	// temporary folder isn't removed under the save (CI's RemoveAll found
+	// its held folder not empty)
+	waitHeldSaved(t)
+}
+
+// waitHeldSaved waits for the held request's report to be on disk.
+func waitHeldSaved(t *testing.T) {
+	t.Helper()
+	for deadline := time.Now().Add(10 * time.Second); ; time.Sleep(10 * time.Millisecond) {
+		if es, err := os.ReadDir(HeldDir()); err == nil && len(es) > 0 {
+			return
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("the held request's report wasn't saved")
+		}
 	}
 }
 
