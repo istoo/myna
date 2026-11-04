@@ -24,10 +24,15 @@
 验证方式：`go vet ./...`、`go test ./...`、`make app` 后 `codesign --verify --deep --strict`、本地起 feed 服务走完一次自更新、网关 200。
 ## 后续架构任务（审计遗留，需真实环境验证，不能盲改）
 
-- [ ] 插件隔离：每个插件独立 Bun 子进程 + `input.client` RPC 代理。
-      理由：同一 JS realm 下 `globalThis.fetch`、`Bun.fetch`、`node:http` 均可跨插件改写；
-      冻结 `globalThis.fetch` 会让 Pi 兼容层 `watchFetch` 加载即失败（实测）。
-      验证：在真实 grok/cursor/workbuddy 插件上逐家跑 sign-in、models、usage、请求。
+- [x] 插件间请求劫持（审计发现的那一面）：`globalThis.fetch` 按插件作用域解析
+      （`host.js` 的 `pluginALS`/`pluginFetches`，Pi 加载器保留兜底），一个插件换掉的
+      fetch 不再作用于别的插件；`Bun.fetch` 实测为只读、不可配置（Bun 1.4.3），
+      插件改不了。`node:http` 等内建模块的默认导出仍可被插件改写，只影响直接用它们的
+      插件；要堵住它需要每插件独立 Bun 子进程 + `input.client` RPC 代理。
+      评估结论：暂不做独立进程——插件在宿主内本就是受信代码（可调 `input.client`、
+      读宿主环境），进程隔离不构成新的安全边界，只防误伤；代价是每插件一个运行时
+      （内存显著上升），且必须在真实 grok/cursor/workbuddy 插件上逐家重验
+      sign-in、models、usage、请求，不能盲改。将来要做时按这条起。
 - [x] 回环对端 OS 用户检查（`internal/gateway/peeruid`、`peeruser.go`）：
       macOS `sysctl net.inet.tcp.pcblist` 的 `xsocket.so_uid`，Linux/Android
       `/proc/net/tcp[6]` 的 uid 列，Windows `GetExtendedTcpTable` + token SID；
