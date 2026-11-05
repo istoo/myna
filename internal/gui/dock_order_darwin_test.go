@@ -24,7 +24,7 @@ import (
 func TestDockJoinLeadsCommandTab(t *testing.T) {
 	out, err := runAppKit(t, 30*time.Second, []string{"MYNA_TEST_DOCK_ORDER=1"})
 	if strings.Contains(string(out), "dock order: skip") {
-		t.Skipf("this session can't bring an app to the front:\n%s", out)
+		t.Skipf("this session can't keep an app in front:\n%s", out)
 	}
 	if err != nil || !strings.Contains(string(out), "dock order: ok") {
 		t.Fatalf("dock order: %v\n%s", err, out)
@@ -98,6 +98,14 @@ func init() {
 				}
 			}
 			if !first {
+				// another app took the front while the check ran (one the
+				// user was using): Command-Tab's order then says nothing
+				// about myna's own, as #1651 is about myna front and not
+				// first
+				if _, front, _ := lsFirst(os.Getpid()); !front {
+					fmt.Println("dock order: skip")
+					return
+				}
 				fmt.Printf("dock order: myna isn't first in Command-Tab's order: %s\n", got)
 				return
 			}
