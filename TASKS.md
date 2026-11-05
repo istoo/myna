@@ -72,3 +72,6 @@
 - [x] 客户端离开时的回复结尾：`TestClientGoneRecordedAsCanceled` 接受
       `message_stop` 或 `event: error` 两种终态（#4822 的竞态），仍要求内容
       出现且不计为完整回复（499）。验证：`-race -count=10` 通过。
+- [x] CI 全绿：`10b82b3aa` 的 run 41946918501，ubuntu/macOS/Windows 与两个 CLI 全部
+      通过（含 Race 分片 45m）。#1、#2 已关闭；#3（本机环境）、#4（宿主端 CAS）为
+      已记录的遗留。
