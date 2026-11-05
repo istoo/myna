@@ -15,12 +15,16 @@ func TestOwnAddrReachable(t *testing.T) {
 	}
 }
 
+// Both outcomes of the skip, forced: the OS refusing the dial is what a
+// skipped test meets, and no test can ask macOS's Local Network privacy to
+// refuse one (on this Mac it does so for every newly built binary, #3), so
+// the sentence is checked with a dial that answers either way.
 func TestOwnAddrSkip(t *testing.T) {
-	if why := OwnAddrSkip("127.0.0.1"); why != "" {
-		t.Fatalf("loopback skipped: %s", why)
+	if why := ownAddrSkip("127.0.0.1", func(string) bool { return true }); why != "" {
+		t.Fatalf("a reached address skipped: %s", why)
 	}
-	why := OwnAddrSkip("192.0.2.1")
+	why := ownAddrSkip("192.0.2.1", func(string) bool { return false })
 	if !strings.Contains(why, "192.0.2.1") || !strings.Contains(why, "Local Network privacy") {
-		t.Fatalf("an unreachable address skips with %q", why)
+		t.Fatalf("an unreached address skips with %q", why)
 	}
 }

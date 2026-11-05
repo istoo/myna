@@ -28,6 +28,40 @@ func TestPanelJoinsFullScreenSpaces(t *testing.T) {
 	}
 }
 
+// panelKeyVerdict says what a shown panel that isn't key lets a test
+// conclude: "fail" when the session keys such a panel from code and this
+// one stayed unfocused, otherwise why this session can't tell, which the
+// test says and goes on. Both branches are checked without a session of any
+// kind (TestPanelKeyVerdict).
+func panelKeyVerdict(sessionKeys, askedKey bool) string {
+	switch {
+	case !sessionKeys:
+		return "this session makes no non-activating panel key"
+	case !askedKey:
+		return "this Mac keys no non-activating panel of an app that isn't active without a click"
+	}
+	return "fail"
+}
+
+// TestPanelKeyVerdict checks both reasons a session can't tell and the one
+// verdict that fails, so neither branch depends on the Mac it runs on.
+func TestPanelKeyVerdict(t *testing.T) {
+	for _, c := range []struct {
+		name               string
+		sessionKeys, asked bool
+		want               string
+	}{
+		{"neither", false, false, "this session makes no non-activating panel key"},
+		{"the session keys none", false, true, "this session makes no non-activating panel key"},
+		{"this Mac needs a click", true, false, "this Mac keys no non-activating panel of an app that isn't active without a click"},
+		{"the panel stayed unfocused", true, true, "fail"},
+	} {
+		if got := panelKeyVerdict(c.sessionKeys, c.asked); got != c.want {
+			t.Errorf("%s: %q, want %q", c.name, got, c.want)
+		}
+	}
+}
+
 func init() {
 	if os.Getenv("MYNA_TEST_PANEL_SPACE") != "1" {
 		return
@@ -84,13 +118,14 @@ func init() {
 			// the panel itself without a click: macOS 27.2 keys the titled
 			// one and not a borderless non-activating panel of an app that
 			// isn't active (this Mac, 11-05), and a test can't click
-			switch {
-			case !application.InvokeSyncWithResult(sessionKeysPanels):
-				fmt.Printf("panel space: %s: not checked that it takes the keyboard: this session makes no non-activating panel key\n", how)
-			case !application.InvokeSyncWithResult(func() bool { return madeKey(w) }):
-				fmt.Printf("panel space: %s: not checked that it takes the keyboard: this Mac keys no non-activating panel of an app that isn't active without a click\n", how)
-			default:
+			switch v := panelKeyVerdict(
+				application.InvokeSyncWithResult(sessionKeysPanels),
+				application.InvokeSyncWithResult(func() bool { return madeKey(w) }),
+			); v {
+			case "fail":
 				fail("%s: the panel shown doesn't take the keyboard", how)
+			default:
+				fmt.Printf("panel space: %s: not checked that it takes the keyboard: %s\n", how, v)
 			}
 		}
 		if !application.InvokeSyncWithResult(func() bool { return joinsFullScreenSpaces(w) }) {

@@ -29,8 +29,12 @@ func OwnAddrReachable(ip string) bool {
 // OwnAddrSkip is why a test that must reach ip should skip, "" when it
 // can: the sentence a skipped test says, kept out of the test so both
 // outcomes can be checked (TestOwnAddrSkip).
-func OwnAddrSkip(ip string) string {
-	if OwnAddrReachable(ip) {
+func OwnAddrSkip(ip string) string { return ownAddrSkip(ip, OwnAddrReachable) }
+
+// ownAddrSkip is OwnAddrSkip with the dial its caller's, so the skip itself
+// is checked without the OS having to refuse one (TestOwnAddrSkip).
+func ownAddrSkip(ip string, reach func(string) bool) string {
+	if reach(ip) {
 		return ""
 	}
 	return "this process can't reach this computer's own address " + ip +

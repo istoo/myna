@@ -31,6 +31,40 @@ func TestDockJoinLeadsCommandTab(t *testing.T) {
 	}
 }
 
+// dockVerdict is what a check of myna's place in Command-Tab's order came
+// to: "" when it is first; "skip" when another app took the front while the
+// check ran (one the user was using), where the order says nothing about
+// myna's own, as #1651 is about myna front and not first; and why when myna
+// is front but not first. Both outcomes are checked without a session of
+// any kind (TestDockVerdict).
+func dockVerdict(first, front bool) string {
+	if first {
+		return ""
+	}
+	if !front {
+		return "skip"
+	}
+	return "myna isn't first in Command-Tab's order"
+}
+
+// TestDockVerdict checks each of the three outcomes, including the skip a
+// session that can't keep an app in front gets.
+func TestDockVerdict(t *testing.T) {
+	for _, c := range []struct {
+		name         string
+		first, front bool
+		want         string
+	}{
+		{"first", true, true, ""},
+		{"another app took the front", false, false, "skip"},
+		{"front but not first", false, true, "myna isn't first in Command-Tab's order"},
+	} {
+		if got := dockVerdict(c.first, c.front); got != c.want {
+			t.Errorf("%s: %q, want %q", c.name, got, c.want)
+		}
+	}
+}
+
 // lsFirst says whether pid's app leads the front-to-back order, and whether
 // it is the front app at all.
 func lsFirst(pid int) (first, front bool, out string) {
@@ -97,19 +131,15 @@ func init() {
 					break
 				}
 			}
-			if !first {
-				// another app took the front while the check ran (one the
-				// user was using): Command-Tab's order then says nothing
-				// about myna's own, as #1651 is about myna front and not
-				// first
-				if _, front, _ := lsFirst(os.Getpid()); !front {
-					fmt.Println("dock order: skip")
-					return
-				}
-				fmt.Printf("dock order: myna isn't first in Command-Tab's order: %s\n", got)
-				return
+			_, front, _ := lsFirst(os.Getpid())
+			switch v := dockVerdict(first, front); v {
+			case "":
+				fmt.Println("dock order: ok")
+			case "skip":
+				fmt.Println("dock order: skip")
+			default:
+				fmt.Printf("dock order: %s: %s\n", v, got)
 			}
-			fmt.Println("dock order: ok")
 		}()
 	})
 	if err := app.Run(); err != nil {
