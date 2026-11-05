@@ -45,7 +45,9 @@ const fs = { ...realFs, readFileSync: (p, ...rest) => {
   if (p === authPath) reads++
   return realFs.readFileSync(p, ...rest)
 } }
-const context = vm.createContext({ fs, authPath, Buffer, structuredClone, Date, toErr: () => {}, send: () => {}, pause: () => {} })
+// authCopy notes what a scoped read handed a plugin (scope, from the
+// accounts section, not in this one): no scope here, as a top-level read.
+const context = vm.createContext({ fs, authPath, Buffer, structuredClone, Date, scope: { getStore: () => undefined }, toErr: () => {}, send: () => {}, pause: () => {} })
 const run = code => vm.runInContext(code, context)
 run(section('function parseAuth(', '// writeDurable'))
 const past = new Date(Date.now() - 60e3)

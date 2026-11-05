@@ -202,3 +202,51 @@ func TestTakenAccountNotSignedBackInByALateListing(t *testing.T) {
 		t.Fatalf("a listing still in flight signed the taken account back in: %v", a)
 	}
 }
+
+// A listing in flight saves its rotation only over the sign-in it read: one
+// renewed or replaced meanwhile (myna's own renewal, another host, a move)
+// stands, and the spent token it was based on isn't written over it (#4).
+func TestLateRotationKeepsTheReplacedSignIn(t *testing.T) {
+	sandbox(t)
+	t.Setenv("FAKE_BASE", "http://127.0.0.1:1/v1")
+	release := filepath.Join(t.TempDir(), "release")
+	t.Setenv("FAKE_MODELS_HOLD", release)
+	asked := filepath.Join(t.TempDir(), "asked")
+	t.Setenv("FAKE_MODELS_LOG", asked)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
+	abs, _ := filepath.Abs("testdata/fake/index.js")
+	if _, err := Add(ctx, abs); err != nil {
+		t.Fatal(err)
+	}
+	key, err := Import(ctx, "fakeco", map[string]any{"type": "oauth", "refresh": "rot-a", "access": "a", "expires": 9e15, "accountId": "a@fake"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	done := make(chan error, 1)
+	go func() {
+		_, err := Check(ctx, "fakeco", key)
+		done <- err
+	}()
+	for deadline := time.Now().Add(20 * time.Second); ; time.Sleep(10 * time.Millisecond) {
+		if b, _ := os.ReadFile(asked); strings.Contains(string(b), "asked") {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("the listing never began")
+		}
+	}
+	// the sign-in is replaced at the same key while the listing holds
+	if err := Restore(ctx, "fakeco", key, map[string]any{"type": "oauth", "refresh": "rot-new", "access": "a2", "expires": 9e15, "accountId": "a@fake"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(release, nil, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	<-done
+	// the replacement stands (a later listing reads it and rotates it on,
+	// as any listing does): what it never becomes is the spent rot-a
+	if a := Auths("fakeco")[key]; !strings.HasPrefix(fmt.Sprint(a["refresh"]), "rot-new") || a["access"] != "a2" {
+		t.Fatalf("a listing's late rotation replaced the sign-in it read: %v", a)
+	}
+}

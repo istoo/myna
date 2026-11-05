@@ -920,7 +920,10 @@ function readAuth() {
 function authCopy(key) {
   const all = readAuth()
   const v = key === undefined ? all : all[key]
-  return v === undefined ? undefined : structuredClone(v)
+  if (v === undefined) return undefined
+  const s = scope.getStore()
+  if (s && key !== undefined && s.handed) s.handed.set(key, versionOf(v))
+  return structuredClone(v)
 }
 
 // writeDurable replaces p with data through a temp file flushed to the
@@ -1107,7 +1110,9 @@ async function removeAuth(key) {
 
 // ---- accounts ----------------------------------------------------------------
 
-// scope is the account a request is for: {provider, key}.
+// scope is the account a request is for: {provider, key}, and the sign-ins
+// handed to the plugin for it (handed, key → versionOf): a write is taken
+// only over the version the plugin read, never over one that replaced it.
 const scope = new AsyncLocalStorage()
 
 const providerOf = (key) => key.split("#")[0]
@@ -1146,7 +1151,13 @@ function freshKey(provider) {
 }
 
 function inScope(provider, key, fn) {
-  return scope.run({ provider, key }, fn)
+  return scope.run({ provider, key, handed: new Map() }, fn)
+}
+
+// versionOf is a sign-in as a write's CAS reads it: the secret the vendor
+// spends (a refresh token, an API key) and the access token beside it.
+function versionOf(a) {
+  return secretOf(a) + "\u0000" + (a?.access ?? "")
 }
 
 function whoOf(a) {
@@ -1248,8 +1259,19 @@ function makeClient() {
             // own record of another provider (a card of two records) is
             // not this account.
             if (!(key in all) && s?.provider === id && !authSignIn.getStore()) return false
+            // The sign-in the request read has been renewed or replaced
+            // since (myna's own renewal, another host, a move): the write
+            // is the token from before that, and putting it over the newer
+            // one hands the vendor a spent refresh token. A sign-in may
+            // replace what it is signing in to.
+            if (s?.handed?.has(key) && !authSignIn.getStore() &&
+                versionOf(all[key]) !== s.handed.get(key) &&
+                JSON.stringify(all[key]) !== JSON.stringify(body)) {
+              return false
+            }
             if (JSON.stringify(all[key]) === JSON.stringify(body)) return false
             all[key] = body
+            if (s?.handed) s.handed.set(key, versionOf(body))
           })
           if (kept !== false) {
             forgetAccount(key)
