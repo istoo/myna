@@ -22,6 +22,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // lanAddr is a private IPv4 address of this computer: one on the user's
@@ -123,6 +125,9 @@ func certFor(t *testing.T, ip net.IP) (tls.Certificate, []byte) {
 // vendor's still go through the proxy.
 func TestPluginLeavesTheUserNetworkDirect(t *testing.T) {
 	ip := lanAddr(t)
+	if !testenv.OwnAddrReachable(ip.String()) {
+		t.Skipf("this process can't reach this computer's own address %s: macOS's Local Network privacy refuses a newly built binary, and curl/bun reach it (#3)", ip)
+	}
 	sandbox(t)
 	for _, k := range []string{"NO_PROXY", "no_proxy", "ALL_PROXY", "all_proxy", "https_proxy", "http_proxy", "FAKE_H2"} {
 		t.Setenv(k, "")

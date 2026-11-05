@@ -12,6 +12,7 @@ import (
 
 	"github.com/istoo/myna/internal/provider"
 	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // ownIPv4 is an IPv4 address of one of this computer's interfaces that
@@ -45,6 +46,9 @@ func TestClaudeToolCallbackOnANonLoopbackAddress(t *testing.T) {
 	ip := ownIPv4()
 	if ip == "" {
 		t.Skip("this computer has no address beyond loopback")
+	}
+	if !testenv.OwnAddrReachable(ip) {
+		t.Skipf("this process can't reach this computer's own address %s: macOS's Local Network privacy refuses a newly built binary, and curl/bun reach it (#3)", ip)
 	}
 	fresh(t)
 	log := takebackClaude(t)
