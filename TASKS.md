@@ -72,12 +72,14 @@
 - [x] 客户端离开时的回复结尾：`TestClientGoneRecordedAsCanceled` 接受
       `message_stop` 或 `event: error` 两种终态（#4822 的竞态），仍要求内容
       出现且不计为完整回复（499）。验证：`-race -count=10` 通过。
+- [x] 用户确认 11-05：保留 v0.1.2902 发布；站点 worker 文件保留；
+      插件不做独立进程隔离；GUI 测试的“会话无法判定即跳过”策略保留。
 - [x] CI 全绿：`10b82b3aa` 的 run 41946918501，ubuntu/macOS/Windows 与两个 CLI 全部
       通过（含 Race 分片 45m）。#1、#2 已关闭；#3（本机环境）、#4（宿主端 CAS）为
       已记录的遗留。
 - [x] `-race` 余量补齐到其余 26–42MB 的字节上限测试（`roomForRace`），
       ubuntu Race 分片的 504 不再出现。验证：四个测试 `-race` 66s 通过。
-- [x] 站点 worker 文件：保留（决定）。`site/worker.js` 及 `partners.js`/
-      `sponsors.js`/`i18n.js` 是站点源码，隐私页（三种语言）与
+- [x] 站点 worker 文件：保留（用户 11-05 确认）。`site/worker.js` 及
+      `partners.js`/`sponsors.js`/`i18n.js` 是站点源码，隐私页（三种语言）与
       `docs/reference.md` 直接引用它们；本 fork 不部署该 worker，但删除会
       让这些文档失效，属于内容问题而非可安全删除的死代码。
