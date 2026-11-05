@@ -193,8 +193,16 @@ func TestClientGoneRecordedAsCanceled(t *testing.T) {
 	body := `{"model":"claude-sonnet-5","max_tokens":100,"stream":true,"messages":[{"role":"user","content":"hang on"}]}`
 	var u Usage
 	s.serveClaudeSubscription(h, httptest.NewRequest("POST", "/v1/messages", strings.NewReader(body)).WithContext(ctx), provider.Anthropic, p, "claude-sonnet-5", []byte(body), &u)
-	if !strings.Contains(rec.Body.String(), "thinking it over") || !strings.Contains(rec.Body.String(), "message_stop") {
-		t.Fatalf("the run's reply: %q", rec.Body.String())
+	// the stream ends with a terminal event whichever the relay reaches
+	// first: the segment closed as it should (message_stop), or the run's
+	// output closed before that and it says why (an error event, #4822) —
+	// ubuntu CI saw the second at 1ms into the reply, this Mac the first
+	// at 4ms. Neither is a stream left hanging, and neither is a reply
+	// counted as whole.
+	reply := rec.Body.String()
+	if !strings.Contains(reply, "thinking it over") ||
+		!strings.Contains(reply, "event: message_stop") && !strings.Contains(reply, "event: error") {
+		t.Fatalf("the run's reply: %q", reply)
 	}
 	if h.ended {
 		t.Fatal("a Claude Code run stopped as its agent left taken as a whole reply, recorded as a 200")

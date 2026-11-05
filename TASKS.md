@@ -69,3 +69,6 @@
 - [x] `-race` 下三个大请求/大行测试的限值放宽（`roomForRace`、24MB 行
       30s）：CI 的 Race 分片在 `-race` 下是机器慢而不是回归。
       验证：三个测试 `-race` 7 通过；网关整包 `-race`（1281s）除 #3 外全绿。
+- [x] 客户端离开时的回复结尾：`TestClientGoneRecordedAsCanceled` 接受
+      `message_stop` 或 `event: error` 两种终态（#4822 的竞态），仍要求内容
+      出现且不计为完整回复（499）。验证：`-race -count=10` 通过。
