@@ -36,6 +36,17 @@ static int canBeKey(void *win) {
 	return ((NSWindow *)win).canBecomeKeyWindow;
 }
 
+// Asked to be the key window by hand, as a click on the quick panel does,
+// and whether the session let it: macOS 27.2 keys no borderless
+// non-activating panel of an app that isn't active without that input,
+// where the titled one sessionKeysPanels tries still is — a test that
+// can't click can tell nothing from it there (#2141).
+static int makeKeyDirect(void *win) {
+	NSWindow *w = (NSWindow *)win;
+	[w makeKeyWindow];
+	return w.isKeyWindow;
+}
+
 // Whether this session lets an app that isn't active make a
 // non-activating panel key from code: a plain titled one is shown and
 // made key as the quick panel is. With no click or key press behind it,
@@ -133,6 +144,15 @@ func canBeKey(w *application.WebviewWindow) bool {
 // which decides whether a test can see the quick panel take the keyboard
 // (#2450); on the main thread.
 func sessionKeysPanels() bool { return C.sessionKeysPanels() != 0 }
+
+// madeKey asks w itself to be the key window, as a click does, and says
+// whether the session let it: where it doesn't, no test without a real
+// click can tell whether the quick panel takes the keyboard (#2141,
+// macOS 27.2); on the main thread.
+func madeKey(w *application.WebviewWindow) bool {
+	p := w.NativeWindow()
+	return p != nil && C.makeKeyDirect(p) != 0
+}
 
 // nonActivating says whether w shows and takes the keyboard without
 // activating myna, as the quick panel does (#2141); on the main thread.

@@ -80,10 +80,18 @@ func init() {
 		// icon is input, which this test can't make, so where a plain one
 		// isn't made key the check can't tell.
 		if !application.InvokeSyncWithResult(w.IsFocused) {
-			if application.InvokeSyncWithResult(sessionKeysPanels) {
+			// a plain titled panel says nothing where this Mac won't key
+			// the panel itself without a click: macOS 27.2 keys the titled
+			// one and not a borderless non-activating panel of an app that
+			// isn't active (this Mac, 11-05), and a test can't click
+			switch {
+			case !application.InvokeSyncWithResult(sessionKeysPanels):
+				fmt.Printf("panel space: %s: not checked that it takes the keyboard: this session makes no non-activating panel key\n", how)
+			case !application.InvokeSyncWithResult(func() bool { return madeKey(w) }):
+				fmt.Printf("panel space: %s: not checked that it takes the keyboard: this Mac keys no non-activating panel of an app that isn't active without a click\n", how)
+			default:
 				fail("%s: the panel shown doesn't take the keyboard", how)
 			}
-			fmt.Printf("panel space: %s: not checked that it takes the keyboard: this session makes no non-activating panel key\n", how)
 		}
 		if !application.InvokeSyncWithResult(func() bool { return joinsFullScreenSpaces(w) }) {
 			fail("%s: showing the panel took it off full-screen Spaces", how)
