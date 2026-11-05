@@ -25,3 +25,14 @@ func OwnAddrReachable(ip string) bool {
 	c.Close()
 	return true
 }
+
+// OwnAddrSkip is why a test that must reach ip should skip, "" when it
+// can: the sentence a skipped test says, kept out of the test so both
+// outcomes can be checked (TestOwnAddrSkip).
+func OwnAddrSkip(ip string) string {
+	if OwnAddrReachable(ip) {
+		return ""
+	}
+	return "this process can't reach this computer's own address " + ip +
+		": macOS's Local Network privacy refuses a newly built binary, and curl/bun reach it (#3)"
+}

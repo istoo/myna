@@ -77,3 +77,7 @@
       已记录的遗留。
 - [x] `-race` 余量补齐到其余 26–42MB 的字节上限测试（`roomForRace`），
       ubuntu Race 分片的 504 不再出现。验证：四个测试 `-race` 66s 通过。
+- [x] 站点 worker 文件：保留（决定）。`site/worker.js` 及 `partners.js`/
+      `sponsors.js`/`i18n.js` 是站点源码，隐私页（三种语言）与
+      `docs/reference.md` 直接引用它们；本 fork 不部署该 worker，但删除会
+      让这些文档失效，属于内容问题而非可安全删除的死代码。

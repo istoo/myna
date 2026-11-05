@@ -47,8 +47,8 @@ func TestClaudeToolCallbackOnANonLoopbackAddress(t *testing.T) {
 	if ip == "" {
 		t.Skip("this computer has no address beyond loopback")
 	}
-	if !testenv.OwnAddrReachable(ip) {
-		t.Skipf("this process can't reach this computer's own address %s: macOS's Local Network privacy refuses a newly built binary, and curl/bun reach it (#3)", ip)
+	if why := testenv.OwnAddrSkip(ip); why != "" {
+		t.Skip(why)
 	}
 	fresh(t)
 	log := takebackClaude(t)
