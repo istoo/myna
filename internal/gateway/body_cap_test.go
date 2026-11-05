@@ -126,6 +126,7 @@ func TestCompactionOverByteCapLeavesOutOldImages(t *testing.T) {
 // A turn of the same session is fitted as its compaction is, and the next
 // turn to the same provider goes fitted at once: the cap is learned.
 func TestTurnOverByteCapLeavesOutOldImages(t *testing.T) {
+	roomForRace(t)
 	fresh(t)
 	up := &capped{proto: provider.Responses, most: commandCodeMost, status: 400, ctype: "application/json", body: commandCodeCap}
 	cappedOn(t, up)
@@ -154,6 +155,7 @@ func TestTurnOverByteCapLeavesOutOldImages(t *testing.T) {
 // byte cap (context_length_exceeded, its cue to compact), with the size
 // and the cap; another client gets a 413 saying so.
 func TestOverByteCapNothingToLeaveOut(t *testing.T) {
+	roomForRace(t)
 	var b strings.Builder
 	b.WriteString(`{"model":"fake/m1","stream":true,"input":[{"type":"message","role":"user","content":[{"type":"input_text","text":"all of these"}`)
 	for i := range 20 {
@@ -237,6 +239,7 @@ func TestWithoutOldImagesEachProtocol(t *testing.T) {
 // compaction is asked as text and then made without a model, not sent
 // again into the compaction guard's hold.
 func TestCompactionOverByteCapEveryTime(t *testing.T) {
+	roomForRace(t)
 	up := &capped{proto: provider.Responses, most: 0, status: 400, ctype: "application/json", body: commandCodeCap}
 	cappedOn(t, up)
 	code, body := codexPost(t, screenshotSession(true))

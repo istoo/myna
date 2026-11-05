@@ -75,3 +75,5 @@
 - [x] CI 全绿：`10b82b3aa` 的 run 41946918501，ubuntu/macOS/Windows 与两个 CLI 全部
       通过（含 Race 分片 45m）。#1、#2 已关闭；#3（本机环境）、#4（宿主端 CAS）为
       已记录的遗留。
+- [x] `-race` 余量补齐到其余 26–42MB 的字节上限测试（`roomForRace`），
+      ubuntu Race 分片的 504 不再出现。验证：四个测试 `-race` 66s 通过。
