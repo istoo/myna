@@ -1009,14 +1009,6 @@ func Handler(w Windows, gw *gateway.Server) http.Handler {
 		if !isWeb(w) {
 			boot["uiFont"], boot["codeFont"] = s.UIFont, s.CodeFont
 		}
-		// and whether this app's webview would crash on a <video> (Linux
-		// without gst-plugins-good, webkitPlaysVideo), so the pages show
-		// none. Here, not in the settings: the page's settings come from
-		// /api/state, which never said it, so the masking demo set its
-		// video and the web process aborted (avk458 on X, omarchy)
-		if !isWeb(w) && !webkitPlaysVideo() {
-			boot["noVideo"] = true
-		}
 		// and whether it is a gateway's page alone (gatewaymode.go), so the
 		// pages left out never show
 		if on, _ := gatewayMode(ownWeb(w)); on {

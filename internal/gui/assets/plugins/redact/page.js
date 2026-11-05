@@ -638,8 +638,7 @@ function maskOneOpen(key, r) {
   if (!key) return;
   maskTipOff();
   const o = maskO = { key, r: r || maskL.records.find((x) => x.key === key) || null, sent: undefined, leaves: null, vals: new Map(), view: "both", pick: "", open: new Set(), whole: new Set() };
-  $("#maskCard").hidden = $("#maskList").hidden = $("#maskDemo").hidden = $("#maskPrefs").hidden = true;
-  xqd?.wake();
+  $("#maskCard").hidden = $("#maskList").hidden = $("#maskPrefs").hidden = true;
   $("#maskOne").hidden = false;
   drawMaskOne();
   (o.r ? Promise.resolve(o.r) : api("masking/record?key=" + key))
@@ -667,9 +666,8 @@ function maskOneClose() {
   maskO = null;
   $("#maskOne").hidden = true;
   $("#maskOne").replaceChildren();
-  $("#maskCard").hidden = $("#maskList").hidden = $("#maskDemo").hidden = false;
+  $("#maskCard").hidden = $("#maskList").hidden = false;
   $("#maskPrefs").hidden = gatewayMode;
-  xqd?.wake();
   drawMaskList();
 }
 
