@@ -73,15 +73,30 @@ function serve(lang, posts) {
 }
 
 // wheel to a control, as the reader would (the page keeps still for any
-// other scroll), and return where it is
+// other scroll), and return where it is: once the view has stopped. WebKit
+// glides on after a wheel for some 200ms, and a click sent while it does
+// lands where the control was, off it
 async function reach(page, loc) {
   const height = page.viewportSize().height;
   await page.mouse.move(Math.min(550, (page.viewportSize().width / 2) | 0), 300);
   for (let i = 0; i < 30; i++) {
-    const y = (await loc.boundingBox()).y;
-    if (y > 80 && y < height - 160) break;
-    await page.mouse.wheel(0, y < 80 ? -300 : 300);
+    const b = await loc.boundingBox();
+    if (b && b.y > 80 && b.y < height - 160) break;
+    await page.mouse.wheel(0, b && b.y < 80 ? -300 : 300);
     await page.waitForTimeout(150);
+  }
+  // still for three reads, and the pointer's middle is on it
+  let last = "", still = 0;
+  for (let i = 0; i < 40; i++) {
+    const b = await loc.boundingBox();
+    const key = b && [b.x, b.y, b.width, b.height].map((n) => Math.round(n * 10)).join();
+    still = key === last ? still + 1 : 0;
+    last = key;
+    if (b && still >= 3) {
+      const under = await loc.evaluate((e) => { const r = e.getBoundingClientRect(); return e.contains(document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2)); });
+      if (under) return b;
+    }
+    await page.waitForTimeout(50);
   }
   return loc.boundingBox();
 }
@@ -97,6 +112,13 @@ async function openEditor(page, w) {
   await press(page, group.locator("button", { hasText: w.edit }));
   const ed = page.locator(".rt-gedit");
   await ed.locator(".rt-rule").first().waitFor();
+  // the editor opens by growing from nothing over 570ms with its content
+  // clipped (slotMorph): a control pressed meanwhile is scrolled by the
+  // growth and the menu it opens is closed by that scroll
+  await page.waitForFunction(() => {
+    const n = document.querySelector(".rt-gedit");
+    return n && !n.style.overflow && !n.getAnimations().length;
+  });
   return ed;
 }
 
