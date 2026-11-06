@@ -96,11 +96,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await pick.evaluate((x) => x.scrollIntoView({ block: "center" })); // as the reader would
         await page.waitForTimeout(200);
         const at = () => page.evaluate(() => [...document.querySelectorAll("*")].filter((e) => e.scrollTop).map((e) => [e.id || e.className, e.scrollTop]).join(";"));
-        const before = await at();
 
         await pick.click();
         const menu = page.locator(".pop.proto-menu.rt-skip-menu");
         await menu.waitFor();
+        // the click that brought the pick into sight scrolled it there
+        // itself (Playwright's, not the app's): what follows is what counts
+        const before = await at();
         assert.equal((await menu.locator(".pm-head").textContent()).trim(), w.head);
         assert.deepEqual(await menu.locator(".pm-item .pm-name").allTextContents(), ["Alpha", "Trae CN", "Gamma"]);
         // in sight, within the window
@@ -121,7 +123,23 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const border = await page.locator(".rt-skip-pick").evaluate((e) => { const c = getComputedStyle(e); return c.borderLeftWidth !== c.borderRightWidth || c.borderLeftColor !== c.borderRightColor; });
         assert.equal(border, false, "no left-border accent");
 
-        // let back in
+        // let back in. The pick can be under the fold by now (the group's
+        // members changed): a reader wheels to it, and the clicks from there
+        // are the ones that must move nothing — a click that has to scroll
+        // its control into view is the test's own
+        const reveal = async (loc) => {
+          const vh = page.viewportSize().height;
+          await page.mouse.move(195, vh / 2);
+          for (let i = 0; i < 40; i++) {
+            const b = await loc.boundingBox();
+            if (b && b.y > 60 && b.y + b.height < vh - 60) break;
+            await page.mouse.wheel(0, b && b.y < 60 ? -120 : 120);
+            await page.waitForTimeout(40);
+          }
+          await page.waitForTimeout(300);
+        };
+        await reveal(page.locator(".rt-skip-pick"));
+        const before2 = await at();
         await page.locator(".rt-skip-pick").click();
         await menu.waitFor();
         await menu.locator(".pm-item", { hasText: "Trae CN" }).click();
@@ -129,7 +147,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.waitForFunction((m) => document.querySelector(".rt-skip-pick")?.textContent.trim() === m, w.none);
         assert.deepEqual(posts, [{ skip: ["b"] }, { skip: [] }]);
         await page.waitForFunction(() => document.querySelector(".rt-group .mem")?.textContent.includes("Trae CN"));
-        assert.equal(await at(), before, "the clicks moved nothing");
+        assert.equal(await at(), before2, "the clicks moved nothing");
 
         if (lang !== "en") {
           const missing = await page.evaluate(([l, ks]) => ks.filter((k) => !I18N[l][k]), [lang, keys]);
