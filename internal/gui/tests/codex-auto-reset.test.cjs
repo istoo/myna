@@ -169,7 +169,15 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal(await page.locator(sel).evaluate((e) => e.classList.contains("on")), want);
         assert.equal(await page.locator("#status").textContent(), said);
         await page.waitForTimeout(200);
-        assert.deepEqual(await page.locator(sel).evaluate((e) => [e.getBoundingClientRect().top, document.scrollingElement.scrollTop, ...[...document.querySelectorAll(".view")].map((v) => v.scrollTop)]), at, "the click moved the page");
+        // a whole pixel: the guard works in whole scrollTops (backToReader's
+        // rounding), and WebKit's scrollIntoViewIfNeeded can leave a view a
+        // pixel off its top before the click
+        const now = await page.locator(sel).evaluate((e) => [e.getBoundingClientRect().top, document.scrollingElement.scrollTop, ...[...document.querySelectorAll(".view")].map((v) => v.scrollTop)]);
+        assert.ok(now.every((v, i) => Math.abs(v - at[i]) < 1.5), "the click moved the page: " + JSON.stringify([at, now]));
+        // a long say (German's) keeps the toast up for up to 15s, lifted
+        // over the switches at the foot: its words were checked above, and
+        // the next click isn't about them
+        await page.evaluate(() => status(""));
       };
       const checked = (page, sel) => page.locator(sel).getAttribute("aria-checked");
       // fits: sel lies inside its card, cut off nowhere
