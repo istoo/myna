@@ -54,6 +54,10 @@ function server(lang, posts) {
 // where the bar's label is on screen: a switch leaves it where it was (a
 // pixel's give, for a page scrolled to its foot whose note changed length)
 const labelAt = (page) => page.locator("#lib-skillwhere .label").evaluate((e) => Math.round(e.getBoundingClientRect().top));
+// every scroll a switch could move the page by; the note it changes can
+// reflow a few pixels above, which is not a scroll
+const scrollsAt = (page) => page.evaluate(() => [...document.querySelectorAll("*")].filter((e) => e.scrollTop)
+  .map((e) => [e.id || e.className, e.scrollTop]).concat([["doc", document.scrollingElement.scrollTop]]));
 const press = async (page, loc) => {
   const b = await loc.boundingBox();
   await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2);
@@ -147,7 +151,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             await page.mouse.wheel(0, 200);
             await page.waitForTimeout(150);
           }
-          const before = await labelAt(page);
+          const before = await scrollsAt(page);
 
           await press(page, segs.nth(1));
           await bar.locator(".segs .opt.on", { hasText: SHARED }).waitFor();
@@ -158,7 +162,15 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           // Codex and Pi read ~/.agents/skills: every skill, locked on
           assert.deepEqual(await locked(page, "pdf"), ["codex", "pi"]);
           assert.deepEqual(await locked(page, "tdd"), ["codex", "pi"]);
-          assert(Math.abs(await labelAt(page) - before) <= 2, "the switch scrolls nothing");
+          {
+            // WebKit drops a fraction of a scroll: a pixel is the rounding
+            const now = await scrollsAt(page);
+            assert.equal(now.length, before.length, "the switch scrolls another part");
+            for (let i = 0; i < now.length; i++) {
+              assert.equal(now[i][0], before[i][0]);
+              assert(Math.abs(now[i][1] - before[i][1]) <= 1, `the switch scrolls ${now[i][0]}: ${before[i][1]} -> ${now[i][1]}`);
+            }
+          }
           assert.deepEqual(await pastEdge(page), [], "nothing past the window's edge");
 
           await press(page, now.locator(".segs .opt").nth(0));

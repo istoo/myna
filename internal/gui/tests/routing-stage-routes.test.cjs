@@ -120,6 +120,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal(await heads.nth(2).locator("i").textContent(), "");
         // each heading has a wire from myna, and lights while its own answers
         assert.equal(await page.locator(".rt-wires path[d]").count(), 3 + 3 + 5);
+        // each lights as its request answers: wait for all three, not a frame
+        await page.waitForFunction(() => [...document.querySelectorAll(".rt-accts > li.rt-sub")].every((li) => li.classList.contains("on")), null, { timeout: 15000 });
         for (let i = 0; i < 3; i++) assert.equal(await heads.nth(i).evaluate((li) => li.classList.contains("on")), true);
 
         // the pointer on Kimi Code's row is on Kimi Code's row
