@@ -126,7 +126,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     test(`${engine} ${platform} ${lang}: opening an agent's details past the window moves nothing sideways`, async (t) => {
       const browser = await launch();
       t.after(() => browser.close());
-      const page = await onPlatform(browser, platform, { width: 1000, height: 330 });
+      const page = await onPlatform(browser, platform, { width: 1000, height: 260 });
       page.setDefaultTimeout(6000);
       page.setDefaultNavigationTimeout(60000);
       const errors = [];

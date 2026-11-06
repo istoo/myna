@@ -23008,7 +23008,10 @@ function hold(h) {
     // (~138px), and the bar is held where it was clicked (#961). Half its
     // height was too little once a settings row kept 12px above and below its
     // words: the Version row's line grew it 12px past a 22px switch (10-22)
-    if (h.top && want > 0 && Math.abs(d) < a[0].getBoundingClientRect().height) want = 0;
+    // a row put back above (50px) is the click's own doing, and the line
+    // held under it follows it; a line or two coming in above (2px on
+    // #2134, 12px on the Version row) is where the view stays at its top
+    if (h.top && want > 0 && Math.abs(d) < Math.min(24, a[0].getBoundingClientRect().height)) want = 0;
     // a view at its top when clicked stays there rather than be given room
     // to scroll down: a chip saved in the panel's Profiles came in above the
     // button held, and room made for the button slid the chip up under the
