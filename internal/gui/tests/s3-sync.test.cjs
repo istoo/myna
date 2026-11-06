@@ -92,12 +92,32 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const top = () => page.evaluate(() => document.querySelector("#view-settings").scrollTop);
       // at the page's end, then back up by the wheel till the choice is in sight
       await toEnd();
-      const segTop = () => page.evaluate(() => document.querySelector(".sync-form .segs").getBoundingClientRect().top - document.querySelector("#view-settings").getBoundingClientRect().top);
-      for (let i = 0; i < 40 && (await segTop()) < 10; i++) { await page.mouse.wheel(0, -40); await page.waitForTimeout(15); }
-      await page.waitForTimeout(300);
+      // the choice fully in sight, under the header and above the foot, and
+      // the page settled there: a click that has to scroll it into view
+      // would move the page itself. The page puts back a scroll it didn't
+      // hear the reader make, so after the wheels it is looked at again
+      const revealOpt = async (name) => {
+        const opt = form.locator(".segs .opt", { hasText: name });
+        const inSight = async () => {
+          const b = await opt.boundingBox(), v = await page.locator("#view-settings").boundingBox();
+          return !!b && !!v && b.y > v.y + 60 && b.y + b.height < v.y + v.height - 8;
+        };
+        for (let round = 0; round < 3; round++) {
+          await page.mouse.move(450, 300);
+          for (let i = 0; i < 20 && !(await inSight()); i++) {
+            const b = await opt.boundingBox(), v = await page.locator("#view-settings").boundingBox();
+            await page.mouse.wheel(0, b && v && b.y < v.y + 60 ? -40 : 40);
+            await page.waitForTimeout(15);
+          }
+          await page.waitForTimeout(400);
+          if (await inSight()) break;
+        }
+        return opt;
+      };
+      const opt = await revealOpt("S3");
       const before = await top();
       assert.ok(before > 0, "the settings page must be scrolled");
-      await form.locator(".segs .opt", { hasText: "S3" }).click();
+      await opt.click();
       await page.waitForTimeout(250);
       assert.equal(await top(), before, "picking S3 must not scroll the page");
       assert.deepEqual(await labels(), zh
@@ -127,16 +147,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // the WebDAV address typed before is still there, and isn't sent;
       // going back and forth, the shorter form too, moves nothing
       // the fields filled scrolled the choice out of sight: wheeled back to it
-      await page.mouse.move(450, 300);
-      for (let i = 0; i < 40 && (await segTop()) < 10; i++) { await page.mouse.wheel(0, -40); await page.waitForTimeout(15); }
-      await page.waitForTimeout(300);
+      const davOpt = await revealOpt("WebDAV");
       const at = await top();
       assert.ok(at > 0, "the settings page must still be scrolled");
-      await form.locator(".segs .opt", { hasText: "WebDAV" }).click();
+      await davOpt.click();
       await page.waitForTimeout(250);
       assert.equal(await top(), at, "picking WebDAV must not scroll the page");
       assert.equal(await form.locator(":scope > div").nth(1).locator("input").inputValue(), "https://dav.example.com/dav/");
-      await form.locator(".segs .opt", { hasText: "S3" }).click();
+      await (await revealOpt("S3")).click();
       await page.waitForTimeout(250);
       assert.equal(await top(), at, "picking S3 again must not scroll the page");
       await toEnd(); // the save button, at the form's foot, wheeled into sight
