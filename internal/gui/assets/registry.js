@@ -11,7 +11,7 @@
 
   function from(r) {
     switch (r.from) {
-      case "magpie": return t("set here");
+      case "myna": case "magpie": return t("set here"); // the row's own since the rename; "magpie" from an older myna serving the page
       case "env": return t("from {name}", { name: r.var });
       case "shell": return t("from your shell's {name}", { name: r.var });
       case "bunfig": case "npmrc": return t("from {name}", { name: r.path });
