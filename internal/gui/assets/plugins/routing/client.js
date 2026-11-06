@@ -5097,12 +5097,30 @@ function routingPage(part) {
           if (wanted) { wanted = 0; params.delete("req"); history.replaceState(null, "", params.size ? "?" + params : location.pathname); }
           if (asked && asked.id !== newest().id) pinned = asked;
           if (r) { cur = r; sync(true); say(affWhy(r, true) || ruleWhy(r, true) || firstWhy(r)); renderAll(); } else empty();
+          // a request opened from Usage before the live list was read (it
+          // asked nothing while out of sight) came in as history, by the day
+          // its archive copy names. Seen live and newest, it is live: there
+          // is nothing to go back to
+          const liveNewest = [...routes.values()].reduce((a, b) => (!a || b.id > a.id ? b : a), null);
+          if (day && !rp && cur && liveNewest?.id === cur.id) {
+            day = ""; pinned = null; cur = liveNewest;
+            sync(true);
+            say(affWhy(cur, true) || ruleWhy(cur, true) || firstWhy(cur));
+            renderAll();
+          }
           // the page's first frame came before the trace did, and found
           // nothing to fly: the requests under way fly now, not never
           if (seen && shown()) for (const u of underWay()) if (!playing.has(u.id)) play(u.id);
         } else {
           if (cur && routes.has(cur.id) && !rp) cur = routes.get(cur.id);
           if (pinned && routes.has(pinned.id)) pinned = routes.get(pinned.id);
+          // a request opened from Usage while the live list was unread came
+          // in as history; seen live and newest, it is live, with nothing
+          // to go back to
+          if (day && !rp && pinned && routes.has(pinned.id) && pinned.id === [...routes.values()].reduce((a, b) => b.id > a ? b.id : a, -1)) {
+            day = ""; pinned = null; cur = routes.get(cur?.id ?? 0) || newest();
+            renderAll();
+          }
           // a request picked (in the list, or the tray panel's row that
           // opened the window) goes back to live once it has left the list,
           // as a filter that leaves it out does: the stage stayed on one
