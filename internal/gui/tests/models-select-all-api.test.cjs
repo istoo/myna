@@ -93,7 +93,22 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         };
         const bulk = (name) => editor.locator(".mbulk").getByRole("button", { name, exact: true });
         const chipsOf = (cls) => editor.locator(`.mchips .mchip${cls}`).evaluateAll((cs) => cs.map((c) => c.querySelector("span").textContent).sort());
-        const scrolled = () => page.evaluate(() => [window.scrollX, window.scrollY, ...[...document.querySelectorAll("*")].filter((e) => e.scrollTop > 0).map((e) => `${e.className}:${e.scrollTop}`)].join(" "));
+        // a scrollable's class can change under the pointer (app.css's .holds
+        // says one overflows), so it is known by its first class and its
+        // place among the scrollables, not by the whole class
+        const scrolled = () => page.evaluate(() => [window.scrollX, window.scrollY, ...[...document.querySelectorAll("*")].filter((e) => e.scrollTop > 0).map((e, i) => `${e.className.trim().split(/\s+/)[0]}#${i}:${e.scrollTop}`)].join(" "));
+        // the fields' scroll set by code lands with the layout after it, and
+        // the body clamps to what it can scroll then: wait for it to hold still
+        const settled = () => page.evaluate(() => new Promise((ok) => {
+          const b = document.querySelector(".modal .editor > .ebody");
+          let last = b.scrollTop, still = 0;
+          const frame = () => {
+            still = b.scrollTop === last ? still + 1 : 0;
+            last = b.scrollTop;
+            if (still >= 3) ok(); else requestAnimationFrame(frame);
+          };
+          requestAnimationFrame(frame);
+        }));
         const save = async () => {
           await editor.locator(".bar").getByRole("button", { name: tr("Save"), exact: true }).click();
           for (let i = 0; i < 100 && !posts.some((p) => p.path === "/api/provider/save"); i++) await page.waitForTimeout(30);
@@ -121,6 +136,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // Select all, the button scrolled into the editor's view first: the
         // click moves nothing, and the Claude models are left
         await editor.locator(".ebody").evaluate((b) => { b.scrollTop += b.querySelector(".mbulk").getBoundingClientRect().top - b.getBoundingClientRect().top - 8; });
+        await settled();
         const before = await scrolled();
         await bulk(tr("Select all")).click();
         assert.equal(await scrolled(), before, "the click scrolled");
