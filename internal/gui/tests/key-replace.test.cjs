@@ -64,7 +64,9 @@ const want = {
   de: { edit: "Schlüssel ändern", hint: "Neuen Wert des Schlüssels einfügen", note: "Team nutzt jetzt den neuen Wert" },
 };
 
-const scrolled = (page) => page.evaluate(() => [window.scrollY, ...[...document.querySelectorAll("*")].filter((e) => e.scrollTop > 0).map((e) => `${e.className}:${e.scrollTop}`)].join(" "));
+// a scrollable's class can change under the pointer (app.css's .holds says
+// one overflows), so it is known by its first class and place, not all of it
+const scrolled = (page) => page.evaluate(() => [window.scrollY, ...[...document.querySelectorAll("*")].filter((e) => e.scrollTop > 0).map((e, i) => `${e.className.trim().split(/\s+/)[0]}#${i}:${e.scrollTop}`)].join(" "));
 const sideways = (page) => page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
 // a reader wheels the row into sight and points at it
 async function reach(page, row) {
