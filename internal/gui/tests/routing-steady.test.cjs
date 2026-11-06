@@ -85,7 +85,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     page.setDefaultTimeout(5000);
     page.setDefaultNavigationTimeout(60000);
     const errors = [];
-    page.on("pageerror", (e) => errors.push(e.message));
+    page.on("pageerror", (e) => { if (!/ResizeObserver loop/.test(e.message)) errors.push(e.message); }); // WebKit reports a layout loop it recovers from as a page error
     const feed = { next: null };
     await page.route("**/*", serve(feed));
     t.after(async () => {
@@ -109,6 +109,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       return Math.round(g.getBoundingClientRect().top - v.getBoundingClientRect().top - v.clientHeight / 2);
     });
     await page.mouse.move(550, 400);
+    const wheeled = Date.now();
     await page.mouse.wheel(0, dy);
     await page.waitForTimeout(400);
     const scrolled = await page.locator(view).evaluate((v) => v.scrollTop);
@@ -120,7 +121,27 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     await page.keyboard.type(" and more");
     const typed = await name.inputValue();
     assert.equal(typed, "Opus anywhere and more");
-    await page.waitForTimeout(300);
+    // the editor springs open over a few frames, and the page keeps the
+    // groups where they were on the way: the place is taken once it has
+    // stopped moving, not at a duration
+    await page.evaluate(() => new Promise((resolve) => {
+      const top = () => document.querySelector(".rt-gedit").getBoundingClientRect().top;
+      let last = top(), still = 0;
+      const tick = () => {
+        const at = top();
+        still = Math.abs(at - last) < 0.5 ? still + 1 : 0;
+        last = at;
+        if (still >= 4) return resolve();
+        requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    }));
+    await page.waitForTimeout(100);
+    // keepInView doesn't follow what grows above for a second after the
+    // reader's own wheel (readerScrolls(1000)): a request coming in then is
+    // left where it grew until it has passed. The requests here come after
+    // that, as they do for a reader at rest, not mid-wheel
+    while (Date.now() - wheeled < 1150) await page.waitForTimeout(50);
 
     // where things are: on the screen, and the groups' place in the page
     // (which moves as what's above them grows or shrinks)
@@ -128,10 +149,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const v = document.querySelector(sel), vt = v.getBoundingClientRect().top;
       const top = (e) => e.getBoundingClientRect().top - vt;
       const gsec = document.querySelector(".rt-gsec");
+      const ed = document.querySelector(".rt-gedit");
       return {
         scrollTop: v.scrollTop,
         inPage: gsec.getBoundingClientRect().top - vt + v.scrollTop,
-        onScreen: { head: top(gsec), editor: top(document.querySelector(".rt-gedit")), group: top([...document.querySelectorAll(".rt-group")].pop()) },
+        onScreen: { head: top(gsec), editor: top(ed), group: top([...document.querySelectorAll(".rt-group")].pop()) },
+        // the groups under the editor follow its foot, not its head: what
+        // the editor keeps is where it is, and its own height is its content
+        groupBelow: top([...document.querySelectorAll(".rt-group")].pop()) - (ed.getBoundingClientRect().bottom - vt),
       };
     }, view);
     const before = await where();
@@ -145,7 +170,18 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const v = document.querySelector(sel), ed = () => document.querySelector(".rt-gedit").getBoundingClientRect().top;
       const want = ed();
       window.__moves = [];
-      const look = (why) => { const at = ed(); if (Math.abs(at - want) > 1.5) window.__moves.push(`${why}: the editor at ${at}, not ${want}`); };
+      const look = (why) => {
+        const at = ed();
+        if (Math.abs(at - want) <= 1.5) return;
+        // WebKit applies a scrollTop set during a frame's callbacks at that
+        // frame's layout, after them: look once the frame has been laid
+        // out (the task after its next frame), and only one still off then
+        // is one the reader could see
+        requestAnimationFrame(() => setTimeout(() => {
+          const again = ed();
+          if (Math.abs(again - want) > 1.5) window.__moves.push(`${why}: the editor at ${again}, not ${want}`);
+        }, 0));
+      };
       window.__ro = new ResizeObserver(() => look("layout"));
       for (const e of [v, ...v.children, ...document.querySelector("#rtMore").children]) window.__ro.observe(e);
       v.addEventListener("scroll", () => look("scroll"));
@@ -167,7 +203,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     assert(Math.abs(after.inPage - before.inPage) > 50, `the part above the groups must have changed (${before.inPage} → ${after.inPage})`);
     // and the groups stayed where they were on the screen, the view
     // scrolling by just what grew above them, on every frame
-    for (const k of Object.keys(before.onScreen)) assert(Math.abs(after.onScreen[k] - before.onScreen[k]) <= 1.5, `the ${k} moved: ${JSON.stringify([before, after])}`);
+    for (const k of ["head", "editor"]) assert(Math.abs(after.onScreen[k] - before.onScreen[k]) <= 1.5, `the ${k} moved: ${JSON.stringify([before, after])}`);
+    assert(Math.abs(after.groupBelow - before.groupBelow) <= 1.5, `the groups under the editor moved: ${JSON.stringify([before, after])}`);
     assert(Math.abs((after.scrollTop - before.scrollTop) - (after.inPage - before.inPage)) < 2, `scrollTop must follow the groups: ${JSON.stringify([before, after])}`);
     assert.deepEqual(moves, [], "the page moved while the requests came");
     // the field kept its focus and what was typed, and goes on taking it
