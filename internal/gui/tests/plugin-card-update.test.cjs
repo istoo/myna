@@ -61,6 +61,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang));
         await page.goto("http://myna.test/?view=plugins");
+        // the page opens on Installed when the updates are known at its
+        // first draw, and on Discover otherwise: this is Discover's card
+        const tabs = page.locator(".pm-head .segs .opt");
+        await tabs.first().waitFor();
+        if ((await tabs.nth(1).getAttribute("aria-pressed")) !== "true") await tabs.nth(1).click();
         const card = page.locator('#view-plugins .pm-card[data-pkg="opencode-copilot-auth"]').first();
         const up = card.locator("button.pm-act.pm-up");
         await up.waitFor();
