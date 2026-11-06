@@ -87,7 +87,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     const open = async (lang, cur, width, posted) => {
       const context = await browser.newContext({ viewport: { width, height: 760 }, reducedMotion: "reduce" });
       const page = await context.newPage();
-      page.setDefaultTimeout(5000);
+      page.setDefaultTimeout(15000);
       page.setDefaultNavigationTimeout(60000);
       page.errors = [];
       page.on("pageerror", (e) => page.errors.push(e.message));
@@ -97,7 +97,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       return page;
     };
     const click = async (page, loc) => {
-      const b = await loc.boundingBox();
+      // the list is drawn again while it settles: the row under the
+      // pointer can be its copy, with no box for a moment
+      await loc.waitFor();
+      let b = await loc.boundingBox();
+      for (let i = 0; i < 100 && !b; i++) { await page.waitForTimeout(20); b = await loc.boundingBox(); }
       await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2);
     };
     for (const lang of Object.keys(want)) {

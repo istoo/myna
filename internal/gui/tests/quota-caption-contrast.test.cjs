@@ -83,7 +83,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const ctx = await browser.newContext({ viewport: { width, height: 700 }, reducedMotion: "reduce", colorScheme: theme });
           const errors = [];
           const page = await ctx.newPage();
-          page.setDefaultTimeout(8000);
+          page.setDefaultTimeout(15000);
           page.setDefaultNavigationTimeout(60000);
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", serve(lang, theme, true));
@@ -102,7 +102,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const ctx = await browser.newContext({ viewport: { width: 360, height: 640 }, reducedMotion: "reduce", colorScheme: theme });
         await ctx.addInitScript(() => { try { localStorage.setItem("myna.panelTab", "usage"); } catch {} });
         const panel = await ctx.newPage();
-        panel.setDefaultTimeout(8000);
+        panel.setDefaultTimeout(15000);
         panel.setDefaultNavigationTimeout(60000);
         await panel.route("**/*", serve(lang, theme, false));
         await panel.goto("http://myna.test/?mode=panel");

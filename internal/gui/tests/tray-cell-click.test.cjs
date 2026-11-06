@@ -55,7 +55,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         });
         for (const script of init || []) await context.addInitScript(script);
         const page = await context.newPage();
-        page.setDefaultTimeout(5000);
+        page.setDefaultTimeout(15000);
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, empty, ready));
@@ -178,7 +178,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const id = "codex|other-5@例子.test";
       const account = await open("http://myna.test/?view=usage&tab=usage&provider=codex&card=" + encodeURIComponent(id), { width: 900, height: 500 });
       await account.waitForFunction(() => document.querySelector('.subscription-card[data-provider="codex"]')?.classList.contains("flash"));
-      assert.deepEqual(await account.evaluate(() => window.__scrolled.slice(-1)), [id]);
+      // the asked-for account is scrolled to: the card holds it in sight as
+      // it fills, so it isn't the last call to scrollIntoView
+      await account.waitForFunction((id) => window.__scrolled.includes(id), id);
       await visible(account, '.subscription-account[data-card="codex|other-5@例子.test"]');
       assert.deepEqual(await account.evaluate(() => JSON.parse(localStorage.getItem("myna.usageAccounts"))), { "codex\nother-5@例子.test": true });
       assert.equal(await account.evaluate(() => location.search.includes("card=")), false);

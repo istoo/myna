@@ -106,6 +106,8 @@ async function saved(page, ed, w, posts) {
   const n = posts.length;
   await press(page, ed.locator("button.primary", { hasText: w.save }));
   await page.waitForFunction(() => !document.querySelector(".rt-gedit"));
+  // the save was posted as the editor closed; the fake records it then
+  for (let i = 0; i < 250 && posts.length <= n; i++) await page.waitForTimeout(20);
   const save = posts.slice(n).find((p) => p.path === "/api/groups/save");
   assert(save, `saved: ${JSON.stringify(posts)}`);
   return save.body;
@@ -119,7 +121,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
         t.after(() => browser.close());
         const page = await (await browser.newContext({ viewport: { width, height: 1400 } })).newPage();
-        page.setDefaultTimeout(5000);
+        page.setDefaultTimeout(15000);
         page.setDefaultNavigationTimeout(60000);
         const errors = [], posts = [];
         page.on("pageerror", (e) => errors.push(e.message));

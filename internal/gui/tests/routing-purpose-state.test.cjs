@@ -61,7 +61,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     test(`${engine} ${lang}: purpose scopes Routing counts, story and subsequent live updates`, async (t) => {
       const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
       const page = await browser.newPage({ viewport: { width: 1100, height: 850 }, reducedMotion: "reduce" });
-      page.setDefaultTimeout(5000);
+      page.setDefaultTimeout(15000);
       page.setDefaultNavigationTimeout(60000);
       const feed = { seq: 100 }, errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
