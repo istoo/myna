@@ -16956,7 +16956,19 @@ function flashCard(card, target = card, elapsed = 0) {
   if (target) {
     // The native menu-bar click has no DOM event; permit this requested scroll.
     readerScrolls(1000);
-    target.scrollIntoView({ block: "nearest", behavior: "instant" });
+    // the card is filled in as it is drawn (its windows come with the
+    // reading), and what was visible when it was short is cut off once it
+    // grows: it is brought back into sight while it settles
+    let h = -1, still = 0, n = 0;
+    const keep = () => {
+      if (!target.isConnected || still > 2 || ++n > 30) return;
+      target.scrollIntoView({ block: "nearest", behavior: "instant" });
+      const now = Math.round(target.getBoundingClientRect().height);
+      still = now === h ? still + 1 : 0;
+      h = now;
+      requestAnimationFrame(keep);
+    };
+    keep();
   }
   card.classList.remove("flash");
   void card.offsetWidth; // restart even if this card is still highlighted
@@ -16989,6 +17001,12 @@ function keepQuotaFlash(box) {
     if (flashes.length && view) {
       view.scrollTop = scroll;
       readerLeaves(view);
+      // a card that was asked for is filled in as it is drawn, and what
+      // was in sight while it was short is cut off once it grows
+      for (const { selector } of flashes) {
+        const card = box.querySelector(selector);
+        if (card && !calm()) card.scrollIntoView({ block: "nearest", behavior: "instant" });
+      }
     }
   };
 }
