@@ -83,3 +83,15 @@
       `partners.js`/`sponsors.js`/`i18n.js` 是站点源码，隐私页（三种语言）与
       `docs/reference.md` 直接引用它们；本 fork 不部署该 worker，但删除会
       让这些文档失效，属于内容问题而非可安全删除的死代码。
+- [ ] GUI 套件的既有红（另开任务，用户 11-06 决定）：为验证“删除脱敏
+      演示”，1182 个文件分 12 片跑完——19,913 项，19,561 通过，352 失败；
+      把 67 个失败文件单独复跑（1,312 项）仍有 284 例真实失败，不是并发
+      负载。产品资源与 `v0.1.2903` 逐字节一致（
+      `git diff v0.1.2903 HEAD -- internal/gui/assets` 为空），且 GUI 套件
+      不在 CI，所以这些红在此前发布即存在，与本次改动无关。主要文件：
+      usage-agents-hide(20)、model-chip-steady(20)、segs-press-redraw(16)、
+      rest-try-now(15)、provider-fetch-again(14)、page-width-steady(11)、
+      routing-rule-remove(10)、recovered-file(10)、plugin-registry(10)、
+      zero-priced-free(9)、vertex-editor(8)、models-works-only(8)、
+      models-select-all-api(7)、context-map(5)、usage-ledger(5) 等 67 个。
+      复跑证据：`/tmp/ui-chunk-*.log`、`/tmp/ui-redo.log`。
