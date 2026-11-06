@@ -92,6 +92,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         const ctl = {};
+        // a click's answer sits over the foot of the page until its time is
+        // up, and at 600 the row's button can be under it: clear it first
+        const clickStart = async (r) => {
+          await page.evaluate(() => status(""));
+          await r.locator(".ag-start").click();
+        };
         await page.route("**/*", (route) => serve(route, lang, added, ctl));
         await page.goto("http://myna.test/");
         await page.waitForLoadState("networkidle");
@@ -106,7 +112,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         for (const said of Object.values(SAID).flat()) assert.doesNotMatch(hint, said);
         assert.equal(await lody.locator(".ag-st").evaluate((e) => e.classList.contains("on")), false);
         const lodyOpened = page.waitForRequest((r) => r.url().includes("/api/open"));
-        await lody.locator(".ag-start").click();
+        await clickStart(lody);
         assert.equal(JSON.parse((await lodyOpened).postData()).url, "lody://provider/import?v=1&data=fixture");
 
         const row = page.locator('.row.agent[data-id="cindy"]');
@@ -141,7 +147,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const aionIcon = await page.evaluate(async () => (await fetch("/icons/aionui.svg")).status);
         assert.equal(aionIcon, 200);
         const aionOpened = page.waitForRequest((r) => r.url().includes("/api/open"));
-        await aion.locator(".ag-start").click();
+        await clickStart(aion);
         assert.equal(JSON.parse((await aionOpened).postData()).url, AIONUI_LINK);
 
         // narrow: no page scroll sideways, and every import row keeps its
@@ -162,7 +168,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.setViewportSize({ width: 960, height: 600 });
         // a click opens the app's link, the row's one control
         const opened = page.waitForRequest((r) => r.url().includes("/api/open"));
-        await row.locator(".ag-start").click();
+        await clickStart(row);
         const req = await opened;
         assert.equal(JSON.parse(req.postData() || "{}").url, "cindy://import?x=1");
         // and says what became of it: opened, or why nothing opened
@@ -173,10 +179,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         };
         await said(OPENED[lang], "ok");
         ctl.noHandler = true;
-        await row.locator(".ag-start").click();
+        await clickStart(row);
         await said(NO_HANDLER[lang], "err");
         ctl.exe = "C:\\gone\\Cindy.exe";
-        await row.locator(".ag-start").click();
+        await clickStart(row);
         await said(NO_HANDLER[lang] + " (C:\\gone\\Cindy.exe)", "err");
       });
     }
