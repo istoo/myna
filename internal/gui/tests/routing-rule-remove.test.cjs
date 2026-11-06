@@ -175,9 +175,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert(await row.locator(".rt-rmore").evaluate((b) => b === document.activeElement), "Tab reaches the rule's ⋯");
         await page.keyboard.press("Enter");
         await page.locator(".row-menu").waitFor();
+        // the menu takes the focus on the frame after Enter: keys go to it
+        await page.waitForFunction(() => document.querySelector(".row-menu")?.contains(document.activeElement), null, { timeout: 15000 });
         await page.keyboard.press("ArrowUp");
         assert.equal((await page.evaluate(() => document.activeElement.textContent)).trim(), w.remove);
         await page.keyboard.press("Enter");
+        await page.waitForFunction(() => !document.querySelector(".rt-gedit .rt-rule"), null, { timeout: 15000 });
         assert.equal(await ed.locator(".rt-rule").count(), 0);
         await press(page, ed.locator("button.primary", { hasText: w.save }));
         await page.waitForFunction(() => !document.querySelector(".rt-gedit"));

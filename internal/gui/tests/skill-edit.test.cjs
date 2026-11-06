@@ -56,8 +56,9 @@ function server(lang, posts, files) {
 // a mouse press where the button is, once the dialog has stopped moving
 const press = async (page, loc) => {
   await page.waitForFunction(() => !document.getAnimations().some((a) => a.playState === "running" && a.effect?.target?.closest?.("#modal")));
-  const b = await loc.boundingBox();
-  await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2);
+  // the click is looked up again as it is made: the dialog's content can
+  // settle between a box read and the press, and the press then missed
+  await loc.click();
 };
 const scrolls = (page) => page.evaluate(() => [...document.querySelectorAll("*")].filter((e) => e.scrollTop && !e.closest("#modal")).map((e) => (e.id || e.className) + ":" + e.scrollTop).concat("doc:" + document.scrollingElement.scrollTop).join(" "));
 
