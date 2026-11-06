@@ -71,13 +71,24 @@ function serve(lang) {
   };
 }
 
-// a picker row's free tag: its text, its hover, and whether it sits in the row
-const tagOf = (row) => row.evaluate((li) => {
-  const f = li.querySelector(".badge.free");
-  if (!f) return null;
-  const r = li.getBoundingClientRect(), b = f.getBoundingClientRect();
-  return { text: f.textContent, title: f.title, inside: b.width > 4 && b.left >= r.left && b.right <= r.right + 0.5 };
-});
+// a picker row's free tag: its text, its hover, and whether it sits in the
+// row. A picker's rows are drawn again as the agent list's own reads land,
+// and a row read while it is being replaced has no box: read again
+const tagOf = async (row) => {
+  for (let i = 0; i < 40; i++) {
+    const v = await row.evaluate((li) => {
+      const f = li.querySelector(".badge.free");
+      if (!f) return { none: true };
+      const r = li.getBoundingClientRect(), b = f.getBoundingClientRect();
+      if (!(r.width > 0 && b.width > 0)) return { gone: true };
+      return { text: f.textContent, title: f.title, inside: b.left >= r.left && b.right <= r.right + 0.5 };
+    }).catch(() => ({ gone: true }));
+    if (v.none && i >= 5) return null;
+    if (!v.none && !v.gone) return v;
+    await new Promise((r) => setTimeout(r, 50));
+  }
+  return null;
+};
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   for (const width of [1100, 420]) {
