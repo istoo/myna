@@ -178,12 +178,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.deepEqual(errors, []);
     });
 
-    // #1620: the strip is wider than the editor and scrolls. On a Mac the
-    // system's overlay bar showed over the options' lower half for a moment
-    // after each scroll, and a click there went to the bar: the strip paged
-    // sideways and nothing was picked (WebKit missed 39 of these 50 clicks).
-    // Off a Mac the strip's bar sits under it and never covered them.
-    test(`${engine} ${lang}: a region clicked right after the strip scrolled is the one picked`, async (t) => {
+    // #1620 had the strip wider than the editor, scrolling in itself, and on
+    // a Mac the system's overlay bar showed over the options' lower half for
+    // a moment after each scroll, so a click went to the bar. The strip wraps
+    // now, its regions one under another in a narrow window: there is no
+    // sideways bar to page, and a click on any of them picks it.
+    test(`${engine} ${lang}: a region clicked in a narrow window is the one picked`, async (t) => {
       const { page, errors } = await start(t, [relay]);
       // narrow enough that the Chinese names overflow too, and tall enough
       // that the strip is in the window: a click below it picks nothing
@@ -194,14 +194,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await strip.waitFor();
       const box = await strip.boundingBox();
       assert.ok(box.y + box.height <= 1200, `the strip is in the window (bottom at ${box.y + box.height})`);
-      const most = await strip.evaluate((s) => s.scrollWidth - s.clientWidth);
-      assert.ok(most > 40, `the strip scrolls (${most}px)`);
+      // wrapped in the window, not paged sideways
+      assert.equal(await strip.evaluate((s) => s.scrollWidth - s.clientWidth), 0, "the strip doesn't scroll");
+      const edBox = await ed(page).locator(".segs.regions").evaluate((s) => s.closest(".editor").getBoundingClientRect().toJSON());
       const missed = [];
       for (let k = 0; k < 10; k++) {
-        for (const [i, part] of [[4, 1], [1, 0], [3, 0.6], [0, 0], [2, 0.3]]) {
-          await strip.evaluate((s, left) => { s.scrollLeft = left; }, Math.round(most * part));
-          await page.waitForTimeout(30);
+        for (const i of [4, 1, 3, 0, 2]) {
           const b = await segs(page).nth(i).boundingBox();
+          if (b.x < edBox.x - 1 || b.x + b.width > edBox.right + 1) missed.push(`${w.regions[i]} out of the editor`);
           await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2);
           const on = await ed(page).locator(".segs.regions .opt.on").textContent();
           if (on !== w.regions[i]) missed.push(`${w.regions[i]} → ${on}`);
