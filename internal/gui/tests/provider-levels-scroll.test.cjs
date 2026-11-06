@@ -64,17 +64,23 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     let before = await into("model-5");
     assert(before > 0);
     const fifth = page.locator(".mname", { has: page.locator("code", { hasText: "model-5" }) });
+    // what the reader is on keeps its place on the screen: a level unticked
+    // grows what the list says under its names (the scrollHeight moves with
+    // it), and the place is the row, not the number
+    const rowAt = (r) => r.evaluate((e) => e.getBoundingClientRect().top);
+    let at = await rowAt(fifth);
     const old = await list.elementHandle();
     await fifth.getByRole("checkbox", { name: "low" }).uncheck();
     assert(await old.evaluate((e) => e.isConnected));
     assert.equal(await fifth.getByRole("checkbox", { name: "low" }).isChecked(), false);
-    assert.equal(await list.evaluate((e) => e.scrollTop), before);
+    assert(Math.abs(await rowAt(fifth) - at) <= 1, "the row stays where it was");
     const next = page.locator(".mname", { has: page.locator("code", { hasText: "model-6" }) });
     before = await into("model-6");
+    at = await rowAt(next);
     await next.getByRole("checkbox", { name: "high" }).uncheck();
     assert.equal(await next.getByRole("checkbox", { name: "high" }).isChecked(), false);
     assert.deepEqual(posts, []);
-    assert.equal(await list.evaluate((e) => e.scrollTop), before);
+    assert(Math.abs(await rowAt(next) - at) <= 1, "the next row stays where it was");
     assert.deepEqual(errors, []);
   });
 }
