@@ -72,7 +72,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         const errors = [];
-        page.on("pageerror", (error) => errors.push(error.message));
+        // WebKit reports a layout loop it recovers from as a page error
+        page.on("pageerror", (error) => { if (!/ResizeObserver loop/.test(error.message)) errors.push(error.message); });
         await page.route("**/*", serve(lang));
         await page.goto("http://myna.test/?view=routing");
         const say = (key, vars = {}) => page.evaluate(([lang, key, vars]) => {
