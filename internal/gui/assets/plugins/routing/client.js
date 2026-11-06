@@ -5119,23 +5119,24 @@ function routingPage(part) {
           if (seen && shown()) for (const u of underWay()) if (!playing.has(u.id)) play(u.id);
         } else {
           if (cur && routes.has(cur.id) && !rp) cur = routes.get(cur.id);
+          // a request picked (in the list, or the tray panel's row that
+          // opened the window) goes back to live once it has left the list,
+          // as a filter that leaves it out does: the stage stayed on one
+          // provider's request for hours while every request since went to
+          // another (#1389, Creat55). This is the else of the line above:
+          // a picked one still listed stays picked, and is read as it is now
           if (pinned && routes.has(pinned.id)) pinned = routes.get(pinned.id);
+          else if (pinned && !day) {
+            pinned = null;
+            cur = newest();
+            if (cur) { sync(true); say(affWhy(cur, true) || ruleWhy(cur, true) || firstWhy(cur)); }
+          }
           // a request opened from Usage while the live list was unread came
           // in as history; seen live and newest, it is live, with nothing
           // to go back to
           if (day && !rp && pinned && routes.has(pinned.id) && pinned.id === [...routes.values()].reduce((a, b) => b.id > a ? b.id : a, -1)) {
             day = ""; pinned = null; cur = routes.get(cur?.id ?? 0) || newest();
             renderAll();
-          }
-          // a request picked (in the list, or the tray panel's row that
-          // opened the window) goes back to live once it has left the list,
-          // as a filter that leaves it out does: the stage stayed on one
-          // provider's request for hours while every request since went to
-          // another (#1389, Creat55)
-          else if (pinned && !day) {
-            pinned = null;
-            cur = newest();
-            if (cur) { sync(true); say(affWhy(cur, true) || ruleWhy(cur, true) || firstWhy(cur)); }
           }
           // back in sight to requests that came while away: live again
           if (back) backToPick(true);
