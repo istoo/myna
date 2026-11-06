@@ -39,7 +39,10 @@ function serve(feed) {
       const trace = (routes) => json({ mine: true, now: new Date().toISOString(), seq: routes.length ? routes[routes.length - 1].seq : Number(url.searchParams.get("after")), totals: { requests: 0, rerouted: 0, errors: 0 }, routes });
       if (!url.searchParams.get("wait")) return trace(first);
       const r = await new Promise((res) => { feed.next = res; });
-      return trace([r]);
+      // the envelope's seq is the gateway's counter, ahead of every route it
+      // lists: the finished request keeps its own (110), and sending that as
+      // the counter made the page take the gateway for restarted
+      return json({ mine: true, now: new Date().toISOString(), seq: Math.max(131, r.seq), totals: { requests: 0, rerouted: 0, errors: 0 }, routes: [r] });
     }
     if (url.pathname === "/api/gateway/history") return json({ cut: false, days: [], routes: [] });
     if (url.pathname === "/api/groups") return json({ groups: [], models: [], pools: [] });
@@ -52,7 +55,7 @@ function serve(feed) {
 }
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
-  test(`${engine}: a request done in the middle of the list swaps its own row only`, async (t) => {
+  test(`${engine}: a request done in the middle of the list updates its own row only`, async (t) => {
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     t.after(() => browser.close());
     const page = await browser.newPage({ viewport: { width: 1100, height: 900 } });
@@ -78,7 +81,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     for (let i = 0; i < 60 && !feed.next; i++) await page.waitForTimeout(50);
     assert(feed.next, "the page asks for the next trace");
     feed.next(req(110, true, 200));
-    await page.waitForFunction(() => document.querySelectorAll(".rt-req.ok, .rt-req:not(.wait)").length && ![...document.querySelectorAll(".rt-req:not(.probe)")].every((r) => window.__was.includes(r)));
+    // the finished request's row is updated where it is (no row goes out or
+    // in): it is the one that no longer waits
+    await page.waitForFunction(() => {
+      const rows = [...document.querySelectorAll(".rt-reqs .rt-req:not(.probe)")];
+      return rows.length === 30 && !rows.some((r) => r.classList.contains("wait"));
+    });
     await page.waitForTimeout(300);
     const got = await page.evaluate(() => {
       window.__mo.disconnect();
@@ -86,8 +94,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       return { rows: rows.length, kept: window.__was.filter((r) => rows.includes(r)).length, moved: window.__moved };
     });
     assert.equal(got.rows, 30);
-    assert.equal(got.kept, 29, "every other row is the one it was");
-    assert.deepEqual(got.moved, { added: 1, removed: 1 }, "only the finished request's row goes out and in");
+    assert.equal(got.kept, 30, "every row is the one it was");
+    assert.deepEqual(got.moved, { added: 0, removed: 0 }, "no row goes out or in");
     assert.deepEqual(errors, []);
   });
 }

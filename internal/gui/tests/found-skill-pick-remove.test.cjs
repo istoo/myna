@@ -86,7 +86,10 @@ const reach = async (page, loc) => {
   for (let i = 0; i < 20; i++) {
     const b = await loc.boundingBox();
     if (b && await loc.evaluate((e, [x, y]) => e.contains(document.elementFromPoint(x, y)), [b.x + b.width / 2, b.y + b.height / 2])) return;
-    await page.mouse.move(b.x + b.width / 2, Math.max(b.y - 40, 10));
+    // inside the window: a row below the fold puts b.y - 40 past its foot,
+    // where a wheel scrolls nothing
+    const vh = page.viewportSize().height;
+    await page.mouse.move(b.x + b.width / 2, Math.min(Math.max(b.y - 40, 10), vh - 30));
     await page.mouse.wheel(0, 120);
     await page.waitForTimeout(80);
   }
