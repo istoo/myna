@@ -814,7 +814,7 @@ body.window .rt-gedit > .bar { --vfoot: 8px; }
 .rt-cond {
   display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 10px; border-radius: 999px;
   border: 1px dashed var(--line); background: transparent; color: var(--muted);
-  font: inherit; font-size: 12px; cursor: pointer; white-space: nowrap; max-width: 100%;
+  font: inherit; font-size: 12px; cursor: pointer; white-space: nowrap; max-width: 100%; min-width: 0;
   transition: color .15s, border-color .15s, background .15s;
 }
 .rt-cond:hover { color: var(--fg); border-color: var(--muted); }

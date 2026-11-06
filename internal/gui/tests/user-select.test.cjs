@@ -80,7 +80,9 @@ async function drag(page, loc) {
   await page.mouse.up();
   return page.evaluate(() => String(getSelection()));
 }
-const selectOf = (loc) => loc.evaluate((e) => { const s = getComputedStyle(e); return s.userSelect || s.webkitUserSelect; });
+// WebKit 16 (Playwright's) computes the standard property as auto and keeps
+// the rule in the prefixed one: read that first
+const selectOf = (loc) => loc.evaluate((e) => { const s = getComputedStyle(e); return s.webkitUserSelect || s.userSelect; });
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   for (const lang of ["en", "zh", "ja", "de"]) {
@@ -120,7 +122,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // the page's navigation and every button stay controls; every field
         // can still be typed into and selected
         const st = await page.evaluate(() => {
-          const sel = (e) => { const s = getComputedStyle(e); return s.userSelect || s.webkitUserSelect; };
+          const sel = (e) => { const s = getComputedStyle(e); return s.webkitUserSelect || s.userSelect; };
           return {
             controls: [...document.querySelectorAll("nav, nav *, button, button *, [role=tab], .seg, .opt")].map(sel).filter((v) => v !== "none").length,
             fields: [...document.querySelectorAll("input:not([type=checkbox]):not([type=radio]):not([type=range]), textarea")].map(sel).filter((v) => v === "none").length,
