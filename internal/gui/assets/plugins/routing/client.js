@@ -2943,18 +2943,24 @@ function routingPage(part) {
   // a local browser: the room grew with use). A request picked, a replay
   // or a past day is drawn at its own height. A change of width measures it again at
   // once, as it is then (the list coming in under it can take a
-  // scrollbar's width off it before the first live request)
-  const STORY_HELD = 3;
-  let storyHold = { key: "", told: new Map() }, storyDrawn = "", storyW = 0;
+  // scrollbar's width off it before the first live request). A scrollbar
+  // coming or going is a few pixels, and it comes or goes exactly when
+  // the story changes height: that much is not a change of width, and
+  // what was told keeps holding (WebKit on Linux draws it as a bar, and
+  // the tall story's bar went as the short one was told, dropping the
+  // tall one's height with it)
+  const STORY_HELD = 3, STORY_WIDTH = 40;
+  let storyHold = { key: "", w: 0, told: new Map() }, storyDrawn = "", storyW = 0;
   function holdStory() {
     const follow = !pinned && !rp && !day;
     // the width as the observer below last found it: read here, it laid
     // the whole page out again on each of the story's ten draws a second,
     // half of what the story took with two folds open in WebKit (#3164)
     const w = storyW;
-    const key = JSON.stringify([follow, w, document.documentElement.lang]);
+    const key = JSON.stringify([follow, document.documentElement.lang]);
     if (key === storyHold.key && storyDrawn === headKey + stepsKey) return;
-    if (key !== storyHold.key) storyHold = { key, told: new Map() };
+    if (key !== storyHold.key) storyHold = { key, w, told: new Map() };
+    else if (Math.abs(w - storyHold.w) > STORY_WIDTH) storyHold = { key, w, told: new Map() };
     storyDrawn = headKey + stepsKey;
     [logHead, steps].forEach((e) => { e.style.minHeight = ""; });
     if (!follow || !w || !logR) return;

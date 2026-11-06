@@ -67,26 +67,58 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         const errors = [];
-        page.on("pageerror", (e) => errors.push(e.message));
+        // WebKit reports a ResizeObserver loop as an error; the page draws
+        // in it on purpose (holdStory measures the story it just drew)
+        page.on("pageerror", (e) => { if (!/ResizeObserver loop/.test(e.message)) errors.push(e.message); });
         const feed = { next: null };
         await page.route("**/*", serve(lang, feed));
         await page.goto("http://myna.test/?view=routing");
         await page.locator(".rt-req").nth(first.length - 1).waitFor();
         await page.locator(".rt-log .rt-steps li").first().waitFor();
         await page.waitForTimeout(800);
+        // the trace is drawn and held in the same turn that reads it, and
+        // the page asks for the next one only after: that ask is the sign
+        // it is all drawn. The story's words can repeat from one request
+        // to the next, so they aren't
         const send = async (r) => {
           for (let i = 0; i < 60 && !feed.next; i++) await page.waitForTimeout(50);
           const next = feed.next;
           assert(next, "the page asks for the next trace");
           feed.next = null;
           next(r);
-          await page.waitForTimeout(400);
+          for (let i = 0; i < 100 && !feed.next; i++) await page.waitForTimeout(20);
+          // the box is measured again after its width settles (a log shown
+          // for the first time, a scrollbar come), which WebKit does a
+          // frame later than Chromium: hold past that frame
+          await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
         };
-        const story = () => page.evaluate(() => {
-          const s = document.querySelector(".rt-log .rt-steps");
-          const lines = [...s.children].reduce((b, li) => Math.max(b, li.getBoundingClientRect().bottom), s.getBoundingClientRect().top);
-          return { h: s.getBoundingClientRect().height, content: lines - s.getBoundingClientRect().top, held: s.style.minHeight };
-        });
+        // the hold is applied a few frames after the trace is drawn: wait
+        // for the height it is about, not a duration
+        const waitH = async (ok, said) => {
+          const read = () => page.evaluate(() => document.querySelector(".rt-log .rt-steps").getBoundingClientRect().height);
+          let h = await read();
+          for (let i = 0; i < 200 && !ok(h); i++) { await page.waitForTimeout(40); h = await read(); }
+          assert(ok(h), `${said}: ${h}`);
+          return story();
+        };
+        // settled: the story is drawn again a frame after a trace, and
+        // held then; read until it holds still rather than at a duration
+        const story = async () => {
+          let last = null, still = 0;
+          for (let i = 0; i < 60; i++) {
+            const v = await page.evaluate(() => {
+              const s = document.querySelector(".rt-log .rt-steps");
+              const lines = [...s.children].reduce((b, li) => Math.max(b, li.getBoundingClientRect().bottom), s.getBoundingClientRect().top);
+              return { h: s.getBoundingClientRect().height, content: lines - s.getBoundingClientRect().top, held: s.style.minHeight };
+            });
+            const key = JSON.stringify(v);
+            still = key === last ? still + 1 : 0;
+            last = key;
+            if (still >= 3) return v;
+            await page.waitForTimeout(50);
+          }
+          return last;
+        };
         const short = await story();
 
         await send(req(103, 4));
@@ -96,17 +128,20 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // under way after it, and the two answered after it: held, so
         // nothing jumps from one request to the next
         await send(req(104, 0, "start"));
-        assert((await story()).h >= tall.h - 0.5, "held while under way");
+        {
+          const h = (await waitH((x) => x >= tall.h - 0.5, `held while under way at ${tall.h}`)).h;
+          assert(h >= tall.h - 0.5, "held while under way");
+        }
         for (const id of [104, 105]) {
           await send(req(id, 0));
-          const h = (await story()).h;
+          const h = (await waitH((x) => x >= tall.h - 0.5, `${id} held at ${tall.h}`)).h;
           assert(h >= tall.h - 0.5, `${id} held: ${h} vs ${tall.h}`);
         }
 
         // the third short one answered: the long one has gone out of the
         // hold, and the box is as tall as its own lines
         await send(req(106, 0));
-        const after = await story();
+        const after = await waitH((x) => x < tall.h - 40, `shrunk under ${tall.h - 40}`);
         assert(after.h < tall.h - 40, `the box shrank back after the long request: ${after.h} vs ${tall.h} (min-height ${after.held || "none"})`);
         assert(Math.abs(after.h - short.h) <= 1, `as tall as a short request: ${after.h} vs ${short.h}`);
         assert(after.h - after.content <= 24, `no empty room under its lines: ${after.h} tall, lines to ${after.content}`);
@@ -128,34 +163,66 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         const errors = [];
-        page.on("pageerror", (e) => errors.push(e.message));
+        // WebKit reports a ResizeObserver loop as an error; the page draws
+        // in it on purpose (holdStory measures the story it just drew)
+        page.on("pageerror", (e) => { if (!/ResizeObserver loop/.test(e.message)) errors.push(e.message); });
         const feed = { next: null };
         await page.route("**/*", serve(lang, feed));
         await page.goto("http://myna.test/?view=routing");
         await page.locator(".rt-req").nth(first.length - 1).waitFor();
         await page.locator(".rt-log .rt-steps li").first().waitFor();
         await page.waitForTimeout(800);
+        // the trace is drawn and held in the same turn that reads it, and
+        // the page asks for the next one only after: that ask is the sign
+        // it is all drawn. The story's words can repeat from one request
+        // to the next, so they aren't
         const send = async (r) => {
           for (let i = 0; i < 60 && !feed.next; i++) await page.waitForTimeout(50);
           const next = feed.next;
           assert(next, "the page asks for the next trace");
           feed.next = null;
           next(r);
-          await page.waitForTimeout(400);
+          for (let i = 0; i < 100 && !feed.next; i++) await page.waitForTimeout(20);
+          // the box is measured again after its width settles (a log shown
+          // for the first time, a scrollbar come), which WebKit does a
+          // frame later than Chromium: hold past that frame
+          await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
         };
-        const story = () => page.evaluate(() => {
-          const s = document.querySelector(".rt-log .rt-steps");
-          const lines = [...s.children].reduce((b, li) => Math.max(b, li.getBoundingClientRect().bottom), s.getBoundingClientRect().top);
-          return { h: s.getBoundingClientRect().height, content: lines - s.getBoundingClientRect().top, held: s.style.minHeight };
-        });
+        // the hold is applied a few frames after the trace is drawn: wait
+        // for the height it is about, not a duration
+        const waitH = async (ok, said) => {
+          const read = () => page.evaluate(() => document.querySelector(".rt-log .rt-steps").getBoundingClientRect().height);
+          let h = await read();
+          for (let i = 0; i < 200 && !ok(h); i++) { await page.waitForTimeout(40); h = await read(); }
+          assert(ok(h), `${said}: ${h}`);
+          return story();
+        };
+        // settled: the story is drawn again a frame after a trace, and
+        // held then; read until it holds still rather than at a duration
+        const story = async () => {
+          let last = null, still = 0;
+          for (let i = 0; i < 60; i++) {
+            const v = await page.evaluate(() => {
+              const s = document.querySelector(".rt-log .rt-steps");
+              const lines = [...s.children].reduce((b, li) => Math.max(b, li.getBoundingClientRect().bottom), s.getBoundingClientRect().top);
+              return { h: s.getBoundingClientRect().height, content: lines - s.getBoundingClientRect().top, held: s.style.minHeight };
+            });
+            const key = JSON.stringify(v);
+            still = key === last ? still + 1 : 0;
+            last = key;
+            if (still >= 3) return v;
+            await page.waitForTimeout(50);
+          }
+          return last;
+        };
 
         await send(req(103, 4));
         const tall = await story();
         await send([req(104, 0, "start")]);
-        const going = await story();
+        const going = await waitH((x) => x >= tall.h - 0.5, `held while the next is under way at ${tall.h}`);
         assert(going.h >= tall.h - 0.5, `held while the next is under way: ${going.h} vs ${tall.h}`);
         for (let id = 105; id <= 110; id++) await send([req(id - 1, 0), req(id, 0, "start")]);
-        const after = await story();
+        const after = await waitH((x) => x < tall.h - 40, `shrunk under ${tall.h - 40}`);
         assert(after.h < tall.h - 40, `the box shrank back with the newest always under way: ${after.h} vs ${tall.h} (min-height ${after.held || "none"})`);
         assert(after.h - after.content <= 24, `no empty room under its lines: ${after.h} tall, lines to ${after.content}`);
 
