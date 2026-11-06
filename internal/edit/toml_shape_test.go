@@ -2,6 +2,7 @@ package edit
 
 import (
 	"fmt"
+	"runtime/debug"
 	"strings"
 	"testing"
 	"time"
@@ -58,6 +59,11 @@ func tomlBigFile(size int) []string {
 // loaded runner can still reach, and the file it read.
 func parseTOMLTimed(t *testing.T, lines []string) (tomlFile, time.Duration) {
 	t.Helper()
+	// the parse's work, not a collection's: an 8 MB file allocates enough
+	// that a cycle lands inside a rep at any heap the runner has, and CI's
+	// macOS once took the still-linear parse to 31× the 1 MB one's (#2219)
+	gc := debug.SetGCPercent(-1)
+	defer debug.SetGCPercent(gc)
 	var f tomlFile
 	var best time.Duration
 	for rep := 0; rep < 5; rep++ {
