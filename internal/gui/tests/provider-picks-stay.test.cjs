@@ -87,6 +87,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await editor.locator(".mchips .mchip").first().waitFor();
       };
       const picks = () => editor.locator(".mchips .mchip.on").evaluateAll((cs) => cs.map((c) => c.textContent).sort());
+      // the unpicked models are folded behind "Show the other n" (#685)
+      const showAll = async () => { const r = editor.locator(".mchips .mchips-rest"); if (await r.count()) await r.click(); };
       const button = (name) => editor.locator(".mfoot").getByRole("button", { name, exact: true });
       const until = async (f) => { for (let i = 0; i < 100 && !(await f()); i++) await page.waitForTimeout(30); assert(await f()); };
 
@@ -94,6 +96,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // or Forget, and the editor left for GPT Relay's before the list is in
       for (const [action, label] of [["models", w.refresh], ["unfetch", w.forget]]) {
         await open("Claude Relay");
+        await showAll();
         await editor.locator(".mchips .mchip", { hasText: "claude-sonnet-4-6" }).click();
         assert.deepEqual(await picks(), ["claude-opus-4-6", "claude-sonnet-4-6"]);
         shut();
@@ -123,6 +126,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // Forget: one made before the Save, and an id its vendor doesn't
       // list, typed in, which stays picked as one added by hand
       await open("Claude Relay");
+      await showAll();
       await editor.locator(".mchips .mchip", { hasText: "claude-haiku-4-5" }).click();
       const add = editor.locator(".mfoot input");
       await add.fill("claude-mine-1");
