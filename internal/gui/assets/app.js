@@ -8750,13 +8750,10 @@ function holdModal(later) {
   const c = getComputedStyle(m), h = d.getBoundingClientRect().height;
   const space = m.clientHeight - parseFloat(c.paddingTop) - parseFloat(c.paddingBottom);
   if (!modalHold.touched) {
-    // untouched: centred, as it opened, over what it holds now; measured
-    // by its layout, as content that comes while it opens is measured
-    // under the open's scale
+    // untouched: centred over what it holds now, measured as it lays out
     modalHold.off = Math.max(0, (space - Math.min(d.offsetHeight, space)) / 2);
     modalHold.cap = null;
-    // no cap from its place: capped by it, a dialog growing from short would
-    // take a frame a step to reach the middle
+    // no cap from its place: it would take a frame a step to the middle
     d.style.top = modalHold.off + "px";
     d.style.maxHeight = "100%";
     modalHold.capSet = "";
@@ -8792,9 +8789,7 @@ function holdModal(later) {
   m.addEventListener("keydown", () => { modalHold.touched = true; }, true);
   m.addEventListener("focusin", (e) => {
     modalMark(e.target);
-    // WebKit takes no focus from a click on a button, and gives it to the
-    // dialog itself (tabIndex -1), which it scrolls into view: a click is
-    // never a scroll (gui-shell.md), so the fields go back where they were
+    // WebKit focuses the dialog and scrolls it on a click: put the fields back
     if (e.target !== d || pressedBody == null) return;
     const body = d.querySelector(".ebody"), at = pressedBody;
     pressedBody = null;
@@ -8864,9 +8859,7 @@ function openModal(content, quiet) {
   const grow = d.animate(from ? [morphFrom(from, to), { transform: "none", clipPath: MORPH_REST }] : [{ transform: "translateY(24px) scale(.94)" }, { transform: "none" }], { duration: 570, easing: SPRING });
   d.animate([{ opacity: 0 }, { opacity: 1 }], { duration: from ? 140 : 240, easing: "ease-out" });
   if (!from) return;
-  // an editor can settle its size after it was measured (a provider's grew
-  // 30px shorter as it filled in), which left the strip off the row; while
-  // it grows, the start follows the size it has now
+  // an editor can settle its size after it was measured: follow it as it grows
   const x0 = d.offsetLeft, y0 = d.offsetTop;
   const follow = new ResizeObserver(() => {
     const now = { left: to.left + d.offsetLeft - x0, top: to.top + d.offsetTop - y0, width: d.offsetWidth, height: d.offsetHeight };
@@ -11180,9 +11173,8 @@ function renderModels(p) {
   names.dataset.provider = p.id;
   const q = p.models.length > 24 ? input("", t("filter {n} models…", { n: p.models.length })) : null;
   let showAll = false;
-  // the chips are held to a few lines, scrolled within, and let out to
-  // their full height and folded back (#833), while taller than those lines;
-  // kept open from one editor to the next till folded
+  // the chips are held to a few lines, scrolled within, let out whole and
+  // folded back (#833), kept open from one editor to the next
   const fold = el("button", "agent-more mchips-fold");
   fold.dataset.unrolls = ""; // it goes down with the models it lets out
   const foldLabel = el("span", "", "");
@@ -11256,9 +11248,7 @@ function renderModels(p) {
       if (kb.length) c.title = (c.title || m.id) + "\n" + t("Kept out of agents' lists by {groups}, a routing group listed alone", { groups: kb.join(", ") });
       tested(c, m.id);
       menu(c, m.id);
-      // a click picks the model, a served one too: with none picked it
-      // becomes the only pick (#681). The last unpicked leaves none, not
-      // the vendor's list again (#1831, kchen0x)
+      // a click picks the model; the last unpicked leaves none (#681, #1831)
       c.onclick = () => {
         draft.chosen = on ? draft.chosen.filter((x) => x !== m.id) : [...draft.chosen, m.id];
         draft.none = true;
@@ -11278,8 +11268,7 @@ function renderModels(p) {
       c.onclick = () => { draft.chosen = draft.chosen.filter((x) => x !== id); draft.none = true; draw(); };
       chips.append(c);
     }
-    // one click draws everything the button counted: the picks-only fold off,
-    // and past 80 opened too
+    // one click draws all the button counted: both folds off
     if (hidden || unpicked) chips.append(showRest(hidden + unpicked, () => { if (unpicked) unpickedShown = p.id; showAll = true; draw(); }));
     if (!p.models.length && !draft.chosen.length) chips.append(el("span", "hint", t(emptyModelsHint(p))));
     // the list is of models agents chat with: image, embedding and speech
@@ -11331,16 +11320,12 @@ function renderModels(p) {
       lost.append(b);
     }
   };
-  // the names and reasoning levels of the models agents see, and whether
-  // they see images: staged in draft.modelPrefs and made with the editor's
-  // Save, as the rest of it is, Cancel dropping them. Each tick used to be
-  // saved on its own, every one rewriting the agents' files, so picking a
-  // model's levels lagged a click behind (ARNO on Discord).
+  // the models' names and levels are staged and saved with the editor,
+  // not a tick at a time (ARNO on Discord)
   const drawNames = () => {
-    // drawn again, the list stays where it was scrolled to, and as tall
-    // while its rows go back in: a row measured on the way (its API's
-    // slider) lays the editor out with the list empty, and WebKit pulls
-    // the editor's scroll up to fit, the button just clicked moving away
+    // drawn again, the list keeps its scroll and height while its rows
+    // go back in: a row measured on the way leaves it empty, and WebKit
+    // pulls the editor up under the click
     const top = names.scrollTop, tall = names.offsetHeight;
     names.replaceChildren();
     names.hidden = naming !== p.id;
@@ -16946,8 +16931,7 @@ function setPanelTab(tab) {
   panelAge();
   syncTitle();
   window.panelRoutingShown?.();
-  // the tab remembered is drawn as the page loads, before what the tab is drawn with,
-  // further down, is set: a microtask later, when all of it is
+  // the tab remembered is drawn before its content is set: a microtask later
   queueMicrotask(panelUseShown);
   fit();
 }
@@ -16956,9 +16940,7 @@ function flashCard(card, target = card, elapsed = 0) {
   if (target) {
     // The native menu-bar click has no DOM event; permit this requested scroll.
     readerScrolls(1000);
-    // the card is filled in as it is drawn (its windows come with the
-    // reading), and what was visible when it was short is cut off once it
-    // grows: it is brought back into sight while it settles
+    // the card grows as it fills: bring it back into sight while it does
     let h = -1, still = 0, n = 0;
     const keep = () => {
       if (!target.isConnected || still > 2 || ++n > 30) return;
@@ -17001,8 +16983,7 @@ function keepQuotaFlash(box) {
     if (flashes.length && view) {
       view.scrollTop = scroll;
       readerLeaves(view);
-      // a card that was asked for is filled in as it is drawn, and what
-      // was in sight while it was short is cut off once it grows
+      // the asked-for card grows as it fills: bring it back into sight
       for (const { selector } of flashes) {
         const card = box.querySelector(selector);
         if (card && !calm()) card.scrollIntoView({ block: "nearest", behavior: "instant" });
