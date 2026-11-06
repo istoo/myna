@@ -50,10 +50,24 @@ function serve(lang) {
 async function press(page, loc) {
   await page.mouse.move(Math.min(550, (page.viewportSize().width / 2) | 0), 300);
   for (let i = 0; i < 20; i++) {
-    const y = (await loc.boundingBox()).y;
-    if (y > 80 && y < page.viewportSize().height - 160) break;
-    await page.mouse.wheel(0, y < 80 ? -300 : 300);
+    const b = await loc.boundingBox();
+    if (b && b.y > 80 && b.y < page.viewportSize().height - 160) break;
+    await page.mouse.wheel(0, b && b.y < 80 ? -300 : 300);
     await page.waitForTimeout(150);
+  }
+  // still for three reads, and its middle on it: WebKit glides on after a
+  // wheel, and a click sent while it does lands where the control was
+  let last = "", still = 0;
+  for (let i = 0; i < 40; i++) {
+    const b = await loc.boundingBox();
+    const key = b && [b.x, b.y, b.width, b.height].map((n) => Math.round(n * 10)).join();
+    still = key === last ? still + 1 : 0;
+    last = key;
+    if (b && still >= 3) {
+      const under = await loc.evaluate((e) => { const r = e.getBoundingClientRect(); return e.contains(document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2)); });
+      if (under) { await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2); return; }
+    }
+    await page.waitForTimeout(50);
   }
   const b = await loc.boundingBox();
   await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2);
@@ -74,6 +88,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const group = page.locator(".rt-group").first();
       await group.waitFor();
       await press(page, group.locator("button", { hasText: words[lang].edit }));
+      // the editor grows in over 570ms with its content clipped (slotMorph),
+      // and a menu opened meanwhile is closed by that growth's scroll
+      await page.waitForFunction(() => {
+        const n = document.querySelector(".rt-gedit");
+        return n && !n.style.overflow && !n.getAnimations().length;
+      });
       const row = page.locator(".rt-gedit .rt-rule").first();
       const box = row.locator(".rt-cond.xf input");
       for (const [opener, menu] of [[".rt-rmore", ".row-menu"], [".rt-addc", ".proto-menu"]]) {
