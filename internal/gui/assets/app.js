@@ -22735,7 +22735,7 @@ function puttingBack(v, from, h) {
   putBack = putBack.filter((p) => at - p.at < 1000);
   if (Math.abs(by) < 1) return;
   putBack.push({ v, by, at, h });
-  if (held?.v === v) return; // the click's, till a wheel, touch or drag lets it go
+  if (h) return;
   const mine = putBack.filter((p) => p.v === v && !p.h && Math.sign(p.by) === d);
   if (mine.length < 3 && !(run?.v === v && run.d === d && at - run.at < 1000)) return;
   run = { v, d, at }; putBack = putBack.filter((p) => !mine.includes(p)); flings();
