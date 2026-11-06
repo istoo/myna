@@ -84,6 +84,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.goto("http://myna.test/?view=providers");
       await page.locator(".row.provider", { hasText: "Relay" }).click();
       await page.locator(".editor .mchips .mchip").first().waitFor();
+      // with picks the editor draws the picks alone till the rest are asked
+      // for (#685); this test names chips among the unpicked too
+      const rest = page.locator(".editor .mchips-rest");
+      if (await rest.count()) await rest.click();
       const chip = (text) => page.locator(".editor .mchips .mchip", { hasText: text });
       const menu = page.locator(".pop.row-menu");
       const picked = () => page.locator(".editor .mchips .mchip.on").count();

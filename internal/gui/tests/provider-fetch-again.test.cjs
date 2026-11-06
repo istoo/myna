@@ -97,7 +97,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           await page.locator("#modal").waitFor({ state: "hidden" });
         };
         const foot = () => editor.locator(".mfoot");
-        const chips = () => editor.locator(".mchips .mchip").evaluateAll((cs) => cs.map((c) => c.dataset.model || c.textContent).sort());
+        // with picks the editor draws the picks alone till the rest are
+        // asked for (#685): the list these assertions name is all of it
+        const chips = async () => {
+          const rest = editor.locator(".mchips-rest");
+          if (await rest.count()) await rest.click();
+          return editor.locator(".mchips .mchip").evaluateAll((cs) => cs.map((c) => c.dataset.model || c.textContent).sort());
+        };
         const picks = () => editor.locator(".mchips .mchip.on").evaluateAll((cs) => cs.map((c) => c.dataset.model || c.textContent).sort());
 
         // never fetched: the add form's name, and the hint names it too

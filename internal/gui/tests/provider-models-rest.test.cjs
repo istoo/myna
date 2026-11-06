@@ -40,7 +40,8 @@ function serve(lang) {
   };
 }
 
-const rest = { en: "Show the other 1", zh: "显示其余 1 个" };
+// the ten picks are drawn, so the button counts the 74 left
+const rest = { en: "Show the other 74", zh: "显示其余 74 个" };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   for (const lang of ["en", "zh"]) {
@@ -66,24 +67,24 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const chips = editor.locator(".mchips").first();
       const names = (sel) => chips.locator(sel).evaluateAll((cs) => cs.map((c) => c.firstChild.textContent));
 
-      // all ten picked are drawn, the three past 80 too; one unpicked is left out
+      // every pick is in sight, and the rest are the button's (#685)
       assert.deepEqual(await names(".mchip.on"), chosen);
-      assert.equal(await chips.locator(".mchip").count(), 83);
+      assert.equal(await chips.locator(".mchip").count(), chosen.length);
       const more = chips.getByRole("button", { name: rest[lang], exact: true });
       await more.waitFor();
       assert.equal(await chips.getByText(/filter to find them|用筛选查找/).count(), 0);
 
       // the rest come in where the button was; the editor stays put
       await more.scrollIntoViewIfNeeded();
-      const last = chips.locator(".mchip", { hasText: /^zen\/model-79$/ });
-      const before = await last.evaluate((e) => e.getBoundingClientRect().top);
+      const first = chips.locator(".mchip").first();
+      const before = await first.evaluate((e) => e.getBoundingClientRect().top);
       await more.click();
       await page.waitForTimeout(300);
       assert.equal(await chips.locator(".mchip").count(), 84);
       assert.deepEqual(await names(".mchip:not(.on)"), ids.filter((id) => !chosen.includes(id)));
       assert.equal(await chips.getByRole("button", { name: rest[lang], exact: true }).count(), 0);
       assert.deepEqual(await names(".mchip.on"), chosen, "opening the rest picks nothing");
-      assert.equal(await last.evaluate((e) => e.getBoundingClientRect().top), before, "the click moved the list");
+      assert.equal(await first.evaluate((e) => e.getBoundingClientRect().top), before, "the click moved the list");
 
       // a chip clicked keeps the rest open
       await chips.locator(".mchip", { hasText: /^zen\/model-81$/ }).click();
