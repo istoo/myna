@@ -412,8 +412,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await t.test(lang + ": newest live route needs no return-to-live button", async () => {
         const asked = [];
         const { page, errors } = await open(lang, "light", asked);
+        // a node timer, not the page's: the page can go while a long-poll is
+        // in flight, and Playwright's own wait on a closed page aborts the
+        // run ("while running route callback")
         await page.route("**/api/gateway/trace?*", async route => {
-          await page.waitForTimeout(100);
+          await new Promise((ok) => setTimeout(ok, 100));
           await route.fulfill({json:{mine:true, seq:1, routes:[{id:123,time:ROWS[0].t,agent:"codex",model:"gpt-6-sol",provider:"relay",order:[],tries:[],done:true,status:200}],totals:{requests:1,rerouted:0,errors:0},now:new Date().toISOString()}}).catch(()=>{});
         });
         await page.waitForTimeout(5500);
@@ -421,8 +424,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await wheelTo(page, link);
         await link.click();
         await page.locator("#view-routing").waitFor({state:"visible"});
+        // the live list is read now that the page is in sight, and it waits
+        // for the app's state (the agents' names) first: the button goes
+        // once the request is known to be the live list's newest
+        await page.waitForFunction((t) => !document.querySelector(".rt-log-head")?.textContent.includes(t), lang === "en" ? "Back to live" : "回到实时", { timeout: 10000 });
         assert.equal(await page.locator(".rt-log-head").getByText(lang === "en" ? "Back to live" : "回到实时", {exact:true}).count(), 0);
         assert.deepEqual(errors, []);
+        await page.unrouteAll({ behavior: "ignoreErrors" });
         await page.close();
       });
 
