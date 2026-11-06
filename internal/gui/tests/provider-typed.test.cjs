@@ -16,12 +16,15 @@ const assets = path.resolve(__dirname, "../assets");
 const relay = {
   id: "relay", name: "Relay", preset: "relay", icon: "generic", chat: "https://relay.example.com/v1", responses: "", anthropic: "", catalog: "",
   models: [{ id: "gpt-5.1", name: "gpt-5.1", on: true }], agents: [], fallback: [], headers: { "X-Team": "a" },
-  key: { set: true, masked: "sk-…one" }, keyList: [{ id: "k1", name: "", masked: "sk-…one", on: true, active: true }],
+  key: { set: true, masked: "sk-…one" },
+  // its accounts are listed after the first part: a key box is for a
+  // provider with none yet, and then "Add another key" is the one
+  keyList: [],
   balanceToken: { takes: false, set: false }, proxy: "",
 };
 
-function serve(lang, calls) {
-  const providers = { providers: [relay], presets: [{ id: "relay", name: "Relay", icon: "generic", chat: relay.chat, added: true }], excluded: [], gateway: { running: true, window: true } };
+function serve(lang, calls, accounts = null) {
+  const providers = { providers: [accounts || relay], presets: [{ id: "relay", name: "Relay", icon: "generic", chat: relay.chat, added: true }], excluded: [], gateway: { running: true, window: true } };
   const state = { agents: [], profiles: [], settings: { lang, theme: "light" } };
   return async (route) => {
     const url = new URL(route.request().url());
@@ -61,6 +64,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       const calls = [];
+      const relayWithAccounts = { ...relay, keyList: [{ id: "k1", name: "", masked: "sk-…one", on: true, active: true }] };
       await page.route("**/*", serve(lang, calls));
       await page.goto("http://myna.test/?view=providers");
       const missing = await page.evaluate((w) => Object.values(w).filter((s) => /[a-z]/i.test(s) && !I18N.zh[s] && !["optional"].includes(s)), words.en);
@@ -98,7 +102,15 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.deepEqual(calls.map((c) => c[0]), ["models", "test", "test", "test"], "nothing saved");
       assert.ok(await ed.isVisible());
 
-      // a provider's new key: the key is focused, the name is optional
+      // a provider's new key: the key is focused, the name is optional.
+      // One whose accounts are listed is the same shape (its box is the
+      // accounts' Add another key), and the key box above only shows for a
+      // provider with none yet, which is why this page is read again
+      await page.unrouteAll({ behavior: "ignoreErrors" });
+      await page.route("**/*", serve(lang, calls, relayWithAccounts));
+      await page.goto("http://myna.test/?view=providers");
+      await page.locator(".row.provider", { hasText: "Relay" }).click();
+      await ed.locator(".ehead b", { hasText: "Relay" }).waitFor();
       await ed.getByRole("button", { name: w.addKey }).click();
       const box = page.locator(".editor .acc.adding");
       await box.waitFor();
