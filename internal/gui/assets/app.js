@@ -8786,9 +8786,20 @@ function holdModal(later) {
   new ResizeObserver(later).observe(m);
   new MutationObserver(() => holdModal()).observe(d, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ["class", "hidden", "open"] });
   // the reader's own press or key: from here the dialog holds its place
-  m.addEventListener("pointerdown", (e) => { modalHold.touched = true; modalMark(e.target); }, true);
+  let pressedBody = null; // the fields' place when the press went down
+  m.addEventListener("pointerdown", (e) => { modalHold.touched = true; modalMark(e.target); pressedBody = d.querySelector(".ebody")?.scrollTop ?? null; }, true);
+  m.addEventListener("pointerup", () => { pressedBody = null; }, true);
   m.addEventListener("keydown", () => { modalHold.touched = true; }, true);
-  m.addEventListener("focusin", (e) => modalMark(e.target), true);
+  m.addEventListener("focusin", (e) => {
+    modalMark(e.target);
+    // WebKit takes no focus from a click on a button, and gives it to the
+    // dialog itself (tabIndex -1), which it scrolls into view: a click is
+    // never a scroll (gui-shell.md), so the fields go back where they were
+    if (e.target !== d || pressedBody == null) return;
+    const body = d.querySelector(".ebody"), at = pressedBody;
+    pressedBody = null;
+    if (body) requestAnimationFrame(() => { if (Math.abs(body.scrollTop - at) > 1) body.scrollTop = at; });
+  }, true);
   // a scroll moves the marked element, not the dialog
   m.addEventListener("scroll", () => modalMark(modalHold.at), true);
 }
