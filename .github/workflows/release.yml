@@ -72,7 +72,11 @@ jobs:
 
   release:
     needs: [version, linux]
-    runs-on: macos-14
+    # macos-14's arm64 configuration was withdrawn from this account's
+    # runners (v0.1.2904's release job was cancelled with "The
+    # configuration 'macos-14-arm64-us-default' is not supported");
+    # macos-latest is an arm64 image, as the app it packs is
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
         with:
