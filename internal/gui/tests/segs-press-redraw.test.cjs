@@ -216,7 +216,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // times, a card beside the tray icon and the local network's address
         // shown, so their controls are drawn. Not here: Gateway mode (a
         // browser's page only) and the Omarchy bar icon (Omarchy only).
-        const st = { workbuddy: true, trae: true, minimax: true, qoder: true, codexUsers: ["a@example.test", "b@example.test"],
+        // a provider that searches, so the models tab's search row is on
+        const st = { searchProvider: "exa", workbuddy: true, trae: true, minimax: true, qoder: true, codexUsers: ["a@example.test", "b@example.test"],
           checkinPlugins: [{ id: "one", name: "One", on: false }, { id: "two", name: "Two", on: true }],
           trayUsages: ["codex|a@example.test"], lan: true, lanURLs: ["http://192.168.1.2:3999"] };
         const { page, errors } = await open(engine, lang, width, "general", posted, st, t);
