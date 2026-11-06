@@ -110,6 +110,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert(fits, "the button runs off the editor");
 
         // a model picked after the test: not tested, so it stays
+        const rest = editor.locator(".mchips-rest"); // the unpicked fold, #685
+        if (await rest.count()) await rest.click();
         await editor.locator(".mchips .mchip", { hasText: "minimax-m3" }).click();
 
         // the editor's body scrolled to the buttons; the click leaves it,

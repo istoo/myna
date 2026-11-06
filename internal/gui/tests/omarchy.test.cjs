@@ -131,12 +131,20 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // Font preferences add rows above the bar control. Bring it into
         // this short window with a reader's wheel before testing a click.
         await page.locator("#view-settings").hover();
-        await page.mouse.wheel(0, 260);
-        await page.waitForFunction(() => {
+        const shown = () => {
           const r = document.querySelector("#barIconSegs").getBoundingClientRect();
           const v = document.querySelector("#view-settings").getBoundingClientRect();
           return r.top >= v.top && r.bottom <= v.bottom;
+        };
+        // one wheel, as far as this short window needs: the rows above it
+        // grow as settings gain rows, and one 260 was no longer enough
+        const delta = await page.evaluate(() => {
+          const r = document.querySelector("#barIconSegs").getBoundingClientRect();
+          const v = document.querySelector("#view-settings").getBoundingClientRect();
+          return Math.max(0, Math.round(r.bottom - v.bottom + 24));
         });
+        if (delta) await page.mouse.wheel(0, delta);
+        await page.waitForFunction(shown);
         const before = await view(page);
         await segs.nth(1).click();
         await page.locator("#barIconSegs .opt.on", { hasText: on }).waitFor();
