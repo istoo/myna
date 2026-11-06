@@ -98,9 +98,16 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             // the editor's last row
             {
               const b = await ed.boundingBox();
-              await page.mouse.wheel(0, Math.round(b.y + b.height - 700 + 40));
+              const step = Math.max(40, Math.round((b.y + b.height - 700 + 40) / 10));
+              // WebKit can put a wheel back as one it never heard of: wheel
+              // again, the same way, as the reader would, till the foot shows
+              for (let i = 0; i < 60; i++) {
+                if (await page.evaluate(() => document.querySelector(".rt-gedit").getBoundingClientRect().bottom <= innerHeight)) break;
+                await page.mouse.wheel(0, step);
+                await page.waitForTimeout(30);
+              }
             }
-            await page.waitForFunction(() => document.querySelector(".rt-gedit").getBoundingClientRect().bottom <= innerHeight);
+            await page.waitForFunction(() => document.querySelector(".rt-gedit").getBoundingClientRect().bottom <= innerHeight, null, { timeout: 15000 });
             const foot = await page.evaluate(() => {
               const ed = document.querySelector(".rt-gedit"), bar = ed.querySelector(":scope > .bar");
               const last = bar.previousElementSibling;
