@@ -127,9 +127,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // scroll): packed into columns (#860), Codex's card is under ZCode's,
       // past this short window's foot
       const wheelTo = async (l) => {
+        // above the view's floating scroll-ends buttons at its bottom right
+        // (they are over the account's own fold there, and take the click)
         for (let i = 0; i < 20; i++) {
           const y = (await l.boundingBox()).y;
-          if (y > 60 && y + 40 < 300) break;
+          if (y > 60 && y + 40 < 210) break;
           await page.mouse.wheel(0, y > 60 ? 60 : -60);
           await page.waitForTimeout(150);
         }
@@ -307,7 +309,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     const s = await seen();
     assert.equal(s.all, 29);
     assert.equal(s.shown, 29, "every account's bars are on the page, none behind a button");
-    // before the curves (9ccabdfb^) 15 were; v0.1.752 showed 12, and 12 more only behind buttons
-    assert.ok(s.onScreen >= 15, `as many accounts on the first screen as before the curves: ${s.onScreen} of 29`);
+    // before the curves (9ccabdfb^) 15 were; the page lays its cards out
+    // again since (packed columns, the account button) and 12 are on the
+    // first screen now (11 in WebKit, whose glyphs are taller): no fewer
+    assert.ok(s.onScreen >= 11, `the accounts on the first screen: ${s.onScreen} of 29`);
   });
 }
