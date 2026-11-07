@@ -359,6 +359,19 @@ func (b *bursty) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// burstGap is the wait before a burst. myna takes a moment to pass the
+// burst on, which its flow measures, and the wait is read as a held reply
+// only when it is HeldShare times that flow: under -race on ubuntu CI the
+// 5,000 tokens took ~170 ms to pass, a flow of 201 ms against a 770 ms
+// window, and read 6,493 tok/s at 1c1493116. Under -race the wait leaves
+// room for a flow up to ~540 ms.
+func burstGap() time.Duration {
+	if raceOn {
+		return 2 * time.Second
+	}
+	return 600 * time.Millisecond
+}
+
 // burstChunks: a reply's first word at once, then its out tokens' worth
 // of words n events in each later chunk, then its end with the usage.
 func burstChunks(proto provider.Protocol, words, per, out int) [][]string {
@@ -395,7 +408,6 @@ func burstChunks(proto provider.Protocol, words, per, out int) [][]string {
 // 1,000 read 7,246 tok/s. One that streamed steadily keeps its speed, over
 // nearly all of its time from its first word.
 func TestBurstTellsNoSpeed(t *testing.T) {
-	const gap = 600 * time.Millisecond
 	for _, c := range []struct {
 		name  string
 		proto provider.Protocol
@@ -407,10 +419,12 @@ func TestBurstTellsNoSpeed(t *testing.T) {
 	} {
 		for _, steady := range []bool{false, true} {
 			name := c.name + " burst"
-			chunks, g := burstChunks(c.proto, 200, 199, 5000), gap
+			chunks, g := burstChunks(c.proto, 200, 199, 5000), burstGap()
+			gap := g // the wait from the first word to the end
 			if steady {
 				name = c.name + " steady"
-				chunks, g = burstChunks(c.proto, 11, 1, 200), gap/10
+				chunks, g = burstChunks(c.proto, 11, 1, 200), 60*time.Millisecond
+				gap = 10 * g
 			}
 			t.Run(name, func(t *testing.T) {
 				fresh(t)
@@ -457,7 +471,7 @@ func TestBurstTellsNoSpeed(t *testing.T) {
 // speed for a burst either.
 func TestCodexBackendBurstTellsNoSpeed(t *testing.T) {
 	setup(t, provider.Chat, &fake{t: t})
-	b := &bursty{chunks: burstChunks(provider.Responses, 200, 199, 5000), gap: 600 * time.Millisecond, header: true}
+	b := &bursty{chunks: burstChunks(provider.Responses, 200, 199, 5000), gap: burstGap(), header: true}
 	chatgpt(t, b.ServeHTTP)
 	if code, body := codexPost(t, `{"model":"gpt-5.5","stream":true,"input":"hi"}`); code != 200 {
 		t.Fatalf("%d %s", code, body)
@@ -465,7 +479,7 @@ func TestCodexBackendBurstTellsNoSpeed(t *testing.T) {
 	u := lastUsage(t)
 	// the end after the wait, less the moment the first word took to
 	// reach myna (599 ms of 600 on macOS CI at 58f45d05)
-	if u.Millis-u.TTFT < 540 || u.Output != 5000 {
+	if u.Millis-u.TTFT < burstGap().Milliseconds()*9/10 || u.Output != 5000 {
 		t.Fatalf("usage %+v", u)
 	}
 	if n, w := u.Decode(); n != 0 || w != 0 {
