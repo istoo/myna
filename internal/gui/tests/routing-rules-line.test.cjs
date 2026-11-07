@@ -87,9 +87,18 @@ async function reach(page, loc) {
   return loc.boundingBox();
 }
 
-// reached, then clicked with the mouse
+// reached, then clicked with the mouse once it is still and on top: a box
+// read while the page still settled from the wheel (the guard putting a
+// scroll back, the live stage redrawing above) sent the click past it
 async function press(page, loc) {
-  const b = await reach(page, loc);
+  let b = await reach(page, loc);
+  for (let i = 0; i < 40; i++) {
+    await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+    const now = await loc.boundingBox();
+    const still = now && Math.abs(now.x - b.x) < 0.5 && Math.abs(now.y - b.y) < 0.5;
+    b = now;
+    if (still && await loc.evaluate((e, [x, y]) => e.contains(document.elementFromPoint(x, y)), [b.x + b.width / 2, b.y + b.height / 2])) break;
+  }
   await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2);
 }
 
