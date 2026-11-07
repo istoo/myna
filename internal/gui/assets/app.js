@@ -16983,8 +16983,10 @@ function keepQuotaFlash(box) {
     if (flashes.length && view) {
       view.scrollTop = scroll;
       readerLeaves(view);
-      // the asked-for card grows as it fills: bring it back into sight
-      for (const { selector } of flashes) {
+      // the asked-for card grows as it fills: bring it back into sight.
+      // An account asked for has its own place in it, kept by focusQuotaCard:
+      // the card's nearest edge would take it out of sight again
+      if (!quotaFocus) for (const { selector } of flashes) {
         const card = box.querySelector(selector);
         if (card && !calm()) card.scrollIntoView({ block: "nearest", behavior: "instant" });
       }

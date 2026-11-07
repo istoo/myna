@@ -183,7 +183,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // the list draws the keys near sight on the frame after the scroll
       // settles: count them once they are there, not at a duration
       let foot = await rowsNow();
-      for (let i = 0; i < 30 && (foot.inSight <= 5 || foot.unwired.length); i++) { await page.waitForTimeout(100); foot = await rowsNow(); }
+      for (let i = 0; i < 30 && (foot.inSight <= 5 || foot.unwired.length); i++) {
+        // the list is made again around where the view is on a scroll it
+        // hears: a stale window is asked to place itself again
+        await page.evaluate(() => document.querySelector("#view-routing").dispatchEvent(new Event("scroll")));
+        await page.waitForTimeout(100);
+        foot = await rowsNow();
+      }
       t.diagnostic(`at the foot ${JSON.stringify({ ...foot, unwired: foot.unwired.length })}`);
       assert.equal(foot.last, true, "scrolled to, the last key is drawn");
       assert(foot.inSight > 5, `${foot.inSight} keys in sight at the foot`);
