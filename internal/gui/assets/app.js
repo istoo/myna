@@ -16940,17 +16940,8 @@ function flashCard(card, target = card, elapsed = 0) {
   if (target) {
     // The native menu-bar click has no DOM event; permit this requested scroll.
     readerScrolls(1000);
-    // the card grows as it fills: bring it back into sight while it does
-    let h = -1, still = 0, n = 0;
-    const keep = () => {
-      if (!target.isConnected || still > 2 || ++n > 30) return;
-      target.scrollIntoView({ block: "nearest", behavior: "instant" });
-      const now = Math.round(target.getBoundingClientRect().height);
-      still = now === h ? still + 1 : 0;
-      h = now;
-      requestAnimationFrame(keep);
-    };
-    keep();
+    card.dataset.asked = target === card ? "" : target.dataset.card || "";
+    holdInSight(target);
   }
   card.classList.remove("flash");
   void card.offsetWidth; // restart even if this card is still highlighted
@@ -16963,9 +16954,21 @@ function flashCard(card, target = card, elapsed = 0) {
     card.onanimationend = null;
   };
 }
+// the card grows as it fills: bring it back into sight while it does
+function holdInSight(target) {
+  let h = -1, still = 0, n = 0;
+  const keep = () => {
+    if (!target.isConnected || still > 2 || ++n > 30) return;
+    target.scrollIntoView({ block: "nearest", behavior: "instant" });
+    const now = Math.round(target.getBoundingClientRect().height);
+    still = now === h ? still + 1 : 0;
+    h = now;
+    requestAnimationFrame(keep);
+  };
+  keep();
+}
 
-// A focus refresh rebuilds quota cards. Carry the active animation's time
-// to its replacement, preserving scroll position and the remaining duration.
+// A refresh rebuilds quota cards: carry each flash's time and the scroll over
 function keepQuotaFlash(box) {
   const view = box.closest(".view"), scroll = view?.scrollTop;
   const flashes = [...box.querySelectorAll(".subscription-card.flash, .pq-card.flash")].flatMap((card) => {
@@ -16973,22 +16976,20 @@ function keepQuotaFlash(box) {
     if (!animation) return [];
     const selector = card.matches(".pq-card") ? `.pq-card[data-card="${CSS.escape(card.dataset.card)}"]`
       : `.subscription-card[data-provider="${CSS.escape(card.dataset.provider)}"]`;
-    return [{ selector, elapsed: animation.currentTime || 0 }];
+    return [{ selector, elapsed: animation.currentTime || 0, asked: card.dataset.asked }];
   });
   return () => {
-    for (const { selector, elapsed } of flashes) {
+    for (const { selector, elapsed, asked } of flashes) {
       const card = box.querySelector(selector);
-      if (card) flashCard(card, null, elapsed);
+      if (card) { flashCard(card, null, elapsed); card.dataset.asked = asked || ""; }
     }
     if (flashes.length && view) {
       view.scrollTop = scroll;
       readerLeaves(view);
-      // the asked-for card grows as it fills: bring it back into sight.
-      // An account asked for has its own place in it, kept by focusQuotaCard:
-      // the card's nearest edge would take it out of sight again
-      if (!quotaFocus) for (const { selector } of flashes) {
-        const card = box.querySelector(selector);
-        if (card && !calm()) card.scrollIntoView({ block: "nearest", behavior: "instant" });
+      // the card grows as it fills: keep it, or its account asked for, in sight
+      for (const { selector, asked } of flashes) {
+        const card = box.querySelector(selector), acct = asked && card?.querySelector(`[data-card="${CSS.escape(asked)}"]`);
+        if (card && !calm()) acct ? holdInSight(acct) : card.scrollIntoView({ block: "nearest", behavior: "instant" });
       }
     }
   };
