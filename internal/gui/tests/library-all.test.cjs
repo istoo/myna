@@ -131,7 +131,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           await page.mouse.move(0, 0);
           const r = row(page, "files"), all = r.locator(".lib-ag.all");
           await r.evaluate(async (r) => {
-            await Promise.all(r.parentElement.getAnimations({ subtree: true }).map((a) => a.finished.catch(() => {})));
+            // the body's own entrance (content-in) too, a row's grandparent's:
+            // read during it, All sat 2px low and "moved" as it ended. Only
+            // what ends: a health check's pulse runs on
+            const finite = (a) => a.effect?.getComputedTiming().endTime !== Infinity;
+            await Promise.all(r.closest(".lib-body").getAnimations({ subtree: true }).filter(finite).map((a) => a.finished.catch(() => {})));
           });
           const before = await all.boundingBox();
           const point = { x: before.x + before.width / 2, y: before.y + before.height / 2 };
