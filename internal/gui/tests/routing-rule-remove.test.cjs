@@ -178,6 +178,15 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // the menu takes the focus on the frame after Enter: keys go to it
         await page.waitForFunction(() => document.querySelector(".row-menu")?.contains(document.activeElement), null, { timeout: 15000 });
         await page.keyboard.press("ArrowUp");
+        // an arrow in the menu moves through it, not the page: a view
+        // scrolled by a redraw just after is no reader's scroll and leaves
+        // the menu open (it closed, the focus on body, under load)
+        await page.evaluate(() => new Promise((r) => {
+          const v = document.querySelector("#view-routing");
+          v.scrollTop += v.scrollTop >= 1 ? -1 : 1;
+          requestAnimationFrame(() => requestAnimationFrame(r));
+        }));
+        assert(await page.locator(".row-menu").isVisible(), "a redraw's scroll after an arrow in the menu leaves it open");
         assert.equal((await page.evaluate(() => document.activeElement.textContent)).trim(), w.remove);
         await page.keyboard.press("Enter");
         await page.waitForFunction(() => !document.querySelector(".rt-gedit .rt-rule"), null, { timeout: 15000 });

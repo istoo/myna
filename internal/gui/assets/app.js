@@ -22699,9 +22699,8 @@ function savePrefs(body) {
 // shows that with the reader's event: scrollOnPurpose(e). Called without one
 // it is refused, and whatever scroll follows is put back.
 let purposeUntil = 0, held = null;
-// guardUntil is purposeUntil when the window is the click guard's own (a
-// field brought back into sight, backToReader): it lets that scroll stand,
-// but it isn't the reader's, so an app menu the click opens stays open.
+// guardUntil: the click guard's own window (backToReader): its scroll
+// stands but is no reader's, so a menu the click opens stays open.
 let guardUntil = 0;
 const readerScrolls = (ms) => { quotaFocus = ""; purposeUntil = Math.max(purposeUntil, performance.now() + ms); held = null; guardUntil = 0; };
 function scrollOnPurpose(e, ms = 1000) {
@@ -22860,7 +22859,8 @@ addEventListener("keyup", panEnds, true);
 addEventListener("blur", panEnds);
 addEventListener("keydown", (e) => {
   panEnds();
-  const typing = e.target.closest?.("input, textarea, select, [contenteditable]");
+  // an arrow in a menu (.pop) moves in it, not the page
+  const typing = e.target.closest?.("input, textarea, select, [contenteditable], .pop");
   if (e.key === "Tab" || (!typing && SCROLL_KEYS.has(e.key))) readerScrolls(400);
   if (e.isTrusted && e.key === "Enter") keyboardFocus(e);
 }, true);
