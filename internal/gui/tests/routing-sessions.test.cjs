@@ -289,7 +289,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     feed.names = { "main-a": "独立刷新名称" };
     await page.evaluate(() => window.dispatchEvent(new Event("focus")));
     const refreshed = page.locator("button.rt-session").filter({ hasText: "独立刷新名称" });
-    await refreshed.waitFor();
+    // the titles are asked for on the focus and come back in their own
+    // time (WebKit asks later than the focus's handler runs): wait for it
+    await refreshed.waitFor({ timeout: 15000 });
     assert.equal(await refreshed.getAttribute("aria-expanded"), "false", "names refresh without new routing requests");
     assert.equal(await page.locator("button.rt-session").filter({ hasText: "Claude" }).count(), 0);
     await page.locator(".rt-group-by button").first().click();

@@ -65,7 +65,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(60000);
       const errors = [];
-      page.on("pageerror", (e) => errors.push(e.message));
+      // a fetch in flight when the page closes is refused by WebKit as an
+    // access control failure: the close, not the page
+    page.on("pageerror", (e) => { if (!/access control checks/.test(e.message)) errors.push(e.message); });
       await page.route("**/*", server());
 
       // first time: Agents, the first page

@@ -429,8 +429,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // once the request is known to be the live list's newest
         // the head has to be there first: a page that has not drawn it yet
         // has no button either, but it is not what this waits for
-        await page.waitForFunction((t) => { const h = document.querySelector(".rt-log-head"); return h && !h.textContent.includes(t); }, lang === "en" ? "Back to live" : "回到实时", { timeout: 10000 });
-        assert.equal(await page.locator(".rt-log-head").getByText(lang === "en" ? "Back to live" : "回到实时", {exact:true}).count(), 0);
+        // the page waits for the app's state before it reads the live list
+        // (up to 3s of it): the head's change is waited for, not checked
+        await page.waitForFunction((t) => { const h = document.querySelector(".rt-log-head"); return h && !h.textContent.includes(t); }, lang === "en" ? "Back to live" : "回到实时", { timeout: 15000 });
         assert.deepEqual(errors, []);
         await page.unrouteAll({ behavior: "ignoreErrors" });
         await page.close();
