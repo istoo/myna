@@ -119,7 +119,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
       // the editor's body scrolled down to the buttons, still in view; the
       // click leaves it, the page and the button where they are
-      await editor.locator(".ebody").evaluate((b) => { b.scrollTop += b.querySelector(".mbulk").getBoundingClientRect().top - b.getBoundingClientRect().top - 8; });
+      // the body takes a scroll once its list has grown taller than it:
+      // set it again as it grows, till it holds
+      for (let i = 0; i < 50; i++) {
+        if (await editor.locator(".ebody").evaluate((b) => b.scrollTop > 0)) break;
+        await editor.locator(".ebody").evaluate((b) => { const d = b.querySelector(".mbulk").getBoundingClientRect().top - b.getBoundingClientRect().top - 8; b.scrollTop += d || 60; });
+        await page.waitForTimeout(100);
+      }
       assert(await editor.locator(".ebody").evaluate((b) => b.scrollTop > 0), "the editor's body must have scrolled");
       const before = await scrolled(), at = await free.evaluate((e) => Math.round(e.getBoundingClientRect().top));
       await free.click();
