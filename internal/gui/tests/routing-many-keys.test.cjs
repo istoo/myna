@@ -174,7 +174,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       for (let k = 0; k < 80; k++) {
         const at = await page.evaluate(() => [...document.querySelectorAll("#view-routing .rt-accts > li")].find((li) => li.title === "solpool2#k299")?.getBoundingClientRect().top);
         // at the foot: the last key low in the window, the keys above it in sight
-        const want = page.viewportSize().height - 160;
+        const want = page.viewportSize().height - 120;
         if (at !== undefined && Math.abs(at - want) < 120) break;
         await page.mouse.wheel(0, at === undefined ? 3000 : Math.max(-3000, Math.min(3000, at - want)));
         await page.waitForTimeout(at === undefined ? 50 : 300);

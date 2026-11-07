@@ -132,6 +132,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // the × takes one out; the last has none
         await row.locator(".rt-c", { has: page.locator(".rt-model", { hasText: "flash" }) }).hover();
         await press(page, row.locator(`.rt-cx[title="${w.rm}"]`));
+        // the chip is taken out on the frame after the press
+        await page.waitForFunction(() => [...document.querySelectorAll(".rt-gedit .rt-rule")][0]?.querySelectorAll(".rt-then .rt-model").length === 1, null, { timeout: 15000 });
         assert.deepEqual(await chips(row), ["mini"]);
         assert.equal(await row.locator(".rt-then .rt-cx").count(), 0, "a rule's one model can't be taken out");
 
