@@ -109,3 +109,11 @@
       2 个文件 7 条（plugin-card-update 的 WebKit 卡片按钮、routing-many-keys
       的页脚键数）用 v0.1.2903 资产同样复现，属既有的浏览器差异，不在
       本次改动范围内。
+      11-07 第二轮全量（最终代码）：12 片共 19,943 项，
+      19,941 通过，剩下 2 条在 routing-many-keys。原因是测试的 wheel 指针
+      固定在 (700,500)，滚过头后落在请求列表 `.rt-reqs` 上，该列表
+      `overscroll-behavior: contain` 且 scrollTop 为 0，吞掉了向上的
+      wheel（与 LESSONS 10-28 同类，产品行为正确）。现在每次滚动前把
+      指针放到 view 内没有自滚动祖先的点。验证：两引擎三语言 3 轮
+      18/18 通过。另含产品修复 `f4bdc3da2`：按账户点开的额度卡不再把
+      该账户滚出视野。
