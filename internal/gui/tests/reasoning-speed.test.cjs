@@ -98,7 +98,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(60000);
       const errors = [];
-      page.on("pageerror", (e) => errors.push(e.message));
+      // a fetch the closing page had in flight (session titles) is refused
+      // as an access control failure by WebKit: it is the close, not the page
+      page.on("pageerror", (e) => { if (!/access control checks/.test(e.message)) errors.push(e.message); });
       await page.route("**/*", serve(lang));
 
       // the Routing page: each row, and the session's average

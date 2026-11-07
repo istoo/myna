@@ -128,10 +128,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           await page.locator("#pop").waitFor({ state: "visible" });
           // the rows are read by their first line: wait for one drawn with
           // its provider on a line of its own, not mid-draw on one line
-          await page.waitForFunction(() => [...document.querySelectorAll("#list li")].some((li) => li.innerText.split("\n")[0] === "GPT Image"));
+          await page.waitForFunction(() => [...document.querySelectorAll("#list li")].filter((li) => !li.classList.contains("group")).some((li) => li.innerText.startsWith("GPT Image") && li.innerText.includes("Codex")));
           const items = await page.locator("#list li:not(.group)").allInnerTexts();
           // the model rows (Automatic's note names the entry too)
-          const codex = items.filter((x) => x.includes("Codex") && x.split("\n")[0] === "GPT Image");
+          // at a phone's width the provider follows the name on its line
+          const codex = items.filter((x) => x.startsWith("GPT Image") && x.includes("Codex"));
           assert.equal(codex.length, 1, items.join(" | "));
           assert.equal(items.filter((x) => /GPT Image 2|gpt-image-2\.5[^]*Codex/.test(x)).length, 0, items.join(" | "));
           assert(codex[0].includes("GPT Image") && codex[0].includes(want[lang].note), codex[0]);
