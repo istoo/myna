@@ -176,6 +176,19 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // at the foot: the last key low in the window, the keys above it in sight
         const want = page.viewportSize().height - 120;
         if (at !== undefined && Math.abs(at - want) < 120) break;
+        // the wheel where the page scrolls: past the last key a fixed point
+        // can be over the requests list, which scrolls on its own and keeps
+        // its wheel at its top
+        const free = await page.evaluate(() => {
+          const view = document.querySelector("#view-routing"), r = view.getBoundingClientRect();
+          for (let y = r.top + 40; y < r.bottom - 20; y += 40) for (let x = r.left + 100; x < r.right - 20; x += 100) {
+            let e = document.elementFromPoint(x, y);
+            if (!e || !view.contains(e)) continue;
+            for (; e !== view && !(/auto|scroll/.test(getComputedStyle(e).overflowY) && e.scrollHeight > e.clientHeight); e = e.parentElement);
+            if (e === view) return { x, y };
+          }
+        });
+        if (free) await page.mouse.move(free.x, free.y);
         await page.mouse.wheel(0, at === undefined ? 3000 : Math.max(-3000, Math.min(3000, at - want)));
         await page.waitForTimeout(at === undefined ? 50 : 300);
       }
