@@ -15,8 +15,9 @@ const assets = path.resolve(__dirname, "../assets");
 for (const engine of engines) for (const lang of ["en", "zh"]) {
   test(`copilot GHE.com sign-in (${engine}, ${lang})`, async (t) => {
     const browser = await playwright[engine].launch();
-    t.after(() => browser.close());
     const page = await browser.newPage({ viewport: { width: 420, height: 640 } });
+    // a route still waiting when the test ends must not throw on its way out
+    t.after(async () => { await page.unrouteAll({ behavior: "ignoreErrors" }); await browser.close(); });
     page.setDefaultTimeout(5000);
     page.setDefaultNavigationTimeout(60000);
     const errors = [];

@@ -93,8 +93,9 @@ async function press(page, b) {
     await page.mouse.wheel(0, 300);
     await page.waitForTimeout(150);
   }
-  const bb = await b.boundingBox();
-  await page.mouse.click(bb.x + bb.width / 2, bb.y + bb.height / 2);
+  // the click is looked up again as it is made: the editor can settle
+  // between a box read and the press
+  await b.click();
 }
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
