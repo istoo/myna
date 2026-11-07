@@ -64,7 +64,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(60000);
       const errors = [], posts = [];
-      page.on("pageerror", (e) => errors.push(e.message));
+      // this test loads the page twice; the first document's lazy import
+      // (scrollends, on its first scroll) is cancelled by the second load
+      page.on("pageerror", (e) => { if (!/Failed to fetch dynamically imported module/.test(e.message)) errors.push(e.message); });
       // Provider in model names is Settings' (joe on Discord): the editor
       // says what each saved choice shows, On and then Off
       for (const [plain, label] of [[false, "DeepSeek Chat · Relay A · Remote myna"], [true, "DeepSeek Chat"]]) {

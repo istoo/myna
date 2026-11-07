@@ -92,6 +92,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // the three stay inside the row, wide and narrow
       for (const width of [900, 560]) {
         await page.setViewportSize({ width, height: 480 });
+        // the row is laid out at the new width on the frame after it
+        await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
         const r = await row.boundingBox(), s = await page.locator("#plainNamesSegs .segs").boundingBox();
         assert(s.x >= r.x - 0.5 && s.x + s.width <= r.x + r.width + 0.5, `${width}px: the options overflow the row`);
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, `${width}px: the page scrolls sideways`);

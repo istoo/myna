@@ -90,7 +90,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.match(days[4].title, w.bar);
       assert.match(days[0].title, w.unknown);
       assert.match(await box.locator(".cd-note").textContent(), w.since);
-      // no coloured stripe down a side
+      // no coloured stripe down a side: read once the card drawn by the
+      // period's click has settled (a card swapped mid-redraw has no style)
+      await box.waitFor({ state: "visible" });
+      await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
       const sides = await box.evaluate((b) => { const s = getComputedStyle(b); return [s.borderLeftWidth, s.borderRightWidth]; });
       assert.deepEqual(sides, ["0px", "0px"]);
       assert.deepEqual(errors, []);

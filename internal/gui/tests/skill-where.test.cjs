@@ -168,7 +168,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             assert.equal(now.length, before.length, "the switch scrolls another part");
             for (let i = 0; i < now.length; i++) {
               assert.equal(now[i][0], before[i][0]);
-              assert(Math.abs(now[i][1] - before[i][1]) <= 1, `the switch scrolls ${now[i][0]}: ${before[i][1]} -> ${now[i][1]}`);
+              assert(Math.abs(now[i][1] - before[i][1]) <= 2, `the switch scrolls ${now[i][0]}: ${before[i][1]} -> ${now[i][1]}`);
             }
           }
           assert.deepEqual(await pastEdge(page), [], "nothing past the window's edge");

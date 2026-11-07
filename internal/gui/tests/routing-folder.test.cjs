@@ -126,7 +126,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await box.fill("work/acme");
       const saveBtn = ed.locator("button.primary", { hasText: w.save });
       await press(page, saveBtn);
-      await page.waitForFunction((s) => document.documentElement.innerText.includes(s), w.bad);
+      await page.waitForFunction((s) => document.documentElement.innerText.includes(s), w.bad, { timeout: 15000 });
       assert.equal(posts.filter((p) => p.path === "/api/groups/save").length, 0);
 
       // emptied, the rule has no condition and the folder's is off

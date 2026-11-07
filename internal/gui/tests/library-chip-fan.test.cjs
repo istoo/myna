@@ -120,7 +120,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           // it moves over several frames, and each card only ever leftward
           const between = frames.filter((f) => f.x[0] < rest.x[0] - 1 && f.x[0] > fan.x[0] + 1);
           assert(between.length >= 3, JSON.stringify(frames.map((f) => [Math.round(f.t), Math.round(f.x[0])])));
-          for (let j = 1; j < frames.length; j++) for (let i = 0; i < 6; i++) assert(frames[j].x[i] <= frames[j - 1].x[i] + 0.01, JSON.stringify([frames[j - 1], frames[j]]));
+          // a card only ever moved left; the layout rounds to half a pixel
+          for (let j = 1; j < frames.length; j++) for (let i = 0; i < 6; i++) assert(frames[j].x[i] <= frames[j - 1].x[i] + 0.5, JSON.stringify([frames[j - 1], frames[j]]));
           // dealt one after another: the bottom card, with furthest to go, is first off
           const moved = (i) => frames.findIndex((f) => f.x[i] < rest.x[i] - 0.5);
           assert(moved(0) >= 0 && moved(0) <= moved(4), JSON.stringify([moved(0), moved(4)]));
