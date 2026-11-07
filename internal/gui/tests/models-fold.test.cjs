@@ -83,7 +83,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       };
       const fold = editor.locator(".mchips-fold");
       const box = () => editor.locator(".models > .mchips").evaluate((c) => ({ shown: c.clientHeight, all: c.scrollHeight }));
-      const scrolled = () => page.evaluate(() => [window.scrollY, ...[...document.querySelectorAll("*")].filter((e) => e.scrollTop > 0 && !e.classList.contains("mchips")).map((e) => `${e.className}:${e.scrollTop}`)].join(" "));
+      // the element's first class: a press marks the dialog's body (holds),
+      // which is not a scroll
+      const scrolled = () => page.evaluate(() => [window.scrollY, ...[...document.querySelectorAll("*")].filter((e) => e.scrollTop > 0 && !e.classList.contains("mchips")).map((e) => `${e.id || e.className.split(" ")[0]}:${e.scrollTop}`)].join(" "));
       const settle = () => page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
 
       // a short list fits its box: nothing to let out

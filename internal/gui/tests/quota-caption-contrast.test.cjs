@@ -89,6 +89,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           await page.route("**/*", serve(lang, theme, true));
           await page.goto("http://myna.test/?view=usage");
           await page.locator(".subscription-card .quota-curve").first().waitFor();
+          // a card fading in reads at 1:1: measure the caption it shows
+          await page.waitForFunction(() => {
+            const c = document.querySelector(".subscription-card .quota-reset");
+            for (let x = c; x; x = x.parentElement) if (parseFloat(getComputedStyle(x).opacity) < 1) return false;
+            return true;
+          });
           const caps = await page.evaluate(ratios, [".subscription-card", captions]);
           for (const sel of [".quota-reset", ".qc-range", ".qc-axis"]) assert.ok(caps.some((c) => c.sel === sel), `${where}: ${sel} shows`);
           for (const c of caps) assert.ok(c.ratio >= 4.5, `${where}: ${c.sel} "${c.text}" reads at ${c.ratio.toFixed(2)}:1`);
@@ -107,6 +113,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await panel.route("**/*", serve(lang, theme, false));
         await panel.goto("http://myna.test/?mode=panel");
         await panel.locator(".pq-card .pq-sub").first().waitFor();
+        await panel.waitForFunction(() => {
+          const c = document.querySelector(".pq-card .pq-sub");
+          for (let x = c; x; x = x.parentElement) if (parseFloat(getComputedStyle(x).opacity) < 1) return false;
+          return true;
+        });
         const pcaps = await panel.evaluate(ratios, [".pq-card", [".pq-sub", ".pq-rn"]]);
         assert.ok(pcaps.length, `${theme} ${lang} panel: a caption shows`);
         for (const c of pcaps) assert.ok(c.ratio >= 4.5, `${theme} ${lang} panel: ${c.sel} "${c.text}" reads at ${c.ratio.toFixed(2)}:1`);

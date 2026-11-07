@@ -126,6 +126,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
           await click(page, button);
           await page.locator("#pop").waitFor({ state: "visible" });
+          // the rows are read by their first line: wait for one drawn with
+          // its provider on a line of its own, not mid-draw on one line
+          await page.waitForFunction(() => [...document.querySelectorAll("#list li")].some((li) => li.innerText.split("\n")[0] === "GPT Image"));
           const items = await page.locator("#list li:not(.group)").allInnerTexts();
           // the model rows (Automatic's note names the entry too)
           const codex = items.filter((x) => x.includes("Codex") && x.split("\n")[0] === "GPT Image");
