@@ -1035,6 +1035,11 @@ func Slug(name string) string {
 }
 
 // Save adds or replaces a provider.
+// ErrNeedsKey is Save's refusal of a provider with no key that needs one.
+// The CLI adds the command that gives it (myna provider add <preset> <key>);
+// the editor and the TUI, which ask for the key in a field, don't.
+var ErrNeedsKey = errors.New("needs an API key")
+
 func Save(p Provider) error {
 	// a key given a Vertex AI provider is refused here, before normalize
 	// drops it: it would never be sent
@@ -1109,7 +1114,7 @@ func Save(p Provider) error {
 			return errors.New("Bailian's decision model is asked at your workspace's host: give its workspace ID (workspace=… or the editor's Workspace ID), or pick the Token Plan")
 		}
 		if p.Key == "" && !keyOptional(p) && !p.IsVertex() {
-			return fmt.Errorf("%s needs an API key", p.Name)
+			return fmt.Errorf("%s %w", p.Name, ErrNeedsKey)
 		}
 	}
 	f, err := read()

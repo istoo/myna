@@ -791,6 +791,9 @@ func addProvider(rest []string) error {
 		// the pair that gives the project, which Save's words don't name
 		return fmt.Errorf("%w · myna provider add %s project=<your Google Cloud project's id>", err, p.Preset)
 	}
+	if err != nil && p.Preset != "" && errors.Is(err, provider.ErrNeedsKey) {
+		return fmt.Errorf("%w · myna provider add %s <key>", err, p.Preset)
+	}
 	if err != nil {
 		return err
 	}
