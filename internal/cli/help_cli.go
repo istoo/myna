@@ -24,18 +24,49 @@ func helpAsked(args []string) bool {
 			return true
 		}
 	}
-	return len(args) > 1 && args[1] == "help"
+	if len(args) == 0 {
+		return false
+	}
+	// `myna help <command>` is the same ask as `myna <command> --help`
+	return args[0] == "help" || len(args) > 1 && args[1] == "help"
 }
+
+// tuiUsage is `myna tui --help`: the keys that work on every page. The
+// ? panel in the terminal lists each page's own keys too.
+const tuiUsage = `usage: myna tui
+
+  myna in the terminal: agents, providers, routing, usage, sessions and the
+  library, 1–6 between them. It serves the gateway while it is open when no
+  other myna does.
+
+  ↑↓ / k j    pick an agent or a row
+  ←→ / h l    pick a field or a range
+  ↵ / space   change what is picked
+  s / p       save a profile / the profiles (agents)
+  r           reload the page
+  1–6         a page; ] and [ for the next and the one before
+  q / esc     quit
+  ?           every key of the page, and the ones that work everywhere
+              (esc or ? closes the panel)
+  ctrl+c      quit
+`
 
 // helpFor is what `myna <command> --help` prints: the command's own
 // usage where it has one, its lines of myna's usage otherwise, an
 // agent's forms and fields for an agent, and the whole usage for
 // anything else.
 func helpFor(args []string) string {
+	// `myna help <command>` asks for that command's help, not the whole
+	// usage it used to print
+	if args[0] == "help" && len(args) > 1 {
+		args = args[1:]
+	}
 	cmd := args[0]
 	switch cmd {
 	case "-h", "--help", "help":
 		return usage
+	case "tui":
+		return tuiUsage
 	case "model":
 		if len(args) > 1 && (args[1] == "spec" || args[1] == "specs") {
 			return specUsage

@@ -156,7 +156,7 @@ func TestHelpOnEveryCommandDoesNothing(t *testing.T) {
 	for _, c := range cmds {
 		t.Run(c, func(t *testing.T) {
 			for _, args := range [][]string{
-				{c, "--help"}, {c, "-h"}, {c, "help"},
+				{c, "--help"}, {c, "-h"}, {c, "help"}, {"help", c},
 				{c, "x", "--help"}, {c, "x", "y", "-h"}, {c, "--help", "x"},
 			} {
 				out, err := runOut(t, args...)
@@ -236,5 +236,45 @@ func TestAgentHelpLeavesSnowWired(t *testing.T) {
 	}
 	if got := tree(t, dir); !reflect.DeepEqual(got, before) {
 		t.Fatalf("myna snow nonsense changed Snow's files:\nbefore %v\nafter  %v", before, got)
+	}
+}
+
+// `myna help <cmd>` prints what `myna <cmd> --help` prints, the plain
+// usage only when no command follows. It printed the top-level usage for
+// every command and exited 0.
+func TestHelpWordMatchesTheCommandsHelp(t *testing.T) {
+	for _, args := range [][]string{
+		{"provider"},
+		{"provider", "add"},
+		{"models"},
+		{"ls"},
+		{"sessions"},
+		{"group", "add"},
+		{"library"},
+		{"tui"},
+		{"codex"},
+		{"claude"},
+	} {
+		want := helpFor(append([]string{args[0], "--help"}, args[1:]...))
+		got := helpFor(append([]string{"help"}, args...))
+		if got != want {
+			t.Errorf("myna help %s:\n%s\nwant myna %s --help:\n%s", strings.Join(args, " "), got, strings.Join(args, " "), want)
+		}
+		if got == usage && want == usage {
+			t.Errorf("myna help %s printed the top-level usage", strings.Join(args, " "))
+		}
+		if !helpAsked(append([]string{"help"}, args...)) {
+			t.Errorf("myna help %s is not read as help", strings.Join(args, " "))
+		}
+	}
+	if got := helpFor([]string{"help"}); got != usage {
+		t.Errorf("myna help alone:\n%s", got)
+	}
+	// the TUI's own help is a key table that names the ? panel
+	tui := helpFor([]string{"tui", "--help"})
+	for _, want := range []string{"myna tui", "↑↓", "1–6", "?", "esc"} {
+		if !strings.Contains(tui, want) {
+			t.Errorf("myna tui --help doesn't name %q:\n%s", want, tui)
+		}
 	}
 }

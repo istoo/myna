@@ -145,6 +145,7 @@ type model struct {
 	libView   *library.View
 	libAgents []library.AgentView
 	libErr    string
+	help      bool // the ? help panel is open
 }
 
 type flashMsg struct {
@@ -366,6 +367,20 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		if msg.String() == "ctrl+c" {
 			return m, tea.Quit
+		}
+		// the help panel is modal: only ? and esc leave it, so a key
+		// meant for the page under it changes nothing
+		if m.help {
+			if msg.String() == "?" || msg.String() == "esc" {
+				m.help = false
+			}
+			return m, nil
+		}
+		// a page's keys, and those of a group opened from one, have a
+		// help panel; a picker's own keys don't (it takes ? as a filter)
+		if msg.String() == "?" && (m.mode == modeList || m.mode == modeGroup) {
+			m.help = true
+			return m, nil
 		}
 		switch m.mode {
 		case modeList:
@@ -773,59 +788,65 @@ func plural(n int) string {
 // ---- view ------------------------------------------------------------------
 
 func (m model) View() string {
+	if m.help {
+		return m.viewHelp()
+	}
 	var body string
 	var footer string
+	w := m.hintWidth()
 	switch m.mode {
 	case modeList:
 		switch m.page {
 		case pageProviders:
 			body = m.viewProviders()
-			footer = hints("↑↓", "provider", "↵", "models", "e", "key", "w", "address", "a", "add", "f", "family", "u", "list/groups only", "o", "on/off", "m", "fetch models", "t", "test", "b", "balances", "d", "remove", "1–6", "pages")
+			footer = hintsFit(w, "↑↓", "provider", "↵", "models", "a", "add", "q", "quit", "e", "key", "o", "on/off", "d", "remove",
+				"w", "address", "f", "family", "u", "list/groups only", "m", "fetch models", "t", "test", "b", "balances", "1–6", "pages", "?", "help")
 		case pageGroups:
 			body = m.viewGroups()
-			footer = hints("↑↓", "group", "↵", "open", "n", "new", "o", "routing", "d", "remove", "u", "bring back", "1–6", "pages", "q", "quit")
+			footer = hintsFit(w, "↑↓", "group", "↵", "open", "n", "new", "q", "quit", "o", "routing", "d", "remove", "u", "bring back", "1–6", "pages", "?", "help")
 		case pageLibrary:
 			body = m.viewLibrary()
-			footer = hints("↑↓", "item", "↵", "agents", "a", "add", "e", "edit", "u", "update skill", "i", "bring in", "d", "remove", "s", "sync", "r", "reload", "1–6", "pages", "q", "quit")
+			footer = hintsFit(w, "↑↓", "item", "↵", "agents", "a", "add", "q", "quit", "e", "edit", "d", "remove", "s", "sync",
+				"u", "update skill", "i", "bring in", "r", "reload", "1–6", "pages", "?", "help")
 		case pageSessions:
 			body = m.viewSessions()
 			if m.sstat {
-				footer = hints("←→", "range", "M", "model", "f", "folder", "x", "clear", "c", "tokens / cost", "s", "sessions", "r", "reload", "1–6", "pages", "q", "quit")
+				footer = hintsFit(w, "←→", "range", "q", "quit", "M", "model", "f", "folder", "x", "clear", "c", "tokens / cost", "s", "sessions", "1–6", "pages", "?", "help")
 			} else {
-				footer = hints("↑↓", "session", "↵", "resume", "←→", "range", "M", "model", "f", "folder", "x", "clear", "s", "stats", "r", "reload", "1–6", "pages", "q", "quit")
+				footer = hintsFit(w, "↑↓", "session", "↵", "resume", "q", "quit", "←→", "range", "M", "model", "f", "folder", "x", "clear", "s", "stats", "c", "tokens / cost", "1–6", "pages", "?", "help")
 			}
 		case pageUsage:
 			body = m.viewUsage()
-			footer = hints("←→", "period", "t w m A", "today · 7 days · 30 days · all", "u", "used / left", "c", "daily check-in", "r", "reload", "1–6", "pages", "q", "quit")
+			footer = hintsFit(w, "←→", "period", "u", "used / left", "c", "daily check-in", "q", "quit", "r", "reload", "1–6", "pages", "t w m A", "today · 7 days · 30 days · all", "?", "help")
 		default:
 			body = m.viewList()
-			footer = hints("↑↓", "agent", "←→", "field", "↵", "change", "s", "save profile", "p", "profiles", "1–6", "pages", "q", "quit")
+			footer = hintsFit(w, "↑↓", "agent", "←→", "field", "↵", "change", "q", "quit", "s", "save profile", "p", "profiles", "1–6", "pages", "?", "help")
 		}
 	case modePick, modeProfiles:
 		body = m.viewPicker()
 		switch {
 		case m.mode == modeProfiles:
-			footer = hints("↑↓", "move", "↵", "apply", "ctrl+e", "rename", "ctrl+d", "delete", "esc", "back")
+			footer = hintsFit(w, "↑↓", "move", "↵", "apply", "ctrl+e", "rename", "ctrl+d", "delete", "esc", "back")
 		case m.pk.refetch != nil:
-			footer = hints("↑↓", "move", "↵", "on / off", "ctrl+r", "fetch models again", "esc", "back")
+			footer = hintsFit(w, "↑↓", "move", "↵", "on / off", "ctrl+r", "fetch models again", "esc", "back")
 		case m.pk.toggle != nil:
-			footer = hints("↑↓", "move", "↵", "on / off", "esc", "back")
+			footer = hintsFit(w, "↑↓", "move", "↵", "on / off", "esc", "back")
 		default:
-			footer = hints("↑↓", "move", "↵", "select", "esc", "back")
+			footer = hintsFit(w, "↑↓", "move", "↵", "select", "esc", "back")
 		}
 	case modeAsk:
 		body = m.viewAsk()
-		footer = hints("↵", "save", "esc", "cancel")
+		footer = hintsFit(w, "↵", "save", "esc", "cancel")
 	case modeGroup:
 		body = m.viewGroup()
 		// two lines: there is more to do to a group than one holds
-		footer = hints("↑↓", "model / rule", "J K", "move", "a", "add model", "n", "new rule", "↵", "edit rule", "d", "take out", "esc", "back") + "\n" +
-			pad + hints("E", "effort", "F", "fast", "c", "classifier", "o", "routing", "s", "stays", "x", "context", "l", "levels", "f", "family", "R", "rename")
+		footer = hintsFit(w, "↑↓", "model / rule", "J K", "move", "a", "add model", "n", "new rule", "↵", "edit rule", "d", "take out", "esc", "back") + "\n" +
+			pad + hintsFit(w, "E", "effort", "F", "fast", "c", "classifier", "o", "routing", "s", "stays", "x", "context", "l", "levels", "f", "family", "R", "rename", "?", "help")
 	case modeName:
 		body = m.viewName()
-		footer = hints("↵", "save", "esc", "cancel")
+		footer = hintsFit(w, "↵", "save", "esc", "cancel")
 		if m.rename != "" {
-			footer = hints("↵", "rename", "esc", "cancel")
+			footer = hintsFit(w, "↵", "rename", "esc", "cancel")
 		}
 	}
 
@@ -1009,12 +1030,228 @@ func (m model) viewName() string {
 	return strings.TrimRight(b.String(), "\n")
 }
 
-func hints(kv ...string) string {
-	var parts []string
-	for i := 0; i+1 < len(kv); i += 2 {
-		parts = append(parts, sKey.Render(kv[i])+" "+sMuted.Render(kv[i+1]))
+// hintWidth is the columns a footer line has: the terminal's, without
+// the two spaces the line is indented by. 0 before the first size is
+// known, when hintsFit leaves the line as it is.
+func (m model) hintWidth() int {
+	if m.w <= 0 {
+		return 0
 	}
-	return strings.Join(parts, sFaint.Render("  ·  "))
+	return m.w - lipgloss.Width(pad)
+}
+
+// hintsFit is a footer's keys and what they do, at most max columns wide
+// (0: the width isn't known yet). Hints are kept whole, from the front,
+// and the last one is reserved: the ones that don't fit are left out
+// rather than cut, since half a word reads wrong. The pages pass the help
+// hint last, so ? survives every width.
+func hintsFit(max int, kv ...string) string {
+	sep := sFaint.Render("  ·  ")
+	sepW := lipgloss.Width(sep)
+	type piece struct {
+		text string
+		w    int
+	}
+	var ps []piece
+	for i := 0; i+1 < len(kv); i += 2 {
+		t := sKey.Render(kv[i]) + " " + sMuted.Render(kv[i+1])
+		ps = append(ps, piece{t, lipgloss.Width(t)})
+	}
+	if len(ps) == 0 {
+		return ""
+	}
+	last := ps[len(ps)-1]
+	n := len(ps)
+	if max > 0 {
+		// the last hint is what gets the reader to the rest: reserve it
+		room := max - last.w
+		if len(ps) > 1 {
+			room -= sepW
+		}
+		used, keep := 0, 0
+		for i := 0; i < len(ps)-1; i++ {
+			add := ps[i].w
+			if keep > 0 {
+				add += sepW
+			}
+			if used+add > room {
+				break
+			}
+			used += add
+			keep++
+		}
+		n = keep
+	}
+	out := make([]string, 0, n+1)
+	for _, p := range ps[:n] {
+		out = append(out, p.text)
+	}
+	out = append(out, last.text)
+	return strings.Join(out, sep)
+}
+
+// helpRow is one key and what it does in the ? panel.
+type helpRow struct{ keys, does string }
+
+// helpRows are the keys of what is open: the page's own, then the ones
+// that work everywhere.
+func (m model) helpRows() (title string, rows, global []helpRow) {
+	global = []helpRow{
+		{"1–6", "go to a page"},
+		{"] / [", "next / previous page"},
+		{"r", "reload the page"},
+		{"q / esc", "quit"},
+		{"ctrl+c", "quit"},
+		{"?", "this help"},
+	}
+	switch m.mode {
+	case modeGroup:
+		return "routing · the group open", []helpRow{
+				{"↑↓ / k j", "pick a model or a rule"},
+				{"J / K", "move it"},
+				{"↵ / e", "edit the rule"},
+				{"a", "add a model"},
+				{"n", "new rule"},
+				{"d", "take it out"},
+				{"E / F", "effort / fast"},
+				{"c", "classifier"},
+				{"o / s", "routing / stays"},
+				{"x / l", "context / levels"},
+				{"f / R", "family / rename"},
+			}, []helpRow{
+				{"esc / q", "back to the groups"},
+				{"?", "this help"},
+				{"ctrl+c", "quit"},
+			}
+	}
+	switch m.page {
+	case pageProviders:
+		return "providers", []helpRow{
+			{"↑↓ / k j", "pick a provider"},
+			{"↵", "its models"},
+			{"a", "add a provider"},
+			{"e", "its key"},
+			{"o", "on / off"},
+			{"d", "remove (twice)"},
+			{"w", "its address"},
+			{"f", "its family"},
+			{"u", "list / groups only"},
+			{"m", "fetch models"},
+			{"t", "test it"},
+			{"b", "balances"},
+		}, global
+	case pageGroups:
+		return "routing", []helpRow{
+			{"↑↓ / k j", "pick a group"},
+			{"↵", "open it"},
+			{"n", "new group"},
+			{"o", "routing"},
+			{"d", "remove (twice)"},
+			{"u", "bring a removed one back"},
+		}, global
+	case pageUsage:
+		return "usage", []helpRow{
+			{"←→ / h l", "the period"},
+			{"t w m A", "today · 7 days · 30 days · all"},
+			{"u", "used / left"},
+			{"c", "daily check-in"},
+		}, global
+	case pageSessions:
+		return "sessions", []helpRow{
+			{"↑↓ / k j", "pick a session"},
+			{"↵", "resume it"},
+			{"s / tab", "sessions / stats"},
+			{"←→ / h l", "the range"},
+			{"t w m A", "today · 7 days · 30 days · all"},
+			{"M", "narrow to a model"},
+			{"f", "narrow to a folder"},
+			{"x", "clear both"},
+			{"c", "tokens / cost"},
+		}, global
+	case pageLibrary:
+		return "library", []helpRow{
+			{"↑↓ / k j", "pick an item"},
+			{"↵", "the agents it reaches"},
+			{"a", "add"},
+			{"e", "edit"},
+			{"d", "remove"},
+			{"s", "sync into the agents"},
+			{"u", "update a skill"},
+			{"i", "bring in"},
+		}, global
+	}
+	return "agents", []helpRow{
+		{"↑↓ / k j", "pick an agent"},
+		{"←→ / h l", "pick a field"},
+		{"↵ / space", "change it"},
+		{"s", "save a profile"},
+		{"p", "profiles"},
+		{"S", "sync the model catalog"},
+	}, global
+}
+
+// viewHelp is the ? panel: the keys of the page and the ones that work
+// everywhere, in a box that leaves with esc or ?.
+func (m model) viewHelp() string {
+	title, rows, global := m.helpRows()
+	width := m.w - lipgloss.Width(pad) - 2 // the box's border
+	content := []string{
+		sCrumb.Render("keys · ") + sName.Render(title),
+		"",
+		sName.Render("this page"),
+	}
+	content = append(content, helpGrid(rows, width)...)
+	content = append(content, "", sName.Render("everywhere"))
+	content = append(content, helpGrid(global, width)...)
+	box := lipgloss.NewStyle().
+		Border(lipgloss.RoundedBorder()).
+		BorderForeground(cAccent).
+		Padding(0, 1).
+		Render(strings.Join(content, "\n"))
+	boxLines := strings.Count(box, "\n") + 1
+	if m.w > 0 {
+		// over the page, not in its place: it is centred on the screen
+		box = lipgloss.Place(m.w, boxLines, lipgloss.Center, lipgloss.Top, box)
+	}
+	body := m.header("help", title) + "\n\n" + box
+	footer := hintsFit(m.hintWidth(), "esc / ?", "close")
+	lines := strings.Count(body, "\n") + 1
+	fill := m.h - lines - 3 - strings.Count(footer, "\n")
+	if fill < 1 {
+		fill = 1
+	}
+	return body + strings.Repeat("\n", fill) + pad + gatewayStatus() + "\n" + pad + footer + "\n"
+}
+
+// helpGrid lays help rows out in one column, or two when the width holds
+// both, so 80 columns still show every key without cutting a word.
+func helpGrid(rows []helpRow, width int) []string {
+	keyW, cellW := 0, 0
+	for _, r := range rows {
+		keyW = max(keyW, lipgloss.Width(r.keys))
+	}
+	cell := func(r helpRow) string {
+		return sKey.Render(padRight(r.keys, keyW)) + "  " + sMuted.Render(r.does)
+	}
+	for _, r := range rows {
+		cellW = max(cellW, lipgloss.Width(cell(r)))
+	}
+	cols := 1
+	if width >= 2*cellW && len(rows) > 3 {
+		cols = 2
+	}
+	var out []string
+	for i := 0; i < len(rows); i += cols {
+		line := cell(rows[i])
+		if cols == 2 {
+			line = padRight(line, cellW)
+			if i+1 < len(rows) {
+				line += "  " + cell(rows[i+1])
+			}
+		}
+		out = append(out, line)
+	}
+	return out
 }
 
 func padRight(s string, w int) string {
