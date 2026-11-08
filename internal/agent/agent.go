@@ -19,6 +19,7 @@ import (
 	"github.com/istoo/myna/internal/edit"
 	"github.com/istoo/myna/internal/proc"
 	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/myna/internal/suggest"
 )
 
 // Option is one value the picker offers for a field.
@@ -663,7 +664,11 @@ func FindIn(all []*Agent, q string) (*Agent, error) {
 	case 1:
 		return prefix[0], nil
 	case 0:
-		return nil, fmt.Errorf("unknown agent %q (try: %s)", q, strings.Join(ids(all), ", "))
+		msg := fmt.Sprintf("unknown agent %q", q)
+		if near := suggest.Close(q, ids(all), 3); len(near) > 0 {
+			msg += "; did you mean " + strings.Join(near, ", ") + "?"
+		}
+		return nil, fmt.Errorf("%s · myna ls lists the agents on this machine; myna agents lists every one myna supports", msg)
 	}
 	return nil, fmt.Errorf("%q is ambiguous: %s", q, strings.Join(ids(prefix), ", "))
 }

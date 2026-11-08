@@ -264,20 +264,6 @@ func TestGroupAddSetRemove(t *testing.T) {
 	}
 }
 
-func TestCloseMatches(t *testing.T) {
-	ids := []string{"claude/claude-opus-5-5", "copilot/claude-opus-5.5", "deepseek/deepseek-chat", "b/gpt-5.5"}
-	got := closeMatches("claude-opus", ids, 5)
-	if len(got) != 2 || got[0] != "claude/claude-opus-5-5" {
-		t.Errorf("%v", got)
-	}
-	if got := closeMatches("x/deepseek-chta", ids, 5); len(got) != 1 || got[0] != "deepseek/deepseek-chat" {
-		t.Errorf("%v", got)
-	}
-	if got := closeMatches("zzz", ids, 5); len(got) != 0 {
-		t.Errorf("%v", got)
-	}
-}
-
 // myna group set <id> id=<new>: a found group loses its auto- prefix and
 // stays removed under the old id.
 func TestGroupSetID(t *testing.T) {
