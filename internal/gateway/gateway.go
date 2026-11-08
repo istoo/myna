@@ -2117,6 +2117,18 @@ func estimate(req *Request) int {
 	return n / 4
 }
 
+// replyBufSize is the buffer a reply is read through: as large as the
+// reply's length when the upstream tells it, at least 4 KB; 32 KB when it
+// doesn't (a stream). A 170-byte JSON reply allocated 32 KB for every
+// request answered whole.
+func replyBufSize(contentLength int64) int {
+	const most = 32 << 10
+	if contentLength >= 0 && contentLength < most {
+		return max(int(contentLength), 4<<10)
+	}
+	return most
+}
+
 // serve routes one parsed-enough request to its provider.
 func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Protocol, body []byte) {
 	start := time.Now()
@@ -6428,7 +6440,7 @@ func (s *Server) passthrough(w http.ResponseWriter, r *http.Request, p provider.
 		}
 		return b
 	}
-	buf := make([]byte, 32<<10)
+	buf := make([]byte, replyBufSize(res.ContentLength))
 	var rerr error
 	// atLine says whether what the client has ends a line, so what is
 	// appended below begins one of its own: appended after a line still
