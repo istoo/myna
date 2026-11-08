@@ -204,7 +204,7 @@ func TestClear(t *testing.T) {
 	dir := sandbox(t, now)
 	for back := range 3 {
 		at := now.AddDate(0, 0, -back)
-		Add(Record{Time: at, What: "chat", Agent: "claude", N: 1, Sent: `{"k":"{{API_KEY_aaaabbbb}}"}`,
+		Add(Record{Time: at, What: "chat", Agent: "claude", N: 1, Sent: []byte(`{"k":"{{API_KEY_aaaabbbb}}"}`),
 			Values: []Value{{Placeholder: "{{API_KEY_aaaabbbb}}", Kind: "API_KEY", By: "rule", Head: "sk-", Len: 40}},
 			Snips:  map[string]string{"{{API_KEY_aaaabbbb}}": "key {{API_KEY_aaaabbbb}}"}})
 	}

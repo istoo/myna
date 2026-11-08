@@ -180,12 +180,12 @@ func TestModelNotAskedAboutDefinitions(t *testing.T) {
 		}
 		defs := definitions(v)
 		var inDefs, said []string
-		walk(raw, func(path, key, s string) string {
+		walk(raw, func(path []byte, key, s string) string {
 			if len(s) >= 3 && !kept[key] && !isID(key) {
 				if under(path, defs) {
-					inDefs = append(inDefs, s)
+					inDefs = append(inDefs, strings.Clone(s))
 				} else {
-					said = append(said, s)
+					said = append(said, strings.Clone(s))
 				}
 			}
 			return s

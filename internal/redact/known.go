@@ -1,8 +1,8 @@
 package redact
 
 import (
-	"crypto/sha256"
 	"fmt"
+	"hash"
 	"slices"
 	"strings"
 	"sync"
@@ -47,7 +47,9 @@ func gram(s string, i int) uint32 {
 	return (g * 2654435761) >> 12 // 20 bits
 }
 
-// addKnown adds the value of placeholder p; called with mu held. The
+// addKnown adds the value of placeholder p; called with mu held. v is a
+// copy of its own: it is kept, and the head of it is what a later text is
+// looked up by (walk hands a value as the request body's own bytes). The
 // user's own words are left to Options.Words, which match them anywhere
 // already, and are only as long as two letters.
 func addKnown(p, v string) {
@@ -172,9 +174,14 @@ func noteScores(s string, found []span) {
 		if f.by == ByModel && f.score > 0 {
 			sc = f.score
 		}
-		if old, ok := scores[v]; !ok || sc > old {
-			scores[v] = sc
+		if old, ok := scores[v]; ok {
+			if sc > old {
+				scores[v] = sc
+			}
+			continue
 		}
+		// kept past the walk: a copy of its own (walk)
+		scores[strings.Clone(v)] = sc
 	}
 }
 
@@ -331,7 +338,8 @@ func sentSpans(what byte, s string, o Options, find func() []span) []span {
 		// finds now, wherever it goes
 		return find()
 	}
-	h := sha256.New()
+	h := digestPool.Get().(hash.Hash)
+	h.Reset()
 	fmt.Fprintf(h, "%d\x00%q\x00%t\x00%t\x00", what, o.Route, o.Secrets, o.Personal)
 	if what == sentModel {
 		fmt.Fprintf(h, "%t\x00%t\x00%g\x00", o.Model != nil, o.NamesByModel, o.MinScore)
@@ -342,9 +350,10 @@ func sentSpans(what byte, s string, o Options, find func() []span) []span {
 	}
 	slices.Sort(kinds)
 	fmt.Fprintf(h, "%s\x00", strings.Join(kinds, ","))
-	h.Write([]byte(s))
+	h.Write(bytesOf(s))
 	var k [32]byte
 	h.Sum(k[:0])
+	digestPool.Put(h)
 	sentMemo.Lock()
 	sp, ok := sentMemo.cur[k]
 	if !ok {

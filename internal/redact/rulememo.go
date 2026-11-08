@@ -3,6 +3,7 @@ package redact
 import (
 	"crypto/sha256"
 	"fmt"
+	"hash"
 	"slices"
 	"strings"
 	"sync"
@@ -31,11 +32,17 @@ var ruleMemo struct {
 // run over (a test reads it).
 var ruleRuns atomic.Uint64
 
+// digestPool shares a SHA-256 among a request's texts: a digest object
+// made for each of the hundred-odd long texts an agent sends a turn was
+// an allocation a text.
+var digestPool = sync.Pool{New: func() any { return sha256.New() }}
+
 func memoRules(s string, o Options, find func() []span) []span {
 	if len(s) < ruleMemoMin {
 		return find()
 	}
-	h := sha256.New()
+	h := digestPool.Get().(hash.Hash)
+	h.Reset()
 	fmt.Fprintf(h, "%s\x00%t\x00%t\x00", dateClock().Format("2006-01-02"), o.Secrets, o.Personal)
 	kinds := make([]string, 0, len(o.Kinds))
 	for k, on := range o.Kinds {
@@ -49,9 +56,10 @@ func memoRules(s string, o Options, find func() []span) []span {
 		}
 	}
 	h.Write([]byte{0})
-	h.Write([]byte(s))
+	h.Write(bytesOf(s))
 	var k [32]byte
 	h.Sum(k[:0])
+	digestPool.Put(h)
 	ruleMemo.Lock()
 	sp, ok := ruleMemo.cur[k]
 	if !ok {

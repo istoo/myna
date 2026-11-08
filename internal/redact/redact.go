@@ -17,6 +17,7 @@
 package redact
 
 import (
+	"bytes"
 	"crypto/hmac"
 	"crypto/rand"
 	"crypto/sha256"
@@ -305,6 +306,14 @@ var placeholderRe = regexp.MustCompile(`\{\{[A-Z][A-Z0-9_]*_[a-z2-7]{8}\}\}`)
 func HasPlaceholder(s string) bool {
 	return strings.Contains(s, "{{") && placeholderRe.MatchString(s)
 }
+
+// HasPlaceholderBytes is HasPlaceholder for a body read as bytes, so a
+// whole request isn't copied into a string to look for one.
+func HasPlaceholderBytes(b []byte) bool {
+	return bytes.Contains(b, openBraces) && placeholderRe.Match(b)
+}
+
+var openBraces = []byte("{{")
 
 // notAVariable turns away what stands in for a value: ${PASS}, <password>, ****.
 func notAVariable(v string) bool {
@@ -784,6 +793,9 @@ func placeholder(kind, v string) string {
 	mu.Lock()
 	if _, ok := values[p]; !ok {
 		makeRoom()
+		// the walker hands a value as the request body's own bytes: what
+		// is kept past the request is a copy of its own (walk)
+		v = strings.Clone(v)
 		values[p] = v
 		kinds[kind] = true
 		addKnown(p, v)
@@ -1307,7 +1319,7 @@ func outsideEscapes(s string, found []span) []span {
 // (xiaojiang091499 on X). Every finder's values go through here, as
 // through outsideEscapes. Text that isn't JSON is left as it is.
 func inStrings(s string, found []span) []span {
-	if len(found) == 0 || !json.Valid([]byte(s)) {
+	if len(found) == 0 || !json.Valid(bytesOf(s)) {
 		return found
 	}
 	// in[i] is 1 + which string literal byte i is the text of, 0 for one

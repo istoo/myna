@@ -70,7 +70,10 @@ func notesPlaceholders(p provider.Provider, from provider.Protocol, body []byte)
 // or with no placeholder or no place for it, is returned as it is; the
 // edit is made in place in the bytes, the rest as the client wrote it.
 func withPlaceholderNote(from provider.Protocol, body []byte) []byte {
-	if !gjson.ValidBytes(body) || !gjson.ParseBytes(body).IsObject() || !redact.HasPlaceholder(string(body)) {
+	// a body is an object when, valid as it is, its first byte that isn't
+	// space is '{': gjson.ParseBytes made a string of the whole body to
+	// ask that, and another to look for a placeholder
+	if !gjson.ValidBytes(body) || !firstByteIs(body, '{') || !redact.HasPlaceholderBytes(body) {
 		return body
 	}
 	switch from {
@@ -84,6 +87,18 @@ func withPlaceholderNote(from provider.Protocol, body []byte) []byte {
 		return withNoteGemini(body)
 	}
 	return body
+}
+
+// firstByteIs says b's first byte that isn't space is c.
+func firstByteIs(b []byte, c byte) bool {
+	for _, x := range b {
+		switch x {
+		case ' ', '\t', '\n', '\r':
+			continue
+		}
+		return x == c
+	}
+	return false
 }
 
 // holds says whether r's text has a placeholder.

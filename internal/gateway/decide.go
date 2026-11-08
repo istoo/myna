@@ -410,7 +410,7 @@ func maskedState(ctx context.Context, text, user, reply string) (string, string,
 		out[i] = m
 		all.add(h)
 	}
-	noteMasked(nil, "decide", all, strings.Join(out[:], "\n"), 0, "", "")
+	noteMasked(nil, "decide", all, []byte(strings.Join(out[:], "\n")), 0, "", "")
 	return out[0], out[1], out[2], nil
 }
 

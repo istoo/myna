@@ -235,7 +235,7 @@ func maskedQuery(ctx context.Context, query string, p *provider.Provider) (strin
 		if p != nil {
 			id = p.ID
 		}
-		noteMasked(nil, "search", h, masked, 0, id, "")
+		noteMasked(nil, "search", h, []byte(masked), 0, id, "")
 	}
 	return masked, err
 }

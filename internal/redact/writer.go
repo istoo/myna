@@ -242,8 +242,8 @@ func (rw *Writer) event(ev []byte) error {
 		typ = name
 	}
 	var tails, cuts map[string]string
-	restored, _ := walk(data, func(path, key, s string) string {
-		if c, ok := carry[path]; ok {
+	restored, _ := walk(data, func(path []byte, key, s string) string {
+		if c, ok := carry[string(path)]; ok {
 			s = c + s
 		}
 		if sealedText(key, s) {
@@ -257,8 +257,10 @@ func (rw *Writer) event(ev []byte) error {
 				if tails == nil {
 					tails, cuts = map[string]string{}, map[string]string{}
 				}
-				tails[path] = s[len(s)-n:]
-				cuts[path] = Restore(s[:len(s)-n], asJSON(key, typ))
+				// kept for the event after, which walk doesn't own: a
+				// copy of its own, not the event's bytes
+				tails[string(path)] = strings.Clone(s[len(s)-n:])
+				cuts[string(path)] = Restore(s[:len(s)-n], asJSON(key, typ))
 			}
 		}
 		// counted here only: cut is s again without its tail, and
@@ -270,8 +272,8 @@ func (rw *Writer) event(ev []byte) error {
 		_, err := rw.w.Write(full)
 		return err
 	}
-	cutData, _ := walk(restored, func(path, _, s string) string {
-		if c, ok := cuts[path]; ok {
+	cutData, _ := walk(restored, func(path []byte, _, s string) string {
+		if c, ok := cuts[string(path)]; ok {
 			return c
 		}
 		return s
@@ -348,10 +350,10 @@ func splitEvent(ev []byte) (name string, data, pre, post []byte, ok bool) {
 // eventCtx is what says which text an event goes on with.
 func eventCtx(data []byte) string {
 	var b strings.Builder
-	walk(data, func(path, _, s string) string {
-		switch path {
+	walk(data, func(path []byte, _, s string) string {
+		switch string(path) {
 		case "type", "item_id":
-			b.WriteString(path + "=" + s + ";")
+			b.WriteString(string(path) + "=" + s + ";")
 		}
 		return s
 	})
@@ -371,8 +373,8 @@ func eventCtx(data []byte) string {
 // hasPaths says data has a string at each of the paths.
 func hasPaths(data []byte, paths map[string]string) bool {
 	found := 0
-	walk(data, func(p, _, s string) string {
-		if _, ok := paths[p]; ok {
+	walk(data, func(p []byte, _, s string) string {
+		if _, ok := paths[string(p)]; ok {
 			found++
 		}
 		return s

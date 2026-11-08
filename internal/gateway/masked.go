@@ -50,22 +50,26 @@ func (h *maskHits) add(o maskHits) {
 	h.took += o.took
 }
 
-// sentOf is a masked body as noteMasked takes it: copied only for a
-// record that keeps it. With nothing masked no record is made, and one
-// over maskrec.SentMax keeps none of it, so a 45 MiB Codex turn was
-// copied whole on every request for nothing (#4004).
-func sentOf(h maskHits, body []byte) string {
+// sentOf is a masked body as noteMasked takes it: kept only for a record
+// that holds it. With nothing masked no record is made, and one over
+// maskrec.SentMax keeps none of it, so a 45 MiB Codex turn was copied
+// whole on every request for nothing (#4004). The body is the served
+// one, which nothing writes after masking, and the record copies it once
+// into what it keeps (maskrec.Hold).
+func sentOf(h maskHits, body []byte) []byte {
 	if h.n == 0 && len(h.hits) == 0 || len(body) > maskrec.SentMax {
-		return ""
+		return nil
 	}
-	return string(body)
+	return body
 }
 
 // noteMasked records what masking swapped in a request that went to a
 // vendor as sent: what it was (chat, search, image…), who sent it, the
 // route it is in the trace (0 for none), and the provider and model it
-// went to. It returns its summary, nil when nothing was masked.
-func noteMasked(r *http.Request, what string, h maskHits, sent string, route int64, prov, model string) *Masked {
+// went to. It returns its summary, nil when nothing was masked. sent is
+// the text the vendor got, as the bytes served where there are any: the
+// record copies it once (maskrec.Hold).
+func noteMasked(r *http.Request, what string, h maskHits, sent []byte, route int64, prov, model string) *Masked {
 	m, done := noteMaskedUntil(r, what, h, sent, route, prov, model)
 	done("", "")
 	return m
@@ -75,7 +79,7 @@ func noteMasked(r *http.Request, what string, h maskHits, sent string, route int
 // to try: prov and model are the first planned, and done, called once the
 // request is over, names the provider and model that had it last, which
 // the record keeps (maskrec.Hold).
-func noteMaskedUntil(r *http.Request, what string, h maskHits, sent string, route int64, prov, model string) (*Masked, func(prov, model string)) {
+func noteMaskedUntil(r *http.Request, what string, h maskHits, sent []byte, route int64, prov, model string) (*Masked, func(prov, model string)) {
 	if h.n == 0 && len(h.hits) == 0 {
 		return nil, func(string, string) {}
 	}
@@ -132,20 +136,21 @@ const snipRunes = 56
 // snipsOf are, by placeholder, the text around the first place sent has
 // each of hits, as the vendor saw it: what the record shows of a value,
 // in memory only.
-func snipsOf(sent string, hits []gwmw.Hit) map[string]string {
-	if sent == "" || len(hits) == 0 {
+func snipsOf(sent []byte, hits []gwmw.Hit) map[string]string {
+	if len(sent) == 0 || len(hits) == 0 {
 		return nil
 	}
+	text := string(sent)
 	// in a JSON body a snip stays inside the string the value is in,
 	// so it reads as the text, not as the body around it
-	t := strings.TrimSpace(sent)
+	t := strings.TrimSpace(text)
 	inJSON := t != "" && (t[0] == '{' || t[0] == '[')
 	out := map[string]string{}
 	for _, x := range hits {
 		if _, ok := out[x.Placeholder]; ok || len(out) >= 200 {
 			continue
 		}
-		i := strings.Index(sent, x.Placeholder)
+		i := strings.Index(text, x.Placeholder)
 		if i < 0 {
 			continue
 		}
@@ -156,24 +161,24 @@ func snipsOf(sent string, hits []gwmw.Hit) map[string]string {
 			continue
 		}
 		a, b := i, i+len(x.Placeholder)
-		start, end := 0, len(sent)
+		start, end := 0, len(text)
 		for k := 0; k < snipRunes && a > start; k++ {
-			if inJSON && sent[a-1] == '"' && !quoteEscaped(sent, a-1) {
+			if inJSON && text[a-1] == '"' && !quoteEscaped(text, a-1) {
 				start = a
 				break
 			}
-			_, n := utf8.DecodeLastRuneInString(sent[:a])
+			_, n := utf8.DecodeLastRuneInString(text[:a])
 			a -= n
 		}
 		for k := 0; k < snipRunes && b < end; k++ {
-			if inJSON && sent[b] == '"' && !quoteEscaped(sent, b) {
+			if inJSON && text[b] == '"' && !quoteEscaped(text, b) {
 				end = b
 				break
 			}
-			_, n := utf8.DecodeRuneInString(sent[b:])
+			_, n := utf8.DecodeRuneInString(text[b:])
 			b += n
 		}
-		s := unescapeSnip(sent[a:b])
+		s := unescapeSnip(text[a:b])
 		if a > start {
 			s = "…" + s
 		}

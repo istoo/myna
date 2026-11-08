@@ -175,6 +175,8 @@ func shaped(kind, v string) string {
 	have, taken := values[f]
 	if !taken {
 		makeRoom()
+		// kept past the walk: a copy of its own (walk)
+		k = strings.Clone(k)
 		values[f] = k
 		kinds[kind] = true
 		shapes[f] = kind
@@ -470,6 +472,8 @@ func ipStandIn(v string) (string, bool) {
 		return "", false
 	}
 	makeRoom()
+	// kept past the walk: a copy of its own (walk)
+	v = strings.Clone(v)
 	values[free] = v
 	kinds["IP"] = true
 	shapes[free] = "IP"
@@ -500,6 +504,8 @@ func standIn(put func(kind, v string) string) func(kind, v string) string {
 		have, taken := values[f]
 		if !taken {
 			makeRoom()
+			// kept past the walk: a copy of its own (walk)
+			v = strings.Clone(v)
 			values[f] = v
 			kinds[kind] = true
 			shapes[f] = kind

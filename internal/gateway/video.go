@@ -1103,7 +1103,7 @@ func (s *Server) videosCreate(w http.ResponseWriter, r *http.Request) {
 		grp = groupRef(g, ms)
 	}
 	side := s.beginSide(r, start, call.Model, p.ID, grp)
-	masked, noted := noteMaskedUntil(r, "video", hits, sent, side.id(), cmp.Or(call.Provider, p.ID), call.Model)
+	masked, noted := noteMaskedUntil(r, "video", hits, []byte(sent), side.id(), cmp.Or(call.Provider, p.ID), call.Model)
 	side.masked(masked)
 	defer func() { noted(call.Provider, model) }()
 	if n > 0 && f.Prompt == prompt { // the prompt's mask wraps w already

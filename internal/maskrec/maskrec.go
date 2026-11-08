@@ -90,9 +90,10 @@ type Record struct {
 	// Back: by placeholder, the places the answer had it put back; in
 	// memory only, told once the answer is done (Restored)
 	Back map[string]int `json:"back,omitempty"`
-	// Sent is the request as the vendor got it; in memory only, for the
+	// Sent is the request as the vendor got it, the body served: read
+	// while the record is made, then kept zstd, in memory only, for the
 	// latest keepSent, and never in a list (SentOf)
-	Sent string `json:"-"`
+	Sent []byte `json:"-"`
 }
 
 // Dir is where the days are kept.
@@ -168,11 +169,11 @@ func Hold(r Record) (Record, func(provider, model string)) {
 		r.Time = clock()
 	}
 	var body []byte
-	if r.Sent != "" && len(r.Sent) <= sentMax {
+	if len(r.Sent) > 0 && len(r.Sent) <= sentMax {
 		// the encoder may make room for all of Sent; keep what it wrote
-		body = bytes.Clone(sentEnc().EncodeAll([]byte(r.Sent), nil))
+		body = bytes.Clone(sentEnc().EncodeAll(r.Sent, nil))
 	}
-	r.Sent = ""
+	r.Sent = nil
 	store.mu.Lock()
 	defer store.mu.Unlock()
 	r.Key = r.Time.UnixNano()

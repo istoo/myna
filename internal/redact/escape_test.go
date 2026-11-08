@@ -1,6 +1,7 @@
 package redact
 
 import (
+	"bytes"
 	"encoding/json"
 	"strings"
 	"testing"
@@ -253,5 +254,62 @@ func TestMaskJSONArgumentsCutShort(t *testing.T) {
 	out, n = MaskJSON(chatWithCall(`{"cmd":"x REL-ab\"c d"}`), Options{Secrets: true, Rules: []Rule{{Kind: "rel", Regex: `REL-[a-z\\]+`}}})
 	if got := argsOf(t, out)[0]; n != 1 || !json.Valid([]byte(got)) || strings.Contains(got, "REL-ab") || !strings.Contains(got, `\"c d`) {
 		t.Fatalf("%d: %s", n, got)
+	}
+}
+
+// jsonEscape writes what encoding/json writes for a string with
+// SetEscapeHTML(false), every byte of it: a masked value goes between the
+// quotes of the request's JSON, and one byte written differently is a
+// request the vendor no longer reads as the agent's.
+func TestJSONEscapeIsEncodingJSONs(t *testing.T) {
+	all := make([]byte, 0, 256)
+	for c := range 256 {
+		all = append(all, byte(c))
+	}
+	for _, s := range []string{
+		"", "a", "读这个文件", "😀 é", `quote " and slash \`, "<b> & </b>",
+		"tab \t newline \n return \r backspace \b form \f", "\x00\x01\x1f\x7f",
+		"  ", string(all), "\xff\xfe\xed\xa0\x80", "a\xffb",
+	} {
+		var b bytes.Buffer
+		enc := json.NewEncoder(&b)
+		enc.SetEscapeHTML(false)
+		if err := enc.Encode(s); err != nil {
+			t.Fatal(err)
+		}
+		quoted := strings.TrimSuffix(b.String(), "\n")
+		want := quoted[1 : len(quoted)-1] // between the quotes
+		if got := jsonEscape(s); got != want {
+			t.Errorf("%q: jsonEscape %q, encoding/json %q", s, got, want)
+		}
+		if got := string(appendJSONEscape(nil, s)); got != want {
+			t.Errorf("%q: appendJSONEscape %q, encoding/json %q", s, got, want)
+		}
+	}
+}
+
+// unquoteJSONString reads a string literal the way encoding/json reads it:
+// walk unquotes the values of a request with escapes with it, and one read
+// differently is a value masked or kept wrongly.
+func TestUnquoteJSONStringIsEncodingJSONs(t *testing.T) {
+	for _, lit := range []string{
+		`"\n"`, `"a\tb\r"`, `"\/"`, `"\\\\"`, `"say \"hi\""`, `"\b\f"`,
+		`"é"`, `"😀"`, `"\ud83d"`, `"\u0000"`, `"读"`,
+		`"a\\nb"`, `"one   two"`, `"plain"`, `""`,
+	} {
+		var want string
+		if err := json.Unmarshal([]byte(lit), &want); err != nil {
+			t.Fatalf("%s: %v", lit, err)
+		}
+		got, ok := unquoteJSONString([]byte(lit))
+		if !ok || got != want {
+			t.Errorf("%s: read %q (%v), encoding/json %q", lit, got, ok, want)
+		}
+	}
+	// an escape encoding/json refuses is one walk refuses
+	for _, lit := range []string{`"\x"`, `"\u12"`, `"no close`, `"a` + "\x01" + `b"`} {
+		if _, ok := unquoteJSONString([]byte(lit)); ok {
+			t.Errorf("%s was read", lit)
+		}
 	}
 }

@@ -40,7 +40,7 @@ func Scrub(s string) string {
 	// alone: a result is kept under the knownGen it was made at, and none
 	// made before a value became known is used again.
 	gen := knownGen.Load()
-	k := sha256.Sum256([]byte(s))
+	k := sha256.Sum256(bytesOf(s))
 	if out, ok := scrubMemo.get(k, gen, s); ok {
 		return out
 	}
@@ -210,7 +210,7 @@ func ScrubJSON(body []byte) []byte {
 }
 
 func scrubJSON(b []byte) ([]byte, bool) {
-	return walk(b, func(_, key, s string) string {
+	return walk(b, func(_ []byte, key, s string) string {
 		switch {
 		case isDataURL(s):
 			return s

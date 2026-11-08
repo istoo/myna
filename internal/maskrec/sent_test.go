@@ -18,9 +18,9 @@ func TestSentAndBackInMemory(t *testing.T) {
 	dir := sandbox(t, now)
 	const p = "{{API_KEY_ccccdddd}}"
 	body := `{"messages":[{"role":"user","content":"key ` + p + ` here"}]}`
-	first := Add(Record{Time: now, What: "chat", N: 1, Took: 812, Sent: body,
+	first := Add(Record{Time: now, What: "chat", N: 1, Took: 812, Sent: []byte(body),
 		Values: []Value{{Placeholder: p, Kind: "API_KEY", By: "rule", Head: "sk-", Len: 40}}})
-	if first.Sent != "" {
+	if len(first.Sent) != 0 {
 		t.Fatal("Add handed the body back")
 	}
 	if got, ok := SentOf(first.Key); !ok || got != body {
@@ -29,7 +29,7 @@ func TestSentAndBackInMemory(t *testing.T) {
 	Restored(first.Key, map[string]int{p: 2})
 	Restored(first.Key, map[string]int{p: 1})
 	got, ok := Get(first.Key)
-	if !ok || got.Back[p] != 3 || got.Took != 812 || got.Sent != "" {
+	if !ok || got.Back[p] != 3 || got.Took != 812 || len(got.Sent) != 0 {
 		t.Fatalf("Get: %+v", got)
 	}
 	b, err := os.ReadFile(filepath.Join(dir, "2026-10-24.jsonl"))
@@ -41,14 +41,14 @@ func TestSentAndBackInMemory(t *testing.T) {
 	}
 
 	// too large: the record is kept, its body isn't
-	big := Add(Record{Time: now, What: "chat", N: 1, Sent: strings.Repeat("x", sentMax+1),
+	big := Add(Record{Time: now, What: "chat", N: 1, Sent: []byte(strings.Repeat("x", sentMax+1)),
 		Values: []Value{{Placeholder: p, Kind: "API_KEY", By: "rule", Len: 40}}})
 	if _, ok := SentOf(big.Key); ok {
 		t.Fatal("a body over sentMax was kept")
 	}
 	// keepSent more: the first's body goes, its record and snips stay
 	for range keepSent {
-		Add(Record{Time: now, What: "chat", N: 1, Sent: body,
+		Add(Record{Time: now, What: "chat", N: 1, Sent: []byte(body),
 			Values: []Value{{Placeholder: p, Kind: "API_KEY", By: "rule", Len: 40}}})
 	}
 	if _, ok := SentOf(first.Key); ok {
@@ -60,7 +60,7 @@ func TestSentAndBackInMemory(t *testing.T) {
 	store.mu.Lock()
 	n := len(store.sent)
 	for _, r := range store.snips {
-		if r.Sent != "" {
+		if len(r.Sent) != 0 {
 			t.Fatal("a record in memory holds its body whole")
 		}
 	}
@@ -78,7 +78,7 @@ func TestSentAndBackInMemory(t *testing.T) {
 		for i := range raw {
 			raw[i] = byte(rnd.Uint32())
 		}
-		r := Add(Record{Time: now, What: "chat", N: 1, Sent: string(raw),
+		r := Add(Record{Time: now, What: "chat", N: 1, Sent: raw,
 			Values: []Value{{Placeholder: p, Kind: "API_KEY", By: "rule", Len: 40}}})
 		keys = append(keys, r.Key)
 	}
@@ -114,7 +114,7 @@ func TestSentKeptCompressed(t *testing.T) {
 	}
 	b.WriteString(`{"role":"user","content":"go on"}]}`)
 	body := b.String()
-	r := Add(Record{Time: now, What: "chat", N: 1, Sent: body,
+	r := Add(Record{Time: now, What: "chat", N: 1, Sent: []byte(body),
 		Values: []Value{{Placeholder: p, Kind: "API_KEY", By: "rule", Len: 40}}})
 	store.mu.Lock()
 	stored := store.sentBytes

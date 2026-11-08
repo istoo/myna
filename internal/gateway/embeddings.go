@@ -216,7 +216,7 @@ func (s *Server) serveRetrieval(w http.ResponseWriter, r *http.Request, path, op
 		}
 		// the record names the try that had it last, not the first
 		// planned (noteMaskedUntil)
-		masked, noted := noteMaskedUntil(r, what, hits, sent, side.id(), tries[0].p.ID, asked)
+		masked, noted := noteMaskedUntil(r, what, hits, []byte(sent), side.id(), tries[0].p.ID, asked)
 		side.masked(masked)
 		defer func() { noted(call.Provider, went) }()
 	}

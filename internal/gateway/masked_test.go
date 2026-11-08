@@ -1,6 +1,7 @@
 package gateway
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"io"
@@ -104,11 +105,11 @@ func TestSnipStaysInItsString(t *testing.T) {
 	const p = "{{API_KEY_abcd1234}}"
 	hits := []gwmw.Hit{{Placeholder: p}}
 	sent := `{"model":"m1","messages":[{"role":"user","content":"say \"hi\" to ` + p + ` now\nplease"}]}`
-	if got, want := snipsOf(sent, hits)[p], `say "hi" to `+p+` now please`; got != want {
+	if got, want := snipsOf([]byte(sent), hits)[p], `say "hi" to `+p+` now please`; got != want {
 		t.Fatalf("JSON snip = %q, want %q", got, want)
 	}
 	long := strings.Repeat("a", 80) + ` "` + p + `" ` + strings.Repeat("b", 80)
-	got := snipsOf(long, hits)[p]
+	got := snipsOf([]byte(long), hits)[p]
 	if !strings.HasPrefix(got, "…") || !strings.HasSuffix(got, "…") || !strings.Contains(got, `"`+p+`"`) {
 		t.Fatalf("text snip = %q", got)
 	}
@@ -119,7 +120,7 @@ func TestSnipStaysInItsString(t *testing.T) {
 func TestSnipSharedByNearValues(t *testing.T) {
 	const p, q = "{{PERSON_aaaa1111}}", "{{PERSON_bbbb2222}}"
 	sent := strings.Repeat("x ", 40) + "Ask " + p + " whether the results for " + q + " came back " + strings.Repeat("y ", 40)
-	got := snipsOf(sent, []gwmw.Hit{{Placeholder: p}, {Placeholder: q}})
+	got := snipsOf([]byte(sent), []gwmw.Hit{{Placeholder: p}, {Placeholder: q}})
 	if got[p] == "" || got[p] != got[q] || !strings.Contains(got[p], q) {
 		t.Fatalf("snips = %q", got)
 	}
@@ -134,7 +135,7 @@ func TestMaskedBodyCopiedOnlyWhenKept(t *testing.T) {
 	if n := allocated(func() { _ = sentOf(maskHits{}, body) }); n > 64<<10 {
 		t.Fatalf("nothing masked: %d bytes allocated for a %d byte body", n, len(body))
 	}
-	if got := sentOf(maskHits{n: 1}, body); got != string(body) {
+	if got := sentOf(maskHits{n: 1}, body); !bytes.Equal(got, body) {
 		t.Fatal("a masked body under SentMax isn't kept as sent")
 	}
 	big := []byte(strings.Repeat("y", maskrec.SentMax+1))
@@ -149,7 +150,7 @@ func TestMaskedBodyCopiedOnlyWhenKept(t *testing.T) {
 func TestSnipsHoldNoneOfTheBody(t *testing.T) {
 	const p = "{{API_KEY_ccccdddd}}"
 	sent := `{"api_key":"` + p + `","input":"` + strings.Repeat("a", 1<<20) + `"}`
-	snips := snipsOf(sent, []gwmw.Hit{{Placeholder: p}})
+	snips := snipsOf([]byte(sent), []gwmw.Hit{{Placeholder: p}})
 	got, ok := snips[p]
 	if !ok || got != p {
 		t.Fatalf("snips: %q", snips)

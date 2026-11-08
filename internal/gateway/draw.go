@@ -666,7 +666,7 @@ func (s *Server) images(edit bool) http.HandlerFunc {
 			grp = groupRef(g, ms)
 		}
 		side := s.beginSide(r, start, call.Model, p.ID, grp)
-		side.masked(noteMasked(r, "image", hits, d.Prompt, side.id(), p.ID, call.Model))
+		side.masked(noteMasked(r, "image", hits, []byte(d.Prompt), side.id(), p.ID, call.Model))
 		call.Provider, call.To = p.ID, provider.Chat
 		ctx, cancel := drawWithin(withSide(r.Context(), side), drawTimeout())
 		defer cancel()

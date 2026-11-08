@@ -133,7 +133,7 @@ func (s *Server) native(w http.ResponseWriter, r *http.Request) {
 		}
 		if hits.n > 0 {
 			b, _ := json.Marshal(obj)
-			noteMasked(r, "native", hits, string(b), 0, p.ID, model)
+			noteMasked(r, "native", hits, b, 0, p.ID, model)
 		}
 		body, _ = json.Marshal(obj)
 	}

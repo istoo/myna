@@ -1,6 +1,7 @@
 package redact
 
 import (
+	"bytes"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -325,6 +326,47 @@ func TestMaskJSONToolArgsMasked(t *testing.T) {
 		}
 		if !strings.Contains(string(out), `"toolu_1"`) && strings.Contains(c.body, "toolu_1") {
 			t.Errorf("%s: the call's id changed: %s", c.name, out)
+		}
+	}
+}
+
+// The values masking keeps are its own copies. walk hands a value as the
+// request body's own bytes, and a body may be written once the request is
+// masked (a buffer a stream fills again): a value kept as a window into it
+// would put back another request's bytes, or nothing. A secret in message
+// text, in a tool call's arguments and in a nested object alike.
+func TestMaskedValuesLivePastTheBody(t *testing.T) {
+	for _, c := range []struct{ name, body string }{
+		{"message text", `{"messages":[{"role":"user","content":"my key is ` + openaiKey + ` ok"}]}`},
+		{"tool arguments", `{"messages":[{"role":"assistant","content":[{"type":"tool_use","id":"toolu_1","name":"deploy","input":{"api_key":"` + openaiKey + `"}}]}]}`},
+		{"nested object", `{"a":{"b":{"c":["` + openaiKey + `"]}}}`},
+	} {
+		body := []byte(c.body)
+		out, n := MaskJSON(body, Options{Secrets: true})
+		if n == 0 || bytes.Contains(out, []byte(openaiKey)) {
+			t.Fatalf("%s: masked %d: %s", c.name, n, out)
+		}
+		p := placeholderRe.FindString(string(out))
+		if p == "" {
+			t.Fatalf("%s: no placeholder in %s", c.name, out)
+		}
+		// the body is written over, as a buffer reused for the next read is
+		for i := range body {
+			body[i] = 'X'
+		}
+		got, ok := Value(p)
+		if !ok || got != openaiKey {
+			t.Errorf("%s: value kept = %q (%v), not the copy masking made", c.name, got, ok)
+		}
+		if got := Restore(p, false); got != openaiKey {
+			t.Errorf("%s: restored %q", c.name, got)
+		}
+		// and the value is known past that body: masking it again, in a
+		// body of its own, masks it, and what it goes as puts it back
+		again, m := MaskJSON([]byte(`{"q":"`+openaiKey+`"}`), Options{Secrets: true})
+		p2 := placeholderRe.FindString(string(again))
+		if m == 0 || p2 == "" || Restore(p2, false) != openaiKey {
+			t.Errorf("%s: masked again as %s, and %q came back", c.name, again, Restore(p2, false))
 		}
 	}
 }

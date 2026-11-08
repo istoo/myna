@@ -99,7 +99,7 @@ func TestMaskingRecordsAPI(t *testing.T) {
 
 	// the request as it went, and the values to read it as it came
 	body := `{"messages":[{"role":"user","content":"` + sent + `"}]}`
-	whole := maskrec.Add(maskrec.Record{What: "chat", N: 1, Sent: body,
+	whole := maskrec.Add(maskrec.Record{What: "chat", N: 1, Sent: []byte(body),
 		Values: []maskrec.Value{{Placeholder: p, Kind: hits[0].Kind, By: hits[0].By, Len: hits[0].Len}}})
 	var got struct{ Body string }
 	if get("/api/masking/sent?key="+strconv.FormatInt(whole.Key, 10), &got); got.Body != body {
