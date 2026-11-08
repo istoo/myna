@@ -373,10 +373,16 @@ var spotlightApps = spotlightBundles
 
 // spotlight keeps each bundle id's answer for spotlightFresh: the Agents
 // page asks whether an app is installed on every read, and an app that
-// isn't anywhere would ask mdfind each time.
+// isn't anywhere would ask mdfind each time. Queries for different ids run
+// at once: the first Agents read asks for every app's, and one mdfind call
+// is ~30 ms, so asking them one after another made a cold /api/state wait
+// ~430 ms for fifteen.
 var spotlight struct {
 	sync.Mutex
 	m map[string]spotlightAnswer
+	// w holds the ids whose mdfind is running: a second ask for one of
+	// them waits for that answer instead of asking again.
+	w map[string]chan struct{}
 }
 
 type spotlightAnswer struct {
@@ -391,30 +397,92 @@ const spotlightFresh = 5 * time.Minute
 // developer's own apps (#1823) from every package that asks for one.
 const spotlightSandbox = "MYNA_TEST_SANDBOX"
 
+// spotlightRun is one mdfind query. A var so a test can count the queries
+// without asking the machine's Spotlight.
+var spotlightRun = func(ctx context.Context, id string) ([]byte, error) {
+	return proc.CommandContext(ctx, "mdfind", "kMDItemCFBundleIdentifier == '"+id+"'").Output()
+}
+
+// spotlightIDs are every bundle id an agent's desktop app may have: the
+// agents' apps, the editors' builds, and the apps agents are found by. An
+// app a new one names and this list misses is still looked up when it is
+// asked for, only not before the read.
+func spotlightIDs() []string {
+	var ids []string
+	seen := map[string]bool{}
+	add := func(app desktopApp) {
+		for _, b := range app.builds() {
+			if b.id != "" && !seen[b.id] {
+				seen[b.id] = true
+				ids = append(ids, b.id)
+			}
+		}
+	}
+	for _, app := range desktopApps {
+		add(app)
+	}
+	for _, app := range vscodeBundles {
+		add(app)
+	}
+	for _, app := range []desktopApp{claudeDesktopApp, kiroCrewApp, openBotApp, newMaxApp, openPencilApp, raycastApp, workbuddyApp, workbuddyAIApp} {
+		add(app)
+	}
+	return ids
+}
+
 func spotlightBundles(id string) []string {
 	if runtime.GOOS != "darwin" || os.Getenv(spotlightSandbox) != "" {
 		return nil
 	}
 	spotlight.Lock()
-	defer spotlight.Unlock()
 	if a, ok := spotlight.m[id]; ok && time.Since(a.at) < spotlightFresh {
+		spotlight.Unlock()
 		return a.paths
 	}
+	if wait, ok := spotlight.w[id]; ok {
+		// another read is asking for this id: its answer is this one's
+		spotlight.Unlock()
+		<-wait
+		spotlight.Lock()
+		a := spotlight.m[id]
+		spotlight.Unlock()
+		return a.paths
+	}
+	wait := make(chan struct{})
+	if spotlight.w == nil {
+		spotlight.w = map[string]chan struct{}{}
+	}
+	spotlight.w[id] = wait
+	spotlight.Unlock()
+	// an ask that misses starts every other app's too, so the fifteen
+	// reads that follow in one Agents read don't each wait for a query of
+	// their own: on the first read, and again once the answers are stale
+	// (spotlightFresh). One that is fresh or being asked returns at once.
+	for _, other := range spotlightIDs() {
+		if other != id {
+			go spotlightBundles(other)
+		}
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	var paths []string
-	out, err := proc.CommandContext(ctx, "mdfind", "kMDItemCFBundleIdentifier == '"+id+"'").Output()
-	if err == nil {
+	if out, err := spotlightRun(ctx, id); err == nil {
 		for _, p := range strings.Split(strings.TrimSpace(string(out)), "\n") {
 			if p = strings.TrimSpace(p); p != "" {
 				paths = append(paths, p)
 			}
 		}
 	}
+
+	spotlight.Lock()
 	if spotlight.m == nil {
 		spotlight.m = map[string]spotlightAnswer{}
 	}
 	spotlight.m[id] = spotlightAnswer{paths: paths, at: time.Now()}
+	delete(spotlight.w, id)
+	close(wait)
+	spotlight.Unlock()
 	return paths
 }
 
