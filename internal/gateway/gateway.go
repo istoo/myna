@@ -566,6 +566,8 @@ type Server struct {
 // New makes a gateway.
 func New() *Server {
 	redact.SetKeyPath(filepath.Join(settings.Dir(), "redact.key"))
+	// a kept socket's turns are logged as a call is (codex_socket_keep.go)
+	codexSocketDebug.Store(os.Getenv("MYNA_DEBUG") != "")
 	s := &Server{
 		// a request counted against a MaxRPM waits for room in its minute
 		// first (rpm.go); the ChatGPT backend is spoken to over HTTP/1.1
@@ -858,6 +860,9 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 		defer close(drained)
 		<-ctx.Done()
 		s.endStreams()
+		// the ChatGPT backend's sockets kept for a session's next turn end
+		// with the gateway, as its client sockets do (codex_socket_keep.go)
+		codexKeptSockets.closeAll()
 		c, cancel := context.WithTimeout(context.Background(), s.drainFor())
 		defer cancel()
 		if s.handingOver() {

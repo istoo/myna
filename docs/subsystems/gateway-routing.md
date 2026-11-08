@@ -2139,11 +2139,12 @@ serves it on `/v1/responses`, `/responses` and the Codex backend's
 - `Run`'s shutdown ends each socket going away (1001) once its turn is
   answered, through `clientSockets.drain` beside `srv.Shutdown` (a hijacked
   connection isn't the server's), and refuses new ones 503.
-- Not covered: the leg to the vendor is the whole conversation each turn,
-  as before (for the ChatGPT backend, a socket per turn: see
-  [Providers and accounts](providers-accounts.md)); what is saved is
-  Codex's upload to myna. A socket's conversation doesn't outlive the
-  socket or the gateway.
+- Not covered: what is saved is Codex's upload to myna; myna's own leg to
+  the ChatGPT backend keeps a socket per session and sends the next turn
+  as a delta after the previous one (see
+  [Providers and accounts](providers-accounts.md)), not this socket's
+  conversation. A socket's conversation doesn't outlive the socket or
+  the gateway.
 
 ## A Responses request that names the response it follows
 
