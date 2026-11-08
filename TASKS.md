@@ -128,3 +128,42 @@
       文件，第 06 片（含该文件）已在 `b8b29195e` 上整片重跑：1,812/1,812。
       合计：12 片 19,913 项、19,913 通过、0 失败（11 片在 `114b28493`，
       第 06 片在 `b8b29195e`，两者的产品代码相同）。
+
+## 精简 / 交互 / 性能（2026-11-08 起）
+
+约束：所有面向用户的功能保留（网关、订阅路由、全部 agent 接入、插件体系、附加能力）。
+“精简”只删死代码、冗余实现、无引用资源。不 commit / push，等用户确认。
+全量 `go test ./...` 最后由主会话统一跑一次（同机只跑一套）。
+
+- [x] A. 网关 CPU/内存（主会话）结论：**无空转、无泄漏**。
+      - 30s CPU profile：13% 单核，全部用在当时 4 个 Claude 会话的请求处理上（脱敏 25%、翻译/流式、PII CoreML 推理、GC）；去掉请求路径后只剩 GC 与上游 TLS 读。
+      - 两次 heap 差分（间隔 5 分钟）增长只在处理中的请求体。footprint 734MB（ps 的 1GB 含已归还页），Go 堆约 240MB，GPU/图形 116MB。
+      - 根因是规模：1MB 的 Claude Code 请求每次分配 22.8MB（21.7 倍），6.5h 合计 395GB。分配分散在多次解码/脱敏遍历中，不存在单点。
+      - 试过并撤回（实测无收益）：hold 脱敏后请求体；mcp 子进程 GOMAXPROCS/FreeOSMemory（footprint 26MB→26MB，主要是框架加载）。
+      - 待用户决定：单次解析流水线重构（大）；redact walker 零拷贝（隐私链路，需审计）；mcp 独立小二进制。
+- [x] B. 死代码/冗余：已核对并应用到主工作区（54 文件 +96/−359；U1000 39→6，deadcode 32→4，剩余为构建标签保护项；18 包测试 ok，日志 /tmp/myna-deadcode/test-final.log）。
+- [x] C1. 已合入：/api/state 冷启动 417→57ms（15 次串行 mdfind 改并发预取+in-flight 去重，主会话补“过期后再预取”及先红后绿测试）、首屏可交互 530→143ms、myna ls 0.46→0.19s、网关回复读缓冲按长度取（同负载分配 −17%）。网关附加首字节中位 0.26ms，切页 0 long task，app.js 0 死函数。
+- [ ] C2. GUI 设计/易用性审查（subagent，只读）：出带截图的问题清单与方案，布局改动经用户确认后再做。
+- [x] C2. GUI 审查完成（报告见会话；截图在 /tmp/myna-review/shots）。已核实：#2 CLI 写入非法 effort、#4 Esc 不关对话框、#5 浅色 muted/faint 色值。
+- [x] E. 已合入主工作区（25 文件 +295/−34，26 字段 Closed，Codex/Grok 回落补全，WSL 克隆补 Closed；agent/cli/profile/gui ok）。CLI 封闭枚举校验：Field 加 Closed，Spell 校验；24 个 effort/subagent_effort 字段逐家核对 vendor 实际接受值
+      （Codex 未入目录模型回落 low..xhigh，但 Codex 本身接受 none/minimal，不能误伤）。复现：`myna codex effort highish` 写入 config.toml。
+- [x] F. 已合入（245 文件，均在 internal/gui/assets|tests；与 F-CLI/G/H 无冲突）。主会话修 update-download ja@420：hold() 的“停在顶部”阈值由 min(24,参照物高) 改为 24px（14px 的 code 参照物遇两行折行被当成整行放回）；22/22 绿，预算内。原：（C1 合并后，一个 subagent 顺序做，均改 app.js）用户 11-08 授权按业界最优自定：
+      F1 非布局：#1 读取失败错误态+重试、#4 Esc 统一关对话框（经 confirmDiscard）、#5 浅色 muted/faint ≥4.5:1、#7 设置搜索孤立标题、
+         #15 快速上手计数、#21 tablist aria-orientation、#16 侧栏网关行加 chevron、#17“隐藏侧边栏”改名、#18 长命令可换行、#14 文案。
+      F2 布局：#3 窄屏导航 priority+（放不下的收进“更多”菜单，可键盘达）、#13 路由策略改单选下拉+当前项说明，限流/会话保持/模型收进“高级”、
+         #20 账号行邮箱可换行+完整值 title、#6 行可聚焦 Enter 打开、#12 两态设置统一 switch。
+      F3 #19 Cmd+K 命令面板（页面/设置项复用 searchSettings/供应商/Agent/插件），独立模块动态 import，不抬 app.js 预算。
+      F4 #9 会话授权卡：加“暂不允许”，主按钮改“允许所选”，“全部允许”降为次要（避免诱导最宽授权）。
+      [x] CLI/TUI 已合入（主会话把缺 key 示例从 provider.Save 挪到 CLI add 路径：ErrNeedsKey，GUI/TUI 不再显示 CLI 命令；suggest/tui/cli/provider ok）。CLI：#10 未知 agent did-you-mean（复用 groups_cli 的实现）、#11 `myna help <cmd>` 等同 `--help`、provider 缺 key 时给示例；TUI #8 `?` 帮助浮层+footer 按宽度截短。
+- [x] G. 已合入（主会话审计零拷贝存储点：placeholder/scores/texts/tails/shape 均显式 Clone，bytesOf 仅同步只读；去 Clone 测试变红已复现）。1MB 脱敏翻译请求 33.6→20.7MB/req（−38.5%）、79.8k→37.8k mallocs（−52.6%），上游字节归一化后一致。网关分配削减（C1 合并后）：探针（1MB Claude Code 请求、脱敏开、翻译路由，基线 22.8MB/21.7x）作分配上限测试，逐项削减并保留数字；
+      redact walker 零拷贝只在审计占位符存储不会钉住请求体后做，并按 LESSONS 把秘密放在工具参数/消息正文/嵌套对象里测。
+- [x] 决定不做：MCP 独立小二进制。footprint 21MB/进程且多为共享框架页，换来打包与各 agent 配置路径变更，收益不抵风险。
+- [~] H. 已实现并合入（codex_socket_keep.go 新增；gateway.go 两行接线；文档同步；11 个新测试，-race -count=20 通过，主工作区 37+90 通过）。**真实 chatgpt.com 未验证**：本机 myna 无 ChatGPT 订阅、Codex 为 apikey 登录。用户登录 ChatGPT 后跑 scripts/check-codex-kept-socket.sh（模型 id 按实际改）。ChatGPT Codex 后端 WS 增量接续（用户 11-08 提出）：codex_socket.go 每轮新开 socket、发全量、完成即关。
+      改为按（主机+账号身份+session-id/thread-id/prompt_cache_key）保留上游连接；本轮除 input/client_metadata 外与上轮逐字节相同、
+      且 input 以“上轮 input+上轮 k 个输出项（类型/call_id 校验）”开头时，只发 previous_response_id+新增项；否则全量。
+      previous_response_not_found/回复前断开 → 新连接全量重发；并发轮次另开连接；空闲回收。验证：真实 ChatGPT 账号两轮，上游第二轮消息体只含新增。
+- [~] D. 汇总验证（11-09）：go vet 三平台 ok；go test ./... 87 包 ok，claudebridge TestCallbackGoesPastTheAgentsProxy 与 netproxy TestLANModelListNotThroughProxy
+      红，origin/main 6d4fd95f6 同样红（本机 Little Snitch 拦截未签名测试二进制的回环/LAN 连接），待开 issue。
+      GUI：合入后 3 红（account-arrange/icon-url/key-weight）+ 补跑出 2 红（update-network/vertex-editor）均已按根因修（lastScrollInput 初值、
+      按钮宽度保持、药丸显隐同步 fitTop）；hold() 阈值仅对“点击元素已重绘”的旁位参照用 24px。负载下偶发：update-served-anew ja@420、update-hide webkit zh，待开 issue。
+      最终 GUI 全量（3 分片）进行中；通过后按 11 个提交推送 main，CI 绿后打 v0.1.2908。
