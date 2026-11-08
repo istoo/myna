@@ -32,9 +32,6 @@ type libRow struct {
 	bad   int      // agents it couldn't be given to
 }
 
-// libKinds are what the library can give, by row kind.
-var libKinds = map[string]string{"instructions": "instructions", "mcp": "mcp", "skill": "skills"}
-
 func (m *model) reloadLibrary() {
 	m.lib, m.libAgents, m.libErr = nil, nil, ""
 	v, err := library.Read(nil)

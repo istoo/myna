@@ -22,7 +22,7 @@ function serve(lang, back) {
     const req = route.request();
     const url = new URL(req.url());
     const json = (data) => route.fulfill({ json: data });
-    // as writeJSONSame answers: the tag of the bytes, and no body for the
+    // as writeSame answers: the tag of the bytes, and no body for the
     // tag the page has; and as writeJSONRows, the list (rows) asked with
     // the tag of one sent before has only its new rows, and [from, count]
     // for each run of the old

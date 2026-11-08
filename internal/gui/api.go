@@ -33,6 +33,7 @@ import (
 
 	"github.com/istoo/myna/internal/access"
 	"github.com/istoo/myna/internal/agent"
+	"github.com/istoo/myna/internal/appdir"
 	"github.com/istoo/myna/internal/applog"
 	"github.com/istoo/myna/internal/autostart"
 	"github.com/istoo/myna/internal/catalog"
@@ -2801,20 +2802,16 @@ func writeJSON(rw http.ResponseWriter, v any) {
 	_ = json.NewEncoder(rw).Encode(v)
 }
 
-// writeJSONSame is writeJSON for a read the page asks for again and again:
-// the answer's X-Magpie-Tag is a hash of its bytes, and a request whose
+// writeSame writes an answer the page asks for again and again: the
+// answer's X-Magpie-Tag is a hash of its bytes, and a request whose
 // X-Magpie-Had is that tag gets X-Magpie-Same and no body, which the page
 // reads as the answer it has (api in app.js). The Sessions tab read a long
 // history's ~8 MB list and ~0.7 MB of stats every 15 s, and parsed and
 // compared them whole to find them the same. Not an ETag and a 304:
 // WebView2 is sent no If-None-Match, and Wails turns its 304 into a 505.
-// It returns the tag, or "" when v could not be written.
-func writeJSONSame(rw http.ResponseWriter, r *http.Request, v any) string {
-	return writeSame(rw, r, func(w io.Writer) error { return json.NewEncoder(w).Encode(v) })
-}
-
-// writeSame is writeJSONSame of the answer write writes to the writer it
-// is given, called twice: once into the hash, for the tag, and once
+// It returns the tag, or "" when write could not write the answer.
+//
+// write is called twice: once into the hash, for the tag, and once
 // straight to rw when the page hasn't got it. The answer is never held
 // whole: the stats' ~6 MB each, in buffers kept between polls, were
 // 12.5 MB of a warm start's 169 MB live heap over a full history (#2278).
@@ -2849,7 +2846,7 @@ var sentRows struct {
 
 const sentRowsKept = 4
 
-// writeJSONRows is writeJSONSame for an answer that is a long list, key,
+// writeJSONRows is writeSame for an answer that is a long list, key,
 // beside the fields of rest: one asked with the tag of a list sent before
 // that changed since gets X-Magpie-Delta: key, and its list holds only the
 // rows not in that one, each run of rows that was, in its order, written
@@ -3059,12 +3056,7 @@ func fail(rw http.ResponseWriter, err error) {
 	_ = json.NewEncoder(rw).Encode(out)
 }
 
-func tilde(p string) string {
-	if home, err := os.UserHomeDir(); err == nil && strings.HasPrefix(p, home) {
-		return "~" + p[len(home):]
-	}
-	return p
-}
+func tilde(p string) string { return appdir.Tilde(p) }
 
 // loginUsers is agent's accounts signed in, by name, each once.
 func loginUsers(agent string) []string {

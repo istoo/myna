@@ -653,7 +653,6 @@ type socketTurnWriter struct {
 	id               string
 	items            []json.RawMessage
 	ended, completed bool
-	wroteErr         bool
 }
 
 func (w *socketTurnWriter) Header() http.Header { return w.h }

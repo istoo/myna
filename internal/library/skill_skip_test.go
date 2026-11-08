@@ -26,14 +26,6 @@ func cavemanRepo(t *testing.T) {
 	t.Cleanup(func() { tarballURL = old })
 }
 
-func skipped(r *Result) []string {
-	var out []string
-	for _, p := range r.Skipped {
-		out = append(out, strings.TrimPrefix(p.What, "skill:"))
-	}
-	return out
-}
-
 // lc on Discord (安装skills的时候，没有跳过已经安装的): installing a set
 // of skills stopped at the first one the library's folder already had
 // ("the library's folder already has a caveman-commit in it"), and none

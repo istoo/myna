@@ -69,17 +69,6 @@ func PluginErrors() map[string]string {
 	return out
 }
 
-// PluginAgentOf is the id of the agent the plugin spec adds, "" for none.
-func PluginAgentOf(spec string) string {
-	list, _ := agentplug.List()
-	for _, a := range list {
-		if a.Spec == spec {
-			return a.Desc.ID
-		}
-	}
-	return ""
-}
-
 // pluggedAgents are the agents plugins add, but one whose id or alias is
 // one of builtin's, which errs (when not nil) says.
 func pluggedAgents(home string, builtin []*Agent, errs map[string]string) []*Agent {

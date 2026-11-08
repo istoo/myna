@@ -20,6 +20,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 
 	"github.com/istoo/myna/internal/agent"
+	"github.com/istoo/myna/internal/appdir"
 	"github.com/istoo/myna/internal/proc"
 	"github.com/istoo/myna/internal/sessions"
 	"github.com/istoo/myna/internal/usage"
@@ -493,9 +494,4 @@ func shortDate(d string) string {
 	return t.Format("Jan 2")
 }
 
-func tildePath(p string) string {
-	if home, err := os.UserHomeDir(); err == nil && home != "" && strings.HasPrefix(p, home) {
-		return "~" + p[len(home):]
-	}
-	return p
-}
+func tildePath(p string) string { return appdir.Tilde(p) }

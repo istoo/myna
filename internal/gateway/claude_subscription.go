@@ -72,14 +72,13 @@ import (
 )
 
 type subscriptionBridge struct {
-	mu      sync.Mutex
-	runs    map[string]*subscriptionRun // callback token → run
-	calls   map[string]*subscriptionRun // tool_use id → run
-	idle    map[string]*subscriptionRun // conversation so far (turnKey) → run
-	shelf   map[string]*savedSession    // conversation so far (turnKey) → its saved session
-	baseURL string
-	sweep   sync.Once
-	swept   sync.Map // Claude Code's project folders sweepSessions went through
+	mu    sync.Mutex
+	runs  map[string]*subscriptionRun // callback token → run
+	calls map[string]*subscriptionRun // tool_use id → run
+	idle  map[string]*subscriptionRun // conversation so far (turnKey) → run
+	shelf map[string]*savedSession    // conversation so far (turnKey) → its saved session
+	sweep sync.Once
+	swept sync.Map // Claude Code's project folders sweepSessions went through
 	// lost is why each run that had a conversation ended, by that
 	// conversation (convKey), and lostCalls by the tool calls it waited
 	// on or was last handed results for, for the log of a request that

@@ -580,10 +580,6 @@ func qwenpawOwn(providers, cur string) []Option {
 	return out
 }
 
-// qwenpawOwned are the keys of myna's provider file that are myna's to
-// say; the rest are the user's to change in QwenPaw's console.
-var qwenpawOwned = []string{"id", "name", "base_url", "api_key", "chat_model", "is_custom", "extra_models"}
-
 // qwenpawModelOwned are the keys of one of myna's models that are
 // myna's to say, unless the user changed one in QwenPaw (the model's
 // config_overrides names it).

@@ -26,7 +26,7 @@ const groups = () => ({
     memberInfo: [{ id: "a/opus", ready: true, context: 1000000 }, { id: "b/kimi", ready: true, context: 256000 }], rules: [{ use: "b/kimi", agents: ["codex"] }] }],
   pools: [],
 });
-// /api/usage?period=30d's agents, as usageapi.Page names them: a known
+// /api/usage?period=30d's agents, as usageapi.PageIn names them: a known
 // one, one by its User-Agent as the gateway kept it, and the two the
 // picker leaves out
 const usage = { agents: [

@@ -894,24 +894,9 @@ func membersImageInput(ms []provider.Member) *bool {
 			out = in
 			continue
 		}
-		out = anyImageInput(out, in)
+		out = provider.AnyImageInput(out, in)
 	}
 	return out
-}
-
-// anyImageInput is provider's: one member that takes images is enough,
-// both text-only is text-only, and otherwise it is unknown.
-func anyImageInput(a, b *bool) *bool {
-	if a != nil && *a {
-		return a
-	}
-	if b != nil && *b {
-		return b
-	}
-	if a != nil && b != nil {
-		return a
-	}
-	return nil
 }
 
 // pausedError tells an agent that every model of the group it asked for

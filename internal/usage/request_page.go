@@ -466,7 +466,6 @@ type rowRef struct {
 	Index int
 }
 
-func (r rowRef) row() Row { return r.Chunk.row(r.Index) }
 func refNewer(a, b rowRef) bool {
 	return timedOf(a, &a.Chunk.Rows[a.Index]).newer(timedOf(b, &b.Chunk.Rows[b.Index]))
 }
@@ -645,8 +644,6 @@ func (r *chunkRows) release() {
 	}
 }
 
-func (r *chunkRows) row(ref rowRef) Row { return r.of(ref.Chunk).row(ref.Index) }
-
 // rowsOf reads the rows refs name, each chunk once, in the order of chunks.
 func rowsOf(chunks []*rowChunk, refs []rowRef) map[rowRef]Row {
 	out := make(map[rowRef]Row, len(refs))
@@ -705,7 +702,7 @@ type requestIndex struct {
 	// names a call changes (meta), and read without the lock, since a
 	// part is never written once made
 	parts map[partKey]map[uint64]*chunkPart
-	// heatParts are the heatmap's sums of each chunk (heatOf), kept as
+	// heatParts are the heatmap's sums of each chunk (heatDaysOf), kept as
 	// parts are but apart, so that the heatmap's never push a page's out
 	heatParts map[partKey]map[uint64]*chunkPart
 	// heatOld are the heatmap's days before its last few (heatSplit)

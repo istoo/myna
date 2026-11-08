@@ -246,7 +246,7 @@ func keepCalls(path string, st *callFile) {
 // wholeCallReaders read an agent's calls from one session file at a time,
 // rather than a line at a time: its calls are not lines, or its file cannot
 // be read on from the middle of one. Every agent in callSources that is not
-// in callFiles needs an entry here, in lineCallReaders or in
+// in callFileLists needs an entry here, in lineCallReaders or in
 // resumeCallReaders, or its calls are never read.
 var wholeCallReaders = map[string]func(file) (*callFile, bool){
 	"opencode":     readOpenCodeCalls,
@@ -284,8 +284,8 @@ type lineCallReader struct {
 	kept  func(st *callFile) bool
 }
 
-// lineCallReaders are the agents in callSources, beside callFiles' own,
-// whose calls are each one line of a file only appended to.
+// lineCallReaders are the agents in callSources, beside callFileLists',
+// own, whose calls are each one line of a file only appended to.
 var lineCallReaders = map[string]lineCallReader{
 	"kimi":  {kimiCallsBegin, kimiCallLine, nil},         // #1607
 	"pi":    {piCallsBegin, readPiCallLine, piCallsKept}, // #1951

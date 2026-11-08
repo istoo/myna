@@ -105,7 +105,6 @@ func TestElapsed(t *testing.T) {
 func TestDryRunKnowsTheAskersProviders(t *testing.T) {
 	t.Cleanup(func() {
 		dryProviders = nil
-		disconnectDryRun = false
 	})
 	if isMyna("elsewhere/gpt-x") {
 		t.Fatal("an unknown provider's model is myna's")

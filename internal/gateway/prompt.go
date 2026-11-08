@@ -1217,18 +1217,6 @@ func promptCounted(us []RouteUsage) int {
 	return u.Input + u.CacheRead + u.CacheWrite
 }
 
-// windowFor is the context window of a provider's model; 0 when unknown.
-func windowFor(id, model string) int {
-	if id == "" || model == "" {
-		return 0
-	}
-	p, err := provider.Find(id)
-	if err != nil || p == nil {
-		return 0
-	}
-	return windowOf(*p, model)
-}
-
 // livePrompt is p as a route still answering shows it: in the window of
 // the model its try went to, read as the try went out (packinggoods on
 // Discord: a request in flight on a remote myna's claude-opus-5-5 said

@@ -2,6 +2,7 @@ package gateway
 
 import (
 	"bytes"
+	"cmp"
 	"context"
 	"errors"
 	"fmt"
@@ -706,8 +707,8 @@ func (u *unroutedHold) giveUp(unknown bool) {
 	// the report is taken while it is still held: once its context ends,
 	// what held it lets go, and the stacks would show it gone
 	asked, _ := u.asked.Load().(string)
-	who := cmpOr(u.agent, cmpOr(f.agent, "?"))
-	where = cmpOr(where, " not masking it")
+	who := cmp.Or(u.agent, cmp.Or(f.agent, "?"))
+	where = cmp.Or(where, " not masking it")
 	report := u.s.heldReport(u, held, status, who, asked, where)
 	u.cancel(errUnrouted)
 	name, err := writeHeld(report)
@@ -718,7 +719,7 @@ func (u *unroutedHold) giveUp(unknown bool) {
 		saved = "; its report is " + filepath.Join(HeldDir(), name)
 		u.s.trace.update(shown, func(r *Route) { r.Held = name })
 	}
-	log.Printf("gateway: %s %s for %s from %s held %s before routing,%s%s; stopped with %d%s%s", u.r.Method, u.r.URL.Path, cmpOr(asked, "?"), who, held, where, u.waitsSaid(), status, saved, unroutedStacks())
+	log.Printf("gateway: %s %s for %s from %s held %s before routing,%s%s; stopped with %d%s%s", u.r.Method, u.r.URL.Path, cmp.Or(asked, "?"), who, held, where, u.waitsSaid(), status, saved, unroutedStacks())
 }
 
 // unroutedMsg is the error of a request held for held before routing:
@@ -748,13 +749,6 @@ const heldSay = "If it keeps happening, report it with the report myna saved of 
 // modelOn and modelBusy are internal/masking's, a test's
 // to stand in for.
 var modelOn, modelBusy = masking.ModelOn, masking.ModelBusy
-
-func cmpOr(a, b string) string {
-	if a != "" {
-		return a
-	}
-	return b
-}
 
 // unroutedDumped is when the goroutines were last written to the log for
 // a held request: one dump says where, and a burst of held requests

@@ -86,7 +86,7 @@ type chunkPart struct {
 	cells []pageCell
 	kept  int       // rows the filter keeps
 	first time.Time // the oldest charted row's time
-	// days are the heatmap's sums of the chunk, oldest first (heatOf)
+	// days are the heatmap's sums of the chunk, oldest first (heatDaysOf)
 	days []Day
 	// newest is the chunk's newest rows a page read of it (newest)
 	newest atomic.Pointer[chunkNewest]

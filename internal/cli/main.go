@@ -881,12 +881,7 @@ func list(agents []*agent.Agent, detectedOnly bool, dimFrom int) error {
 	return nil
 }
 
-func tilde(p string) string {
-	if home, err := os.UserHomeDir(); err == nil && strings.HasPrefix(p, home) {
-		return "~" + p[len(home):]
-	}
-	return p
-}
+func tilde(p string) string { return appdir.Tilde(p) }
 
 func profiles(args []string) error {
 	switch args[0] {

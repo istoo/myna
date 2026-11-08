@@ -73,8 +73,7 @@ type wire struct {
 	method, path string
 	query        string // its secrets taken out on the way (a key= Gemini's way)
 	req          http.Header
-	body         []byte // the request's, until it is written to reqFull
-	reqFull      *spool
+	body         []byte // the request's, until it is written
 	res          *captureResponseWriter
 	to           Putter
 }

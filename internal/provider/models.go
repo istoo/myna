@@ -1472,11 +1472,11 @@ func sharedImageInput(a, b *bool) *bool {
 	return a
 }
 
-// anyImageInput is a group's answer from two of its members': it takes
+// AnyImageInput is a group's answer from two of its members': it takes
 // images when one of them does (the gateway sends a request with an image
 // to the members that see, #756), is text-only when both are, and is
 // unknown otherwise.
-func anyImageInput(a, b *bool) *bool {
+func AnyImageInput(a, b *bool) *bool {
 	if a != nil && *a {
 		return a
 	}

@@ -25,7 +25,6 @@ type clsUp struct {
 	fail   int
 	wait   time.Duration
 	asked  []string
-	agents []string
 }
 
 func (u *clsUp) ServeHTTP(w http.ResponseWriter, r *http.Request) {

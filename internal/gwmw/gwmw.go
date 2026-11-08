@@ -118,17 +118,6 @@ type Hit struct {
 	Len                                 int
 }
 
-// Blocks says hits have a value the user asked to hold a request back
-// for.
-func Blocks(hits []Hit) bool {
-	for _, h := range hits {
-		if h.Action == "block" {
-			return true
-		}
-	}
-	return false
-}
-
 // Teller is a Masker that says what it masked too, for the record of
 // what was masked; one that doesn't is counted only.
 type Teller interface {

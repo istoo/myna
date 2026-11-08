@@ -1,6 +1,7 @@
 package agent
 
 import (
+	"cmp"
 	"encoding/json"
 	"path/filepath"
 	"reflect"
@@ -209,7 +210,7 @@ func TestClaudeCloudSwitchElsewhereIsSaid(t *testing.T) {
 		{name: "shell off", shell: map[string]string{"CLAUDE_CODE_USE_BEDROCK": "0"}},
 	} {
 		t.Run(c.name, func(t *testing.T) {
-			home, path, _ := claudeCloudHome(t, cmpOr(c.settings, `{}`))
+			home, path, _ := claudeCloudHome(t, cmp.Or(c.settings, `{}`))
 			if c.managed != "" {
 				writeFile(t, claudeManaged(), c.managed)
 			}
@@ -246,13 +247,6 @@ func TestClaudeCloudSwitchElsewhereIsSaid(t *testing.T) {
 			_ = path
 		})
 	}
-}
-
-func cmpOr(a, b string) string {
-	if a != "" {
-		return a
-	}
-	return b
 }
 
 // A Claude Code in WSL keeps its switch under its own stash key, apart

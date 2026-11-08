@@ -54,9 +54,6 @@ var (
 	readyWait = ReadyWait
 	pasteWait = 10 * time.Second
 	sentWait  = 3 * time.Second
-	// rows of one message are written together: a message is whole once
-	// none of its rows came for this long, or anything else did
-	messageQuiet = 150 * time.Millisecond
 )
 
 type shim struct {

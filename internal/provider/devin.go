@@ -225,7 +225,7 @@ func devinModelsFlatten(families []DevinFamily) []catalog.Model {
 		out = append(out, catalog.Model{ID: f.UID, Name: f.Label, Provider: "devin", Context: window, Output: most, ImageInput: images})
 		// the family's fast run, one model for its fast variants as the
 		// family's id is for the rest; not an id of Devin's, the gateway
-		// asks for the variant at the effort (DevinVariant). One a family
+		// asks for the variant at the effort (devinVariantIn). One a family
 		// of that name already is (swe-1.6-fast) isn't made up.
 		for _, t := range f.tiers() {
 			if id := f.UID + "-" + t; !slices.ContainsFunc(families, func(g DevinFamily) bool { return g.named(id) }) {
@@ -654,22 +654,6 @@ func DevinAuthAt(home string) (key, server string, err error) {
 	return c.Key, server, nil
 }
 
-// DevinVariant is the model to ask Devin's API for: a family's name
-// follows its newest model, which the API takes only as one of its
-// variants — the one at the effort asked for, or at the nearest effort
-// the family has; with none asked, the family's default. A family's fast
-// run (claude-opus-5-5-fast) is likewise its fast variant at that effort
-// (claude-opus-5-5-high-fast). A variant's own id (swe-2-medium, one an
-// agent was set to) goes as it is, whatever effort is asked: its id is the
-// effort it runs at.
-func DevinVariant(ctx context.Context, model, effort string) string {
-	families, err := DevinFamilies(ctx)
-	if err != nil {
-		return model
-	}
-	return devinVariantIn(families, model, effort)
-}
-
 func devinVariantIn(families []DevinFamily, model, effort string) string {
 	for _, f := range families {
 		if !f.named(model) || len(f.Models) == 0 {
@@ -889,7 +873,7 @@ func devinNearest(want string, levels []string) string {
 
 // devinModels is Devin's list as myna offers it: each family one model,
 // whose effort is picked as any model's is and turned into the variant at
-// it by the gateway (DevinVariant), rather than 600-odd ids that are
+// it (devinVariantIn), rather than 600-odd ids that are
 // mostly one family at an effort each. See devinCollapse.
 func devinModels(families []DevinFamily) []catalog.Model {
 	return devinCollapse(devinModelsFlatten(families), families, nil)

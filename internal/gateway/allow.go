@@ -134,14 +134,9 @@ var ownAddr = func(a netip.Addr) bool {
 	return false
 }
 
-// AllowedFrom: a request from a may reach myna under the allow list —
-// there is none, a is this computer's, or a is in it.
-func AllowedFrom(a netip.Addr) bool {
-	ps, on, _ := allowPrefixes()
-	return allowedIn(ps, on, a)
-}
-
-// allowedIn is AllowedFrom for the list ps (on: there is one).
+// allowedIn is whether a request from a may reach myna under the allow
+// list ps (on: there is one): there is none, a is this computer's, or a
+// is in it.
 func allowedIn(ps []netip.Prefix, on bool, a netip.Addr) bool {
 	if !on || a.IsLoopback() {
 		return true
@@ -154,7 +149,7 @@ func allowedIn(ps []netip.Prefix, on bool, a netip.Addr) bool {
 	return ownAddr(a)
 }
 
-// allowedListFrom is AllowedFrom for a list not yet in force (Settings
+// allowedListFrom is allowedIn for a list not yet in force (Settings
 // checking a new one won't shut out the page it was saved from).
 func allowedListFrom(list []string, a netip.Addr) bool {
 	if len(list) == 0 || a.IsLoopback() {

@@ -252,7 +252,7 @@ anyone agreed). `sessions.Reads(agent)` in
 `Agents` wins, the others follow `All`). Every lister asks it at its
 entry (`ccFiles`, `codexFiles`, `openCodeFiles`, `piFilesIn`, ... down to
 `geminiTraceFiles`), the aggregators filter by it again (`allFiles`,
-`callFilesWith`, `callSourcesWith`, `traceLineFiles`, `wslFiles`, and
+`callFileLists`, `callSourcesWith`, `traceLineFiles`, `wslFiles`, and
 `DesktopDataDirs`, which Usage's Desktop readers take), and the readers
 that take a session already listed (`TranscriptOf`, `ContentOf`,
 `SearchSession`, `SubagentTranscript`, `CarryOver`, `ReadCallSource`)

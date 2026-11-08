@@ -1224,7 +1224,7 @@ func buildGroupEntries(entries []Entry) []Entry {
 			if i == 0 {
 				e.ImageInput = imageInput
 			} else {
-				e.ImageInput = anyImageInput(e.ImageInput, imageInput)
+				e.ImageInput = AnyImageInput(e.ImageInput, imageInput)
 			}
 			// a member the user gave several levels of its own offers them
 			// (Garydesu on X: one model at a few efforts, the agent picking);

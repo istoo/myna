@@ -47,12 +47,6 @@ func (u *toolsUpstream) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	io("data: {\"type\":\"response.completed\",\"response\":{\"id\":\"resp_" + call + "\",\"status\":\"completed\",\"output\":[{\"type\":\"function_call\",\"id\":\"" + item + "\",\"call_id\":\"" + call + "\",\"name\":\"Bash\",\"arguments\":\"{\\\"command\\\":\\\"date\\\"}\"}],\"usage\":{\"input_tokens\":5,\"output_tokens\":3}}}\n\n")
 }
 
-func (u *toolsUpstream) asked() []string {
-	u.mu.Lock()
-	defer u.mu.Unlock()
-	return append([]string(nil), u.got...)
-}
-
 // messagesUpstream is an upstream that speaks Messages itself, and answers
 // every ask with Bash calls under the ids a bridge numbers by their place
 // in the reply (#4910): fc_0 for the first block of every reply, so the
@@ -106,12 +100,6 @@ func (u *messagesUpstream) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	io("event: message_delta\ndata: {\"type\":\"message_delta\",\"delta\":{\"stop_reason\":\"tool_use\"},\"usage\":{\"output_tokens\":3}}\n\n")
 	io("event: message_stop\ndata: {\"type\":\"message_stop\"}\n\n")
-}
-
-func (u *messagesUpstream) asked() []string {
-	u.mu.Lock()
-	defer u.mu.Unlock()
-	return append([]string(nil), u.got...)
 }
 
 // messageToolUseIDs is the ids of every tool_use block of a Messages reply,

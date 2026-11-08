@@ -93,10 +93,6 @@ func readPenguin(path string) (penguinConfig, error) {
 	return c, err
 }
 
-// PenguinRoot is PenguinHarness's data root under home: $PENGUIN_HOME,
-// else ~/.penguin/data.
-func PenguinRoot(home string) string { return penguinRoot(here(home)) }
-
 // penguinRoot is the data root at a place; a WSL distro's variables
 // aren't read, so it is ~/.penguin/data there.
 func penguinRoot(at place) string {

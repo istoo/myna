@@ -60,8 +60,8 @@ func writeSeatsLocked() {
 }
 
 // seatMatch says whether a key's plan a and the account's card b are one
-// seat: 1 when their windows' resets agree (at least one, as sameAccount
-// asks), -1 when they don't or b can't be a GLM seat, 0 when it can't be
+// seat: 1 when their windows' resets agree (at least one), -1 when they
+// don't or b can't be a GLM seat, 0 when it can't be
 // told: either failed to read, a is not known to be GLM's (a card kept
 // from disk), or no window of both has a reset yet.
 func seatMatch(a, b SubscriptionQuota) int {
@@ -88,9 +88,6 @@ func seatMatch(a, b SubscriptionQuota) int {
 	}
 	return 0
 }
-
-// sameAccount is seatMatch's "the same seat", read afresh.
-func sameAccount(a, b SubscriptionQuota) bool { return seatMatch(a, b) == 1 }
 
 // seatName is how the account card standing in for plan p names the
 // seat: the key provider's name, and the key's when it has several.

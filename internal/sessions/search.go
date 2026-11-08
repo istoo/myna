@@ -39,9 +39,6 @@ const (
 	hitAfter  = 120 // and after it
 )
 
-// errFound stops a read at the first match a reader would want.
-var errFound = errors.New("found")
-
 // fold is a text lowered rune by rune, so a rune's index in it is its index
 // in the text itself.
 func fold(s string) string {

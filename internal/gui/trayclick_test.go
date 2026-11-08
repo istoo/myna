@@ -72,7 +72,6 @@ func TestTrayMenuOpenFrameIsWails(t *testing.T) {
 type fakeTray struct{ impl any }
 
 type fakeLinuxTray struct {
-	label                  string
 	lastClickX, lastClickY int
 }
 

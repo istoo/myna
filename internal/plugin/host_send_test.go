@@ -59,16 +59,6 @@ func (c *wireIn) lastLine() []byte {
 	return c.lines[len(c.lines)-1]
 }
 
-// last is the frame myna wrote last.
-func (c *wireIn) last(t *testing.T) []byte {
-	t.Helper()
-	line := c.lastLine()
-	if line == nil {
-		t.Fatal("myna wrote nothing to the child")
-	}
-	return line
-}
-
 // fetchFrame is the fetch request myna wrote, whatever else it wrote (an
 // abort follows when a test ends a body by cancelling it).
 func (c *wireIn) fetchFrame(t *testing.T) []byte {

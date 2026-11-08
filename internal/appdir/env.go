@@ -49,6 +49,15 @@ func Home() (string, error) {
 	}
 }
 
+// Tilde is p with the user's home folder written ~. A path outside it is
+// left as it is.
+func Tilde(p string) string {
+	if home, err := os.UserHomeDir(); err == nil && strings.HasPrefix(p, home) {
+		return "~" + p[len(home):]
+	}
+	return p
+}
+
 // mustHome is Home for paths built once main has checked it; reached with
 // an unusable home anyway (a test made one), it stops rather than write
 // under the working folder.

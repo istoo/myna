@@ -144,16 +144,7 @@ func heatmapFrom(since, now time.Time, days []Day) *Heatmap {
 	return out
 }
 
-// heatOf is heatmapOf of ps's rows f keeps, added up a chunk at a time:
-// cache's sums of a chunk paired as before are taken as they are. A call
-// through myna changes the gateway's log, and the Requests tab's refresh
-// read every row of the year again for it, and paired them: ~4 GB a
-// minute and seconds of CPU a refresh while an agent worked (#2278).
-func (ps *pairedRows) heatOf(since, now time.Time, f Filter, cache *partCache, identities map[string]sessions.CodexIdentity) *Heatmap {
-	return heatmapFrom(since, now, ps.heatDaysOf(since, now, f, cache, identities, nil))
-}
-
-// heatDaysOf is heatOf's days, oldest first, each with a call, of the
+// heatDaysOf is heatmapOf's days, oldest first, each with a call, of the
 // chunks of ps that only keeps (nil: all).
 func (ps *pairedRows) heatDaysOf(since, now time.Time, f Filter, cache *partCache, identities map[string]sessions.CodexIdentity, only func(*rowChunk) bool) []Day {
 	sigs := ps.sigs(identities)
@@ -325,7 +316,7 @@ var heatBefores struct {
 // heatBeforeOpening, in tests, is told each chunk heatBefore unpacks.
 var heatBeforeOpening func(*rowChunk)
 
-// heatSplit is heatOf of the rows of every chunk, paired. A call through
+// heatSplit is heatDaysOf of the rows of every chunk, paired. A call through
 // myna changes the gateway's newest block and a session file, and the
 // heatmap paired a year of calls again for it: ~1.8 s and most of the
 // GC of each refresh of the Usage page while an agent worked (#2278). The
@@ -476,5 +467,5 @@ func heatCold(cut, since, now time.Time, f Filter, identities map[string]session
 // heatPairing, in tests, is told how many chunks heatSplit pairs.
 var heatPairing func(chunks int)
 
-// heatReading, in tests, is told each chunk heatOf adds up again.
+// heatReading, in tests, is told each chunk heatDaysOf adds up again.
 var heatReading func(*rowChunk)

@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/istoo/myna/internal/agent"
+	"github.com/istoo/myna/internal/appdir"
 	"github.com/istoo/myna/internal/sessions"
 	stats "github.com/istoo/myna/internal/usage"
 )
@@ -549,12 +550,7 @@ func trunc(s string, n int) string {
 	return s
 }
 
-func tildePath(p string) string {
-	if home, err := os.UserHomeDir(); err == nil && home != "" && strings.HasPrefix(p, home) {
-		return "~" + p[len(home):]
-	}
-	return p
-}
+func tildePath(p string) string { return appdir.Tilde(p) }
 
 func writeJSON(w io.Writer, v any) error {
 	e := json.NewEncoder(w)

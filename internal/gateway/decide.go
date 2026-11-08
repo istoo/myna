@@ -395,7 +395,7 @@ func (s *Server) askJev(ctx context.Context, wait time.Duration, p provider.Prov
 	return readJev(b, intents, l.levels, prev)
 }
 
-// maskedState masks what Jev is told of a turn, each as maskedText does.
+// maskedState masks what Jev is told of a turn, each as maskTextHits does.
 func maskedState(ctx context.Context, text, user, reply string) (string, string, string, error) {
 	out := [3]string{text, user, reply}
 	var all maskHits

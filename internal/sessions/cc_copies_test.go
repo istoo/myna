@@ -383,15 +383,6 @@ func TestQoderForkCopiesAreOneRow(t *testing.T) {
 	}
 }
 
-func agentCount(agent string) int {
-	for _, a := range Agents() {
-		if a.Agent == agent {
-			return a.Count
-		}
-	}
-	return 0
-}
-
 // The gateway may know a copy's id from its requests: that is the listed
 // session's, not a gateway-only session of its own.
 func TestMergeExternalKnowsCopies(t *testing.T) {

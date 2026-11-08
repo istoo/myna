@@ -25,7 +25,6 @@ import (
 // The Usage page's JSON is built in usageapi, which the gateway's
 // /v1/myna/usage answers from too.
 type (
-	usageGroup = usageapi.Group
 	usageJSON  = usageapi.Usage
 	ledgerRow  = usageapi.Row
 	ledgerJSON = usageapi.Ledger

@@ -45,7 +45,6 @@ type Run struct {
 	insts    []*inst
 	ctxs     []moejs.Value
 	rejected *Reject
-	status   int
 }
 
 // Begin starts a request's middleware; nil when there is none, and a nil

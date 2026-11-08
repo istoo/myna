@@ -19,6 +19,7 @@ package provider
 
 import (
 	"bytes"
+	"cmp"
 	"encoding/json"
 	"errors"
 	"os"
@@ -403,7 +404,7 @@ func foldSet(ps []Provider, set []int) (Provider, []string) {
 		p.Was = append(p.Was, q.Was...)
 		p.Gave = append(p.Gave, q.Gave...)
 		off := q.Off && !allOff
-		first := KeyAccount{Name: cmpOr(q.KeyName, q.Name), Key: q.Key, Off: off, Protocol: q.KeyProtocol, Weight: q.KeyWeight, Plan: q.KeyPlan}
+		first := KeyAccount{Name: cmp.Or(q.KeyName, q.Name), Key: q.Key, Off: off, Protocol: q.KeyProtocol, Weight: q.KeyWeight, Plan: q.KeyPlan}
 		for _, k := range append([]KeyAccount{first}, q.Keys...) {
 			if k.Key == "" || have[k.Key] {
 				continue
@@ -415,13 +416,6 @@ func foldSet(ps []Provider, set []int) (Provider, []string) {
 	}
 	p.Was = compact(p.Was)
 	return p, ids
-}
-
-func cmpOr(a, b string) string {
-	if a != "" {
-		return a
-	}
-	return b
 }
 
 // foldedRef is a model id ("provider/model", "myna/provider/model")
@@ -517,9 +511,9 @@ func foldHistories(folds [][]int, ps []Provider) {
 		}
 		for _, i := range set {
 			q := ps[i]
-			name := cmpOr(q.KeyName, q.Name)
+			name := cmp.Or(q.KeyName, q.Name)
 			if q.ID == p.ID {
-				name = cmpOr(p.KeyName, Mask(p.Key))
+				name = cmp.Or(p.KeyName, Mask(p.Key))
 			}
 			moves[q.ID] = quotaHistKey(p.ID, name)
 		}

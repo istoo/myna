@@ -35,18 +35,6 @@ func dot(a, b []int8) int32 {
 	return s0 + s1 + s2 + s3
 }
 
-// dot32 is a·b for one attention head's rows.
-func dot32(a, b *[32]float32) float32 {
-	var s0, s1, s2, s3 float32
-	for i := 0; i < 32; i += 4 {
-		s0 += a[i] * b[i]
-		s1 += a[i+1] * b[i+1]
-		s2 += a[i+2] * b[i+2]
-		s3 += a[i+3] * b[i+3]
-	}
-	return (s0 + s1) + (s2 + s3)
-}
-
 // axpy32 adds w·v to c.
 func axpy32(c *[32]float32, w float32, v *[32]float32) {
 	for i := range c {

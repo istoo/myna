@@ -312,16 +312,6 @@ func dshBeforeProfiles(dir, version string, cold bool) bool {
 	return err == nil && slices.ContainsFunc(items, func(it dshItem) bool { return !it.myna })
 }
 
-// dshMakeDesktop makes the desktop app's patch list, as dsh's template,
-// for an app installed and never opened (#2279, liangjinyuan-sihan): with
-// no profile at all myna had nowhere to write, and DeepSeek Harness
-// Desktop has no ~/.dsh until its first start. The app's initProfile
-// writes each of a profile's files only where it is missing ("Existing
-// files are never touched"), so on its first start it adds its
-// package.json and pnpm-workspace.yaml beside this one and keeps
-// myna's entries. The folder is owner-only, as the app makes it.
-func dshMakeDesktop(dir string) error { return dshMakeProfile(dshDesktopFile(dir)) }
-
 // dshMakeProfile makes the patch list f of a profile dsh hasn't made yet, as
 // dsh's template; dsh's initProfile adds the profile's other files beside
 // it on its first boot and keeps it.

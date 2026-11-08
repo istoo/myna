@@ -299,16 +299,10 @@ func callsFor(since time.Time, session, agent string) []Call {
 	return out
 }
 
-// callFiles are the session files that hold calls: Claude Code's, Cowork's
-// and Desktop's own, and Codex's.
-func callFiles() []file { return callFilesWith(codexFiles()) }
-
-// callFilesWith is callFiles with codex the rollouts codexFiles found.
-func callFilesWith(codex []file) []file { return distinctOf(callFileLists(codex)...) }
-
-// callFileLists are callFilesWith's lists, each path not yet kept once:
+// callFileLists are the session files that hold calls: Claude Code's,
+// Cowork's and Desktop's own, and Codex's, each path not yet kept once:
 // the callers that list more add theirs and keep each path once, over
-// all of them (distinctOf), instead of copying callFilesWith's again.
+// all of them (distinctOf).
 func callFileLists(codex []file) [][]file {
 	lists := [][]file{ccFiles("claude", ClaudeDir())}
 	for _, d := range desktopReadDirs() {
@@ -321,13 +315,13 @@ func callFileLists(codex []file) [][]file {
 	return append(lists, allowed(codex), wslFiles("claude", "codex"))
 }
 
-// callSources are callFiles and the other agents' session files. Most are
+// callSources are the calls' files and the other agents' session files. Most are
 // read whole rather than line by line: OpenCode's (#680) and ZCode's, whose
 // calls are rows of their database or their JSON files; and WorkBuddy's, whose usage lines repeat a reply's id as it
 // goes on, as CodeBuddy Code's do (#1779); and MiniMax Code's, whose messages
 // file a later generation of its history may replace (#1605). Kimi Code's
 // (#1607), Pi's and omp's (#1951) and Grok Build's (#4423) are lines of a
-// file only appended to, read on as callFiles' are; DeepSeek Harness's, a
+// file only appended to, read on as the calls' files are; DeepSeek Harness's, a
 // file only appended to that may be packed in zstd frames, is read on
 // from the frame it was left in (readDshCalls). Every agent here needs an
 // entry in wholeCallReaders, lineCallReaders or resumeCallReaders.

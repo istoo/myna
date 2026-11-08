@@ -8,13 +8,13 @@ import (
 	"cmp"
 	"net/http"
 	"net/url"
-	"os"
 	"slices"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/istoo/myna/internal/access"
+	"github.com/istoo/myna/internal/appdir"
 	"github.com/istoo/myna/internal/provider"
 	"github.com/istoo/myna/internal/usage"
 )
@@ -39,12 +39,7 @@ func clients() map[string]*Named {
 }
 
 // Tilde is p with the home folder written ~.
-func Tilde(p string) string {
-	if home, err := os.UserHomeDir(); err == nil && strings.HasPrefix(p, home) {
-		return "~" + p[len(home):]
-	}
-	return p
-}
+func Tilde(p string) string { return appdir.Tilde(p) }
 
 // Group is a usage.Group with what the UI needs to draw it.
 type Group struct {
@@ -71,14 +66,11 @@ func State(p usage.Period) Usage { return stateOf(usage.Summarize(p)) }
 // them, and SessionCount says how many there are.
 const PageSessions = 100
 
-// Page is State with the top PageSessions sessions only, which is what the
-// Usage page asks for: over a long history (Vantiboo1ean, ~750k requests)
-// State sent the page every one of ~84k sessions (22 MB) and worked the
-// summary out again for each refresh.
-func Page(p usage.Period) Usage { return PageIn(p, nil) }
-
-// PageIn is Page with the period's days and the chart's hours in zone, the
-// reader's (ZoneOf); nil is this computer's.
+// PageIn is State with the top PageSessions sessions only, which is what
+// the Usage page asks for: over a long history (Vantiboo1ean, ~750k
+// requests) State sent the page every one of ~84k sessions (22 MB) and
+// worked the summary out again for each refresh. Its days and the chart's
+// hours are in zone, the reader's (ZoneOf); nil is this computer's.
 func PageIn(p usage.Period, zone *time.Location) Usage {
 	return stateOf(usage.SummarizeTopIn(p, PageSessions, zone))
 }
