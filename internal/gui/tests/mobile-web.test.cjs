@@ -133,9 +133,17 @@ async function open(browser, lang, width, { original = false, touch = true, open
 }
 
 async function go(page, view) {
-  // Playwright scrolls each real navigation button into sight before clicking;
-  // this exercises the phone's horizontal navigation strip too.
-  await page.locator(view === "settings" ? "#prefs" : `#nav [data-view="${view}"]`).click();
+  // Playwright scrolls each real navigation button into sight before clicking.
+  // A phone's tab row holds its pages without a sideways scroll: the ones
+  // that don't fit are under More (app.js renderNavOver), which reaches them.
+  const b = page.locator(view === "settings" ? "#prefs" : `#nav [data-view="${view}"]`);
+  if (view === "settings" || (await b.isVisible())) await b.click();
+  else {
+    const name = (await b.textContent()).trim();
+    await page.locator("#navMore").waitFor();
+    await page.locator("#navMore").click();
+    await page.locator(".nav-more-menu .pm-item", { hasText: name }).click();
+  }
   await page.locator(`#view-${view}`).waitFor();
   if (view === "library") await page.locator("#view-library .lib-more:not(:disabled)").waitFor();
   if (view === "plugins") await page.locator("#view-plugins .pm-find").waitFor();
@@ -393,6 +401,48 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
               // compared as ever; side-toggle.test.cjs covers where they are.
               if (!baselineFile("app.js").includes("append(btn, brand)")) {
                 for (const p of [current, original]) await p.addStyleTag({ content: "#sideToggle, .brand, body.side-nav .top { visibility: hidden !important; }" });
+                await current.waitForTimeout(350);
+              }
+              // The light theme's quiet words are darker so they reach 4.5:1
+              // (light-contrast.test.cjs): until BASE_REF has them, both
+              // pictures use the new values and the rest is compared as ever.
+              if (!baselineFile("app.css").includes("--muted: #5f5f67")) {
+                for (const p of [current, original]) await p.addStyleTag({ content: "html, body.panel { --muted: #5f5f67 !important; --faint: #66666e !important; }" });
+                await current.waitForTimeout(350);
+              }
+              // A row with two states is a switch now (settings-switch.test.cjs):
+              // until BASE_REF has it, the controls in Settings' rows are
+              // left out of both pictures, so the rows and what they say are
+              // compared as ever; the control itself is covered by its test.
+              if (!baselineFile("app.js").includes("function settingSwitch")) {
+                for (const p of [current, original]) await p.addStyleTag({ content: "#view-settings .row.pref :is(.segs, .setting-switch) { display: none !important; }" });
+                await current.waitForTimeout(350);
+              }
+              // A segmented control's picked option is heavier: until
+              // BASE_REF has it, both pictures keep the old weight.
+              if (!baselineFile("app.css").includes(".opt.on { color: var(--fg); font-weight: 560")) {
+                for (const p of [current, original]) await p.addStyleTag({ content: ".opt.on { font-weight: 400 !important; }" });
+                await current.waitForTimeout(350);
+              }
+              // Gateway's line now says "one address for every API format" (the review
+              // asked for it in place of "five APIs, one URL"): until BASE_REF
+              // has it, both pictures show the same line; gateway-systemone
+              // checks the words.
+              if (view === "gateway" && !baselineFile("plugins/gateway/client.js").toString().includes("one address for every API format")) {
+                for (const p of [current, original]) await p.evaluate(() => {
+                  const s = document.querySelector("#gateway .who > .sub");
+                  if (s) s.textContent = "N models · no agent routed through it yet · one address for every API format";
+                });
+                await current.waitForTimeout(350);
+              }
+              // Usage's cost note now says "at your model prices" (the review asked
+              // for it in place of "effective prices"): until BASE_REF has
+              // it, both pictures show the same words.
+              if (view === "usage" && !baselineFile("plugins/usage/page.js").toString().includes("at your model prices")) {
+                for (const p of [current, original]) await p.evaluate(() => {
+                  const s = document.querySelector("#usageCost > span:not([class])");
+                  if (s) s.textContent = "at your model prices";
+                });
                 await current.waitForTimeout(350);
               }
               const before = PNG.sync.read(await still(original));

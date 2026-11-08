@@ -10,6 +10,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const HOME = "/Users/aimer";
@@ -78,7 +79,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, calls));
         await page.goto("http://myna.test/");
-        await page.locator('button[data-view="library"]').click();
+        await navTo(page, "library");
         const v = page.locator("#view-library");
         const row = (name) => v.locator(".lib-row").filter({ has: page.locator(".name", { hasText: name }) });
         await row("Antigravity CLI").waitFor();

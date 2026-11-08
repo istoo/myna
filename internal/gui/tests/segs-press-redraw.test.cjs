@@ -20,7 +20,7 @@ const { chromium, webkit } = require("playwright");
 const { watchSettingsReads, settingsDrawn, reach } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
-const words = { en: { on: "On", off: "Off" }, zh: { on: "开启", off: "关闭" }, ja: { on: "オン", off: "オフ" }, de: { on: "An", off: "Aus" } };
+const words = { en: { on: "On", off: "Off", display: "Screen on too" }, zh: { on: "开启", off: "关闭", display: "屏幕也常亮" }, ja: { on: "オン", off: "オフ", display: "画面もオン" }, de: { on: "An", off: "Aus", display: "Bildschirm auch an" } };
 
 function serve(lang, posted, st) {
   const settings = () => ({ lang, theme: "light", searchVendors: [], searchAPIs: [], ...st });
@@ -106,19 +106,19 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const w = words[lang];
       test(`${engine} ${lang} ${width}px: an option pressed while Settings is redrawn is picked once, and nothing when dragged off`, async (t) => {
         // Lightweight mode turned off by the user, so On is a pick away
-        const posted = [], st = { lightweight: false };
+        const posted = [], st = { keepAwake: false };
         const { page, errors } = await open(engine, lang, width, "general", posted, st, t);
         const opt = (id, name) => page.locator(`#${id} .opt`, { hasText: new RegExp(`^${name}$`) });
-        const on = () => page.locator("#lightweightSegs .opt.on").innerText();
-        const saves = () => posted.filter((b) => "lightweight" in b).map((b) => b.lightweight);
+        const on = () => page.locator("#keepAwakeSegs .opt.on").innerText();
+        const saves = () => posted.filter((b) => "keepAwake" in b).map((b) => b.keepAwake);
         assert.equal(await on(), w.off, "off by default");
 
         // pressed, the page redrawn as a save's answer does, let go on the same spot
-        const b = await reveal(page, opt("lightweightSegs", w.on));
+        const b = await reveal(page, opt("keepAwakeSegs", w.on));
         await page.mouse.move(...mid(b));
         await page.mouse.down();
         const swapped = await page.evaluate(() => {
-          const was = document.querySelector("#lightweightSegs .opt:nth-of-type(2)");
+          const was = document.querySelector("#keepAwakeSegs .opt:nth-of-type(2)");
           renderSettings();
           return !was.isConnected;
         });
@@ -127,7 +127,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         for (let i = 0; i < 40 && !saves().length; i++) await page.waitForTimeout(50);
         await settle(page);
         assert.deepEqual(saves(), [true], `posted ${JSON.stringify(posted)}`);
-        assert.equal(st.lightweight, true);
+        assert.equal(st.keepAwake, true);
         assert.equal(await on(), w.on);
 
         // which control's option, and which of its options, the pointer is on
@@ -139,31 +139,31 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
         // dragged off to the other option: nothing, as for any button
         const n = posted.length;
-        const off = await reveal(page, opt("lightweightSegs", w.off));
+        const off = await reveal(page, opt("keepAwakeSegs", w.off));
         await page.mouse.move(...mid(off));
         await page.mouse.down();
         await page.evaluate(() => renderSettings());
-        await page.mouse.move(...mid(await opt("lightweightSegs", w.on).boundingBox()), { steps: 4 });
-        assert.equal(await under(), "lightweightSegs " + w.on);
+        await page.mouse.move(...mid(await opt("keepAwakeSegs", w.on).boundingBox()), { steps: 4 });
+        assert.equal(await under(), "keepAwakeSegs " + w.on);
         await page.mouse.up();
         await page.waitForTimeout(400);
         assert.equal(posted.length, n, `dragged off, posted ${JSON.stringify(posted.slice(n))}`);
         assert.equal(await on(), w.on);
 
-        // dragged to the same option of another control (Keep awake's Off): nothing
-        await reveal(page, opt("keepAwakeSegs", w.off));
-        await page.mouse.move(...mid(await reveal(page, opt("lightweightSegs", w.off))));
+        // dragged to another option of the same control (Keep awake's Screen on too): nothing
+        await reveal(page, opt("keepAwakeSegs", w.display));
+        await page.mouse.move(...mid(await reveal(page, opt("keepAwakeSegs", w.off))));
         await page.mouse.down();
         await page.evaluate(() => renderSettings());
-        await page.mouse.move(...mid(await opt("keepAwakeSegs", w.off).boundingBox()), { steps: 4 });
-        assert.equal(await under(), "keepAwakeSegs " + w.off);
+        await page.mouse.move(...mid(await opt("keepAwakeSegs", w.display).boundingBox()), { steps: 4 });
+        assert.equal(await under(), "keepAwakeSegs " + w.display);
         await page.mouse.up();
         await page.waitForTimeout(400);
         assert.equal(posted.length, n, `dragged to another control, posted ${JSON.stringify(posted.slice(n))}`);
         assert.equal(await on(), w.on);
 
         // a plain click with no redraw is saved once, not twice
-        await page.mouse.click(...mid(await reveal(page, opt("lightweightSegs", w.off))));
+        await page.mouse.click(...mid(await reveal(page, opt("keepAwakeSegs", w.off))));
         for (let i = 0; i < 40 && saves().length < 2; i++) await page.waitForTimeout(50);
         await page.waitForTimeout(300);
         assert.deepEqual(saves(), [true, false], `posted ${JSON.stringify(posted)}`);
@@ -172,7 +172,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // pressed, redrawn, let go, and redrawn again before the click it
         // set off comes, as Browser access is when its state's answer lands
         // then (#3922): the newest On is clicked, once
-        await page.mouse.move(...mid(await reveal(page, opt("lightweightSegs", w.on))));
+        await page.mouse.move(...mid(await reveal(page, opt("keepAwakeSegs", w.on))));
         await page.mouse.down();
         await page.evaluate(() => {
           renderSettings();
@@ -190,14 +190,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // as it lifts, the new On, and that is the only pick. Playwright can't
       // hold a tap in WebKit, so it is Chromium's, through its DevTools.
       if (engine === "chromium") test(`${engine} ${lang} ${width}px: an option tapped while Settings is redrawn is picked once, not twice`, async (t) => {
-        const posted = [], st = { lightweight: false };
+        const posted = [], st = { keepAwake: false };
         const { page, errors } = await open(engine, lang, width, "general", posted, st, t, true);
-        const opt = page.locator("#lightweightSegs .opt", { hasText: new RegExp(`^${w.on}$`) });
+        const opt = page.locator("#keepAwakeSegs .opt", { hasText: new RegExp(`^${w.on}$`) });
         const [x, y] = mid(await reveal(page, opt));
         const cdp = await page.context().newCDPSession(page);
         await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
         const swapped = await page.evaluate(() => {
-          const was = document.querySelector("#lightweightSegs .opt:nth-of-type(2)");
+          const was = document.querySelector("#keepAwakeSegs .opt:nth-of-type(2)");
           renderSettings();
           return !was.isConnected;
         });
@@ -205,8 +205,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
         for (let i = 0; i < 40 && !posted.length; i++) await page.waitForTimeout(50);
         await page.waitForTimeout(500);
-        assert.deepEqual(posted.filter((b) => "lightweight" in b).map((b) => b.lightweight), [true]);
-        assert.equal(await page.locator("#lightweightSegs .opt.on").innerText(), w.on);
+        assert.deepEqual(posted.filter((b) => "keepAwake" in b).map((b) => b.keepAwake), [true]);
+        assert.equal(await page.locator("#keepAwakeSegs .opt.on").innerText(), w.on);
         assert.deepEqual(errors, []);
       });
 

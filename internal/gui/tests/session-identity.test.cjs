@@ -6,6 +6,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 const assets = path.resolve(__dirname, "../assets");
 const now = new Date().toISOString();
 const rows = [
@@ -49,7 +50,7 @@ for (const engine of ["chromium", "webkit"]) {
           await route.fulfill({body:await fs.readFile(file),contentType:{".html":"text/html",".css":"text/css",".js":"text/javascript",".svg":"image/svg+xml"}[path.extname(file)]});
         });
         await page.goto("http://myna.test/");
-        await page.locator('[data-view="usage"]').first().click();
+        await navTo(page, "usage");
         await page.locator(":is(#usageTab .opt, .nav-s):visible").nth(1).click();
         await page.locator(".led-row").first().waitFor();
         const cells = page.locator(".led-row .where");

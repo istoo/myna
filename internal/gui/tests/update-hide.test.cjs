@@ -17,9 +17,9 @@ const { watchSettingsReads, settingsDrawn } = require("./reader.cjs");
 const assets = path.resolve(__dirname, "../assets");
 
 const words = {
-  en: { update: "Update", hide: "Hide until the next version", pill: "Update button", off: "Off", on: "On",
+  en: { update: "Update", hide: "Hide until the next version", pill: "Update reminder", off: "Off", on: "On",
     hidden: "Hidden for 0.1.401 until a newer version is out", again: "Show again", restart: "Restart to update", version: "Version" },
-  zh: { update: "更新", hide: "隐藏，直到下一个版本", pill: "更新按钮", off: "关闭", on: "开启",
+  zh: { update: "更新", hide: "隐藏，直到下一个版本", pill: "更新提示", off: "关闭", on: "开启",
     hidden: "0.1.401 已隐藏，更新的版本发布时再显示", again: "重新显示", restart: "重启以更新", version: "版本" },
 };
 
@@ -190,7 +190,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // off for good: no pill, whatever version is out
         await showRow(page, row);
         const before = await scrolls(page);
-        await row.locator("button", { hasText: w.off }).click();
+        await row.getByRole("switch").click();
         await page.locator("#update").waitFor({ state: "hidden" });
         assert.equal(ctl.saves.at(-1).noUpdatePill, true);
         assert.equal(await scrolls(page), before, "the click must not scroll the page");
@@ -200,7 +200,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.waitForTimeout(400);
         assert.equal(await page.locator("#update").isHidden(), true);
         await showRow(page, row);
-        await page.locator("#about .row.pref", { has: page.locator(".name", { hasText: w.pill }) }).locator("button", { hasText: w.on }).click();
+        await page.locator("#about .row.pref", { has: page.locator(".name", { hasText: w.pill }) }).getByRole("switch").click();
         await page.locator("#update").waitFor({ state: "visible" });
         assert.equal(ctl.saves.at(-1).noUpdatePill, false);
         assert.deepEqual(errors, []);

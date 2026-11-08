@@ -15,6 +15,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const now = Date.now();
@@ -70,8 +71,8 @@ const ways = {
     back: (page) => page.evaluate(() => window.dispatchEvent(new Event("focus"))),
   },
   "another page": {
-    leave: (page) => page.locator('#nav button[data-view="agents"]').click(),
-    back: (page) => page.locator('#nav button[data-view="routing"]').click(),
+    leave: (page) => navTo(page, "agents"),
+    back: (page) => navTo(page, "routing"),
   },
   "the window hidden": {
     leave: (page) => page.evaluate(() => window.__hide(true)),

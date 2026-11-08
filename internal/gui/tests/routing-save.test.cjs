@@ -81,11 +81,23 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         };
         // the field under a label: the label's next sibling
         const fieldOf = (label) => page.locator(".editor label", { hasText: new RegExp(`^${label}$`) }).locator("xpath=following-sibling::div[1]");
+        // Stays sits in the editor's Advanced fold; the routing mode is one
+        // picker whose menu names them all
+        const openAdv = async () => {
+          const adv = page.locator(".editor details.more.advanced");
+          if (!(await adv.evaluate((d) => d.open))) await adv.locator("summary").first().click();
+        };
+        const pick = async (name) => {
+          await page.locator(".editor .route-pick-btn").click();
+          await page.locator(".route-menu .pm-item", { hasText: new RegExp(`^${name}$`) }).click();
+        };
+        const picked = async () => (await page.locator(".editor .route-pick-btn").textContent()).trim();
         const opt = (label, name) => fieldOf(label).locator(".segs .opt", { hasText: new RegExp(`^${name}$`) });
         const hint = (label) => fieldOf(label).locator(":scope > .hint").first();
         const unsaved = (label) => fieldOf(label).getByText(L.unsaved, { exact: true });
         const said = (s) => page.evaluate(([k, zh]) => zh ? I18N.zh[k] : k, [s, zh]);
         await open();
+        await openAdv();
         const missing = await page.evaluate(() => [
           "Stays", "Auto", "Session", "Within a turn", "Off", "unsaved", "Made when the provider is saved; Cancel drops it",
           "A conversation stays with the account or key that answered it while what the vendor cached of it is worth keeping — within a turn always, across turns while it's fresh.",
@@ -100,8 +112,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal(await unsaved(L.routing).isVisible(), false);
         // each option shows what it does: nothing sent, redrawn or scrolled
         for (const [id, en, cn] of [...ROUTINGS.slice(1), ROUTINGS[0]]) {
-          await opt(L.routing, zh ? cn : en).click();
-          assert.match(await opt(L.routing, zh ? cn : en).getAttribute("class"), /\bon\b/);
+          await pick(zh ? cn : en);
+          assert.equal(await picked(), zh ? cn : en, `${en} picked`);
           const desc = await page.evaluate((id) => ROUTINGS.find((r) => r[0] === id)[2], id);
           assert.equal(await hint(L.routing).textContent(), await said(desc), `${en} says what it does`);
           assert.equal(await unsaved(L.routing).isVisible(), id !== "", `${en}: unsaved said`);
@@ -120,13 +132,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.getByRole("button", { name: L.cancel, exact: true }).click();
         await page.getByRole("alertdialog").locator("button").last().click();
         await open();
-        assert.match(await opt(L.routing, zh ? "智能" : "Smart").getAttribute("class"), /\bon\b/);
+        await openAdv();
+        assert.equal(await picked(), zh ? "智能" : "Smart");
         assert.match(await opt(L.stays, zh ? "自动" : "Auto").getAttribute("class"), /\bon\b/);
         assert.equal(await unsaved(L.routing).isVisible(), false);
         assert.equal(await unsaved(L.stays).isVisible(), false);
         assert.deepEqual(posts, []);
         // picked again and saved: the Save carries them
-        await opt(L.routing, zh ? "轮流" : "In turn").click();
+        await pick(zh ? "轮流" : "In turn");
         await opt(L.stays, zh ? "整个会话" : "Session").click();
         await page.getByRole("button", { name: L.save, exact: true }).click();
         await page.waitForFunction(() => !document.querySelector(".editor"));
@@ -151,14 +164,19 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           await page.goto("http://myna.test/?view=providers");
           await page.locator(".row.provider", { hasText: p.name }).first().click();
           await page.locator(".editor .accts").first().waitFor();
-          const field = page.locator(".editor label", { hasText: new RegExp(`^${L.routing}$`) }).locator("xpath=following-sibling::div[1]");
-          const shown = await field.locator(".segs").first().evaluate((box) => [...box.querySelectorAll(".opt")].filter((b) => getComputedStyle(b).display !== "none").map((b) => b.textContent));
-          assert.deepEqual(shown, [zh ? "智能" : "Smart"], `${where}: Smart alone`);
-          assert.match(await field.locator(".segs .opt").first().getAttribute("class"), /\bon\b/, `${where}: Smart picked`);
+          const btn = page.locator(".editor .route-pick-btn");
+          const names = async () => {
+            await btn.click();
+            const out = await page.locator(".route-menu .pm-item .pm-name").allTextContents();
+            await page.keyboard.press("Escape");
+            return out;
+          };
+          assert.equal((await btn.textContent()).trim(), zh ? "智能" : "Smart", `${where}: Smart picked`);
+          assert.deepEqual(await names(), [zh ? "智能" : "Smart"], `${where}: Smart alone`);
           assert.ok(await page.evaluate(() => document.scrollingElement.scrollWidth <= innerWidth + 1), `${where}: fits`);
           // on again, every routing is back
           await page.evaluate(() => applyFeatures([{ id: "rotation", on: true }]));
-          const back = await field.locator(".segs").first().evaluate((box) => [...box.querySelectorAll(".opt")].filter((b) => getComputedStyle(b).display !== "none").length);
+          const back = (await names()).length;
           // By weight is offered for accounts as for keys (rubbzha on X)
           assert.equal(back, 9, `${where}: every routing back`);
           assert.deepEqual(errors, [], where);

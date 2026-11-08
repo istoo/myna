@@ -160,9 +160,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal(await row.evaluate((r) => r.previousElementSibling.id), "trayBirdRow", `${where}: under the myna icon row`);
         assert.equal(await row.evaluate((r) => getComputedStyle(r).borderLeftWidth), "0px");
         assert.equal(await row.evaluate((r) => r.scrollWidth <= r.clientWidth + 1 && r.getBoundingClientRect().right <= innerWidth), true, `${where}: the row is cut`);
-        const opts = row.locator("#trayPaceSegs .opt");
-        if (want[lang].off) assert.deepEqual((await opts.allTextContents()).map((s) => s.trim()), [want[lang].off, want[lang].on]);
-        assert.equal(await opts.nth(0).evaluate((b) => b.classList.contains("on")), true, `${where}: off unless asked for`);
+        const opts = row.locator("#trayPaceSegs [role=switch]");
+        assert.equal(await opts.getAttribute("aria-checked"), "false", `${where}: off unless asked for`);
 
         // scrolled down with a real wheel, the row in sight; then clicked: no scroll
         await page.waitForTimeout(500);
@@ -172,10 +171,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.waitForTimeout(300);
         const before = await scrolled(page);
         assert(before > 0, `${where}: the settings list must be scrolled`);
-        await opts.nth(1).click();
+        await opts.click();
         for (let i = 0; i < 50 && !posts.length; i++) await page.waitForTimeout(50);
         assert.equal(posts.at(-1).trayPace, true, `${where}: On posts trayPace`);
-        await page.waitForFunction(() => document.querySelectorAll("#trayPaceSegs .opt")[1].classList.contains("on"));
+        await page.waitForFunction(() => document.querySelector("#trayPaceSegs [role=switch]")?.getAttribute("aria-checked") === "true");
         await page.waitForTimeout(300);
         assert.equal(await scrolled(page), before, `${where}: On moved the page`);
 

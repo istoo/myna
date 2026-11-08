@@ -5,8 +5,8 @@
 // quitNoAsk with the rest of the settings kept; a quitNoAsk the question's
 // Don't ask again saved shows Off, and On saves it false. The app's only:
 // a browser's page (myna web) quits without asking, so the row isn't
-// there. In every language, both engines, 1100 and 420 wide; segments,
-// never a native <select>, and the click moves nothing.
+// there. In every language, both engines, 1100 and 420 wide; one switch
+// (role=switch), never a native <select>, and the click moves nothing.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
@@ -16,11 +16,11 @@ const { watchSettingsReads, settingsDrawn } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const words = {
-  en: { name: "Ask before quitting", off: "Off", on: "On", sub: "Quit names them and asks first" },
-  zh: { name: "退出前询问", off: "关闭", on: "开启", sub: "退出前先列出它们并询问" },
-  "zh-TW": { name: "退出前詢問", off: "關閉", on: "開啟", sub: "退出前先列出它們並詢問" },
-  ja: { name: "終了前に確認", off: "オフ", on: "オン", sub: "終了前にそれらを示して確認します" },
-  de: { name: "Vor dem Beenden fragen", off: "Aus", on: "An", sub: "nennt Beenden sie und fragt zuerst nach" },
+  en: { name: "Ask before quitting", sub: "Quit names them and asks first" },
+  zh: { name: "退出前询问", sub: "退出前先列出它们并询问" },
+  "zh-TW": { name: "退出前詢問", sub: "退出前先列出它們並詢問" },
+  ja: { name: "終了前に確認", sub: "終了前にそれらを示して確認します" },
+  de: { name: "Vor dem Beenden fragen", sub: "nennt Beenden sie und fragt zuerst nach" },
 };
 
 function serve(lang, saved, own, web) {
@@ -95,7 +95,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // its explanation rests out of sight, shown whole in the row's hover card
       // (settings-hints.test.cjs)
       assert.equal(await row.locator(".sub").first().evaluate((e) => getComputedStyle(e).getPropertyValue("--hint").trim()), "1", "the explanation shows at rest");
-      for (const part of [".name", ".segs"]) {
+      for (const part of [".name", "#quitAskSegs [role=switch]"]) {
         const fit = await row.locator(part).first().evaluate((e) => {
           const r = e.getBoundingClientRect();
           return e.scrollWidth <= e.clientWidth + 1 && r.width > 0 && r.left >= 0 && r.right <= innerWidth + 1;
@@ -103,12 +103,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.ok(fit, `${part} fits at ${width}`);
       }
       assert.equal(await row.locator("select").count(), 0, "no native <select>");
-      const on = row.locator(".segs button", { hasText: w.on });
-      const off = row.locator(".segs button", { hasText: w.off });
-      assert.equal(await on.getAttribute("aria-pressed"), "true", "On by default");
+      const sw = row.locator("#quitAskSegs [role=switch]");
+      assert.equal(await sw.getAttribute("aria-checked"), "true", "On by default");
 
       const before = await page.evaluate(() => [scrollX, scrollY, document.querySelector("#view-settings")?.scrollTop]);
-      await press(page, off);
+      await press(page, sw);
       await until(() => saved.length);
       assert.equal(saved.length, 1, "saved once");
       assert.equal(saved[0].quitNoAsk, true);
@@ -123,9 +122,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const row = page.locator("#setPage-general #quitAskRow");
       await row.waitFor();
       await reach(page, row);
-      const on = row.locator(".segs button", { hasText: w.on });
-      assert.equal(await row.locator(".segs button", { hasText: w.off }).getAttribute("aria-pressed"), "true", "Off, as the question left it");
-      await press(page, on);
+      const sw = row.locator("#quitAskSegs [role=switch]");
+      assert.equal(await sw.getAttribute("aria-checked"), "false", "Off, as the question left it");
+      await press(page, sw);
       await until(() => saved.length);
       assert.equal(saved.length, 1, "saved once");
       assert.equal(saved[0].quitNoAsk, false);

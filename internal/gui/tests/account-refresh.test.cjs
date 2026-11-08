@@ -75,7 +75,7 @@ for (const [engine, browserType] of [["chromium", chromium], ["webkit", webkit]]
       const tip = await page.evaluate((lang) => lang === "en" ? "Read this account's usage again" : I18N[lang]?.["Read this account's usage again"], lang);
       assert.ok(tip, `${at}: the refresh's tip has no ${lang}`);
       for (const u of ["first@example.com", "spare@example.com"]) {
-        const b = row(u).locator(".acc-line > .plan + .quota-refresh");
+        const b = row(u).locator(".acc-line .plan + .quota-refresh");
         assert.equal(await b.count(), 1, `${at}: ${u} has no refresh`);
         assert.equal(await b.getAttribute("title"), tip);
         const box = await b.boundingBox(), aq = await row(u).locator(".acc-line").boundingBox(), r = await row(u).boundingBox();
@@ -83,7 +83,7 @@ for (const [engine, browserType] of [["chromium", chromium], ["webkit", webkit]]
         assert.ok(box.y >= aq.y - 1 && box.y + box.height <= aq.y + aq.height + 1, `${at}: ${u}'s refresh is off its line`);
         assert.ok(box.x + box.width <= r.x + r.width + 1, `${at}: ${u}'s refresh is out of its row`);
         // beside the plan
-        const plan = await row(u).locator(".acc-line > .plan").boundingBox();
+        const plan = await row(u).locator(".acc-line .plan").boundingBox();
         assert.ok(box.y < plan.y + plan.height && box.y + box.height > plan.y && box.x >= plan.x + plan.width && box.x - plan.x - plan.width <= 8, `${at}: ${u}'s refresh is not beside its plan`);
       }
       assert.equal(await row("gone@example.com").locator(".quota-refresh").count(), 0, `${at}: a signed-out account has a refresh`);

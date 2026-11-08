@@ -13,6 +13,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const N = 250; // two pages and a half in the big folder
@@ -65,7 +66,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message + " " + e.stack));
         await page.route("**/*", serve(lang));
         await page.goto("http://myna.test/");
-        await page.locator('#nav [data-view="sessions"]').click();
+        await navTo(page, "sessions");
         const view = page.locator("#view-sessions");
         const rows = view.locator(".row.sm-sess");
         const more = view.locator(".sm-more");

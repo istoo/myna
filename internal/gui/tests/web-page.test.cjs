@@ -14,6 +14,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const midnight = new Date();
@@ -115,7 +116,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.locator("#gateway > .gw-mark").waitFor();
 
       // the request archive's switch, over the Usage page's requests
-      await page.locator('[data-view="usage"]').first().click();
+      await navTo(page, "usage");
       await page.locator(":is(#usageTab .opt, .nav-s):visible").nth(1).click();
       const sw = page.locator("#ledArchive .led-arch-sw");
       await sw.waitFor();

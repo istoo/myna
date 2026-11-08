@@ -220,7 +220,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.deepEqual((await shown(page)).panes, ["wb"]);
         assert.deepEqual(await visibleRows(), [w.checkin]);
         await thumbsUnderPicks("wb");
-        await pick("#wbCheckinSegs", w.on);
+        await page.locator("#wbCheckinSegs [role=switch]").click();
         await last("workbuddyCheckin", true);
 
         await page.locator("#warmTab-codex").click();
@@ -319,7 +319,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.deepEqual(await shown(page), { on: ["trae"], panes: ["trae"], focus: "trae" });
         assert.deepEqual(await page.locator(".warm-panes .row.pref:visible .who .name").allTextContents(), [w.checkin]);
         assert((await page.locator("#traeCheckinSub").textContent()).includes(w.checked), "today's check-in is shown");
-        await page.locator("#traeCheckinSegs .opt", { hasText: w.on }).first().click();
+        await page.locator("#traeCheckinSegs [role=switch]").click();
         for (let i = 0; i < 50 && !posts.length; i++) await page.waitForTimeout(40);
         assert.equal(posts.at(-1).traeCheckin, true);
         assert.equal(posts.at(-1).workbuddyCheckin, false);

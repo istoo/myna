@@ -70,7 +70,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         ].filter((k) => ["zh", "zh-TW", "ja", "de"].some((l) => !I18N[l][k])));
         assert.deepEqual(missing, [], "every string has its translations");
         const field = () => page.locator(".editor label", { hasText: new RegExp(`^${L.routing}$`) }).locator("xpath=following-sibling::div[1]");
-        const shown = () => field().locator(".segs").first().evaluate((box) => [...box.querySelectorAll(".opt")].filter((b) => getComputedStyle(b).display !== "none").map((b) => [b.textContent, b.classList.contains("on")]));
+        // the one picker: its menu lists the routings and marks the one picked
+        const shown = async () => {
+          await field().locator(".route-pick-btn").click();
+          await page.locator(".route-menu").waitFor();
+          return page.locator(".route-menu .pm-item").evaluateAll((bs) => bs.filter((b) => getComputedStyle(b).display !== "none").map((b) => [b.querySelector(".pm-name").textContent, b.classList.contains("on")]));
+        };
         const hint = () => field().locator(":scope > .hint").first().textContent();
         for (const p of [sub, relay]) {
           const where = `${width}px ${p.name}`;
@@ -83,7 +88,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             assert.deepEqual(opts.at(-1), ["gone/old", true], `${where}: the saved routing`);
             assert.equal(await hint(), await page.evaluate(() => t("No plugin serves this routing now, so requests go to the accounts or keys in their listed order. Turn on the gateway plugin that serves it on the Plugins page.")), where);
           } else assert.ok(!opts.some(([n]) => n === "gone/old"), `${where}: not another provider's`);
-          await field().locator(".segs .opt", { hasText: /^spread\/fewest-tokens$/ }).click();
+          // the menu is open from shown(); pick the plugin's routing in it
+          await page.locator(".route-menu .pm-item", { hasText: "spread/fewest-tokens" }).click();
           assert.equal(await hint(), await page.evaluate(() => t("Routed by {name}, a routing of the gateway plugin {plugin}: it orders the accounts or keys for each request. If it fails or takes too long, they are tried in their listed order.", { name: "fewest-tokens", plugin: "spread" })), where);
           assert.ok(await page.evaluate(() => document.scrollingElement.scrollWidth <= innerWidth + 1), `${where}: fits`);
           await page.getByRole("button", { name: L.save, exact: true }).click();
@@ -105,7 +111,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.locator(".row.provider", { hasText: sub.name }).first().click();
       await page.locator(".editor .accts").first().waitFor();
       const field = page.locator(".editor label", { hasText: new RegExp(`^${L.routing}$`) }).locator("xpath=following-sibling::div[1]");
-      const names = await field.locator(".segs").first().evaluate((box) => [...box.querySelectorAll(".opt")].filter((b) => getComputedStyle(b).display !== "none").map((b) => b.textContent));
+      await field.locator(".route-pick-btn").click();
+      await page.locator(".route-menu").waitFor();
+      const names = await page.locator(".route-menu .pm-item").evaluateAll((bs) => bs.filter((b) => getComputedStyle(b).display !== "none").map((b) => b.querySelector(".pm-name").textContent));
       assert.ok(!names.includes("spread/fewest-tokens"), JSON.stringify(names));
       assert.ok(names.length >= 5, JSON.stringify(names));
     });

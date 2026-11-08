@@ -72,15 +72,21 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.waitForSelector("#nav button.on");
         await page.waitForFunction(() => !document.querySelector("#update").hidden);
         assert(Math.abs(await page.evaluate(() => devicePixelRatio) - zoom) < 0.01, "the page isn't zoomed");
-        let last = 0;
+        let last = 0, moreWas = false;
         for (let w = 1300; w >= 700; w -= 10) {
           // the window's points; at a 1.1 zoom 1300 points are 1182 CSS pixels
           await page.setViewportSize({ width: engine === "webkit" ? Math.round(w / zoom) : w, height: 600 });
           await settled(page);
-          const n = await steps(page), at = `${w}pt: ${await page.evaluate(() => document.querySelector(".top").className)}`;
+          const n = await steps(page), more = await page.evaluate(() => !document.querySelector("#navMore").hidden);
+          const at = `${w}pt: ${await page.evaluate(() => document.querySelector(".top").className)}`;
           if (w >= 1200) assert.equal(n, 0, "the header is drawn in with room to spare at " + at);
-          assert(n >= last, "a wider window is drawn in more than a narrower one at " + at);
-          last = n;
+          // under More the row is packed again, so its classes start over:
+          // the pages go under More rather than the header drawing in
+          if (more && !moreWas) last = 0;
+          assert(more || !moreWas, "More stays once it is there at " + at);
+          if (!more) assert(n >= last, "a wider window is drawn in more than a narrower one at " + at);
+          last = Math.max(last, n);
+          moreWas = more;
         }
         assert(last > 0, "the narrowest window never drew the header in");
         assert.deepEqual(errors, []);

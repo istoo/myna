@@ -169,6 +169,27 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       });
     }
 
+    // a section's heading is there only while one of its rows matched
+    await t.test("no heading without a match", async () => {
+      const page = await open("en", []);
+      const headings = () => page.evaluate(() => [...document.querySelectorAll("#view-settings > [role=tabpanel]")].filter((p) => p.getClientRects().length).flatMap((p) => [...p.querySelectorAll(":scope > .row-head")].filter((h) => !h.classList.contains("warm-head")).map((h) => {
+        let hit = false;
+        for (let n = h.nextElementSibling; n && !n.matches(".row-head"); n = n.nextElementSibling) {
+          if (n.classList.contains("set-hit") || n.querySelector?.(".set-hit")) { hit = true; break; }
+          if (n.matches(".list,.warm-panes") && !n.classList.contains("set-miss")) { hit = true; break; }
+        }
+        return { text: h.textContent.trim(), shown: !!h.getClientRects().length, hit };
+      })));
+      for (const q of ["Appearance", "Reduce motion", "currency", "reduced", "zzqqxx"]) {
+        await type(page, q);
+        for (const h of await headings()) assert.ok(!h.shown || h.hit, `${q}: "${h.text}" stays with nothing under it`);
+      }
+      await type(page, "github");
+      assert.ok((await headings()).some((h) => h.shown && h.hit), "the heading of the match shows");
+      assert.deepEqual(page.errors, []);
+      await page.context().close();
+    });
+
     await t.test("myna web on a phone", async () => {
       const page = await open("zh", [], { width: 390, height: 760, web: true });
       assert.deepEqual(await overflow(page), []);

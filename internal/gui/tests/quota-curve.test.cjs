@@ -560,10 +560,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const row = page.locator("#colorblindRow");
       await row.waitFor();
       assert.equal(await row.locator(".name").innerText(), w.label);
-      assert.deepEqual(await row.locator("#colorblindSegs .opt").allInnerTexts(), [w.off, w.on]);
-      assert.equal(await row.locator("#colorblindSegs .opt.on").innerText(), w.off, "off by default");
+      assert.equal(await row.locator("#colorblindSegs [role=switch]").getAttribute("aria-checked"), "false", "off by default");
       const scroll0 = await page.locator("#view-settings").evaluate((v) => v.scrollTop);
-      await row.locator("#colorblindSegs .opt", { hasText: w.on }).click();
+      await row.locator("#colorblindSegs [role=switch]").click();
       for (let i = 0; i < 50 && !posts.length; i++) await page.waitForTimeout(40);
       assert.equal(posts.at(-1)?.colorblind, true);
       assert.equal(await page.locator("#view-settings").evaluate((v) => v.scrollTop), scroll0, "toggling colorblind mode never scrolls");
@@ -645,8 +644,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.goto("http://myna.test/?view=settings&tab=general");
       await row.waitFor();
       assert.equal(await page.evaluate(() => document.documentElement.dataset.colorblind), "1", "kept across reload via boot.js");
-      assert.equal(await row.locator("#colorblindSegs .opt.on").innerText(), w.on);
-      await row.locator("#colorblindSegs .opt", { hasText: w.off }).click();
+      assert.equal(await row.locator("#colorblindSegs [role=switch]").getAttribute("aria-checked"), "true");
+      await row.locator("#colorblindSegs [role=switch]").click();
       for (let i = 0; i < 50 && posts.at(-1)?.colorblind !== false; i++) await page.waitForTimeout(40);
       assert.equal(posts.at(-1)?.colorblind, false);
       await page.waitForFunction(() => !document.documentElement.dataset.colorblind);

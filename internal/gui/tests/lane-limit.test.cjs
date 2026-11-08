@@ -224,7 +224,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.mouse.move(0, 0);
       await page.waitForTimeout(250);
       assert.equal(await me.isVisible(), true, "running: shown on its line, ⋯ closed");
-      assert.equal(await me.evaluate((e) => e.parentElement.classList.contains("acc-line")), true);
+      assert.equal(await me.evaluate((e) => !!e.closest(".acc-line")), true);
       // the rest of the row's pill look, no colour of a full lane
       assert.equal(await me.evaluate((e) => e.classList.contains("busy-lane") || e.classList.contains("queued")), false);
       const el = await me.elementHandle();

@@ -20,6 +20,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 const engines = process.env.BROWSER ? [process.env.BROWSER] : ["webkit"];
 
 const assets = path.resolve(process.env.MYNA_ROUTING_ASSETS || path.join(__dirname, "../assets"));
@@ -153,7 +154,7 @@ for (const engine of engines) for (const lang of ["en", "zh"]) {
     assert(errors.length === 0, errors.join("\n"));
 
     // Agents picked: #view-routing.hidden, the tab in sight, frames drawn
-    await page.locator('#nav button[data-view="agents"]').click();
+    await navTo(page, "agents");
     assert.equal(await page.evaluate(() => document.querySelector("#view-routing").hidden), true, "Agents selected must hide the Routing view");
     await page.evaluate(() => window.__mark());
     const idle = await page.evaluate(() => window.__count(1200));
@@ -165,7 +166,7 @@ for (const engine of engines) for (const lang of ["en", "zh"]) {
     assert.equal(await page.evaluate(() => window.__count(1200)), 0, "the Routing loop came back with Agents still selected");
 
     // Routing picked again: the loop resumes, and the page is drawn
-    await page.locator('#nav button[data-view="routing"]').click();
+    await navTo(page, "routing");
     await page.evaluate(() => window.__mark());
     const again = await page.evaluate(() => window.__count(600));
     assert(again > 10, `picking Routing again must resume the loop, and fly the request under way (${again} frames in 600ms)`);
@@ -191,8 +192,8 @@ for (const engine of engines) for (const lang of ["en", "zh"]) {
 
 const hiddenWays = {
   "another view": {
-    hide: page => page.locator('#nav button[data-view="agents"]').click(),
-    show: page => page.locator('#nav button[data-view="routing"]').click(),
+    hide: page => navTo(page, "agents"),
+    show: page => navTo(page, "routing"),
   },
   "document visibility": {
     hide: page => page.evaluate(() => window.__visibility(true)),

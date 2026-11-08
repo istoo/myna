@@ -86,11 +86,12 @@ function fixture(lang, { libOn, have = false, imageGen = "", gateway = false }) 
 
 const row = (page) => page.locator("#imageGenRow");
 const wide = (page) => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-// the Library's tab in the nav, there or switched off (at 420 the nav
-// itself folds away, so its own display is what tells)
+// the Library's tab in the nav, there or switched off. A tab that doesn't
+// fit a narrow row is under More (nav-over) and is still there; one whose
+// feature is off is display:none without that class.
 const libNav = (page) => page.evaluate(() => {
   const b = document.querySelector('#nav button[data-view="library"]');
-  return !!b && !b.hidden && getComputedStyle(b).display !== "none";
+  return !!b && !b.hidden && (getComputedStyle(b).display !== "none" || b.classList.contains("nav-over"));
 });
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -138,7 +139,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           assert.equal(await wide(page), 0);
           shots.push([`${lang}-${width}-off`, await row(page).screenshot()]);
           await go.click();
-          await page.waitForFunction(() => { const b = document.querySelector('#nav button[data-view="library"]'); return !!b && !b.hidden && getComputedStyle(b).display !== "none"; });
+          await page.waitForFunction(() => { const b = document.querySelector('#nav button[data-view="library"]'); return !!b && !b.hidden && (getComputedStyle(b).display !== "none" || b.classList.contains("nav-over")); });
           assert.deepEqual(posts, [{ id: "library", on: true }]);
           await page.waitForFunction((s) => document.querySelector("#imageGenRow button.image-gen-tool")?.textContent.trim() === s, w("Give agents Myna Image…"));
           assert.equal(await row(page).locator(".who > .sub").first().textContent(), w("The model Myna Image draws with. Agents get the Myna Image tool from the Library; images are saved in their project"));

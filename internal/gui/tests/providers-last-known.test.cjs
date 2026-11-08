@@ -12,6 +12,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const SLOW = 1500; // each fresh read of the list
@@ -101,7 +102,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.waitForFunction(() => document.querySelector("#view-agents") && !document.querySelector("#view-agents").classList.contains("loading"));
       for (let i = 0; i < 100 && reads.done < 1; i++) await page.waitForTimeout(50);
       assert.equal(reads.done, 1, "the list was not read in the background");
-      await page.locator('#nav button[data-view="providers"]').click();
+      await navTo(page, "providers");
       await row(page).first().waitFor({ timeout: 1000 });
       assert.equal(await skeletons(page).count(), 0, "skeletons drawn over a list read in the background");
       assert.equal(await name(page), "Fresh Relay");

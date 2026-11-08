@@ -211,21 +211,21 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     t.after(() => browser.close());
     const prefs = {}, posted = [];
     const { page, errors } = await open(browser, false, async () => {}, prefs, posted, "settings");
-    const on = page.locator("#birdSegs .opt", { hasText: /^On$/ }), off = page.locator("#birdSegs .opt", { hasText: /^Off$/ });
-    await on.waitFor();
-    assert.match(await on.getAttribute("class"), /\bon\b/);
+    const sw = page.locator("#birdSegs [role=switch]");
+    await sw.waitFor();
+    assert.equal(await sw.getAttribute("aria-checked"), "true");
     // a skeleton up while it is turned off: the look stops, and one added
     // after never starts it
     await page.evaluate(() => { const s = document.createElement("span"); s.className = "skeleton"; document.body.append(s); });
     await page.waitForFunction(() => looks.live.size === 1);
-    await off.click();
+    await sw.click();
     await page.waitForFunction(() => document.documentElement.dataset.bird === "off" && looks.live.size === 0);
     assert.equal(posted.at(-1).noBird, true);
     const made = await page.evaluate(() => looks.made);
     await page.evaluate(() => { const s = document.createElement("span"); s.className = "skeleton"; document.body.append(s); });
     await page.waitForTimeout(600);
     assert.equal(await page.evaluate(() => looks.made), made, "nothing starts looking with it off");
-    await on.click();
+    await sw.click();
     await page.waitForFunction(() => !document.documentElement.dataset.bird && looks.live.size === 1);
     assert.equal(posted.at(-1).noBird, false);
     assert.deepEqual(errors, []);

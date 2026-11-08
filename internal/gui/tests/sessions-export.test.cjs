@@ -12,7 +12,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
-const { reach } = require("./reader.cjs");
+const { reach, navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const at = (min) => new Date(Date.now() - min * 60e3).toISOString();
@@ -84,7 +84,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const calls = [];
         await page.route("**/*", serve(lang, web, calls));
         await page.goto("http://myna.test/?view=providers");
-        await page.locator("#nav").getByRole("button", { name: w.nav, exact: true }).click();
+        await navTo(page, "sessions");
         const view = page.locator("#view-sessions");
         const row = view.locator('.row.sm-sess[data-id="c-1"]');
         await row.waitFor();

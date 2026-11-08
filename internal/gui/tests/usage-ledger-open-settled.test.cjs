@@ -15,6 +15,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const now = Date.now();
@@ -62,7 +63,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     const answer = { first: 0 };
     await p.route("**/*", server(answer));
     await p.goto("http://myna.test/");
-    await p.locator('[data-view="usage"]').first().click();
+    await navTo(p, "usage");
     await p.locator(":is(#usageTab .opt, .nav-s):visible").nth(1).click();
     await p.locator("#ledWrap .led tbody tr").first().waitFor();
     await p.locator("#period .opt").nth(1).click();
@@ -73,7 +74,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
     // watch the table while the reader goes away and comes back
     const back = async () => {
-      await p.locator('[data-view="gateway"]').first().click();
+      await navTo(p, "gateway");
       await p.waitForTimeout(700);
       await p.evaluate(() => {
         const wrap = document.querySelector("#ledWrap");
@@ -91,7 +92,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         });
         window.__watch.observe(wrap, { subtree: true, childList: true, attributes: true, attributeFilter: ["class"] });
       });
-      await p.locator('[data-view="usage"]').first().click();
+      await navTo(p, "usage");
       await p.waitForTimeout(1200);
       return p.evaluate(() => {
         const table = document.querySelector("#ledWrap table.led");

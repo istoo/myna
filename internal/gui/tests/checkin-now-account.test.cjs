@@ -213,7 +213,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     await page.goto("http://myna.test/?view=settings&tab=usage");
     await page.locator("#warmTab-wb").waitFor();
     await page.locator("#warmTab-wb").click();
-    await page.locator("#wbCheckinSegs .opt").first().waitFor();
+    await page.locator("#wbCheckinSegs [role=switch]").waitFor();
     assert.equal(await page.locator(".ci-now-row").count(), 0);
     assert.deepEqual(errors, []);
   });

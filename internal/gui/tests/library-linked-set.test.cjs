@@ -11,6 +11,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const HOME = "/Users/xv";
@@ -101,7 +102,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const sent = [];
           await page.route("**/*", server(lang, library(), sent));
           await page.goto("http://myna.test/");
-          await page.locator('button[data-view="library"]').click();
+          await navTo(page, "library");
           await page.locator(`${view} .lib-set`).nth(1).waitFor();
           const missing = await page.evaluate(([keys, lang]) => lang === "en" ? [] : keys.filter((k) => !I18N[lang]?.[k]), [KEYS, lang]);
           assert.deepEqual(missing, [], `every string has its ${lang}`);

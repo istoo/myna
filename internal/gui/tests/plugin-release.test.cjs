@@ -11,6 +11,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const ZED = "@magpie-community/opencode-zed-auth";
@@ -85,7 +86,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, asked));
         await page.goto("http://myna.test/?view=providers");
-        await page.locator('#nav button[data-view="plugins"]').click();
+        await navTo(page, "plugins");
         const view = page.locator("#view-plugins");
         await view.waitFor({ state: "visible" });
         await view.page().locator(":is(.lib-tabs .opt, .nav-s):visible", { hasText: w.installed }).click();

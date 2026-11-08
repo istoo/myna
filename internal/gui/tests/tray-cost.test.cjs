@@ -106,10 +106,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           assert.equal((await row.locator(".name").textContent()).trim(), name);
           assert.equal((await row.locator(".sub").textContent()).trim(), sub);
           assert.equal(await row.evaluate((r) => r.previousElementSibling.id), "trayPaceRow", "under the pace row");
-          const opts = row.locator("#trayCostSegs .opt");
-          assert.equal(await opts.count(), 2);
+          const opts = row.locator("#trayCostSegs [role=switch]");
+          assert.equal(await opts.count(), 1);
           // the cost shown, as before
-          assert.equal(await opts.nth(1).evaluate((b) => b.classList.contains("on")), true, "the cost on by default");
+          assert.equal(await opts.getAttribute("aria-checked"), "true", "the cost on by default");
           // the row fits: nothing cut off nor pushed past the page
           await reach(page, row);
           const fit = await row.evaluate((r) => {
@@ -120,10 +120,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
           await page.waitForTimeout(300);
           const before = await view(page);
-          await opts.nth(0).click();
+          await opts.click();
           for (let i = 0; i < 50 && !posts.length; i++) await page.waitForTimeout(50);
           assert.equal(posts.at(-1).trayNoCost, true, "Off posts trayNoCost");
-          await page.waitForFunction(() => document.querySelector("#trayCostSegs .opt").classList.contains("on"));
+          await page.waitForFunction(() => document.querySelector("#trayCostSegs [role=switch]")?.getAttribute("aria-checked") === "false");
           await page.waitForTimeout(300);
           assert.equal(await view(page), before, "Off moved the page");
 
@@ -136,7 +136,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
           // and On takes it back
           sent = posts.length;
-          await page.locator("#trayCostSegs .opt").nth(1).click();
+          await page.locator("#trayCostSegs [role=switch]").click();
           for (let i = 0; i < 50 && posts.length === sent; i++) await page.waitForTimeout(50);
           assert.equal(posts.at(-1).trayNoCost, false, "On posts the cost back");
           assert.deepEqual(errors, []);
@@ -147,7 +147,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             const { context, page } = await open(browser, lang, [], platform, width, { trayNoCost: true, ...over });
             const row = page.locator("#trayCostRow");
             await row.waitFor();
-            assert.equal(await row.locator("#trayCostSegs .opt").nth(0).evaluate((b) => b.classList.contains("on")), true, platform + ": off as saved");
+            assert.equal(await row.locator("#trayCostSegs [role=switch]").getAttribute("aria-checked"), "false", platform + ": off as saved");
             await context.close();
           }
         });

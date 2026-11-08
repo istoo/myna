@@ -12,6 +12,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 const reader = require("./reader.cjs");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const now = new Date();
@@ -133,7 +134,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.equal(await page.locator(".rt-steps li.upstream-said").count(), 0);
 
       // the Usage page's Requests: a request's details name it
-      await page.locator('[data-view="usage"]').first().click();
+      await navTo(page, "usage");
       await page.locator(":is(#usageTab .opt, .nav-s):visible").nth(1).click();
       const rows = page.locator(".led tbody tr.led-row");
       await rows.nth(1).waitFor();

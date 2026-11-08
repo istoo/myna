@@ -18,6 +18,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const { I18N } = require("./strings.cjs").strings();
@@ -100,7 +101,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", server(lang, calls));
           await page.goto("http://myna.test/");
-          await page.locator('button[data-view="library"]').click();
+          await navTo(page, "library");
           const row = page.locator("#view-library .lib-server", { has: page.locator('.lib-health[data-server="db"]') });
           const ed = page.locator("#modal .lib-editor");
           const cmd = ed.locator("textarea.lib-cmd");
@@ -172,7 +173,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           // a skill's note, over its SKILL.md
           await page.evaluate(() => { try { localStorage.setItem("myna.libTab", "skills"); } catch {} });
           await page.reload();
-          await page.locator('button[data-view="library"]').click();
+          await navTo(page, "library");
           const skill = (name) => page.locator("#view-library .lib-skill", { has: page.locator(".name", { hasText: new RegExp("^" + name + "$") }) });
           await skill("weekly").locator(".name").click();
           await ed.waitFor();

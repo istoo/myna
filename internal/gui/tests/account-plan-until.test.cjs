@@ -72,14 +72,15 @@ for (const [engine, browserType] of [["chromium", chromium], ["webkit", webkit]]
       assert.equal(await plus.textContent(), want.short, `${at}: when the plan ends`);
       assert.equal(await plus.getAttribute("title"), want.long, `${at}: the whole date in its tooltip`);
       assert.equal(await row("pro@example.com").locator(".aq-until").count(), 0, `${at}: no until, no date`);
-      assert.equal(await row("plus@example.com").locator(".acc-line > .plan").textContent(), "ChatGPT Plus", `${at}: the plan as before`);
+      assert.equal(await row("plus@example.com").locator(".acc-line .plan").textContent(), "ChatGPT Plus", `${at}: the plan as before`);
       const m = await plus.evaluate((e) => {
         const b = e.getBoundingClientRect(), r = e.closest(".acc").getBoundingClientRect(), line = e.closest(".acc").querySelector(".acc-line").getBoundingClientRect();
         return { cut: e.scrollWidth - e.clientWidth, w: b.width, inside: b.left >= r.left - 1 && b.right <= r.right + 1, line: line.height, vis: getComputedStyle(e).visibility };
       });
       assert.ok(m.w > 0 && m.cut <= 0 && m.vis === "visible", `${at}: the date is shown whole (${m.cut}px cut)`);
       assert.ok(m.inside, `${at}: the date stays inside its row`);
-      assert.ok(m.line <= (web ? 48 : 24), `${at}: the first line is one line (${m.line}px)`);
+      // on a phone the plan has a line of its own under the address
+      assert.ok(m.line <= (web ? 84 : 24), `${at}: the first line is one line (${m.line}px)`);
       const wide = await page.evaluate(() => { const b = document.querySelector(".modal .ebody"); return b.scrollWidth - b.clientWidth; });
       assert.ok(wide <= 0, `${at}: the sheet doesn't scroll sideways (${wide}px)`);
       await context.close();

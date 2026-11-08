@@ -4,6 +4,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 const assets = path.resolve(__dirname, "../assets");
 
 function fixture(lang, posts) {
@@ -156,7 +157,7 @@ for (const engine of process.env.BROWSER ? [process.env.BROWSER] : ["chromium", 
       await answer(page, leave, true, dirtyText);
       await modal.waitFor({ state: "hidden" });
       await page.waitForFunction(() => !document.querySelector("#view-agents").hidden);
-      await page.locator('#nav button[data-view="providers"]').click();
+      await navTo(page, "providers");
       // Removal never mutates anything when declined.
       await row.click();
       const remove = modal.getByRole("button", { name: lang === "zh" ? "移除" : "Remove", exact: true }).first();

@@ -28,11 +28,11 @@ function serve(lang) {
 }
 
 const words = {
-  en: ["Hide sidebar", "Show sidebar"],
-  zh: ["隐藏侧边栏", "显示侧边栏"],
-  "zh-TW": ["隱藏側邊欄", "顯示側邊欄"],
-  ja: ["サイドバーを非表示", "サイドバーを表示"],
-  de: ["Seitenleiste ausblenden", "Seitenleiste einblenden"],
+  en: ["Use tabs on top", "Use sidebar"],
+  zh: ["使用顶部标签", "使用侧边栏"],
+  "zh-TW": ["使用頂部標籤", "使用側邊欄"],
+  ja: ["上部のタブを使う", "サイドバーを使う"],
+  de: ["Tabs oben verwenden", "Seitenleiste verwenden"],
 };
 const frame = (page) => page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
 const side = (page) => page.evaluate(() => document.body.classList.contains("side-nav"));

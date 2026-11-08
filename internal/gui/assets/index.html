@@ -42,7 +42,7 @@
   <div class="side-top" style="--wails-draggable:drag"></div>
   <div class="side-scroll"></div>
   <div class="side-foot">
-    <button type="button" class="side-gw" id="sideGw" data-feature="gateway" hidden><i></i><span></span></button>
+    <button type="button" class="side-gw" id="sideGw" data-feature="gateway" hidden><i></i><span></span><span class="side-gw-chev" aria-hidden="true"><svg viewBox="0 0 16 16" width="11" height="11"><path d="m6.5 4.5 3 3.5-3 3.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
   </div>
   <!-- its edge, dragged to make it wider or narrower (app.js sideDrag).
        Out of Tab's reach, as a Mac split view's divider is: a Mac window
@@ -78,6 +78,9 @@
     <button data-view="masking" data-feature="redact"><svg class="nav-ic" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M8 1.8 13 3.6v4.1c0 3-2.1 5.4-5 6.5-2.9-1.1-5-3.5-5-6.5V3.6Z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg><span data-t>Masking</span></button>
     <span class="nav-gl" data-t>Extend</span>
     <button data-view="plugins"><svg class="nav-ic" viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3.5h4v2.5a1.5 1.5 0 0 0 3 0V3.5h1.5v13H4v-4h2.5a1.5 1.5 0 0 0 0-3H4v-6z"/></g></svg><span data-t>Plugins</span></button>
+    <!-- priority+: the pages that don't fit at this width, under one menu
+         (app.js renderNavOver); the open page always stays in the row -->
+    <button type="button" id="navMore" class="nav-more" aria-haspopup="menu" aria-expanded="false" hidden><span data-t>More pages</span><span class="nav-more-chev" aria-hidden="true"><svg viewBox="0 0 16 16" width="11" height="11"><path d="m6.5 4.5 3 3.5-3 3.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
   </nav>
   <div class="actions" style="--wails-draggable:no-drag">
     <span class="update-wrap">
@@ -133,6 +136,10 @@
   </aside>
   <div class="pv-head" id="pvHead" hidden><input class="sess-filter pv-q" id="pvQ" type="search" spellcheck="false" autocomplete="off" placeholder="Find a provider" aria-label="Find a provider" data-tp><button class="text rt-mask" id="pvMask" aria-pressed="false" data-tt="Mask the accounts on every page — email addresses and account names — for a screenshot to share"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.9 4.2A10.4 10.4 0 0 1 12 4c6.5 0 10 8 10 8a17.6 17.6 0 0 1-2.2 3.2M6.6 6.6C3.9 8.4 2 12 2 12s3.5 8 10 8a9.7 9.7 0 0 0 5.4-1.6M9.9 9.9a3 3 0 0 0 4.2 4.2M2 2l20 20"/></svg><span data-t>Hide accounts</span></button></div>
   <p class="set-none pv-none" id="pvNone" role="status" hidden></p>
+  <!-- a read of the list that failed: with an old list kept, this line
+       says so above it; with nothing yet it is the page (app.js
+       renderProvidersError) -->
+  <div class="load-error" id="providersError" role="alert" hidden></div>
   <div class="list" id="providers"></div>
   <div class="row-head off-head" id="offHead" hidden><button class="fold" id="foldOff" aria-expanded="false" aria-controls="offProviders"><span class="label" data-t>Turned off</span><span class="note" id="offCount"></span></button></div>
   <div class="list" id="offProviders" hidden></div>
@@ -152,7 +159,7 @@
 <main class="view" id="view-plugins" hidden></main>
 
 <main class="view" id="view-settings" hidden>
-  <div class="row-head set-head"><div class="warm-tabs set-tabs" id="setTabs" role="tablist" aria-label="Settings">
+  <div class="row-head set-head"><div class="warm-tabs set-tabs" id="setTabs" role="tablist" aria-orientation="horizontal" aria-label="Settings">
     <button type="button" role="tab" id="setTab-general" data-set="general" aria-controls="setPage-general" data-t>General</button>
     <button type="button" role="tab" id="setTab-usage" data-set="usage" aria-controls="setPage-usage" data-t>Allowances</button>
     <button type="button" role="tab" id="setTab-network" data-set="network" aria-controls="setPage-network" data-t>Network and sharing</button>
@@ -332,7 +339,7 @@
         <div id="turnDoneSegs"></div>
       </div>
     </div>
-    <div class="row-head warm-head" data-feature="warmups"><div class="warm-tabs" id="warmTabs" role="tablist">
+    <div class="row-head warm-head" data-feature="warmups"><div class="warm-tabs" id="warmTabs" role="tablist" aria-orientation="horizontal">
       <button type="button" role="tab" id="warmTab-codex" data-warm="codex" aria-controls="codexWarmList">Codex</button>
       <button type="button" role="tab" id="warmTab-claude" data-warm="claude" aria-controls="claudeWarmList">Claude Code</button>
       <button type="button" role="tab" id="warmTab-wb" data-warm="wb" aria-controls="wbList" hidden>WorkBuddy</button>

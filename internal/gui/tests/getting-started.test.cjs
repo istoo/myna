@@ -132,7 +132,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal((await page.locator(".guide-h").textContent()), await tr("Get started"));
         assert.equal(await stepDone(page, "source"), false);
         assert.equal(await stepDone(page, "agent"), false);
-        assert.equal(await page.locator(".guide-n").textContent(), await tr("{n} of {m} done", { n: 0, m: 2 }));
+        assert.equal(await page.locator(".guide-n").textContent(), await tr("{n} of {m} done", { n: 0, m: 3 }));
         // the agents found here are named, Cursor (never connectable) not;
         // with no models yet they can't be connected
         assert.deepEqual(await page.locator(".guide-agent").evaluateAll((bs) => bs.map((b) => b.dataset.id)), ["codex", "claude", "opencode"]);
@@ -161,7 +161,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await card.waitFor();
         assert.equal(await stepDone(page, "source"), true);
         assert.match(await page.locator('.guide-step[data-step="source"] .guide-say').textContent(), /12/);
-        assert.equal(await page.locator(".guide-n").textContent(), await tr("{n} of {m} done", { n: 1, m: 2 }));
+        assert.equal(await page.locator(".guide-n").textContent(), await tr("{n} of {m} done", { n: 1, m: 3 }));
         const codex = page.locator('.guide-agent[data-id="codex"]');
         assert.equal(await codex.isDisabled(), false);
         const tpl = page.locator(".guide-tpl");

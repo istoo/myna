@@ -12,6 +12,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const now = Date.now();
@@ -164,7 +165,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         p.on("pageerror", (e) => errors.push(e.message));
         await p.route("**/*", server(lang));
         await p.goto("http://myna.test/");
-        await p.locator('[data-view="usage"]').first().click();
+        await navTo(p, "usage");
         await p.locator(":is(#usageTab .opt, .nav-s):visible").nth(1).click();
         await p.locator("#ledWrap .led tbody tr").first().waitFor();
         await p.waitForTimeout(300);
@@ -230,7 +231,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         p.on("pageerror", (e) => errors.push(e.message));
         await p.route("**/*", server(lang));
         await p.goto("http://myna.test/");
-        await p.locator('[data-view="usage"]').first().click();
+        await navTo(p, "usage");
         await p.locator(":is(#usageTab .opt, .nav-s):visible").nth(1).click();
         const rows = p.locator("#ledWrap .led tbody tr:not(.led-detail)");
         await rows.nth(2).waitFor();

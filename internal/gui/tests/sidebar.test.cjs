@@ -8,6 +8,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 
@@ -94,7 +95,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // read, not held back until the providers have come in
       assert.ok(await page.locator("#sideGw").isVisible(), "the gateway's line from boot.js");
       assert.match(await page.locator("#sideGw").textContent(), /127\.0\.0\.1:3425/);
-      assert.ok(await page.locator("#sideGw span").evaluate((s) => s.scrollWidth <= s.clientWidth), "the address is read whole");
+      assert.ok(await page.locator("#sideGw span:not(.side-gw-chev)").evaluate((s) => s.scrollWidth <= s.clientWidth), "the address is read whole");
       assert.equal(reads.length, 1, "read once for the sidebar");
 
       // Settings: its tabs listed under it, its own strip hidden, and picked there
@@ -134,7 +135,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.ok(Math.abs(hl - cur) < 1, `the selection is on the tab: ${hl} ${cur}`);
 
       // another page without tabs of its own: the list folds away
-      await page.locator('#nav button[data-view="agents"]').click();
+      await navTo(page, "agents");
       await page.waitForFunction(() => !document.querySelector(".nav-sub"));
 
       // a point narrower, the header's row has them again, and no sidebar
@@ -205,7 +206,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const box = page.locator("#side .nav-sub").first();
       await box.waitFor();
       assert.ok(await box.evaluate((b) => b.getAnimations().length > 0), "the list unrolls");
-      await page.locator('#nav button[data-view="agents"]').click();
+      await navTo(page, "agents");
       // folding: out of reach at once, gone once it has played
       assert.equal(await page.locator(".nav-sub:not(.leaving)").count(), 0);
       assert.equal(await page.locator(".nav-s").count(), 0, "its rows are no tabs while they fold");

@@ -13,6 +13,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const now = Date.now();
@@ -103,7 +104,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium"]
     await p.clock.install({ time: now });
     await p.route("**/*", windowServer("en", log, gate, { holdUsage: true }));
     await p.goto("http://myna.test/");
-    await p.locator('[data-view="usage"]').first().click(); // Overview
+    await navTo(p, "usage"); // Overview
     await gate.waitFor("usage", 1); // the opening read, held
     gate.release("usage", "all"); // let it settle, so the page is drawn and the button is idle
     await p.locator("#stats .kpi:not(.loading-kpi)").first().waitFor();
@@ -158,7 +159,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium"]
       return base(route);
     });
     await p.goto("http://myna.test/");
-    await p.locator('[data-view="usage"]').first().click(); // Overview
+    await navTo(p, "usage"); // Overview
     await p.locator("#stats .kpi:not(.loading-kpi)").first().waitFor(); // the opening read settled
     // the timer's read is held and will fail; the reader's own click (idle
     // button) must wait for it, not overlap it, and must go out when it fails
@@ -204,7 +205,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium"]
       return base(route);
     });
     await p.goto("http://myna.test/");
-    await p.locator('[data-view="usage"]').first().click();
+    await navTo(p, "usage");
     await gate.waitFor("usage", 1); // Overview's opening read, held
     gate.release("usage", "all");
     await p.locator("#stats .kpi:not(.loading-kpi)").first().waitFor();
@@ -256,7 +257,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium"]
     });
     const loading = () => p.locator("#view-usage").evaluate((el) => el.classList.contains("loading"));
     await p.goto("http://myna.test/");
-    await p.locator('[data-view="usage"]').first().click(); // Overview
+    await navTo(p, "usage"); // Overview
     await gate.waitFor("usage", 1);
     gate.release("usage", "all"); // the opening read
     await p.locator("#stats .kpi:not(.loading-kpi)").first().waitFor();

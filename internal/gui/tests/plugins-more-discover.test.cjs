@@ -10,6 +10,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 
@@ -76,7 +77,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const tabOn = () => view.locator(".lib-tabs .opt[aria-pressed=true]").innerText();
         const pick = (name) => page.locator(":is(.lib-tabs .opt, .nav-s):visible", { hasText: name }).first().click();
         const toProviders = async () => {
-          await page.locator('#nav button[data-view="providers"]').click();
+          await navTo(page, "providers");
           await page.locator("#view-providers").waitFor({ state: "visible" });
           // the add sheet, open still from the last search or opened now,
           // with nothing looked for

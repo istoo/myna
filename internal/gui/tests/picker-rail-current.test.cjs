@@ -10,6 +10,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const row = (group, icon, id, label, note) => ({ value: id, ref: id, label, group, icon, note });
@@ -58,7 +59,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             await page.unroute("http://myna.test/**").catch(() => {});
             await page.route("http://myna.test/**", serve(state(wired, value)));
             await page.goto("http://myna.test/");
-            await page.locator('#nav [data-view="agents"]').click();
+            await navTo(page, "agents");
             if (wired) await page.locator("#agents .ag-link").first().click();
             await page.locator('#agents [data-key="model"]').first().click();
             await page.locator("#pickerRail .rail-item").first().waitFor();

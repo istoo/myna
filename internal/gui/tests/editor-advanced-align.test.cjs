@@ -69,8 +69,21 @@ for (const [engine, browserType] of [["chromium", chromium], ["webkit", webkit]]
       const adv = page.locator(".editor details.advanced");
       await adv.locator("summary").waitFor();
       // the editor drawn last has been laid out: a redraw between two
-      // frames measured a details its observer hadn't seen yet (86px)
-      await page.waitForFunction(() => document.querySelector(".editor details.advanced")?.style.getPropertyValue("--ed-at"));
+      // frames measured a details its observer hadn't seen yet (86px). Wait
+      // for the fold to sit where the fields start, the thing asserted
+      // below; a screen reader's width read before its labels settled is
+      // stale, and under load the observer reaches it late.
+      await page.waitForFunction(() => {
+        const d = document.querySelector(".editor details.advanced");
+        if (!d) return false;
+        const g = d.parentElement, cs = getComputedStyle(g);
+        const lab = [...g.children].find((c) => c.tagName === "LABEL" && c.offsetWidth);
+        if (!lab || !lab.nextElementSibling) return false;
+        const field = lab.nextElementSibling.getBoundingClientRect();
+        const stacked = cs.gridTemplateColumns.split(" ").length === 1;
+        const want = stacked ? g.getBoundingClientRect().left + parseFloat(cs.paddingLeft) : field.left;
+        return Math.abs(d.querySelector("summary").getBoundingClientRect().left - want) <= 1;
+      }, null, { timeout: 15000 });
       await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
       let m = await measure(page);
       const start = m.stacked ? m.edge : m.fields;

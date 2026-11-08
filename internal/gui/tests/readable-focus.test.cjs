@@ -4,7 +4,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
-const { watchSettingsReads, settingsDrawn } = require("./reader.cjs");
+const { watchSettingsReads, settingsDrawn, navTo } = require("./reader.cjs");
 const assets = path.resolve(__dirname, "../assets");
 const settings = { theme: "light", lang: "en", tray: "panel", textSize: 100, currency: "usd",
   dir: "/config/myna", gateway: "http://127.0.0.1:3999", version: "0.1.900",
@@ -90,7 +90,7 @@ for (const engine of process.env.BROWSER ? [process.env.BROWSER] : ["chromium", 
           assert.ok(ratio >= 4.5, `${theme} ${selector}: contrast ${ratio}`);
         }
       }
-      await page.locator('#nav button[data-view="providers"]').click();
+      await navTo(page, "providers");
       await page.locator("#providers .row.provider").click();
       for (const theme of ["light", "dark"]) {
         await page.evaluate((value) => { document.documentElement.dataset.theme = value; }, theme);
@@ -124,7 +124,7 @@ for (const engine of process.env.BROWSER ? [process.env.BROWSER] : ["chromium", 
       assert.equal(await selectText(page, page.locator("#status")), "Connection refused: acme.test");
       await name.click();
       assert.equal(await page.locator("#gwModels .selected .name").textContent(), await name.textContent(), "an ordinary click still picks the model");
-      await page.locator('#nav button[data-view="providers"]').click();
+      await navTo(page, "providers");
       await page.locator("#providers .row.provider").click();
       await page.getByRole("button", { name: "Names, prices & levels", exact: true }).click();
       const id = page.locator(".mname .mwho code").first();

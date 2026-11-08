@@ -13,6 +13,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 const reader = require("./reader.cjs");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const now = Date.now();
@@ -118,7 +119,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await p.route("**/*", server(lang));
         await p.goto("http://myna.test/");
         assert(await p.evaluate(() => document.body.classList.contains("window")), "the app's window");
-        await p.locator('[data-view="usage"]').first().click();
+        await navTo(p, "usage");
         await p.locator(":is(#usageTab .opt, .nav-s):visible").nth(1).click();
         await p.locator("#ledWrap .led tbody tr").first().waitFor();
         await p.waitForTimeout(300);
@@ -192,7 +193,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
         // a wide window: the Agents and Settings rows don't stretch across it
         await p.setViewportSize({ width: 1670, height: 1060 });
-        await p.locator('[data-view="agents"]').first().click();
+        await navTo(p, "agents");
         await p.locator(".row.agent").first().waitFor();
         await p.waitForTimeout(200);
         const centred = async (sel, what) => {

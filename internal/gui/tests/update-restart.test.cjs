@@ -114,14 +114,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const auto = rowOf(w.auto), restart = rowOf(w.restart);
         await restart.waitFor();
         await restart.locator(".sub", { hasText: w.what }).waitFor();
-        assert.equal(await restart.locator(".opt").count(), 2);
-        assert.equal(await restart.locator(".opt").nth(0).evaluate((o) => o.classList.contains("on")), true, "off by default");
+        assert.equal(await restart.locator("[role=switch]").count(), 1);
+        assert.equal(await restart.locator("[role=switch]").getAttribute("aria-checked"), "false", "off by default");
 
         // on: saved, nothing else changed
         await showRow(page, restart);
         let before = await scrolls(page);
-        await restart.locator(".opt").nth(1).click();
-        await page.waitForFunction(() => document.querySelectorAll(".update-restart-row .opt")[1]?.classList.contains("on"));
+        await restart.locator("[role=switch]").click();
+        await page.waitForFunction(() => document.querySelector(".update-restart-row [role=switch]")?.getAttribute("aria-checked") === "true");
         assert.equal(ctl.saves.at(-1).autoRestart, true);
         assert.equal(ctl.saves.at(-1).noAutoUpdate, false);
         assert.equal(ctl.saves.at(-1).updateEvery, 360);
@@ -133,7 +133,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         for (let i = 0; i < 50 && !(box && segs); i++) {
           await page.waitForTimeout(40);
           box = await restart.boundingBox().catch(() => null);
-          segs = await restart.locator(".segs").boundingBox().catch(() => null);
+          segs = await restart.locator("[role=switch]").boundingBox().catch(() => null);
         }
         assert.ok(box && segs, "the row isn't drawn");
         assert.ok(box.x >= 0 && box.x + box.width <= width + 0.5, `row ${box.x}+${box.width} past ${width}`);
@@ -144,7 +144,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.reload();
         await aboutTab();
         await restart.waitFor();
-        assert.equal(await restart.locator(".opt").nth(1).evaluate((o) => o.classList.contains("on")), true);
+        assert.equal(await restart.locator("[role=switch]").getAttribute("aria-checked"), "true");
 
         // automatic updates off: kept, dimmed, says when it works
         // (the version row above then says automatic updates are off, a
@@ -155,29 +155,29 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await showRow(page, auto);
         const settings = page.locator("#view-settings");
         const atTop = await settings.evaluate((v) => v.scrollTop < 1);
-        const y0 = (await auto.locator(".opt").nth(0).boundingBox()).y;
-        await auto.locator(".opt").nth(0).click();
+        const y0 = (await auto.locator("[role=switch]").boundingBox()).y;
+        await auto.locator("[role=switch]").click();
         await restart.locator(".sub", { hasText: w.whileOn }).waitFor();
         assert.equal(await restart.evaluate((r) => r.classList.contains("off")), true);
         assert.equal(ctl.saves.at(-1).noAutoUpdate, true);
         assert.equal(ctl.saves.at(-1).autoRestart, true);
         await page.waitForTimeout(400);
-        const y1 = (await auto.locator(".opt").nth(0).boundingBox()).y;
+        const y1 = (await auto.locator("[role=switch]").boundingBox()).y;
         // (the Version row's line wraps whole, arculongus on Discord: at a
         // narrow width it can grow the row past the switch's height, and
         // then the switch is held where it was clicked)
         const held = Math.abs(y1 - y0) <= 1;
         if (atTop && !held) {
           assert.equal(await settings.evaluate((v) => v.scrollTop), 0, "a view at its top stays at its top");
-          const tall = (await auto.locator(".opt").nth(0).boundingBox()).height;
+          const tall = (await auto.locator("[role=switch]").boundingBox()).height;
           assert.ok(y1 - y0 >= -1 && y1 - y0 < tall, `the clicked switch moved ${y1 - y0}px, its height ${tall}px`);
         } else assert.ok(Math.abs(y1 - y0) <= 1, `the clicked switch moved ${y1 - y0}px`);
 
         // and off again
         await showRow(page, restart);
         before = await scrolls(page);
-        await restart.locator(".opt").nth(0).click();
-        await page.waitForFunction(() => document.querySelectorAll(".update-restart-row .opt")[0]?.classList.contains("on"));
+        await restart.locator("[role=switch]").click();
+        await page.waitForFunction(() => document.querySelector(".update-restart-row [role=switch]")?.getAttribute("aria-checked") === "false");
         assert.equal(ctl.saves.at(-1).autoRestart, false);
         await page.waitForTimeout(400);
         assert.equal(await scrolls(page), before, "the click must not scroll the page");

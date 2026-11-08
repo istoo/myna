@@ -17,6 +17,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 const { strings } = require("./strings.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
@@ -128,7 +129,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("dialog", (d) => { errors.push("a browser dialog: " + d.message()); d.dismiss(); });
         await page.route("**/*", server(lang, state, posts));
         await page.goto("http://myna.test/");
-        await page.locator('button[data-view="library"]').click();
+        await navTo(page, "library");
         const v = page.locator("#view-library");
         const sheet = page.locator("#modal .lib-editor");
         // its name, and a tag after it (Signed in) when it has one
@@ -187,7 +188,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // a hook's row, the same
         await page.evaluate(() => sessionStorage.setItem("tab", "hooks"));
         await page.reload();
-        await page.locator('button[data-view="library"]').click();
+        await navTo(page, "library");
         const hrow = (name) => v.locator(".lib-hook").filter({ has: page.locator(".name", { hasText: new RegExp("^" + name + "$") }) });
         await hrow("fmt").waitFor();
         await press(page, hrow("fmt").locator(".lib-rowacts .lib-icon.danger"));

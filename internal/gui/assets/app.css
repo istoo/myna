@@ -17,8 +17,10 @@
   --line-2: #ececf0;
   --fg: #1c1c21;
   --fg-2: #4b4b53;
-  --muted: #85858d;
-  --faint: #b9b9c2;
+  /* 4.5:1 or better on every surface each sits on: --muted 5.09:1 on the
+     deepest (--seg-track), --faint 4.57:1 there and 4.7:1 on --pill-hover */
+  --muted: #5f5f67;
+  --faint: #66666e;
   --accent: #4f46e5;
   --accent-soft: #eeedfd;
   --accent-fg: #ffffff;
@@ -161,9 +163,9 @@ body.linux.panel { --panel-tint: var(--bg); }
 }
 :root[data-theme="dark"] body.panel { --bg: #1b1c20; --card: #25262c; --card-2: #212227; --line: rgba(255, 255, 255, .07); --line-2: rgba(255, 255, 255, .06); --pill: #2e2f36; --pill-hover: #383942; --pill-line: rgba(255, 255, 255, .11); --pill-shadow: 0 1px 2px rgba(0, 0, 0, .28); --muted: #9c9ca6; --faint: #7c7c87; --card-edge: inset 0 0 0 1px rgba(255, 255, 255, .06); }
 @media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) body.panel { --bg: #f2f2f5; --card: #ffffff; --card-2: #f8f8fa; --line: rgba(0, 0, 0, .07); --line-2: rgba(0, 0, 0, .06); --pill: #ffffff; --pill-hover: #f4f4f7; --skel: #eeeef2; --skel-hi: #e2e2e8; --pill-line: rgba(0, 0, 0, .12); --pill-shadow: 0 1px 1px rgba(0, 0, 0, .06); --faint: #9a9aa3; --card-edge: 0 0 0 1px rgba(0, 0, 0, .05), 0 1px 2px rgba(0, 0, 0, .04); }
+  :root:not([data-theme="dark"]) body.panel { --bg: #f2f2f5; --card: #ffffff; --card-2: #f8f8fa; --line: rgba(0, 0, 0, .07); --line-2: rgba(0, 0, 0, .06); --pill: #ffffff; --pill-hover: #f4f4f7; --skel: #eeeef2; --skel-hi: #e2e2e8; --pill-line: rgba(0, 0, 0, .12); --pill-shadow: 0 1px 1px rgba(0, 0, 0, .06); --faint: #66666e; --card-edge: 0 0 0 1px rgba(0, 0, 0, .05), 0 1px 2px rgba(0, 0, 0, .04); }
 }
-:root[data-theme="light"] body.panel { --bg: #f2f2f5; --card: #ffffff; --card-2: #f8f8fa; --line: rgba(0, 0, 0, .07); --line-2: rgba(0, 0, 0, .06); --pill: #ffffff; --pill-hover: #f4f4f7; --skel: #eeeef2; --skel-hi: #e2e2e8; --pill-line: rgba(0, 0, 0, .12); --pill-shadow: 0 1px 1px rgba(0, 0, 0, .06); --faint: #9a9aa3; --card-edge: 0 0 0 1px rgba(0, 0, 0, .05), 0 1px 2px rgba(0, 0, 0, .04); }
+:root[data-theme="light"] body.panel { --bg: #f2f2f5; --card: #ffffff; --card-2: #f8f8fa; --line: rgba(0, 0, 0, .07); --line-2: rgba(0, 0, 0, .06); --pill: #ffffff; --pill-hover: #f4f4f7; --skel: #eeeef2; --skel-hi: #e2e2e8; --pill-line: rgba(0, 0, 0, .12); --pill-shadow: 0 1px 1px rgba(0, 0, 0, .06); --faint: #66666e; --card-edge: 0 0 0 1px rgba(0, 0, 0, .05), 0 1px 2px rgba(0, 0, 0, .04); }
 button { font: inherit; color: inherit; background: none; border: 0; cursor: default; appearance: none; -webkit-appearance: none; text-align: center; }
 button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 input { font: inherit; color: var(--fg); }
@@ -269,6 +271,16 @@ body.panel .seg { display: none; }
 /* a plugin update waiting for the reader: a dot on Plugins */
 .seg button.has-dot::after { content: ""; position: absolute; top: 4px; right: 4px; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
 .seg button:hover:not(.on) { color: var(--fg-2); }
+/* priority+: the pages that don't fit are under More, which stays in the
+   row after them until wide enough for every page (app.js renderNavOver) */
+.seg button.nav-more { display: inline-flex; align-items: center; gap: 3px; color: var(--muted); }
+.seg button.nav-more[hidden] { display: none; }
+.nav-more-chev { display: inline-flex; opacity: .75; }
+.seg button.nav-more.open .nav-more-chev { transform: rotate(90deg); }
+.nav-more-chev svg { transition: transform .18s var(--ease); }
+@media (prefers-reduced-motion: reduce) { .nav-more-chev svg { transition: none; } }
+/* a page in the menu keeps no room in the row */
+#nav button.nav-over { display: none !important; }
 .actions { margin-left: auto; display: flex; gap: 2px; }
 .icon {
   width: 26px; height: 26px; border-radius: 7px;
@@ -326,6 +338,9 @@ body.panel .seg { display: none; }
 .top.tight .update { width: 22px; padding: 0; justify-content: center; margin-right: 4px; }
 .top.tight .update-hide { right: -5px; }
 body.window .top.inrow .seg { position: relative; left: auto; top: auto; transform: none; margin: 0 auto; } /* relative still: its thumb sits in it, not over the whole header */
+/* the last step: what still doesn't fit (an Update pill come in beside a
+   full row) takes the logo's room before the tabs scroll */
+.top.packed .brand { display: none; }
 body.window .top.inrow .actions { margin-left: 0; }
 .top.cramped .seg button { padding: 0 8px; }
 .top.crowded .seg button { padding: 0 6px; font-size: 12px; }
@@ -511,6 +526,9 @@ body.side-nav :is(#view-library, #view-plugins, #view-settings) { padding-top: 8
 .side-gw > i { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 3px var(--green-soft); }
 .side-gw.off > i { background: var(--faint); box-shadow: none; }
 .side-gw > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+/* it opens the Gateway page, so it says so with the arrow every other row
+   that goes somewhere has */
+.side-gw > .side-gw-chev { flex: none; display: inline-flex; margin-left: auto; color: var(--faint); font-variant-numeric: normal; }
 /* beside the sidebar the header says where the reader is, "Work / Library /
    MCP servers", and holds the icons; the pages' own tab strips are the
    sidebar's now */
@@ -645,6 +663,13 @@ body.window .row .ic { width: 22px; height: 22px; }
 .row .sub { font-size: 11.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
 .empty-state { padding: 36px 20px; text-align: center; color: var(--muted); }
 .empty-state b { display: block; color: var(--fg); font-weight: 500; margin-bottom: 4px; }
+/* a list that couldn't be read: the card in its place, or a line over the
+   list kept from before (app.js renderProvidersError) */
+#providersError { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: var(--fg-2); font-size: 12.5px; }
+#providersError[hidden] { display: none; }
+#providersError .load-error-why { min-width: 0; flex: 1 1 12em; }
+.empty-state.load-error { padding: 28px 20px; }
+.empty-state.load-error .why { display: block; margin: 6px 0 12px; color: var(--fg-2); overflow-wrap: anywhere; }
 
 /* the last row of the list: the agents nothing is set on, folded away */
 .agent-more { display: flex; align-items: center; justify-content: center; gap: 5px; width: 100%; border: 0; border-top: 1px solid var(--line-2); background: none; font: inherit; font-size: 12px; color: var(--muted); padding: 9px; cursor: pointer; transition: color .2s, background-color .2s; }
@@ -2753,6 +2778,20 @@ body.window .ag-sk-icon { width: 22px; height: 22px; border-radius: 6px; }
 @media (prefers-reduced-motion: reduce) { .cc-tip { animation: none; } }
 .editor .accts .pool-ends .note { flex-basis: 100%; color: var(--fg-2); }
 .acc .n { font-weight: 500; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* a narrow editor puts a plan on a line of its own, and wraps a long
+   address instead of cutting it: it is the one thing that says which
+   account a row is, and its title still names it whole */
+.acc-tail { display: contents; }
+@media (max-width: 480px) {
+  .acc-line { flex-wrap: wrap; row-gap: 2px; }
+  .acc-line > .acct-who { flex: 1 1 auto; }
+  .acc-line > .acct-who .n { white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; }
+  .acc-line > .acc-break { display: block; flex: 0 0 100%; height: 0; }
+  .acc-line > .acc-tail { display: flex; align-items: center; gap: 9px; flex: 0 0 100%; min-width: 0; overflow: hidden; }
+  .acc-tail > * { flex-shrink: 1; min-width: 0; }
+  .acc-tail > .grow { flex: 1; }
+  .acc-tail > .plan { margin-left: 25px; }
+}
 .acc .plan { color: var(--muted); font-size: 11px; padding: 1px 6px; border-radius: 5px; background: var(--pill); white-space: nowrap; }
 .acc .grow { flex: 1; }
 .acc .dot { width: 16px; height: 16px; flex: none; border-radius: 50%; display: grid; place-items: center; box-shadow: inset 0 0 0 1.5px var(--faint); color: var(--muted); }
@@ -2884,23 +2923,26 @@ body.window .ag-sk-icon { width: 22px; height: 22px; border-radius: 6px; }
    same edge. What is set shows on it; the rest waits under ⋯ on a line
    of its own, so nothing on it takes room it doesn't show */
 .acc-line { flex: 1 0 100%; display: flex; align-items: center; gap: 9px; min-width: 0; min-height: 22px; }
-.acc-line > .plan { flex: 0 3 auto; min-width: 3em; overflow: hidden; text-overflow: ellipsis; }
-.acc-line > :not(.acct-who, .n, .plan, .grow, .amodels, .acap, .alane, .text, .using) { flex-shrink: 0; }
-.acc-line > .using, .acc-line > .text { white-space: nowrap; }
+.acc-line > .plan, .acc-tail > .plan { flex: 0 3 auto; min-width: 3em; overflow: hidden; text-overflow: ellipsis; }
+.acc-line > :not(.acct-who, .n, .plan, .grow, .amodels, .acap, .alane, .text, .using), .acc-tail > :not(.acct-who, .n, .plan, .grow, .amodels, .acap, .alane, .text, .using) { flex-shrink: 0; }
+/* the line's last part: the plan and controls after the name, in one box
+   that takes what the name leaves */
+.acc-line > .acc-tail { flex: 1 1 auto; }
+.acc-line > .using, .acc-line > .text, .acc-tail > .using, .acc-tail > .text { white-space: nowrap; }
 /* and only where even that is too narrow (a long German Make first beside
    a 240px row) the button's own words end in an ellipsis, last of all */
-.acc-line > :is(.using, .text:not(.quiet)) { flex-shrink: .001; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.acc-line > :is(.using, .text:not(.quiet)), .acc-tail > :is(.using, .text:not(.quiet)) { flex-shrink: .001; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .acc-line > .acct-who, .acc-line > .n { min-width: 4.5em; }
 /* a signed-out account keeps both ways out on its line: where they don't
    fit beside the name they wrap under it, Remove still at the right end */
 .acc.signed-out .acc-line { flex-wrap: wrap; row-gap: 4px; }
-.acc.signed-out .acc-line > .text.quiet:last-child { margin-left: auto; }
-.acc-line > :is(.amodels, .acap, .alane) { flex-shrink: .01; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.acc.signed-out .acc-line > .text.quiet:last-child, .acc.signed-out .acc-tail > .text.quiet:last-child { margin-left: auto; }
+.acc-line > :is(.amodels, .acap, .alane), .acc-tail > :is(.amodels, .acap, .alane) { flex-shrink: .01; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* the pills sit closer to one another than to the name */
-.acc-line > :is(.amodels, .acap, .alane) + :is(.amodels, .acap, .alane) { margin-left: -4px; }
+.acc-line > :is(.amodels, .acap, .alane) + :is(.amodels, .acap, .alane), .acc-tail > :is(.amodels, .acap, .alane) + :is(.amodels, .acap, .alane) { margin-left: -4px; }
 /* a pill set when the row was drawn that is no longer (requests running
    that ended) takes no room till the row is drawn again */
-.acc-line > :is(.amodels:not(.set), .acap:not(.set), .alane:not(.set)):not(.open):not(:focus-visible) { max-width: 0; padding-left: 0; padding-right: 0; margin-left: -9px; box-shadow: none; opacity: 0; }
+.acc-line > :is(.amodels:not(.set), .acap:not(.set), .alane:not(.set)):not(.open):not(:focus-visible), .acc-tail > :is(.amodels:not(.set), .acap:not(.set), .alane:not(.set)):not(.open):not(:focus-visible) { max-width: 0; padding-left: 0; padding-right: 0; margin-left: -9px; box-shadow: none; opacity: 0; }
 /* ⋯: a hover brings it out, beside what ends the row */
 .acc .acc-more { flex: none; display: inline-grid; place-items: center; width: 22px; height: 20px; padding: 0; border: 0; border-radius: 5px; background: none; color: var(--muted); cursor: default; opacity: 0; transition: opacity .15s, background .12s, color .12s; }
 .acc:hover .acc-more, .acc.tools-open .acc-more { opacity: 1; }
@@ -3045,7 +3087,7 @@ body.window .ag-sk-icon { width: 22px; height: 22px; border-radius: 6px; }
 .accts .acc.with-aq { flex-wrap: wrap; row-gap: 3px; padding-top: 7px; padding-bottom: 8px; }
 .acc .aq { flex-basis: 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px; padding-left: 25px; font-size: 10.5px; color: var(--muted); min-height: 14px; }
 /* its refresh always shown, after its plan on the line that never wraps: on the readings' line it added a line where the meters filled it (the owner asked for a button here) */
-.acc-line > .quota-refresh { width: 14px; margin: 0 0 0 -5px; opacity: 1; }
+.acc-line > .quota-refresh, .acc-tail > .quota-refresh { width: 14px; margin: 0 0 0 -5px; opacity: 1; }
 .acc .aq-w { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
 .acc .aq-until { white-space: nowrap; }
 .acc .aq-track { width: 54px; height: 4px; border-radius: 2px; background: var(--pill); overflow: hidden; }
@@ -3345,9 +3387,12 @@ body.window .ag-sk-icon { width: 22px; height: 22px; border-radius: 6px; }
    sheet into a sideways scroll (German Routing at the 560px window) */
 .editor .segs { max-width: 100%; flex-wrap: wrap; }
 .opt { position: relative; z-index: 1; white-space: nowrap; height: 22px; padding: 0 10px; border-radius: 5px; font-size: 12px; color: var(--muted); transition: color .18s var(--ease), transform .14s var(--ease); }
+/* the pick reads as one: its thumb edged, where the light theme's grey
+   track was nearly the card (the owner's review) */
 .opt.on { color: var(--fg); }
+.segs .thumb { box-shadow: 0 1px 2px rgba(0, 0, 0, .14), 0 0 0 1px var(--line); }
 /* how often myna checks for updates, while it doesn't by itself */
-.update-every-row.off .segs, .update-restart-row.off .segs, .search-all-row.off .segs { opacity: .55; }
+.update-every-row.off .segs, .update-restart-row.off .segs, .update-restart-row.off .setting-switch, .search-all-row.off .segs { opacity: .55; }
 /* Command line: each shell's `myna`, a dot for whether it runs this app */
 .cli-row .sub { overflow-wrap: anywhere; }
 .cli-shells { display: flex; flex-direction: column; gap: 3px; margin-top: 6px; }
@@ -3392,6 +3437,19 @@ body.window .ag-sk-icon { width: 22px; height: 22px; border-radius: 6px; }
 .segs.sortby .opt { height: 20px; padding: 0 8px; font-size: 11px; }
 /* a provider's Routing and Stays, with "unsaved" beside a pick not saved yet */
 .route-pick { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+/* the one routing picker: a control that opens the app's menu */
+.route-pick-btn { display: inline-flex; align-items: center; gap: 3px; height: 24px; padding: 0 6px 0 9px; font: inherit; font-size: 12.5px; color: var(--fg-2); border: 0; border-radius: 7px; background: var(--pill); white-space: nowrap; }
+.route-pick-btn:hover, .route-pick-btn.open { color: var(--fg); background: var(--pill-hover); }
+.route-pick-btn svg { opacity: .7; transition: transform .15s var(--ease); }
+.route-pick-btn.open svg { transform: rotate(180deg); }
+/* a setting's switch, where an Off/On pair used to be */
+.setting-switch { flex: none; align-self: center; cursor: pointer; }
+.setting-switch:disabled { opacity: .6; cursor: default; }
+/* the models the routing fold carries are the inner grid's own rows */
+.models-slot { display: contents; }
+/* its summary names the models it holds, so folding them away doesn't
+   hide which ones agents see */
+.route-adv-say { margin-left: 4px; color: var(--muted); font-size: 11.5px; }
 .route-pick > .hint { margin: 0; }
 .thumb.still { transition: none; }
 .link { font-size: 12px; color: var(--accent); padding: 3px 4px; white-space: nowrap; }
@@ -3488,8 +3546,10 @@ body.window .ag-sk-icon { width: 22px; height: 22px; border-radius: 6px; }
 
 /* model chips: click to expose, click again to hide */
 .models { display: flex; flex-direction: column; gap: 6px; }
-.mbulk { display: flex; align-items: center; gap: 6px; }
-.mbulk > input { max-width: 260px; flex: 1; }
+/* in the Advanced fold the models sit in the narrow column, where German's
+   longer words ran past it (#4471): the row wraps */
+.mbulk { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.mbulk > input { max-width: 260px; flex: 1; min-width: 0; }
 /* a long list scrolls on its own, not the editor with it past its ends */
 .mchips { display: flex; flex-wrap: wrap; gap: 4px; max-height: min(240px, 40vh); overflow-y: auto; overscroll-behavior: contain; padding: 1px; }
 .mchips::-webkit-scrollbar { width: 0; }
@@ -3548,7 +3608,9 @@ body.window .ag-sk-icon { width: 22px; height: 22px; border-radius: 6px; }
 /* the foot of a long list: draws the models left out of it (#685) */
 .mchips .mchips-rest { flex: none; height: 24px; padding: 0 9px; border-radius: 999px; font-size: 11.5px; box-shadow: none; }
 .mfoot { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-height: 27px; }
-.mfoot .hint { white-space: nowrap; }
+/* a phone's Japanese has no spaces to break at: the line wraps rather than
+   running past the sheet's edge */
+.mfoot .hint { white-space: normal; overflow-wrap: anywhere; }
 .mfoot > input { height: 27px; }
 .mfoot .text.action { flex: none; }
 .mfoot input { max-width: 200px; height: 27px !important; }
@@ -3929,6 +3991,9 @@ input.words.search-key, input.words.search-url { flex: 1 1 120px; width: auto; m
 .row.pref.plugin-add .val { flex-wrap: wrap; justify-content: flex-end; }
 .prefs .val { display: inline-flex; align-items: center; gap: 2px; margin-left: auto; min-width: 0; max-width: 60%; flex: none; }
 .prefs .val code { font-size: 12px; color: var(--fg-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; user-select: text; -webkit-user-select: text; padding: 0 6px; }
+/* About's long commands (a curl line, a path) wrap whole: a command cut
+   short is one the reader can't read or copy by sight */
+#about .val code { white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; }
 .prefs .val .text { padding: 3px 6px; }
 /* how hard a side model thinks, beside it: the model's chip gives way first
    (MOMO on Discord); with-effort is a class sideEffortChip sets, not :has(),
@@ -4065,7 +4130,7 @@ html.theming, html.theming *, html.theming *::before, html.theming *::after {
 .modal .dialog { display: flex; flex-direction: column; }
 .modal .editor.framed { display: flex; flex-direction: column; align-items: stretch; gap: 0; padding: 0; min-height: 0; overflow: hidden; }
 .modal .editor.framed > .ebody {
-  flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain;
+  flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; overflow-anchor: none; /* the app keeps the reader's place, not the browser's anchoring */
   display: grid; grid-template-columns: inherit; gap: 10px 14px; align-items: start; padding: 14px 18px;
 }
 .modal .editor.framed > .ehead, .modal .editor.framed > .bar { flex: none; min-height: 48px; margin: 0; padding: 0 18px; }
@@ -4866,3 +4931,16 @@ body .row.agent .ag-prefs .row.pref .who { display: block; }
 .sess-tools .led-rename { flex: none; width: 180px; height: 26px; padding: 0 8px; border-radius: 7px; font-size: 12px; }
 /* Settings › About › Open-source licenses: the notices, as written */
 .notices-text { margin: 0; font: 11px/1.5 var(--code); white-space: pre-wrap; overflow-wrap: anywhere; }
+
+/* ---- the command palette (palette.js, loaded when ⌘K is first used) ---- */
+.palette-dialog { display: flex; flex-direction: column; gap: 8px; width: 100%; padding: 14px 16px; box-sizing: border-box; }
+.palette-head { display: flex; align-items: center; }
+.palette-head b { color: var(--fg); font-size: 13px; }
+.palette-q { width: 100%; height: 36px; padding: 0 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--card); color: var(--fg); font: inherit; font-size: 14px; }
+.palette-q:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+.palette-list { max-height: min(58vh, 430px); overflow-y: auto; display: flex; flex-direction: column; gap: 1px; }
+.palette-item { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 32px; padding: 5px 10px; border: 0; border-radius: 7px; background: none; color: var(--fg); font: inherit; font-size: 13px; text-align: left; }
+.palette-item.on, .palette-item:hover { background: var(--sel); }
+.palette-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.palette-kind { margin-left: auto; flex: none; color: var(--muted); font-size: 11px; }
+.palette-none { padding: 22px 12px; text-align: center; color: var(--muted); font-size: 12.5px; }

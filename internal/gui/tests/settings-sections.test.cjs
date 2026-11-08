@@ -18,7 +18,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
-const { openPart } = require("./reader.cjs");
+const { openPart, navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 
@@ -200,7 +200,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
         // another view leaves the tab out of the address; Settings again
         // brings it back
-        await page.locator('#nav [data-view="usage"]').click();
+        await navTo(page, "usage");
         assert.equal(new URL(page.url()).searchParams.get("tab"), null);
         await page.locator("#prefs").click();
         assert.deepEqual((await shown(page)).url, "settings/sync");

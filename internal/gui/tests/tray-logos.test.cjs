@@ -100,10 +100,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const row = page.locator("#trayLogosRow");
         await row.waitFor();
         assert.equal((await row.locator(".name").textContent()).trim(), name);
-        const opts = row.locator("#trayLogosSegs .opt");
-        assert.deepEqual((await opts.allTextContents()).map((s) => s.trim()), [off, on]);
         // logos are on, as before
-        assert.equal(await opts.nth(1).evaluate((b) => b.classList.contains("on")), true, "logos on by default");
+        assert.equal(await row.locator("#trayLogosSegs [role=switch]").getAttribute("aria-checked"), "true", "logos on by default");
         assert.equal(await row.evaluate((r) => getComputedStyle(r).borderLeftWidth), "0px");
 
         // scrolled down with a real wheel, once the page has settled, the
@@ -129,10 +127,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           assert.fail("the settings list must be scrolled: " + JSON.stringify({ at, tops, refused, ...seen }));
         }
 
-        await opts.nth(0).click();
+        await row.locator("#trayLogosSegs [role=switch]").click();
         for (let i = 0; i < 50 && !posts.length; i++) await page.waitForTimeout(50);
         assert.equal(posts.at(-1).trayNoLogos, true, "Off posts trayNoLogos");
-        await page.waitForFunction(() => document.querySelector("#trayLogosSegs .opt").classList.contains("on"));
+        await page.waitForFunction(() => document.querySelector("#trayLogosSegs [role=switch]")?.getAttribute("aria-checked") === "false");
         await page.waitForTimeout(300);
         assert.equal(await view(page), before, "Off moved the page");
 
@@ -148,7 +146,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.waitForTimeout(300);
         const back = await view(page);
         sent = posts.length;
-        await page.locator("#trayLogosSegs .opt").nth(1).click();
+        await page.locator("#trayLogosSegs [role=switch]").click();
         for (let i = 0; i < 50 && posts.length === sent; i++) await page.waitForTimeout(50);
         assert.equal(posts.at(-1).trayNoLogos, false, "On posts logos back");
         await page.waitForTimeout(300);

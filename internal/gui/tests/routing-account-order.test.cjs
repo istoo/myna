@@ -14,6 +14,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 
@@ -105,7 +106,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.deepEqual(listed(f).antigravity, ["ag-a@x.test", "ag-c@x.test", "ag-b@x.test"]);
 
       // drag the subscription's first account down one, in its editor
-      await page.locator('#nav button[data-view="providers"]').click();
+      await navTo(page, "providers");
       await page.locator('.row.provider[data-id="antigravity"]').click();
       const first = page.locator('.accts [data-account-id="ag-a@x.test"]');
       await first.focus();
@@ -118,7 +119,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // back on Routing, no reload and no new request: the stage follows
       await page.keyboard.press("Escape");
       await page.locator("#modal .ehead").waitFor({ state: "hidden" });
-      await page.locator('#nav button[data-view="routing"]').click();
+      await navTo(page, "routing");
       await page.waitForFunction((want) => {
         const by = {};
         for (const l of document.querySelectorAll(".rt-accts > li[title]:not(.rt-fold)")) { const p = l.title.split(/[@#]/)[0]; (by[p] ||= []).push(l.querySelector(".who").textContent); }

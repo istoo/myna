@@ -9,7 +9,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
-const { openPart } = require("./reader.cjs");
+const { openPart, navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 
@@ -136,7 +136,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal(await tall(), height, "the saved note resized the settings page");
 
         // the Usage page now shows ¥, at the fixed rate (12.34 * 7.2)
-        await page.locator('[data-view="usage"]').click();
+        await navTo(page, "usage");
         await page.waitForTimeout(200);
         assert.equal((await page.locator("#usageCost b").textContent()).trim(), "≈¥88.85");
 
@@ -198,7 +198,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal(await page.locator("#currencySegs .opt", { hasText: cny }).evaluate((b) => b.classList.contains("on")), true);
 
         // and back on Usage, still ¥
-        await page.locator('[data-view="usage"]').click();
+        await navTo(page, "usage");
         await page.waitForTimeout(200);
         assert.equal((await page.locator("#usageCost b").textContent()).trim(), "≈¥88.85");
 

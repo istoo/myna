@@ -101,10 +101,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await row.waitFor();
         assert.equal((await row.locator(".name").textContent()).trim(), name);
         assert.equal(await row.evaluate((r) => r.previousElementSibling.id), "trayLogosRow", "under the logos row");
-        const opts = row.locator("#trayBirdSegs .opt");
-        assert.deepEqual((await opts.allTextContents()).map((s) => s.trim()), [off, on]);
         // logos are on, as before
-        assert.equal(await opts.nth(1).evaluate((b) => b.classList.contains("on")), true, "the icon on by default");
+        assert.equal(await row.locator("#trayBirdSegs [role=switch]").getAttribute("aria-checked"), "true", "the icon on by default");
         assert.equal(await row.evaluate((r) => getComputedStyle(r).borderLeftWidth), "0px");
 
         // scrolled down with a real wheel, once the page has settled, the
@@ -117,10 +115,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const before = await view(page);
         assert(before > 0, "the settings list must be scrolled");
 
-        await opts.nth(0).click();
+        await row.locator("#trayBirdSegs [role=switch]").click();
         for (let i = 0; i < 50 && !posts.length; i++) await page.waitForTimeout(50);
         assert.equal(posts.at(-1).trayNoBird, true, "Off posts trayNoBird");
-        await page.waitForFunction(() => document.querySelector("#trayBirdSegs .opt").classList.contains("on"));
+        await page.waitForFunction(() => document.querySelector("#trayBirdSegs [role=switch]")?.getAttribute("aria-checked") === "false");
         await page.waitForTimeout(300);
         assert.equal(await view(page), before, "Off moved the page");
 
@@ -136,7 +134,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.waitForTimeout(300);
         const back = await view(page);
         sent = posts.length;
-        await page.locator("#trayBirdSegs .opt").nth(1).click();
+        await page.locator("#trayBirdSegs [role=switch]").click();
         for (let i = 0; i < 50 && posts.length === sent; i++) await page.waitForTimeout(50);
         assert.equal(posts.at(-1).trayNoBird, false, "On posts the icon back");
         await page.waitForTimeout(300);

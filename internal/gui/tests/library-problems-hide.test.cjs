@@ -21,6 +21,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const HOME = "/Users/me";
@@ -138,7 +139,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.goto("http://myna.test/");
       // a fresh browser's first page, on a busy machine, can take longer to
       // show than the 5s every other wait here gets
-      await page.locator('button[data-view="library"]').click({ timeout: 20000 });
+      // at a narrow width the tab may be under More, which reaches it
+      await navTo(page, "library");
       await page.locator(`${lib} .lib-body:not(.lib-skel)`).first().waitFor();
       return { page, st, posts };
     };
@@ -170,8 +172,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     // the page left for another and opened again: open reads the library
     const reopen = async (page, st) => {
       const n = st.reads;
-      await page.locator('button[data-view="usage"]').click();
-      await page.locator('button[data-view="library"]').click();
+      await navTo(page, "usage");
+      await navTo(page, "library");
       await drawnAfter(page, n);
     };
     // the × clicked from a view scrolled a little, where the card's going

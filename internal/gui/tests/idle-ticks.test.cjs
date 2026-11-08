@@ -10,6 +10,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const now = Date.now();
@@ -72,7 +73,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     for (const w of WATCHED) assert.equal(of(after, w) - of(before, w), 0, `${w[0]} ticked out of sight`);
 
     // Usage shown: its look ticks each second; Routing's still doesn't
-    await p.locator('[data-view="usage"]').first().click();
+    await navTo(p, "usage");
     await pass(1000);
     before = await ticks();
     await pass(5000);
@@ -81,7 +82,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     assert.equal(of(after, WATCHED[0]) - of(before, WATCHED[0]), 0, "Routing's countdown ticked on Usage");
 
     // Routing shown: its countdown ticks; Usage's has stopped
-    await p.locator('[data-view="routing"]').first().click();
+    await navTo(p, "routing");
     await pass(1000);
     before = await ticks();
     await pass(5000);

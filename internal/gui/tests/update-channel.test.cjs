@@ -129,8 +129,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           // another setting's save keeps it
           await showRow(page, auto);
           before = await scrolls(page);
-          await auto.locator(".opt", { hasText: w.off }).click();
-          await page.waitForFunction(() => document.querySelector(".update-auto-row .opt.on") && document.querySelector(".update-auto-row .opt.on") === document.querySelector(".update-auto-row .opt"));
+          await auto.locator("[role=switch]").click();
+          await page.waitForFunction(() => document.querySelector(".update-auto-row [role=switch]")?.getAttribute("aria-checked") === "false");
           assert.equal(ctl.saves.at(-1).noAutoUpdate, true);
           assert.equal(ctl.saves.at(-1).updateChannel, "stable");
           assert.equal(await scrolls(page), before, "the click must not scroll the page");

@@ -14,6 +14,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const N = 250; // two pages of folders and a half
@@ -69,7 +70,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message + " " + e.stack));
         await page.route("**/*", serve(lang));
         await page.goto("http://myna.test/");
-        await page.locator('#nav [data-view="sessions"]').click();
+        await navTo(page, "sessions");
         const view = page.locator("#view-sessions");
         const folders = view.locator(".row.sm-folder");
         const more = view.locator(".sm-more-folders");
@@ -104,8 +105,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
         // the bar picks every session, its folder drawn or not
         if (w.all) {
-          await page.locator('#nav [data-view="agents"]').click();
-          await page.locator('#nav [data-view="sessions"]').click();
+          await navTo(page, "agents");
+          await navTo(page, "sessions");
           assert.equal(await folders.count(), N, "coming back to the page keeps the folders drawn");
           // back to the top as the reader goes there: a scroll of code's own
           // is put back (WebKit)

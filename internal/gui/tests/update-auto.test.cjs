@@ -18,10 +18,10 @@ const { watchSettingsReads, settingsDrawn, openPart } = require("./reader.cjs");
 const assets = path.resolve(__dirname, "../assets");
 
 const words = {
-  en: { auto: "Automatic updates", every: "Check every", off: "Off", on: "On", m30: "30 min", h6: "6 h", h24: "24 h",
+  en: { auto: "Automatic updates", every: "Check every", m30: "30 min", h6: "6 h", h24: "24 h",
     version: "Version", check: "Check", isOff: "Automatic updates are off", latest: "Up to date", whileOn: "While automatic updates are on", often: "How often myna looks for a newer version",
     what: "Checks for a newer myna by itself" },
-  zh: { auto: "自动更新", every: "检查间隔", off: "关闭", on: "开启", m30: "30 分钟", h6: "6 小时", h24: "24 小时",
+  zh: { auto: "自动更新", every: "检查间隔", m30: "30 分钟", h6: "6 小时", h24: "24 小时",
     version: "版本", check: "检查", isOff: "自动更新已关闭", latest: "已是最新", whileOn: "自动更新开启时生效", often: "myna 多久检查一次新版本",
     what: "自动检查 myna 新版本" },
 };
@@ -115,7 +115,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const rowOf = (name) => page.locator("#about .row.pref", { has: page.locator(".name", { hasText: new RegExp("^" + name + "$") }) });
         const auto = rowOf(w.auto), every = rowOf(w.every), version = rowOf(w.version);
         await auto.waitFor();
-        assert.equal((await auto.locator(".opt.on").innerText()).trim(), w.on);
+        assert.equal(await auto.locator("[role=switch]").getAttribute("aria-checked"), "true", "automatic updates are on by default");
         assert.equal((await auto.locator(".sub").innerText()).trim(), w.what, "the switch says it checks, not that it downloads");
         assert.equal((await every.locator(".opt.on").innerText()).trim(), w.h6);
         assert.deepEqual((await every.locator(".opt").allInnerTexts()).map((s) => s.trim()), [w.m30, lang === "zh" ? "1 小时" : "1 h", w.h6, w.h24]);
@@ -132,7 +132,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // off: the interval stays, dimmed, as it was
         await showRow(page, auto);
         before = await scrolls(page);
-        await auto.locator(".opt", { hasText: w.off }).click();
+        await auto.locator("[role=switch]").click();
         await every.locator(".sub", { hasText: w.whileOn }).waitFor();
         assert.equal(await every.evaluate((r) => r.classList.contains("off")), true);
         assert.equal(ctl.saves.at(-1).noAutoUpdate, true);
@@ -143,7 +143,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.reload();
         await aboutTab();
         await auto.waitFor();
-        assert.equal((await auto.locator(".opt.on").innerText()).trim(), w.off);
+        assert.equal(await auto.locator("[role=switch]").getAttribute("aria-checked"), "false");
         assert.equal((await every.locator(".opt.on").innerText()).trim(), w.m30);
         await version.locator(".sub", { hasText: w.isOff }).waitFor();
         await showRow(page, version);
@@ -156,7 +156,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // on again, every 24 hours
         await showRow(page, auto);
         before = await scrolls(page);
-        await auto.locator(".opt", { hasText: w.on }).click();
+        await auto.locator("[role=switch]").click();
         await every.locator(".sub", { hasText: w.often }).waitFor();
         assert.equal(ctl.saves.at(-1).noAutoUpdate, false);
         assert.equal(await every.evaluate((r) => r.classList.contains("off")), false);
@@ -194,7 +194,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const view = page.locator("#view-settings");
         assert.equal(await view.evaluate((v) => v.scrollTop), 0);
         assert.ok(await view.evaluate((v) => v.scrollHeight > v.clientHeight + 10), "Settings must be able to scroll at 420");
-        await auto.locator(".opt", { hasText: w.off }).click();
+        await auto.locator("[role=switch]").click();
         await page.locator("#about .sub", { hasText: w.isOff }).waitFor();
         await page.waitForTimeout(600); // past the save's redraw and the switch's play
         assert.equal(await view.evaluate((v) => v.scrollTop), 0, "a view at its top stays at its top");

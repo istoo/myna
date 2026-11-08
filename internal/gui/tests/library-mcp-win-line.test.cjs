@@ -12,6 +12,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const HOME = "C:\\Users\\fd";
@@ -89,7 +90,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const saves = [];
         await page.route("http://myna.test/**", server(saves));
         await page.goto("http://myna.test/");
-        await page.locator('button[data-view="library"]').click();
+        await navTo(page, "library");
         await page.locator("#view-library .lib-body:not(.lib-skel) .lib-row").first().waitFor();
         const lines = await page.locator("#view-library .lib-row .sub.mono").evaluateAll((els) => els.map((e) => [e.textContent, e.title]));
         for (const [name, line] of Object.entries(want[platform])) {

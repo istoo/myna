@@ -12,6 +12,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const HOME = "/Users/szoxidy";
@@ -65,7 +66,6 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, state));
         await page.goto("http://myna.test/");
-        const nav = page.locator('button[data-view="library"]');
         const v = page.locator("#view-library");
         const srow = (name) => v.locator(".lib-server").filter({ has: page.locator(".name", { hasText: new RegExp("^" + name + "$") }) });
         // the read an opening asks for has come back, and what it draws is drawn
@@ -76,19 +76,19 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           }
           await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
         };
-        await nav.click();
+        await navTo(page, "library");
         await srow("exa").waitFor();
         await opened(1);
         await page.evaluate(() => { document.querySelector("#view-library .lib-server").dataset.kept = "1"; });
 
         // its nav clicked while on it: read again, the same rows
-        await nav.click();
+        await navTo(page, "library");
         await opened(2);
         assert.equal(await srow("exa").getAttribute("data-kept"), "1", "the row was drawn over again, nothing changed");
 
         // a server added meanwhile: it shows on the next opening
         state.servers = [...state.servers, sv("context7", "https://mcp.context7.com/mcp", [])];
-        await nav.click();
+        await navTo(page, "library");
         await srow("context7").waitFor();
         assert.equal(await srow("exa").count(), 1);
         assert.deepEqual(errors, []);

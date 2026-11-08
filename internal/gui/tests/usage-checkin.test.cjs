@@ -301,7 +301,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.locator("#minimaxList").waitFor();
       assert.match(await page.locator("#minimaxCheckinSub").innerText(), /MiniMax Code/);
       const saved = page.waitForRequest((r) => new URL(r.url()).pathname === "/api/settings" && r.method() === "POST");
-      await page.locator("#minimaxCheckinSegs button").nth(1).click();
+      await page.locator("#minimaxCheckinSegs [role=switch]").click();
       await saved;
       assert.deepEqual(asked, [true]);
       assert.deepEqual(errors, []);
@@ -383,7 +383,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const box = await page.locator("#qoderCheckinRow").boundingBox();
       assert(box.width > 0 && box.x + box.width <= 440, "the row fits at 440px");
       const saved = page.waitForRequest((r) => new URL(r.url()).pathname === "/api/settings" && r.method() === "POST");
-      await page.locator("#qoderCheckinSegs button").nth(1).click();
+      await page.locator("#qoderCheckinSegs [role=switch]").click();
       await saved;
       assert.deepEqual(asked, [true]);
       assert.deepEqual(errors, []);

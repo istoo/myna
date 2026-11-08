@@ -11,6 +11,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 
@@ -73,7 +74,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const dot = await nav.evaluate((b) => { const s = getComputedStyle(b, "::after"); return { w: s.width, pos: s.position }; });
         assert.deepEqual(dot, { w: await page.evaluate(() => document.body.classList.contains("side-nav")) ? "6px" : "5px", pos: "absolute" });
 
-        await nav.click();
+        await navTo(page, "plugins");
         // in the sidebar, the row the reader acts on says what the dot is
         const side = await page.evaluate(() => document.body.classList.contains("side-nav"));
         const up = page.locator(".nav-s em.up");

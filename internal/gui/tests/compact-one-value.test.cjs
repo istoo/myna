@@ -12,7 +12,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
-const { watchSettingsReads, agentRow, openAgentSettings } = require("./reader.cjs");
+const { watchSettingsReads, agentRow, openAgentSettings, navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const curve = (lo, hi, best) => {
@@ -114,7 +114,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.deepEqual(posts.map((p) => [p.path, p.body.agent, p.body.value]), [["/api/tune/apply", "codex", "400000"]]);
 
         // the Agents page's sheet shows the window Use put in
-        await page.locator('#nav button[data-view="agents"]').click();
+        await navTo(page, "agents");
         await openAgentSettings(page, "codex");
         const num = page.locator("#fullContextSegs input.compact-num");
         await num.waitFor();
@@ -125,7 +125,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await num.press("Enter");
         await page.waitForFunction(() => document.querySelector("#fullContextSegs input.compact-num")?.value === "300k");
         assert.deepEqual(posts.at(-1), { path: "/api/settings/full-context", body: { on: false, at: 300000 } });
-        await page.locator('#nav button[data-view="usage"]').click();
+        await navTo(page, "usage");
         await page.locator(".ctx-tune-row .ctx-tune-val.now b").filter({ hasText: "300K" }).waitFor();
         // no longer the window tune put in: no Undo, and still the one value
         assert.equal(await page.locator(".ctx-tune-row").first().getByRole("button", { name: w.undo, exact: true }).count(), 0);

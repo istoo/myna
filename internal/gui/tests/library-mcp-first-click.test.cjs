@@ -11,6 +11,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const { I18N } = require("./strings.cjs").strings();
@@ -62,7 +63,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           page.setDefaultNavigationTimeout(60000);
           await page.route("**/*", server(lang, width < 600));
           await page.goto("http://myna.test/");
-          await page.locator('button[data-view="library"]').click();
+          await navTo(page, "library");
           const ed = page.locator("#modal .lib-editor");
           await page.locator("#view-library .lib-server .name", { hasText: "myna-web-search" }).click();
           await ed.waitFor();

@@ -15,6 +15,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 const { strings } = require("./strings.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
@@ -142,7 +143,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("dialog", (d) => { errors.push("a browser dialog: " + d.message()); d.dismiss(); });
         await page.route("**/*", server(lang, state, posts));
         await page.goto("http://myna.test/");
-        await page.locator('button[data-view="library"]').click();
+        await navTo(page, "library");
         const v = page.locator("#view-library");
         const row = (name) => v.locator(".lib-found").filter({ has: page.locator(".name", { hasText: new RegExp("^" + name + "$") }) });
         const shown = async () => (await v.locator(".lib-found .who > .name").allTextContents()).sort();

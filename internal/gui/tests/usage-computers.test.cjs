@@ -14,6 +14,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 const reader = require("./reader.cjs");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const now = Date.now();
@@ -98,7 +99,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         return { p, errors };
       };
       const requests = async (p) => {
-        await p.locator('[data-view="usage"]').first().click();
+        await navTo(p, "usage");
         await p.locator(":is(#usageTab .opt, .nav-s):visible").nth(1).click();
         await p.locator(".led tbody tr.led-row").first().waitFor();
       };

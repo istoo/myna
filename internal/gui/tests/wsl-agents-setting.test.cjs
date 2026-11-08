@@ -81,8 +81,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       }
       assert.equal(await row.locator(".name").innerText(), w.name);
       assert.equal(await row.locator(".sub").innerText(), w.sub);
-      const opt = (name) => row.locator("#wslAgentsSegs .opt").getByText(name, { exact: true });
-      assert.equal(await row.locator("#wslAgentsSegs .opt.on").innerText(), w.on, "on by default");
+      const sw = () => row.locator("#wslAgentsSegs [role=switch]");
+      assert.equal(await sw().getAttribute("aria-checked"), "true", "on by default");
       const where = () => page.evaluate(() => [scrollX, scrollY, document.scrollingElement.scrollTop, ...[...document.querySelectorAll("*")].filter((e) => e.scrollTop).map((e) => e.scrollTop)]);
       const before = await where();
       const click = async (loc) => {
@@ -90,10 +90,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const b = await loc.boundingBox();
         await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2);
       };
-      await click(opt(w.off));
+      await click(sw());
       for (let i = 0; i < 50 && posted.at(-1)?.noWSLAgents !== true; i++) await page.waitForTimeout(50);
       assert.equal(posted.at(-1)?.noWSLAgents, true, `posted ${JSON.stringify(posted)}`);
-      assert.equal(await row.locator("#wslAgentsSegs .opt.on").innerText(), w.off);
+      // the save's answer draws the switch again; one read here can be the one it replaced
+      await page.waitForFunction(() => document.querySelector("#wslAgentsSegs [role=switch]")?.getAttribute("aria-checked") === "false");
+      assert.equal(await sw().getAttribute("aria-checked"), "false");
       // another setting saved keeps it off
       const n = posted.length;
       await click(page.locator("#keepAwakeSegs .opt").nth(1));
@@ -102,10 +104,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.equal(posted.at(-1).noWSLAgents, true, "another setting's save turned WSL detection on");
       const fit = await page.evaluate(() => {
         const row = document.querySelector("#wslAgentsRow").getBoundingClientRect();
-        return [...document.querySelectorAll("#wslAgentsSegs .opt")].every((o) => { const b = o.getBoundingClientRect(); return b.width > 0 && b.right <= row.right + 1 && o.scrollWidth <= o.clientWidth + 1; });
+        const b = document.querySelector("#wslAgentsSegs [role=switch]").getBoundingClientRect();
+        return b.width > 0 && b.right <= row.right + 1;
       });
       assert(fit, "the segments don't fit the row");
-      await click(opt(w.on));
+      await click(sw());
       for (let i = 0; i < 50 && posted.at(-1)?.noWSLAgents !== false; i++) await page.waitForTimeout(50);
       assert.equal(posted.at(-1).noWSLAgents, false);
       assert.deepEqual(await where(), before, "the clicks moved the page");
@@ -120,7 +123,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.equal(await a.page.locator("#wslAgentsRow").isVisible(), false, "shown without WSL");
       const b = await open(engine, lang, [], { wsl: true, noWSLAgents: true }, t);
       await b.page.locator("#wslAgentsRow").waitFor();
-      assert.equal(await b.page.locator("#wslAgentsSegs .opt.on").innerText(), w.off);
+      assert.equal(await b.page.locator("#wslAgentsSegs [role=switch]").getAttribute("aria-checked"), "false");
       assert.deepEqual([...a.errors, ...b.errors], []);
     });
   }

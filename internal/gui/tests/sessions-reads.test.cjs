@@ -131,6 +131,25 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.deepEqual(errors, []);
     });
   }
+  test(`${engine} en 390px: Not now puts the consent away for this visit`, async (t) => {
+    const { page, errors } = await open(engine, 390, t);
+    const store = { asked: false, all: false, found: found(), named: {} }, posts = [];
+    await page.route("**/*", serve("en", store, posts));
+    await page.goto("http://myna.test/?view=sessions");
+    const card = page.locator("#view-sessions .sm-consent");
+    await card.getByRole("button", { name: "Not now", exact: true }).click();
+    await card.waitFor({ state: "detached" });
+    // the empty state says where the choice lives, and nothing was saved
+    const empty = page.locator("#view-sessions .empty-state.sm-consent-later");
+    await empty.waitFor();
+    assert.match(await empty.textContent(), /Settings › Privacy/);
+    assert.equal(posts.length, 0, "Not now saves nothing");
+    // a reload asks again: the card is put away for the visit, not for good
+    await page.reload();
+    await page.locator("#view-sessions .sm-consent").waitFor();
+    assert.deepEqual(errors, []);
+  });
+
   test(`${engine} en 390px: Allow all reads every agent, those found later too`, async (t) => {
     const { page, errors } = await open(engine, 390, t);
     const store = { asked: false, all: false, found: found(), named: {} }, posts = [];

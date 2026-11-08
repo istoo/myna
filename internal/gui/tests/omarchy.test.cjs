@@ -81,7 +81,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await browser.close();
     });
 
-    for (const [lang, barName, on, off] of [["en", "Bar icon", "On", "Off"], ["zh", "状态栏图标", "开启", "关闭"]]) {
+    for (const [lang, barName] of [["en", "Bar icon"], ["zh", "状态栏图标"]]) {
       await t.test(lang + ": elsewhere nothing changes", async () => {
         const errors = [], asked = [], posted = [];
         const context = await browser.newContext({ viewport: { width: 900, height: 420 }, reducedMotion: "reduce" });
@@ -118,16 +118,16 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal(await page.evaluate(() => document.documentElement.classList.contains("omarchy")), true);
         assert.equal(await page.evaluate(() => getComputedStyle(document.body).backgroundColor), "rgb(26, 27, 38)", "the theme's background");
         await page.locator("#prefs").click();
-        await page.locator("#barIconSegs .opt").first().waitFor();
+        await page.locator("#barIconSegs [role=switch]").waitFor();
         assert.equal((await page.locator(".om-theme-name").textContent()).trim(), "tokyo-night");
         assert.equal(await page.locator("#themeSegs").isVisible(), false, "the theme is Omarchy's to pick");
         assert.equal(await page.locator("#textSizeSegs .opt").first().evaluate((b) => getComputedStyle(b).borderTopLeftRadius), "0px", "square");
         assert.equal((await page.locator("#barIconRow .name").textContent()).trim(), barName);
 
         // On, then Off: each posted, the pick drawn, the page not moved
-        const segs = page.locator("#barIconSegs .opt");
-        assert.deepEqual(await segs.allTextContents(), [off, on]);
-        assert.equal(await segs.nth(0).evaluate((b) => b.classList.contains("on")), true, "off to start");
+        const sw = page.locator("#barIconSegs [role=switch]");
+        assert.equal(await sw.getAttribute("aria-label"), barName);
+        assert.equal(await sw.getAttribute("aria-checked"), "false", "off to start");
         // Font preferences add rows above the bar control. Bring it into
         // this short window with a reader's wheel before testing a click.
         await page.locator("#view-settings").hover();
@@ -146,10 +146,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         if (delta) await page.mouse.wheel(0, delta);
         await page.waitForFunction(shown);
         const before = await view(page);
-        await segs.nth(1).click();
-        await page.locator("#barIconSegs .opt.on", { hasText: on }).waitFor();
-        await segs.nth(0).click();
-        await page.locator("#barIconSegs .opt.on", { hasText: off }).waitFor();
+        await sw.click();
+        await page.waitForFunction(() => document.querySelector("#barIconSegs [role=switch]")?.getAttribute("aria-checked") === "true");
+        await sw.click();
+        await page.waitForFunction(() => document.querySelector("#barIconSegs [role=switch]")?.getAttribute("aria-checked") === "false");
         assert.deepEqual(posted, [{ on: true }, { on: false }]);
         await page.waitForTimeout(300);
         assert.equal(await view(page), before, "a pick moves nothing");

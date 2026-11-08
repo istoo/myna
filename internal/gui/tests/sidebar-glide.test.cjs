@@ -13,6 +13,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 
@@ -112,13 +113,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.locator("#prefs").click();
       await page.waitForFunction(() => document.querySelector("#nav > .nav-top-hl").hidden);
       assert.notEqual(await page.locator("#prefs").evaluate((b) => getComputedStyle(b).backgroundColor), "rgba(0, 0, 0, 0)", "Settings keeps its own selection");
-      await page.locator('#nav button[data-view="routing"]').click();
+      await navTo(page, "routing");
       await page.waitForTimeout(300);
       await on(page, "routing");
 
       // reduced motion: there at once
       await page.emulateMedia({ reducedMotion: "reduce" });
-      await page.locator('#nav button[data-view="gateway"]').click();
+      await navTo(page, "gateway");
       await on(page, "gateway");
       assert.deepEqual(errors, []);
       await context.close();
@@ -133,7 +134,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.goto("http://myna.test/?view=providers");
       await page.waitForSelector("#nav button.on");
       assert.ok(!(await page.evaluate(() => document.body.classList.contains("side-nav"))));
-      await page.locator('#nav button[data-view="usage"]').click();
+      await navTo(page, "usage");
       assert.equal(await shape(page), null);
       assert.notEqual(await page.locator("#nav > .thumb").count(), 0, "the header's own thumb");
       await context.close();

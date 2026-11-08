@@ -70,7 +70,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const page = await (await browser.newContext({ viewport: { width: 980, height: 520 } })).newPage();
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(60000);
-      page.on("pageerror", (e) => errors.push(e.message));
+      // WebKit's note that a resize settled a frame late is not the page's error
+      page.on("pageerror", (e) => { if (!/^ResizeObserver loop completed with undelivered notifications/.test(e.message)) errors.push(e.message); });
       await page.route("**/*", server(lang, posts, web));
       await page.goto("http://myna.test/");
       await page.locator(`${row("codex")} .ag-ver`).waitFor();

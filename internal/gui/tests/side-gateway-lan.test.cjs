@@ -27,7 +27,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // boot.js says the gateway (bootGateway); the providers' read comes
       // 1.5s after, so what is read at once is boot.js's line
       await page.route("**/*", fixture(lang, "light", [], { lan: true, lanURLs, bootGateway: true }));
-      const line = () => page.locator("#sideGw span").textContent();
+      const line = () => page.locator("#sideGw span:not(.side-gw-chev)").textContent();
       const tip = () => page.locator("#sideGw").getAttribute("title");
       const says = (host) => page.waitForFunction((h) => document.querySelector("#sideGw span")?.textContent.includes(h), host);
 
@@ -80,7 +80,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     await page.locator("#sideGw").waitFor();
     await read;
     await page.evaluate(() => new Promise(requestAnimationFrame));
-    assert.equal(await page.locator("#sideGw span").textContent(), "Gateway 127.0.0.1:3999");
+    assert.equal(await page.locator("#sideGw span:not(.side-gw-chev)").textContent(), "Gateway 127.0.0.1:3999");
     assert.equal(await page.locator("#sideGw").getAttribute("title"), "Gateway " + LOCAL);
     assert.deepEqual(errors, []);
   });

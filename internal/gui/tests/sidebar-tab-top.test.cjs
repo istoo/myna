@@ -11,6 +11,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const HOME = "/Users/aimer";
@@ -108,7 +109,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
       // Library › MCP servers at its foot, then Skills
       const libv = "#view-library";
-      await page.locator('#nav button[data-view="library"]').click();
+      await navTo(page, "library");
       await sub(page, w.skills).waitFor();
       await page.locator(`${libv} .lib-row, ${libv} .row`).first().waitFor();
       await toFoot(page, libv);
@@ -131,7 +132,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await settle(page);
       const setAt = await top(page, set);
       assert.ok(setAt > 100, `Settings is where it was left: ${setAt}`);
-      await page.locator('#nav button[data-view="library"]').click();
+      await navTo(page, "library");
       await settle(page);
       assert.equal(await top(page, libv), libAt, "the Library is where it was left");
 
@@ -162,7 +163,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.ok(!(await page.evaluate(() => document.body.classList.contains("side-nav"))), "no sidebar");
 
       const libv = "#view-library";
-      await page.locator('#nav button[data-view="library"]').click();
+      await navTo(page, "library");
       await page.locator(`${libv} .lib-row, ${libv} .row`).first().waitFor();
       const at = await toFoot(page, libv);
       await page.locator(`${libv} .lib-tabs > button`).nth(1).click();

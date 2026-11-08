@@ -100,10 +100,18 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.locator(".row.provider", { hasText: sub.name }).first().click();
       await page.locator(".editor .accts").first().waitFor();
       assert.deepEqual(await page.evaluate((keys) => keys.filter((k) => !I18N.zh[k]), KEYS), [], "every string has its Chinese");
+      // Rate limited and Stays sit in the editor's Advanced fold (open
+      // already when its other settings aren't at their defaults), and the
+      // routing mode is one picker, not nine buttons
+      const adv = page.locator(".editor details.more.advanced");
+      if (!(await adv.evaluate((d) => d.open))) await adv.locator("summary").first().click();
       const label = page.locator(".editor label", { hasText: new RegExp(`^${w.label}$`) });
       const field = label.locator("xpath=following-sibling::div[1]");
       const opt = (name) => field.locator(".segs .opt", { hasText: new RegExp(`^${name}$`) });
-      const routing = (name) => page.locator(".editor .segs .opt", { hasText: new RegExp(`^${name}$`) }).first();
+      const routing = async (name) => {
+        await page.locator(".editor .route-pick-btn").click();
+        await page.locator(".route-menu .pm-item", { hasText: new RegExp(`^${name}$`) }).click();
+      };
       assert.equal(await page.locator(".editor select").count(), 0, "no native select");
       assert.match(await opt(w.keep).getAttribute("class"), /\bon\b/, "keeps its place by default");
       assert.equal(await field.locator(".hint").last().textContent(), await said(page, "One rate limited while it still has quota rests as long as the vendor asks, then takes its place in the order again."));
@@ -113,9 +121,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.match(await field.locator(".hint").last().textContent(), zh ? /排到最后/ : /goes to the back of the order/);
       assert.equal(await field.getByText(w.unsaved, { exact: true }).isVisible(), true);
       // in turn goes round already: nothing to pick
-      await routing(w.turn).click();
+      await routing(w.turn);
       assert.equal(await label.isVisible(), false);
-      await routing(w.order).click();
+      await routing(w.order);
       assert.equal(await label.isVisible(), true);
       assert.equal(await page.evaluate(() => document.scrollingElement.scrollTop), y, "a click never scrolls the page");
       assert.deepEqual(posts, [], "nothing is sent before the Save");

@@ -11,6 +11,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const iso = (ms) => new Date(ms).toISOString();
@@ -96,7 +97,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.equal(await page.locator(".rt-req").nth(at).evaluate((r) => r.__kept === true), true, "the row picked must be a kept one");
 
       // another tab open: updates come, and the list isn't touched
-      await page.locator('#nav button[data-view="agents"]').click();
+      await navTo(page, "agents");
       await page.evaluate(() => {
         window.__touched = 0;
         window.__mo = new MutationObserver((ms) => { window.__touched += ms.length; });
@@ -108,7 +109,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const touched = await page.evaluate(() => window.__touched);
       assert.equal(touched, 0, `the list was redrawn ${touched} times out of sight`);
       // back: all of them listed
-      await page.locator('#nav button[data-view="routing"]').click();
+      await navTo(page, "routing");
       await page.waitForFunction((n) => document.querySelectorAll(".rt-req").length === n, first.length + 8 + 6);
       assert.deepEqual(errors, []);
     });

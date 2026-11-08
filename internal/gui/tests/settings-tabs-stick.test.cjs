@@ -166,9 +166,17 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const after = await headAt(page, set, ".set-head");
       assert.ok(after.gap >= -0.5 && after.gap <= 1, `the tabs still at the top: ${after.gap}`);
 
-      // the Library's tabs, the same way (they stayed already: .lib-head)
+      // the Library's tabs, the same way (they stayed already: .lib-head);
+      // at a narrow width its page is under More
+      const go = async (v) => {
+        const b = page.locator(`#nav button[data-view="${v}"]`);
+        if (await b.isVisible()) return b.click();
+        const name = (await b.textContent()).trim();
+        await page.locator("#navMore").click();
+        await page.locator(".nav-more-menu .pm-item", { hasText: name }).click();
+      };
       const libv = "#view-library";
-      await page.locator('#nav button[data-view="library"]').click();
+      await go("library");
       await page.locator(`${libv} .lib-row, ${libv} .row`).first().waitFor();
       await toFoot(page, libv);
       const la = await headAt(page, libv, ".lib-head");
@@ -177,7 +185,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.locator(`${libv} .lib-tabs > button`).nth(0).click();
       await page.waitForFunction(() => document.querySelectorAll("#view-library .lib-tabs > button")[0]?.classList.contains("on"));
       // and the Plugins' head is the same strip
-      await page.locator('#nav button[data-view="plugins"]').click();
+      await go("plugins");
       await page.locator("#view-plugins .pm-head").waitFor();
       assert.equal((await strip(page, "#view-plugins .pm-head")).position, "sticky", "the Plugins' tabs stay too");
 

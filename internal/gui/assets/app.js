@@ -462,6 +462,21 @@ function renderAgentsLoading() {
   fit(); // the panel as tall as the rows, not as it was
 }
 
+function renderAgentsError(e) {
+  const page = $("#view-agents");
+  page.classList.remove("loading");
+  page.removeAttribute("aria-busy");
+  const list = $("#agents");
+  list.replaceChildren();
+  const card = el("div", "empty-state load-error");
+  card.setAttribute("role", "alert");
+  card.append(el("b", "", t("Couldn't read your agents")), el("span", "why", e?.message || t("The list couldn't be read")));
+  const again = el("button", "text primary", t("Retry"));
+  again.type = "button";
+  again.onclick = () => { renderAgentsLoading(); load().catch(() => {}); };
+  card.append(again);
+  list.append(card);
+}
 let agentArranging = false, agentRenderPending = false;
 function renderAgents() {
   renderCodexMemories(); // the Codex sheet's row is the same field
@@ -487,6 +502,15 @@ function renderAgents() {
     const row = el("div", "row agent");
     row.dataset.id = a.id;
     row.title = a.path;
+        row.tabIndex = 0;
+    row.setAttribute("role", "button");
+    row.setAttribute("aria-label", t("Open {name}", { name: a.name }));
+    row.onkeydown = (e) => {
+      if (e.target !== row || (e.key !== "Enter" && e.key !== " ")) return;
+      e.preventDefault();
+      if (row.onclick) row.onclick({ target: row, preventDefault() {} });
+      else row.querySelector(".ag-handle")?.click();
+    };
     row.oncontextmenu = (ev) => { ev.preventDefault(); openAgentMenu(row.querySelector(".ag-handle"), a, inFold); };
     const who = el("div", "who");
     who.append(el("div", "name", a.name));
@@ -1539,7 +1563,8 @@ function connectRow(a, row, who, { fields, extras, fieldBtn, sw, kind }) {
       const link = expandLink(a);
       row.append(link);
       row.onclick = (ev) => {
-        if (ev.target.closest("button, a, input, label, [role], .ag-exp, .ag-handle")) return;
+        const hit = ev.target.closest("button, a, input, label, [role], .ag-exp, .ag-handle");
+        if (hit && hit !== row) return;
         if (!getSelection()?.isCollapsed) return; // words being selected
         link.click();
       };
@@ -1743,7 +1768,8 @@ function guideCard(g) {
   const card = el("section", "guide");
   card.setAttribute("aria-label", t("Get started"));
   const head = el("div", "guide-head");
-  const steps = [g.source, g.agent];
+  // the optional third step counts
+  const steps = [g.source, g.agent, ...(featuresOff.has("groups") ? [] : [g.routing])];
   head.append(el("b", "guide-h", t("Get started")), el("span", "guide-n", t("{n} of {m} done", { n: steps.filter(Boolean).length, m: steps.length })));
   const x = el("button", "guide-x");
   x.type = "button";
@@ -3073,7 +3099,7 @@ const EYE = "M1.75 8S4.25 3.5 8 3.5 14.25 8 14.25 8 11.75 12.5 8 12.5 1.75 8 1.7
 function agentHandle(a, row, inFold) {
   const b = el("button", "ag-handle");
   b.type = "button";
-  b.setAttribute("aria-label", t("Arrange {agent}", { agent: a.name }));
+    b.setAttribute("aria-label", t("Drag to reorder"));
   b.setAttribute("aria-haspopup", "menu");
   b.title = inFold ? t(isHidden(a) ? "Show {agent}" : "Hide {agent}", { agent: a.name }) : t(a.wired ? "Drag to reorder · click to move, hide or disconnect from myna" : "Drag to reorder · click to move or hide");
   b.append(icon(a.icon));
@@ -4354,6 +4380,7 @@ async function load(again) {
     if (view === "settings" && !syncOpen) await loadSettings();
   } catch (e) {
     statusErr(e);
+        if (!load.done) renderAgentsError(e);
   }
   renderUpdateBadge();
   cliBehindOnce();
@@ -4418,7 +4445,7 @@ async function renderUpdateBadge() {
   }
   // a package manager's myna: Settings names its command, no pill
   const on = pulling || (!!u && !updatePillOff(u.latest) && (u.state === "ready" || (u.state === "available" && !u.packaged) || u.state === "found" || (u.state === "error" && u.retry)));
-  if (b.hidden !== !on) b.hidden = !on;
+  if (b.hidden !== !on) b.hidden = !on, fitTop();
   if (!on) return;
   const hide = $("#updateHide");
   hide.setAttribute("aria-label", t("Hide until the next version"));
@@ -5911,6 +5938,7 @@ saveCurrent.onclick = () => {
 // The list read in the background once the app has started (#1519), for
 // the page's first opening: { read, got } — the read, and the list once in.
 let providersEarly = null;
+let providersError = "";
 function prefetchProviders() {
   if (providers || providersEarly) return;
   const e = providersEarly = { read: api("providers") };
@@ -5972,7 +6000,20 @@ async function loadProvidersNow() {
   // at once (#123)
   else if (providersPage(view)) myna.call(view, "draft");
   const was = providers;
-  const next = await fresh;
+  let next;
+  try {
+    next = await fresh;
+  } catch (e) {
+    if (view !== "providers" && !providersPage(view)) throw e;
+    providersError = e?.message || t("The list couldn't be read");
+    if (view === "providers") renderProvidersError(e);
+    // accounts still loading: the asking goes on
+    providersWhileFetching();
+    if (providersPage(view)) throw e;
+    return;
+  }
+  providersError = "";
+  $("#providersError").hidden = true;
   // a change saved meanwhile drew the list it was answered with, newer
   // than this read
   if (kept && providers !== kept) return;
@@ -6088,7 +6129,20 @@ function markUpstream() {
 
 // Rows in the shape of the list while it is first asked for; a reload keeps
 // the list it has until the new one is in.
+function retryProviders() {
+  providersError = "";
+  $("#providersError").hidden = true;
+  if (!providers) renderProvidersLoading();
+  loadProviders().catch(() => {});
+}
+const providersErr = import("./providerserr.js").then((m) => m.drawProvidersError).catch(() => null);
+function renderProvidersError(e) {
+  const why = e?.message || providersError || t("The list couldn't be read");
+  providersErr.then((draw) => draw?.(why, !!providers));
+}
+
 function renderProvidersLoading() {
+  $("#providersError").hidden = true;
   const page = $("#view-providers");
   page.classList.add("loading");
   page.setAttribute("aria-busy", "true");
@@ -6131,7 +6185,8 @@ function renderProviders(quiet) {
   keepIcons($("#providers"), $("#offProviders"), $("#addSheet"), $("#excluded"));
   view.classList.remove("loading");
   view.removeAttribute("aria-busy");
-  closeProtoMenu();
+  $("#providersError").hidden = true;
+  if (!protoMenu?.anchor.closest("#modal")) closeProtoMenu();
   syncURL();
   const onList = $("#providers"), offList = $("#offProviders");
   onList.replaceChildren();
@@ -6143,6 +6198,14 @@ function renderProviders(quiet) {
     const open = editing === p.id;
     const row = el("div", "row provider" + (open ? " selected" : "") + (p.off ? " off" : ""));
     row.dataset.id = p.id;
+        row.tabIndex = 0;
+    row.setAttribute("role", "button");
+    row.setAttribute("aria-label", t("Open {name}", { name: p.name }));
+    row.onkeydown = (e) => {
+      if (e.target !== row || (e.key !== "Enter" && e.key !== " ")) return;
+      e.preventDefault();
+      row.click();
+    };
     const who = el("div", "who");
     const name = el("div", "name", p.name);
     if (p.sponsored) name.append(el("span", "badge", t("sponsored")));
@@ -6242,7 +6305,7 @@ let providerArranging = false;
 function providerHandle(p, row) {
   const b = el("button", "ag-handle pv-handle");
   b.type = "button";
-  b.setAttribute("aria-label", t("Arrange {agent}", { agent: p.name }));
+    b.setAttribute("aria-label", t("Drag to reorder"));
   b.title = t("Drag to reorder — a model several providers serve goes to the higher one first · Alt+↑/↓ to move") + " · " + t("right-click to move it to the top or the bottom");
   b.append(icon(p.icon || "generic"));
   b.onkeydown = (e) => {
@@ -6830,6 +6893,21 @@ function segs(items, current, onPick) {
     slide(box, key);
   });
   return box;
+}
+function settingSwitch(label, on, onPick) {
+  const b = el("button", "lib-switch setting-switch" + (on ? " on" : ""));
+  b.type = "button";
+  b.setAttribute("role", "switch");
+  b.setAttribute("aria-checked", String(on));
+  b.setAttribute("aria-label", label);
+  b.append(el("i"));
+  b.onclick = async (e) => {
+    e.stopPropagation();
+    if (b.disabled) return;
+    b.disabled = true;
+    try { await onPick(!on); } finally { if (b.isConnected) b.disabled = false; }
+  };
+  return b;
 }
 // where a control is in the page: the nearest element with an id, and which
 // of the same options it is there; "" for one not in the page
@@ -7529,10 +7607,8 @@ function input(value, placeholder, type = "text") {
   i.spellcheck = false;
   i.autocomplete = "off";
   i.onkeydown = (e) => {
+        if (e.key === "Escape") return;
     e.stopPropagation();
-    if (e.key === "Escape") {
-      if (editing !== null || importing || importingApps) cancelEdit();
-    }
   };
   return i;
 }
@@ -8348,8 +8424,7 @@ function iconPicker(ed) {
     };
     const choose = el("button", "text", t("Choose a picture…"));
     choose.onclick = () => file.click();
-    // the site's own icon (as before), a picture's address, or the name's
-    // letters on a tile: many sites have no /favicon.ico (usrname1833)
+    // the site's icon, a picture's address, or the name's letters (usrname1833)
     const base = () => draft[apiField[draft.api]] || draft.chat || draft.responses || draft.anthropic || "";
     const site = el("button", "text", t("Get icon"));
     site.setAttribute("aria-haspopup", "menu");
@@ -8357,6 +8432,7 @@ function iconPicker(ed) {
     site.append(svg(CHEV, 11, 1.7));
     // true when the picture is the icon now (hoobnn)
     const get = async (path, body) => {
+      site.style.minWidth = site.offsetWidth + "px";
       site.disabled = true;
       site.textContent = t("Looking…");
       let note = "", kind = "warn", ok = false;
@@ -8693,7 +8769,20 @@ function modalBackground(inert) {
     modalBackgroundElements = [];
   }
 }
+function modalEscape() {
+  const modal = $("#modal");
+  if (modal.hidden || modal.classList.contains("out")) return false;
+  if (confirmAsk) { closeConfirmAsk(); return true; }
+  if (editing !== null || importing || importingApps) { cancelEdit(); return true; }
+  if (view === "library") { myna.call("library", "close"); return true; }
+  closeModal().then(() => { if (!confirmAsk) modal.classList.remove("lib"); });
+  return true;
+}
 $("#modal").addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    if (modalEscape()) { e.preventDefault(); e.stopPropagation(); }
+    return;
+  }
   if (e.key !== "Tab") return;
   const modal = e.currentTarget;
   const controls = [...modal.querySelectorAll('button, input, select, textarea, a[href], [tabindex="0"]')]
@@ -8869,17 +8958,17 @@ function openModal(content, quiet) {
   const stop = () => follow.disconnect();
   grow.finished.then(stop, stop);
 }
-// edAligned: a row across an editor starts where its fields do (--ed-at)
+// edAligned: an editor row starts where its fields do (--ed-at).
+const edPut = (n) => {
+  const cs = getComputedStyle(n.parentElement), cols = cs.gridTemplateColumns.split(" ");
+  const lab = cols.length > 1 ? parseFloat(cols[0]) || 0 : 0;
+  n.style.setProperty("--ed-lab", lab + "px");
+  n.style.setProperty("--ed-at", (lab && lab + parseFloat(cs.columnGap)) + "px");
+};
 const edAlign = new ResizeObserver((es) => {
-  for (const { target: n } of es) {
-    if (!n.isConnected) { edAlign.unobserve(n); continue; }
-    const cs = getComputedStyle(n.parentElement), cols = cs.gridTemplateColumns.split(" ");
-    const lab = cols.length > 1 ? parseFloat(cols[0]) || 0 : 0;
-    n.style.setProperty("--ed-lab", lab + "px");
-    n.style.setProperty("--ed-at", (lab && lab + parseFloat(cs.columnGap)) + "px");
-  }
+  for (const { target: n } of es) n.isConnected ? edPut(n) : edAlign.unobserve(n);
 });
-const edAligned = (n) => (edAlign.observe(n), n);
+const edAligned = (n) => (edAlign.observe(n), requestAnimationFrame(() => requestAnimationFrame(() => edPut(n))), n);
 // frame holds an editor's head and its buttons still while the fields
 // between them scroll.
 function frame(ed) {
@@ -9363,6 +9452,7 @@ function drawEditor(p, presetID) {
     return row;
   };
 
+  let routePick = null;
   if (p?.account) {
     // the sign-in belongs to the agent; myna only borrows it
     const a = p.account;
@@ -9371,14 +9461,16 @@ function drawEditor(p, presetID) {
       if (a.agent === "claude" && !p.switchOnly) ed.append(claudeModeRow());
       const via = a.wsl ? t("Runs through WSL · {distro}: Claude Code there signs in and answers; Windows has none of its own.", { distro: a.wsl }) + " " : "";
       ed.append(...field(t("Accounts"), renderAccounts(a, p), via + (p.routing ? t("Tick every account to use; Routing says how requests spread over them.") : subOf(a.agent).single ? t("{agent} keeps one account; the gateway runs it for every request. Signing in to another replaces it.", { agent: a.agentName }) : subOf(a.agent).own && (a.logins || []).some((l) => l.own) ? t("The gateway uses the first. Tick more and it moves on to the next when the one before it is out of quota. {agent} itself stays signed in as it is.", { agent: a.agentName && a.agentName !== a.agent ? a.agentName : p.name }) : subOf(a.agent).own || subOf(a.agent).plugin ? t("The gateway uses the first. Tick more and it moves on to the next when the one before it is out of quota.") : t("{agent} signs in to the first. Tick more and myna moves on to the next when the one before it is out of quota. Sessions already running keep theirs until restarted.", { agent: a.agentName }))));
-      if ((a.logins || []).filter((l) => l.active || l.on).length > 1) ed.append(...renderRouting(p));
+      if ((a.logins || []).filter((l) => l.active || l.on).length > 1) { routePick = renderRouting(p); ed.append(...routePick.nodes); }
       if (p.move) ed.append(...renderMove(p));
     } else {
       const acct = el("div", "acct");
       acct.append(icon(a.agentIcon), el("span", "n", a.user), hideAccounts.eye(a.user, p.id), el("span", "plan", accountPlan(a)));
       ed.append(...field(t("Account"), acct, t("{agent}'s sign-in, read from its own files. Sign out there and this provider goes away.", { agent: a.agentName })));
     }
-    ed.append(...field(t("Models"), renderModels(p), pluginFilterNote(subOf(a.agent))));
+    const modelsField = field(t("Models"), renderModels(p), pluginFilterNote(subOf(a.agent)));
+    if (routePick) routePick.slot.append(...modelsField);
+    else ed.append(...modelsField);
     if (p.drawIds?.length) ed.append(...renderDrawers(p));
     if (p.filmIds?.length) ed.append(...renderVideomakers(p));
     // a subscription's window too: Codex's backend says 272K for models
@@ -9404,6 +9496,7 @@ function drawEditor(p, presetID) {
     const urls = [p.chat, p.responses, p.anthropic].filter(Boolean);
     if (urls.length && !urls.some((u) => u.startsWith("plugin://"))) ed.append(...field(t("Endpoints"), renderEndpoints(p, p)));
     ed.append(adv);
+  mergeRouteAdv(adv, advIn, routePick);
     const bar = el("div", "bar");
     // removing only hides it from myna; the agent stays signed in
     const del = el("button", "text danger", t("Remove"));
@@ -9592,7 +9685,7 @@ function drawEditor(p, presetID) {
   };
   if (addressField) ed.append(...addressField);
   if (p?.keyList?.length) ed.append(...field(t("Accounts"), renderKeyAccounts(p), p.routing ? t("Tick every key to use; Routing says how requests spread over them.") : t("Tick every key to use. Requests go to the first; when it runs out of quota or hits a rate limit, the next ticked key takes over.")));
-  if (p?.keyList?.filter((k) => k.on).length > 1) ed.append(...renderRouting(p));
+  if (p?.keyList?.filter((k) => k.on).length > 1) { routePick = renderRouting(p); ed.append(...routePick.nodes); }
   else if (vertex) ed.append(...vertexFields());
   // keys are replaced in Accounts; the box is for no key yet (Kylin_Cloud on X)
   else if (!p?.keyList?.length) ed.append(...field(t("API key"), keyWrap, isNew ? t("Kept in ~/.config/myna/providers.json, readable by you alone. Nothing is read from your shell.") : ""));
@@ -9821,7 +9914,11 @@ function drawEditor(p, presetID) {
     ed.append(...field(t(pr.regionLabel || "Region"), seg, t(pr.splitAccounts ? "pick the region of your {p} account" : "which endpoint {p} is reached through", { p: pr.name })));
   }
 
-  if (p) ed.append(...field(t("Models"), renderModels(p), ""));
+  if (p) {
+    const modelsField = field(t("Models"), renderModels(p), "");
+    if (routePick) routePick.slot.append(...modelsField);
+    else ed.append(...modelsField);
+  }
   // Azure OpenAI's models are its deployments, which myna lists with the
   // key once the resource is added (#1995): said here, so no one takes the
   // add page for one where they must type them
@@ -9907,6 +10004,7 @@ function drawEditor(p, presetID) {
     ed.append(...row);
   }
   ed.append(adv);
+  mergeRouteAdv(adv, advIn, routePick);
 
   if (custom) {
     const more = edAligned(el("details", "more"));
@@ -10971,10 +11069,10 @@ function modelTestWhy(p) {
   return "";
 }
 
-// modelTests: each provider's Test models answers by id, null while asked
+// each provider's Test models answers by id, null while asked
 const modelTests = {};
 
-// testsOn: a provider's tests under way, by run; Stop ends them on the server too (RIck)
+// testsOn: a provider's tests under way; Stop ends them on the server
 const testsOn = {};
 async function provTest(id, body) {
   const run = Math.random().toString(36).slice(2), ac = new AbortController(), on = testsOn[id] ||= new Map();
@@ -10987,7 +11085,7 @@ async function provTest(id, body) {
 const testErr = (e) => e.stopped ? status(t("Test stopped")) : statusErr(e);
 function testBtns(id) {
   const on = testsOn[id]?.size;
-  for (const b of document.querySelectorAll("[data-tests]")) if (b.dataset.tests === id) b.textContent = on ? t("Stop") : b.dataset.label, b.title = on ? "" : b.dataset.tip;
+  for (const b of document.querySelectorAll("[data-tests]")) if (b.dataset.tests === id) b.style.minWidth = b.offsetWidth + "px", b.textContent = on ? t("Stop") : b.dataset.label, b.title = on ? "" : b.dataset.tip;
 }
 function testButton(p, label, tip, run) {
   const b = el("button", "text action", label), on = () => testsOn[p.id];
@@ -12000,8 +12098,17 @@ function renderRouting(p) {
     return u;
   };
   const rHint = el("div", "hint"), rUnsaved = unsaved();
+  // one picker: its names, the picked one's description beneath
+  const rBtn = el("button", "proto pick route-pick-btn");
+  rBtn.type = "button";
+  rBtn.setAttribute("aria-haspopup", "menu");
+  rBtn.setAttribute("aria-expanded", "false");
+  const shownRoutings = () => routingsOf(p).filter(([id, , , js]) => id === routingNow()
+    || !((ROTATION.has(id) && featuresOff.has("rotation")) || (js && featuresOff.has("middleware"))));
   const drawRouting = () => {
     const cur = routingsOf(p).find(([id]) => id === routingNow()) || ROUTINGS[0];
+    rBtn.dataset.value = cur[0];
+    rBtn.replaceChildren(el("span", "", ROUTINGS.some((r) => r[0] === cur[0]) ? t(cur[1]) : cur[1]), svg(CHEV, 11, 1.6));
     rHint.textContent = (ROUTINGS.includes(cur) ? t(cur[2]) : cur[2]) + own(cur[0]);
     rUnsaved.hidden = routingNow() === (p.routing || "");
     // in turn and by weight go round already
@@ -12009,9 +12116,15 @@ function renderRouting(p) {
     // each key's or account's weight shows beside it while by weight
     for (const l of document.querySelectorAll(".accts")) if (l.dataset.provider === p.id) l.classList.toggle("weighted", routingNow() === "weight");
   };
-  const rPick = routingSegs(routingsOf(p).map(([id, name, , js]) => [id, ROUTINGS.some((r) => r[0] === id) ? t(name) : name, , js]), routingNow(), (routing) => { draft.routing = routing; drawRouting(); });
+  rBtn.onclick = (e) => {
+    e.stopPropagation();
+    if (rBtn.classList.contains("open")) return closeProtoMenu();
+    openProtoMenu(rBtn, shownRoutings().map(([id, name, , js]) => ({
+      v: id, name, note: "", literalName: !!js && !ROUTINGS.some((r) => r[0] === id),
+    })), routingNow(), (routing) => { draft.routing = routing; drawRouting(); }, t("Routing"), "route-menu", "left");
+  };
   const rRow = el("div", "route-pick");
-  rRow.append(rPick, rUnsaved);
+  rRow.append(rBtn, rUnsaved);
   const rWrap = el("div");
   rWrap.append(rRow, rHint);
   const kHint = el("div", "hint"), kUnsaved = unsaved();
@@ -12036,10 +12149,29 @@ function renderRouting(p) {
   sRow.append(sPick, sUnsaved);
   const sWrap = el("div");
   sWrap.append(sRow, sHint);
+  // Rate limited, Stays and Models sit in Advanced
+  const modelsMode = () => draft.chosen.length || draft.picking ? t("Picked only")
+    : draft.none ? t("Usage only") : draft.best ? t("Best in family") : t("Vendor's list");
+  const routeSet = () => sinkNow() !== !!p.sink || affinityNow() !== (p.affinity || "")
+    || !!(draft.chosen.length || draft.picking || draft.none || draft.best);
+  const say = el("span", "hint route-adv-say");
+  const paintSay = () => {
+    const n = p.models.filter((m) => m.on).length;
+    say.textContent = t("{n} models · {mode}", { n, mode: modelsMode() });
+  };
+  paintSay();
+  const slot = el("div", "models-slot");
   drawRouting();
   drawSink();
   drawStays();
-  return [el("label", "", t("Routing")), rWrap, kLabel, kWrap, el("label", "", t("Stays")), sWrap];
+  return { nodes: [el("label", "", t("Routing")), rWrap], advNodes: [kLabel, kWrap, el("label", "", t("Stays")), sWrap, slot], slot, say, paintSay, isSet: routeSet };
+}
+
+function mergeRouteAdv(adv, advIn, routePick) {
+  if (!routePick) return;
+  advIn.prepend(...routePick.advNodes);
+  adv.querySelector("summary").append(routePick.say);
+  if (routePick.isSet()) adv.open = true;
 }
 
 // renderFallback: where requests go when this provider can't take them —
@@ -13162,7 +13294,7 @@ function renderAccounts(a, p) {
     // one line, First or Make first at its right end (the owner, 10-29)
     const line = el("div", "acc-line");
     row.append(line);
-    line.append(dot, accountNameButton(p, l.user), el("span", "plan", accountPlan({ agent: a.agent, builtin: a.builtin, plan: l.plan })));
+    line.append(dot, accountNameButton(p, l.user), el("span", "acc-break"), el("span", "plan", accountPlan({ agent: a.agent, builtin: a.builtin, plan: l.plan })));
     if (p && on && several) line.append(keyWeight(p, { name: l.user }, wOf(l), weights, "provider/accountweight", { id: p.id, account: l.user }));
     // its own models (#474), when there is another account to send the rest to
     const [amPill, amBox] = ls.length > 1 || accountModelsOf(p, l.user).length ? accountModels(p, l.user, false, l.user) : [];
@@ -13273,6 +13405,12 @@ function renderAccounts(a, p) {
       row.append(tools);
     }
     if (amBox) row.append(amBox);
+        const brk = line.querySelector(":scope > .acc-break");
+    if (brk) {
+      const tail = el("span", "acc-tail");
+      while (brk.nextSibling) tail.append(brk.nextSibling);
+      line.append(tail);
+    }
     list.append(row);
   }
   // one account (#209, #408, #524)
@@ -15064,6 +15202,7 @@ function openProtoMenu(anchor, opts, value, choose, head = "Protocol this key sp
   // Only the reader's scroll dismisses it; the click guard holds its anchor.
   const scroll = (e) => {
     if (box.contains(e.target) || live && performance.now() >= purposeUntil) return;
+    if (anchor.isConnected && e.target.nodeType === 1 && e.target !== anchor && e.target.contains(anchor) && performance.now() >= purposeUntil && performance.now() - lastScrollInput > 500) return placeMenu(box, anchor, align);
     if (scrollCloses(box, e)) closeProtoMenu();
   };
   const keys = (e) => {
@@ -19343,8 +19482,8 @@ let barIcon = null;
 function renderBarIcon() {
   $("#barIconRow").hidden = !barIcon?.available || gatewayMode; // the desktop's, not a gateway's
   if ($("#barIconRow").hidden) return;
-  $("#barIconSegs").replaceChildren(segs([["off", t("Off")], ["on", t("On")]], barIcon.on ? "on" : "off", (v) =>
-    api("omarchy/widget", { on: v === "on" }).then((b) => { barIcon = b; renderBarIcon(); })
+  $("#barIconSegs").replaceChildren(settingSwitch(t("Bar icon"), !!barIcon.on, (on) =>
+    api("omarchy/widget", { on }).then((b) => { barIcon = b; renderBarIcon(); })
       .catch((e) => { statusTErr(e); renderBarIcon(); })));
 }
 
@@ -19559,6 +19698,7 @@ function findSettings() {
       }
       const hit = words.every((w) => says.includes(w));
       n.classList.toggle("set-miss", !hit);
+      n.classList.toggle("set-hit", hit);
       let shows = hit;
       for (let a = n; shows && a && a !== page; a = a.parentElement) if (a.hidden && a !== pane) shows = false;
       if (shows && pane && $('[aria-controls="' + pane.id + '"]').hidden) shows = false;
@@ -19573,9 +19713,16 @@ function findSettings() {
       if (box.parentElement.closest(".row")) continue; // inside a row: it goes with the row
       box.classList.toggle("set-miss", ![...lit].some((l) => box.contains(l)));
     }
+    // a heading stays while a matched row precedes the next one
     for (const h of page.querySelectorAll(":scope > .row-head")) {
-      const next = h.nextElementSibling;
-      h.classList.toggle("set-miss", h.matches(".warm-head") || !next || next.classList.contains("set-miss") || (next.matches(".warm-panes") && ![...lit].some((l) => next.contains(l))));
+      let shows = false;
+      if (!h.matches(".warm-head")) {
+        for (let n = h.nextElementSibling; n && !n.matches(".row-head"); n = n.nextElementSibling) {
+          if (n.classList.contains("set-hit") || n.querySelector?.(".set-hit")) { shows = true; break; }
+          if (n.matches(".list, .warm-panes") && !n.classList.contains("set-miss")) { shows = true; break; }
+        }
+      }
+      h.classList.toggle("set-miss", !shows);
     }
     page.dataset.part = tab.textContent;
     page.hidden = !hits;
@@ -19590,7 +19737,7 @@ function searchSettings(q) {
   if (setQuery) return findSettings();
   const v = $("#view-settings");
   v.classList.remove("set-searching");
-  for (const n of v.querySelectorAll(".set-miss")) n.classList.remove("set-miss");
+  for (const n of v.querySelectorAll(".set-miss, .set-hit")) n.classList.remove("set-miss", "set-hit");
   $("#setNone").hidden = true;
   setSetTab(setTab);
 }
@@ -19732,6 +19879,22 @@ function renderUpdateMirror(r, s) {
   queueMicrotask(() => { if (i.isConnected && document.activeElement !== i) i.focus(NO_SCROLL); });
 }
 
+// About's rows: aboutrows.js
+let aboutRowsDraw = null;
+function renderAboutRows(s, keep) {
+  const about = $("#about");
+  const run = () => {
+    about.replaceChildren();
+    aboutRowsDraw({ about, s, keep, web, setTab, UPDATE_EVERY, DISCORD_SVG, GITHUB_SVG, gatewayMode });
+  };
+  if (aboutRowsDraw) return run();
+  about.replaceChildren();
+  import("./aboutrows.js").then((m) => {
+    aboutRowsDraw = m.aboutRows;
+    if (about.isConnected) run();
+  }).catch(statusErr);
+}
+
 function renderSettings() {
   const s = prefs;
   const keep = prefsKeep(s);
@@ -19739,11 +19902,11 @@ function renderSettings() {
   renderFonts(s);
   $("#themeSegs").replaceChildren(segs(THEMES.map(([id, name]) => [id, t(name)]), s.theme, (theme) => savePrefs({ ...keep, theme })));
   $("#colorblindSegs").title = t("Colorblind-safe chart colors, and each allowance window's line in a dash of its own");
-  $("#colorblindSegs").replaceChildren(segs([["off", t("Off")], ["on", t("On")]], s.colorblind ? "on" : "off", (v) => savePrefs({ ...keep, colorblind: v === "on" })));
+  $("#colorblindSegs").replaceChildren(settingSwitch(t("Colorblind mode"), !!s.colorblind, (on) => savePrefs({ ...keep, colorblind: on })));
   $("#reduceMotionSegs").title = t("Animations stand still, as with the system's Reduce Motion, so myna keeps the computer less busy");
-  $("#reduceMotionSegs").replaceChildren(segs([["off", t("Off")], ["on", t("On")]], s.reduceMotion ? "on" : "off", (v) => savePrefs({ ...keep, reduceMotion: v === "on" })));
+  $("#reduceMotionSegs").replaceChildren(settingSwitch(t("Reduce motion"), !!s.reduceMotion, (on) => savePrefs({ ...keep, reduceMotion: on })));
   $("#birdSegs").title = t("myna's bird hops on what is still loading; Off keeps it away, and myna stops looking for it");
-  $("#birdSegs").replaceChildren(segs([["off", t("Off")], ["on", t("On")]], s.noBird ? "off" : "on", (v) => savePrefs({ ...keep, noBird: v === "off" })));
+  $("#birdSegs").replaceChildren(settingSwitch(t("Loading bird"), !s.noBird, (on) => savePrefs({ ...keep, noBird: !on })));
   renderLangPick(s, keep);
   renderGatewayMode(s);
   // a browser tab has its own zoom, and myna leaves it to it
@@ -19760,8 +19923,8 @@ function renderSettings() {
     dockChoice(s), (v) => savePrefs({ ...keep, dock: v === "on", dockWindow: v === "window", dockNever: v === "off" })));
   // a closed window's webview let go (#580): the app's windows alone
   $("#lightweightRow").hidden = web;
-  $("#lightweightSegs").replaceChildren(segs([["off", t("Off")], ["on", t("On")]], s.lightweight === true ? "on" : "off",
-    (v) => savePrefs({ ...keep, lightweight: v === "on" })));
+  $("#lightweightSegs").replaceChildren(settingSwitch(t("Lightweight mode"), s.lightweight === true,
+    (on) => savePrefs({ ...keep, lightweight: on })));
   // the display kept on too (#975)
   $("#keepAwakeSegs").replaceChildren(segs([["off", t("Off")], ["on", t("On")], ["display", t("Screen on too")]],
     !s.keepAwake ? "off" : s.keepAwakeDisplay ? "display" : "on",
@@ -19773,11 +19936,11 @@ function renderSettings() {
     : "Keeps this computer awake while myna runs tasks";
   awakeSub.textContent = t(awakeSub.dataset.en);
   // quitask.js's question
-  $("#quitAskSegs").replaceChildren(segs([["off", t("Off")], ["on", t("On")]], s.quitNoAsk ? "off" : "on", (v) => savePrefs({ ...keep, quitNoAsk: v === "off" })));
+  $("#quitAskSegs").replaceChildren(settingSwitch(t("Ask before quitting"), !s.quitNoAsk, (on) => savePrefs({ ...keep, quitNoAsk: !on })));
   // WSL's distros, looked in on Windows unless turned off (#1264)
   $("#wslAgentsRow").hidden = !s.wsl;
-  $("#wslAgentsSegs").replaceChildren(segs([["off", t("Off")], ["on", t("On")]], s.noWSLAgents ? "off" : "on",
-    (v) => savePrefs({ ...keep, noWSLAgents: v === "off" })));
+  $("#wslAgentsSegs").replaceChildren(settingSwitch(t("Detect agents in WSL"), !s.noWSLAgents,
+    (on) => savePrefs({ ...keep, noWSLAgents: !on })));
   renderSessionTerminal(s, keep);
   renderBarIcon();
   // what it does in its tooltip (#2120), and where the Mac lists it
@@ -19785,8 +19948,8 @@ function renderSettings() {
     ? "Opens in the menu bar with no window. System Settings › General › Login Items lists it under App Background Activity, not Open at Login"
     : "Opens in the tray with no window");
   // the system's record, set on its own, not with the other choices
-  $("#loginSegs").replaceChildren(segs([["off", t("Off")], ["on", t("On")]], s.login ? "on" : "off", (v) =>
-    prefWrite(api("settings/login", { on: v === "on" }))));
+  $("#loginSegs").replaceChildren(settingSwitch(t("Open at login"), !!s.login, (on) =>
+    prefWrite(api("settings/login", { on }))));
   renderLoginAllow(s);
   // the warm-ups and check-in, one tab each over one card
   // A ChatGPT account's next window started as soon as the last resets
@@ -19819,7 +19982,7 @@ function renderSettings() {
     ["qoder", "qoder", t("Claims each signed-in Qoder account's daily credits once a day"), t("As claiming the daily credits in Qoder does")]]) {
     const on = k + "Checkin", sub = $(`#${id}CheckinSub`), list = $(`#${id}List`);
     $("#warmTab-" + id).hidden = !s[k] && !s[on];
-    $(`#${id}CheckinSegs`).replaceChildren(segs([["off", t("Off")], ["on", t("On")]], s[on] ? "on" : "off", (v) => savePrefs({ ...keep, [on]: v === "on" })));
+    $(`#${id}CheckinSegs`).replaceChildren(settingSwitch(t("Daily check-in"), !!s[on], (v) => savePrefs({ ...keep, [on]: v })));
     sub.textContent = [say, ...ciLines(s[on + "s"])].filter(Boolean).join(" · ");
     sub.title = as;
     list.querySelectorAll(".ci-acct, .ci-now-row").forEach((x) => x.remove());
@@ -19847,123 +20010,7 @@ function renderSettings() {
   renderCORS(s);
   renderSync();
 
-  const about = $("#about");
-  about.replaceChildren();
-  const row = (name, sub, value, ...tools) => {
-    const r = el("div", "row pref");
-    const who = el("div", "who");
-    who.append(el("div", "name", name));
-    if (sub) who.append(el("div", "sub", sub));
-    const val = el("div", "val");
-    if (value) val.append(el("code", "", value));
-    val.append(...tools);
-    r.append(who, val);
-    about.append(r);
-    return r;
-  };
-  renderUpdate(row(t("Version"), "", s.version));
-  // what changed in this version, and in one waiting; a build from source
-  // has no notes
-  if (/^v?\d+\.\d+\.\d+$/.test(s.version || "")) {
-    const notes = el("button", "text", t("Open"));
-    notes.onclick = () => openWhatsNew(notes);
-    row(t("What's new"), t("The release notes since the last update"), "", notes).classList.add("whatsnew-row");
-  }
-  // the header's Update pill, kept away for good or for one version; the
-  // version row above still says what is out and offers it
-  const pill = row(t("Update button"), t("Shows in the header when a newer myna is out"),
-    "", segs([["off", t("Off")], ["on", t("On")]], s.noUpdatePill ? "off" : "on", (v) => savePrefs({ ...keep, noUpdatePill: v === "off" }).then(renderUpdateBadge)));
-  pill.classList.add("update-pill-row");
-  if (s.updateSkip && !s.noUpdatePill) {
-    api(updatePath("update")).then((u) => {
-      if (!pill.isConnected || !u || u.latest !== s.updateSkip) return;
-      pill.querySelector(".sub").textContent = t("Hidden for {v} until a newer version is out", { v: u.latest });
-      const back = el("button", "text", t("Show again"));
-      back.onclick = () => skipUpdate("");
-      pill.querySelector(".val").prepend(back);
-    }, () => {});
-  }
-  // whether myna asks for a newer version by itself, and how often;
-  // off, only the version row's Check asks (#472)
-  row(t("Automatic updates"), t("Checks for a newer myna by itself"),
-    "", segs([["off", t("Off")], ["on", t("On")]], s.noAutoUpdate ? "off" : "on", (v) => savePrefs({ ...keep, noAutoUpdate: v === "off" }))).classList.add("update-auto-row");
-  // kept in place while off, dimmed, its height the same (a row or a line
-  // taken away would shorten the page under the click), for when they are
-  // turned on again
-  row(t("Check every"), s.noAutoUpdate ? t("While automatic updates are on") : t("How often myna looks for a newer version"), "",
-    segs(UPDATE_EVERY.map((m) => [m, m < 60 ? t("{n} min", { n: m }) : t("{n} h", { n: m / 60 })]), s.updateEvery || 360,
-      (updateEvery) => savePrefs({ ...keep, updateEvery }))).classList.add("update-every-row", ...(s.noAutoUpdate ? ["off"] : []));
-  // which versions an update offers (ssharpcc on X): every one as it comes
-  // out, or Stable, one a week and an urgent one at once, chosen by the
-  // update feed. It holds for the version row's Check too, so it stays lit
-  // with automatic updates off.
-  row(t("Update channel"), s.updateChannel === "stable"
-    ? t("One version a week, out for three days first, and urgent fixes at once. What's new lists every change since yours")
-    : t("Every version as soon as it is out"), "",
-    segs([["every", t("Every version")], ["stable", t("Stable")]], s.updateChannel === "stable" ? "stable" : "every",
-      (v) => savePrefs({ ...keep, updateChannel: v === "stable" ? "stable" : "" }))).classList.add("update-channel-row");
-  // whether a newer version found is downloaded at once, or only said to
-  // be out and downloaded on a click (#2296): a metered network or a
-  // proxy billed by traffic. It holds for the version row's Check too.
-  row(t("Download updates automatically"), s.noAutoDownload
-    ? t("Off: a newer version is only shown, with its size; it downloads when you click Download update. For metered networks and proxies billed by traffic")
-    : t("Downloads a newer version as soon as it is found. Turn off on a metered network or a proxy billed by traffic"), "",
-    segs([["off", t("Off")], ["on", t("On")]], s.noAutoDownload ? "off" : "on", (v) => savePrefs({ ...keep, noAutoDownload: v === "off" }))).classList.add("update-download-row");
-  row(t("Restart automatically"), s.noAutoUpdate ? t("While automatic updates are on") : t("Once an update is downloaded, restarts into it without cutting off an agent's request"), "",
-    segs([["off", t("Off")], ["on", t("On")]], s.autoRestart ? "on" : "off", (v) => savePrefs({ ...keep, autoRestart: v === "on" }))).classList.add("update-restart-row", ...(s.noAutoUpdate ? ["off"] : []));
-  renderUpdateMirror(row(t("Download source"), "", ""), s);
-  const open = el("button", "text", t("Open"));
-  open.onclick = () => api("settings/reveal", {}).catch(statusErr);
-  // portable (a data folder beside myna, #508): everything is in there
-  row(t("Config folder"), s.portable ? t("Portable: everything myna keeps, in the data folder beside it") : t("providers, profiles and these settings"), s.dir, copyBtn(s.dir, t("Path")), open);
-  // app.log (applog); myna web writes none
-  if (s.log) {
-    const o = el("button", "text", t("Open"));
-    o.onclick = () => api("settings/log/reveal", {}).catch(statusErr);
-    row(t("Log"), t("What myna has logged, to send with a bug report"), s.log, copyBtn(s.log, t("Path")), o).id = "logRow";
-  }
-  renderCLI(row(t("Command line"), t("Checking your shells…"), ""));
-  // served to other machines (myna web), the one they reach (noahhrreion)
-  const gw = web && s.publicURL || s.gateway;
-  row(t("Gateway URL"), t("the address every agent is pointed at"), gw, copyBtn(gw, t("Gateway URL")));
-  // Claude Code elsewhere (Docker): the host runs this curl
-  if (web) {
-    const cmd = "curl -fsS -m 1 -H 'Authorization: Bearer <gateway key>' --data-binary @- " + gw + "/v1/myna/statusline || true";
-    row(t("Status line on another computer"), t("statusLine's command in Claude Code's settings.json there; a read-only gateway key is enough"), cmd, copyBtn(cmd, t("Command"))).id = "statuslineRemoteRow";
-  }
-  // MYNA_PUBLIC_URL, where other machines reach it (#1551)
-  if (s.publicURL && gw !== s.publicURL) row(t("Public address"), t("MYNA_PUBLIC_URL: where other computers reach the gateway, with a gateway key"), s.publicURL, copyBtn(s.publicURL, t("Public address"))).id = "publicURLRow";
-  const site = el("button", "text", t("Open"));
-  site.onclick = () => api("open", { url: "https://github.com/istoo/myna" }).catch(() => {});
-  row(t("Website"), t("downloads, docs and what's new"), "github.com/istoo/myna", site);
-  const lic = el("button", "text", t("View"));
-  lic.onclick = showNotices;
-  row(t("Open-source licenses"), t("the notices of the code and data myna is built with"), "", lic);
-  const join = el("button", "discord");
-  join.innerHTML = DISCORD_SVG;
-  join.append(el("span", "", t("Join Discord")));
-  join.title = "discord.gg/vGSnD3ZKQF";
-  join.onclick = () => api("open", { url: "https://discord.gg/vGSnD3ZKQF" }).catch(() => {});
-  // issues and the code are on GitHub, for those who'd rather not use Discord
-  const repo = el("button", "github");
-  repo.innerHTML = GITHUB_SVG;
-  repo.append(el("span", "", "GitHub"));
-  repo.title = "github.com/istoo/myna";
-  repo.onclick = () => api("open", { url: "https://github.com/istoo/myna" }).catch(() => {});
-  row(t("Community"), t("questions, ideas and feedback, on Discord or GitHub"), "", join, repo);
-  // myna uninstall, from the app (Jevik_AI on X deleted myna's folders
-  // by hand and Codex kept pointing at a gateway that was gone). Never in a
-  // browser: myna web would be taken off the computer serving the page.
-  if (!web) {
-    const go = el("button", "text danger", t("Uninstall…"));
-    go.onclick = () => uninstallMyna(go);
-    row(t("Uninstall myna"), t("Disconnects every agent, putting back what each had, then removes myna's service and files"), "", go).id = "uninstallRow";
-  }
-  // gateway mode leaves out what is written into this computer's agents'
-  // files, and the alerts its desktop would show
-  for (const r of [$("#plainNamesSegs").parentElement, $("#usageAlertRow"), $("#balanceAlertRow"), $("#resetReminderRow"), $("#turnDoneRow")]) r.hidden = gatewayMode;
-  // the parts' tabs, one gone whose rows are all hidden here
-  setSetTab(setTab);
+  renderAboutRows(s, keep);
 }
 
 // Gateway mode's switch, in myna web alone (gatewaymode.go): Automatic
@@ -20605,24 +20652,24 @@ function renderTrayUsage(s, keep) {
     (trayUsageEvery) => savePrefs({ ...keep, trayUsageEvery })));
   // only the Mac's menu bar draws the cards, with their logos or without
   $("#trayLogosRow").hidden = !ids.length || !mac;
-  $("#trayLogosSegs").replaceChildren(segs([["off", t("Off")], ["on", t("On")]], s.trayNoLogos ? "off" : "on",
-    (v) => savePrefs({ ...keep, trayNoLogos: v === "off" })));
+  $("#trayLogosSegs").replaceChildren(settingSwitch(t("Menu bar logos"), !s.trayNoLogos,
+    (on) => savePrefs({ ...keep, trayNoLogos: !on })));
   // and beside myna's icon or alone
   $("#trayBirdRow").hidden = !ids.length || !mac;
-  $("#trayBirdSegs").replaceChildren(segs([["off", t("Off")], ["on", t("On")]], s.trayNoBird ? "off" : "on",
-    (v) => savePrefs({ ...keep, trayNoBird: v === "off" })));
+  $("#trayBirdSegs").replaceChildren(settingSwitch(t("Menu bar myna icon"), !s.trayNoBird,
+    (on) => savePrefs({ ...keep, trayNoBird: !on })));
   // and each window's Pace number beside its figure (fflake33), off unless
   // asked for, as it widens every card; not where the tray shows no text
   $("#trayPaceRow").hidden = !ids.length || document.documentElement.classList.contains("win");
-  $("#trayPaceSegs").replaceChildren(segs([["off", t("Off")], ["on", t("On")]], s.trayPace ? "on" : "off",
-    (v) => savePrefs({ ...keep, trayPace: v === "on" })));
+  $("#trayPaceSegs").replaceChildren(settingSwitch(t("Menu bar pace"), !!s.trayPace,
+    (on) => savePrefs({ ...keep, trayPace: on })));
   // a card's windows
   if (!ids.length) $("#trayWindowsRow").hidden = $("#trayNumberRow").hidden = true;
   else import("./traywindows.js").then(() => trayWindowsRow(s, keep, ids, mac), () => {});
   // and the cost beside myna's own totals, in their cards and the
   // tooltip, which every OS shows with or without cards (BussanQ)
-  $("#trayCostSegs").replaceChildren(segs([["off", t("Off")], ["on", t("On")]], s.trayNoCost ? "off" : "on",
-    (v) => savePrefs({ ...keep, trayNoCost: v === "off" })));
+  $("#trayCostSegs").replaceChildren(settingSwitch(t("Menu bar cost"), !s.trayNoCost,
+    (on) => savePrefs({ ...keep, trayNoCost: !on })));
 }
 const TRAY_EVERY = [1, 3, 5, 10, 30];
 // the totals the menu bar can show beside the allowances (gui.trayTotal)
@@ -22698,7 +22745,7 @@ function savePrefs(body) {
 // Code moves a view only in answer to a click that asks to go somewhere, and
 // shows that with the reader's event: scrollOnPurpose(e). Called without one
 // it is refused, and whatever scroll follows is put back.
-let purposeUntil = 0, held = null;
+let purposeUntil = 0, held = null, lastScrollInput = -Infinity;
 // guardUntil: the click guard's own window (backToReader): its scroll
 // stands but is no reader's, so a menu the click opens stays open.
 let guardUntil = 0;
@@ -22786,9 +22833,10 @@ function givesBack(e, dir) {
 const holds = (e) => { for (let b = e.target; b instanceof Element && !b.matches(".view,body"); b = b.parentNode) b.classList.toggle("holds", b.scrollHeight > b.clientHeight + 1 && /auto|scroll/.test(getComputedStyle(b).overflowY)); };
 addEventListener("pointerover", holds, { capture: true, passive: true });
 let touchY = null;
-addEventListener("wheel", (e) => { holds(e); flings(); givesBack(e, Math.sign(e.deltaY)); }, { capture: true, passive: true });
+addEventListener("wheel", (e) => { lastScrollInput = performance.now(); holds(e); flings(); givesBack(e, Math.sign(e.deltaY)); }, { capture: true, passive: true });
 addEventListener("touchstart", (e) => { touchY = e.touches[0]?.clientY ?? null; }, { capture: true, passive: true });
 addEventListener("touchmove", (e) => {
+  lastScrollInput = performance.now();
   readerScrolls(250);
   const y = e.touches[0]?.clientY;
   if (y == null) return;
@@ -23025,8 +23073,9 @@ function hold(h) {
     // words: the Version row's line grew it 12px past a 22px switch (10-22)
     // a row put back above (50px) is the click's own doing, and the line
     // held under it follows it; a line or two coming in above (2px on
-    // #2134, 12px on the Version row) is where the view stays at its top
-    if (h.top && want > 0 && Math.abs(d) < Math.min(24, a[0].getBoundingClientRect().height)) want = 0;
+    // #2134, 12px on the Version row) is where the view stays at its top;
+    // held beside a redrawn click, two lines (19px) are 24px's
+    if (h.top && want > 0 && Math.abs(d) < (a === h.chain[0] ? Math.min(24, a[0].getBoundingClientRect().height) : 24)) want = 0;
     // a view at its top when clicked stays there rather than be given room
     // to scroll down: a chip saved in the panel's Profiles came in above the
     // button held, and room made for the button slid the chip up under the
@@ -23183,7 +23232,7 @@ async function show(v) {
       b.classList.toggle("on", on);
       if (on) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
     }
-    if (!sideNav()) { slide($("#nav"), "nav"); navInSight(); }
+    if (!sideNav()) { slide($("#nav"), "nav"); navInSight(); renderNavOver(); }
     else navTopGo($("#nav").querySelector("button[data-view].on"), true);
   }
   $("#prefs").classList.toggle("on", v === "settings");
@@ -23263,6 +23312,7 @@ function applyFeatures(list) {
   if (mode === "panel" && panelTab !== "agents") setPanelTab(panelTab); // its tab may be gone
   if (mode !== "window") return;
   navHides();
+  fitTop(); // the fit changed
   if (featureHides($(`#nav button[data-view="${view}"]`))) show(gatewayMode ? "providers" : "agents");
   else if (!sideNav()) slide($("#nav"), "nav");
   setSetTab(setTab);
@@ -23470,42 +23520,53 @@ function navInSight() {
 }
 matchMedia("(max-width: 760px), (pointer: coarse) and (max-width: 1024px)").addEventListener?.("change", () => { layoutNav(); fitTop(); navInSight(); });
 
-// A narrow window has no room for the whole header: the name goes, leaving
-// the myna, and Update becomes its arrow; narrower still, the tabs stop
-// centring and take the room between, and at the narrowest they draw in,
-// further still when they don't fit (the 560px window at 150%).
+// the header's room: not off the right edge, nor over the myna
+function topFits() {
+  const top = $(".top"), nav = $("#nav"), brand = $(".brand"), actions = $(".actions");
+  const a = actions.getBoundingClientRect();
+  // the buttons sit against the padding; under a page zoom (the text size)
+  // their edge can measure a hair past it, which isn't running off (#457)
+  if (a.right > top.getBoundingClientRect().right - parseFloat(getComputedStyle(top).paddingRight) + 0.5) return false;
+  const lead = brand.offsetParent ? brand : $("#sideToggle");
+  const left = lead.offsetParent ? lead.getBoundingClientRect().right
+    : top.getBoundingClientRect().left + parseFloat(getComputedStyle(top).paddingLeft);
+  if (!nav?.offsetParent) return left + 8 <= a.left;
+  const n = nav.getBoundingClientRect();
+  return left + 8 <= n.left && n.right + 8 <= a.left;
+}
+var navMoreOver = null, navMoreOpen = null; // navmore.js, as the window starts
+import("./navmore.js").then((m) => { navMoreOver = m.renderNavOver; navMoreOpen = m.openNavMore; fitTop(); }).catch(() => {});
+function renderNavOver() { navMoreOver?.(mode); }
+
+// Narrow: the rest under More.
 function fitTop() {
-  const top = $(".top"), nav = $("#nav"), brand = $(".brand"), actions = $(".actions"), st = $(".side-top");
+  const top = $(".top"), st = $(".side-top");
   st?.classList.remove("tight");
   st?.classList.toggle("tight", st.scrollWidth > st.clientWidth);
-  // a phone's browser: the tabs have a row of their own (app.css), at their size;
-  // and beside the sidebar the header holds only where the reader is and the icons
-  if (phoneWeb() || sideNav()) { top.classList.remove("tight", "cramped", "inrow", "crowded", "packed"); return; }
-  const fits = () => {
-    const a = actions.getBoundingClientRect();
-    // the buttons sit against the padding; under a page zoom (the text size)
-    // their edge can measure a hair past it, which isn't running off (#457)
-    if (a.right > top.getBoundingClientRect().right - parseFloat(getComputedStyle(top).paddingRight) + 0.5) return false;
-    const lead = brand.offsetParent ? brand : $("#sideToggle");
-    const left = lead.offsetParent ? lead.getBoundingClientRect().right
-      : top.getBoundingClientRect().left + parseFloat(getComputedStyle(top).paddingLeft);
-    if (!nav?.offsetParent) return left + 8 <= a.left;
-    const n = nav.getBoundingClientRect();
-    return left + 8 <= n.left && n.right + 8 <= a.left;
-  };
+  // a phone's browser has its own tab row (app.css);
+  // beside the sidebar it holds only where the reader is and the icons
+  if (phoneWeb() || sideNav()) {
+    top.classList.remove("tight", "cramped", "inrow", "crowded", "packed");
+    renderNavOver();
+    return;
+  }
   top.classList.remove("tight", "cramped", "inrow", "crowded", "packed");
-  if (fits()) return;
+  if (topFits()) { renderNavOver(); return; }
   top.classList.add("tight");
-  if (fits()) return;
+  if (topFits()) { renderNavOver(); return; }
   // the tabs closer together are tried in the middle first (#442)
   top.classList.add("cramped");
-  if (fits()) return;
+  if (topFits()) { renderNavOver(); return; }
   top.classList.add("inrow");
-  if (fits()) return;
+  if (topFits()) { renderNavOver(); return; }
   top.classList.add("crowded");
-  if (!fits()) top.classList.add("packed");
+  if (topFits()) { renderNavOver(); return; }
+  // priority+: pages that don't fit go under More
+  top.classList.remove("cramped", "crowded");
+  renderNavOver();
+  if (!topFits()) top.classList.add("packed");
 }
-const topFit = new ResizeObserver(fitTop);
+const topFit = new ResizeObserver(() => requestAnimationFrame(fitTop)); // never lay out inside a delivery
 for (const e of [".top", ".brand", ".actions"]) topFit.observe($(e));
 document.fonts?.ready.then(fitTop);
 // a font picked later (Settings' Font) can still be loading when it's applied
@@ -23701,7 +23762,7 @@ function renderSideToggle() {
   const b = $("#sideToggle");
   if (!b) return;
   b.hidden = mode !== "window" || phoneWeb();
-  const label = t(sideNav() ? "Hide sidebar" : "Show sidebar");
+    const label = t(sideNav() ? "Use tabs on top" : "Use sidebar");
   const keys = web ? "" : /^Mac/.test(navigator.platform) ? "⌃⌘S" : "Ctrl+Shift+S";
   b.title = keys ? `${label} (${keys})` : label;
   b.setAttribute("aria-label", label);
@@ -23765,6 +23826,7 @@ function navSubs() {
     if (fresh) {
       box = el("div", "nav-sub");
       box.setAttribute("role", "tablist");
+      box.setAttribute("aria-orientation", "vertical"); // its keys are ↑/↓
       box.dataset.view = view;
       box.append(el("i", "nav-hl"));
       box.onkeydown = (e) => {
@@ -24000,6 +24062,21 @@ function renderSideGw(g) {
 }
 if (mode === "window") {
   $("#sideGw").onclick = () => { show("gateway"); $("#sideGw").blur(); };
+  // More opens on click, Enter, Space or ArrowDown
+  $("#navMore").onclick = (e) => { e.stopPropagation(); navMoreOpen?.(view); };
+  $("#navMore").onkeydown = (e) => { if (e.key === "ArrowDown") { e.preventDefault(); navMoreOpen?.(view); } };
+  // ⌘K opens the palette (palette.js); "/" the page's search
+  let paletteLoad = null;
+  addEventListener("keydown", (e) => {
+    const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName || "") || !!document.activeElement?.isContentEditable;
+    if ((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === "k") {
+      e.preventDefault();
+      (paletteLoad ||= import("./palette.js")).then((m) => m.openPalette()).catch(statusErr);
+    } else if (e.key === "/" && !typing && !e.metaKey && !e.ctrlKey && !e.altKey && $("#modal").hidden) {
+      const box = $("#view-" + view).querySelector('input[type="search"], .sess-filter, .find');
+      if (box) { e.preventDefault(); box.focus(); box.select?.(); }
+    }
+  });
   sideQuery.addEventListener?.("change", layoutNav);
   layoutNav();
   $("#sideToggle").onclick = toggleSideNav;

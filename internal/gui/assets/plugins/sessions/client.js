@@ -63,7 +63,7 @@ myna.plugin("sessions", (ctx) => {
   // the agents picked in the consent (RustCats on X), by id, and whether
   // the choice is being saved
   const consentPicked = new Set();
-  let consentBusy = false;
+  let consentBusy = false, consentDismissed = false; // Not now: this visit only
   // An open folder draws its latest SM_PAGE sessions and a "Show N more"
   // that adds the next page where it is (ChildhoodAndy on X: with thousands
   // of sessions, switching to the page or to another agent, a keystroke in
@@ -419,14 +419,21 @@ myna.plugin("sessions", (ctx) => {
       } catch (err) { status(err.message, "err"); }
       finally { consentBusy = false; draw(); }
     };
+    // Not now puts the card away for this visit and shows the empty page;
+    // Settings › Privacy has the same choice later
+    const later = el("button", "text quiet sm-consent-notnow", t("Not now"));
+    later.type = "button";
+    later.disabled = consentBusy;
+    later.onclick = () => { consentDismissed = true; draw(); };
+    acts.append(later);
     if (found.length) {
-      const some = el("button", "text sm-consent-some", t("Allow selected"));
+      const some = el("button", "text primary sm-consent-some", t("Allow selected"));
       some.type = "button";
       some.disabled = consentBusy || !consentPicked.size;
       some.onclick = () => save(false);
       acts.append(some);
     }
-    const all = el("button", "text primary sm-consent-all", t("Allow all"));
+    const all = el("button", "text sm-consent-all", t("Allow all"));
     all.type = "button";
     all.disabled = consentBusy;
     all.onclick = () => save(true);
@@ -509,6 +516,14 @@ myna.plugin("sessions", (ctx) => {
       return box;
     }
     if (trashOn) { box.append(...trash()); return box; }
+    // Not now: the card is put away for this visit, and the page says why
+    // it is empty and where the choice lives
+    if (consentApplies() && consentDismissed) {
+      const e = el("div", "empty-state sm-consent-later");
+      e.append(el("b", "", t("Sessions aren't shown yet")), el("span", "", t("Allow myna to read your agents' sessions in Settings › Privacy whenever you like.")));
+      box.append(e);
+      return box;
+    }
     if (consentApplies()) box.append(consentCard());
     if (recordingApplies()) box.append(recordingCard());
     if (!data.agents.length) {

@@ -72,23 +72,22 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     const st = { reduceMotion: true }, posted = [];
     await page.route("**/*", serve(st, posted));
     await page.goto("http://myna.test/?view=settings");
-    const on = page.locator("#reduceMotionSegs .opt", { hasText: /^On$/ });
-    const off = page.locator("#reduceMotionSegs .opt", { hasText: /^Off$/ });
-    await on.waitFor();
+    const sw = page.locator("#reduceMotionSegs [role=switch]");
+    await sw.waitFor();
 
     const first = await looks(page);
     assert(first.all > 20, `the reduced-motion rules must apply from the start (${JSON.stringify(first)})`);
     assert.deepEqual({ ...first, all: 0 }, { reduce: 0, all: 0, anim: "none", calm: true, motion: "reduce" });
-    assert.match(await on.getAttribute("class"), /\bon\b/);
+    assert.equal(await sw.getAttribute("aria-checked"), "true");
 
-    await off.click();
+    await sw.click();
     await page.waitForFunction(() => !document.documentElement.dataset.motion);
     const moving = await looks(page);
     assert.deepEqual({ ...moving, reduce: 0 }, { reduce: 0, all: 0, anim: "rtlive", calm: false, motion: "" });
     assert.equal(moving.reduce, first.all, "every rule held must be the system's again");
     assert.equal(posted.at(-1).reduceMotion, false);
 
-    await on.click();
+    await sw.click();
     await page.waitForFunction(() => document.documentElement.dataset.motion === "reduce");
     assert.deepEqual(await looks(page), first, "turned on again, the page is as still as it started");
     assert.equal(posted.at(-1).reduceMotion, true);

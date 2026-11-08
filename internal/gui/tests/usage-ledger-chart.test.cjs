@@ -15,6 +15,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const midnight = new Date();
@@ -138,7 +139,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       p.on("pageerror", (e) => errors.push(e.message));
       await p.route("**/*", server(lang, theme, variant, asked, exported));
       await p.goto("http://myna.test/");
-      await p.locator('[data-view="usage"]').first().click();
+      await navTo(p, "usage");
       await p.locator(":is(#usageTab .opt, .nav-s):visible").nth(1).click();
       if (variant !== "none") await p.locator("#ledRank .rk").first().waitFor();
       if (["many", "unpriced"].includes(variant)) await p.locator("#ledSplit .opt").nth(SPLIT.provider).click();

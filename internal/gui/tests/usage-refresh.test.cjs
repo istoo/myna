@@ -12,6 +12,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const now = Date.now();
@@ -70,7 +71,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const pass = async (p, ms) => { await p.clock.fastForward(ms); await p.waitForTimeout(150); };
 
       const p = await open();
-      await p.locator('[data-view="usage"]').first().click();
+      await navTo(p, "usage");
       await p.locator(":is(#usageTab .opt, .nav-s):visible").nth(1).click(); // Requests
       await p.locator("#ledWrap .led tbody tr").first().waitFor();
       assert.equal((await p.locator("#usageEvery").textContent()).trim(), w.label, "every 5 s to begin with");
@@ -127,7 +128,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // remembered: another window opens on the minute
       await p.locator('[data-view="usage"]').first().waitFor();
       const again = await open();
-      await again.locator('[data-view="usage"]').first().click();
+      await navTo(again, "usage");
       await again.locator("#usageEvery").waitFor();
       assert.equal((await again.locator("#usageEvery").textContent()).trim(), w.min);
       assert.deepEqual(errors, []);

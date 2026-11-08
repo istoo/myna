@@ -223,4 +223,21 @@ async function pickItem(page, locator) {
   throw new Error("the picker's item never settled: " + last);
 }
 
-module.exports = { settled, inView, reach, wheelTo, click, openPart, watchSettingsReads, settingsDrawn, agentRow, openAgentSettings, pickItem };
+// navTo opens a page by its tab: at a narrow width the tab is under More,
+// which reaches it. The open page's own tab stays in the row.
+async function navTo(page, view) {
+  const b = page.locator(`#nav button[data-view="${view}"]`).first();
+  if (await b.isVisible()) return b.click();
+  // the fit runs a frame after a resize, and a page redraw can close More's
+  // menu under the click: wait for the row, and open the menu again if so
+  await page.locator("#navMore").waitFor({ state: "visible", timeout: 1000 }).catch(() => {});
+  if (await b.isVisible()) return b.click();
+  const name = (await b.textContent()).trim();
+  for (let i = 0; i < 3; i++) {
+    await page.locator("#navMore").click();
+    try { await page.locator(".nav-more-menu .pm-item", { hasText: name }).click({ timeout: 3000 }); return; } catch { /* a redraw closed the menu */ }
+  }
+  await page.locator(".nav-more-menu .pm-item", { hasText: name }).click();
+}
+
+module.exports = { settled, inView, reach, wheelTo, click, openPart, watchSettingsReads, settingsDrawn, agentRow, openAgentSettings, pickItem, navTo };

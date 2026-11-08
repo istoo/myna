@@ -4,6 +4,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const date = "2026-09-28";
@@ -166,7 +167,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     });
     await t.test("main model picker keeps scrolling", async () => {
       await reset();
-      await page.locator('#nav [data-view="agents"]').click();
+      await navTo(page, "agents");
       for (const gesture of ["wheel", "track", "drag"]) {
         await page.locator('#agents [data-key="model"]').click();
         await scrollMenu(page, "#list", gesture);

@@ -12,6 +12,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const iso = (ms) => new Date(ms).toISOString();
@@ -83,8 +84,8 @@ const ways = {
     show: (page) => page.evaluate(() => window.__resume()),
   },
   "another tab open": {
-    hide: (page) => page.locator('#nav button[data-view="agents"]').click(),
-    show: (page) => page.locator('#nav button[data-view="routing"]').click(),
+    hide: (page) => navTo(page, "agents"),
+    show: (page) => navTo(page, "routing"),
   },
 };
 

@@ -72,8 +72,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await row.waitFor();
       assert.equal(await row.locator(".name").innerText(), w.name);
       assert.equal(await row.locator(".sub").innerText(), w.sub);
-      const opt = (name) => row.locator("#lightweightSegs .opt", { hasText: name });
-      assert.equal(await row.locator("#lightweightSegs .opt.on").innerText(), w.off, "off for a user who never chose");
+      const sw = () => row.locator("#lightweightSegs [role=switch]");
+      assert.equal(await sw().getAttribute("aria-checked"), "false", "off for a user who never chose");
       const where = () => page.evaluate(() => [scrollX, scrollY, document.scrollingElement.scrollTop, ...[...document.querySelectorAll("*")].filter((e) => e.scrollTop).map((e) => e.scrollTop)]);
       const before = await where();
       const click = async (loc) => {
@@ -89,17 +89,20 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await click(page.locator("#dockSegs .opt").first()).catch(() => {});
       for (let i = 0; i < 20 && posted.length === n; i++) await page.waitForTimeout(50);
       if (posted.length > n) assert.equal("lightweight" in posted.at(-1), false, `another setting's save chose it: ${JSON.stringify(posted.at(-1))}`);
-      await click(opt(w.on));
+      await click(sw());
       for (let i = 0; i < 50 && posted.at(-1)?.lightweight !== true; i++) await page.waitForTimeout(50);
       assert.equal(posted.at(-1)?.lightweight, true, `posted ${JSON.stringify(posted)}`);
       assert.equal(st.lightweight, true);
-      assert.equal(await row.locator("#lightweightSegs .opt.on").innerText(), w.on);
+      // Settings is drawn from the save's answer; on a busy machine the
+      // switch read here can be the one the answer replaced
+      await page.waitForFunction(() => document.querySelector("#lightweightSegs [role=switch]")?.getAttribute("aria-checked") === "true");
+      assert.equal(await sw().getAttribute("aria-checked"), "true");
       // another setting saved keeps it on
       n = posted.length;
       await click(page.locator("#dockSegs .opt").last()).catch(() => {});
       for (let i = 0; i < 20 && posted.length === n; i++) await page.waitForTimeout(50);
       if (posted.length > n) assert.equal(posted.at(-1).lightweight, true, "another setting's save turned it off");
-      await click(opt(w.off));
+      await click(sw());
       for (let i = 0; i < 50 && posted.at(-1)?.lightweight !== false; i++) await page.waitForTimeout(50);
       assert.equal(posted.at(-1).lightweight, false);
       assert.deepEqual(await where(), before, "the clicks moved the page");

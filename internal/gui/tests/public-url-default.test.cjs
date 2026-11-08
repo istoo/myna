@@ -72,7 +72,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // the sidebar's line, shared, names where other machines reach it
         // (coeo91), this computer's in its tooltip
         if (width >= 1100) {
-          assert.match(await shown("#sideGw span"), /myna\.example\.com/);
+          assert.match(await shown("#sideGw span:not(.side-gw-chev)"), /myna\.example\.com/);
           assert.match(await page.locator("#sideGw").getAttribute("title"), /127\.0\.0\.1:3999/);
         }
         await page.locator("#connectAddress").click();
@@ -108,7 +108,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.equal(await shown("#gatewayLan .gw-url:first-child code"), PUBLIC);
       // the sidebar's line at its foot, there at this width, says it too
       if (width >= 1100) {
-        assert.match(await shown("#sideGw span"), /myna\.example\.com/);
+        assert.match(await shown("#sideGw span:not(.side-gw-chev)"), /myna\.example\.com/);
         assert.doesNotMatch(await page.locator("#sideGw").getAttribute("title"), /127\.0\.0\.1/);
       }
       // and About's Gateway URL, with no second row saying the same

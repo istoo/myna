@@ -12,6 +12,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 const reader = require("./reader.cjs");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const now = Date.now();
@@ -90,7 +91,7 @@ async function open(browser, lang, width) {
   p.on("pageerror", (e) => errors.push(e.message));
   await p.route("**/*", server(lang, s));
   await p.goto("http://myna.test/");
-  await p.locator('[data-view="usage"]').first().click();
+  await navTo(p, "usage");
   await p.locator(":is(#usageTab .opt, .nav-s):visible").nth(1).click();
   await p.locator("#ledWrap .led tbody tr").first().waitFor();
   await p.waitForTimeout(300);

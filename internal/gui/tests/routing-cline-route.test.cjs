@@ -13,6 +13,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(process.env.MYNA_ROUTE_ASSETS || path.join(__dirname, "../assets"));
 const now = new Date();
@@ -142,7 +143,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       }
 
       // the Usage page's Requests: the served model's title says the route
-      await page.locator('[data-view="usage"]').first().click();
+      await navTo(page, "usage");
       await page.locator(":is(#usageTab .opt, .nav-s):visible").nth(1).click();
       const served = page.locator(".led tbody tr.led-row .swap").first();
       await served.waitFor();

@@ -10,6 +10,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const row = (group, icon, id, label) => ({ value: id, ref: id, label, group, icon });
@@ -66,7 +67,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("http://myna.test/**", serve(lang));
           await page.goto("http://myna.test/");
-          await page.locator('#nav [data-view="agents"]').click();
+          await navTo(page, "agents");
           await page.locator('#agents [data-key="model"]').first().click();
           await page.locator("#list .badge.speed").first().waitFor();
           const [tps, both, first] = said[lang];

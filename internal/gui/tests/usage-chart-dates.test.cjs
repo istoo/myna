@@ -11,6 +11,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 
@@ -70,7 +71,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         let answer = () => overview("day");
         await p.route("**/*", serve(lang, () => answer()));
         await p.goto("http://myna.test/");
-        await p.locator('[data-view="usage"]').first().click();
+        await navTo(p, "usage");
         const labels = () => p.locator("#chart .labels span").allTextContents();
         const title = (i) => p.locator("#chart .bar").nth(i).getAttribute("title");
         await p.waitForFunction(() => document.querySelectorAll("#chart .labels span").length === 3);

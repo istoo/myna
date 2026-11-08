@@ -116,7 +116,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.deepEqual(posts[0].trayUsages, ["claude|*", "copilot", "usage:today"], "the cards are kept");
 
         // another setting saved keeps the pick
-        await page.locator("#trayPaceSegs button").nth(1).click();
+        await page.locator("#trayPaceSegs [role=switch]").click();
         for (let i = 0; i < 100 && posts.length < 2; i++) await page.waitForTimeout(20);
         assert.equal(posts.length, 2);
         assert.equal(posts[1].trayPace, true);

@@ -80,10 +80,17 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
       // smart: no weights shown
       assert.equal(await chip("aaaaaaaaaa").isVisible(), false);
-      const by = page.locator(".editor").getByRole("button", { name: w.by, exact: true });
-      await by.scrollIntoViewIfNeeded();
+      const pickMode = async (name) => {
+        const btn = page.locator(".editor .route-pick-btn");
+        if ((await btn.textContent()).trim() === name) return;
+        // a save's answer redraws the editor under the press: wait for it
+        await page.waitForFunction(() => !document.querySelector(".editor .busy"));
+        await btn.click();
+        await page.locator(".route-menu .pm-item", { hasText: new RegExp(`^${name}$`) }).click();
+      };
+      await page.locator(".editor .route-pick-btn").scrollIntoViewIfNeeded();
       const sc = await scrolled();
-      await by.click();
+      await pickMode(w.by);
       assert.equal(await scrolled(), sc, "a click scrolled");
       assert.equal((await chip("aaaaaaaaaa").textContent()).trim(), w.a);
       assert.equal((await chip("bbbbbbbbbb").textContent()).trim(), w.b);
@@ -110,7 +117,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
       if (process.env.ARTIFACT_DIR) await page.locator(".editor .accts").screenshot({ path: path.join(process.env.ARTIFACT_DIR, `${engine}-${lang}-key-weight-rows.png`) });
       // back to Smart hides them
-      await page.locator(".editor").getByRole("button", { name: lang === "en" ? "Smart" : "智能", exact: true }).first().click();
+      await pickMode(lang === "en" ? "Smart" : "智能");
       assert.equal(await chip("aaaaaaaaaa").isVisible(), false);
       assert.deepEqual(errors, []);
     });

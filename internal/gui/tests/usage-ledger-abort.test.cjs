@@ -15,7 +15,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
-const { inView } = require("./reader.cjs");
+const { inView, navTo } = require("./reader.cjs");
 
 const assets = process.env.MYNA_ASSETS || path.resolve(__dirname, "../assets");
 const now = Date.now();
@@ -65,7 +65,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("requestfailed", (r) => { if (/\/api\/usage\/(requests|heatmap)\?/.test(r.url())) failed.push(r.url()); });
       await page.route("**/*", server("en", seen, held));
       await page.goto("http://myna.test/");
-      await page.locator('[data-view="usage"]').first().click();
+      await navTo(page, "usage");
       await page.locator(":is(#usageTab .opt, .nav-s):visible").nth(1).click();
       // the tab's opening reads, let go so the page is drawn
       await settle(page, seen, 2);

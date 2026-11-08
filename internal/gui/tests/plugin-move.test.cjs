@@ -119,7 +119,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
       // the reader opened Advanced (so the editor runs on past the field)
       // and scrolled to the field: nothing the move does moves it, and the
-      // fold stays as they left it though the move starts a new draft
+      // fold stays as they left it though the move starts a new draft.
+      // Settings not at their defaults open it: close it, then open it.
+      if (await ed.locator("details.advanced").evaluate((d) => d.open)) await ed.locator("details.advanced > summary").click();
       await ed.locator("details.advanced > summary").click();
       assert.equal(await ed.locator("details.advanced").evaluate((d) => d.open), true);
       // the reader scrolled to the field: nothing the move does moves it.

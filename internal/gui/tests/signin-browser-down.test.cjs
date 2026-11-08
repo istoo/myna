@@ -11,7 +11,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
-const { reach } = require("./reader.cjs");
+const { reach, navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const LINK = "https://factory.example/device?code=WDJB-MJHT&state=" + "x".repeat(60);
@@ -121,7 +121,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, st));
         await page.goto("http://myna.test/");
-        await page.locator('button[data-view="library"]').click();
+        await navTo(page, "library");
         await page.locator("#view-library .lib-row", { has: page.locator(".name", { hasText: /^cloudflare-api/ }) }).click();
         const lib = page.locator("#modal .lib-signin");
         await lib.getByRole("button", { name: w.signIn, exact: true }).click();

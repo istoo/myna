@@ -47,8 +47,8 @@ function serve(lang, theme) {
 }
 
 const words = {
-  en: { five: "five APIs, one URL", note: "TypeSafe's decision API", hint: "A decision model (Jev, Clef)" },
-  zh: { five: "五种 API，一个地址", note: "TypeSafe 的决策 API", hint: "决策模型（Jev、Clef）" },
+  en: { five: "one address for every API format", note: "TypeSafe's decision API", hint: "A decision model (Jev, Clef)" },
+  zh: { five: "一个地址支持所有 API 格式", note: "TypeSafe 的决策 API", hint: "决策模型（Jev、Clef）" },
 };
 const rowOf = (page, id) => page.locator("#gwModels .row.model").filter({ has: page.locator(".name", { hasText: new RegExp("^" + id.replace(/[./@]/g, "\\$&") + "$") }) });
 
@@ -77,7 +77,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
         await page.goto("http://myna.test/?view=gateway&lang=curl");
         await page.locator("#gwModels .row.model").first().waitFor();
-        assert(await page.getByText(w.five).first().isVisible(), "the head counts five APIs");
+        assert(await page.getByText(w.five).first().isVisible(), "the head names the one address");
         const connect = page.locator("#connect");
         const modelCode = () => connect.locator(".val").nth(2).locator("code").textContent();
         const snippet = () => connect.locator("pre.snip").textContent();

@@ -125,7 +125,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // picked, then made with the editor's Save, which closes it
         const saveResponse = page.waitForResponse(response =>
           new URL(response.url()).pathname === "/api/provider/save" && response.request().method() === "POST");
-        await page.locator(".editor .segs button", { hasText: new RegExp(`^${label}$`) }).click();
+        const pick = page.locator(".editor .route-pick-btn");
+        if ((await pick.textContent()).trim() !== label) {
+          await pick.click();
+          await page.locator(".route-menu .pm-item", { hasText: new RegExp(`^${label}$`) }).click();
+        }
         await page.locator(".editor .bar button", { hasText: /^Save$/ }).click();
         assert.equal((await saveResponse).status(), 200);
         await page.waitForFunction(() => !document.querySelector(".editor"));

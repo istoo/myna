@@ -11,6 +11,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 
@@ -66,10 +67,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.ok(views.includes("masking"), `the sidebar's pages: ${views}`);
         const got = {};
         for (const v of views) {
-          // Settings is at the sidebar's foot, the others in its list
-          const b = page.locator(v === "settings" ? "#prefs" : `#nav button[data-view="${v}"]`);
-          if (!(await b.isVisible())) continue;
-          await b.click();
+          // Settings is at the sidebar's foot, the others in its list; one that
+          // doesn't fit a narrow row is reached through More
+          if (v === "settings") await page.locator("#prefs").click();
+          else await navTo(page, v);
           await page.waitForFunction((v) => !document.querySelector(`#view-${v}`).hidden, v);
           got[v] = await box(page, v);
         }

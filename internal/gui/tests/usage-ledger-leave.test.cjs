@@ -11,7 +11,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
-const { click } = require("./reader.cjs");
+const { click, navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const now = Date.now();
@@ -83,9 +83,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const tabAt = (p, id) => p.evaluate((id) => USAGE_TABS.findIndex(([x]) => x === id), id).then((i) => p.locator(":is(#usageTab .opt, .nav-s):visible").nth(i));
       // away to the Agents page and back to the Usage page's Requests
       const awayByPage = async (p) => {
-        await p.locator('#nav button[data-view="agents"]').click();
+        await navTo(p, "agents");
         await p.locator("#view-agents").waitFor();
-        await p.locator('#nav button[data-view="usage"]').click();
+        await navTo(p, "usage");
       };
       // away to the Overview tab and back
       const awayByTab = async (p) => {

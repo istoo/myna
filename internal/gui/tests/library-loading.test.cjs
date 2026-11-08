@@ -10,6 +10,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const HOME = "/Users/aimer";
@@ -62,7 +63,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         if (s) { window.firstOpacity = getComputedStyle(s).opacity; mo.disconnect(); }
       }).observe(document.querySelector("#view-library"), { childList: true, subtree: true });
     });
-    await page.locator('button[data-view="library"]').click();
+    await navTo(page, "library");
 
     const v = page.locator("#view-library");
     const skel = v.locator(".lib-skel");
@@ -133,7 +134,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         return rest(route);
       });
       await page.goto("http://myna.test/");
-      await page.locator('button[data-view="library"]').click();
+      await navTo(page, "library");
       const v = page.locator("#view-library");
       await v.locator(".lib-head .lib-more:not([disabled])").waitFor();
       assert.equal(await v.locator(".lib-skel").count(), 0, "drawn from the glance, no outline");

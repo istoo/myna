@@ -3,6 +3,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 
@@ -97,7 +98,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         catch { return route.fulfill({ status: 404, body: "" }); }
       });
       await page.goto("http://myna.test/?view=providers");
-      await page.locator('#nav button[data-view="sessions"]').click();
+      await navTo(page, "sessions");
       const sw = page.locator(".sm-record .sm-record-switch[role=switch]");
       await sw.waitFor();
       assert.equal(await sw.getAttribute("aria-checked"), "false");
@@ -199,7 +200,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         catch { return route.fulfill({ status: 404, body: "" }); }
       });
       await page.goto("http://myna.test/?view=providers");
-      await page.locator('#nav button[data-view="sessions"]').click();
+      await navTo(page, "sessions");
       await page.locator("#view-sessions .row.sm-folder").first().waitFor();
       assert.equal(await page.locator(".sm-recording, .sm-record-label").count(), 0, "no bare checkbox bar under the tabs");
       for (const width of [1400, 390]) {

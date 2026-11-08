@@ -134,7 +134,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // WebKit's notice of a ResizeObserver loop is no error of the page's
         page.on("pageerror", (e) => { if (!/ResizeObserver loop/.test(e.message)) errors.push(e.message); });
         // turned off by the user, so On is a glide away
-        const st = { lightweight: false }, ctl = { hold: 0, refuse: false };
+        const st = { keepAwake: false }, ctl = { hold: 0, refuse: false };
         await page.route("**/*", serve(lang, st, ctl));
         // opened on another tab: General is drawn while hidden
         await watchSettingsReads(page);
@@ -143,10 +143,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.locator("#setTab-general").waitFor();
         await page.waitForTimeout(300);
         await page.locator("#setTab-general").click();
-        await page.locator("#lightweightSegs .opt").first().waitFor();
+        await page.locator("#keepAwakeSegs .opt").first().waitFor();
         await underPicks(page, "General shown from another tab");
 
-        const opt = (i) => page.locator("#lightweightSegs .opt").nth(i);
+        const opt = (i) => page.locator("#keepAwakeSegs .opt").nth(i);
         const scroll = () => page.evaluate(() => document.querySelector("#view-settings").scrollTop);
         await reveal(page, opt(1));
         await page.waitForTimeout(300);
@@ -157,8 +157,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await record(page);
         await opt(1).click();
         await page.waitForTimeout(700);
-        oneWay(await stop(page), "lightweightSegs", "answer mid-glide");
-        assert.equal(st.lightweight, true);
+        oneWay(await stop(page), "keepAwakeSegs", "answer mid-glide");
+        assert.equal(st.keepAwake, true);
         await underPicks(page, "after On");
 
         // the answer at once, then the page drawn twice more on the way
@@ -170,8 +170,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.waitForTimeout(60);
         await page.evaluate(() => renderSettings());
         await page.waitForTimeout(600);
-        oneWay(await stop(page), "lightweightSegs", "drawn again on the way");
-        assert.equal(st.lightweight, false);
+        oneWay(await stop(page), "keepAwakeSegs", "drawn again on the way");
+        assert.equal(st.keepAwake, false);
         await underPicks(page, "after Off");
 
         // a refused save puts Off back: the thumb glides back to it
@@ -181,7 +181,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await opt(1).click();
         await page.waitForTimeout(1000);
         const frames = await stop(page);
-        const lw = frames.map((f) => f.find((c) => c.id === "lightweightSegs")).filter(Boolean);
+        const lw = frames.map((f) => f.find((c) => c.id === "keepAwakeSegs")).filter(Boolean);
         assert.ok(lw.some((p) => p.x > lw[0].x + 8), "it went towards On first");
         await underPicks(page, "a refused save");
         assert.equal(await opt(0).evaluate((b) => b.classList.contains("on")), true, "Off is back");

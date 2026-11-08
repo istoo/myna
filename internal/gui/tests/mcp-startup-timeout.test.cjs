@@ -11,6 +11,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const { I18N } = require("./strings.cjs").strings(); // i18n.js's and the plugins'
@@ -75,7 +76,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             page.on("pageerror", (e) => errors.push(e.message));
             await page.route("**/*", server(lang, calls, agents));
             await page.goto("http://myna.test/");
-            await page.locator('button[data-view="library"]').click();
+            await navTo(page, "library");
             const row = page.locator("#view-library .lib-server", { has: page.locator('.lib-health[data-server="slow"]') });
             const ed = page.locator("#modal .lib-editor");
             const open = async () => { await row.locator(".name").click(); await ed.waitFor(); };

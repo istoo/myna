@@ -205,7 +205,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           out.push([(await rows.nth(i).locator(".gw-url-label").textContent()).trim(), (await rows.nth(i).locator("code").textContent()).trim()]);
         return out;
       };
-      const side = (page) => page.locator("#sideGw span").textContent();
+      const side = (page) => page.locator("#sideGw span:not(.side-gw-chev)").textContent();
       const keyPage = (page) => page.locator("#gatewayKeys .gw-key-page code").textContent();
 
       // opened at the NAS's address: the host's first, the host's bridge

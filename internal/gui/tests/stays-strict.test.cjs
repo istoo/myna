@@ -77,6 +77,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.goto("http://myna.test/?view=providers");
         await page.locator(".row.provider", { hasText: sub.name }).first().click();
         await page.locator(".editor .accts").first().waitFor();
+        // Stays sits in the editor's Advanced fold, closed while its
+        // settings are at their defaults
+        const adv = page.locator(".editor details.more.advanced");
+        if (!(await adv.evaluate((d) => d.open))) await adv.locator("summary").first().click();
         if (lang !== "en") assert.deepEqual(await page.evaluate(([keys, lang]) => keys.filter((k) => !I18N[lang][k]), [["Strict", HINT], lang]), [], "translated");
         const strict = await tr(page, "Strict"), stays = await tr(page, "Stays");
         const label = page.locator(".editor label", { hasText: new RegExp(`^${stays}$`) });

@@ -14,6 +14,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 
@@ -262,7 +263,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           for (const [zoom, size] of [[1, 100], [1.5, 150]]) {
             const page = await open(lang, theme, size, [], { width: Math.round(840 / zoom), height: Math.round(630 / zoom), zoom });
             for (const v of ["agents", "providers", "gateway", "routing", "usage", "library", "settings"]) {
-              await page.locator(v === "settings" ? "#prefs" : `[data-view="${v}"]`).click();
+              // at 560 CSS px, 150% of the smallest window, the pages that don't
+              // fit are under More
+              if (v === "settings") await page.locator("#prefs").click();
+              else await navTo(page, v);
               await page.waitForTimeout(250);
               assert.deepEqual(await overflow(page), [], `${v} at ${size}%`);
               assert.equal(await page.locator("#status.err").count(), 0, `${v}: ${await page.locator("#status").textContent()}`);

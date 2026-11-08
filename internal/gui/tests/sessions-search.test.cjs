@@ -12,6 +12,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const at = (min) => new Date(Date.now() - min * 60e3).toISOString();
@@ -88,7 +89,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const log = [];
         await page.route("**/*", serve(lang, log));
         await page.goto("http://myna.test/?view=providers");
-        await page.locator('#nav [data-view="sessions"]').first().click();
+        await navTo(page, "sessions");
         const view = page.locator("#view-sessions");
         const row = (id) => view.locator(`.row.sm-sess[data-id="${id}"]`);
         await row("ses_03").waitFor();

@@ -13,6 +13,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const BASE = "http://myna.test/";
@@ -73,9 +74,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // first time: Agents, the first page
       await open(page, BASE, "agents", `${where}: first open`);
       // left on Routing, opened again and reloaded: Routing
-      const tab = page.locator('#nav button[data-view="routing"]');
-      await tab.scrollIntoViewIfNeeded();
-      await tab.click();
+      // at 420 the tab may be under More, which reaches it
+      await navTo(page, "routing");
       await page.waitForFunction(() => !document.querySelector("#view-routing").hidden);
       await open(page, BASE, "routing", `${where}: opened again`);
       await page.reload();
@@ -97,7 +97,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // left on Agents: Agents
       await keep(page, "plugins");
       await open(page, BASE, "plugins", `${where}: Plugins kept`);
-      await page.locator('#nav button[data-view="agents"]').click();
+      await navTo(page, "agents");
       await open(page, BASE, "agents", `${where}: Agents kept`);
       assert.deepEqual(errors, [], where);
       await context.close();

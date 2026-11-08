@@ -16,6 +16,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const relay = { id: "relay:team", provider: "relay", name: "Relay", kind: "key", who: "team", model: "gpt-6-sol" };
@@ -73,8 +74,8 @@ const newestListed = () => Math.max(0, ...[...document.querySelectorAll("#view-r
 
 const ways = {
   "another page picked": {
-    hide: (page) => page.locator('#nav button[data-view="agents"]').click(),
-    show: (page) => page.locator('#nav button[data-view="routing"]').click(),
+    hide: (page) => navTo(page, "agents"),
+    show: (page) => navTo(page, "routing"),
   },
   "the window hidden": {
     hide: (page) => page.evaluate(() => window.__hide(true)),

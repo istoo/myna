@@ -10,6 +10,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
+const { navTo } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 
@@ -60,7 +61,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
     await page.goto("http://myna.test/?view=providers");
     await page.waitForFunction(() => document.querySelector('#nav button[data-view="plugins"]')?.classList.contains("has-dot"));
-    await page.locator('#nav button[data-view="plugins"]').click();
+    await navTo(page, "plugins");
     const view = page.locator("#view-plugins");
     await view.page().locator(":is(.lib-tabs .opt, .nav-s):visible", { hasText: "Installed" }).click();
     await view.locator(".pm-row").nth(cases.length - 1).waitFor();
