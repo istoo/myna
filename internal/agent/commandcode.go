@@ -103,7 +103,7 @@ func commandCodeIn(at place) *Agent {
 		}, {
 			// settings.json's reasoningEffort keeps an effort for each model
 			// (Command Code's /effort saves it); this is the current model's
-			Key: "effort", Label: "effort",
+			Key: "effort", Label: "effort", Closed: true,
 			Get: func() string { return ccEffortMap(path)[get("model")] },
 			Set: func(v string) error {
 				model := get("model")

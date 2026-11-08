@@ -225,13 +225,19 @@ func CodexSubAgentsV1Warning() string {
 // only once it restarts; a var so tests can say.
 var codexRunning = func() bool { return Running(`(^|/)codex( |$)`) }
 
+// codexEffortsAll are the levels Codex takes for a model myna's catalog
+// doesn't describe: its ReasoningEffort enum, none through xhigh. The
+// Codex app's picker knows more (codexAppEfforts), but those are its
+// [desktop] setting's, not model_reasoning_effort's.
+var codexEffortsAll = []string{"none", "minimal", "low", "medium", "high", "xhigh"}
+
 // codexEfforts are the effort control's choices for a model among ms:
 // Default first, with the level Codex takes for it when none is set, as
 // the catalog entry it reads says it, then the model's levels.
 func codexEfforts(ms []catalog.Model, model string) []Option {
 	e := catalog.Efforts(ms, model)
 	if len(e) == 0 {
-		return static("low", "medium", "high", "xhigh")
+		return static(codexEffortsAll...)
 	}
 	d := Option{Value: "", Note: "Codex's default for the model", Takes: codexcat.TakesEffort(ms, model)}
 	if d.Takes != "" {
@@ -1878,7 +1884,7 @@ func codexIn(at place) *Agent {
 				Options: func(map[string]string) []Option { return modelOptions(true) },
 			},
 			{
-				Key: "effort", Label: "effort",
+				Key: "effort", Label: "effort", Closed: true,
 				// unset reads as Default, which it is; the level Codex then
 				// takes is on the Default option (Takes), not the value, so
 				// picking Default doesn't read back as medium (lgtm)
@@ -1983,7 +1989,7 @@ func codexIn(at place) *Agent {
 				// [agents] default_subagent_reasoning_effort: unset, a
 				// subagent runs at the session's effort, or at its model's
 				// default when it has a model of its own
-				Key: "subagent_effort", Label: "subagent effort", Quiet: true,
+				Key: "subagent_effort", Label: "subagent effort", Quiet: true, Closed: true,
 				Get: func() string { v, _ := subEffort(); return v },
 				Set: func(v string) error {
 					if v == "" {
@@ -1998,7 +2004,7 @@ func codexIn(at place) *Agent {
 					if e := subEfforts(); len(e) > 0 {
 						return static(e...)
 					}
-					return static("low", "medium", "high", "xhigh")
+					return static(codexEffortsAll...)
 				},
 			},
 			{
@@ -2033,7 +2039,7 @@ func codexIn(at place) *Agent {
 				// the app lost its chats, projects and Chrome control
 				// (#1824, Qyburn3 on X). Kept in the stash, where set("")
 				// leaves it.
-				Key: "login", Label: "sign-in", Quiet: true,
+				Key: "login", Label: "sign-in", Quiet: true, Closed: true,
 				Get: func() string { return stashShared()[at.key("codex.login")] },
 				Set: func(v string) error {
 					if v != "" && v != "api" && v != "chatgpt" {

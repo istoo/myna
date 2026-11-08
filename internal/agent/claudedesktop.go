@@ -443,7 +443,7 @@ func desktopSubagentField(ps []desktopPaths) Field {
 // so all levels are offered and the gateway fits each to the actual model.
 func desktopSubagentEffortField(ps []desktopPaths) Field {
 	return Field{
-		Key: "subagent_effort", Label: "subagent effort", Quiet: true, Live: true,
+		Key: "subagent_effort", Label: "subagent effort", Quiet: true, Live: true, Closed: true,
 		Get: provider.DesktopSubagentEffort,
 		Set: provider.SetDesktopSubagentEffort,
 		Options: func(map[string]string) []Option {

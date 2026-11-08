@@ -227,7 +227,7 @@ func hermesIn(at place) *Agent {
 		}, {
 			// agent.reasoning_effort, which Hermes's /reasoning saves; none
 			// turns reasoning off, and unset Hermes asks for medium
-			Key: "effort", Label: "effort",
+			Key: "effort", Label: "effort", Closed: true,
 			Get: func() string { return getKey("agent.reasoning_effort") },
 			Set: func(v string) error {
 				if v == "" {

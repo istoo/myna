@@ -348,3 +348,74 @@ func TestClaudeAliasSaysItTookMynaOut(t *testing.T) {
 		t.Errorf("myna claude help: %v\n%s", err, out)
 	}
 }
+
+// `myna codex effort highish` printed "✓ Codex effort highish" and wrote
+// model_reasoning_effort = "highish" into config.toml, a level Codex
+// refuses at start-up. A closed field refuses a value its picker doesn't
+// offer and writes nothing; the levels Codex takes, and default, still work.
+func TestUnknownEffortWritesNothing(t *testing.T) {
+	path := codexOnAdvanced(t)
+	before := homeFiles(t)
+	was, _ := os.ReadFile(path)
+
+	out, err := printed(t, func() error { return run([]string{"codex", "effort", "highish"}) })
+	if err == nil || out != "" {
+		t.Fatalf("myna codex effort highish: %v %q, want refused", err, out)
+	}
+	for _, want := range []string{"highish", "one of", "try: myna codex effort"} {
+		if !strings.Contains(err.Error(), want) {
+			t.Errorf("error %q doesn't name %q", err, want)
+		}
+	}
+	if diff := filesChanged(before, homeFiles(t)); diff != "" {
+		t.Fatalf("myna codex effort highish wrote:\n%s", diff)
+	}
+	if now, _ := os.ReadFile(path); string(now) != string(was) {
+		t.Fatalf("config.toml changed:\n%s", now)
+	}
+
+	out, err = printed(t, func() error { return run([]string{"codex", "effort", "high"}) })
+	if err != nil || !strings.Contains(out, "✓ Codex effort high") {
+		t.Errorf("myna codex effort high: %v %q", err, out)
+	}
+	out, err = printed(t, func() error { return run([]string{"codex", "effort", "default"}) })
+	if err != nil || !strings.Contains(out, "✓ Codex effort default") {
+		t.Errorf("myna codex effort default: %v %q", err, out)
+	}
+}
+
+// Every closed field refuses a value its picker doesn't offer, through the
+// CLI as the user reaches it, and leaves every file as it was. A field
+// whose values aren't known in this sandbox (nothing wired, no model picked)
+// is the agent's own to refuse, as in internal/agent's test; Devin's list
+// is asked of its CLI, and its own test stands in for that one.
+func TestEveryClosedFieldRefusesAnUnknownValue(t *testing.T) {
+	cliHome(t)
+	// start-up's own files (the plugins list, the state folders) settle first
+	if _, err := printed(t, func() error { return run([]string{"version"}) }); err != nil {
+		t.Fatal(err)
+	}
+	checked := 0
+	for _, a := range agent.All() {
+		if a.WSL != "" || a.ID == "devin" {
+			continue
+		}
+		for _, f := range a.Fields {
+			if !f.Closed || len(f.Options(a.Values())) == 0 {
+				continue
+			}
+			checked++
+			before := homeFiles(t)
+			out, err := printed(t, func() error { return run([]string{a.ID, f.Key, "zz-bogus-closed"}) })
+			if err == nil || out != "" {
+				t.Errorf("myna %s %s zz-bogus-closed: %v %q, want refused", a.ID, f.Key, err, out)
+			}
+			if diff := filesChanged(before, homeFiles(t)); diff != "" {
+				t.Errorf("myna %s %s zz-bogus-closed wrote:\n%s", a.ID, f.Key, diff)
+			}
+		}
+	}
+	if checked < 15 {
+		t.Fatalf("only %d closed fields had values to check", checked)
+	}
+}

@@ -540,7 +540,7 @@ func ompAt(at place, dir string, entry func() ompProviderEntry) *Agent {
 			// not a level a model lists, so it is offered here and kept out of
 			// ompEfforts, which a model's thinking levels are filtered by. First,
 			// as omp's own picker has it (16.3.5 and 18.4.4 alike)
-			Key: "effort", Label: "thinking",
+			Key: "effort", Label: "thinking", Closed: true,
 			Get: func() string { v, _ := edit.GetYAML(path, "defaultThinkingLevel"); return v },
 			Set: func(v string) error {
 				if v == "" {

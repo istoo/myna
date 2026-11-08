@@ -1,9 +1,14 @@
 package agent
 
 import (
+	"context"
+	"errors"
 	"os"
+	"slices"
+	"strings"
 	"testing"
 
+	"github.com/istoo/myna/internal/catalog"
 	"github.com/istoo/myna/internal/provider"
 	"github.com/istoo/myna/internal/settings"
 )
@@ -82,5 +87,140 @@ func TestSpellRefusesMynaModelNotOffered(t *testing.T) {
 	}
 	if got, err := pi(home).Spell("model", "remote/group/smart"); err != nil || got != "myna/remote/group/smart" {
 		t.Errorf("pi, shown every model: %q, %v", got, err)
+	}
+}
+
+// A closed field (an effort level, a switch) takes only the values its
+// picker offers: `myna codex effort highish` wrote a level Codex refuses at
+// start-up, and every agent's closed field had the same hole. One whose
+// values aren't known here (nothing wired, a file unreadable) is left as
+// typed, and a model field is a model the agent may reach on its own.
+func TestClosedFieldsTakeOnlyTheirOptions(t *testing.T) {
+	syncHome(t)
+	// Devin's list is asked of its CLI: never this machine's binary here
+	was := providerDevinFamilies
+	providerDevinFamilies = func(context.Context) ([]provider.DevinFamily, error) {
+		return nil, errors.New("no Devin list in a test")
+	}
+	t.Cleanup(func() { providerDevinFamilies = was })
+
+	checked := 0
+	for _, a := range All() {
+		for _, f := range a.Fields {
+			if !f.Closed {
+				continue
+			}
+			bad := "zz-bogus-" + f.Key
+			got, err := a.Spell(f.Key, bad)
+			opts := f.Options(a.Values())
+			if len(opts) == 0 {
+				// unknown here: left as typed, as for a model
+				if err != nil || got != bad {
+					t.Errorf("%s %s, values unknown: %q, %v; want it left as typed", a.ID, f.Key, got, err)
+				}
+				continue
+			}
+			checked++
+			if err == nil || got != "" {
+				t.Errorf("%s %s took %q, want it refused", a.ID, f.Key, got)
+				continue
+			}
+			if !strings.Contains(err.Error(), bad) || !strings.Contains(err.Error(), "try: myna "+a.ID+" "+f.Key+" ") {
+				t.Errorf("%s %s refused with %q, want the value, the ones it takes and an example command", a.ID, f.Key, err)
+			}
+			// each value it offers is taken, in any case; "" is the default
+			for _, o := range opts {
+				if o.Value == "" {
+					continue
+				}
+				if got, err := a.Spell(f.Key, o.Value); err != nil || got != o.Value {
+					t.Errorf("%s %s offered %q: got %q, %v", a.ID, f.Key, o.Value, got, err)
+				}
+				if got, err := a.Spell(f.Key, strings.ToUpper(o.Value)); err != nil || got != o.Value {
+					t.Errorf("%s %s offered %q in another case: got %q, %v", a.ID, f.Key, o.Value, got, err)
+				}
+				break
+			}
+			if got, err := a.Spell(f.Key, ""); err != nil || got != "" {
+				t.Errorf("%s %s default: got %q, %v", a.ID, f.Key, got, err)
+			}
+		}
+	}
+	// the fields whose values are known without wiring: the static levels
+	// and the ones from a model the agent is on
+	if checked < 15 {
+		t.Fatalf("only %d closed fields had values to check", checked)
+	}
+}
+
+// An effort whose options come from the model the agent is on: Devin's
+// levels are its family's variants, so a level it doesn't list is refused.
+func TestClosedEffortUsesTheModelsLevels(t *testing.T) {
+	syncHome(t)
+	was := providerDevinFamilies
+	providerDevinFamilies = func(context.Context) ([]provider.DevinFamily, error) {
+		return []provider.DevinFamily{{
+			UID: "swe-2", Label: "SWE-2",
+			Models: []catalog.Model{{ID: "swe-2-low"}, {ID: "swe-2-high"}},
+		}}, nil
+	}
+	t.Cleanup(func() { providerDevinFamilies = was })
+
+	a := devin(os.Getenv("HOME"), os.Getenv("XDG_CONFIG_HOME"))
+	if err := a.Fields[0].Set("swe-2"); err != nil {
+		t.Fatal(err)
+	}
+	if got, err := a.Spell("effort", "highish"); err == nil || got != "" {
+		t.Errorf("highish: %q, %v; want refused", got, err)
+	}
+	for _, v := range []string{"low", "high"} {
+		if got, err := a.Spell("effort", v); err != nil || got != v {
+			t.Errorf("%s: %q, %v", v, got, err)
+		}
+	}
+}
+
+// For a model myna's catalog doesn't describe, Codex and Grok take the
+// levels their own enums know: Codex none through xhigh (codexEffortsAll),
+// Grok none through max (grokEfforts). A fallback shorter than that turned
+// a level the agent takes into one myna refused.
+func TestEffortFallbacksOfferEveryLevelTheAgentKnows(t *testing.T) {
+	syncHome(t)
+	home := os.Getenv("HOME")
+	for _, c := range []struct {
+		name string
+		a    *Agent
+		want []string
+	}{
+		{"codex", codex(home), codexEffortsAll},
+		{"grok", grok(home), grokEfforts},
+	} {
+		f := c.a.Field("effort")
+		if f == nil {
+			t.Fatalf("%s: no effort field", c.name)
+		}
+		opts := f.Options(c.a.Values())
+		for _, want := range c.want {
+			if !slices.ContainsFunc(opts, func(o Option) bool { return o.Value == want }) {
+				t.Errorf("%s offers %v, wanting %q", c.name, opts, want)
+			}
+			if got, err := c.a.Spell("effort", want); err != nil || got != want {
+				t.Errorf("%s %q: %q, %v", c.name, want, got, err)
+			}
+		}
+	}
+}
+
+// A stopped WSL distro's agent is a copy of the live one, its options the
+// distro's: the closed fields go with it, so `myna codex@wsl:Ubuntu effort
+// highish` is refused too.
+func TestClosedFieldSurvivesTheWSLClone(t *testing.T) {
+	syncHome(t)
+	a := asleep(codex(os.Getenv("HOME")), wslKindOf("codex"), distro{Name: "Ubuntu"})
+	if got, err := a.Spell("effort", "highish"); err == nil || got != "" {
+		t.Errorf("highish: %q, %v; want refused", got, err)
+	}
+	if got, err := a.Spell("effort", "high"); err != nil || got != "high" {
+		t.Errorf("high: %q, %v", got, err)
 	}
 }

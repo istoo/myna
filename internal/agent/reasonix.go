@@ -396,7 +396,7 @@ func reasonixIn(at place) *Agent {
 					return withVia(group("Reasonix Studio", own), "reasonix", mynaID+"/")
 				},
 			},
-			{Key: "effort", Label: "effort", Quiet: true,
+			{Key: "effort", Label: "effort", Quiet: true, Closed: true,
 				Get: func() string {
 					cfg, _ := readReasonix(path)
 					if usesMyna(model()) {

@@ -112,6 +112,15 @@ type Field struct {
 	// restart of the agent, so its Notice isn't shown after it, unless
 	// the pick connected the agent to myna as well.
 	Live bool
+	// Closed fields take only the values Options offers: a level, a switch,
+	// a sign-in choice. Spell refuses any other value, naming the ones the
+	// agent takes, so `myna codex effort highish` doesn't write a level
+	// Codex would refuse at start-up. A model field stays open: a model may
+	// be one the agent reaches on its own that isn't listed here. An empty
+	// Options list means the agent's values aren't known here (nothing is
+	// wired, a file couldn't be read), and Spell leaves the value as typed.
+	// The empty value is always allowed, as the agent's default.
+	Closed bool
 	// Follows is the key of the field a Quiet one takes after while empty
 	// ("model" for Claude Code's tiers and subagents): a profile's details
 	// say so, and Drift reads the field as on that one's model (#1050).
@@ -676,17 +685,34 @@ func ids(as []*Agent) []string {
 // error rather than a model the agent would ask its own vendor for, and so
 // is one of myna's the agent isn't shown (notOffered). The
 // agent's suffix after the model (SplitSuffix) stays as typed, and so does
-// a list of models, the user's own.
+// a list of models, the user's own. A closed field is the exception: only
+// the values its Options offers are taken (Field.Closed).
 func (a *Agent) Spell(key, v string) (string, error) {
 	f := a.Field(key)
 	if f == nil || f.Options == nil || v == "" {
 		return v, nil
 	}
+	// A closed field's values are the agent's own: refusals and levels it
+	// takes, in its spelling. An empty list is unknown, as for a model.
+	var opts []Option
+	if f.Closed {
+		opts = f.Options(a.Values())
+		if len(opts) > 0 {
+			for _, o := range opts {
+				if strings.EqualFold(o.Value, v) {
+					return o.Value, nil
+				}
+			}
+			return "", a.closedValueError(f, opts, v)
+		}
+	}
 	model, suffix, one := a.split(v)
 	if !one {
 		return v, nil
 	}
-	opts := f.Options(a.Values())
+	if opts == nil {
+		opts = f.Options(a.Values())
+	}
 	for _, o := range opts {
 		if o.Value == model {
 			return v, nil
@@ -716,6 +742,22 @@ func (a *Agent) Spell(key, v string) (string, error) {
 		return "", err
 	}
 	return v, nil
+}
+
+// closedValueError refuses a value a closed field doesn't take, naming the
+// values it does and the command that sets one of them.
+func (a *Agent) closedValueError(f *Field, opts []Option, v string) error {
+	var vals []string
+	for _, o := range opts {
+		if o.Value != "" && !slices.Contains(vals, o.Value) {
+			vals = append(vals, o.Value)
+		}
+	}
+	if len(vals) == 0 {
+		return fmt.Errorf("%s's %s takes no value but default, not %q (try: myna %s %s default)", a.Name, f.Key, v, a.ID, f.Key)
+	}
+	return fmt.Errorf("%s's %s is one of %s, not %q (try: myna %s %s %s)",
+		a.Name, f.Key, strings.Join(vals, ", "), v, a.ID, f.Key, vals[0])
 }
 
 // notOffered refuses a value that names one of myna's models, or one of

@@ -579,7 +579,7 @@ func kiroCrew(home string) *Agent {
 				return []Option{{Value: mynaID, Label: "myna", Icon: "myna", Note: note}}
 			},
 		}, {
-			Key: "harness", Label: "harness", Quiet: true,
+			Key: "harness", Label: "harness", Quiet: true, Closed: true,
 			Get: on,
 			Set: func(v string) error {
 				if v == "" {

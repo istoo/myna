@@ -1509,7 +1509,7 @@ func piLikeKeyed(at place, id, name, dir string, key func() string) *Agent {
 				// offer is shown as the one Pi runs it at: myna showed max
 				// for a group Pi offered off alone for, so ran without
 				// reasoning (#597).
-				Key: "effort", Label: "thinking",
+				Key: "effort", Label: "thinking", Closed: true,
 				Get: func() string {
 					v, _ := get("defaultThinkingLevel")
 					if offered := piOffered(id, startup()); v != "" && offered != nil {
@@ -1618,7 +1618,7 @@ func gooseIn(at place, cfg string) *Agent {
 		}, {
 			// GOOSE_THINKING_EFFORT, the effort goose asks of a model that
 			// thinks, for every provider
-			Key: "effort", Label: "effort",
+			Key: "effort", Label: "effort", Closed: true,
 			Get: func() string { v, _ := get("GOOSE_THINKING_EFFORT"); return v },
 			Set: func(v string) error {
 				if v == "" {
@@ -1746,7 +1746,7 @@ func copilot(home string) *Agent {
 			// effortLevel, which Copilot saves beside the model and clears
 			// when its own /model changes the model; the levels are the
 			// model's, low to xhigh when Copilot's list does not say
-			Key: "effort", Label: "effort",
+			Key: "effort", Label: "effort", Closed: true,
 			Get: jsonGet(path, "effortLevel"),
 			Set: jsonSet(path, "effortLevel"),
 			Options: func(cur map[string]string) []Option {
@@ -1971,7 +1971,7 @@ func crushAt(at place, path, data string) *Agent {
 			{
 				// the large model's reasoning_effort, which Crush's schema
 				// takes as low, medium or high (for OpenAI-style models)
-				Key: "effort", Label: "effort",
+				Key: "effort", Label: "effort", Closed: true,
 				Get: func() string { v, _ := pick("models.large.reasoning_effort"); return v },
 				Set: func(v string) error {
 					if v == "" {

@@ -391,7 +391,7 @@ func snowIn(at place) *Agent {
 			// myna's profile only; Snow's thinking.effort (Anthropic)
 			// and responsesReasoning (Responses) are for protocols that
 			// profile doesn't use.
-			Key: "effort", Label: "thinking",
+			Key: "effort", Label: "thinking", Closed: true,
 			Get: func() string {
 				if !onOurs() {
 					return ""

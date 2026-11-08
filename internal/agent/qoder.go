@@ -193,7 +193,7 @@ func qoderAt(at place, b qoderBuild) *Agent {
 			},
 		}, {
 			// the effort of the model in use, in its model.preferences
-			Key: "effort", Label: "effort",
+			Key: "effort", Label: "effort", Closed: true,
 			Get: effort,
 			Set: func(v string) error { return setEffort(get("model.name"), v) },
 			Options: func(map[string]string) []Option {

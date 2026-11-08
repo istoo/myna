@@ -459,7 +459,7 @@ func qwenpawAt(at place, work string, p qwenpawProfile) *Agent {
 			// the agent's thinking_level (config.py's AgentProfileConfig),
 			// held by QwenPaw to the levels its model's card has; "" is
 			// its inherit, the model's own
-			Key: "effort", Label: "effort",
+			Key: "effort", Label: "effort", Closed: true,
 			Get: func() string {
 				l := get("thinking_level").String()
 				if l == "inherit" {

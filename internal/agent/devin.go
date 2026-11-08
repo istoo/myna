@@ -67,7 +67,7 @@ func devin(home, cfg string) *Agent {
 		}, {
 			// not a key of Devin's: the effort the model's id is at, and
 			// picking one writes the model's variant at it
-			Key: "effort", Label: "effort",
+			Key: "effort", Label: "effort", Closed: true,
 			Get: func() string {
 				_, e := devinSplit(get())
 				return e

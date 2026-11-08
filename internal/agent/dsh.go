@@ -232,7 +232,7 @@ func dshAt(at place) *Agent {
 			// reasoningEffort since 0.1.5 (a model through myna offers its
 			// own levels), llm-deepseek's before (off, low, high or max;
 			// dsh's own default is high)
-			Key: "effort", Label: "thinking",
+			Key: "effort", Label: "thinking", Closed: true,
 			Get: func() string { return dshGetEffort(dir) },
 			Set: func(v string) error { return dshSetEffort(dir, v, gw()) },
 			Options: func(cur map[string]string) []Option {

@@ -2097,7 +2097,7 @@ func claudeIn(at place) *Agent {
 	// the model it is on (#536); empty, the session's effort as before
 	effortField := func(key, label, who string, at func() (string, string), put func(model, effort string) error) Field {
 		return Field{
-			Key: key, Label: label, Quiet: true,
+			Key: key, Label: label, Quiet: true, Closed: true,
 			Get: func() string {
 				if !routed() {
 					return ""
@@ -2194,7 +2194,7 @@ func claudeIn(at place) *Agent {
 	// its sign-in while it runs through myna: myna's key, or its own
 	// claude.ai sign-in kept (loginKey), where the gateway takes any key
 	fields = append(fields, Field{
-		Key: "login", Label: "sign-in", Quiet: true,
+		Key: "login", Label: "sign-in", Quiet: true, Closed: true,
 		Get: func() string {
 			if routed() && keepSignIn() {
 				return "claudeai"

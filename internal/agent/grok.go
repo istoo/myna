@@ -343,7 +343,7 @@ func grokIn(at place) *Agent {
 			{
 				// the effort new sessions start with; Grok applies it to a
 				// model that supports it and ignores it otherwise
-				Key: "effort", Label: "effort",
+				Key: "effort", Label: "effort", Closed: true,
 				Get: func() string { v, _ := get("default_reasoning_effort"); return v },
 				Set: func(v string) error {
 					if v == "" {
@@ -355,7 +355,9 @@ func grokIn(at place) *Agent {
 					if es := efforts(cur["model"]); es != nil {
 						return static(es...)
 					}
-					return static("low", "medium", "high")
+					// a model myna's catalog doesn't describe: the levels
+					// Grok knows, which it applies or ignores by the model
+					return static(grokEfforts...)
 				},
 			},
 		},

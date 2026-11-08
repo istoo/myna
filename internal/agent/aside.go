@@ -28,7 +28,7 @@ func asideIn(at place) *Agent {
 		if key == "effort" {
 			label = "thinking"
 		}
-		f := Field{Key: key, Label: label, Quiet: key != "model" && key != "effort", Get: func() string { return c.value(key) }, Set: func(v string) error { return c.apply(key, v) }}
+		f := Field{Key: key, Label: label, Quiet: key != "model" && key != "effort", Closed: key == "effort", Get: func() string { return c.value(key) }, Set: func(v string) error { return c.apply(key, v) }}
 		if f.Quiet && key != "image" {
 			f.Follows = "model"
 		}

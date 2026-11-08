@@ -259,7 +259,7 @@ func clineIn(at place) *Agent {
 		}, {
 			// the reasoning of the provider in use, what Cline's --thinking
 			// (and its extension) asks for when it is not given
-			Key: "effort", Label: "effort",
+			Key: "effort", Label: "effort", Closed: true,
 			Get: func() string {
 				p := inUse()
 				if p == "" {

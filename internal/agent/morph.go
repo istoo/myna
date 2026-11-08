@@ -157,7 +157,7 @@ func morphIn(at place) *Agent {
 			},
 		}, {
 			// llm.reasoning_effort; unset, morph sends none
-			Key: "effort", Label: "effort",
+			Key: "effort", Label: "effort", Closed: true,
 			Get: func() string { return getKey("reasoning_effort") },
 			Set: func(v string) error {
 				if v == "" {

@@ -226,7 +226,7 @@ func atomcodeIn(at place) *Agent {
 		}, {
 			// the current model table's reasoning_effort, sent with every
 			// request to it; one table per model keeps one with each
-			Key: "effort", Label: "effort",
+			Key: "effort", Label: "effort", Closed: true,
 			Get: func() string {
 				k := cur()
 				if !usesMyna(k) {

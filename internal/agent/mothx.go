@@ -125,7 +125,7 @@ func mothxIn(at place) *Agent {
 			{
 				// defaultThinkingLevel, what a session starts at; MothX sends
 				// none for a model whose entry doesn't say it reasons
-				Key: "effort", Label: "thinking",
+				Key: "effort", Label: "thinking", Closed: true,
 				Get: func() string { v, _ := get("defaultThinkingLevel"); return v },
 				Set: func(v string) error {
 					if v == "" {
