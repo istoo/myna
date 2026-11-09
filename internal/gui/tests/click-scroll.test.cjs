@@ -341,7 +341,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // widens this gap
       await page.waitForTimeout(100);
       await wheel(-40);
-      assert(Math.abs((await scrollTop()) - (was - 40)) <= 1, "the wheel moves the view by its own step only");
+      // its own step, not the 200 px put back before it: a step is 40 px on
+      // this Mac and 15 on ubuntu's WebKit, so what is checked is that the
+      // view went up from where it was and by less than the roll-back
+      const moved = await scrollTop();
+      assert(moved < was && was - moved < 200, `the wheel moves the view by its own step only: was ${was}, now ${moved}`);
       await page.evaluate(() => { window.__lateWheel = false; });
     });
 
