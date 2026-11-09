@@ -41,7 +41,11 @@ jobs:
   gui:
     name: gui (shard ${{ matrix.shard }}/4)
     runs-on: ubuntu-latest
-    timeout-minutes: 150
+    # A full shard took 133 to 143 minutes on the first webkit run (42618144294),
+    # which killed shard 3 at its step's 140m with its totals unwritten. The
+    # whole suite is 1,182 files in four shards, and a red is 5s of waits
+    # each; 200 leaves a shard room to finish and still bounds a hang.
+    timeout-minutes: 200
     strategy:
       fail-fast: false
       matrix:
@@ -96,7 +100,7 @@ jobs:
           echo "files=$(wc -l < "$RUNNER_TEMP/files.txt")" >> "$GITHUB_OUTPUT"
 
       - name: Run
-        timeout-minutes: 140
+        timeout-minutes: 190
         shell: bash
         env:
           SHARDS: ${{ steps.files.outputs.shards }}
@@ -127,6 +131,8 @@ jobs:
           fails=$(sed -n 's/^ℹ fail \([0-9]*\)$/\1/p' "$RUNNER_TEMP/gui.log" | tail -1)
           {
             echo "shard $SHARD/$SHARDS, $browser: ${fails:-?} failed of $(sed -n 's/^ℹ tests \([0-9]*\)$/\1/p' "$RUNNER_TEMP/gui.log" | tail -1)"
+            # no totals: the step was cut off, and the log ends where it was
+            [ -n "$fails" ] || echo "the log has no totals: the step was cut off before the suite ended"
             # A red is named with its file, in the summary the run leaves: the
             # log is an artifact of four shards, and a count nobody can act on
             # (LESSONS.md: a suite's log is kept whole until its reds are named)
