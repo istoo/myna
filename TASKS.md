@@ -162,8 +162,9 @@
       改为按（主机+账号身份+session-id/thread-id/prompt_cache_key）保留上游连接；本轮除 input/client_metadata 外与上轮逐字节相同、
       且 input 以“上轮 input+上轮 k 个输出项（类型/call_id 校验）”开头时，只发 previous_response_id+新增项；否则全量。
       previous_response_not_found/回复前断开 → 新连接全量重发；并发轮次另开连接；空闲回收。验证：真实 ChatGPT 账号两轮，上游第二轮消息体只含新增。
-- [~] D. 汇总验证（11-09）：go vet 三平台 ok；go test ./... 87 包 ok，claudebridge TestCallbackGoesPastTheAgentsProxy 与 netproxy TestLANModelListNotThroughProxy
+- [x] D. 汇总验证（11-09）：go vet 三平台 ok；go test ./... 87 包 ok，claudebridge TestCallbackGoesPastTheAgentsProxy 与 netproxy TestLANModelListNotThroughProxy
       红，origin/main 6d4fd95f6 同样红（本机 Little Snitch 拦截未签名测试二进制的回环/LAN 连接），待开 issue。
       GUI：合入后 3 红（account-arrange/icon-url/key-weight）+ 补跑出 2 红（update-network/vertex-editor）均已按根因修（lastScrollInput 初值、
       按钮宽度保持、药丸显隐同步 fitTop）；hold() 阈值仅对“点击元素已重绘”的旁位参照用 24px。负载下偶发：update-served-anew ja@420、update-hide webkit zh，待开 issue。
-      最终 GUI 全量（3 分片）进行中；通过后按 11 个提交推送 main，CI 绿后打 v0.1.2908。
+      GUI 全量 3 分片通过后推送 main，CI 绿后已发布 v0.1.2908（Release run 42538105753）。负载下的 4 个 GUI 红与 2 个 Little Snitch 红分别为 #7–#10、#5–#6。
+- [ ] I. 收尾（11-09）：#7–#10 改为等状态（注入延迟先红后绿）；#5/#6 拨号自带期限、快速失败并说明原因。
