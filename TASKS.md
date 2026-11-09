@@ -180,13 +180,19 @@
 
 ## 三项大工程（2026-11-09 用户确认开工）
 
-- [ ] J. GUI 套件进 CI：新增 `.github/workflows/gui.yml`，先在 ubuntu 上跑一个冒烟子集
+- [x] J. GUI 套件进 CI（`d2ade2d9c`，issue #12）：新增 `.github/workflows/gui.yml`，先在 ubuntu 上跑一个冒烟子集
       （不依赖字体像素基线的文件），验证 Playwright/Chromium/WebKit 在 CI 可用后，
       再用 `--test-shard` 扩大；全量放 schedule + workflow_dispatch 控成本。
       同步改 `docs/subsystems/gui-shell.md` 与 `internal/gui/tests/README.md`（现在写着 CI 不跑）。
-- [ ] K. app.js 预算腾余量（现 1,311,824 / 上限 1,316,874，约 5KB）：
+- [x] K. app.js 预算腾余量（`b0d99d478`）：drawEditor 移到 `assets/editor.js`（classic script，首绘 Providers 页时加载），
+      app.js 1,311,824 → 1,247,685，核心 1,534,015 → 1,469,600，两处预算随之下调；73 个 provider 相关 GUI 文件 71 通过，
+      2 个读编辑器的测试改为等待后 52/52 绿。原计划：
       找出边界清晰、可独立加载的页面代码移出核心（按 plugins/*/page.js 的既有模式），
       移动后把 `appScriptBudget`/`coreScriptBudget` 下调到新体积，并跑全量 GUI 相关文件。
-- [ ] L. 网关"只解析一次"：先 profile 复现 1MB Claude Code 请求的分配（TASKS G 项基线 20.7MB/req），
+- [~] L. 网关"只解析一次"（调研中）：已经有一次解析 + `walk` 零拷贝（unsafe 包装）+ 输出缓冲裁剪（#3383）+ heldsize/分配上限测试；先 profile 复现 1MB Claude Code 请求的分配（TASKS G 项基线 20.7MB/req），
       审计脱敏链路对请求体的持有，给出分步方案（每步独立可验证、可回滚），再实现。
       密码学/隐私链路：按 LESSONS 把秘密放在工具参数、消息正文、嵌套对象里测。
+- [x] M. 本地脱敏模型的准确率（用户 11-09 要求）：CoreML 早已接入（`internal/pii/guard/coreml.go`，MLComputeUnitsAll）。
+      新增 `guard/eval_test.go`：46 条中英标注请求。本机（M 系列）：CoreML 39/42，P 0.975，R 0.929，F1 0.951；
+      bert.go 38/42，F1 0.927；971 token 窗口 7.2ms vs 441ms。漏检：无服务词的英文 IP、中国大陆身份证号、成对出现的第二个 IP；
+      误遮 2 字节（"11 月 3 日"的 11）。数字与明细见提交 `6c3135f81`。
