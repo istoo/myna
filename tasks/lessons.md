@@ -9,6 +9,13 @@
 - 2026-11-09：`.github/workflows/privacy-filter.yml` 的 matrix 第一项和 `gh workflow run -f targets=...` 的值都被替换，CI 收到的 target 名不匹配，5 个 job 全部空跑（0 秒完成）。
 - 解决：需要写入精确字面量时用拼接（`'darwin-'+'ar'+'m64'`）或按行号替换；用字符码（`[ord(c) for c in line]`）核对文件真实内容；给 CI 传参时传不含占位符形式的值（如 `targets=all`）。
 
+## 工具输出会把 npm 的依赖目录名换成一个随机串
+
+CI 日志、`ls`、`npm config` 里出现的那个 8 字符小写串，是 npm 的依赖目录名（`node_` 开头、`modules` 结尾，14 个字符）被显示层替换后的样子；**文件本身是对的**。见到"路径不存在"的结论，先用十六进制核对该行再下判断。
+
+- 2026-11-10：`gui.yml` 的 `NODE_PATH=$RUNNER_TEMP/pw/<那个串>` 看起来指向不存在的目录，实际 CI 上解析正常、测试全绿。差点被当成 bug "修正"，那样会打断 GUI 工作流。
+- 核对：`python3 -I -c "b=open(p,'rb').read();i=b.find(b'NODE_PATH=');print(b[i:i+40].hex())"`。
+
 ## main 上的推送会排队，不会取消，但会拖慢反馈
 
 `test.yml` 的并发设置对 main 是 `cancel-in-progress: false`：连续推送不会互相取消，但会串成队列。
