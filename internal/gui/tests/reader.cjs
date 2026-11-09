@@ -1,3 +1,5 @@
+const { wheelRest } = require("./fixtures/wheel-rest.cjs");
+
 // The app deliberately undoes unsolicited scrollIntoView (including Playwright's
 // automatic scroll). Bring a control into sight with real wheel input first.
 // Wholly in sight: one cut off by a fraction of a pixel at the view's foot
@@ -16,7 +18,7 @@ async function inView(page, locator) {
     if (!b) { await page.waitForTimeout(40); continue; }
     // one taller than the view: its top in sight
     if (b.y >= v.y && (b.y + b.height <= v.y + v.height || (b.height > v.height && b.y < v.y + v.height))) {
-      await page.waitForTimeout(300);
+      await wheelRest(page, "#view-usage");
       return;
     }
     const delta = b.y < v.y ? -20 : 20;
@@ -65,7 +67,10 @@ async function reach(page, locator) {
     });
     // drawn again between two looks, or not drawn yet: look again
     if (!at) { await page.waitForTimeout(40); continue; }
-    if (at.clear) { await page.waitForTimeout(300); return; }
+    // the wheel's coast runs a moment past its last step (the app's flings,
+    // 250ms), and a fixed 300 was short on a loaded Linux runner: the place
+    // was taken between two of the coast's scrolls (#13)
+    if (at.clear) { await wheelRest(page, "#" + id); return; }
     // landed, or the view is at its end and the wheel moves nothing: three
     // of those in turn and the control can't be brought clear
     stalls = (await wheeled(page, id, at.down ? 20 : -20)) ? 0 : stalls + 1;

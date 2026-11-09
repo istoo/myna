@@ -219,4 +219,9 @@
 - [x] 全量分片时限 Run 140→190m、job 150→200m：首轮 webkit 的 shard 3 在 140m 被杀，totals 与失败清单都没写。`0df956cdc`
 - [x] click-scroll「late-heard wheel」：`wheel(-40)` 后只读一次 `scrollTop`，滚动晚一两帧落地就误判"没动"；
       改为等 `scrollTop < from`（2s 上限）再断言。容器 1.58.2 连跑 4 次 24/24（修复前 3 次红 2），macOS 24/24。
+- [x] 「click moved the page/nothing」一类（currency、plain-names、omarchy、redact-rule-edit，共 11 条）：
+      根因是记录位置时滚轮惯性还没停（应用 flings 250ms），固定等 300ms 在重载 runner 上不够。
+      新增 `fixtures/wheel-rest.cjs`（8 帧不变且 ≥250ms，2s 上限），`reach`/`inView` 用它替换固定 300ms。
+      容器 1.58.2：12/12、4/4、14/14、20/20；macOS 五个文件 132/132，冒烟集 108/108。
+- [ ] model-load 390 窗口「busy models go last」点击后视图跳 229px：与本次改动无关（回滚 reader.cjs 同样复现），是独立问题。
 - [ ] 等 full webkit（42679120343）跑完，按完整清单继续逐条适配。

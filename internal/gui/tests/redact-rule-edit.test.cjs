@@ -14,6 +14,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 const { watchSettingsReads, settingsDrawn } = require("./reader.cjs");
+const { wheelRest } = require("./fixtures/wheel-rest.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const words = {
@@ -90,6 +91,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             await page.mouse.wheel(0, b.y < 0 ? -200 : 200);
             await page.waitForTimeout(80);
           }
+          // the wheel's coast runs a moment past its last step (the app's
+          // flings, 250ms): the place is taken at rest, not between two of
+          // them, which on a loaded Linux runner moved it after the click
+          await wheelRest(page, "#view-settings");
           const before = await scroll();
           const b = await loc.boundingBox();
           await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2);

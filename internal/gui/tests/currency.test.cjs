@@ -10,6 +10,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 const { openPart, navTo } = require("./reader.cjs");
+const { wheelRest } = require("./fixtures/wheel-rest.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 
@@ -120,6 +121,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           await page.mouse.wheel(0, -60);
           await page.waitForTimeout(30);
         }
+        // the wheel's coast ends after its last step; the place is taken at
+        // rest, not between two of its scrolls (a loaded Linux runner)
+        await wheelRest(page, "#view-settings");
         const before = await view(page);
         assert(before > 0, "the settings list must be long enough to scroll");
         const tall = () => page.locator("#view-settings").evaluate((v) => v.getBoundingClientRect().height);
