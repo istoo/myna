@@ -10,8 +10,10 @@ import (
 	"net/url"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // stubLookup answers names from m for the test, and forgets what earlier
@@ -70,6 +72,9 @@ func TestLANModelListNotThroughProxy(t *testing.T) {
 	if lan == nil {
 		t.Skip("no private IPv4 address on this computer")
 	}
+	if why := testenv.OwnAddrSkip(lan.String()); why != "" {
+		t.Skip(why)
+	}
 	proxy := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadGateway)
 	}))
@@ -92,7 +97,7 @@ func TestLANModelListNotThroughProxy(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	settings.Save(settings.Settings{Proxy: proxy.URL})
 	clear(lanCache.m)
-	c := &http.Client{Transport: Dispatch(&http.Transport{Proxy: Func})}
+	c := &http.Client{Transport: Dispatch(&http.Transport{Proxy: Func}), Timeout: 30 * time.Second}
 	req, _ := http.NewRequest("GET", remote.URL+"/v1/models", nil)
 	req.Header.Set("Authorization", "Bearer sk-myna-key")
 	res, err := c.Do(req)

@@ -12,6 +12,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/istoo/myna/internal/testenv"
 )
 
 // ownIPv4 is an IPv4 address of one of this computer's interfaces that
@@ -43,6 +45,9 @@ func TestCallbackGoesPastTheAgentsProxy(t *testing.T) {
 	ip := ownIPv4()
 	if ip == "" {
 		t.Skip("this computer has no address beyond loopback")
+	}
+	if why := testenv.OwnAddrSkip(ip); why != "" {
+		t.Skip(why)
 	}
 	ln, err := net.Listen("tcp", net.JoinHostPort(ip, "0"))
 	if err != nil {
