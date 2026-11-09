@@ -112,6 +112,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           tag="${GITHUB_REF_NAME}"
+          # --latest=false: the app's updater reads
+          # releases/latest/download/latest.json, so a pf-v* release must
+          # never take Latest from the app's own release (LESSONS: an older
+          # release published later took it and the tap went back with it)
           gh release view "$tag" >/dev/null 2>&1 || \
-            gh release create "$tag" --title "Privacy Filter $tag" --notes "pf-serve for each system; sha256 in each run's log."
+            gh release create "$tag" --title "Privacy Filter $tag" --notes "pf-serve for each system; sha256 in each run's log." --latest=false
           gh release upload "$tag" "$RUNNER_TEMP/pf-serve-${{ matrix.target }}.zip" --clobber
