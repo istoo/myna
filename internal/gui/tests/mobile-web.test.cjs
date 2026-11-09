@@ -90,8 +90,13 @@ function server(lang, original = false, opened = []) {
       // main's usage render can reveal the empty quota heading again if it
       // finishes last. Deliver the empty allowances after the totals paint,
       // so both screenshot pages compare the same completed API state.
-      await route.request().frame().page().locator("#usageAgents .row.stat").first().waitFor({ state: "attached", timeout: 30000 });
-      return json([]);
+      // Only Usage's ask waits: Routing asks too, and its ask held until the
+      // test reached Usage outlived its page on a busy machine, failing
+      // whichever test ran then (#10).
+      const page = route.request().frame().page();
+      if (await page.locator("#view-usage:not([hidden])").count().catch(() => 0))
+        await page.locator("#usageAgents .row.stat").first().waitFor({ state: "attached", timeout: 30000 }).catch(() => {});
+      return json([]).catch(() => {}); // the page closed meanwhile
     }
     if (url.pathname === "/api/usage") return json(usage);
     if (url.pathname === "/api/gateway/trace") return json({ mine: true, now: at, seq: 0, routes: [], totals: { requests: 0, rerouted: 0, errors: 0 } });
