@@ -321,15 +321,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.waitForFunction(([sel, from]) => document.querySelector(sel).scrollTop > from + 100, [view, was], { timeout: 3000 })
           .catch(() => {});
         const now = await scrollTop();
-        if (now <= was + 100) {
-          // what the page heard, and whether a wheel of its own moves it at
-          // all here: a browser that doesn't scroll on a synthetic wheel
-          // says this test can't judge the reader's wheel there
-          const seen = await page.evaluate(() => ({ heard: window.__wheelsHeard, late: window.__lateBy, h: document.querySelector(".view:not([hidden])")?.scrollHeight }));
-          await page.mouse.wheel(0, 300);
-          await page.waitForTimeout(300);
-          const plain = await scrollTop();
-          assert.fail(`the late-heard wheel must scroll the view${click ? " after a click" : ""}: was ${was}, now ${now}, a plain wheel then ${plain}, heard ${JSON.stringify(seen)}`);
+        // that it moved at all, not by how much: a wheel of 300 scrolls 300
+        // px here and 15 on ubuntu's WebKit (measured: was 0, now 15, a
+        // plain wheel then 32), and what this is about is the page not
+        // putting the reader's late wheel back (#12, 42585455725)
+        if (now <= was) {
+          const seen = await page.evaluate(() => ({ heard: window.__wheelsHeard, h: document.querySelector(".view:not([hidden])")?.scrollHeight }));
+          assert.fail(`the late-heard wheel must scroll the view${click ? " after a click" : ""}: was ${was}, now ${now}, heard ${JSON.stringify(seen)}`);
         }
       }
       // a scroll by code is still put back, the wheel that follows it not
