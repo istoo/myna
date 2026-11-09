@@ -130,14 +130,19 @@ for (const engine of ["chromium", "webkit"]) {
         for (const width of [1200,440]) {
           await page.setViewportSize({width,height:900});
           // the table is fitted to the new width on a frame after the resize
-          // (ledFit, which may cut names shorter): look once it has been
-          await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(r, 100)))));
-          const layout = await cells.nth(7).evaluate(cell => {
-            const badges = [...cell.querySelectorAll(".source-badges .src")].map(n => n.getBoundingClientRect());
+          // (ledFit, which may cut names shorter): wait for the layout the
+          // check is about, not a fixed moment — on a loaded runner the two
+          // frames and 100ms read it half fitted (issue #13)
+          const fitted = (i) => {
+            const cell = document.querySelectorAll(".led-row .where")[i];
+            if (!cell) return false;
+            const badges = [...cell.querySelectorAll(".source-badges .src")].map((n) => n.getBoundingClientRect());
             const bounds = cell.getBoundingClientRect();
             const name = cell.querySelector(".where-name").getBoundingClientRect();
-            return badges.length === 2 && Math.abs(badges[0].top - badges[1].top) < 1 && badges[0].right < badges[1].left && badges.every(b => b.top >= name.bottom && b.left >= bounds.left && b.right <= bounds.right && b.bottom <= bounds.bottom);
-          });
+            return badges.length === 2 && Math.abs(badges[0].top - badges[1].top) < 1 && badges[0].right < badges[1].left && badges.every((b) => b.top >= name.bottom && b.left >= bounds.left && b.right <= bounds.right && b.bottom <= bounds.bottom);
+          };
+          await page.waitForFunction(fitted, 7, { timeout: 3000 }).catch(() => {});
+          const layout = await page.evaluate(fitted, 7);
           assert(layout,"both badges share one row below the account at " + width);
         }
         await page.setViewportSize({width:1200,height:900});
