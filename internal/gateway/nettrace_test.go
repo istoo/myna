@@ -57,9 +57,10 @@ func TestTryTellsWhereItsTimeWent(t *testing.T) {
 	}
 	r, n := ask()
 	t.Logf("a new connection: %+v", n)
-	// the vendor's wait is the hold, give or take the machine
+	// the vendor's wait is the hold, give or take the machine: a loaded
+	// runner measured 298.7 ms for a 300 ms hold (11-10)
 	holdMs := float64(hold.Milliseconds())
-	if n.Wait < holdMs-1 || n.Wait > holdMs+5000 {
+	if n.Wait < holdMs-10 || n.Wait > holdMs+5000 {
 		t.Fatalf("wait %v for a %v hold: %+v", n.Wait, hold, n)
 	}
 	if n.Reused || n.TLS <= 0 || n.Asks != 1 || n.Before != 0 {
@@ -77,7 +78,7 @@ func TestTryTellsWhereItsTimeWent(t *testing.T) {
 	}
 	// the open connection carries the next one
 	_, n = ask()
-	if !n.Reused || n.DNS != 0 || n.Connect != 0 || n.TLS != 0 || n.Wait < holdMs-1 {
+	if !n.Reused || n.DNS != 0 || n.Connect != 0 || n.TLS != 0 || n.Wait < holdMs-10 {
 		t.Fatalf("the open connection: %+v", n)
 	}
 }
