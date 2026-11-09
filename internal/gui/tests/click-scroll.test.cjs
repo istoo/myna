@@ -343,7 +343,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await wheel(-40);
       // its own step, not the 200 px put back before it: a step is 40 px on
       // this Mac and 15 on ubuntu's WebKit, so what is checked is that the
-      // view went up from where it was and by less than the roll-back
+      // view went up from where it was and by less than the roll-back. The
+      // wheel's scroll can land a frame or two after the page hears of it
+      // (a loaded Linux runner), so the movement is waited for, not read once
+      await page.waitForFunction(([sel, from]) => document.querySelector(sel).scrollTop < from, [view, was], { timeout: 2000 })
+        .catch(() => {});
       const moved = await scrollTop();
       assert(moved < was && was - moved < 200, `the wheel moves the view by its own step only: was ${was}, now ${moved}`);
       await page.evaluate(() => { window.__lateWheel = false; });

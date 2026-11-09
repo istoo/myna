@@ -217,4 +217,6 @@
 - [x] quit-ask-setting（webkit 5 条）：测量前把开关滚进视野，点击本身才是被测的位移。`3673d3245`
 - [x] 分片 summary 列出失败测试的 `文件:行` 与名字；日志无 totals 时写明被截断。`c14a03359`
 - [x] 全量分片时限 Run 140→190m、job 150→200m：首轮 webkit 的 shard 3 在 140m 被杀，totals 与失败清单都没写。`0df956cdc`
+- [x] click-scroll「late-heard wheel」：`wheel(-40)` 后只读一次 `scrollTop`，滚动晚一两帧落地就误判"没动"；
+      改为等 `scrollTop < from`（2s 上限）再断言。容器 1.58.2 连跑 4 次 24/24（修复前 3 次红 2），macOS 24/24。
 - [ ] 等 full webkit（42679120343）跑完，按完整清单继续逐条适配。
