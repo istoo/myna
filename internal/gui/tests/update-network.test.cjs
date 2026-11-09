@@ -80,6 +80,19 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           await row.locator("button", { hasText: w.page }).waitFor();
           const check = row.locator("button", { hasText: w.check });
           await check.waitFor();
+          // the header takes a frame to narrow itself (fitTop is asked by a
+          // frame, and again when the Update pill shows): read once the class
+          // it settles on has stayed through three frames (#11)
+          await page.evaluate(() => new Promise((done) => {
+            const top = document.querySelector(".top");
+            let last = null, same = 0;
+            const tick = () => {
+              same = top.className === last ? same + 1 : 0;
+              last = top.className;
+              if (same >= 2) done(); else requestAnimationFrame(tick);
+            };
+            tick();
+          }));
           const over = await page.evaluate(() => document.scrollingElement.scrollWidth - document.scrollingElement.clientWidth);
           assert.ok(over <= 0, "no sideways scroll at " + width + ": " + over);
           const box = await row.boundingBox(), sbox = await row.locator(".sub").boundingBox();
