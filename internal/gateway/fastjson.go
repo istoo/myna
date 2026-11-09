@@ -706,7 +706,10 @@ func unquoteJSON(q []byte) (string, bool) {
 		r += size
 	}
 	if r == len(s) {
-		return string(s), true
+		// no escape in it: the body's own bytes, which nothing writes to
+		// while the request is read (inHeldBody), not a copy of them —
+		// 4 MB of a 1 MB request's strings were copies of the request
+		return unsafe.String(unsafe.SliceData(s), len(s)), true
 	}
 	b := make([]byte, 0, len(s)+2*utf8.UTFMax)
 	b = append(b, s[:r]...)
