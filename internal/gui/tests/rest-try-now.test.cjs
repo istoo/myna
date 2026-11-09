@@ -10,6 +10,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
+const { wheelRest } = require("./fixtures/wheel-rest.cjs");
 const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
@@ -92,7 +93,9 @@ const sideways = (page) => page.evaluate(() => document.documentElement.scrollWi
 async function reach(page, go) {
   await page.mouse.move(200, 300);
   for (let i = 0; i < 30 && !(await go.evaluate((e) => e.getBoundingClientRect().bottom < innerHeight - 80)); i++) await page.mouse.wheel(0, 200);
-  await page.waitForTimeout(200);
+  // the coast after the last wheel ends on its own; the button is under the
+  // pointer only once the view has stopped (a loaded Linux runner, #13)
+  await wheelRest(page, "#view-routing");
   assert(await go.evaluate((e) => { const r = e.getBoundingClientRect(); return e.contains(document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2)); }), "the button can't be reached");
 }
 
