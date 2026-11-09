@@ -133,9 +133,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const seen = await frames;
         const end = seen.at(-1);
         assert(end.height > before.height + 40, `grew: ${JSON.stringify({ before, end })}`);
-        // drawn at heights between the two, not the skeleton's then the README's
-        const between = seen.filter((f) => f.height > before.height + 4 && f.height < end.height - 4);
-        assert(between.length >= 3, `grew over frames: ${JSON.stringify(seen.map((f) => Math.round(f.height)))}`);
+        // drawn at more than two heights, not the skeleton's then the README's.
+        // Counted as heights, not as frames between the two: an engine may
+        // paint one or two of them on the way (Linux's WebKit drew 407, 491,
+        // 517, 520 where a Mac drew a dozen), and what this is about is that
+        // the README did not arrive in one jump (issue #13)
+        const drawn = new Set(seen.map((f) => Math.round(f.height))).size;
+        assert(drawn >= 3, `grew over frames: ${JSON.stringify(seen.map((f) => Math.round(f.height)))}`);
         for (const f of seen) assert(Math.abs(f.top - f.bottom) <= 2, `centred in every frame: ${JSON.stringify(f)}`);
         assert.deepEqual(errors, []);
         await page.context().close();
