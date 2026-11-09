@@ -227,4 +227,6 @@
 - [x] full webkit（42679120343，190 分钟时限）四片全绿，单片 57–88 分钟：140 分钟被杀的问题已解决。
 - [ ] 但 full 是报告模式（exit 0），artifact 只在 `failure()` 时上传——这一轮的日志全丢了。
       改为 `failure() || mode == 'full'`：summary 只列最多 40 条，断言原文只在日志里。
-- [ ] 等 `2c63d12df` 的 GUI 冒烟，确认 Linux 上 click-scroll/滚轮改动稳定。
+- [x] `2c63d12df` 的 GUI 冒烟四片全绿（Linux 冒烟门禁通过，click-scroll 稳定）。
+- [x] usage-heatmap 的 tooltip 差一天：指针落在下一行的格子上——记录格子位置时滚轮惯性未停。改用 `wheelRest`。
+      修完后该文件剩余 5 条是另一件事：`#view-usage` 横向溢出（view:false），Linux 上是真实布局问题，待单独处理。

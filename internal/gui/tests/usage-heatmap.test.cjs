@@ -19,6 +19,7 @@ async function pointTo(p, loc) {
 }
 const { chromium, webkit } = require("playwright");
 const { navTo } = require("./reader.cjs");
+const { wheelRest } = require("./fixtures/wheel-rest.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -164,6 +165,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           await p.mouse.wheel(0, b.y < 60 ? -120 : 120);
           await p.waitForTimeout(60);
         }
+        // at rest: the wheel's coast is still running a moment after the
+        // last step, and a cell's box read then was one row off, so the
+        // pointer rested on the day below (a loaded Linux runner, #13)
+        await wheelRest(p, "#view-usage");
         await pointTo(p, cell);
         const tip = heat.locator("#ledHeatTip");
         await tip.waitFor();
