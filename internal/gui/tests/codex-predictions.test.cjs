@@ -15,6 +15,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 const { watchSettingsReads, agentRow, openAgentSettings } = require("./reader.cjs");
+const { wheelRest } = require("./fixtures/wheel-rest.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 
@@ -123,6 +124,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
         const top = () => pick.evaluate((e) => e.getBoundingClientRect().top);
         for (let i = 0; i < 80 && (await top()) > 200; i++) { await page.mouse.wheel(0, 100); await page.waitForTimeout(30); }
+        // the wheel's coast ends after its last step: the place is taken at
+        // rest, not between two of its scrolls (a loaded Linux runner, #13)
+        await wheelRest(page, "#view-agents");
         const before = await view(page);
         assert(before > 0, "the agents list must scroll to the row");
         const pickItem = async (s) => {

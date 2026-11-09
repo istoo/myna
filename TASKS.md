@@ -231,4 +231,12 @@
 - [x] usage-heatmap 的 tooltip 差一天：指针落在下一行的格子上——记录格子位置时滚轮惯性未停。改用 `wheelRest`。
       修完后该文件剩余的红是另一件事：`#view-usage` 横向溢出 3–4px（scrollWidth 414 vs clientWidth 410），
       越界元素是 ledger 的 `table.led`（宽 475，本应在自己的滚动容器里）。量级很小，先不改布局，待查。
-- [ ] 应用侧待修（已在 #13 记录）：codex-predictions 选完模型视图回跳 ≈300px；model-load 390 宽点击跳 229px。
+- [x] 共享 `reach` 的"等滚轮停稳"顺带修掉：routing-bodies 20/20、routing-time-went、sessions-pending-fill、
+      session-identity、settings-proxy-auth 全绿（镜像 1.58.2，一批 110 项）。
+- [x] routing-rule-models：Playwright 的 `hover()` 会先把控件滚进视野、被应用撤销，悬停超时。改成本地 `hover()`
+      （真实滚轮 + 停稳后定位），Linux 镜像 30/30，macOS 60/60。
+- [x] rest-try-now：本地 `reach` 的 200ms 固定等待换成 `wheelRest`；剩 2 条间歇性"按钮点不到"（webkit en/de@420），单跑不复现。
+- [x] title-bar-tools：4 条红全部来自 WebKit 取消导航时报告的错误；`e.message` 是截断的（以 `/myna.test/api/... due to access control checks.` 开头），
+      过滤按 `e.stack` 才匹配。加负载跑（4 个 CPU 忙循环）时 111 条错误全部滤掉，5/5 绿。
+- [ ] codex-predictions：加了 `wheelRest` 后失败差从 ~300px 变成 ~50px，仍是应用在选完后自己滚动（#14 记录），测试不再放宽。
+- [ ] 应用侧待修（#14）：codex-predictions 选完模型视图回跳 ≈300px；model-load 390 宽点击跳 229px；usage 视图横向溢出 4px。

@@ -92,11 +92,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         const errors = [];
         let on = "";
-        // going from page to page cancels the reads still on their way, and
-        // WebKit reports each one as a page error, "Fetch API cannot load …
-        // due to access control checks" (#1350, #1307): not this test's
         page.on("pageerror", (e) => {
-          if (engine === "webkit" && /^Fetch API cannot load .* due to access control checks/.test(e.message)) return;
+          // WebKit reports a read its navigation cancelled as a page error:
+          // "Fetch API cannot load … due to access control checks" (#1350,
+          // #1307), not this test's. Its message starts partway through the
+          // sentence ("/myna.test/api/agents/cli due to access control
+          // checks."), so the filter reads the stack, which has it whole.
+          if (engine === "webkit" && /Fetch API cannot load .* due to access control checks/.test(e.stack)) return;
           errors.push(`${width}px ${on}: ${e.stack}`);
         });
         await page.route("**/*", serve(lang));
