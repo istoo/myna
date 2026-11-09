@@ -2764,7 +2764,7 @@ Linux, the desktop app, with WebKitGTK 4.1 installed for it on a desktop
 that lacks it; the terminal build where there is no desktop):
 
 ```sh
-curl -fsSL https://github.com/istoo/myna/install.sh | sh
+curl -fsSL https://github.com/istoo/myna/releases/latest/download/install.sh | sh
 ```
 
 On a Linux computer with a desktop (a graphical session, the user's
@@ -2797,7 +2797,7 @@ the release's github.com URL (or `MYNA_MIRROR`; `myna update mirror
 <prefix>|off` keeps one for every update, the app's too):
 
 ```sh
-curl -fsSL https://github.com/istoo/myna/install.sh | sh -s -- --proxy http://127.0.0.1:7890
+curl -fsSL https://github.com/istoo/myna/releases/latest/download/install.sh | sh -s -- --proxy http://127.0.0.1:7890
 myna update --mirror https://mirror.example/
 ```
 
