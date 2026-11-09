@@ -315,6 +315,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         if (click) await dayButtons.nth(1).click();
         const was = await scrollTop();
         await wheel(300);
+        // the wheel's scroll lands a frame or two after the page hears of it,
+        // later still on a loaded Linux runner: wait for the state this is
+        // about (the view scrolled), not one read of it (#12's first run)
+        await page.waitForFunction(([sel, from]) => document.querySelector(sel).scrollTop > from + 100, [view, was], { timeout: 3000 })
+          .catch(() => {});
         assert((await scrollTop()) > was + 100, `the late-heard wheel must scroll the view${click ? " after a click" : ""}`);
       }
       // a scroll by code is still put back, the wheel that follows it not
