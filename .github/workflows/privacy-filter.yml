@@ -1,78 +1,109 @@
-# Builds pf-serve, the program that runs Settings → Privacy's local
-# masking model (native/privacy-filter, internal/pii), for each system.
-# A change to it is built on every push; a pf-v* tag publishes the zips as
-# a prerelease of this repo, never Latest, whose sha256s internal/pii pins.
-name: privacy-filter
+name: Privacy Filter
 
+# pf-serve, the program that runs Privacy Filter (Settings › Privacy's
+# 1.6 GB local model), built for each system and published as a release's
+# assets. internal/pii pins a tag (serveTag) and each system's sha256; a
+# run of this workflow on a pf-v* tag makes the release that pin names.
+# The model is not here: LocalAI's q8 GGUF is downloaded by myna itself.
+#
+# A repository with no pf-v* release yet, as this fork was, gives the
+# model's download a 404 and Privacy Filter can't be turned on (the first
+# run of this workflow fixes that).
 on:
-  push:
-    branches: [main, "pf/**"]
-    paths: ["native/privacy-filter/**", ".github/workflows/privacy-filter.yml"]
-    tags: ["pf-v*"]
-  pull_request:
-    paths: ["native/privacy-filter/**", ".github/workflows/privacy-filter.yml"]
   workflow_dispatch:
+    inputs:
+      targets:
+        description: "comma-separated targets to build (darwin-arm64, darwin-amd64, linux-amd64, linux-arm64, windows-amd64)"
+        default: "darwin-arm64"
+  push:
+    tags:
+      - "pf-v*"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
+    name: build (${{ matrix.target }})
     strategy:
       fail-fast: false
       matrix:
         include:
-          - { target: darwin-arm64, os: macos-15 }
-          - { target: darwin-amd64, os: macos-15 }
-          # the oldest glibc a runner has, so the program runs on older systems too
-          - { target: linux-amd64, os: ubuntu-22.04 }
-          - { target: linux-arm64, os: ubuntu-22.04-arm }
-          - { target: windows-amd64, os: ubuntu-24.04 }
+          - target: darwin-arm64
+            os: macos-14
+          - target: darwin-amd64
+            os: macos-14
+          - target: linux-amd64
+            os: ubuntu-22.04
+          - target: linux-arm64
+            os: ubuntu-24.04-arm
+          - target: windows-amd64
+            os: ubuntu-22.04
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
-      - name: tools (macOS)
-        if: runner.os == 'macOS'
-        run: brew install ninja
-      - name: tools (Linux)
-        # no glslc in Ubuntu 22.04: build.sh takes LunarG's
-        if: startsWith(matrix.target, 'linux')
-        run: sudo apt-get update && sudo apt-get install -y ninja-build libvulkan-dev xz-utils zip
-      - name: tools (Windows, cross)
-        if: matrix.target == 'windows-amd64'
-        run: sudo apt-get update && sudo apt-get install -y ninja-build mingw-w64 glslc zip
-      - name: build
-        run: native/privacy-filter/build.sh ${{ matrix.target }} pf-serve-${{ matrix.target }}.zip
-      - name: starts
-        # each program the runner can start runs to its usage line
-        if: matrix.target != 'windows-amd64' && matrix.target != 'darwin-amd64'
+
+      - name: Choose targets
+        id: pick
+        shell: bash
         run: |
-          mkdir t && cd t && unzip -q ../pf-serve-${{ matrix.target }}.zip
-          for p in pf-serve pf-serve-vulkan pf-serve-base; do
-            [ -f "$p" ] || continue
-            ./"$p" | tee out.txt; grep -q usage out.txt
-          done
+          wanted="${{ github.event_name == 'push' && 'all' || inputs.targets }}"
+          if [ "$wanted" = "all" ] || [[ ",$wanted," == *",${{ matrix.target }},"* ]]; then
+            echo "build=yes" >> "$GITHUB_OUTPUT"
+          else
+            echo "build=no" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Tools
+        if: steps.pick.outputs.build == 'yes'
+        shell: bash
+        run: |
+          case "$RUNNER_OS" in
+            macOS) brew install ninja ;;
+            Linux)
+              sudo apt-get update
+              sudo apt-get install -y ninja-build zip
+              if [ "${{ matrix.target }}" = windows-amd64 ]; then
+                sudo apt-get install -y mingw-w64
+              fi
+              ;;
+          esac
+
+      # build.sh fetches privacy-filter.cpp and ggml at the pinned commit
+      # and writes pf-serve-<target>.zip; pf-serve-base and
+      # pf-serve-vulkan are in the same zip where the target has them.
+      - name: Build
+        if: steps.pick.outputs.build == 'yes'
+        shell: bash
+        working-directory: native/privacy-filter
+        run: ./build.sh "${{ matrix.target }}" "$RUNNER_TEMP/pf-serve-${{ matrix.target }}.zip"
+
+      - name: Record the digest
+        if: steps.pick.outputs.build == 'yes'
+        shell: bash
+        run: |
+          sha256sum "$RUNNER_TEMP/pf-serve-${{ matrix.target }}.zip" | tee "$RUNNER_TEMP/sha.txt"
+          echo "sha=$(cut -d' ' -f1 "$RUNNER_TEMP/sha.txt")" >> "$GITHUB_OUTPUT"
+        id: digest
+
       - uses: actions/upload-artifact@v4
+        if: steps.pick.outputs.build == 'yes'
         with:
           name: pf-serve-${{ matrix.target }}
-          path: pf-serve-${{ matrix.target }}.zip
+          path: |
+            ${{ runner.temp }}/pf-serve-${{ matrix.target }}.zip
+            ${{ runner.temp }}/sha.txt
 
-  release:
-    if: startsWith(github.ref, 'refs/tags/pf-v')
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          merge-multiple: true
-      - name: publish
+      # A pf-v* tag publishes each system's zip under the tag's name, the
+      # file names internal/pii asks for (pf-serve-<target>.zip).
+      - name: Publish
+        if: steps.pick.outputs.build == 'yes' && github.event_name == 'push'
+        shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          sha256sum pf-serve-*.zip | tee SHA256SUMS
-          gh release create "$GITHUB_REF_NAME" -R "$GITHUB_REPOSITORY" --prerelease --latest=false \
-            --title "pf-serve $GITHUB_REF_NAME" \
-            --notes "pf-serve, which runs the local masking model of Settings → Privacy (native/privacy-filter). Not a myna release: myna downloads these itself, checked against the sha256s in internal/pii." \
-            pf-serve-*.zip SHA256SUMS
+          tag="${GITHUB_REF_NAME}"
+          gh release view "$tag" >/dev/null 2>&1 || \
+            gh release create "$tag" --title "Privacy Filter $tag" --notes "pf-serve for each system; sha256 in each run's log."
+          gh release upload "$tag" "$RUNNER_TEMP/pf-serve-${{ matrix.target }}.zip" --clobber
