@@ -14,6 +14,16 @@ import (
 // readCodexUsage stands in for ChatGPT's usage readings: the five hours
 // of me@example.com, at what used says now, back at resets. The stand-in
 // is asked for every agent; only codex's is filled.
+// reading is a number the usage stand-in reads while the test changes it:
+// the stand-in runs in provider's own goroutine, so the two need a door
+// between them (the race detector caught a plain float, 2026-11-10).
+func reading(v float64) (get func() float64, set func(float64)) {
+	var a atomic.Pointer[float64]
+	put := func(f float64) { a.Store(&f) }
+	put(v)
+	return func() float64 { return *a.Load() }, put
+}
+
 func readCodexUsage(t *testing.T, used func() float64, resets time.Time) {
 	t.Helper()
 	provider.LoginUsageVia(func(_ context.Context, agent string) map[string]provider.SubscriptionQuota {
@@ -114,12 +124,12 @@ func TestReadingKeepsARefusalsRest(t *testing.T) {
 	}
 	id := candidate{p: *p, model: "gpt-6.1-sol"}.restKey()
 	resets := time.Now().Add(92 * time.Minute).Truncate(time.Second)
-	used := 100.0
-	readCodexUsage(t, func() float64 { return used }, resets)
+	used, setUsed := reading(100)
+	readCodexUsage(t, used, resets)
 	waitUsed(t, 100)
 	restByRefusal(t, id, resets)
 	told := armRenewed(t)
-	used = 80
+	setUsed(80)
 	waitUsed(t, 80)
 	told()
 	if _, ok := restOf(id); !ok {
@@ -149,15 +159,15 @@ func TestAutoVisionKeepsOffARefusedAccount(t *testing.T) {
 		t.Fatal(err)
 	}
 	resets := time.Now().Add(92 * time.Minute).Truncate(time.Second)
-	used := 100.0
-	readCodexUsage(t, func() float64 { return used }, resets)
+	used, setUsed := reading(100)
+	readCodexUsage(t, used, resets)
 	waitUsed(t, 100)
 	restByRefusal(t, candidate{p: *p, model: "gpt-6.1-sol"}.restKey(), resets)
 	if m := AutoVision(); m != "keyed/eye" {
 		t.Fatalf("AutoVision = %q with codex refused till %s", m, resets.Format(time.TimeOnly))
 	}
 	told := armRenewed(t)
-	used = 80
+	setUsed(80)
 	waitUsed(t, 80)
 	told()
 	if m := AutoVision(); m != "keyed/eye" {
