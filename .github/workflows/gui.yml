@@ -127,6 +127,19 @@ jobs:
           fails=$(sed -n 's/^ℹ fail \([0-9]*\)$/\1/p' "$RUNNER_TEMP/gui.log" | tail -1)
           {
             echo "shard $SHARD/$SHARDS, $browser: ${fails:-?} failed of $(sed -n 's/^ℹ tests \([0-9]*\)$/\1/p' "$RUNNER_TEMP/gui.log" | tail -1)"
+            # A red is named with its file, in the summary the run leaves: the
+            # log is an artifact of four shards, and a count nobody can act on
+            # (LESSONS.md: a suite's log is kept whole until its reds are named)
+            if [ -n "$fails" ] && [ "$fails" != 0 ]; then
+              echo ""
+              echo "<details><summary>the tests that failed</summary>"
+              echo ""
+              awk '/^test at internal\/gui\/tests\// { f = $3; sub(/^internal\/gui\/tests\//, "", f); next }
+                   /^✖ / { if (f != "") { print "- `" f "` " substr($0, index($0, " ") + 1); f = "" } }' \
+                "$RUNNER_TEMP/gui.log" | head -40
+              echo ""
+              echo "</details>"
+            fi
           } >> "$GITHUB_STEP_SUMMARY"
           # The smoke set is the gate (it is green here). A full run is a
           # report: the whole suite on Linux has layout and timing
