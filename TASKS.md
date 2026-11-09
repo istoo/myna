@@ -224,4 +224,7 @@
       新增 `fixtures/wheel-rest.cjs`（8 帧不变且 ≥250ms，2s 上限），`reach`/`inView` 用它替换固定 300ms。
       容器 1.58.2：12/12、4/4、14/14、20/20；macOS 五个文件 132/132，冒烟集 108/108。
 - [ ] model-load 390 窗口「busy models go last」点击后视图跳 229px：与本次改动无关（回滚 reader.cjs 同样复现），是独立问题。
-- [ ] 等 full webkit（42679120343）跑完，按完整清单继续逐条适配。
+- [x] full webkit（42679120343，190 分钟时限）四片全绿，单片 57–88 分钟：140 分钟被杀的问题已解决。
+- [ ] 但 full 是报告模式（exit 0），artifact 只在 `failure()` 时上传——这一轮的日志全丢了。
+      改为 `failure() || mode == 'full'`：summary 只列最多 40 条，断言原文只在日志里。
+- [ ] 等 `2c63d12df` 的 GUI 冒烟，确认 Linux 上 click-scroll/滚轮改动稳定。

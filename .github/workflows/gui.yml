@@ -157,8 +157,11 @@ jobs:
 
       # A shard that fails keeps its whole log: a red is named with its file
       # and its output, never a tail of the run (LESSONS.md).
+      # A full run exits 0 by design, so `failure()` alone would never keep
+      # its log: the summary names up to 40 reds, and the assertion each one
+      # gave lives here (LESSONS.md, 10-17 and 10-28).
       - uses: actions/upload-artifact@v4
-        if: failure()
+        if: failure() || steps.files.outputs.mode == 'full'
         with:
           name: gui-log-${{ matrix.shard }}
           path: ${{ runner.temp }}/gui.log
