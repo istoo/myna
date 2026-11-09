@@ -145,8 +145,19 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const pill = page.locator("#update"), x = page.locator("#updateHide");
           await pill.waitFor({ state: "visible" });
           if (tight) {
-            // the header as fitTop leaves it when the tabs don't fit (#442)
-            await page.evaluate(() => { topFit.disconnect(); document.querySelector(".top").classList.add("tight"); });
+            // the header as fitTop leaves it when the tabs don't fit (#442),
+            // once every late fitTop has had its turn: the fonts, navmore.js
+            // and a frame the observer queued would each take .tight off
+            // again on a busy machine (#8)
+            await page.evaluate(async () => {
+              topFit.disconnect();
+              document.fonts.removeEventListener("loadingdone", fitTop);
+              await document.fonts.ready;
+              const frames = () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+              while (!navMoreOver) await frames();
+              await frames();
+              document.querySelector(".top").classList.add("tight");
+            });
             assert.equal(await pill.locator("span").evaluate((e) => getComputedStyle(e).display), "none", "the pill is its round arrow");
           }
           await pill.hover();
