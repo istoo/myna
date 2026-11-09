@@ -34,6 +34,7 @@ function server(lang, web, ctl) {
   return async (route) => {
     const req = route.request(), url = new URL(req.url());
     const json = (data) => route.fulfill({ json: data });
+    if (url.pathname === "/" || url.pathname === "/api/update") ctl.log.push(url.pathname + "@" + ctl.version);
     if (url.pathname === "/") ctl.pages++;
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:${web},version:"${ctl.version}"};` });
     if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
@@ -76,23 +77,23 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     t.after(() => browser.close());
     for (const width of [1100, 420]) for (const lang of langs) {
       await t.test(`${lang} at ${width}: clicked back into`, async () => {
-        const ctl = { version: "0.1.400", pages: 0 };
+        const ctl = { version: "0.1.400", pages: 0, log: [] };
         const { page, errors } = await open(browser, width, lang, true, ctl);
         // the app's window put 0.1.401 in, and myna web restarted into it
         ctl.version = "0.1.401";
         await page.evaluate(() => window.dispatchEvent(new Event("focus")));
         await page.waitForFunction(() => !window.oldPage && document.readyState === "complete");
-        assert.equal(ctl.pages, 2, "loaded again once");
+        assert.equal(ctl.pages, 2, "loaded again once: " + ctl.log.join(" "));
         await page.waitForTimeout(400);
         assert.equal(await pill(page).isHidden(), true, "the reloaded page offers no update");
-        assert.equal(ctl.pages, 2, "no reload after the first");
+        assert.equal(ctl.pages, 2, "no reload after the first: " + ctl.log.join(" "));
         assert.deepEqual(errors, []);
         await page.context().close();
       });
     }
     for (const lang of langs) {
       await t.test(`${lang}: left on screen, within a minute`, async () => {
-        const ctl = { version: "0.1.400", pages: 0 };
+        const ctl = { version: "0.1.400", pages: 0, log: [] };
         const { page, errors } = await open(browser, 1100, lang, true, ctl, true);
         ctl.version = "0.1.401";
         await page.clock.runFor(61e3);
@@ -103,7 +104,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       });
     }
     await t.test("the app's own window doesn't reload", async () => {
-      const ctl = { version: "0.1.400", pages: 0 };
+      const ctl = { version: "0.1.400", pages: 0, log: [] };
       const { page, errors } = await open(browser, 1100, "en", false, ctl);
       ctl.version = "0.1.401";
       await page.evaluate(() => window.dispatchEvent(new Event("focus")));

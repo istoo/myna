@@ -4562,20 +4562,19 @@ async function backAsNew(was) {
   for (let i = 0; i < 180; i++) {
     await new Promise((r) => setTimeout(r, 1000));
     const u = await fetch("/api/update").then((r) => (r.ok ? r.json() : null)).catch(() => null);
-    if (u && u.current !== was) return location.reload();
+    if (u && u.current !== was) return reloadOnce();
   }
 }
 
-// servedAnew reloads a browser's page (myna web, or the app's page)
-// that another version of myna now answers for, and says whether it did.
-// The page restarted to update itself reloads in backAsNew; one whose
-// myna restarted for another's update (the app's window put it in, and
-// myna web followed, or the app restarted under its own page) ran on as
-// the old page, its Update pill still offering the version already in
-// (visamzh on X).
+// servedAnew reloads a browser's page that another version of myna now
+// answers for, after another's update (visamzh on X: it ran on as the old
+// page, offering the version already in), and says whether it did. Once:
+// the pill and Settings' row both ask, and a second reload refetches (#7).
+let reloading = false;
+const reloadOnce = () => reloading || (reloading = true, location.reload());
 function servedAnew(u) {
   if (!web || !pageVersion || !u?.current || u.current === pageVersion) return false;
-  location.reload();
+  reloadOnce();
   return true;
 }
 
