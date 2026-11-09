@@ -192,6 +192,11 @@
 - [~] L. 网关"只解析一次"（调研中）：已经有一次解析 + `walk` 零拷贝（unsafe 包装）+ 输出缓冲裁剪（#3383）+ heldsize/分配上限测试；先 profile 复现 1MB Claude Code 请求的分配（TASKS G 项基线 20.7MB/req），
       审计脱敏链路对请求体的持有，给出分步方案（每步独立可验证、可回滚），再实现。
       密码学/隐私链路：按 LESSONS 把秘密放在工具参数、消息正文、嵌套对象里测。
+      11-09 profile（TestMaskedTranslatedRequestAlloc，1MB 请求 20.6MB/37.8k 次；`/tmp/mem.out`）：
+      大头是 `unquoteJSON` 4.2MB/req、`bytes.Clone`（fillJSONIn 的 RawMessage 复制，低于 heldShareMost 的小片段）4MB/req、
+      `io.ReadAll` 2.8MB、`bytes.growSlice` 1.8MB、`gjson.getBytes` 1.7MB、`marshalSized` 1.6MB、`insertAt`/`snipsOf` 各 1.4MB。
+      结论：共享机制（inHeldBody/heldShareMost）已在，剩余是"共享会不会钉住 1MB body"的权衡，
+      下一批按单点做并各自保留分配数字，不整体重写。
 - [x] M. 本地脱敏模型的准确率（用户 11-09 要求）：CoreML 早已接入（`internal/pii/guard/coreml.go`，MLComputeUnitsAll）。
       新增 `guard/eval_test.go`：46 条中英标注请求。本机（M 系列）：CoreML 39/42，P 0.975，R 0.929，F1 0.951；
       bert.go 38/42，F1 0.927；971 token 窗口 7.2ms vs 441ms。漏检：无服务词的英文 IP、中国大陆身份证号、成对出现的第二个 IP；
