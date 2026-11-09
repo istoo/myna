@@ -106,6 +106,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const sw = row.locator("#quitAskSegs [role=switch]");
       assert.equal(await sw.getAttribute("aria-checked"), "true", "On by default");
 
+      // the switch itself in sight, not just its row: the wheel above stops
+      // at the window's edge, and the view's own scroll is less (Linux's
+      // taller lines, issue #13). A click on a control the browser must
+      // still reach scrolls first, and that is not the page moving
+      await sw.scrollIntoViewIfNeeded();
       const before = await page.evaluate(() => [scrollX, scrollY, document.querySelector("#view-settings")?.scrollTop]);
       await press(page, sw);
       await until(() => saved.length);

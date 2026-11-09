@@ -55,7 +55,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const a = r.getBoundingClientRect(), b = n.querySelector(".state").getBoundingClientRect();
           return Math.abs((a.top + a.bottom) / 2 - (b.top + b.bottom) / 2);
         });
-        assert(off <= 0.25, `the state's middle is ${off}px off the title's`);
+        // a half pixel is how Linux's font metrics round the line box: the
+        // state centred within one pixel is still centred, one on the
+        // baseline (the bug above) is several off (issue #13)
+        assert(off <= 1, `the state's middle is ${off}px off the title's`);
         // Connect folded by default, its base URL in its head
         assert.equal(await page.locator("#foldConnect").getAttribute("aria-expanded"), "false", "Connect starts folded");
         assert(await page.locator("#connect").evaluate((c) => c.hidden));
