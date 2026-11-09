@@ -229,4 +229,6 @@
       改为 `failure() || mode == 'full'`：summary 只列最多 40 条，断言原文只在日志里。
 - [x] `2c63d12df` 的 GUI 冒烟四片全绿（Linux 冒烟门禁通过，click-scroll 稳定）。
 - [x] usage-heatmap 的 tooltip 差一天：指针落在下一行的格子上——记录格子位置时滚轮惯性未停。改用 `wheelRest`。
-      修完后该文件剩余 5 条是另一件事：`#view-usage` 横向溢出（view:false），Linux 上是真实布局问题，待单独处理。
+      修完后该文件剩余的红是另一件事：`#view-usage` 横向溢出 3–4px（scrollWidth 414 vs clientWidth 410），
+      越界元素是 ledger 的 `table.led`（宽 475，本应在自己的滚动容器里）。量级很小，先不改布局，待查。
+- [ ] 应用侧待修（已在 #13 记录）：codex-predictions 选完模型视图回跳 ≈300px；model-load 390 宽点击跳 229px。
