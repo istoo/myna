@@ -5,12 +5,13 @@
 # its bytes.
 #
 # Needs a ChatGPT account signed in to myna (the `codex` provider has a
-# model list with codex/gpt-5.5). It builds and starts its own gateway on
+# model list; MODEL picks one, codex/gpt-5.5 by default). It builds and starts its own gateway on
 # $PORT, so the app's own gateway is untouched; nothing else should serve
 # that port.
 #
 #   scripts/check-codex-kept-socket.sh
 #   PORT=8899 MYNA_BIN=/path/to/myna scripts/check-codex-kept-socket.sh
+#   MODEL=codex/gpt-5.6-terra scripts/check-codex-kept-socket.sh
 #
 # What it prints: the delta line, and every socket turn's line. It exits
 # non-zero when the second turn was whole, the reply failed, or the log
@@ -20,6 +21,7 @@ set -euo pipefail
 PORT="${PORT:-8899}"
 BASE="http://127.0.0.1:$PORT"
 SESSION="kept-socket-check-$$"
+MODEL="${MODEL:-codex/gpt-5.5}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 BIN="${MYNA_BIN:-/tmp/myna-kept}"
 LOG="${LOG:-/tmp/myna-kept-socket.log}"
@@ -61,11 +63,11 @@ USER2='{"type":"message","role":"user","content":[{"type":"input_text","text":"R
 
 # turn one: the whole conversation. include the reasoning seal as Codex
 # does, so whatever it streamed can be sent back as Codex sends it.
-BODY1=$(python3 - "$SESSION" "$USER1" <<'PY'
+BODY1=$(python3 - "$SESSION" "$USER1" "$MODEL" <<'PY'
 import json, sys
-session, user1 = sys.argv[1:3]
+session, user1, model = sys.argv[1:4]
 print(json.dumps({
-    "model": "codex/gpt-5.5",
+    "model": model,
     "stream": True,
     "prompt_cache_key": session,
     "include": ["reasoning.encrypted_content"],
@@ -82,9 +84,9 @@ fi
 
 # the reply's output items, in output_item.done order: what Codex sends
 # back at the head of the next turn's input
-BODY2=$(python3 - "$SESSION" "$USER1" "$USER2" "$TURN1" <<'PY'
+BODY2=$(python3 - "$SESSION" "$USER1" "$USER2" "$TURN1" "$MODEL" <<'PY'
 import json, sys
-session, user1, user2, turn1 = sys.argv[1:5]
+session, user1, user2, turn1, model = sys.argv[1:6]
 items = []
 for line in open(turn1, encoding="utf-8"):
     if not line.startswith("data: "):
@@ -98,7 +100,7 @@ for line in open(turn1, encoding="utf-8"):
 if not items:
     sys.exit("the first turn streamed no output item")
 print(json.dumps({
-    "model": "codex/gpt-5.5",
+    "model": model,
     "stream": True,
     "prompt_cache_key": session,
     "include": ["reasoning.encrypted_content"],

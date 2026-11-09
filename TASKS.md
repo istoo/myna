@@ -158,7 +158,7 @@
 - [x] G. 已合入（主会话审计零拷贝存储点：placeholder/scores/texts/tails/shape 均显式 Clone，bytesOf 仅同步只读；去 Clone 测试变红已复现）。1MB 脱敏翻译请求 33.6→20.7MB/req（−38.5%）、79.8k→37.8k mallocs（−52.6%），上游字节归一化后一致。网关分配削减（C1 合并后）：探针（1MB Claude Code 请求、脱敏开、翻译路由，基线 22.8MB/21.7x）作分配上限测试，逐项削减并保留数字；
       redact walker 零拷贝只在审计占位符存储不会钉住请求体后做，并按 LESSONS 把秘密放在工具参数/消息正文/嵌套对象里测。
 - [x] 决定不做：MCP 独立小二进制。footprint 21MB/进程且多为共享框架页，换来打包与各 agent 配置路径变更，收益不抵风险。
-- [~] H. 已实现并合入（codex_socket_keep.go 新增；gateway.go 两行接线；文档同步；11 个新测试，-race -count=20 通过，主工作区 37+90 通过）。**真实 chatgpt.com 未验证**：本机 myna 无 ChatGPT 订阅、Codex 为 apikey 登录。用户登录 ChatGPT 后跑 scripts/check-codex-kept-socket.sh（模型 id 按实际改）。ChatGPT Codex 后端 WS 增量接续（用户 11-08 提出）：codex_socket.go 每轮新开 socket、发全量、完成即关。
+- [x] H. 已实现并合入（codex_socket_keep.go 新增；gateway.go 两行接线；文档同步；11 个新测试，-race -count=20 通过，主工作区 37+90 通过）。11-09 真实 chatgpt.com（free 账号，codex/gpt-5.6-terra）验证：`MODEL=codex/gpt-5.6-terra scripts/check-codex-kept-socket.sh` 第一轮 whole 18374 B，第二轮 delta 18455 of 18622 B，回复 one/two 均 completed；省下的只是 input 部分，instructions 和 tools 每轮照发（与 codex-rs 相同），会话越长省得越多。ChatGPT Codex 后端 WS 增量接续（用户 11-08 提出）：codex_socket.go 每轮新开 socket、发全量、完成即关。
       改为按（主机+账号身份+session-id/thread-id/prompt_cache_key）保留上游连接；本轮除 input/client_metadata 外与上轮逐字节相同、
       且 input 以“上轮 input+上轮 k 个输出项（类型/call_id 校验）”开头时，只发 previous_response_id+新增项；否则全量。
       previous_response_not_found/回复前断开 → 新连接全量重发；并发轮次另开连接；空闲回收。验证：真实 ChatGPT 账号两轮，上游第二轮消息体只含新增。
