@@ -198,6 +198,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.route("**/*", serve("en"));
       await page.goto("http://myna.test/");
       await page.waitForSelector("#nav button.on");
+      // the app keeps the layouts still on Linux: WebKitGTK with compositing
+      // off crashes inside a view transition, so navMorph changes at once
+      // and there is no motion to watch (app.js)
+      if (await page.evaluate(() => document.body.classList.contains("linux"))) { await context.close(); return; }
       assert.ok(await page.evaluate(() => !!document.startViewTransition), "the webview has view transitions");
       // what plays, read as the button is clicked: the old drawn, the new laid out
       const playing = () => page.evaluate(() => new Promise((r) => {
@@ -286,6 +290,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.route("**/*", serve("en"));
       await page.goto("http://myna.test/");
       await page.waitForSelector("#nav button.on");
+      // on Linux navMorph never starts a transition (see above), so there is
+      // none to cut short
+      if (await page.evaluate(() => document.body.classList.contains("linux"))) { await context.close(); return; }
       const t0 = Date.now();
       await page.locator("#sideToggle").click();
       await page.waitForFunction(() => document.documentElement.classList.contains("nav-morph"));
