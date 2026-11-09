@@ -167,4 +167,13 @@
       GUI：合入后 3 红（account-arrange/icon-url/key-weight）+ 补跑出 2 红（update-network/vertex-editor）均已按根因修（lastScrollInput 初值、
       按钮宽度保持、药丸显隐同步 fitTop）；hold() 阈值仅对“点击元素已重绘”的旁位参照用 24px。负载下偶发：update-served-anew ja@420、update-hide webkit zh，待开 issue。
       GUI 全量 3 分片通过后推送 main，CI 绿后已发布 v0.1.2908（Release run 42538105753）。负载下的 4 个 GUI 红与 2 个 Little Snitch 红分别为 #7–#10、#5–#6。
-- [ ] I. 收尾（11-09）：#7–#10 改为等状态（注入延迟先红后绿）；#5/#6 拨号自带期限、快速失败并说明原因。
+- [x] I. 收尾（11-09）：
+      #5/#6：两个 LAN 回调测试改用 `testenv.OwnAddrSkip`（与 #3 同一守卫），netproxy 客户端加 30s 期限；
+        注入 192.0.2.1 时两测试 0.00s 跳过并说明原因，正常路径 4/4。`acd3f5eeb`。
+      #7：`reloadOnce` 一次重载（servedAnew/backAsNew 共用）；CDP 12 倍降频下旧码日志 `/@0.1.401` 两次，新码 17/17 ×2。`e10acc6e9`。
+      #8：测试先等 fonts.ready、navmore.js 与额外一帧再置 tight；排队帧下旧测 2/2 红（'block'），新测 18/18。`22edf98de`。
+      #9：`focusSoon`（library 三处 + routing 一处）焦点已移开则不抢；旧码 4/4 红"a late frame took the focus"，新码 16/16；
+        5 路 WebKit + 600ms 抖动 30/30（旧 7/30）。`8db0b3c04`。
+      #10：配额假接口只在 Usage 页等待并容忍页面已关；等待压到 3s 时旧 10/15 红（9 条为 issue 同款），新 15/15；正常 30/30。`fece23c07`。
+      #11（本轮发现的 main 既有红）：update-network chromium en@390 在头栏 fitTop 稳定前读宽度；改为等 class 三帧不变，22/22 ×3。`a1f8494c0`。
+      可达 GUI 文件回归：99 个（update/market/library/routing 组编辑器等）98 通过，唯一红即 #11，已修。
