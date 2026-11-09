@@ -1,0 +1,376 @@
+[
+  {
+    "text": "mail me at alice.chen@example.com before the standup",
+    "want": [
+      {
+        "text": "alice.chen@example.com",
+        "label": "email"
+      }
+    ]
+  },
+  {
+    "text": "dial +1 415 555 0134 when you land",
+    "want": [
+      {
+        "text": "+1 415 555 0134",
+        "label": "phone"
+      }
+    ]
+  },
+  {
+    "text": "the card on file is 4111 1111 1111 1111",
+    "want": [
+      {
+        "text": "4111 1111 1111 1111",
+        "label": "payment_card"
+      }
+    ]
+  },
+  {
+    "text": "prod-db answers at 192.168.10.24 on 5432",
+    "want": [
+      {
+        "text": "192.168.10.24",
+        "label": "ip_address"
+      }
+    ]
+  },
+  {
+    "text": "the runbook is at https://intranet.example.com/ops/runbook",
+    "want": [
+      {
+        "text": "https://intranet.example.com/ops/runbook",
+        "label": "url"
+      }
+    ]
+  },
+  {
+    "text": "set the password to S3cr3t-Pa55w0rd and restart",
+    "want": [
+      {
+        "text": "S3cr3t-Pa55w0rd",
+        "label": "common_secret"
+      }
+    ]
+  },
+  {
+    "text": "ship it to 14 Haight Street, San Francisco",
+    "want": [
+      {
+        "text": "14 Haight Street, San Francisco",
+        "label": "private_address"
+      }
+    ]
+  },
+  {
+    "text": "her birthday is 1990-08-23, remember it",
+    "want": [
+      {
+        "text": "1990-08-23",
+        "label": "private_date"
+      }
+    ]
+  },
+  {
+    "text": "Alice Chen is the new lead",
+    "want": [
+      {
+        "text": "Alice Chen",
+        "label": "private_person"
+      }
+    ]
+  },
+  {
+    "text": "user jdoe1985 signed in from a new laptop",
+    "want": [
+      {
+        "text": "jdoe1985",
+        "label": "account"
+      }
+    ]
+  },
+  {
+    "text": "write to maria.gomez@corp.example and cc ada@corp.example",
+    "want": [
+      {
+        "text": "maria.gomez@corp.example",
+        "label": "email"
+      },
+      {
+        "text": "ada@corp.example",
+        "label": "email"
+      }
+    ]
+  },
+  {
+    "text": "call +1 415 555 0177 or mail ops@relay.example",
+    "want": [
+      {
+        "text": "+1 415 555 0177",
+        "label": "phone"
+      },
+      {
+        "text": "ops@relay.example",
+        "label": "email"
+      }
+    ]
+  },
+  {
+    "text": "the box at 10.20.30.40 serves files.example.dev",
+    "want": [
+      {
+        "text": "10.20.30.40",
+        "label": "ip_address"
+      }
+    ]
+  },
+  {
+    "text": "token 550e8400-e29b-41d4-a716-446655440000 goes in the header",
+    "want": [
+      {
+        "text": "550e8400-e29b-41d4-a716-446655440000",
+        "label": "common_secret"
+      }
+    ]
+  },
+  {
+    "text": "Alice Chen's number is 415 555 0188",
+    "want": [
+      {
+        "text": "Alice Chen",
+        "label": "private_person"
+      },
+      {
+        "text": "415 555 0188",
+        "label": "phone"
+      }
+    ]
+  },
+  {
+    "text": "the build failed on the third attempt, so I retried it"
+  },
+  {
+    "text": "OpenAI released a new model with a longer context"
+  },
+  {
+    "text": "increase the timeout to 30 seconds and run it again"
+  },
+  {
+    "text": "the weather in Denver was fine for the demo"
+  },
+  {
+    "text": "rename the function to parse_request and update callers"
+  },
+  {
+    "text": "password is correct, retry the request"
+  },
+  {
+    "text": "contact +44 20 7946 0958 for the shipment",
+    "want": [
+      {
+        "text": "+44 20 7946 0958",
+        "label": "phone"
+      }
+    ]
+  },
+  {
+    "text": "ssh into 10.1.2.3 as ops and rotate the key",
+    "want": [
+      {
+        "text": "10.1.2.3",
+        "label": "ip_address"
+      }
+    ]
+  },
+  {
+    "text": "the api key sk-live-9f8a7b6c5d4e3f2a1b0c goes in .env",
+    "want": [
+      {
+        "text": "sk-live-9f8a7b6c5d4e3f2a1b0c",
+        "label": "common_secret"
+      }
+    ]
+  },
+  {
+    "text": "Alice Chen and Bob Martin joined the call",
+    "want": [
+      {
+        "text": "Alice Chen",
+        "label": "private_person"
+      },
+      {
+        "text": "Bob Martin",
+        "label": "private_person"
+      }
+    ]
+  },
+  {
+    "text": "我的邮箱是 li.ming@example.cn，请抄送给他",
+    "want": [
+      {
+        "text": "li.ming@example.cn",
+        "label": "email"
+      }
+    ]
+  },
+  {
+    "text": "手机号 138 0013 8000，下午联系",
+    "want": [
+      {
+        "text": "138 0013 8000",
+        "label": "phone"
+      }
+    ]
+  },
+  {
+    "text": "身份证号 110101199003071234，帮我核对",
+    "want": [
+      {
+        "text": "110101199003071234",
+        "label": "account"
+      }
+    ]
+  },
+  {
+    "text": "银行卡 6222 0202 0011 2233 444 已绑定",
+    "want": [
+      {
+        "text": "6222 0202 0011 2233 444",
+        "label": "payment_card"
+      }
+    ]
+  },
+  {
+    "text": "服务器 10.0.0.8 拒绝连接",
+    "want": [
+      {
+        "text": "10.0.0.8",
+        "label": "ip_address"
+      }
+    ]
+  },
+  {
+    "text": "文档在 http://intra.example.cn/wiki/deploy",
+    "want": [
+      {
+        "text": "http://intra.example.cn/wiki/deploy",
+        "label": "url"
+      }
+    ]
+  },
+  {
+    "text": "密码改成 Xk9mQ2vP 后重启",
+    "want": [
+      {
+        "text": "Xk9mQ2vP",
+        "label": "common_secret"
+      }
+    ]
+  },
+  {
+    "text": "家住上海市徐汇区衡山路 128 弄 3 号",
+    "want": [
+      {
+        "text": "上海市徐汇区衡山路 128 弄 3 号",
+        "label": "private_address"
+      }
+    ]
+  },
+  {
+    "text": "出生日期 1990-08-23",
+    "want": [
+      {
+        "text": "1990-08-23",
+        "label": "private_date"
+      }
+    ]
+  },
+  {
+    "text": "联系人田大力，明天到公司",
+    "want": [
+      {
+        "text": "田大力",
+        "label": "private_person"
+      }
+    ]
+  },
+  {
+    "text": "联系 li.ming@example.cn 或打 139 0013 9000",
+    "want": [
+      {
+        "text": "li.ming@example.cn",
+        "label": "email"
+      },
+      {
+        "text": "139 0013 9000",
+        "label": "phone"
+      }
+    ]
+  },
+  {
+    "text": "田大力的地址是北京市朝阳区建国路 88 号",
+    "want": [
+      {
+        "text": "田大力",
+        "label": "private_person"
+      },
+      {
+        "text": "北京市朝阳区建国路 88 号",
+        "label": "private_address"
+      }
+    ]
+  },
+  {
+    "text": "账号 admin_ops 密码 Xk9mQ2vP",
+    "want": [
+      {
+        "text": "admin_ops",
+        "label": "account"
+      },
+      {
+        "text": "Xk9mQ2vP",
+        "label": "common_secret"
+      }
+    ]
+  },
+  {
+    "text": "构建在第三次尝试时失败，我重新跑了一遍"
+  },
+  {
+    "text": "把超时改成 30 秒再试一次"
+  },
+  {
+    "text": "版本 1.2.3 修复了三个问题"
+  },
+  {
+    "text": "请更新 README 里的安装步骤"
+  },
+  {
+    "text": "这个函数的返回值需要排序"
+  },
+  {
+    "text": "联系电话 137 0000 1111，尽快回电",
+    "want": [
+      {
+        "text": "137 0000 1111",
+        "label": "phone"
+      }
+    ]
+  },
+  {
+    "text": "把 192.168.1.1 改成 10.0.0.1 再试",
+    "want": [
+      {
+        "text": "192.168.1.1",
+        "label": "ip_address"
+      },
+      {
+        "text": "10.0.0.1",
+        "label": "ip_address"
+      }
+    ]
+  },
+  {
+    "text": "11 月 3 日的会议改到下午"
+  }
+]
