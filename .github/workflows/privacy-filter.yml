@@ -30,9 +30,9 @@ jobs:
       matrix:
         include:
           - target: darwin-arm64
-            os: macos-14
+            os: macos-latest
           - target: darwin-amd64
-            os: macos-14
+            os: macos-latest
           - target: linux-amd64
             os: ubuntu-22.04
           - target: linux-arm64
@@ -49,7 +49,10 @@ jobs:
         shell: bash
         run: |
           wanted="${{ github.event_name == 'push' && 'all' || inputs.targets }}"
-          if [ "$wanted" = "all" ] || [[ ",$wanted," == *",${{ matrix.target }},"* ]]; then
+          if [ "$wanted" = "all" ] || [[ ",$wanted," == *",${{ matrix.target }},"* ]] \
+            || { [ "$wanted" = "apple" ] && [[ "${{ matrix.target }}" == *darwin* ]]; } \
+            || { [ "$wanted" = "linux" ] && [[ "${{ matrix.target }}" == *linux* ]]; } \
+            || { [ "$wanted" = "windows" ] && [[ "${{ matrix.target }}" == *windows* ]]; }; then
             echo "build=yes" >> "$GITHUB_OUTPUT"
           else
             echo "build=no" >> "$GITHUB_OUTPUT"
