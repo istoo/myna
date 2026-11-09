@@ -14,6 +14,11 @@ on:
         type: choice
         options: [smoke, full]
         default: smoke
+      browser:
+        description: "which engine a full run uses (smoke runs both)"
+        type: choice
+        options: [chromium, webkit, both]
+        default: chromium
   schedule:
     - cron: "37 3 * * *" # nightly, full
   push:
@@ -74,9 +79,11 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ inputs.mode }}" = "full" ]; then
             echo "shards=4" >> "$GITHUB_OUTPUT"
+            echo "mode=full" >> "$GITHUB_OUTPUT"
             ls internal/gui/tests/*.test.cjs > "$RUNNER_TEMP/files.txt"
           else
             echo "shards=1" >> "$GITHUB_OUTPUT"
+            echo "mode=smoke" >> "$GITHUB_OUTPUT"
             printf '%s\n' \
               internal/gui/tests/i18n-keys.test.cjs \
               internal/gui/tests/click-scroll.test.cjs \
@@ -94,11 +101,25 @@ jobs:
         env:
           SHARDS: ${{ steps.files.outputs.shards }}
           SHARD: ${{ matrix.shard }}
+          MODE: ${{ steps.files.outputs.mode }}
+          PICK: ${{ inputs.browser }}
         run: |
           if [ "$SHARD" -gt "$SHARDS" ]; then
             echo "shard $SHARD of 4: the smoke set runs in $SHARDS shard, nothing to do here"
             exit 0
           fi
+          # The whole suite runs one engine here. Linux's WebKit differs from
+          # the Mac's in ways its tests assume (a 300 px wheel scrolls 15, a
+          # page scrolls sideways by 9 px at 560 in de, a 5 s wait is short):
+          # the first full run had 46 such reds on webkit and 1 real one,
+          # filed together. A Chromium run covers the product logic; webkit
+          # still runs the smoke set, and `browser: webkit` asks for the
+          # whole suite in it when a change is about that engine.
+          browser="$PICK"
+          if [ -z "$browser" ]; then
+            if [ "$MODE" = full ]; then browser=chromium; else browser=both; fi
+          fi
+          if [ "$browser" != both ]; then export BROWSER="$browser"; fi
           node --test --test-concurrency=2 --test-shard="$SHARD/$SHARDS" \
             $(tr '\n' ' ' < "$RUNNER_TEMP/files.txt") 2>&1 | tee "$RUNNER_TEMP/gui.log"
           test ${PIPESTATUS[0]} -eq 0
