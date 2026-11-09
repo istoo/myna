@@ -90,8 +90,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       });
       await page.goto("http://myna.test/?view=routing");
       // a browser started cold draws the days late
-      await page.locator(".rt-day").nth(1).waitFor({ state: "visible", timeout: 15000 });
-      await page.locator(".rt-day").nth(1).click();
+      // the date bar's own buttons: the request-grouping controls share the
+      // class, and on ubuntu's WebKit nth(1) of them all was one drawn hidden
+      // (#13)
+      await page.locator(".rt-days .rt-day").nth(1).waitFor({ state: "visible", timeout: 15000 });
+      await page.locator(".rt-days .rt-day").nth(1).click();
       await page.locator(".rt-req").nth(ups.length - 1).waitFor();
 
       // the list: the one passed on says where, whole, inside its row

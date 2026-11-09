@@ -122,8 +122,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       };
       const pick = (i) => tap(page.locator(".rt-req").nth(i));
       await page.goto("http://myna.test/?view=routing");
-      await page.locator(".rt-day").nth(1).waitFor({ state: "visible", timeout: 15000 });
-      await page.locator(".rt-day").nth(1).click();
+      // the date bar's own buttons: the request-grouping controls share the
+      // class (the first subtest says so), and on ubuntu's WebKit nth(1) of
+      // all of them was one of those, drawn hidden (#13)
+      await page.locator(".rt-days .rt-day").nth(1).waitFor({ state: "visible", timeout: 15000 });
+      await page.locator(".rt-days .rt-day").nth(1).click();
       await page.locator(".rt-req").nth(routes.length - 1).waitFor();
 
       // in the recent calls: both bodies, read only when asked
@@ -210,8 +213,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.mouse.click(x, y);
       };
       await page.goto("http://myna.test/?view=routing");
-      await page.locator(".rt-day").nth(1).waitFor({ state: "visible", timeout: 15000 });
-      await page.locator(".rt-day").nth(1).click();
+      // the date bar's own buttons: the request-grouping controls share the
+      // class (the first subtest says so), and on ubuntu's WebKit nth(1) of
+      // all of them was one of those, drawn hidden (#13)
+      await page.locator(".rt-days .rt-day").nth(1).waitFor({ state: "visible", timeout: 15000 });
+      await page.locator(".rt-days .rt-day").nth(1).click();
       await page.locator(".rt-req").nth(routes.length - 1).waitFor();
       await tap(page.locator(".rt-req").nth(2));
       await page.locator(".rt-req").nth(2).and(page.locator('[aria-pressed="true"]')).waitFor();
