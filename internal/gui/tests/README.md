@@ -2132,7 +2132,13 @@ an external directory to retain screenshots and Playwright traces, including
 failed assertions. These browser checks run through `make test-ui`, separately
 from `make test` (which is Go only) and from the UI preview workflow (which
 only records screenshots).
-The Test workflow does not run this suite.
+
+The GUI workflow (`.github/workflows/gui.yml`) runs this suite on ubuntu: a
+smoke subset on a push that touches `internal/gui/**`, and every file in four
+shards nightly and on `workflow_dispatch` with `mode: full`. It pins Node 24
+(22 accepts `--test-shard` and runs nothing) and Playwright 1.65.0, installed
+outside the checkout with `NODE_PATH` set. A red keeps its shard's whole log
+as an artifact.
 
 `quota-refresh-order.test.cjs`, `usage-stale-answer.test.cjs` and
 `providers-fetching-retry.test.cjs` use Node's VM and need no browser. Set

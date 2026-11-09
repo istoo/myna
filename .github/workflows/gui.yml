@@ -1,0 +1,113 @@
+name: GUI
+
+# The browser regressions under internal/gui/tests, which the Test workflow
+# doesn't run: a GUI change used to be checked only on the machine that made
+# it, and reds an unrelated page's file held went unseen for days (LESSONS.md,
+# 10-14 to 10-16). A push that touches the GUI runs a smoke subset, the pages
+# and mechanisms every GUI change goes through; the whole suite runs nightly
+# and on demand, since 1,182 files over 4 shards is hours of runners.
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "smoke (a subset) or full (every file, sharded)"
+        type: choice
+        options: [smoke, full]
+        default: smoke
+  schedule:
+    - cron: "37 3 * * *" # nightly, full
+  push:
+    branches: [main]
+    paths:
+      - "internal/gui/**"
+      - ".github/workflows/gui.yml"
+
+concurrency:
+  group: gui-${{ github.ref }}
+  cancel-in-progress: false # a cancelled shard leaves a file untested
+
+permissions:
+  contents: read
+
+env:
+  PLAYWRIGHT_VERSION: "1.65.0"
+
+jobs:
+  gui:
+    name: gui (shard ${{ matrix.shard }}/4)
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # origin/main, for mobile-web's screenshot baseline
+
+      # 24, not 22: on 22 --test-shard is accepted and ignored, and the run
+      # passes having run no test at all (checked with npx node@22: "1..0").
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      # Playwright and its browsers live outside the checkout: the app has no
+      # frontend dependency, and the suite asks for Playwright by module name
+      # (NODE_PATH).
+      - name: Install Playwright
+        timeout-minutes: 20
+        run: |
+          mkdir -p "$RUNNER_TEMP/pw" && cd "$RUNNER_TEMP/pw"
+          npm init -y >/dev/null
+          npm i --no-audit --no-fund "playwright@$PLAYWRIGHT_VERSION"
+          npx playwright install --with-deps chromium webkit
+          echo "NODE_PATH=$RUNNER_TEMP/pw/node_modules" >> "$GITHUB_ENV"
+
+      # The smoke set is what every GUI change passes through: translations
+      # complete, the window's scrolling, the Routing and Plugins pages, and
+      # three Update pages that hold the header's layout. It runs whole in one
+      # shard; the other three say so and stop.
+      - name: Files
+        id: files
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ inputs.mode }}" = "full" ]; then
+            echo "shards=4" >> "$GITHUB_OUTPUT"
+            ls internal/gui/tests/*.test.cjs > "$RUNNER_TEMP/files.txt"
+          else
+            echo "shards=1" >> "$GITHUB_OUTPUT"
+            printf '%s\n' \
+              internal/gui/tests/i18n-keys.test.cjs \
+              internal/gui/tests/click-scroll.test.cjs \
+              internal/gui/tests/routing-js.test.cjs \
+              internal/gui/tests/plugin-kernel.test.cjs \
+              internal/gui/tests/update-hide.test.cjs \
+              internal/gui/tests/update-served-anew.test.cjs \
+              internal/gui/tests/market-have.test.cjs > "$RUNNER_TEMP/files.txt"
+          fi
+          echo "files=$(wc -l < "$RUNNER_TEMP/files.txt")" >> "$GITHUB_OUTPUT"
+
+      - name: Run
+        timeout-minutes: 140
+        shell: bash
+        env:
+          SHARDS: ${{ steps.files.outputs.shards }}
+          SHARD: ${{ matrix.shard }}
+        run: |
+          if [ "$SHARD" -gt "$SHARDS" ]; then
+            echo "shard $SHARD of 4: the smoke set runs in $SHARDS shard, nothing to do here"
+            exit 0
+          fi
+          node --test --test-concurrency=2 --test-shard="$SHARD/$SHARDS" \
+            $(tr '\n' ' ' < "$RUNNER_TEMP/files.txt") 2>&1 | tee "$RUNNER_TEMP/gui.log"
+          test ${PIPESTATUS[0]} -eq 0
+
+      # A shard that fails keeps its whole log: a red is named with its file
+      # and its output, never a tail of the run (LESSONS.md).
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: gui-log-${{ matrix.shard }}
+          path: ${{ runner.temp }}/gui.log
+          if-no-files-found: ignore

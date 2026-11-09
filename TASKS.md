@@ -177,3 +177,16 @@
       #10：配额假接口只在 Usage 页等待并容忍页面已关；等待压到 3s 时旧 10/15 红（9 条为 issue 同款），新 15/15；正常 30/30。`fece23c07`。
       #11（本轮发现的 main 既有红）：update-network chromium en@390 在头栏 fitTop 稳定前读宽度；改为等 class 三帧不变，22/22 ×3。`a1f8494c0`。
       可达 GUI 文件回归：99 个（update/market/library/routing 组编辑器等）98 通过，唯一红即 #11，已修。
+
+## 三项大工程（2026-11-09 用户确认开工）
+
+- [ ] J. GUI 套件进 CI：新增 `.github/workflows/gui.yml`，先在 ubuntu 上跑一个冒烟子集
+      （不依赖字体像素基线的文件），验证 Playwright/Chromium/WebKit 在 CI 可用后，
+      再用 `--test-shard` 扩大；全量放 schedule + workflow_dispatch 控成本。
+      同步改 `docs/subsystems/gui-shell.md` 与 `internal/gui/tests/README.md`（现在写着 CI 不跑）。
+- [ ] K. app.js 预算腾余量（现 1,311,824 / 上限 1,316,874，约 5KB）：
+      找出边界清晰、可独立加载的页面代码移出核心（按 plugins/*/page.js 的既有模式），
+      移动后把 `appScriptBudget`/`coreScriptBudget` 下调到新体积，并跑全量 GUI 相关文件。
+- [ ] L. 网关"只解析一次"：先 profile 复现 1MB Claude Code 请求的分配（TASKS G 项基线 20.7MB/req），
+      审计脱敏链路对请求体的持有，给出分步方案（每步独立可验证、可回滚），再实现。
+      密码学/隐私链路：按 LESSONS 把秘密放在工具参数、消息正文、嵌套对象里测。

@@ -923,9 +923,14 @@ BROWSER=webkit node --test internal/gui/tests/click-scroll.test.cjs
 ```
 
 `make test-ui` needs Node.js and Playwright (`playwright install chromium
-webkit`). Set `NODE_PATH` when Playwright is installed outside the repo. The
-Test workflow in CI does not run this suite, so a GUI change must run it
-locally and report the result. See [`tests/README.md`](../../internal/gui/tests/README.md).
+webkit`). Set `NODE_PATH` when Playwright is installed outside the repo.
+
+The Test workflow runs Go only. The GUI workflow runs this suite on ubuntu: a
+smoke subset on a push touching `internal/gui/**`, and every file in four
+shards nightly and on `workflow_dispatch` (`mode: full`). It pins Node 24,
+because 22 accepts `--test-shard` and runs no test, and Playwright 1.65.0. A
+GUI change still reports what it ran locally. See
+[`tests/README.md`](../../internal/gui/tests/README.md).
 
 `TestMainWindowCorners` and `TestMainWindowRightToLeft` run on a Mac with a
 desktop session, as CI's macOS job has, and show a few windows for some
