@@ -207,3 +207,14 @@
       Privacy Filter 在本仓库目前装不上：`pf-v3` 的 pf-serve 资产 404（Release 未构建）。本地已用
       `native/privacy-filter/build.sh darwin-arm64` 构建并手工装好、下载模型（sha256 与 pin 一致），对比才得以进行。
       待办：`docs/reference.md:2767,2800` 的 install.sh 链接是仓库根路径（404），应改为 releases/latest/download。
+
+## GUI 全量在 Linux 上的红（issue #13，2026-11-10 起）
+
+- [x] 本地 Linux oracle：Playwright 官方镜像 + `NODE_PATH`，命令写进 `docs/subsystems/gui-shell.md`。
+      1.58.2 复现了 chromium 的 gateway-card 与 webkit 的 quit-ask-setting；1.65 镜像两次拉取失败（网络），
+      且 `editor-roomy` 在 1.58 里不复现——本地结论要按"日志说什么"复核。
+- [x] gateway-card（chromium 10 条）：中线偏 0.586px，容差 0.25→1px。`3673d3245`
+- [x] quit-ask-setting（webkit 5 条）：测量前把开关滚进视野，点击本身才是被测的位移。`3673d3245`
+- [x] 分片 summary 列出失败测试的 `文件:行` 与名字；日志无 totals 时写明被截断。`c14a03359`
+- [x] 全量分片时限 Run 140→190m、job 150→200m：首轮 webkit 的 shard 3 在 140m 被杀，totals 与失败清单都没写。`0df956cdc`
+- [ ] 等 full webkit（42679120343）跑完，按完整清单继续逐条适配。
