@@ -19,6 +19,7 @@
 ## CI 的墙钟由最长的 job 决定，串行的独立阶段应拆开
 
 - `Test` 与 `Race` 原本在同一 job 里串行：macOS 22m + 19m = 43m。拆成并行 job 后 macOS 27m，ubuntu 33m → 17m（run 42595707169）。
+
 ## CI 的每个独立 job 都会暴露前一环掩盖的问题
 
 - 把 `Race` 从 `Test` 里拆出来后，第一次跑就抓到 `TestAutoVisionKeepsOffARefusedAccount` 的真实数据竞争（测试与 usage stand-in 共享普通 float64）。串行时它藏在 Test 之后。
