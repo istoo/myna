@@ -932,23 +932,28 @@ because 22 accepts `--test-shard` and runs no test, and Playwright 1.65.0. A
 GUI change still reports what it ran locally. See
 [`tests/README.md`](../../internal/gui/tests/README.md).
 
-A red only the ubuntu shard has is reproduced on a Mac in Playwright's own
-image, which carries the fonts and the engine builds that job installs:
+A red only the ubuntu shard has is reproduced on a Mac in Playwright's
+image. The image's own browsers are older than the job's: the job installs
+Playwright 1.65.0's builds, and the engine matters — WebKit 1.58 passed
+`routing-bodies` 20 of 20 where 1.65 fails 9 of the same code. Install the
+1.65 module and its browsers into the image once, then run a file as the job
+does:
 
 ```sh
-docker run --rm --shm-size=1g -v "$PWD":/src -w /src \
-  mcr.microsoft.com/playwright:v1.65.0-noble bash -lc '
-    mkdir -p /opt/pw && cd /opt/pw && npm init -y >/dev/null &&
-    npm i --no-audit --no-fund playwright@1.65.0 >/dev/null &&
-    cd /src && NODE_PATH=/opt/pw/node_modules BROWSER=webkit \
-      node --test internal/gui/tests/click-scroll.test.cjs'
+docker run -d --name myna-gui --shm-size=1g -v "$PWD":/src -w /src \
+  mcr.microsoft.com/playwright:v1.58.2-noble sleep infinity
+docker exec myna-gui bash -lc 'mkdir -p /opt/pw && cd /opt/pw && npm init -y >/dev/null &&
+  npm i --no-audit --no-fund playwright@1.65.0 >/dev/null &&
+  npx playwright install webkit chromium'
+docker exec myna-gui bash -lc 'cd /src && NODE_PATH=/opt/pw/node_modules \
+  BROWSER=webkit node --test internal/gui/tests/click-scroll.test.cjs'
 ```
 
 Issue #13 is where the Linux reds of a full run are listed. A test that
-fails with the same message there and here is the engine's metrics, not a
-flake: fix the assumption (a tolerance, or the control scrolled into sight
-before the click it measures). One that doesn't reproduce with an older
-image may still be its own engine's, so fix it by what the log says.
+fails with the same message here is the engine's metrics, not a flake: fix
+the assumption (a tolerance, or the control scrolled into sight before the
+click it measures). One that does not reproduce under load may still be a
+redraw race on the runner, so fix it by what the log says.
 
 `TestMainWindowCorners` and `TestMainWindowRightToLeft` run on a Mac with a
 desktop session, as CI's macOS job has, and show a few windows for some
