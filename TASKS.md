@@ -201,3 +201,9 @@
       新增 `guard/eval_test.go`：46 条中英标注请求。本机（M 系列）：CoreML 39/42，P 0.975，R 0.929，F1 0.951；
       bert.go 38/42，F1 0.927；971 token 窗口 7.2ms vs 441ms。漏检：无服务词的英文 IP、中国大陆身份证号、成对出现的第二个 IP；
       误遮 2 字节（"11 月 3 日"的 11）。数字与明细见提交 `6c3135f81`。
+      两模型对比（`TestEvalBothModels`，同一 46 条集，11-09）：AstrLink Guard 39/42，P 0.951，R 0.929，F1 0.940，
+      636/702 字节，误遮 6；Privacy Filter 30/42，P 0.938，R 0.714，F1 0.811，553/702，误遮 19，耗时 8.0s vs 0.85s。
+      注意：本集以自然语言为主，Privacy Filter 的强项（代码里的哈希/产品名）未覆盖，结论不可外推到代码场景。
+      Privacy Filter 在本仓库目前装不上：`pf-v3` 的 pf-serve 资产 404（Release 未构建）。本地已用
+      `native/privacy-filter/build.sh darwin-arm64` 构建并手工装好、下载模型（sha256 与 pin 一致），对比才得以进行。
+      待办：`docs/reference.md:2767,2800` 的 install.sh 链接是仓库根路径（404），应改为 releases/latest/download。
