@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 	"unicode/utf8"
+	"unsafe"
 
 	"github.com/istoo/myna/internal/gwmw"
 	"github.com/istoo/myna/internal/maskrec"
@@ -140,7 +141,10 @@ func snipsOf(sent []byte, hits []gwmw.Hit) map[string]string {
 	if len(sent) == 0 || len(hits) == 0 {
 		return nil
 	}
-	text := string(sent)
+	// the body's own bytes: every snip that leaves here is copied by
+	// strings.Clone below, so this string never outlives the call and
+	// the body is not kept by it (1 MB of copy a request)
+	text := unsafe.String(unsafe.SliceData(sent), len(sent))
 	// in a JSON body a snip stays inside the string the value is in,
 	// so it reads as the text, not as the body around it
 	t := strings.TrimSpace(text)
