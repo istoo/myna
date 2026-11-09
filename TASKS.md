@@ -239,4 +239,12 @@
 - [x] title-bar-tools：4 条红全部来自 WebKit 取消导航时报告的错误；`e.message` 是截断的（以 `/myna.test/api/... due to access control checks.` 开头），
       过滤按 `e.stack` 才匹配。加负载跑（4 个 CPU 忙循环）时 111 条错误全部滤掉，5/5 绿。
 - [ ] codex-predictions：加了 `wheelRest` 后失败差从 ~300px 变成 ~50px，仍是应用在选完后自己滚动（#14 记录），测试不再放宽。
+- [x] 第一次**完整**的 full webkit（42699937825，四片全部跑完，单片 57–88 分钟）：10,152 项、166 红、134 个不同(file,test)。
+      清单与分类见 #13；日志已作为 artifact 保留。
+- [x] `.rt-day` 裸选择器命中了同 class 的隐藏分组按钮（1.65 上必现）：routing-bodies、call-headers、routing-cline-route、
+      routing-time-went、routing-upstream、phone-rows 改为 `.rt-days .rt-day`。
+- [x] 本地 Linux 镜像升级到 Playwright 1.65 自己的浏览器（模块 `/opt/pw`，浏览器 `/ms-playwright`：webkit-2388、chromium-1254）。
+      routing-bodies + call-headers 40/40。注意：旧选择器在本地 1.65 上不复现那 9 条（CI 上是重载下的重绘竞态），
+      所以 `.rt-days .rt-day` 的依据是 CI 日志里 nth(1) 解析到隐藏的分组按钮，而不是本地红绿。
+- [x] allow-ips、lan-docker 的"Add/开关移动了页面"：同样是滚轮惯性未停就取基准，加 `wheelRest` 后 1.65 上 30/30。
 - [ ] 应用侧待修（#14）：codex-predictions 选完模型视图回跳 ≈300px；model-load 390 宽点击跳 229px；usage 视图横向溢出 4px。
