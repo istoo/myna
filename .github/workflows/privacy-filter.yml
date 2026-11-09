@@ -66,6 +66,11 @@ jobs:
               sudo apt-get install -y ninja-build zip
               if [ "${{ matrix.target }}" = windows-amd64 ]; then
                 sudo apt-get install -y mingw-w64
+              else
+                # ggml-vulkan's find_package(Vulkan) wants the loader's
+                # library; build.sh brings the headers, the loader's .def
+                # and glslc, not libvulkan.so
+                sudo apt-get install -y libvulkan-dev
               fi
               ;;
           esac
