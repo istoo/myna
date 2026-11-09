@@ -114,6 +114,12 @@ myna.plugin("library", (ctx) => {
     box.querySelector("img").onerror = () => box.replaceWith(glyph(d));
     return box;
   }
+  // focusSoon focuses an editor's first field once it is drawn, unless the
+  // focus moved meanwhile: a late frame took typing into that field (#9)
+  function focusSoon(e) {
+    const at = document.activeElement;
+    requestAnimationFrame(() => { if (document.activeElement === at && e.isConnected) e.focus(); });
+  }
   function button(text, cls, onclick) {
     const b = el("button", "text " + (cls || ""), text);
     b.onclick = (e) => { e.stopPropagation(); onclick(e, b); };
@@ -3051,7 +3057,7 @@ myna.plugin("library", (ctx) => {
     let original = JSON.stringify(d);
     modal = { save, dirty: () => !!jsonBad || JSON.stringify(d) !== original };
     openLib(ed);
-    if (!s) requestAnimationFrame(() => name.focus());
+    if (!s) focusSoon(name);
   }
 
   // Several servers pasted at once: pick those to add.
@@ -3312,7 +3318,7 @@ myna.plugin("library", (ctx) => {
     const original = JSON.stringify(d);
     modal = { save, dirty: () => JSON.stringify(d) !== original };
     openLib(ed);
-    if (!h) requestAnimationFrame(() => name.focus());
+    if (!h) focusSoon(name);
   }
 
   function confirmRemoveEveryHook(some) {
@@ -3483,7 +3489,7 @@ myna.plugin("library", (ctx) => {
     const original = JSON.stringify(d);
     modal = { save, dirty: () => JSON.stringify(d) !== original };
     openLib(ed);
-    if (!s) requestAnimationFrame(() => name.focus());
+    if (!s) focusSoon(name);
   }
 
   // ---------- skills ----------
@@ -6329,7 +6335,7 @@ myna.plugin("library", (ctx) => {
     ed.append(bar);
     modal = { save };
     openLib(ed);
-    if (firsts.length) requestAnimationFrame(() => firsts[0].focus());
+    if (firsts.length) focusSoon(firsts[0]);
   }
 
   // Myna Browser's extension: whether it is connected, and setting it up

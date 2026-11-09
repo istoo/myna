@@ -7628,7 +7628,10 @@ function routingPage(part) {
     };
     bar.append(cancel, saveBtn);
     ed.append(bar);
-    if (!g) setTimeout(() => name.focus({ preventScroll: true }), 0); // WebKit would scroll the page to put it mid-view
+    // WebKit would scroll the page to put it mid-view; a click into another
+    // field meanwhile keeps its focus (#9)
+    const at = document.activeElement;
+    if (!g) setTimeout(() => { if (document.activeElement === at) name.focus({ preventScroll: true }); }, 0);
     if (gEdit.was == null) gEdit.was = JSON.stringify(d);
     return ed;
   }

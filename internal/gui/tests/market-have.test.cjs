@@ -125,8 +125,21 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
       await t.test("a server added by hand is marked added", async () => {
         // the library has none now: its empty state's button
+        // every frame late, as on a busy machine: the one that focuses Name
+        // must leave a field clicked into meanwhile, where it took the
+        // typing into Name (#9)
+        await page.evaluate(() => {
+          const raf = window.requestAnimationFrame;
+          window.lateFrames = { raf, asked: 0, ran: 0 };
+          window.requestAnimationFrame = (f) => (lateFrames.asked++, raf(() => setTimeout(() => { lateFrames.ran++; f(performance.now()); }, 300)));
+        });
         await view.getByRole("button", { name: words[lang].addServer, exact: true }).click();
         const ed = page.locator(".lib-editor");
+        await ed.locator("textarea.lib-cmd").focus();
+        const asked = await page.evaluate(() => lateFrames.asked);
+        await page.waitForFunction((n) => lateFrames.ran >= n, asked);
+        assert.equal(await page.evaluate(() => document.activeElement.matches("textarea.lib-cmd")), true, "a late frame took the focus");
+        await page.evaluate(() => { window.requestAnimationFrame = lateFrames.raf; });
         await ed.locator('input[placeholder="e.g. github"], input[placeholder="例如 github"]').fill("fetch");
         await ed.locator("textarea.lib-cmd").fill("uvx mcp-server-fetch");
         const market = answered("servers");
