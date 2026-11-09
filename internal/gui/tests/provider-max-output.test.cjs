@@ -49,6 +49,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const zh = lang === "zh";
       await page.locator(".row.provider").click();
       const label = page.getByText(zh ? "最大输出" : "Max output", { exact: true });
+      // the editor's drawing is editor.js, loaded with the page: wait for
+      // the field rather than read the empty place it leaves until then
+      await label.waitFor();
       assert(await label.isVisible(), "the field is there");
       const box = page.locator("input.outputs");
       assert.equal(await box.inputValue(), "64k, model-2=8k", "what is set is shown");

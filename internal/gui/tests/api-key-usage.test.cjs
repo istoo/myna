@@ -97,6 +97,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         : { addButton: "Add", first: "Make first", remove: "Remove", failed: "Failed", all: "All gateway keys" };
       await page.goto("http://myna.test/?view=providers");
       await page.locator(".row.provider", { hasText: "Relay" }).click();
+      // the editor's drawing is editor.js, loaded with the page: wait for
+      // it rather than read the empty place it leaves until then
+      await page.locator(".accts .acc:not(.add)").nth(1).waitFor();
       assert.equal(await page.locator(".accts .acc:not(.add)").count(), 2);
       await page.locator(".accts .acc.add").click();
       await page.locator(".acc.adding .kf input").nth(0).fill("Backup");
