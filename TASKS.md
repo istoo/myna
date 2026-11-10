@@ -1,6 +1,23 @@
-# Myna 品牌化改造任务
+# Owl 品牌化改造任务（2026-11-10 由 Myna 全面改名）
 
 目标：把 magpie 变成自己的发行版 Myna，更新与所有官方网络依赖走自己的 GitHub 仓库，独立配置并迁移旧配置。
+
+## 改名 Myna → Owl（2026-11-10）
+
+- [x] 机械改名：module `github.com/istoo/owl` 与全部 import（3146 文件）、二进制/应用名、`~/.config/owl`/`~/.cache/owl`、
+      Bundle ID 与 LaunchAgent `com.istoo.owl`、Windows Run 值 `owl`、Omarchy widget `useowl.owl`、网关 `/v1/owl/*`、`OWL_*`、
+      文档与站点。文件名含 myna 的 45 个路径一并改名（`git mv`）。
+- [x] 旧数据迁移：`appdir` 依次从 `~/.config/myna`、`~/.config/magpie` 复制（新测试覆盖"myna 优先、不改 owl 已有"）；
+      启动时删除旧 LaunchAgent `com.istoo.myna.plist`、Windows Run 值 `myna`、旧 Omarchy widget `usemyna.myna`（各有测试）。
+- [x] 图标：`build/icon/owl.svg`、`owl-small.svg` 换成正面猫头鹰（圆身、两只大眼、三角喙、双耳羽），
+      header logo（`index.html` 的 `#bird` 与 body/tail/wing clip）、favicon、add-to 徽章、架构图、PWA 图标全部重画；
+      `make icons` 重建 icns/ico/png；Dock 与托盘的 flap 保留三分片与关键帧（折叠的双翅只转 1°）。
+- [x] 仓库改名：`gh repo rename owl`（istoo/myna → istoo/owl，旧地址重定向），本地 origin 同步。
+- [x] 验证：`go build ./...`、`go vet ./...`、`go test ./internal/{appdir,autostart,omarchy,update}`（203）、
+      `go test ./internal/gui -run 'Icon|Flap|Logo|Manifest|Tray'`（62）、`go test ./internal/provider -run 'Logo|Signin|Brand'`（5）、
+      GUI 冒烟 7 文件 56/56（chromium）、`make icons`。PR #15。
+- [ ] 未验证：真实安装的 myna → owl 首次启动迁移；Mac 上 Dock 磁贴的 flap 动画。
+- 记录原则：`LESSONS.md`、`tasks/lessons.md` 与本文件的历史叙述保持原样（它们是历史事实），新内容用新名。
 
 - [x] 0. 创建 istoo/myna 仓库，设置 origin/upstream
 - [x] 1. module 路径与全局标识改名（magpie → myna，com.yetone → com.istoo，MAGPIE_ → MYNA_）
