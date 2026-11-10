@@ -22231,7 +22231,7 @@ async function show(v) {
       b.classList.toggle("on", on);
       if (on) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
     }
-    if (!sideNav()) { slide($("#nav"), "nav"); navInSight(); renderNavOver(); }
+    if (!sideNav()) { slide($("#nav"), "nav"); renderNavOver(); }
     else navTopGo($("#nav").querySelector("button[data-view].on"), true);
   }
   $("#prefs").classList.toggle("on", v === "settings");
@@ -22506,18 +22506,9 @@ function wag() {
 document.querySelector(".brand")?.addEventListener("mouseenter", wag);
 setTimeout(wag, 250);
 
-// owl web on a phone, or a browser as narrow: the header is two rows,
-// the owl and the icons over the tabs, which scroll sideways when they
-// don't fit, the one open kept in sight
+// owl web on a phone, or a browser as narrow: the tabs are a bar at the foot
 function phoneWeb() { return document.body.classList.contains("web") && matchMedia("(max-width: 760px), (pointer: coarse) and (max-width: 1024px)").matches; }
-function navInSight() {
-  const nav = $("#nav"), on = nav?.querySelector("button.on");
-  if (!phoneWeb() || !on || nav.scrollWidth <= nav.clientWidth) return;
-  const l = on.offsetLeft - 16, r = on.offsetLeft + on.offsetWidth + 16 - nav.clientWidth;
-  if (nav.scrollLeft > l) nav.scrollLeft = l;
-  else if (nav.scrollLeft < r) nav.scrollLeft = r;
-}
-matchMedia("(max-width: 760px), (pointer: coarse) and (max-width: 1024px)").addEventListener?.("change", () => { layoutNav(); fitTop(); navInSight(); });
+matchMedia("(max-width: 760px), (pointer: coarse) and (max-width: 1024px)").addEventListener?.("change", () => { layoutNav(); fitTop(); });
 
 // the header's room: not off the right edge, nor over the owl
 function topFits() {
@@ -22591,7 +22582,8 @@ try { navPick = localStorage.getItem("owl.navLayout") || ""; } catch { /* by the
 if (navPick !== "side" && navPick !== "top") navPick = "";
 function layoutNav() {
   if (mode !== "window") return;
-  // owl web on a phone has its own tab bar and no title bar
+  // owl web on a phone has its own tab bar (phonetabs.js) and no title bar
+  if (phoneWeb()) import("./phonetabs.js").catch(() => {});
   const on = !phoneWeb() && (navPick ? navPick === "side" : sideQuery.matches);
   if (layoutNav.done && on === sideNav()) {
     // the button goes with the phone's layout all the same
@@ -22621,7 +22613,7 @@ function layoutNav() {
   navSubs.quiet = true;
   navSubs();
   navSubs.quiet = false;
-  if (!on) { slide(nav, "nav"); navInSight(); } else { sideGwRead(); renderSideGw(); }
+  if (!on) slide(nav, "nav"); else { sideGwRead(); renderSideGw(); }
   navTopGo(navTopOn(), false);
   sideWidth();
   renderSideToggle();

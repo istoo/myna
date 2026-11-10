@@ -13,7 +13,7 @@ const path = require("node:path");
 const { execFileSync } = require("node:child_process");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
-const { reach } = require("./reader.cjs");
+const { reach, openPage } = require("./reader.cjs");
 const { PNG } = require("playwright-core/lib/utilsBundle");
 
 const assets = path.resolve(__dirname, "../assets");
@@ -138,18 +138,10 @@ async function open(browser, lang, width, { original = false, touch = true, open
 }
 
 async function go(page, view) {
-  // Playwright scrolls each real navigation button into sight before clicking.
-  // A phone's tab row holds its pages without a sideways scroll: the ones
-  // that don't fit are under More (app.js renderNavOver), which reaches them.
-  const b = page.locator(view === "settings" ? "#prefs" : `#nav [data-view="${view}"]`);
-  if (view === "settings" || (await b.isVisible())) await b.click();
-  else {
-    const name = (await b.textContent()).trim();
-    await page.locator("#navMore").waitFor();
-    await page.locator("#navMore").click();
-    await page.locator(".nav-more-menu .pm-item", { hasText: name }).click();
-  }
-  await page.locator(`#view-${view}`).waitFor();
+  // the page's tab, or on a phone's tab bar More and its row for a page
+  // past the fifth (phonetabs.js)
+  if (view === "settings") await page.locator("#prefs").click();
+  await (view === "settings" ? page.locator(`#view-${view}`).waitFor() : openPage(page, view));
   if (view === "library") await page.locator("#view-library .lib-more:not(:disabled)").waitFor();
   if (view === "plugins") await page.locator("#view-plugins .pm-find").waitFor();
   if (view === "usage") {

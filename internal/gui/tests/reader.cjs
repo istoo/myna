@@ -234,15 +234,31 @@ async function navTo(page, view) {
   const b = page.locator(`#nav button[data-view="${view}"]`).first();
   if (await b.isVisible()) return b.click();
   // the fit runs a frame after a resize, and a page redraw can close More's
-  // menu under the click: wait for the row, and open the menu again if so
-  await page.locator("#navMore").waitFor({ state: "visible", timeout: 1000 }).catch(() => {});
+  // menu under the click: wait for the row, and open the menu again if so.
+  // A phone's tab bar has its own More (phonetabs.js); the header's is #navMore.
+  const more = page.locator("#nav .tb-more").or(page.locator("#navMore"));
+  await more.waitFor({ state: "visible", timeout: 1000 }).catch(() => {});
   if (await b.isVisible()) return b.click();
   const name = (await b.textContent()).trim();
   for (let i = 0; i < 3; i++) {
-    await page.locator("#navMore").click();
+    await more.click();
     try { await page.locator(".nav-more-menu .pm-item", { hasText: name }).click({ timeout: 3000 }); return; } catch { /* a redraw closed the menu */ }
   }
   await page.locator(".nav-more-menu .pm-item", { hasText: name }).click();
 }
 
-module.exports = { settled, inView, reach, wheelTo, click, openPart, watchSettingsReads, settingsDrawn, agentRow, openAgentSettings, pickItem, navTo };
+// openPage opens a page from the navigation as the reader does: its tab, or,
+// on a phone's tab bar where it is past the fifth, More and then its row in
+// More's menu (phonetabs.js).
+async function openPage(page, view) {
+  const tab = page.locator(`#nav [data-view="${view}"]`);
+  if (await tab.isVisible()) await tab.click();
+  else {
+    await page.locator("#nav .tb-more").click();
+    const name = (await tab.textContent()).trim();
+    await page.locator(".nav-more-menu .pm-item", { hasText: name }).first().click();
+  }
+  await page.locator(`#view-${view}`).waitFor();
+}
+
+module.exports = { openPage, settled, inView, reach, wheelTo, click, openPart, watchSettingsReads, settingsDrawn, agentRow, openAgentSettings, pickItem, navTo };

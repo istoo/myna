@@ -11,14 +11,8 @@ export function renderNavOver(mode) {
   more.hidden = true;
   if (mode !== "window" || sideNav()) return;
   if (phoneWeb()) {
-    // a phone's browser: the tabs have a row of their own, which must need
-    // no sideways scroll
-    if (nav.scrollWidth <= nav.clientWidth + 1) return;
-    more.hidden = false;
-    const btns = navPageButtons();
-    for (let i = btns.length - 1; i >= 0 && nav.scrollWidth > nav.clientWidth + 1; i--) {
-      if (!btns[i].classList.contains("on")) btns[i].classList.add("nav-over");
-    }
+    // a phone's browser: phonetabs.js makes the tabs a bar at the foot,
+    // five at most with More the fifth, so none moves under this one
     return;
   }
   if (topFits()) return;
