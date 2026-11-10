@@ -48,7 +48,16 @@ func TestSearchQueueKeepsCodexAlive(t *testing.T) {
 					http.Error(w, "missing tools", 400)
 					return
 				}
-				<-proceed
+				// a client that gave up before proceeding is not waited on:
+				// with only <-proceed here, a failed Do left this handler
+				// parked and up.Close() waited out the package's 30m timeout
+				// (run 42860876555, TestSearchQueueKeepsCodexAlive/cancel hung
+				// 19m after search_queue_test.go:103's Fatal)
+				select {
+				case <-proceed:
+				case <-r.Context().Done():
+					return
+				}
 				w.Header().Set("Content-Type", "text/event-stream")
 				io.WriteString(w, "data: "+`{"type":"response.created","response":{"id":"queued","model":"m1","status":"in_progress"}}`+"\n\n")
 				w.(http.Flusher).Flush()
