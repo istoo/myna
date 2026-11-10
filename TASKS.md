@@ -23,6 +23,8 @@
       （下一版撤）。`magpie-community/plugins` 全仓库零处 myna 引用，无需改。
       验证：19 个资产（8 myna + 8 owl + install/latest/notes）；`latest.json` 16 条；下载 `myna-darwin-arm64.zip` 检查为
       `myna.app/` 且 `Info.plist` 是 owl；Release 与 Docker 两个 workflow 全绿；Latest 指向 2910。
+- [ ] **下一版发布前**：撤掉网关的 `/v1/myna/*` 改写与插件环境的 `MYNA_*` 镜像（用户 11-10 定：按计划撤），
+      并在发布说明里写明；社区插件仓库经查零处引用，撤掉不影响它们。Mac 上从旧版升级的 `myna.app` 目录不重命名（签名/LaunchServices 风险）。
 - [ ] 未验证：Mac 上 Dock 磁贴的 flap 动画（新图形）在真机上的观感。
 - 记录原则：`LESSONS.md`、`tasks/lessons.md` 与本文件的历史叙述保持原样（它们是历史事实），新内容用新名。
 
