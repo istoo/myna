@@ -313,3 +313,10 @@
 - [ ] view-open-wheel 本地镜像与 CI 结论相反：CI 全量里 chromium 360s、webkit 366s 全绿；本地 webkit 的 `unheard` 子测试单条 57–250s 并有 5 条红
       （CI 上同样 160 条只要 6 分钟）。属镜像环境差异，测试未改；不再用本地红绿判断这个文件。
 - [ ] 已知限制：CI 的字体集与本地镜像不同，德语 560 宽的 9px/6px 溢出本地复现不了；已在镜像里跑 `playwright install-deps` 试图对齐。
+
+## 2026-11-10 反馈帖 + 上游同步（第 N 轮）
+- [x] 抓取反馈帖 195 条，官方 v0.1.3501–3612 修了大量问题；清单见 ~/.local/share/owl-feedback/bugs.md
+- [x] backport 18c932385（Fable 5.2 压缩）→ f767a791c
+- [x] backport 1b2ad557f（Alma/OpenHanako 卸载后可关；Trash 不算已安装）→ 636eaab02
+- [ ] CI 绿后决定是否发版（owl 自身 tag 已到 v0.1.2910；上游 2911–3612 的 tag 已占用）
+- [ ] 下一批候选：543eb39b9（改 effort 不重启本轮）、10bef5fe0（Codex 项目共享）、6bac8f8a5（手机导航）
