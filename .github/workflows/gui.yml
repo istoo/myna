@@ -64,13 +64,28 @@ jobs:
       # Playwright and its browsers live outside the checkout: the app has no
       # frontend dependency, and the suite asks for Playwright by module name
       # (NODE_PATH).
+      #
+      # The two browsers are a few hundred MB a shard, and the version is
+      # fixed, so they are kept between runs: a hit installs nothing from the
+      # network, run 42809799587's shard 4 died at this step's 20-minute
+      # timeout. A miss installs as before, --with-deps included.
+      - name: Playwright browsers cache
+        id: pwcache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
       - name: Install Playwright
         timeout-minutes: 20
         run: |
           mkdir -p "$RUNNER_TEMP/pw" && cd "$RUNNER_TEMP/pw"
           npm init -y >/dev/null
           npm i --no-audit --no-fund "playwright@$PLAYWRIGHT_VERSION"
-          npx playwright install --with-deps chromium webkit
+          if [ "${{ steps.pwcache.outputs.cache-hit }}" = "true" ]; then
+            npx playwright install chromium webkit
+          else
+            npx playwright install --with-deps chromium webkit
+          fi
           echo "NODE_PATH=$RUNNER_TEMP/pw/node_modules" >> "$GITHUB_ENV"
 
       # The smoke set is what every GUI change passes through: translations
