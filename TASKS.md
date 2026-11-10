@@ -320,3 +320,5 @@
 - [x] backport 1b2ad557f（Alma/OpenHanako 卸载后可关；Trash 不算已安装）→ 636eaab02
 - [ ] CI 绿后决定是否发版（owl 自身 tag 已到 v0.1.2910；上游 2911–3612 的 tag 已占用）
 - [ ] 下一批候选：543eb39b9（改 effort 不重启本轮）、10bef5fe0（Codex 项目共享）、6bac8f8a5（手机导航）
+- [x] 2026-11-10 23:5x：反馈帖二次抓取 387 条；backport b2509b9a8（ptmx EAGAIN）→ 2627b3f49
+- [ ] 下一批：0791c91c5（非法 UTF-8）、93a33d817（OpenBot）
