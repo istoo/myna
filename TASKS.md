@@ -334,3 +334,5 @@
 - [x] d4ccee0d4 的 Test 全绿（effort 修复）
 - [x] 2026-11-11 04:5x：backport b9a1b4aa1（Copilot 多账号模型并集与按账号路由）
 - [x] 83cfb6b02 的 Test 与 GUI 全绿（Desktop 导入提示）
+- [x] 2026-11-11 05:2x：backport 3a3d161fa（Win 上卸载 Claude Desktop 后不再列出）
+- [x] d0aa4ad89 的 Test 全绿（Copilot 池模型）
