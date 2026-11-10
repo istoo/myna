@@ -9,6 +9,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
+const { wheelRest } = require("./fixtures/wheel-rest.cjs");
 const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
@@ -72,6 +73,11 @@ async function drag(page, loc) {
     await page.waitForTimeout(120);
     b = await loc.boundingBox();
   }
+  // the wheel's coast runs on past its last step (the app's flings, 250ms),
+  // and a place taken during it is not where the text ends up: the drag
+  // started a line up (#13)
+  await wheelRest(page, "#view-routing");
+  b = await loc.boundingBox();
   const y = b.y + Math.min(b.height / 2, 8);
   await page.mouse.move(b.x + 2, y);
   await page.mouse.down();
@@ -81,8 +87,10 @@ async function drag(page, loc) {
   return page.evaluate(() => String(getSelection()));
 }
 // WebKit 16 (Playwright's) computes the standard property as auto and keeps
-// the rule in the prefixed one: read that first
-const selectOf = (loc) => loc.evaluate((e) => { const s = getComputedStyle(e); return s.webkitUserSelect || s.userSelect; });
+// the rule in the prefixed one; newer WebKit (WebKitGTK 2.52) the other way
+// round, the prefixed one auto. Read whichever names a value of its own,
+// auto being neither's rule (the Linux runs said "auto" for "text", #13)
+const selectOf = (loc) => loc.evaluate((e) => { const s = getComputedStyle(e); return s.userSelect && s.userSelect !== "auto" ? s.userSelect : s.webkitUserSelect || s.userSelect; });
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   for (const lang of ["en", "zh", "ja", "de"]) {
@@ -122,7 +130,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // the page's navigation and every button stay controls; every field
         // can still be typed into and selected
         const st = await page.evaluate(() => {
-          const sel = (e) => { const s = getComputedStyle(e); return s.webkitUserSelect || s.userSelect; };
+          const sel = (e) => { const s = getComputedStyle(e); return s.userSelect && s.userSelect !== "auto" ? s.userSelect : s.webkitUserSelect || s.userSelect; };
           return {
             controls: [...document.querySelectorAll("nav, nav *, button, button *, [role=tab], .seg, .opt")].map(sel).filter((v) => v !== "none").length,
             fields: [...document.querySelectorAll("input:not([type=checkbox]):not([type=radio]):not([type=range]), textarea")].map(sel).filter((v) => v === "none").length,
