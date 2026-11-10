@@ -136,13 +136,13 @@ func buddyGatewayIDs(dir string) map[string]bool {
 		var doc struct{ Models []wbEntry }
 		if json.Unmarshal(b, &list) == nil {
 			for _, e := range list {
-				if (e.Vendor == "owl" || e.Vendor == "myna") && e.ID != "" {
+				if e.Vendor == "owl" && e.ID != "" {
 					ids[e.ID] = true
 				}
 			}
 		} else if json.Unmarshal(b, &doc) == nil {
 			for _, e := range doc.Models {
-				if (e.Vendor == "owl" || e.Vendor == "myna") && e.ID != "" {
+				if e.Vendor == "owl" && e.ID != "" {
 					ids[e.ID] = true
 				}
 			}

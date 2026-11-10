@@ -2,7 +2,6 @@ package autostart
 
 import (
 	"os"
-	"path/filepath"
 	"runtime"
 	"strings"
 	"testing"
@@ -49,32 +48,5 @@ func TestSet(t *testing.T) {
 	}
 	if err := Set(false); err != nil {
 		t.Fatal(err)
-	}
-}
-
-// This fork wrote its entry as myna before it was owl: Refresh takes the
-// old one out, so two of them don't open at login and fight for one port.
-func TestRefreshDropsMynaEntry(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		t.Skip("the Run key is the real user's")
-	}
-	home := t.TempDir()
-	t.Setenv("HOME", home)
-	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
-	legacy := filepath.Join(home, ".config", "autostart", "myna.desktop")
-	if runtime.GOOS == "darwin" {
-		legacy = filepath.Join(home, "Library", "LaunchAgents", "com.istoo.myna.plist")
-	}
-	if err := os.MkdirAll(filepath.Dir(legacy), 0o755); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(legacy, []byte("x"), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	if err := Refresh(); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := os.Stat(legacy); !os.IsNotExist(err) {
-		t.Fatalf("myna's entry is still there: %v", err)
 	}
 }

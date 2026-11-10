@@ -56,9 +56,8 @@ func piCallFiles() []file {
 
 // piGateway is whether a provider is owl's own entry, in agent's files.
 func piGateway(agent, provider string) bool {
-	// "owl", and the names this fork used before it: a user's older
-	// sessions are under one of those
-	if provider == "owl" || provider == "myna" || provider == "magpie" || provider == "dial" {
+	// "owl", and the names it served under before
+	if provider == "owl" || provider == "magpie" || provider == "dial" {
 		return true
 	}
 	return agent == "cindy" && cindyGatewayProvider(provider)
@@ -69,13 +68,9 @@ func piGateway(agent, provider string) bool {
 // provider the user adds in Cindy by hand under the name Owl is
 // "owl", or "owl-2" beside another (its slug), never this shape.
 func cindyGatewayProvider(id string) bool {
-	// the prefix owl writes, and the one this fork wrote as myna
-	rest := id
-	for _, pre := range []string{"owl-", "myna-"} {
-		if r, ok := strings.CutPrefix(id, pre); ok {
-			rest = r
-			break
-		}
+	rest, ok := strings.CutPrefix(id, "owl-")
+	if !ok {
+		return false
 	}
 	if len(rest) != 8 {
 		return false

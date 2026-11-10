@@ -66,19 +66,3 @@ func TestKeepWidget(t *testing.T) {
 		t.Error("not rewritten")
 	}
 }
-
-// The widget this fork wrote as myna goes when the owl one is put in: two
-// of them in the bar, one opening the app this build replaced.
-func TestAddWidgetDropsMynaWidget(t *testing.T) {
-	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
-	t.Setenv("PATH", t.TempDir())
-	old := filepath.Join(filepath.Dir(widgetDir()), legacyWidgetID)
-	if err := os.MkdirAll(old, 0o755); err != nil {
-		t.Fatal(err)
-	}
-	// the shell isn't here, so the put-in fails after the old one is gone
-	_ = AddWidget("/usr/bin/owl")
-	if _, err := os.Stat(old); !os.IsNotExist(err) {
-		t.Fatalf("myna's widget is still there: %v", err)
-	}
-}

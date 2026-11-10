@@ -26,11 +26,11 @@ import (
 // was once called) the gateway has logged already: it is left out, not
 // matched afterwards.
 
-// ocGatewayProvider is whether an OpenCode provider id is owl's gateway.
-// ocGatewayProvider: owl's own provider id, or the one this fork used as
-// myna, which a user's older sessions are under (as "magpie's" before it)
+// ocGatewayProvider is whether an OpenCode provider id is owl's gateway:
+// owl's own id, or the names it served under before (as "dial", and the
+// upstream "magpie")
 func ocGatewayProvider(id string) bool {
-	return id == "owl" || id == "myna" || id == "magpie" || id == "dial"
+	return id == "owl" || id == "magpie" || id == "dial"
 }
 
 // ocCallList is the last listing of OpenCode's database, kept while the

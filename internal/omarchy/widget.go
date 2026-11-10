@@ -23,11 +23,6 @@ import (
 // and only when the user asks for it in Settings.
 const WidgetID = "useowl.owl"
 
-// legacyWidgetID is the widget this fork wrote as myna (until it became
-// owl): left in, it sits beside the new one in the bar and opens the old
-// app.
-const legacyWidgetID = "usemyna.myna"
-
 //go:embed widget
 var widgetFiles embed.FS
 
@@ -49,9 +44,6 @@ func WidgetOn() bool {
 // AddWidget puts the widget in Omarchy's bar, running exe (owl) when
 // clicked, or brings it up to date.
 func AddWidget(exe string) error {
-	// the old one goes first: two widgets in one bar, one of them opening
-	// an app this build replaced
-	_ = os.RemoveAll(filepath.Join(filepath.Dir(widgetDir()), legacyWidgetID))
 	dir := widgetDir()
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return err

@@ -213,7 +213,6 @@ func dshGatewayProvider(src dshSource) bool {
 	}
 	switch p {
 	case "owl", "owl-responses", "owl-anthropic", "dial",
-		"myna", "myna-responses", "myna-anthropic",
 		"magpie", "magpie-responses", "magpie-anthropic":
 		return true
 	}

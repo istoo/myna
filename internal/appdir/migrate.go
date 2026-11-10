@@ -10,32 +10,22 @@ import (
 )
 
 // This build keeps its files in owl's own folders, but a user coming from
-// myna (this fork's name until it became owl) or from upstream magpie has
-// theirs in those: the first start copies them over, once, so the sign-ins,
-// providers and settings are all there. The copy goes to a temporary folder
-// that is renamed into place, so a start that is killed part way leaves
-// nothing half-written to be trusted next time.
+// upstream magpie has theirs there: the first start copies them over, once,
+// so the sign-ins, providers and settings are all there. The copy goes to a
+// temporary folder that is renamed into place, so a start that is killed
+// part way leaves nothing half-written to be trusted next time.
 
-// The folders older builds kept their files in, newest first, which this one
-// copies from. Spelled out here rather than derived from owl's name: they
-// are history, fixed.
-const (
-	legacyMyName = "myna"
-	legacyUpName = "magpie"
-)
+// The folder the upstream build kept its files in, which this one copies
+// from. Spelled out here rather than derived from owl's name: it is
+// history, fixed.
+const legacyUpName = "magpie"
 
 func legacyConfigs(home string) []string {
-	return []string{
-		filepath.Join(home, ".config", legacyMyName),
-		filepath.Join(home, ".config", legacyUpName),
-	}
+	return []string{filepath.Join(home, ".config", legacyUpName)}
 }
 
 func legacyCaches(home string) []string {
-	return []string{
-		filepath.Join(home, ".cache", legacyMyName),
-		filepath.Join(home, ".cache", legacyUpName),
-	}
+	return []string{filepath.Join(home, ".cache", legacyUpName)}
 }
 
 // migrate copies src to dst once, when dst holds nothing yet. It reports

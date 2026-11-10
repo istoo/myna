@@ -115,18 +115,8 @@ func disable() error {
 	return nil
 }
 
-// refresh: nothing an older owl wrote here needs writing again, but this
-// fork's entry as myna is taken out: the myna it names may still be
-// installed, and both opening at sign-in fight for one port.
+// refresh: nothing an older owl wrote here needs writing again
 func refresh() error {
-	k, err := openRunKey(registry.CURRENT_USER, runKey, registry.SET_VALUE)
-	if err != nil {
-		return nil // no Run key: nothing of an older build to take out
-	}
-	defer k.Close()
-	if err := k.DeleteValue("myna"); err != nil && !errors.Is(err, registry.ErrNotExist) {
-		return nil // a value that can't go is no reason to fail the start
-	}
 	return nil
 }
 

@@ -502,7 +502,7 @@ var indexFiles = []string{"index.ts", "index.tsx", "index.js", "index.mjs", "ind
 // notPlugin says why the plugin at target is nothing the host can load,
 // or nil: a package that names no file to import (main, exports), has no
 // index file, and is neither pi's nor a middleware — a command alone
-// (bin), an MCP server like myna-x-search, is installed fine and then
+// (bin), an MCP server like owl-x-search, is installed fine and then
 // never loads (#1327).
 func notPlugin(target string) error {
 	st, err := os.Stat(target)
@@ -1013,30 +1013,8 @@ func command(ctx context.Context, name string, args ...string) *exec.Cmd {
 }
 
 // env is the plugins' environment: owl's, with its proxy.
-// env is the environment a plugin's programs are started with. A plugin
-// written before the rename reads MYNA_ADDR and the other MYNA_* names:
-// each OWL_* variable is handed to it under that name too, for the release
-// while the community's plugins move over. A MYNA_* the user set stands.
 func env() []string {
-	e := netproxy.Env(os.Environ())
-	seen := make(map[string]bool, len(e))
-	for _, kv := range e {
-		if k, _, ok := strings.Cut(kv, "="); ok {
-			seen[k] = true
-		}
-	}
-	out := e[:len(e):len(e)]
-	for _, kv := range e {
-		k, v, ok := strings.Cut(kv, "=")
-		if !ok || !strings.HasPrefix(k, "OWL_") {
-			continue
-		}
-		if old := "MYNA_" + strings.TrimPrefix(k, "OWL_"); !seen[old] {
-			out = append(out, old+"="+v)
-			seen[old] = true
-		}
-	}
-	return out
+	return netproxy.Env(os.Environ())
 }
 
 // Version is the version of the package spec installed (or checked out

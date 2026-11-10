@@ -921,21 +921,7 @@ func (s *Server) Handler() http.Handler {
 	// the goroutine dump first, ahead of every lock the rest can be stuck
 	// on (dumpFirst)
 	// a socket's turns go through all of it again (socketEntry)
-	return legacyMyna(socketEntry(s.dumpFirst(s.counted(headerLogged(holdCatalog(corsGuard(callerGuard(readOnlyGuard(mux, withCaller(keyLimited(mux)))))))))))
-}
-
-// legacyMyna takes the gateway's own paths as this fork served them before
-// it was owl (/v1/myna/quotas and the rest) onto owl's. Plugins and scripts
-// written before the rename reach them for this release; /v1/owl/... is
-// the name now.
-func legacyMyna(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if p := r.URL.Path; strings.HasPrefix(p, "/v1/myna/") {
-			r.URL.Path = "/v1/owl/" + strings.TrimPrefix(p, "/v1/myna/")
-			r.URL.RawPath = ""
-		}
-		next.ServeHTTP(w, r)
-	})
+	return socketEntry(s.dumpFirst(s.counted(headerLogged(holdCatalog(corsGuard(callerGuard(readOnlyGuard(mux, withCaller(keyLimited(mux))))))))))
 }
 
 // routes are the client APIs, each by its pattern: readOnlyGuard reads

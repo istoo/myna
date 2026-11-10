@@ -14,18 +14,6 @@ import (
 	"github.com/istoo/owl/internal/edit"
 )
 
-// dropLegacy removes the entry this fork wrote as myna (until it became
-// owl): the myna it names may still be installed, and both opening at
-// login fight for one port.
-func dropLegacy() {
-	dir := appdir.Getenv("XDG_CONFIG_HOME")
-	if dir == "" {
-		home, _ := os.UserHomeDir()
-		dir = filepath.Join(home, ".config")
-	}
-	_ = os.Remove(filepath.Join(dir, "autostart", "myna.desktop"))
-}
-
 // record is the user's own autostart entry, the one owl writes.
 func record() string {
 	dir := appdir.Getenv("XDG_CONFIG_HOME")
@@ -252,7 +240,6 @@ func removeRecord() error {
 
 // refresh: nothing an older owl wrote here needs writing again
 func refresh() error {
-	dropLegacy()
 	return nil
 }
 

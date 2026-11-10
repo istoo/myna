@@ -49,7 +49,7 @@ func Rename(from, to string) error {
 		return fmt.Errorf("%s is a subscription: its id is its agent's", from)
 	}
 	switch {
-	case to == "owl" || to == "myna" || to == "magpie":
+	case to == "owl" || to == "magpie":
 		return errors.New(`"owl" is what agents call the gateway itself; pick another id`)
 	case to == strings.TrimSuffix(GroupPrefix, "/"):
 		return errors.New(`"group" starts the ids of routing groups; pick another id`)

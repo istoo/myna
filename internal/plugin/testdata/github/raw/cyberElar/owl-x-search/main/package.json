@@ -1,23 +1,23 @@
 {
-  "name": "myna-x-search",
+  "name": "owl-x-search",
   "version": "1.2.0",
-  "description": "MCP server for native Grok X search through local myna OAuth, callable by any model.",
+  "description": "MCP server for native Grok X search through local owl OAuth, callable by any model.",
   "license": "MIT",
   "author": "cyberElar",
-  "homepage": "https://github.com/cyberElar/myna-x-search#readme",
+  "homepage": "https://github.com/cyberElar/owl-x-search#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cyberElar/myna-x-search.git"
+    "url": "git+https://github.com/cyberElar/owl-x-search.git"
   },
   "bugs": {
-    "url": "https://github.com/cyberElar/myna-x-search/issues"
+    "url": "https://github.com/cyberElar/owl-x-search/issues"
   },
-  "keywords": ["mcp", "x-search", "twitter", "grok", "myna", "oauth", "stdio"],
+  "keywords": ["mcp", "x-search", "twitter", "grok", "owl", "oauth", "stdio"],
   "engines": {
     "node": ">=22"
   },
   "bin": {
-    "myna-x-search": "launcher.cjs"
+    "owl-x-search": "launcher.cjs"
   },
   "files": ["launcher.cjs", "x_search_mcp.py", "search_backend.py", "search_cache.py"],
   "scripts": {

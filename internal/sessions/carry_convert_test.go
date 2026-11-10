@@ -18,7 +18,7 @@ import (
 // of parents runs through them.
 const (
 	// the fixture's own path, from the session it was taken from
-	carryCwd    = "/Users/yetone/workspace/projects/myna-wt/carry-sb/proj"
+	carryCwd    = "/Users/yetone/workspace/projects/owl-wt/carry-sb/proj"
 	carryClaude = "5b0c7a1e-3f2d-4c8b-9a6e-1d2c3b4a5f60"
 	carryCodex  = "01a1712c-4d18-79a3-8dad-145c6b40351e"
 )

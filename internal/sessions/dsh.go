@@ -450,11 +450,9 @@ func dshConvs(content json.RawMessage) []string {
 		return nil
 	}
 	t := jsString(parts[0].Text)
-	// the prefix the gateway gives them now, and the one this fork used
-	// before it was owl: dsh's older sessions keep the id they were
-	// recorded under, and are still found by it
-	out := make([]string, 0, 6)
-	for _, pre := range []string{"owl-", "myna-"} {
+	// the prefix the gateway gives them
+	out := make([]string, 0, 3)
+	for _, pre := range []string{"owl-"} {
 		for _, m := range []string{
 			`{"role":"user","content":` + t + `}`,
 			`{"role":"user","content":[{"type":"text","text":` + t + `}]}`,

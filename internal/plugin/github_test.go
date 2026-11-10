@@ -71,7 +71,7 @@ func fakeGitHub(t *testing.T, up *atomic.Bool, asked *atomic.Int32) {
 		like("someone/page-gone", nil),
 		like("alfaoz/opencode-see-image", nil),
 		like("someone/flaky-entry", map[string]any{"license": map[string]any{"key": "other", "spdx_id": "NOASSERTION"}}),
-		like("cyberElar/myna-x-search", nil),
+		like("cyberElar/owl-x-search", nil),
 		like("forker/opencode-claude-auth", map[string]any{"fork": true}),
 		like("old/opencode-old", map[string]any{"archived": true}),
 		like("magpie-community/plugins", nil))
@@ -191,7 +191,7 @@ func TestTaggedRepos(t *testing.T) {
 	}
 	// iPolloWork and learn-opencode (a workspace and a course) have no
 	// index.js to load, nor see-image its dist: installed from GitHub,
-	// none would load. myna-x-search (real, #1327) is on npm from its
+	// none would load. owl-x-search (real, #1327) is on npm from its
 	// repository, but a command alone, an MCP server: npm's copy names no
 	// file to load, and it has no index.js
 	want := "rynfar/meridian griffinmartin/opencode-claude-auth slkiser/opencode-quota someone/word-guard someone/agent-aider someone/page-glance someone/flaky-entry"

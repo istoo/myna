@@ -19,23 +19,7 @@ func migrateFrom(t *testing.T, home, dst string, legacy func(string) []string) s
 	return ""
 }
 
-// This fork was myna before it was owl: its sign-ins and settings are in
-// ~/.config/myna, and the first start as owl brings them over.
-func TestMigrateFromMyna(t *testing.T) {
-	home := root(t)
-	cfg := filepath.Join(home, ".config")
-	touch(t, filepath.Join(cfg, "myna", "providers.json"))
-	dst := filepath.Join(cfg, "owl")
-
-	if src := migrateFrom(t, home, dst, legacyConfigs); src != filepath.Join(cfg, "myna") {
-		t.Fatalf("migrated from %q", src)
-	}
-	if _, err := os.Stat(filepath.Join(dst, "providers.json")); err != nil {
-		t.Fatalf("owl's folder doesn't hold myna's file: %v", err)
-	}
-}
-
-// A user who came from upstream magpie and never ran myna still comes over.
+// A user who came from upstream magpie still comes over.
 func TestMigrateFromMagpie(t *testing.T) {
 	home := root(t)
 	cfg := filepath.Join(home, ".config")
@@ -50,44 +34,33 @@ func TestMigrateFromMagpie(t *testing.T) {
 	}
 }
 
-// A folder holding both copies myna's, the newer, and never puts one
-// over what owl already has.
-func TestMigrateMynaBeforeMagpieAndNeverOverOwl(t *testing.T) {
+// A folder owl already writes in is its own: nothing is copied over it.
+func TestMigrateNeverOverOwl(t *testing.T) {
 	home := root(t)
 	cfg := filepath.Join(home, ".config")
-	touch(t, filepath.Join(cfg, "myna", "myna.json"))
 	touch(t, filepath.Join(cfg, "magpie", "magpie.json"))
-	dst := filepath.Join(cfg, "owl")
-
-	if src := migrateFrom(t, home, dst, legacyConfigs); src != filepath.Join(cfg, "myna") {
-		t.Fatalf("migrated from %q", src)
-	}
-	if _, err := os.Stat(filepath.Join(dst, "magpie.json")); err == nil {
-		t.Fatal("magpie's files came over beside myna's")
-	}
-
-	// a folder owl already writes in is its own, whatever myna's holds
-	held := filepath.Join(cfg, "owl-held")
+	held := filepath.Join(cfg, "owl")
 	touch(t, filepath.Join(held, "settings.json"))
-	if src := migrate(filepath.Join(cfg, "myna"), held); src != "" {
+
+	if src := migrate(filepath.Join(cfg, "magpie"), held); src != "" {
 		t.Fatalf("copied over an owl folder that had files, from %q", src)
 	}
-	if _, err := os.Stat(filepath.Join(held, "myna.json")); err == nil {
-		t.Fatal("myna's file went into a folder that had owl's own")
+	if _, err := os.Stat(filepath.Join(held, "magpie.json")); err == nil {
+		t.Fatal("magpie's file went into a folder that had owl's own")
 	}
 }
 
-// The cache comes over the same way, myna's before magpie's.
-func TestMigrateCacheFromMyna(t *testing.T) {
+// The cache comes over the same way.
+func TestMigrateCacheFromMagpie(t *testing.T) {
 	home := root(t)
 	cache := filepath.Join(home, ".cache")
-	touch(t, filepath.Join(cache, "myna", "models.json"))
+	touch(t, filepath.Join(cache, "magpie", "models.json"))
 	dst := filepath.Join(cache, "owl")
 
-	if src := migrateFrom(t, home, dst, legacyCaches); src != filepath.Join(cache, "myna") {
+	if src := migrateFrom(t, home, dst, legacyCaches); src != filepath.Join(cache, "magpie") {
 		t.Fatalf("migrated from %q", src)
 	}
 	if _, err := os.Stat(filepath.Join(dst, "models.json")); err != nil {
-		t.Fatalf("owl's cache doesn't hold myna's file: %v", err)
+		t.Fatalf("owl's cache doesn't hold magpie's file: %v", err)
 	}
 }

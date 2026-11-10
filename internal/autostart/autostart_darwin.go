@@ -114,19 +114,10 @@ func associated(exe string) string {
 // launchd refuses the job
 var program = regexp.MustCompile(`<key>ProgramArguments</key>\s*<array><string>([^<]+)</string>`)
 
-// dropLegacy removes the launch agent this fork wrote as myna (until it
-// became owl): the myna it names may still be installed, and both opening
-// at login fight for one port. A job already loaded stays till log-out.
-func dropLegacy() {
-	home, _ := os.UserHomeDir()
-	_ = os.Remove(filepath.Join(home, "Library", "LaunchAgents", "com.istoo.myna.plist"))
-}
-
 // refresh writes a launch agent an older owl wrote over as this one
 // would, for the program it names: the path stays the one the user turned
 // it on for, whichever copy of owl is running now.
 func refresh() error {
-	dropLegacy()
 	p := record()
 	b, err := os.ReadFile(p)
 	if err != nil {

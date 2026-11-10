@@ -124,21 +124,6 @@ jobs:
             git log -1 --pretty='- %s' "$TAG" > NOTES.md
           fi
 
-      # A build from before the rename installs from myna-* and, on a Mac,
-      # expects myna.app inside its zip: this release hands it both, once,
-      # so an installed myna updates itself instead of being downloaded by
-      # hand. What it installs is owl, under the old file's name.
-      - name: Old names
-        run: |
-          for f in dist/owl-*; do
-            cp "$f" "dist/myna-${f#dist/owl-}"
-          done
-          rm -rf repack && mkdir repack
-          ditto -x -k owl-darwin-arm64.zip repack
-          mv repack/owl.app repack/myna.app
-          ditto -c -k --sequesterRsrc --keepParent repack/myna.app dist/myna-darwin-arm64.zip
-          rm -rf repack
-
       - name: Feed files
         run: |
           mkdir -p prev
@@ -149,7 +134,7 @@ jobs:
             --notes NOTES.md \
             --out dist \
             --previous prev/notes.json \
-            owl-darwin-arm64.zip dist/owl-cli-* dist/owl-linux-* dist/myna-*
+            owl-darwin-arm64.zip dist/owl-cli-* dist/owl-linux-*
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -162,4 +147,4 @@ jobs:
             --repo "$GITHUB_REPOSITORY" \
             --title "Owl $TAG" \
             --notes-file NOTES.md \
-            owl-darwin-arm64.zip dist/owl-cli-* dist/owl-linux-* dist/myna-* dist/latest.json dist/notes.json dist/install.sh
+            owl-darwin-arm64.zip dist/owl-cli-* dist/owl-linux-* dist/latest.json dist/notes.json dist/install.sh

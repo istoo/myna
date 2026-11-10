@@ -19,7 +19,7 @@ import (
 // when its hooks file is in the repository; one whose hooks file isn't
 // (a dist built only to publish) couldn't be installed from it, and is
 // left out, as a middleware's is. The first package.json is
-// IvanXxxxyyuffff/myna-system-prompt-file's, one the report names, as
+// IvanXxxxyyuffff/owl-system-prompt-file's, one the report names, as
 // it is; neither package is on npm.
 func TestTaggedHooksAlone(t *testing.T) {
 	var mu sync.Mutex
@@ -47,16 +47,16 @@ func TestTaggedHooksAlone(t *testing.T) {
 		mu.Unlock()
 		return readTagged(context.Background(), Tagged{Spec: "github:" + repo, Repo: repo}, "main")
 	}
-	got, keep, known, err := read("IvanXxxxyyuffff/myna-system-prompt-file")
-	if !keep || !known || err != nil || got.Kind != "hooks" || got.Spec != "github:IvanXxxxyyuffff/myna-system-prompt-file" ||
-		got.Package != "myna-system-prompt-file" || got.Version != "0.3.0" {
+	got, keep, known, err := read("IvanXxxxyyuffff/owl-system-prompt-file")
+	if !keep || !known || err != nil || got.Kind != "hooks" || got.Spec != "github:IvanXxxxyyuffff/owl-system-prompt-file" ||
+		got.Package != "owl-system-prompt-file" || got.Version != "0.3.0" {
 		t.Fatalf("hooks alone: %+v, kept %v, known %v, %v", got, keep, known, err)
 	}
 	// its hooks file is the one looked for, not an index.js it needn't have
 	mu.Lock()
 	a := slices.Clone(asked)
 	mu.Unlock()
-	if !slices.Contains(a, "/raw/IvanXxxxyyuffff/myna-system-prompt-file/main/system-prompt.hooks.mjs") || slices.ContainsFunc(a, func(p string) bool { return strings.HasSuffix(p, "/index.js") }) {
+	if !slices.Contains(a, "/raw/IvanXxxxyyuffff/owl-system-prompt-file/main/system-prompt.hooks.mjs") || slices.ContainsFunc(a, func(p string) bool { return strings.HasSuffix(p, "/index.js") }) {
 		t.Fatalf("asked %v", a)
 	}
 

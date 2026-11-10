@@ -44,9 +44,8 @@ func MiniMaxDir() string {
 
 func minimaxSessions() string { return filepath.Join(MiniMaxDir(), "v2", "sessions") }
 
-// mcodeGateway is the provider MiniMax Code names a call to owl's entry by,
-// and the name this fork used as myna, which a user's older calls are under.
-var mcodeGateway = []string{"custom_provider:owl", "custom_provider:myna"}
+// mcodeGateway is the provider MiniMax Code names a call to owl's entry by.
+var mcodeGateway = []string{"custom_provider:owl"}
 
 // minimaxCallFiles are each session's messages files: messages.jsonl, and
 // any other generation of it the session's history-catalog.json keeps
