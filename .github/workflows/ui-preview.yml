@@ -57,7 +57,10 @@ jobs:
           PR: ${{ steps.detect.outputs.number }}
         run: |
           mkdir pr-info
-          gh api "repos/$GITHUB_REPOSITORY/pulls/$PR" -H "Accept: application/vnd.github.diff" > pr-info/pr.diff
+          # GitHub refuses a diff of over 300 files (HTTP 406); a rename
+          # this wide has one, and the preview is worth having without it
+          gh api "repos/$GITHUB_REPOSITORY/pulls/$PR" -H "Accept: application/vnd.github.diff" > pr-info/pr.diff || \
+            echo "the diff is over GitHub's 300-file limit" > pr-info/pr.diff
           gh api "repos/$GITHUB_REPOSITORY/pulls/$PR" --jq .title > pr-info/title.txt
           gh api "repos/$GITHUB_REPOSITORY/pulls/$PR" --jq '.body // ""' > pr-info/body.txt
       - if: steps.detect.outputs.ui == 'true'
