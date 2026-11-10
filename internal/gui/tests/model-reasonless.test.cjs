@@ -10,6 +10,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
+const { press } = require("./fixtures/press.cjs");
 const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
@@ -82,8 +83,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // model-1: both unticked, no error, the hint shows
         assert.deepEqual(await ticked("model-1"), [true, true]);
         assert(!(await hint("model-1").isVisible()));
-        await boxes("model-1").nth(0).click();
-        await boxes("model-1").nth(1).click();
+        // focused, then pressed: the sheet's re-flow comes with its first
+        // focus, which moves the row under the pointer (fixtures/press.cjs)
+        await press(boxes("model-1").nth(0));
+        await press(boxes("model-1").nth(1));
         assert.deepEqual(await ticked("model-1"), [false, false], "the last level unticks");
         assert(await hint("model-1").isVisible());
         assert.equal(await hint("model-1").textContent(), none);

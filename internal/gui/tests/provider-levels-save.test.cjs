@@ -7,6 +7,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
+const { press } = require("./fixtures/press.cjs");
 const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
@@ -56,13 +57,16 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         if (!(await page.locator(".mnames:not([hidden])").count())) await page.getByRole("button", { name: L.names, exact: true }).click();
       };
       const row = (id) => page.locator(".mname", { has: page.locator("code", { hasText: id }) });
+      // a tick, as check()/uncheck(): the sheet's re-flow comes with its first
+      // focus and moves the row under the pointer (fixtures/press.cjs)
+      const tick = async (box, on) => { await press(box); assert.equal(await box.isChecked(), on); };
       await open();
       const list = await page.locator(".mnames:not([hidden])").elementHandle();
       const y = await page.evaluate(() => scrollY);
       // ticks: nothing sent, nothing redrawn, the boxes as ticked
-      await row("model-1").getByRole("checkbox", { name: L.low, exact: true }).uncheck();
-      await row("model-1").getByRole("checkbox", { name: L.high, exact: true }).uncheck();
-      await row("model-1").getByRole("checkbox", { name: L.images, exact: true }).check();
+      await tick(row("model-1").getByRole("checkbox", { name: L.low, exact: true }), false);
+      await tick(row("model-1").getByRole("checkbox", { name: L.high, exact: true }), false);
+      await tick(row("model-1").getByRole("checkbox", { name: L.images, exact: true }), true);
       await row("model-2").locator(".mwho input").first().fill("Two");
       await row("model-2").locator(".mwho input").first().press("Enter");
       await row("model-3").getByRole("button", { name: L.reset }).click();
@@ -83,10 +87,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.equal(await row("model-1").getByText(L.unsaved, { exact: true }).isVisible(), false);
       assert.deepEqual(posts, []);
       // picked again and saved: one Save carries them all
-      await row("model-1").getByRole("checkbox", { name: L.low, exact: true }).uncheck();
-      await row("model-1").getByRole("checkbox", { name: L.low, exact: true }).check(); // back as it was: nothing for it
-      await row("model-1").getByRole("checkbox", { name: L.high, exact: true }).uncheck();
-      await row("model-3").getByRole("checkbox", { name: zh ? "中" : "medium", exact: true }).check();
+      await tick(row("model-1").getByRole("checkbox", { name: L.low, exact: true }), false);
+      await tick(row("model-1").getByRole("checkbox", { name: L.low, exact: true }), true); // back as it was: nothing for it
+      await tick(row("model-1").getByRole("checkbox", { name: L.high, exact: true }), false);
+      await tick(row("model-3").getByRole("checkbox", { name: zh ? "中" : "medium", exact: true }), true);
       await page.getByRole("button", { name: L.save, exact: true }).click();
       await page.waitForFunction(() => !document.querySelector(".mnames"));
       assert.deepEqual(posts.map((p) => p.path), ["/api/provider/save"]);
