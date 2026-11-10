@@ -50,7 +50,7 @@ func TestHomebrew(t *testing.T) {
 	for exe, want := range map[string]bool{
 		"/opt/homebrew/Cellar/owl/0.1.126/bin/owl":              true,
 		"/home/linuxbrew/.linuxbrew/Cellar/owl/0.1.126/bin/owl": true,
-		"/usr/local/bin/owl":                                     false,
+		"/usr/local/bin/owl":                                    false,
 		"/Applications/owl.app/Contents/MacOS/owl":              false,
 	} {
 		if Homebrew(exe) != want {

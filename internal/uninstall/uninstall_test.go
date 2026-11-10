@@ -200,7 +200,7 @@ func TestFoldersNeverHome(t *testing.T) {
 		root:                                false,
 		h:                                   false,
 		filepath.Join(root, "Users"):        false,
-		filepath.Join(h, ".config", "owl"): true,
+		filepath.Join(h, ".config", "owl"):  true,
 		filepath.Join(root, "Users", "me2"): true,
 	} {
 		if removable(p, h) != ok {

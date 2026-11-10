@@ -30,7 +30,7 @@ func Agent(target string) (file string, only bool) {
 	var pkg struct {
 		Main    string          `json:"main"`
 		Exports json.RawMessage `json:"exports"`
-		Owl    struct {
+		Owl     struct {
 			Agent string `json:"agent"`
 		} `json:"magpie"`
 	}

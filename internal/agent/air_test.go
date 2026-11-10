@@ -58,7 +58,7 @@ func TestAirAddsOwlAgent(t *testing.T) {
 	}
 	cfg := filepath.Join(dir, "owl-opencode.json")
 	for k, v := range map[string]string{
-		"agent_servers.Goose.command":            "goose",
+		"agent_servers.Goose.command":           "goose",
 		"agent_servers.Owl.command":             "/opt/bin/opencode",
 		"agent_servers.Owl.args.0":              "acp",
 		"agent_servers.Owl.env.OPENCODE_CONFIG": cfg,
@@ -68,9 +68,9 @@ func TestAirAddsOwlAgent(t *testing.T) {
 		}
 	}
 	for k, v := range map[string]string{
-		"model":                         "owl/fake/m1",
-		"small_model":                   "owl/fake/m1",
-		"enabled_providers":             `["owl"]`,
+		"model":                        "owl/fake/m1",
+		"small_model":                  "owl/fake/m1",
+		"enabled_providers":            `["owl"]`,
 		"provider.owl.options.baseURL": gatewayV1(),
 		"provider.owl.options.apiKey":  "owl",
 		"provider.owl.npm":             "@ai-sdk/openai-compatible",

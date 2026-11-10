@@ -139,7 +139,7 @@ var NotPaths = map[string]bool{
 	"WINDSURF_API_SERVER_URL": true, "ZCODE_CREDENTIAL_SECRET": true,
 	"PI_CONFIG_DIR": true, "OPENCODE_DB": true,
 	"STEPCODE_CONFIG_DIR": true,
-	"OWL_ZED_BIN":        true, "OWL_ZED_PROCESS_NAMES": true,
+	"OWL_ZED_BIN":         true, "OWL_ZED_PROCESS_NAMES": true,
 	"PENGUIN_PROJECT_ID": true,
 	"OPENCLAW_PROFILE":   true,
 }

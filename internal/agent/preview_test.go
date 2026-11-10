@@ -64,7 +64,7 @@ func TestDiffLines(t *testing.T) {
 func TestMask(t *testing.T) {
 	const compact = `[{"requestHeaders":{"Authorization":"Bearer owl"}}]`
 	for in, want := range map[string]string{
-		`  "ANTHROPIC_AUTH_TOKEN": "owl",`:            `  "ANTHROPIC_AUTH_TOKEN": "owl",`,
+		`  "ANTHROPIC_AUTH_TOKEN": "owl",`:             `  "ANTHROPIC_AUTH_TOKEN": "owl",`,
 		`  "ANTHROPIC_API_KEY": "sk-ant-x",`:           `  "ANTHROPIC_API_KEY": ••••`,
 		`export OPENAI_API_KEY=sk-1`:                   `export OPENAI_API_KEY= ••••`,
 		`env_key = "$KEY"`:                             `env_key = "$KEY"`,

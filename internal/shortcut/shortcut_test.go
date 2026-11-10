@@ -26,7 +26,7 @@ func TestStale(t *testing.T) {
 		target, dir string
 		stale       bool
 	}{
-		{"", "", true},                          // no shortcut yet
+		{"", "", true},                         // no shortcut yet
 		{"/tools/owl.exe", "/tools", false},    // already this one
 		{"/TOOLS/Owl.EXE", "/Tools/", false},   // the same, in another case
 		{"/downloads/owl.exe", "/tools", true}, // the exe was moved

@@ -66,22 +66,22 @@ func evalPath(p string) string {
 func TestIsOwl(t *testing.T) {
 	for path, want := range map[string]bool{
 		"/Applications/Owl.app/Contents/MacOS/owl": true,
-		"/usr/local/bin/owl":                        true,
+		"/usr/local/bin/owl":                       true,
 		`C:\Users\u\AppData\Local\owl\owl.exe`:     true,
 		`C:\Users\u\AppData\Local\owl\owl.exe.old`: true,
 		// an update that finds .old still held leaves the running exe at
 		// .old-2, the name it holds the gateway port under
 		`C:\Users\u\AppData\Local\owl\owl.exe.old-2`: true,
 		`C:\Users\u\AppData\Local\owl\owl.exe.old-3`: true,
-		"/home/u/owl.old-2":                           true,
-		"/home/u/dial.old-4":                           true,
+		"/home/u/owl.old-2":                          true,
+		"/home/u/dial.old-4":                         true,
 		// the numbered suffix is an update's, not another program's
 		`C:\Users\u\other-server.old-2`:   false,
-		`C:\Users\u\owl.old-backup`:      false,
+		`C:\Users\u\owl.old-backup`:       false,
 		"/home/u/.local/bin/dial":         true,
-		"/opt/owl-dev":                   true,
+		"/opt/owl-dev":                    true,
 		"/usr/bin/python3":                false,
-		"/usr/bin/owls":                  false,
+		"/usr/bin/owls":                   false,
 		"/tmp/other-server":               false,
 		`C:\Windows\System32\svchost.exe`: false,
 		"":                                false,
@@ -103,7 +103,7 @@ func TestIsForwarder(t *testing.T) {
 		`C:\Windows\System32\wslrelay.exe`:                                true,
 		"/opt/homebrew/bin/limactl":                                       true,
 		"/usr/libexec/podman/gvproxy":                                     true,
-		"/Applications/Owl.app/Contents/MacOS/owl":                      false,
+		"/Applications/Owl.app/Contents/MacOS/owl":                        false,
 		"/usr/bin/python3":                                                false,
 		"/tmp/other-server":                                               false,
 		"":                                                                false,

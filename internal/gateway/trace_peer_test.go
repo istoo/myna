@@ -82,7 +82,7 @@ func TestOwnerReadOnLoopbackAlone(t *testing.T) {
 		"192.168.1.9:3561": "",
 		"10.0.0.5:3561":    "",
 		"example.com:3561": "",
-		"owl.tail:3561":   "",
+		"owl.tail:3561":    "",
 	} {
 		t.Setenv("OWL_ADDR", addr)
 		if got := ownerURL(); got != want {

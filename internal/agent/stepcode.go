@@ -163,7 +163,7 @@ type stepcodeState struct {
 	LastHasScope        bool     `json:"last_has_scope"`
 	LastScope           []string `json:"last_scope,omitempty"`
 	AppendedScope       []string `json:"appended_scope,omitempty"`
-	OrigOwlRaw         *string  `json:"orig_owl_raw,omitempty"`
+	OrigOwlRaw          *string  `json:"orig_owl_raw,omitempty"`
 	ConfigFileExisted   bool     `json:"config_file_existed"`
 	ModelsFileExisted   bool     `json:"models_file_existed"`
 	ProvidersMapExisted bool     `json:"providers_map_existed"`

@@ -508,7 +508,7 @@ func dshJoin(items []dshItem) string {
 // dshItem is one entry of the patch list, as its lines.
 type dshItem struct {
 	id    string
-	owl  bool
+	owl   bool
 	lines []string
 }
 

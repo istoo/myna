@@ -422,7 +422,7 @@ func readTagged(pc context.Context, t Tagged, branch string) (Tagged, bool, bool
 		Main    string          `json:"main"`
 		Exports json.RawMessage `json:"exports"`
 		License any             `json:"license"`
-		Owl    struct {
+		Owl     struct {
 			Middleware string `json:"middleware"`
 			Agent      string `json:"agent"`
 			Hooks      string `json:"hooks"`

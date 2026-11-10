@@ -920,7 +920,7 @@ func (a *Agent) DisconnectOffline() error {
 // fields it changed (Routed: those that were owl's) and what it left
 // every field at.
 type reconnection struct {
-	Owl   map[string]string `json:"magpie"`
+	Owl    map[string]string `json:"magpie"`
 	Routed []string          `json:"routed,omitempty"`
 	Left   map[string]string `json:"left"`
 }

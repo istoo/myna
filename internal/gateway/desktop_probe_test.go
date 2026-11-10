@@ -136,10 +136,10 @@ func TestClaudeDesktopProbeToDefaultModel(t *testing.T) {
 func TestDesktopProbe(t *testing.T) {
 	for body, want := range map[string]bool{
 		`{"model":"owl-0958175816.anthropic.claude-haiku-5-5[1m]","max_tokens":1,"messages":[{"role":"user","content":"."}]}`: true,
-		`{"model":"x","max_tokens":200,"messages":[{"role":"user","content":"."}]}`:                                            false,
-		`{"model":"x","max_tokens":1,"system":"You write short session titles.","messages":[{"role":"user","content":"."}]}`:   false,
-		`{"model":"x","max_tokens":1,"messages":[{"role":"user","content":"hi"}]}`:                                             false,
-		`{"model":"x","max_tokens":1,"tools":[{"name":"a"}],"messages":[{"role":"user","content":"."}]}`:                       false,
+		`{"model":"x","max_tokens":200,"messages":[{"role":"user","content":"."}]}`:                                           false,
+		`{"model":"x","max_tokens":1,"system":"You write short session titles.","messages":[{"role":"user","content":"."}]}`:  false,
+		`{"model":"x","max_tokens":1,"messages":[{"role":"user","content":"hi"}]}`:                                            false,
+		`{"model":"x","max_tokens":1,"tools":[{"name":"a"}],"messages":[{"role":"user","content":"."}]}`:                      false,
 	} {
 		if desktopProbe([]byte(body)) != want {
 			t.Errorf("desktopProbe(%s) = %v", body, !want)

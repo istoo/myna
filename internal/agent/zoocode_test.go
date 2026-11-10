@@ -63,7 +63,7 @@ func TestZooCode(t *testing.T) {
 	// a current profile that is one of apiConfigs, and a modelInfo with
 	// contextWindow and supportsPromptCache
 	for k, want := range map[string]string{
-		"providerProfiles.currentApiConfigName":                                      "owl",
+		"providerProfiles.currentApiConfigName":                                     "owl",
 		"providerProfiles.apiConfigs.owl.apiProvider":                               "openai",
 		"providerProfiles.apiConfigs.owl.openAiBaseUrl":                             gatewayV1(),
 		"providerProfiles.apiConfigs.owl.openAiApiKey":                              agentKey("zoo-code"),

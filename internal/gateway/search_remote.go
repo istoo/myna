@@ -29,7 +29,7 @@ const SearchingHeader = "X-Magpie-Searching"
 // Web search as a Remote owl's list says it.
 const (
 	searchNative = "native"
-	searchOwl   = "owl"
+	searchOwl    = "owl"
 )
 
 // remoteSearch is how a Remote owl says it searches the web for model,

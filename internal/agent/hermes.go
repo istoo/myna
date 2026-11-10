@@ -503,7 +503,7 @@ func hermesModelOf(p string) hermesModel {
 func hermesOffKey(p string) string { return "hermes:" + p + ":off" }
 
 type hermesOff struct {
-	Owl hermesModel `json:"magpie"`
+	Owl  hermesModel `json:"magpie"`
 	Left hermesModel `json:"left"`
 }
 

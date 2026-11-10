@@ -146,8 +146,8 @@ type pluginEntryJSON struct {
 	// listed; IsAgent is whether its package has one, said of one switched
 	// off too; InOwlOnly is whether all it has runs in owl itself,
 	// middleware and an agent, no provider to sign in to
-	Agent      *pluginAgentJSON `json:"agent,omitempty"`
-	IsAgent    bool             `json:"isAgent,omitempty"`
+	Agent     *pluginAgentJSON `json:"agent,omitempty"`
+	IsAgent   bool             `json:"isAgent,omitempty"`
 	InOwlOnly bool             `json:"inOwlOnly,omitempty"`
 	// Page is the page it adds to the window (owl.page), said of one
 	// switched off too: what the row shows before it is turned on, with

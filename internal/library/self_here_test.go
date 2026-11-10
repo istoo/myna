@@ -127,7 +127,7 @@ func TestUsersOwnServerStaysAsItIs(t *testing.T) {
 	write(t, otherBuild, "")
 	mine := map[string]string{
 		"gone-tool":    `C:\Users\me\tools\imagetool.exe`, // mcp image, but not owl
-		"owl-cli":     `C:\Users\me\tools\owl-helper.exe`,
+		"owl-cli":      `C:\Users\me\tools\owl-helper.exe`,
 		"pinned-build": otherBuild,
 		"npx-server":   "npx",
 	}
