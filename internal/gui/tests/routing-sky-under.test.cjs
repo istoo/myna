@@ -107,7 +107,10 @@ const dots = () => {
   const cards = [...document.querySelectorAll(".rt-stage .rt-node, .rt-accts li:not(.rt-gap)")].map((e) => [e, e.getBoundingClientRect()]);
   return [...document.querySelectorAll(".rt-sky .pkt")].filter((d) => d.getAttribute("visibility") !== "hidden").map((d) => {
     const r = d.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2, rad = Number(d.getAttribute("r")) || 4.5;
-    const over = cards.filter(([, c]) => cx + rad > c.left + .5 && cx - rad < c.right - .5 && cy + rad > c.top + .5 && cy - rad < c.bottom - .5)
+    // a dot's edge and a card's are drawn on the same half pixel: within one
+    // pixel they are touching, not covering (560px in Chinese and Japanese
+    // put a waiting dot 0.52px into the hub's edge, #13)
+    const over = cards.filter(([, c]) => cx + rad > c.left + 1 && cx - rad < c.right - 1 && cy + rad > c.top + 1 && cy - rad < c.bottom - 1)
       .map(([e]) => e.className || e.tagName);
     // the nearest card: how far the dot is from it
     const gap = Math.min(...cards.map(([, c]) => Math.hypot(Math.max(c.left - cx, 0, cx - c.right), Math.max(c.top - cy, 0, cy - c.bottom))));
@@ -146,7 +149,19 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // third's dot waits at owl
         await page.waitForFunction(() => document.querySelectorAll(".rt-sky .pkt.held").length === 2);
         await page.waitForFunction(() => document.querySelectorAll(".rt-sky .pkt:not([visibility])").length === 3);
-        await page.waitForTimeout(900); // the third's flight to owl lands, the carriers fly off
+        await page.waitForTimeout(900); // the carriers fly off
+        // the third's flight to owl lands: its place holds for a handful of
+        // frames, rather than 900ms after the wait began, which a loaded
+        // runner reached mid-flight and read the dot over a card (#13)
+        await page.waitForFunction(() => {
+          const ps = [...document.querySelectorAll(".rt-sky .pkt")];
+          if (!ps.length) return false;
+          const k = ps.map((e) => { const r = e.getBoundingClientRect(); return Math.round(r.x) + "," + Math.round(r.y); }).join(";");
+          const w = window.__pktStill || (window.__pktStill = { k: "", n: 0 });
+          w.n = w.k === k ? w.n + 1 : 0;
+          w.k = k;
+          return w.n >= 5;
+        }, null, { timeout: 5000 });
         const flown = await page.evaluate(() => document.querySelectorAll(".rt-sky .rt-flier").length);
         assert(flown >= 1, "the owl carrying the waiting request stays with it at owl");
 
