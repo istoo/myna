@@ -322,3 +322,8 @@
 - [ ] 下一批候选：543eb39b9（改 effort 不重启本轮）、10bef5fe0（Codex 项目共享）、6bac8f8a5（手机导航）
 - [x] 2026-11-10 23:5x：反馈帖二次抓取 387 条；backport b2509b9a8（ptmx EAGAIN）→ 2627b3f49
 - [ ] 下一批：0791c91c5（非法 UTF-8）、93a33d817（OpenBot）
+- [x] 2026-11-11 00:4x：backport 0791c91c5（非法 UTF-8 → U+FFFD）→ f5f171f03，已推送
+- CI：fb4ad6568 的 Test 全绿（含 Alma/OpenHanako 修复）；7bc72e281 的 test(macos) 15 分钟无步骤被取消，属 runner 侧，代码由 f5f171f03 的新 run 覆盖
+- [ ] 等 f5f171f03 的 Test 全绿（含 claudetui ptmx）
+- [x] 2026-11-11 01:0x：backport 93a33d817（OpenBot 图标/请求归属/Library skills）→ e9b52ce34
+- [ ] OpenBot 的 GUI 浏览器测试未跑（本机无 Playwright）；待 CI 或装 Playwright 后补
