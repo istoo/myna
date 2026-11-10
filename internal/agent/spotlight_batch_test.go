@@ -19,10 +19,13 @@ func resetSpotlight(t *testing.T) {
 }
 
 // waitSpotlight waits until done() holds and no query is running, so a
-// test's spotlightRun is restored once nothing reads it.
+// test's spotlightRun is restored once nothing reads it. The bound only
+// keeps a broken test from hanging: what it waits for is state, and a
+// macOS runner with the package's other tests beside it took more than 5s
+// to schedule the queries (run 42866483737, TestSpotlightStaleAsksEveryAppAgain).
 func waitSpotlight(t *testing.T, done func() bool) {
 	t.Helper()
-	deadline := time.Now().Add(5 * time.Second)
+	deadline := time.Now().Add(30 * time.Second)
 	for time.Now().Before(deadline) {
 		spotlight.Lock()
 		running := len(spotlight.w)
