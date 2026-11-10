@@ -342,3 +342,5 @@
 - [x] d897811f2 的 Test 与 GUI 全绿（弹窗拖动）
 - [x] 2026-11-11 07:0x：backport 2545bce6e（更新后菜单栏图标位置保留）
 - [x] b4c6aff83 的 Test 与 GUI 全绿（手机 tab bar）
+- [x] 2026-11-11 07:3x：backport d374168d0（侧栏 Settings 按钮不随列表上移）
+- [x] 6ee8cf0f2 的 Test 与 GUI 全绿（菜单栏图标位置）
