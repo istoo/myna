@@ -9,12 +9,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// #1515: `myna accounts alias` names an account for the user, as
-// myna keeps it (providers.json): the agent's own sign-in is left as it
-// is, and `myna accounts` and `myna quota` show the name first.
+// #1515: `owl accounts alias` names an account for the user, as
+// owl keeps it (providers.json): the agent's own sign-in is left as it
+// is, and `owl accounts` and `owl quota` show the name first.
 func TestAccountsAlias(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)

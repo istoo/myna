@@ -49,7 +49,7 @@ for (const engine of ["chromium", "webkit"]) {
           const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
           await route.fulfill({body:await fs.readFile(file),contentType:{".html":"text/html",".css":"text/css",".js":"text/javascript",".svg":"image/svg+xml"}[path.extname(file)]});
         });
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         await navTo(page, "usage");
         await page.locator(":is(#usageTab .opt, .nav-s):visible").nth(1).click();
         await page.locator(".led-row").first().waitFor();
@@ -74,7 +74,7 @@ for (const engine of ["chromium", "webkit"]) {
           assert.equal(await cells.nth(i).textContent(),localName,"a file that names no provider says only Local session");
         }
         // A session file names the provider it was set up to call. That is
-        // the file's own record, not a route myna saw, so the id is shown
+        // the file's own record, not a route owl saw, so the id is shown
         // as the file carries it — never resolved to a provider's name,
         // which would promote an unknown request to an official provider —
         // and the row keeps saying it is a local session. An account, when
@@ -84,7 +84,7 @@ for (const engine of ["chromium", "webkit"]) {
           assert.equal(await cell.locator(".where-name").textContent(),"my-custom-route","the recorded provider ID, as the file carries it");
           assert((await cell.textContent()).includes(localName),"and it is still a local session");
           assert.equal(await cell.locator(".local").count(),1);
-          assert((await cell.locator(".local").getAttribute("title")).includes(lang === "zh" ? "不是 myna 看到的路由" : "not a route myna saw"));
+          assert((await cell.locator(".local").getAttribute("title")).includes(lang === "zh" ? "不是 owl 看到的路由" : "not a route owl saw"));
         }
         assert((await cells.nth(4).textContent()).includes("My Relay · relay.example"));
         assert.equal(await cells.nth(4).locator(".access").textContent(),"API");
@@ -106,9 +106,9 @@ for (const engine of ["chromium", "webkit"]) {
         });
         assert.equal(new Set(palette.map(p=>p.color)).size,4,"source types have distinct colors");
         assert(palette.every(p=>p.contrast>=4.5),"small badge text remains readable: "+JSON.stringify(palette));
-        if (process.env.MYNA_STYLE_SHOTS && lang === "zh" && engine === "chromium") {
+        if (process.env.OWL_STYLE_SHOTS && lang === "zh" && engine === "chromium") {
           await page.setViewportSize({width:1900,height:950});
-          await page.locator(".led-wrap").screenshot({path:process.env.MYNA_STYLE_SHOTS+"/badges-"+theme+".png"});
+          await page.locator(".led-wrap").screenshot({path:process.env.OWL_STYLE_SHOTS+"/badges-"+theme+".png"});
           await page.setViewportSize({width:1200,height:900});
         }
         // beside the sidebar the cards above wrap and the row sits under the

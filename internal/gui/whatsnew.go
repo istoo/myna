@@ -14,21 +14,21 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/update"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/update"
 )
 
-// whatsNew shows what changed once myna runs a newer release than it last
+// whatsNew shows what changed once owl runs a newer release than it last
 // did (a Discord user: to see whether their issue was fixed). The version it
-// last ran is kept in myna's own folder; as it starts on a newer one, the
+// last ran is kept in owl's own folder; as it starts on a newer one, the
 // notes of every release since are asked of the site (where the update feed
-// is) the first time a window or myna web's page asks, and shown once.
+// is) the first time a window or owl web's page asks, and shown once.
 // Offline, nothing is shown. Settings can open them again. The notes are
 // in the page's language, Chinese or English, where a release has them in
 // it (freecss on Discord: they should follow Settings' language).
 //
 // The dialog comes up by itself only on the first start of a version the
-// user didn't ask for from inside myna (#525: releases come many a day,
+// user didn't ask for from inside owl (#525: releases come many a day,
 // and a dialog after every "Restart to update" is in the way): a restart
 // into an update leaves a note of the version it installs, and that version
 // starting finds it and keeps quiet; the notes are still a click away in
@@ -49,7 +49,7 @@ type whatsNew struct {
 }
 
 // notesAgain is how long notes some of which came without their
-// translation are kept before the site is asked again: myna-releases'
+// translation are kept before the site is asked again: owl-releases'
 // notes.yml writes a release's Chinese notes each hour once DeepSeek
 // answers (#2260), the site keeps an answer five minutes, and a page kept
 // open, or opened again, should show them without a restart (yuu003348 on
@@ -76,7 +76,7 @@ func untranslated(notes []update.Note, lang string) bool {
 }
 
 // askAgainAt is when notes had now in lang are asked for again, zero for
-// never while myna runs.
+// never while owl runs.
 func askAgainAt(notes []update.Note, lang string) time.Time {
 	if untranslated(notes, lang) {
 		return notesNow().Add(notesAgain)
@@ -97,7 +97,7 @@ type backNotes struct {
 
 var news = &whatsNew{}
 
-// started is when this process began, to tell myna's folder from before
+// started is when this process began, to tell owl's folder from before
 // it apart from one this run just made.
 var started = time.Now()
 
@@ -176,8 +176,8 @@ func (n *whatsNew) start() {
 	}
 }
 
-// usedBefore is whether myna's folder held its files before this run: a
-// myna from before the version was kept, not a fresh install.
+// usedBefore is whether owl's folder held its files before this run: a
+// owl from before the version was kept, not a fresh install.
 func usedBefore(dir string) bool {
 	for _, f := range []string{"settings.json", "providers.json"} {
 		if fi, err := os.Stat(filepath.Join(dir, f)); err == nil && fi.ModTime().Before(started) {
@@ -229,7 +229,7 @@ func (n *whatsNew) get(ctx context.Context, all bool, lang string) whatsNewJSON 
 		}
 		n.mu.Lock()
 		if len(got) > 0 {
-			// kept: they don't change while myna runs, but for a
+			// kept: they don't change while owl runs, but for a
 			// translation written since (askAgainAt)
 			notes = got
 			if n.notes == nil {
@@ -276,7 +276,7 @@ func notesKey(lang string) string {
 // before is Settings' other ranges (Linka on Discord): this version's notes
 // and those of the count releases before it, newest first. They are asked
 // of the site once per language for the longest count asked so far, and
-// kept while myna runs, as the releases up to this one don't change. A
+// kept while owl runs, as the releases up to this one don't change. A
 // failed ask is said (Error), with the notes of a shorter range asked
 // before, if any, so a page keeps what it had.
 func (n *whatsNew) before(ctx context.Context, count int, lang string) whatsNewJSON {

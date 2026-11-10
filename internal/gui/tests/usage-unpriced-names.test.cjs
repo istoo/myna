@@ -62,8 +62,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang));
-      await page.addInitScript(() => { localStorage.setItem("myna.usageTab", "sessions"); localStorage.setItem("myna.sessRange", "all"); });
-      await page.goto("http://myna.test/?view=usage");
+      await page.addInitScript(() => { localStorage.setItem("owl.usageTab", "sessions"); localStorage.setItem("owl.sessRange", "all"); });
+      await page.goto("http://owl.test/?view=usage");
       const row = page.locator("#sessList .row.sess", { hasText: "port the parser" });
       await row.waitFor();
       await page.waitForFunction(() => document.querySelector("#usageCost")?.title);

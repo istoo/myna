@@ -2,7 +2,7 @@
 // Share on local network on a computer with an internet address (Discord,
 // 10-28: 203.236.50.70 shown as the LAN address): the private addresses come
 // first (gateway.LANURLs), and picking the internet one says anyone online
-// can reach myna there, and how to keep it to this network; with an
+// can reach owl there, and how to keep it to this network; with an
 // allow list, that only those addresses get in. The Gateway page lists it
 // under "On the internet", not "Local network". English and Chinese,
 // Chromium and WebKit; no backend, the API is faked here.
@@ -22,10 +22,10 @@ function settingsPayload(over) {
     dock: false, dockWindow: false, proxy: "", redact: false, redactPersonal: false, redactWords: [],
     codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", workbuddyCheckin: false, noStats: false,
     trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "",
-    version: "0.1.400", dir: "/config/myna", gateway: "http://0.0.0.0:3425",
+    version: "0.1.400", dir: "/config/owl", gateway: "http://0.0.0.0:3425",
     proxyNow: "none", proxySource: "none", login: false,
     visionModels: [], imageGenModels: [], workbuddyCheckins: [],
-    lan: true, lanKey: "sk-myna-0123456789abcdef", lanURLs: ["http://192.168.1.5:3425", "http://203.236.50.70:3425"], lanPublic: ["http://203.236.50.70:3425"],
+    lan: true, lanKey: "sk-owl-0123456789abcdef", lanURLs: ["http://192.168.1.5:3425", "http://203.236.50.70:3425"], lanPublic: ["http://203.236.50.70:3425"],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
     ...over,
   };
@@ -52,13 +52,13 @@ function server(lang, web, over) {
 
 const words = {
   en: {
-    open: "An internet address: anyone online can reach myna here with a gateway key. To keep it to this network, list its range under Allowed addresses",
+    open: "An internet address: anyone online can reach owl here with a gateway key. To keep it to this network, list its range under Allowed addresses",
     listed: "An internet address: only the addresses under Allowed addresses get in",
     note: "On the internet",
     lan: "Local network", local: "This computer",
   },
   zh: {
-    open: "公网地址：互联网上任何人凭网关密钥都能在这里连到 myna。只想让这个局域网连入，请在「允许的地址」里填上它的网段",
+    open: "公网地址：互联网上任何人凭网关密钥都能在这里连到 owl。只想让这个局域网连入，请在「允许的地址」里填上它的网段",
     listed: "公网地址：只有「允许的地址」里的地址能连入",
     note: "在公网上",
     lan: "局域网", local: "本机",
@@ -120,7 +120,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", fixture(lang, "light", [], { lan: true,
             lanURLs: ["http://192.168.1.10:3999", "http://203.236.50.70:3999"], lanPublic: ["http://203.236.50.70:3999"] }));
-          await page.goto("http://myna.test/?view=gateway");
+          await page.goto("http://owl.test/?view=gateway");
           const box = page.locator("#gatewayLan");
           await page.waitForFunction(() => document.querySelectorAll("#gatewayLan .gw-url").length === 3);
           assert.deepEqual((await box.locator(".gw-url code").allTextContents()).map((x) => x.trim()),

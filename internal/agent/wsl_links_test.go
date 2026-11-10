@@ -22,7 +22,7 @@ func TestWSLLinks(t *testing.T) {
 	wslDistros()
 	a := &Agent{ID: "codex@wsl:U", WSL: "U"}
 	home := filepath.Join(root, "home", "me")
-	store := filepath.Join(home, ".local", "share", "myna", "skills", "pdf")
+	store := filepath.Join(home, ".local", "share", "owl", "skills", "pdf")
 	if err := os.MkdirAll(store, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -61,17 +61,17 @@ func TestWSLLinks(t *testing.T) {
 	}
 }
 
-// On a real WSL: MYNA_WSL_TEST_DISTRO names the distro, and the test
+// On a real WSL: OWL_WSL_TEST_DISTRO names the distro, and the test
 // works only in a folder of its own it makes in /tmp there. What Windows
 // can't do through \\wsl.localhost (read, follow or remove a link the
 // distro has) is done in the distro, and the distro follows the link.
 func TestWSLLinksLive(t *testing.T) {
-	name := os.Getenv("MYNA_WSL_TEST_DISTRO")
+	name := os.Getenv("OWL_WSL_TEST_DISTRO")
 	if name == "" || runtime.GOOS != "windows" {
-		t.Skip("MYNA_WSL_TEST_DISTRO not set")
+		t.Skip("OWL_WSL_TEST_DISTRO not set")
 	}
 	t.Setenv("PATH", filepath.Join(os.Getenv("SystemRoot"), "System32")+string(os.PathListSeparator)+os.Getenv("PATH"))
-	base := "/tmp/myna-wsl-links-" + strconv.FormatInt(time.Now().UnixNano(), 36)
+	base := "/tmp/owl-wsl-links-" + strconv.FormatInt(time.Now().UnixNano(), 36)
 	sh := func(script string, args ...string) string {
 		t.Helper()
 		out, err := realWSLRun(30*time.Second, append([]string{"-d", name, "--exec", "sh", "-c", script, "sh"}, args...)...)

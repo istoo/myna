@@ -53,7 +53,7 @@ const (
 	keyNoWindowsAge = 30 * time.Minute
 )
 
-// readsKeyWindows says p is a key whose own usage windows myna reads:
+// readsKeyWindows says p is a key whose own usage windows owl reads:
 // one whose Balance URL is a sub2api panel's query for a key, or one at a
 // vendor whose keys tell their plan's windows (planQuotaSourceOf). Said
 // without asking anything, so any other key costs nothing here.
@@ -74,10 +74,10 @@ func readsKeyWindows(p Provider) bool {
 // account tells, not the key: Volcengine Ark's Coding and Agent Plans and
 // Tencent Cloud's Token Plan Enterprise, read with the account's access
 // key (volcengine_usage.go, tencent_usage.go), and StepFun's Step Plan,
-// read with myna's sign-in to its platform (stepfun_plan.go). The
+// read with owl's sign-in to its platform (stepfun_plan.go). The
 // Usage page had their windows while routing had none, and the Routing
 // page said "one key" of a plan with them (chen on Discord). "" for any
-// other key, or one whose access key myna isn't given; said without
+// other key, or one whose access key owl isn't given; said without
 // asking anything or reading a file, as a request routes by it.
 func accountPlanOf(p Provider) string {
 	if p.Account != nil || p.Key == "" {
@@ -127,7 +127,7 @@ func accountPlanWindows(ctx context.Context, q Provider) (keyReading, error) {
 func keyAllowanceID(p Provider) string { return p.ID + "#" + keyID(p.Key) }
 
 // KeyAllowanceID is what OnRenewed's hooks are told, as the user of agent
-// "", of a key whose own windows myna reads; empty for any other.
+// "", of a key whose own windows owl reads; empty for any other.
 func KeyAllowanceID(p Provider) string {
 	if !readsKeyWindows(p) {
 		return ""
@@ -349,7 +349,7 @@ func StaleKeyAllowance(p Provider) {
 // forgetKeyAllowances has every key's windows read again at its next ask:
 // a key or its Balance URL changed (ForgetBalances). What was read stands
 // until then — fresher than its card's, which routing's reads never write
-// (they are laid over it only for another myna, withKeyReadings) — and
+// (they are laid over it only for another owl, withKeyReadings) — and
 // a key changed is another key, with windows of its own.
 func forgetKeyAllowances() {
 	c := &keyAllowances

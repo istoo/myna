@@ -9,13 +9,13 @@ package agent
 // its own Settings → Import does (importSettingsFromPath,
 // src/core/config/importExport.ts):
 //
-//	{"providerProfiles":{"currentApiConfigName":"myna",
-//	  "apiConfigs":{"myna":{"id":"myna","apiProvider":"openai",
-//	    "openAiBaseUrl":"http://127.0.0.1:3425/v1","openAiApiKey":"myna-zoo-code",
+//	{"providerProfiles":{"currentApiConfigName":"owl",
+//	  "apiConfigs":{"owl":{"id":"owl","apiProvider":"openai",
+//	    "openAiBaseUrl":"http://127.0.0.1:3425/v1","openAiApiKey":"owl-zoo-code",
 //	    "openAiModelId":"<model>","openAiCustomModelInfo":{…}}}}}
 //
 // Imported profiles are merged over the user's own, which stay, and the
-// imported currentApiConfigName becomes the profile Zoo Code uses. myna
+// imported currentApiConfigName becomes the profile Zoo Code uses. owl
 // writes that file in Zoo Code's own folder of VS Code's
 // (zooCodeImportPath) and points the setting at it in VS Code's settings.json, the default profile's and
 // each other profile's (vscodeProfiles), a value of the user's own kept
@@ -25,25 +25,25 @@ package agent
 //
 // What this route can't do: Zoo Code reads the file only when it starts
 // (the Notice asks for a window reload), and imports it again on each
-// start, so while connected each start puts Zoo Code back on myna's
+// start, so while connected each start puts Zoo Code back on owl's
 // profile. A profile once imported lives in Zoo Code's secret storage,
-// which myna can't write, so Disconnect stops the import and leaves the
-// profile "myna" there for the user to switch from or delete. Which
-// profile the user picks inside Zoo Code myna can't see either.
+// which owl can't write, so Disconnect stops the import and leaves the
+// profile "owl" there for the user to switch from or delete. Which
+// profile the user picks inside Zoo Code owl can't see either.
 //
 // Zoo Code for JetBrains runs the same extension in its own extension
 // host, which is handed an empty configuration on every start
 // (RPCManager.startInitialize), so the setting can't reach it there, and
 // keeps its secrets in ~/.zoo-code/secrets.json, a store of its own with
-// no lock and no documented format. myna doesn't write either.
+// no lock and no documented format. owl doesn't write either.
 
 import (
 	"os"
 	"path/filepath"
 	"strings"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/edit"
 	"github.com/tidwall/gjson"
 )
 
@@ -55,7 +55,7 @@ const zooImport = `zoo-code\.autoImportSettingsPath`
 // in begins: zoocodeorganization.zoo-code-<version>.
 const zooExtension = "zoocodeorganization.zoo-code"
 
-var noticeZoo = newNotice("Zoo Code reads myna's profile when it starts — run Developer: Reload Window in VS Code to use this.")
+var noticeZoo = newNotice("Zoo Code reads owl's profile when it starts — run Developer: Reload Window in VS Code to use this.")
 
 func zooCode(home, cfg string) *Agent {
 	// VS Code's own User and extensions folders: a portable build's are
@@ -63,14 +63,14 @@ func zooCode(home, cfg string) *Agent {
 	return zooCodeAt(vscodeDirs(vscodeStable, home, cfg))
 }
 
-// zooCodeImportPath is the file myna has Zoo Code import, in the VS Code
+// zooCodeImportPath is the file owl has Zoo Code import, in the VS Code
 // User folder dir: in Zoo Code's own folder there, beside the settings
 // files it keeps itself (globalStorage/<extension>/settings). It is the
-// agent's config, not myna's: one the user points at a myna on another
+// agent's config, not owl's: one the user points at a owl on another
 // machine keeps that address through a sync (kept.away), which skips
-// myna's own folder.
+// owl's own folder.
 func zooCodeImportPath(dir string) string {
-	return filepath.Join(dir, "globalStorage", zooExtension, "settings", "myna-import.json")
+	return filepath.Join(dir, "globalStorage", zooExtension, "settings", "owl-import.json")
 }
 
 // zooCodeAt is Zoo Code in the VS Code whose User folder is dir and whose
@@ -81,13 +81,13 @@ func zooCodeAt(dir, exts string) *Agent {
 	key := func(p string) string { return "zoo-code:" + p + ":import" }
 	getAt := func(p string) string { v, _ := edit.GetJSON(p, zooImport); return v }
 	ours := func(p string) bool { return getAt(p) == file }
-	// profile is myna's profile in the file, "" when there's none
+	// profile is owl's profile in the file, "" when there's none
 	profile := func() string {
 		b, err := os.ReadFile(file)
 		if err != nil || !gjson.ValidBytes(b) {
 			return ""
 		}
-		return gjson.GetBytes(b, "providerProfiles.apiConfigs."+mynaID).Raw
+		return gjson.GetBytes(b, "providerProfiles.apiConfigs."+owlID).Raw
 	}
 	joined := func() bool { return ours(path) && profile() != "" }
 	model := func() string {
@@ -95,11 +95,11 @@ func zooCodeAt(dir, exts string) *Agent {
 			return ""
 		}
 		if id := gjson.Get(profile(), "openAiModelId").String(); id != "" {
-			return mynaID + "/" + id
+			return owlID + "/" + id
 		}
 		return ""
 	}
-	// restore puts back the setting a settings.json had before myna's
+	// restore puts back the setting a settings.json had before owl's
 	restore := func(p string) error {
 		if was := unstash(key(p)); was != "" {
 			return edit.SetJSON(p, edit.KV{Path: zooImport, Value: was})
@@ -188,10 +188,10 @@ func zooCodeAt(dir, exts string) *Agent {
 		Fields: []Field{{
 			Key: "model", Label: "model", Get: model,
 			Set: func(v string) error {
-				ref, ok := strings.CutPrefix(v, mynaID+"/")
-				if !ok || !isMyna(ref) {
+				ref, ok := strings.CutPrefix(v, owlID+"/")
+				if !ok || !isOwl(ref) {
 					// Zoo Code's own profiles are in its secret storage:
-					// myna stops the import and leaves them to it
+					// owl stops the import and leaves them to it
 					return off()
 				}
 				if err := write(ref); err != nil {
@@ -205,7 +205,7 @@ func zooCodeAt(dir, exts string) *Agent {
 				})
 			},
 			Options: func(map[string]string) []Option {
-				return viaMyna("zoo-code", mynaID+"/")
+				return viaOwl("zoo-code", owlID+"/")
 			},
 		}},
 	}, path, file, stashPath())
@@ -225,12 +225,12 @@ func zooCodeInstalled(exts string) bool {
 	return false
 }
 
-// zooCodeProfiles is myna as Zoo Code's provider profiles to import: one
-// profile, "myna", on the gateway's Chat Completions with model ref, the
+// zooCodeProfiles is owl as Zoo Code's provider profiles to import: one
+// profile, "owl", on the gateway's Chat Completions with model ref, the
 // one Zoo Code uses after the import.
 func zooCodeProfiles(ref string) map[string]any {
 	p := map[string]any{
-		"id": mynaID, "apiProvider": "openai",
+		"id": owlID, "apiProvider": "openai",
 		"openAiBaseUrl": gatewayV1(), "openAiApiKey": agentKey("zoo-code"),
 		"openAiModelId": ref, "openAiStreamingEnabled": true,
 	}
@@ -241,12 +241,12 @@ func zooCodeProfiles(ref string) map[string]any {
 		}
 	}
 	return map[string]any{
-		"currentApiConfigName": mynaID,
-		"apiConfigs":           map[string]any{mynaID: p},
+		"currentApiConfigName": owlID,
+		"apiConfigs":           map[string]any{owlID: p},
 	}
 }
 
-// zooCodeModelInfo is a model of myna's as Zoo Code's modelInfo: the
+// zooCodeModelInfo is a model of owl's as Zoo Code's modelInfo: the
 // window it trims a conversation to, what a reply may take, and whether it
 // sends images. contextWindow and supportsPromptCache are the two its
 // schema requires.

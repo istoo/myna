@@ -3,11 +3,11 @@ package agent
 // omp (oh-my-pi, a fork of Pi) keeps its settings in ~/.omp/agent/config.yml
 // (or where ompDir says its variables move it),
 // the model of each role under modelRoles as "provider/model", and providers
-// of the user's own in models.yml beside it. myna adds itself there as the
-// provider "myna", keyless (auth: none) on loopback, with the catalog as its models; a
-// model through myna is "myna/<provider>/<model>", which omp matches
+// of the user's own in models.yml beside it. owl adds itself there as the
+// provider "owl", keyless (auth: none) on loopback, with the catalog as its models; a
+// model through owl is "owl/<provider>/<model>", which omp matches
 // whole against provider/id. The other roles, the fallback chains and the
-// like may name them as well (ompRefKeys); myna stays while any does.
+// like may name them as well (ompRefKeys); owl stays while any does.
 
 import (
 	"fmt"
@@ -18,12 +18,12 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/dirent"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/dirent"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/provider"
 	"gopkg.in/yaml.v3"
 )
 
@@ -35,9 +35,9 @@ var ompEfforts = []string{"minimal", "low", "medium", "high", "xhigh", "max"}
 // models under each key; the key is a role's name, the only kind omp 16
 // takes (agent-session.ts), or from omp 18 a model selector as well
 // (retry-fallback-chains.ts) — a role's name read with them is no model of
-// myna's and is passed over), the models it cycles through (enabledModels,
+// owl's and is passed over), the models it cycles through (enabledModels,
 // also scoped to paths) and the models of task agents. An entry may end in a
-// thinking level ("myna/deepseek/pro:max").
+// thinking level ("owl/deepseek/pro:max").
 var ompRefKeys = []string{"modelRoles", "retry.fallbackChains", "enabledModels", "task.agentModelOverrides"}
 
 // ompRefs calls fn on each model of a value under ompRefKeys, the spaces
@@ -77,10 +77,10 @@ func ompSplit(v string) (model, level string, one bool) {
 	return model, level, true
 }
 
-// ompOnMyna: a role's value is one of myna's models, at a level or not.
-func ompOnMyna(v string) bool {
+// ompOnOwl: a role's value is one of owl's models, at a level or not.
+func ompOnOwl(v string) bool {
 	_, _, one := ompSplit(v)
-	return one && usesMyna(v)
+	return one && usesOwl(v)
 }
 
 // ompYAMLList: a value the stash keeps is a list as the YAML it was written
@@ -196,10 +196,10 @@ func ompIn(at place) *Agent {
 	return ompAt(at, at.join(".omp", "agent"), func() ompProviderEntry { return ompProviderAt(at.gw(), at.version) })
 }
 
-// ompAt is omp with its agent folder at dir, myna's entry in its
+// ompAt is omp with its agent folder at dir, owl's entry in its
 // models.yml being entry's.
 func ompAt(at place, dir string, entry func() ompProviderEntry) *Agent {
-	// myna's entry laid over the one in the models file at path (ompKept)
+	// owl's entry laid over the one in the models file at path (ompKept)
 	ompProvider := func(path string) any { return ompKept(path, entry()) }
 	// omp reads the .yml and falls back to the .yaml
 	pick := func(name string) string {
@@ -224,60 +224,60 @@ func ompAt(at place, dir string, entry func() ompProviderEntry) *Agent {
 			return strings.Join(edit.GetYAMLList(path, k), ",")
 		}
 	}
-	// onMyna: a role, a fallback chain, … (ompRefKeys) still names one of
-	// myna's models
-	onMyna := func() (used bool, err error) {
+	// onOwl: a role, a fallback chain, … (ompRefKeys) still names one of
+	// owl's models
+	onOwl := func() (used bool, err error) {
 		err = edit.EditYAMLStrings(path, ompRefKeys, func(v string) string {
-			ompRefs(v, func(m string) string { used = used || usesMyna(m); return m })
+			ompRefs(v, func(m string) string { used = used || usesOwl(m); return m })
 			return v
 		})
 		return used, err
 	}
-	writeMyna := func() error {
+	writeOwl := func() error {
 		models := pick("models")
 		if _, err := os.Stat(models); err != nil {
 			// omp moves an older models.json to models.yml only while there is
-			// no models.yml, so one myna writes first has to carry it over
+			// no models.yml, so one owl writes first has to carry it over
 			if err := edit.JSONToYAML(filepath.Join(dir, "models.json"), models); err != nil {
 				return err
 			}
 		}
-		return edit.SetYAML(models, edit.KV{Path: "providers." + mynaID, Value: ompProvider(models)})
+		return edit.SetYAML(models, edit.KV{Path: "providers." + owlID, Value: ompProvider(models)})
 	}
-	// dropMyna takes myna's provider out of models.yml once nothing in
-	// the config is on myna; while something is (a fallback chain, another
-	// role), it writes it afresh instead, so a role set off myna — applying
+	// dropOwl takes owl's provider out of models.yml once nothing in
+	// the config is on owl; while something is (a fallback chain, another
+	// role), it writes it afresh instead, so a role set off owl — applying
 	// again what Check found — mends the wiring that is left.
-	// The plain entries of enabledModels on myna, which myna adds there
-	// (omp_scope.go), don't count: once nothing else is on myna they go
+	// The plain entries of enabledModels on owl, which owl adds there
+	// (omp_scope.go), don't count: once nothing else is on owl they go
 	// with its provider (#1769). Those scoped to folders are the user's, and
 	// count.
-	dropMyna := func() error {
+	dropOwl := func() error {
 		used := false
 		err := edit.EditYAMLStrings(path, slices.DeleteFunc(slices.Clone(ompRefKeys), func(k string) bool { return k == "enabledModels" }), func(v string) string {
-			ompRefs(v, func(m string) string { used = used || usesMyna(m); return m })
+			ompRefs(v, func(m string) string { used = used || usesOwl(m); return m })
 			return v
 		})
 		if err == nil && !used {
-			used, err = ompScopeFoldersOnMyna(path)
+			used, err = ompScopeFoldersOnOwl(path)
 		}
 		switch {
 		case err != nil:
 			return err
 		case used:
-			return writeMyna()
+			return writeOwl()
 		}
 		if err := ompScopeWithout(path); err != nil {
 			return err
 		}
 		forget(gone)
-		return edit.DelYAML(pick("models"), "providers."+mynaID)
+		return edit.DelYAML(pick("models"), "providers."+owlID)
 	}
 	// was are the stash's keys for the roles, one each
 	var was []string
-	// role is the field for one of omp's model roles: one of myna's brings
-	// myna's provider into models.yml, and it goes once nothing is on it.
-	// What the user had there before myna took the role over is stashed,
+	// role is the field for one of omp's model roles: one of owl's brings
+	// owl's provider into models.yml, and it goes once nothing is on it.
+	// What the user had there before owl took the role over is stashed,
 	// and resetting the role puts it back: a list of models as the YAML it
 	// was written in, a flow list flow and a block one block.
 	role := func(key, label, name string, quiet bool) Field {
@@ -298,20 +298,20 @@ func ompAt(at place, dir string, entry func() ompProviderEntry) *Agent {
 			Set: func(v string) error {
 				cur := get()
 				if v == "" {
-					if ompOnMyna(cur) {
+					if ompOnOwl(cur) {
 						v = unstash(w)
 					}
 					if v == "" {
 						if err := edit.DelYAML(path, k); err != nil {
 							return err
 						}
-						return dropMyna()
+						return dropOwl()
 					}
 					if ompYAMLList(v) {
 						if err := edit.SetYAML(path, edit.KV{Path: k, Value: edit.YAMLText(v)}); err != nil {
 							return err
 						}
-						return dropMyna()
+						return dropOwl()
 					}
 				} else if _, level, one := ompSplit(v); one && level == "" {
 					// another model keeps the role's thinking level; omp
@@ -326,11 +326,11 @@ func ompAt(at place, dir string, entry func() ompProviderEntry) *Agent {
 					}
 				}
 				model, _, one := ompSplit(v)
-				if ref, ok := strings.CutPrefix(model, mynaID+"/"); one && ok && isMyna(ref) {
-					if !ompOnMyna(cur) {
+				if ref, ok := strings.CutPrefix(model, owlID+"/"); one && ok && isOwl(ref) {
+					if !ompOnOwl(cur) {
 						stash(map[string]string{w: kept()})
 					}
-					if err := writeMyna(); err != nil {
+					if err := writeOwl(); err != nil {
 						return err
 					}
 					return edit.SetYAML(path, edit.KV{Path: k, Value: v})
@@ -339,10 +339,10 @@ func ompAt(at place, dir string, entry func() ompProviderEntry) *Agent {
 				if err := edit.SetYAML(path, edit.KV{Path: k, Value: v}); err != nil {
 					return err
 				}
-				return dropMyna()
+				return dropOwl()
 			},
 			Options: func(cur map[string]string) []Option {
-				opts := append(ompOwnOptions(pick("models"), cur[key]), viaMynaShared("omp", mynaID+"/")...)
+				opts := append(ompOwnOptions(pick("models"), cur[key]), viaOwlShared("omp", owlID+"/")...)
 				// a catalog model with a thinking level is offered as it
 				// reads, beside the model: that keeps the level, the model
 				// alone clears it
@@ -386,7 +386,7 @@ func ompAt(at place, dir string, entry func() ompProviderEntry) *Agent {
 		// (ROLE_CONFIGURED_FALLBACK). omp's other roles (KIND_ROLE_IDS)
 		// are for kinds of model other than chat: image making, web
 		// search, speech, dictation, and the judge its find tool turns on
-		// for a TypeSafe jev model. Of those myna writes image models
+		// for a TypeSafe jev model. Of those owl writes image models
 		// for omp (ompImageModels), picked in omp's own Roles view
 		role("commit", "commit", "commit", true),
 		role("tiny", "tiny", "tiny", true),
@@ -410,7 +410,7 @@ func ompAt(at place, dir string, entry func() ompProviderEntry) *Agent {
 	// ":level" omp reads off the end of the role's model
 	// (splitThinkingSuffix, resolveModelRoleValue): #1397, the slow role at
 	// high while sessions start at medium. It is the role's value written
-	// again, so it goes through the role's own Set (myna's provider, the
+	// again, so it goes through the role's own Set (owl's provider, the
 	// stash). Offered while the role is one model: a role that follows
 	// another, or a list omp falls back through, has no level here. Unset,
 	// the role runs at the session's level
@@ -459,19 +459,19 @@ func ompAt(at place, dir string, entry func() ompProviderEntry) *Agent {
 		ListOnly:    true,
 		Sync: func() error {
 			models := pick("models")
-			if err := syncYAML(models, "providers."+mynaID, func() any { return ompProvider(models) }); err != nil {
+			if err := syncYAML(models, "providers."+owlID, func() any { return ompProvider(models) }); err != nil {
 				return err
 			}
-			// an entry on a model myna no longer gives omp names nothing
+			// an entry on a model owl no longer gives omp names nothing
 			// (#2055, scope_gone.go)
 			return ompScopeSynced(path, models, gone)
 		},
 		// a provider renamed takes its models' ids in models.yml with it; a
 		// name left on the old one omp would pass over, with a warning. So
-		// does what a role had before myna (a list may name myna's
+		// does what a role had before owl (a list may name owl's
 		// models), which a reset puts back
 		RenameRefs: func(from, to string) (bool, error) {
-			old, now := mynaID+"/"+from+"/", mynaID+"/"+to+"/"
+			old, now := owlID+"/"+from+"/", owlID+"/"+to+"/"
 			move := func(v string) string {
 				return ompRefs(v, func(m string) string {
 					if rest, ok := strings.CutPrefix(m, old); ok {
@@ -515,19 +515,19 @@ func ompAt(at place, dir string, entry func() ompProviderEntry) *Agent {
 			return ""
 		},
 		Check: func() string {
-			// whatever keeps myna's provider in models.yml has its wiring
+			// whatever keeps owl's provider in models.yml has its wiring
 			// checked, a fallback chain alone as much as a role
-			if used, _ := onMyna(); !used {
+			if used, _ := onOwl(); !used {
 				return ""
 			}
 			models := pick("models")
-			if d := wiringOff("omp", models, func(k string) (string, bool) { return edit.GetYAML(models, "providers."+mynaID+"."+k) },
+			if d := wiringOff("omp", models, func(k string) (string, bool) { return edit.GetYAML(models, "providers."+owlID+"."+k) },
 				"baseUrl", at.v1()); d != "" {
 				return d
 			}
-			// a default role on myna that enabledModels leaves out never
+			// a default role on owl that enabledModels leaves out never
 			// starts; setting it again adds it there (#1769)
-			if def := roleGet("default")(); ompOnMyna(def) {
+			if def := roleGet("default")(); ompOnOwl(def) {
 				if m := ompScopeLeavesOut(path, def); m != "" {
 					return "omp's enabledModels (" + filepath.Base(path) + ") leaves out " + m + ", so new sessions start on another of its models"
 				}
@@ -626,13 +626,13 @@ var ompVersion = func() string { return (&Agent{ID: "omp", Bin: "omp"}).Installe
 
 // ompTakesMax says whether omp at version v takes max in models.yml. One
 // whose version isn't known is taken for an older one: a max it refuses
-// costs every model myna gives it, an xhigh in its place only the top
+// costs every model owl gives it, an xhigh in its place only the top
 // level of a model that has both.
 func ompTakesMax(v string) bool {
 	return v != "" && !Newer(ompMaxSince, v)
 }
 
-// ompProvider is myna's entry in models.yml. The thinking efforts are the
+// ompProvider is owl's entry in models.yml. The thinking efforts are the
 // levels omp offers for the model; on Chat it sends them as
 // reasoning_effort.
 //
@@ -730,14 +730,14 @@ func ompProviderAt(gw, version string) ompProviderEntry {
 // the whole file away over an api it doesn't list.
 const ompKindSince = "18.7.0"
 
-// ompImageModels are myna's image models (Settings › Images, as
+// ompImageModels are owl's image models (Settings › Images, as
 // generate_image offers them) as omp's image role takes them (treeman_26897
 // on Discord): kind image on openai-images, which omp's generate_image
 // posts to the provider's baseUrl + /images/generations, or /images/edits
 // with images to change (pi-ai images/openai-images.ts, omp 18.7.0 to
 // 18.15.0), the gateway's /v1/images. The role accepts a model of kind
 // image alone (model-roles.ts), and a chat model is of kind chat, so before
-// these the role listed none of myna's. With one listed, the provider
+// these the role listed none of owl's. With one listed, the provider
 // takes the gateway's key in place of auth: none (ompProviderAt). None for
 // an omp before ompKindSince, or one whose version isn't known, as
 // ompTakesMax; nor one whose id a chat model in chat has already, which one
@@ -775,16 +775,16 @@ func ompGeminiMode(id string) string {
 	return "google-level"
 }
 
-// ompKept is myna's entry e laid over the one in the models.yml at path.
+// ompKept is owl's entry e laid over the one in the models.yml at path.
 // omp keeps keys its schema doesn't name and never writes the file itself,
-// so what is there beside myna's is the user's: modelOverrides (a model's
+// so what is there beside owl's is the user's: modelOverrides (a model's
 // context or cost), discovery, disableStrictTools, remoteCompaction, a
 // header or compat flag of their own (models-config-schema-bundle.ts
 // ProviderConfigSchema). Each stays; the address, API, auth, key and model
-// list are myna's, an auth or key it no longer writes gone with it, so a
+// list are owl's, an auth or key it no longer writes gone with it, so a
 // loopback's auth: none never sits beside the key a WSL omp needs (#2030).
 func ompKept(path string, e ompProviderEntry) any {
-	return yamlKept(path, "providers."+mynaID, e, "baseUrl", "api", "auth", "apiKey", "models")
+	return yamlKept(path, "providers."+owlID, e, "baseUrl", "api", "auth", "apiKey", "models")
 }
 
 // ompOwnOptions lists the models of the providers the user added to omp's
@@ -794,7 +794,7 @@ func ompKept(path string, e ompProviderEntry) any {
 // either one had. A provider in both stays one group, where it first comes:
 // the picker draws a heading at each change of group. A provider with only
 // discovery has its models listed by omp asking it at run time, out of
-// myna's sight, so it offers none here.
+// owl's sight, so it offers none here.
 func ompOwnOptions(modelsFile, cur string) []Option {
 	var f struct {
 		Providers map[string]struct {
@@ -809,7 +809,7 @@ func ompOwnOptions(modelsFile, cur string) []Option {
 	}
 	providers := make([]string, 0, len(f.Providers))
 	for p := range f.Providers {
-		if p != mynaID {
+		if p != owlID {
 			providers = append(providers, p)
 		}
 	}

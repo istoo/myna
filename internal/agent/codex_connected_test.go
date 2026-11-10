@@ -6,17 +6,17 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/owl/internal/edit"
 )
 
-// Codex signed in with ChatGPT, connected on one of myna's models beside
+// Codex signed in with ChatGPT, connected on one of owl's models beside
 // its sign-in, stays connected when Codex writes one of its own models in
 // (its /model, or a Codex app still running on its old pick): its own
-// models are in its list beside myna's, as when it joined (#940: Codex
-// read as not connected then, its config still on myna's gateway).
-// Disconnect leaves it on that model. Made myna's provider (the Codex
+// models are in its list beside owl's, as when it joined (#940: Codex
+// read as not connected then, its config still on owl's gateway).
+// Disconnect leaves it on that model. Made owl's provider (the Codex
 // app blocking its account), it is not beside the sign-in.
-func TestCodexOwnPickAfterMynaModelStaysConnected(t *testing.T) {
+func TestCodexOwnPickAfterOwlModelStaysConnected(t *testing.T) {
 	home, read := codexHome(t, `{"tokens":{"access_token":"x","id_token":"x.e30.x"}}`, "model = \"gpt-5.5\"\n")
 	cx := codex(home)
 	if err := cx.Apply("model", "fake/m1"); err != nil {
@@ -31,7 +31,7 @@ func TestCodexOwnPickAfterMynaModelStaysConnected(t *testing.T) {
 	if !cx.Wired() {
 		t.Fatalf("Codex's own pick disconnected it:\n%s", read())
 	}
-	// a pick beside myna's models, not a change from outside (#2424)
+	// a pick beside owl's models, not a change from outside (#2424)
 	if d := cx.Drift(); d != nil {
 		t.Fatalf("drift on Codex's own pick beside its sign-in: %+v", d)
 	}
@@ -42,8 +42,8 @@ func TestCodexOwnPickAfterMynaModelStaysConnected(t *testing.T) {
 		t.Fatalf("disconnected:\n%s", cfg)
 	}
 
-	// out of its allowance, myna is its provider: an own model written
-	// back is a change from outside, not a pick beside myna's
+	// out of its allowance, owl is its provider: an own model written
+	// back is a change from outside, not a pick beside owl's
 	codexUsedUp = func() bool { return true }
 	if err := cx.Fields[0].Set("fake/m1"); err != nil {
 		t.Fatal(err)
@@ -56,16 +56,16 @@ func TestCodexOwnPickAfterMynaModelStaysConnected(t *testing.T) {
 		t.Fatal(err)
 	}
 	if cx.Wired() {
-		t.Fatalf("still beside the sign-in after myna became its provider:\n%s", read())
+		t.Fatalf("still beside the sign-in after owl became its provider:\n%s", read())
 	}
 }
 
 // Connected while Codex can't join (the Codex app blocking its ChatGPT
 // account, or a provider of its own in config.toml), Codex stays on the
-// model it was on as myna serves it on the ChatGPT account, not the first
-// of myna's other models (#940: it went to Grok 4.7, "myna doesn't
+// model it was on as owl serves it on the ChatGPT account, not the first
+// of owl's other models (#940: it went to Grok 4.7, "owl doesn't
 // serve the model it was on").
-func TestCodexConnectKeepsItsOwnModelThroughMyna(t *testing.T) {
+func TestCodexConnectKeepsItsOwnModelThroughOwl(t *testing.T) {
 	home, read := codexHome(t, `{"tokens":{"access_token":"x","id_token":"x.e30.x"}}`, "model = \"gpt-b\"\n")
 	os.WriteFile(filepath.Join(home, ".codex", "models_cache.json"), []byte(`{"models":[
 		{"slug":"gpt-a","display_name":"A","priority":1},

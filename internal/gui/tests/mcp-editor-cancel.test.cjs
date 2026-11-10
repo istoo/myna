@@ -26,7 +26,7 @@ const TOKEN = "Bearer ghp_0000000000000000000000000000000000AB";
 
 function server(lang, calls) {
   const lib = {
-    dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
+    dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
     agents: [agent("claude", "Claude Code")],
     instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [], skills: [],
     servers: [
@@ -82,13 +82,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const w = (s) => tr(lang, s);
           const calls = [];
           const ctx = await browser.newContext({ viewport: { width, height: 800 } });
-          await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "mcp"); } catch {} });
+          await ctx.addInitScript(() => { try { localStorage.setItem("owl.libTab", "mcp"); } catch {} });
           const page = await ctx.newPage();
           page.setDefaultTimeout(5000);
           page.setDefaultNavigationTimeout(60000);
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", server(lang, calls));
-          await page.goto("http://myna.test/");
+          await page.goto("http://owl.test/");
           await navTo(page, "library");
           const row = (name) => page.locator("#view-library .lib-server", { has: page.locator(`.lib-health[data-server="${name}"]`) });
           const ed = page.locator("#modal .lib-editor");

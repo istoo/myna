@@ -6,12 +6,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // factoryPolicyMsg is what the Factory plugin says of Factory's usage
-// policy check refusing a request, as sweanng's ZCode showed it from myna
-// (Discord #general, 10-29), myna's "Factory: " left off.
+// policy check refusing a request, as sweanng's ZCode showed it from owl
+// (Discord #general, 10-29), owl's "Factory: " left off.
 const factoryPolicyMsg = `This request was blocked by Factory's usage policy check. (upstream request id 8d1f0c2a3b4e5f60::LAX, code content_policy_rejected) — Factory's usage policy check reads the whole conversation, so this session's requests are refused again until the text that tripped it is gone: start a new session, or remove or reword what the conversation quotes (another agent's system prompt or instructions pasted in a message or a tool's output are the usual cause)`
 
 // factoryPolicy403 is that refusal as the Factory plugin answers it, in
@@ -51,7 +51,7 @@ func TestFactoryPolicyRejectedIsARefusal(t *testing.T) {
 	}
 }
 
-// sweanng's ZCode, asking Factory through myna, was handed Factory's
+// sweanng's ZCode, asking Factory through owl, was handed Factory's
 // usage policy refusal as the plugin's 403 permission_error, and showed
 // "Provider authentication failed" (reason=auth_failed status=403). Each
 // agent protocol is now told it as a refusal of the request: 400, the

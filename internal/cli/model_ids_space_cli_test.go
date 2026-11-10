@@ -4,7 +4,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A model id can hold a space ("Opus 5.5" on a relay, #1976): models=,

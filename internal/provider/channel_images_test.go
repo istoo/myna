@@ -7,9 +7,9 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/codexcat"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/codexcat"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // #2157 (sstdgm): a custom provider's nyro-gpt-5.5 is GPT-5.5 on the

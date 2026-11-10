@@ -8,7 +8,7 @@ import (
 
 // A reply's model name is one setting of three (ReplyModel, ZoeCats on
 // Discord). A file from before it, with memberModel on, still names the
-// member; memberModel is written beside replyModel for such a myna, and
+// member; memberModel is written beside replyModel for such a owl, and
 // the model asked for is "" whichever way it is sent.
 func TestReplyModelFoldsMemberModel(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
@@ -59,7 +59,7 @@ func TestReplyModelFoldsMemberModel(t *testing.T) {
 		{ReplyVendor, true, ReplyVendor},
 		{ReplyMember, false, ReplyMember},
 		{ReplyAsked, true, ""},
-		{"", true, ReplyMember}, // as a myna before replyModel sends it
+		{"", true, ReplyMember}, // as a owl before replyModel sends it
 		{"", false, ""},
 	} {
 		if err := Save(Settings{ReplyModel: c.reply, MemberModel: c.member}); err != nil {

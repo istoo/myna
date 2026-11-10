@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/claudetui"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/claudetui"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // appendHarness is a script harness whose Claude Code keeps the file it is
@@ -26,7 +26,7 @@ done`)
 	if tui {
 		claudeTUIRuns = true
 		t.Cleanup(func() { claudeTUIRuns = false })
-		helper := filepath.Join(t.TempDir(), "myna")
+		helper := filepath.Join(t.TempDir(), "owl")
 		testenv.Program(t, helper, `#!/bin/sh
 [ "$1" = "`+claudetui.Command+`" ] || exit 9
 shift; claude=$1; shift

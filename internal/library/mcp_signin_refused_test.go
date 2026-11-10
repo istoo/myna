@@ -5,14 +5,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/mcpauth"
-	"github.com/istoo/myna/internal/mcpauth/mcpauthtest"
+	"github.com/istoo/owl/internal/mcpauth"
+	"github.com/istoo/owl/internal/mcpauth/mcpauthtest"
 )
 
 // Xichun123 (#1619): Figma's remote MCP server (mcp.figma.com/mcp) admits
-// only the clients it lists, and its authorization server answers myna's
+// only the clients it lists, and its authorization server answers owl's
 // dynamic client registration 403 with the bare body "Forbidden". The
-// Library's Sign in said "registering myna with the server's sign-in
+// Library's Sign in said "registering owl with the server's sign-in
 // failed (403): Forbidden", which reads as a fault to retry. It now says the
 // server admits only its listed apps and that each agent signs in itself,
 // and the agents given the server keep its own address, where they do.

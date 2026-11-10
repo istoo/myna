@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/provider"
 )
 
 func TestAsideImageCatalogSeparatesGenerationFromVision(t *testing.T) {
@@ -18,10 +18,10 @@ func TestAsideImageCatalogSeparatesGenerationFromVision(t *testing.T) {
 	opts := asideImageOptions()
 	found := false
 	for _, o := range opts {
-		if o.Value == "myna/art/vision-chat" {
+		if o.Value == "owl/art/vision-chat" {
 			t.Fatal("vision model offered as image generator")
 		}
-		if o.Value == "myna/art/gpt-image-1" {
+		if o.Value == "owl/art/gpt-image-1" {
 			found = true
 		}
 	}
@@ -29,10 +29,10 @@ func TestAsideImageCatalogSeparatesGenerationFromVision(t *testing.T) {
 		t.Fatal("image generation endpoint omitted")
 	}
 	a := mustFindAside(t)
-	if err := a.Apply("image", "myna/art/gpt-image-1"); err != nil {
+	if err := a.Apply("image", "owl/art/gpt-image-1"); err != nil {
 		t.Fatal(err)
 	}
-	if a.Field("image").Get() != "myna/art/gpt-image-1" {
+	if a.Field("image").Get() != "owl/art/gpt-image-1" {
 		t.Fatal("image setting not preserved")
 	}
 	if err := a.Disconnect(); err != nil {
@@ -48,7 +48,7 @@ func TestAsideRuntimeRefusalDoesNotCommitOwnership(t *testing.T) {
 	a := mustFindAside(t)
 	before := readFile(settings)
 	asideSet = func(string, string) error { return nil }
-	if err := a.Apply("fast", "myna/relay/glm-4.6"); err == nil {
+	if err := a.Apply("fast", "owl/relay/glm-4.6"); err == nil {
 		t.Fatal("silently dropped selection was accepted")
 	}
 	if readFile(settings) != before {
@@ -70,7 +70,7 @@ func TestAsideModelChangesKeepOriginalRestorePoint(t *testing.T) {
 		t.Fatal(err)
 	}
 	a := mustFindAside(t)
-	for _, v := range []string{"myna/relay/one", "myna/relay/two"} {
+	for _, v := range []string{"owl/relay/one", "owl/relay/two"} {
 		if err := a.Apply("model", v); err != nil {
 			t.Fatal(err)
 		}
@@ -90,7 +90,7 @@ func TestAsideRoleRestoreKeepsDefaultAndOtherRoles(t *testing.T) {
 	}
 	before := readFile(settings)
 	a := mustFindAside(t)
-	if err := a.Apply("fast", "myna/relay/glm-4.6"); err != nil {
+	if err := a.Apply("fast", "owl/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	if a.Field("model").Get() != "native/native-model" || a.Field("deep").Get() != "" {
@@ -116,7 +116,7 @@ func equalJSONValues(a, b any) bool {
 func TestAsidePlanRejectsChangedFiles(t *testing.T) {
 	settings, models := asideHome(t)
 	a := mustFindAside(t)
-	if err := a.Apply("model", "myna/relay/glm-4.6"); err != nil {
+	if err := a.Apply("model", "owl/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	plan, err := a.Native.Disconnect()
@@ -129,7 +129,7 @@ func TestAsidePlanRejectsChangedFiles(t *testing.T) {
 	if err := a.Native.Execute(plan); err == nil {
 		t.Fatal("stale plan was executed")
 	}
-	if _, ok := edit.GetJSON(models, "providers.myna"); !ok {
+	if _, ok := edit.GetJSON(models, "providers.owl"); !ok {
 		t.Fatal("stale plan removed provider")
 	}
 }
@@ -141,7 +141,7 @@ func TestAsideReconnectAndSyncNeverChangeSelections(t *testing.T) {
 		t.Fatal(err)
 	}
 	before := readFile(settings)
-	if err := edit.SetJSON(models, edit.KV{Path: "providers.myna.baseUrl", Value: "http://127.0.0.1:9/v1"}); err != nil {
+	if err := edit.SetJSON(models, edit.KV{Path: "providers.owl.baseUrl", Value: "http://127.0.0.1:9/v1"}); err != nil {
 		t.Fatal(err)
 	}
 	bad := readFile(models)
@@ -186,7 +186,7 @@ func TestAsideSettingsIDsAreQuoted(t *testing.T) {
 func TestAsideRestoreReadbackFailureKeepsProvider(t *testing.T) {
 	_, models := asideHome(t)
 	a := mustFindAside(t)
-	if err := a.Apply("model", "myna/relay/glm-4.6"); err != nil {
+	if err := a.Apply("model", "owl/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	inner := asideRead
@@ -201,7 +201,7 @@ func TestAsideRestoreReadbackFailureKeepsProvider(t *testing.T) {
 	if err := a.Disconnect(); err == nil {
 		t.Fatal("unconfirmed restoration reported success")
 	}
-	if _, ok := edit.GetJSON(models, "providers.myna"); !ok {
+	if _, ok := edit.GetJSON(models, "providers.owl"); !ok {
 		t.Fatal("provider deleted after failed readback")
 	}
 }
@@ -212,7 +212,7 @@ func TestAsideImageFailureDoesNotMarkProviderDisconnected(t *testing.T) {
 	if err := a.Connect(); err != nil {
 		t.Fatal(err)
 	}
-	if err := edit.SetJSON(settings, edit.KV{Path: asideImageKey, Value: json.RawMessage(`{"provider":"myna","modelId":"gone/image"}`)}); err != nil {
+	if err := edit.SetJSON(settings, edit.KV{Path: asideImageKey, Value: json.RawMessage(`{"provider":"owl","modelId":"gone/image"}`)}); err != nil {
 		t.Fatal(err)
 	}
 	a = mustFindAside(t)

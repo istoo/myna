@@ -90,7 +90,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.route("**/*", serve(lang, posted, st));
         const load = async () => {
           await watchSettingsReads(page);
-          await page.goto("http://myna.test/?view=settings&tab=models");
+          await page.goto("http://owl.test/?view=settings&tab=models");
           await settingsDrawn(page);
           await page.locator("#searchList .searcher-row").waitFor();
         };

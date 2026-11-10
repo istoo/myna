@@ -4,7 +4,7 @@ package provider
 // was read again from there at every look, so Remove refused it and said to
 // run `CODEX_HOME=… codex logout` (charliepu on Discord, Windows: the
 // folder was C:\Users\…\.codex-db-backup-20260803, a backup no Codex runs
-// in). Removed now, the folder's sign-in is set aside here, myna's own
+// in). Removed now, the folder's sign-in is set aside here, owl's own
 // record: that folder is listed no more while it holds that sign-in. Its
 // files are left as they are. A sign-in made there again is another token,
 // which nothing here names: it is listed again with no step of the user's.
@@ -17,14 +17,14 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/istoo/myna/internal/lastgood"
+	"github.com/istoo/owl/internal/lastgood"
 )
 
 // codexAsideMu guards the record's file.
 var codexAsideMu sync.Mutex
 
 // codexAsidePath is the record: a Codex folder to the hash of the sign-in
-// in it that the user removed from myna (codexAsideKey).
+// in it that the user removed from owl (codexAsideKey).
 func codexAsidePath() string {
 	return filepath.Join(filepath.Dir(Path()), "codex-homes-removed.json")
 }
@@ -63,7 +63,7 @@ func readCodexAside() (map[string]string, error) {
 }
 
 // setCodexAside records that the sign-in auth in the Codex folder dir was
-// removed from myna.
+// removed from owl.
 func setCodexAside(dir string, auth []byte) error {
 	key := codexAsideKey(auth)
 	if key == "" {
@@ -88,7 +88,7 @@ func setCodexAside(dir string, auth []byte) error {
 }
 
 // codexSetAside says whether l, read from its folder l.Home, is the sign-in
-// the user removed from myna there, by the record m (readCodexAside).
+// the user removed from owl there, by the record m (readCodexAside).
 func codexSetAside(l savedLogin, m map[string]string) bool {
 	key := codexAsideKey(l.Auth)
 	return key != "" && m[filepath.Clean(l.Home)] == key

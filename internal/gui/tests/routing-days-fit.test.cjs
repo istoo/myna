@@ -71,7 +71,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], asked = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, allDays, asked));
-        await page.goto("http://myna.test/?view=routing");
+        await page.goto("http://owl.test/?view=routing");
         await page.locator(".rt-days .rt-day-more").waitFor();
         await page.waitForTimeout(200);
 
@@ -120,7 +120,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     t.after(() => browser.close());
     const page = await (await browser.newContext({ viewport: { width: 1100, height: 760 } })).newPage();
     await page.route("**/*", serve("en", allDays.slice(0, 3), []));
-    await page.goto("http://myna.test/?view=routing");
+    await page.goto("http://owl.test/?view=routing");
     await page.locator(".rt-days .rt-day").nth(3).waitFor();
     await page.waitForTimeout(200);
     assert.equal(await page.locator(".rt-days .rt-day-more").count(), 0);
@@ -132,7 +132,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     t.after(() => browser.close());
     const page = await (await browser.newContext({ viewport: { width: 1600, height: 760 } })).newPage();
     await page.route("**/*", serve("en", allDays.slice(0, 8), []));
-    await page.goto("http://myna.test/?view=routing");
+    await page.goto("http://owl.test/?view=routing");
     await page.locator(".rt-days .rt-day").nth(8).waitFor();
     await page.waitForTimeout(200);
     const wide = await seen(page);

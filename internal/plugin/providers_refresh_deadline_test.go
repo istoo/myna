@@ -12,11 +12,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/settings"
 )
 
-// refreshSandbox isolates the test's myna folders and replaces the
+// refreshSandbox isolates the test's owl folders and replaces the
 // bounded provider refresh with ask, so a stalled or failing ask is
 // proved without Bun, a host or a network. The folders are the test's
 // own, as sandbox's are, so nothing under a real HOME is touched.
@@ -29,8 +29,8 @@ func refreshSandbox(t *testing.T, ask func(ctx context.Context, epoch uint64) er
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(dir, "cache"))
 	// a Bun is at hand, as HasBun's check needs to let the refresh start:
 	// the replaced ask never runs it
-	t.Setenv("MYNA_BUN", "bun-not-really")
-	// the plugin's providers as this myna keeps them
+	t.Setenv("OWL_BUN", "bun-not-really")
+	// the plugin's providers as this owl keeps them
 	if err := os.MkdirAll(settings.Dir(), 0o700); err != nil {
 		t.Fatal(err)
 	}
@@ -196,7 +196,7 @@ func TestRefreshSingleFlight(t *testing.T) {
 	}
 }
 
-// Another myna's invalidation while a refresh is running must not be
+// Another owl's invalidation while a refresh is running must not be
 // overwritten by that refresh's older completion.
 func TestRefreshOutlivedByInvalidation(t *testing.T) {
 	stale := make(chan struct{})

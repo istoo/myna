@@ -5,18 +5,18 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/proc"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/proc"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // Gemini CLI only speaks Google's own API, so "provider" here is how it
 // authenticates: Google sign-in, a Gemini API key, or Vertex AI. The choice
 // lives in settings.json (security.auth.selectedType). A Google provider
-// added in myna lends its key through ~/.gemini/.env, which the CLI loads.
+// added in owl lends its key through ~/.gemini/.env, which the CLI loads.
 //
-// Any catalog model works too: the gateway serves the Gemini API, so myna
+// Any catalog model works too: the gateway serves the Gemini API, so owl
 // points GOOGLE_GEMINI_BASE_URL at it, uses the gateway token as the API
 // key and names the catalog model in model.name.
 
@@ -35,13 +35,13 @@ func geminiIn(at place) *Agent {
 	envKey := func() string { v, _ := edit.GetEnvFile(envPath, "GEMINI_API_KEY"); return v }
 	// routed: the .env names the gateway, or names it at an address it
 	// no longer has (a WSL distro's under NAT changes as WSL restarts) with
-	// myna's key: either way what is there is myna's, never stashed as
+	// owl's key: either way what is there is owl's, never stashed as
 	// the user's own
 	routed := func() bool {
 		b, k := base(), envKey()
 		return b == at.gw() || b != "" && (ourKey(k) || k == at.gwKey())
 	}
-	mynaKey := func() string {
+	owlKey := func() string {
 		for _, id := range []string{"google", "gemini"} {
 			if p, err := provider.Find(id); err == nil && p.Key != "" {
 				return p.Key
@@ -94,7 +94,7 @@ func geminiIn(at place) *Agent {
 			}
 			return delModelName(path)
 		}
-		if isMyna(v) {
+		if isOwl(v) {
 			if !routed() {
 				stash(map[string]string{at.key("gemini.base_url"): base(), at.key("gemini.api_key"): envKey(), at.key("gemini.auth"): auth(), at.key("gemini.model"): model()})
 			}
@@ -111,7 +111,7 @@ func geminiIn(at place) *Agent {
 
 	current := func() string {
 		if routed() {
-			return mynaID
+			return owlID
 		}
 		if base() != "" {
 			return "custom"
@@ -129,15 +129,15 @@ func geminiIn(at place) *Agent {
 		return "google"
 	}
 	use := func(id string) error {
-		if id == mynaID {
+		if id == owlID {
 			if routed() {
 				return nil
 			}
-			return fmt.Errorf("pick a model via myna instead; that routes Gemini CLI through the gateway")
+			return fmt.Errorf("pick a model via owl instead; that routes Gemini CLI through the gateway")
 		}
-		// an auth it doesn't know is refused before myna is taken out:
-		// `myna gemini <a model it has no option for>` comes here, and
-		// unrouted Gemini CLI first, as `myna snow --help` took myna
+		// an auth it doesn't know is refused before owl is taken out:
+		// `owl gemini <a model it has no option for>` comes here, and
+		// unrouted Gemini CLI first, as `owl snow --help` took owl
 		// out of Snow (#1457)
 		switch id {
 		case "", "custom", "google", "vertex", "api-key":
@@ -170,7 +170,7 @@ func geminiIn(at place) *Agent {
 			if err := edit.SetJSON(path, edit.KV{Path: "security.auth.selectedType", Value: "gemini-api-key"}); err != nil {
 				return err
 			}
-			if k := mynaKey(); k != "" && envKey() != k {
+			if k := owlKey(); k != "" && envKey() != k {
 				if err := edit.SetEnvFile(envPath, edit.KV{Path: "GEMINI_API_KEY", Value: k}); err != nil {
 					return err
 				}
@@ -185,7 +185,7 @@ func geminiIn(at place) *Agent {
 		ID: "gemini", Name: "Gemini CLI", Icon: "geminicli-color", Aliases: []string{"gemini-cli"}, NoNames: true,
 		UA:  []string{"geminicli", "gemini-cli"},
 		Bin: "gemini", Dir: dir, Path: path,
-		// its model's default forgets what it had before myna, its
+		// its model's default forgets what it had before owl, its
 		// sign-in's default forgets the sign-in: this puts both back
 		Unwire: unroute,
 		// Gemini CLI is its binary. What it leaves in ~/.gemini stays when it
@@ -202,7 +202,7 @@ func geminiIn(at place) *Agent {
 			return err == nil
 		},
 		Check: func() string {
-			if !isMyna(model()) {
+			if !isOwl(model()) {
 				return ""
 			}
 			if d := wiringOff("Gemini CLI", envPath, func(k string) (string, bool) { return edit.GetEnvFile(envPath, k) },
@@ -210,7 +210,7 @@ func geminiIn(at place) *Agent {
 				return d
 			}
 			if a := auth(); a != "gemini-api-key" {
-				return "Gemini CLI signs in with " + orDefault(a) + " rather than myna's key, so it asks Google directly"
+				return "Gemini CLI signs in with " + orDefault(a) + " rather than owl's key, so it asks Google directly"
 			}
 			return ""
 		},
@@ -228,12 +228,12 @@ func geminiIn(at place) *Agent {
 				Options: func(map[string]string) []Option {
 					key := Option{Value: "api-key", Label: "API key", Icon: "gemini-color"}
 					switch {
-					case mynaKey() != "":
-						key.Note = "the Google key from myna's providers"
+					case owlKey() != "":
+						key.Note = "the Google key from owl's providers"
 					case envKey() != "":
 						key.Note = "GEMINI_API_KEY from ~/.gemini/.env"
 					default:
-						key.Note = "needs GEMINI_API_KEY — add Google Gemini in myna's providers"
+						key.Note = "needs GEMINI_API_KEY — add Google Gemini in owl's providers"
 					}
 					out := []Option{
 						{Value: "google", Label: "Google", Icon: "gemini-color", Note: "Google account · OAuth sign-in"},
@@ -243,8 +243,8 @@ func geminiIn(at place) *Agent {
 					switch current() {
 					case "custom":
 						out = append(out, Option{Value: "custom", Note: hostOf(base()) + " (from .env)"})
-					case mynaID:
-						out = append(out, Option{Value: mynaID, Label: "myna", Note: "the local gateway · every provider's models"})
+					case owlID:
+						out = append(out, Option{Value: owlID, Label: "owl", Note: "the local gateway · every provider's models"})
 					}
 					return out
 				},

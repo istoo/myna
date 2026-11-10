@@ -25,11 +25,11 @@ func TestStaleCopySinceSameEachLook(t *testing.T) {
 	dir := filepath.Join(home, ".codex")
 	os.MkdirAll(dir, 0o755)
 	cfg := filepath.Join(dir, "config.toml")
-	list := filepath.Join(dir, "myna-models.json")
-	conf := "model = \"myna/gpt-6-luna\"\nmodel_provider = \"myna\"\nmodel_catalog_json = \"" + tomlString(list) + "\"\n\n" +
-		"[model_providers.myna]\nname = \"myna\"\nbase_url = \"http://127.0.0.1:3425/v1\"\n"
+	list := filepath.Join(dir, "owl-models.json")
+	conf := "model = \"owl/gpt-6-luna\"\nmodel_provider = \"owl\"\nmodel_catalog_json = \"" + tomlString(list) + "\"\n\n" +
+		"[model_providers.owl]\nname = \"owl\"\nbase_url = \"http://127.0.0.1:3425/v1\"\n"
 	os.WriteFile(cfg, []byte(conf), 0o600)
-	os.WriteFile(list, []byte(`{"models":[{"slug":"myna/gpt-6-luna"}]}`), 0o644)
+	os.WriteFile(list, []byte(`{"models":[{"slug":"owl/gpt-6-luna"}]}`), 0o644)
 
 	// started two hours ago, half a second past a whole second, as the
 	// process list tells it: how long it has run at the moment it is read
@@ -42,7 +42,7 @@ func TestStaleCopySinceSameEachLook(t *testing.T) {
 	a := codex(home)
 	first := a.StaleCopies()
 	if len(first) != 1 {
-		t.Fatalf("the copy from before myna's list: %+v", first)
+		t.Fatalf("the copy from before owl's list: %+v", first)
 	}
 	for range 20 {
 		time.Sleep(time.Millisecond)

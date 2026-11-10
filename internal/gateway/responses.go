@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/claudeseal"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/claudeseal"
+	"github.com/istoo/owl/internal/provider"
 	"github.com/tidwall/gjson"
 )
 
@@ -94,7 +94,7 @@ type rFormat struct {
 // the models its catalog puts in code mode (gpt-6.1-sol, gpt-6-luna…),
 // exec, through which every other tool of Codex's is called (#534: offered
 // none, the model said it had only the collaboration and wait tools). A
-// model myna translates for is offered it as a function taking the text
+// model owl translates for is offered it as a function taking the text
 // as its one argument, and its call goes back to Codex as the
 // custom_tool_call Codex runs, the text as its input.
 
@@ -139,7 +139,7 @@ func customInput(args string) string {
 // ChatGPT apps' among them) and its sub-agent tools only in the search's
 // description, and hands the model the ones it searched for in a
 // tool_search_output, instead of every schema on every request (#258).
-// Codex runs the search itself ("execution": "client"): a model myna
+// Codex runs the search itself ("execution": "client"): a model owl
 // translates for is offered it as the function it is, and its call goes
 // back to Codex as the tool_search_call Codex runs.
 const toolSearch = "tool_search"
@@ -458,7 +458,7 @@ func readResponsesFor(body []byte, facts, keepInstructions bool) (*Request, erro
 				r.Messages = append(r.Messages, Message{Role: "user", Parts: []Part{part}})
 			case it.Type == "reasoning":
 				// the reasoning itself when the item carries it, else its
-				// summary (all myna gives a client of a translated reply)
+				// summary (all owl gives a client of a translated reply)
 				var b strings.Builder
 				var content []rText
 				_ = decodeJSON(it.Content, &content)
@@ -474,7 +474,7 @@ func readResponsesFor(body []byte, facts, keepInstructions bool) (*Request, erro
 				}
 				part := Part{Kind: Thinking, Text: b.String()}
 				if block, ours := claudeseal.Open(it.EncryptedContent); ours {
-					// Claude's block, which myna gave the client to carry
+					// Claude's block, which owl gave the client to carry
 					// back: as Claude wrote it, and never to a Responses API
 					// (withoutClaudeSeals). One that can't be read is its
 					// summary, as before.
@@ -493,7 +493,7 @@ func readResponsesFor(body []byte, facts, keepInstructions bool) (*Request, erro
 					r.Messages = append(r.Messages, Message{Role: "assistant", Parts: []Part{part}})
 				}
 			case it.Type == "web_search_call" && it.Action != nil && strings.TrimSpace(it.Action.Query) != "":
-				// where a search ran in the turn: myna's own search round
+				// where a search ran in the turn: owl's own search round
 				// for a Claude reply is put back (searchRoundsBack), and
 				// otherwise it goes, as before
 				var hits []Hit
@@ -612,10 +612,10 @@ func readResponsesFor(body []byte, facts, keepInstructions bool) (*Request, erro
 	return r, nil
 }
 
-// searchRoundsBack puts back the search rounds myna ran for a Claude
+// searchRoundsBack puts back the search rounds owl ran for a Claude
 // reply (searchRounds), which its client keeps only as web_search_call
 // items. Claude wrote the thinking before a search in a message that
-// ended with myna's web_search call, and what it wrote after the
+// ended with owl's web_search call, and what it wrote after the
 // result in a message of its own; told as one message, the thinking
 // blocks of the latest assistant message aren't where Claude wrote them,
 // and an upstream that checks them refuses the turn: Claude on Bedrock
@@ -991,13 +991,13 @@ func pairToolItems(body []byte) []byte {
 // request into chat for its model, and a web_search_call becomes an
 // assistant tool call that no tool message answers: Command Code's
 // Provider API answered Codex's summary request for a thread that had
-// searched (52 function calls and their outputs, 8 web searches myna
+// searched (52 function calls and their outputs, 8 web searches owl
 // ran for the model) 400 "An assistant message with 'tool_calls' must be
 // followed by tool messages responding to each 'tool_call_id'"
 // (mxmllln on Discord, deepseek-v4-flash-vision-exp). A turn offering
-// web_search is translated for myna's search and leaves them out there
+// web_search is translated for owl's search and leaves them out there
 // already (searchedForIt, searchRoundsBack); a request with no web_search
-// offered — Codex's compaction, myna's summary request, a turn with
+// offered — Codex's compaction, owl's summary request, a turn with
 // search off — was relayed with them. The item holds the query and the
 // pages, never what they said, and the reply after it says what was
 // found, so nothing the model read is lost.
@@ -1127,7 +1127,7 @@ func replaysReasoning(model, host string) bool {
 // carries no reasoning_text its summary as one, else noReasoning, and has
 // each step that needs one lead with a reasoning item (reasonFirst), for an
 // upstream that wants the reasoning back (replaysReasoning). Codex sends an
-// item back as it got it: one from a turn myna translated has only a
+// item back as it got it: one from a turn owl translated has only a
 // summary, one the ChatGPT backend sealed has only encrypted_content, and a
 // turn another model in a mixed group served may have no reasoning item at
 // all. DeepSeek refuses the whole request over any of them, and over an
@@ -1242,7 +1242,7 @@ func noReasoningItem() map[string]any {
 // back to the API") when a step of the turn being continued starts with
 // anything else: a call (#1592), or what the model said, as Codex sends a
 // step that said something before its call with its reasoning between them,
-// or with none, which myna put between them (#1822). Checked against
+// or with none, which owl put between them (#1822). Checked against
 // api.deepseek.com on 2026-10-12: [text, reasoning, call] and [output,
 // text] are refused, [reasoning, text, call] and [output, reasoning, text]
 // are taken. ok is false, and items comes back as it is, when every such
@@ -1507,10 +1507,10 @@ func buildResponses(r *Request, model, host string, rejectTemp bool) []byte {
 		out["reasoning"] = map[string]any{"summary": "auto"}
 	}
 	// the client's include goes on as the request would have without
-	// myna. Sealed reasoning is asked for only with reasoning, as Codex
+	// owl. Sealed reasoning is asked for only with reasoning, as Codex
 	// asks for it: OpenAI refuses it of a model that doesn't reason. What
 	// comes back sealed goes to a Responses client as it came, and the
-	// input's goes back to a Responses upstream, as it would without myna
+	// input's goes back to a Responses upstream, as it would without owl
 	// (#1445); an account or vendor that can't read another's turns it away,
 	// and is asked again without it (foreignReasoning, withoutRefused).
 	// Output token replay's include is OpenAI's alone, as Codex sends it
@@ -2012,7 +2012,7 @@ func (d *responsesDecoder) decode(data string, emit func(Event)) error {
 // Responses stream's error event or failed response says the request
 // itself is at fault (type invalid_request_error): the ChatGPT backend
 // answers an access program the workspace doesn't have with a 200 stream
-// whose error event is access_program_not_enabled (myna-releases#18).
+// whose error event is access_program_not_enabled (owl-releases#18).
 // Asked again, on this account or another, it is refused the same way, so
 // it is neither retried nor resumed, and a client answered whole gets its
 // code and param. Read by the error object's type, never by its words.
@@ -2029,8 +2029,8 @@ func requestRefused(data string) (int, json.RawMessage) {
 // saidError puts the type, code and param of the vendor's own error (an
 // Event's Said) on the error a stream encoder writes, so a request the
 // vendor refused reads as refused (invalid_request_error) to the agent and
-// to the hold that decides whether to ask again, not as myna's api_error
-// (myna-releases#18). Without Said it is left as it was.
+// to the hold that decides whether to ask again, not as owl's api_error
+// (owl-releases#18). Without Said it is left as it was.
 func saidError(failed map[string]any, said json.RawMessage) {
 	e := gjson.GetBytes(said, "error")
 	for _, k := range []string{"type", "code", "param"} {
@@ -2108,7 +2108,7 @@ func callTo(item map[string]any, name string, named map[string]nsTool) map[strin
 		}
 	} else if q, ok := named[name]; ok {
 		item["name"], item["namespace"] = q.Name, q.Namespace
-		// Nothing myna serves seals arguments. Codex reads a namespaced call
+		// Nothing owl serves seals arguments. Codex reads a namespaced call
 		// without this list as sealed: spawn_agent's message in MultiAgentV2
 		// would reach the subagent as ciphertext, which is really plain text.
 		item["encrypted_function_args"] = []any{}
@@ -2347,12 +2347,12 @@ func (e *responsesEncoder) event(ev Event) {
 			// the item streamed so far, done as the upstream wrote it,
 			// made over when it carries its text (another vendor's,
 			// #2855); its events name it by the id they already carried
-			e.closeAs(mynaMadeReasoningRaw(raw, e.itemID))
+			e.closeAs(owlMadeReasoningRaw(raw, e.itemID))
 			break
 		}
 		// none of it streamed (no summary): added and done whole, made
 		// over when the item carries its text (#2855)
-		raw = mynaMadeReasoningRaw(raw, "")
+		raw = owlMadeReasoningRaw(raw, "")
 		e.closeItem()
 		e.item++
 		e.thinkNew, e.thinkID = false, ""
@@ -2477,7 +2477,7 @@ func renderResponses(res Result, model string, named map[string]nsTool) []byte {
 				// as the upstream wrote it: id, summary, encrypted_content;
 				// made over when it carries its text (another vendor's,
 				// #2855)
-				output = append(output, mynaMadeReasoningRaw(p.Sealed, ""))
+				output = append(output, owlMadeReasoningRaw(p.Sealed, ""))
 				continue
 			}
 			if p.sealedBy(sealAnthropic) {

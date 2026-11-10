@@ -21,7 +21,7 @@ function server(lang, users, posts, lead) {
   const fixed = {
     theme: "light", lang, tray: "panel", quotaLeft: false, currency: "usd", dock: false, dockWindow: false, proxy: "",
     redact: false, redactPersonal: false, redactWords: [], codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "",
-    trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "", version: "0.1.900", dir: "~/.config/myna",
+    trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "", version: "0.1.900", dir: "~/.config/owl",
     gateway: "http://127.0.0.1:3425", proxyNow: "none", proxySource: "none", visionModels: [], imageGenModels: [], lanURLs: [],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
     codexUsers: users, codexAutoReset: users.slice(0, 1).map((u) => u.toLowerCase()), codexAutoResetOnly: {},
@@ -89,7 +89,7 @@ async function open(t, engine, lang, width, lead, posts) {
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", server(lang, users, posts, lead));
   await watchSettingsReads(page);
-  await page.goto("http://myna.test/?view=settings&tab=usage");
+  await page.goto("http://owl.test/?view=settings&tab=usage");
   await settingsDrawn(page);
   await page.locator("#codexResetLeadRow").waitFor();
   return { page, errors };
@@ -183,7 +183,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     page.setDefaultNavigationTimeout(60000);
     await page.route("**/*", server("en", [], [], undefined));
     await watchSettingsReads(page);
-    await page.goto("http://myna.test/?view=settings&tab=usage");
+    await page.goto("http://owl.test/?view=settings&tab=usage");
     await settingsDrawn(page);
     await page.locator("#resetReminderSegs .opt").first().waitFor();
     assert.equal(await page.locator("#codexResetLeadRow").isVisible(), false);

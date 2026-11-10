@@ -11,9 +11,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/testenv"
-	"github.com/istoo/myna/internal/update"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/testenv"
+	"github.com/istoo/owl/internal/update"
 )
 
 // elevation fakes Windows' administrator prompt: writable is whether the
@@ -47,7 +47,7 @@ func hasEnv(env []string, kv string) bool {
 
 // 新v学员 on Discord: "RTK and other actions that need elevation all
 // fail". RTK winget installed for every user of the computer (under
-// Program Files) can only be upgraded by an administrator, and myna runs
+// Program Files) can only be upgraded by an administrator, and owl runs
 // as the user, so Upgrade failed. Upgrade now runs winget through Windows'
 // administrator prompt when only an administrator can change rtk's folder,
 // says so on the button first, and a prompt declined or not to be had

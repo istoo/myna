@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // Kiro CLI reads global skills from ~/.kiro/skills, its user-wide MCP
@@ -16,7 +16,7 @@ import (
 // its global steering (kiro.dev/docs/skills, /docs/mcp/configuration,
 // /docs/steering), but the library gave it none of the three: its targets
 // are agent.All and apps, which held Claude Desktop alone, and Kiro CLI is
-// no agent myna wires a model into (#4769, ump45nose).
+// no agent owl wires a model into (#4769, ump45nose).
 func TestKiroCLITarget(t *testing.T) {
 	h := sandbox(t)
 	holdCLI(t, h, "kiro-cli") // found by the kiro-cli program alone
@@ -72,7 +72,7 @@ func TestKiroCLINotByItsFolder(t *testing.T) {
 	}
 }
 
-// The mcp.json myna writes is Kiro's own shape: mcpServers of
+// The mcp.json owl writes is Kiro's own shape: mcpServers of
 // command/args/env, or url/headers — no type on an entry, the user's
 // fields kept, no SSE named, a ${NAME} passed through as the docs say
 // (kiro.dev/docs/mcp/configuration) (#4769).
@@ -180,7 +180,7 @@ func TestKiroMCP(t *testing.T) {
 // gone, on that server's row, for it to be unticked and taken out of
 // ~/.kiro (the same as any agent, TestGoneAgentListedToTakeOut). Found by
 // kiro-cli alone, it was in apps only while installed, so held never saw
-// it, and myna's entry stayed in Kiro's mcp.json with nothing on the
+// it, and owl's entry stayed in Kiro's mcp.json with nothing on the
 // page to take it out (#4769). Nor is an uninstalled one told it takes
 // anything.
 func TestKiroCLIUninstalledHeld(t *testing.T) {

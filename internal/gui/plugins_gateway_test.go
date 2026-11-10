@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/owl/internal/plugin"
 )
 
 func TestGatewayPluginOptionsAndKind(t *testing.T) {
@@ -13,7 +13,7 @@ func TestGatewayPluginOptionsAndKind(t *testing.T) {
 	t.Setenv("USERPROFILE", t.TempDir())
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
-	t.Setenv("MYNA_PLUGIN_MARKET", "off")
+	t.Setenv("OWL_PLUGIN_MARKET", "off")
 	t.Cleanup(plugin.Settle)
 	dir := t.TempDir()
 	if err := os.WriteFile(filepath.Join(dir, "package.json"), []byte(`{"name":"gateway-fixture","magpie":{"hooks":"./hooks.js","options":{"serverUrl":"http://127.0.0.1:8000"}}}`), 0o644); err != nil {
@@ -50,7 +50,7 @@ func TestProviderPluginOptionsExample(t *testing.T) {
 	t.Setenv("USERPROFILE", t.TempDir())
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
-	t.Setenv("MYNA_PLUGIN_MARKET", "off")
+	t.Setenv("OWL_PLUGIN_MARKET", "off")
 	t.Cleanup(plugin.Settle)
 	dir := t.TempDir()
 	if err := os.WriteFile(filepath.Join(dir, "package.json"), []byte(`{"name":"provider-fixture","main":"index.js","magpie":{"options":{"cacheKeepaliveInterval":285,"cacheKeepaliveMaxPings":6}}}`), 0o644); err != nil {

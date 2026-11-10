@@ -1,5 +1,5 @@
 // Package tools serves the tools the user's plugins give (their OpenCode
-// tool hook) to every agent, over myna's plugin tools MCP server
+// tool hook) to every agent, over owl's plugin tools MCP server
 // (internal/gateway/tools_mcp.go, docs/subsystems/plugin-tools.md). While
 // a plugin that is on gives a tool, it stays on.
 //
@@ -10,9 +10,9 @@
 package tools
 
 import (
-	"github.com/istoo/myna/internal/gwtool"
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/pluginrt"
+	"github.com/istoo/owl/internal/gwtool"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/pluginrt"
 )
 
 func init() {

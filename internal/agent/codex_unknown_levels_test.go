@@ -5,12 +5,12 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // ccdcn on X: in the Codex app, the models of a provider the user added
-// (XJAI's model-code, model-work, model-test), which nothing myna reads
-// knows, had no reasoning effort to pick. myna-models.json, which Codex
+// (XJAI's model-code, model-work, model-test), which nothing owl reads
+// knows, had no reasoning effort to pick. owl-models.json, which Codex
 // reads them from, now offers them low, medium and high, as GET
 // /v1/codex/models does (provider.CodexEfforts).
 func TestCodexCatalogOffersUnknownModelsLevels(t *testing.T) {
@@ -31,7 +31,7 @@ func TestCodexCatalogOffersUnknownModelsLevels(t *testing.T) {
 			} `json:"supported_reasoning_levels"`
 		} `json:"models"`
 	}
-	raw := readFile(filepath.Join(home, ".codex", "myna-models.json"))
+	raw := readFile(filepath.Join(home, ".codex", "owl-models.json"))
 	if err := json.Unmarshal([]byte(raw), &got); err != nil {
 		t.Fatalf("%v: %s", err, raw)
 	}
@@ -50,10 +50,10 @@ func TestCodexCatalogOffersUnknownModelsLevels(t *testing.T) {
 		}
 	}
 	if seen != 3 {
-		t.Errorf("%d of XJAI's models in myna-models.json: %s", seen, raw)
+		t.Errorf("%d of XJAI's models in owl-models.json: %s", seen, raw)
 	}
-	// and myna's own effort control for Codex offers the same
-	if opts := codexEfforts(mynaModels("codex"), "xjai/model-test"); len(opts) != 4 || opts[0].Value != "" {
+	// and owl's own effort control for Codex offers the same
+	if opts := codexEfforts(owlModels("codex"), "xjai/model-test"); len(opts) != 4 || opts[0].Value != "" {
 		t.Errorf("effort control: %+v", opts)
 	}
 }

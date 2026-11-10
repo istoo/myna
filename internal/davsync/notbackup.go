@@ -16,7 +16,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/istoo/myna/internal/backup"
+	"github.com/istoo/owl/internal/backup"
 	"github.com/klauspost/compress/zstd"
 )
 
@@ -25,7 +25,7 @@ import (
 // whether Upload may write this computer's setup over it. It never carries
 // the file's contents — only its size, its kind, and a page's title.
 type ServerFile struct {
-	// What is "empty", "cut" (a myna backup cut short), "page" (a web
+	// What is "empty", "cut" (a owl backup cut short), "page" (a web
 	// page), "xml", "format" (another app's JSON file, named by its
 	// "format"), "json" or "other"
 	What   string `json:"what"`
@@ -40,7 +40,7 @@ type ServerFile struct {
 }
 
 // notBackup is the error for a server file that doesn't open as a backup:
-// what it is and what to do, instead of only "not a myna backup".
+// what it is and what to do, instead of only "not a owl backup".
 type notBackup struct {
 	f     ServerFile
 	where string // the file and server, as messages name them
@@ -52,12 +52,12 @@ func (e *notBackup) Unwrap() error { return e.err }
 
 func (e *notBackup) Error() string {
 	f := e.f
-	upload := fmt.Sprintf("upload this computer's setup over it (Settings › Sync and backup, or myna %s upload); the server's copy is kept in the sync folder first", e.cmd)
+	upload := fmt.Sprintf("upload this computer's setup over it (Settings › Sync and backup, or owl %s upload); the server's copy is kept in the sync folder first", e.cmd)
 	switch f.What {
 	case "empty":
 		return fmt.Sprintf("%s is empty (0 bytes): a write to it didn't finish. To start it again, %s", e.where, upload)
 	case "cut":
-		return fmt.Sprintf("%s is a myna backup cut short or damaged (%d bytes): a write to it was interrupted. Sync on the computer that wrote it last to rebuild it, or %s", e.where, f.Size, upload)
+		return fmt.Sprintf("%s is a owl backup cut short or damaged (%d bytes): a write to it was interrupted. Sync on the computer that wrote it last to rebuild it, or %s", e.where, f.Size, upload)
 	case "page", "xml":
 		got := "a web page"
 		if f.Title != "" {
@@ -70,7 +70,7 @@ func (e *notBackup) Error() string {
 			}
 		}
 		if e.cmd == "github" {
-			return fmt.Sprintf("%s contains %s, not a myna backup: check the backup file in the repository, or point sync at another folder", e.where, got)
+			return fmt.Sprintf("%s contains %s, not a owl backup: check the backup file in the repository, or point sync at another folder", e.where, got)
 		}
 		got += " instead of the file"
 		if f.Moved != "" {
@@ -81,11 +81,11 @@ func (e *notBackup) Error() string {
 		}
 		return fmt.Sprintf("reading %s, the server answered with %s: check the address is the server's WebDAV address (坚果云: https://dav.jianguoyun.com/dav/, Nextcloud: https://…/remote.php/dav/files/<user>/), not its web page, and that no sign-in page or proxy stands in front of it", e.where, got)
 	case "format":
-		return fmt.Sprintf("%s is a %q file, not a myna backup: another app keeps a file there. Point sync at another folder, or %s", e.where, f.Format, upload)
+		return fmt.Sprintf("%s is a %q file, not a owl backup: another app keeps a file there. Point sync at another folder, or %s", e.where, f.Format, upload)
 	case "json":
-		return fmt.Sprintf("%s is a JSON file that isn't a myna backup (%d bytes). Point sync at another folder, or %s", e.where, f.Size, upload)
+		return fmt.Sprintf("%s is a JSON file that isn't a owl backup (%d bytes). Point sync at another folder, or %s", e.where, f.Size, upload)
 	}
-	return fmt.Sprintf("%s isn't a myna backup: it is %s (%d bytes). Point sync at another folder, or %s", e.where, f.Type, f.Size, upload)
+	return fmt.Sprintf("%s isn't a owl backup: it is %s (%d bytes). Point sync at another folder, or %s", e.where, f.Type, f.Size, upload)
 }
 
 // fileWhere names the backup file and the server in messages.
@@ -187,7 +187,7 @@ func backupHead(b []byte) bool {
 		}
 		return r
 	}, string(b[:min(len(b), 64)]))
-	const want = `{"format":"myna-backup"`
+	const want = `{"format":"owl-backup"`
 	return strings.HasPrefix(head, want) || len(head) > 0 && strings.HasPrefix(want, head)
 }
 
@@ -213,7 +213,7 @@ var (
 // header) undone too. A backup is JSON, so a body that begins with either's
 // magic number is never the file as it is. A header that names an encoding
 // the body isn't in (a server that says gzip and sends the file) is
-// ignored; one myna can't undo (br) is said plainly.
+// ignored; one owl can't undo (br) is said plainly.
 func unpacked(kind string, data []byte, encoding string) ([]byte, error) {
 	enc := strings.ToLower(strings.TrimSpace(encoding))
 	if i := strings.LastIndexByte(enc, ','); i >= 0 { // the last applied is undone first
@@ -235,7 +235,7 @@ func unpacked(kind string, data []byte, encoding string) ([]byte, error) {
 		}
 		return readAll(flate.NewReader(bytes.NewReader(data)), nil)
 	case enc == "br" && len(data) > 0 && data[0] != '{':
-		return nil, fmt.Errorf("the %s server sent the backup compressed with Brotli (Content-Encoding: br), though myna asked for it as it is, and myna can't unpack that: turn off Brotli compression for it on the server, or on the proxy in front of it", kind)
+		return nil, fmt.Errorf("the %s server sent the backup compressed with Brotli (Content-Encoding: br), though owl asked for it as it is, and owl can't unpack that: turn off Brotli compression for it on the server, or on the proxy in front of it", kind)
 	}
 	return data, nil
 }

@@ -6,11 +6,11 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// Cursor Private Inference reads myna's /models for each model's APIs
+// Cursor Private Inference reads owl's /models for each model's APIs
 // (api_types: it asks Anthropic Messages only when no OpenAI one is
 // listed) and its limits (capabilities.context_length) (#299): asked with
 // its key, each model has them, the ones its provider serves it on; asked
@@ -119,7 +119,7 @@ func TestCursorLocalModels(t *testing.T) {
 		t.Errorf("taken out of another agent's list: %v", got)
 	}
 
-	// asked with another key of myna's, typed in its Open configuration,
+	// asked with another key of owl's, typed in its Open configuration,
 	// it still says who it is in its User-Agent and is shown its own list,
 	// with the fields its Reasoning control needs (mamba on Discord)
 	for _, ua := range []string{"Cursor-CLI/unknown", "Cursor/3.23.12"} {

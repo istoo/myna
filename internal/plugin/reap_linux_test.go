@@ -15,8 +15,8 @@ import (
 // A plugin host is reaped when it ends, while a program the plugin started
 // still holds its stdout. The host was waited for only once its stdout
 // reached EOF, which such a program put off for its whole life, so every
-// host stopped (a Restart, a proxy change) left a <defunct> myna-bun
-// under myna until myna quit (acezan on Discord: 57 after 47 hours as
+// host stopped (a Restart, a proxy change) left a <defunct> owl-bun
+// under owl until owl quit (acezan on Discord: 57 after 47 hours as
 // a systemd service on Linux).
 func TestHostReapedWhileItsChildHoldsStdout(t *testing.T) {
 	sandbox(t)
@@ -116,10 +116,10 @@ func killSleeps(secs string) {
 	}
 }
 
-// EndHosts, which myna runs before it puts a new version in its place,
+// EndHosts, which owl runs before it puts a new version in its place,
 // returns with every host ended and waited for, and starts none after: a
 // host left running
-// at the exec was a <defunct> myna-bun under myna's pid from then on
+// at the exec was a <defunct> owl-bun under owl's pid from then on
 // (#3285).
 func TestEndHostsLeavesNoChild(t *testing.T) {
 	sandbox(t)

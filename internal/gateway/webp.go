@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 	"golang.org/x/image/webp"
 )
 

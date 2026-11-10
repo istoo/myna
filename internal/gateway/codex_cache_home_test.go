@@ -8,21 +8,21 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/codexcat"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/codexcat"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // With the backend away, the list a ChatGPT sign-in is handed is made from
 // Codex's cache — the one under CODEX_HOME when it is set, as Codex keeps
 // it there. A cached entry restored to the account's own window keeps the
-// cache's max when myna's live list has none (one saved before myna
+// cache's max when owl's live list has none (one saved before owl
 // kept the max): 872000 stays, it doesn't fall to the window.
 func TestCodexCachedListUnderCodexHomeKeepsItsMax(t *testing.T) {
 	codexSignedIn(t)
 	codexHome := t.TempDir()
 	t.Setenv("CODEX_HOME", codexHome)
-	// myna handed Codex 600000 earlier; the window is no longer set
+	// owl handed Codex 600000 earlier; the window is no longer set
 	os.WriteFile(filepath.Join(codexHome, "models_cache.json"), []byte(`{"etag":"\"v1\"","models":[
 		{"slug":"gpt-6.1-sol","priority":1,"context_window":600000,"max_context_window":872000,"base_instructions":"sol prompt"},
 		{"slug":"gpt-6-astra","priority":2,"context_window":272000,"max_context_window":272000}]}`), 0o644)
@@ -70,7 +70,7 @@ func TestCodexCachedListUnderCodexHomeKeepsItsMax(t *testing.T) {
 	}
 }
 
-// A ChatGPT account's model in a catalog myna writes takes its entry from
+// A ChatGPT account's model in a catalog owl writes takes its entry from
 // the cache under CODEX_HOME when it is set.
 func TestCodexCatalogEntryFromCodexHome(t *testing.T) {
 	codexSignedIn(t)

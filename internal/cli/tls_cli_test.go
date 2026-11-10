@@ -15,7 +15,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/owl/internal/gateway"
 )
 
 // pemPair writes a self-signed certificate and its key into dir.
@@ -109,16 +109,16 @@ func TestCommandsRefuseHalfAPair(t *testing.T) {
 }
 
 // The service installed again from a shell that names no certificate
-// (myna daemon web on, a new PATH) keeps the one it was installed with;
+// (owl daemon web on, a new PATH) keeps the one it was installed with;
 // --no-tls takes it away.
 func TestDaemonReinstallKeepsTLS(t *testing.T) {
 	var file string
 	switch runtime.GOOS {
 	case "darwin":
-		file = filepath.Join(os.Getenv("HOME"), "Library", "LaunchAgents", "com.istoo.myna.serve.plist")
+		file = filepath.Join(os.Getenv("HOME"), "Library", "LaunchAgents", "com.istoo.owl.serve.plist")
 	case "linux":
 		t.Setenv("XDG_CONFIG_HOME", filepath.Join(t.TempDir(), "config"))
-		file = filepath.Join(os.Getenv("XDG_CONFIG_HOME"), "systemd", "user", "myna.service")
+		file = filepath.Join(os.Getenv("XDG_CONFIG_HOME"), "systemd", "user", "owl.service")
 	default:
 		t.Skip("no service on " + runtime.GOOS)
 	}
@@ -133,10 +133,10 @@ func TestDaemonReinstallKeepsTLS(t *testing.T) {
 			os.Remove(file)
 		}
 	})
-	text := `<key>MYNA_TLS_CERT</key><string>/etc/le/full&amp;chain.pem</string>
-		<key>MYNA_TLS_KEY</key><string>/etc/le/privkey.pem</string>`
+	text := `<key>OWL_TLS_CERT</key><string>/etc/le/full&amp;chain.pem</string>
+		<key>OWL_TLS_KEY</key><string>/etc/le/privkey.pem</string>`
 	if runtime.GOOS == "linux" {
-		text = "Environment=\"MYNA_TLS_CERT=/etc/le/full&chain.pem\"\nEnvironment=\"MYNA_TLS_KEY=/etc/le/privkey.pem\"\n"
+		text = "Environment=\"OWL_TLS_CERT=/etc/le/full&chain.pem\"\nEnvironment=\"OWL_TLS_KEY=/etc/le/privkey.pem\"\n"
 	}
 	if err := os.WriteFile(file, []byte(text), 0o600); err != nil {
 		t.Fatal(err)

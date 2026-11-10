@@ -4,8 +4,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/istoo/myna/internal/fonts"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/fonts"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 func TestFontChoicesPersistAndStayLocal(t *testing.T) {

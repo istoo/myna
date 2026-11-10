@@ -57,7 +57,7 @@ async function open(engine, lang, width, saved, own, t) {
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", serve(lang, saved, own));
   await watchSettingsReads(page);
-  await page.goto("http://myna.test/?view=settings&tab=models");
+  await page.goto("http://owl.test/?view=settings&tab=models");
   await settingsDrawn(page); // rows found are the ones that stay (#1659)
   const row = page.locator("#imagesList #imageTimeoutRow");
   await row.waitFor();

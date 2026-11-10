@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/beat"
-	"github.com/istoo/myna/internal/filememo"
+	"github.com/istoo/owl/internal/beat"
+	"github.com/istoo/owl/internal/filememo"
 )
 
 func TestWant(t *testing.T) {

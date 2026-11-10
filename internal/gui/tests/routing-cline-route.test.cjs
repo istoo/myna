@@ -6,7 +6,7 @@
 // another model, and whether DeepSeek was asked for: asked and not said
 // who answered, or nothing asked and the tick that asks. Another vendor's
 // swap still reads as one. The Usage page's Requests say the route too.
-// English and Chinese; the API is faked. MYNA_ROUTE_ASSETS points at an
+// English and Chinese; the API is faked. OWL_ROUTE_ASSETS points at an
 // older asset folder to watch it fail.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -15,7 +15,7 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 const { navTo } = require("./reader.cjs");
 
-const assets = path.resolve(process.env.MYNA_ROUTE_ASSETS || path.join(__dirname, "../assets"));
+const assets = path.resolve(process.env.OWL_ROUTE_ASSETS || path.join(__dirname, "../assets"));
 const now = new Date();
 const day = [now.getFullYear(), now.getMonth() + 1, now.getDate()].map((n) => String(n).padStart(2, "0")).join("-");
 const at = (i) => new Date(now.getTime() - (i + 1) * 60e3).toISOString();
@@ -61,7 +61,7 @@ function serve(lang) {
     if (url.pathname === "/api/usage/requests") return json({ period: url.searchParams.get("period"), rows: ROWS, offset: 0, total: 1, calls: 1, errors: 0, input: 300, output: 40, cache_read: 0, cache_write: 0, reasoning: 0, cost: 0, unpriced: 1, agents: [{ id: "codex", name: "Codex", icon: "codex-color" }] });
     if (url.pathname === "/api/usage/requests/content") return json({ found: false, why: "read" });
     if (url.pathname === "/api/usage/quotas") return json([]);
-    if (url.pathname === "/api/usage") return json({ calls: 1, errors: 0, input: 300, output: 40, cache_read: 0, cache_write: 0, reasoning: 0, unpriced: 1, cost: 0, bucket: "day", series: [], agents: [], models: [], path: "~/.config/myna/usage.jsonl" });
+    if (url.pathname === "/api/usage") return json({ calls: 1, errors: 0, input: 300, output: 40, cache_read: 0, cache_write: 0, reasoning: 0, unpriced: 1, cost: 0, bucket: "day", series: [], agents: [], models: [], path: "~/.config/owl/usage.jsonl" });
     if (url.pathname === "/api/sessions") return json({ sessions: [], dirs: [] });
     if (url.pathname === "/api/sessions/stats") return json({ from: "", to: "", days: [], agents: {} });
     if (url.pathname.startsWith("/api/")) return json({});
@@ -108,7 +108,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         }
         await browser.close();
       });
-      await page.goto("http://myna.test/?view=routing");
+      await page.goto("http://owl.test/?view=routing");
       // the date bar's own buttons: the request-grouping controls share the
       // class, and on ubuntu's WebKit nth(1) of them all was one drawn hidden
       // (#13)

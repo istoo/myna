@@ -1,6 +1,6 @@
 package gateway
 
-import "github.com/istoo/myna/internal/provider"
+import "github.com/istoo/owl/internal/provider"
 
 // usageEncoder reads the encoder's chosen ID after it starts writing. Upstream
 // IDs can be absent or acquire a protocol prefix, so KStart.MsgID is not enough.

@@ -7,8 +7,8 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/edit"
 )
 
 // piNativeHome is a home with Pi signed in to both openai and openai-codex
@@ -113,7 +113,7 @@ func TestPiOffersItsOwnOpenAICodexModels(t *testing.T) {
 	}
 }
 
-// Without Pi's registry in reach (Pi installed where myna doesn't look),
+// Without Pi's registry in reach (Pi installed where owl doesn't look),
 // openai-codex still lists what the ChatGPT backend serves a Codex client,
 // from Codex CLI's models cache.
 func TestPiOpenAICodexWithoutItsRegistry(t *testing.T) {

@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/filememo"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/filememo"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A provider's row on the Providers page reads the vendor's list once:
@@ -26,7 +26,7 @@ func TestProviderInfoReadsTheListOnce(t *testing.T) {
 		fmt.Fprintf(&b, `"m-%d": {"id":"m-%d","name":"M %d"},`, i, i, i)
 	}
 	b.WriteString(`"x": {"id":"x"}}}}`)
-	os.MkdirAll(h+"/.cache/myna", 0o755)
+	os.MkdirAll(h+"/.cache/owl", 0o755)
 	if err := os.WriteFile(catalog.CachePath(), []byte(b.String()), 0o644); err != nil {
 		t.Fatal(err)
 	}

@@ -30,14 +30,14 @@ static BOOL claimsCommandFile(NSBundle *bundle) {
     return NO;
 }
 
-char *mynaTerminalAppsJSON(void) {
+char *owlTerminalAppsJSON(void) {
     @autoreleasepool {
         UTType *type = [UTType typeWithFilenameExtension:@"command"];
         if (type == nil) return NULL;
         NSWorkspace *workspace = [NSWorkspace sharedWorkspace];
         NSURL *defaultURL;
         NSArray<NSURL *> *appURLs;
-        // myna needs macOS 12 (LSMinimumSystemVersion); the check only
+        // owl needs macOS 12 (LSMinimumSystemVersion); the check only
         // keeps builds aimed at an older default target quiet.
         if (@available(macOS 12.0, *)) {
             defaultURL = [workspace URLForApplicationToOpenContentType:type];

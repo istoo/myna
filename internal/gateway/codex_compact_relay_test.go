@@ -7,10 +7,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// #292: a myna model's summary goes to a relay in front of the ChatGPT
+// #292: a owl model's summary goes to a relay in front of the ChatGPT
 // backend as Codex asks for its own — streamed, with its tool_choice and
 // include, under its thread's prompt_cache_key — or the relay answers
 // "invalid codex request". The summary comes back from the stream.
@@ -57,7 +57,7 @@ func TestCodexCompactsThroughCodexRelay(t *testing.T) {
 		}
 	}
 	enc, _ := item["encrypted_content"].(string)
-	b, _ := base64.StdEncoding.DecodeString(strings.TrimPrefix(enc, mynaCompaction))
+	b, _ := base64.StdEncoding.DecodeString(strings.TrimPrefix(enc, owlCompaction))
 	if item["type"] != "compaction" || string(b) != "SUMMARY" || done == nil || done["id"] != "resp_r1" || done["usage"] == nil {
 		t.Errorf("events: %s", body)
 	}

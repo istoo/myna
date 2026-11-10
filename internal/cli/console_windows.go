@@ -5,21 +5,21 @@ import (
 	"syscall"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/istoo/myna/internal/update"
+	"github.com/istoo/owl/internal/update"
 )
 
 // The desktop build is linked as a GUI program so double-clicking it opens
 // no console window; such a program starts with no standard streams. When it
 // is run from a terminal with a command, borrow that terminal's console so
-// `myna ls` and friends still print. Output that is redirected already has
+// `owl ls` and friends still print. Output that is redirected already has
 // somewhere to go and is left alone.
 //
-// myna.com, the console program a terminal runs for `myna` (#3737,
+// owl.com, the console program a terminal runs for `owl` (#3737,
 // update.EnsureCompanion), hands over its own standard handles, redirected
 // or the terminal's, and says so in update.ComEnv: they are kept, and its
 // console is borrowed too, so Ctrl+C, a hidden prompt and the programs
-// myna starts have it. The variable is taken out of the environment, so
-// what myna starts doesn't read it as its own.
+// owl starts have it. The variable is taken out of the environment, so
+// what owl starts doesn't read it as its own.
 func init() {
 	fromCom := os.Getenv(update.ComEnv) != ""
 	if fromCom {
@@ -73,10 +73,10 @@ func init() {
 	companion()
 }
 
-// companion has a command run in a terminal bring the myna.com beside
+// companion has a command run in a terminal bring the owl.com beside
 // this app up, or write it there when the folder is on PATH: run as
-// myna.exe, the first command after an update to this version, the next
-// `myna` is waited for (update.EnsureCompanion).
+// owl.exe, the first command after an update to this version, the next
+// `owl` is waited for (update.EnsureCompanion).
 func companion() {
 	if exe, err := update.Executable(); err == nil {
 		update.EnsureCompanion(exe)

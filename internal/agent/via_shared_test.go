@@ -16,7 +16,7 @@ func TestKeptListSharedWithoutACopy(t *testing.T) {
 	build := func() []Option {
 		out := make([]Option, 500)
 		for i := range out {
-			out[i] = Option{Value: "p/m" + strconv.Itoa(i), Note: "via myna"}
+			out[i] = Option{Value: "p/m" + strconv.Itoa(i), Note: "via owl"}
 		}
 		return out
 	}

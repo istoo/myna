@@ -9,7 +9,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // liteSubagentCatalog is models.dev's entries for the models the subagent
@@ -26,7 +26,7 @@ const liteSubagentCatalog = `{
 // on OpenCode Go's DeepSeek ("Codex subagents on any model" on). Codex
 // sends the subagent's turn in the lead's Lite shape, its model name alone
 // changed: reasoning context "all_turns", the Lite header, its tools in an
-// additional_tools item. myna lifted the tools but sent the rest, and
+// additional_tools item. owl lifted the tools but sent the rest, and
 // OpenCode Go answered 503 "Endpoint is unavailable"; the same subagent
 // under a DeepSeek lead, not Lite, was answered. Every provider that isn't
 // OpenAI is now sent what Codex sends a model that isn't Lite: OpenCode Go,

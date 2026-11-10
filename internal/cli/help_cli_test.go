@@ -14,7 +14,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/agent"
+	"github.com/istoo/owl/internal/agent"
 )
 
 // helpHome points the home and every config, cache and data folder into
@@ -60,7 +60,7 @@ func tree(t *testing.T, root string) map[string]string {
 	return out
 }
 
-// runOut runs myna with args and gives what it printed; a run that
+// runOut runs owl with args and gives what it printed; a run that
 // doesn't come back in time (a gateway started, a window waited on) fails
 // the test.
 func runOut(t *testing.T, args ...string) (string, error) {
@@ -84,7 +84,7 @@ func runOut(t *testing.T, args ...string) (string, error) {
 	case err = <-done:
 	case <-time.After(20 * time.Second):
 		os.Stdout = old
-		t.Fatalf("myna %s didn't come back: it ran", strings.Join(args, " "))
+		t.Fatalf("owl %s didn't come back: it ran", strings.Join(args, " "))
 	}
 	w.Close()
 	os.Stdout = old
@@ -143,8 +143,8 @@ func types(ix *ast.IndexExpr) string {
 
 // --help, -h or help after any command, and every agent, in any place,
 // prints its usage and does nothing else: no file under the home is
-// written and nothing is started. `myna snow --help` set Snow's model to
-// "--help" and took myna out of it (#1457), and `myna serve --help`
+// written and nothing is started. `owl snow --help` set Snow's model to
+// "--help" and took owl out of it (#1457), and `owl serve --help`
 // ran a gateway.
 func TestHelpOnEveryCommandDoesNothing(t *testing.T) {
 	root := helpHome(t)
@@ -161,21 +161,21 @@ func TestHelpOnEveryCommandDoesNothing(t *testing.T) {
 			} {
 				out, err := runOut(t, args...)
 				if err != nil {
-					t.Errorf("myna %s: %v", strings.Join(args, " "), err)
+					t.Errorf("owl %s: %v", strings.Join(args, " "), err)
 				}
-				if !strings.Contains(out, "myna") && !strings.Contains(out, "usage") {
-					t.Errorf("myna %s printed no usage: %q", strings.Join(args, " "), out)
+				if !strings.Contains(out, "owl") && !strings.Contains(out, "usage") {
+					t.Errorf("owl %s printed no usage: %q", strings.Join(args, " "), out)
 				}
 				if got := tree(t, root); !reflect.DeepEqual(got, before) {
-					t.Fatalf("myna %s wrote under the home:\nbefore %v\nafter  %v", strings.Join(args, " "), before, got)
+					t.Fatalf("owl %s wrote under the home:\nbefore %v\nafter  %v", strings.Join(args, " "), before, got)
 				}
 			}
 		})
 	}
 }
 
-// The reporter's case (#1457, blackrion): Snow on myna's profile, then
-// `myna snow --help` and its other forms. Each prints Snow's usage, a
+// The reporter's case (#1457, blackrion): Snow on owl's profile, then
+// `owl snow --help` and its other forms. Each prints Snow's usage, a
 // flag no agent form takes is refused, and Snow's files stay as they were.
 func TestAgentHelpLeavesSnowWired(t *testing.T) {
 	groupsHome(t)
@@ -204,18 +204,18 @@ func TestAgentHelpLeavesSnowWired(t *testing.T) {
 		t.Fatal(err)
 	}
 	before := tree(t, dir)
-	if _, ok := before[filepath.Join("profiles", "myna.json")]; !ok {
+	if _, ok := before[filepath.Join("profiles", "owl.json")]; !ok {
 		t.Fatalf("not wired: %v", before)
 	}
 	for _, args := range [][]string{
 		{"snow", "--help"}, {"snow", "-h"}, {"snow", "help"}, {"snow", "model", "--help"}, {"snow-cli", "--help"},
 	} {
 		out, err := runOut(t, args...)
-		if err != nil || !strings.Contains(out, "myna snow <model>") {
-			t.Errorf("myna %s: %v %q", strings.Join(args, " "), err, out)
+		if err != nil || !strings.Contains(out, "owl snow <model>") {
+			t.Errorf("owl %s: %v %q", strings.Join(args, " "), err, out)
 		}
 		if got := tree(t, dir); !reflect.DeepEqual(got, before) {
-			t.Fatalf("myna %s changed Snow's files:\nbefore %v\nafter  %v", strings.Join(args, " "), before, got)
+			t.Fatalf("owl %s changed Snow's files:\nbefore %v\nafter  %v", strings.Join(args, " "), before, got)
 		}
 	}
 	for _, args := range [][]string{
@@ -223,23 +223,23 @@ func TestAgentHelpLeavesSnowWired(t *testing.T) {
 	} {
 		_, err := runOut(t, args...)
 		if err == nil || !strings.Contains(err.Error(), "nothing was changed") {
-			t.Errorf("myna %s: %v", strings.Join(args, " "), err)
+			t.Errorf("owl %s: %v", strings.Join(args, " "), err)
 		}
 		if got := tree(t, dir); !reflect.DeepEqual(got, before) {
-			t.Fatalf("myna %s changed Snow's files:\nbefore %v\nafter  %v", strings.Join(args, " "), before, got)
+			t.Fatalf("owl %s changed Snow's files:\nbefore %v\nafter  %v", strings.Join(args, " "), before, got)
 		}
 	}
 	// a model no profile of the user's is on, typed without a flag, is
 	// refused by Snow itself the same way
 	if _, err := runOut(t, "snow", "nonsense"); err == nil {
-		t.Error("myna snow nonsense taken")
+		t.Error("owl snow nonsense taken")
 	}
 	if got := tree(t, dir); !reflect.DeepEqual(got, before) {
-		t.Fatalf("myna snow nonsense changed Snow's files:\nbefore %v\nafter  %v", before, got)
+		t.Fatalf("owl snow nonsense changed Snow's files:\nbefore %v\nafter  %v", before, got)
 	}
 }
 
-// `myna help <cmd>` prints what `myna <cmd> --help` prints, the plain
+// `owl help <cmd>` prints what `owl <cmd> --help` prints, the plain
 // usage only when no command follows. It printed the top-level usage for
 // every command and exited 0.
 func TestHelpWordMatchesTheCommandsHelp(t *testing.T) {
@@ -258,23 +258,23 @@ func TestHelpWordMatchesTheCommandsHelp(t *testing.T) {
 		want := helpFor(append([]string{args[0], "--help"}, args[1:]...))
 		got := helpFor(append([]string{"help"}, args...))
 		if got != want {
-			t.Errorf("myna help %s:\n%s\nwant myna %s --help:\n%s", strings.Join(args, " "), got, strings.Join(args, " "), want)
+			t.Errorf("owl help %s:\n%s\nwant owl %s --help:\n%s", strings.Join(args, " "), got, strings.Join(args, " "), want)
 		}
 		if got == usage && want == usage {
-			t.Errorf("myna help %s printed the top-level usage", strings.Join(args, " "))
+			t.Errorf("owl help %s printed the top-level usage", strings.Join(args, " "))
 		}
 		if !helpAsked(append([]string{"help"}, args...)) {
-			t.Errorf("myna help %s is not read as help", strings.Join(args, " "))
+			t.Errorf("owl help %s is not read as help", strings.Join(args, " "))
 		}
 	}
 	if got := helpFor([]string{"help"}); got != usage {
-		t.Errorf("myna help alone:\n%s", got)
+		t.Errorf("owl help alone:\n%s", got)
 	}
 	// the TUI's own help is a key table that names the ? panel
 	tui := helpFor([]string{"tui", "--help"})
-	for _, want := range []string{"myna tui", "↑↓", "1–6", "?", "esc"} {
+	for _, want := range []string{"owl tui", "↑↓", "1–6", "?", "esc"} {
 		if !strings.Contains(tui, want) {
-			t.Errorf("myna tui --help doesn't name %q:\n%s", want, tui)
+			t.Errorf("owl tui --help doesn't name %q:\n%s", want, tui)
 		}
 	}
 }

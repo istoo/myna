@@ -31,7 +31,7 @@ var purposeKinds = func() map[string]PurposeKind {
 	add("Image description", "vision")
 	add("Routing classifier", "routing")
 	add("Connection check", "connection_check") // Claude Desktop's (gateway.KindDesktopCheck)
-	add("Test", "provider_test")                // myna's own (probelog.KindTest)
+	add("Test", "provider_test")                // owl's own (probelog.KindTest)
 	add("Detect APIs", "api_detect")            // probelog.KindDetect
 	add("Model list", "model_list")             // probelog.KindList
 	add("MCP tool", KindMCP)                    // an MCP tool call (SourceMCP)

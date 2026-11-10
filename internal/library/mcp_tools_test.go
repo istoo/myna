@@ -23,7 +23,7 @@ func TestCheckKeepsToolNames(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	h := CheckServer(context.Background(), fakeStdio(t, "ok", map[string]string{"MYNA_FAKE_MCP_TOOLS": file}))
+	h := CheckServer(context.Background(), fakeStdio(t, "ok", map[string]string{"OWL_FAKE_MCP_TOOLS": file}))
 	if h.State != "ok" || h.Tools != 14 || len(h.ToolList) != 14 {
 		t.Fatalf("got %+v, want ok with 14 tools, each listed", h)
 	}

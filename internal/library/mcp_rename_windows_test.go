@@ -8,9 +8,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/mcpauth"
-	"github.com/istoo/myna/internal/mcpauth/mcpauthtest"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/mcpauth"
+	"github.com/istoo/owl/internal/mcpauth/mcpauthtest"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // On Windows, a read-only sign-in file can't be replaced, while the

@@ -6,11 +6,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/owl/internal/sessions"
 )
 
-// The Sessions page reads the sessions of Claude Code in a WSL distro myna
-// found it in (lgtm on Discord: myna can't see the session lists of agents
+// The Sessions page reads the sessions of Claude Code in a WSL distro owl
+// found it in (lgtm on Discord: owl can't see the session lists of agents
 // inside WSL), at the distro user's home as the agent is set up there, and
 // resumes one through wsl.exe in the distro.
 func TestWSLSessionsOfTheDistro(t *testing.T) {

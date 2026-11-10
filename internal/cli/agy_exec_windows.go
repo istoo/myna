@@ -6,11 +6,11 @@ import (
 	"os/exec"
 	"os/signal"
 
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/proc"
 )
 
-// agyExecOS starts agy and waits for it, its exit code myna's: Windows
-// has no exec. Ctrl+C is agy's to handle, so myna lets it pass.
+// agyExecOS starts agy and waits for it, its exit code owl's: Windows
+// has no exec. Ctrl+C is agy's to handle, so owl lets it pass.
 func agyExecOS(bin string, args, env []string) error {
 	cmd := proc.Command(bin, args...)
 	cmd.Env = env

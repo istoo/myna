@@ -15,15 +15,15 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // The app serves its window's page to a browser too, when Settings ›
 // Network and sharing › Browser access says so (jiakun_zhao on X: the page
-// managed through a Cloudflare tunnel took `myna web` kept running in a
-// terminal beside the app). It is myna web's page, served from the app's
+// managed through a Cloudflare tunnel took `owl web` kept running in a
+// terminal beside the app). It is owl web's page, served from the app's
 // own process, beside the gateway the app serves: the same key in the
 // link, traded for the same cookie (webGuard), the same allow list, and
 // the gateway's client routes on its port judged as from another machine
@@ -39,7 +39,7 @@ import (
 // appPageFile is where the app's page's choice and key are kept, 0600.
 func appPageFile() string { return filepath.Join(settings.Dir(), "web-page.json") }
 
-// appPageDefaultPort is myna web's own port: a browser signed in to one
+// appPageDefaultPort is owl web's own port: a browser signed in to one
 // is signed in to the other where they share the key.
 const appPageDefaultPort = 3430
 
@@ -90,7 +90,7 @@ func loadAppPage() (appPageConf, error) {
 }
 
 // saveAppPage writes web-page.json readable by its owner alone: it holds
-// the key that opens every setting and key myna has.
+// the key that opens every setting and key owl has.
 func saveAppPage(c appPageConf) error {
 	p := appPageFile()
 	if err := os.MkdirAll(filepath.Dir(p), 0o700); err != nil {
@@ -108,7 +108,7 @@ func saveAppPage(c appPageConf) error {
 }
 
 // AppPage is where the app serves its page and its key, "" when it doesn't
-// say it does: `myna web` points to it rather than starting a second.
+// say it does: `owl web` points to it rather than starting a second.
 func AppPage() (addr, key string) {
 	c, err := loadAppPage()
 	if err != nil || c.addr() == "" || CheckWebKey(c.Key) != nil {
@@ -129,7 +129,7 @@ func (a appWebHost) MainShown() bool { return mainShown(a.app) }
 
 // appPage is the app's page served to a browser: listening where
 // web-page.json says, or trying again every appPageRetry while another
-// program (myna web, the myna before a restart to update) has the port.
+// program (owl web, the owl before a restart to update) has the port.
 type appPage struct {
 	mu   sync.Mutex
 	mk   func() http.Handler // the page behind the key; nil until the app starts
@@ -149,7 +149,7 @@ var appPageRetry = 4 * time.Second
 
 // startAppPage has the app serve its page as web-page.json says, now and
 // whenever Settings changes it. app is the app's own windows; gw the
-// gateway it serves (nil while another myna has it).
+// gateway it serves (nil while another owl has it).
 func startAppPage(app Windows, gw *gateway.Server) {
 	p := appPageServer
 	p.mu.Lock()
@@ -229,7 +229,7 @@ func (p *appPage) apply() {
 		p.err = busySays(c.port(), err)
 		return
 	}
-	// with --tls-cert the page is HTTPS to other computers, as myna web's
+	// with --tls-cert the page is HTTPS to other computers, as owl web's
 	if ln, err = gateway.ServeTLS(ln); err != nil {
 		p.err = err.Error()
 		return
@@ -240,13 +240,13 @@ func (p *appPage) apply() {
 	}
 	p.addr, p.err = want, ""
 	go p.srv.Serve(ln)
-	log.Printf("myna: the page is served to browsers on %s", ln.Addr())
+	log.Printf("owl: the page is served to browsers on %s", ln.Addr())
 }
 
 // busySays is why the page couldn't listen on port: most often another
-// program has it (myna web, or the myna before a restart to update).
+// program has it (owl web, or the owl before a restart to update).
 func busySays(port int, err error) string {
-	return fmt.Sprintf("port %d can't be taken (%v): myna tries again every few seconds", port, err)
+	return fmt.Sprintf("port %d can't be taken (%v): owl tries again every few seconds", port, err)
 }
 
 // appPageJSON is GET /api/web-page: the choice, and what came of it.

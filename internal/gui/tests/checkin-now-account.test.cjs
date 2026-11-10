@@ -125,7 +125,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           "trae-cn|u9": [{ user: "Cat", by: "trae", day: today, outcome: "claimed", credit: 100, asked: true }],
         };
         await page.route("**/*", serve(lang, asked, answers));
-        await page.goto("http://myna.test/?view=settings&tab=usage");
+        await page.goto("http://owl.test/?view=settings&tab=usage");
         const tab = page.locator("#warmTab-wb");
         await tab.waitFor();
         await tab.click();
@@ -210,7 +210,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       if (new URL(r.request().url()).pathname === "/api/settings") return r.fulfill({ json: { theme: "light", lang: "en", workbuddy: true, workbuddyCheckin: true, checkinAccounts: [] } });
       return route(r);
     });
-    await page.goto("http://myna.test/?view=settings&tab=usage");
+    await page.goto("http://owl.test/?view=settings&tab=usage");
     await page.locator("#warmTab-wb").waitFor();
     await page.locator("#warmTab-wb").click();
     await page.locator("#wbCheckinSegs [role=switch]").waitFor();

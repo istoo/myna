@@ -16,11 +16,11 @@ const path = require("node:path");
 const vm = require("node:vm");
 const { test } = require("node:test");
 
-// Another revision of app.js can be selected with MYNA_APP_JS to check
+// Another revision of app.js can be selected with OWL_APP_JS to check
 // the same behavior cases against the implementation before the fix. The
 // Usage page's code is the Usage plugin's page.js, beside app.js's
 // allowances (quotasOpened).
-const APP = process.env.MYNA_APP_JS || path.resolve(__dirname, "../assets/app.js");
+const APP = process.env.OWL_APP_JS || path.resolve(__dirname, "../assets/app.js");
 const PAGE = path.resolve(__dirname, "../assets/plugins/usage/page.js");
 const source = [APP, PAGE].filter((f) => fs.existsSync(f)).map((f) => fs.readFileSync(f, "utf8")).join("\n").replace(/\r\n/g, "\n");
 

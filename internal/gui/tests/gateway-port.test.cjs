@@ -6,7 +6,7 @@
 // page's language, what was typed kept; a free one moves the gateway and
 // says how many agents moved with it, and the row then says the new URL,
 // as does the sidebar's gateway line (noahhrreion on Discord).
-// With MYNA_ADDR set the field is off, shows its host:port and says why;
+// With OWL_ADDR set the field is off, shows its host:port and says why;
 // the row is titled an address, not a port, since it shows one there
 // (Chicring on Discord), and says only the port is typed. The field is an
 // input, not a native <select>; applying never scrolls the page; no
@@ -27,7 +27,7 @@ function settingsPayload(over) {
     dock: false, dockWindow: false, proxy: "", redact: false, redactPersonal: false, redactWords: [],
     codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", workbuddyCheckin: false, noStats: false,
     trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "",
-    version: "0.1.900", dir: "/config/myna", gateway: "http://127.0.0.1:3425",
+    version: "0.1.900", dir: "/config/owl", gateway: "http://127.0.0.1:3425",
     proxyNow: "none", proxySource: "none", login: false,
     visionModels: [], imageGenModels: [], workbuddyCheckins: [],
     lan: false, lanURLs: [],
@@ -66,19 +66,19 @@ function server(lang, over, posts) {
 const words = {
   en: {
     name: "Gateway address", apply: "Apply",
-    now: (u) => "Only the port is set here, 1024 to 65535; MYNA_ADDR=host:port sets the whole address instead. Agents myna connected move with it. Now " + u,
+    now: (u) => "Only the port is set here, 1024 to 65535; OWL_ADDR=host:port sets the whole address instead. Agents owl connected move with it. Now " + u,
     range: "A port is a number from 1024 to 65535",
     taken: "Port 3500 is in use by another program: pick another one",
     moved: "Gateway on port 3591; 2 agents moved with it",
-    env: "MYNA_ADDR=127.0.0.1:3426 sets the gateway’s whole address, host:port: unset it to set the port here",
+    env: "OWL_ADDR=127.0.0.1:3426 sets the gateway’s whole address, host:port: unset it to set the port here",
   },
   zh: {
     name: "网关地址", apply: "应用",
-    now: (u) => "这里只设端口（1024 到 65535）；MYNA_ADDR=主机:端口 可指定完整地址。改了之后，已接入 myna 的 Agent 会一起换过去。当前 " + u,
+    now: (u) => "这里只设端口（1024 到 65535）；OWL_ADDR=主机:端口 可指定完整地址。改了之后，已接入 owl 的 Agent 会一起换过去。当前 " + u,
     range: "端口是 1024 到 65535 之间的数字",
     taken: "端口 3500 已被其他程序占用，请换一个",
     moved: "网关已换到端口 3591，2 个 Agent 已跟着换过去",
-    env: "MYNA_ADDR=127.0.0.1:3426 已指定网关的完整地址（主机:端口）：去掉这个环境变量后才能在这里设端口",
+    env: "OWL_ADDR=127.0.0.1:3426 已指定网关的完整地址（主机:端口）：去掉这个环境变量后才能在这里设端口",
   },
 };
 
@@ -185,7 +185,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           assert.equal(await scroll(), before, "applying moved the page");
           assert.deepEqual(errors, []);
         }
-        // MYNA_ADDR comes first: the field is off and says why
+        // OWL_ADDR comes first: the field is off and says why
         {
           const { page, errors, posts } = await open(lang, { addrEnv: "127.0.0.1:3426", gateway: "http://127.0.0.1:3426" });
           const row = page.locator("#portList .port-row");

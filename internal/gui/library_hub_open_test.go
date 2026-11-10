@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/library"
+	"github.com/istoo/owl/internal/library"
 )
 
 // opens records the links handed to the system, opening none.

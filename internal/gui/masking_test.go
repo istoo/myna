@@ -10,11 +10,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/gwmw"
-	"github.com/istoo/myna/internal/masking"
-	"github.com/istoo/myna/internal/maskrec"
-	"github.com/istoo/myna/internal/redact"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/gwmw"
+	"github.com/istoo/owl/internal/masking"
+	"github.com/istoo/owl/internal/maskrec"
+	"github.com/istoo/owl/internal/redact"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // Settings → Privacy reads what masking swapped: the summary, the records

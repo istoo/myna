@@ -4,8 +4,8 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/routes"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/routes"
 )
 
 // The router strategy point with plugins/rotation on and off: a provider

@@ -2,7 +2,7 @@
 // issennknight on Discord: Import of a shared routing group whose id is a
 // group of the user's own replaces that group instead of adding another.
 // The box says so before it is pressed (the button reads Replace <name>,
-// a line says what stays), a group myna found or an id nobody has is
+// a line says what stays), a group owl found or an id nobody has is
 // still added, and only a replacing import posts replace. At 420px, in
 // every language, Chromium and WebKit.
 const assert = require("node:assert/strict");
@@ -26,7 +26,7 @@ const words = {
   ja: { imp: "インポート", rep: "One を置き換える", hint: "One と ID が同じ", done: "One を置き換えました" },
   de: { imp: "Importieren", rep: "One ersetzen", hint: "One hat dieselbe ID", done: "One ersetzt" },
 };
-const shared = (id) => JSON.stringify({ myna: "routing-group", version: 1, group: { id, name: "One", members: ["a/x"] } });
+const shared = (id) => JSON.stringify({ owl: "routing-group", version: 1, group: { id, name: "One", members: ["a/x"] } });
 function serve(lang, posts) {
   let list = [
     group("one", "One", ["a/x", "a/m"], { routing: "order" }),
@@ -55,7 +55,7 @@ function serve(lang, posts) {
     if (url.pathname === "/api/groups/import") {
       const { text } = JSON.parse(r.request().postData() || "{}");
       posts.push(["import", text, JSON.parse(r.request().postData()).replace]);
-      if (!text.includes("routing-group")) return r.fulfill({ status: 400, json: { error: "this is not a routing group shared from myna", code: "share", share: "not_shared", format: "0", models: "" } });
+      if (!text.includes("routing-group")) return r.fulfill({ status: 400, json: { error: "this is not a routing group shared from owl", code: "share", share: "not_shared", format: "0", models: "" } });
       const replace = JSON.parse(r.request().postData()).replace;
       if (replace) return json({ ...groups(), imported: { id: "one", name: "One", replaced: true } });
       list = [...list, group("new", "New", ["a/x"])];
@@ -84,7 +84,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], posts = [];
         page.on("pageerror", (e) => { if (!/^ResizeObserver loop completed with undelivered notifications/.test(e.message)) errors.push(e.message); });
         await page.route("**/*", serve(lang, posts));
-        await page.goto("http://myna.test/?view=routing");
+        await page.goto("http://owl.test/?view=routing");
         await page.locator(".rt-groups > .rt-group").nth(1).waitFor();
         await page.waitForTimeout(500);
         await page.locator(".rt-gimportbtn").click();
@@ -93,7 +93,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal((await go.textContent()).trim(), w.imp);
         assert(await over.isHidden(), "a hint with nothing pasted");
 
-        // an id no group of the user's has, or one myna found: Import
+        // an id no group of the user's has, or one owl found: Import
         for (const id of ["nope", "found"]) {
           await text.fill(shared(id));
           assert.equal((await go.textContent()).trim(), w.imp, id);

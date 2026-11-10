@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// refeccd on Discord: Library > MCP servers > myna-web-search > Edit, the
+// refeccd on Discord: Library > MCP servers > owl-web-search > Edit, the
 // Form | JSON switch: the first click changed the text size but not the
 // view; it took a second click. A trackpad's tap lifts a few pixels from
 // where it came down: here a press near the top of the option that slides 8px
@@ -21,10 +21,10 @@ const agent = (id, name) => ({ id, name, icon: "", skills: `${HOME}/.${id}/skill
 
 function server(lang, web) {
   const lib = {
-    dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
+    dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
     agents: ["claude:Claude Code","codex:Codex","gemini:Gemini CLI","cursor:Cursor","opencode:OpenCode","kimi:Kimi Code","droid:Droid","amp:Amp","qwen:Qwen Code","crush:Crush","pi:Pi","zed:Zed","trae:Trae","iflow:iFlow","goose:Goose","cline:Cline","roo:Roo","kilo:Kilo","aider:Aider","warp:Warp"].map((x) => agent(...x.split(":"))), mcpHub: true, hubPath: "/mcp",
     instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [], skills: [],
-    servers: [{ name: "myna-web-search", transport: "stdio", command: "/Applications/myna.app/Contents/MacOS/myna", args: ["mcp", "search"], env: {}, icon: "https://raw.githubusercontent.com/istoo/myna/main/internal/gui/icon-256.png", agents: ["claude", "codex", "gemini"] }],
+    servers: [{ name: "owl-web-search", transport: "stdio", command: "/Applications/owl.app/Contents/MacOS/owl", args: ["mcp", "search"], env: {}, icon: "https://raw.githubusercontent.com/istoo/owl/main/internal/gui/icon-256.png", agents: ["claude", "codex", "gemini"] }],
   };
   return async (route) => {
     const req = route.request(), url = new URL(req.url());
@@ -38,7 +38,7 @@ function server(lang, web) {
     if (url.pathname === "/api/groups") return route.fulfill({ json: { groups: [] } });
     if (url.pathname === "/api/providers") return route.fulfill({ json: { providers: [], gateway: { running: true } } });
     if (url.pathname.startsWith("/api/")) return route.fulfill({ json: {} });
-    if (url.hostname === "github.com/istoo/myna") {
+    if (url.hostname === "github.com/istoo/owl") {
       return route.fulfill({ body: await fs.readFile(path.join(assets, "favicon.png")).catch(() => Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64")), contentType: "image/png" });
     }
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
@@ -57,15 +57,15 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await t.test(`${lang} ${width}`, async () => {
           const w = (s) => tr(lang, s);
           const ctx = await browser.newContext({ viewport: { width, height: 800 } });
-          await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "mcp"); } catch {} });
+          await ctx.addInitScript(() => { try { localStorage.setItem("owl.libTab", "mcp"); } catch {} });
           const page = await ctx.newPage();
           page.setDefaultTimeout(5000);
           page.setDefaultNavigationTimeout(60000);
           await page.route("**/*", server(lang, width < 600));
-          await page.goto("http://myna.test/");
+          await page.goto("http://owl.test/");
           await navTo(page, "library");
           const ed = page.locator("#modal .lib-editor");
-          await page.locator("#view-library .lib-server .name", { hasText: "myna-web-search" }).click();
+          await page.locator("#view-library .lib-server .name", { hasText: "owl-web-search" }).click();
           await ed.waitFor();
           await page.waitForTimeout(600); // the dialog has stopped growing in
           const pick = (name) => ed.locator(".lib-viewpick .opt", { hasText: new RegExp("^" + name + "$") });

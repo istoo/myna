@@ -18,18 +18,18 @@ import (
 	"github.com/coder/websocket"
 	"github.com/tidwall/gjson"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A streamed turn to the ChatGPT backend (CodexBase/responses) goes over
 // the backend's WebSocket, as Codex's own client sends it, and comes back
-// to myna's caller as the server-sent events the HTTP route answers with.
+// to owl's caller as the server-sent events the HTTP route answers with.
 // On some networks a streamed HTTP reply from chatgpt.com is cut at about
 // 120 s, before response.completed, while the same turn over the WebSocket
-// runs to its end (brickhao on Discord: 120.7 s through myna, 121.5 s
+// runs to its end (brickhao on Discord: 120.7 s through owl, 121.5 s
 // over HTTP without it, both cut; 124.5 s and 131.4 s over the WebSocket,
-// both whole). Codex itself still speaks HTTP to myna, over loopback:
-// it is the leg from myna to the vendor that was cut.
+// both whole). Codex itself still speaks HTTP to owl, over loopback:
+// it is the leg from owl to the vendor that was cut.
 //
 // What goes on the socket is what Codex 0.16x sends there (codex-rs
 // ResponseCreateWsRequest, build_websocket_headers): the handshake carries

@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/owl/internal/sessions"
 )
 
 // pairAtOnce has a first build pair every chunk at once, for the tests
@@ -32,9 +32,9 @@ func TestFirstBuildPairsSpans(t *testing.T) {
 	writeCodexCall(t, path, "z", "sz", `"vscode"`, "resp-z", "m", "high", at, 300, 30)
 	Append(Record{Time: at.Add(time.Minute), Agent: "codex", Provider: "openai", Model: "m", Input: 300, Output: 30, Status: 200, ResponseID: "resp-z", Session: "sz"})
 	// a Codex thread written over three weeks, one file: a call 20 days
-	// back and one 2 days back, each through myna too
+	// back and one 2 days back, each through owl too
 	writeLongCodexThread(t, yesterday.AddDate(0, 0, -20), yesterday.AddDate(0, 0, -1))
-	// a call through myna alone, 30 days back
+	// a call through owl alone, 30 days back
 	Append(Record{Time: yesterday.AddDate(0, 0, -30), Agent: "claude-code", Provider: "anthropic", Model: "c", Input: 50, Output: 5, Status: 200})
 	restart := func() {
 		requestCache.Lock()

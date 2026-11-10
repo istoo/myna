@@ -8,9 +8,9 @@ package agent
 // The model sessions start on is defaultModel, "<provider id>/<model id>",
 // split at the first "/".
 //
-// myna adds a provider of its own, id "myna", at the gateway, and sets
-// defaultModel to myna/<catalog id>; the defaultModel the user had is
-// stashed and put back when myna steps out, and the "myna" provider
+// owl adds a provider of its own, id "owl", at the gateway, and sets
+// defaultModel to owl/<catalog id>; the defaultModel the user had is
+// stashed and put back when owl steps out, and the "owl" provider
 // goes again then. The user's providers and other keys are left as they
 // are. With no envVar Empryo only lists a provider whose baseURL answers
 // (2xx, 401 or 403), which the gateway's GET /v1 does.
@@ -22,7 +22,7 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/owl/internal/edit"
 )
 
 const (
@@ -42,30 +42,30 @@ func empryoAt(at place) *Agent {
 	dir := at.join(".empryo")
 	path := filepath.Join(dir, "config.json")
 	keyModel := "empryo:" + path + ":" + empryoModel
-	// keyNew marks a file myna made, which goes again once myna's
+	// keyNew marks a file owl made, which goes again once owl's
 	// provider and model are taken out of it and nothing is left
 	keyNew := "empryo:" + path + ":new"
 	model := func() string { v, _ := edit.GetJSON(path, empryoModel); return v }
-	// ours is myna's provider entry, "" where there is none
+	// ours is owl's provider entry, "" where there is none
 	ours := func() string {
 		raw, err := edit.Read(path)
 		if err != nil {
 			return ""
 		}
 		for _, p := range gjson.GetBytes(raw, empryoProviders).Array() {
-			if p.Get("id").String() == mynaID {
+			if p.Get("id").String() == owlID {
 				return p.Raw
 			}
 		}
 		return ""
 	}
-	// on: myna's — the model is one of myna's provider
+	// on: owl's — the model is one of owl's provider
 	on := func() bool {
-		ref, ok := strings.CutPrefix(model(), mynaID+"/")
-		return ok && isMyna(ref)
+		ref, ok := strings.CutPrefix(model(), owlID+"/")
+		return ok && isOwl(ref)
 	}
 	// providers sets the providers array to the user's ones plus, with
-	// add, myna's; with neither left the key goes
+	// add, owl's; with neither left the key goes
 	providers := func(add bool) error {
 		raw, err := edit.Read(path)
 		if err != nil && isFile(path) {
@@ -73,13 +73,13 @@ func empryoAt(at place) *Agent {
 		}
 		var list []json.RawMessage
 		for _, p := range gjson.GetBytes(raw, empryoProviders).Array() {
-			if p.Get("id").String() != mynaID {
+			if p.Get("id").String() != owlID {
 				list = append(list, json.RawMessage(p.Raw))
 			}
 		}
 		if add {
 			mine, _ := json.Marshal(map[string]any{
-				"id": mynaID, "name": "Myna",
+				"id": owlID, "name": "Owl",
 				"baseURL": gatewayV1(), "modelsAPI": gatewayV1() + "/models",
 			})
 			list = append(list, mine)
@@ -116,7 +116,7 @@ func empryoAt(at place) *Agent {
 			}
 			raw := ours()
 			if raw == "" {
-				return "Empryo's myna provider (config.json) is gone, so it no longer reaches myna"
+				return "Empryo's owl provider (config.json) is gone, so it no longer reaches owl"
 			}
 			return wiringOff("Empryo", path, func(k string) (string, bool) {
 				r := gjson.Get(raw, k)
@@ -127,8 +127,8 @@ func empryoAt(at place) *Agent {
 			Key: "model", Label: "model",
 			Get: model,
 			Set: func(v string) error {
-				if ref, ok := strings.CutPrefix(v, mynaID+"/"); ok && isMyna(ref) {
-					// what the user had, unless myna stashed it already
+				if ref, ok := strings.CutPrefix(v, owlID+"/"); ok && isOwl(ref) {
+					// what the user had, unless owl stashed it already
 					if !on() {
 						forget(keyModel, keyNew)
 						stash(map[string]string{keyModel: model()})
@@ -166,11 +166,11 @@ func empryoAt(at place) *Agent {
 			},
 			Options: func(cur map[string]string) []Option {
 				var own []Option
-				if c := cur["model"]; c != "" && !usesMyna(c) {
+				if c := cur["model"]; c != "" && !usesOwl(c) {
 					_, id, _ := strings.Cut(c, "/")
 					own = append(own, Option{Value: c, Icon: modelIcon("", id)})
 				}
-				return withVia(group("Empryo", own), "empryo", mynaID+"/")
+				return withVia(group("Empryo", own), "empryo", owlID+"/")
 			},
 		}},
 	}, path)

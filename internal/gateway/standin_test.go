@@ -6,11 +6,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// a model the agent names that myna doesn't serve goes to the one the
-// agent is set to use for it; one myna serves is sent as asked
+// a model the agent names that owl doesn't serve goes to the one the
+// agent is set to use for it; one owl serves is sent as asked
 func TestStandIn(t *testing.T) {
 	setHome(t, t.TempDir())
 	f := &fake{t: t, ctype: "application/json", reply: `{"id":"c1","choices":[{"message":{"role":"assistant","content":"OK"},"finish_reason":"stop"}]}`}
@@ -36,7 +36,7 @@ func TestStandIn(t *testing.T) {
 	}
 }
 
-// Codex's auto-review asks myna, its provider, for "codex-auto-review":
+// Codex's auto-review asks owl, its provider, for "codex-auto-review":
 // the review goes to the model that stands in (Codex's, TestCodexStandIn).
 func TestCodexAutoReviewStandIn(t *testing.T) {
 	setHome(t, t.TempDir())
@@ -59,11 +59,11 @@ func TestCodexAutoReviewStandIn(t *testing.T) {
 	}
 }
 
-// Adam on Discord: Codex's auto-review was answered 404 myna knows no
+// Adam on Discord: Codex's auto-review was answered 404 owl knows no
 // model "codex-auto-review". Codex's config may name its model as a routing
 // group's bare name (or Codex's spelling of a group's model, #750), which
 // its turns reach; the review stood in for by that name reaches the group
-// too. And a Codex whose config myna doesn't read as on myna (another
+// too. And a Codex whose config owl doesn't read as on owl (another
 // provider table, a profile, its own CODEX_HOME, another computer) has its
 // review go to the model its turns went to, as Codex reviews on the
 // conversation's model; before any turn it is still turned away.
@@ -99,7 +99,7 @@ func TestCodexAutoReviewReachesItsTurnsModel(t *testing.T) {
 	}
 	t.Cleanup(func() { StandIn = nil })
 
-	// a config myna doesn't read as Codex's on myna: no stand-in
+	// a config owl doesn't read as Codex's on owl: no stand-in
 	StandIn = func(string, string) string { return "" }
 	s := New()
 	if rec := ask(s, "codex-auto-review", true); rec.Code != 404 {
@@ -150,7 +150,7 @@ func TestClaudeTierStandInByFamily(t *testing.T) {
 	if err := provider.Save(*p); err != nil {
 		t.Fatal(err)
 	}
-	// the user's Claude account, as myna serves it, by Anthropic's ids
+	// the user's Claude account, as owl serves it, by Anthropic's ids
 	native := []string{"claude-sonnet-5", "claude-sonnet-5-5", "claude-fable-5-1", "claude-fable-5", "claude-opus-5", "claude-opus-5-5", "claude-sonnet-4-6"}
 	if err := provider.Save(provider.Provider{ID: "anth", Name: "Anth", Key: "k", Anthropic: up.URL, Models: native}); err != nil {
 		t.Fatal(err)
@@ -206,11 +206,11 @@ func TestClaudeTierStandInByFamily(t *testing.T) {
 			t.Errorf("%s: %d %s, upstream got %q, want %q", asked, code, body, modelOf(f.got), want)
 		}
 	}
-	// another agent's request for a model myna serves is sent as asked
+	// another agent's request for a model owl serves is sent as asked
 	if code, body := ask("claude-sonnet-5", ""); code != 200 || modelOf(f.got) != "claude-sonnet-5" {
 		t.Errorf("another agent: %d %s, upstream got %q", code, body, modelOf(f.got))
 	}
-	// Claude Code not routed through myna: nothing stands in
+	// Claude Code not routed through owl: nothing stands in
 	StandIn = func(string, string) string { return "" }
 	if code, body := ask("claude-fable-5-1", cc); code != 200 || modelOf(f.got) != "claude-fable-5-1" {
 		t.Errorf("not routed: %d %s, upstream got %q", code, body, modelOf(f.got))
@@ -218,12 +218,12 @@ func TestClaudeTierStandInByFamily(t *testing.T) {
 }
 
 // tbxark on X: a script Claude Code starts (a hook, its statusline, a
-// plugin's) inherits its ANTHROPIC_BASE_URL and token, and asked myna
+// plugin's) inherits its ANTHROPIC_BASE_URL and token, and asked owl
 // for claude-sonnet-4-6 as Python-urllib: 404 unknown model, while Claude
-// Code's own requests went to its tier. A client myna knows as no agent,
-// with the plain token, naming a Claude id myna doesn't serve, gets
+// Code's own requests went to its tier. A client owl knows as no agent,
+// with the plain token, naming a Claude id owl doesn't serve, gets
 // Claude Code's tier, on /v1/messages and count_tokens; an id the user
-// serves goes where it is served, and an agent myna gave a token keeps
+// serves goes where it is served, and an agent owl gave a token keeps
 // what it asked for.
 func TestClaudeTierForAScriptClaudeCodeStarted(t *testing.T) {
 	setHome(t, t.TempDir())
@@ -280,12 +280,12 @@ func TestClaudeTierForAScriptClaudeCodeStarted(t *testing.T) {
 	if rec := ask("/v1/messages", "claude-sonnet-5", urllib, Token); rec.Code != 200 || modelOf(f.got) != "claude-sonnet-5" {
 		t.Errorf("served id: %d %s, upstream got %q", rec.Code, rec.Body.String(), modelOf(f.got))
 	}
-	// an agent myna gave its own token isn't taken for Claude Code
+	// an agent owl gave its own token isn't taken for Claude Code
 	askedFor = nil
 	if rec := ask("/v1/messages", "claude-sonnet-4-6", urllib, TokenFor("codex")); rec.Code != 404 || slices.Contains(askedFor, "claude") {
 		t.Errorf("an agent's token: %d %s, stand-ins asked %v", rec.Code, rec.Body.String(), askedFor)
 	}
-	// Claude Code not routed through myna: still unknown
+	// Claude Code not routed through owl: still unknown
 	StandIn = func(string, string) string { return "" }
 	if rec := ask("/v1/messages", "claude-sonnet-4-6", urllib, Token); rec.Code != 404 {
 		t.Errorf("not routed: %d %s", rec.Code, rec.Body.String())

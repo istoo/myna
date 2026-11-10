@@ -5,11 +5,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/settings"
 )
 
-// The groups myna finds merge a model however a vendor spells its id:
+// The groups owl finds merge a model however a vendor spells its id:
 // Volcengine Ark's dated deepseek-v4-1-flash-260910 is ali's
 // deepseek-v4.1-flash (kyzhouxu, #583). Models that differ stay apart.
 func TestSameModelVendorSpellings(t *testing.T) {
@@ -65,7 +65,7 @@ func TestSameModelVendorSpellings(t *testing.T) {
 // A model whose id no rule matches up with another vendor's is merged
 // with it once the user says, in the provider's Names, prices & levels, which
 // model it is the same as (#583): saved with the provider's Save, kept in
-// settings' ModelSameAs, and taken by the groups myna finds.
+// settings' ModelSameAs, and taken by the groups owl finds.
 func TestModelSameAsMergesFoundGroup(t *testing.T) {
 	prefsHome(t)
 	touched := 0
@@ -131,7 +131,7 @@ func TestModelSameAsMergesFoundGroup(t *testing.T) {
 }
 
 // A provider added "Only through routing groups" whose relay lists a
-// model by its display name ("GPT-6 Sol") joins the group myna found
+// model by its display name ("GPT-6 Sol") joins the group owl found
 // for gpt-6-sol, as a tidy Claude id joins its own (Chill on Discord).
 // Spaces, "_" and "-" are one gap; the words in them still count, so
 // gpt-6 and its -mini or -sol stay apart, and so does OpenAI's dated

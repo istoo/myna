@@ -13,10 +13,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/testenv"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/testenv"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // besideFake installs the fake plugin as the plugin of the built-in id,
@@ -26,7 +26,7 @@ func besideFake(t *testing.T, id string, up http.Handler) string {
 	t.Helper()
 	bun := testenv.Bun(t)
 	fresh(t)
-	t.Setenv("MYNA_BUN", bun)
+	t.Setenv("OWL_BUN", bun)
 	t.Setenv("FAKE_ID", id)
 	t.Setenv("FAKE_RESPONSES", "1")
 	t.Cleanup(plugin.Settle)
@@ -74,13 +74,13 @@ func TestGrokPluginDraws(t *testing.T) {
 	if vs := Videomakers(*p); len(vs) == 0 {
 		t.Fatal("the Grok plugin makes no videos")
 	}
-	code, a, raw := postImages(t, New(), "/v1/images/generations", "application/json", `{"model":"`+pid+`/grok-imagine-image","prompt":"a myna","size":"1792x1024"}`)
+	code, a, raw := postImages(t, New(), "/v1/images/generations", "application/json", `{"model":"`+pid+`/grok-imagine-image","prompt":"a owl","size":"1792x1024"}`)
 	if code != 200 || len(a.Data) != 1 {
 		t.Fatalf("%d %s", code, raw)
 	}
 	// a newer image model by its bare name, as with the built-in (#1857,
 	// TestGrokDrawsANewerModelByItsBareName)
-	code, a, raw = postImages(t, New(), "/v1/images/generations", "application/json", `{"model":"grok-imagine-image-2.0","prompt":"a myna"}`)
+	code, a, raw = postImages(t, New(), "/v1/images/generations", "application/json", `{"model":"grok-imagine-image-2.0","prompt":"a owl"}`)
 	if code != 200 || len(a.Data) != 1 {
 		t.Fatalf("bare grok-imagine-image-2.0: %d %s", code, raw)
 	}
@@ -240,7 +240,7 @@ func TestGrokPluginCallsGiveCodexIntegers(t *testing.T) {
 func TestGrokPluginNonStreamKeepsHostedTools(t *testing.T) {
 	var mu sync.Mutex
 	var sent []map[string]any
-	call := `{"type":"custom_tool_call","id":"ctc_1","call_id":"xs_1","name":"x_keyword_search","input":"{\"query\":\"myna\"}","status":"completed"}`
+	call := `{"type":"custom_tool_call","id":"ctc_1","call_id":"xs_1","name":"x_keyword_search","input":"{\"query\":\"owl\"}","status":"completed"}`
 	msg := `{"type":"message","id":"msg_1","role":"assistant","status":"completed","content":[{"type":"output_text","text":"Found it.","annotations":[]}]}`
 	done := `{"id":"r1","object":"response","status":"completed","model":"grok-4.7","tools":[{"type":"x_search"}],"output":[` + call + `,` + msg + `],"usage":{"input_tokens":50,"output_tokens":7,"total_tokens":57,"server_side_tool_usage_details":{"web_search_calls":0,"x_search_calls":1}}}`
 	pid := besideFake(t, "grok", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -257,7 +257,7 @@ func TestGrokPluginNonStreamKeepsHostedTools(t *testing.T) {
 			`event: response.output_item.done`+"\n"+`data: {"type":"response.output_item.done","output_index":1,"item":`+msg+`}`,
 			`event: response.completed`+"\n"+`data: {"type":"response.completed","response":`+done+`}`))
 	}))
-	body := `{"model":"` + pid + `/fake-resp","stream":false,"tools":[{"type":"x_search"}],"input":"What do people say about myna?"}`
+	body := `{"model":"` + pid + `/fake-resp","stream":false,"tools":[{"type":"x_search"}],"input":"What do people say about owl?"}`
 	rec := httptest.NewRecorder()
 	New().Handler().ServeHTTP(rec, httptest.NewRequest("POST", "/v1/responses", strings.NewReader(body)))
 	if rec.Code != 200 {

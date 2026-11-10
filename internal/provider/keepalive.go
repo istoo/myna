@@ -1,17 +1,17 @@
 package provider
 
-// Keeping saved accounts signed in. A ChatGPT account saved in myna but
+// Keeping saved accounts signed in. A ChatGPT account saved in owl but
 // not the one Codex is signed in to is refreshed only when it is used or
 // its allowance looked at — and one waiting its turn (smart
 // routing leaves the accounts whose week resets later for days) could sit
 // unused past its refresh token's life, and be found signed out just when
-// it's needed. So whichever myna runs the gateway renews each such
+// it's needed. So whichever owl runs the gateway renews each such
 // sign-in about as often as Codex renews its own: every eight days, one
 // account an hour, never all of them at once. The account the agent is signed in to is the
 // agent's own to refresh, and is left to it.
 //
 // A saved Claude account goes the same way, on or off, but is never
-// refreshed by myna, nor is Anthropic asked anything with its sign-in
+// refreshed by owl, nor is Anthropic asked anything with its sign-in
 // (9bf6d4352): Claude Code refreshes it whenever it runs on it
 // (claude_dirs.go), so the keep-alive runs Claude Code's /usage once in the
 // account's own config directory, as its card's refresh does, and keeps
@@ -34,7 +34,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // keepAliveEvery is how long a saved sign-in goes before it is renewed:
@@ -276,7 +276,7 @@ func renewClaude(ctx context.Context, r Renewal) Renewal {
 }
 
 // renewalDue says whether a saved sign-in has gone every without being
-// renewed — since myna last renewed it, or since it was last seen in the
+// renewed — since owl last renewed it, or since it was last seen in the
 // agent's hands, which kept it fresh — or its refresh token is near its end.
 func renewalDue(l savedLogin, every time.Duration, now time.Time) bool {
 	last := l.Renewed

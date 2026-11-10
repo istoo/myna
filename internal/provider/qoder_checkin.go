@@ -4,7 +4,7 @@ package provider
 // wallechfox/qoder-checkin claims them): Qoder and Qoder CN list an
 // account's campaigns on their openapi host, the day's credits among them
 // (actionType CLAIM_BENEFIT), and claim one with a POST. While the setting
-// is on, whichever myna runs the gateway claims each claimable one for
+// is on, whichever owl runs the gateway claims each claimable one for
 // each account of @magpie-community/opencode-qoder-auth. Campaigns are
 // checked every 30 minutes and on a Beijing day change: their daily
 // rollover need not be midnight. The server decides which can be claimed.
@@ -30,8 +30,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // qoderCampaignURLs are the campaigns of each site, by the plugin's

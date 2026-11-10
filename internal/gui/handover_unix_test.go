@@ -18,21 +18,21 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/update"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/update"
 )
 
-// successorEnv has this test binary, started again, play the new myna
+// successorEnv has this test binary, started again, play the new owl
 // (TestHandoverSuccessor).
-const successorEnv = "MYNA_TEST_SUCCESSOR"
+const successorEnv = "OWL_TEST_SUCCESSOR"
 
 // TestHandoverSuccessor is the new version a restart starts, in a process
-// of its own: it takes the gateway over from the myna that started it
+// of its own: it takes the gateway over from the owl that started it
 // and serves it until it is ended.
 func TestHandoverSuccessor(t *testing.T) {
 	if os.Getenv(successorEnv) == "" {
-		t.Skip("the new myna of TestRestartHandsTheGatewayOver")
+		t.Skip("the new owl of TestRestartHandsTheGatewayOver")
 	}
 	exe, err := update.Executable()
 	if err != nil {
@@ -48,15 +48,15 @@ func TestHandoverSuccessor(t *testing.T) {
 	}
 }
 
-// handoverSandbox is a myna serving the gateway on a port of its own,
+// handoverSandbox is a owl serving the gateway on a port of its own,
 // as the app does, to restart; what it set is put back after.
 func handoverSandbox(t *testing.T, up string) *gateway.Server {
 	t.Helper()
 	if err := provider.Save(provider.Provider{ID: "plan", Name: "Plan", Key: "upstream", Chat: up + "/v1", Models: []string{"m1"}}); err != nil {
 		t.Fatal(err)
 	}
-	t.Setenv("MYNA_ADDR", "127.0.0.1:0")
-	t.Setenv("MYNA_NO_HANDOVER", "")
+	t.Setenv("OWL_ADDR", "127.0.0.1:0")
+	t.Setenv("OWL_NO_HANDOVER", "")
 	oldExe, oldHello, oldAck := startExe, helloWait, ackWait
 	oldStart, oldRelaunch := startBeside, relaunchBinary
 	exe, err := update.Executable()
@@ -66,7 +66,7 @@ func handoverSandbox(t *testing.T, up string) *gateway.Server {
 	startExe = exe
 	handoverHost.Store(true)
 	oldExit := exitNow
-	exitNow = func(int) { t.Error("the myna that handed over was made to exit before its deadline") }
+	exitNow = func(int) { t.Error("the owl that handed over was made to exit before its deadline") }
 	t.Cleanup(func() {
 		if d := quitDeadline.Swap(nil); d != nil {
 			d.Stop()
@@ -88,7 +88,7 @@ func handoverSandbox(t *testing.T, up string) *gateway.Server {
 		t.Fatal("the gateway wasn't served")
 	}
 	eventually(t, "the gateway never listened", func() bool { return gw.Addr() != "" })
-	t.Setenv("MYNA_ADDR", gw.Addr()) // as the new one finds it in settings
+	t.Setenv("OWL_ADDR", gw.Addr()) // as the new one finds it in settings
 	return gw
 }
 
@@ -116,7 +116,7 @@ func slowUpstream(t *testing.T, release <-chan struct{}) *httptest.Server {
 	return up
 }
 
-// servedByPid is the pid of the myna answering at addr, 0 when none.
+// servedByPid is the pid of the owl answering at addr, 0 when none.
 func servedByPid(addr string) int {
 	c := &http.Client{Timeout: 2 * time.Second, Transport: &http.Transport{DisableKeepAlives: true}}
 	r, err := c.Get("http://" + addr + "/")
@@ -215,7 +215,7 @@ func TestRestartHandsTheGatewayOver(t *testing.T) {
 	quit := make(chan struct{})
 	leave(func() { close(quit) })
 
-	eventually2(t, 30*time.Second, "the new myna never served the gateway", func() bool {
+	eventually2(t, 30*time.Second, "the new owl never served the gateway", func() bool {
 		return child != nil && child.Process != nil && servedByPid(addr) == child.Process.Pid
 	})
 	if !handedOver.Load() {
@@ -223,7 +223,7 @@ func TestRestartHandsTheGatewayOver(t *testing.T) {
 	}
 	// and is gone by the end of its drain, whatever holds its quit up (#4938)
 	if quitDeadline.Load() == nil {
-		t.Fatal("the myna that handed over has no deadline to quit by")
+		t.Fatal("the owl that handed over has no deadline to quit by")
 	}
 	// the old one keeps its stream past the 2s an ordinary end gives
 	// requests (gateway.shortDrain), and so doesn't quit yet
@@ -356,6 +356,6 @@ func TestHandedOverQuitsByItsDeadline(t *testing.T) {
 			t.Fatalf("exited %d, want 0", code)
 		}
 	case <-time.After(30 * time.Second):
-		t.Fatal("the myna that handed over never exited")
+		t.Fatal("the owl that handed over never exited")
 	}
 }

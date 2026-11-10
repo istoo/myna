@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// myna provider account-weight gives a subscription account its share
+// owl provider account-weight gives a subscription account its share
 // of the requests under routing=weight (rubbzha on X: a Max account 5, a
 // Pro one 1), default takes it back to 1; a weight out of 1–1000, an
 // account the subscription hasn't, or a provider with keys is an error.

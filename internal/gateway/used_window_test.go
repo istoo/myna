@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // #1778 (Vigilans): a Factory account, its 5 hours unused, 32% into its

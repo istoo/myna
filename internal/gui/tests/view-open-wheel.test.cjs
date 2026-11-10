@@ -24,7 +24,7 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 const { navTo } = require("./reader.cjs");
 
-const assets = process.env.MYNA_OPEN_WHEEL_ASSETS || path.resolve(__dirname, "../assets");
+const assets = process.env.OWL_OPEN_WHEEL_ASSETS || path.resolve(__dirname, "../assets");
 const now = new Date();
 const day = [now.getFullYear(), now.getMonth() + 1, now.getDate()].map((n) => String(n).padStart(2, "0")).join("-");
 const at = (i) => new Date(now.getTime() - (i + 1) * 60e3).toISOString();
@@ -102,8 +102,8 @@ const UPS = `{
     d.set.call(this, y);
   } });
 }`;
-// MYNA_OPEN_WHEEL_HEARD=late or unheard runs only that half
-const HEARD = process.env.MYNA_OPEN_WHEEL_HEARD ? [process.env.MYNA_OPEN_WHEEL_HEARD] : ["late", "unheard"];
+// OWL_OPEN_WHEEL_HEARD=late or unheard runs only that half
+const HEARD = process.env.OWL_OPEN_WHEEL_HEARD ? [process.env.OWL_OPEN_WHEEL_HEARD] : ["late", "unheard"];
 const LANGS = ["en", "zh", "zh-TW", "ja", "de"];
 
 for (const engine of ["chromium", "webkit"]) {
@@ -123,7 +123,7 @@ for (const engine of ["chromium", "webkit"]) {
         await p.addInitScript(UPS);
         const gate = { on: false };
         await p.route("**/*", server(lang, gate));
-        await p.goto("http://myna.test/?view=agents");
+        await p.goto("http://owl.test/?view=agents");
         await p.locator("#view-agents .ag-lead").first().waitFor();
         await p.waitForTimeout(500);
         // unheard: the window learns it on the page before, as the reader's
@@ -133,7 +133,7 @@ for (const engine of ["chromium", "webkit"]) {
           await p.mouse.move(a.x + a.width / 2, a.y + a.height / 2);
           for (let i = 0; i < 8; i++) { await p.mouse.wheel(0, 30); await p.waitForTimeout(16); }
           await p.waitForTimeout(400);
-          assert.equal(await p.evaluate(() => localStorage.getItem("myna.unheardWheels")), "1", "wheels the page never heard are learned");
+          assert.equal(await p.evaluate(() => localStorage.getItem("owl.unheardWheels")), "1", "wheels the page never heard are learned");
         }
         const view = p.locator("#view-" + name);
         // opened again: what it drew the first time is there while it reads again

@@ -15,7 +15,7 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A provider's cap on the bytes of one request.
@@ -96,7 +96,7 @@ func statedCap(errBody []byte, sent int) int {
 }
 
 // bodyCaps are the byte caps providers refused requests over, by
-// provider id, for as long as myna runs.
+// provider id, for as long as owl runs.
 type bodyCaps struct {
 	mu sync.Mutex
 	m  map[string]int
@@ -233,7 +233,7 @@ func overCap(res *http.Response, errBody []byte, p provider.Provider, size, n, i
 }
 
 // imageLeftOut is what stands where an image was left out. It goes to the
-// vendor, so it names neither myna nor the vendor.
+// vendor, so it names neither owl nor the vendor.
 const imageLeftOut = "[An earlier image was left out here to keep this request under its size limit.]"
 
 // capImage is one image of a request's history: where its JSON object sits

@@ -1,9 +1,9 @@
 package agent
 
 // Devin keeps its settings in ~/.config/devin/config.json (%APPDATA%\devin on
-// Windows), the model under agent.model. Devin has no endpoint myna can
+// Windows), the model under agent.model. Devin has no endpoint owl can
 // stand in for — its models are its own — so the options are the families
-// `devin models list --format json` reports, not the myna catalog, offered
+// `devin models list --format json` reports, not the owl catalog, offered
 // as the provider offers them: each family one model (and its fast run one
 // more, claude-opus-5-5-fast), with an effort beside it. Devin's config has
 // no effort of its own — a variant id is the effort it runs at — so the pair
@@ -17,8 +17,8 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/provider"
 )
 
 func devin(home, cfg string) *Agent {

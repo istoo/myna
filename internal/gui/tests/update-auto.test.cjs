@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Settings → Automatic updates turns myna's own update checks (and the
+// Settings → Automatic updates turns owl's own update checks (and the
 // downloads they start) off and on, and Check every picks how often they
 // run: 30 min, 1 h, 6 h (the default, nothing set) or 24 h (#472). Off, the
 // interval stays, dimmed, kept for when it is on again, and the version
@@ -19,11 +19,11 @@ const assets = path.resolve(__dirname, "../assets");
 
 const words = {
   en: { auto: "Automatic updates", every: "Check every", m30: "30 min", h6: "6 h", h24: "24 h",
-    version: "Version", check: "Check", isOff: "Automatic updates are off", latest: "Up to date", whileOn: "While automatic updates are on", often: "How often myna looks for a newer version",
-    what: "Checks for a newer myna by itself" },
+    version: "Version", check: "Check", isOff: "Automatic updates are off", latest: "Up to date", whileOn: "While automatic updates are on", often: "How often owl looks for a newer version",
+    what: "Checks for a newer owl by itself" },
   zh: { auto: "自动更新", every: "检查间隔", m30: "30 分钟", h6: "6 小时", h24: "24 小时",
-    version: "版本", check: "检查", isOff: "自动更新已关闭", latest: "已是最新", whileOn: "自动更新开启时生效", often: "myna 多久检查一次新版本",
-    what: "自动检查 myna 新版本" },
+    version: "版本", check: "检查", isOff: "自动更新已关闭", latest: "已是最新", whileOn: "自动更新开启时生效", often: "owl 多久检查一次新版本",
+    what: "自动检查 owl 新版本" },
 };
 
 function settingsPayload(lang, ctl) {
@@ -32,7 +32,7 @@ function settingsPayload(lang, ctl) {
     dock: false, dockWindow: false, proxy: "", redact: false, redactPersonal: false, redactWords: [],
     codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", workbuddyCheckin: false, noStats: false,
     trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "",
-    version: "0.1.400", dir: "~/.config/myna", gateway: "http://127.0.0.1:3425",
+    version: "0.1.400", dir: "~/.config/owl", gateway: "http://127.0.0.1:3425",
     proxyNow: "none", proxySource: "none", login: false,
     visionModels: [], imageGenModels: [], workbuddyCheckins: [], lanURLs: [],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
@@ -104,7 +104,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => { if (!/^ResizeObserver loop completed with undelivered notifications/.test(e.message)) errors.push(e.message); });
         await page.route("**/*", server(lang, ctl));
         await watchSettingsReads(page);
-        await page.goto("http://myna.test/?view=settings");
+        await page.goto("http://owl.test/?view=settings");
         await settingsDrawn(page); // rows found are the ones that stay (#1659)
         // the rows are in Settings' About part
         const aboutTab = async () => {
@@ -184,7 +184,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => { if (!/^ResizeObserver loop completed with undelivered notifications/.test(e.message)) errors.push(e.message); });
         await page.route("**/*", server(lang, ctl));
         await watchSettingsReads(page);
-        await page.goto("http://myna.test/?view=settings");
+        await page.goto("http://owl.test/?view=settings");
         await settingsDrawn(page);
         await openPart(page, "about");
         await page.locator("#setPage-about").waitFor({ state: "visible" });

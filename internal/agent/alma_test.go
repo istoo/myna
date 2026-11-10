@@ -12,8 +12,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // fakeAlma is Alma's API as its spec has it: providers and settings in
@@ -130,7 +130,7 @@ func (f *fakeAlma) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // startAlma serves a fake Alma, with a provider of the user's and settings
-// myna doesn't know, and points myna at it.
+// owl doesn't know, and points owl at it.
 func startAlma(t *testing.T) *fakeAlma {
 	t.Helper()
 	f := &fakeAlma{
@@ -188,12 +188,12 @@ func TestAlma(t *testing.T) {
 	if got := fl.Get(); got != "own:gpt-4o" {
 		t.Fatalf("get: %q", got)
 	}
-	// nothing of myna's in Alma: Sync adds nothing
+	// nothing of owl's in Alma: Sync adds nothing
 	if err := a.Sync(); err != nil {
 		t.Fatal(err)
 	}
 	if w := f.takeWrites(); len(w) != 0 {
-		t.Fatalf("sync without myna's provider wrote %v", w)
+		t.Fatalf("sync without owl's provider wrote %v", w)
 	}
 
 	var ref string
@@ -204,24 +204,24 @@ func TestAlma(t *testing.T) {
 		}
 	}
 	if ref == "" {
-		t.Fatal("no myna model offered")
+		t.Fatal("no owl model offered")
 	}
-	if err := a.Apply("model", "myna/"+ref); err != nil {
+	if err := a.Apply("model", "owl/"+ref); err != nil {
 		t.Fatal(err)
 	}
 	var mine []map[string]any
 	for _, p := range f.providers {
-		if p["name"] == "myna" {
+		if p["name"] == "owl" {
 			mine = append(mine, p)
 		}
 	}
 	if len(mine) != 1 {
-		t.Fatalf("myna providers: %v", f.providers)
+		t.Fatalf("owl providers: %v", f.providers)
 	}
 	p := mine[0]
 	ms, _ := p["models"].([]any)
-	if p["type"] != "openai" || p["baseURL"] != gatewayV1() || len(f.keys) != 1 || f.keys[0] != "myna-alma" || p["enabled"] != true || len(ms) == 0 {
-		t.Fatalf("myna provider: %v", p)
+	if p["type"] != "openai" || p["baseURL"] != gatewayV1() || len(f.keys) != 1 || f.keys[0] != "owl-alma" || p["enabled"] != true || len(ms) == 0 {
+		t.Fatalf("owl provider: %v", p)
 	}
 	av, _ := p["availableModels"].([]any)
 	if ms[0] != ref || len(av) != len(ms) || av[0].(map[string]any)["id"] != ref || av[0].(map[string]any)["name"] == "" {
@@ -232,10 +232,10 @@ func TestAlma(t *testing.T) {
 		f.settings["general"].(map[string]any)["theme"] != "dark" || f.settings["memory"] == nil {
 		t.Fatalf("settings: %v", f.settings)
 	}
-	if got := fl.Get(); got != "myna/"+ref {
+	if got := fl.Get(); got != "owl/"+ref {
 		t.Fatalf("get: %q", got)
 	}
-	// myna draws with nothing: Alma's image generation is left be
+	// owl draws with nothing: Alma's image generation is left be
 	if f.settings["imageGen"] != nil {
 		t.Fatalf("image generation set with nothing to draw: %v", f.settings["imageGen"])
 	}
@@ -252,7 +252,7 @@ func TestAlma(t *testing.T) {
 	if err := a.Sync(); err != nil {
 		t.Fatal(err)
 	}
-	if err := a.Apply("model", "myna/"+ref); err != nil {
+	if err := a.Apply("model", "owl/"+ref); err != nil {
 		t.Fatal(err)
 	}
 	if w := f.takeWrites(); len(w) != 0 {
@@ -271,23 +271,23 @@ func TestAlma(t *testing.T) {
 		t.Fatalf("synced models: %v", ms)
 	}
 
-	// Alma's own model again: myna's provider stays
+	// Alma's own model again: owl's provider stays
 	if err := a.Apply("model", "own:gpt-4o"); err != nil {
 		t.Fatal(err)
 	}
 	if chat := f.settings["chat"].(map[string]any); chat["defaultModel"] != "own:gpt-4o" || f.provider(p["id"].(string)) == nil {
 		t.Fatalf("settings: %v providers: %v", f.settings, f.providers)
 	}
-	// the gateway moved: choosing myna's model points it back
+	// the gateway moved: choosing owl's model points it back
 	p["baseURL"] = "http://127.0.0.1:9/v1"
-	if err := a.Apply("model", "myna/"+ref); err != nil {
+	if err := a.Apply("model", "owl/"+ref); err != nil {
 		t.Fatal(err)
 	}
 	if len(f.providers) != 2 || p["baseURL"] != gatewayV1() {
 		t.Fatalf("providers: %v", f.providers)
 	}
 
-	// back to Alma's default: myna's provider comes out, the user's stays
+	// back to Alma's default: owl's provider comes out, the user's stays
 	if err := a.Apply("model", ""); err != nil {
 		t.Fatal(err)
 	}
@@ -319,18 +319,18 @@ func TestAlmaModelObjects(t *testing.T) {
 		}
 	}
 	if ref == "" {
-		t.Fatal("no myna model offered")
+		t.Fatal("no owl model offered")
 	}
-	if err := a.Apply("model", "myna/"+ref); err != nil {
+	if err := a.Apply("model", "owl/"+ref); err != nil {
 		t.Fatal(err)
 	}
-	if got := fl.Get(); got != "myna/"+ref {
+	if got := fl.Get(); got != "owl/"+ref {
 		t.Fatalf("get: %q", got)
 	}
-	// myna's own listed as objects too, the same ones: nothing to write
+	// owl's own listed as objects too, the same ones: nothing to write
 	var mine map[string]any
 	for _, p := range f.providers {
-		if p["name"] == "myna" {
+		if p["name"] == "owl" {
 			mine = p
 		}
 	}
@@ -367,7 +367,7 @@ func TestAlmaDown(t *testing.T) {
 			break
 		}
 	}
-	if err := a.Apply("model", "myna/"+ref); err != nil {
+	if err := a.Apply("model", "owl/"+ref); err != nil {
 		t.Fatal(err)
 	}
 	srv := almaAPI
@@ -376,17 +376,17 @@ func TestAlmaDown(t *testing.T) {
 	if err := a.Sync(); err != nil {
 		t.Fatalf("sync: %v", err)
 	}
-	if got := a.Field("model").Get(); got != "myna/"+ref {
+	if got := a.Field("model").Get(); got != "owl/"+ref {
 		t.Fatalf("get while down: %q", got)
 	}
 	if d := a.Drift(); d != nil {
 		t.Fatalf("drift while down: %+v", d)
 	}
-	if err := a.Field("model").Set("myna/" + ref); err == nil || !strings.Contains(err.Error(), "isn't running") {
+	if err := a.Field("model").Set("owl/" + ref); err == nil || !strings.Contains(err.Error(), "isn't running") {
 		t.Fatalf("set while down: %v", err)
 	}
 	if len(a.Field("model").Options(nil)) == 0 {
-		t.Fatal("myna's models not offered while Alma is down")
+		t.Fatal("owl's models not offered while Alma is down")
 	}
 }
 
@@ -434,8 +434,8 @@ func TestAlmaLook(t *testing.T) {
 
 // alma-server, Alma without a desktop, keeps its data in
 // ~/.local/share/alma on Linux (its README; $XDG_DATA_HOME/alma, or
-// ALMA_DATA_DIR) and answers on Alma's port: myna finds it there, and its
-// myna provider gets Alma's key on the next Sync, so its requests read as
+// ALMA_DATA_DIR) and answers on Alma's port: owl finds it there, and its
+// owl provider gets Alma's key on the next Sync, so its requests read as
 // Alma's rather than the AI SDK's (Lutra.x on Discord). A Mac's Alma is
 // looked for where it was.
 func TestAlmaServerKeyed(t *testing.T) {
@@ -450,8 +450,8 @@ func TestAlmaServerKeyed(t *testing.T) {
 		t.Fatal(err)
 	}
 	f := startAlma(t)
-	f.providers = append(f.providers, map[string]any{"id": "mg", "name": "myna", "type": "openai", "baseURL": gatewayV1(),
-		"enabled": true, "apiKey": "myna", "models": []any{}, "availableModels": []any{}})
+	f.providers = append(f.providers, map[string]any{"id": "mg", "name": "owl", "type": "openai", "baseURL": gatewayV1(),
+		"enabled": true, "apiKey": "owl", "models": []any{}, "availableModels": []any{}})
 	a := alma()
 	if a.Dir != data {
 		t.Fatalf("Alma's folder: %q, want alma-server's %q", a.Dir, data)
@@ -459,8 +459,8 @@ func TestAlmaServerKeyed(t *testing.T) {
 	if err := a.Sync(); err != nil {
 		t.Fatal(err)
 	}
-	if p := f.provider("mg"); p["apiKey"] != "myna-alma" {
-		t.Fatalf("alma-server's myna provider after Sync: %v", p)
+	if p := f.provider("mg"); p["apiKey"] != "owl-alma" {
+		t.Fatalf("alma-server's owl provider after Sync: %v", p)
 	}
 
 	// $XDG_DATA_HOME and ALMA_DATA_DIR, as alma-server reads them
@@ -494,8 +494,8 @@ func TestAlmaServerKeyed(t *testing.T) {
 // Alma's requests say nothing of Alma (they go out as the AI SDK's), so its
 // provider carries a key of Alma's: one wired before there was one gets it
 // on the next Sync, with nothing else sent, and only once.
-// Wiring Alma makes the model myna draws with Alma's image generation
-// model, listed on myna's provider as one that makes images, when Alma
+// Wiring Alma makes the model owl draws with Alma's image generation
+// model, listed on owl's provider as one that makes images, when Alma
 // has none picked (Sorghum on Discord); one the user picked is theirs.
 func TestAlmaImageGen(t *testing.T) {
 	syncHome(t)
@@ -504,7 +504,7 @@ func TestAlmaImageGen(t *testing.T) {
 	}
 	const drawn = "img/gpt-image-1"
 	if d := gateway.Drawer(); d != drawn {
-		t.Fatalf("myna draws with %q", d)
+		t.Fatalf("owl draws with %q", d)
 	}
 	f := startAlma(t)
 	a := alma()
@@ -523,12 +523,12 @@ func TestAlmaImageGen(t *testing.T) {
 	}
 	// Alma's defaults: Auto
 	setImage("")
-	if err := a.Apply("model", "myna/relay/glm-4.6"); err != nil {
+	if err := a.Apply("model", "owl/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	var p map[string]any
 	for _, q := range f.providers {
-		if q["name"] == "myna" {
+		if q["name"] == "owl" {
 			p = q
 		}
 	}
@@ -548,14 +548,14 @@ func TestAlmaImageGen(t *testing.T) {
 		}
 	}
 	if ms := p["models"].([]any); !listed || ms[len(ms)-1] != drawn {
-		t.Fatalf("myna's models: %v %v", p["models"], p["availableModels"])
+		t.Fatalf("owl's models: %v %v", p["models"], p["availableModels"])
 	}
 
-	// the user's own pick, theirs or myna's, stays: choosing a model
+	// the user's own pick, theirs or owl's, stays: choosing a model
 	// again or Sync leaves it
 	for _, v := range []string{"own:gpt-image-1", pid + ":relay/glm-4.6"} {
 		setImage(v)
-		if err := a.Apply("model", "myna/relay/glm-4.6"); err != nil {
+		if err := a.Apply("model", "owl/relay/glm-4.6"); err != nil {
 			t.Fatal(err)
 		}
 		if err := a.Sync(); err != nil {
@@ -565,7 +565,7 @@ func TestAlmaImageGen(t *testing.T) {
 			t.Fatalf("the user's %q became %q", v, got)
 		}
 	}
-	// Auto, gone back to after myna set it: Sync leaves it
+	// Auto, gone back to after owl set it: Sync leaves it
 	setImage("")
 	if err := a.Sync(); err != nil {
 		t.Fatal(err)
@@ -573,7 +573,7 @@ func TestAlmaImageGen(t *testing.T) {
 	if got := image(); got != "" {
 		t.Fatalf("Sync filled Auto with %q", got)
 	}
-	// a drawer myna gave it before and offers no longer: Sync puts the
+	// a drawer owl gave it before and offers no longer: Sync puts the
 	// one it draws with now
 	setImage(pid + ":old/gpt-image-0")
 	if err := a.Sync(); err != nil {
@@ -598,15 +598,15 @@ func TestAlmaKey(t *testing.T) {
 	if err := os.MkdirAll(a.Dir, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	f.providers = append(f.providers, map[string]any{"id": "mg", "name": "myna", "type": "openai", "baseURL": gatewayV1(),
-		"enabled": true, "apiKey": "myna", "models": []any{}, "availableModels": []any{}})
+	f.providers = append(f.providers, map[string]any{"id": "mg", "name": "owl", "type": "openai", "baseURL": gatewayV1(),
+		"enabled": true, "apiKey": "owl", "models": []any{}, "availableModels": []any{}})
 	if err := a.Sync(); err != nil {
 		t.Fatal(err)
 	}
-	if p := f.provider("mg"); p["apiKey"] != "myna-alma" || p["baseURL"] != gatewayV1() {
+	if p := f.provider("mg"); p["apiKey"] != "owl-alma" || p["baseURL"] != gatewayV1() {
 		t.Fatalf("provider after Sync: %v", p)
 	}
-	if len(f.keys) != 1 || f.keys[0] != "myna-alma" {
+	if len(f.keys) != 1 || f.keys[0] != "owl-alma" {
 		t.Fatalf("keys sent: %v", f.keys)
 	}
 	f.takeWrites()

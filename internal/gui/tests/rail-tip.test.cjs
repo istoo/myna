@@ -59,8 +59,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const page = await browser.newPage({ viewport: { width: 1000, height: 700 }, colorScheme: theme });
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
-        await page.route("http://myna.test/**", serve(lang, theme));
-        await page.goto("http://myna.test/");
+        await page.route("http://owl.test/**", serve(lang, theme));
+        await page.goto("http://owl.test/");
         await navTo(page, "agents");
         // connected, its model picked in its opened row
         await page.locator("#agents .ag-link").first().click();

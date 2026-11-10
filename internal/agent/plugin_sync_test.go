@@ -8,10 +8,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // A plugin's sign-in changing reaches the model lists agents keep in
@@ -22,13 +22,13 @@ import (
 // go from the file, by the same hook.
 func TestPluginSignInReachesPiModels(t *testing.T) {
 	home := syncHome(t)
-	t.Setenv("MYNA_BUN", "")
+	t.Setenv("OWL_BUN", "")
 	catalog.Changed = SyncCatalog
 	t.Cleanup(func() { plugin.Told(); catalog.Changed = nil })
 	if err := provider.Save(provider.Provider{ID: "deepseek", Name: "DeepSeek", Chat: "https://api.deepseek.com/v1", Key: "k", Models: []string{"pro"}}); err != nil {
 		t.Fatal(err)
 	}
-	spec := "@myna-community/opencode-trae-auth"
+	spec := "@owl-community/opencode-trae-auth"
 	write := func(name string, v any) {
 		t.Helper()
 		b, _ := json.Marshal(v)
@@ -46,7 +46,7 @@ func TestPluginSignInReachesPiModels(t *testing.T) {
 	t.Cleanup(plugin.Settle)
 
 	p := pi(home)
-	if err := p.Pick("model", "myna/deepseek/pro"); err != nil {
+	if err := p.Pick("model", "owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	plugin.Told()

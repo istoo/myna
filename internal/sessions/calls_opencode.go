@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // OpenCode's own calls (#680): each assistant message is one, with its
@@ -22,12 +22,12 @@ import (
 // and its time the latest change to one, so only a session that changed is
 // read again, and what it holds is kept in the call cache as a file's is.
 //
-// A reply through myna's gateway (provider "myna", or "dial" as myna
+// A reply through owl's gateway (provider "owl", or "dial" as owl
 // was once called) the gateway has logged already: it is left out, not
 // matched afterwards.
 
-// ocGatewayProvider is whether an OpenCode provider id is myna's gateway.
-func ocGatewayProvider(id string) bool { return id == "myna" || id == "dial" }
+// ocGatewayProvider is whether an OpenCode provider id is owl's gateway.
+func ocGatewayProvider(id string) bool { return id == "owl" || id == "dial" }
 
 // ocCallList is the last listing of OpenCode's database, kept while the
 // database and its WAL are as they were.

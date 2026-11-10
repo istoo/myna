@@ -16,9 +16,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // a one-pixel PNG
@@ -31,7 +31,7 @@ func tinyPNG(t *testing.T) []byte {
 	return b.Bytes()
 }
 
-// fakeTools is a gateway's MCP servers as `myna tool` asks them: the
+// fakeTools is a gateway's MCP servers as `owl tool` asks them: the
 // image server's generate_image and generation_result, the web search
 // server's web_search, and every request it was sent.
 type fakeTools struct {
@@ -112,14 +112,14 @@ func (f *fakeTools) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]any{"jsonrpc": "2.0", "id": m.ID, "result": result})
 }
 
-// toolHere is a fake gateway myna tool asks, and a folder of its own the
+// toolHere is a fake gateway owl tool asks, and a folder of its own the
 // command runs in.
 func toolHere(t *testing.T) (*fakeTools, string) {
 	t.Helper()
 	f := &fakeTools{}
 	srv := httptest.NewServer(f)
 	t.Cleanup(srv.Close)
-	t.Setenv("MYNA_GATEWAY", srv.URL)
+	t.Setenv("OWL_GATEWAY", srv.URL)
 	dir := t.TempDir()
 	t.Chdir(dir)
 	was := toolPoll
@@ -141,7 +141,7 @@ func filesIn(t *testing.T, dir string) []string {
 	return out
 }
 
-// myna tools lists every server's tools, each with its parameters.
+// owl tools lists every server's tools, each with its parameters.
 func TestToolsListsTheServersTools(t *testing.T) {
 	toolHere(t)
 	out, err := runOut(t, "tools")
@@ -157,7 +157,7 @@ func TestToolsListsTheServersTools(t *testing.T) {
 		t.Errorf("the list has more than a description's first sentence:\n%s", out)
 	}
 	out, err = runOut(t, "tools", "generate_image")
-	if err != nil || !strings.Contains(out, "More words here") || !strings.Contains(out, "myna tool generate_image <prompt>") {
+	if err != nil || !strings.Contains(out, "More words here") || !strings.Contains(out, "owl tool generate_image <prompt>") {
 		t.Fatalf("one tool: %v\n%s", err, out)
 	}
 	if _, err := runOut(t, "tools", "draw"); err == nil || !strings.Contains(err.Error(), `no tool called "draw"`) {
@@ -175,12 +175,12 @@ func TestToolReadsParameters(t *testing.T) {
 		t.Fatal(err)
 	}
 	img, _ := findTool(tools, "generate_image")
-	c, err := parseToolArgs(img, []string{"a", "myna", "--n", "2", "--quality=high", "--reference-images", "ref.png", "--reference_images", "https://x/y.png", "-o", "out", "--json"})
+	c, err := parseToolArgs(img, []string{"a", "owl", "--n", "2", "--quality=high", "--reference-images", "ref.png", "--reference_images", "https://x/y.png", "-o", "out", "--json"})
 	if err != nil {
 		t.Fatal(err)
 	}
 	got, _ := json.Marshal(c.args)
-	want, _ := json.Marshal(map[string]any{"prompt": "a myna", "n": 2, "quality": "high", "reference_images": []string{filepath.Join(dir, "ref.png"), "https://x/y.png"}})
+	want, _ := json.Marshal(map[string]any{"prompt": "a owl", "n": 2, "quality": "high", "reference_images": []string{filepath.Join(dir, "ref.png"), "https://x/y.png"}})
 	if string(got) != string(want) || c.output != "out" || !c.json {
 		t.Fatalf("got %s %q %v, want %s", got, c.output, c.json, want)
 	}
@@ -198,21 +198,21 @@ func TestToolReadsParameters(t *testing.T) {
 func TestToolRefusesWhatItDoesntKnowAndCallsNothing(t *testing.T) {
 	f, dir := toolHere(t)
 	for _, args := range [][]string{
-		{"tool", "generate_image", "--style", "vivid", "a myna"},
-		{"tool", "generate_image", "--model", "art/nope", "a myna"},
+		{"tool", "generate_image", "--style", "vivid", "a owl"},
+		{"tool", "generate_image", "--model", "art/nope", "a owl"},
 		{"tool", "generate_image", "--n", "2"},
-		{"tool", "generate_image", "--n", "two", "a myna"},
-		{"tool", "generate_image", "--quality", "ultra", "a myna"},
-		{"tool", "generate_image", "--prompt", "a", "a myna"},
-		{"tool", "generate_image", "--n", "1", "--n", "2", "a myna"},
-		{"tool", "generate_image", "-x", "a myna"},
-		{"tool", "generate_image", "a myna", "-o"},
-		{"tool", "draw", "a myna"},
+		{"tool", "generate_image", "--n", "two", "a owl"},
+		{"tool", "generate_image", "--quality", "ultra", "a owl"},
+		{"tool", "generate_image", "--prompt", "a", "a owl"},
+		{"tool", "generate_image", "--n", "1", "--n", "2", "a owl"},
+		{"tool", "generate_image", "-x", "a owl"},
+		{"tool", "generate_image", "a owl", "-o"},
+		{"tool", "draw", "a owl"},
 		{"tool"},
 	} {
 		_, err := runOut(t, args...)
 		if err == nil {
-			t.Errorf("myna %s: no error", strings.Join(args, " "))
+			t.Errorf("owl %s: no error", strings.Join(args, " "))
 		}
 	}
 	if c := f.toolCalls(); len(c) != 0 {
@@ -221,7 +221,7 @@ func TestToolRefusesWhatItDoesntKnowAndCallsNothing(t *testing.T) {
 	if got := filesIn(t, dir); len(got) != 0 {
 		t.Fatalf("a refused call wrote %v", got)
 	}
-	_, err := runOut(t, "tool", "generate_image", "--style", "x", "a myna")
+	_, err := runOut(t, "tool", "generate_image", "--style", "x", "a owl")
 	if err == nil || !strings.Contains(err.Error(), "takes no --style") || !strings.Contains(err.Error(), "--prompt") || !strings.Contains(err.Error(), "nothing was called") {
 		t.Fatalf("an unknown parameter: %v", err)
 	}
@@ -230,10 +230,10 @@ func TestToolRefusesWhatItDoesntKnowAndCallsNothing(t *testing.T) {
 // --help prints the usage and asks the gateway nothing.
 func TestToolHelpCallsNothing(t *testing.T) {
 	f, dir := toolHere(t)
-	for _, args := range [][]string{{"tool", "generate_image", "a myna", "--help"}, {"tool", "-h"}, {"tools", "--help"}, {"tool", "help"}} {
+	for _, args := range [][]string{{"tool", "generate_image", "a owl", "--help"}, {"tool", "-h"}, {"tools", "--help"}, {"tool", "help"}} {
 		out, err := runOut(t, args...)
-		if err != nil || !strings.Contains(out, "myna tool <name>") {
-			t.Fatalf("myna %s: %v\n%s", strings.Join(args, " "), err, out)
+		if err != nil || !strings.Contains(out, "owl tool <name>") {
+			t.Fatalf("owl %s: %v\n%s", strings.Join(args, " "), err, out)
 		}
 	}
 	f.mu.Lock()
@@ -257,7 +257,7 @@ func TestToolSavesTheImage(t *testing.T) {
 			"_meta": map[string]any{gateway.FilesMeta: []any{map[string]any{"url": "http://127.0.0.1:3425" + gateway.ImageMCPFiles + "a.png", "inline": true}}},
 		}
 	}
-	out, err := runOut(t, "tool", "generate_image", "a myna on a branch", "-o", "hero.png")
+	out, err := runOut(t, "tool", "generate_image", "a owl on a branch", "-o", "hero.png")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -268,29 +268,29 @@ func TestToolSavesTheImage(t *testing.T) {
 		t.Fatalf("printed %q", out)
 	}
 	// hero.png is there: the next is saved beside it
-	if _, err := runOut(t, "tool", "generate_image", "a myna on a branch", "-o", "hero.png"); err != nil {
+	if _, err := runOut(t, "tool", "generate_image", "a owl on a branch", "-o", "hero.png"); err != nil {
 		t.Fatal(err)
 	}
 	if got := filesIn(t, dir); len(got) != 2 {
 		t.Fatalf("files %v: one was written over", got)
 	}
 	// no -o: here, named from the prompt
-	if _, err := runOut(t, "tool", "generate_image", "a myna on a branch"); err != nil {
+	if _, err := runOut(t, "tool", "generate_image", "a owl on a branch"); err != nil {
 		t.Fatal(err)
 	}
-	if got := strings.Join(filesIn(t, dir), " "); len(filesIn(t, dir)) != 3 || !strings.Contains(got, "myna") {
+	if got := strings.Join(filesIn(t, dir), " "); len(filesIn(t, dir)) != 3 || !strings.Contains(got, "owl") {
 		t.Fatalf("files %s", got)
 	}
-	if c := f.toolCalls(); len(c) != 3 || !strings.Contains(c[0], gateway.ImageMCPPath+` tools/call generate_image {"prompt":"a myna on a branch"}`) {
+	if c := f.toolCalls(); len(c) != 3 || !strings.Contains(c[0], gateway.ImageMCPPath+` tools/call generate_image {"prompt":"a owl on a branch"}`) {
 		t.Fatalf("calls %v", c)
 	}
 	// --json prints the answer and saves nothing
-	out, err = runOut(t, "tool", "generate_image", "--json", "a myna")
+	out, err = runOut(t, "tool", "generate_image", "--json", "a owl")
 	if err != nil || !strings.Contains(out, gateway.FilesMeta) || len(filesIn(t, dir)) != 3 {
 		t.Fatalf("--json: %v %q", err, out)
 	}
 	// --model goes to the tool as its model argument
-	if _, err := runOut(t, "tool", "generate_image", "--model", "art/painter", "--json", "a myna"); err != nil {
+	if _, err := runOut(t, "tool", "generate_image", "--model", "art/painter", "--json", "a owl"); err != nil {
 		t.Fatal(err)
 	}
 	if c := f.toolCalls(); !strings.Contains(c[len(c)-1], `"model":"art/painter"`) {
@@ -317,7 +317,7 @@ func TestToolWaitsOnWhatIsStillMade(t *testing.T) {
 		}
 		return map[string]any{
 			"content": []any{map[string]any{"type": "text", "text": "made"}},
-			"_meta":   map[string]any{gateway.FilesMeta: []any{map[string]any{"url": "https://myna.example.net/v1/videos/img_1/content"}}},
+			"_meta":   map[string]any{gateway.FilesMeta: []any{map[string]any{"url": "https://owl.example.net/v1/videos/img_1/content"}}},
 		}
 	}
 	out, err := runOut(t, "tool", "generate_image", "a kite", "-o", "clips")
@@ -354,24 +354,24 @@ func TestToolErrorIsSaid(t *testing.T) {
 	}
 }
 
-// With no myna running it says so, plainly.
-func TestToolSaysMynaIsntRunning(t *testing.T) {
+// With no owl running it says so, plainly.
+func TestToolSaysOwlIsntRunning(t *testing.T) {
 	l, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
 		t.Fatal(err)
 	}
 	addr := l.Addr().String()
 	l.Close()
-	t.Setenv("MYNA_GATEWAY", "http://"+addr)
+	t.Setenv("OWL_GATEWAY", "http://"+addr)
 	for _, args := range [][]string{{"tools"}, {"tool", "web_search", "go"}} {
-		if _, err := runOut(t, args...); err == nil || !strings.Contains(err.Error(), "myna isn't running at http://"+addr) {
-			t.Fatalf("myna %s: %v", strings.Join(args, " "), err)
+		if _, err := runOut(t, args...); err == nil || !strings.Contains(err.Error(), "owl isn't running at http://"+addr) {
+			t.Fatalf("owl %s: %v", strings.Join(args, " "), err)
 		}
 	}
 }
 
 // Against the real gateway, with a fake vendor: the image server's own
-// tools and schema are what myna tool lists and calls, and the image the
+// tools and schema are what owl tool lists and calls, and the image the
 // vendor drew is saved.
 func TestToolDrawsThroughTheGateway(t *testing.T) {
 	home := t.TempDir()
@@ -379,7 +379,7 @@ func TestToolDrawsThroughTheGateway(t *testing.T) {
 	t.Setenv("USERPROFILE", home)
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
-	t.Setenv("MYNA_PUBLIC_URL", "")
+	t.Setenv("OWL_PUBLIC_URL", "")
 	pic := tinyPNG(t)
 	var sent []string
 	var mu sync.Mutex
@@ -403,14 +403,14 @@ func TestToolDrawsThroughTheGateway(t *testing.T) {
 	}
 	gw := httptest.NewServer(gateway.New().Handler())
 	t.Cleanup(gw.Close)
-	t.Setenv("MYNA_GATEWAY", gw.URL)
+	t.Setenv("OWL_GATEWAY", gw.URL)
 	dir := t.TempDir()
 	t.Chdir(dir)
 	out, err := runOut(t, "tools")
 	if err != nil || !strings.Contains(out, "generate_image") || !strings.Contains(out, "--prompt <text> (required)") || !strings.Contains(out, "analyze_image") || !strings.Contains(out, "web_search") {
 		t.Fatalf("tools: %v\n%s", err, out)
 	}
-	out, err = runOut(t, "tool", "generate_image", "a myna", "--size", "1024x1024", "-o", "hero.png")
+	out, err = runOut(t, "tool", "generate_image", "a owl", "--size", "1024x1024", "-o", "hero.png")
 	if err != nil {
 		t.Fatalf("%v\n%s", err, out)
 	}
@@ -419,7 +419,7 @@ func TestToolDrawsThroughTheGateway(t *testing.T) {
 	}
 	mu.Lock()
 	defer mu.Unlock()
-	if len(sent) != 1 || !strings.Contains(sent[0], `"prompt":"a myna"`) || !strings.Contains(sent[0], `"size":"1024x1024"`) {
+	if len(sent) != 1 || !strings.Contains(sent[0], `"prompt":"a owl"`) || !strings.Contains(sent[0], `"size":"1024x1024"`) {
 		t.Fatalf("vendor was sent %v", sent)
 	}
 }

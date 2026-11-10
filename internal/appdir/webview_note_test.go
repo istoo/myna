@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-// The note beside a Windows myna installed from a download names the
+// The note beside a Windows owl installed from a download names the
 // webview profile it keeps (update.Settle); a missing note, or one that
 // doesn't name an absolute folder, leaves WebView2's own default.
 func TestWebViewNote(t *testing.T) {
@@ -15,14 +15,14 @@ func TestWebViewNote(t *testing.T) {
 	if got := noted(note); got != "" {
 		t.Fatalf("no note read as %q", got)
 	}
-	want := filepath.Join(dir, "Roaming", "myna-windows-amd64.exe")
+	want := filepath.Join(dir, "Roaming", "owl-windows-amd64.exe")
 	if err := os.WriteFile(note, []byte(want+"\r\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	if got := noted(note); got != want {
 		t.Fatalf("note read as %q, want %q", got, want)
 	}
-	if err := os.WriteFile(note, []byte("myna-windows-amd64.exe\n"), 0o644); err != nil {
+	if err := os.WriteFile(note, []byte("owl-windows-amd64.exe\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	if got := noted(note); got != "" {

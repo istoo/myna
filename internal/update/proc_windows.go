@@ -5,7 +5,7 @@ import (
 	"os/exec"
 	"syscall"
 
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/proc"
 )
 
 const (
@@ -28,7 +28,7 @@ func alive(pid int) bool {
 	return ev == waitTimeout
 }
 
-// detach starts a relaunched myna outside this one's console, so it
+// detach starts a relaunched owl outside this one's console, so it
 // outlives it. It gets no console at all, so Windows ignores the
 // CREATE_NO_WINDOW proc may have set.
 func detach(cmd *exec.Cmd) {

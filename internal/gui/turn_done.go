@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/gateway"
 )
 
 // turnDoneText is the notification that an agent's turn is done (itieniu
@@ -71,7 +71,7 @@ func turnTook(lang string, d time.Duration) string {
 	return fmt.Sprintf("%d%s", sec, u.s)
 }
 
-// agentName is an agent's name as myna shows it, its id for one it
+// agentName is an agent's name as owl shows it, its id for one it
 // doesn't know.
 func agentName(id string) string {
 	for _, a := range agent.All() {

@@ -5,7 +5,7 @@
 // a model Pi would keep. Pi's, OmO's and Prime Agent's (#1528) Default says it clears the default
 // and Pi picks one itself; other agents' says what it said. Pi's
 // openai-codex models are rows of their own beside openai's of the same
-// name. Both connected to myna, so the pickers in their rows list every
+// name. Both connected to owl, so the pickers in their rows list every
 // choice there is. In English and Chinese; no backend, the API is faked here.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -18,15 +18,15 @@ const piOptions = [
   { value: "openai/gpt-6-astra", note: "GPT-6 Astra", group: "OpenAI" },
   { value: "openai-codex/gpt-6-astra", note: "GPT-6 Astra", group: "OpenAI Codex" },
   { value: "openai-codex/gpt-5.5", note: "GPT-5.5", group: "OpenAI Codex" },
-  { value: "myna/relay/m1", label: "m1", ref: "relay/m1", note: "Relay · via myna" },
+  { value: "owl/relay/m1", label: "m1", ref: "relay/m1", note: "Relay · via owl" },
 ];
 const state = {
   agents: [
     { id: "pi", name: "Pi", icon: "generic", path: "/fixture/pi", wired: true, fields: [{ key: "model", label: "model", value: "openai/gpt-6-astra", options: piOptions }] },
     // #1528: Prime Agent, Pi's files in ~/.prime/agent, with no default of
     // its own either (it starts on its featured model)
-    { id: "prime-agent", name: "Prime Agent", icon: "prime-agent", path: "/fixture/prime", wired: true, fields: [{ key: "model", label: "model", value: "myna/relay/m1", options: piOptions.filter((o) => o.ref) }] },
-    { id: "claude", name: "Claude Code", icon: "generic", path: "/fixture/claude", wired: true, fields: [{ key: "model", label: "model", value: "opus", options: [{ value: "opus" }, { value: "sonnet" }, { value: "relay/m1", label: "m1", ref: "relay/m1", note: "Relay · via myna" }] }] },
+    { id: "prime-agent", name: "Prime Agent", icon: "prime-agent", path: "/fixture/prime", wired: true, fields: [{ key: "model", label: "model", value: "owl/relay/m1", options: piOptions.filter((o) => o.ref) }] },
+    { id: "claude", name: "Claude Code", icon: "generic", path: "/fixture/claude", wired: true, fields: [{ key: "model", label: "model", value: "opus", options: [{ value: "opus" }, { value: "sonnet" }, { value: "relay/m1", label: "m1", ref: "relay/m1", note: "Relay · via owl" }] }] },
   ],
   profiles: [],
 };
@@ -68,7 +68,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", server(lang));
-      await page.goto("http://myna.test/?view=agents");
+      await page.goto("http://owl.test/?view=agents");
       await page.locator(row("pi")).waitFor();
       assert.ok(await page.evaluate(() => !!I18N.zh["clears the default model; {agent} picks one on its own"]), "the string has its Chinese");
 

@@ -25,7 +25,7 @@ func TestTrayImageOneWindow(t *testing.T) {
 	if len(both[0].Rows) != 2 || len(one[0].Rows) != 1 || one[0].Rows[0] != "42%" || len(one[1].Rows) != 2 {
 		t.Fatalf("both %q %q, one %q %q", both[0].Rows, both[1].Rows, one[0].Rows, one[1].Rows)
 	}
-	out := os.Getenv("MYNA_TRAY_PREVIEW")
+	out := os.Getenv("OWL_TRAY_PREVIEW")
 	for _, dark := range []bool{false, true} {
 		_, w0, _ := trayImagePNG(nil, bird, 22, 2, dark, false)
 		lines := map[string]int{}

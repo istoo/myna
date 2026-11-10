@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/proc"
 )
 
 // launcherFlags are the go build flags `make release-windows` builds the
@@ -41,9 +41,9 @@ func launcherFlags(t *testing.T) []string {
 }
 
 // The launcher is built into every Windows release and written out as
-// myna.com wherever its bytes differ from the one there (writeCom). Built
+// owl.com wherever its bytes differ from the one there (writeCom). Built
 // from a git checkout with Go's default -buildvcs, it carried the release's
-// commit and time, so every update wrote a new myna.com though the
+// commit and time, so every update wrote a new owl.com though the
 // launcher hadn't changed (lucky_eagle_38410 on Discord, 10-28). Built as
 // the Makefile builds it, the same source at two commits is the same bytes.
 func TestLauncherSameAtEveryCommit(t *testing.T) {
@@ -88,6 +88,6 @@ func TestLauncherSameAtEveryCommit(t *testing.T) {
 	first := build(filepath.Join(out, "1.com"))
 	run("git", "commit", "-q", "--allow-empty", "-m", "two")
 	if second := build(filepath.Join(out, "2.com")); !bytes.Equal(first, second) {
-		t.Fatalf("the launcher built at the next commit differs (%v): myna.com would be written again on every update", flags)
+		t.Fatalf("the launcher built at the next commit differs (%v): owl.com would be written again on every update", flags)
 	}
 }

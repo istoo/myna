@@ -47,12 +47,12 @@ func TestDecodeBIO(t *testing.T) {
 	}
 }
 
-// dir is the model's folder, given in MYNA_GUARD_DIR: the tests that
+// dir is the model's folder, given in OWL_GUARD_DIR: the tests that
 // need the model run only then, as no test downloads it.
 func dir(t *testing.T) string {
-	d := os.Getenv("MYNA_GUARD_DIR")
+	d := os.Getenv("OWL_GUARD_DIR")
 	if d == "" {
-		t.Skip("MYNA_GUARD_DIR is not set")
+		t.Skip("OWL_GUARD_DIR is not set")
 	}
 	return d
 }
@@ -116,7 +116,7 @@ func TestModelFinds(t *testing.T) {
 
 // The model reads text that isn't valid UTF-8, as an embeddings input
 // with a stray byte came to it (#4553: "hello \xff" panicked in the
-// tokenizer and ended myna), and finds in the valid text around it
+// tokenizer and ended owl), and finds in the valid text around it
 // what it finds without the byte, with every span inside the text.
 func TestModelFindsAroundMalformedBytes(t *testing.T) {
 	m, err := Load(dir(t))

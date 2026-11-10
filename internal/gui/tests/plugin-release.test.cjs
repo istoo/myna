@@ -3,7 +3,7 @@
 // removing it or switching it off asks first, in the row, naming the
 // subscription that stops working with it (there is no built-in to go
 // back to) and saying its accounts are kept; only a yes sends the request.
-// A plugin myna never had as a built-in that signs in to two providers
+// A plugin owl never had as a built-in that signs in to two providers
 // names them in the same chip (#3902), with no "in place of the built-in".
 // English and Chinese; the API is faked here.
 const assert = require("node:assert/strict");
@@ -20,7 +20,7 @@ function server(lang, asked) {
   const installed = [
     { spec: ZED + "@0.1.2", providers: ["Zed"], version: "0.1.2", moved: ["zed"] },
     { spec: "opencode-gemini-auth", providers: ["Gemini"], version: "1.4.0", moved: [] },
-    { spec: "myna-magicrew-auth", providers: ["超级麦吉", "MagiCrew"], version: "0.2.0", moved: [], serves: ["超级麦吉", "MagiCrew"] },
+    { spec: "owl-magicrew-auth", providers: ["超级麦吉", "MagiCrew"], version: "0.2.0", moved: [], serves: ["超级麦吉", "MagiCrew"] },
   ];
   const onPlugins = ["zed"];
   const market = () => ({ listings: [{ package: ZED, name: "Zed", icon: "zed", providers: ["zed"], community: true, replaces: "zed", npm: { version: "0.1.2" } }],
@@ -51,7 +51,7 @@ function server(lang, asked) {
       return json({});
     }
     if (url.pathname.startsWith("/api/")) return json({});
-    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "myna.test") { asked.push(["fetched", url.href]); return route.fulfill({ status: 404, body: "" }); }
+    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "owl.test") { asked.push(["fetched", url.href]); return route.fulfill({ status: 404, body: "" }); }
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -85,7 +85,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], asked = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, asked));
-        await page.goto("http://myna.test/?view=providers");
+        await page.goto("http://owl.test/?view=providers");
         await navTo(page, "plugins");
         const view = page.locator("#view-plugins");
         await view.waitFor({ state: "visible" });
@@ -97,7 +97,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal(await chip.locator(".dot").count(), 1);
         assert.notEqual(await chip.getAttribute("title"), null);
         assert.equal(await view.locator(".pm-row").filter({ hasText: "opencode-gemini-auth" }).locator(".pm-chip.moved").count(), 0);
-        const two = view.locator(".pm-row").filter({ hasText: "myna-magicrew-auth" }).locator(".pm-chip.moved");
+        const two = view.locator(".pm-row").filter({ hasText: "owl-magicrew-auth" }).locator(".pm-chip.moved");
         assert.equal(await two.innerText(), w.two);
         assert.equal(await two.getAttribute("title"), null, "nothing moved: no built-in to name");
         const top = await view.evaluate((e) => e.scrollTop);

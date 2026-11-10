@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/istoo/myna/internal/redact"
+	"github.com/istoo/owl/internal/redact"
 )
 
 // How many values the masking allowlist may hold, and how long each.

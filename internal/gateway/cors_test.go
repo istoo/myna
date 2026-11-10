@@ -8,10 +8,10 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/sessions"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/sessions"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // A web page the user listed in Settings (#1051, SkyAerope: a preflight
@@ -90,7 +90,7 @@ func TestCORSOrigins(t *testing.T) {
 	}
 	// without one, or with a key that isn't a gateway key, it is refused —
 	// readably, so the page can say why
-	for _, key := range []string{"", "myna", "sk-myna-not-a-key"} {
+	for _, key := range []string{"", "owl", "sk-owl-not-a-key"} {
 		w := do("POST", "/v1/chat/completions", "http://localhost:3000", key, nil)
 		if w.Code != http.StatusUnauthorized || w.Header().Get("Access-Control-Allow-Origin") != "http://localhost:3000" || !strings.Contains(w.Body.String(), "gateway key") {
 			t.Errorf("key %q: %d %v %s", key, w.Code, w.Header(), w.Body)
@@ -121,7 +121,7 @@ func TestCORSOrigins(t *testing.T) {
 }
 
 // On the real server lanGuard sits in front of Handler and, for a gateway
-// key sent from this computer, records who called and puts myna's own
+// key sent from this computer, records who called and puts owl's own
 // token in the key's place; a listed page's keyed call is still answered.
 func TestCORSKeyThroughTheServer(t *testing.T) {
 	fresh(t)
@@ -244,15 +244,15 @@ func TestForeignPagesRefused(t *testing.T) {
 		{"POST", "/v1/videos", `{"model":"plan/m1","prompt":"hi"}`},
 		{"POST", CodexPath + "/responses", `{"model":"plan/m1","input":"hi"}`},
 		{"POST", "/mcp/notes", `{"jsonrpc":"2.0","id":1,"method":"tools/list"}`},
-		{"POST", "/_myna/claude-mcp/tok", `{"jsonrpc":"2.0","id":1,"method":"tools/list"}`},
+		{"POST", "/_owl/claude-mcp/tok", `{"jsonrpc":"2.0","id":1,"method":"tools/list"}`},
 		{"POST", provider.RemoteRefreshPath, ""},
 		{"POST", provider.RemoteCodexResetPath + "?user=me@example.com", ""},
-		{"GET", "/v1/myna/quotas", ""},
+		{"GET", "/v1/owl/quotas", ""},
 		{"GET", "/v1/models", ""},
 		{"OPTIONS", "/v1/chat/completions", ""},
 	}
 	const loop = "127.0.0.1:50123"
-	for _, o := range []string{"https://evil.example", "http://evil.example:3425", "http://localhost.evil.example", "http://192.168.1.7:3000", "HTTPS://Evil.Example", "https://github.com/istoo/myna"} {
+	for _, o := range []string{"https://evil.example", "http://evil.example:3425", "http://localhost.evil.example", "http://192.168.1.7:3000", "HTTPS://Evil.Example", "https://github.com/istoo/owl"} {
 		for _, c := range routes {
 			if w := do(c, o, "127.0.0.1:3425", loop, ""); w.Code != http.StatusForbidden || !strings.Contains(w.Body.String(), "web page") || w.Header().Get("Access-Control-Allow-Origin") != "" {
 				t.Errorf("%s %s from %s: %d %s", c.method, c.path, o, w.Code, w.Body)
@@ -281,7 +281,7 @@ func TestForeignPagesRefused(t *testing.T) {
 		{"http://tauri.localhost", "127.0.0.1:3425", loop, secret},                   // a localhost subdomain, with a key (keyless on Windows: TestLocalhostSubdomainNeedsAKey)
 		{"https://app.example.com", "127.0.0.1:3425", loop, secret},                  // listed, with its key
 		{"http://192.168.1.5:3425", "192.168.1.5:3425", "192.168.1.9:50123", secret}, // the gateway's own origin, shared on the LAN
-		{"https://myna.example.com", "myna.example.com", loop, secret},               // its own origin behind a port-443 name, with a key (without one, a rebound page: TestReboundPageRefused)
+		{"https://owl.example.com", "owl.example.com", loop, secret},               // its own origin behind a port-443 name, with a key (without one, a rebound page: TestReboundPageRefused)
 		{"null", "127.0.0.1:3425", loop, secret},                                     // a sandboxed frame or a file:// page, with its key
 		{"app://cherry", "127.0.0.1:3425", loop, ""},                                 // an Electron renderer
 		{"file://", "127.0.0.1:3425", loop, ""},
@@ -293,9 +293,9 @@ func TestForeignPagesRefused(t *testing.T) {
 			t.Errorf("%q to %s: %d %s", c.origin, c.host, w.Code, w.Body)
 		}
 	}
-	// github.com/istoo/myna still reads the Omarchy theme, and only that
-	if w := do(call{"GET", "/v1/myna/omarchy", ""}, "https://github.com/istoo/myna", "127.0.0.1:3425", loop, ""); w.Code == http.StatusForbidden {
-		t.Errorf("github.com/istoo/myna's Omarchy theme: %d %s", w.Code, w.Body)
+	// github.com/istoo/owl still reads the Omarchy theme, and only that
+	if w := do(call{"GET", "/v1/owl/omarchy", ""}, "https://github.com/istoo/owl", "127.0.0.1:3425", loop, ""); w.Code == http.StatusForbidden {
+		t.Errorf("github.com/istoo/owl's Omarchy theme: %d %s", w.Code, w.Body)
 	}
 }
 
@@ -401,8 +401,8 @@ func TestOpaqueOriginNeedsAKey(t *testing.T) {
 // Wails' webviews serve themselves and no browser asks the DNS for them.
 func TestLocalhostSubdomainNeedsAKey(t *testing.T) {
 	fresh(t)
-	t.Setenv("MYNA_ADDR", "")
-	t.Setenv("MYNA_PUBLIC_URL", "")
+	t.Setenv("OWL_ADDR", "")
+	t.Setenv("OWL_PUBLIC_URL", "")
 	var hits atomic.Int64
 	up := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		hits.Add(1)
@@ -449,7 +449,7 @@ func TestLocalhostSubdomainNeedsAKey(t *testing.T) {
 		{"POST", "/v1/responses"},
 		{"POST", "/v1/embeddings"},
 		{"GET", "/v1/models"},
-		{"GET", "/v1/myna/quotas"},
+		{"GET", "/v1/owl/quotas"},
 	}
 	const gw = "127.0.0.1:3425"
 	for _, os := range []string{"darwin", "linux", "windows"} {
@@ -669,7 +669,7 @@ func TestCORSPreflightFromLAN(t *testing.T) {
 		t.Errorf("LAN preflight: %d %v", w.Code, w.Header())
 	}
 	// behind a reverse proxy that forwards with a header (nginx): was 401
-	if w := do("127.0.0.1:50123", "myna.example.com", "OPTIONS", trancy, "",
+	if w := do("127.0.0.1:50123", "owl.example.com", "OPTIONS", trancy, "",
 		map[string]string{"Access-Control-Request-Method": "GET", "Access-Control-Request-Headers": "authorization", "X-Forwarded-For": "203.0.113.7"}); w.Code != http.StatusNoContent ||
 		w.Header().Get("Access-Control-Allow-Origin") != trancy {
 		t.Errorf("proxied preflight: %d %v", w.Code, w.Header())
@@ -687,7 +687,7 @@ func TestCORSPreflightFromLAN(t *testing.T) {
 	if w := do(lan, lanHost, "OPTIONS", trancy, "", nil); w.Code != http.StatusUnauthorized {
 		t.Errorf("plain OPTIONS from the LAN: %d", w.Code)
 	}
-	// and while myna isn't shared, the network's rules refuse a
+	// and while owl isn't shared, the network's rules refuse a
 	// preflight as they refuse everything else from another machine
 	s.LAN = false
 	if err := settings.Save(s); err != nil {

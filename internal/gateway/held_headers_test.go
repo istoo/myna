@@ -9,14 +9,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// proxyCut is how long a proxy between Codex and myna let a request go
+// proxyCut is how long a proxy between Codex and owl let a request go
 // with nothing back before it hung up: about 10s (mrten_95615 on Discord,
 // Windows, a Clash-style app's system proxy, which Codex's reqwest takes
 // for 127.0.0.1 too). Every turn whose vendor took longer to its first
-// event ended 499, as myna held the stream's headers for 15s.
+// event ended 499, as owl held the stream's headers for 15s.
 const proxyCut = 10 * time.Second
 
 // A vendor slow to answer at all leaves its agent neither headers nor

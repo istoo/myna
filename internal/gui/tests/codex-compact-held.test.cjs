@@ -18,7 +18,7 @@ const { watchSettingsReads, agentRow, openAgentSettings, reach } = require("./re
 const assets = path.resolve(__dirname, "../assets");
 
 function serve(lang, posts) {
-  let settings = { theme: "light", lang, tray: "panel", currency: "usd", version: "0.1.900", dir: "~/.config/myna", gateway: "http://127.0.0.1:3425", proxyNow: "none", proxySource: "none", visionModels: [], imageGenModels: [], titleModels: [], workbuddyCheckins: [], lanURLs: [], redactWords: [], trayUsageEvery: 3, compactAt: 544000, codexCompactKeys: keys, codexWindow: { model: "relay/gpt-6-A", window: 128000, n: "128K" } };
+  let settings = { theme: "light", lang, tray: "panel", currency: "usd", version: "0.1.900", dir: "~/.config/owl", gateway: "http://127.0.0.1:3425", proxyNow: "none", proxySource: "none", visionModels: [], imageGenModels: [], titleModels: [], workbuddyCheckins: [], lanURLs: [], redactWords: [], trayUsageEvery: 3, compactAt: 544000, codexCompactKeys: keys, codexWindow: { model: "relay/gpt-6-A", window: 128000, n: "128K" } };
   const providers = { providers: [], presets: [], excluded: [], gateway: { running: true, window: true } };
   return async (route) => {
     const req = route.request(), url = new URL(req.url());
@@ -52,10 +52,10 @@ function serve(lang, posts) {
 const keys = "model_context_window = 128000, [profiles.work] model_auto_compact_token_limit = 120000";
 const words = {
   en: { line: `Codex's config.toml sets ${keys}, read before Long conversations`, drop: "Take it out", at: "Compact at 544K", own: "Codex compacts relay/gpt-6-A at 90% of its 128K window, before Long conversations; set a larger one in its provider's Context window" },
-  zh: { line: `Codex 的 config.toml 设了 ${keys}，Codex 先读它再读「长对话」，所以按它压缩`, drop: "拿掉它", at: "544K 时压缩", own: "myna 告诉 Codex relay/gpt-6-A 的窗口是 128K，所以 Codex 在它的 90% 处压缩，不等「长对话」；更大的窗口在它服务商的「上下文窗口」里设" },
-  "zh-TW": { line: `Codex 的 config.toml 設了 ${keys}，Codex 先讀它再讀「長對話」，所以按它壓縮`, drop: "拿掉它", at: "544K 時壓縮", own: "myna 告訴 Codex relay/gpt-6-A 的視窗是 128K，所以 Codex 在它的 90% 處壓縮，不等「長對話」；更大的視窗在它服務商的「上下文視窗」裡設" },
-  ja: { line: `Codex の config.toml に ${keys} があり、Codex は「長い会話」より先にこれを読むため、これで圧縮します`, drop: "取り除く", at: "544K で圧縮", own: "myna は Codex に relay/gpt-6-A のウィンドウを 128K と伝えているため、Codex は「長い会話」より先にその 90% で圧縮します。より大きいウィンドウはプロバイダの「コンテキストウィンドウ」で設定します" },
-  de: { line: `Codex’ config.toml setzt ${keys}, das Codex vor „Lange Unterhaltungen“ liest, also komprimiert es danach`, drop: "Entfernen", at: "Bei 544K komprimieren", own: "myna nennt Codex für relay/gpt-6-A ein Fenster von 128K, also komprimiert Codex bei 90 % davon, vor „Lange Unterhaltungen“; ein größeres wird im „Kontextfenster“ seines Anbieters gesetzt" },
+  zh: { line: `Codex 的 config.toml 设了 ${keys}，Codex 先读它再读「长对话」，所以按它压缩`, drop: "拿掉它", at: "544K 时压缩", own: "owl 告诉 Codex relay/gpt-6-A 的窗口是 128K，所以 Codex 在它的 90% 处压缩，不等「长对话」；更大的窗口在它服务商的「上下文窗口」里设" },
+  "zh-TW": { line: `Codex 的 config.toml 設了 ${keys}，Codex 先讀它再讀「長對話」，所以按它壓縮`, drop: "拿掉它", at: "544K 時壓縮", own: "owl 告訴 Codex relay/gpt-6-A 的視窗是 128K，所以 Codex 在它的 90% 處壓縮，不等「長對話」；更大的視窗在它服務商的「上下文視窗」裡設" },
+  ja: { line: `Codex の config.toml に ${keys} があり、Codex は「長い会話」より先にこれを読むため、これで圧縮します`, drop: "取り除く", at: "544K で圧縮", own: "owl は Codex に relay/gpt-6-A のウィンドウを 128K と伝えているため、Codex は「長い会話」より先にその 90% で圧縮します。より大きいウィンドウはプロバイダの「コンテキストウィンドウ」で設定します" },
+  de: { line: `Codex’ config.toml setzt ${keys}, das Codex vor „Lange Unterhaltungen“ liest, also komprimiert es danach`, drop: "Entfernen", at: "Bei 544K komprimieren", own: "owl nennt Codex für relay/gpt-6-A ein Fenster von 128K, also komprimiert Codex bei 90 % davon, vor „Lange Unterhaltungen“; ein größeres wird im „Kontextfenster“ seines Anbieters gesetzt" },
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -72,9 +72,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, posts));
         await watchSettingsReads(page);
-        await page.goto("http://myna.test/?view=agents");
+        await page.goto("http://owl.test/?view=agents");
         await openAgentSettings(page);
-        // the window myna tells Codex for the model its config runs, when Long conversations is over it (gpt-6-A)
+        // the window owl tells Codex for the model its config runs, when Long conversations is over it (gpt-6-A)
         const own = page.locator("#fullContextRow .compact-held").filter({ hasText: w.own });
         await own.waitFor();
         assert.equal((await own.textContent()).trim(), w.own);

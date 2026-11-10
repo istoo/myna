@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // piExtensionHome is a sandbox home with a provider that decides
@@ -38,18 +38,18 @@ type piExtensionData struct {
 	Images      []piExtensionModel `json:"images"`
 }
 
-// readPiExtension is the data in the extension myna wrote at path.
+// readPiExtension is the data in the extension owl wrote at path.
 func readPiExtension(t *testing.T, path string) piExtensionData {
 	t.Helper()
 	src := readFile(path)
 	if !strings.HasPrefix(src, piExtensionMark) {
-		t.Fatalf("%s is not myna's: %.200s", path, src)
+		t.Fatalf("%s is not owl's: %.200s", path, src)
 	}
-	_, rest, ok := strings.Cut(src, "const MYNA = ")
+	_, rest, ok := strings.Cut(src, "const OWL = ")
 	line, _, _ := strings.Cut(rest, ";\n")
 	var d piExtensionData
 	if !ok || json.Unmarshal([]byte(line), &d) != nil {
-		t.Fatalf("no MYNA data in %s: %.400s", path, rest)
+		t.Fatalf("no OWL data in %s: %.400s", path, rest)
 	}
 	return d
 }
@@ -64,21 +64,21 @@ func hasModel(ms []piExtensionModel, id string) (piExtensionModel, bool) {
 }
 
 // Pi's codemode reaches classifier and image models, which models.json
-// can't define (wangbinyq on Discord): picking a model of myna's writes
-// extensions/myna.ts with myna's decision and image models, and
-// taking Pi off myna removes it.
+// can't define (wangbinyq on Discord): picking a model of owl's writes
+// extensions/owl.ts with owl's decision and image models, and
+// taking Pi off owl removes it.
 func TestPiExtensionListsDecisionAndImageModels(t *testing.T) {
 	home := piExtensionHome(t)
 	a := pi(home)
 	path := piExtensionPath(a.Dir)
-	if err := a.Field("model").Set(mynaID + "/mixed/deepseek-v4.1-flash"); err != nil {
+	if err := a.Field("model").Set(owlID + "/mixed/deepseek-v4.1-flash"); err != nil {
 		t.Fatal(err)
 	}
 	d := readPiExtension(t, path)
 	if d.BaseURL != here(home).v1() {
 		t.Errorf("baseUrl = %q, want %q", d.BaseURL, here(home).v1())
 	}
-	if want := mustGet(t, filepath.Join(a.Dir, "models.json"), "providers.myna.apiKey"); d.APIKey != strings.Trim(want, `"`) {
+	if want := mustGet(t, filepath.Join(a.Dir, "models.json"), "providers.owl.apiKey"); d.APIKey != strings.Trim(want, `"`) {
 		t.Errorf("apiKey = %q, models.json's is %s", d.APIKey, want)
 	}
 	if _, ok := hasModel(d.Classifiers, "mixed/typesafe/jev"); !ok {
@@ -94,7 +94,7 @@ func TestPiExtensionListsDecisionAndImageModels(t *testing.T) {
 	if strings.Join(img.Input, ",") != "text,image" || img.Name != "GPT Image 2 · Art" {
 		t.Errorf("image model = %+v", img)
 	}
-	if !strings.Contains(readFile(path), `pi.registerProvider("myna-systemone"`) || !strings.Contains(readFile(path), `"typesafe-system-one"`) {
+	if !strings.Contains(readFile(path), `pi.registerProvider("owl-systemone"`) || !strings.Contains(readFile(path), `"typesafe-system-one"`) {
 		t.Errorf("extension source: %.300s", readFile(path))
 	}
 
@@ -102,17 +102,17 @@ func TestPiExtensionListsDecisionAndImageModels(t *testing.T) {
 		t.Fatal(err)
 	}
 	if _, err := os.Stat(path); !os.IsNotExist(err) {
-		t.Errorf("extension left after Pi went off myna: %v", err)
+		t.Errorf("extension left after Pi went off owl: %v", err)
 	}
 }
 
-// The catalog sync rewrites the extension as myna's models change, and
-// removes it once models.json has no provider myna.
+// The catalog sync rewrites the extension as owl's models change, and
+// removes it once models.json has no provider owl.
 func TestPiExtensionFollowsSync(t *testing.T) {
 	home := piExtensionHome(t)
 	a := pi(home)
 	path := piExtensionPath(a.Dir)
-	if err := a.Field("model").Set(mynaID + "/mixed/deepseek-v4.1-flash"); err != nil {
+	if err := a.Field("model").Set(owlID + "/mixed/deepseek-v4.1-flash"); err != nil {
 		t.Fatal(err)
 	}
 	// the one provider that draws removed: no image model is listed
@@ -126,27 +126,27 @@ func TestPiExtensionFollowsSync(t *testing.T) {
 		t.Errorf("after the drawing provider went: %+v", d)
 	}
 	models := filepath.Join(a.Dir, "models.json")
-	if err := edit.DelJSON(models, "providers.myna"); err != nil {
+	if err := edit.DelJSON(models, "providers.owl"); err != nil {
 		t.Fatal(err)
 	}
 	if err := a.Sync(); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := os.Stat(path); !os.IsNotExist(err) {
-		t.Errorf("extension left with no provider myna: %v", err)
+		t.Errorf("extension left with no provider owl: %v", err)
 	}
 }
 
-// A myna.ts the user wrote themselves is theirs: never written over,
+// A owl.ts the user wrote themselves is theirs: never written over,
 // never removed.
 func TestPiExtensionLeavesTheUsersOwn(t *testing.T) {
 	home := piExtensionHome(t)
 	a := pi(home)
 	path := piExtensionPath(a.Dir)
 	os.MkdirAll(filepath.Dir(path), 0o755)
-	own := "// my own myna helpers\nexport default function (pi) {}\n"
+	own := "// my own owl helpers\nexport default function (pi) {}\n"
 	os.WriteFile(path, []byte(own), 0o644)
-	if err := a.Field("model").Set(mynaID + "/mixed/deepseek-v4.1-flash"); err != nil {
+	if err := a.Field("model").Set(owlID + "/mixed/deepseek-v4.1-flash"); err != nil {
 		t.Fatal(err)
 	}
 	if err := a.Sync(); err != nil {
@@ -167,7 +167,7 @@ func TestPiExtensionLeavesTheUsersOwn(t *testing.T) {
 func TestPiExtensionPiOnly(t *testing.T) {
 	home := piExtensionHome(t)
 	a := omo(home)
-	if err := a.Field("model").Set(mynaID + "/mixed/deepseek-v4.1-flash"); err != nil {
+	if err := a.Field("model").Set(owlID + "/mixed/deepseek-v4.1-flash"); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := os.Stat(piExtensionPath(a.Dir)); !os.IsNotExist(err) {

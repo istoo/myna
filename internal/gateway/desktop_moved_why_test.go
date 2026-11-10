@@ -6,14 +6,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // Neo on Discord: a Routing › Requests row read "chatflowsai/claude-opus-5-5"
 // asked and AgentRouter's gpt-6.1-sol served, with nothing saying why, and
 // read as Claude Desktop asking for another provider's model by itself. It
 // was Desktop's own short request (a chat's title), which Desktop names by
-// the only Claude-looking id it is shown and myna keeps on the chat's
+// the only Claude-looking id it is shown and owl keeps on the chat's
 // model. The trace says so: Route.Moved names the model served and the rule
 // that moved it, and a request served as asked has none.
 func TestClaudeDesktopMoveSaysWhy(t *testing.T) {

@@ -3,12 +3,12 @@ package cli
 import (
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // routing= on a provider spreads requests over its keys or accounts as
 // the editor's Routing does: fast (fastest, speed) is Speed first; manual
-// and cheapest are a group's alone, and a name myna doesn't know is refused.
+// and cheapest are a group's alone, and a name owl doesn't know is refused.
 func TestProviderRoutingPair(t *testing.T) {
 	var p provider.Provider
 	for in, want := range map[string]string{"fast": provider.Fastest, "fastest": provider.Fastest, "Speed": provider.Fastest, "order": provider.Ordered, "smart": ""} {

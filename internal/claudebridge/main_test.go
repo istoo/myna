@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // helperEnv makes the test binary the helper itself, as an agent starts

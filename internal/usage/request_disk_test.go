@@ -11,11 +11,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/sessions"
 )
 
-// A started myna reads the session files' chunks from the file the last
+// A started owl reads the session files' chunks from the file the last
 // one wrote, and reads again only the session files that changed since; a
 // file of other prices, or a bad one, is read past. Every page is the one
 // the ledger gives.

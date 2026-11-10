@@ -14,7 +14,7 @@ import (
 	"testing"
 )
 
-// myna web added to an iPhone's home screen opened in Safari, with its
+// owl web added to an iPhone's home screen opened in Safari, with its
 // address bar (ninja_s6114 on Discord): the page named no web app
 // manifest and no apple-mobile-web-app-capable. Now it does, and the
 // manifest and the icons it and the page name are served, with their
@@ -31,7 +31,7 @@ func TestWebAppAddsToHomeScreen(t *testing.T) {
 	do := func(method, path string, signedIn bool) *httptest.ResponseRecorder {
 		r := httptest.NewRequest(method, path, nil)
 		if signedIn {
-			r.AddCookie(&http.Cookie{Name: "myna_web_3430", Value: key})
+			r.AddCookie(&http.Cookie{Name: "owl_web_3430", Value: key})
 		}
 		rec := httptest.NewRecorder()
 		srv.ServeHTTP(rec, r)
@@ -52,7 +52,7 @@ func TestWebAppAddsToHomeScreen(t *testing.T) {
 			t.Errorf("the page lacks %s", want)
 		}
 	}
-	// a theme colour a browser's tab would take too would change how myna
+	// a theme colour a browser's tab would take too would change how owl
 	// web looks in Safari and Chrome; only the app's window takes it
 	for _, m := range regexp.MustCompile(`<meta name="theme-color"[^>]*>`).FindAllString(html, -1) {
 		if !strings.Contains(m, `media="(display-mode: standalone)`) {
@@ -99,7 +99,7 @@ func TestWebAppAddsToHomeScreen(t *testing.T) {
 	}
 	var raw map[string]any
 	json.Unmarshal(rec.Body.Bytes(), &raw)
-	if raw["name"] != "myna" || raw["display"] != "standalone" || m.StartURL == "" {
+	if raw["name"] != "owl" || raw["display"] != "standalone" || m.StartURL == "" {
 		t.Errorf("manifest: name %v, display %v, start_url %q", raw["name"], raw["display"], m.StartURL)
 	}
 	big := false
@@ -122,7 +122,7 @@ func TestWebAppAddsToHomeScreen(t *testing.T) {
 		{"GET", "/app.js"},
 		{"GET", "/boot.js"},
 		{"GET", "/icons/favicon.svg"},
-		{"GET", "/icons/myna.svg"},
+		{"GET", "/icons/owl.svg"},
 		{"GET", "/api/state"},
 		{"GET", "/api/providers"},
 		{"GET", "/manifest.json/"},

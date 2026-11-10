@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/istoo/myna/internal/masking"
-	"github.com/istoo/myna/internal/pii"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/masking"
+	"github.com/istoo/owl/internal/pii"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // privacyModelJSON is Settings → Privacy's local masking model: whether it

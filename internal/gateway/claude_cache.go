@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // clientCache owns the marks of an explicitly opted-in Messages request.
@@ -39,7 +39,7 @@ func wantsClientCache(r *http.Request, from provider.Protocol) bool {
 
 // classifierClientCache reports whether a Messages body is Claude Code's
 // auto mode classifier carrying cache marks of its own. Desktop's
-// classifier marks its blocks but knows nothing of myna's private header
+// classifier marks its blocks but knows nothing of owl's private header
 // (#3835): its marks are kept like an opted-in client's, validated as
 // theirs are. The bytes are looked at before the request is parsed, and
 // only a classifier-shaped body carrying a cache_control field is parsed

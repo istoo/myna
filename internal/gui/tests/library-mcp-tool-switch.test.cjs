@@ -17,7 +17,7 @@ const { navTo } = require("./reader.cjs");
 const assets = path.resolve(__dirname, "../assets");
 const HOME = "/Users/nf";
 const fixture = (off) => ({
-  dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
+  dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
   agents: [
     { id: "claude", name: "Claude Code", icon: "claudecode-color", skills: `${HOME}/.claude/skills`, mcp: `${HOME}/.claude.json`, toolsOff: true },
     { id: "cursor", name: "Cursor", icon: "cursor", skills: `${HOME}/.cursor/skills`, mcp: `${HOME}/.cursor/mcp.json` },
@@ -87,13 +87,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         t.after(async () => { await browser.close(); });
         const w = words[lang], sends = [];
         const ctx = await browser.newContext({ viewport: { width, height: width < 600 ? 820 : 500 } });
-        await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "mcp"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("owl.libTab", "mcp"); } catch {} });
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
-        await page.route("http://myna.test/**", server(lang, sends));
-        await page.goto("http://myna.test/");
+        await page.route("http://owl.test/**", server(lang, sends));
+        await page.goto("http://owl.test/");
         await navTo(page, "library");
         await page.locator("#view-library .lib-body:not(.lib-skel) .lib-row").first().waitFor();
         const pill = page.locator('#view-library .lib-health[data-server="filesystem"]');

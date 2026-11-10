@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // codexEffortChanged is a turn as Codex 0.162.1 sends it with its
@@ -100,7 +100,7 @@ func TestCodexEffortChangeReaders(t *testing.T) {
 		}
 	}
 
-	// myna's own pick goes where the last change went; the top stays
+	// owl's own pick goes where the last change went; the top stays
 	picked := withEffort(provider.Responses, body, "high")
 	var q struct {
 		Reasoning map[string]any   `json:"reasoning"`

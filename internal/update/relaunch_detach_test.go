@@ -13,21 +13,21 @@ import (
 
 // jobMarkerEnv, when set, makes TestRelaunchOutlivesItsJobsGroup's binary
 // the app being relaunched: it starts the helper and exits.
-const jobMarkerEnv = "MYNA_TEST_RELAUNCH_MARKER"
+const jobMarkerEnv = "OWL_TEST_RELAUNCH_MARKER"
 
-// The shell that opens the new version once myna has quit outlives the
-// end of the launchd job myna ran in. launchd kills the job's process
+// The shell that opens the new version once owl has quit outlives the
+// end of the launchd job owl ran in. launchd kills the job's process
 // group when its process exits: the Open at login agent without
 // AbandonProcessGroup, and on the reporter's macOS 13 the application job
 // LaunchServices makes for an app opened from the Dock or Finder (#2362).
-// The shell, left in myna's group, went with it: myna quit and never
-// came back. Here the test's child stands for myna, leading a group of
+// The shell, left in owl's group, went with it: owl quit and never
+// came back. Here the test's child stands for owl, leading a group of
 // its own as a job's process does; once it exits the group is killed as
 // launchd kills it, and the helper must still run its command.
 func TestRelaunchOutlivesItsJobsGroup(t *testing.T) {
 	if marker := os.Getenv(jobMarkerEnv); marker != "" {
 		// a moment's sleep first, so the group is killed while the helper
-		// is still waiting, as launchd's kill comes the moment myna exits
+		// is still waiting, as launchd's kill comes the moment owl exits
 		if err := runAfterExit(os.Getpid(), "sleep 1; echo opened > '"+marker+"'"); err != nil {
 			os.Exit(3)
 		}

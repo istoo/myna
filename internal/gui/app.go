@@ -19,18 +19,18 @@ import (
 	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/wailsapp/wails/v3/pkg/events"
 
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/autostart"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/library"
-	"github.com/istoo/myna/internal/omarchy"
-	"github.com/istoo/myna/internal/proc"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/shortcut"
-	"github.com/istoo/myna/internal/stats"
-	"github.com/istoo/myna/internal/update"
-	"github.com/istoo/myna/internal/webview2env"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/autostart"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/library"
+	"github.com/istoo/owl/internal/omarchy"
+	"github.com/istoo/owl/internal/proc"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/shortcut"
+	"github.com/istoo/owl/internal/stats"
+	"github.com/istoo/owl/internal/update"
+	"github.com/istoo/owl/internal/webview2env"
 )
 
 //go:embed tray.png
@@ -153,12 +153,12 @@ func (h *host) Import(link string) {
 	})
 }
 
-// dock puts myna in the Dock or takes it out as s says, with the window
+// dock puts owl in the Dock or takes it out as s says, with the window
 // shown or not, full screen or not.
 func (h *host) dock(s settings.Settings, shown bool) { h.dockFront(s, shown, shown) }
 
 // dockFront is dock, with front saying whether joining the Dock activates
-// myna: not for the window a restart by itself brings back.
+// owl: not for the window a restart by itself brings back.
 func (h *host) dockFront(s settings.Settings, shown, front bool) {
 	full := application.InvokeSyncWithResult(func() bool { return h.main != nil && h.main.IsFullscreen() })
 	setDock(inDock(s, shown, full), front)
@@ -195,8 +195,8 @@ func (h *host) ChooseFolder(title string) (string, error) {
 }
 
 // panelTitle names the panel for Hyprland's rule, which places it, and
-// for niri, which finds it by it (the main window is "myna")
-const panelTitle = "myna panel"
+// for niri, which finds it by it (the main window is "owl")
+const panelTitle = "owl panel"
 
 // FitPanel grows or shrinks the panel to its content and keeps it anchored
 // under the tray icon; a shown panel glides there when g says how. height
@@ -296,8 +296,8 @@ func (h *host) zoomWindows() {
 }
 
 // windowsOptions are the app's Windows options. Portable, WebView2 keeps
-// its profile in data\webview2: left to Wails it is %APPDATA%\myna.exe,
-// a folder a portable myna must not leave behind (#508). Installed, it
+// its profile in data\webview2: left to Wails it is %APPDATA%\owl.exe,
+// a folder a portable owl must not leave behind (#508). Installed, it
 // stays there, so what the pages kept isn't lost. The browser arguments
 // the user set in WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS, which Wails' loader
 // blanks before WebView2 can read them, are merged into Wails' own (#2753).
@@ -320,7 +320,7 @@ const panelStart = 520
 // Run starts the desktop app: a menu bar icon whose click drops down a compact
 // panel, plus a regular window for when you want it to stay around.
 // showMain opens the window immediately; otherwise only the tray icon appears.
-// link is a myna:// link the app was started with, to confirm and import.
+// link is a owl:// link the app was started with, to confirm and import.
 func Run(version string, showMain bool, link string) error {
 	Version = version
 	webkitDefaults()
@@ -343,7 +343,7 @@ func Run(version string, showMain bool, link string) error {
 		log.Println("install:", err)
 	}
 	// A restart to update on a Mac or Linux started this one beside the
-	// myna before, which hands it the gateway (handover.go).
+	// owl before, which hands it the gateway (handover.go).
 	startExe, _ = update.Executable()
 	handoverHost.Store(true)
 	before := 0
@@ -353,13 +353,13 @@ func Run(version string, showMain bool, link string) error {
 	// After an update off the Mac, the old process starts this one and then
 	// quits; let it go before looking for the gateway.
 	update.AwaitPredecessor()
-	// installed from a download just now: what myna left beside it goes
+	// installed from a download just now: what owl left beside it goes
 	update.Settled()
-	// the Mac's second launch hands over to the myna already running
+	// the Mac's second launch hands over to the owl already running
 	if runningAlready(showMain || OpenPanel, link) {
 		return nil
 	}
-	// a restart myna made by itself: back as it was, taking no focus
+	// a restart owl made by itself: back as it was, taking no focus
 	// (quiet_restart.go)
 	quiet := takeQuietRestart()
 	quietShow.Store(quiet && showMain)
@@ -367,19 +367,19 @@ func Run(version string, showMain bool, link string) error {
 	keepWebData()
 	go func() {
 		if err := registerScheme(); err != nil {
-			log.Println("myna:// links:", err)
+			log.Println("owl:// links:", err)
 		}
-		// Windows has no installer to put myna in the Start menu
+		// Windows has no installer to put owl in the Start menu
 		shortcut.Ensure()
 		// Open at login as this version writes it (the Mac's, so a restart
-		// to update from a myna opened at login comes back)
+		// to update from a owl opened at login comes back)
 		if err := autostart.Refresh(); err != nil {
 			log.Println("open at login:", err)
 		}
 	}()
-	// MYNA_THEME=light|dark forces the palette; handy for screenshots.
+	// OWL_THEME=light|dark forces the palette; handy for screenshots.
 	theme := ""
-	if t := os.Getenv("MYNA_THEME"); t != "" {
+	if t := os.Getenv("OWL_THEME"); t != "" {
 		theme = "&theme=" + t
 	}
 	h := &host{query: theme, ready: make(chan struct{})}
@@ -396,7 +396,7 @@ func Run(version string, showMain bool, link string) error {
 		gw = startBackend()
 		handler = Handler(h, gw)
 	}
-	// Linux: the myna before holds the app's D-Bus name until it quits,
+	// Linux: the owl before holds the app's D-Bus name until it quits,
 	// once it has finished its requests; this one serves the gateway
 	// meanwhile, and puts its tray icon up after
 	if before != 0 && runtime.GOOS == "linux" {
@@ -406,11 +406,11 @@ func Run(version string, showMain bool, link string) error {
 	// an app that starts in it
 	policy := dockPolicy(settings.Load().Dock && !quiet)
 	h.app = application.New(application.Options{
-		// Windows and Linux start a new process for a myna:// link (or a
+		// Windows and Linux start a new process for a owl:// link (or a
 		// second launch); it hands its arguments to the running one and quits.
 		// The Mac sends the link to the running app itself.
 		SingleInstance: singleInstance(h),
-		Name:           "myna",
+		Name:           "owl",
 		Description:    "one place to pick every agent's model",
 		Icon:           appIconFor(),
 		Assets:         application.AssetOptions{Handler: ownWindow(handler)},
@@ -421,11 +421,11 @@ func Run(version string, showMain bool, link string) error {
 		// way out, so the next launch is the new one.
 		// Quitting doesn't come back to main on a Mac (NSApp terminate:
 		// exits), so the CLIs still being asked something end here.
-		// Account failover myna wrote into Codex goes with the gateway
+		// Account failover owl wrote into Codex goes with the gateway
 		// this process serves: Codex left pointed at it would retry till
-		// myna is open again (Leon920717 on X). The next start writes it
+		// owl is open again (Leon920717 on X). The next start writes it
 		// again (Sync).
-		// A myna that handed the gateway to the new version (handover.go)
+		// A owl that handed the gateway to the new version (handover.go)
 		// leaves both to it: the failover goes on through the new one, and
 		// so do the threads.
 		OnShutdown: func() {
@@ -441,21 +441,21 @@ func Run(version string, showMain bool, link string) error {
 				// the threads Codex has open keep the gateway's address
 				// they began with: a relay serves them there on Codex's
 				// own sign-in once the gateway has let go (codexrelay;
-				// idkatbro on X: 503 "Unknown error" till myna reopened)
+				// idkatbro on X: 503 "Unknown error" till owl reopened)
 				if ended {
 					if err := agent.RelayOpenCodex(); err != nil {
 						log.Println("codex relay:", err)
 					}
 				}
 			}
-			// the compactions myna made in Codex's threads written as
-			// Codex's own, for the threads no Codex has open: with myna
+			// the compactions owl made in Codex's threads written as
+			// Codex's own, for the threads no Codex has open: with owl
 			// gone they still go on (LukeMa on X)
 			agent.PortCodexRollouts(3 * time.Second)
 			updates.install(false)
 		},
 		// Wails exits on some webview errors; say why before it does.
-		ErrorHandler: func(err error) { log.Println("myna:", err) },
+		ErrorHandler: func(err error) { log.Println("owl:", err) },
 	})
 	// Windows without the WebView2 runtime can make no window: Wails would
 	// exit on the first, with nothing on screen to say why (#1806). The
@@ -465,18 +465,18 @@ func Run(version string, showMain bool, link string) error {
 	}
 	var appQuit *application.MenuItem // the Mac's app menu's Quit
 	// Wails' default Learn More replaces the current window with wails.io.
-	// Keep the native menus, but open myna's help in the system browser.
+	// Keep the native menus, but open owl's help in the system browser.
 	// macOS only: it is the one that shows a menu bar unasked; on Linux a
 	// set menu becomes a menu bar in every window, the panel's too.
 	if runtime.GOOS == "darwin" {
 		appMenu := application.DefaultApplicationMenu()
 		help := appMenu.FindByRole(application.HelpMenu).GetSubmenu()
 		help.Clear()
-		help.Add("Learn More").OnClick(func(*application.Context) { _ = h.OpenURL("https://github.com/istoo/myna") })
+		help.Add("Learn More").OnClick(func(*application.Context) { _ = h.OpenURL("https://github.com/istoo/owl") })
 		// Command-Q asks first while agents are connected (quitask.go). The
 		// role's item sends terminate:, which logging out and shutting down
 		// send too, so it is replaced rather than the app's ShouldQuit set
-		appQuit = askingQuit(appMenu, trayText(trayLang(settings.Load().Lang, systemLang), "Quit myna"), func() { go h.AskQuit() })
+		appQuit = askingQuit(appMenu, trayText(trayLang(settings.Load().Lang, systemLang), "Quit owl"), func() { go h.AskQuit() })
 		h.app.Menu.Set(appMenu)
 	}
 	if Started != nil {
@@ -563,7 +563,7 @@ func Run(version string, showMain bool, link string) error {
 			}
 		}
 		// a set kept in a file of the user's (~/.agents/AGENTS.md) is
-		// edited outside myna: the agents get each change, until this
+		// edited outside owl: the agents get each change, until this
 		// one has handed the gateway to the new version (#4938)
 		library.KeepLinked(backendCtx, 30*time.Second)
 	}()
@@ -574,10 +574,10 @@ func Run(version string, showMain bool, link string) error {
 	if runtime.GOOS == "linux" {
 		// set before the tray starts, it is the item's id too, which
 		// Omarchy's bar pins it by (Wails calls it "Wails" otherwise)
-		h.tray.SetLabel("myna")
+		h.tray.SetLabel("owl")
 		go dropTrayName()
 	}
-	h.tray.SetTooltip("myna")
+	h.tray.SetTooltip("owl")
 	if icon, template := trayIconFor(runtime.GOOS, traySchemeLight()); template {
 		h.tray.SetTemplateIcon(icon)
 	} else {
@@ -598,14 +598,14 @@ func Run(version string, showMain bool, link string) error {
 	// leaves the menu bar to it while it finishes its requests: one bird
 	if runtime.GOOS == "darwin" {
 		onHandedOver = h.leaveMenuBar
-		// a myna before this fix hid its item for good as it handed
+		// a owl before this fix hid its item for good as it handed
 		// over (leaveMenuBar): once it has quit, bring the icon back
 		if before != 0 && !hiddenAtStart {
 			go func() {
 				awaitExit(before, handedOffWait)
 				<-h.ready
 				if forgetTrayHidden() > 0 {
-					log.Println("tray: brought back the menu bar icon the myna before hid")
+					log.Println("tray: brought back the menu bar icon the owl before hid")
 				}
 				h.tray.Show()
 			}()
@@ -613,7 +613,7 @@ func Run(version string, showMain bool, link string) error {
 	}
 	h.watchTrayUsage()
 	h.startPanelKey(before)
-	// Omarchy's bar shows myna once: as its widget (Settings → Bar
+	// Omarchy's bar shows owl once: as its widget (Settings → Bar
 	// icon) or as the tray's item, not both
 	onBarIcon = h.setTrayInBar
 	h.setTrayInBar(barIcon(h)["on"])
@@ -718,7 +718,7 @@ func linuxOptions() application.LinuxOptions {
 
 // singleInstance makes a second launch hand over to this one, off the Mac.
 // The id covers the config dir, so a sandboxed HOME runs on its own, but
-// not the executable: two copies of myna on one config (one autostarted
+// not the executable: two copies of owl on one config (one autostarted
 // from where it was first run, another from where it was put later) would
 // share the gateway's port and put two icons in the tray.
 func singleInstance(h *host) *application.SingleInstanceOptions {
@@ -727,7 +727,7 @@ func singleInstance(h *host) *application.SingleInstanceOptions {
 	}
 	sum := sha256.Sum256([]byte(settings.Dir()))
 	return &application.SingleInstanceOptions{
-		UniqueID: "ai.usemyna.app.i" + hex.EncodeToString(sum[:6]),
+		UniqueID: "ai.useowl.app.i" + hex.EncodeToString(sum[:6]),
 		OnSecondInstanceLaunch: func(d application.SecondInstanceData) {
 			args := d.Args
 			if len(args) > 0 {
@@ -796,7 +796,7 @@ func (h *host) setBird(b []byte) {
 func panelOptions(goos, theme string) application.WebviewWindowOptions {
 	o := application.WebviewWindowOptions{
 		Name:            "panel",
-		Title:           "myna",
+		Title:           "owl",
 		URL:             "/?mode=panel" + theme,
 		Width:           panelWidth,
 		Height:          520,
@@ -817,9 +817,9 @@ func panelOptions(goos, theme string) application.WebviewWindowOptions {
 			// out of sight, until the user swiped back (#2141).
 			CollectionBehavior: application.MacWindowCollectionBehaviorCanJoinAllSpaces |
 				application.MacWindowCollectionBehaviorFullScreenAuxiliary,
-			// and shown without activating myna, as a menu bar extra's
+			// and shown without activating owl, as a menu bar extra's
 			// panel is: an ordinary window's Focus activated the app, and
-			// the Mac then took the user to the Space of myna's other
+			// the Mac then took the user to the Space of owl's other
 			// windows (the desktop the main window is on), off the
 			// full-screen app's, panel and all (#2141, witt-bit, on
 			// v0.1.1246). A non-activating panel still takes the keyboard.
@@ -839,21 +839,21 @@ func panelOptions(goos, theme string) application.WebviewWindowOptions {
 	return o
 }
 
-// OpenPanel has Run open the quick panel once it starts, as `myna panel`
-// does; a second `myna panel` toggles it in the running one. Omarchy's bar
+// OpenPanel has Run open the quick panel once it starts, as `owl panel`
+// does; a second `owl panel` toggles it in the running one. Omarchy's bar
 // icon runs it (see omarchy.AddWidget).
 var OpenPanel bool
 
-// OpenView is the tab the window opens on, as `myna gui settings` asks:
+// OpenView is the tab the window opens on, as `owl gui settings` asks:
 // a restart to update comes back where it was asked for.
 var OpenView string
 
 // Started is called once the app has started, by when Wails handles SIGINT
 // and SIGTERM itself (it starts listening as it runs, before the app is
-// said to have started); until then a signal is myna's to handle.
+// said to have started); until then a signal is owl's to handle.
 var Started func()
 
-// leaveMenuBar is a Mac's myna that handed the gateway to the new
+// leaveMenuBar is a Mac's owl that handed the gateway to the new
 // version leaving the menu bar, panel, window and Dock to it while it
 // finishes its requests: one bird. Hidden, the item's visibility is kept by
 // AppKit for the app, the new version's item and every later one too, so it
@@ -870,7 +870,7 @@ func (h *host) leaveMenuBar() {
 	})
 }
 
-// setTrayInBar has the tray's item leave the bar's tray while myna's icon
+// setTrayInBar has the tray's item leave the bar's tray while owl's icon
 // is in Omarchy's bar as its widget, and come back once it isn't. The item
 // is there to be set a moment after the app has started; the newest call
 // wins.

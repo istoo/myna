@@ -5,17 +5,17 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// JFunfunfun on X: Pi set by hand onto a provider of its own named myna
-// (myna/<model>, at myna's gateway) read as connected in myna, which
+// JFunfunfun on X: Pi set by hand onto a provider of its own named owl
+// (owl/<model>, at owl's gateway) read as connected in owl, which
 // then wrote its own list over that provider's models on every catalog
-// change, and Disconnect took the provider out. A provider named myna
-// that myna didn't put there is the user's: the agent isn't connected,
+// change, and Disconnect took the provider out. A provider named owl
+// that owl didn't put there is the user's: the agent isn't connected,
 // nothing drifts, and neither a sync, a rename nor Disconnect touches its
-// files. Connecting it in myna takes it on.
-func TestPiHandWiredMynaProviderIsTheirs(t *testing.T) {
+// files. Connecting it in owl takes it on.
+func TestPiHandWiredOwlProviderIsTheirs(t *testing.T) {
 	syncHome(t)
 	a, err := Find("pi")
 	if err != nil {
@@ -26,14 +26,14 @@ func TestPiHandWiredMynaProviderIsTheirs(t *testing.T) {
 	// Pi's own layout, as a person writes it (pi.dev docs: models.json
 	// providers, settings.json defaultProvider/defaultModel)
 	settingsJSON := `{
-  "defaultProvider": "myna",
+  "defaultProvider": "owl",
   "defaultModel": "relay/glm-4.6",
   "defaultThinkingLevel": "medium"
 }
 `
 	modelsJSON := `{
   "providers": {
-    "myna": {
+    "owl": {
       "baseUrl": "` + gatewayV1() + `",
       "api": "openai-completions",
       "apiKey": "sk-a-gateway-key-of-mine",
@@ -52,14 +52,14 @@ func TestPiHandWiredMynaProviderIsTheirs(t *testing.T) {
 			}
 		}
 	}
-	if v := a.Values()["model"]; v != "myna/relay/glm-4.6" {
+	if v := a.Values()["model"]; v != "owl/relay/glm-4.6" {
 		t.Fatalf("model reads %q", v)
 	}
 	if a.Wired() {
-		t.Fatal("a provider named myna written by hand reads as connected")
+		t.Fatal("a provider named owl written by hand reads as connected")
 	}
 	if d := a.Drift(); d != nil {
-		t.Errorf("drift on a config myna never set: %+v", d)
+		t.Errorf("drift on a config owl never set: %+v", d)
 	}
 	// a provider saved: the catalog changed, every agent's list is synced
 	if err := provider.Save(provider.Provider{ID: "relay2", Name: "Relay 2", Key: "k", Chat: "http://127.0.0.1:1/v1", Models: []string{"glm-4.6"}}); err != nil {
@@ -79,7 +79,7 @@ func TestPiHandWiredMynaProviderIsTheirs(t *testing.T) {
 		t.Fatal("connected after Disconnect")
 	}
 
-	// connected in myna, it is myna's: Keep (taking the config as it
+	// connected in owl, it is owl's: Keep (taking the config as it
 	// is) leaves it so, Disconnect gives it up
 	hanakoWrite(t, a.Path, `{}`, 0o644)
 	os.Remove(models)
@@ -91,7 +91,7 @@ func TestPiHandWiredMynaProviderIsTheirs(t *testing.T) {
 	}
 	a.Keep()
 	if !a.Wired() {
-		t.Fatal("Keep took myna's connection away")
+		t.Fatal("Keep took owl's connection away")
 	}
 	if err := a.Disconnect(); err != nil {
 		t.Fatal(err)
@@ -102,17 +102,17 @@ func TestPiHandWiredMynaProviderIsTheirs(t *testing.T) {
 }
 
 // Users who connected before this release read as connected still: an
-// older myna recorded the model it set (applied.json), or, where Keep
+// older owl recorded the model it set (applied.json), or, where Keep
 // took that record away, stashed what the agent was on at Connect.
 func TestPiConnectedBeforeStaysConnected(t *testing.T) {
 	for _, c := range []struct {
 		name string
 		mark func(a *Agent)
 	}{
-		{"applied", func(a *Agent) { record(a.ID, "model", "myna/relay/glm-4.6") }},
-		{"applied, model since gone", func(a *Agent) { record(a.ID, "model", "myna/gone/model-x") }},
+		{"applied", func(a *Agent) { record(a.ID, "model", "owl/relay/glm-4.6") }},
+		{"applied, model since gone", func(a *Agent) { record(a.ID, "model", "owl/gone/model-x") }},
 		{"kept before", func(a *Agent) { stash(map[string]string{a.ID + ".connect.was": `{"model":""}`}) }},
-		{"applied, then kept", func(a *Agent) { record(a.ID, "model", "myna/relay/glm-4.6"); a.Keep() }},
+		{"applied, then kept", func(a *Agent) { record(a.ID, "model", "owl/relay/glm-4.6"); a.Keep() }},
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			syncHome(t)
@@ -120,8 +120,8 @@ func TestPiConnectedBeforeStaysConnected(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			// as myna wrote it: the model field's Set, with nothing recorded
-			if err := a.Field("model").Set("myna/relay/glm-4.6"); err != nil {
+			// as owl wrote it: the model field's Set, with nothing recorded
+			if err := a.Field("model").Set("owl/relay/glm-4.6"); err != nil {
 				t.Fatal(err)
 			}
 			if a.Wired() {
@@ -135,27 +135,27 @@ func TestPiConnectedBeforeStaysConnected(t *testing.T) {
 	}
 }
 
-// Every agent whose myna is a provider of its own config (Spelled) holds
-// a provider myna didn't put there as the user's, as Pi does.
-func TestHandWiredMynaProviderSiblings(t *testing.T) {
+// Every agent whose owl is a provider of its own config (Spelled) holds
+// a provider owl didn't put there as the user's, as Pi does.
+func TestHandWiredOwlProviderSiblings(t *testing.T) {
 	ids := []string{"agy", "opencode", "openchamber", "mimocode", "deveco", "pi", "aside", "omo", "prime-agent", "goose", "zed", "vscode",
 		"crush", "dsh", "commandcode", "fx", "omp", "hermes", "morph", "kimi", "empryo", "minimax-code", "droid",
 		"qoder", "qoder-cn", "grok", "atomcode", "cline", "snow"}
 	for _, id := range ids {
 		t.Run(id, func(t *testing.T) {
 			if id == "aside" {
-				// connected natively, Aside's provider named myna is
-				// myna's by the key myna wrote in it; one with a key of
+				// connected natively, Aside's provider named owl is
+				// owl's by the key owl wrote in it; one with a key of
 				// the user's is theirs (asideConnection.provider)
 				settings, models := asideHome(t)
-				writeFile(t, settings, `{"defaultModel":{"provider":"myna","modelId":"relay/glm-4.6"}}`)
-				writeFile(t, models, `{"providers":{"myna":{"apiKey":"myna","baseUrl":"`+gatewayV1()+`","api":"openai-completions","models":[{"id":"relay/glm-4.6"}]}}}`)
+				writeFile(t, settings, `{"defaultModel":{"provider":"owl","modelId":"relay/glm-4.6"}}`)
+				writeFile(t, models, `{"providers":{"owl":{"apiKey":"owl","baseUrl":"`+gatewayV1()+`","api":"openai-completions","models":[{"id":"relay/glm-4.6"}]}}}`)
 				a, err := Find(id)
 				if err != nil {
 					t.Fatal(err)
 				}
 				if a.Wired() {
-					t.Fatal("Aside's provider named myna, with the user's key, reads as connected")
+					t.Fatal("Aside's provider named owl, with the user's key, reads as connected")
 				}
 				return
 			}
@@ -170,12 +170,12 @@ func TestHandWiredMynaProviderSiblings(t *testing.T) {
 			if id == "cline" {
 				hanakoWrite(t, a.Path, `{"version":1,"modes":{},"providers":{},"lastUsedProvider":"openrouter"}`, 0o600)
 			}
-			// written outside myna: the field's own Set, nothing recorded
-			if err := a.Fields[0].Set("myna/relay/glm-4.6"); err != nil {
+			// written outside owl: the field's own Set, nothing recorded
+			if err := a.Fields[0].Set("owl/relay/glm-4.6"); err != nil {
 				t.Fatal(err)
 			}
 			if a.Wired() {
-				t.Fatalf("a provider named myna myna didn't set reads as connected: %v", a.Values())
+				t.Fatalf("a provider named owl owl didn't set reads as connected: %v", a.Values())
 			}
 			if d := a.Drift(); d != nil {
 				t.Errorf("drift: %+v", d)
@@ -196,10 +196,10 @@ func TestHandWiredMynaProviderSiblings(t *testing.T) {
 	}
 }
 
-// setUpInMyna marks agents as connected in myna, as Connect leaves them
+// setUpInOwl marks agents as connected in owl, as Connect leaves them
 // (its connect.was stash), for a test that writes a connected agent's files
 // itself.
-func setUpInMyna(ids ...string) {
+func setUpInOwl(ids ...string) {
 	for _, id := range ids {
 		stash(map[string]string{id + ".connect.was": "{}"})
 	}

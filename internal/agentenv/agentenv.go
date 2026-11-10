@@ -1,27 +1,27 @@
 // Package agentenv names the environment variables through which an agent
-// really installed on this machine reaches myna: the one list a test
+// really installed on this machine reaches owl: the one list a test
 // sandbox clears, so that a test meets only the agents it put there itself.
 //
-// A sandbox fakes myna's own folders through HOME, USERPROFILE and the XDG
+// A sandbox fakes owl's own folders through HOME, USERPROFILE and the XDG
 // variables (appdir decides those), and an agent's folder through the
 // variable that agent's own CLI reads before it falls back to its folder in
 // the home: CLAUDE_CONFIG_DIR, CODEX_HOME, QODER_CONFIG_DIR and the rest.
-// Any one of them left over from the developer's shell points myna at a
+// Any one of them left over from the developer's shell points owl at a
 // real agent, whose sessions and settings a test then reads — and, where
-// myna writes what it wires, writes into (#522). Qoder's CLI sets both of
-// its variables for every child it starts, and myna manages Qoder, so
-// writing myna from inside Qoder was one way to meet this.
+// owl writes what it wires, writes into (#522). Qoder's CLI sets both of
+// its variables for every child it starts, and owl manages Qoder, so
+// writing owl from inside Qoder was one way to meet this.
 //
 // Each package keeps its own sandbox, because a test in internal/sessions
 // cannot import internal/agent, which imports it, to ask which variables
-// there are; this is the list they all clear. A name here is one myna
-// reads, and TestVarsAreRead says so, so a variable myna stopped reading
+// there are; this is the list they all clear. A name here is one owl
+// reads, and TestVarsAreRead says so, so a variable owl stopped reading
 // does not linger — that is how GEMINI_CLI_HOME and OPENCODE_CONFIG came to
-// be cleared by a sandbox while OPENCODE_CONFIG_DIR, the one myna reads,
+// be cleared by a sandbox while OPENCODE_CONFIG_DIR, the one owl reads,
 // was not. What is deliberately not here: APPDATA and LOCALAPPDATA, Windows'
 // folders rather than an agent's, which a sandbox sets to a folder of its
 // own instead of clearing; and CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC, a
-// behaviour flag whose one test sets it on purpose to read what myna then
+// behaviour flag whose one test sets it on purpose to read what owl then
 // does.
 package agentenv
 
@@ -33,7 +33,7 @@ var Vars = []string{
 	// Claude Code's temp folder, the images its sessions were given
 	"CLAUDE_CODE_TMPDIR",
 	// Zed, or a fork of it that keeps its settings (ZedG)
-	"MYNA_ZED_BIN", "MYNA_ZED_CONFIG_DIR", "MYNA_ZED_PROCESS_NAMES",
+	"OWL_ZED_BIN", "OWL_ZED_CONFIG_DIR", "OWL_ZED_PROCESS_NAMES",
 	// Codex's state database, when it is kept apart from CODEX_HOME
 	"CODEX_SQLITE_HOME",
 	// Gemini CLI's session/config home
@@ -139,17 +139,17 @@ var NotPaths = map[string]bool{
 	"WINDSURF_API_SERVER_URL": true, "ZCODE_CREDENTIAL_SECRET": true,
 	"PI_CONFIG_DIR": true, "OPENCODE_DB": true,
 	"STEPCODE_CONFIG_DIR": true,
-	"MYNA_ZED_BIN":        true, "MYNA_ZED_PROCESS_NAMES": true,
+	"OWL_ZED_BIN":        true, "OWL_ZED_PROCESS_NAMES": true,
 	"PENGUIN_PROJECT_ID": true,
 	"OPENCLAW_PROFILE":   true,
 }
 
 // ClaudeProviders are Claude Code's switches that send its requests to a
 // cloud's endpoint (Amazon Bedrock, Vertex AI, …) in place of
-// ANTHROPIC_BASE_URL, so a Claude Code wired to myna with one on never
+// ANTHROPIC_BASE_URL, so a Claude Code wired to owl with one on never
 // reaches it (jw1dev on X). The login shell is asked for them
-// (proc.LoginEnv), for myna to say when a terminal's Claude Code has one
-// on, but they are never set in myna's own environment, and a test's
+// (proc.LoginEnv), for owl to say when a terminal's Claude Code has one
+// on, but they are never set in owl's own environment, and a test's
 // sandbox clears them. They are Claude Code 2.1.300's (Ie() in its bundle).
 var ClaudeProviders = []string{
 	"CLAUDE_CODE_USE_BEDROCK", "CLAUDE_CODE_USE_VERTEX", "CLAUDE_CODE_USE_FOUNDRY",

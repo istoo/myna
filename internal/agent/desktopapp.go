@@ -12,8 +12,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/proc"
 )
 
 // An agent that is a desktop app as well as a CLI has the app's version shown
@@ -50,7 +50,7 @@ var desktopApps = map[string]desktopApp{
 	// package, in preview since 08-11) installs the app to /usr/lib/chatgpt:
 	// ChatGPT, with its codex in resources and its version in
 	// resources/linux-package-metadata.json (26.1027.30824's deb, seen in
-	// the WSL distro myna-desktop). Its app-server reads ~/.codex, as the
+	// the WSL distro owl-desktop). Its app-server reads ~/.codex, as the
 	// CLI does (pota on Discord: no account switch for it on Linux).
 	"codex": {id: "com.openai.codex", names: []string{"ChatGPT.app", "Codex.app"}, store: "OpenAI.Codex", publisher: "2p2nqsd0c76g0", linux: "/usr/lib/chatgpt"},
 	// DeepSeek Harness Desktop (0.2.0-rc.2's DeepSeek Harness.app,
@@ -70,7 +70,7 @@ var desktopApps = map[string]desktopApp{
 	// ~/.penguin/data (app-identity.ts: "the release profile shares the
 	// CLI's root by design"), and needs no CLI: it links
 	// /usr/local/bin/penguin only when the user lets it (cli-install.ts),
-	// and with no such link myna took ~/.penguin for a leftover
+	// and with no such link owl took ~/.penguin for a leftover
 	// (rankyurky_80676 on Discord: the app not detected). On Windows its
 	// assisted NSIS installer puts it under %LOCALAPPDATA%\Programs by
 	// default and lets the folder be changed; guid is the key
@@ -281,7 +281,7 @@ type keptPlist struct {
 
 // macBundles are where app's bundle may be on a Mac, the likeliest first:
 // under one of its names in appFolders, or in a folder of theirs one level
-// down (sungoku keeps DeepSeek Harness.app in /Applications/AI, and myna
+// down (sungoku keeps DeepSeek Harness.app in /Applications/AI, and owl
 // 0.1.1253 said 未找到 CLI, #2325), then wherever Spotlight knows its bundle
 // id to be (spotlightApps), as Zed's is found (zedAppPath). A caller still
 // reads each one's Info.plist.
@@ -395,7 +395,7 @@ const spotlightFresh = 5 * time.Minute
 // spotlightSandbox is testenv.Marker, which agent can't import: set in a
 // test binary testenv isolated, where this Mac's Spotlight would find the
 // developer's own apps (#1823) from every package that asks for one.
-const spotlightSandbox = "MYNA_TEST_SANDBOX"
+const spotlightSandbox = "OWL_TEST_SANDBOX"
 
 // spotlightRun is one mdfind query. A var so a test can count the queries
 // without asking the machine's Spotlight.
@@ -487,7 +487,7 @@ func spotlightBundles(id string) []string {
 }
 
 // AppVersion is the version of the agent's desktop app installed here, ""
-// for an agent without one myna knows, one not installed, or an Info.plist
+// for an agent without one owl knows, one not installed, or an Info.plist
 // that doesn't say (a binary one isn't read).
 func (a *Agent) AppVersion() string {
 	app, ok := desktopApps[a.ID]

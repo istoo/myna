@@ -85,7 +85,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         const posted = [];
         await page.route("**/*", serve(lang, posted));
-        await page.goto("http://myna.test/?view=providers");
+        await page.goto("http://owl.test/?view=providers");
         const open = async (name) => {
           await page.locator(".row.provider", { hasText: name }).first().click();
           await page.locator(".editor .accts .acc.add").waitFor();

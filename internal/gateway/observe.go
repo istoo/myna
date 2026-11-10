@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // observed is a request the registered observers watch (usage.Observer,
@@ -25,7 +25,7 @@ func observeRequest(r *http.Request, kind string, body []byte) (*http.Request, *
 	if len(observers) == 0 {
 		return r, nil
 	}
-	// the agent it is recorded as, another myna's own (callerFrom)
+	// the agent it is recorded as, another owl's own (callerFrom)
 	agent := callerOf(r).agent
 	q := usage.Request{Header: r.Header, Agent: agent, Session: observedSession(r.Header), Kind: observedKind(agent, kind, body),
 		Plain: local(r) && access.Caller(r.Context()).KeyID == "" && callerOf(r).via == ""}

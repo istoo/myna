@@ -14,12 +14,12 @@ import (
 // started kept a copy of its stdout (a program a plugin started, a daemon
 // it left behind), so the reader never reached EOF after the command
 // ended, the command was never waited for, and it stayed a <defunct>
-// child of myna until myna quit (acezan on Discord: 57 myna-bun
+// child of owl until owl quit (acezan on Discord: 57 owl-bun
 // after 47 hours). Output's command is waited for the moment it ends;
 // its readers then have OutputGrace to read what it wrote last, and the
 // pipes are closed, which ends their reads.
 type Output struct {
-	// Out and Err are the ends myna reads.
+	// Out and Err are the ends owl reads.
 	Out, Err *os.File
 	ws       []*os.File
 	outDone  chan struct{}
@@ -55,7 +55,7 @@ func (o *Output) OutRead() { o.outOnce.Do(func() { close(o.outDone) }) }
 // ErrRead says Err's reader has read to its end.
 func (o *Output) ErrRead() { o.errOnce.Do(func() { close(o.errDone) }) }
 
-// Close closes the ends myna reads, for an Output whose command
+// Close closes the ends owl reads, for an Output whose command
 // isn't started.
 func (o *Output) Close() {
 	for _, f := range append(o.ws, o.Out, o.Err) {
@@ -104,10 +104,10 @@ func (o *Output) Start(cmd *exec.Cmd) (wait func() error, err error) {
 	}, nil
 }
 
-// StartReaped starts cmd, which myna leaves running (it outlives myna
+// StartReaped starts cmd, which owl leaves running (it outlives owl
 // or ends on its own), and waits for it in the background, so it is
 // reaped whenever it ends. Process.Release doesn't reap on Unix: a child
-// released and ended stays <defunct> until myna quits.
+// released and ended stays <defunct> until owl quits.
 func StartReaped(cmd *exec.Cmd) error {
 	if err := cmd.Start(); err != nil {
 		return err

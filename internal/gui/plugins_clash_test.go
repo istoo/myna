@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // Two installed plugins that sign in to one provider (neiko on Discord:
@@ -23,8 +23,8 @@ func TestPluginsClashRows(t *testing.T) {
 	testenv.SetHome(t, dir)
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(dir, "config"))
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(dir, "cache"))
-	t.Setenv("MYNA_BUN", bun)
-	t.Setenv("MYNA_PLUGIN_MARKET", "off")
+	t.Setenv("OWL_BUN", bun)
+	t.Setenv("OWL_PLUGIN_MARKET", "off")
 	t.Cleanup(plugin.Settle)
 	src, err := os.ReadFile("../plugin/testdata/fake/index.js")
 	if err != nil {

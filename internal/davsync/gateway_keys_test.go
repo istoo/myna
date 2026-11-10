@@ -6,11 +6,11 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/backup"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/backup"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // Gateway keys travel with Settings in a backup. Changing just an independent
@@ -55,7 +55,7 @@ func TestGatewayKeysSync(t *testing.T) {
 			remote := func() backup.Bundle {
 				t.Helper()
 				fake.mu.Lock()
-				data := append([]byte(nil), fake.files["/dav/myna/myna.myna-backup"]...)
+				data := append([]byte(nil), fake.files["/dav/owl/owl.owl-backup"]...)
 				fake.mu.Unlock()
 				got, err := backup.Open(data, cfg.Passphrase)
 				if err != nil {

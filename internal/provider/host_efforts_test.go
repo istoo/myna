@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 // ARNO on Discord: 我发现是之前很多能自动推导 reasoning_efforts 列表的模型

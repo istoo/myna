@@ -1,10 +1,10 @@
-// Package probelog writes down the requests myna sends a provider on its
+// Package probelog writes down the requests owl sends a provider on its
 // own behalf, outside any agent's turn: the provider editor's Test, its
 // Detect APIs and per-model detection, and a model list's refresh (neiko
 // and gys619 on Discord: a test left no trace in the request log). Each
-// such request is one row of the request log, marked as myna's own test
+// such request is one row of the request log, marked as owl's own test
 // (usage.SourceProbe) and never counted in a usage or cost total; a model
-// list that was answered is left out there (usage's quietProbe), as myna
+// list that was answered is left out there (usage's quietProbe), as owl
 // asks for lists by itself all day.
 //
 // The provider package marks a context with the kind of test (With); every
@@ -125,13 +125,13 @@ func Note(ctx context.Context, u, method string, start time.Time, status int, er
 		r.Provider = host // a provider being added has no id yet
 	}
 	if r.Provider == "" {
-		r.Provider = "myna" // never "": the log reads that as turned away
+		r.Provider = "owl" // never "": the log reads that as turned away
 	}
 	Sink(r)
 }
 
 // NoteResult writes down one request that isn't sent through an HTTP
-// client of myna's (Claude Code run for a test, the gateway's translated
+// client of owl's (Claude Code run for a test, the gateway's translated
 // test), from what came of it.
 func NoteResult(ctx context.Context, endpoint string, start time.Time, status int, errText string) {
 	m, ok := from(ctx)
@@ -141,7 +141,7 @@ func NoteResult(ctx context.Context, endpoint string, start time.Time, status in
 	r := Row{Time: start, Kind: m.kind, Provider: m.provider, Account: m.account, Model: m.model,
 		Endpoint: endpoint, Status: status, Millis: time.Since(start).Milliseconds(), Error: errText}
 	if r.Provider == "" {
-		r.Provider = "myna"
+		r.Provider = "owl"
 	}
 	Sink(r)
 }

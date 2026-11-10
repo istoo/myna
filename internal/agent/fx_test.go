@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 func TestFx(t *testing.T) {
@@ -35,13 +35,13 @@ func TestFx(t *testing.T) {
 	if f.Get() != "anthropic/claude-sonnet-5" {
 		t.Fatalf("get: %q", f.Get())
 	}
-	if err := f.Set("myna/deepseek/flash"); err != nil {
+	if err := f.Set("owl/deepseek/flash"); err != nil {
 		t.Fatal(err)
 	}
 	s := read()
 	ps := s["providers"].(map[string]any)
-	m, ok := ps["myna"].(map[string]any)
-	if !ok || ps["local"] == nil || s["provider"] != "myna" || s["models"].(map[string]any)["myna"] != "deepseek/flash" || s["theme"] != "dark" {
+	m, ok := ps["owl"].(map[string]any)
+	if !ok || ps["local"] == nil || s["provider"] != "owl" || s["models"].(map[string]any)["owl"] != "deepseek/flash" || s["theme"] != "dark" {
 		t.Fatalf("settings: %v", s)
 	}
 	if m["protocol"] != "openai-chat-completions" || m["base_url"] != gatewayV1() || m["auth"].(map[string]any)["type"] != "none" {
@@ -50,16 +50,16 @@ func TestFx(t *testing.T) {
 	if ms := m["model_metadata"].(map[string]any); ms["deepseek/pro"] == nil || ms["deepseek/flash"] == nil {
 		t.Fatalf("models: %v", ms)
 	}
-	if f.Get() != "myna/deepseek/flash" || a.Check() != "" {
+	if f.Get() != "owl/deepseek/flash" || a.Check() != "" {
 		t.Fatalf("get: %q, check: %q", f.Get(), a.Check())
 	}
 
-	// its own model: myna steps out, and the gateway's model is set
+	// its own model: owl steps out, and the gateway's model is set
 	if err := f.Set("openai/gpt-6-sol"); err != nil {
 		t.Fatal(err)
 	}
 	s = read()
-	if s["provider"] != nil || s["providers"].(map[string]any)["myna"] != nil || s["providers"].(map[string]any)["local"] == nil ||
+	if s["provider"] != nil || s["providers"].(map[string]any)["owl"] != nil || s["providers"].(map[string]any)["local"] == nil ||
 		s["models"].(map[string]any)["gateway"] != "openai/gpt-6-sol" || f.Get() != "openai/gpt-6-sol" {
 		t.Fatalf("own: %v", s)
 	}
@@ -70,13 +70,13 @@ func TestFx(t *testing.T) {
 		t.Fatalf("local: %q", f.Get())
 	}
 
-	// through myna, then reset
-	f.Set("myna/deepseek/pro")
+	// through owl, then reset
+	f.Set("owl/deepseek/pro")
 	if err := f.Set(""); err != nil {
 		t.Fatal(err)
 	}
 	s = read()
-	if s["provider"] != nil || s["providers"].(map[string]any)["myna"] != nil || s["models"].(map[string]any)["myna"] != nil {
+	if s["provider"] != nil || s["providers"].(map[string]any)["owl"] != nil || s["models"].(map[string]any)["owl"] != nil {
 		t.Fatalf("reset: %v", s)
 	}
 }
@@ -106,10 +106,10 @@ func TestFxDetected(t *testing.T) {
 	}
 }
 
-// What the user set on myna's provider in fx's settings stays through
+// What the user set on owl's provider in fx's settings stays through
 // every sync and pick, as T3 Code's did after #2030: the reviewer model fx's
 // auto permission mode asks, and a tool_choice_mode turned to omit. The
-// address, auth and model list stay myna's; an auth the user changed goes
+// address, auth and model list stay owl's; an auth the user changed goes
 // back whole, as fx refuses an env beside type none.
 func TestFxKeepsTheUsersSettings(t *testing.T) {
 	home := syncHome(t)
@@ -118,15 +118,15 @@ func TestFxKeepsTheUsersSettings(t *testing.T) {
 	os.WriteFile(path, []byte(`{"theme":"dark","providers":{"local":{"protocol":"openai-chat-completions","base_url":"http://localhost:11434/v1","auth":{"type":"none"}}}}`), 0o644)
 	a := fx(home)
 	f := a.Field("model")
-	if err := f.Set("myna/relay/glm-4.6"); err != nil {
+	if err := f.Set("owl/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	if err := edit.SetJSON(path,
-		edit.KV{Path: "providers.myna.reviewer_model", Value: "relay/glm-4.6"},
-		edit.KV{Path: "providers.myna.tool_choice_mode", Value: "omit"},
-		edit.KV{Path: "providers.myna.auth", Value: map[string]any{"type": "bearer", "env": "MY_KEY"}},
-		edit.KV{Path: "providers.myna.base_url", Value: "http://127.0.0.1:1/v1"},
-		edit.KV{Path: "providers.myna.model_metadata", Value: map[string]any{"gone/old": map[string]any{}}},
+		edit.KV{Path: "providers.owl.reviewer_model", Value: "relay/glm-4.6"},
+		edit.KV{Path: "providers.owl.tool_choice_mode", Value: "omit"},
+		edit.KV{Path: "providers.owl.auth", Value: map[string]any{"type": "bearer", "env": "MY_KEY"}},
+		edit.KV{Path: "providers.owl.base_url", Value: "http://127.0.0.1:1/v1"},
+		edit.KV{Path: "providers.owl.model_metadata", Value: map[string]any{"gone/old": map[string]any{}}},
 	); err != nil {
 		t.Fatal(err)
 	}
@@ -154,19 +154,19 @@ func TestFxKeepsTheUsersSettings(t *testing.T) {
 		if err := json.Unmarshal([]byte(raw), &s); err != nil {
 			t.Fatalf("%v\n%s", err, raw)
 		}
-		p := s.Providers[mynaID]
+		p := s.Providers[owlID]
 		if p.ReviewerModel != "relay/glm-4.6" || p.ToolChoiceMode != "omit" {
 			t.Errorf("%s: the user's settings not kept:\n%s", when, raw)
 		}
 		if p.BaseURL == "http://127.0.0.1:1/v1" || p.BaseURL == "" || len(p.Auth) != 1 || p.Auth["type"] != "none" || p.ModelMetadata["gone/old"] != nil || p.ModelMetadata["deepseek/pro"] == nil {
-			t.Errorf("%s: myna's own parts not written:\n%s", when, raw)
+			t.Errorf("%s: owl's own parts not written:\n%s", when, raw)
 		}
 		if s.Theme != "dark" || s.Providers["local"].BaseURL == "" {
 			t.Errorf("%s: the user's other settings changed:\n%s", when, raw)
 		}
 	}
 	check("sync")
-	if err := f.Set("myna/deepseek/pro"); err != nil {
+	if err := f.Set("owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	check("pick")

@@ -5,11 +5,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
-// A model counted under another id (myna model alias) is one row in the
+// A model counted under another id (owl model alias) is one row in the
 // usage summary and in a gateway session, and each call keeps the price of
 // the id it was made under: the alias's own price is never put on the
 // other id's calls (SlouchyQuill507 on Discord: deepseek-v4.1-flash and

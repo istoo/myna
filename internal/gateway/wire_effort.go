@@ -3,7 +3,7 @@ package gateway
 import (
 	"context"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // thinkingBackOn is req with the thinking off it asked for taken back, for

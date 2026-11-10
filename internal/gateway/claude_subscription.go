@@ -7,7 +7,7 @@ package gateway
 // Extra Usage. The subprocess keeps Claude Code's real Agent/CLI identity.
 //
 // Caller tools are exposed as an MCP server. A tools/call blocks in the hidden
-// stdio helper while myna returns the tool_use to the caller. The caller's next
+// stdio helper while owl returns the tool_use to the caller. The caller's next
 // HTTP request supplies tool_result blocks, which unblock the same Claude Code
 // turn. This is the protocol-neutral equivalent of pi-claude-bridge's parked
 // Agent SDK query (https://github.com/elidickinson/pi-claude-bridge, MIT).
@@ -60,14 +60,14 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/claudecode"
-	"github.com/istoo/myna/internal/claudetui"
-	"github.com/istoo/myna/internal/netproxy"
-	"github.com/istoo/myna/internal/proc"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/wslrun"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/claudecode"
+	"github.com/istoo/owl/internal/claudetui"
+	"github.com/istoo/owl/internal/netproxy"
+	"github.com/istoo/owl/internal/proc"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/wslrun"
 	"github.com/santhosh-tekuri/jsonschema/v6"
 )
 
@@ -87,7 +87,7 @@ type subscriptionBridge struct {
 	lostCalls map[string]lostRun
 	// untrusted are callers' folders, by account folder, whose
 	// interactive Claude Code asked whether to trust them, and when: a
-	// run for one goes in myna's own folder until untrustedFor has
+	// run for one goes in owl's own folder until untrustedFor has
 	// passed (start)
 	untrusted sync.Map
 }
@@ -109,7 +109,7 @@ func (e *tuiUntrusted) Error() string { return e.err.Error() }
 func (e *tuiUntrusted) Unwrap() error { return e.err }
 
 // passedOver is whether a run in dir under configDir's account goes in
-// myna's own folder instead: its Claude Code asked lately whether to
+// owl's own folder instead: its Claude Code asked lately whether to
 // trust it.
 func (b *subscriptionBridge) passedOver(configDir, dir string) bool {
 	at, ok := b.untrusted.Load(configDir + "\x00" + dir)
@@ -167,14 +167,14 @@ type subscriptionRun struct {
 	outputs []*os.File
 	reading sync.WaitGroup
 	// exited is closed once Claude Code has exited and its output is read,
-	// exit then how it ended (Wait's error); killed says myna ended it
+	// exit then how it ended (Wait's error); killed says owl ended it
 	// (abort) while it ran
 	exited chan struct{}
 	exit   error
 	killed bool
 	tmp    string
 	// room frees the process's place in claudeRoom once it has exited,
-	// roomLeft telling it myna ended it (abort)
+	// roomLeft telling it owl ended it (abort)
 	room     func(left bool)
 	roomLeft bool
 	// schema says the client asked for an answer fitting a JSON schema,
@@ -267,7 +267,7 @@ type subscriptionRun struct {
 	// at: the interactive mode, which can't be taken back, is branched
 	// off its session there (resume)
 	behindLine string
-	// endWhy is why myna ended it, as the log of a turn that finds it
+	// endWhy is why owl ended it, as the log of a turn that finds it
 	// gone says (abortFor); results are the calls whose results it was
 	// last handed (continueWith)
 	endWhy  string
@@ -309,7 +309,7 @@ type subscriptionRun struct {
 	// helper hands each one over. Set and read under mu.
 	onCall func(id, name string, args json.RawMessage)
 
-	// search answers myna's web search tool, searchName, which the
+	// search answers owl's web search tool, searchName, which the
 	// client never sees
 	search     func(ctx context.Context, query string) (string, []Hit, error)
 	searchName string
@@ -348,7 +348,7 @@ type subscriptionRun struct {
 	parkedAt time.Time
 
 	// started is when it was started, and active when its turn under way
-	// began (r.mu), for `myna claude-code runs` (claudeRunList)
+	// began (r.mu), for `owl claude-code runs` (claudeRunList)
 	started time.Time
 	active  time.Time
 	// ends is when its timer lets it go (endIn), under r.mu
@@ -398,7 +398,7 @@ type shownCall struct {
 }
 
 // waitTool collects a tool result that took longer than an agent's patience.
-const waitTool = "myna_wait"
+const waitTool = "owl_wait"
 
 type mcpToolResult struct {
 	Content []map[string]any `json:"content"`
@@ -430,12 +430,12 @@ func claudeProjectName(path string) string {
 
 // sweepBridgeProjects removes the projects that runs from before
 // --no-session-persistence left in Claude Code's folder: only those named
-// after a myna-claude- folder in the temp directory, which no one but the
+// after a owl-claude- folder in the temp directory, which no one but the
 // bridge works in.
 func sweepBridgeProjects(claudeDir, tempDir string) {
 	var prefixes []string
 	for _, d := range []string{tempDir, evalSymlinks(tempDir)} {
-		prefix := claudeProjectName(filepath.Join(d, "myna-claude-"))
+		prefix := claudeProjectName(filepath.Join(d, "owl-claude-"))
 		if !slices.Contains(prefixes, prefix) {
 			prefixes = append(prefixes, prefix)
 		}
@@ -454,7 +454,7 @@ func sweepBridgeProjects(claudeDir, tempDir string) {
 }
 
 // sweepBridgeTemps removes the folders runs a gateway no longer running
-// left in the temp directory: a run's own myna-claude-<n> (its tools.json,
+// left in the temp directory: a run's own owl-claude-<n> (its tools.json,
 // its work folder when it has no shared one) is removed when it ends, but a
 // gateway quit for an update, or killed, ends none of its runs (#958).
 // Another gateway on the same account (a dev build) makes them in the same
@@ -464,7 +464,7 @@ func sweepBridgeProjects(claudeDir, tempDir string) {
 func sweepBridgeTemps(tempDir string) {
 	entries, _ := os.ReadDir(tempDir)
 	for _, e := range entries {
-		rest, ok := strings.CutPrefix(e.Name(), "myna-claude-")
+		rest, ok := strings.CutPrefix(e.Name(), "owl-claude-")
 		if !ok || !e.IsDir() || rest == "" || strings.Trim(rest, "0123456789") != "" {
 			continue
 		}
@@ -525,7 +525,7 @@ func clientWorkDir(req *Request) string {
 		// a folder the redact rules masked a word of names no folder on
 		// disk, and is never unmasked to run in: Claude Code tells its
 		// vendor the folder it runs in, so the masked word would go out
-		// as it is. The run works in myna's folder, told the caller's
+		// as it is. The run works in owl's folder, told the caller's
 		// (envElsewhere), and the model's paths are put back on the way
 		// to the caller's tools (#4449)
 		return ""
@@ -673,7 +673,7 @@ func randomToken() string {
 	return hex.EncodeToString(b[:])
 }
 
-// claudeCLI is the Claude Code myna runs: this machine's, or, on Windows
+// claudeCLI is the Claude Code owl runs: this machine's, or, on Windows
 // without one, the one installed in a running WSL distro, run there with
 // its own login and quota (wslrun).
 type claudeCLI struct {
@@ -681,7 +681,7 @@ type claudeCLI struct {
 	wsl  *wslrun.Tool
 }
 
-// claudeBinary is this machine's Claude Code, or the one myna downloaded
+// claudeBinary is this machine's Claude Code, or the one owl downloaded
 // for it (claudecode.Find), else one in WSL.
 func claudeBinary() (claudeCLI, error) {
 	if p := claudecode.Find(); p != "" {
@@ -700,10 +700,10 @@ func (c claudeCLI) command(ctx context.Context, args ...string) *exec.Cmd {
 	return proc.CommandContext(ctx, c.path, args...)
 }
 
-// claudeEuid is the user myna runs as; a var for tests.
+// claudeEuid is the user owl runs as; a var for tests.
 var claudeEuid = os.Geteuid
 
-// root is whether this Claude Code runs as root: myna itself as root
+// root is whether this Claude Code runs as root: owl itself as root
 // (a server's or a container's), or a WSL distro's default user root.
 func (c claudeCLI) root() bool {
 	if c.wsl != nil {
@@ -717,7 +717,7 @@ func (c claudeCLI) root() bool {
 // used with root/sudo privileges") unless IS_SANDBOX is "1" or
 // CLAUDE_CODE_BUBBLEWRAP is set: its setup checks exactly that (2.1.296).
 // The run has no tool of Claude Code's own that touches the machine, only
-// myna's MCP ones, answered by the client, and Anthropic's web search,
+// owl's MCP ones, answered by the client, and Anthropic's web search,
 // so skipping the permission prompts as root does nothing more than as
 // anyone else. Run as anyone else, env is kept as it is.
 func (c claudeCLI) asRoot(env []string) []string {
@@ -740,7 +740,7 @@ func (c claudeCLI) asRoot(env []string) []string {
 	return append(out, "IS_SANDBOX=1")
 }
 
-// claudeEnvVars are the variables myna sets for a Claude Code run, which
+// claudeEnvVars are the variables owl sets for a Claude Code run, which
 // one in WSL is handed (wslrun's Env).
 var claudeEnvVars = []string{"ENABLE_CLAUDEAI_MCP_SERVERS", "DISABLE_AUTO_COMPACT", "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC",
 	"DISABLE_TELEMETRY", "DISABLE_ERROR_REPORTING", "DISABLE_AUTOUPDATER", "ANTHROPIC_BETAS",
@@ -775,7 +775,7 @@ func (c claudeCLI) proxied(ctx context.Context, env []string) ([]string, error) 
 	return netproxy.EnvForBunWith(claudeProxy(ctx), env, c.wsl == nil || c.wsl.Host == "")
 }
 
-// file is where this Claude Code reads a file of myna's at path: one in
+// file is where this Claude Code reads a file of owl's at path: one in
 // WSL under the distro's mount of the drive.
 func (c claudeCLI) file(path string) string {
 	if c.wsl != nil {
@@ -817,7 +817,7 @@ func (c claudeCLI) tuiWSLUnread() bool {
 	return err != nil
 }
 
-// exe is myna's own executable, as this Claude Code starts it.
+// exe is owl's own executable, as this Claude Code starts it.
 func (c claudeCLI) exe() (string, error) {
 	if c.wsl != nil {
 		return c.wsl.Exe()
@@ -839,7 +839,7 @@ func callbackBaseURL() string {
 
 // claudeMCPPath is where the Claude subscription bridge's MCP helper hands
 // a tool call back: the path, then the run's callback token.
-const claudeMCPPath = "/_myna/claude-mcp/"
+const claudeMCPPath = "/_owl/claude-mcp/"
 
 // from, when set, is the conversation's session a run let go past idleMost
 // saved (unshelve): Claude Code goes on with it, told only the messages
@@ -866,7 +866,7 @@ func (b *subscriptionBridge) start(ctx context.Context, req *Request, model, con
 	return run, events, err
 }
 
-// startTrusted is startRun, run again in myna's own folder when the
+// startTrusted is startRun, run again in owl's own folder when the
 // caller's is one the user hasn't trusted in their own Claude Code, which
 // only they answer: told the caller's folder (envElsewhere), the turn is
 // answered. It was a 502, which a Claude Code client asks again and
@@ -880,7 +880,7 @@ func (b *subscriptionBridge) startTrusted(ctx context.Context, req *Request, mod
 	// passed over from now on (passedOver): this run, and the next,
 	// aren't in the caller's folder
 	b.untrusted.Store(untrusted.key, time.Now())
-	log.Printf("claude: Claude Code asks whether to trust %s, which its user hasn't; the run goes in myna's own folder, told the caller's", untrusted.dir)
+	log.Printf("claude: Claude Code asks whether to trust %s, which its user hasn't; the run goes in owl's own folder, told the caller's", untrusted.dir)
 	req.branch = nil
 	return b.startRun(ctx, req, model, configDir, owner, nil)
 }
@@ -913,7 +913,7 @@ func (b *subscriptionBridge) startRun(ctx context.Context, req *Request, model, 
 			sweepBridgeTemps(os.TempDir())
 		}()
 	})
-	tmp, err := os.MkdirTemp("", "myna-claude-")
+	tmp, err := os.MkdirTemp("", "owl-claude-")
 	if err != nil {
 		return nil, nil, err
 	}
@@ -955,7 +955,7 @@ func (b *subscriptionBridge) startRun(ctx context.Context, req *Request, model, 
 	}
 	// in the caller's own folder when it says which it is and it is one
 	// here (clientWorkDir): Claude Code tells the model the folder it runs
-	// in as its working directory, and a model told myna's folder wrote
+	// in as its working directory, and a model told owl's folder wrote
 	// the caller's files there, through tools that run in the caller's
 	work := ""
 	if binary.wsl == nil {
@@ -1003,7 +1003,7 @@ func (b *subscriptionBridge) startRun(ctx context.Context, req *Request, model, 
 		sessions = claudeSessions(configDir, work)
 		args = slices.DeleteFunc(args, func(a string) bool { return a == "--no-session-persistence" })
 		// a caller's folder keeps its own sessions beside the runs': only
-		// myna's own folder is swept, a run's session removed by its id
+		// owl's own folder is swept, a run's session removed by its id
 		if !client {
 			b.sweepSessions(sessions)
 		}
@@ -1153,15 +1153,15 @@ func (b *subscriptionBridge) startRun(ctx context.Context, req *Request, model, 
 		}
 	}
 	if tui && (!client || configDir != "") {
-		// a folder of myna's, or an account folder of myna's whose
+		// a folder of owl's, or an account folder of owl's whose
 		// Claude Code no one else runs: asked whether to trust it, the
 		// shim says yes; in the user's own account a caller's folder is
-		// theirs to answer for, and the run goes in myna's
+		// theirs to answer for, and the run goes in owl's
 		// (startTrusted)
 		env = append(env, claudetui.TrustEnv+"=1")
 	}
 	if tui && !client {
-		// a saved account's run in myna's folder is never asked (#4830)
+		// a saved account's run in owl's folder is never asked (#4830)
 		trustWork(binary, configDir, work)
 	}
 	cmd.Env = binary.env(binary.asRoot(env), configDir)
@@ -1289,7 +1289,7 @@ func (b *subscriptionBridge) startRun(ctx context.Context, req *Request, model, 
 }
 
 // claudeTUIHelper, when set, is run as the interactive mode's helper in
-// place of myna's executable: a test's stand-in.
+// place of owl's executable: a test's stand-in.
 var claudeTUIHelper string
 
 // controlWait is how long Claude Code may take to answer a control
@@ -1314,7 +1314,7 @@ type tuiNoStart struct{ err error }
 func (e *tuiNoStart) Error() string { return e.err.Error() }
 func (e *tuiNoStart) Unwrap() error { return e.err }
 
-// claudeTUIRuns is false where myna's executable has no shim to run:
+// claudeTUIRuns is false where owl's executable has no shim to run:
 // the gateway's tests, whose fake Claude Codes are -p ones. It is the one
 // case besides the setting turned off (ClaudePrintMode) where a model
 // request runs as -p.
@@ -1394,7 +1394,7 @@ type ClaudeMode struct {
 	TUI bool   `json:"tui"`
 	Why string `json:"why,omitempty"`
 	WSL bool   `json:"wsl,omitempty"` // Claude Code in WSL
-	// how the last run since myna started went (noteClaudeRun)
+	// how the last run since owl started went (noteClaudeRun)
 	Last *ClaudeLastRun `json:"last,omitempty"`
 }
 
@@ -1406,7 +1406,7 @@ type ClaudeLastRun struct {
 	At  time.Time `json:"at"`
 }
 
-// claudeLast is the last run's, since myna started
+// claudeLast is the last run's, since owl started
 var claudeLast struct {
 	sync.Mutex
 	run ClaudeLastRun
@@ -1601,8 +1601,8 @@ func writeGuard(path, body string) error {
 // tuiCommand is the interactive mode's helper (claudetui) running this
 // Claude Code with the -p arguments args; tuiEnv adds to its environment.
 func (c claudeCLI) tuiCommand(ctx context.Context, args ...string) (*exec.Cmd, error) {
-	// the helper runs here, on Windows for Claude Code in WSL too: myna
-	// itself, not exe, which is myna as the distro starts it (/mnt/c/…)
+	// the helper runs here, on Windows for Claude Code in WSL too: owl
+	// itself, not exe, which is owl as the distro starts it (/mnt/c/…)
 	helper, err := os.Executable()
 	if err != nil {
 		return nil, err
@@ -1630,7 +1630,7 @@ func (c claudeCLI) tuiEnv(env []string, configDir string) []string {
 
 // claudeTUIOn is whether a Claude subscription's model requests run in
 // Claude Code's interactive mode, and never as -p: the user hasn't turned
-// it off (ClaudePrintMode), and myna has its shim (claudeTUIRuns).
+// it off (ClaudePrintMode), and owl has its shim (claudeTUIRuns).
 func claudeTUIOn() bool {
 	return claudeTUIRuns && !settings.Load().ClaudePrintMode
 }
@@ -1651,7 +1651,7 @@ func claudeTUIErr(why string) error {
 	// the settings come first: "Models" close before the error's
 	// "invalid_request_error" read as a model the account doesn't serve
 	// (provider.ModelUnserved), and the next account was asked
-	return fmt.Errorf("Claude Code's interactive mode, on in Settings › Models › Replies, can't answer this request (%s), and myna never runs it as claude -p instead; turned off there, every request runs as -p", why)
+	return fmt.Errorf("Claude Code's interactive mode, on in Settings › Models › Replies, can't answer this request (%s), and owl never runs it as claude -p instead; turned off there, every request runs as -p", why)
 }
 
 // tuiRefusal is a request the interactive mode refuses for what it asks,
@@ -1675,7 +1675,7 @@ func (r *subscriptionRun) cliControlWithin(ctx context.Context, request map[stri
 	ch := make(chan controlReply, 1)
 	// one that ended says how, and the last it wrote to stderr: "Claude
 	// Code ended" alone left the user nothing to act on
-	what := fmt.Sprintf("answered myna's %v request", request["subtype"])
+	what := fmt.Sprintf("answered owl's %v request", request["subtype"])
 	r.mu.Lock()
 	if r.closed {
 		r.mu.Unlock()
@@ -2241,7 +2241,7 @@ func (b *subscriptionBridge) keepIdle(r *subscriptionRun, key, conv string) bool
 	// request exclude each other through gone()). Left there, the same
 	// run under two keys was the oldest again after each pass below, which
 	// let go of one key only, so the loop never ended and drop grew with
-	// b.mu held (X, Sma1lboy: myna at 158 GB after two days).
+	// b.mu held (X, Sma1lboy: owl at 158 GB after two days).
 	if r.idleKey != "" && r.idleKey != key && b.idle[r.idleKey] == r {
 		delete(b.idle, r.idleKey)
 	}
@@ -2290,7 +2290,7 @@ const shelfMost = 64
 // have asked it, a prefix it has cached; a run started anew is told the
 // whole conversation in one message, and writes all of it to the cache
 // again (X, AncientTwo: a Claude subscription's limits went much faster
-// through myna than in Claude Code — with more than idleMost
+// through owl than in Claude Code — with more than idleMost
 // conversations going, each turn of each wrote its whole conversation).
 type savedSession struct {
 	session  string
@@ -2303,7 +2303,7 @@ type savedSession struct {
 	// session carries that exchange, and the next turn leaves it out, so
 	// the turn that takes it resumes a copy cut before it (unshelve):
 	// before the side question's own message, behindTurn, that a -p run
-	// was told under myna's uuid, or, for the interactive mode, which
+	// was told under owl's uuid, or, for the interactive mode, which
 	// names its messages itself, after behindLine, the reply before it
 	behind     string
 	behindTurn string
@@ -3400,14 +3400,14 @@ func (r *subscriptionRun) readOutput(rd io.Reader) {
 	}
 	// toolStart says whether a tool_use block, index of this message, is a
 	// call of the client's, to be handed over as name: Claude Code's own
-	// calls (WebSearch, myna's web search, a schema's StructuredOutput)
+	// calls (WebSearch, owl's web search, a schema's StructuredOutput)
 	// are its own to answer
 	toolStart := func(index int, name string) (string, bool) {
 		if r.schema && name == "StructuredOutput" {
 			own[index] = true
 			return "", false
 		}
-		rest, ok := strings.CutPrefix(name, "mcp__myna__")
+		rest, ok := strings.CutPrefix(name, "mcp__owl__")
 		r.mu.Lock()
 		called := name
 		name = declaredName(r.names, rest)
@@ -3423,7 +3423,7 @@ func (r *subscriptionRun) readOutput(rd io.Reader) {
 			name = called
 		}
 		r.mu.Unlock()
-		// myna answers its own web search, as Claude Code does
+		// owl answers its own web search, as Claude Code does
 		// its WebSearch, and a call of a tool the turn may not call
 		// (mcpCall): the client is never shown it
 		if !ok || search || refused {
@@ -3504,7 +3504,7 @@ func (r *subscriptionRun) readOutput(rd io.Reader) {
 					return
 				}
 				begin("msg_"+strings.ReplaceAll(newUUID(), "-", ""), r.model, cliUsage{})
-				name, _ = toolStart(0, "mcp__myna__"+name)
+				name, _ = toolStart(0, "mcp__owl__"+name)
 				told[id] = true
 				if written[id] {
 					delete(written, id)
@@ -3637,7 +3637,7 @@ func (r *subscriptionRun) readOutput(rd io.Reader) {
 			_ = json.Unmarshal(envelope.Message, &whole)
 			var ids []string
 			for _, c := range whole.Content {
-				if c.Type == "tool_use" && strings.HasPrefix(c.Name, "mcp__myna__") && c.ID != "" {
+				if c.Type == "tool_use" && strings.HasPrefix(c.Name, "mcp__owl__") && c.ID != "" {
 					ids = append(ids, c.ID)
 				}
 			}
@@ -4293,7 +4293,7 @@ func leanSystem(req *Request) string {
 // mark reach a mark 320 messages earlier.
 const historyChunk = 16
 
-// cacheMark1h is the prompt-cache mark on what myna gives a run: an
+// cacheMark1h is the prompt-cache mark on what owl gives a run: an
 // hour's, as Claude Code's own (claudeCacheTTL, pinned in cleanClaudeEnv),
 // since Anthropic refuses a 1h mark after a 5m one.
 func cacheMark1h() map[string]string {
@@ -4458,28 +4458,28 @@ func historyEnd(msgs []Message) int {
 // "Bash is disabled for this session, in subagents as well as here.",
 // which the model takes for a fact and gives up (#958).
 func bridgeName(name string) string {
-	return "mcp__myna__" + bridgeToolName(name)
+	return "mcp__owl__" + bridgeToolName(name)
 }
 
 // bridgeToolName is the name the MCP helper offers a tool of the caller's
 // under. Claude Code takes an MCP tool's name as [A-Za-z0-9_-] only, with
-// mcp__myna__ before it in at most 64: it made "spawn.agent" its
+// mcp__owl__ before it in at most 64: it made "spawn.agent" its
 // spawn_agent, which the client never offered (#2649). A name it would
 // change, or one ending as a changed name ends, is told apart by a hash of
 // it, the same in every run, so a resumed session and a conversation's
 // history name the tool as before; declaredName maps it back.
 //
-// A tool of myna's own MCP server, which the client (Claude Code with
-// myna's Library) already names mcp__myna__<server>__<tool>, is
-// offered under the rest of its name: with the helper's mcp__myna__
+// A tool of owl's own MCP server, which the client (Claude Code with
+// owl's Library) already names mcp__owl__<server>__<tool>, is
+// offered under the rest of its name: with the helper's mcp__owl__
 // before it again, the run's model was shown
-// mcp__myna__mcp__myna__myna-browser__browser_click, while a
+// mcp__owl__mcp__owl__owl-browser__browser_click, while a
 // deferred tool the client named in its text kept the single prefix
 // (packinggoods on Discord, 11-01). The model now sees the client's own
-// name. A client offering both "mcp__myna__x" and a bare "x" would
+// name. A client offering both "mcp__owl__x" and a bare "x" would
 // have the two offered alike, which this doesn't tell apart.
 func bridgeToolName(name string) string {
-	if rest, ok := strings.CutPrefix(name, "mcp__myna__"); ok && bridgeToolNameOK.MatchString(rest) && !bridgeToolNameHashed.MatchString(rest) {
+	if rest, ok := strings.CutPrefix(name, "mcp__owl__"); ok && bridgeToolNameOK.MatchString(rest) && !bridgeToolNameHashed.MatchString(rest) {
 		return rest
 	}
 	if bridgeToolNameOK.MatchString(name) && !bridgeToolNameHashed.MatchString(name) {
@@ -5234,7 +5234,7 @@ func (b *subscriptionBridge) mcpCall(w http.ResponseWriter, r *http.Request) {
 	run := b.runs[token]
 	b.mu.Unlock()
 	if run == nil {
-		// a run of the myna this one took the gateway over from, its
+		// a run of the owl this one took the gateway over from, its
 		// turn under way when the gateway changed hands (handover.go)
 		if forwardCallback(w, r) {
 			return
@@ -5453,10 +5453,10 @@ func (r *subscriptionRun) launch() error {
 // tell writes line to Claude Code's input. Wait closes that input as
 // Claude Code exits, and a write after it failed "write |1: file already
 // closed", which said nothing of why: one Claude Code no longer reads says
-// how it ended, or that myna ended it, and the last it wrote to stderr —
+// how it ended, or that owl ended it, and the last it wrote to stderr —
 // the cause comes last, after any warnings before it.
 func (r *subscriptionRun) tell(line []byte) error {
-	// one myna ended is not written to: until Wait has reaped it, its
+	// one owl ended is not written to: until Wait has reaped it, its
 	// input still takes a write, which no one will read
 	r.mu.Lock()
 	killed := r.killed
@@ -5482,7 +5482,7 @@ func (r *subscriptionRun) tell(line []byte) error {
 	return r.whyEnded()
 }
 
-// whyEnded says how the run's Claude Code ended, or that myna ended it,
+// whyEnded says how the run's Claude Code ended, or that owl ended it,
 // and the last it wrote to stderr.
 func (r *subscriptionRun) whyEnded() error {
 	return r.endedBefore("read its input")
@@ -5512,7 +5512,7 @@ func (r *subscriptionRun) endedBefore(what string) error {
 	defer r.mu.Unlock()
 	why := "exited before it " + what
 	if r.killed {
-		why = "was ended by myna before it " + what
+		why = "was ended by owl before it " + what
 	} else if r.exit != nil {
 		why += " (" + r.exit.Error() + ")"
 	}
@@ -5674,7 +5674,7 @@ func (b *subscriptionBridge) abortAll() {
 		runs = append(runs, run)
 	}
 	b.mu.Unlock()
-	// each asked at once, then waited for: a Claude Code myna exits
+	// each asked at once, then waited for: a Claude Code owl exits
 	// under is not left to be killed by no one
 	stops := make([]<-chan struct{}, 0, len(runs))
 	for _, run := range runs {
@@ -5710,7 +5710,7 @@ func keepLost(m map[string]lostRun, key string, l lostRun, most int) {
 }
 
 // whyLost is why the run ended, for the log of its conversation's next
-// turn: the reason myna gave (abortFor), or how its Claude Code exited.
+// turn: the reason owl gave (abortFor), or how its Claude Code exited.
 func (r *subscriptionRun) whyLost() string {
 	r.mu.Lock()
 	why, killed, exit := r.endWhy, r.killed, r.exit
@@ -5719,7 +5719,7 @@ func (r *subscriptionRun) whyLost() string {
 	case why != "":
 		return why
 	case killed:
-		return "myna ended it"
+		return "owl ended it"
 	case exit != nil:
 		return "its Claude Code exited (" + exit.Error() + ")"
 	}
@@ -5958,7 +5958,7 @@ func (s *Server) serveClaudeSubscription(w http.ResponseWriter, r *http.Request,
 // anthropic-ratelimit-unified-* headers, which a Claude Code signed in to
 // claude.ai reads into its status line's rate_limits (claude-hud's 5-hour
 // and weekly figures, #1257). Its run tells them in its rate_limit_event,
-// not as headers, so they are said again from what myna keeps.
+// not as headers, so they are said again from what owl keeps.
 func limitHeaders(w http.ResponseWriter, owner string) {
 	user, own := ownerAccount(owner)
 	if user == "" || own && provider.ClaudeCodeMovedOff(user) {
@@ -5998,7 +5998,7 @@ func (s *Server) serveSubscription(w http.ResponseWriter, r *http.Request, from 
 	if name == "Claude Code" && wantsClientCache(r, from) {
 		req, err = parseAnthropicRequest(body, true)
 	} else if name == "Claude Code" && classifierClientCache(from, body) && !claudeTUIOn() {
-		// the classifier never asked for its marks through myna's
+		// the classifier never asked for its marks through owl's
 		// header: a set the bridge can't keep (a TTL order Anthropic
 		// would refuse) goes the default way, as before, not refused; in
 		// the interactive mode, which can't place them, it goes the
@@ -6054,7 +6054,7 @@ func (s *Server) serveSubscription(w http.ResponseWriter, r *http.Request, from 
 			return writeError(w, from, 400, "Claude Code: "+err.Error()), err.Error()
 		}
 	}
-	// the interactive mode answers a schema through myna's answer tool
+	// the interactive mode answers a schema through owl's answer tool
 	var answer Tool
 	var answerSchema *jsonschema.Schema
 	if name == "Claude Code" && claudeTUIOn() && len(req.Format.schema()) > 0 {
@@ -6064,7 +6064,7 @@ func (s *Server) serveSubscription(w http.ResponseWriter, r *http.Request, from 
 		answer = answerTool(req.Tools, req.Format.schema())
 		req.Tools = append(slices.Clone(req.Tools), answer)
 	}
-	// its model searches the web with myna's tool, which myna answers
+	// its model searches the web with owl's tool, which owl answers
 	var search Tool
 	if req.WebSearch && !searching(r.Context()) {
 		if canSearch() {
@@ -6296,7 +6296,7 @@ const thirdPartyWords = "Third-party apps now draw from your extra usage"
 // answered with, with what happened and what to do said after it when
 // Anthropic refused the turn as a third-party app's (#4503). The bare
 // 400 said "keep going" and nothing of why a client's turn was refused
-// while plain ones were served. myna never asks again on its own, as
+// while plain ones were served. owl never asks again on its own, as
 // claude -p or otherwise: a second try may draw from the account's extra
 // usage, which is the user's to spend (the owner's call on #4503). The
 // refusal is about the request, the same on every account, so it stays a
@@ -6309,13 +6309,13 @@ func thirdPartyRefused(name string, req *Request, code int, msg string) string {
 	}
 	if !req.interactive {
 		log.Printf("claude: Anthropic refused a claude -p turn on %s as a third-party app's (#4503)", req.Model)
-		return msg + " (myna: Anthropic counted this turn, run as claude -p, as a third-party app's and answered nothing. " +
-			"Asking again may draw from the Claude account's extra usage, so myna doesn't ask again on its own.)"
+		return msg + " (owl: Anthropic counted this turn, run as claude -p, as a third-party app's and answered nothing. " +
+			"Asking again may draw from the Claude account's extra usage, so owl doesn't ask again on its own.)"
 	}
 	log.Printf("claude: Anthropic refused an interactive-mode turn on %s as a third-party app's (#4503)", req.Model)
-	return msg + " (myna: Anthropic counted this turn as a third-party app's and answered nothing. " +
+	return msg + " (owl: Anthropic counted this turn as a third-party app's and answered nothing. " +
 		"It ran in Claude Code's interactive mode with your agent's own system prompt, which Anthropic can refuse there. " +
-		"Asking again the same way may draw from the Claude account's extra usage, so myna doesn't ask again on its own. " +
+		"Asking again the same way may draw from the Claude account's extra usage, so owl doesn't ask again on its own. " +
 		"Claude Code as claude -p is served such prompts: turn off Claude Code's interactive mode in Settings › Models › Replies " +
 		"or in this provider's editor; the plan counts a -p request at about twice the interactive mode's.)"
 }

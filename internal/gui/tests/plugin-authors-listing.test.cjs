@@ -3,7 +3,7 @@
 // registry.json without "community": true (the owner on
 // magpie-community/plugins#479). Discover doesn't browse it: not in
 // Agents, nor any section. A search finds it, by its name or its
-// publisher, under its publisher's name and never with the myna
+// publisher, under its publisher's name and never with the owl
 // community badge, on its card and on its page. PinK's listing is
 // registry.json's before plugins#617. Every language, both engines, at a
 // narrow width too; the API is faked here.
@@ -15,7 +15,7 @@ const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
 
-const PINK = "myna-plugin-pink";
+const PINK = "owl-plugin-pink";
 const RIVER = "@magpie-community/opencode-river-auth";
 const KILO = "@magpie-community/agent-kilo";
 // as /api/plugins/listings gives them: Listing's fields, community left out
@@ -23,9 +23,9 @@ const KILO = "@magpie-community/agent-kilo";
 const listings = () => [
   { package: RIVER, name: "River", providers: ["river"], community: true,
     summary: { en: "River (river.ai) pay-as-you-go inference with your API key: per-account models from /v1/models, documented reasoning efforts and live prices from River's public pricing endpoint.", zh: "用你的 API key 接入 River (river.ai) 按量计费推理：按账号从 /v1/models 列出模型，带官方推理档位与实时价格。" } },
-  { package: KILO, name: "Kilo Code", kind: "agent", community: true, summary: { en: "Kilo Code on myna's Agents page.", zh: "把 Kilo Code 加到 Agent 页。" } },
-  { package: PINK, name: "PinK", kind: "agent", icon: "https://raw.githubusercontent.com/YuchenWell/myna-plugin-pink/main/assets/pink.png",
-    summary: { en: "Connect PinK to Myna's models from the Agents page and track gateway usage and cost. Disconnecting restores the managed configuration.", zh: "在 Agent 页面连接 PinK，使用 Myna 中配置的模型并查看调用用量与费用；断开时恢复插件管理的配置。" } },
+  { package: KILO, name: "Kilo Code", kind: "agent", community: true, summary: { en: "Kilo Code on owl's Agents page.", zh: "把 Kilo Code 加到 Agent 页。" } },
+  { package: PINK, name: "PinK", kind: "agent", icon: "https://raw.githubusercontent.com/YuchenWell/owl-plugin-pink/main/assets/pink.png",
+    summary: { en: "Connect PinK to Owl's models from the Agents page and track gateway usage and cost. Disconnecting restores the managed configuration.", zh: "在 Agent 页面连接 PinK，使用 Owl 中配置的模型并查看调用用量与费用；断开时恢复插件管理的配置。" } },
 ];
 const npm = {
   [PINK]: { version: "0.1.1", publisher: "zhouzhenzhou", license: "MIT", weekly: 12 },
@@ -57,7 +57,7 @@ function server(lang) {
     if (url.pathname === "/api/plugins/github") return json({ repos: [] });
     if (url.pathname === "/api/plugins/page") return json({ readme: "# PinK", updated: "2026-10-30T00:00:00Z" });
     if (url.pathname.startsWith("/api/")) return json({});
-    if (url.hostname !== "myna.test") return route.fulfill({ status: 404, body: "" });
+    if (url.hostname !== "owl.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -65,11 +65,11 @@ function server(lang) {
 }
 
 const L = {
-  en: { agents: "Agents", community: "myna community" },
-  zh: { agents: "Agent", community: "myna 社区" },
-  "zh-TW": { agents: "Agent", community: "myna 社群" },
-  ja: { agents: "エージェント", community: "myna コミュニティ" },
-  de: { agents: "Agenten", community: "myna-Community" },
+  en: { agents: "Agents", community: "owl community" },
+  zh: { agents: "Agent", community: "owl 社区" },
+  "zh-TW": { agents: "Agent", community: "owl 社群" },
+  ja: { agents: "エージェント", community: "owl コミュニティ" },
+  de: { agents: "Agenten", community: "owl-Community" },
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -85,7 +85,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang));
-        await page.goto("http://myna.test/?view=plugins");
+        await page.goto("http://owl.test/?view=plugins");
         const view = page.locator("#view-plugins");
         const card = (pkg) => view.locator(`.pm-card[data-pkg="${pkg}"]`);
         const shot = (name) => process.env.ARTIFACT_DIR && view.screenshot({ path: path.join(process.env.ARTIFACT_DIR, `plugin-authors-${name}-${engine}-${lang}-${width}.png`) });

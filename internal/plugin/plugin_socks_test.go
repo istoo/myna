@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/netproxy"
+	"github.com/istoo/owl/internal/netproxy"
 )
 
 // socksTo is a SOCKS5 proxy that carries every connection to addr,

@@ -70,7 +70,7 @@ function usageServer(lang, theme) {
       agents: [{ id: "codex", name: "Codex", icon: "codex-color" }], providers: [{ id: "openai", name: "OpenAI", icon: "openai" }, { id: "zhipu", name: "Zhipu", icon: "zhipu-color" }],
     });
     if (url.pathname === "/api/usage/quotas") return json([]);
-    if (url.pathname === "/api/usage") return json({ calls: 1, errors: 0, input: 1, output: 1, cache_read: 0, cache_write: 0, reasoning: 0, unpriced: 0, cost: 1, bucket: "day", series: [], agents: [], models: [], path: "~/.config/myna/usage.jsonl" });
+    if (url.pathname === "/api/usage") return json({ calls: 1, errors: 0, input: 1, output: 1, cache_read: 0, cache_write: 0, reasoning: 0, unpriced: 0, cost: 1, bucket: "day", series: [], agents: [], models: [], path: "~/.config/owl/usage.jsonl" });
     if (url.pathname === "/api/sessions") return json({ sessions: [], dirs: [] });
     if (url.pathname === "/api/sessions/stats") return json({ from: "", to: "", days: [], agents: {} });
     if (url.pathname === "/api/groups") return json({ groups: [], models: [] });
@@ -98,7 +98,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
           // Routing's Requests
           await p.route("**/*", routingServer(lang));
-          await p.goto("http://myna.test/?view=routing");
+          await p.goto("http://owl.test/?view=routing");
           await p.locator(".rt-reqs .rt-req.bad").waitFor();
           const reqs = await p.locator(".rt-reqs .rt-req").evaluateAll((bs) => bs.map((b) => {
             const to = b.querySelector(".to"), ic = to.querySelector(":scope > .ic"), said = to.querySelector(".said");
@@ -116,7 +116,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           // Usage → Requests
           await p.unroute("**/*");
           await p.route("**/*", usageServer(lang, "light"));
-          await p.goto("http://myna.test/?view=usage&tab=requests");
+          await p.goto("http://owl.test/?view=usage&tab=requests");
           await p.locator("table.led tbody tr.led-row").nth(2).waitFor();
           // the table drawn and laid out (a first draw can be swapped for the next)
           await p.waitForFunction(() => [...document.querySelectorAll("table.led td.where .ic")].some((e) => e.getBoundingClientRect().width > 0));

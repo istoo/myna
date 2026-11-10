@@ -3,7 +3,7 @@ package gateway
 import (
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // 0xAncientTwo on X: the Claude subscription was signed out again and again.

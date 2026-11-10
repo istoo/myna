@@ -10,13 +10,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/agentenv"
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/filememo"
+	"github.com/istoo/owl/internal/agentenv"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/filememo"
 )
 
 // mythosCatalogs puts models.dev's catalogs as they were on 10-27, cut to
-// Claude, where myna keeps them: Claude Mythos 5.1 is in the anthropic
+// Claude, where owl keeps them: Claude Mythos 5.1 is in the anthropic
 // lab (models.json) and in no provider's list (api.json).
 func mythosCatalogs(t *testing.T) {
 	t.Helper()

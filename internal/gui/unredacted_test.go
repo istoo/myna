@@ -11,8 +11,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/netproxy"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/netproxy"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // lc on Discord: the editor's "Send requests unmasked" is saved on a

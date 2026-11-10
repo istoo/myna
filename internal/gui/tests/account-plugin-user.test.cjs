@@ -67,7 +67,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang));
-        await page.goto("http://myna.test/?view=providers");
+        await page.goto("http://owl.test/?view=providers");
         await page.locator(".row.provider", { hasText: "CodeArts" }).first().click();
         const who = (id) => page.locator(`.editor .accts .acc[data-account-id="${id}"] .acct-who`);
         await who(IAM).waitFor();

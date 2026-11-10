@@ -24,7 +24,7 @@ function serve(lang) {
   const state = {
     agents: [{
       id: "pi", name: "Pi", icon: "generic", wired: true, path: "~/.pi/agent/settings.json",
-      fields: [{ key: "model", label: "model", value: "myna/deepseek/deepseek-v4-pro", options: [{ value: "myna/deepseek/deepseek-v4-pro", label: "DeepSeek V4 Pro", ref: "deepseek/deepseek-v4-pro" }] }],
+      fields: [{ key: "model", label: "model", value: "owl/deepseek/deepseek-v4-pro", options: [{ value: "owl/deepseek/deepseek-v4-pro", label: "DeepSeek V4 Pro", ref: "deepseek/deepseek-v4-pro" }] }],
     }],
     profiles: [], settings: { lang, theme: "dark" },
   };
@@ -71,12 +71,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     page.setDefaultTimeout(6000);
     page.setDefaultNavigationTimeout(60000);
     await page.route("**/*", serve("en"));
-    await page.goto("http://myna.test/?view=agents");
+    await page.goto("http://owl.test/?view=agents");
     const ids = await page.evaluate(() => [...document.querySelectorAll(".view[id^='view-']")].map((v) => v.id.slice(5)));
     assert(ids.length >= 8, `pages found: ${ids}`);
     let tried = 0;
     for (const id of ids) {
-      await page.goto(`http://myna.test/?view=${id}`);
+      await page.goto(`http://owl.test/?view=${id}`);
       const before = await shown(page).catch(() => null);
       if (!before || before.id !== `view-${id}`) continue; // a page this fixture doesn't open
       tried++;
@@ -132,7 +132,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang));
-      await page.goto("http://myna.test/?view=agents");
+      await page.goto("http://owl.test/?view=agents");
       const row = page.locator('.row.agent[data-id="pi"]');
       await row.waitFor();
       if (await row.locator(".ag-exp").count()) await row.locator(".ag-link").click(); // start folded

@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// xgddm88 on X: turning Claude Desktop on in myna, every earlier project
+// xgddm88 on X: turning Claude Desktop on in owl, every earlier project
 // and chat was gone. Desktop's third-party mode runs in a userData of its
 // own (Claude-3p), so the signed-in profile's history isn't shown there;
 // it isn't deleted, and turning Desktop off brings it back. The row says so
@@ -14,15 +14,15 @@ const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
 
-const before = "Not connected · on myna, Claude Desktop opens a separate profile: chats and projects from your Anthropic sign-in stay, and are back when you turn it off";
-const once = "Chats and projects from your Anthropic sign-in stay in Desktop's own profile, not shown on myna; nothing is deleted, and turning this off brings them back.";
+const before = "Not connected · on owl, Claude Desktop opens a separate profile: chats and projects from your Anthropic sign-in stay, and are back when you turn it off";
+const once = "Chats and projects from your Anthropic sign-in stay in Desktop's own profile, not shown on owl; nothing is deleted, and turning this off brings them back.";
 const plain = "Not connected · {agent} uses its own settings";
 
 function fixture(lang, wired) {
   const settings = { lang, theme: "light" };
   const desktop = {
     id: "claude-desktop", name: "Claude Desktop", path: "/test/claude_desktop_config.json", icon: "claude-color", wired,
-    fields: [{ key: "provider", label: "provider", value: wired ? "myna" : "", options: [{ value: "myna", label: "myna", icon: "myna" }] }],
+    fields: [{ key: "provider", label: "provider", value: wired ? "owl" : "", options: [{ value: "owl", label: "owl", icon: "owl" }] }],
     models: { shown: 2, listed: 2, by: [{ name: "DeepSeek", icon: "deepseek", n: 2 }], names: ["DeepSeek V4.1 Flash", "DeepSeek V4.1 Pro"] },
   };
   // another agent not connected says what it always did
@@ -67,7 +67,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
         // not connected: said on its row before the switch is touched
         await page.route("**/*", fixture(lang, false));
-        await page.goto("http://myna.test/?view=agents");
+        await page.goto("http://owl.test/?view=agents");
         await page.locator(`${row("claude-desktop")} .ag-st`).waitFor();
         for (const k of [before, once]) assert.ok(await tr(k), `${lang} has ${k.slice(0, 40)}`);
         assert.equal(await page.locator(`${row("claude-desktop")} .ag-st`).textContent(), await tr(before));
@@ -78,7 +78,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // connected: its opened row says it too
         await page.unroute("**/*");
         await page.route("**/*", fixture(lang, true));
-        await page.goto("http://myna.test/?view=agents");
+        await page.goto("http://owl.test/?view=agents");
         await page.locator(`${row("claude-desktop")} .ag-link`, { hasText: details[lang] }).click();
         const exp = page.locator(`${row("claude-desktop")} .ag-exp`);
         await exp.waitFor();

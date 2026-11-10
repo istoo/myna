@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 // codexDir holds the files of openai/codex rust-v0.166.0 that say what Codex
@@ -83,7 +83,7 @@ func entryBySlug(t *testing.T, ms []catalog.Model) map[string]map[string]any {
 	return out
 }
 
-// A myna model serving one of OpenAI's (#3759: mycpa/gpt-6-astra; #4008:
+// A owl model serving one of OpenAI's (#3759: mycpa/gpt-6-astra; #4008:
 // the auto group's auto/gpt-6.1-sol) carries the instructions official
 // Codex sends that model, matched as Codex matches a slug; any other model
 // carries those Codex sends a model it doesn't know (#4783), and a routing

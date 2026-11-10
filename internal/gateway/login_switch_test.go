@@ -4,11 +4,11 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // Claude Code signed in to a, with b on beside it; then signed in to b
-// (myna switching it, or the user). The account the agent is on is
+// (owl switching it, or the user). The account the agent is on is
 // named by the provider's id alone, so the switch hands "claude" from a to
 // b — but a conversation a answered stays with a, and what a served and
 // how often it failed are a's, not b's (#209).

@@ -34,7 +34,7 @@ const problems = [
   { agent: `${HOME}/code/app`, what: "project:", error: "the folder is gone" },
 ];
 const base = () => ({
-  dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
+  dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
   agents: [agent("claude", "Claude Code", "claudecode-color"), agent("codex", "Codex", "codex-color"), agent("pi", "Pi", "pi"), agent("zcode", "ZCode", "zcode")],
   instructions: { agents: [], sets: [] }, servers: [], foundServers: [], projects: [], foundSkills: [], skills: structuredClone(skills),
 });
@@ -101,14 +101,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     });
     const open = async (lang, { theme = "light", width = 980, posts = [], flaky = false } = {}) => {
       const ctx = await browser.newContext({ viewport: { width, height: 700 }, colorScheme: theme });
-      await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "skills"); } catch {} });
+      await ctx.addInitScript(() => { try { localStorage.setItem("owl.libTab", "skills"); } catch {} });
       const page = await ctx.newPage();
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(60000);
       page.on("pageerror", (e) => errors.push(e.message));
       // only the page's own address: a blob: URL (the grey copies) is left alone
-      await page.route("http://myna.test/**", server(lang, theme, posts, { flaky }));
-      await page.goto("http://myna.test/");
+      await page.route("http://owl.test/**", server(lang, theme, posts, { flaky }));
+      await page.goto("http://owl.test/");
       await navTo(page, "library");
       await page.locator("#view-library .lib-body:not(.lib-skel) .lib-row").first().waitFor();
       return page;

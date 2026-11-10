@@ -11,26 +11,26 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/istoo/myna/internal/access"
+	"github.com/istoo/owl/internal/access"
 )
 
-// myna's web search, the one a model that can't search is given
+// owl's web search, the one a model that can't search is given
 // (webSearch: the searcher's model, a Kimi Code plan's service, the
 // search APIs), is also an MCP server of its own (Kayphoon on Discord),
 // so Cursor, Claude Desktop and any other agent can mount it as a
 // web_search tool: Streamable HTTP at SearchMCPPath, JSON answered to each
 // POST. It is a gateway route like the others: this computer calls it with
-// any key, another one only while myna is shared and with an enabled
+// any key, another one only while owl is shared and with an enabled
 // gateway key (lanGuard), a gateway key's limit holds each search
 // (reserveFor), and a web page is turned away, as the MCP spec has a
 // server check Origin.
 
 // SearchMCPPath is where the web search MCP server is served. It has two
 // segments under /mcp/, so it can't hide a signed-in server's /mcp/{name}.
-const SearchMCPPath = "/mcp/myna/web-search"
+const SearchMCPPath = "/mcp/owl/web-search"
 
 // OwnMCPServers are the MCP servers the gateway serves itself, by the
-// names `myna tools` lists their tools under, in the order a tool name
+// names `owl tools` lists their tools under, in the order a tool name
 // two of them have is looked for.
 var OwnMCPServers = []struct{ Name, Path string }{
 	{"image", ImageMCPPath},
@@ -56,17 +56,17 @@ type mcpMessage struct {
 }
 
 func (s *Server) searchMCP(w http.ResponseWriter, r *http.Request) {
-	serveMCP(w, r, "myna's web search", "myna-web-search", 1<<20, s.searchMCPCall)
+	serveMCP(w, r, "owl's web search", "owl-web-search", 1<<20, s.searchMCPCall)
 }
 
-// serveMCP answers the JSON-RPC messages POSTed to one of myna's own MCP
+// serveMCP answers the JSON-RPC messages POSTed to one of owl's own MCP
 // servers (what names it in a refusal, server in the request log) with
 // call, a body up to limit bytes long: guarded as a gateway route, and a
 // web page turned away. Each tools/call is a row of the request log
 // (callMCPTool).
 func serveMCP(w http.ResponseWriter, r *http.Request, what, server string, limit int64, call func(*http.Request, mcpMessage) (any, map[string]any)) {
 	if !local(r) && !sharedWith(r) {
-		http.Error(w, what+" is served to another machine only when myna is shared on the local network and the request carries a gateway key (Authorization: Bearer <key>)", http.StatusForbidden)
+		http.Error(w, what+" is served to another machine only when owl is shared on the local network and the request carries a gateway key (Authorization: Bearer <key>)", http.StatusForbidden)
 		return
 	}
 	// a page on this computer (localhost) gets past corsGuard; only one the
@@ -104,9 +104,9 @@ func serveMCP(w http.ResponseWriter, r *http.Request, what, server string, limit
 	// one request, by a client that takes an event stream back, may be
 	// answered by one, for the server to ask the client something first
 	// a client that initializes is given a session id, which it sends on
-	// every request after (Streamable HTTP's Mcp-Session-Id): myna keeps
+	// every request after (Streamable HTTP's Mcp-Session-Id): owl keeps
 	// nothing by it and never refuses a request for it, but tells two
-	// clients of one server apart by it, as Myna Browser does to give
+	// clients of one server apart by it, as Owl Browser does to give
 	// each its own tab (browserSession, hubSession)
 	if r.Header.Get("Mcp-Session-Id") == "" && slices.ContainsFunc(msgs, func(m mcpMessage) bool { return m.Method == "initialize" }) {
 		w.Header().Set("Mcp-Session-Id", newMCPSession())
@@ -160,8 +160,8 @@ func (s *Server) searchMCPCall(r *http.Request, m mcpMessage) (any, map[string]a
 		return map[string]any{
 			"protocolVersion": mcpVersion(m),
 			"capabilities":    map[string]any{"tools": map[string]any{}},
-			"serverInfo":      map[string]any{"name": "myna-web-search", "title": "Myna Web Search", "version": Version},
-			"instructions":    "web_search searches the web with the search myna gives its models: a provider that can search, or the search APIs set up in myna (Settings → Models → Web search). web_fetch reads a page it found, by its URL.",
+			"serverInfo":      map[string]any{"name": "owl-web-search", "title": "Owl Web Search", "version": Version},
+			"instructions":    "web_search searches the web with the search owl gives its models: a provider that can search, or the search APIs set up in owl (Settings → Models → Web search). web_fetch reads a page it found, by its URL.",
 		}, nil
 	case "ping":
 		return map[string]any{}, nil
@@ -242,9 +242,9 @@ func (s *Server) searchMCPRun(r *http.Request, query string) (string, error) {
 		if r.Context().Err() == nil {
 			log.Printf("web search MCP: %v", err)
 		}
-		msg := "myna couldn't search the web: " + err.Error()
+		msg := "owl couldn't search the web: " + err.Error()
 		if errors.Is(err, errNoSearcher) {
-			msg += ": add a search API in myna's Settings → Models → Web search (or myna search add <api> <key>), or a provider that can search"
+			msg += ": add a search API in owl's Settings → Models → Web search (or owl search add <api> <key>), or a provider that can search"
 		}
 		return "", searchMCPError(msg)
 	}

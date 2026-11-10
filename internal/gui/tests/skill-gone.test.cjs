@@ -24,7 +24,7 @@ const sk = (name, extra) => ({ name, description: name + " skill", kind: "github
 const mine = (name) => ({ name, description: name + " of mine", kind: "folder", source: `${HOME}/skills/${name}`, agents: ["claude"] });
 const goneCheck = (name) => ({ name, status: "gone", error: `${REPO} has no ${name} any more: it was removed from there` });
 const lib = (st) => ({
-  dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
+  dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
   agents: [agent("claude", "Claude Code"), agent("codex", "Codex")],
   instructions: { agents: [] }, servers: [], foundServers: [], projects: [], foundSkills: [], newSkills: [],
   checkDue: false,
@@ -103,13 +103,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await t.test(`${lang} at ${width}px, ${single ? "one group" : "two groups"}`, async () => {
         const w = words[lang], posts = [], st = { single };
         const ctx = await browser.newContext({ viewport: { width, height: 1100 } });
-        await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "skills"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("owl.libTab", "skills"); } catch {} });
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, posts, st));
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         await navTo(page, "library");
         const v = page.locator("#view-library");
         await v.locator(".lib-skill .lib-tag.lib-gone").first().waitFor();

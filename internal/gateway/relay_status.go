@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // relayStatus relays a backend's events and keeps its upstream failures

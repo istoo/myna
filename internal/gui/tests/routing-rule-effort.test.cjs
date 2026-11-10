@@ -12,7 +12,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(__dirname, process.env.MYNA_RULE_EFFORT_ASSETS || "../assets");
+const assets = path.resolve(__dirname, process.env.OWL_RULE_EFFORT_ASSETS || "../assets");
 const models = [
   { id: "a/glm", name: "glm", providerName: "A", icon: "generic", context: 200000, ready: true },
   { id: "b/other", name: "other", providerName: "B", icon: "generic", context: 200000, ready: true },
@@ -70,7 +70,7 @@ async function open(engine, lang, width, t) {
   const errors = [], posts = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", serve(lang, posts));
-  await page.goto("http://myna.test/?view=routing");
+  await page.goto("http://owl.test/?view=routing");
   const group = page.locator(".rt-group").first();
   await group.waitFor();
   return { page, group, errors, posts };

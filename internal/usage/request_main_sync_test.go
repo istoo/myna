@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // The Requests cache must follow the same upstream names as Ledger, even
@@ -13,7 +13,7 @@ func TestRequestPageUpstreamNamesAndRemoteRouting(t *testing.T) {
 	pageHome(t)
 	now := time.Now()
 	for i := 0; i < 80; i++ {
-		Append(Record{Time: now.Add(time.Duration(i) * time.Second), Agent: "codex", Via: "myna", Provider: "relay", Model: "alias", Served: "vendor-model", Input: 10, Output: 1, Status: 200})
+		Append(Record{Time: now.Add(time.Duration(i) * time.Second), Agent: "codex", Via: "owl", Provider: "relay", Model: "alias", Served: "vendor-model", Input: 10, Output: 1, Status: 200})
 	}
 	check := func(swapped, routed bool) {
 		t.Helper()
@@ -25,7 +25,7 @@ func TestRequestPageUpstreamNamesAndRemoteRouting(t *testing.T) {
 					t.Fatalf("rows = %d", len(rows))
 				}
 				for _, row := range rows {
-					if row.Swapped != swapped || row.Routed != routed || row.Via != "myna" {
+					if row.Swapped != swapped || row.Routed != routed || row.Via != "owl" {
 						t.Fatalf("lost model mapping or remote metadata: %+v", row)
 					}
 				}

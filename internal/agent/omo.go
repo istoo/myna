@@ -3,9 +3,9 @@ package agent
 // OmO (omo-ai, oh-my-openagent) is a fork of Pi, its engine senpi, with
 // Pi's settings.json and models.json in an agent folder of its own:
 // ~/.omo/agent, or OMO_CODING_AGENT_DIR's, else SENPI_CODING_AGENT_DIR's
-// (bin/lib/agent-dir.js, canonicalAgentDir). myna wires it as it does Pi:
+// (bin/lib/agent-dir.js, canonicalAgentDir). owl wires it as it does Pi:
 // defaultProvider/defaultModel/defaultThinkingLevel in settings.json and
-// myna as the provider "myna" in models.json. Its requests say
+// owl as the provider "owl" in models.json. Its requests say
 // omo/<version>.
 //
 // OmO reads PI_CODING_AGENT_DIR as well, after its own two; that one is
@@ -20,7 +20,7 @@ import (
 func omo(home string) *Agent { return omoIn(here(home)) }
 
 // omoIn is OmO at a place: this machine's home, where its variables move
-// it, or a WSL distro's, whose variables myna can't read.
+// it, or a WSL distro's, whose variables owl can't read.
 func omoIn(at place) *Agent {
 	a := piLike(at, "omo", "OmO", omoDir(at))
 	a.Aliases = []string{"oh-my-openagent", "omo-ai"}

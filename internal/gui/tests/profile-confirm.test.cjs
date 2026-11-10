@@ -75,7 +75,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, calls));
-        await page.goto("http://myna.test/" + (panel ? "?mode=panel" : ""));
+        await page.goto("http://owl.test/" + (panel ? "?mode=panel" : ""));
         const chip = (name) => page.locator("#profiles .chip", { hasText: new RegExp("^" + name) });
         await chip("work").waitFor({ state: "attached" });
         const open = page.locator(".profiles.open");

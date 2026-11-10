@@ -74,7 +74,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         const posts = [];
         await page.route("**/*", serve(lang, posts));
-        await page.goto("http://myna.test/?view=providers");
+        await page.goto("http://owl.test/?view=providers");
 
         // every new word is said in every language, and the test reads its labels from there
         const w = await page.evaluate(([lang, keys]) => Object.fromEntries(keys.map((k) => [k, lang === "en" ? k : I18N[lang]?.[k]])), [lang, KEYS]);

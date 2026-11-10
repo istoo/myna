@@ -38,7 +38,7 @@ func TestDownloadRetriesAndReports(t *testing.T) {
 
 	var done, total int64
 	ctx := WithProgress(context.Background(), func(d, t int64) { done, total = d, t })
-	path := filepath.Join(t.TempDir(), "myna.new")
+	path := filepath.Join(t.TempDir(), "owl.new")
 	if err := download(ctx, Asset{URL: srv.URL, SHA256: hex.EncodeToString(sum[:])}, path); err != nil {
 		t.Fatal(err)
 	}
@@ -99,7 +99,7 @@ func TestDownloadResumesWhereItBrokeOff(t *testing.T) {
 
 	var done, total int64
 	ctx := WithProgress(context.Background(), func(d, t int64) { done, total = d, t })
-	path := filepath.Join(t.TempDir(), "myna.new")
+	path := filepath.Join(t.TempDir(), "owl.new")
 	if err := download(ctx, Asset{URL: srv.URL, SHA256: hex.EncodeToString(sum[:])}, path); err != nil {
 		t.Fatal(err)
 	}
@@ -120,7 +120,7 @@ func TestDownloadResumesWhereItBrokeOff(t *testing.T) {
 // nothing is kept.
 func TestDownloadResumedFileIsStillChecked(t *testing.T) {
 	quickRetries(t)
-	body := bytes.Repeat([]byte("myna"), 50<<10)
+	body := bytes.Repeat([]byte("owl"), 50<<10)
 	sum := sha256.Sum256(body)
 	tries := 0
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -138,7 +138,7 @@ func TestDownloadResumedFileIsStillChecked(t *testing.T) {
 		w.Write(bytes.Repeat([]byte("x"), len(body)-1000))
 	}))
 	defer srv.Close()
-	path := filepath.Join(t.TempDir(), "myna.new")
+	path := filepath.Join(t.TempDir(), "owl.new")
 	err := download(context.Background(), Asset{URL: srv.URL, SHA256: hex.EncodeToString(sum[:])}, path)
 	if err == nil || !strings.Contains(err.Error(), "does not match its checksum") {
 		t.Fatalf("err = %v, want a checksum mismatch", err)
@@ -166,15 +166,15 @@ func TestDownloadDroppedConnectionErrorKeepsAddressOut(t *testing.T) {
 		http.Redirect(w, r, signed, http.StatusFound)
 	}))
 	defer gh.Close()
-	path := filepath.Join(t.TempDir(), "myna.new")
-	err := download(context.Background(), Asset{URL: gh.URL + "/myna-windows-amd64.exe", SHA256: "00"}, path)
+	path := filepath.Join(t.TempDir(), "owl.new")
+	err := download(context.Background(), Asset{URL: gh.URL + "/owl-windows-amd64.exe", SHA256: "00"}, path)
 	if err == nil || !Network(err) {
 		t.Fatalf("err = %v, want a network error", err)
 	}
 	if tries != len(retryWaits)+1 {
 		t.Fatalf("tries = %d, want %d", tries, len(retryWaits)+1)
 	}
-	if msg := err.Error(); strings.Contains(msg, "SECRET") || strings.Contains(msg, "http") || !strings.Contains(msg, "myna.new") || !strings.Contains(msg, "EOF") {
+	if msg := err.Error(); strings.Contains(msg, "SECRET") || strings.Contains(msg, "http") || !strings.Contains(msg, "owl.new") || !strings.Contains(msg, "EOF") {
 		t.Fatalf("error = %q", msg)
 	}
 	if _, serr := os.Stat(path); !os.IsNotExist(serr) {
@@ -192,7 +192,7 @@ func TestDownloadNotFoundIsNotRetried(t *testing.T) {
 		http.NotFound(w, r)
 	}))
 	defer srv.Close()
-	err := download(context.Background(), Asset{URL: srv.URL, SHA256: "00"}, filepath.Join(t.TempDir(), "myna.new"))
+	err := download(context.Background(), Asset{URL: srv.URL, SHA256: "00"}, filepath.Join(t.TempDir(), "owl.new"))
 	if err == nil || Network(err) || tries != 1 {
 		t.Fatalf("err = %v after %d tries, want one 404", err, tries)
 	}

@@ -74,9 +74,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, reads));
       await page.clock.install();
-      await page.addInitScript(() => { localStorage.setItem("myna.usageTab", "sessions"); localStorage.setItem("myna.sessRange", "30d"); });
+      await page.addInitScript(() => { localStorage.setItem("owl.usageTab", "sessions"); localStorage.setItem("owl.sessRange", "30d"); });
       t.after(() => browser.close());
-      await page.goto("http://myna.test/?view=usage");
+      await page.goto("http://owl.test/?view=usage");
       const bars = page.locator("#sessChart .bars > .bar");
       await page.waitForFunction(() => document.querySelectorAll("#sessChart .bars > .bar").length === 30);
       const last = bars.last();

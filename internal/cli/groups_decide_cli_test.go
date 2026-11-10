@@ -4,10 +4,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// myna group add takes decision models for a group of them alone, asked
+// owl group add takes decision models for a group of them alone, asked
 // at /v1/systemone (ARNO on Discord), and refuses one beside a chat model.
 func TestGroupAddDecisionModels(t *testing.T) {
 	groupsHome(t)

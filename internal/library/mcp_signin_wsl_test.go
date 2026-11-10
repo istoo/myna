@@ -5,14 +5,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/mcpauth/mcpauthtest"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/mcpauth/mcpauthtest"
 )
 
 // A WSL agent under NAT reaches the gateway at Windows' address, where a
 // request without an enabled gateway key is refused with a 401, which an
-// MCP client takes for the server asking it to sign in. A server myna
+// MCP client takes for the server asking it to sign in. A server owl
 // signed in to is given to it at /mcp/<name> with the key the gateway is
 // shared with, as its models are; this machine's agent stays keyless, and
 // so does the WSL one while nothing is shared.

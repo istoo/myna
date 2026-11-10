@@ -22,7 +22,7 @@ const agent = (id, name, more = {}) => ({ id, name, icon: "", skills: `${HOME}/.
 const sk = (name, agents) => ({ name, description: name, kind: "folder", agents });
 const sv = (name, transport, agents) => ({ name, transport, command: transport === "stdio" ? name : "", url: transport === "stdio" ? "" : "http://localhost:9/" + name, agents });
 const lib = (skills, servers) => ({
-  dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
+  dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
   agents: [agent("claude", "Claude Code"), agent("codex", "Codex", { noSSE: true }), agent("copilot", "Copilot CLI"), agent("goose", "Goose", { skills: "" })],
   instructions: { agents: [] }, servers, skills, foundServers: [], projects: [], foundSkills: [],
 });
@@ -95,14 +95,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     });
     const open = async (lang, posts, tab) => {
       const ctx = await browser.newContext({ viewport: { width: 860, height: 700 } });
-      await ctx.addInitScript((tab) => { try { localStorage.setItem("myna.libTab", tab); } catch {} }, tab);
+      await ctx.addInitScript((tab) => { try { localStorage.setItem("owl.libTab", tab); } catch {} }, tab);
       const page = await ctx.newPage();
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(60000);
       page.on("pageerror", (e) => errors.push(e.message));
       page.on("dialog", (d) => { errors.push("a browser dialog: " + d.message()); d.dismiss(); });
       await page.route("**/*", server(lang, posts));
-      await page.goto("http://myna.test/");
+      await page.goto("http://owl.test/");
       await navTo(page, "library");
       await page.locator("#view-library .lib-body:not(.lib-skel) .lib-row").first().waitFor();
       return page;

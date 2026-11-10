@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // The Codex app's Restart restarts only the app-server of the app the row
@@ -30,7 +30,7 @@ func TestCodexAppReopen(t *testing.T) {
 	t.Setenv("CODEX_HOME", "")
 	dir := filepath.Join(home, ".codex")
 	os.MkdirAll(dir, 0o755)
-	os.WriteFile(filepath.Join(dir, "config.toml"), []byte("model_provider = \"myna\"\n"), 0o600)
+	os.WriteFile(filepath.Join(dir, "config.toml"), []byte("model_provider = \"owl\"\n"), 0o600)
 
 	const bundle = "/Applications/Codex.app"
 	wasRunning, wasQuit, wasOpen, wasRestart := running, appQuit, appOpen, restartAppServer
@@ -100,9 +100,9 @@ func TestRestartSwitchedCodexAppSays(t *testing.T) {
 }
 
 // When the Windows Codex app starts no app-server in place of the one
-// myna ended (its stdout held open by a process that one started), it
+// owl ended (its stdout held open by a process that one started), it
 // can't send till it is quit and opened again (蛋仔 on Discord, 10-30):
-// myna does that, to the OpenAI.Codex package's ChatGPT.exe only, by
+// owl does that, to the OpenAI.Codex package's ChatGPT.exe only, by
 // its AppUserModelID. macOS isn't reopened unasked.
 func TestCodexAppReopenedOnWindows(t *testing.T) {
 	restartSandbox(t)

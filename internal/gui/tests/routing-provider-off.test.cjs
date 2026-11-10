@@ -24,7 +24,7 @@ const base = { members: ["a/sol", "b/sol", "c/sol"], ready: true, memberInfo: in
 const groups = { models, pools: [], groups: [
   { ...base, id: "auto-sol", name: "Sol", routing: "order" },
   { ...base, id: "hand", name: "Hand", routing: "manual", pick: "a/sol", picked: "a/sol" },
-  // one myna found (XYenon on Discord): its card leaves the member out
+  // one owl found (XYenon on Discord): its card leaves the member out
   { id: "auto-luna", name: "Luna", auto: true, routing: "order", ready: true, offers: [], shared: [],
     members: ["a/luna", "b/luna"], memberInfo: [
       { id: "a/luna", ready: true, provider: "a", name: "A Cloud", icon: "openai", model: "luna", on: 1 },
@@ -69,7 +69,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang));
-        await page.goto("http://myna.test/?view=routing");
+        await page.goto("http://owl.test/?view=routing");
         const say = (key, vars = {}) => page.evaluate(([lang, key, vars]) => {
           const s = (lang !== "en" && I18N[lang]?.[key]) || key;
           return s.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? `{${k}}`);
@@ -90,7 +90,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal(await pick.evaluate((b) => b.classList.contains("off")), true);
         assert.equal(await hand.locator('.rt-pick[data-member="c/sol"]').getAttribute("title"), await say("No provider serves {id} now; it is skipped", { id: "c/sol" }));
 
-        // a group myna found lists only the members it can send to, and
+        // a group owl found lists only the members it can send to, and
         // its logos are theirs: the switched-off one is counted in a tag
         // that says why when hovered
         const found = page.locator(".rt-group", { hasText: "Luna" }).first();

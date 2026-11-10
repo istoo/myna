@@ -277,7 +277,7 @@ func withModel(o Options, texts []string) Options {
 // secret. Each goes as written now:
 //   - a piece cut out of a longer word, whatever its kind;
 //   - a name with a digit, a slash, an @ or a file's dot in it, all in
-//     lower case (myna, claude-in-chrome), a path's part, or an
+//     lower case (owl, claude-in-chrome), a path's part, or an
 //     assistant's or a model's own (Claude, Codex, Haiku 4.5);
 //   - an account that is a commit's hash, a version, or a number with
 //     nothing before it to say it is an account's; a phone number that is

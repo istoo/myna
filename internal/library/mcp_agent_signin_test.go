@@ -8,7 +8,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/agent"
+	"github.com/istoo/owl/internal/agent"
 )
 
 // claudeOwnSignIn is Claude Code's .credentials.json after /mcp signed in
@@ -25,7 +25,7 @@ func claudeOwnSignIn(name, url string) string {
 }
 
 // CyberCaius on Discord: a remote server signed in to in Claude Code in
-// WSL was "needs sign-in" in the Library, as myna's check connects
+// WSL was "needs sign-in" in the Library, as owl's check connects
 // without the agent's tokens. The check reads each Claude Code's own
 // sign-ins where it keeps them, the WSL distro's home for one there, and
 // names the agents signed in; a server no agent signed in to, and a
@@ -122,7 +122,7 @@ func codexOwnSignInExecutor(name, url string) string {
 }
 
 // A remote server signed in to in Codex itself (`codex mcp login`) was
-// "needs sign-in" in the Library, as myna's check connects without the
+// "needs sign-in" in the Library, as owl's check connects without the
 // agent's tokens. The check reads the file codex-rs falls back to when
 // mcp_oauth_credentials_store is file or the keyring is missing, beside
 // the config.toml the target already has, a distro's too, and names the

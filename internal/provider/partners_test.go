@@ -30,7 +30,7 @@ func fetchPartnersNow() {
 
 func partnerFeedServer(t *testing.T, body *atomic.Value) *httptest.Server {
 	srv := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		if r.Header.Get("User-Agent") != "myna" {
+		if r.Header.Get("User-Agent") != "owl" {
 			t.Errorf("User-Agent %q", r.Header.Get("User-Agent"))
 		}
 		_, _ = rw.Write([]byte(body.Load().(string)))
@@ -47,9 +47,9 @@ func partnerIDs(ps []Partner) string {
 	return strings.Join(ids, ",")
 }
 
-// The add sheet's Partners are what github.com/istoo/myna lists, checked: an entry
+// The add sheet's Partners are what github.com/istoo/owl lists, checked: an entry
 // that would send a key over http, take a built-in preset's id or set
-// what only myna's own presets may is left out, and one outside its
+// what only owl's own presets may is left out, and one outside its
 // window isn't listed.
 func TestPartnersFromTheFeed(t *testing.T) {
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
@@ -69,8 +69,8 @@ func TestPartnersFromTheFeed(t *testing.T) {
 	future := time.Now().Add(time.Hour).UTC().Format(time.RFC3339)
 	var body atomic.Value
 	body.Store(`{"partners":[
-		{"id":"acme","name":"Acme AI","chat":"https://api.acme.example/v1","keysUrl":"https://acme.example/keys?ref=myna",
-		 "website":"https://github.com/istoo/myna/go/acme/site","siteHost":"www.acme.example",
+		{"id":"acme","name":"Acme AI","chat":"https://api.acme.example/v1","keysUrl":"https://acme.example/keys?ref=owl",
+		 "website":"https://github.com/istoo/owl/go/acme/site","siteHost":"www.acme.example",
 		 "iconUrl":"https://acme.example/logo.png","notes":{"en":"Fast relay","zh":"快速中转"},"langs":["zh"],
 		 "decide":"https://api.acme.example/decide","noKey":true},
 		{"id":"plain","name":"Plain","chat":"http://api.plain.example/v1"},
@@ -79,10 +79,10 @@ func TestPartnersFromTheFeed(t *testing.T) {
 		{"id":"noname","chat":"https://x.example/v1"},
 		{"id":"later","name":"Later","chat":"https://later.example/v1","from":"` + future + `"},
 		{"id":"gone","name":"Gone","chat":"https://gone.example/v1","until":"` + past + `"},
-		{"id":"regioned","name":"Regioned","regions":[{"id":"cn","name":"China","chat":"https://cn.regioned.example/v1","website":"https://github.com/istoo/myna/go/regioned/site/cn","siteHost":"cn.regioned.example"}]},
+		{"id":"regioned","name":"Regioned","regions":[{"id":"cn","name":"China","chat":"https://cn.regioned.example/v1","website":"https://github.com/istoo/owl/go/regioned/site/cn","siteHost":"cn.regioned.example"}]},
 		{"id":"acme","name":"Acme twice","chat":"https://twice.example/v1"}
 	]}`)
-	t.Setenv("MYNA_PARTNERS", partnerFeedServer(t, &body).URL)
+	t.Setenv("OWL_PARTNERS", partnerFeedServer(t, &body).URL)
 
 	if got := Partners(); len(got) != 0 {
 		t.Fatalf("listed before any list was fetched: %v", partnerIDs(got))
@@ -118,7 +118,7 @@ func TestPartnersFromTheFeed(t *testing.T) {
 
 	// a provider is added from it as from a preset
 	p, err := FromPreset("acme")
-	if err != nil || p.Chat != "https://api.acme.example/v1" || p.KeysURL != "https://acme.example/keys?ref=myna" || p.Decide != "" {
+	if err != nil || p.Chat != "https://api.acme.example/v1" || p.KeysURL != "https://acme.example/keys?ref=owl" || p.Decide != "" {
 		t.Fatalf("FromPreset(acme) = %+v, %v", p, err)
 	}
 	if pr := Preset("acme"); pr == nil || !pr.Sponsored {
@@ -177,7 +177,7 @@ func TestPartnersFetchedLastIsHeld(t *testing.T) {
 	// fails before the release below doesn't leave it held (#1808)
 	let := sync.OnceFunc(func() { close(release) })
 	t.Cleanup(let)
-	t.Setenv("MYNA_PARTNERS", srv.URL)
+	t.Setenv("OWL_PARTNERS", srv.URL)
 
 	Partners()
 	for deadline := time.Now().Add(5 * time.Second); asked.Load() == 0; {
@@ -218,7 +218,7 @@ func TestPartnersFetchedOnStart(t *testing.T) {
 	}
 	var body atomic.Value
 	body.Store(`{"partners":[{"id":"acme","name":"Acme","chat":"https://a.example/v1"}]}`)
-	t.Setenv("MYNA_PARTNERS", partnerFeedServer(t, &body).URL)
+	t.Setenv("OWL_PARTNERS", partnerFeedServer(t, &body).URL)
 
 	Partners()
 	// the fetch it started has ended once a fetch can be claimed
@@ -229,7 +229,7 @@ func TestPartnersFetchedOnStart(t *testing.T) {
 	}
 }
 
-// MYNA_PARTNERS=off lists none and asks nobody, whatever was kept.
+// OWL_PARTNERS=off lists none and asks nobody, whatever was kept.
 func TestPartnersOff(t *testing.T) {
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
 	resetPartners()
@@ -240,12 +240,12 @@ func TestPartnersOff(t *testing.T) {
 		_, _ = rw.Write([]byte(`{"partners":[{"id":"acme","name":"Acme","chat":"https://a.example/v1"}]}`))
 	}))
 	defer srv.Close()
-	t.Setenv("MYNA_PARTNERS", srv.URL)
+	t.Setenv("OWL_PARTNERS", srv.URL)
 	fetchPartnersNow()
 	if _, err := os.Stat(partnerCacheFile()); err != nil {
 		t.Fatal(err)
 	}
-	t.Setenv("MYNA_PARTNERS", "off")
+	t.Setenv("OWL_PARTNERS", "off")
 	resetPartners()
 	if got := Partners(); len(got) != 0 || Preset("acme") != nil {
 		t.Fatalf("off listed %s", partnerIDs(got))
@@ -281,7 +281,7 @@ func TestPartnersDoesNotWait(t *testing.T) {
 			time.Sleep(5 * time.Millisecond)
 		}
 	})
-	t.Setenv("MYNA_PARTNERS", srv.URL)
+	t.Setenv("OWL_PARTNERS", srv.URL)
 	// The site is held until the test ends, so Partners coming back at all is
 	// Partners not waiting for it (#1617). The deadline only turns a wait
 	// into a FAIL, and is short of the fetch's own 20s.
@@ -315,7 +315,7 @@ func TestPartnersNow(t *testing.T) {
 	t.Cleanup(resetPartners)
 	var body atomic.Value
 	body.Store(`{"partners":[{"id":"acme","name":"Acme","chat":"https://a.example/v1"}]}`)
-	t.Setenv("MYNA_PARTNERS", partnerFeedServer(t, &body).URL)
+	t.Setenv("OWL_PARTNERS", partnerFeedServer(t, &body).URL)
 	if ids := partnerIDs(PartnersNow(5 * time.Second)); ids != "acme" {
 		t.Fatalf("PartnersNow = %q, want acme", ids)
 	}
@@ -336,7 +336,7 @@ func TestPartnersNow(t *testing.T) {
 			time.Sleep(5 * time.Millisecond)
 		}
 	})
-	t.Setenv("MYNA_PARTNERS", srv.URL)
+	t.Setenv("OWL_PARTNERS", srv.URL)
 	// the list kept is due again
 	partnerMu.Lock()
 	loadPartners()
@@ -377,7 +377,7 @@ func TestNoticePartners(t *testing.T) {
 	t.Cleanup(resetPartners)
 	var body atomic.Value
 	body.Store(`{"partners":[{"id":"acme","name":"Acme","chat":"https://a.example/v1"},{"id":"beta","name":"Beta","chat":"https://b.example/v1"}]}`)
-	t.Setenv("MYNA_PARTNERS", partnerFeedServer(t, &body).URL)
+	t.Setenv("OWL_PARTNERS", partnerFeedServer(t, &body).URL)
 	fetchPartnersNow()
 	if PartnerNoticed("acme") || PartnerNoticed("beta") {
 		t.Fatal("noticed before shown")
@@ -395,7 +395,7 @@ func TestNoticePartners(t *testing.T) {
 	}
 }
 
-// The myna serving the gateway fetches the list when it starts and
+// The owl serving the gateway fetches the list when it starts and
 // again when it is due, with no page asking: an app left open on another
 // page still learns of a partner added within the hour.
 func TestPartnersKeptFreshUnasked(t *testing.T) {
@@ -413,7 +413,7 @@ func TestPartnersKeptFreshUnasked(t *testing.T) {
 		_, _ = rw.Write([]byte(body.Load().(string)))
 	}))
 	t.Cleanup(srv.Close)
-	t.Setenv("MYNA_PARTNERS", srv.URL)
+	t.Setenv("OWL_PARTNERS", srv.URL)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	done := make(chan struct{})
@@ -464,7 +464,7 @@ func TestPartnerLogoOutlivesAProvidersSave(t *testing.T) {
 	}
 	var body atomic.Value
 	body.Store(`{"partners":[{"id":"acme","name":"Acme AI","chat":"https://api.acme.example/v1","iconUrl":"https://acme.example/logo.png"}]}`)
-	t.Setenv("MYNA_PARTNERS", partnerFeedServer(t, &body).URL)
+	t.Setenv("OWL_PARTNERS", partnerFeedServer(t, &body).URL)
 	fetchPartnersNow()
 	got := Partners()
 	if len(got) != 1 || !strings.HasPrefix(got[0].Icon, iconPrefix) {
@@ -533,7 +533,7 @@ func TestPartnersKeepTheirLastTry(t *testing.T) {
 	// runs before srv.Close, which waits for a held fetch (#1808)
 	let := sync.OnceFunc(func() { close(release) })
 	t.Cleanup(let)
-	t.Setenv("MYNA_PARTNERS", srv.URL)
+	t.Setenv("OWL_PARTNERS", srv.URL)
 
 	// what the file says, read as written, not through partnerCache
 	type kept struct {
@@ -621,7 +621,7 @@ func TestPartnersUnparsedFileKeptAside(t *testing.T) {
 		http.Error(rw, "down", http.StatusServiceUnavailable)
 	}))
 	t.Cleanup(srv.Close)
-	t.Setenv("MYNA_PARTNERS", srv.URL)
+	t.Setenv("OWL_PARTNERS", srv.URL)
 	fetchPartnersNow()
 
 	aside, _ := filepath.Glob(partnerCacheFile() + ".bad-*")

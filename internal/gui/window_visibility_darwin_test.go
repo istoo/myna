@@ -16,25 +16,25 @@ import (
 	"github.com/wailsapp/wails/v3/pkg/events"
 )
 
-// A closed NSWindow keeps its WKWebView's document visible unless myna
+// A closed NSWindow keeps its WKWebView's document visible unless owl
 // says otherwise. The page here records what it saw as it was hidden, and
 // reports that record once it is shown again; without hideWebview's signal
 // it remains a visible page with running animations.
 func TestClosingWindowMarksPageOutOfSight(t *testing.T) {
-	out, err := runAppKit(t, 30*time.Second, []string{"MYNA_TEST_WINDOW_VISIBILITY=1"})
+	out, err := runAppKit(t, 30*time.Second, []string{"OWL_TEST_WINDOW_VISIBILITY=1"})
 	if err != nil || !strings.Contains(string(out), "window visibility: ok") {
 		t.Fatalf("window visibility: %v\n%s", err, out)
 	}
 }
 
 func init() {
-	if os.Getenv("MYNA_TEST_WINDOW_VISIBILITY") != "1" {
+	if os.Getenv("OWL_TEST_WINDOW_VISIBILITY") != "1" {
 		return
 	}
 	ready := make(chan struct{}, 1)
 	reports := make(chan url.Values, 1)
 	app := application.New(application.Options{
-		Name: "myna window visibility regression",
+		Name: "owl window visibility regression",
 		Mac:  application.MacOptions{ActivationPolicy: application.ActivationPolicyProhibited},
 		Assets: application.AssetOptions{Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			switch r.URL.Path {
@@ -42,15 +42,15 @@ func init() {
 				w.Header().Set("Content-Type", "text/html")
 				fmt.Fprint(w, `<!doctype html><script type="module">import "/wails/runtime.js";</script><style>
 #probe{animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(1turn)}}
-html.myna-out-of-sight #probe{animation-play-state:paused!important}
+html.owl-out-of-sight #probe{animation-play-state:paused!important}
 </style><i id="probe"></i><script>
 const probe = document.querySelector("#probe");
-window.mynaWindowVisibility = (visible) => {
-  document.documentElement.classList.toggle("myna-out-of-sight", !visible);
+window.owlWindowVisibility = (visible) => {
+  document.documentElement.classList.toggle("owl-out-of-sight", !visible);
   document.dispatchEvent(new Event("visibilitychange"));
 };
 document.addEventListener("visibilitychange", () => {
-  const marked = document.documentElement.classList.contains("myna-out-of-sight");
+  const marked = document.documentElement.classList.contains("owl-out-of-sight");
   if (document.hidden || marked) {
     localStorage.setItem("hiddenProbe", JSON.stringify({
       hidden: document.hidden,
@@ -129,7 +129,7 @@ fetch("/ready");
 			if err := json.Unmarshal([]byte(report.Get("probe")), &probe); err != nil {
 				fail("the page's hidden event is %q: %v", report.Get("probe"), err)
 			}
-			// myna's signal marks the page out of sight and pauses its
+			// owl's signal marks the page out of sight and pauses its
 			// animations. Whether the webview also calls the document
 			// hidden is the OS's, and macOS 26.6 doesn't when a window is
 			// ordered out; where it does, its state is hidden too.

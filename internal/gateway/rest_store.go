@@ -8,13 +8,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/steady"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/steady"
 )
 
 // A key out of credit climbs creditLadder (30 minutes up to a week) in
-// restingUntil, which is memory: a restart of myna started it over at
+// restingUntil, which is memory: a restart of owl started it over at
 // 30 minutes, its rest gone too (PaulT on Discord). Each such rest — its
 // rung (Failures) and when it ends — is kept in rests.json beside
 // providers.json, and read back once at start (loadRests), so the key
@@ -97,7 +97,7 @@ func saveRests() {
 	if err != nil {
 		return
 	}
-	tmp := target + ".myna-tmp"
+	tmp := target + ".owl-tmp"
 	if os.WriteFile(tmp, b, 0o600) != nil {
 		return
 	}
@@ -108,7 +108,7 @@ func saveRests() {
 	restsSaving.path, restsSaving.last = path, string(b)
 }
 
-// loadRests reads the ladder's rests a myna before this one kept, once
+// loadRests reads the ladder's rests a owl before this one kept, once
 // for each file. A rest ended since keeps its rung, as it would have here,
 // unless it ended over restsKeep ago; a key no longer in providers.json
 // is let go. A file that can't be read or parsed adds nothing: no rest is

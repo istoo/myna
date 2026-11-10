@@ -23,7 +23,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const w = zh
         ? { label: "此密钥可用的模型", all: "全部模型", gone: "当前未提供", off: "当前未登录", used: "会被使用：OpenAI 没有勾选任何账号", unused: "不会被使用：OpenAI 没有勾选任何模型或账号", hint: "没勾选任何账号的供应商", only: "此密钥只能使用所勾选账号所属供应商的模型", told: "Server 仅可使用所选账号的模型" }
         : { label: "Models this key may use", all: "All models", gone: "Not served now", off: "Not signed in now", used: "Used: no OpenAI account is picked", unused: "Not used: no OpenAI model or account is picked", hint: "A provider with no account picked is used on every account", only: "this key may use only the picked accounts' providers' models", told: "Server may use only the picked accounts' models" };
-      await page.goto("http://myna.test/?view=gateway");
+      await page.goto("http://owl.test/?view=gateway");
       await page.locator("#gatewayKeys .acc[data-key]").last().waitFor();
       const row = (id) => page.locator(`#gatewayKeys .acc[data-key="${id}"]`);
       // what the menu sends on close is sent asynchronously: wait for it

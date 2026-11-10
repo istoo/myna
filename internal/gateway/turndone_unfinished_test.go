@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // emo172 (#4866): a reply that ended unfinished under a 200 is no task
@@ -164,7 +164,7 @@ func TestTurnDoneCodexBackendUnfinished(t *testing.T) {
 	}
 }
 
-// emo172 (#4866): Codex's socket to myna, its turn on the ChatGPT
+// emo172 (#4866): Codex's socket to owl, its turn on the ChatGPT
 // backend. Esc sends response.interrupt; the turn it stops is no task
 // done, and the next whole one ends its turn.
 func TestTurnDoneCodexSocketInterrupt(t *testing.T) {

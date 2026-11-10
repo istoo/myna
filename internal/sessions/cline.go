@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/appdir"
+	"github.com/istoo/owl/internal/appdir"
 )
 
 // Cline's CLI (3, on the Cline SDK) keeps a session in a folder of its own

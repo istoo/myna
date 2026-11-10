@@ -14,7 +14,7 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/owl/internal/sessions"
 )
 
 // The chunks a start reads from the file are of the file's pages, not of

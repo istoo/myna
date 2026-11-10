@@ -14,9 +14,9 @@ import (
 )
 
 // A background reading of an account is a point of the account's quota
-// history too, as a Usage-page reading is: a myna only ever serving
-// other mynas has nobody on its Usage page, so its routing read each
-// account every few minutes while GET /v1/myna/quotas/history stayed
+// history too, as a Usage-page reading is: a owl only ever serving
+// other owls has nobody on its Usage page, so its routing read each
+// account every few minutes while GET /v1/owl/quotas/history stayed
 // empty (#1313; yetone on #1317).
 func TestBackgroundLoginReadNotesQuotaHistory(t *testing.T) {
 	azureHome(t)

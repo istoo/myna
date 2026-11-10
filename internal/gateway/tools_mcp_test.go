@@ -8,9 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/gwtool"
-	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/gwtool"
+	"github.com/istoo/owl/internal/plugin"
 )
 
 // fakePluginTools has the gateway's plugin tools be pts and record the
@@ -62,7 +62,7 @@ func TestToolsMCPServesPluginTools(t *testing.T) {
 		{Spec: "/Users/me/weather-tools", Tools: []plugin.Tool{{Name: "now", Description: "Mine."}}},
 	})
 	h := lanGuard(New().Handler())
-	if m := readMCP(t, toolsPost(h, `{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26"}}`)); m.Result.ServerInfo.Name != "myna-tools" || m.Result.ProtocolVersion != "2025-03-26" {
+	if m := readMCP(t, toolsPost(h, `{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26"}}`)); m.Result.ServerInfo.Name != "owl-tools" || m.Result.ProtocolVersion != "2025-03-26" {
 		t.Fatalf("initialize = %+v", m)
 	}
 	m := readMCP(t, toolsPost(h, toolsList))

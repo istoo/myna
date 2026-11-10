@@ -14,11 +14,11 @@ import (
 	"github.com/wailsapp/wails/v3/pkg/events"
 )
 
-// nb5p on Discord (macOS 26): Ice put myna's menu bar icon back in its
+// nb5p on Discord (macOS 26): Ice put owl's menu bar icon back in its
 // hidden section after every update, and after a plain quit and reopen,
 // however often it was moved out. AppKit keeps where the item sits by its
 // autosave name ("NSStatusItem Preferred Position Item-0"), and Wails
-// removes the item as the app quits, which forgets it: the next myna's
+// removes the item as the app quits, which forgets it: the next owl's
 // item started at the default spot. Renamed first, the removal forgets
 // nothing kept.
 func TestQuitKeepsTheMenuBarIconsPlace(t *testing.T) {
@@ -26,7 +26,7 @@ func TestQuitKeepsTheMenuBarIconsPlace(t *testing.T) {
 		{"0", "tray place: forgotten"}, // the cause, without the fix
 		{"1", "tray place: kept"},
 	} {
-		out, err := runAppKit(t, 30*time.Second, []string{"MYNA_TEST_TRAY_PLACE=" + c.keep})
+		out, err := runAppKit(t, 30*time.Second, []string{"OWL_TEST_TRAY_PLACE=" + c.keep})
 		if err != nil || !strings.Contains(string(out), c.want) {
 			t.Fatalf("keep %s: want %q: %v\n%s", c.keep, c.want, err, out)
 		}
@@ -34,7 +34,7 @@ func TestQuitKeepsTheMenuBarIconsPlace(t *testing.T) {
 }
 
 func init() {
-	keep := os.Getenv("MYNA_TEST_TRAY_PLACE")
+	keep := os.Getenv("OWL_TEST_TRAY_PLACE")
 	if keep == "" {
 		return
 	}
@@ -45,11 +45,11 @@ func init() {
 	// where the user put it, the launch before
 	setTrayPlace("Item-0", 400)
 	app := application.New(application.Options{
-		Name: "myna tray place regression",
+		Name: "owl tray place regression",
 		Mac:  application.MacOptions{ActivationPolicy: application.ActivationPolicyAccessory},
 		Assets: application.AssetOptions{Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "text/html")
-			fmt.Fprint(w, `<p>myna</p>`)
+			fmt.Fprint(w, `<p>owl</p>`)
 		})},
 	})
 	tray := app.SystemTray.New()
@@ -67,7 +67,7 @@ func init() {
 			if _, ok := trayPlace("Item-0"); !ok {
 				fail("the place set before the start is gone")
 			}
-			// what the app's shutdown does: myna's task, then Wails'
+			// what the app's shutdown does: owl's task, then Wails'
 			// removal of every tray
 			if keep == "1" {
 				if n := keepTrayPlace(); n != 1 {

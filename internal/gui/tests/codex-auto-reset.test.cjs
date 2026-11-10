@@ -33,7 +33,7 @@ const quotas = [
     windows: [{ name: "5 hours", used: 10, resetsAt: later }, { name: "7 days", used: 20, resetsAt: later }] },
   { provider: "zhipu", name: "GLM Coding", icon: "zhipu-color", user: "team@example.com", plan: "Team",
     windows: [{ name: "5 hours", used: 30 }], resets: { count: 1, byWindow: true, fiveHour: 1 } },
-  // a plugin's, its resets told but not spent from myna: never sent to Codex's
+  // a plugin's, its resets told but not spent from owl: never sent to Codex's
   { provider: "codex-plugin", name: "Codex (plugin)", user: "Me@example.com", plan: "Plus",
     windows: [{ name: "7 days", used: 100, resetsAt: later }], resets: { count: 3, until: later } },
 ];
@@ -188,7 +188,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
       // the Usage page's card: Me in full, two in brief
       const posts = [];
-      const page = await open("http://myna.test/?view=usage", { width, height: 800 }, posts);
+      const page = await open("http://owl.test/?view=usage", { width, height: 800 }, posts);
       w = await wordsOf(page, lang);
       const me = '.quota-autoreset[data-user="Me@example.com"]', two = '.quota-autoreset[data-user="two@example.com"]';
       const week = (row) => row + ' .ar-case[data-case="week"] .auto-reset', expiry = (row) => row + ' .ar-case[data-case="expiring"] .auto-reset';
@@ -260,7 +260,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
       // the menu bar panel's card
       const panelPosts = [];
-      const panel = await open("http://myna.test/?mode=panel", { width: Math.min(width, 440), height: 600 }, panelPosts);
+      const panel = await open("http://owl.test/?mode=panel", { width: Math.min(width, 440), height: 600 }, panelPosts);
       const psel = '.pq-autoreset[data-user="Me@example.com"]';
       await panel.locator('#ptabs [data-ptab="usage"]').click();
       await panel.locator(psel).waitFor();

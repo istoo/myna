@@ -28,13 +28,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         if (url.pathname === "/api/sessions/overview") return json({ count: url.searchParams.get("days") === "0" ? 1 : 0, days: [], top: { tokens: [], cost: [], active: [] } });
         if (url.pathname === "/api/usage/quotas") return json([]);
         if (url.pathname.startsWith("/api/")) return json({});
-        const file = url.pathname === "/app.js" && process.env.MYNA_TEST_APP_JS ? process.env.MYNA_TEST_APP_JS : path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
+        const file = url.pathname === "/app.js" && process.env.OWL_TEST_APP_JS ? process.env.OWL_TEST_APP_JS : path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
         const body = await fs.readFile(file).catch(() => null);
         const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml" }[path.extname(file)];
         return body ? route.fulfill({ body, contentType }) : route.fulfill({ status: 404, body: "" });
       });
-      await page.addInitScript(() => { localStorage.setItem("myna.usageTab", "sessions"); localStorage.setItem("myna.sessRange", "today"); });
-      await page.goto("http://myna.test/?view=usage");
+      await page.addInitScript(() => { localStorage.setItem("owl.usageTab", "sessions"); localStorage.setItem("owl.sessRange", "today"); });
+      await page.goto("http://owl.test/?view=usage");
       // the agent filter is a menu (as the model and folder ones)
       await page.locator("#sessAgent").click();
       await page.locator('.sess-menu .pm-item[title="opencode"]').click();

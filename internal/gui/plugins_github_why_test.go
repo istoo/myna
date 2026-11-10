@@ -9,12 +9,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/ghtoken"
-	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/owl/internal/ghtoken"
+	"github.com/istoo/owl/internal/plugin"
 )
 
 // The Plugins page says why GitHub's list isn't whole in the reader's
-// language when myna knows the kind of why, rather than Go's English in
+// language when owl knows the kind of why, rather than Go's English in
 // the middle of the page (the Kiko03O1 reply on X: "no answer in 8s"
 // under 非官方插件 · GitHub). Each kind as the errors arrive: wrapped in
 // TaggedMissing, in a url.Error, or as they are.

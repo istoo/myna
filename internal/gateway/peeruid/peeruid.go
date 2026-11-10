@@ -1,5 +1,5 @@
 // Package peeruid tells whether the process on the other end of a loopback
-// TCP connection runs as this computer user, so myna's gateway doesn't
+// TCP connection runs as this computer user, so owl's gateway doesn't
 // answer another user's process as if it were this one's.
 //
 // A TCP connection carries no peer credentials (unlike a unix socket): the
@@ -14,7 +14,7 @@ import "net/netip"
 
 // Same reports whether the process whose TCP connection runs from peer to
 // local is this user's. peer is the connection's remote address, local the
-// address of myna's own end. known is false when this platform, or this
+// address of owl's own end. known is false when this platform, or this
 // connection, can't tell.
 func Same(peer, local netip.AddrPort) (same, known bool) {
 	return sameUser(peer, local)

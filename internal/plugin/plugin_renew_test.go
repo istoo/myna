@@ -12,10 +12,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/testenv"
 )
 
-// A plugin with auth.refresh leaves renewing its sign-ins to myna: a
+// A plugin with auth.refresh leaves renewing its sign-ins to owl: a
 // token close to its end is renewed once however many requests find it
 // so, each of them sent with the new one; one with time left, or no
 // expiry, isn't renewed; one the vendor turns away is marked expired and

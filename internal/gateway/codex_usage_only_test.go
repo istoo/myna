@@ -10,7 +10,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // Usage only keeps the ChatGPT account's visible models out of Codex's own

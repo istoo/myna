@@ -12,16 +12,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/middleware"
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/middleware"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // codexShaped is a Responses request as codex-cli sends one: developer
 // messages with its permissions (a writable root under the user's home)
 // and the user's own, then the prompt. What Privacy masks in them is what
-// made myna wrap the reply to put the values back (#2402); a plain
+// made owl wrap the reply to put the values back (#2402); a plain
 // {"input": "<prompt>"} has nothing to mask, and its reply went unwrapped.
 const codexShaped = `{"model":"fixture/gpt-test","stream":true,"store":false,"instructions":"You are Codex.",
  "input":[
@@ -31,12 +31,12 @@ const codexShaped = `{"model":"fixture/gpt-test","stream":true,"store":false,"in
  "reasoning":{"effort":"xhigh"},"tool_choice":"auto","parallel_tool_calls":true}`
 
 // A Codex request through a Responses provider whose vendor sent
-// response.created and then reasoned in silence: myna wrote a
+// response.created and then reasoned in silence: owl wrote a
 // ": keepalive" every keepaliveEvery, but with something in the request
 // masked the reply went through the writer that puts the values back, and
 // it held each comment for the event after it, as a part of that event. The
 // six of 90s came together with the first words, and Cloudflare in front of
-// myna had hung up at 100s with a 524 (#2402, moonshardx). A JS
+// owl had hung up at 100s with a 524 (#2402, moonshardx). A JS
 // middleware's onEvent wraps the reply the same way. The vendor here says
 // nothing more until the agent has read a keepalive, so a held one waits
 // out its 3s and fails.

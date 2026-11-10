@@ -7,24 +7,24 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// What the user adds by hand to the model list myna writes for Codex
+// What the user adds by hand to the model list owl writes for Codex
 // stays through the next model switch, sync and stepping out (#1450:
 // supports_reasoning_summaries, put in for Codex to show a model's
-// thinking, was gone after the next change). A key myna writes, or took
+// thinking, was gone after the next change). A key owl writes, or took
 // out on purpose (multi_agent_version with the V1 setting off), is
-// myna's.
+// owl's.
 func TestCodexCatalogKeepsWhatTheUserAdded(t *testing.T) {
 	home, _ := codexHome(t, "", "")
-	list := filepath.Join(home, ".codex", "myna-models.json")
+	list := filepath.Join(home, ".codex", "owl-models.json")
 	cx := codex(home)
 	if err := cx.Fields[0].Set("fake/m1"); err != nil {
 		t.Fatal(err)
 	}
-	// the file as myna wrote it, edited by hand: two keys on fake/m1's
-	// entry, and a version myna no longer writes
+	// the file as owl wrote it, edited by hand: two keys on fake/m1's
+	// entry, and a version owl no longer writes
 	var cat map[string]any
 	if err := json.Unmarshal([]byte(readFile(list)), &cat); err != nil {
 		t.Fatal(err)
@@ -57,10 +57,10 @@ func TestCodexCatalogKeepsWhatTheUserAdded(t *testing.T) {
 			t.Errorf("%s: the user's keys are gone: %v %v", when, m1["supports_reasoning_summaries"], m1["default_reasoning_summary"])
 		}
 		if _, ok := m1["multi_agent_version"]; ok {
-			t.Errorf("%s: a version myna no longer writes stayed", when)
+			t.Errorf("%s: a version owl no longer writes stayed", when)
 		}
 		if m1["base_instructions"] == nil || m1["supports_parallel_tool_calls"] != true {
-			t.Errorf("%s: myna's own keys are gone", when)
+			t.Errorf("%s: owl's own keys are gone", when)
 		}
 	}
 
@@ -79,8 +79,8 @@ func TestCodexCatalogKeepsWhatTheUserAdded(t *testing.T) {
 	}
 	has("after a model switch")
 
-	// Codex's own default: myna steps out, and the list the user added
-	// to stays for when myna is back
+	// Codex's own default: owl steps out, and the list the user added
+	// to stays for when owl is back
 	if err := cx.Fields[0].Set(""); err != nil {
 		t.Fatal(err)
 	}
@@ -93,10 +93,10 @@ func TestCodexCatalogKeepsWhatTheUserAdded(t *testing.T) {
 	has("after stepping out and back")
 }
 
-// A list holding nothing of the user's still goes as myna steps out.
+// A list holding nothing of the user's still goes as owl steps out.
 func TestCodexCatalogRemovedWhenNothingAdded(t *testing.T) {
 	home, _ := codexHome(t, "", "")
-	list := filepath.Join(home, ".codex", "myna-models.json")
+	list := filepath.Join(home, ".codex", "owl-models.json")
 	cx := codex(home)
 	if err := cx.Fields[0].Set("fake/m1"); err != nil {
 		t.Fatal(err)
@@ -108,6 +108,6 @@ func TestCodexCatalogRemovedWhenNothingAdded(t *testing.T) {
 		t.Fatal(err)
 	}
 	if _, err := os.Stat(list); err == nil {
-		t.Error("myna's list stayed after it stepped out")
+		t.Error("owl's list stayed after it stepped out")
 	}
 }

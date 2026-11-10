@@ -4,7 +4,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // dzxx0496 on Discord: free accounts one after another, each until its

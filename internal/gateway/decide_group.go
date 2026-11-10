@@ -18,8 +18,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // decisionGroupOf is the decision group a System One request's model names:
@@ -43,9 +43,9 @@ func decisionGroupOf(asked string) (g provider.Group, ms []provider.Member, ok b
 			return g, nil, false, 0, nil
 		}
 		if off, isOff := provider.DisabledGroup(ref); isOff {
-			return g, nil, false, http.StatusNotFound, fmt.Errorf("the routing group %s is switched off in Myna, so %q is not served; switch it on again on Myna's Routing page to use it", off.Name, asked)
+			return g, nil, false, http.StatusNotFound, fmt.Errorf("the routing group %s is switched off in Owl, so %q is not served; switch it on again on Owl's Routing page to use it", off.Name, asked)
 		}
-		return g, nil, false, http.StatusNotFound, fmt.Errorf("myna has no routing group %q", strings.TrimPrefix(ref, provider.GroupPrefix))
+		return g, nil, false, http.StatusNotFound, fmt.Errorf("owl has no routing group %q", strings.TrimPrefix(ref, provider.GroupPrefix))
 	}
 	if !g.Decides() {
 		if !explicit {
@@ -255,7 +255,7 @@ func (s *Server) serveDecideTries(w http.ResponseWriter, r *http.Request, body [
 			}
 		}
 		last = true
-		took := time.Since(start).Milliseconds() // before what myna writes down of it (#1939)
+		took := time.Since(start).Milliseconds() // before what owl writes down of it (#1939)
 		tried(status, errMsg, fail, rest, used)
 		if status < 400 {
 			servedCandidate(c, used.Input+used.Output)

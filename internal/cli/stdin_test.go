@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/owl/internal/plugin"
 )
 
 // swapStdin sets os.Stdin to a pipe holding text, after package init, and
@@ -29,7 +29,7 @@ func swapStdin(t *testing.T, text string) {
 // TestPromptsReadStdinSetAfterInit: every CLI prompt reads os.Stdin as it
 // is when asked, not as it was when the package's variables were set. On
 // Windows a reader made at package init held the GUI binary's invalid
-// handle, and `myna plugin login` failed with "read /dev/stdin: The
+// handle, and `owl plugin login` failed with "read /dev/stdin: The
 // handle is invalid" (tom047784).
 func TestPromptsReadStdinSetAfterInit(t *testing.T) {
 	// plugin login's question, as a line

@@ -24,9 +24,9 @@ const words = {
 
 // the agent's picker: the gateway's Option.Zero and Option.Free
 const options = [
-  { value: "myna/or/nemotron-lite", ref: "or/nemotron-lite", label: "Nemotron Lite", group: "OpenRouter", icon: "openrouter", zero: true },
-  { value: "myna/or/glm-5", ref: "or/glm-5", label: "GLM-5", group: "OpenRouter", icon: "openrouter" },
-  { value: "myna/wb/kimi-k3", ref: "wb/kimi-k3", label: "Kimi K3", group: "WorkBuddy", icon: "generic", free: true },
+  { value: "owl/or/nemotron-lite", ref: "or/nemotron-lite", label: "Nemotron Lite", group: "OpenRouter", icon: "openrouter", zero: true },
+  { value: "owl/or/glm-5", ref: "or/glm-5", label: "GLM-5", group: "OpenRouter", icon: "openrouter" },
+  { value: "owl/wb/kimi-k3", ref: "wb/kimi-k3", label: "Kimi K3", group: "WorkBuddy", icon: "generic", free: true },
 ];
 // the editor's list: modelJSON.Zero
 const fetched = new Date(Date.now() - 3600e3).toISOString();
@@ -47,7 +47,7 @@ function serve(lang) {
     models, deciders: [], pools: [],
     groups: [{ id: "g", name: "G", members: ["or/glm-5"], off: [], routing: "order", ready: true, memberInfo: [{ id: "or/glm-5", ready: true, provider: "or", name: "OpenRouter", model: "glm-5" }] }],
   });
-  const state = { agents: [{ id: "codex", name: "Codex", path: "/test/config.toml", icon: "codex-color", wired: false, fields: [{ key: "model", label: "model", value: "myna/or/glm-5", options }] }], profiles: [], settings: { lang, theme: "light" } };
+  const state = { agents: [{ id: "codex", name: "Codex", path: "/test/config.toml", icon: "codex-color", wired: false, fields: [{ key: "model", label: "model", value: "owl/or/glm-5", options }] }], profiles: [], settings: { lang, theme: "light" } };
   return async (r) => {
     const url = new URL(r.request().url());
     const json = (data) => r.fulfill({ json: data });
@@ -107,7 +107,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const sideways = () => page.evaluate(() => document.documentElement.scrollWidth > innerWidth);
 
         // the agent's model picker
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         await navTo(page, "agents");
         await page.locator('#agents [data-key="model"]').first().click();
         const row = (label) => page.locator("#list li:not(.group):not(.custom)", { hasText: label }).first();
@@ -124,7 +124,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.keyboard.press("Escape");
 
         // the provider editor's model list
-        await page.goto("http://myna.test/?view=providers");
+        await page.goto("http://owl.test/?view=providers");
         await page.locator(".row.provider", { hasText: "OpenRouter" }).click();
         const editor = page.locator("#modal:not([hidden]) .editor");
         const chip = (id) => editor.locator(".mchips .mchip", { has: page.locator("span", { hasText: new RegExp(`^${id}$`) }) });
@@ -140,7 +140,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.locator("#modal").waitFor({ state: "hidden" });
 
         // a routing group's Add a model picker
-        await page.goto("http://myna.test/?view=routing");
+        await page.goto("http://owl.test/?view=routing");
         const card = page.locator('.rt-group[data-id="g"]');
         await card.waitFor();
         await card.locator("button", { hasText: w.edit }).click();

@@ -68,7 +68,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], posts = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", fixture(lang, posts).serve);
-        await page.goto("http://myna.test/" + (where === "panel" ? "?mode=panel" : ""));
+        await page.goto("http://owl.test/" + (where === "panel" ? "?mode=panel" : ""));
         await page.locator(row).waitFor();
         const name = await page.evaluate(() => t("Don't sync picks to your other computers"));
         const word = await page.evaluate(() => t("Not synced"));

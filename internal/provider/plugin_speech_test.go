@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // gaiModels are a Google AI Studio plugin's models as the host hands them
@@ -37,7 +37,7 @@ var (
 func gaiPlugin(t *testing.T) {
 	t.Helper()
 	claudeHome(t)
-	t.Setenv("MYNA_BUN", "")
+	t.Setenv("OWL_BUN", "")
 	os.MkdirAll(filepath.Dir(catalog.CachePath()), 0o755)
 	os.WriteFile(catalog.CachePath(), []byte(`{}`), 0o644)
 	catalog.Reset()

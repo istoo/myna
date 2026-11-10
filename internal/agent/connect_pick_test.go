@@ -6,13 +6,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // The 「接入」 switch keeps an agent on the model it was on, now through
-// myna: Claude Code on its opus alias goes to the Claude Opus myna
+// owl: Claude Code on its opus alias goes to the Claude Opus owl
 // serves, not to the first model of the first provider.
 func TestConnectKeepsTheModel(t *testing.T) {
 	home, _ := codexHome(t, "", "")
@@ -59,7 +59,7 @@ func TestGeminiConnectRoundTrip(t *testing.T) {
 	}
 	if _, err := os.Stat(filepath.Join(dir, ".env")); err == nil {
 		if k, _ := edit.GetEnvFile(filepath.Join(dir, ".env"), "GEMINI_API_KEY"); k != "" {
-			t.Fatalf("myna's key left: %q", k)
+			t.Fatalf("owl's key left: %q", k)
 		}
 	}
 	// and on again, on the model it was on (its sign-in follows the model)
@@ -119,9 +119,9 @@ func TestConnectPrefersTheSubscription(t *testing.T) {
 }
 
 // Codex signed in with ChatGPT keeps its own last pick when connected (the
-// owner: 让 Codex 记住上次的选择): myna's models join its list by the base
+// owner: 让 Codex 记住上次的选择): owl's models join its list by the base
 // URL and its model stays; a model picked beside them keeps it connected,
-// and Disconnect leaves Codex on that pick, myna taken out.
+// and Disconnect leaves Codex on that pick, owl taken out.
 func TestCodexConnectKeepsItsPick(t *testing.T) {
 	home, read := codexHome(t, `{"tokens":{"access_token":"x","id_token":"x.e30.x"}}`,
 		"model = \"gpt-5.5\"\nmodel_reasoning_effort = \"xhigh\"\n")
@@ -131,7 +131,7 @@ func TestCodexConnectKeepsItsPick(t *testing.T) {
 	}
 	cfg := read()
 	if !cx.Wired() || !strings.Contains(cfg, `model = "gpt-5.5"`) || !strings.Contains(cfg, `openai_base_url = "`+codexGatewayURL()+`"`) ||
-		!strings.Contains(cfg, "[model_providers.myna]") || strings.Contains(cfg, "model_provider =") {
+		!strings.Contains(cfg, "[model_providers.owl]") || strings.Contains(cfg, "model_provider =") {
 		t.Fatalf("connected (wired %v):\n%s", cx.Wired(), cfg)
 	}
 	if d := cx.Drift(); d != nil {
@@ -160,19 +160,19 @@ func TestCodexConnectKeepsItsPick(t *testing.T) {
 	}
 }
 
-// Codex with its subagents or memories on one of myna's, switched off and
+// Codex with its subagents or memories on one of owl's, switched off and
 // on again, is as it was: joined again on its own model, its config and
 // those fields back (#3868, why8023). Put back alone, the subagents' model
 // read as connected with no openai_base_url, and the memories and [agents]
 // model couldn't be set at all. A Codex that switch-on left so gets out of
-// it by switching off and on again. On one of myna's models it is joined
-// again too, beside its sign-in; on myna API, which can't join, that model
+// it by switching off and on again. On one of owl's models it is joined
+// again too, beside its sign-in; on owl API, which can't join, that model
 // takes it back.
-func TestCodexOffAndOnJoinsAgainWithItsHelpersOnMyna(t *testing.T) {
+func TestCodexOffAndOnJoinsAgainWithItsHelpersOnOwl(t *testing.T) {
 	for _, c := range []struct {
 		name   string
-		login  string // its sign-in field: "" ChatGPT, "api" myna API
-		model  string // one of myna's it is on, "" for its own gpt-5.5
+		login  string // its sign-in field: "" ChatGPT, "api" owl API
+		model  string // one of owl's it is on, "" for its own gpt-5.5
 		fields []string
 		left   bool // as the switch-on before #3868 left it
 	}{
@@ -181,8 +181,8 @@ func TestCodexOffAndOnJoinsAgainWithItsHelpersOnMyna(t *testing.T) {
 		{"subagents", "", "", []string{"subagent"}, false},
 		{"subagents' model and memories", "", "", []string{"subagent_model", "memories"}, false},
 		{"left unjoined", "", "", []string{"subagent_model"}, true},
-		{"on one of myna's", "", "fake/m1", []string{"subagent_model", "memories"}, false},
-		{"myna API", "api", "fake/m1", []string{"subagent_model", "memories"}, false},
+		{"on one of owl's", "", "fake/m1", []string{"subagent_model", "memories"}, false},
+		{"owl API", "api", "fake/m1", []string{"subagent_model", "memories"}, false},
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			home, read := codexHome(t, `{"tokens":{"access_token":"x","id_token":"x.e30.x"}}`,
@@ -242,7 +242,7 @@ func TestCodexOffAndOnJoinsAgainWithItsHelpersOnMyna(t *testing.T) {
 
 // The 「接入」 switch off and on again leaves the agent on the models it was
 // on (the owner: an agent remembers its last pick): Claude Code on a second
-// myna model and its effort, not the one Connect would pick. One the user
+// owl model and its effort, not the one Connect would pick. One the user
 // changed while it was off is theirs, and Connect picks as it does at first.
 func TestReconnectKeepsTheLastPick(t *testing.T) {
 	home, _ := codexHome(t, "", "")
@@ -312,13 +312,13 @@ func TestGooseRoundTripKeepsItsOwnModel(t *testing.T) {
 		}
 	}
 	if _, err := os.Stat(gooseProviderPath(a.Path)); err == nil {
-		t.Fatal("myna's custom provider left")
+		t.Fatal("owl's custom provider left")
 	}
 }
 
-// myna's max rides in Claude Code's env, over the effortLevel the user
+// owl's max rides in Claude Code's env, over the effortLevel the user
 // had: disconnecting takes the env's level away and leaves theirs, and
-// switching on again puts myna's back over it (found on the omarchy VM:
+// switching on again puts owl's back over it (found on the omarchy VM:
 // a round trip lost the user's xhigh, under a connection made before
 // Connect kept what the agent was on).
 func TestClaudeDisconnectKeepsTheUsersEffort(t *testing.T) {
@@ -338,7 +338,7 @@ func TestClaudeDisconnectKeepsTheUsersEffort(t *testing.T) {
 	if err := c.Apply("effort", "max"); err != nil {
 		t.Fatal(err)
 	}
-	// connected by a myna before this one, which kept no record of what
+	// connected by a owl before this one, which kept no record of what
 	// the agent was on
 	stash(map[string]string{"claude.connect.was": ""})
 	if err := c.Disconnect(); err != nil {
@@ -356,9 +356,9 @@ func TestClaudeDisconnectKeepsTheUsersEffort(t *testing.T) {
 	}
 }
 
-// A model of myna's picked on the Agents page for an agent not connected
+// A model of owl's picked on the Agents page for an agent not connected
 // connects it first, as its switch does (the owner: the switch, and one
-// click in myna, both): Goose starts on the model picked, and
+// click in owl, both): Goose starts on the model picked, and
 // disconnecting it brings back its own provider and model.
 func TestPickConnectsFirst(t *testing.T) {
 	home := syncHome(t)
@@ -396,10 +396,10 @@ func TestPickConnectsFirst(t *testing.T) {
 }
 
 // The switch says how it chose the model it connected an agent on (#726:
-// Codex kept its last pick, Claude Code went to a Sonnet through myna,
+// Codex kept its last pick, Claude Code went to a Sonnet through owl,
 // with nothing to say why): Claude Code on its opus alias goes to the
-// Opus myna serves, said "alike"; switched off and on, it is back on what
-// it was on, "again"; one already connected is "kept"; on a model myna
+// Opus owl serves, said "alike"; switched off and on, it is back on what
+// it was on, "again"; one already connected is "kept"; on a model owl
 // doesn't serve, "first".
 func TestConnectSaysHow(t *testing.T) {
 	home, _ := codexHome(t, "", "")
@@ -436,16 +436,16 @@ func TestConnectSaysHow(t *testing.T) {
 	}
 	writeFile(t, path, `{"model": "claude-haiku-9"}`)
 	if how, err := c.ConnectHow(); err != nil || how.How != "first" || how.Value == "" {
-		t.Fatalf("on a model myna lacks: %+v %v", how, err)
+		t.Fatalf("on a model owl lacks: %+v %v", how, err)
 	}
 }
 
 // A Codex on a provider of the user's own, back on its own model with only
-// its subagents' model on myna, switched off and on again can't be
+// its subagents' model on owl, switched off and on again can't be
 // joined: its own model goes to its provider. Put back alone, the
 // subagents' model read as connected (「已接入」) while Codex's own turns
-// never reached myna (#3868, the case fae438b4a left). It is connected
-// as at first instead, on one of myna's models.
+// never reached owl (#3868, the case fae438b4a left). It is connected
+// as at first instead, on one of owl's models.
 func TestCodexOwnProviderOffAndOnIsNotConnectedByItsHelpers(t *testing.T) {
 	home, read := codexHome(t, `{"OPENAI_API_KEY":"sk-relay"}`,
 		"model = \"gpt-5.5\"\nmodel_provider = \"relay\"\n\n[model_providers.relay]\nname = \"relay\"\nbase_url = \"https://relay.example/v1\"\nwire_api = \"responses\"\n")
@@ -470,9 +470,9 @@ func TestCodexOwnProviderOffAndOnIsNotConnectedByItsHelpers(t *testing.T) {
 		t.Fatal(err)
 	}
 	if how.How == "again" && !cx.Routed() {
-		t.Fatalf("on again (%+v) with its own model off myna:\n%s", how, read())
+		t.Fatalf("on again (%+v) with its own model off owl:\n%s", how, read())
 	}
-	if !cx.Routed() || !isMyna(cx.Values()["model"]) {
+	if !cx.Routed() || !isOwl(cx.Values()["model"]) {
 		t.Fatalf("connected (%+v) on %q, routed %v:\n%s", how, cx.Values()["model"], cx.Routed(), read())
 	}
 }

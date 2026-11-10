@@ -6,7 +6,7 @@ package provider
 // by a session id in a header, so its sealed reasoning can be read back).
 //
 //   - ${sessionId} is the session the agent names (its session header),
-//     else the id myna derives from the conversation's first user
+//     else the id owl derives from the conversation's first user
 //     message: the same for every turn of it.
 //   - ${threadId} is the thread the agent names within that session, where
 //     one names a thread apart from its session: Codex's thread_id (its
@@ -15,8 +15,8 @@ package provider
 //     and there a conversation is one thread: ${threadId} is ${sessionId}.
 //   - A request that is no turn of a conversation — a model list, a
 //     balance, an embedding or image, the editor's Test and Detect — goes
-//     on a conversation of its own: a new id each time ("myna-" and 12
-//     random letters; Test and Detect's "myna-test-…", the same one in
+//     on a conversation of its own: a new id each time ("owl-" and 12
+//     random letters; Test and Detect's "owl-test-…", the same one in
 //     its headers and body). A literal "${sessionId}" is never sent.
 //   - In a header the ids go without control characters (CR, LF, tab…):
 //     an id is the agent's, and a header can't carry them.
@@ -33,7 +33,7 @@ import (
 const ThreadPlaceholder = "${threadId}"
 
 // SubagentPlaceholder is what a header or an extraBody string writes for
-// the Claude Code subagent a request is of (istoo/myna#2937).
+// the Claude Code subagent a request is of (istoo/owl#2937).
 const SubagentPlaceholder = "${subagentId}"
 
 // Conversation is what ${sessionId}, ${threadId} and ${subagentId} stand
@@ -56,7 +56,7 @@ func conversationOf(ctx context.Context) Conversation {
 	if c, ok := ctx.Value(conversationCtxKey{}).(Conversation); ok && c.Session != "" {
 		return c
 	}
-	return OwnConversation("myna-")
+	return OwnConversation("owl-")
 }
 
 // OwnConversation is a conversation of a request's own: prefix and 12

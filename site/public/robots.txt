@@ -4,4 +4,4 @@ Disallow: /go/
 Disallow: /r/
 Disallow: /download
 
-Sitemap: https://github.com/istoo/myna/sitemap.xml
+Sitemap: https://github.com/istoo/owl/sitemap.xml

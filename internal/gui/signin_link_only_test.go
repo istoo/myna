@@ -9,10 +9,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // An account's sign-in page is left out of the default browser when the
@@ -27,8 +27,8 @@ func TestSignInLinkOnlyOpensNothing(t *testing.T) {
 	testenv.SetHome(t, dir)
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(dir, "config"))
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(dir, "cache"))
-	t.Setenv("MYNA_BUN", bun)
-	t.Setenv("MYNA_PLUGIN_MARKET", "off")
+	t.Setenv("OWL_BUN", bun)
+	t.Setenv("OWL_PLUGIN_MARKET", "off")
 	t.Cleanup(plugin.Settle)
 	abs, _ := filepath.Abs("../plugin/testdata/fake/index.js")
 	if _, err := plugin.Add(t.Context(), abs); err != nil {

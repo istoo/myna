@@ -12,20 +12,20 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // AlphaSearchPath is where Codex's own web search, its web.run tool, goes:
 // "alpha/search" under the model provider's base URL, so /v1/alpha/search
-// on myna's provider and CodexPath+"/alpha/search" when Codex is signed in
+// on owl's provider and CodexPath+"/alpha/search" when Codex is signed in
 // to ChatGPT. Codex offers web.run since 0.143 for a provider that sends
-// x-openai-actor-authorization, as myna's does, on a model whose catalog
-// entry says use_responses_lite, as a ChatGPT account's do in myna
+// x-openai-actor-authorization, as owl's does, on a model whose catalog
+// entry says use_responses_lite, as a ChatGPT account's do in owl
 // (codexcat copies Codex's own entry). Unanswered, the 404 ended the turn:
 // Codex takes any failure of web.run as fatal (anton on Discord).
 const AlphaSearchPath = "/alpha/search"
 
-// alphaSearchRequest is the part of Codex's SearchRequest myna reads; the
+// alphaSearchRequest is the part of Codex's SearchRequest owl reads; the
 // rest goes on to the ChatGPT backend as it came.
 type alphaSearchRequest struct {
 	Model    string `json:"model"`
@@ -54,7 +54,7 @@ type alphaSearchReply struct {
 // alphaSearch answers POST /v1/alpha/search. A ChatGPT account's model
 // goes to the ChatGPT backend's search, as Codex sends it there itself,
 // on the account's sign-in. Any other model's search_query is searched as
-// myna searches for a model that can't (webSearch). What myna can't
+// owl searches for a model that can't (webSearch). What owl can't
 // do is said in the tool's output with a 200, which the model reads; a
 // failure status would end the turn.
 func (s *Server) alphaSearch(w http.ResponseWriter, r *http.Request) {
@@ -68,7 +68,7 @@ func (s *Server) alphaSearch(w http.ResponseWriter, r *http.Request) {
 func (s *Server) alphaSearchBody(w http.ResponseWriter, r *http.Request, body []byte) {
 	var q alphaSearchRequest
 	if err := json.Unmarshal(body, &q); err != nil {
-		writeError(w, provider.Responses, http.StatusBadRequest, "myna couldn't read the web search request: "+err.Error())
+		writeError(w, provider.Responses, http.StatusBadRequest, "owl couldn't read the web search request: "+err.Error())
 		return
 	}
 	if q.Model == "" {
@@ -81,9 +81,9 @@ func (s *Server) alphaSearchBody(w http.ResponseWriter, r *http.Request, body []
 		if answered {
 			return
 		}
-		// a failure would end the turn: myna searches in its place
+		// a failure would end the turn: owl searches in its place
 		log.Printf("web search on ChatGPT for %s: %s", q.Model, why)
-		note = "ChatGPT's web search failed (" + why + "); myna searched in its place.\n\n"
+		note = "ChatGPT's web search failed (" + why + "); owl searched in its place.\n\n"
 	}
 	s.alphaSearchHere(w, r, q, note)
 }
@@ -124,12 +124,12 @@ func chatGPTSearchers(r *http.Request, model string) ([]provider.Provider, strin
 // alphaSearchOn sends the search to the ChatGPT backend on each account in
 // turn, the next asked when one is refused, limited or fails, and relays
 // the backend's answer as it is. It says whether one answered: when none
-// did, nothing is written, and the search is myna's (alphaSearchHere),
+// did, nothing is written, and the search is owl's (alphaSearchHere),
 // with why returned.
 func (s *Server) alphaSearchOn(w http.ResponseWriter, r *http.Request, body []byte, model string, ons []provider.Provider) (bool, string) {
 	start := time.Now()
 	// as written only when every account it may be asked on is set to go
-	// unmasked (provider.SkipsRedaction, isee1_1 on Discord); myna's own
+	// unmasked (provider.SkipsRedaction, isee1_1 on Discord); owl's own
 	// search in its place masks its query itself (maskedQuery)
 	if len(ons) > 0 && !slices.ContainsFunc(ons, func(p provider.Provider) bool { return !p.SkipsRedaction() }) {
 		return s.alphaSearchAsked(w, r, body, model, ons, start)
@@ -205,7 +205,7 @@ func (s *Server) alphaSearchAsked(w http.ResponseWriter, r *http.Request, body [
 }
 
 // alphaSearchHere answers a search for a model no ChatGPT account serves:
-// its search_query and image_query searched as myna searches for a
+// its search_query and image_query searched as owl searches for a
 // model that can't, the findings the tool's output. Opening, clicking or
 // finding in a page is the ChatGPT backend's alone, and said so.
 func (s *Server) alphaSearchHere(w http.ResponseWriter, r *http.Request, q alphaSearchRequest, note string) {
@@ -223,7 +223,7 @@ func (s *Server) alphaSearchHere(w http.ResponseWriter, r *http.Request, q alpha
 		queries = append(queries, text)
 	}
 	if len(queries) == 0 {
-		writeJSON(w, http.StatusOK, alphaSearchReply{Output: note + "myna can only search the web for " + q.Model + ": give web.run a search_query. Opening, clicking or finding in a page goes to the ChatGPT backend, for a ChatGPT account's model in myna."})
+		writeJSON(w, http.StatusOK, alphaSearchReply{Output: note + "owl can only search the web for " + q.Model + ": give web.run a search_query. Opening, clicking or finding in a page goes to the ChatGPT backend, for a ChatGPT account's model in owl."})
 		return
 	}
 	ctx := withWebAccess(context.WithValue(r.Context(), searchForKey{}, &CallFor{Agent: callerOf(r).agent, Model: q.Model}), q.Settings.ExternalWebAccess)
@@ -235,9 +235,9 @@ func (s *Server) alphaSearchHere(w http.ResponseWriter, r *http.Request, q alpha
 				return
 			}
 			log.Printf("web search for %s: %v", q.Model, err)
-			msg := "myna couldn't search the web for " + query + ": " + err.Error()
+			msg := "owl couldn't search the web for " + query + ": " + err.Error()
 			if errors.Is(err, errNoSearcher) {
-				msg += ": add a search API in myna's Settings → Models → Web search (or myna search add <api> <key>), or a provider that can search"
+				msg += ": add a search API in owl's Settings → Models → Web search (or owl search add <api> <key>), or a provider that can search"
 			}
 			said = append(said, msg)
 			continue

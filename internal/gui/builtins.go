@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/istoo/myna/internal/pluginrt"
+	"github.com/istoo/owl/internal/pluginrt"
 )
 
-// Plugins › Built-in (Lxxyx on X: "功能太多了"): myna's built-in plugins
+// Plugins › Built-in (Lxxyx on X: "功能太多了"): owl's built-in plugins
 // (internal/pluginrt, plugins/), each with a switch kept in plugins.yml.
 // Off, a plugin's parts leave the window: its page leaves the sidebar and
 // the header's tabs, its sections leave the pages they are on, its rows

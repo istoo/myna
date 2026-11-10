@@ -8,13 +8,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// Disconnect leaves Codex as it was before myna was wired in (Fate on
-// Discord asked for one action that takes out what myna wrote): the
-// provider, model and effort the user had come back, and myna's base URL,
+// Disconnect leaves Codex as it was before owl was wired in (Fate on
+// Discord asked for one action that takes out what owl wrote): the
+// provider, model and effort the user had come back, and owl's base URL,
 // catalog, subagent model and the effort it set go. Picking the agent's
 // default instead leaves Codex as installed, the user's own provider gone.
 func TestCodexDisconnect(t *testing.T) {
@@ -40,7 +40,7 @@ func TestCodexDisconnect(t *testing.T) {
 			was := top()
 			cx := codex(home)
 			if cx.Wired() {
-				t.Fatal("wired before myna set anything")
+				t.Fatal("wired before owl set anything")
 			}
 			if err := cx.Apply("model", "fake/m1"); err != nil {
 				t.Fatal(err)
@@ -52,7 +52,7 @@ func TestCodexDisconnect(t *testing.T) {
 				t.Fatal(err)
 			}
 			if !cx.Wired() {
-				t.Fatalf("not wired on a myna model:\n%s", read())
+				t.Fatalf("not wired on a owl model:\n%s", read())
 			}
 			if err := cx.Disconnect(); err != nil {
 				t.Fatal(err)
@@ -66,14 +66,14 @@ func TestCodexDisconnect(t *testing.T) {
 			if mine, _ := edit.GetTOMLTable(path, "model_providers.mine"); tc.config != "" && mine["base_url"] != "https://mine.example/v1" {
 				t.Fatalf("own provider table changed:\n%s", read())
 			}
-			if _, err := os.Stat(filepath.Join(home, ".codex", "myna-models.json")); err == nil {
-				t.Error("myna's catalog left")
+			if _, err := os.Stat(filepath.Join(home, ".codex", "owl-models.json")); err == nil {
+				t.Error("owl's catalog left")
 			}
 			if cx.Wired() || cx.Drift() != nil {
 				t.Fatalf("still wired (drift %+v):\n%s", cx.Drift(), read())
 			}
 			if _, ok := appliedLoad()["codex"]; ok {
-				t.Error("myna still remembers setting Codex")
+				t.Error("owl still remembers setting Codex")
 			}
 			for _, k := range []string{"codex.model", "codex.effort", "codex.provider", "codex.catalog"} {
 				if v, ok := stashLoad()[here(home).key(k)]; ok {
@@ -84,13 +84,13 @@ func TestCodexDisconnect(t *testing.T) {
 	}
 }
 
-// Disconnect leaves Claude Code's settings.json as it was before myna
+// Disconnect leaves Claude Code's settings.json as it was before owl
 // was wired in: the relay's endpoint and token and the model the user had
-// come back, and every env key, tier and capability myna wrote goes.
+// come back, and every env key, tier and capability owl wrote goes.
 // The tier and subagent models the user set for their relay come back with
-// it (#1050), whether myna steps out by Disconnect or by Claude Code's
+// it (#1050), whether owl steps out by Disconnect or by Claude Code's
 // own model. So does the main model set for the relay in the env
-// (ANTHROPIC_MODEL), which myna takes out while wired in, and the auto
+// (ANTHROPIC_MODEL), which owl takes out while wired in, and the auto
 // mode classifier's model (CLAUDE_CODE_AUTO_MODE_MODEL).
 func TestClaudeDisconnect(t *testing.T) {
 	for name, before := range map[string]string{
@@ -98,10 +98,10 @@ func TestClaudeDisconnect(t *testing.T) {
 		"own tiers":   `{"model":"sonnet","env":{"ANTHROPIC_BASE_URL":"https://relay.example","ANTHROPIC_AUTH_TOKEN":"sk-relay","ANTHROPIC_DEFAULT_OPUS_MODEL":"relay-opus","ANTHROPIC_DEFAULT_SONNET_MODEL":"relay-sonnet","ANTHROPIC_DEFAULT_HAIKU_MODEL":"relay-haiku","ANTHROPIC_SMALL_FAST_MODEL":"relay-haiku","CLAUDE_CODE_SUBAGENT_MODEL":"relay-sonnet"}}`,
 		"nothing set": `{"theme":"dark"}`,
 		// the auto mode classifier's model the user set themselves, which
-		// myna takes out while wired in and puts back
+		// owl takes out while wired in and puts back
 		"own auto mode": `{"env":{"ANTHROPIC_BASE_URL":"https://relay.example","ANTHROPIC_AUTH_TOKEN":"sk-relay","CLAUDE_CODE_AUTO_MODE_MODEL":"relay-haiku"}}`,
 		// the main model set for the relay in the env (with no settings
-		// model, and beside one), which myna takes out while wired in:
+		// model, and beside one), which owl takes out while wired in:
 		// it outranks a pick in /model
 		"own env model":       `{"env":{"ANTHROPIC_BASE_URL":"https://relay.example","ANTHROPIC_AUTH_TOKEN":"sk-relay","ANTHROPIC_MODEL":"relay-main"}}`,
 		"own env model, both": `{"model":"opus","env":{"ANTHROPIC_BASE_URL":"https://relay.example","ANTHROPIC_AUTH_TOKEN":"sk-relay","ANTHROPIC_MODEL":"relay-main[1m]"}}`,
@@ -132,7 +132,7 @@ func TestClaudeDisconnect(t *testing.T) {
 					if err := json.Unmarshal(b, &m); err != nil {
 						t.Fatal(err)
 					}
-					// an object myna emptied out is the same as none
+					// an object owl emptied out is the same as none
 					for k, v := range m {
 						if o, ok := v.(map[string]any); ok && len(o) == 0 {
 							delete(m, k)
@@ -143,7 +143,7 @@ func TestClaudeDisconnect(t *testing.T) {
 				want := parse()
 				a := claude(home)
 				if a.Wired() {
-					t.Fatal("wired before myna set anything")
+					t.Fatal("wired before owl set anything")
 				}
 				if err := a.Apply("model", "deepseek/pro"); err != nil {
 					t.Fatal(err)
@@ -158,7 +158,7 @@ func TestClaudeDisconnect(t *testing.T) {
 					t.Fatal(err)
 				}
 				if !a.Wired() {
-					t.Fatal("not wired on a myna model")
+					t.Fatal("not wired on a owl model")
 				}
 				if out == "default" {
 					if err := a.Apply("model", ""); err != nil {
@@ -177,7 +177,7 @@ func TestClaudeDisconnect(t *testing.T) {
 					t.Fatal("still wired")
 				}
 				if _, ok := appliedLoad()["claude"]; ok && out == "disconnect" {
-					t.Error("myna still remembers setting Claude Code")
+					t.Error("owl still remembers setting Claude Code")
 				}
 				for k := range stashLoad() {
 					if strings.HasPrefix(k, "claude.env.") {
@@ -189,7 +189,7 @@ func TestClaudeDisconnect(t *testing.T) {
 	}
 }
 
-// Gemini CLI's model default forgets the sign-in it had before myna:
+// Gemini CLI's model default forgets the sign-in it had before owl:
 // Disconnect brings back the sign-in, the model and the user's own key.
 func TestGeminiDisconnect(t *testing.T) {
 	home, _ := codexHome(t, "", "")
@@ -204,7 +204,7 @@ func TestGeminiDisconnect(t *testing.T) {
 		t.Fatal(err)
 	}
 	if !g.Wired() {
-		t.Fatal("not wired on a myna model")
+		t.Fatal("not wired on a owl model")
 	}
 	if err := g.Disconnect(); err != nil {
 		t.Fatal(err)
@@ -220,7 +220,7 @@ func TestGeminiDisconnect(t *testing.T) {
 	}
 }
 
-// An agent myna is not in has nothing to disconnect: its config stays
+// An agent owl is not in has nothing to disconnect: its config stays
 // byte for byte.
 func TestDisconnectUnwiredLeavesConfig(t *testing.T) {
 	home, read := codexHome(t, "", "model = \"gpt-5.4\"\nmodel_reasoning_effort = \"high\"\n")
@@ -234,10 +234,10 @@ func TestDisconnectUnwiredLeavesConfig(t *testing.T) {
 }
 
 // An auth Gemini CLI doesn't know, set on its provider field, is refused
-// before myna is taken out. `myna gemini <a model it has no option
-// for>` sets that field (it is the first), and took Gemini CLI off myna,
+// before owl is taken out. `owl gemini <a model it has no option
+// for>` sets that field (it is the first), and took Gemini CLI off owl,
 // its sign-in and key put back, before saying the auth was unknown: the
-// sibling of `myna snow --help` (#1457).
+// sibling of `owl snow --help` (#1457).
 func TestGeminiUnknownAuthChangesNothing(t *testing.T) {
 	home, _ := codexHome(t, "", "")
 	dir := filepath.Join(home, ".gemini")

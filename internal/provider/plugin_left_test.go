@@ -8,7 +8,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/owl/internal/plugin"
 )
 
 // leftPlugins installs two plugins from folders (so removing one runs no

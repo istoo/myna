@@ -32,7 +32,7 @@ function serve(lang, about) {
     if (url.pathname === "/api/plugins") return json({ plugins: [] });
     if (url.pathname === "/api/library") {
       return json({
-        dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
+        dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
         agents: [{ id: "claude", name: "Claude Code", icon: "claudecode-color", skills: `${HOME}/.claude/skills`, mcp: `${HOME}/.claude.json` }],
         instructions: { agents: [], sets: [] }, servers: [], foundServers: [], projects: [], foundSkills: [], skills: [], problems: [],
       });
@@ -68,9 +68,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         const about = [];
         await page.route("**/*", serve(lang, about));
-        await page.addInitScript((tab) => { try { localStorage.setItem("myna.libTab", tab); } catch {} }, kind);
+        await page.addInitScript((tab) => { try { localStorage.setItem("owl.libTab", tab); } catch {} }, kind);
         t.after(() => browser.close());
-        await page.goto("http://myna.test/?view=library");
+        await page.goto("http://owl.test/?view=library");
         const box = page.locator(`#view-library .mk[data-market="${kind}"]`);
         const cards = box.locator(".mk-card");
         const button = box.locator(".mk-more");

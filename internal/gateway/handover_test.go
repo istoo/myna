@@ -17,7 +17,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // serveOn starts s's ListenAndServe and waits for it to listen.
@@ -43,7 +43,7 @@ func listening(t *testing.T, s *Server) (stop context.CancelFunc, done <-chan er
 	return cancel, ch
 }
 
-// A restart to update hands the gateway's socket to the new myna: a
+// A restart to update hands the gateway's socket to the new owl: a
 // reply streaming through the old one when it does finishes there — the
 // old one's end waits for it, rather than 2s — while new requests are
 // answered by the new one, and none is refused on the way.
@@ -83,14 +83,14 @@ func TestHandedOverGatewayFinishesItsStream(t *testing.T) {
 	shortDrain = 10 * time.Millisecond
 	t.Cleanup(func() { shortDrain = oldShort })
 
-	t.Setenv("MYNA_ADDR", "127.0.0.1:0")
+	t.Setenv("OWL_ADDR", "127.0.0.1:0")
 	old := New()
 	stopOld, oldDone := listening(t, old)
 	defer stopOld()
 	old.lnMu.Lock()
 	addr := old.ln.Addr().String()
 	old.lnMu.Unlock()
-	t.Setenv("MYNA_ADDR", addr) // as settings name it, for the new one
+	t.Setenv("OWL_ADDR", addr) // as settings name it, for the new one
 
 	// a stream under way through the old one
 	req, _ := http.NewRequest("POST", "http://"+addr+"/v1/chat/completions", strings.NewReader(`{"model":"plan/m1","stream":true,"messages":[{"role":"user","content":"hi"}]}`))
@@ -199,17 +199,17 @@ func quickChat(t *testing.T) {
 }
 
 // handOffSandbox is a gateway serving on a port of its own, its chat
-// answered at once (quickChat), as the myna to hand off; stop ends it
+// answered at once (quickChat), as the owl to hand off; stop ends it
 // and done says how it ended.
 func handOffSandbox(t *testing.T) (old *Server, addr string, stop context.CancelFunc, done <-chan error) {
 	t.Helper()
 	quickChat(t)
-	t.Setenv("MYNA_ADDR", "127.0.0.1:0")
+	t.Setenv("OWL_ADDR", "127.0.0.1:0")
 	old = New()
 	stop, done = listening(t, old)
 	t.Cleanup(stop)
 	addr = old.Addr()
-	t.Setenv("MYNA_ADDR", addr) // as settings name it, for a new one
+	t.Setenv("OWL_ADDR", addr) // as settings name it, for a new one
 	return old, addr, stop, done
 }
 
@@ -234,7 +234,7 @@ func answerOn(c net.Conn) (string, error) {
 }
 
 // A gateway handed off takes no connection from then on, its ctx not
-// ended yet: one made then waits on the socket for the myna it was
+// ended yet: one made then waits on the socket for the owl it was
 // handed to, which answers it. The old one took it before, until its end
 // closed its listener, and closed it unanswered when it read the request
 // after that end began (#3568).
@@ -482,7 +482,7 @@ func TestHandedOffGatewayAnswersAConnectionStillAnswering(t *testing.T) {
 				t.Fatal(err)
 			}
 			addr := tcp.Addr().String()
-			t.Setenv("MYNA_ADDR", addr)
+			t.Setenv("OWL_ADDR", addr)
 			lagged := &lagListener{Listener: tcp}
 			Inherit(lagged, func() {})
 			old := New()
@@ -591,7 +591,7 @@ func TestHandedOffGatewayAnswersAConnectionNotedLate(t *testing.T) {
 				t.Fatal(err)
 			}
 			addr := tcp.Addr().String()
-			t.Setenv("MYNA_ADDR", addr)
+			t.Setenv("OWL_ADDR", addr)
 			held := &heldListener{Listener: tcp, took: make(chan struct{}), let: make(chan struct{})}
 			Inherit(held, func() {})
 			old := New()
@@ -696,15 +696,15 @@ func TestSameAddr(t *testing.T) {
 	}
 }
 
-// A Claude Code run of the myna before this one, its turn under way when
+// A Claude Code run of the owl before this one, its turn under way when
 // the gateway changed hands, calls its tools on the port this one now
-// serves: the call goes on to that myna's callbacks socket, through the
+// serves: the call goes on to that owl's callbacks socket, through the
 // network guard as its own run's would, and comes back answered. Once that
-// myna is gone, such a call is unknown here again, and guarded.
-func TestToolCallOfTheMynaBeforeGoesToIt(t *testing.T) {
+// owl is gone, such a call is unknown here again, and guarded.
+func TestToolCallOfTheOwlBeforeGoesToIt(t *testing.T) {
 	fresh(t)
-	t.Setenv("MYNA_ADDR", "0.0.0.0:3425")
-	t.Setenv("MYNA_TRUST_PROXY", "")
+	t.Setenv("OWL_ADDR", "0.0.0.0:3425")
+	t.Setenv("OWL_TRUST_PROXY", "")
 	newCaller(t, "Host") // gateway keys on
 	sock := shortSock(t)
 	ln, err := net.Listen("unix", sock)
@@ -731,26 +731,26 @@ func TestToolCallOfTheMynaBeforeGoesToIt(t *testing.T) {
 		h.ServeHTTP(w, r)
 		return w.Code, w.Body.String()
 	}
-	// from this computer's own LAN address, as on a non-loopback MYNA_ADDR
+	// from this computer's own LAN address, as on a non-loopback OWL_ADDR
 	// (#1546): no key, as for this one's own runs
 	if c, b := call("192.168.1.9:5000"); c != 200 || !strings.Contains(b, "answered there") {
 		t.Fatalf("the call wasn't passed on: %d %s", c, b)
 	}
 	if g, _ := got.Load().(string); !strings.HasPrefix(g, "POST "+claudeMCPPath+token+" ") || !strings.Contains(g, `"tool_call_id":"x"`) {
-		t.Fatalf("the myna before got %q", g)
+		t.Fatalf("the owl before got %q", g)
 	}
-	// that myna gone: the call is unknown here, and from the network it
+	// that owl gone: the call is unknown here, and from the network it
 	// needs a key again
 	before.Close()
 	os.Remove(sock)
 	if c, b := call("127.0.0.1:5000"); c != http.StatusNotFound {
-		t.Fatalf("with the myna before gone: %d %s", c, b)
+		t.Fatalf("with the owl before gone: %d %s", c, b)
 	}
 	if forwarding() {
-		t.Fatal("still passing calls on to a myna gone")
+		t.Fatal("still passing calls on to a owl gone")
 	}
 	if c, b := call("192.168.1.9:5000"); c != http.StatusUnauthorized {
-		t.Fatalf("from the network, with the myna before gone: %d %s", c, b)
+		t.Fatalf("from the network, with the owl before gone: %d %s", c, b)
 	}
 }
 

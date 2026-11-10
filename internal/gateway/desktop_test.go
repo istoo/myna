@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // Claude Desktop asks for anthropic/<id>: served by the model with that id
@@ -55,7 +55,7 @@ func TestAnthropicPrefixedModel(t *testing.T) {
 
 // Claude Desktop turns away any id naming another vendor's model, prefix
 // or not (#148): deepseek, kimi, gpt, codex… get an alias it keeps, which
-// myna serves again, and it is known by its User-Agent without the key
+// owl serves again, and it is known by its User-Agent without the key
 func TestClaudeDesktopAliases(t *testing.T) {
 	for id, want := range map[string]bool{
 		"claude-sonnet-4-5": true, "anthropic/claude-x": true, "opus": true, "sonnet-4.5": true,
@@ -118,7 +118,7 @@ func TestClaudeDesktopAliases(t *testing.T) {
 	}
 }
 
-// Claude Desktop set up by myna sends the key myna gave it, from its
+// Claude Desktop set up by owl sends the key owl gave it, from its
 // own client and from the Claude Code its Code tab runs alike; without it,
 // its Electron User-Agent still says who it is.
 func TestClaudeDesktopKnown(t *testing.T) {
@@ -146,23 +146,23 @@ type desktopRow struct {
 
 // DesktopNumber is the number Claude Desktop's menu says beside a model:
 // only one it names after its own catalog, a Claude model with reasoning
-// levels (myna-<n>.anthropic.<model>), so the Providers page says it
+// levels (owl-<n>.anthropic.<model>), so the Providers page says it
 // there alone (#2578). A row Desktop names by display_name, which says the
 // provider, or by the model's own id, gets none.
 func TestDesktopNumber(t *testing.T) {
 	opus := provider.Entry{ID: "a/claude-opus-5-5", Model: "claude-opus-5-5", Efforts: []string{"low"}}
 	n := DesktopNumber(opus)
-	if n != aliasNumber(opus.ID) || claudeLooking(opus) != "myna-"+n+".anthropic.claude-opus-5-5" {
+	if n != aliasNumber(opus.ID) || claudeLooking(opus) != "owl-"+n+".anthropic.claude-opus-5-5" {
 		t.Errorf("an effort Claude model: DesktopNumber = %q, listed as %s", n, claudeLooking(opus))
 	}
 	for _, e := range []provider.Entry{
-		// mythos-myna-<n>, named by display_name
+		// mythos-owl-<n>, named by display_name
 		{ID: "a/glm-5.3", Model: "glm-5.3", Efforts: []string{"low"}},
-		// anthropic/myna-<n>, named by display_name
+		// anthropic/owl-<n>, named by display_name
 		{ID: "a/glm-5.3", Model: "glm-5.3"},
 		// its own id, which carries no number
 		{ID: "a/claude-opus-5-5", Model: "claude-opus-5-5"},
-		// a group led by a Claude model keeps its own name (mythos-myna-<n>)
+		// a group led by a Claude model keeps its own name (mythos-owl-<n>)
 		{ID: "group/opus", Model: "claude-opus-5-5", Group: "opus", Efforts: []string{"low"}},
 	} {
 		if got := DesktopNumber(e); got != "" {

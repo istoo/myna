@@ -8,11 +8,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/settings"
 )
 
-// myna gateway-key issue prints a short-lived key alone, for a script
+// owl gateway-key issue prints a short-lived key alone, for a script
 // that hands it to a sandbox; --from holds it to a key let issue keys.
 func TestGatewayKeyIssueCLI(t *testing.T) {
 	t.Setenv("HOME", t.TempDir())
@@ -76,7 +76,7 @@ func TestGatewayKeyIssueCLI(t *testing.T) {
 	}
 }
 
-// myna gateway-key oidc adds, lists and removes the rules a CI job's
+// owl gateway-key oidc adds, lists and removes the rules a CI job's
 // token is traded by; a rule open to every repository is refused.
 func TestGatewayKeyOIDCCLI(t *testing.T) {
 	t.Setenv("HOME", t.TempDir())
@@ -102,7 +102,7 @@ func TestGatewayKeyOIDCCLI(t *testing.T) {
 		}
 	}
 	got, err := call("oidc", "add", "--key", id, "--repo", "acme/app", "--environment", "prod", "--ttl", "30m")
-	if err != nil || !strings.Contains(got, "audience myna-") || !strings.Contains(got, "30m0s") {
+	if err != nil || !strings.Contains(got, "audience owl-") || !strings.Contains(got, "30m0s") {
 		t.Fatal(got, err)
 	}
 	list, _ := call("oidc", "list")

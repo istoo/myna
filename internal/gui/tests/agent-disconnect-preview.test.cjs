@@ -12,14 +12,14 @@ const changes = (id) => [
   {
     path: id === "omp" ? "~/.omp/agent/config.yml" : "~/.codex/config.toml",
     lines: [
-      { op: "-", text: "default: myna/group/auto-model" },
+      { op: "-", text: "default: owl/group/auto-model" },
       { op: "-", text: "defaultThinkingLevel: xhigh" },
-      ...Array.from({ length: 12 }, (_, i) => ({ op: "-", text: `  model-${i}: myna/group/auto-model-${i}` })),
+      ...Array.from({ length: 12 }, (_, i) => ({ op: "-", text: `  model-${i}: owl/group/auto-model-${i}` })),
     ],
   },
   {
     path: id === "omp" ? "~/.omp/agent/models.yml" : "~/.codex/models.json",
-    lines: [{ op: "~", text: "providers: {}", was: "providers: {myna: {baseUrl: 'http://127.0.0.1:3425/v1', models: [{id: group/auto-model, name: Auto model}]}}" }],
+    lines: [{ op: "~", text: "providers: {}", was: "providers: {owl: {baseUrl: 'http://127.0.0.1:3425/v1', models: [{id: group/auto-model, name: Auto model}]}}" }],
   },
 ];
 
@@ -28,7 +28,7 @@ function serve(lang, textSize, posts) {
     agents: ["omp", "codex"].map((id) => ({
       id, name: id === "omp" ? "omp" : "Codex", icon: id === "omp" ? "omp" : "generic", wired: true,
       path: id === "omp" ? "~/.omp/agent/config.yml" : "~/.codex/config.toml",
-      fields: [{ key: "model", label: "model", value: "myna/relay/m1", options: [{ value: "myna/relay/m1", label: "Model one", ref: "relay/m1" }] }],
+      fields: [{ key: "model", label: "model", value: "owl/relay/m1", options: [{ value: "owl/relay/m1", label: "Model one", ref: "relay/m1" }] }],
     })),
     profiles: [], settings: { lang, theme: "light", textSize },
   };
@@ -74,8 +74,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         page.on("console", (m) => { if (m.type() === "error") errors.push(m.text()); });
         await page.route("**/*", serve(lang, textSize, posts));
-        await page.goto("http://myna.test/?view=agents");
-        assert.equal(await page.title(), "myna");
+        await page.goto("http://owl.test/?view=agents");
+        assert.equal(await page.title(), "owl");
         assert.equal(new URL(page.url()).searchParams.get("view"), "agents");
         for (const id of ["omp", "codex"]) {
           await page.locator(`.row.agent[data-id="${id}"] .ag-conn`).click();

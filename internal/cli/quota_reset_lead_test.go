@@ -4,10 +4,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
-// myna quota auto-reset lead sets how long before a reset about to
+// owl quota auto-reset lead sets how long before a reset about to
 // expire it is used, says it alone, puts back the default, and refuses a
 // value out of range or not whole minutes, writing nothing then.
 func TestQuotaResetLeadCmd(t *testing.T) {

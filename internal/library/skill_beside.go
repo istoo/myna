@@ -171,7 +171,7 @@ func (s *Skill) fetchedHash(from string) string {
 	if s.Called == "" {
 		return hashDir(from)
 	}
-	tmp, err := os.MkdirTemp("", "myna-skill-named-")
+	tmp, err := os.MkdirTemp("", "owl-skill-named-")
 	if err != nil {
 		return ""
 	}

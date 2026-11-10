@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-// A DimAgent account signed in before myna dropped DimAgent is neither
+// A DimAgent account signed in before owl dropped DimAgent is neither
 // listed nor kept: the next write of logins.json leaves it out.
 func TestDimAgentLoginDropped(t *testing.T) {
 	signIn(t)

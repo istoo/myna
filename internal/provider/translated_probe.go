@@ -5,7 +5,7 @@ import (
 	"slices"
 	"time"
 
-	"github.com/istoo/myna/internal/probelog"
+	"github.com/istoo/owl/internal/probelog"
 )
 
 // A Google sign-in (Antigravity, Gemini CLI) speaks Code Assist alone, an

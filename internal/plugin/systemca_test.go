@@ -11,7 +11,7 @@ import (
 // Bun checks TLS against its own roots: behind a proxy that re-signs HTTPS
 // with a root the user installed, `bun add` failed with
 // UNABLE_TO_VERIFY_LEAF_SIGNATURE (chenyyi001 on X, installing
-// @magpie-community/opencode-kiro-auth). Every bun myna runs is given
+// @magpie-community/opencode-kiro-auth). Every bun owl runs is given
 // the system's roots, unless the user names a file of their own.
 func TestBunIsGivenTheSystemsRoots(t *testing.T) {
 	old := systemCAFile
@@ -38,7 +38,7 @@ func TestBunIsGivenTheSystemsRoots(t *testing.T) {
 	}
 }
 
-// Bun reads the system's store itself (NODE_USE_SYSTEM_CA): myna's copy
+// Bun reads the system's store itself (NODE_USE_SYSTEM_CA): owl's copy
 // of the ROOT store missed what Bun's own reading has (the CA store's
 // intermediates a proxy doesn't send, the enterprise's and group
 // policy's roots), and a plugin answered "self signed certificate in
@@ -97,13 +97,13 @@ func caVars(env []string) []string {
 // from where it runs, which is under the same user folder.
 func TestBunIsGivenAnASCIIWayToTheRoots(t *testing.T) {
 	user := `C:\Users\张三`
-	ca := user + `\.cache\myna\bun\system-ca-abc.pem`
+	ca := user + `\.cache\owl\bun\system-ca-abc.pem`
 	for _, c := range []struct{ name, p, dir, goos, want string }{
-		{"under a Chinese user name", ca, user + `\.config\myna\plugins`, "windows", `..\..\..\.cache\myna\bun\system-ca-abc.pem`},
-		{"an ASCII path as it is", `C:\Users\bob\.cache\myna\bun\system-ca-abc.pem`, `C:\Users\bob\x`, "windows", `C:\Users\bob\.cache\myna\bun\system-ca-abc.pem`},
+		{"under a Chinese user name", ca, user + `\.config\owl\plugins`, "windows", `..\..\..\.cache\owl\bun\system-ca-abc.pem`},
+		{"an ASCII path as it is", `C:\Users\bob\.cache\owl\bun\system-ca-abc.pem`, `C:\Users\bob\x`, "windows", `C:\Users\bob\.cache\owl\bun\system-ca-abc.pem`},
 		{"another drive, no way there", ca, `D:\plugins`, "windows", ca},
 		{"no way there in ASCII", ca, `C:\其他\plugins`, "windows", ca},
-		{"Bun elsewhere reads it whole", "/home/张三/.cache/myna/bun/system-ca-abc.pem", "/home/张三/.config/myna/plugins", "linux", "/home/张三/.cache/myna/bun/system-ca-abc.pem"},
+		{"Bun elsewhere reads it whole", "/home/张三/.cache/owl/bun/system-ca-abc.pem", "/home/张三/.config/owl/plugins", "linux", "/home/张三/.cache/owl/bun/system-ca-abc.pem"},
 	} {
 		if c.goos == "windows" && runtime.GOOS != "windows" {
 			// filepath.Rel works on this OS's paths; Windows' are tried there

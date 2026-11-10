@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/steady"
+	"github.com/istoo/owl/internal/steady"
 )
 
 // WriteAtomic (settings, profiles, caller keys, agents' configs) flushes

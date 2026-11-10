@@ -16,8 +16,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/backup"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/backup"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // apacheDAV answers as InfiniCLOUD's (TeraCloud's) WebDAV plausibly does
@@ -172,7 +172,7 @@ func TestSyncTeraCloudGzipETag(t *testing.T) {
 	if fake.refused != 0 || fake.gzipped != 0 {
 		t.Fatalf("%d writes refused, %d reads sent gzip", fake.refused, fake.gzipped)
 	}
-	remote, err := backup.Open(fake.files["/dav/myna/myna.myna-backup"], "correct horse")
+	remote, err := backup.Open(fake.files["/dav/owl/owl.owl-backup"], "correct horse")
 	if err != nil || len(remote.Providers) != 4 {
 		t.Fatalf("on the server: %v %+v", err, remote.Providers)
 	}
@@ -201,7 +201,7 @@ func TestSyncTeraCloudGzipETag(t *testing.T) {
 // A server that sends the file gzip though it was asked for as it is: the
 // file is still read whole.
 func TestDAVGetGzipAnyway(t *testing.T) {
-	want := []byte(`{"app":"myna"}`)
+	want := []byte(`{"app":"owl"}`)
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("ETag", `"1-gzip"`)
 		w.Header().Set("Content-Encoding", "gzip")
@@ -229,7 +229,7 @@ func TestSyncTeraCloudStillSeesOtherWrites(t *testing.T) {
 	srv := httptest.NewServer(fake)
 	defer srv.Close()
 	ctx := context.Background()
-	const name = "/dav/myna/myna.myna-backup"
+	const name = "/dav/owl/owl.owl-backup"
 
 	// the remote alone: a write over a version another write replaced
 	d, err := newDAV(Config{URL: srv.URL + "/dav/", User: "me", Password: "pw"})

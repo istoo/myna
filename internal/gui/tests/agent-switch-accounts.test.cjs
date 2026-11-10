@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Switch accounts only (the owner on X; growaiskills, Rennix7t): myna as
+// Switch accounts only (the owner on X; growaiskills, Rennix7t): owl as
 // a Claude Code account switcher alone, with nothing connected. The Agents
 // row of a Claude Code not connected says the account it is signed in to,
 // always; its menu, headed Switch accounts only, signs it in to another
@@ -8,7 +8,7 @@
 // ticked there and, ticked, the row says it switches accounts only. One
 // kept signed in to an account of the user's choosing moves that choice
 // (keeplogin). Codex has the same entry; with one account, no toggle.
-// With no models in myna to connect (the switcher's case) it is there.
+// With no models in owl to connect (the switcher's case) it is there.
 // A connected Claude Code, and its WSL twin, have none. In every language,
 // at a narrow width too, in Chromium and WebKit; no click moves the page.
 const assert = require("node:assert/strict");
@@ -18,8 +18,8 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
-// with no models in myna (every Claude account kept to Claude Code,
-// nothing else added) the fields offer none of myna's
+// with no models in owl (every Claude account kept to Claude Code,
+// nothing else added) the fields offer none of owl's
 const own = [{ value: "sonnet", label: "Sonnet" }];
 const agents = (wired, options = wired ? [...own, { value: "relay/m1", label: "m1", ref: "relay/m1" }] : own) => [
   { id: "claude", name: "Claude Code", icon: "generic", path: "/fixture/claude", source: "sub", wired, fields: [{ key: "model", label: "model", value: "sonnet", options }] },
@@ -74,7 +74,7 @@ function server(lang, w, posts) {
 
 const K = {
   head: "Switch accounts only",
-  title: "Switch accounts only: {agent} is signed in as {user}. Pick another of its accounts to sign {agent} in to it, without connecting it to myna.",
+  title: "Switch accounts only: {agent} is signed in as {user}. Pick another of its accounts to sign {agent} in to it, without connecting it to owl.",
   switched: "Switched",
   manage: "Manage accounts…",
   only: "Only switch {agent}'s sign-in",
@@ -94,7 +94,7 @@ async function open(engine, lang, width, w, t) {
   page.on("pageerror", (e) => errors.push(e.message));
   page.on("dialog", (d) => { dialogs.push(d.message()); d.dismiss(); });
   await page.route("**/*", server(lang, w, posts));
-  await page.goto("http://myna.test/?view=agents");
+  await page.goto("http://owl.test/?view=agents");
   await page.locator(`${row("claude")} .ag-st`).waitFor();
   const tr = async (k, vars = {}) => {
     const s = await page.evaluate(([k, lang]) => (lang === "en" ? k : I18N[lang]?.[k]), [k, lang]);

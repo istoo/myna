@@ -11,11 +11,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/mcpauth"
-	"github.com/istoo/myna/internal/netproxy"
+	"github.com/istoo/owl/internal/mcpauth"
+	"github.com/istoo/owl/internal/netproxy"
 )
 
-// mcpClient relays the agents' requests to a remote MCP server myna is
+// mcpClient relays the agents' requests to a remote MCP server owl is
 // signed in to. It has no timeout: a GET's event stream stays open for as
 // long as the agent keeps it.
 var mcpClient = &http.Client{Transport: mcpTransport()}
@@ -34,7 +34,7 @@ var mcpHop = map[string]bool{
 	"Transfer-Encoding": true, "Upgrade": true, "Content-Length": true, "Accept-Encoding": true,
 }
 
-// RunMCP serves /mcp/run/<server>: a server myna runs by its command,
+// RunMCP serves /mcp/run/<server>: a server owl runs by its command,
 // for an agent on this computer given it that way (library's ServeRun);
 // nil until the library sets it.
 var RunMCP func(w http.ResponseWriter, r *http.Request, name string)
@@ -44,39 +44,39 @@ var RunMCP func(w http.ResponseWriter, r *http.Request, name string)
 // posting a form, or of a name pointed at 127.0.0.1), may have it started.
 func runMCP(w http.ResponseWriter, r *http.Request) {
 	if !local(r) || r.Header.Get("Origin") != "" || !loopbackHost(r.Host) {
-		http.Error(w, "myna runs the Library's MCP servers for the agents on this computer alone", http.StatusForbidden)
+		http.Error(w, "owl runs the Library's MCP servers for the agents on this computer alone", http.StatusForbidden)
 		return
 	}
 	if RunMCP == nil {
-		http.Error(w, "myna runs no MCP server here", http.StatusNotFound)
+		http.Error(w, "owl runs no MCP server here", http.StatusNotFound)
 		return
 	}
 	RunMCP(w, r, r.PathValue("name"))
 }
 
-// mcpProxy is /mcp/<server>: a remote MCP server myna signed in to once,
+// mcpProxy is /mcp/<server>: a remote MCP server owl signed in to once,
 // for every agent the Library gives it to (#615). The agent speaks to it as
 // to the server itself (streamable HTTP: a POST answered with JSON or an
 // event stream, a GET's event stream, a DELETE that ends the session, with
-// Mcp-Session-Id), and myna sends it on with its own token, renewing it
+// Mcp-Session-Id), and owl sends it on with its own token, renewing it
 // when it runs out or the server says it has.
 func (s *Server) mcpProxy(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue("name")
 	if !local(r) && !sharedWith(r) {
-		http.Error(w, "myna lends its MCP sign-ins to another machine only when myna is shared on the local network and the request carries its API key", http.StatusForbidden)
+		http.Error(w, "owl lends its MCP sign-ins to another machine only when owl is shared on the local network and the request carries its API key", http.StatusForbidden)
 		return
 	}
 	// a web page can make the browser send a request here too (a form, or
-	// a hostname of its own pointed at 127.0.0.1), and myna would carry
+	// a hostname of its own pointed at 127.0.0.1), and owl would carry
 	// it to the server with the user's sign-in; agents send no Origin and
 	// name this computer, as the MCP spec has servers check
 	if r.Header.Get("Origin") != "" || !sharedWith(r) && !loopbackHost(r.Host) {
-		http.Error(w, "myna lends its MCP sign-ins to agents, not to web pages", http.StatusForbidden)
+		http.Error(w, "owl lends its MCP sign-ins to agents, not to web pages", http.StatusForbidden)
 		return
 	}
 	rec, ok := mcpauth.Get(name)
 	if !ok {
-		http.Error(w, "myna isn't signed in to an MCP server called "+name+": sign in to it in myna's Library", http.StatusNotFound)
+		http.Error(w, "owl isn't signed in to an MCP server called "+name+": sign in to it in owl's Library", http.StatusNotFound)
 		return
 	}
 	// a body cut at the limit would go to the server as a shorter message
@@ -147,7 +147,7 @@ func (s *Server) mcpProxy(w http.ResponseWriter, r *http.Request) {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode == http.StatusUnauthorized {
-		// the agent would start a sign-in of its own, at myna's address
+		// the agent would start a sign-in of its own, at owl's address
 		io.Copy(io.Discard, io.LimitReader(resp.Body, 1<<16))
 		mcpRefused(w, name, mcpauth.ErrExpired)
 		return
@@ -177,13 +177,13 @@ func (s *Server) mcpProxy(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// mcpRefused answers an agent whose request myna has no token for. It is
+// mcpRefused answers an agent whose request owl has no token for. It is
 // not a 401, which would set the agent signing in itself.
 func mcpRefused(w http.ResponseWriter, name string, err error) {
 	status := http.StatusBadGateway
 	msg := err.Error()
 	if errors.Is(err, mcpauth.ErrExpired) || errors.Is(err, mcpauth.ErrNotSignedIn) {
-		msg = "myna's sign-in to the MCP server " + name + " has run out: sign in to it again in myna's Library"
+		msg = "owl's sign-in to the MCP server " + name + " has run out: sign in to it again in owl's Library"
 	}
 	http.Error(w, msg, status)
 }

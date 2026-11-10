@@ -22,10 +22,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // The gateway makes videos: POST /v1/videos, GET /v1/videos/{id} and
@@ -40,9 +40,9 @@ import (
 // with its request_id. Volcengine Agent Plan uses Ark's asynchronous content
 // generation tasks under its /api/plan/v3 base.
 //
-// Another myna's videos (a Remote myna's, #545) are asked of it, at its
+// Another owl's videos (a Remote owl's, #545) are asked of it, at its
 // own videos API: its id for one goes, encoded, in the id given here, and
-// what it answers comes back with this myna's id and name for the model.
+// what it answers comes back with this owl's id and name for the model.
 // A provider set up with a base URL whose own model list marks a model
 // "kind": "video" (#1446) is asked the same way, at the OpenAI-shaped
 // videos API under its base, on the key that started the video.
@@ -65,7 +65,7 @@ const maxVideoBytes = 512 << 20
 const videoTimeout = 5 * time.Minute
 
 // Videomakers are the models a provider can make videos with: a Grok
-// subscription's, another myna's, a preset plan's models when myna
+// subscription's, another owl's, a preset plan's models when owl
 // implements that vendor's video API, a MiniMax API key's H3 models
 // (video_minimax.go), and those a provider's own model list marks as video
 // models (customVideomakers).
@@ -75,7 +75,7 @@ func Videomakers(p provider.Provider) []catalog.Model { return VideomakersOf(p, 
 // when it is wanted, as DrawersOf is: the Providers page has each
 // provider's list at hand. What avail gives is only read.
 func VideomakersOf(p provider.Provider, avail func() []catalog.Model) []catalog.Model {
-	if p.IsRemoteMyna() {
+	if p.IsRemoteOwl() {
 		out := catalog.LiveVideomakers(p.ID)
 		for i := range out {
 			out[i].Provider = p.ID
@@ -112,11 +112,11 @@ func OfferedVideomakers(p provider.Provider) []catalog.Model {
 }
 
 // customVideomakers are the video models of a provider set up with a base
-// URL — not a subscription's account, not another myna, not a preset plan
-// whose own video API myna speaks — that its fetched model list marks
+// URL — not a subscription's account, not another owl, not a preset plan
+// whose own video API owl speaks — that its fetched model list marks
 // "kind": "video" (catalog.LiveVideomakers, #1446), or the user said make
 // videos (provider.SetModelKind, #1399). They are asked at the
-// OpenAI-shaped videos API under its base, as another myna's are. A
+// OpenAI-shaped videos API under its base, as another owl's are. A
 // model's name alone makes none of them one: a list that doesn't say so,
 // and a user who doesn't, leave the provider making no videos. A plugin's
 // are the models it says give video (capabilities.output.video), asked
@@ -136,7 +136,7 @@ func customVideomakersOf(p provider.Provider, avail func() []catalog.Model) []ca
 		}
 		return out
 	}
-	if p.Account != nil || p.IsRemoteMyna() || len(p.PlanVideos()) > 0 || filmsMiniMax(p) || videoBase(p) == "" {
+	if p.Account != nil || p.IsRemoteOwl() || len(p.PlanVideos()) > 0 || filmsMiniMax(p) || videoBase(p) == "" {
 		return nil
 	}
 	out := catalog.LiveVideomakers(p.ID)
@@ -172,7 +172,7 @@ func customVideomakersOf(p provider.Provider, avail func() []catalog.Model) []ca
 	return slices.DeleteFunc(out, func(m catalog.Model) bool { return p.ModelKind(m.ID) == provider.KindImage })
 }
 
-// videoBase is the root of the OpenAI-shaped videos API of another myna
+// videoBase is the root of the OpenAI-shaped videos API of another owl
 // or a provider set up with a base URL: its Chat base, or a Responses-only
 // relay's Responses base, under which it serves the images API too; a
 // plugin's fetch whatever API its chat is on (Provider.OpenAIBase).
@@ -201,7 +201,7 @@ func arkVideoModel(id string) bool {
 // key. Ark has no OpenAI-shaped videos API, so such a key's video models
 // are never asked at <base>/videos.
 func arkFilms(p provider.Provider, model string) bool {
-	if p.IsRemoteMyna() {
+	if p.IsRemoteOwl() {
 		return false
 	}
 	if p.Preset == "volcengine" && slices.ContainsFunc(p.PlanVideos(), func(m catalog.Model) bool { return m.ID == model }) {
@@ -312,7 +312,7 @@ func bareVideomaker(name string) (provider.Provider, string, bool) {
 		}
 	}
 	// any grok-imagine-video*, as videosCreate takes with the provider
-	// named: the vendor's newer ones work before myna lists them (#1857)
+	// named: the vendor's newer ones work before owl lists them (#1857)
 	for _, p := range provider.All() {
 		if p.On() && !p.DecideOnly() && drawsGrok(p) && strings.HasPrefix(name, grokVideoFamily) {
 			return p, name, true
@@ -330,7 +330,7 @@ type filming struct {
 	Start                        *picture  // the first frame to animate
 	End                          *picture  // the last frame, where the video ends (MiniMax)
 	References                   []picture // images the video draws its subjects from
-	// the request's other fields, which myna doesn't read: a provider's
+	// the request's other fields, which owl doesn't read: a provider's
 	// own videos API takes them as they came (Agnes's mode, aspect_ratio;
 	// #1399, shen-joe: "mode 不能为空")
 	Extra map[string]any
@@ -338,7 +338,7 @@ type filming struct {
 	Form bool
 }
 
-// filmingRead are the fields of a videos request myna reads itself.
+// filmingRead are the fields of a videos request owl reads itself.
 var filmingRead = []string{"model", "prompt", "seconds", "size", "input_reference", "last_frame", "reference_images", "reference_images[]"}
 
 // readFilming reads a videos request: JSON, or the multipart form OpenAI's
@@ -648,7 +648,7 @@ func formValue(k string, v any, text []string) any {
 // reference videos, audio and draft_task: the prompt is put first only
 // when it has no text, and the images of OpenAI's fields after it. An Ark
 // field the caller names (ratio "adaptive", resolution, duration) is
-// never overridden by what myna makes of size or seconds.
+// never overridden by what owl makes of size or seconds.
 func volcengineVideoBody(model string, f filming) []byte {
 	req := map[string]any{}
 	for k, v := range f.Extra {
@@ -857,7 +857,7 @@ func videoObject(id, model string, started time.Time, st videoState, f filming) 
 func videoMaker(id string) (p provider.Provider, vendorID string, started time.Time, err error) {
 	pid, vendorID, started, by, ok := parseVideoID(id)
 	if !ok {
-		return p, "", started, fmt.Errorf("%q isn't the id of a video myna is making", id)
+		return p, "", started, fmt.Errorf("%q isn't the id of a video owl is making", id)
 	}
 	found, ferr := provider.Find(pid)
 	if ferr == nil && filmsMiniMax(*found) {
@@ -868,7 +868,7 @@ func videoMaker(id string) (p provider.Provider, vendorID string, started time.T
 		}
 		return q, vendorID, started, nil
 	}
-	if ferr == nil && !drawsGrok(*found) && !found.IsRemoteMyna() && len(found.PlanVideos()) == 0 && len(customVideomakers(*found)) > 0 {
+	if ferr == nil && !drawsGrok(*found) && !found.IsRemoteOwl() && len(found.PlanVideos()) == 0 && len(customVideomakers(*found)) > 0 {
 		// asked on the key that started it
 		q, ok := markedKey(*found, by)
 		if !ok {
@@ -876,7 +876,7 @@ func videoMaker(id string) (p provider.Provider, vendorID string, started time.T
 		}
 		return q, vendorID, started, nil
 	}
-	if ferr != nil || !drawsGrok(*found) && !found.IsRemoteMyna() && len(found.PlanVideos()) == 0 {
+	if ferr != nil || !drawsGrok(*found) && !found.IsRemoteOwl() && len(found.PlanVideos()) == 0 {
 		return p, "", started, fmt.Errorf("no provider %q makes videos here", pid)
 	}
 	if found.Account == nil && found.PlansMixed() {
@@ -893,19 +893,19 @@ func videoMaker(id string) (p provider.Provider, vendorID string, started time.T
 	return *found, vendorID, started, nil
 }
 
-// remoteVideoID is the id of a video another myna (p) is making, by its
+// remoteVideoID is the id of a video another owl (p) is making, by its
 // id there: that has dots in it, so it goes in base64.
 func remoteVideoID(p provider.Provider, theirs string, t time.Time) string {
 	return videoID(p, base64.RawURLEncoding.EncodeToString([]byte(theirs)), t)
 }
 
-// theirVideoID is the other myna's id of a video, from remoteVideoID's.
+// theirVideoID is the other owl's id of a video, from remoteVideoID's.
 func theirVideoID(vendorID string) string {
 	b, _ := base64.RawURLEncoding.DecodeString(vendorID)
 	return string(b)
 }
 
-// remoteVideoBody is f as another myna's videos API takes it: OpenAI's,
+// remoteVideoBody is f as another owl's videos API takes it: OpenAI's,
 // the images as data URLs.
 func remoteVideoBody(model string, f filming) []byte {
 	req := map[string]any{}
@@ -936,7 +936,7 @@ func remoteVideoBody(model string, f filming) []byte {
 	return b
 }
 
-// asOurs is another myna's video object with this myna's id for it and
+// asOurs is another owl's video object with this owl's id for it and
 // name for its model.
 func asOurs(b []byte, p provider.Provider, id string) (map[string]any, error) {
 	var obj map[string]any
@@ -951,12 +951,12 @@ func asOurs(b []byte, p provider.Provider, id string) (map[string]any, error) {
 }
 
 // filmsOpenAI is whether p makes videos at an OpenAI-shaped videos API:
-// another myna, or a provider whose model list marks video models.
+// another owl, or a provider whose model list marks video models.
 func filmsOpenAI(p provider.Provider) bool {
-	return p.IsRemoteMyna() || len(customVideomakers(p)) > 0 && !isArk(p)
+	return p.IsRemoteOwl() || len(customVideomakers(p)) > 0 && !isArk(p)
 }
 
-// remoteVideoURL is where another myna, or a provider's OpenAI-shaped
+// remoteVideoURL is where another owl, or a provider's OpenAI-shaped
 // videos API, answers for a video, with suffix ("" or "/content").
 func remoteVideoURL(p provider.Provider, vendorID, suffix string) string {
 	return videoBase(p) + "/videos/" + url.PathEscape(theirVideoID(vendorID)) + suffix
@@ -1033,7 +1033,7 @@ func (s *Server) videosCreate(w http.ResponseWriter, r *http.Request) {
 			fail(404, switchedOff(off, f.Model))
 			return
 		}
-		fail(404, fmt.Sprintf("myna knows no model %q to make videos with", f.Model))
+		fail(404, fmt.Sprintf("owl knows no model %q to make videos with", f.Model))
 		return
 	}
 	g, ms, isGroup := groupToMake(f.Model, p, model, provider.FindGroup)
@@ -1202,7 +1202,7 @@ type videoStart struct {
 	onKey bool
 }
 
-// startVideo starts f's video on p's model: at another myna's videos
+// startVideo starts f's video on p's model: at another owl's videos
 // API, a provider's OpenAI-shaped one, Volcengine's tasks or Grok's. A
 // failure before any vendor is asked (the model makes no videos, a key may
 // use none of the provider's keys) has asked unset.
@@ -1211,7 +1211,7 @@ func (s *Server) startVideo(ctx context.Context, r *http.Request, p provider.Pro
 	// says it doesn't serve the model
 	var keys []candidate
 	onKey := false
-	if !p.IsRemoteMyna() && filmsCustom(p, model) {
+	if !p.IsRemoteOwl() && filmsCustom(p, model) {
 		// at a provider's own videos API: sent on the first key a chat
 		// for the model would go to (#1657), never one whose own list of
 		// models leaves it out, nor one the calling key may not use
@@ -1234,7 +1234,7 @@ func (s *Server) startVideo(ctx context.Context, r *http.Request, p provider.Pro
 		}
 		p, keys = cs[0].p, cs[1:]
 		onKey = true
-	} else if !p.IsRemoteMyna() && p.PlansMixed() {
+	} else if !p.IsRemoteOwl() && p.PlansMixed() {
 		// keys on plans of their own (KeyAccount.Plan): sent on a key
 		// whose plan makes the model, the Agent Plan's Seedance on the
 		// Agent Plan's key, never a pay-as-you-go key beside it
@@ -1253,26 +1253,26 @@ func (s *Server) startVideo(ctx context.Context, r *http.Request, p provider.Pro
 			return videoStart{p: p}, 403, errors.New(keyAccountsError(keyWho, f.Model))
 		}
 	}
-	v := videoStart{p: p, remote: p.IsRemoteMyna(), onKey: onKey}
+	v := videoStart{p: p, remote: p.IsRemoteOwl(), onKey: onKey}
 	volcengine := arkFilms(p, model)
 	if msg := f.arkOnly(); msg != "" && !volcengine && !v.remote {
 		return v, 400, errors.New(msg)
 	}
 	v.custom = !v.remote && !volcengine && filmsCustom(p, model)
 	minimax := !v.remote && !v.custom && makesMiniMaxVideo(p, model)
-	// any grok-imagine-video*, not only those listed: the vendor's newer ones work before myna names them
+	// any grok-imagine-video*, not only those listed: the vendor's newer ones work before owl names them
 	if !v.remote && !v.custom && !volcengine && !minimax && (!drawsGrok(p) || !strings.HasPrefix(model, grokVideoFamily)) {
 		v.unfit = true
-		return v, 400, fmt.Errorf(`%s/%s can't make videos: myna makes videos with a Grok subscription's grok-imagine-video, Volcengine Agent Plan's or an Ark key's Seedance models, a MiniMax API key's MiniMax-H3 models, another myna's, and a provider's models its own model list marks "kind": "video" or that you mark a Video model (right-click the model in the provider's editor: Makes…)`, p.ID, model)
+		return v, 400, fmt.Errorf(`%s/%s can't make videos: owl makes videos with a Grok subscription's grok-imagine-video, Volcengine Agent Plan's or an Ark key's Seedance models, a MiniMax API key's MiniMax-H3 models, another owl's, and a provider's models its own model list marks "kind": "video" or that you mark a Video model (right-click the model in the provider's editor: Makes…)`, p.ID, model)
 	}
-	// another myna is asked at its videos API, which says itself what
+	// another owl is asked at its videos API, which says itself what
 	// it can't make
 	at, field := strings.TrimRight(p.Base(provider.Responses), "/")+"/videos/generations", "request_id"
 	var body []byte
 	switch {
 	case v.remote, v.custom:
 		// a provider's OpenAI-shaped videos API is asked as another
-		// myna's is: OpenAI's body, its answer its own
+		// owl's is: OpenAI's body, its answer its own
 		at, field, body = videoBase(p)+"/videos", "id", remoteVideoBody(model, f)
 	case volcengine:
 		at, field, body = arkTasks(p), "id", volcengineVideoBody(model, f)
@@ -1320,7 +1320,7 @@ func videoAsker(r *http.Request, p provider.Provider) (provider.Provider, string
 	if !held {
 		return p, ""
 	}
-	if !p.IsRemoteMyna() && (filmsOpenAI(p) || filmsMiniMax(p) || isArk(p) && len(customVideomakers(p)) > 0) {
+	if !p.IsRemoteOwl() && (filmsOpenAI(p) || filmsMiniMax(p) || isArk(p) && len(customVideomakers(p)) > 0) {
 		if p.Key == "" && p.Account == nil || accountAllowed(who, candidate{p: p}) {
 			return p, ""
 		}
@@ -1348,7 +1348,7 @@ func videoModelHeld(r *http.Request, p provider.Provider, model string) string {
 }
 
 // openAIVideo is how a video at an OpenAI-shaped videos API (another
-// myna's, a provider's) is going, with this myna's id for it, and the
+// owl's, a provider's) is going, with this owl's id for it, and the
 // model making it as that API names it.
 func (s *Server) openAIVideo(ctx context.Context, p provider.Provider, vendorID, id string) (map[string]any, string, int, error) {
 	b, code, err := s.sendAs(ctx, p, http.MethodGet, remoteVideoURL(p, vendorID, ""), "", nil, true)
@@ -1511,7 +1511,7 @@ func videoType(head []byte, said string, ark map[string]any) string {
 	return "video/mp4"
 }
 
-// remoteVideoContent passes on the bytes of a video another myna, or a
+// remoteVideoContent passes on the bytes of a video another owl, or a
 // provider's OpenAI-shaped videos API, made, or what it says of one it
 // hasn't.
 func (s *Server) remoteVideoContent(ctx context.Context, w http.ResponseWriter, p provider.Provider, vendorID string) {
@@ -1521,11 +1521,11 @@ func (s *Server) remoteVideoContent(ctx context.Context, w http.ResponseWriter, 
 		writeError(w, provider.Chat, 502, err.Error())
 		return
 	}
-	// myna's, or the agent's own where the provider passes it on (#1851)
+	// owl's, or the agent's own where the provider passes it on (#1851)
 	stampUA(ctx, p, req.Header)
-	if p.IsRemoteMyna() {
+	if p.IsRemoteOwl() {
 		// vendors are told no caller
-		req.Header.Set("User-Agent", "myna/"+Version)
+		req.Header.Set("User-Agent", "owl/"+Version)
 		passOnCaller(ctx, req)
 	}
 	if err := p.Sign(ctx, req, provider.Chat, nil); err != nil {

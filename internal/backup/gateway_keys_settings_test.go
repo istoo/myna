@@ -5,11 +5,11 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/library"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/library"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 func TestCollectSettingsKeysCompatibility(t *testing.T) {

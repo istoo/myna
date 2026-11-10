@@ -14,7 +14,7 @@ import (
 // keeps an interrupt that lands while nothing runs for the next call,
 // whatever it is. That call's limit never fired, so nothing cleared it,
 // and the module's every connect after failed with "interrupted: took too
-// long" until myna loaded it again (#3727). Here the timer's func is
+// long" until owl loaded it again (#3727). Here the timer's func is
 // held at that moment, and limit waits for it: it hasn't returned before
 // the func is let go. A call that finished keeps what it returned, one that
 // failed reads took too long, and the next connect answers in time.

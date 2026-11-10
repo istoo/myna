@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // recordingProxy is an HTTP proxy that answers each request itself, as the
@@ -47,7 +47,7 @@ func TestPluginCheckinGoesThroughItsProxy(t *testing.T) {
 	for _, k := range []string{"HTTPS_PROXY", "https_proxy", "HTTP_PROXY", "http_proxy", "ALL_PROXY", "all_proxy", "NO_PROXY", "no_proxy"} {
 		t.Setenv(k, "")
 	}
-	t.Setenv("MYNA_BUN", bun)
+	t.Setenv("OWL_BUN", bun)
 	t.Setenv("FAKE_CHECKIN", filepath.Join(home, "presses"))
 	// a name no request reaches but through a proxy that answers for it
 	t.Setenv("FAKE_CHECKIN_URL", "http://vendor.invalid/checkin")

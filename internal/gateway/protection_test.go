@@ -9,7 +9,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A long Codex conversation's compaction, as Codex sends it: the history
@@ -68,7 +68,7 @@ func restingNow(t *testing.T) []string {
 // "response protection is unavailable" for that history. It is the
 // request, not an account: asked once, not on every account and then the
 // last again, and no account rests for it. The compaction goes to the
-// backend as it came only with native compaction on (#2582); off, myna
+// backend as it came only with native compaction on (#2582); off, owl
 // summarises it, as TestProtectionRefusedCompactionAsText's model is.
 func TestProtectionRefusalAskedOnceNobodyRests(t *testing.T) {
 	for _, said := range []string{
@@ -93,14 +93,14 @@ func TestProtectionRefusalAskedOnceNobodyRests(t *testing.T) {
 	}
 }
 
-// The same compaction on a myna model served by the ChatGPT accounts:
+// The same compaction on a owl model served by the ChatGPT accounts:
 // refused so, it is asked again once with the conversation as plain text,
 // as vs's control experiment was answered, and Codex gets its compaction.
 func TestProtectionRefusedCompactionAsText(t *testing.T) {
 	codexSignedIn(t, "two@example.com")
 	tried := protectionUp(t, `{"error":{"message":"response protection is unavailable","type":"server_error"}}`)
 	code, body := codexPost(t, strings.Replace(protectedCompaction, "%q", `"codex/gpt-5.5"`, 1))
-	if code != 200 || !strings.Contains(body, `"type":"compaction"`) || !strings.Contains(body, mynaCompaction) {
+	if code != 200 || !strings.Contains(body, `"type":"compaction"`) || !strings.Contains(body, owlCompaction) {
 		t.Fatalf("status %d: %s", code, body)
 	}
 	if len(*tried) != 2 {
@@ -167,7 +167,7 @@ func TestProtectionBrokenOffCompactionAsText(t *testing.T) {
 	codexSignedIn(t, "two@example.com")
 	tried := brokenOffUp(t, false)
 	code, body := codexPost(t, strings.Replace(protectedCompaction, "%q", `"codex/gpt-6.1-sol"`, 1))
-	if code != 200 || !strings.Contains(body, `"type":"compaction"`) || !strings.Contains(body, mynaCompaction) {
+	if code != 200 || !strings.Contains(body, `"type":"compaction"`) || !strings.Contains(body, owlCompaction) {
 		t.Fatalf("status %d: %s", code, body)
 	}
 	if len(*tried) != 2 {
@@ -178,7 +178,7 @@ func TestProtectionBrokenOffCompactionAsText(t *testing.T) {
 	}
 }
 
-// Broken off as text too, the summary is myna's own, and Codex goes on.
+// Broken off as text too, the summary is owl's own, and Codex goes on.
 func TestProtectionBrokenOffTwiceCompactsLocally(t *testing.T) {
 	codexSignedIn(t, "two@example.com")
 	brokenOffUp(t, true)
@@ -186,7 +186,7 @@ func TestProtectionBrokenOffTwiceCompactsLocally(t *testing.T) {
 	if code != 200 || !strings.Contains(body, `"type":"compaction"`) {
 		t.Fatalf("status %d: %s", code, body)
 	}
-	_, enc, _ := strings.Cut(body, mynaCompaction)
+	_, enc, _ := strings.Cut(body, owlCompaction)
 	enc, _, _ = strings.Cut(enc, `"`)
 	sum, _ := base64.StdEncoding.DecodeString(enc)
 	if !strings.Contains(string(sum), "refactor the parser") || !strings.Contains(string(sum), "response protection is unavailable") {

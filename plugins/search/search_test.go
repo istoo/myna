@@ -5,11 +5,11 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/gwtool"
-	"github.com/istoo/myna/internal/pluginrt"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/gwtool"
+	"github.com/istoo/owl/internal/pluginrt"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 func TestMain(m *testing.M) { testenv.Main(m) }
@@ -34,7 +34,7 @@ func sandbox(t *testing.T) {
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(home, "cache"))
 }
 
-// In a process serving the gateway, on serves myna's web search, off
+// In a process serving the gateway, on serves owl's web search, off
 // doesn't, on again does; a process not serving it has it either way.
 func TestOnServesOffDoesNot(t *testing.T) {
 	sandbox(t)
@@ -60,7 +60,7 @@ func TestOnServesOffDoesNot(t *testing.T) {
 	served(true)
 }
 
-// In use while a search API is set up or a searcher is picked; myna's
+// In use while a search API is set up or a searcher is picked; owl's
 // pick or off: none; files that can't be read: not known.
 func TestInUse(t *testing.T) {
 	sandbox(t)

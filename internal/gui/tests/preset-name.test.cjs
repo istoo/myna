@@ -59,7 +59,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [], saved = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, saved));
-      await page.goto("http://myna.test/?view=providers");
+      await page.goto("http://owl.test/?view=providers");
       const open = async (name) => {
         await page.locator(".row.provider", { has: page.locator(".name", { hasText: new RegExp(`^${name.replace(/[()]/g, "\\$&")}$`) }) }).click();
         const ed = page.locator(".editor");

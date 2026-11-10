@@ -1,13 +1,13 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // #2679 (@minggang123 on X): the Library's MCP section has a switch that
-// gives each agent one MCP server, myna, in place of the library's
+// gives each agent one MCP server, owl, in place of the library's
 // servers. Off, it says what it would do; a click posts servers/hub on,
-// says the agents are given myna's one server, and the page then says so.
+// says the agents are given owl's one server, and the page then says so.
 // Each agent that keeps each server's own entry is named under it with why
-// (Claude Desktop reaches no server over HTTP; Codex has a "myna" of its
+// (Claude Desktop reaches no server over HTTP; Codex has a "owl" of its
 // own). On, it counts what it serves (servers, tools, the agents given it)
 // and shows the one address any other app connects at, with Connect…: a
-// sheet of two tabs. Agents: every agent myna found that takes MCP
+// sheet of two tabs. Agents: every agent owl found that takes MCP
 // servers, in groups (not connected, connected, keeping each server's own
 // entry), each a switch that posts servers/agents-all, or a word for why it
 // keeps its entries with the reason in full behind (i); a Connect all in
@@ -36,8 +36,8 @@ const HOME = "/Users/mg";
 // 21 more agents, for a sheet with 25: the first 17 are connected
 const MANY = Array.from({ length: 21 }, (_, i) => ({ id: "agent" + (i + 1), name: "Agent " + String(i + 1).padStart(2, "0"), icon: "generic", mcp: `${HOME}/.agent${i + 1}/mcp.json` }));
 const fixture = (on, st = {}) => ({
-  dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
-  mcpHub: on, hubPath: "/mcp/myna/hub/",
+  dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
+  mcpHub: on, hubPath: "/mcp/owl/hub/",
   agents: [
     { id: "claude", name: "Claude Code", icon: "claudecode-color", skills: `${HOME}/.claude/skills`, mcp: `${HOME}/.claude.json`, ...(on ? { hub: "on" } : {}) },
     { id: "codex", name: "Codex", icon: "codex-color", mcp: `${HOME}/.codex/config.toml`, ...(on ? { hub: "own" } : {}) },
@@ -50,8 +50,8 @@ const fixture = (on, st = {}) => ({
   servers: [
     { name: "my-tools", transport: "stdio", command: "node", args: [`${HOME}/code/my-tools/index.js`], agents: ["claude", "codex", "claude-desktop", ...(st.cursorOn ? ["cursor"] : [])] },
     { name: "notes", transport: "stdio", command: "uvx", args: ["notes-mcp"], agents: ["claude", "codex", ...(st.cursorOn ? ["cursor"] : [])] },
-    // myna's own: in the hub too, saving into the calling agent's project
-    { name: "myna-image", transport: "stdio", command: "/Applications/myna.app/Contents/MacOS/myna", args: ["mcp", "image"], agents: ["claude"] },
+    // owl's own: in the hub too, saving into the calling agent's project
+    { name: "owl-image", transport: "stdio", command: "/Applications/owl.app/Contents/MacOS/owl", args: ["mcp", "image"], agents: ["claude"] },
   ],
 });
 
@@ -100,7 +100,7 @@ function server(lang, st) {
     if (url.pathname === "/api/groups") return json({ groups: [] });
     if (url.pathname === "/api/providers") return json({ providers: [], gateway: { running: true } });
     if (url.pathname.startsWith("/api/")) return json({});
-    if (url.host !== "myna.test") return route.fulfill({ status: 404, body: "" });
+    if (url.host !== "owl.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -139,16 +139,16 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const web = width < 800;
         // Cursor is one of the agents in the app, and not in a browser
         const st = { on: false, sent: [], opened: [], all: [], copied: [], web, cursor: !web };
-        const url = (web ? "https://mac.tail0.ts.net" : "http://127.0.0.1:3425") + "/mcp/myna/hub";
+        const url = (web ? "https://mac.tail0.ts.net" : "http://127.0.0.1:3425") + "/mcp/owl/hub";
         const errors = [];
         const ctx = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: "reduce" });
-        await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "mcp"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("owl.libTab", "mcp"); } catch {} });
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, st));
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         await navTo(page, "library");
         const v = page.locator("#view-library");
         const hub = v.locator(".lib-hub");
@@ -156,7 +156,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
         // off: what it would do, and no reasons yet
         assert.equal((await hub.locator(".name").textContent()).trim(), w("MCP router"));
-        assert.equal((await hub.locator(".sub.wraps").textContent()).trim(), w("Serve every server through myna: each agent is given one server, myna, in place of these, and any other app connects at one address."));
+        assert.equal((await hub.locator(".sub.wraps").textContent()).trim(), w("Serve every server through owl: each agent is given one server, owl, in place of these, and any other app connects at one address."));
         assert.equal(await v.locator(".lib-hubstats, .lib-hubat").count(), 0);
         const sw = hub.locator(".lib-switch");
         assert.equal(await sw.getAttribute("role"), "switch");
@@ -173,14 +173,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
         // on
         await sw.click();
-        await page.waitForFunction((x) => document.querySelector("#status")?.textContent === x, w("The agents are given myna's one MCP server — restart them to use it"));
+        await page.waitForFunction((x) => document.querySelector("#status")?.textContent === x, w("The agents are given owl's one MCP server — restart them to use it"));
         assert.deepEqual(st.sent, [{ on: true }]);
         await page.waitForFunction(() => document.querySelector("#view-library .lib-hub .lib-switch")?.getAttribute("aria-checked") === "true");
-        assert.equal((await v.locator(".lib-hub .sub.wraps").textContent()).trim(), w("Each agent is given one server, myna, in place of these. myna runs each server once for all of them and hands each call to it, as server__tool. Restart an agent for it to read the change."));
-        // what it serves: three servers, myna-image among them, 2 tools each once checked, in Claude Code
+        assert.equal((await v.locator(".lib-hub .sub.wraps").textContent()).trim(), w("Each agent is given one server, owl, in place of these. owl runs each server once for all of them and hands each call to it, as server__tool. Restart an agent for it to read the change."));
+        // what it serves: three servers, owl-image among them, 2 tools each once checked, in Claude Code
         await page.waitForFunction((x) => document.querySelector("#view-library .lib-hubstats")?.textContent === x,
           [w("{n} servers", { n: 3 }), w("{n} tools", { n: 6 }), w("in {agents}", { agents: "Claude Code" })].join(" · "));
-        // the hub's mark is myna's bird (the owner didn't like a made-up glyph),
+        // the hub's mark is owl's bird (the owner didn't like a made-up glyph),
         // its tail three routes out to three ends (the owner's pick, 10-31),
         // drawn by a clip the page has
         assert.equal(await v.locator('.lib-hub > .lib-hubmark use[href="#bird"][clip-path="url(#bird-notail)"]').count(), 1);
@@ -196,7 +196,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const why = v.locator(".lib-hub-why");
         assert.deepEqual(await why.evaluateAll((ps) => ps.map((p) => p.dataset.why)), ["no-remote", "own"]);
         assert.equal((await v.locator('.lib-hub-why[data-why="no-remote"]').textContent()).trim(), w("{agents} reaches no MCP server over HTTP, so it keeps each server's own entry.", { agents: "Claude Desktop" }));
-        assert.equal((await v.locator('.lib-hub-why[data-why="own"]').textContent()).trim(), w("{agents} has an MCP server called myna of its own, which myna leaves as it is, so it keeps each server's own entry.", { agents: "Codex" }));
+        assert.equal((await v.locator('.lib-hub-why[data-why="own"]').textContent()).trim(), w("{agents} has an MCP server called owl of its own, which owl leaves as it is, so it keeps each server's own entry.", { agents: "Codex" }));
         // the switch sits beside its text, inside the row
         const fits = await page.evaluate(() => {
           const row = document.querySelector("#view-library .lib-hub").getBoundingClientRect();
@@ -215,10 +215,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.deepEqual((await tabs.allTextContents()).map((x) => x.trim()), [w("Agents"), w("Other apps")]);
         const lead = () => sheet.locator(".lib-hublead").textContent().then((x) => x.trim());
         // one agent that can be: named, not counted
-        assert.equal(await lead(), web ? w("{agent} uses the library's servers through myna", { agent: "Claude Code" }) : w("{on} of {all} agents use the library's servers through myna", { on: 1, all: 2 }));
+        assert.equal(await lead(), web ? w("{agent} uses the library's servers through owl", { agent: "Claude Code" }) : w("{on} of {all} agents use the library's servers through owl", { on: 1, all: 2 }));
         assert.equal((await sheet.locator(".lib-hubsub").textContent()).trim().replace(/\u00a0/g, " "),
           [web ? w("Each server runs once, for all of them") : w("{n} more can be connected", { n: 1 }), w("{n} keep each server's own entry", { n: 2 })].join(" · "));
-        // the diagram's servers are the library's three, myna-image's mark too (the owner: why isn't its logo there?)
+        // the diagram's servers are the library's three, owl-image's mark too (the owner: why isn't its logo there?)
         assert.equal(await sheet.locator(".lib-hubroute > .lib-hubstack").last().locator(":scope > *").count(), 3);
         assert.equal(await sheet.locator('.ehead > .lib-hubmark use[href="#bird"]').count(), 1);
         // a few agents: no search, nothing folded
@@ -234,14 +234,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal(await agent("claude").locator(".lib-switch").getAttribute("aria-checked"), "true");
         // the kept: a word for why, the reason in full behind (i)
         assert.equal(await agent("codex").locator(".lib-switch").count(), 0);
-        assert.equal((await agent("codex").locator(".lib-hubtag").textContent()).trim(), w("Has its own myna"));
+        assert.equal((await agent("codex").locator(".lib-hubtag").textContent()).trim(), w("Has its own owl"));
         assert.equal((await agent("claude-desktop").locator(".lib-hubtag").textContent()).trim(), w("No HTTP"));
         assert.equal(await sheet.locator(".lib-hubwhy").count(), 0);
         await agent("claude-desktop").locator(".lib-hubinfo").click();
         assert.equal((await sheet.locator('.lib-hubwhy[data-why="no-remote"]').textContent()).trim(), w("It reaches no MCP server over HTTP, so it keeps each server's own entry"));
         assert.equal(await agent("claude-desktop").locator(".lib-hubinfo").getAttribute("aria-expanded"), "true");
         await agent("codex").locator(".lib-hubinfo").click();
-        assert.equal((await sheet.locator('.lib-hubwhy[data-why="own"]').textContent()).trim(), w("It has a server called myna of its own, which myna leaves as it is"));
+        assert.equal((await sheet.locator('.lib-hubwhy[data-why="own"]').textContent()).trim(), w("It has a server called owl of its own, which owl leaves as it is"));
         assert.doesNotMatch(await sheet.textContent(), /mcp add/);
         await shot(page, `${engine}-${lang}-${width}-agents`);
         const bar = sheet.locator(".bar");
@@ -253,10 +253,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           // one switch on, then off, then Connect all
           assert.equal((await bar.locator(".lib-huball").textContent()).trim(), w("Connect all"));
           await agent("cursor").locator(".lib-switch").click();
-          await page.waitForFunction((x) => document.querySelector("#status")?.textContent === x, w("{agent} is connected — restart it to use myna's tools", { agent: "Cursor" }));
+          await page.waitForFunction((x) => document.querySelector("#status")?.textContent === x, w("{agent} is connected — restart it to use owl's tools", { agent: "Cursor" }));
           await page.waitForFunction(() => document.querySelector('.lib-hubagent[data-agent="cursor"]')?.dataset.state === "on");
           assert.deepEqual(await groups(), [["on", ["claude", "cursor"]], ["kept", ["codex", "claude-desktop"]]]);
-          assert.equal(await lead(), w("{on} of {all} agents use the library's servers through myna", { on: 2, all: 2 }));
+          assert.equal(await lead(), w("{on} of {all} agents use the library's servers through owl", { on: 2, all: 2 }));
           assert.equal(await bar.locator(".lib-huball").count(), 0);
           assert.equal((await bar.locator(".lib-hubnote").textContent()).trim(), w("Restart an agent for it to read the change"));
           await agent("cursor").locator(".lib-switch").click();
@@ -280,7 +280,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await tabs.last().click();
         assert.equal((await sheet.locator(".lib-hubaddr code").textContent()).trim(), url);
         const apps = sheet.locator(".lib-hubapp");
-        // Cursor is set up by hand only when myna doesn't look after it
+        // Cursor is set up by hand only when owl doesn't look after it
         assert.deepEqual(await apps.evaluateAll((rs) => rs.map((r) => r.dataset.app)), [...(web ? ["cursor"] : []), "vscode", "windsurf", "json"]);
         const app = (id) => sheet.locator(`.lib-hubapp[data-app="${id}"]`);
         const copied = async (id, name) => {
@@ -291,20 +291,20 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         if (web) {
           assert.equal(await sheet.locator(".lib-hubadd").count(), 0);
           assert.equal((await app("cursor").locator(".sub").textContent()).trim(), w("Or add it to ~/.cursor/mcp.json"));
-          assert.deepEqual(await copied("cursor", "Cursor"), { mcpServers: { myna: { url } } });
+          assert.deepEqual(await copied("cursor", "Cursor"), { mcpServers: { owl: { url } } });
           assert.equal((await app("vscode").locator(".sub").textContent()).trim(), w("Or add it to .vscode/mcp.json, or to your user mcp.json"));
         } else {
           assert.equal((await app("vscode").locator(".sub").textContent()).trim(), w("{app} asks you to confirm, then it's ready", { app: "VS Code" }));
           assert.equal((await app("vscode").locator(".lib-hubadd").textContent()).trim(), w("Add"));
           await app("vscode").locator(".lib-hubadd").click();
-          await page.waitForFunction((x) => document.querySelector("#status")?.textContent === x, w("{app} asks you to confirm adding myna", { app: "VS Code" }));
+          await page.waitForFunction((x) => document.querySelector("#status")?.textContent === x, w("{app} asks you to confirm adding owl", { app: "VS Code" }));
         }
         assert.deepEqual(st.opened, web ? [] : [{ app: "vscode" }]);
-        assert.deepEqual(await copied("vscode", "VS Code"), { servers: { myna: { type: "http", url } } });
+        assert.deepEqual(await copied("vscode", "VS Code"), { servers: { owl: { type: "http", url } } });
         assert.equal((await app("windsurf").locator(".sub").textContent()).trim(), w("Paste it into ~/.codeium/windsurf/mcp_config.json"));
-        assert.deepEqual(await copied("windsurf", "Windsurf"), { mcpServers: { myna: { serverUrl: url } } });
-        assert.deepEqual(await copied("json", w("Other")), { mcpServers: { myna: { type: "http", url } } });
-        assert.equal((await sheet.locator(".lib-hubcap").textContent()).trim(), w("From another computer, use the address myna is reached at there, with a gateway key: Authorization: Bearer <key>."));
+        assert.deepEqual(await copied("windsurf", "Windsurf"), { mcpServers: { owl: { serverUrl: url } } });
+        assert.deepEqual(await copied("json", w("Other")), { mcpServers: { owl: { type: "http", url } } });
+        assert.equal((await sheet.locator(".lib-hubcap").textContent()).trim(), w("From another computer, use the address owl is reached at there, with a gateway key: Authorization: Bearer <key>."));
         assert.deepEqual(await sideways(page), [], "sideways scroll, apps");
         await shot(page, `${engine}-${lang}-${width}-apps`);
         await bar.locator("button.primary").click();
@@ -319,7 +319,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await sheet.waitFor();
         await tabs.first().click();
         const can = web ? 22 : 23, on = web ? 18 : 19;
-        assert.equal(await lead(), w("{on} of {all} agents use the library's servers through myna", { on, all: can }));
+        assert.equal(await lead(), w("{on} of {all} agents use the library's servers through owl", { on, all: can }));
         assert.equal(await sheet.locator(".lib-hubsearch input").count(), 1);
         // the owner: the glass and the placeholder sat above the field's
         // middle. Both are centred in the box, the placeholder's own line too
@@ -360,7 +360,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // Connect all: the four given nothing yet, in one post
         st.all.length = 0;
         await bar.locator(".lib-huball").click();
-        await page.waitForFunction((x) => document.querySelector("#status")?.textContent === x, w("{n} agents are connected — restart them to use myna's tools", { n: 4 }));
+        await page.waitForFunction((x) => document.querySelector("#status")?.textContent === x, w("{n} agents are connected — restart them to use owl's tools", { n: 4 }));
         assert.deepEqual(st.all, [{ agents: ["agent18", "agent19", "agent20", "agent21"], on: true }]);
         assert.equal(await bar.locator(".lib-huball").count(), 0);
         await bar.locator("button.primary").click();

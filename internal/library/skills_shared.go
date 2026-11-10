@@ -7,10 +7,10 @@ package library
 // every skill, ticked or not, as it finds one the user keeps there.
 //
 // The skill's files stay in the library's folder and ~/.agents/skills
-// gets myna's link to it, as it does for an agent whose folder it is
+// gets owl's link to it, as it does for an agent whose folder it is
 // (Goose, Kimi Code, Cindy): an update, a check, an edit, a sync and
 // turning one off on this computer work as for any skill, and turning
-// the setting off takes out myna's links there and nothing else. An
+// the setting off takes out owl's links there and nothing else. An
 // entry of the user's own by a skill's name is never written over.
 //
 // It is this computer's setting: Collect never carries it.
@@ -52,7 +52,7 @@ func (l *Library) keepsShared(s *Skill) bool {
 }
 
 // inSharedHere is whether ~/.agents/skills has the library's skill s by
-// the setting: myna's link (or copy) there.
+// the setting: owl's link (or copy) there.
 func (l *Library) inSharedHere(s *Skill) bool {
 	return l.keepsShared(s) && ours(filepath.Join(sharedSkillsDir(), s.Name), s.Name)
 }

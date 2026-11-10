@@ -9,9 +9,9 @@ import (
 	"testing"
 )
 
-// TestGatewayStartsGetUserPath: every way myna starts with a gateway
+// TestGatewayStartsGetUserPath: every way owl starts with a gateway
 // gives what it starts the node a version manager put on PATH only in the
-// shell's profile (#2685, #3803). myna tui runs in a terminal, with its
+// shell's profile (#2685, #3803). owl tui runs in a terminal, with its
 // PATH already. A start counts when it calls proc.UserPath, or calls a
 // function or func var of this package that does (runGUI's openApp, which
 // a test stands in for).

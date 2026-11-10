@@ -69,7 +69,7 @@ function fixture(lang, theme, posts, requests) {
       return json(providers);
     }
     if (url.pathname === "/api/usage/quotas") return json([]);
-    if (url.pathname === "/api/usage") return json({ ...totals(rows), callerKeys: callerKeys(), agents: [], models: [], series: [], bucket: "day", path: "~/.config/myna/usage.jsonl" });
+    if (url.pathname === "/api/usage") return json({ ...totals(rows), callerKeys: callerKeys(), agents: [], models: [], series: [], bucket: "day", path: "~/.config/owl/usage.jsonl" });
     if (url.pathname === "/api/usage/requests") { requests.push(url.searchParams); return json(ledger(url.searchParams)); }
     if (url.pathname === "/api/usage/requests/export") {
       requests.push(Object.assign(url.searchParams, { method: req.method() }));
@@ -95,7 +95,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const w = lang === "zh"
         ? { addButton: "添加", first: "设为首选", remove: "移除", failed: "失败", all: "全部网关密钥" }
         : { addButton: "Add", first: "Make first", remove: "Remove", failed: "Failed", all: "All gateway keys" };
-      await page.goto("http://myna.test/?view=providers");
+      await page.goto("http://owl.test/?view=providers");
       await page.locator(".row.provider", { hasText: "Relay" }).click();
       // the editor's drawing is editor.js, loaded with the page: wait for
       // it rather than read the empty place it leaves until then

@@ -14,7 +14,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // maskingSSE is a Chat upstream that keeps what it was sent and answers

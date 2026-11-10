@@ -18,11 +18,11 @@ const agent = (id, name) => ({ id, name, icon: "", skills: `${HOME}/.${id}/skill
 const cand = (name) => ({ path: "skills/" + name, name, description: name + " like caveman", have: false });
 const probe = { source: "JuliusBrussee/caveman", kind: "github", candidates: [cand("caveman"), cand("caveman-commit"), cand("caveman-review")] };
 const lib = () => ({
-  dir: `${HOME}/.config/myna/library`, backups: `${HOME}/.config/myna/backups`, home: HOME,
+  dir: `${HOME}/.config/owl/library`, backups: `${HOME}/.config/owl/backups`, home: HOME,
   agents: [agent("claude", "Claude Code")],
   instructions: { agents: [] }, servers: [], skills: [], foundServers: [], projects: [], foundSkills: [],
 });
-const why = `the library's folder already has a caveman-commit that isn't this one (${HOME}/.config/myna/library/skills/caveman-commit), left as it is: bring it in from the skills found there to use it`;
+const why = `the library's folder already has a caveman-commit that isn't this one (${HOME}/.config/owl/library/skills/caveman-commit), left as it is: bring it in from the skills found there to use it`;
 
 function server(lang, posts) {
   return async (route) => {
@@ -61,13 +61,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     const install = async (lang, width) => {
       const posts = [];
       const ctx = await browser.newContext({ viewport: { width, height: 800 } });
-      await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "skills"); } catch {} });
+      await ctx.addInitScript(() => { try { localStorage.setItem("owl.libTab", "skills"); } catch {} });
       const page = await ctx.newPage();
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(60000);
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", server(lang, posts));
-      await page.goto("http://myna.test/");
+      await page.goto("http://owl.test/");
       await navTo(page, "library");
       const src = page.locator('#view-library input[data-lib="source"]');
       await src.fill("JuliusBrussee/caveman");

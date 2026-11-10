@@ -7,7 +7,7 @@ import (
 )
 
 // library.json holds an MCP server's env and headers, its credentials:
-// it is not left readable by another user, even in a folder myna made
+// it is not left readable by another user, even in a folder owl made
 // 0755 (#4131).
 func TestLibraryFileIsPrivate(t *testing.T) {
 	h := t.TempDir()
@@ -34,8 +34,8 @@ func TestLibraryFileIsPrivate(t *testing.T) {
 	}
 }
 
-// A project's repository can hold a symbolic link where myna writes
-// (.gitignore -> ~/.zshrc): myna refuses rather than write through it
+// A project's repository can hold a symbolic link where owl writes
+// (.gitignore -> ~/.zshrc): owl refuses rather than write through it
 // (#4132).
 func TestProjectWritesRefuseSymlink(t *testing.T) {
 	dir := t.TempDir()

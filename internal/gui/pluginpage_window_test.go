@@ -64,7 +64,7 @@ func TestPluginPageWindowPolicy(t *testing.T) {
 	}
 }
 
-// A browser's page (myna web) names its folder with a scheme: WebKit
+// A browser's page (owl web) names its folder with a scheme: WebKit
 // takes a scheme-less source's scheme from the sandboxed frame's opaque
 // origin and matched nothing, so iOS Safari loaded no script (#4198).
 // Served over http, or https with TLS ended by a proxy in front, both
@@ -78,8 +78,8 @@ func TestPluginPageWebPolicyNamesItsScheme(t *testing.T) {
 		hdr        map[string]string
 	}{
 		{"http", "192.168.1.5:3430", nil},
-		{"https behind nginx", "myna.test.xyz", map[string]string{"X-Forwarded-Proto": "https", "X-Forwarded-For": "1.2.3.4"}},
-		{"https behind Cloudflare", "myna.test.xyz", map[string]string{"X-Forwarded-Proto": "https", "Cf-Visitor": `{"scheme":"https"}`, "X-Forwarded-Host": "evil.example"}},
+		{"https behind nginx", "owl.test.xyz", map[string]string{"X-Forwarded-Proto": "https", "X-Forwarded-For": "1.2.3.4"}},
+		{"https behind Cloudflare", "owl.test.xyz", map[string]string{"X-Forwarded-Proto": "https", "Cf-Visitor": `{"scheme":"https"}`, "X-Forwarded-Host": "evil.example"}},
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			r := httptest.NewRequest("GET", pluginPagePrefix+page.token+"/index.html", nil)
@@ -102,7 +102,7 @@ func TestPluginPageWebPolicyNamesItsScheme(t *testing.T) {
 			// no source without its scheme is left
 			for _, d := range strings.Split(policy, ";") {
 				for _, src := range strings.Fields(d)[1:] {
-					if strings.Contains(src, "/_myna/") && !strings.HasPrefix(src, "https://") && !strings.HasPrefix(src, "http://") {
+					if strings.Contains(src, "/_owl/") && !strings.HasPrefix(src, "https://") && !strings.HasPrefix(src, "http://") {
 						t.Errorf("scheme-less source %q in %s", src, policy)
 					}
 				}

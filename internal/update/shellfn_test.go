@@ -13,7 +13,7 @@ func fnBody(kind, prog string) string {
 	return "agy() { # " + kind + "\n  '" + prog + "' agy run \"$@\"\n}"
 }
 
-// The block myna puts in a shell's profile for agy (bestony on Discord):
+// The block owl puts in a shell's profile for agy (bestony on Discord):
 // added after the user's own lines, the same file again when nothing
 // changed, rewritten in place, taken out leaving the file as it was, and
 // never written where the file can't be read or outside the home.
@@ -21,7 +21,7 @@ func TestShellFunction(t *testing.T) {
 	h := t.TempDir()
 	t.Setenv("HOME", h)
 	t.Setenv("USERPROFILE", h)
-	exe := filepath.Join(h, "Applications", "myna")
+	exe := filepath.Join(h, "Applications", "owl")
 	rc := filepath.Join(h, ".zshrc")
 	fish := filepath.Join(h, ".config", "fish", "config.fish")
 	crlf := filepath.Join(h, "Documents", "PowerShell", "Microsoft.PowerShell_profile.ps1")
@@ -55,11 +55,11 @@ func TestShellFunction(t *testing.T) {
 	if strings.Join(in, ",") != rc+","+crlf {
 		t.Fatalf("in = %v", in)
 	}
-	want := mine + "\n\n# >>> myna agy >>>\nagy() { # posix\n  '" + exe + "' agy run \"$@\"\n}\n# <<< myna agy <<<\n"
+	want := mine + "\n\n# >>> owl agy >>>\nagy() { # posix\n  '" + exe + "' agy run \"$@\"\n}\n# <<< owl agy <<<\n"
 	if got := read(t, rc); got != want {
 		t.Fatalf(".zshrc:\n%s\nwant:\n%s", got, want)
 	}
-	if got := read(t, crlf); !strings.HasPrefix(got, ps+"\r\n# >>> myna agy >>>\r\nagy() { # powershell\r\n") || strings.Contains(strings.ReplaceAll(got, "\r\n", ""), "\n") {
+	if got := read(t, crlf); !strings.HasPrefix(got, ps+"\r\n# >>> owl agy >>>\r\nagy() { # powershell\r\n") || strings.Contains(strings.ReplaceAll(got, "\r\n", ""), "\n") {
 		t.Fatalf("PowerShell's profile lost its BOM or CRLF: %q", got)
 	}
 	if _, err := os.Stat(fish); !os.IsNotExist(err) {
@@ -88,7 +88,7 @@ func TestShellFunction(t *testing.T) {
 
 	// the user adds lines after it; the block is rewritten where it is
 	write(t, rc, want+"export EDITOR=vim\n")
-	exe = filepath.Join(h, "moved", "myna")
+	exe = filepath.Join(h, "moved", "owl")
 	ShellFunction("agy", fnBody)
 	if got := read(t, rc); got != strings.ReplaceAll(want, filepath.Join(h, "Applications"), filepath.Join(h, "moved"))+"export EDITOR=vim\n" {
 		t.Fatalf("rewritten:\n%s", got)
@@ -111,7 +111,7 @@ func TestShellFunction(t *testing.T) {
 	// the shell a terminal opens gets a profile made for it
 	profiles[1].Create = true
 	ShellFunction("agy", fnBody)
-	if got := read(t, fish); got != "# >>> myna agy >>>\nagy() { # fish\n  '"+exe+"' agy run \"$@\"\n}\n# <<< myna agy <<<\n" {
+	if got := read(t, fish); got != "# >>> owl agy >>>\nagy() { # fish\n  '"+exe+"' agy run \"$@\"\n}\n# <<< owl agy <<<\n" {
 		t.Fatalf("made fish profile:\n%s", got)
 	}
 }
@@ -120,11 +120,11 @@ func TestShellFunction(t *testing.T) {
 // cut, another tool's block left alone.
 func TestWithFnBlock(t *testing.T) {
 	for _, c := range []struct{ name, in, body, want string }{
-		{"empty", "", "x", "# >>> myna agy >>>\nx\n# <<< myna agy <<<\n"},
-		{"ends with newline", "a\n", "x", "a\n\n# >>> myna agy >>>\nx\n# <<< myna agy <<<\n"},
-		{"out", "a\n\n# >>> myna agy >>>\nx\n# <<< myna agy <<<\n", "", "a\n"},
-		{"out, between lines", "a\n\n# >>> myna agy >>>\nx\n# <<< myna agy <<<\nb\n", "", "a\nb\n"},
-		{"close cut", "a\n# >>> myna agy >>>\nb\n", "", "a\nb\n"},
+		{"empty", "", "x", "# >>> owl agy >>>\nx\n# <<< owl agy <<<\n"},
+		{"ends with newline", "a\n", "x", "a\n\n# >>> owl agy >>>\nx\n# <<< owl agy <<<\n"},
+		{"out", "a\n\n# >>> owl agy >>>\nx\n# <<< owl agy <<<\n", "", "a\n"},
+		{"out, between lines", "a\n\n# >>> owl agy >>>\nx\n# <<< owl agy <<<\nb\n", "", "a\nb\n"},
+		{"close cut", "a\n# >>> owl agy >>>\nb\n", "", "a\nb\n"},
 		{"another's block", "# >>> conda initialize >>>\nc\n# <<< conda initialize <<<\n", "", "# >>> conda initialize >>>\nc\n# <<< conda initialize <<<\n"},
 		{"none to drop", "a", "", "a"},
 	} {

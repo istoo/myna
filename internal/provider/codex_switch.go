@@ -2,14 +2,14 @@ package provider
 
 // Signing Codex or Claude Code in to the next of its accounts when the one
 // it is on has used its allowance up. Codex's requests on its own models go
-// through myna while more of its accounts are on there, and move on to
+// through owl while more of its accounts are on there, and move on to
 // the next account when one is out — but the Codex app, once it knows the
 // account it is signed in to is out, may not send at all, so no request
-// reaches myna to move on. Claude Code on its own models never comes
-// through myna: it asks Anthropic as the account it is signed in to, and
+// reaches owl to move on. Claude Code on its own models never comes
+// through owl: it asks Anthropic as the account it is signed in to, and
 // that account being out ends its turns with "You've hit your session
 // limit" while the gateway has long moved on to another (#208). So
-// whichever myna runs the gateway signs the agent in to the next account
+// whichever owl runs the gateway signs the agent in to the next account
 // that is on and has room, as switching it on the Accounts page would: a
 // session started after that is on it from the first turn.
 //
@@ -27,8 +27,8 @@ package provider
 // spent too. A switch the user makes meanwhile ends that. With KeepLogin on the subscription, the agent
 // stays signed in to the first, whatever it has left (#524); with
 // KeepLoginAs, to that account, wherever it stands in the order. Not while
-// myna only switches the sign-in (SwitchOnly): moving it is then all
-// myna is asked to do, and kept on one account nothing would ever move
+// owl only switches the sign-in (SwitchOnly): moving it is then all
+// owl is asked to do, and kept on one account nothing would ever move
 // (#1907, keepsLogin).
 
 import (
@@ -45,8 +45,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/lastgood"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/lastgood"
 )
 
 // loginSwitchEvery is how often the account each agent is on is looked at.
@@ -54,10 +54,10 @@ const loginSwitchEvery = 5 * time.Minute
 
 // codexNearOutEvery is how often the account Codex is signed in to is read
 // while it is near out (codexNearOut) or out: the Codex app greys its Send
-// from its own reading, and myna takes the turns over only once its
+// from its own reading, and owl takes the turns over only once its
 // reading says the account is out too, so five minutes apart left Send
 // grey for up to five (Ethereal499 on X). Read again as soon after the
-// reset, myna gives the app its ChatGPT side back as soon.
+// reset, owl gives the app its ChatGPT side back as soon.
 const codexNearOutEvery = time.Minute
 
 // codexNearShare is the share of a window past which the account counts
@@ -126,7 +126,7 @@ func SpentShareOf(routing string) float64 {
 	return SpentShare
 }
 
-// loginSwitching is how myna moves agent's sign-in, as its subscription
+// loginSwitching is how owl moves agent's sign-in, as its subscription
 // says: the share the account it is on is moved off at, and whether it is
 // kept on the first instead (keepsLogin).
 func loginSwitching(agent string) (share float64, keep bool) {
@@ -138,15 +138,15 @@ func loginSwitching(agent string) (share float64, keep bool) {
 	return SpentShare, false
 }
 
-// returnsToFirst says whether myna signs agent back in to the account
+// returnsToFirst says whether owl signs agent back in to the account
 // it moved it off once that has room again (#408), rather than leaving it
 // on the one it moved it to till that is spent in turn. The sign-in goes
-// back where it follows the gateway: Codex's requests go through myna,
+// back where it follows the gateway: Codex's requests go through owl,
 // whose Smart and In order give the first account requests again once it
 // has room (#209), and In order on any subscription is the user's word
 // that the first comes first. Where the sign-in is what spends the
 // accounts — Claude Code asks Anthropic itself, and Codex whose sign-in
-// alone myna switches (SwitchOnly) — going back at the first's reset
+// alone owl switches (SwitchOnly) — going back at the first's reset
 // left the account moved to part used and started the first's next
 // window early, which is not "use one up, then the next" (hxy920830 on
 // X): there it stays, unless the user said the first comes first.
@@ -161,12 +161,12 @@ func returnsToFirst(agent string) bool {
 	return agent == "codex"
 }
 
-// backShare is the share below which the account myna moved the agent
+// backShare is the share below which the account owl moved the agent
 // off is signed back in to: no longer low, as Smart counts it (the
 // gateway's lowShare), so it doesn't go back and forth at the edge.
 const backShare = 90
 
-// switchedAgents are the agents whose account myna moves on.
+// switchedAgents are the agents whose account owl moves on.
 var switchedAgents = []string{"codex", "claude"}
 
 // usedUp reports whether an account's allowance is used up at now: a
@@ -175,7 +175,7 @@ func usedUp(q SubscriptionQuota, now time.Time) bool {
 	return usedPast(q, 100, now)
 }
 
-// UsedUp is usedUp for the CLI's myna quota wait, so what it waits out
+// UsedUp is usedUp for the CLI's owl quota wait, so what it waits out
 // is what stops an account here.
 func UsedUp(q SubscriptionQuota, now time.Time) bool { return usedUp(q, now) }
 
@@ -226,16 +226,16 @@ func usedPast(q SubscriptionQuota, share float64, now time.Time) bool {
 }
 
 // NextLogin is the account agent should be signed in to instead of the
-// one it is on: the account myna moved it off, once that has room again
+// one it is on: the account owl moved it off, once that has room again
 // (back); else, when the one it is on is spent, the first of its other
-// accounts that are on in myna, in the order they were saved, whose
+// accounts that are on in owl, in the order they were saved, whose
 // allowance is known and not spent, or, when every one is past its line
 // too, the one with the most room left (roomLeft). A saved Claude account
 // not read yet is read then (readSpare). ok is false when the agent should
 // stay.
 func NextLogin(ctx context.Context, agent string) (from, to string, back, ok bool) {
 	if leftAlone(agent) {
-		return "", "", false, false // myna has no say in its sign-in, or was told to leave it be
+		return "", "", false, false // owl has no say in its sign-in, or was told to leave it be
 	}
 	var spares []Login
 	var first *Login
@@ -326,7 +326,7 @@ func NextLogin(ctx context.Context, agent string) (from, to string, back, ok boo
 	for _, l := range spares {
 		q, known := u[l.User]
 		if agent == "claude" && (!known || unreadSpare(q)) {
-			// a saved Claude account myna has no reading of: read now,
+			// a saved Claude account owl has no reading of: read now,
 			// by Claude Code's /usage in its own directory, one account at
 			// a time and only till one has room
 			q, known = readSpare(ctx, l)
@@ -378,14 +378,14 @@ func roomLeft(q SubscriptionQuota, share float64, caps WindowCaps, now time.Time
 	return room
 }
 
-// NextInOrder is the account `myna accounts switch <agent> next` signs
+// NextInOrder is the account `owl accounts switch <agent> next` signs
 // agent in to: of its other accounts the agent can be signed in to, taken
 // in their order from the one after the account it is on, the first whose
 // allowance is known and has room; when none has, the one with the most
 // room left (roomLeft), and over says so. A saved Claude account not read
 // yet is read then, as NextLogin's spares are.
 //
-// An account off in myna is taken too, as switching to it by name or
+// An account off in owl is taken too, as switching to it by name or
 // from the accounts list is: on/off is whether the gateway's requests go
 // to it, not whether the agent may be signed in to it. An account the
 // agent signed itself in to (Claude Code's /login, codex login) starts
@@ -405,7 +405,7 @@ func NextInOrder(ctx context.Context, agent string) (to string, over bool, err e
 		}
 	}
 	if len(order) == 0 {
-		return "", false, fmt.Errorf("%s has no other account in myna to switch to", agent)
+		return "", false, fmt.Errorf("%s has no other account in owl to switch to", agent)
 	}
 	users := make([]string, 0, len(order))
 	for _, l := range order {
@@ -432,7 +432,7 @@ func NextInOrder(ctx context.Context, agent string) (to string, over bool, err e
 		}
 	}
 	if best == "" {
-		return "", false, fmt.Errorf("myna has no reading of %s's other accounts' usage: name the one to switch to (myna accounts switch %s <email>)", agent, agent)
+		return "", false, fmt.Errorf("owl has no reading of %s's other accounts' usage: name the one to switch to (owl accounts switch %s <email>)", agent, agent)
 	}
 	return best, true, nil
 }
@@ -493,7 +493,7 @@ func SwitchWhenSpent(ctx context.Context, agent string) (string, error) {
 			if codexRestartsApp() || !back {
 				log.Printf("codex: the Codex app is still signed in to %s, and shows its limits, until its app-server is restarted once no Codex turn runs", was)
 			} else {
-				log.Printf("codex: the Codex app is still signed in to %s, and shows its limits, until it is restarted: myna restarts it for a switch back only with \"Restart the Codex app to follow\" on", was)
+				log.Printf("codex: the Codex app is still signed in to %s, and shows its limits, until it is restarted: owl restarts it for a switch back only with \"Restart the Codex app to follow\" on", was)
 			}
 		}
 	}
@@ -502,7 +502,7 @@ func SwitchWhenSpent(ctx context.Context, agent string) (string, error) {
 	return to, nil
 }
 
-// loginReturn is the account myna signed an agent out of when it was
+// loginReturn is the account owl signed an agent out of when it was
 // spent (Back), and the one it signed it in to (To): while the agent is
 // still on To, Back is signed in again once it has room.
 type loginReturn struct {
@@ -523,7 +523,7 @@ func readLoginReturns() map[string]loginReturn {
 }
 
 // loginReturnOf is the account to sign agent back in to, when it is still
-// on the one myna moved it to (active): one signed in otherwise since,
+// on the one owl moved it to (active): one signed in otherwise since,
 // by the user or the agent itself, is the user's choice.
 func loginReturnOf(agent, active string) (loginReturn, bool) {
 	loginReturnsMu.Lock()
@@ -569,8 +569,8 @@ var codexWasUsedUp atomic.Bool
 // noteCodexUsedUp tells the agents' files when the account Codex is signed
 // in to runs out (CodexUsedUp: of its allowance and its credits), or has
 // room again: the Codex app sends nothing at all for an account that is
-// out, a myna model's turn included, so the agent package then makes
-// myna Codex's provider, and puts it back beside the sign-in after
+// out, a owl model's turn included, so the agent package then makes
+// owl Codex's provider, and puts it back beside the sign-in after
 // (#540). Only a change is told.
 func noteCodexUsedUp(now bool) {
 	if codexWasUsedUp.Swap(now) != now {

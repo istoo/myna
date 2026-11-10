@@ -3,7 +3,7 @@ package gui
 import (
 	"testing"
 
-	"github.com/istoo/myna/internal/tune"
+	"github.com/istoo/owl/internal/tune"
 )
 
 // TestCodexAsyncAt: the advice as a share of the window Codex's background

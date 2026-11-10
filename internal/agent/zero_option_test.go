@@ -5,9 +5,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // jiangguochao666 on X: an agent's model picker says free by a model its
@@ -36,7 +36,7 @@ func TestPickerSaysAZeroPricedModelIsFree(t *testing.T) {
 	}
 	of := func() map[string]Option {
 		out := map[string]Option{}
-		for _, o := range viaMyna("opencode", "myna/") {
+		for _, o := range viaOwl("opencode", "owl/") {
 			out[o.Ref] = o
 		}
 		return out

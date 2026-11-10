@@ -9,10 +9,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/usage"
 )
 
 func newCaller(t *testing.T, names ...string) ([]access.Key, []string) {
@@ -174,7 +174,7 @@ func TestMigratedLANKeyUsageAndRevocation(t *testing.T) {
 		t.Fatal(err)
 	}
 	s := settings.Load()
-	s.LAN, s.LANKey = true, "sk-myna-test-legacy-lan"
+	s.LAN, s.LANKey = true, "sk-owl-test-legacy-lan"
 	if err := settings.Save(s); err != nil {
 		t.Fatal(err)
 	}

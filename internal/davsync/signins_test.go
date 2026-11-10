@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // Sign-ins in sync (qianxunji and curtinp118 on Discord): with the switch
@@ -71,7 +71,7 @@ func TestSyncSignIns(t *testing.T) {
 	onServer := func() string {
 		fake.mu.Lock()
 		defer fake.mu.Unlock()
-		return string(fake.files["/dav/myna/myna.myna-backup"])
+		return string(fake.files["/dav/owl/owl.owl-backup"])
 	}
 
 	a, b := newComputer(t), newComputer(t)

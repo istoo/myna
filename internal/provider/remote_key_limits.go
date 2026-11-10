@@ -12,28 +12,28 @@ import (
 	"time"
 )
 
-// A remote myna's gateway keys (#1547, PennyVibe): a computer that uses
-// another myna with a gateway key that myna gave it saw the other
-// myna's subscriptions on its Usage page, but not what the key itself
-// may still spend there. Each key of a remote-myna provider now has a
+// A remote owl's gateway keys (#1547, PennyVibe): a computer that uses
+// another owl with a gateway key that owl gave it saw the other
+// owl's subscriptions on its Usage page, but not what the key itself
+// may still spend there. Each key of a remote-owl provider now has a
 // card of its own: its limit, what it used and has left of it, the period
 // and when it resets, or "no limit".
 //
-// The other myna tells a key its own limit and nothing else
+// The other owl tells a key its own limit and nothing else
 // (RemoteKeyLimitPath, answered by the gateway's keyLimit for the key the
 // request carries, and only that one). So each key is asked with itself:
 // a key never sees another key's numbers, here or there.
 
 // RemoteKeyLimitPath is the gateway's answer of the calling key's limit.
-const RemoteKeyLimitPath = "/v1/myna/limit"
+const RemoteKeyLimitPath = "/v1/owl/limit"
 
 // remoteKeyCard is the card id the keys' cards go under, after the
 // remote's ("office/~keys"): no provider id has a "~", so it never meets
 // a card the remote has.
 const remoteKeyCard = "~keys"
 
-// errRemoteNoKeyLimit is a remote myna too old to tell a key its limit.
-const errRemoteNoKeyLimit = "remote myna is too old to tell this key's limit; update myna on that computer"
+// errRemoteNoKeyLimit is a remote owl too old to tell a key its limit.
+const errRemoteNoKeyLimit = "remote owl is too old to tell this key's limit; update owl on that computer"
 
 // GatewayKeyLimit is a remote gateway key's limit as its card carries it.
 // Windows on the card show each cap; this says what they don't.
@@ -59,7 +59,7 @@ type GatewayKeyLimit struct {
 
 // remoteKeyAnswer is RemoteKeyLimitPath's answer (budget.Status, as the
 // gateway's keyLimit sends it): Limit the one holding the key most,
-// Limits each of its limits (#2227), from a myna that has them.
+// Limits each of its limits (#2227), from a owl that has them.
 type remoteKeyAnswer struct {
 	Limited *bool            `json:"limited"`
 	Key     string           `json:"key"`
@@ -161,7 +161,7 @@ func remoteKeyCardOf(ctx context.Context, p Provider, name, key string, fresh bo
 		c.Unlock()
 	}
 	from := remoteName(p)
-	q := SubscriptionQuota{Provider: p.ID + "/" + remoteKeyCard, Name: from, Icon: "myna", User: name, Kind: "plan", From: from, Windows: []QuotaWindow{}}
+	q := SubscriptionQuota{Provider: p.ID + "/" + remoteKeyCard, Name: from, Icon: "owl", User: name, Kind: "plan", From: from, Windows: []QuotaWindow{}}
 	if r.got == nil {
 		q.Error = r.err
 		return q
@@ -186,7 +186,7 @@ func keyLimitCard(a *remoteKeyAnswer) (*GatewayKeyLimit, []QuotaWindow) {
 	}
 	g := &GatewayKeyLimit{Limited: true, Period: l.Period, Days: l.Days, Hours: l.Hours, Start: l.Start, Reset: l.Reset, Calls: l.Calls, Spent: l.Spent, Unpriced: l.Unpriced}
 	all := a.Limits
-	if len(all) == 0 { // a myna from before #2227 tells one
+	if len(all) == 0 { // a owl from before #2227 tells one
 		all = []remoteKeyLimit{*l}
 	}
 	var ws []QuotaWindow
@@ -266,9 +266,9 @@ func askRemoteKeyLimit(ctx context.Context, p Provider, key string) (*remoteKeyA
 	}
 	var a remoteKeyAnswer
 	if err := json.Unmarshal(b, &a); err != nil || a.Limited == nil {
-		// not the answer of a myna's keyLimit: something else at that
+		// not the answer of a owl's keyLimit: something else at that
 		// address, or a reply cut short
-		return nil, fmt.Errorf("%s answered its key's limit in a form myna doesn't read", remoteName(p))
+		return nil, fmt.Errorf("%s answered its key's limit in a form owl doesn't read", remoteName(p))
 	}
 	return &a, nil
 }

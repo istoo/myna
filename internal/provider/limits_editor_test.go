@@ -4,8 +4,8 @@ import (
 	"maps"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // A provider's editor sets its reply limits as a whole, as it sets its

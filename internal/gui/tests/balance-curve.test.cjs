@@ -74,9 +74,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
-        if (range) await page.addInitScript((r) => localStorage.setItem("myna.quotaRange", r), range);
+        if (range) await page.addInitScript((r) => localStorage.setItem("owl.quotaRange", r), range);
         await page.route("**/*", serve(lang, theme, fixtures(Date.now())));
-        await page.goto("http://myna.test/?view=usage");
+        await page.goto("http://owl.test/?view=usage");
         return page;
       };
 
@@ -149,7 +149,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.setDefaultNavigationTimeout(60000);
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve("en", theme, fixtures(Date.now()), colorblind));
-      await page.goto("http://myna.test/?view=usage");
+      await page.goto("http://owl.test/?view=usage");
       const curve = page.locator(".subscription-card", { hasText: "DeepSeek" }).locator(".balance-curve");
       await curve.waitFor();
       const got = await curve.evaluate((c) => {

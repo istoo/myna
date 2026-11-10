@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 func forgetLastProviders() {
@@ -75,7 +75,7 @@ func TestLastKnownProviders(t *testing.T) {
 		t.Errorf("the kept list is readable by others: %v", fi.Mode())
 	}
 
-	// myna starts again: the list kept is served, marked as such
+	// owl starts again: the list kept is served, marked as such
 	forgetLastProviders()
 	var last list
 	if err := json.Unmarshal([]byte(get("/api/providers?last=1")), &last); err != nil {

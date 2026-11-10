@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A key's own limit on requests at once is set, lifted and given back to
@@ -20,9 +20,9 @@ func TestLaneLimitRoutes(t *testing.T) {
 	t.Setenv("USERPROFILE", home)
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
-	// no gateway here: a myna running on this computer must not answer
+	// no gateway here: a owl running on this computer must not answer
 	// /api/lanes through its own address
-	t.Setenv("MYNA_ADDR", "127.0.0.1:0")
+	t.Setenv("OWL_ADDR", "127.0.0.1:0")
 	p := provider.Provider{ID: "lane-test", Name: "Lane", Chat: "https://example.invalid/v1", Key: "primary", Keys: []provider.KeyAccount{{Key: "second"}}}
 	if err := provider.Save(p); err != nil {
 		t.Fatal(err)

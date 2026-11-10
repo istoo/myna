@@ -13,11 +13,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/sessions"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/sessions"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/usage"
 )
 
 type codexTestCall struct {
@@ -346,7 +346,7 @@ func TestCodexSessionAPIAddsOwnModelEffort(t *testing.T) {
 		t.Fatalf("GUI usage requests: %d %s", guiUsage.Code, guiUsage.Body)
 	}
 	gwUsage := httptest.NewRecorder()
-	gwRequest := httptest.NewRequest("GET", "/v1/myna/usage/requests?period=all", nil)
+	gwRequest := httptest.NewRequest("GET", "/v1/owl/usage/requests?period=all", nil)
 	gwRequest.RemoteAddr = "127.0.0.1:5000"
 	gateway.New().Handler().ServeHTTP(gwUsage, gwRequest)
 	if gwUsage.Code != http.StatusOK {

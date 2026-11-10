@@ -7,13 +7,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/agentenv"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/agentenv"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // Settings' Codex auto-review model (#938) is set on its own: a model or
-// group myna serves (one it doesn't, or a name that is no model's id, is
+// group owl serves (one it doesn't, or a name that is no model's id, is
 // refused and the value kept), or back to Codex's own pick; the Settings
 // page's other saves keep it; and Codex's list's tag changes with it, so
 // Codex asks for the list again.

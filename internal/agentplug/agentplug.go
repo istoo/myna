@@ -1,13 +1,13 @@
 // Package agentplug runs the agents plugins add: a module, named by a
-// plugin's package.json myna.agent, that says where an agent myna has
+// plugin's package.json owl.agent, that says where an agent owl has
 // no wiring of its own keeps its model, and what else to write there for
-// it to use myna's gateway. internal/agent makes each one an Agent.
+// it to use owl's gateway. internal/agent makes each one an Agent.
 //
 // A module exports
 //
 //	export const agent = {
 //	  id: "aider", name: "Aider",
-//	  config: "~/.aider.conf.yml", // the file myna edits
+//	  config: "~/.aider.conf.yml", // the file owl edits
 //	  model: "model",              // the key path of the model in it
 //	  prefix: "openai/",           // what the agent wants before the id
 //	}
@@ -15,15 +15,15 @@
 //	  return { "openai-api-base": gateway.v1, "openai-api-key": gateway.key }
 //	}
 //
-// and it runs in moejs in myna's own process, as gateway middleware
+// and it runs in moejs in owl's own process, as gateway middleware
 // does: there is no Node here, so a package it imports is bundled into it.
 //
 // An agent whose model is picked in the agent itself (Raycast's own
 // picker, among the models connect writes) leaves model out: it is connect
-// only, a switch on the Agents page as an app whose one setting is myna
+// only, a switch on the Agents page as an app whose one setting is owl
 // as its provider is, and connect is called without a model (#2374).
 //
-// The agent export may also say where its agent reads what myna's
+// The agent export may also say where its agent reads what owl's
 // Library gives (internal/library): an instructions file, an MCP file in
 // one of MCPFormats, and a skills folder; each is optional.
 //
@@ -50,8 +50,8 @@ import (
 	"time"
 
 	"github.com/MoeForge/moejs"
-	"github.com/istoo/myna/internal/jsmod"
-	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/owl/internal/jsmod"
+	"github.com/istoo/owl/internal/plugin"
 )
 
 // Formats are the config files an agent plugin's file may be, by the
@@ -272,7 +272,7 @@ func Compile(spec, file string) (*Agent, error) {
 			}
 		}
 	}
-	// connect only: with no model key, connect's keys are all myna
+	// connect only: with no model key, connect's keys are all owl
 	// writes, so a module with neither would write nothing
 	if a.Desc.Model == "" && !a.has {
 		return nil, errors.New("agent.model names no key, and there is no connect to write the gateway: say one or both")

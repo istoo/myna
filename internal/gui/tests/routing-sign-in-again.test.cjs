@@ -75,7 +75,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const errors = [], signins = [];
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", serve(lang, signins));
-          await page.goto("http://myna.test/?view=routing");
+          await page.goto("http://owl.test/?view=routing");
           const [needs, again, past] = words[lang];
           const stale = page.locator(".rt-act", { hasText: "stale@example.com" }).first();
           await stale.locator(".tally .bad", { hasText: needs }).waitFor();

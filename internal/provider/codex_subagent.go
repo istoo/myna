@@ -5,16 +5,16 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // Codex's lead picks the model of each subagent it spawns by itself, in
 // spawn_agent's model argument (willz on Discord: gpt-6-astra), and its
 // own config can't overrule that pick: [agents] default_subagent_model is
 // only the default for a spawn that names none. settings.CodexSubagentModel
-// is the model myna puts Codex's subagents on, whatever the lead asked
+// is the model owl puts Codex's subagents on, whatever the lead asked
 // for: the gateway rewrites a subagent's request (x-openai-subagent
-// collab_spawn) to it. Any model myna serves may be set (#1633: a lead
+// collab_spawn) to it. Any model owl serves may be set (#1633: a lead
 // on a chat provider's model, its subagents wanted on that provider too).
 // A subagent's task the ChatGPT backend sealed, its lead having run there,
 // opens only on a ChatGPT account again: the gateway leaves such a
@@ -64,7 +64,7 @@ func chatGPTEntry(e Entry) bool {
 }
 
 // CodexSubagentUnserved says why Codex's subagents can't be put on id now,
-// "" when myna serves it.
+// "" when owl serves it.
 func CodexSubagentUnserved(id string) string {
 	served := Served()
 	for _, e := range served {
@@ -73,28 +73,28 @@ func CodexSubagentUnserved(id string) string {
 		}
 	}
 	if !CodexAccountModel(id) {
-		return "myna doesn't serve it now"
+		return "owl doesn't serve it now"
 	}
 	for _, e := range served {
 		if chatGPTEntry(e) {
-			return "no ChatGPT account on in myna serves it"
+			return "no ChatGPT account on in owl serves it"
 		}
 	}
-	return "no ChatGPT account is on in myna"
+	return "no ChatGPT account is on in owl"
 }
 
 // SetCodexSubagentModel puts Codex's subagents on id, a model or routing
-// group of myna's (provider/model, group/<id>); "" leaves them on the
-// model their lead asks for, CodexSubagentLead puts them on the lead's. One myna doesn't serve now is kept all the
+// group of owl's (provider/model, group/<id>); "" leaves them on the
+// model their lead asks for, CodexSubagentLead puts them on the lead's. One owl doesn't serve now is kept all the
 // same — a backup or profile put back on a computer whose providers
 // differ, or an account signed in again later — and the gateway leaves
 // subagents on the model asked for until it is served, saying why in the
 // route trace. One of Codex's own bare names is refused: it names no
-// model of myna's to put the request on.
+// model of owl's to put the request on.
 func SetCodexSubagentModel(id string) error {
 	id = strings.TrimSpace(id)
 	if pid, model, ok := strings.Cut(id, "/"); id != "" && id != CodexSubagentLead && (!ok || pid == "" || model == "") {
-		return fmt.Errorf("Codex's subagents can't be put on %q: pick one of myna's models (provider/model)", id)
+		return fmt.Errorf("Codex's subagents can't be put on %q: pick one of owl's models (provider/model)", id)
 	}
 	s := settings.Load()
 	if s.CodexSubagentModel == id {

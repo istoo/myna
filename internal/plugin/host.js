@@ -1,22 +1,22 @@
-// myna's plugin host: runs OpenCode (v1) server plugins under Bun and
-// answers myna over stdin/stdout, one JSON message a line.
+// owl's plugin host: runs OpenCode (v1) server plugins under Bun and
+// answers owl over stdin/stdout, one JSON message a line.
 //
-// myna → host: {id, method, params}; the host answers {id, result} or
+// owl → host: {id, method, params}; the host answers {id, result} or
 // {id, error}. A fetch streams its reply first: {id, event: "head", status,
 // headers}, then {id, event: "chunk", data} (base64) as the body comes, then
 // {id, result: null}. {method: "abort", params: {id}} cancels one, and
 // {method: "credit", params: {id, n}} gives a fetch back the n charged bytes
 // its reader took (the payload it read, and a frame's overhead once the frame
 // is done), so it may send that much more. A fetch starts with the window
-// myna gave it and sends no more than that ahead of its reader, so a slow
+// owl gave it and sends no more than that ahead of its reader, so a slow
 // reader pauses its upstream instead of the host buffering without bound.
-// host → myna, unasked: {event: "log", level, message} and {event:
+// host → owl, unasked: {event: "log", level, message} and {event:
 // "toast", ...} (what a plugin logs or shows), {event: "auth", provider}
 // (a sign-in the host saved or refreshed).
 //
 // The plugins get what OpenCode hands them (PluginInput): a client whose
-// auth.set saves to myna's plugin-auth.json in OpenCode's auth.json shape,
-// tui.showToast and app.log, config.get; Bun's $; the folder myna keeps
+// auth.set saves to owl's plugin-auth.json in OpenCode's auth.json shape,
+// tui.showToast and app.log, config.get; Bun's $; the folder owl keeps
 // its files in. What else a plugin asks the client for answers {data:
 // undefined}.
 //
@@ -47,8 +47,8 @@ const rpcWrite = process.stdout.write.bind(process.stdout)
 const hostNonce = (() => {
   try {
     const env = globalThis.process?.env
-    const n = env?.MYNA_HOST_NONCE || ""
-    if (env) delete env.MYNA_HOST_NONCE
+    const n = env?.OWL_HOST_NONCE || ""
+    if (env) delete env.OWL_HOST_NONCE
     return n
   } catch {
     return ""
@@ -188,7 +188,7 @@ const MAX_FRAME = 64 << 10
 // keeps a producer of tiny frames from filling a window with structs.
 const FRAME_OVERHEAD = 2048
 
-// HEAD_MAX and HEAD_ENTRIES are myna's own head-envelope policy, not HTTP's:
+// HEAD_MAX and HEAD_ENTRIES are owl's own head-envelope policy, not HTTP's:
 // a fetch's head carries at most HEAD_MAX header bytes (the UTF-8 bytes of
 // every name and value, plus HEAD_ENTRY_COST an entry) and HEAD_ENTRIES
 // entries, counted the same by Go before it is queued, so a vendor's unbounded
@@ -235,27 +235,27 @@ function makeGate(window) {
 }
 
 // A plugin writing to stdout would break the protocol: everything it
-// prints goes to stderr, which myna logs.
+// prints goes to stderr, which owl logs.
 const toErr = (...xs) => process.stderr.write(xs.map((x) => (typeof x === "string" ? x : Bun.inspect(x))).join(" ") + "\n")
 console.log = console.info = console.debug = console.warn = toErr
 process.stdout.write = (chunk, enc, cb) => process.stderr.write(chunk, enc, cb)
 
 // Nor may a program a plugin starts have them: one given the host's stdin
-// reads myna's messages away (pi-devin-plus runs `devin auth login` with
+// reads owl's messages away (pi-devin-plus runs `devin auth login` with
 // stdio "inherit", which took the next requests as its answer and gave up,
 // "Login canceled"), and its stdout is the host's answers. It reads
 // nothing instead and writes to stderr. node:child_process starts every
 // program through Bun.spawn and Bun.spawnSync, so these see all of them.
 //
 // And it has the proxy the plugin's own fetches take, as a built-in's CLI
-// had myna's (netproxy.Env): the host has its *_PROXY only as
-// MYNA_*_PROXY (see below), so `grok login`, which the Grok plugin runs,
+// had owl's (netproxy.Env): the host has its *_PROXY only as
+// OWL_*_PROXY (see below), so `grok login`, which the Grok plugin runs,
 // went out with none and, where x.ai is reached only through one, printed
 // no link to open (𝕏 on Discord). One the plugin set itself is kept.
 // Node's fetch goes past *_PROXY unless NODE_USE_ENV_PROXY=1 says to take
 // them, so a plugin downloading in a Node program it starts went out with
 // none and failed where the vendor is reached only through one (larchsis
-// on 𝕏, Windows 11, a proxy set in myna only). It is told to, unless
+// on 𝕏, Windows 11, a proxy set in owl only). It is told to, unless
 // the plugin said otherwise.
 const own = (v, fd) => v === "inherit" || v === fd || v === (fd ? process.stdout : process.stdin)
 const PROXY_VARS = ["HTTPS_PROXY", "HTTP_PROXY", "ALL_PROXY"]
@@ -275,13 +275,13 @@ function proxied(env) {
   return env
 }
 // And a program started with no folder of its own runs in workDir, not
-// the host's: the host runs in myna's config folder, beside
+// the host's: the host runs in owl's config folder, beside
 // settings.json and providers.json, so whatever a program saved by a
 // relative name went there, and a tool told to write "providers.json"
-// would write over myna's. The chat page plugin (myna-chat) starts
+// would write over owl's. The chat page plugin (owl-chat) starts
 // the user's MCP servers this way and runs their tools for a model,
 // whose fetched pages and saved files (jiakun_zhao on 𝕏 asked whose
-// page_<hash>.html and myna_*.md files they had found) belong in a
+// page_<hash>.html and owl_*.md files they had found) belong in a
 // folder of their own. A folder the plugin gives is kept.
 const workDir = path.join(process.cwd(), "plugin-work")
 let workReady = false
@@ -366,8 +366,8 @@ let config = { provider: {} } // what the plugins' config hooks made of it
 // listing. A plugin stuck on its vendor (a sign-in answered 401 and tried
 // again, a vendor that never answers) is then given up on alone: the
 // plugins load side by side and every other one is listed meanwhile,
-// rather than all waiting behind it until myna's own deadline fails the
-// whole host or the whole list. myna sets both at init.
+// rather than all waiting behind it until owl's own deadline fails the
+// whole host or the whole list. owl sets both at init.
 let loadWait = 20 * 1000
 let listWait = 20 * 1000
 
@@ -389,14 +389,14 @@ function inTime(step, ms, what) {
 // (#237) goes through it, and so does every fetch the plugin makes for
 // it; one for a provider set to "direct" goes through none. Bun reads
 // *_PROXY once, and a fetch given no proxy option can't be told to skip
-// them, so the host is started with them as MYNA_*_PROXY and each
-// fetch is given myna's own here when it has none of its own.
+// them, so the host is started with them as OWL_*_PROXY and each
+// fetch is given owl's own here when it has none of its own.
 // Loopback never goes through one.
 const via = new AsyncLocalStorage() // the proxy: "", "direct" or its URL
 const bunFetch = globalThis.fetch
 
 function proxyVar(k) {
-  return process.env["MYNA_" + k] || process.env["MYNA_" + k.toLowerCase()] || ""
+  return process.env["OWL_" + k] || process.env["OWL_" + k.toLowerCase()] || ""
 }
 
 const globalProxy = {
@@ -421,9 +421,9 @@ function loopback(host) {
   return host === "localhost" || host.endsWith(".localhost") || host === "::1" || /^127\./.test(host)
 }
 
-// A host on the user's own network — another computer's myna, an LLM
+// A host on the user's own network — another computer's owl, an LLM
 // relay on the NAS — is reached directly, whatever proxy the host was
-// started with, as myna's own requests reach it (netproxy.onLAN, lan.go,
+// started with, as owl's own requests reach it (netproxy.onLAN, lan.go,
 // #982, #1572): a proxy is for reaching vendors; one elsewhere can't reach
 // the user's network, and one here only goes there directly itself. A
 // provider's own proxy (via) is still taken as it is. The rule is lan.go's:
@@ -598,24 +598,24 @@ function asked(input, init) {
   )
 }
 
-// MYNA_ONLY are the headers myna tells a plugin's fetch where the agent
+// OWL_ONLY are the headers owl tells a plugin's fetch where the agent
 // that asked works (WorkDirHeader and WorkGitHeader in internal/provider),
 // that a queue needn't be waited out (FallbackHeader), and the session and
 // subagent the agent named (SessionToPluginHeader, SubagentToPluginHeader):
 // for the plugin to read, never for its vendor, so a plugin that sends on
 // the headers it was given sends them nowhere.
-const MYNA_ONLY = ["x-magpie-work-dir", "x-magpie-work-git", "x-magpie-fallback", "x-magpie-session", "x-magpie-subagent"]
+const OWL_ONLY = ["x-magpie-work-dir", "x-magpie-work-git", "x-magpie-fallback", "x-magpie-session", "x-magpie-subagent"]
 
 function unsaid(input, init) {
-  if (input instanceof Request && MYNA_ONLY.some((k) => input.headers.has(k))) {
+  if (input instanceof Request && OWL_ONLY.some((k) => input.headers.has(k))) {
     const h = new Headers(input.headers)
-    for (const k of MYNA_ONLY) h.delete(k)
+    for (const k of OWL_ONLY) h.delete(k)
     input = new Request(input, { headers: h })
   }
   if (init?.headers) {
     const h = new Headers(init.headers)
-    if (MYNA_ONLY.some((k) => h.has(k))) {
-      for (const k of MYNA_ONLY) h.delete(k)
+    if (OWL_ONLY.some((k) => h.has(k))) {
+      for (const k of OWL_ONLY) h.delete(k)
       init = { ...init, headers: h }
     }
   }
@@ -623,7 +623,7 @@ function unsaid(input, init) {
 }
 
 // signInSignal is the signal of the sign-in a plugin's step runs for: a
-// fetch made for it fails once myna has given the sign-in up.
+// fetch made for it fails once owl has given the sign-in up.
 const signInSignal = new AsyncLocalStorage()
 
 // authSignIn marks the steps of a sign-in, which may create the account
@@ -632,7 +632,7 @@ const signInSignal = new AsyncLocalStorage()
 const authSignIn = new AsyncLocalStorage()
 
 // whileSigningIn gives a fetch made for a sign-in that sign-in's signal
-// beside its own, so a sign-in myna gave up on stops polling its vendor
+// beside its own, so a sign-in owl gave up on stops polling its vendor
 // (#5016).
 function whileSigningIn(input, init) {
   const signal = signInSignal.getStore()
@@ -677,8 +677,8 @@ Object.defineProperty(globalThis, "fetch", {
 // An HTTP/2 session a plugin opens itself goes through the proxy its
 // fetches take, as a built-in's requests on Go's transport did. Cursor's
 // plugin runs agent.v1.AgentService/Run on node:http2, which Bun connects
-// directly, *_PROXY or not: where Cursor is reached only through myna's
-// proxy (the system's, or one set in myna), its sign-in, models and
+// directly, *_PROXY or not: where Cursor is reached only through owl's
+// proxy (the system's, or one set in owl), its sign-in, models and
 // usage came through and every chat went out without it (#1035).
 const h2connect = http2.connect
 http2.connect = function connect(authority, options, listener) {
@@ -794,7 +794,7 @@ function tunnel(which, host, port) {
 // from its last good generation, plugin-auth.json.bak, which each write
 // keeps first; a write over one that doesn't read copies it aside
 // (plugin-auth.json.bad-<time>) first, and never writes none over it. As
-// internal/lastgood does for myna's own files.
+// internal/lastgood does for owl's own files.
 
 // parseAuth is the sign-ins in text, null when it isn't one JSON object.
 function parseAuth(text) {
@@ -1030,7 +1030,7 @@ async function writeAuth(all) {
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 // Two hosts run at once while one is restarted (the old one finishing its
-// calls), and myna writes the file when no host runs: each change to it
+// calls), and owl writes the file when no host runs: each change to it
 // is made under plugin-auth.json.lock, read afresh and written back with
 // only its own accounts changed, so a host never writes another's newer
 // token away with what it read before. The change itself is synchronous;
@@ -1260,7 +1260,7 @@ function makeClient() {
             // not this account.
             if (!(key in all) && s?.provider === id && !authSignIn.getStore()) return false
             // The sign-in the request read has been renewed or replaced
-            // since (myna's own renewal, another host, a move): the write
+            // since (owl's own renewal, another host, a move): the write
             // is the token from before that, and putting it over the newer
             // one hands the vendor a spent refresh token. A sign-in may
             // replace what it is signing in to.
@@ -1358,7 +1358,7 @@ function entries(target) {
     // a command alone (bin), an MCP server, is no plugin at all (#1327)
     const cmd = pkg?.bin ? ", only a command (bin). If it is an MCP server, add it under Library → MCP servers instead" : ""
     // said without a stack: there is no fault in the host to trace
-    throw Object.assign(new Error(`${pkg?.name || target} isn't an OpenCode or myna plugin: its package names no file to load (no main or exports in package.json, no index file)${cmd}`), { plain: true })
+    throw Object.assign(new Error(`${pkg?.name || target} isn't an OpenCode or owl plugin: its package names no file to load (no main or exports in package.json, no index file)${cmd}`), { plain: true })
   }
   return [...new Set(out)]
 }
@@ -1391,10 +1391,10 @@ async function loadPlugins(list) {
     experimental_workspace: { register() {} },
     serverUrl: new URL("http://127.0.0.1:4096"),
     $: Bun.$,
-    // myna's own (OpenCode has none): the plugin's options as the user
-    // set them in myna, read when wanted, so a change reaches the
+    // owl's own (OpenCode has none): the plugin's options as the user
+    // set them in owl, read when wanted, so a change reaches the
     // plugin without a restart (#2038)
-    myna: { option: optionValue, options: optionValues, load: reportLoad, usage: reportUsage, account: keyFor },
+    owl: { option: optionValue, options: optionValues, load: reportLoad, usage: reportUsage, account: keyFor },
   }
   // pi's packages and extensions are loaded as pi loads them (pi.js)
   let pi
@@ -1421,7 +1421,7 @@ async function loadPlugins(list) {
     let gateway
     if (p.gateway) {
       gateway = await import(pathToFileURL(p.gateway).href)
-      if (typeof gateway.onRequest !== "function") throw new Error("myna.hooks exports no onRequest")
+      if (typeof gateway.onRequest !== "function") throw new Error("owl.hooks exports no onRequest")
     }
     let fns = []
     // A gateway-only package needs no OpenCode entry. Mixed packages
@@ -1620,9 +1620,9 @@ function auths() {
 // signsIn are the provider ids the plugin spec's auth hooks name.
 const signsIn = (spec) => [...new Set(hooks.filter((h) => h.spec === spec && h.hooks.auth?.provider).map((h) => h.hooks.auth.provider))]
 
-// withProviders is a loaded plugin as init tells myna of it: the provider
+// withProviders is a loaded plugin as init tells owl of it: the provider
 // ids it signs in to, and for each one another plugin serves (two plugins
-// naming one id: the host runs one), the plugin that does. myna says so
+// naming one id: the host runs one), the plugin that does. owl says so
 // on the plugin's row rather than leave its provider missing. And the
 // tools it gives (toolList).
 function withProviders(l) {
@@ -1641,9 +1641,9 @@ function withProviders(l) {
 //
 // A plugin's tools are OpenCode's tool hook: {tool: {name: {description,
 // args, execute(args, ctx)}}}, args a zod shape (OpenCode's tool.schema is
-// zod) or a JSON Schema. myna offers them to every agent through its
+// zod) or a JSON Schema. owl offers them to every agent through its
 // plugin tools MCP server (internal/gateway/tools_mcp.go), so each is told
-// to myna by its name, description and a JSON Schema of its arguments.
+// to owl by its name, description and a JSON Schema of its arguments.
 
 const TOOL_NAME = /^[A-Za-z0-9_-]{1,48}$/
 
@@ -1795,13 +1795,13 @@ async function runTool({ spec, name, args, ms, agent }) {
 
 // ---- web search APIs --------------------------------------------------------
 //
-// A plugin's search hook adds web search APIs to myna's own list (Tavily,
+// A plugin's search hook adds web search APIs to owl's own list (Tavily,
 // Brave, …): {search: {<id>: {name, keysURL?, keyOptional?, url?, execute}}}.
 // execute({query, count, key, url}, ctx) returns the pages found:
 // [{title, url, text?, age?}] (or {results: [...]}). A throw with a numeric
-// status (401, 402, 403, 429…) is the API refusing the key, which myna
+// status (401, 402, 403, 429…) is the API refusing the key, which owl
 // rests as it does a built-in's; retryAfter is its Retry-After.
-// myna keeps the keys, order and limits, and masks the query before it.
+// owl keeps the keys, order and limits, and masks the query before it.
 
 const SEARCH_ID = /^[a-z0-9][a-z0-9-]{0,31}$/
 
@@ -1911,7 +1911,7 @@ const MODALITIES = ["text", "image", "audio", "video", "pdf"]
 const modalities = (list) => Object.fromEntries(MODALITIES.map((k) => [k, (list ?? ["text"]).includes(k)]))
 
 // kinds are the kinds a capabilities.input or .output says yes to, for
-// myna: undefined when the plugin gave none.
+// owl: undefined when the plugin gave none.
 function kinds(c) {
   if (!c || typeof c !== "object") return undefined
   const out = Object.keys(c).filter((k) => c[k] === true)
@@ -1967,8 +1967,8 @@ function fromModelsDev(p, m) {
 // info is what OpenCode knows of provider id, its models as the plugin
 // lists them for account key (the first when none); strict fails where the
 // plugin's list does, rather than keeping the list it was given.
-// quiet asks no models hook (a provider switched off in myna): the
-// list is told as fallen back, which keeps the one myna had.
+// quiet asks no models hook (a provider switched off in owl): the
+// list is told as fallen back, which keeps the one owl had.
 async function info(id, key, strict, limit, quiet) {
   const md = mdev()[id]
   const cfg = config.provider?.[id]
@@ -1980,10 +1980,10 @@ async function info(id, key, strict, limit, quiet) {
     options: { ...(cfg?.options ?? {}) },
     npm: cfg?.npm ?? md?.npm,
     api: cfg?.api ?? md?.api,
-    // myna's own field: the plugin serves a decision API (System One)
+    // owl's own field: the plugin serves a decision API (System One)
     // for this provider, asked at its base /systemone through its fetch
     decide: cfg?.decide === true,
-    // myna's own field: the provider's upstream answers a web search
+    // owl's own field: the provider's upstream answers a web search
     // tool offered on its Anthropic or Responses API by itself, so a
     // client's web_search goes to it as sent (#2027)
     searches: cfg?.searches === true,
@@ -2015,7 +2015,7 @@ async function info(id, key, strict, limit, quiet) {
       // what the config itself says of the model's sampling, as Factory's
       // config models say temperature of their OpenAI route (plugins#154)
       ...(m.temperature !== undefined ? { temperature: m.temperature } : {}),
-      // myna's own mark: a decision model, answering System One
+      // owl's own mark: a decision model, answering System One
       ...(typeof m.decides === "boolean" ? { decides: m.decides } : was?.decides !== undefined ? { decides: was.decides } : {}),
       // and one that searches the web by itself, asked in plain words
       ...(typeof m.searches === "boolean" ? { searches: m.searches } : was?.searches !== undefined ? { searches: was.searches } : {}),
@@ -2043,11 +2043,11 @@ async function info(id, key, strict, limit, quiet) {
       const ask = () => pluginALS.run(h.spec, () => listing.run(l, () => inScope(id, k, () => ph.models(given, { auth: authCopy(k) }))))
       const next = limit > 0 ? await inTime(ask, Math.max(limit - (Date.now() - began), 0), "the plugin's model list") : await ask()
       // a hook that asked its vendor, got no list and gave back the one it
-      // was given fell back: myna keeps the list it had, as a built-in
+      // was given fell back: owl keeps the list it had, as a built-in
       // whose fetch failed keeps the one it fetched last; so does one that
-      // says so, handing back a list of its own (Symbol.for("myna.fellBack")
+      // says so, handing back a list of its own (Symbol.for("owl.fellBack")
       // on it: Command Code's Go table, ZCode's models)
-      out.fellBack = (next === given.models && l.tried && !l.lastOk) || next?.[Symbol.for("myna.fellBack")] === true
+      out.fellBack = (next === given.models && l.tried && !l.lastOk) || next?.[Symbol.for("owl.fellBack")] === true
       // why, as far as the host saw it: the editor says so rather than
       // show the plugin's short defaults as if they were the account's
       if (out.fellBack) out.listError = l.said || "the plugin couldn't get its vendor's list"
@@ -2067,7 +2067,7 @@ async function info(id, key, strict, limit, quiet) {
       const r = reach.getStore()
       if (r && e?.signIn === "expired") r.refused ??= e?.message ?? String(e)
       // a hook that threw on its vendor's failure has no list to tell:
-      // myna keeps the one it had, as for one that gave its defaults back
+      // owl keeps the one it had, as for one that gave its defaults back
       out.fellBack = true
       out.listError = e?.message ?? String(e)
       send({ event: "log", level: "error", message: `${h.spec}: provider.models: ${e?.message ?? e}` })
@@ -2097,22 +2097,22 @@ function keepInfo(key, p, gen) {
   if (gen === infoGen && !p.failed && !p.late) infos.set(key, { gen, md: mdev(), info: p })
 }
 
-// shown is a plugin's string as myna shows it: trimmed and at most n
+// shown is a plugin's string as owl shows it: trimmed and at most n
 // characters, "" for anything else.
 const shown = (v, n) => (typeof v === "string" ? v.trim().slice(0, n) : "")
 
-// optionsOf are the switches a plugin declares for its provider, myna's
+// optionsOf are the switches a plugin declares for its provider, owl's
 // own field (#2038, Vocllum): auth.options, each {key, label, description?,
 // default?, confirm?, labels?, descriptions?, confirms?, filtersModels?}.
-// myna shows each as an Off/On switch in the provider's editor and keeps
-// what the user sets; the plugin reads it with input.myna.option(provider,
+// owl shows each as an Off/On switch in the provider's editor and keeps
+// what the user sets; the plugin reads it with input.owl.option(provider,
 // key). A switch is kept and handed over, and the models listed again (one
 // may go by it); nothing else is run. Keys are [a-z0-9_-], 1–40 long, the
 // first of a key kept; at most MAX_OPTIONS; one without a key or a label is
 // left out. labels, descriptions and confirms are the same words in the
 // window's other languages ({"zh": "…", "zh-TW": "…", "ja": "…", "de":
 // "…"}), as a page's titles are (plugins#590): label stays a string beside
-// them, so an older myna still reads the option. filtersModels says the
+// them, so an older owl still reads the option. filtersModels says the
 // plugin's model list leaves models out while the switch is on, which the
 // editor says by the models.
 const MAX_OPTIONS = 16
@@ -2164,7 +2164,7 @@ function optionValues(provider) {
   return out
 }
 
-// reportLoad is myna.load(provider, loads): how busy each of the
+// reportLoad is owl.load(provider, loads): how busy each of the
 // provider's models is now, as a plugin knows from its vendor, for the
 // model list to show and routing to weigh (axelburks on Discord). loads
 // maps a model id to a percent from 0, past 100 for a vendor that queues
@@ -2176,8 +2176,8 @@ function optionValues(provider) {
 const LOAD_MODELS = 1000
 const LOAD_MOST = 10000 // a sanity cap: 100 times full, so the UI stays sane
 function reportLoad(provider, loads) {
-  if (typeof provider !== "string" || !provider || provider.length > 200) throw new TypeError("myna.load: provider must be a provider id")
-  if (!loads || typeof loads !== "object" || Array.isArray(loads)) throw new TypeError("myna.load: loads must map model ids to a number from 0 up, or null")
+  if (typeof provider !== "string" || !provider || provider.length > 200) throw new TypeError("owl.load: provider must be a provider id")
+  if (!loads || typeof loads !== "object" || Array.isArray(loads)) throw new TypeError("owl.load: loads must map model ids to a number from 0 up, or null")
   const out = {}
   let n = 0
   for (const [id, v] of Object.entries(loads)) {
@@ -2192,26 +2192,26 @@ function reportLoad(provider, loads) {
   return n
 }
 
-// reportUsage is myna.usage(provider, call): a request a plugin sent its
-// vendor on its own, outside any request myna handed it (Devin's cache
+// reportUsage is owl.usage(provider, call): a request a plugin sent its
+// vendor on its own, outside any request owl handed it (Devin's cache
 // keepalive ping, plugins#592), for the request log and the usage totals
 // to list and count. call is {kind, model, input?, output?, cacheRead?,
 // cacheWrite?, status?, ms?, error?, account?}: kind says what the
 // request was for ([a-z0-9_-], 1–40: "cache_keepalive"), model the
-// model's id as myna handed it to the plugin; the tokens are whole
+// model's id as owl handed it to the plugin; the tokens are whole
 // numbers from 0 (input without the cache's), status the vendor's (0 for
 // none), ms how long it took. account is the account the request was
-// sent for, as myna.account(provider) named it while a request of
-// myna's was in the plugin's hands; without it, the account of the
+// sent for, as owl.account(provider) named it while a request of
+// owl's was in the plugin's hands; without it, the account of the
 // request being served now, else the provider's first. It returns true
 // when the call was sent on.
 const USAGE_KIND = /^[a-z0-9_-]{1,40}$/
 function reportUsage(provider, call) {
-  if (typeof provider !== "string" || !provider || provider.length > 200) throw new TypeError("myna.usage: provider must be a provider id")
-  if (!call || typeof call !== "object" || Array.isArray(call)) throw new TypeError("myna.usage: call must be an object")
-  if (typeof call.kind !== "string" || !USAGE_KIND.test(call.kind)) throw new TypeError("myna.usage: kind must be 1–40 of [a-z0-9_-]")
+  if (typeof provider !== "string" || !provider || provider.length > 200) throw new TypeError("owl.usage: provider must be a provider id")
+  if (!call || typeof call !== "object" || Array.isArray(call)) throw new TypeError("owl.usage: call must be an object")
+  if (typeof call.kind !== "string" || !USAGE_KIND.test(call.kind)) throw new TypeError("owl.usage: kind must be 1–40 of [a-z0-9_-]")
   const model = shown(call.model, 200)
-  if (!model) throw new TypeError("myna.usage: model must be the model's id")
+  if (!model) throw new TypeError("owl.usage: model must be the model's id")
   const n = (v, most = 1e12) => (typeof v === "number" && Number.isFinite(v) && v > 0 ? Math.min(Math.floor(v), most) : 0)
   const account = typeof call.account === "string" && call.account && providerOf(call.account) === provider ? call.account : keyFor(provider)
   send({
@@ -2230,7 +2230,7 @@ function optionValue(provider, key) {
 }
 
 // methods are the auth hook's ways to sign in. An "api" one may say what
-// its key looks like (placeholder, myna's own: OpenCode's dialog says
+// its key looks like (placeholder, owl's own: OpenCode's dialog says
 // "API key"); its label titles the key's field, as OpenCode's does.
 function methods(auth) {
   return (auth.methods ?? []).map((m) => ({
@@ -2241,14 +2241,14 @@ function methods(auth) {
   }))
 }
 
-// iconOf is the picture a plugin gives its provider, myna's own field
+// iconOf is the picture a plugin gives its provider, owl's own field
 // (OpenCode's providers have none): the auth hook's icon, else
-// package.json's myna.icon. An https URL or a data:image URI; myna
+// package.json's owl.icon. An https URL or a data:image URI; owl
 // checks and keeps it (internal/provider), nothing is fetched here.
 function iconOf(a) {
   const ok = (v) => {
     const s = typeof v === "string" ? v.trim() : ""
-    // a data URI of a picture over 1 MB, myna's most, isn't carried
+    // a data URI of a picture over 1 MB, owl's most, isn't carried
     return s.length <= 3 << 19 && /^(https:\/\/|data:image\/)/i.test(s) ? s : ""
   }
   const own = ok(a.auth.icon)
@@ -2258,23 +2258,23 @@ function iconOf(a) {
 }
 
 // concurrencyOf is how many requests the plugin says each of its accounts
-// takes at once, myna's own field: the auth hook's maxConcurrency, else
-// package.json's myna.maxConcurrency. A whole number over 0, else none
+// takes at once, owl's own field: the auth hook's maxConcurrency, else
+// package.json's owl.maxConcurrency. A whole number over 0, else none
 // (0); the user's setting on the provider goes over it.
 function concurrencyOf(a) {
   return declared(a, "maxConcurrency")
 }
 
 // atOnceOf is how many of its accounts the plugin says may take requests
-// at the same time, myna's own field: the auth hook's maxAccounts, else
-// package.json's myna.maxAccounts, as concurrencyOf reads its own. The
+// at the same time, owl's own field: the auth hook's maxAccounts, else
+// package.json's owl.maxAccounts, as concurrencyOf reads its own. The
 // user's setting on the provider goes over it.
 function atOnceOf(a) {
   return declared(a, "maxAccounts")
 }
 
 // declared is a whole number over 0 the plugin declares under key, on its
-// auth hook or else in its package.json's myna, at most 1000; else 0.
+// auth hook or else in its package.json's owl, at most 1000; else 0.
 function declared(a, key) {
   const ok = (v) => (Number.isInteger(v) && v > 0 ? Math.min(v, 1000) : 0)
   const own = ok(a.auth[key])
@@ -2309,9 +2309,9 @@ function tiersOf(v) {
 // built-in fetches each account's list through the account's.
 async function providers({ proxies, off } = {}) {
   const stored = readAuth()
-  // a provider switched off in myna is asked nothing: its models hook
+  // a provider switched off in owl is asked nothing: its models hook
   // (and the sign-in renewal before it) would reach its vendor. It is
-  // told as fallen back, so myna keeps the list it had.
+  // told as fallen back, so owl keeps the list it had.
   const quiet = new Set(Array.isArray(off) ? off : [])
   // every provider is listed side by side, each models hook given
   // listWait: one whose vendor is stuck holds up no other's row
@@ -2408,7 +2408,7 @@ function rowOf(id, a, keys, stored, p, own) {
         outputsSaid: kindsSaid(m.capabilities?.output),
         // whether the model takes temperature and top_p, where something
         // said so (models.dev, the config, the models hook); unsaid goes
-        // to myna as nothing, which keeps them (#2492)
+        // to owl as nothing, which keeps them (#2492)
         ...(typeof m.temperature === "boolean" ? { temperature: m.temperature } : {}),
         released: m.release_date ?? "",
         cost: m.cost,
@@ -2427,7 +2427,7 @@ function rowOf(id, a, keys, stored, p, own) {
         // offered as a routing group's classifier
         decides: m.decides === true,
         // a model that searches the web by itself, asked in plain
-        // words, which myna may search with for other models
+        // words, which owl may search with for other models
         searches: m.searches === true,
       })),
   }
@@ -2448,7 +2448,7 @@ function applies(prompt, inputs) {
 
 // nextPrompt is the method's next question for inputs so far, as
 // OpenCode's CLI asks them: in order, those whose when/condition hold. A
-// method may ask its own way (myna's hook, which pi's sign-ins use, as
+// method may ask its own way (owl's hook, which pi's sign-ins use, as
 // they ask as they go): ask(inputs) → the next question, or null.
 async function nextPrompt(provider, index, inputs) {
   const m = authOf(provider).methods[index]
@@ -2503,9 +2503,9 @@ let nextSession = 1
 // come from one place from its first request on (#1663): authorize and the
 // callback that trades the code are both run under it.
 //
-// A sign-in myna gives up on (the user cancelled it, or it timed out)
+// A sign-in owl gives up on (the user cancelled it, or it timed out)
 // ends here as well (#5016): signal is aborted, the fetches the plugin
-// makes for it fail, the plugin's own wait is handed it (myna's hook:
+// makes for it fail, the plugin's own wait is handed it (owl's hook:
 // callback(code, { signal }), authorize(inputs, { signal }); OpenCode
 // passes none), and whatever the plugin answers after it is dropped,
 // nothing saved.
@@ -2517,7 +2517,7 @@ async function authorize({ provider, method, inputs, account, proxy }, signal) {
   // the inputs go only to a method that asks something, as OpenCode's TUI
   // (/connect) passes them: an object with none is how its CLI (opencode
   // auth login) calls, and a plugin told so asks its questions on the
-  // terminal, myna's stdin here (opencode-antigravity-auth waited on its
+  // terminal, owl's stdin here (opencode-antigravity-auth waited on its
   // "Project ID" prompt, the sign-in never starting)
   const a = await signingIn(signal, proxy ?? "", provider, key, () => m.authorize(m.prompts?.length ? inputs ?? {} : undefined, { signal }))
   if (signal?.aborted) throw abortedSignIn()
@@ -2531,7 +2531,7 @@ async function authorize({ provider, method, inputs, account, proxy }, signal) {
   const session = String(nextSession++)
   sessions.set(session, { provider, key, a, inputs, proxy: proxy ?? "" })
   // opened (not OpenCode's) is a page the plugin's own CLI opened already:
-  // Grok Build's `grok login` opens it on macOS and Windows, and myna's
+  // Grok Build's `grok login` opens it on macOS and Windows, and owl's
   // opening it too showed it twice (andyfmyth on X)
   return { ok: true, session, url: a.url ?? "", instructions: a.instructions ?? "", method: a.method, opened: a.opened === true }
 }
@@ -2581,7 +2581,7 @@ async function apiKey({ provider, method, inputs, key, account, proxy }, signal)
 
 // ---- renewing a sign-in ------------------------------------------------------
 
-// A plugin may leave renewing its accounts' tokens to myna (myna's own
+// A plugin may leave renewing its accounts' tokens to owl (owl's own
 // hook, which OpenCode ignores):
 //   auth.refresh(auth, provider) → the account's sign-in renewed: the
 //     fields to keep over the old ({ access, refresh, expires, … }), or
@@ -2591,7 +2591,7 @@ async function apiKey({ provider, method, inputs, key, account, proxy }, signal)
 //   auth.refreshLead: how long (ms) before expires a token is renewed,
 //     5 minutes when not said.
 //   auth.keepAlive: false leaves an account nothing uses to lapse; any
-//     other value has the myna serving the gateway renew it in the
+//     other value has the owl serving the gateway renew it in the
 //     background as it comes due too (keepSignedIn, #5080).
 // An OAuth sign-in whose expires is that close is renewed before its
 // loader, models, usage or a request runs, once at a time per account: the
@@ -2611,7 +2611,7 @@ function leadOf(a) {
 }
 
 // renewAt is when the sign-in at key is due to be renewed, 0 for never: an
-// OAuth one with an expiry, of a plugin that renews through myna.
+// OAuth one with an expiry, of a plugin that renews through owl.
 function renewAt(a, stored) {
   if (typeof a?.refresh !== "function" || stored?.type !== "oauth") return 0
   const exp = Number(stored.expires)
@@ -2635,7 +2635,7 @@ function renewal(provider, key) {
   pending++ // the host doesn't leave in the middle of it
   r = renew(provider, key, a).finally(() => {
     renewing.delete(key)
-    // nor does myna stop it in the middle of one (host.go's stop)
+    // nor does owl stop it in the middle of one (host.go's stop)
     send({ event: "renewing", count: renewing.size })
     done()
   })
@@ -2661,7 +2661,7 @@ async function fresh(provider, key) {
 // uses it (#5080: OrcaTerm's WeChat token lives two hours and can't be
 // renewed once it ends). It waits for the renewal to end and says what
 // came of it: due false, it wasn't due (renewed meanwhile, no expiry, a
-// plugin that doesn't renew through myna or said keepAlive false);
+// plugin that doesn't renew through owl or said keepAlive false);
 // renewed, the sign-in is a new one; error, why it couldn't be, and gone
 // whether the vendor turned it away for good (the account is marked, as a
 // request's renewal marks it). A renewal that failed lately isn't tried
@@ -2685,14 +2685,14 @@ async function keepSignedIn({ provider, account, proxy }) {
 }
 
 // keepsAlive says the plugin's sign-ins are renewed in the background as
-// they come due (keepSignedIn): any that renews through myna, unless
+// they come due (keepSignedIn): any that renews through owl, unless
 // its auth hook says keepAlive: false (a renewal that costs the account
 // something, or a refresh token another client holds too).
 function keepsAlive(a) {
   return typeof a?.refresh === "function" && a?.keepAlive !== false
 }
 
-// Each myna process runs a host of its own (the gateway, a CLI's quota
+// Each owl process runs a host of its own (the gateway, a CLI's quota
 // or usage, a host restarting), and each renews the same sign-in when it
 // comes due: a vendor that spends a refresh token once turned the second
 // away, and the account was marked signed out under the token the first
@@ -2783,7 +2783,7 @@ async function renewLocked(provider, key, a, was) {
     got = await inScope(provider, key, () => a.refresh(JSON.parse(JSON.stringify(was)), provider))
   } catch (e) {
     // the token was spent by a host that didn't wait for this one's lock
-    // (a myna from before it) and saved what it got: not signed out
+    // (a owl from before it) and saved what it got: not signed out
     if (changed(readAuthState().all[key], was)) {
       send({ event: "log", level: "error", message: `${auths().get(provider)?.spec ?? provider}: auth.refresh: ${e?.message ?? e} (renewed elsewhere meanwhile)` })
       forgetAccount(key)
@@ -2844,7 +2844,7 @@ async function load({ provider, account, proxy }) {
 // ---- usage -------------------------------------------------------------------
 
 // usage is how much of its allowance the account at key has used, as the
-// plugin's auth.usage says (myna's own hook, which OpenCode ignores):
+// plugin's auth.usage says (owl's own hook, which OpenCode ignores):
 //   auth.usage(getAuth, provider) → {
 //     plan?, user? (the account as the service names it), until?,
 //     renew?: "auto" | "off", balance?, error?,
@@ -2936,7 +2936,7 @@ async function usageOf(provider, account) {
 // ---- check-in ----------------------------------------------------------------
 
 // checkin presses the vendor's daily check-in (签到) for the account at key,
-// as the plugin's auth.checkin does it (myna's own hook, which OpenCode
+// as the plugin's auth.checkin does it (owl's own hook, which OpenCode
 // ignores; Lemon on Discord: 签到 belongs in the plugins):
 //   auth.checkin(getAuth, provider) → {
 //     outcome: "claimed" (checked in now) | "done" (in already today) |
@@ -2947,7 +2947,7 @@ async function usageOf(provider, account) {
 //     until? (when the vendor's own day turns: an RFC 3339 time or epoch
 //       milliseconds; Qoder's daily credits open at 10:00 UTC+8)
 //   }
-// myna asks once a Beijing day per account while the user has it on, and
+// owl asks once a Beijing day per account while the user has it on, and
 // again later that day after a failure, or at until; a hook that throws is
 // a failure.
 // Run in the account's scope, a token it renews is saved to that account.
@@ -3012,7 +3012,7 @@ async function doFetch(id, record, params) {
 // token: plugins#618) isn't the sign-in gone. So such a 401, with the
 // access token the request began with still the stored one and not due
 // yet, makes it due (expires 1) and keeps the sign-in: the plugin's
-// loader, or myna's auth.refresh, renews it on the next request. The
+// loader, or owl's auth.refresh, renews it on the next request. The
 // account is marked when the token was renewed for this request and
 // still turned away, or was due and the plugin didn't renew it; a
 // refresh the vendor refuses says so itself (signIn "expired"). A
@@ -3037,7 +3037,7 @@ async function staleAccess(key, before) {
 async function fetchAs(id, record, key, params) {
   const { controller: ctl, gate } = record
   const { provider, model, npm, url, method, headers, body, session } = params
-  // the sign-in as the request found it, before its loader or myna
+  // the sign-in as the request found it, before its loader or owl
   // renewed it: a 401 is judged against it (staleAccess)
   const before = key ? readAuth()[key] : undefined
   try {
@@ -3099,7 +3099,7 @@ async function fetchAs(id, record, key, params) {
     }
     const head = headCost(rh)
     if (head.entries > HEAD_ENTRIES || head.n > HEAD_MAX) {
-      // the reply's head is past myna's envelope: give the fetch up rather
+      // the reply's head is past owl's envelope: give the fetch up rather
       // than write a line the host would refuse, and let the body go
       throw new Error(`the reply's headers are past the host's head envelope (${HEAD_MAX} bytes or ${HEAD_ENTRIES} entries)`)
     }
@@ -3132,7 +3132,7 @@ async function fetchAs(id, record, key, params) {
     await sendForFetch(record, { id, result: null })
   } catch (e) {
     transitionFetch(record, "finishing")
-    // a proxy's own 502 to a CONNECT (myna's SOCKS bridge, when its proxy
+    // a proxy's own 502 to a CONNECT (owl's SOCKS bridge, when its proxy
     // is down) is the proxy's answer, as it is over HTTP; Bun reports it as
     // an error, so it goes on as the 502 whose body is the bridge's words,
     // which the gateway reads as the proxy's failure, not the account's
@@ -3261,7 +3261,7 @@ const handlers = {
   },
 }
 
-// Everything waits for init; a request is answered even when myna has
+// Everything waits for init; a request is answered even when owl has
 // closed stdin behind it, the host leaving once nothing is pending.
 let ready
 let readyState
@@ -3307,7 +3307,7 @@ const done = () => {
 }
 
 const gatewayInflight = new Map() // RPC id -> AbortController
-// A sign-in's steps are given up on by myna as a gateway request is
+// A sign-in's steps are given up on by owl as a gateway request is
 // (host.go's cancellable): the user cancelled it, or it timed out. Its
 // answer is then nobody's, and it counts as done at once, whether the
 // plugin's wait ends or not (#5016).
@@ -3315,7 +3315,7 @@ const signInSteps = new Set(["authorize", "callback", "apiKey"])
 const signInInflight = new Map() // RPC id -> AbortController
 const rl = readline.createInterface({ input: process.stdin, terminal: false })
 // readline holds the real stdin; what plugins see is an empty stream, so
-// one reading it gets none of the requests myna sends the host (and every
+// one reading it gets none of the requests owl sends the host (and every
 // other plugin) (#4136)
 try {
   const empty = new Duplex({ read() {}, write(_chunk, _enc, cb) { cb?.() } })

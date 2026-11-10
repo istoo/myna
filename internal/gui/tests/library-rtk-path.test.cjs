@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// #601: an rtk myna found off the PATH the agents get (in ~/.local/bin,
+// #601: an rtk owl found off the PATH the agents get (in ~/.local/bin,
 // which the user's shell doesn't have) was shown as working, while Pi's
 // extension said "RTK disabled: rtk binary not found in PATH". The RTK card
 // now says rtk isn't on PATH and what Put RTK on PATH will do, an agent that
@@ -16,7 +16,7 @@ const assets = path.resolve(__dirname, "../assets");
 const HOME = "/Users/aimer";
 const agent = (id, name) => ({ id, name, icon: "", skills: `${HOME}/.${id}/skills`, mcp: `${HOME}/.${id}/mcp.json` });
 const lib = () => ({
-  dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
+  dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
   agents: [agent("pi", "Pi"), agent("codex", "Codex")],
   instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [], skills: [], servers: [],
 });
@@ -69,13 +69,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await t.test(lang, async () => {
         const w = words[lang], calls = [];
         const ctx = await browser.newContext({ viewport: { width: 980, height: 800 } });
-        await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "rtk"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("owl.libTab", "rtk"); } catch {} });
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, calls));
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         await navTo(page, "library");
         const v = page.locator("#view-library");
         const note = v.locator(".lib-rtk-offpath");

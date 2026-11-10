@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/pii/guard"
-	"github.com/istoo/myna/internal/redact"
+	"github.com/istoo/owl/internal/pii/guard"
+	"github.com/istoo/owl/internal/redact"
 )
 
 // gateFinder is a model whose reads wait at a gate, counting how many

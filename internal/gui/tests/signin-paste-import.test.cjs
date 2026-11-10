@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// LuvLetter on Discord (myna in Docker, `myna web`): ChatGPT sent the
+// LuvLetter on Discord (owl in Docker, `owl web`): ChatGPT sent the
 // browser back to http://localhost:1455/auth/callback?code=…, and the address
 // went into the Import box (Import from a file instead…) rather than the
 // sign-in's Callback URL field. The box canceled the sign-in as it opened,
@@ -63,8 +63,8 @@ async function open(engine, lang, log, paste, t) {
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", server(lang, log, paste));
-  await page.context().route((url) => url.hostname !== "myna.test", (route) => route.fulfill({ contentType: "text/html", body: "" }));
-  await page.goto("http://myna.test/?view=providers");
+  await page.context().route((url) => url.hostname !== "owl.test", (route) => route.fulfill({ contentType: "text/html", body: "" }));
+  await page.goto("http://owl.test/?view=providers");
   await page.locator("#addProvider").click();
   const sheet = page.locator("#addSheet");
   await sheet.locator('.tile[data-pick="ChatGPT"]').click();

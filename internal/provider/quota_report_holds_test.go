@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-// #2333 (zhenghaowen0967): myna quota --json and GET /v1/myna/quotas
+// #2333 (zhenghaowen0967): owl quota --json and GET /v1/owl/quotas
 // tell each window's whole as the Usage page's card does, reckoned once
 // over every card, and say why where it isn't told.
 func TestQuotaReportTellsWindowHolds(t *testing.T) {

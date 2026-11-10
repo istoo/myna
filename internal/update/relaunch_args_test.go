@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // #275: a restart to update from the open window (Windows, Linux) came
@@ -37,7 +37,7 @@ func TestRelaunchArgs(t *testing.T) {
 // process as before.
 func TestRelaunchBinaryArgs(t *testing.T) {
 	if runtime.GOOS == "windows" {
-		t.Skip("a shell script stands in for myna")
+		t.Skip("a shell script stands in for owl")
 	}
 	for _, c := range []struct {
 		window bool
@@ -51,8 +51,8 @@ func TestRelaunchBinaryArgs(t *testing.T) {
 		// read as the next one's
 		dir := t.TempDir()
 		out := filepath.Join(dir, "out")
-		exe := filepath.Join(dir, "myna")
-		script := "#!/bin/sh\necho \"$* $MYNA_REPLACES\" > " + out + ".tmp && mv " + out + ".tmp " + out + "\n"
+		exe := filepath.Join(dir, "owl")
+		script := "#!/bin/sh\necho \"$* $OWL_REPLACES\" > " + out + ".tmp && mv " + out + ".tmp " + out + "\n"
 		testenv.Program(t, exe, script)
 		if err := RelaunchBinary(exe, "", c.window, c.view); err != nil {
 			t.Fatal(err)

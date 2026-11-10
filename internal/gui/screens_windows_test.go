@@ -54,7 +54,7 @@ func TestDisplayChangesAreReadOnWailsWindowOnly(t *testing.T) {
 		t.Cleanup(func() { w32.DestroyWindow(h) })
 		return h
 	}
-	wails, other := window(wailsMainThread), window("myna")
+	wails, other := window(wailsMainThread), window("owl")
 	laid := 0
 	was := layoutScreens
 	layoutScreens = func([]*application.Screen) error { laid++; return nil }

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // compactedText is the summary in a compaction Codex was answered with.
@@ -17,10 +17,10 @@ func compactedText(t *testing.T, body string) string {
 		}
 		item := e["item"].(map[string]any)
 		enc, _ := item["encrypted_content"].(string)
-		if item["type"] != "compaction" || !strings.HasPrefix(enc, mynaCompaction) {
-			t.Fatalf("not myna's compaction: %s", body)
+		if item["type"] != "compaction" || !strings.HasPrefix(enc, owlCompaction) {
+			t.Fatalf("not owl's compaction: %s", body)
 		}
-		b, _ := base64.StdEncoding.DecodeString(strings.TrimPrefix(enc, mynaCompaction))
+		b, _ := base64.StdEncoding.DecodeString(strings.TrimPrefix(enc, owlCompaction))
 		return string(b)
 	}
 	t.Fatalf("no compaction: %s", body)
@@ -38,9 +38,9 @@ const compact404Request = `{"model":"fake/m1","stream":true,"store":false,"inclu
 
 const relay404 = `{"error":{"message":"Upstream request failed","type":"upstream_error"}}`
 
-// #866: a relay that answers a myna model's summary request 404
+// #866: a relay that answers a owl model's summary request 404
 // ("flyapi: Upstream request failed") left Codex's compaction aborted and
-// reconnecting. myna asks again with the conversation as text, and when
+// reconnecting. owl asks again with the conversation as text, and when
 // that fails too compacts without a model, so Codex goes on.
 func TestCodexCompact404AsksAgainAsText(t *testing.T) {
 	f := &fake{t: t, reply: sse(
@@ -98,7 +98,7 @@ func TestCodexCompactOtherFailuresStay(t *testing.T) {
 	}
 }
 
-// #1511 (TooPub): a relay answered a myna model's summary request
+// #1511 (TooPub): a relay answered a owl model's summary request
 // 400 invalid_request_error "apex: Upstream request failed", and Codex's
 // compaction stopped there, while Codex asking the same relay itself
 // compacted. The reporter's body, as it came.

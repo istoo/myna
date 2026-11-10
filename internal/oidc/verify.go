@@ -50,7 +50,7 @@ func (c Claims) Str(name string) string {
 
 // Match verifies token and finds the first rule it satisfies. A token is
 // judged only against rules that name its issuer, so an issuer no rule
-// names is never asked for keys: a token can't make myna fetch from a
+// names is never asked for keys: a token can't make owl fetch from a
 // URL of its choosing.
 func Match(ctx context.Context, token string) (Rule, Claims, error) {
 	parts := strings.Split(token, ".")
@@ -78,7 +78,7 @@ func Match(ctx context.Context, token string) (Rule, Claims, error) {
 	}
 	rules = slices.DeleteFunc(rules, func(r Rule) bool { return r.Issuer != strings.TrimRight(iss, "/") })
 	if len(rules) == 0 {
-		return Rule{}, nil, fmt.Errorf("no rule takes tokens from %q (myna gateway-key oidc add)", clip(iss))
+		return Rule{}, nil, fmt.Errorf("no rule takes tokens from %q (owl gateway-key oidc add)", clip(iss))
 	}
 	sig, err := base64.RawURLEncoding.DecodeString(parts[2])
 	if err != nil {
@@ -234,7 +234,7 @@ var sets = struct {
 
 // Keys are read again after keysFresh, and at most once in refetchGap
 // for a key id they don't have, so tokens with made-up ids can't make
-// myna ask the issuer on every request.
+// owl ask the issuer on every request.
 const (
 	keysFresh  = time.Hour
 	refetchGap = 10 * time.Second

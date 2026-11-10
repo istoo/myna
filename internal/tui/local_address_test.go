@@ -3,7 +3,7 @@ package tui
 import (
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A local server's preset (Ollama, LM Studio, oMLX, MLX-Serve) is asked

@@ -7,17 +7,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // A plugin provider's accounts are arranged like a built-in's: the page
-// names them by the provider's id, myna keeps them as plugin:<id>, and
+// names them by the provider's id, owl keeps them as plugin:<id>, and
 // the gateway tries them in the order dragged.
 func TestAccountOrderPluginAccounts(t *testing.T) {
 	bun := testenv.Bun(t)
 	claudeHome(t)
-	t.Setenv("MYNA_BUN", bun)
+	t.Setenv("OWL_BUN", bun)
 	t.Cleanup(plugin.Settle)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()

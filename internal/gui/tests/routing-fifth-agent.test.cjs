@@ -66,7 +66,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.setDefaultTimeout(8000);
       page.setDefaultNavigationTimeout(60000);
       await page.route("**/*", serve(lang));
-      await page.goto("http://myna.test/?view=routing");
+      await page.goto("http://owl.test/?view=routing");
       await page.locator("#view-routing .rt-srcs .rt-node").first().waitFor();
       let heard = 0;
       page.on("request", (q) => { if (q.url().includes("/api/gateway/trace")) heard++; });

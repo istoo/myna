@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // MiniMax's answers as its docs give them (platform.minimax.io/docs/
@@ -213,7 +213,7 @@ func TestMiniMaxVideoIsStartedPolledAndFetched(t *testing.T) {
 	up := newFakeMiniMax(t)
 	minimaxProvider(t, "minimax", "minimax", up)
 	s := New()
-	code, obj, raw, _ := request(t, s, http.MethodPost, "/v1/videos", "application/json", `{"model":"minimax/MiniMax-H3-Lite","prompt":"a myna lands on a branch","seconds":6,"size":"854x480"}`)
+	code, obj, raw, _ := request(t, s, http.MethodPost, "/v1/videos", "application/json", `{"model":"minimax/MiniMax-H3-Lite","prompt":"a owl lands on a branch","seconds":6,"size":"854x480"}`)
 	if code != 200 || obj["status"] != "queued" || obj["model"] != "minimax/MiniMax-H3-Lite" {
 		t.Fatalf("create: %d %s", code, raw)
 	}
@@ -243,7 +243,7 @@ func TestMiniMaxVideoIsStartedPolledAndFetched(t *testing.T) {
 	json.Unmarshal([]byte(bodies[0]), &sent)
 	content, _ := sent["content"].([]any)
 	first, _ := content[0].(map[string]any)
-	if sent["model"] != "MiniMax-H3-Lite" || sent["duration"] != float64(6) || sent["resolution"] != "480P" || sent["ratio"] != "16:9" || len(content) != 1 || first["type"] != "text" || first["text"] != "a myna lands on a branch" {
+	if sent["model"] != "MiniMax-H3-Lite" || sent["duration"] != float64(6) || sent["resolution"] != "480P" || sent["ratio"] != "16:9" || len(content) != 1 || first["type"] != "text" || first["text"] != "a owl lands on a branch" {
 		t.Fatalf("create body %s", bodies[0])
 	}
 	if _, ok := sent["callback_url"]; ok {
@@ -394,7 +394,7 @@ func TestImageMCPMakesMiniMaxVideos(t *testing.T) {
 	if m := AutoVideomaker(); m != "minimax-cn/MiniMax-H3" {
 		t.Fatalf("auto videomaker %q", m)
 	}
-	t.Setenv("MYNA_PUBLIC_URL", "")
+	t.Setenv("OWL_PUBLIC_URL", "")
 	s := New()
 	h := lanGuard(s.Handler())
 	was, wasPoll := imageMCPWithin, imageMCPPoll

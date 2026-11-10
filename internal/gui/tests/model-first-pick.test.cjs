@@ -83,7 +83,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const errors = [], saves = [];
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", serve(lang, saves));
-          await page.goto("http://myna.test/?view=providers");
+          await page.goto("http://owl.test/?view=providers");
           const editor = page.locator("#modal:not([hidden]) .editor");
           const open = async () => {
             await page.locator(".row.provider", { hasText: name }).first().click();
@@ -138,7 +138,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], saves = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, saves));
-        await page.goto("http://myna.test/?view=providers");
+        await page.goto("http://owl.test/?view=providers");
         const editor = page.locator("#modal:not([hidden]) .editor");
         await page.locator(".row.provider", { hasText: "Cline" }).first().click();
         await editor.locator(".mchips .mchip").first().waitFor();

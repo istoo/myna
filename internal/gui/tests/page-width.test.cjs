@@ -58,7 +58,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang));
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         await page.waitForSelector("#nav button.on");
         // every page the sidebar opens (a community plugin's page draws in a
         // frame of its own, and none is installed here), and Settings

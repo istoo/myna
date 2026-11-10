@@ -80,16 +80,16 @@ func TestCodexSwitchedWhenUsedUp(t *testing.T) {
 	if !spent {
 		t.Fatal("the switch off a used-up account isn't marked spent for the Codex app")
 	}
-	// it is myna's own: the Codex app is left running unless the user
-	// asked myna to restart it (RestartApp; atom0964 on Discord)
+	// it is owl's own: the Codex app is left running unless the user
+	// asked owl to restart it (RestartApp; atom0964 on Discord)
 	codexApp.Lock()
 	auto := codexApp.auto
 	codexApp.Unlock()
 	if !auto {
-		t.Fatal("myna's own switch is counted the user's: the Codex app would be restarted for it")
+		t.Fatal("owl's own switch is counted the user's: the Codex app would be restarted for it")
 	}
 	if codexRestartsApp() {
-		t.Fatal("the Codex app is restarted for myna's own switches with RestartApp never set")
+		t.Fatal("the Codex app is restarted for owl's own switches with RestartApp never set")
 	}
 	if err := SetRestartApp("codex", true); err != nil {
 		t.Fatal(err)

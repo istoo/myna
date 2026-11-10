@@ -15,7 +15,7 @@ const assets = path.resolve(__dirname, "../assets");
 
 const CALC = "/Users/x/pl/calc";
 const state = { bun: true, bunVersion: "1.3.0", plugins: [
-  { spec: CALC, providers: [], moved: [], inMynaOnly: true, tools: [{ name: "add", mcp: "calc_add" }] },
+  { spec: CALC, providers: [], moved: [], inOwlOnly: true, tools: [{ name: "add", mcp: "calc_add" }] },
 ] };
 const listings = [
   { package: "@magpie-community/provider-x", name: "X plan", community: true, providers: ["x"], summary: { en: "Signs in to X" }, npm: { version: "0.1.0" } },
@@ -46,11 +46,11 @@ function server(lang) {
 }
 
 const L = {
-  en: { installed: "Installed", subs: "Subscriptions", tls: "Tools for agents", pgs: "Pages", tool: "Tools", page: "Page", provider: "Provider", write: "Write a plugin", docs: "https://github.com/istoo/myna/blob/main/docs/plugins" },
-  zh: { installed: "已安装", subs: "订阅", tls: "给 Agent 的工具", pgs: "页面", tool: "工具", page: "页面", provider: "供应商", write: "编写插件", docs: "https://github.com/istoo/myna/blob/main/docs/zh/plugins" },
-  "zh-TW": { installed: "已安裝", subs: "訂閱", tls: "給 Agent 的工具", pgs: "頁面", tool: "工具", page: "頁面", write: "編寫外掛", docs: "https://github.com/istoo/myna/blob/main/docs/zh/plugins" },
-  ja: { installed: "インストール済み", subs: "サブスクリプション", tls: "エージェント向けツール", pgs: "ページ", tool: "ツール", page: "ページ", write: "プラグインを書く", docs: "https://github.com/istoo/myna/blob/main/docs/ja/plugins" },
-  de: { installed: "Installiert", subs: "Abos", tls: "Werkzeuge für Agenten", pgs: "Seiten", tool: "Tools", page: "Seite", write: "Eine Erweiterung schreiben", docs: "https://github.com/istoo/myna/blob/main/docs/plugins" },
+  en: { installed: "Installed", subs: "Subscriptions", tls: "Tools for agents", pgs: "Pages", tool: "Tools", page: "Page", provider: "Provider", write: "Write a plugin", docs: "https://github.com/istoo/owl/blob/main/docs/plugins" },
+  zh: { installed: "已安装", subs: "订阅", tls: "给 Agent 的工具", pgs: "页面", tool: "工具", page: "页面", provider: "供应商", write: "编写插件", docs: "https://github.com/istoo/owl/blob/main/docs/zh/plugins" },
+  "zh-TW": { installed: "已安裝", subs: "訂閱", tls: "給 Agent 的工具", pgs: "頁面", tool: "工具", page: "頁面", write: "編寫外掛", docs: "https://github.com/istoo/owl/blob/main/docs/zh/plugins" },
+  ja: { installed: "インストール済み", subs: "サブスクリプション", tls: "エージェント向けツール", pgs: "ページ", tool: "ツール", page: "ページ", write: "プラグインを書く", docs: "https://github.com/istoo/owl/blob/main/docs/ja/plugins" },
+  de: { installed: "Installiert", subs: "Abos", tls: "Werkzeuge für Agenten", pgs: "Seiten", tool: "Tools", page: "Seite", write: "Eine Erweiterung schreiben", docs: "https://github.com/istoo/owl/blob/main/docs/plugins" },
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -66,7 +66,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang));
-        await page.goto("http://myna.test/?view=plugins");
+        await page.goto("http://owl.test/?view=plugins");
         const view = page.locator("#view-plugins");
         const kinds = (r) => r.locator(".pm-chip.kind").allInnerTexts().then((a) => a.map((x) => x.trim()));
         const sec = (name) => view.locator(".pm-sec").filter({ has: page.locator(".pm-sechead h3", { hasText: new RegExp("^" + name + "$") }) });
@@ -94,7 +94,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await how.click();
         for (let i = 0; i < 50 && !opened.length; i++) await page.waitForTimeout(20);
         assert.deepEqual(opened, [w.docs]);
-        assert.equal(page.url(), "http://myna.test/?view=plugins", "the window stays on myna");
+        assert.equal(page.url(), "http://owl.test/?view=plugins", "the window stays on owl");
 
         const over = await page.evaluate(() => document.scrollingElement.scrollWidth - document.scrollingElement.clientWidth);
         assert.ok(over <= 0, "page scrolls sideways by " + over);

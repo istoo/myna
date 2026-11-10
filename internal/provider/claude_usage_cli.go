@@ -1,7 +1,7 @@
 package provider
 
 // A Claude account's allowance, as Claude Code's own /usage tells it:
-// myna runs `claude -p /usage` (a command Claude Code answers itself,
+// owl runs `claude -p /usage` (a command Claude Code answers itself,
 // asking no model) and reads its lines, never asking Anthropic itself.
 
 import (

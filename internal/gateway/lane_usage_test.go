@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // A request turned away by a key's or account's queue answers 429 (that part
@@ -81,7 +81,7 @@ func ledger429s() int {
 }
 
 // The contrast that makes this a defect rather than a design choice: a refusal
-// turned away the same way, for a model myna does not know, does reach the
+// turned away the same way, for a model owl does not know, does reach the
 // ledger, because it goes through turnedAway().
 func TestUnknownModelRefusalIsInTheUsageLedger(t *testing.T) {
 	fresh(t)

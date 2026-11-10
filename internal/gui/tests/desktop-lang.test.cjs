@@ -1,7 +1,7 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Claude Desktop on myna runs in its 3p mode, whose window is Anthropic's
+// Claude Desktop on owl runs in its 3p mode, whose window is Anthropic's
 // bundled one for a gateway: 11 languages, no Chinese (up to 4.4212.0), so a
-// Chinese reader saw it turn English and took it for myna's (GZXYMH on X).
+// Chinese reader saw it turn English and took it for owl's (GZXYMH on X).
 // Claude Desktop's opened row says so in Chinese and Traditional Chinese, and
 // to no one else, whose language Desktop has. Every language, wide and
 // narrow. No backend: faked here.
@@ -19,7 +19,7 @@ function fixture(lang) {
   const state = () => ({
     agents: [{
       id: "claude-desktop", name: "Claude Desktop", path: "/test/claude_desktop_config.json", icon: "claude-color", wired: true,
-      fields: [{ key: "provider", label: "provider", value: "myna", options: [{ value: "myna", label: "myna", icon: "myna" }] }],
+      fields: [{ key: "provider", label: "provider", value: "owl", options: [{ value: "owl", label: "owl", icon: "owl" }] }],
       models: { shown: 2, listed: 2, by: [{ name: "OpenCode Go", icon: "opencode", n: 2 }], names: ["DeepSeek V4 Pro", "Exo Free"] },
     }],
     profiles: [], settings,
@@ -67,7 +67,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const fx = fixture(lang);
         await page.route("**/*", fx.serve);
         t.after(() => browser.close());
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         await page.locator(cd).waitFor();
         await page.locator(`${cd} .ag-link`, { hasText: w.details }).click();
         await page.locator(`${cd} .ag-exp .ag-longest`).waitFor();

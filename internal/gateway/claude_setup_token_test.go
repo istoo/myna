@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 const gwSetupToken = "sk-ant-oat01-gatewaysetuptoken-0123456789abcdefghijklmnop"

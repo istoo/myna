@@ -6,7 +6,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // An agent whose settings are left but whose CLI is gone (#843: dsh
@@ -24,14 +24,14 @@ func TestCLIMissing(t *testing.T) {
 	was := appFolders
 	appFolders = func() []string { return nil }
 	t.Cleanup(func() { appFolders = was })
-	bin := "myna-test-gone-dsh"
+	bin := "owl-test-gone-dsh"
 	dir := filepath.Join(home, ".dsh")
 	if err := os.MkdirAll(dir, 0o700); err != nil {
 		t.Fatal(err)
 	}
 	dsh := &Agent{ID: "dsh", Name: "DeepSeek Harness", Icon: "deepseek-color", Bin: bin, Dir: dir, Path: filepath.Join(dir, "config.yaml")}
-	codex := &Agent{ID: "codex", Name: "Codex", Bin: "myna-test-gone-codex", Dir: dir, Path: filepath.Join(dir, "config.toml")}
-	never := &Agent{ID: "crush", Name: "Crush", Bin: "myna-test-gone-crush", Dir: filepath.Join(home, "nope"), Path: filepath.Join(home, "nope", "crush.json")}
+	codex := &Agent{ID: "codex", Name: "Codex", Bin: "owl-test-gone-codex", Dir: dir, Path: filepath.Join(dir, "config.toml")}
+	never := &Agent{ID: "crush", Name: "Crush", Bin: "owl-test-gone-crush", Dir: filepath.Join(home, "nope"), Path: filepath.Join(home, "nope", "crush.json")}
 	wsl := &Agent{ID: "dsh@wsl:Ubuntu", Name: "DeepSeek Harness", Bin: bin, WSL: "Ubuntu", Dir: dir, Path: filepath.Join(dir, "config.yaml")}
 	if !dsh.Detected() || !dsh.CLIMissing() {
 		t.Fatalf("dsh with ~/.dsh and no dsh: detected %v, missing %v", dsh.Detected(), dsh.CLIMissing())
@@ -57,7 +57,7 @@ func TestCLIMissing(t *testing.T) {
 		t.Fatalf("codex, its folder left, offered as %+v", x)
 	}
 
-	// installed in ~/.local/bin, which myna's PATH hasn't: found
+	// installed in ~/.local/bin, which owl's PATH hasn't: found
 	local := filepath.Join(home, ".local", "bin")
 	if err := os.MkdirAll(local, 0o755); err != nil {
 		t.Fatal(err)
@@ -112,11 +112,11 @@ func TestCLIMissingHermes(t *testing.T) {
 	noApps(t)
 	dir := filepath.Join(home, ".hermes")
 	writeT(t, filepath.Join(dir, "config.yaml"), "custom_providers: []\nmcp_servers: {}\n")
-	h := &Agent{ID: "hermes", Name: "Hermes Agent", Bin: "myna-test-gone-hermes", Dir: dir, Path: filepath.Join(dir, "config.yaml")}
+	h := &Agent{ID: "hermes", Name: "Hermes Agent", Bin: "owl-test-gone-hermes", Dir: dir, Path: filepath.Join(dir, "config.yaml")}
 	if !h.Detected() || !h.CLIMissing() {
 		t.Fatalf("hermes by its config.yaml alone: detected %v, missing %v", h.Detected(), h.CLIMissing())
 	}
-	// no install command myna knows: not offered, though gone
+	// no install command owl knows: not offered, though gone
 	for _, x := range installsOf([]*Agent{h}, runtime.GOOS, true) {
 		t.Fatalf("hermes offered: %+v", x)
 	}
@@ -148,7 +148,7 @@ func TestCLIMissingHermes(t *testing.T) {
 
 // An agent whose folder isn't only its CLI's is gone only when nothing
 // else that reads it is here: an editor's extension, a desktop app, an
-// IDE whose agents bring their own program. Never one myna can't tell
+// IDE whose agents bring their own program. Never one owl can't tell
 // about (OpenCode off a Mac, Gemini, detected its own way).
 type goneCase struct {
 	id      string
@@ -211,7 +211,7 @@ func TestCLIMissingSharedFolders(t *testing.T) {
 		apps := noApps(t)
 		dir := filepath.Join(home, c.folder)
 		writeT(t, filepath.Join(dir, "settings.json"), "{}")
-		a := &Agent{ID: c.id, Name: c.id, Bin: "myna-test-gone-" + c.id, Dir: dir, Path: filepath.Join(dir, "settings.json")}
+		a := &Agent{ID: c.id, Name: c.id, Bin: "owl-test-gone-" + c.id, Dir: dir, Path: filepath.Join(dir, "settings.json")}
 		if c.with != nil {
 			c.with(t, home, apps)
 		}
@@ -223,7 +223,7 @@ func TestCLIMissingSharedFolders(t *testing.T) {
 	// detected its own way: never taken for gone
 	home := t.TempDir()
 	t.Setenv("HOME", home)
-	g := &Agent{ID: "gemini", Bin: "myna-test-gone-gemini", Dir: home, Path: filepath.Join(home, "x"), detect: func() bool { return true }}
+	g := &Agent{ID: "gemini", Bin: "owl-test-gone-gemini", Dir: home, Path: filepath.Join(home, "x"), detect: func() bool { return true }}
 	if g.CLIMissing() {
 		t.Fatal("gemini, detected its own way, taken for missing")
 	}
@@ -263,7 +263,7 @@ func TestCLIMissingSharedFoldersWindows(t *testing.T) {
 		noApps(t)
 		dir := filepath.Join(home, c.folder)
 		writeT(t, filepath.Join(dir, "settings.json"), "{}")
-		a := &Agent{ID: c.id, Name: c.id, Bin: "myna-test-gone-" + c.id, Dir: dir, Path: filepath.Join(dir, "settings.json")}
+		a := &Agent{ID: c.id, Name: c.id, Bin: "owl-test-gone-" + c.id, Dir: dir, Path: filepath.Join(dir, "settings.json")}
 		if !a.Detected() {
 			t.Fatalf("%s: its folder not detected", c.id)
 		}
@@ -285,7 +285,7 @@ func TestCLIMissingSharedFoldersWindows(t *testing.T) {
 	noApps(t)
 	hdir := filepath.Join(home, ".hermes")
 	writeT(t, filepath.Join(hdir, "config.yaml"), "custom_providers: []\n")
-	h := &Agent{ID: "hermes", Name: "Hermes Agent", Bin: "myna-test-gone-hermes", Dir: hdir, Path: filepath.Join(hdir, "config.yaml")}
+	h := &Agent{ID: "hermes", Name: "Hermes Agent", Bin: "owl-test-gone-hermes", Dir: hdir, Path: filepath.Join(hdir, "config.yaml")}
 	if !h.CLIMissing() {
 		t.Fatal("hermes by its config.yaml alone not gone when judged for Windows")
 	}
@@ -295,7 +295,7 @@ func TestCLIMissingSharedFoldersWindows(t *testing.T) {
 // Harness showed 未找到 CLI with no model to pick. ~\.dsh is read by
 // DeepSeek Harness Desktop too, which installs to any folder and puts
 // its dsh.cmd in one the user picks, so on Windows a ~\.dsh whose dsh
-// isn't found where myna looks is never taken for a leftover. Judged
+// isn't found where owl looks is never taken for a leftover. Judged
 // for a Mac, the same folder is still gone (#843).
 func TestCLIMissingDshWindows(t *testing.T) {
 	home := t.TempDir()
@@ -309,7 +309,7 @@ func TestCLIMissingDshWindows(t *testing.T) {
 	// the desktop app's profile, as it leaves it after its first start
 	writeT(t, filepath.Join(dir, "profiles", "desktop", "cordis.patch.yml"), dshDesktopPatch)
 	writeT(t, filepath.Join(dir, "profiles", "desktop", "package.json"), "{}\n")
-	dsh := &Agent{ID: "dsh", Name: "DeepSeek Harness", Bin: "myna-test-gone-dsh", Dir: dir, Path: filepath.Join(dir, "profiles", "desktop", "cordis.patch.yml")}
+	dsh := &Agent{ID: "dsh", Name: "DeepSeek Harness", Bin: "owl-test-gone-dsh", Dir: dir, Path: filepath.Join(dir, "profiles", "desktop", "cordis.patch.yml")}
 	if !dsh.Detected() {
 		t.Fatal("~\\.dsh not detected")
 	}

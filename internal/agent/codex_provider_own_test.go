@@ -7,11 +7,11 @@ import (
 	"testing"
 )
 
-// With myna Codex's provider, a model of Codex's own on the Agents page
-// says what picking it does (#1269, shenghsi: "gpt-5.5 经 myna", and
-// Codex was taken off myna the moment it was picked). With no ChatGPT
-// account in myna to serve it, it goes straight to OpenAI and says so;
-// with one, it is picked as myna serves it and Codex stays on myna.
+// With owl Codex's provider, a model of Codex's own on the Agents page
+// says what picking it does (#1269, shenghsi: "gpt-5.5 经 owl", and
+// Codex was taken off owl the moment it was picked). With no ChatGPT
+// account in owl to serve it, it goes straight to OpenAI and says so;
+// with one, it is picked as owl serves it and Codex stays on owl.
 func TestCodexProviderOwnModelSaysItsPath(t *testing.T) {
 	ownOf := func(a *Agent) []Option {
 		var out []Option
@@ -31,15 +31,15 @@ func TestCodexProviderOwnModelSaysItsPath(t *testing.T) {
 		if err := cx.Fields[0].Set("fake/m1"); err != nil {
 			t.Fatal(err)
 		}
-		if cfg := read(); !strings.Contains(cfg, `model_provider = "myna"`) {
-			t.Fatalf("myna isn't Codex's provider:\n%s", cfg)
+		if cfg := read(); !strings.Contains(cfg, `model_provider = "owl"`) {
+			t.Fatalf("owl isn't Codex's provider:\n%s", cfg)
 		}
 		own := ownOf(codex(home))
 		if len(own) != 1 {
 			t.Fatalf("Codex's own gpt-a: %+v", own)
 		}
 		if o := own[0]; o.Via || o.Direct != "OpenAI" || o.Value != "gpt-a" {
-			t.Fatalf("picking gpt-a takes Codex off myna, yet it reads %+v", o)
+			t.Fatalf("picking gpt-a takes Codex off owl, yet it reads %+v", o)
 		}
 	})
 
@@ -51,18 +51,18 @@ func TestCodexProviderOwnModelSaysItsPath(t *testing.T) {
 		if err := cx.Fields[0].Set("fake/m1"); err != nil {
 			t.Fatal(err)
 		}
-		if cfg := read(); !strings.Contains(cfg, `model_provider = "myna"`) {
-			t.Fatalf("myna isn't Codex's provider:\n%s", cfg)
+		if cfg := read(); !strings.Contains(cfg, `model_provider = "owl"`) {
+			t.Fatalf("owl isn't Codex's provider:\n%s", cfg)
 		}
 		own := ownOf(codex(home))
 		if len(own) != 1 || own[0].Value != "codex/gpt-a" || !own[0].Via {
-			t.Fatalf("Codex's own gpt-a, served by myna: %+v", own)
+			t.Fatalf("Codex's own gpt-a, served by owl: %+v", own)
 		}
 		if err := codex(home).Fields[0].Set(own[0].Value); err != nil {
 			t.Fatal(err)
 		}
-		if cfg := read(); !strings.Contains(cfg, `model_provider = "myna"`) || !strings.Contains(cfg, `model = "codex/gpt-a"`) {
-			t.Fatalf("picking it took Codex off myna:\n%s", cfg)
+		if cfg := read(); !strings.Contains(cfg, `model_provider = "owl"`) || !strings.Contains(cfg, `model = "codex/gpt-a"`) {
+			t.Fatalf("picking it took Codex off owl:\n%s", cfg)
 		}
 	})
 }

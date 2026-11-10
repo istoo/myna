@@ -8,7 +8,7 @@
 // renderSearch: the web search APIs a model's search goes to when no
 // provider can search (#419) — one row each, in the order they are tried,
 // and a row to add one: which API, its key, and the address of one the user
-// runs (SearXNG). They are set on their own; one myna refuses is said in
+// runs (SearXNG). They are set on their own; one owl refuses is said in
 // the row, what was typed kept.
 let searchDraft = { vendor: "tavily", key: "", url: "", err: "" };
 function renderSearch(s, keep) {
@@ -92,7 +92,7 @@ function renderSearch(s, keep) {
     : !s.searchProvider ? t("No provider can search, so these are asked")
     : apiFirst ? t("Asked before {who}, which searches when these fail", { who: s.searchProvider })
     : t("Now done by {who}; these come after it", { who: s.searchProvider });
-  const head = row(t("Search APIs"), d.err || t("When a model can't search the web, myna searches for it with these, in this order, and gives it what they found") + " · " + by,
+  const head = row(t("Search APIs"), d.err || t("When a model can't search the web, owl searches for it with these, in this order, and gives it what they found") + " · " + by,
     pick, key, get, add, url);
   head.classList.add("rule-row", "search-add");
   head.querySelector(".val").classList.add("rule-add");
@@ -159,34 +159,34 @@ function renderSearch(s, keep) {
         (v) => savePrefs({ ...keep, searchFirst: v === "api" ? "api" : "" })));
     r.id = "searchFirstRow";
   }
-  // a model whose provider searches the web by itself is given myna's
+  // a model whose provider searches the web by itself is given owl's
   // search instead, as every other model is (cybercaius on Discord). The
-  // row is always there: with nothing myna can search with it can't be
+  // row is always there: with nothing owl can search with it can't be
   // chosen, and says why and where to add a search ("开关在哪个位置")
   {
     const can = !!(s.searchProvider || asked.length);
-    const sw = segs([["own", t("Their own")], ["myna", t("myna's")]], s.searchAll ? "myna" : "own",
-      (v) => writingPrefs(api("settings/search-all", { on: v === "myna" }))
+    const sw = segs([["own", t("Their own")], ["owl", t("owl's")]], s.searchAll ? "owl" : "own",
+      (v) => writingPrefs(api("settings/search-all", { on: v === "owl" }))
         .then((ns) => { prefs = state.settings = ns; renderSettings(); }).catch(settingsErr));
     if (!can) for (const b of sw.querySelectorAll("button")) b.disabled = true;
-    const r = row(t("Models that search by themselves"), can ? t("Search with their provider's own search, or with myna's, as every other model does")
-      : t("myna has nothing to search with: add a Search API above, or pick a provider under Searches for other models"), sw);
+    const r = row(t("Models that search by themselves"), can ? t("Search with their provider's own search, or with owl's, as every other model does")
+      : t("owl has nothing to search with: add a Search API above, or pick a provider under Searches for other models"), sw);
     r.id = "searchAllRow";
     r.classList.add("search-all-row", ...(can ? [] : ["off"]));
   }
   // the same search as an MCP server of the gateway's (Kayphoon on
   // Discord), for an agent to mount as its web_search and web_fetch tools
-  const mcpURL = mcpAddress(s, "/mcp/myna/web-search");
+  const mcpURL = mcpAddress(s, "/mcp/owl/web-search");
   const mcp = row(t("MCP server"), t("Cursor, Claude Desktop and other agents can add this search as an MCP server (Streamable HTTP), with a web_search tool and a web_fetch tool that reads a page by its URL. From another computer, send a gateway key as Authorization: Bearer <key>."),
     el("code", "", mcpURL), copyBtn(mcpURL, t("Address")));
   mcp.id = "searchMcpRow";
-  // The Library gives this search to the agents picked for it, as Myna
+  // The Library gives this search to the agents picked for it, as Owl
   // Web Search, and lists it under its MCP servers: an address alone had
   // the reader look for it there and not find it (lutra_fs on Discord).
-  // As Images' Myna Image (#2091), the row says how to get there from
+  // As Images' Owl Image (#2091), the row says how to get there from
   // where the reader is: gateway mode has no Library, and the Library can
   // be turned off
-  mcp.querySelector(".who").append(...libWay("myna-web-search", t("Give agents Myna Web Search…"), "search-mcp-lib"));
+  mcp.querySelector(".who").append(...libWay("owl-web-search", t("Give agents Owl Web Search…"), "search-mcp-lib"));
 }
 
 // searchArrange: the search APIs are asked in the order they are listed,
@@ -245,7 +245,7 @@ function searchArrange(box, units, set) {
 }
 
 // searchKeysRow: under a search API with several keys, or one whose keys
-// quota myna can read (Tavily's), a row of its keys (SlouchyQuill on
+// quota owl can read (Tavily's), a row of its keys (SlouchyQuill on
 // Discord): how a search picks among them, in turn (the default) or in
 // order, and what each has used of its limit, read once as the page is
 // drawn and again on Check again. A read that fails says unknown and why,
@@ -309,9 +309,9 @@ function searchKeysRow(s, a, row, set) {
 }
 
 // renderSearcher: the provider that searches the web for a model that
-// can't — the one myna picks, or one named, by itself (its small model)
+// can't — the one owl picks, or one named, by itself (its small model)
 // or with a model of it. One named that is gone, off or can't search gives
-// way to myna's pick, which the row says. Relays said to search can be
+// way to owl's pick, which the row says. Relays said to search can be
 // named, but are never picked automatically (#359), and the row says so.
 function renderSearcher(s, keep, box) {
   const choices = s.searchChoices || [];
@@ -329,10 +329,10 @@ function renderSearcher(s, keep, box) {
   const icOf = (id) => choices.find((x) => x.id === id.split("/")[0])?.icon;
   const r = el("div", "row pref searcher-row");
   const who = el("div", "who");
-  const sub = el("div", "sub", off ? (s.searchAll ? t("When provider search is off, only configured Search APIs are used, for every model. Without a Search API, myna does not add a search tool.") : t("When provider search is off, only configured Search APIs are used. Without a Search API, myna does not add a search tool. Providers' native web search is unchanged.")) : t("When a model can't search the web directly, the selected provider searches for it and returns the results. Searches may use the service's quota or incur charges; if the provider myna picks fails, it tries other available sources, and a provider you select here gives way to the ones you add after it, in their order, then, when it can't search at all (out of quota or rate-limited), to other available sources, then to your Search APIs."));
+  const sub = el("div", "sub", off ? (s.searchAll ? t("When provider search is off, only configured Search APIs are used, for every model. Without a Search API, owl does not add a search tool.") : t("When provider search is off, only configured Search APIs are used. Without a Search API, owl does not add a search tool. Providers' native web search is unchanged.")) : t("When a model can't search the web directly, the selected provider searches for it and returns the results. Searches may use the service's quota or incur charges; if the provider owl picks fails, it tries other available sources, and a provider you select here gives way to the ones you add after it, in their order, then, when it can't search at all (out of quota or rate-limited), to other available sources, then to your Search APIs."));
   if (!off && v && s.searchUnused) {
-    const why = { gone: t("it is no longer in myna"), off: t("it is turned off"), cant: t("it can't search the web by itself"), nomodel: t("it lists no model") }[s.searchUnused] || s.searchUnused;
-    sub.append(" · ", el("span", "warn searcher-unused", t("{who} isn't used: {why}, so myna picks one", { who: named(v), why })));
+    const why = { gone: t("it is no longer in owl"), off: t("it is turned off"), cant: t("it can't search the web by itself"), nomodel: t("it lists no model") }[s.searchUnused] || s.searchUnused;
+    sub.append(" · ", el("span", "warn searcher-unused", t("{who} isn't used: {why}, so owl picks one", { who: named(v), why })));
   }
   // the one named didn't search last time, and no other provider searched
   // in its place (Gearclickist on Discord: Grok picked answered without
@@ -381,8 +381,8 @@ function renderSearcher(s, keep, box) {
     if (c.search) options.push({ value: `${c.id}/@search`, label: t("its web search"), note: c.name, icon: c.icon, group: c.name });
     // its small model is offered once (Player on Discord): the model of the
     // same name below it searched just the same, "<provider>/<small>" being
-    // that model named rather than myna's pick, so a pick saved so is
-    // ticked here. No "via myna": no agent asks for these
+    // that model named rather than owl's pick, so a pick saved so is
+    // ticked here. No "via owl": no agent asks for these
     const small = c.small ? `${c.id}/${c.small}` : "";
     options.push({ value: v === small ? small : c.id, label: t("{model}, its small model", { model: c.smallName || c.small }), note: c.name, icon: c.icon, group: c.name });
     for (const m of c.models) if (m.id !== small) options.push({ value: m.id, label: m.name || m.id, note: c.name, icon: c.icon, group: c.name });

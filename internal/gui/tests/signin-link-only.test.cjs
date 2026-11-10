@@ -1,6 +1,6 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // Sign-in pages kept out of the default browser (max2020 on Discord: they
-// sign in from a separate, fingerprint browser, and myna opening the page
+// sign in from a separate, fingerprint browser, and owl opening the page
 // in the default one shows the vendor that browser). Settings → Privacy →
 // Sign-in pages has "Open sign-in pages in the browser", On by default; Off
 // saves signInLinkOnly. A sign-in the server says it kept to its link
@@ -19,11 +19,11 @@ const assets = path.resolve(__dirname, "../assets");
 const LINK = "https://accounts.example/o/oauth2/auth?client_id=x&redirect_uri=http%3A%2F%2F127.0.0.1%3A51234%2Fcallback&state=" + "s".repeat(80);
 
 const W = {
-  en: { head: "Sign-in pages", name: "Open sign-in pages in the browser", anyway: "Sign in anyway", said: "myna didn't open the sign-in page", open: "Open", again: "Open again", copy: "Copy link" },
-  zh: { head: "登录页", name: "在浏览器中打开登录页", anyway: "仍然登录", said: "myna 按设置没有打开登录页", open: "打开", again: "重新打开", copy: "复制链接" },
-  "zh-TW": { head: "登入頁", name: "在瀏覽器中開啟登入頁", anyway: "仍然登入", said: "myna 依設定沒有開啟登入頁", open: "開啟", again: "重新開啟", copy: "複製連結" },
-  ja: { head: "サインインページ", name: "サインインページをブラウザで開く", anyway: "それでもサインイン", said: "設定に従い、myna はサインインページを開いていません", open: "開く", again: "もう一度開く", copy: "リンクをコピー" },
-  de: { head: "Anmeldeseiten", name: "Anmeldeseiten im Browser öffnen", anyway: "Trotzdem anmelden", said: "myna hat die Anmeldeseite wie in den Einstellungen festgelegt nicht geöffnet", open: "Öffnen", again: "Erneut öffnen", copy: "Link kopieren" },
+  en: { head: "Sign-in pages", name: "Open sign-in pages in the browser", anyway: "Sign in anyway", said: "owl didn't open the sign-in page", open: "Open", again: "Open again", copy: "Copy link" },
+  zh: { head: "登录页", name: "在浏览器中打开登录页", anyway: "仍然登录", said: "owl 按设置没有打开登录页", open: "打开", again: "重新打开", copy: "复制链接" },
+  "zh-TW": { head: "登入頁", name: "在瀏覽器中開啟登入頁", anyway: "仍然登入", said: "owl 依設定沒有開啟登入頁", open: "開啟", again: "重新開啟", copy: "複製連結" },
+  ja: { head: "サインインページ", name: "サインインページをブラウザで開く", anyway: "それでもサインイン", said: "設定に従い、owl はサインインページを開いていません", open: "開く", again: "もう一度開く", copy: "リンクをコピー" },
+  de: { head: "Anmeldeseiten", name: "Anmeldeseiten im Browser öffnen", anyway: "Trotzdem anmelden", said: "owl hat die Anmeldeseite wie in den Einstellungen festgelegt nicht geöffnet", open: "Öffnen", again: "Erneut öffnen", copy: "Link kopieren" },
 };
 
 function settingsPayload(lang, over) {
@@ -32,7 +32,7 @@ function settingsPayload(lang, over) {
     dock: false, dockWindow: false, proxy: "", redact: false, redactPersonal: false, redactWords: [],
     codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", workbuddyCheckin: false, noStats: false,
     trayUsage: "", trayUsages: [], trayUsageEvery: 3, vision: "", imageGen: "",
-    version: "0.1.400", dir: "~/.config/myna", gateway: "http://127.0.0.1:3425",
+    version: "0.1.400", dir: "~/.config/owl", gateway: "http://127.0.0.1:3425",
     proxyNow: "none", proxySource: "none", login: false,
     visionModels: [], imageGenModels: [], workbuddyCheckins: [], lanURLs: [],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
@@ -91,7 +91,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await t.test(`${lang} ${width}: the setting`, async () => {
           const posts = [];
           const { context, page, errors } = await newPage(browser, width, server(lang, false, {}, posts));
-          await page.goto("http://myna.test/?view=usage");
+          await page.goto("http://owl.test/?view=usage");
           await page.locator("#prefs").click();
           await openPart(page, "privacy");
           const box = page.locator("#signInOpenList");
@@ -102,7 +102,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           assert.equal(await opts.nth(1).evaluate((b) => b.classList.contains("on")), true, "On by default");
           const fit = await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1);
           assert(fit, "no sideways scroll");
-          await reach(page, opts.nth(0)); // by the wheel, as a reader does: myna puts back a scroll no one asked for
+          await reach(page, opts.nth(0)); // by the wheel, as a reader does: owl puts back a scroll no one asked for
           await page.waitForTimeout(200);
           const top = await page.locator("#view-settings").evaluate((v) => v.scrollTop);
           await opts.nth(0).click();
@@ -119,7 +119,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await t.test(`${lang}: a sign-in ${linkOnly ? "kept to its link" : "opened"} in a browser tab`, async () => {
           const sign = { id: "s1", agent: "factory", state: "waiting", url: LINK, ...(linkOnly ? { linkOnly: true } : {}) };
           const { context, page, errors } = await newPage(browser, 900, server(lang, true, sign, []));
-          await page.goto("http://myna.test/?view=providers");
+          await page.goto("http://owl.test/?view=providers");
           await page.locator("#addProvider").click();
           const sheet = page.locator("#addSheet");
           await sheet.locator('.tile[data-pick="Factory"]').click();

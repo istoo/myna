@@ -9,9 +9,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/pii"
-	"github.com/istoo/myna/internal/redact"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/pii"
+	"github.com/istoo/owl/internal/redact"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // The local masking model is on only once it is on disk: turned on where

@@ -1,19 +1,19 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Share on local network in a container (莫 on Discord: myna in Docker on
+// Share on local network in a container (莫 on Discord: owl in Docker on
 // a NAS showed the container's own 172.17.x address; jiezhengj on Discord:
 // other devices used the host's 192.168.31.218:3425 well, and other
 // containers on the NAS needed the host's Docker bridge address,
-// http://172.17.0.1:3425): the addresses myna finds for itself there are
-// the container's, which neither reach. Served over the network (myna
+// http://172.17.0.1:3425): the addresses owl finds for itself there are
+// the container's, which neither reach. Served over the network (owl
 // web), the page offers the host it was opened at first, on the gateway's
 // port, and after it the host's bridge address, named other containers';
 // opened at localhost it offers the bridge address and says the host's
-// own is MYNA_PUBLIC_URL's. With no default route known it keeps the
+// own is OWL_PUBLIC_URL's. With no default route known it keeps the
 // container's addresses, said to be its own. Outside a container nothing
 // changes. The OpenAI/Anthropic switch keeps the host and moves nothing.
 // The Gateway page's list, the key page's address and the sidebar's line
 // say the same, whether Share on local network is on or not (the image's
-// MYNA_ADDR puts the gateway on the network either way). No backend,
+// OWL_ADDR puts the gateway on the network either way). No backend,
 // the API is faked here.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -32,10 +32,10 @@ function settingsPayload(over) {
     dock: false, dockWindow: false, proxy: "", redact: false, redactPersonal: false, redactWords: [],
     codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", workbuddyCheckin: false, noStats: false,
     trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "",
-    version: "0.1.400", dir: "/config/myna", gateway: "http://0.0.0.0:3425",
+    version: "0.1.400", dir: "/config/owl", gateway: "http://0.0.0.0:3425",
     proxyNow: "none", proxySource: "none", login: false,
     visionModels: [], imageGenModels: [], workbuddyCheckins: [],
-    lan: true, lanKey: "sk-myna-0123456789abcdef", lanURLs: ["http://172.17.0.2:3425"],
+    lan: true, lanKey: "sk-owl-0123456789abcdef", lanURLs: ["http://172.17.0.2:3425"],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
     ...over,
   };
@@ -63,16 +63,16 @@ function server(lang, web, over) {
 const words = {
   en: {
     container: "In a container",
-    opened: "Other devices use the host’s address this page was opened at, and other containers on this host the host’s Docker bridge address, both on the gateway’s port; MYNA_PUBLIC_URL sets another",
-    bridge: "Other containers on this host use the host’s Docker bridge address, on the gateway’s port; other devices use the host’s own, which MYNA_PUBLIC_URL puts here",
-    own: "The container’s own addresses, which other devices can’t reach: set MYNA_PUBLIC_URL to the host’s",
+    opened: "Other devices use the host’s address this page was opened at, and other containers on this host the host’s Docker bridge address, both on the gateway’s port; OWL_PUBLIC_URL sets another",
+    bridge: "Other containers on this host use the host’s Docker bridge address, on the gateway’s port; other devices use the host’s own, which OWL_PUBLIC_URL puts here",
+    own: "The container’s own addresses, which other devices can’t reach: set OWL_PUBLIC_URL to the host’s",
     others: "Other containers on this host", lan: "Local network",
   },
   zh: {
     container: "在容器中运行",
-    opened: "其他设备用打开这个页面所用的宿主机地址，本机上的其他容器用宿主机的 Docker bridge 地址，端口都是网关的端口；MYNA_PUBLIC_URL 可另设",
-    bridge: "本机上的其他容器用宿主机的 Docker bridge 地址，端口是网关的端口；其他设备用宿主机自己的地址，用 MYNA_PUBLIC_URL 把它设在这里",
-    own: "容器自身的地址，其他设备无法访问：请将 MYNA_PUBLIC_URL 设为宿主机地址",
+    opened: "其他设备用打开这个页面所用的宿主机地址，本机上的其他容器用宿主机的 Docker bridge 地址，端口都是网关的端口；OWL_PUBLIC_URL 可另设",
+    bridge: "本机上的其他容器用宿主机的 Docker bridge 地址，端口是网关的端口；其他设备用宿主机自己的地址，用 OWL_PUBLIC_URL 把它设在这里",
+    own: "容器自身的地址，其他设备无法访问：请将 OWL_PUBLIC_URL 设为宿主机地址",
     others: "同一主机上的其他容器", lan: "局域网",
   },
   "zh-TW": { others: "同一主機上的其他容器", lan: "區域網" },
@@ -114,7 +114,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     for (const lang of ["en", "zh"]) {
       const w = words[lang];
       await t.test(lang, async () => {
-        // myna web, opened at the NAS's address: the gateway there
+        // owl web, opened at the NAS's address: the gateway there
         {
           const { page, errors } = await open(lang, "http://192.168.1.20:3430", true, { lanContainer: true, lanContainerHost: BRIDGE });
           assert.equal(await address(page), "http://192.168.1.20:3425/v1");
@@ -153,7 +153,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         }
         // opened at localhost (a tunnel, or on the NAS itself): the host's
         // bridge address, for other containers, and the host's own is
-        // MYNA_PUBLIC_URL's
+        // OWL_PUBLIC_URL's
         {
           const { page, errors } = await open(lang, "http://localhost:3430", true, { lanContainer: true, lanContainerHost: BRIDGE });
           assert.equal(await address(page), BRIDGE + "/v1");
@@ -167,7 +167,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           assert.equal((await note(page).locator(".sub").textContent()).trim(), w.own);
           assert.deepEqual(errors, []);
         }
-        // not in a container (or MYNA_PUBLIC_URL set): as it was
+        // not in a container (or OWL_PUBLIC_URL set): as it was
         {
           const { page, errors } = await open(lang, "http://192.168.1.20:3430", true, { lanURLs: ["http://192.168.1.5:3425"] });
           assert.equal(await address(page), "http://192.168.1.5:3425/v1");

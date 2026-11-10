@@ -12,7 +12,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // arkImages stands in for Volcengine Ark's images API
@@ -79,7 +79,7 @@ func arked(t *testing.T) (*Server, *arkImages) {
 }
 
 // Ark watermarks every image unless told not to, takes no n, and takes a
-// ratio only in the prompt: myna sends watermark false, asks once per
+// ratio only in the prompt: owl sends watermark false, asks once per
 // image, and sends a ratio as the doc's size for it (JL on Discord).
 func TestArkDrawsWithoutWatermarkOncePerImage(t *testing.T) {
 	s, a := arked(t)

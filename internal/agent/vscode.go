@@ -6,12 +6,12 @@ package agent
 // models in chatLanguageModels.json beside its settings.json (the default
 // profile's, in its User folder, and each other profile's in its own:
 // vscodeProfiles), a JSONC array VS Code watches and reads again when it
-// changes. myna adds a group of its own there,
-// {"vendor": "customendpoint", "name": "myna"}, listing the catalog: each
+// changes. owl adds a group of its own there,
+// {"vendor": "customendpoint", "name": "owl"}, listing the catalog: each
 // model at the gateway's /v1/chat/completions with tool calling on (agent
 // mode lists only models that call tools). A group's apiKey can't be
 // written in the file: VS Code reads it from its secret storage alone, so
-// each model sends myna's token in requestHeaders' Authorization, which a
+// each model sends owl's token in requestHeaders' Authorization, which a
 // Custom Endpoint model may set and which then stands in for the key; the
 // user is asked for none. The model a new chat starts on is the
 // chat.defaultModel setting (a model id: the catalog id here); picked in
@@ -22,10 +22,10 @@ package agent
 // provider but an OpenAI Compatible one, customoai (xybio, #1014: only Auto
 // showed). That one takes the same group in the same file, with each
 // model's window as maxInputTokens beside maxOutputTokens, and drops an
-// Authorization in requestHeaders, so myna's token goes as x-api-key
+// Authorization in requestHeaders, so owl's token goes as x-api-key
 // there (the gateway takes a key from either). It registers its providers
 // only while Copilot Chat is signed in to GitHub with a personal Copilot
-// plan; the Notice says so. Which of the two myna writes is the one the
+// plan; the Notice says so. Which of the two owl writes is the one the
 // installed extension's package.json declares (vscodeChatOf).
 
 import (
@@ -36,9 +36,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/proc"
 	"github.com/tidwall/gjson"
 )
 
@@ -61,7 +61,7 @@ const vscodeUA = "githubcopilotchat"
 // same name, so they are counted as VS Code too.
 const vscodeAgentHostUA = "vscode_agent_host"
 
-// The providers myna's group can be written for: VS Code's Custom
+// The providers owl's group can be written for: VS Code's Custom
 // Endpoint, and the OpenAI Compatible one of the Copilot Chat VSCodium
 // installs.
 const (
@@ -69,19 +69,19 @@ const (
 	vscodeOAI      = "customoai"
 )
 
-// vscodeVendors are both, the one myna writes when it can't tell first.
+// vscodeVendors are both, the one owl writes when it can't tell first.
 var vscodeVendors = []string{vscodeEndpoint, vscodeOAI}
 
-// vscodeGroupOf is how myna's group for a provider is found among the
+// vscodeGroupOf is how owl's group for a provider is found among the
 // user's.
 func vscodeGroupOf(vendor string) map[string]string {
-	return map[string]string{"vendor": vendor, "name": mynaID}
+	return map[string]string{"vendor": vendor, "name": owlID}
 }
 
-// vscodeGroup is myna's Custom Endpoint group.
+// vscodeGroup is owl's Custom Endpoint group.
 var vscodeGroup = vscodeGroupOf(vscodeEndpoint)
 
-// vscodeOurs is myna's group in a chatLanguageModels.json, whichever
+// vscodeOurs is owl's group in a chatLanguageModels.json, whichever
 // provider it was written for, and that provider.
 func vscodeOurs(lm string) (group, vendor string, ok bool) {
 	for _, v := range vscodeVendors {
@@ -338,7 +338,7 @@ func vscodeKindAt(k vscodeKind, dir string) *Agent {
 	get := func() string { return getAt(path) }
 	ours := func() (string, bool) { g, _, ok := vscodeOurs(models); return g, ok }
 	joined := func() bool { _, ok := ours(); return ok }
-	// inGroup: a model id is one of those myna's group lists
+	// inGroup: a model id is one of those owl's group lists
 	inGroup := func(id string) bool {
 		g, ok := ours()
 		if !ok || id == "" {
@@ -354,12 +354,12 @@ func vscodeKindAt(k vscodeKind, dir string) *Agent {
 	model := func() string {
 		v := get()
 		if inGroup(v) {
-			return mynaID + "/" + v
+			return owlID + "/" + v
 		}
 		return v
 	}
 	// restore puts back the chat.defaultModel a settings.json had before
-	// myna's
+	// owl's
 	restore := func(p string) error {
 		if was := unstash(key(p)); was != "" {
 			return edit.SetJSON(p, edit.KV{Path: vscodeDefault, Value: was})
@@ -372,7 +372,7 @@ func vscodeKindAt(k vscodeKind, dir string) *Agent {
 		s, m := vscodeProfiles(dir)
 		return edit.Atomically(func() error { return fn(s, m) }, append(s, m...)...)
 	}
-	// setGroup writes myna's group in the default's and each profile's,
+	// setGroup writes owl's group in the default's and each profile's,
 	// for the provider the chat installed has, in place of one written
 	// for the other
 	setGroup := func(lms []string) error {
@@ -421,8 +421,8 @@ func vscodeKindAt(k vscodeKind, dir string) *Agent {
 			}
 			return ""
 		},
-		// myna's group joins the user's own models: picking one of VS
-		// Code's in myna keeps it, and only switching off takes it out
+		// owl's group joins the user's own models: picking one of VS
+		// Code's in owl keeps it, and only switching off takes it out
 		Joined: joined,
 		Unwire: func() error {
 			return profiles(func(settings, lms []string) error {
@@ -459,7 +459,7 @@ func vscodeKindAt(k vscodeKind, dir string) *Agent {
 			if c := k.chat(); c.unsupported {
 				return c.notice(k.name)
 			} else if c.vendor != vendor {
-				return k.name + "'s Copilot Chat " + c.version + " lists a group for " + c.vendor + " and myna's is for " + vendor + "; myna writes it again when it next starts"
+				return k.name + "'s Copilot Chat " + c.version + " lists a group for " + c.vendor + " and owl's is for " + vendor + "; owl writes it again when it next starts"
 			}
 			header, want := "requestHeaders.Authorization", "Bearer "+k.token()
 			if vendor == vscodeOAI {
@@ -474,7 +474,7 @@ func vscodeKindAt(k vscodeKind, dir string) *Agent {
 			Key: "model", Label: "model", Get: model,
 			Set: func(v string) error {
 				return profiles(func(settings, lms []string) error {
-					if ref, ok := strings.CutPrefix(v, mynaID+"/"); ok && isMyna(ref) {
+					if ref, ok := strings.CutPrefix(v, owlID+"/"); ok && isOwl(ref) {
 						if err := setGroup(lms); err != nil {
 							return err
 						}
@@ -497,7 +497,7 @@ func vscodeKindAt(k vscodeKind, dir string) *Agent {
 							}
 						}
 					}
-					// VS Code's own: its default, where myna's group stays
+					// VS Code's own: its default, where owl's group stays
 					if v == "" {
 						if inGroup(get()) {
 							return restore(path)
@@ -511,10 +511,10 @@ func vscodeKindAt(k vscodeKind, dir string) *Agent {
 			Options: func(cur map[string]string) []Option {
 				// auto: Copilot's Auto, for one signed in to it
 				own := []Option{{Value: "auto", Label: "Auto"}}
-				if v := cur["model"]; v != "" && v != "auto" && !usesMyna(v) {
+				if v := cur["model"]; v != "" && v != "auto" && !usesOwl(v) {
 					own = append(own, Option{Value: v, Icon: modelIcon("", v)})
 				}
-				return withVia(group(k.name, own), k.id, mynaID+"/")
+				return withVia(group(k.name, own), k.id, owlID+"/")
 			},
 		}},
 	}, path, models, stashPath())
@@ -616,7 +616,7 @@ func vscodeProfiles(dir string) (settings, models []string) {
 // url that ends in /chat/completions is asked as it is.
 func vscodeURL() string { return gatewayV1() + "/chat/completions" }
 
-// vscodeGroupJSON is myna's group in chatLanguageModels.json for a
+// vscodeGroupJSON is owl's group in chatLanguageModels.json for a
 // provider (vscodeEndpoint or vscodeOAI): the catalog as the chat of the VS
 // Code k is shown it.
 func vscodeGroupJSON(k vscodeKind, vendor string) map[string]any {
@@ -654,19 +654,19 @@ func vscodeGroupJSON(k vscodeKind, vendor string) map[string]any {
 		list = append(list, entry)
 	}
 	if vendor == vscodeOAI {
-		return map[string]any{"name": mynaID, "vendor": vscodeOAI, "models": list}
+		return map[string]any{"name": owlID, "vendor": vscodeOAI, "models": list}
 	}
-	return map[string]any{"name": mynaID, "vendor": vscodeEndpoint, "apiType": "chat-completions", "models": list}
+	return map[string]any{"name": owlID, "vendor": vscodeEndpoint, "apiType": "chat-completions", "models": list}
 }
 
-// vscodeGroupKept is myna's group v laid over the one in the file, cur,
-// with every key of cur myna doesn't write kept: VS Code itself writes
+// vscodeGroupKept is owl's group v laid over the one in the file, cur,
+// with every key of cur owl doesn't write kept: VS Code itself writes
 // the reasoning effort picked for a model in Chat's model picker into the
 // group, as settings["<model id>"].reasoningEffort (languageModels.ts
 // setModelConfiguration), and a whole rewrite on each Sync and pick sent
 // that model at its first level (chim3744 on Discord: max went out as
-// low). The settings of a model myna no longer lists stay too, as the
-// user's. The model list is myna's whole, so a model gone from the
+// low). The settings of a model owl no longer lists stay too, as the
+// user's. The model list is owl's whole, so a model gone from the
 // catalog leaves it.
 func vscodeGroupKept(cur string, v map[string]any) any {
 	var have, want map[string]json.RawMessage
@@ -680,7 +680,7 @@ func vscodeGroupKept(cur string, v map[string]any) any {
 // vscodeChatID is Copilot Chat's extension id.
 const vscodeChatID = "github.copilot-chat"
 
-// vscodeChat is the Copilot Chat a VS Code build runs, as far as myna's
+// vscodeChat is the Copilot Chat a VS Code build runs, as far as owl's
 // group goes: the provider the group is written for, the version found,
 // none (no Copilot Chat installed) and unsupported (one that declares
 // neither provider).
@@ -693,7 +693,7 @@ type vscodeChat struct {
 // Custom Endpoint provider; one without has the extension installed in its
 // extensions folder, whose package.json says which it registers. A folder
 // or file that can't be read is not taken as "none": the Custom Endpoint
-// group stays as myna always wrote it.
+// group stays as owl always wrote it.
 func (k vscodeKind) chat() vscodeChat {
 	if k.exts == "" {
 		return vscodeChat{vendor: vscodeEndpoint}
@@ -767,7 +767,7 @@ func vscodeChatInstalled(dir string) (at, version string, found bool) {
 	return at, version, at != ""
 }
 
-// notice is what a build without its own chat is told with myna's group
+// notice is what a build without its own chat is told with owl's group
 // written: what its Copilot Chat needs to list it.
 func (c vscodeChat) notice(name string) string {
 	setup := noticeVSCodeSetup.say("agent", name)
@@ -803,9 +803,9 @@ func vscodeNewer(a, b string) bool {
 
 // what VS Code and its forks say after a change (notice.go)
 var (
-	noticeVSCodeJoined = newNotice("myna's models are in {agent}'s Chat model picker, under myna, in each of its profiles (VS Code 1.122 or later). If they don't show, run Developer: Reload Window in {agent}.")
+	noticeVSCodeJoined = newNotice("owl's models are in {agent}'s Chat model picker, under owl, in each of its profiles (VS Code 1.122 or later). If they don't show, run Developer: Reload Window in {agent}.")
 	noticeVSCodeSetup  = newNotice("{agent}'s Chat features must be enabled (chat.disableAIFeatures=false) and its product.json must include defaultChatAgent and trustedExtensionAuthAccess for GitHub.copilot-chat. Then run Developer: Reload Window in {agent}.")
-	noticeVSCodeNoChat = newNotice("Install GitHub Copilot Chat in {agent} to see myna's models in its Chat.")
-	noticeVSCodeOld    = newNotice("{agent}'s GitHub Copilot Chat {version} has neither a Custom Endpoint nor an OpenAI Compatible provider, so it can't list myna's models.")
-	noticeVSCodeOAI    = newNotice("myna's models are in {agent}'s Chat model picker under myna, from GitHub Copilot Chat {version}'s OpenAI Compatible provider, which it offers only while it is signed in to GitHub with a personal Copilot plan.")
+	noticeVSCodeNoChat = newNotice("Install GitHub Copilot Chat in {agent} to see owl's models in its Chat.")
+	noticeVSCodeOld    = newNotice("{agent}'s GitHub Copilot Chat {version} has neither a Custom Endpoint nor an OpenAI Compatible provider, so it can't list owl's models.")
+	noticeVSCodeOAI    = newNotice("owl's models are in {agent}'s Chat model picker under owl, from GitHub Copilot Chat {version}'s OpenAI Compatible provider, which it offers only while it is signed in to GitHub with a personal Copilot plan.")
 )

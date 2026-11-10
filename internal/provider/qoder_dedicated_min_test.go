@@ -3,7 +3,7 @@ package provider
 import (
 	"testing"
 
-	"github.com/istoo/myna/internal/update"
+	"github.com/istoo/owl/internal/update"
 )
 
 // Qoder's plugin before 0.2.53 took a Qoder CN enterprise's own domain only

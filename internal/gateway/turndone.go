@@ -10,7 +10,7 @@ package gateway
 // once the tool has run, and the last reply asks for none. So a session's
 // turn is done when a reply that called no tool has ended, nothing of the
 // session is going, and nothing more came for turnQuiet after it. A
-// request myna makes itself (System One, titles answered here), one an
+// request owl makes itself (System One, titles answered here), one an
 // agent makes on the side (Kind: titles, compaction …) and a Claude Code
 // subagent's (its x-claude-code-agent-id) aren't the turn's: a subagent's
 // last reply is not its parent's.
@@ -24,20 +24,20 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // TurnEnd is a turn that ran at least as long as Settings' TurnDoneAlert.
 type TurnEnd struct {
-	Agent   string // myna's id for it: claude, codex, opencode …
+	Agent   string // owl's id for it: claude, codex, opencode …
 	Session string // the agent's session id, "" when it sends none
 	Folder  string // the folder it says it works in, "" when it doesn't
 	Took    time.Duration
 }
 
 // TurnDone is told of each such turn; set by the app, which notifies.
-// Nil (myna serve, the CLI) has turns not followed at all.
+// Nil (owl serve, the CLI) has turns not followed at all.
 var TurnDone func(TurnEnd)
 
 // turnQuiet is how long after a reply that called no tool nothing more of

@@ -3,7 +3,7 @@
 package gui
 
 import (
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 	"github.com/wailsapp/wails/v3/pkg/application"
 )
 

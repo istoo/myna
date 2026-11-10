@@ -13,9 +13,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // prevEnv is a sandbox with one provider, fresh responses kept, and an
@@ -134,7 +134,7 @@ func TestPreviousResponseGivenWholeToChat(t *testing.T) {
 	}
 }
 
-// An id myna doesn't hold, to a provider it would be translated for,
+// An id owl doesn't hold, to a provider it would be translated for,
 // is OpenAI's own 400; so is one another gateway key's response, and one
 // the client asked not be kept (store false).
 func TestPreviousResponseNotFound(t *testing.T) {
@@ -164,9 +164,9 @@ func TestPreviousResponseNotFound(t *testing.T) {
 	notFound(askResponses(t, s, "", `{"model":"fake/m1","previous_response_id":"`+off+`","input":"again"}`), off)
 }
 
-// An id myna doesn't hold, to a provider on Responses the request is
+// An id owl doesn't hold, to a provider on Responses the request is
 // relayed to, goes as it came: a response the provider made before
-// myna restarted is still its own to find.
+// owl restarted is still its own to find.
 func TestUnknownPreviousResponseRelayedAsSent(t *testing.T) {
 	up := newPrevUp(t, func(int, []byte) (int, string, string) {
 		return 200, "application/json", `{"id":"resp_up","object":"response","status":"completed","output":[{"type":"message","role":"assistant","content":[{"type":"output_text","text":"ok"}]}],"usage":{"input_tokens":3,"output_tokens":1}}`

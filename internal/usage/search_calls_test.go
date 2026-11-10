@@ -22,7 +22,7 @@ func TestSearchAPIRowsListedNotCounted(t *testing.T) {
 		Millis: 800, Status: 200, Kind: "web_search", Source: SourceSearch})
 	Append(Record{Time: now.Add(2 * time.Second), Agent: "claude", Requested: "Brave Search", Host: "api.search.brave.com", Millis: 90, Status: 429,
 		Error: "rate limited", Kind: "web_search", Source: SourceSearch})
-	Append(Record{Time: now.Add(3 * time.Second), Agent: "myna", Requested: "DeepSeek", Host: "api.deepseek.com", Millis: 50,
+	Append(Record{Time: now.Add(3 * time.Second), Agent: "owl", Requested: "DeepSeek", Host: "api.deepseek.com", Millis: 50,
 		Error: "found nothing", Kind: "web_search", Source: SourceSearch})
 
 	page := QueryPage(All, Filter{}, 0, 50)

@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // codexSideRequest is one of the Codex app's hidden side turns as it sends
@@ -36,7 +36,7 @@ const (
 	sideSummarySchema     = `{"type":"object","properties":{"summary":{"type":"string"},"compactSummary":{"type":"string","maxLength":60}},"required":["summary","compactSummary"],"additionalProperties":false}`
 )
 
-// With one of myna's models picked beside Codex's ChatGPT sign-in, the
+// With one of owl's models picked beside Codex's ChatGPT sign-in, the
 // Codex app's titles, descriptions and summaries, which it asks for on
 // gpt-6-luna whatever the conversation is on, are written by the model
 // picked, not by ChatGPT, so a conversation on a third-party model spends
@@ -67,7 +67,7 @@ func TestCodexSideTurnsOnThePickedModel(t *testing.T) {
 		codexSideRequest(t, s, src, sideSummarySchema)
 	}
 	if chatgptCalls != 3 || f.calls != 0 {
-		t.Fatalf("own model: chatgpt %d, myna model %d", chatgptCalls, f.calls)
+		t.Fatalf("own model: chatgpt %d, owl model %d", chatgptCalls, f.calls)
 	}
 
 	side = "fake/m1"
@@ -79,14 +79,14 @@ func TestCodexSideTurnsOnThePickedModel(t *testing.T) {
 		before := f.calls
 		rec := codexSideRequest(t, s, c.source, c.schema)
 		if text, _ := outputText(t, rec.Body.String()); rec.Code != 200 || text != c.want || f.calls != before+1 || chatgptCalls != 3 {
-			t.Fatalf("%s on the picked model: %d %q, myna model %d, chatgpt %d", c.source, rec.Code, rec.Body.String(), f.calls, chatgptCalls)
+			t.Fatalf("%s on the picked model: %d %q, owl model %d, chatgpt %d", c.source, rec.Code, rec.Body.String(), f.calls, chatgptCalls)
 		}
 		var sent struct {
 			Model string `json:"model"`
 		}
 		json.Unmarshal(f.got, &sent)
 		if sent.Model != "m1" {
-			t.Errorf("%s: the myna model was asked for %q", c.source, sent.Model)
+			t.Errorf("%s: the owl model was asked for %q", c.source, sent.Model)
 		}
 	}
 
@@ -97,7 +97,7 @@ func TestCodexSideTurnsOnThePickedModel(t *testing.T) {
 	req.Header.Set("Authorization", "Bearer chatgpt-token")
 	s.Handler().ServeHTTP(rec, req)
 	if chatgptCalls != 4 || f.calls != 3 {
-		t.Errorf("a plain turn: chatgpt %d, myna model %d", chatgptCalls, f.calls)
+		t.Errorf("a plain turn: chatgpt %d, owl model %d", chatgptCalls, f.calls)
 	}
 
 	var kinds []string
@@ -110,10 +110,10 @@ func TestCodexSideTurnsOnThePickedModel(t *testing.T) {
 	}
 }
 
-// A summary on one of myna's models, with myna Codex's provider, is
+// A summary on one of owl's models, with owl Codex's provider, is
 // handed back in the shape its schema asks for too: a model behind the
 // Chat API never sees the schema, and the app drops a plain answer.
-func TestCodexSummaryOnMynaProvider(t *testing.T) {
+func TestCodexSummaryOnOwlProvider(t *testing.T) {
 	f := &fake{t: t, reply: sse(
 		`data: {"id":"c1","choices":[{"index":0,"delta":{"content":"Summary: \"Ran the tests\""}}]}`,
 		`data: {"id":"c1","choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"usage":{"prompt_tokens":10,"completion_tokens":2}}`,

@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/claudetui"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/claudetui"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // A request the interactive mode refuses is refused the same on every
@@ -56,7 +56,7 @@ fi
 	claudeTUIRuns = true
 	t.Cleanup(func() { claudeTUIRuns = false })
 	started := filepath.Join(t.TempDir(), "started")
-	helper := filepath.Join(t.TempDir(), "myna")
+	helper := filepath.Join(t.TempDir(), "owl")
 	testenv.Program(t, helper, `#!/bin/sh
 [ "$1" = "`+claudetui.Command+`" ] || exit 9
 echo start >> '`+started+`'
@@ -73,7 +73,7 @@ exec "$claude" "$@"
 // A turn Anthropic refuses in the interactive mode as a third-party app's
 // (#4503) reaches the client as a 400 that says what happened, that asking
 // again may draw from extra usage, and where to turn the interactive mode
-// off. myna asks nothing again on its own: no claude -p run starts, which
+// off. owl asks nothing again on its own: no claude -p run starts, which
 // the plan counts at about twice and which may draw from extra usage (the
 // owner's call), and no account rests for it or is asked next.
 func TestClaudeTUIThirdPartyRefusalSaysWhy(t *testing.T) {

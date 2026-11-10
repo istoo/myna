@@ -7,9 +7,9 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/library"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/library"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A skill turned off on one computer (hanslin1666 on Discord) stays off

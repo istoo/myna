@@ -74,7 +74,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang));
-        await page.goto("http://myna.test/?view=providers");
+        await page.goto("http://owl.test/?view=providers");
         await open(page);
 
         assert.equal(await page.locator("#addSheet .kind b").first().textContent(), L[lang]);
@@ -109,7 +109,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     for (const [name, ctx, prefs] of [["the system's reduced motion", { reducedMotion: "reduce" }, {}], ["Settings' Reduce motion", {}, { reduceMotion: true }]]) await t.test(name, async () => {
       const page = await (await browser.newContext({ viewport: { width: 900, height: 800 }, ...ctx })).newPage();
       await page.route("**/*", server("en", prefs));
-      await page.goto("http://myna.test/?view=providers");
+      await page.goto("http://owl.test/?view=providers");
       await page.locator("#addProvider").click();
       await page.locator("#addSheet .tile").first().waitFor();
       const h = await look(page);

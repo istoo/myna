@@ -9,31 +9,31 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/proc"
 )
 
-// The Gateway page's button (leslie_luo on Discord): with an older myna
+// The Gateway page's button (leslie_luo on Discord): with an older owl
 // keeping the gateway's port, it quits that one and this one serves the
 // gateway at once; otherwise it restarts the gateway this one serves, or
-// starts it when none does. The page said only "quit that myna", and the
+// starts it when none does. The page said only "quit that owl", and the
 // user couldn't find which one it was. Only a process whose program is a
-// myna (proc.IsMyna, by the pid listening on the port and its path) is
+// owl (proc.IsOwl, by the pid listening on the port and its path) is
 // ever ended; anything else is said, never touched.
 
 // gatewayFixJSON is how a take-over or a restart went: what stood in the
 // way by a reason the page says in its language, and the process it was.
 type gatewayFixJSON struct {
 	OK bool `json:"ok"`
-	// Reason: "not-myna" (the port is another program's), "container"
-	// (a container's or a VM's: the myna answering runs in it, which
+	// Reason: "not-owl" (the port is another program's), "container"
+	// (a container's or a VM's: the owl answering runs in it, which
 	// its own tools stop — docker stop, OrbStack's window), "unseen" (no
 	// process of this user's listens: another user's, an administrator's),
-	// "denied" (a myna this user may not end), "stuck" (it didn't end),
-	// "respawned" (something started a myna on the port again at once:
+	// "denied" (a owl this user may not end), "stuck" (it didn't end),
+	// "respawned" (something started a owl on the port again at once:
 	// a LaunchAgent, a systemd unit, a scheduled task), "taken" (the
 	// gateway couldn't listen: another program has the port), "other"
-	// (a myna not older than this one serves; quit it there), "error"
+	// (a owl not older than this one serves; quit it there), "error"
 	Reason  string `json:"reason,omitempty"`
 	PID     int    `json:"pid,omitempty"`
 	Path    string `json:"path,omitempty"`
@@ -51,7 +51,7 @@ func gatewayFixRoutes(mux *http.ServeMux) {
 	})
 }
 
-// How long a myna asked to quit is given before it is ended at once,
+// How long a owl asked to quit is given before it is ended at once,
 // that again, and the gateway here to answer; vars for the tests.
 var (
 	quitWait  = 5 * time.Second
@@ -59,7 +59,7 @@ var (
 	startWait = 5 * time.Second
 )
 
-// takeOverGateway quits the myna serving the gateway, when there is one,
+// takeOverGateway quits the owl serving the gateway, when there is one,
 // and serves it here.
 func takeOverGateway() gatewayFixJSON {
 	gatewayMu.Lock()
@@ -68,7 +68,7 @@ func takeOverGateway() gatewayFixJSON {
 		return gatewayFixJSON{OK: true}
 	}
 	if o := gateway.ServedBy(); o.Running {
-		if out := quitMynaOnPort(o.Version); !out.OK {
+		if out := quitOwlOnPort(o.Version); !out.OK {
 			return out
 		}
 	}
@@ -76,7 +76,7 @@ func takeOverGateway() gatewayFixJSON {
 }
 
 // restartGateway stops the gateway this process serves and starts it
-// again; with none served here and none answering, it starts it. A myna
+// again; with none served here and none answering, it starts it. A owl
 // serving it elsewhere is left alone: that is the take-over's to quit.
 func restartGateway() gatewayFixJSON {
 	gatewayMu.Lock()
@@ -120,8 +120,8 @@ func startHere() gatewayFixJSON {
 			}
 			out.PID = pid
 			out.Path, _ = proc.Executable(pid)
-			if proc.IsMyna(out.Path) {
-				// a myna took it back as soon as the other quit
+			if proc.IsOwl(out.Path) {
+				// a owl took it back as soon as the other quit
 				out.Reason = "respawned"
 			} else if proc.IsForwarder(out.Path) {
 				out.Reason = "container"
@@ -132,10 +132,10 @@ func startHere() gatewayFixJSON {
 	return out
 }
 
-// quitMynaOnPort ends the myna (of version, as it says) listening on
-// the gateway's port, once its program is checked to be myna's, and
+// quitOwlOnPort ends the owl (of version, as it says) listening on
+// the gateway's port, once its program is checked to be owl's, and
 // waits until the port is let go.
-func quitMynaOnPort(version string) gatewayFixJSON {
+func quitOwlOnPort(version string) gatewayFixJSON {
 	port := gateway.Port()
 	n, _ := strconv.Atoi(port)
 	out := gatewayFixJSON{Port: port, Version: version}
@@ -159,8 +159,8 @@ func quitMynaOnPort(version string) gatewayFixJSON {
 			out.Reason, out.Error = "unseen", err.Error()
 			return out
 		}
-		if !proc.IsMyna(path) {
-			out.Reason = "not-myna"
+		if !proc.IsOwl(path) {
+			out.Reason = "not-owl"
 			if proc.IsForwarder(path) {
 				out.Reason = "container"
 			}

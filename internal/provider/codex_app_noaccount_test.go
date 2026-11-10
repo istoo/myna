@@ -6,10 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/proc"
 )
 
-// With Codex on a provider that takes no ChatGPT account (myna's table
+// With Codex on a provider that takes no ChatGPT account (owl's table
 // with requires_openai_auth = false, danzi002 on Discord: "requires_openai_auth
 // = false 的时候就不应该重启 codex 了"), the app-server sends the
 // provider's own key and reads no account at all, so switching the account
@@ -48,7 +48,7 @@ func TestCodexNoAccountSwitchRestartsNothing(t *testing.T) {
 		codexDaemonMu.Unlock()
 	}
 
-	s.route, s.running = "myna,noauth", []int{60}
+	s.route, s.running = "owl,noauth", []int{60}
 	if got := step(); got != nil {
 		t.Fatalf("nothing changed: ended %v", got)
 	}
@@ -70,7 +70,7 @@ func TestCodexNoAccountSwitchRestartsNothing(t *testing.T) {
 		t.Fatalf("switched off a spent account on a provider that takes no account: ended %v", got)
 	}
 	// where Codex sends its requests changed: restarted as ever
-	s.route = "myna,auth"
+	s.route = "owl,auth"
 	if got := step(); !slices.Equal(got, []int{60}) {
 		t.Fatalf("route changed: ended %v, want [60]", got)
 	}

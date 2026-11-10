@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 // Save pressed on a provider's editor left as it was writes nothing and

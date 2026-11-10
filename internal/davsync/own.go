@@ -5,9 +5,9 @@ import (
 	"maps"
 	"slices"
 
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/backup"
-	"github.com/istoo/myna/internal/profile"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/backup"
+	"github.com/istoo/owl/internal/profile"
 )
 
 // An agent's field that sync wrote over a value picked on this computer,

@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/sessions"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/sessions"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // The user-facing lists and Routing use Desktop's metadata even when no

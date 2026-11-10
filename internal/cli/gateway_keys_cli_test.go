@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/budget"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/budget"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 func TestGatewayKeyCLI(t *testing.T) {
@@ -105,7 +105,7 @@ func TestGatewayKeyCLIOwnValue(t *testing.T) {
 
 func TestGatewayKeyListWithReadOnlyMigration(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
-	s := settings.Settings{LAN: true, LANKey: "sk-myna-fixture-cli"}
+	s := settings.Settings{LAN: true, LANKey: "sk-owl-fixture-cli"}
 	if err := settings.Save(s); err != nil {
 		t.Fatal(err)
 	}
@@ -117,12 +117,12 @@ func TestGatewayKeyListWithReadOnlyMigration(t *testing.T) {
 		t.Skip("settings.json remains writable")
 	}
 	var out bytes.Buffer
-	if err := gatewayKeysTo(&out, []string{"gateway-key", "list"}); err != nil || !strings.Contains(out.String(), "Myna") {
+	if err := gatewayKeysTo(&out, []string{"gateway-key", "list"}); err != nil || !strings.Contains(out.String(), "Owl") {
 		t.Fatal("read-only migration blocked CLI list", out.String(), err)
 	}
 }
 
-// myna gateway-key limit sets, shows and takes off a key's limit, and
+// owl gateway-key limit sets, shows and takes off a key's limit, and
 // list says what each key has used of its own (#585).
 func TestGatewayKeyLimitCLI(t *testing.T) {
 	t.Setenv("HOME", t.TempDir())
@@ -271,7 +271,7 @@ func TestGatewayKeyModelsCLI(t *testing.T) {
 	}
 }
 
-// myna gateway-key accounts sets, shows and takes off a key's account
+// owl gateway-key accounts sets, shows and takes off a key's account
 // whitelist, and refuses an account no provider has (#905). An account's
 // stable id, named by who is signed in, is exercised against a real
 // sign-in in the gateway's tests; a key's fingerprint is one here.
@@ -322,7 +322,7 @@ func TestGatewayKeyAccountsCLI(t *testing.T) {
 	}
 }
 
-// myna gateway-key limit adds, lists, changes and removes a key's
+// owl gateway-key limit adds, lists, changes and removes a key's
 // several limits (#2227); the single-limit form still sets an only limit.
 func TestGatewayKeySeveralLimitsCLI(t *testing.T) {
 	t.Setenv("HOME", t.TempDir())
@@ -448,7 +448,7 @@ func TestGatewayKeyQuotasCLI(t *testing.T) {
 	}
 }
 
-// myna gateway-key move puts a key at a place, counted from 1 as list
+// owl gateway-key move puts a key at a place, counted from 1 as list
 // shows them, and list shows the keys in that order (alextjy on Discord).
 func TestGatewayKeyCLIMove(t *testing.T) {
 	t.Setenv("HOME", t.TempDir())

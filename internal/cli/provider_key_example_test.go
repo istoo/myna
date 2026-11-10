@@ -5,10 +5,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// myna provider add <preset> without its key names the command that adds
+// owl provider add <preset> without its key names the command that adds
 // it, with the preset's own id, rather than only saying a key is needed.
 func TestAddWithoutKeySaysTheCommand(t *testing.T) {
 	home := t.TempDir()
@@ -30,7 +30,7 @@ func TestAddWithoutKeySaysTheCommand(t *testing.T) {
 			continue // refused for another reason before the key
 		}
 		checked++
-		if want := "myna provider add " + pr.ID + " <key>"; !strings.Contains(err.Error(), want) {
+		if want := "owl provider add " + pr.ID + " <key>"; !strings.Contains(err.Error(), want) {
 			t.Errorf("%s: %q doesn't say %q", pr.ID, err, want)
 		}
 	}

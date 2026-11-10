@@ -13,8 +13,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // fakeHub is the library's servers, as the gateway asks for them.
@@ -115,7 +115,7 @@ func TestHubMCPListsAndRoutes(t *testing.T) {
 	h := lanGuard(New().Handler())
 
 	init := readMCP(t, hubPost(h, "claude", here, `{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18"}}`))
-	if init.Error != nil || init.Result.ServerInfo.Name != "myna" || init.Result.ProtocolVersion != "2025-06-18" {
+	if init.Error != nil || init.Result.ServerInfo.Name != "owl" || init.Result.ProtocolVersion != "2025-06-18" {
 		t.Fatalf("initialize: %+v", init)
 	}
 	m := readMCP(t, hubPost(h, "claude", here, toolsList))
@@ -162,7 +162,7 @@ func TestHubMCPListsAndRoutes(t *testing.T) {
 	}
 }
 
-// A tool name the agent listed before its server's list changed (Myna
+// A tool name the agent listed before its server's list changed (Owl
 // Browser's browser_tabs, now the browser tool's tabs action) or while
 // the server's list failed still goes to that server when it is switched
 // on for the agent, for the server to run or refuse; another agent's
@@ -171,18 +171,18 @@ func TestHubMCPCallsAToolNoLongerListed(t *testing.T) {
 	fresh(t)
 	f := &fakeHub{on: true,
 		tools: map[string][]HubTool{
-			"claude": {{Server: "myna-browser", Tool: "browser", Spec: hubSpec("browser")}},
+			"claude": {{Server: "owl-browser", Tool: "browser", Spec: hubSpec("browser")}},
 		},
 		servers: map[string][]HubServer{
-			"claude": {{Name: "myna-browser"}, {Name: "my.fs"}},
+			"claude": {{Name: "owl-browser"}, {Name: "my.fs"}},
 			"codex":  {{Name: "github"}},
 		},
 	}
 	withHub(t, f)
 	h := lanGuard(New().Handler())
 	for _, c := range []struct{ name, ran string }{
-		{"myna-browser__browser_tabs", "ran myna-browser browser_tabs"},
-		{"myna-browser__browser", "ran myna-browser browser"},
+		{"owl-browser__browser_tabs", "ran owl-browser browser_tabs"},
+		{"owl-browser__browser", "ran owl-browser browser"},
 		// listed nothing just now, and its name in the hub's characters
 		{"my-fs__read", "ran my.fs read"},
 	} {
@@ -191,13 +191,13 @@ func TestHubMCPCallsAToolNoLongerListed(t *testing.T) {
 			t.Errorf("%s: %+v", c.name, m)
 		}
 	}
-	for _, c := range []struct{ agent, name string }{{"claude", "github__create_issue"}, {"claude", "myna-browser__"}, {"codex", "myna-browser__browser_tabs"}, {"claude", "nope__x"}} {
+	for _, c := range []struct{ agent, name string }{{"claude", "github__create_issue"}, {"claude", "owl-browser__"}, {"codex", "owl-browser__browser_tabs"}, {"claude", "nope__x"}} {
 		m := readMCP(t, hubPost(h, c.agent, here, toolsCall(c.name, `{}`)))
 		if m.Error == nil || m.Error.Code != -32602 || !strings.Contains(m.Error.Message, "unknown tool "+c.name) {
 			t.Errorf("%s's %s: %+v", c.agent, c.name, m)
 		}
 	}
-	want := `claude myna-browser browser_tabs {"action":"tabs"}|claude myna-browser browser {"action":"tabs"}|claude my.fs read {"action":"tabs"}`
+	want := `claude owl-browser browser_tabs {"action":"tabs"}|claude owl-browser browser {"action":"tabs"}|claude my.fs read {"action":"tabs"}`
 	if got := strings.Join(f.ran(), "|"); got != want {
 		t.Errorf("ran %q, want %q", got, want)
 	}
@@ -208,8 +208,8 @@ func TestHubMCPCallsAToolNoLongerListed(t *testing.T) {
 // word for a tool it doesn't have; an agent's path still lists only its own.
 func TestHubMCPForAnyApp(t *testing.T) {
 	fresh(t)
-	t.Setenv("MYNA_ADDR", "")
-	t.Setenv("MYNA_PUBLIC_URL", "")
+	t.Setenv("OWL_ADDR", "")
+	t.Setenv("OWL_PUBLIC_URL", "")
 	f := &fakeHub{on: true, tools: map[string][]HubTool{
 		"":       {{Server: "github", Tool: "create_issue", Spec: hubSpec("create_issue")}, {Server: "notes", Tool: "find", Spec: hubSpec("find")}},
 		"claude": {{Server: "github", Tool: "create_issue", Spec: hubSpec("create_issue")}},
@@ -218,10 +218,10 @@ func TestHubMCPForAnyApp(t *testing.T) {
 	h := lanGuard(New().Handler())
 
 	w := hubPostAt(h, HubMCPAll, here, `{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18"}}`)
-	if init := readMCP(t, w); init.Error != nil || init.Result.ServerInfo.Name != "myna" {
+	if init := readMCP(t, w); init.Error != nil || init.Result.ServerInfo.Name != "owl" {
 		t.Fatalf("initialize: %+v", init)
 	}
-	if !strings.Contains(w.Body.String(), "The tools of every MCP server in myna's Library") {
+	if !strings.Contains(w.Body.String(), "The tools of every MCP server in owl's Library") {
 		t.Errorf("another app's instructions: %s", w.Body)
 	}
 	var names []string
@@ -236,7 +236,7 @@ func TestHubMCPForAnyApp(t *testing.T) {
 		t.Fatalf("another app's call: %+v", m)
 	}
 	m = readMCP(t, hubPostAt(h, HubMCPAll, here, toolsCall("nope__x", `{}`)))
-	if m.Error == nil || m.Error.Code != -32602 || m.Error.Message != "unknown tool nope__x: no MCP server in myna's Library gives it" {
+	if m.Error == nil || m.Error.Code != -32602 || m.Error.Message != "unknown tool nope__x: no MCP server in owl's Library gives it" {
 		t.Errorf("another app's unknown tool: %+v", m)
 	}
 	// claude's own path doesn't reach a server it isn't given
@@ -248,7 +248,7 @@ func TestHubMCPForAnyApp(t *testing.T) {
 		t.Errorf("ran %q", got)
 	}
 	// guarded as the agents' paths are: no web page, and no other computer
-	// while myna isn't shared
+	// while owl isn't shared
 	if w := hubPostAt(h, HubMCPAll, here, toolsList, "Origin", "https://evil.example", "Sec-Fetch-Site", "cross-site", "Sec-Fetch-Mode", "cors"); w.Code != http.StatusForbidden {
 		t.Errorf("a foreign page's tools/list: %d %s", w.Code, w.Body)
 	}
@@ -316,14 +316,14 @@ func TestHubMCPOff(t *testing.T) {
 	}
 }
 
-// The hub is guarded as myna's other MCP servers are: another computer
+// The hub is guarded as owl's other MCP servers are: another computer
 // only while shared and with a key, and no web page — a sandboxed frame's
 // null Origin, another site's, one on this computer, one rebound to
 // 127.0.0.1 — even from this computer. No tool runs for one turned away.
 func TestHubMCPGuarded(t *testing.T) {
 	fresh(t)
-	t.Setenv("MYNA_ADDR", "")
-	t.Setenv("MYNA_PUBLIC_URL", "")
+	t.Setenv("OWL_ADDR", "")
+	t.Setenv("OWL_PUBLIC_URL", "")
 	f := &fakeHub{on: true, tools: map[string][]HubTool{"claude": {{Server: "fs", Tool: "read", Spec: hubSpec("read")}}}}
 	withHub(t, f)
 	h := lanGuard(New().Handler())
@@ -332,11 +332,11 @@ func TestHubMCPGuarded(t *testing.T) {
 	if w := hubPost(h, "claude", there, call); w.Code != http.StatusForbidden {
 		t.Fatalf("not shared: %d %s", w.Code, w.Body)
 	}
-	_, secrets := newCaller(t, "Laptop") // shares myna
+	_, secrets := newCaller(t, "Laptop") // shares owl
 	if w := hubPost(h, "claude", there, call); w.Code != http.StatusUnauthorized {
 		t.Fatalf("shared, no key: %d %s", w.Code, w.Body)
 	}
-	if w := hubPost(h, "claude", there, call, "Authorization", "Bearer sk-myna-wrong"); w.Code != http.StatusUnauthorized {
+	if w := hubPost(h, "claude", there, call, "Authorization", "Bearer sk-owl-wrong"); w.Code != http.StatusUnauthorized {
 		t.Fatalf("shared, a wrong key: %d %s", w.Code, w.Body)
 	}
 	for _, hdr := range [][]string{
@@ -402,12 +402,12 @@ func TestHubMCPHeldToKeyLimit(t *testing.T) {
 // cut at 250 characters) learns from that line which servers are behind
 // it and what each is for: a Pi asked about a GitHub repository cloned
 // it rather than ask the DeepWiki behind the router, told only "The tools
-// of the MCP servers in myna's Library" (11-01). Every server is named
+// of the MCP servers in owl's Library" (11-01). Every server is named
 // and what it is for cut to fit, then said whole below.
 func TestHubMCPNamesItsServers(t *testing.T) {
 	fresh(t)
-	t.Setenv("MYNA_ADDR", "")
-	t.Setenv("MYNA_PUBLIC_URL", "")
+	t.Setenv("OWL_ADDR", "")
+	t.Setenv("OWL_PUBLIC_URL", "")
 	five := []HubServer{
 		{Name: "context7", About: "Up-to-date documentation and code examples for any library, straight into the prompt."},
 		{Name: "deepwiki", About: "Ask questions about any public GitHub repository and read its generated wiki."},
@@ -493,15 +493,15 @@ func whereReply(t *testing.T, h http.Handler, addr string, hdr ...string) (instr
 }
 
 // Two routers serving the same tools (packinggoodsllc_07668 on Discord:
-// one myna in China, one in Los Angeles) are told apart by what each
+// one owl in China, one in Los Angeles) are told apart by what each
 // says of itself: the user's words (RouterNote) in initialize's
 // instructions and title and before each tool's description, to every
 // caller; with none, this computer's name to an agent on another
 // computer, and nothing to one on this computer.
 func TestHubMCPSaysWhere(t *testing.T) {
 	fresh(t)
-	t.Setenv("MYNA_ADDR", "")
-	t.Setenv("MYNA_PUBLIC_URL", "")
+	t.Setenv("OWL_ADDR", "")
+	t.Setenv("OWL_PUBLIC_URL", "")
 	old := hostName
 	hostName = func() string { return "la-box" }
 	t.Cleanup(func() { hostName = old })
@@ -517,12 +517,12 @@ func TestHubMCPSaysWhere(t *testing.T) {
 
 	// nothing set, this computer: as before
 	say, title, descs := whereReply(t, h, here)
-	if strings.Contains(say, "la-box") || title != "Myna MCP hub" || strings.Join(descs, "|") != "Does fetch.|" {
+	if strings.Contains(say, "la-box") || title != "Owl MCP hub" || strings.Join(descs, "|") != "Does fetch.|" {
 		t.Fatalf("this computer, nothing set: %q %q %q", say, title, descs)
 	}
 	// nothing set, another computer: this computer's name
 	say, title, descs = whereReply(t, h, there, auth...)
-	if !strings.Contains(say, "This router: la-box.") || title != "Myna MCP hub · la-box" || strings.Join(descs, "|") != "[la-box] Does fetch.|[la-box]" {
+	if !strings.Contains(say, "This router: la-box.") || title != "Owl MCP hub · la-box" || strings.Join(descs, "|") != "[la-box] Does fetch.|[la-box]" {
 		t.Fatalf("another computer, nothing set: %q %q %q", say, title, descs)
 	}
 	// the user's words, to every caller, one line and once
@@ -534,11 +534,11 @@ func TestHubMCPSaysWhere(t *testing.T) {
 		hdr  []string
 	}{{here, nil}, {there, auth}} {
 		say, title, descs = whereReply(t, h, c.addr, c.hdr...)
-		if !strings.Contains(say, "This router: Los Angeles (US).") || title != "Myna MCP hub · Los Angeles (US)" || strings.Join(descs, "|") != "[Los Angeles (US)] Does fetch.|[Los Angeles (US)]" {
+		if !strings.Contains(say, "This router: Los Angeles (US).") || title != "Owl MCP hub · Los Angeles (US)" || strings.Join(descs, "|") != "[Los Angeles (US)] Does fetch.|[Los Angeles (US)]" {
 			t.Fatalf("%s, set: %q %q %q", c.addr, say, title, descs)
 		}
 	}
-	// a server whose descriptions say it already (another myna's router
+	// a server whose descriptions say it already (another owl's router
 	// in this one's Library) isn't said twice
 	f.mu.Lock()
 	f.tools["claude"][0].Spec["description"] = json.RawMessage(`"[Los Angeles (US)] Does fetch."`)
@@ -557,8 +557,8 @@ func TestHubMCPSaysWhere(t *testing.T) {
 
 // Each client that initializes is given a session id, and each call the
 // hub runs is made with its caller's session (HubCaller.Session), so a
-// server that keeps something per caller (Myna Browser's tab) keeps it
-// apart for two agents behind one router: the session another myna's
+// server that keeps something per caller (Owl Browser's tab) keeps it
+// apart for two agents behind one router: the session another owl's
 // router names in _meta, which is its caller's, else the client's own; a
 // client that sends none is told apart from no one, as before.
 func TestHubMCPTellsCallersApart(t *testing.T) {
@@ -566,7 +566,7 @@ func TestHubMCPTellsCallersApart(t *testing.T) {
 	var mu sync.Mutex
 	var got []string
 	f := &fakeHub{on: true, tools: map[string][]HubTool{
-		"claude": {{Server: "myna-browser", Tool: "browser_tabs", Spec: hubSpec("browser_tabs")}},
+		"claude": {{Server: "owl-browser", Tool: "browser_tabs", Spec: hubSpec("browser_tabs")}},
 	}, call: func(ctx context.Context, server, tool string) (json.RawMessage, error) {
 		mu.Lock()
 		got = append(got, HubCallerOf(ctx).Session)
@@ -585,10 +585,10 @@ func TestHubMCPTellsCallersApart(t *testing.T) {
 	if again := hubPost(h, "claude", here, initialize, "Mcp-Session-Id", a).Header().Get("Mcp-Session-Id"); again != "" {
 		t.Errorf("a client with a session was given another: %q", again)
 	}
-	call := toolsCall("myna-browser__browser_tabs", `{}`)
+	call := toolsCall("owl-browser__browser_tabs", `{}`)
 	hubPost(h, "claude", here, call, "Mcp-Session-Id", a)
 	hubPost(h, "claude", here, call, "Mcp-Session-Id", b)
-	hubPost(h, "claude", here, `{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"myna-browser__browser_tabs","arguments":{},"_meta":{"myna/session":"hub-claude-far"}}}`, "Mcp-Session-Id", a)
+	hubPost(h, "claude", here, `{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"owl-browser__browser_tabs","arguments":{},"_meta":{"owl/session":"hub-claude-far"}}}`, "Mcp-Session-Id", a)
 	hubPost(h, "claude", here, call)
 	mu.Lock()
 	defer mu.Unlock()

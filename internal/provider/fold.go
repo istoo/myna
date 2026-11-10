@@ -5,7 +5,7 @@ package provider
 // #0001"… at api.mistral.ai, brought in from another app that keeps an
 // entry per key) are one provider with that many keys: its Providers row
 // is one row, its models are listed once in every agent's picker and in
-// the routing groups myna finds, and requests go over the keys as the
+// the routing groups owl finds, and requests go over the keys as the
 // provider's Routing says. Hundreds of copies made every agent's list
 // hundreds of times as long: /api/state was 86 MB for 3,000 keys.
 //
@@ -30,8 +30,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // numbered is a name with a number after it that tells copies apart:
@@ -64,7 +64,7 @@ func foldable(p Provider, stepfun map[string]stepfunSession) bool {
 	if p.Account != nil || p.Hidden || p.Key == "" || !hasEndpoint(p) || p.IsVertex() {
 		return false
 	}
-	if slices.Contains(accountIDs, p.ID) || subscriptionID(p.ID) || p.ID == "myna" {
+	if slices.Contains(accountIDs, p.ID) || subscriptionID(p.ID) || p.ID == "owl" {
 		return false
 	}
 	_, signed := stepfun[p.ID]
@@ -119,7 +119,7 @@ func modelPrefs(s *settings.Settings, id string) string {
 func foldRefs(f file, s *settings.Settings) map[string][]string {
 	out := map[string][]string{}
 	note := func(where, ref string) {
-		r := strings.TrimPrefix(ref, "myna/")
+		r := strings.TrimPrefix(ref, "owl/")
 		id, model, ok := strings.Cut(r, "/")
 		if !ok {
 			id, model = r, ""
@@ -418,12 +418,12 @@ func foldSet(ps []Provider, set []int) (Provider, []string) {
 	return p, ids
 }
 
-// foldedRef is a model id ("provider/model", "myna/provider/model")
+// foldedRef is a model id ("provider/model", "owl/provider/model")
 // with its provider as to names it now.
 func foldedRef(ref string, to func(string) string) string {
 	pre, rest := "", ref
-	if r, ok := strings.CutPrefix(ref, "myna/"); ok {
-		pre, rest = "myna/", r
+	if r, ok := strings.CutPrefix(ref, "owl/"); ok {
+		pre, rest = "owl/", r
 	}
 	id, m, ok := strings.Cut(rest, "/")
 	if !ok {

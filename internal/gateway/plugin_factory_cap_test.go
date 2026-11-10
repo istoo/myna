@@ -16,9 +16,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // factoryCore is the Droid Core models Factory's plugin gives its Core
@@ -51,7 +51,7 @@ func standardOnlyWindows(five, week float64, fiveReset, weekReset time.Time, cor
 func TestPluginFactoryStandardOnlyCaps(t *testing.T) {
 	bun := testenv.Bun(t)
 	fresh(t)
-	t.Setenv("MYNA_BUN", bun)
+	t.Setenv("OWL_BUN", bun)
 	t.Setenv("FAKE_ID", "factory")
 	t.Setenv("FAKE_GLM", "1") // glm-5.3, one of Droid Core's
 	windows := filepath.Join(t.TempDir(), "windows.json")
@@ -194,7 +194,7 @@ func TestPluginFactoryStandardOnlyCaps(t *testing.T) {
 		t.Fatalf("accounts %+v", ls)
 	}
 	// A then B, each at 99% of each window, as the user set them with
-	// myna provider account-cap factory <account> 99
+	// owl provider account-cap factory <account> 99
 	if err := provider.SwitchLogin("factory", "a@fake"); err != nil {
 		t.Fatal(err)
 	}

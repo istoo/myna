@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// A model's load, as its plugin reports it (myna.load, axelburks on
+// A model's load, as its plugin reports it (owl.load, axelburks on
 // Discord: our vendor's busy models make requests queue, and the load put
 // in the model's name only changed when the list did): a small grey
 // number by the model on the provider editor's chips, its title saying
@@ -39,7 +39,7 @@ function settingsPayload(over) {
     dock: false, dockWindow: false, proxy: "", redact: false, redactPersonal: false, redactWords: [],
     codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", workbuddyCheckin: false, noStats: false,
     trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "",
-    version: "0.1.1220", dir: "~/.config/myna", gateway: "http://127.0.0.1:3425",
+    version: "0.1.1220", dir: "~/.config/owl", gateway: "http://127.0.0.1:3425",
     proxyNow: "none", proxySource: "none", login: false,
     visionModels: [], imageGenModels: [], workbuddyCheckins: [], lan: false, lanURLs: [],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
@@ -111,7 +111,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, []));
-        await page.goto("http://myna.test/?view=providers");
+        await page.goto("http://owl.test/?view=providers");
         const editor = page.locator("#modal:not([hidden]) .editor");
         await page.locator(".row.provider", { hasText: "In-house" }).click();
         await editor.locator(".mchips .mchip").first().waitFor();
@@ -148,7 +148,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.route("**/*", server(lang, posted));
         await watchSettingsReads(page);
         if (!web) await page.route("**/boot.js", (r) => r.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light"};` }));
-        await page.goto("http://myna.test/?view=settings&tab=network");
+        await page.goto("http://owl.test/?view=settings&tab=network");
         await settingsDrawn(page);
         const segs = page.locator("#busyLoadSegs .opt");
         await segs.first().waitFor();
@@ -188,7 +188,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, posted));
         await watchSettingsReads(page);
-        await page.goto("http://myna.test/?view=settings&tab=network");
+        await page.goto("http://owl.test/?view=settings&tab=network");
         await settingsDrawn(page);
         const row = page.locator("#busyLoadRow"), sub = row.locator(".sub"), field = row.locator("input.busy-load-at");
         const custom = row.locator(".opt", { hasText: w.custom }), apply = row.locator("#busyLoadSegs .val button").first();
@@ -256,7 +256,7 @@ test("a threshold past 100 set by hand is shown as picked", async (t) => {
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", server("en", [], { busyLoad: 150 }));
-  await page.goto("http://myna.test/?view=settings&tab=network");
+  await page.goto("http://owl.test/?view=settings&tab=network");
   const segs = page.locator("#busyLoadSegs .opt");
   await segs.first().waitFor();
   assert.deepEqual((await segs.allTextContents()).map((s) => s.trim()), ["Off", "Over 50%", "Over 70%", "Over 80%", "Over 90%", "Over 150%", "Custom…"]);
@@ -271,7 +271,7 @@ test("a threshold set by hand is shown as picked", async (t) => {
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", server("en", [], { busyLoad: 75 }));
-  await page.goto("http://myna.test/?view=settings&tab=network");
+  await page.goto("http://owl.test/?view=settings&tab=network");
   const segs = page.locator("#busyLoadSegs .opt");
   await segs.first().waitFor();
   assert.deepEqual((await segs.allTextContents()).map((s) => s.trim()), ["Off", "Over 50%", "Over 70%", "Over 75%", "Over 80%", "Over 90%", "Custom…"]);

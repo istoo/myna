@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 // Codex before 0.145 loads no catalog an entry of which lacks
@@ -36,8 +36,8 @@ func TestCodexCatalogReasoningSummaries(t *testing.T) {
 }
 
 // Keep carries over what the user put in by hand, Codex's own entries too,
-// and a true of supports_reasoning_summaries where myna says false; of
-// the rest myna owns, nothing.
+// and a true of supports_reasoning_summaries where owl says false; of
+// the rest owl owns, nothing.
 func TestKeepUserKeys(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
@@ -57,7 +57,7 @@ func TestKeepUserKeys(t *testing.T) {
 		t.Error("a file that doesn't parse: changed")
 	}
 	if got := Keep(b, b); string(got) != string(b) {
-		t.Error("myna's own file: changed")
+		t.Error("owl's own file: changed")
 	}
 
 	cur := `{"models":[
@@ -81,15 +81,15 @@ func TestKeepUserKeys(t *testing.T) {
 		t.Errorf("user's object: %v", m1["x_note"])
 	}
 	if _, ok := m1["context_window"]; ok {
-		t.Error("a window myna left out came back")
+		t.Error("a window owl left out came back")
 	}
 	if _, ok := m1["auto_review_model_override"]; ok {
-		t.Error("an auto-review model myna took out came back")
+		t.Error("an auto-review model owl took out came back")
 	}
 	if m1["shell_type"] != "unified_exec" {
-		t.Errorf("a key myna writes: %v", m1["shell_type"])
+		t.Errorf("a key owl writes: %v", m1["shell_type"])
 	}
-	// Codex's own entry: its cache's value is myna's; a key of the user's stays
+	// Codex's own entry: its cache's value is owl's; a key of the user's stays
 	if own["supports_reasoning_summaries"] != true || own["x_mine"] != json.Number("1") {
 		t.Errorf("own entry: %v %v", own["supports_reasoning_summaries"], own["x_mine"])
 	}

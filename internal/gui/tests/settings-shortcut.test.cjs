@@ -2,7 +2,7 @@
 // Cmd+, (Ctrl+, off the Mac) opens Settings (#670: no shortcut for it; a
 // Mac app's is ⌘,): from the Agents page, from a text box, and in the tray
 // panel by asking for the window on its Settings page. Another modifier
-// (Ctrl on the Mac, Alt) doesn't, a browser tab (myna web) leaves the
+// (Ctrl on the Mac, Alt) doesn't, a browser tab (owl web) leaves the
 // keys to the browser, and the gear's tooltip says the shortcut. English and
 // Chinese; no backend, the API is faked here.
 const assert = require("node:assert/strict");
@@ -16,7 +16,7 @@ const assets = path.resolve(__dirname, "../assets");
 
 function serve(lang, web, asked) {
   const settings = {
-    theme: "light", lang, tray: "panel", currency: "usd", textSize: 100, version: "0.1.700", dir: "~/.config/myna",
+    theme: "light", lang, tray: "panel", currency: "usd", textSize: 100, version: "0.1.700", dir: "~/.config/owl",
     gateway: "http://127.0.0.1:3999", proxy: "", proxyNow: "none", proxySource: "none", redactWords: [], visionModels: [], imageGenModels: [],
     workbuddyCheckins: [], lanURLs: [], fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
   };
@@ -53,7 +53,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, web, asked));
-        await page.goto("http://myna.test" + url);
+        await page.goto("http://owl.test" + url);
         await page.locator("#prefs").waitFor();
         return { page, errors };
       };

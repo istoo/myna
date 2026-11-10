@@ -5,10 +5,10 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// Models are myna's models the agent is set to, as catalog ids
+// Models are owl's models the agent is set to, as catalog ids
 // (provider/model, group/<id>), each once: the agent's own models aside.
 // Usage stats count them (internal/stats).
 func (a *Agent) Models() []string {
@@ -31,7 +31,7 @@ func (a *Agent) Models() []string {
 	vals := a.Values()
 	for _, f := range a.Fields {
 		v := vals[f.Key]
-		if !mynaValue(a, f, v, vals) {
+		if !owlValue(a, f, v, vals) {
 			continue
 		}
 		m, _, _ := a.split(v)
@@ -49,15 +49,15 @@ func (a *Agent) Models() []string {
 	return out
 }
 
-// modelRef is v as a catalog id when it names one of myna's models or
-// groups, as an agent spells it (myna/…, Claude Code's [1m]); "" else.
+// modelRef is v as a catalog id when it names one of owl's models or
+// groups, as an agent spells it (owl/…, Claude Code's [1m]); "" else.
 func modelRef(v string) string {
 	v = strings.TrimSuffix(strings.TrimSpace(v), "[1m]")
-	v = strings.TrimPrefix(v, mynaID+"/")
+	v = strings.TrimPrefix(v, owlID+"/")
 	if provider.IsGroupRef(v) {
 		return provider.CanonicalRef(v) // a found group by one id, whichever it was set to
 	}
-	if isMyna(v) {
+	if isOwl(v) {
 		return v
 	}
 	return ""

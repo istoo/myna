@@ -12,7 +12,7 @@ import (
 	"github.com/coder/websocket"
 	"github.com/tidwall/gjson"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // keptMsg is one turn a fake ChatGPT backend was sent on a socket: which
@@ -610,7 +610,7 @@ func TestCodexKeptSocketNoSessionIDUnchanged(t *testing.T) {
 }
 
 // The counters tell a delta from a whole turn. It is also the one line
-// MYNA_DEBUG logs, checked here through the same helper.
+// OWL_DEBUG logs, checked here through the same helper.
 func TestCodexKeptSocketCounts(t *testing.T) {
 	keepOn(t)
 	f := &keepBackend{}

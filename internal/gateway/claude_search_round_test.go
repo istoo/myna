@@ -10,14 +10,14 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // strictClaude is a Messages upstream that checks the thinking blocks of
 // the latest assistant message as Claude on Bedrock does: each must be
 // one Claude wrote, at the place in its message it wrote it, or the
 // request is refused 400 as Bedrock refused oreoft's (Discord). The
-// first request is answered with thinking, a line and myna's
+// first request is answered with thinking, a line and owl's
 // web_search call; the one with the search's result with more thinking
 // and the answer; any later one with a line.
 type strictClaude struct {
@@ -134,14 +134,14 @@ func codexSearchAsk(stream bool, input string) string {
 	return strings.Replace(codexLoopAsk(stream, input), `"tools":[`, `"tools":[{"type":"web_search"},`, 1)
 }
 
-// Codex on a Claude model that myna searches for (oreoft on Discord):
+// Codex on a Claude model that owl searches for (oreoft on Discord):
 // the turn after a search is sent with Claude's thinking where Claude
 // wrote it, the search round put back between the two messages of the
 // reply, so an upstream that checks the latest assistant message's
 // thinking (Claude on Bedrock) takes it, streamed or not. Before, the
 // reply went back as one message, its second thinking block moved, and
 // the strict upstream refused every retry.
-func TestClaudeThinkingAroundMynaSearchGoesBackAsWritten(t *testing.T) {
+func TestClaudeThinkingAroundOwlSearchGoesBackAsWritten(t *testing.T) {
 	for _, stream := range []bool{true, false} {
 		fresh(t)
 		t.Setenv("HOME", t.TempDir()) // no signed-in agent searches
@@ -186,7 +186,7 @@ func TestClaudeThinkingAroundMynaSearchGoesBackAsWritten(t *testing.T) {
 		if rec.Code != 200 || refused > 0 || !strings.Contains(rec.Body.String(), "You're welcome.") {
 			t.Fatalf("stream=%t turn 2: %d (refused %d) %s\nsent %s", stream, rec.Code, refused, rec.Body, last)
 		}
-		// the round is back: myna's call, and a result naming the query
+		// the round is back: owl's call, and a result naming the query
 		var q struct {
 			Messages []struct {
 				Role    string           `json:"role"`

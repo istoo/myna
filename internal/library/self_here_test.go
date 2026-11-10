@@ -9,15 +9,15 @@ import (
 	toml "github.com/pelletier/go-toml/v2"
 )
 
-// thisMyna makes exe the myna this computer runs.
-func thisMyna(t *testing.T, exe string) {
+// thisOwl makes exe the owl this computer runs.
+func thisOwl(t *testing.T, exe string) {
 	t.Helper()
 	old := selfExe
 	selfExe = func() (string, error) { return exe, nil }
 	t.Cleanup(func() { selfExe = old })
 }
 
-// seedLibrary writes library.json as a myna before #1439 left it, or
+// seedLibrary writes library.json as a owl before #1439 left it, or
 // as a sync from another computer brought it: the servers as they are.
 func seedLibrary(t *testing.T, servers ...Server) {
 	t.Helper()
@@ -62,27 +62,27 @@ func storedCommand(t *testing.T, name string) string {
 	return ""
 }
 
-// #1439: myna-image was kept with one computer's myna by full path. A
-// sync carried C:\Users\…\Downloads\myna-windows-amd64.exe to a Mac, a
-// Mac's app to Windows, and a myna moved out of Downloads left its old
+// #1439: owl-image was kept with one computer's owl by full path. A
+// sync carried C:\Users\…\Downloads\owl-windows-amd64.exe to a Mac, a
+// Mac's app to Windows, and a owl moved out of Downloads left its old
 // path behind: the page said it couldn't start, and the agents were given
-// a program that isn't there. The library now gives this computer's myna,
+// a program that isn't there. The library now gives this computer's owl,
 // to the agents and to the check, and keeps it.
-func TestOwnServerFromElsewhereRunsThisMyna(t *testing.T) {
+func TestOwnServerFromElsewhereRunsThisOwl(t *testing.T) {
 	for _, c := range []struct{ name, stored string }{
-		{"Windows' myna", `C:\Users\xiaoqian\Downloads\myna-windows-amd64.exe`},
-		{"a Mac's myna", "/Volumes/gone-1439/Myna.app/Contents/MacOS/myna"},
+		{"Windows' owl", `C:\Users\xiaoqian\Downloads\owl-windows-amd64.exe`},
+		{"a Mac's owl", "/Volumes/gone-1439/Owl.app/Contents/MacOS/owl"},
 		{"moved out of Downloads", ""},
-		{"a sync from a myna that names it", "myna"},
+		{"a sync from a owl that names it", "owl"},
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			h := sandbox(t)
-			here := filepath.Join(h, "Programs", "Myna", "myna-windows-amd64.exe")
+			here := filepath.Join(h, "Programs", "Owl", "owl-windows-amd64.exe")
 			write(t, here, "")
-			thisMyna(t, here)
+			thisOwl(t, here)
 			stored := c.stored
 			if stored == "" { // it was here, in Downloads, and has gone
-				stored = filepath.Join(h, "Downloads", "myna-windows-amd64.exe")
+				stored = filepath.Join(h, "Downloads", "owl-windows-amd64.exe")
 				write(t, stored, "")
 				if err := os.Remove(stored); err != nil {
 					t.Fatal(err)
@@ -96,7 +96,7 @@ func TestOwnServerFromElsewhereRunsThisMyna(t *testing.T) {
 				t.Fatal(err)
 			}
 			if got := v.server(selfServerName).Command; got != here {
-				t.Fatalf("read as %q, want this myna %q", got, here)
+				t.Fatalf("read as %q, want this owl %q", got, here)
 			}
 			// the agents are given it, and library.json keeps it
 			ok(t)(Sync())
@@ -114,26 +114,26 @@ func TestOwnServerFromElsewhereRunsThisMyna(t *testing.T) {
 	}
 }
 
-// Only myna's own is pointed at this myna: a server of the user's that
-// runs another program, one by a name like myna's that isn't myna's
-// MCP server, or a myna build that is on this computer stays as it is,
+// Only owl's own is pointed at this owl: a server of the user's that
+// runs another program, one by a name like owl's that isn't owl's
+// MCP server, or a owl build that is on this computer stays as it is,
 // in the library and in the agents, gone or not.
 func TestUsersOwnServerStaysAsItIs(t *testing.T) {
 	h := sandbox(t)
-	here := filepath.Join(h, "Programs", "myna")
+	here := filepath.Join(h, "Programs", "owl")
 	write(t, here, "")
-	thisMyna(t, here)
-	otherBuild := filepath.Join(h, "dev", "myna-dev")
+	thisOwl(t, here)
+	otherBuild := filepath.Join(h, "dev", "owl-dev")
 	write(t, otherBuild, "")
 	mine := map[string]string{
-		"gone-tool":    `C:\Users\me\tools\imagetool.exe`, // mcp image, but not myna
-		"myna-cli":     `C:\Users\me\tools\myna-helper.exe`,
+		"gone-tool":    `C:\Users\me\tools\imagetool.exe`, // mcp image, but not owl
+		"owl-cli":     `C:\Users\me\tools\owl-helper.exe`,
 		"pinned-build": otherBuild,
 		"npx-server":   "npx",
 	}
 	seedLibrary(t,
 		Server{Name: "gone-tool", Transport: "stdio", Command: mine["gone-tool"], Args: []string{"mcp", "image"}, Agents: []string{"codex"}},
-		Server{Name: "myna-cli", Transport: "stdio", Command: mine["myna-cli"], Args: []string{"serve"}, Agents: []string{"codex"}},
+		Server{Name: "owl-cli", Transport: "stdio", Command: mine["owl-cli"], Args: []string{"serve"}, Agents: []string{"codex"}},
 		Server{Name: "pinned-build", Transport: "stdio", Command: mine["pinned-build"], Args: []string{"mcp", "image"}, Agents: []string{"codex"}},
 		Server{Name: "npx-server", Transport: "stdio", Command: "npx", Args: []string{"-y", "@mcp/fs"}, Agents: []string{"codex"}},
 	)
@@ -148,14 +148,14 @@ func TestUsersOwnServerStaysAsItIs(t *testing.T) {
 	}
 }
 
-// A library carried to another computer names myna's own server's
-// program as plain "myna", so two computers with the same library carry
+// A library carried to another computer names owl's own server's
+// program as plain "owl", so two computers with the same library carry
 // the same bundle, and a sync doesn't write one's path over the other's
-// each time. Put there, it runs that computer's myna.
-func TestCarriedOwnServerIsEachComputersMyna(t *testing.T) {
+// each time. Put there, it runs that computer's owl.
+func TestCarriedOwnServerIsEachComputersOwl(t *testing.T) {
 	h := sandbox(t)
-	mac := filepath.Join(h, "mac", "Myna.app", "Contents", "MacOS", "myna")
-	win := filepath.Join(h, "win", "myna-windows-amd64.exe")
+	mac := filepath.Join(h, "mac", "Owl.app", "Contents", "MacOS", "owl")
+	win := filepath.Join(h, "win", "owl-windows-amd64.exe")
 	write(t, mac, "")
 	write(t, win, "")
 	own := func(cmd string) Server {
@@ -163,13 +163,13 @@ func TestCarriedOwnServerIsEachComputersMyna(t *testing.T) {
 	}
 	user := Server{Name: "fs", Transport: "stdio", Command: "npx", Args: []string{"-y", "@mcp/fs"}, Agents: []string{"codex"}}
 
-	thisMyna(t, mac)
+	thisOwl(t, mac)
 	seedLibrary(t, own(mac), user)
 	onMac, err := Collect()
 	if err != nil {
 		t.Fatal(err)
 	}
-	thisMyna(t, win)
+	thisOwl(t, win)
 	seedLibrary(t, own(win), user)
 	onWin, err := Collect()
 	if err != nil {
@@ -179,15 +179,15 @@ func TestCarriedOwnServerIsEachComputersMyna(t *testing.T) {
 		t.Fatalf("one library carried two ways:\n%s\n%s", a, b)
 	}
 	for _, s := range onMac.MCP {
-		if s.Name == selfServerName && s.Command != mynaCommand {
-			t.Errorf("carried as %q, want %q", s.Command, mynaCommand)
+		if s.Name == selfServerName && s.Command != owlCommand {
+			t.Errorf("carried as %q, want %q", s.Command, owlCommand)
 		}
 		if s.Name == "fs" && s.Command != "npx" {
 			t.Errorf("the user's server carried as %q", s.Command)
 		}
 	}
 
-	// the Mac's bundle put on Windows runs Windows' myna
+	// the Mac's bundle put on Windows runs Windows' owl
 	ok(t)(Put(onMac))
 	if got := storedCommand(t, selfServerName); got != win {
 		t.Errorf("library.json keeps %q, want %q", got, win)
@@ -199,9 +199,9 @@ func TestCarriedOwnServerIsEachComputersMyna(t *testing.T) {
 		t.Error("put and carried again, the bundle changed: the next sync would send it back")
 	}
 
-	// a bundle from a myna before #1439, with the Mac's path in it
+	// a bundle from a owl before #1439, with the Mac's path in it
 	old := *onMac
-	old.MCP = []*Server{{Name: selfServerName, Transport: "stdio", Command: "/Volumes/gone-1439/Myna.app/Contents/MacOS/myna", Args: []string{"mcp", "image"}, Agents: []string{"codex"}}}
+	old.MCP = []*Server{{Name: selfServerName, Transport: "stdio", Command: "/Volumes/gone-1439/Owl.app/Contents/MacOS/owl", Args: []string{"mcp", "image"}, Agents: []string{"codex"}}}
 	ok(t)(Put(&old))
 	if got := codexCommand(t, h, selfServerName); got != win {
 		t.Errorf("an old bundle: Codex starts %q, want %q", got, win)

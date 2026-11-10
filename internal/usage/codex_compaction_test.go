@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/owl/internal/sessions"
 )
 
 func codexCompactionCall(at time.Time, responseID string, input, output int, compacted bool) sessions.Call {

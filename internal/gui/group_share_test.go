@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // laincatx on X: the Routing view's Copy to share answers the group as
@@ -47,7 +47,7 @@ func TestGroupShareAndImport(t *testing.T) {
 		t.Fatalf("the shared text has the provider's key: %s", st.Shared)
 	}
 
-	// the same text with a member this myna has no provider of
+	// the same text with a member this owl has no provider of
 	shared := strings.Replace(st.Shared, `"members":["a/m1","a/m2"]`, `"members":["a/m1","a/m2","gone/m9"]`, 1)
 	if shared == st.Shared {
 		t.Fatalf("the members aren't spelt as expected: %s", st.Shared)
@@ -65,7 +65,7 @@ func TestGroupShareAndImport(t *testing.T) {
 	}
 
 	// why, for the page to say in the reader's language
-	if code, _, body = post("import", map[string]string{"text": "a group, honest"}); code == 200 || !strings.Contains(body, "not a routing group shared from myna") ||
+	if code, _, body = post("import", map[string]string{"text": "a group, honest"}); code == 200 || !strings.Contains(body, "not a routing group shared from owl") ||
 		!strings.Contains(body, `"share":"not_shared"`) {
 		t.Fatalf("bad text: %d %s", code, body)
 	}

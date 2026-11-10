@@ -4,14 +4,14 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // TestClaudeContextWindow: Claude Code takes a model it doesn't know for a
-// 200K one, so myna tells it the window of the model it switches it to
+// 200K one, so owl tells it the window of the model it switches it to
 // (CLAUDE_CODE_MAX_CONTEXT_TOKENS), changes it with the model, takes it away
 // for a model it doesn't know the window of and for Claude's own, and never
 // touches a value the user set (#311).
@@ -95,18 +95,18 @@ func TestClaudeContextWindow(t *testing.T) {
 	// back to Claude's own model, and to Claude Code as installed
 	set("model", "claude-opus-4-8")
 	if window() != "" {
-		t.Fatalf("Claude's own model kept myna's window: %q", window())
+		t.Fatalf("Claude's own model kept owl's window: %q", window())
 	}
 	set("model", "v/mid")
 	set("model", "")
 	if window() != "" {
-		t.Fatalf("reset kept myna's window: %q", window())
+		t.Fatalf("reset kept owl's window: %q", window())
 	}
 	if v, _ := edit.GetJSON(path, "theme"); v != "dark" {
 		t.Fatal("theme lost")
 	}
 
-	// the user's own value is theirs, set before myna or over myna's
+	// the user's own value is theirs, set before owl or over owl's
 	if err := edit.SetJSON(path, edit.KV{Path: "env." + claudeContextEnv, Value: "64000"}); err != nil {
 		t.Fatal(err)
 	}
@@ -126,9 +126,9 @@ func TestClaudeContextWindow(t *testing.T) {
 	set("model", "v/mid")
 	set("model", "")
 	if window() != "100000" {
-		t.Fatalf("a value the user changed myna's to: %q", window())
+		t.Fatalf("a value the user changed owl's to: %q", window())
 	}
-	// and one the same as myna would write, but not written by it
+	// and one the same as owl would write, but not written by it
 	set("model", "v/small")
 	if window() != "100000" {
 		t.Fatalf("user value replaced: %q", window())
@@ -138,6 +138,6 @@ func TestClaudeContextWindow(t *testing.T) {
 	}
 	set("model", "")
 	if window() != "400000" {
-		t.Fatalf("the user's 400000 was taken for myna's: %q", window())
+		t.Fatalf("the user's 400000 was taken for owl's: %q", window())
 	}
 }

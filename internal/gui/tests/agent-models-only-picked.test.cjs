@@ -12,7 +12,7 @@ const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
 
-// the server as myna's is (internal/gui/agent_models.go): shown only its
+// the server as owl's is (internal/gui/agent_models.go): shown only its
 // picks, a model it hasn't seen is off; the one in use always stays
 function fixture(lang) {
   const list = [
@@ -25,7 +25,7 @@ function fixture(lang) {
   const state = () => ({
     agents: [{
       id: "codex", name: "Codex", path: "/test/config.toml", icon: "codex-color", wired: true,
-      fields: [{ key: "model", label: "model", value: "myna/openai/gpt-5.5", options: [{ value: "myna/openai/gpt-5.5", label: "GPT-5.5", ref: "openai/gpt-5.5" }] }],
+      fields: [{ key: "model", label: "model", value: "owl/openai/gpt-5.5", options: [{ value: "owl/openai/gpt-5.5", label: "GPT-5.5", ref: "openai/gpt-5.5" }] }],
       models: count(),
     }],
     profiles: [], settings: { lang, theme: "light" },
@@ -89,7 +89,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           }
           await browser.close();
         });
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         const row = page.locator('.row.agent[data-id="codex"]');
         const pop = page.locator(".am-pop:not(.leaving)");
         const open = async () => {

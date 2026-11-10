@@ -9,9 +9,9 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/oidc"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/oidc"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // OIDCKeysPath trades an OIDC token for a short-lived gateway key (#4531):

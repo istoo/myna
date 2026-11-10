@@ -7,19 +7,19 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
-// A plugin with a service of its own is told where myna's gateway is:
-// Magiczerowxy/myna-chat's chat server asks MYNA_ADDR, then 3425, so
+// A plugin with a service of its own is told where owl's gateway is:
+// Magiczerowxy/owl-chat's chat server asks OWL_ADDR, then 3425, so
 // with the port set in Settings its model list was empty and every
-// message failed (yuesh1_ on X, Magiczerowxy/myna-chat#1). The host is
-// told Settings' port, started again when it moves, and a MYNA_ADDR
-// myna runs under, on loopback when it listens on every interface.
+// message failed (yuesh1_ on X, Magiczerowxy/owl-chat#1). The host is
+// told Settings' port, started again when it moves, and a OWL_ADDR
+// owl runs under, on loopback when it listens on every interface.
 func TestHostToldTheGatewayAddress(t *testing.T) {
 	sandbox(t)
-	t.Setenv("MYNA_ADDR", "")
-	os.Unsetenv("MYNA_ADDR")
+	t.Setenv("OWL_ADDR", "")
+	os.Unsetenv("OWL_ADDR")
 	was := proxyLookNone
 	proxyLookNone = 0
 	t.Cleanup(func() { proxyLookNone = was })
@@ -34,9 +34,9 @@ func TestHostToldTheGatewayAddress(t *testing.T) {
 	}
 	files := map[string]string{
 		"package.json": `{"name": "addr-probe", "version": "0.0.1", "type": "module", "main": "./index.mjs"}`,
-		// as myna-chat's index.mjs, which starts its server on import
+		// as owl-chat's index.mjs, which starts its server on import
 		"index.mjs": `import { writeFileSync } from "node:fs"
-writeFileSync(process.env.ADDR_PROBE_OUT, process.env.MYNA_ADDR ?? "unset")
+writeFileSync(process.env.ADDR_PROBE_OUT, process.env.OWL_ADDR ?? "unset")
 export default { id: "addr-probe", server: async () => ({}) }
 `,
 	}
@@ -70,17 +70,17 @@ export default { id: "addr-probe", server: async () => ({}) }
 		t.Fatal(err)
 	}
 	if got := told(); got != "127.0.0.1:3591" {
-		t.Fatalf("with Settings' port 3591 the plugin was told MYNA_ADDR=%s", got)
+		t.Fatalf("with Settings' port 3591 the plugin was told OWL_ADDR=%s", got)
 	}
 	// the port moves in Settings: the page opened next has a host told so
 	setPort(3592)
 	if got := told(); got != "127.0.0.1:3592" {
-		t.Errorf("after the port moved to 3592 the plugin was told MYNA_ADDR=%s", got)
+		t.Errorf("after the port moved to 3592 the plugin was told OWL_ADDR=%s", got)
 	}
-	// myna's own MYNA_ADDR comes first, reached on loopback
-	t.Setenv("MYNA_ADDR", "0.0.0.0:4999")
+	// owl's own OWL_ADDR comes first, reached on loopback
+	t.Setenv("OWL_ADDR", "0.0.0.0:4999")
 	Restart()
 	if got := told(); got != "127.0.0.1:4999" {
-		t.Errorf("under MYNA_ADDR=0.0.0.0:4999 the plugin was told MYNA_ADDR=%s", got)
+		t.Errorf("under OWL_ADDR=0.0.0.0:4999 the plugin was told OWL_ADDR=%s", got)
 	}
 }

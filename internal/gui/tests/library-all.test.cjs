@@ -18,7 +18,7 @@ const assets = path.resolve(__dirname, "../assets");
 const HOME = "/Users/loosheng";
 const agent = (id, name, icon, more = {}) => ({ id, name, icon, skills: `${HOME}/.${id}/skills`, mcp: `${HOME}/.${id}/mcp.json`, ...more });
 const base = () => ({
-  dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
+  dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
   // Pi has no MCP file, Droid no skills folder; Codex and Droid no SSE
   agents: [
     agent("claude", "Claude Code", "claudecode-color"),
@@ -99,13 +99,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     });
     const open = async (lang, tab, posts, fail, { width = 980, fixture } = {}) => {
       const ctx = await browser.newContext({ viewport: { width, height: 800 } }); // the MCP tab fits, its "In projects" too
-      await ctx.addInitScript((tab) => { try { localStorage.setItem("myna.libTab", tab); } catch {} }, tab);
+      await ctx.addInitScript((tab) => { try { localStorage.setItem("owl.libTab", tab); } catch {} }, tab);
       const page = await ctx.newPage();
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(60000);
       page.on("pageerror", (e) => errors.push(e.message));
-      await page.route("http://myna.test/**", server(lang, posts, fail, fixture));
-      await page.goto("http://myna.test/");
+      await page.route("http://owl.test/**", server(lang, posts, fail, fixture));
+      await page.goto("http://owl.test/");
       await navTo(page, "library");
       await page.locator("#view-library .lib-body:not(.lib-skel) .lib-row").first().waitFor();
       return page;

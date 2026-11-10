@@ -1,10 +1,11 @@
 //go:build ignore
 
-// Icon generator. Everything myna shows is drawn from one bird: a round
-// little myna in profile, tail cocked, black and white, on a 44-unit grid.
-// myna.svg is the full drawing, its belly, shoulder and the slits in its
+// Icon generator. Everything owl shows is drawn from one owl: round and
+// faced forward, two big eyes and a small beak, black and white, on a
+// 44-unit grid.
+// owl.svg is the full drawing, its belly, shoulder and the slits in its
 // tail cut out of the black; the app tile uses it from 64px up.
-// myna-small.svg drops the eye, which would only be a speck; the tray and
+// owl-small.svg drops the eye, which would only be a speck; the tray and
 // the smaller tiles use it, and so does the header in
 // internal/gui/assets/index.html.
 //
@@ -13,7 +14,7 @@
 //	go run build/icon/gen.go app 64 internal/gui/icon.png   # app icon at a given size
 //	go run build/icon/gen.go win 256 build/windows/icon-256.png # the Windows tile, filling its square
 //	go run build/icon/gen.go win-ico internal/gui/icon-windows.ico # it at the tray's sizes, one .ico
-//	make icons                                              # regenerates all of them plus myna.icns
+//	make icons                                              # regenerates all of them plus owl.icns
 package main
 
 import (
@@ -32,9 +33,9 @@ import (
 )
 
 var (
-	//go:embed myna.svg
+	//go:embed owl.svg
 	fullSVG string
-	//go:embed myna-small.svg
+	//go:embed owl-small.svg
 	smallSVG string
 )
 
@@ -115,20 +116,20 @@ const (
 	// the clip paths of index.html's #bird-body (even-odd: the wing is cut
 	// out of it), #bird-tail and #bird-wing, their H and V written as L for
 	// parse
-	clipBody = "M16 0L44 0L44 44L0 44L0 26.4L10.6 26.4L13 24.2L16 19Z M29.8 18.3L26 19L22 21L17 23.5L14.6 24.7L10.6 26.4L6 29V32L9 31.5L12.5 32L16.4 31.8L19 31.4L24 28.8L28.5 24L30.6 21.4Z"
-	clipTail = "M0 0L17 0L17.2 19.6L14 25L10.6 26.4L0 26.4Z"
-	clipWing = "M29.8 18.3L26 19L22 21L17 23.5L14.6 24.7L10.6 26.4L6 29V32L9 31.5L12.5 32L16.4 31.8L19 31.4L24 28.8L28.5 24L30.6 21.4Z"
+	clipBody = "M0 0L44 0L44 44L0 44Z M12 34.5L32 34.5L31 41.5L22 42.5L13 41.5Z"
+	clipWing = "M6 21.5C9.5 21.5 12 24 12 27.5C12 31 10.5 34 7.5 35.8C6.5 31 6 26 6 21.5Z M38 21.5C34.5 21.5 32 24 32 27.5C32 31 33.5 34 36.5 35.8C37.5 31 38 26 38 21.5Z"
+	clipTail = "M12 34.5L32 34.5L31 41.5L22 42.5L13 41.5Z"
 )
 
 // A keyframe: at is the fraction of the animation, deg the rotation.
 type key struct{ at, deg float64 }
 
 var (
-	wingKeys = []key{{0, 0}, {.12, 10}, {.26, -3}, {.40, 8}, {.56, -2}, {.72, 3}, {1, 0}}
-	tailKeys = []key{{0, 0}, {.18, 16}, {.36, -7}, {.54, 9}, {.72, -3}, {.86, 2}, {1, 0}}
+	wingKeys = []key{{0, 0}, {.12, 1}, {.26, -1}, {.40, 1}, {.56, -1}, {.72, 1}, {1, 0}}
+	tailKeys = []key{{0, 0}, {.18, 9}, {.36, -4}, {.54, 5}, {.72, -2}, {.86, 1}, {1, 0}}
 	bobKeys  = []key{{0, 0}, {.18, -4}, {.40, 2}, {.62, -1}, {1, 0}}
 	// transform-origin, in the viewBox
-	wingAt, tailAt, bobAt = [2]float64{30, 19.8}, [2]float64{14, 22}, [2]float64{26, 38}
+	wingAt, tailAt, bobAt = [2]float64{22, 24}, [2]float64{22, 35}, [2]float64{22, 41}
 )
 
 // trayFlap writes the frames the tray icon plays when it is clicked,

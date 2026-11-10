@@ -17,7 +17,7 @@ const assets = path.resolve(__dirname, "../assets");
 const HOME = "/Users/aimer";
 const agent = (id, name) => ({ id, name, icon: "", skills: `${HOME}/.${id}/skills`, mcp: `${HOME}/.${id}/mcp.json` });
 const lib = {
-  dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
+  dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
   agents: [agent("codex", "Codex"), agent("pi", "Pi")],
   instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [],
   skills: Array.from({ length: 30 }, (_, i) => ({ name: `skill-${i + 1}`, description: "Grill a plan", kind: "folder", agents: ["codex"], source: `${HOME}/skills/skill-${i + 1}` })),
@@ -79,14 +79,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
     for (const [lang, w] of Object.entries(words)) await t.test(lang, async () => {
       const context = await browser.newContext({ viewport: { width: 1100, height: 480 }, reducedMotion: "reduce" });
-      await context.addInitScript(() => { try { localStorage.setItem("myna.settingsTab", "general"); localStorage.setItem("myna.libTab", "mcp"); } catch {} });
+      await context.addInitScript(() => { try { localStorage.setItem("owl.settingsTab", "general"); localStorage.setItem("owl.libTab", "mcp"); } catch {} });
       const page = await context.newPage();
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(60000);
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", server(lang));
-      await page.goto("http://myna.test/");
+      await page.goto("http://owl.test/");
       await page.waitForSelector("#nav button.on");
       assert.ok(await page.evaluate(() => document.body.classList.contains("side-nav")), "the sidebar is shown");
 
@@ -151,14 +151,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     t.after(() => browser.close());
     for (const [name, width, layout] of [["sidebar off", 1100, "top"], ["narrow", 900, ""]]) for (const lang of Object.keys(words)) await t.test(`${name}, ${lang}`, async () => {
       const context = await browser.newContext({ viewport: { width, height: 480 }, reducedMotion: "reduce" });
-      await context.addInitScript((layout) => { try { localStorage.setItem("myna.settingsTab", "general"); localStorage.setItem("myna.libTab", "mcp"); if (layout) localStorage.setItem("myna.navLayout", layout); } catch {} }, layout);
+      await context.addInitScript((layout) => { try { localStorage.setItem("owl.settingsTab", "general"); localStorage.setItem("owl.libTab", "mcp"); if (layout) localStorage.setItem("owl.navLayout", layout); } catch {} }, layout);
       const page = await context.newPage();
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(60000);
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", server(lang));
-      await page.goto("http://myna.test/");
+      await page.goto("http://owl.test/");
       await page.waitForSelector("#nav button.on");
       assert.ok(!(await page.evaluate(() => document.body.classList.contains("side-nav"))), "no sidebar");
 

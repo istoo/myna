@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/probelog"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/probelog"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // A provider renamed is shown by the id it has now everywhere usage names

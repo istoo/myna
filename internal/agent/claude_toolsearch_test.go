@@ -5,16 +5,16 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // TestClaudeToolSearchOn: Claude Code before 2.1.304 keeps tool search off
 // behind an ANTHROPIC_BASE_URL other than Anthropic's, so every MCP tool's
-// definition went on each request: myna's MCP router's 245 tools were
+// definition went on each request: owl's MCP router's 245 tools were
 // 124K tokens of a 341K context (cybercaius on Discord). While Claude Code
-// is on myna, myna sets ENABLE_TOOL_SEARCH=true; it goes when Claude
-// Code is taken off myna, and a value of the user's, an empty one
+// is on owl, owl sets ENABLE_TOOL_SEARCH=true; it goes when Claude
+// Code is taken off owl, and a value of the user's, an empty one
 // among them, is theirs through a switch, Sync and reset.
 func TestClaudeToolSearchOn(t *testing.T) {
 	home := t.TempDir()
@@ -46,24 +46,24 @@ func TestClaudeToolSearchOn(t *testing.T) {
 
 	set("model", "v/gpt-x")
 	if v, _ := search(); v != "true" {
-		t.Fatalf("on myna: %q, want true", v)
+		t.Fatalf("on owl: %q, want true", v)
 	}
 	sync()
 	if v, _ := search(); v != "true" {
 		t.Fatalf("Sync: %q", v)
 	}
-	// off myna, onto Claude Code's own model, and reset: myna's goes
+	// off owl, onto Claude Code's own model, and reset: owl's goes
 	set("model", "claude-opus-4-8")
 	if v, has := search(); has {
-		t.Fatalf("Claude's own model kept myna's value: %q", v)
+		t.Fatalf("Claude's own model kept owl's value: %q", v)
 	}
 	set("model", "v/gpt-x")
 	if v, _ := search(); v != "true" {
-		t.Fatalf("back on myna: %q", v)
+		t.Fatalf("back on owl: %q", v)
 	}
 	set("model", "")
 	if v, has := search(); has {
-		t.Fatalf("reset kept myna's value: %q", v)
+		t.Fatalf("reset kept owl's value: %q", v)
 	}
 
 	// the user's own value is theirs
@@ -84,7 +84,7 @@ func TestClaudeToolSearchOn(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	// myna's "true" taken out by the user, then a value of theirs: myna
+	// owl's "true" taken out by the user, then a value of theirs: owl
 	// doesn't write over it
 	set("model", "v/gpt-x")
 	if err := edit.SetJSON(path, edit.KV{Path: "env." + claudeSearchEnv, Value: "false"}); err != nil {
@@ -92,14 +92,14 @@ func TestClaudeToolSearchOn(t *testing.T) {
 	}
 	sync()
 	if v, _ := search(); v != "false" {
-		t.Fatalf("the user's false after myna's true became %q", v)
+		t.Fatalf("the user's false after owl's true became %q", v)
 	}
 	if v, _ := edit.GetJSON(path, "theme"); v != "dark" {
 		t.Fatal("theme lost")
 	}
 }
 
-// TestT3CodeToolSearchOn: T3 Code's myna instance runs Claude Code on the
+// TestT3CodeToolSearchOn: T3 Code's owl instance runs Claude Code on the
 // gateway through its own environment, which may be a Claude Code from
 // before 2.1.304: it is given ENABLE_TOOL_SEARCH=true too, and a value the
 // user gave the instance stays.
@@ -109,7 +109,7 @@ func TestT3CodeToolSearchOn(t *testing.T) {
 	path := filepath.Join(home, ".t3", "userdata", "settings.json")
 	writeFile(t, path, `{}`)
 	a := t3code(home)
-	if err := a.Field("provider").Set(mynaID); err != nil {
+	if err := a.Field("provider").Set(owlID); err != nil {
 		t.Fatal(err)
 	}
 	search := func() []string {
@@ -119,7 +119,7 @@ func TestT3CodeToolSearchOn(t *testing.T) {
 			t.Fatal(err)
 		}
 		var vs []string
-		for _, v := range t3Format(t, file["providerInstances"][mynaID]).Environment {
+		for _, v := range t3Format(t, file["providerInstances"][owlID]).Environment {
 			if v.Name == claudeSearchEnv {
 				vs = append(vs, v.Value)
 			}
@@ -127,14 +127,14 @@ func TestT3CodeToolSearchOn(t *testing.T) {
 		return vs
 	}
 	if vs := search(); len(vs) != 1 || vs[0] != "true" {
-		t.Fatalf("myna's instance: %q, want [true]", vs)
+		t.Fatalf("owl's instance: %q, want [true]", vs)
 	}
 	// the user's own value on the instance
 	var file map[string]any
 	if err := json.Unmarshal([]byte(readFile(path)), &file); err != nil {
 		t.Fatal(err)
 	}
-	inst := file["providerInstances"].(map[string]any)[mynaID].(map[string]any)
+	inst := file["providerInstances"].(map[string]any)[owlID].(map[string]any)
 	env := inst["environment"].([]any)
 	for i, v := range env {
 		if v.(map[string]any)["name"] == claudeSearchEnv {

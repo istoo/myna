@@ -36,9 +36,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/netproxy"
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/netproxy"
+	"github.com/istoo/owl/internal/proc"
 )
 
 // GrokExecutable finds the Grok Build CLI; a var so tests can fake it.
@@ -65,7 +65,7 @@ type grokCandidate struct {
 // then ~/.local/bin. On Windows it is grok.exe — looking for a bare grok
 // there missed ~/.grok/bin, and a grok.cmd npm put on PATH first hid it
 // (#180). path is the process' PATH and, on Windows, the registry's, which
-// has what was installed since myna started.
+// has what was installed since owl started.
 func grokCandidates(goos, home, grokHome, binDir string, path []string) []grokCandidate {
 	name := "grok"
 	if goos == "windows" {
@@ -136,7 +136,7 @@ type grokCredential struct {
 	Issuer    string    `json:"oidc_issuer"`
 }
 
-// readGrokCredential reads the sign-in the CLI keeps in its home. myna
+// readGrokCredential reads the sign-in the CLI keeps in its home. owl
 // only reads it: the CLI refreshes it with a token that changes each time.
 func readGrokCredential(home string) (grokCredential, bool) {
 	var all map[string]grokCredential
@@ -165,7 +165,7 @@ var grokTools = map[string]bool{"function": true, "web_search": true, "x_search"
 	"mcp": true, "shell": true, "tool_search": true}
 
 // grokBody leaves out the tools Grok's backend doesn't take, as a backend
-// myna translates for goes without them: Codex, without apply_patch,
+// owl translates for goes without them: Codex, without apply_patch,
 // edits files through its shell. Codex's web_search says whether it may
 // reach the live web, which Grok's doesn't take either; it searches live.
 // And Codex hands reasoning back with "content": null, which the backend
@@ -280,7 +280,7 @@ func grokShaped(body []byte, forPlugin bool) []byte {
 // Grok's backend takes: "From <author> to <recipient>" first, then its text
 // and images as they came, in its place among the input. One sealed
 // (encrypted_content on it or on a part), empty, or with a part of another
-// kind is left as it is: myna reads no sealed task, and the gateway's
+// kind is left as it is: owl reads no sealed task, and the gateway's
 // guard for one (hasSealedAgentMessage) still sees it. The plugin does the
 // same (@magpie-community/opencode-grok-auth 0.1.11, plugins#61).
 func grokAgentMessage(it any) (map[string]any, bool) {

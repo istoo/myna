@@ -3,7 +3,7 @@ package provider
 import (
 	"testing"
 
-	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/owl/internal/plugin"
 )
 
 // Listing an agent's or a plugin's accounts with nothing to change looks
@@ -26,7 +26,7 @@ func TestAccountListsCopyNoLoginsUnchanged(t *testing.T) {
 	if n := loginsCopied.Load() - before; n != 0 {
 		t.Fatalf("20 lists with nothing to change copied the accounts %d times", n)
 	}
-	// nor took logins.json's lock, a file opened across mynas
+	// nor took logins.json's lock, a file opened across owls
 	if n := pluginLoginLocks.Load() - locks; n != 0 {
 		t.Fatalf("20 plugin lists with nothing to change took the lock %d times", n)
 	}

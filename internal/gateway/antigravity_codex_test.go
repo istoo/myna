@@ -32,7 +32,7 @@ func TestAntigravityTurnsAwayCodexsGPT5Prompt(t *testing.T) {
 			t.Errorf("%q isn't told Codex's hint", system)
 		}
 	}
-	// what it answers: myna's own Codex prompt for other models, GPT-6's,
+	// what it answers: owl's own Codex prompt for other models, GPT-6's,
 	// the line reworded, and the identity alone
 	for _, system := range []string{
 		"You are Codex, based on GPT-5. You are running as a coding agent in the Codex CLI on a user's computer.",
@@ -56,7 +56,7 @@ func TestAntigravityTurnsAwayCodexsGPT5Prompt(t *testing.T) {
 // -m, a fork as an agent's thread): it keeps that prompt first and says
 // the switch in a later developer message, after a reply. search is
 // Codex's web_search tool, which it sends every turn and an Antigravity
-// model is given myna's search for.
+// model is given owl's search for.
 func codexAGTurn(switched, search bool) string {
 	input := `{"type":"message","role":"developer","content":[{"type":"input_text","text":` + quote(codexGPT5System) + `}]},` +
 		`{"type":"message","role":"user","content":[{"type":"input_text","text":"hi"}]}`
@@ -84,7 +84,7 @@ func TestAntigravityTurnsCodexsGPT5ThreadAwayOnce(t *testing.T) {
 		t.Run(fmt.Sprintf("switched=%v,search=%v", switched, search), func(t *testing.T) {
 			asked := 0
 			var system string
-			// a model myna's search can be served by, as a Google
+			// a model owl's search can be served by, as a Google
 			// sign-in's own Gemini searches for it
 			s, askedUsage := antigravityGroupFor(t, []string{"u@example.com"}, "gemini-3-flash", func(w http.ResponseWriter, r *http.Request) {
 				asked++

@@ -1,7 +1,7 @@
 package usage
 
 import (
-	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/owl/internal/sessions"
 	"math/rand"
 	"reflect"
 	"strconv"

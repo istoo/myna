@@ -10,10 +10,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // mothxDefault is the settings.json MothX 1.3.104 writes on its first run
@@ -135,10 +135,10 @@ func mothxOf(t *testing.T) *Agent {
 	return nil
 }
 
-// MothX (#2353) is wired in its one settings.json: myna as the provider
-// "myna" beside the user's own, and defaultProvider/defaultModel on it.
+// MothX (#2353) is wired in its one settings.json: owl as the provider
+// "owl" beside the user's own, and defaultProvider/defaultModel on it.
 // Everything else in the file — the settings MothX's first run spelled
-// out, the user's providers, what they added to myna's block — stays.
+// out, the user's providers, what they added to owl's block — stays.
 // The provider's key names MothX; Disconnect puts the file back byte for
 // byte.
 func TestMothX(t *testing.T) {
@@ -174,14 +174,14 @@ func TestMothX(t *testing.T) {
 	for _, o := range a.Field("model").Options(a.Values()) {
 		vals = append(vals, o.Value)
 	}
-	if !slices.Contains(vals, "deepseek-openai/deepseek-v4-flash") || !slices.Contains(vals, "mine/m1") || !slices.Contains(vals, "myna/relay/glm-4.6") {
+	if !slices.Contains(vals, "deepseek-openai/deepseek-v4-flash") || !slices.Contains(vals, "mine/m1") || !slices.Contains(vals, "owl/relay/glm-4.6") {
 		t.Fatalf("options %v", vals)
 	}
 
 	if err := a.Connect(); err != nil {
 		t.Fatal(err)
 	}
-	for k, want := range map[string]string{"defaultProvider": "myna", "defaultModel": "relay/glm-4.6",
+	for k, want := range map[string]string{"defaultProvider": "owl", "defaultModel": "relay/glm-4.6",
 		"defaultThinkingLevel": "medium", "theme": "dark", "defaultMode": "yolo", "sandbox.passEnv.2": "USER",
 		"providers.mine.apiKey": "MINE_KEY", "worktree.branchPrefix": "mothx"} {
 		if v, _ := edit.GetJSON(path, k); v != want {
@@ -194,11 +194,11 @@ func TestMothX(t *testing.T) {
 	if err := json.Unmarshal([]byte(readFile(path)), &file); err != nil {
 		t.Fatal(err)
 	}
-	got := file.Providers["myna"]
-	if got["baseUrl"] != gateway.URL()+"/v1" || got["api"] != "openai-chat" || got["apiKey"] != "myna-mothx" || got["thinkingFormat"] != "openai" {
+	got := file.Providers["owl"]
+	if got["baseUrl"] != gateway.URL()+"/v1" || got["api"] != "openai-chat" || got["apiKey"] != "owl-mothx" || got["thinkingFormat"] != "openai" {
 		t.Fatalf("provider:\n%s", readFile(path))
 	}
-	// one entry per model of myna's, in the fields MothX's ModelConfig has
+	// one entry per model of owl's, in the fields MothX's ModelConfig has
 	ms, _ := got["models"].([]any)
 	if len(ms) == 0 {
 		t.Fatalf("no models:\n%s", readFile(path))
@@ -219,20 +219,20 @@ func TestMothX(t *testing.T) {
 		t.Fatalf("usage: %q", got)
 	}
 
-	// a key myna no longer gives it is off, and a sync mends it, keeping
-	// what the user put in myna's block: a header, and a thinkingFormat
+	// a key owl no longer gives it is off, and a sync mends it, keeping
+	// what the user put in owl's block: a header, and a thinkingFormat
 	// of their own
-	edit.SetJSON(path, edit.KV{Path: "providers.myna.apiKey", Value: gateway.Token},
-		edit.KV{Path: "providers.myna.headers", Value: map[string]string{"X-Mine": "1"}},
-		edit.KV{Path: "providers.myna.thinkingFormat", Value: "qwen"})
+	edit.SetJSON(path, edit.KV{Path: "providers.owl.apiKey", Value: gateway.Token},
+		edit.KV{Path: "providers.owl.headers", Value: map[string]string{"X-Mine": "1"}},
+		edit.KV{Path: "providers.owl.thinkingFormat", Value: "qwen"})
 	if a.Check() == "" {
 		t.Fatal("the shared key reads as MothX's")
 	}
 	if err := a.Sync(); err != nil {
 		t.Fatal(err)
 	}
-	for k, want := range map[string]string{"providers.myna.apiKey": "myna-mothx", "providers.myna.headers.X-Mine": "1",
-		"providers.myna.thinkingFormat": "qwen"} {
+	for k, want := range map[string]string{"providers.owl.apiKey": "owl-mothx", "providers.owl.headers.X-Mine": "1",
+		"providers.owl.thinkingFormat": "qwen"} {
 		if v, _ := edit.GetJSON(path, k); v != want {
 			t.Fatalf("%s = %q after sync:\n%s", k, v, readFile(path))
 		}
@@ -261,8 +261,8 @@ func TestMothX(t *testing.T) {
 	}
 	// back as it was but for what the user added, and Disconnect then
 	// gives back their file byte for byte
-	edit.DelJSON(path, "providers.myna.headers")
-	edit.DelJSON(path, "providers.myna.thinkingFormat")
+	edit.DelJSON(path, "providers.owl.headers")
+	edit.DelJSON(path, "providers.owl.thinkingFormat")
 	if err := a.Disconnect(); err != nil {
 		t.Fatal(err)
 	}
@@ -272,13 +272,13 @@ func TestMothX(t *testing.T) {
 	if b := readFile(path); b != user {
 		t.Fatalf("settings.json not as it was:\n%s", b)
 	}
-	if _, err := os.Stat(path + ".before-myna"); !os.IsNotExist(err) {
+	if _, err := os.Stat(path + ".before-owl"); !os.IsNotExist(err) {
 		t.Fatalf("the copy from before is left: %v", err)
 	}
 }
 
 // With no settings.json at all (MothX installed, never run), Connect
-// writes one with myna alone, and Disconnect takes it away again.
+// writes one with owl alone, and Disconnect takes it away again.
 func TestMothXRoundTripNoFile(t *testing.T) {
 	home := syncHome(t)
 	t.Setenv("MOTHX_DIR", filepath.Join(home, "mx"))
@@ -294,7 +294,7 @@ func TestMothXRoundTripNoFile(t *testing.T) {
 		if err := a.Disconnect(); err != nil {
 			t.Fatal(err)
 		}
-		for _, f := range []string{"settings.json", "settings.json.before-myna"} {
+		for _, f := range []string{"settings.json", "settings.json.before-owl"} {
 			if _, err := os.Stat(filepath.Join(a.Dir, f)); !os.IsNotExist(err) {
 				t.Fatalf("round %d: %s left: %v", i, f, err)
 			}
@@ -303,7 +303,7 @@ func TestMothXRoundTripNoFile(t *testing.T) {
 }
 
 // What the user changes while it is connected stands — MothX's own /model
-// dialog rewrites the whole file — and Disconnect takes myna out of it
+// dialog rewrites the whole file — and Disconnect takes owl out of it
 // rather than putting back the copy from before.
 func TestMothXKeepsWhatChangedWhileConnected(t *testing.T) {
 	home := syncHome(t)
@@ -326,7 +326,7 @@ func TestMothXKeepsWhatChangedWhileConnected(t *testing.T) {
 	}
 	// nor the providers object it opened in a file that had none
 	if _, has := edit.GetJSON(a.Path, "providers"); has {
-		t.Fatalf("myna left:\n%s", readFile(a.Path))
+		t.Fatalf("owl left:\n%s", readFile(a.Path))
 	}
 }
 
@@ -358,7 +358,7 @@ func TestMothXDir(t *testing.T) {
 }
 
 // A model of the user's own is offered MothX's whole list of thinking
-// levels; a model of myna's says it reasons when it has efforts, which is
+// levels; a model of owl's says it reasons when it has efforts, which is
 // what has MothX send a level at all.
 func TestMothXThinkingLevels(t *testing.T) {
 	home := syncHome(t)

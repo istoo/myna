@@ -6,8 +6,8 @@ import (
 	"testing"
 )
 
-// #874: a subscription signed in to one account of myna's could never be
-// signed out — "myna uses … first; put another account first", with no
+// #874: a subscription signed in to one account of owl's could never be
+// signed out — "owl uses … first; put another account first", with no
 // other account to put first. The only one goes; with another there, the
 // first still waits for it to be put first.
 func TestForgetOnlyFirstLogin(t *testing.T) {
@@ -61,8 +61,8 @@ func TestForgetOnlyFirstLogin(t *testing.T) {
 }
 
 // 歧路亡羊 on Discord: Copilot signed in to the editors' own account and
-// two of myna's, one of them first. Removing the first puts the next
-// first, and Sign out… takes them all, where it said "myna uses wwjxhy
+// two of owl's, one of them first. Removing the first puts the next
+// first, and Sign out… takes them all, where it said "owl uses wwjxhy
 // first; put another account first".
 func TestForgetFirstCopilotLogin(t *testing.T) {
 	signIn(t)

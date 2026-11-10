@@ -2,7 +2,7 @@
 // A plugin's "api" way to sign in titles its key's field with its label,
 // as OpenCode's dialog does, and hints at the key with its placeholder
 // (Lemon on Discord); a way labelled only "API key" keeps "<name> API
-// key". The provider's own icon (a picture myna kept) shows on its row.
+// key". The provider's own icon (a picture owl kept) shows on its row.
 // English and Chinese; the API is faked here.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -53,7 +53,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], asked = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, asked));
-        await page.goto("http://myna.test/?view=providers");
+        await page.goto("http://owl.test/?view=providers");
         await page.locator("#addProvider").click();
         const sheet = page.locator("#addSheet");
         await sheet.locator(".kind b", { hasText: w.section }).waitFor();

@@ -52,7 +52,7 @@ for (const [name, engine] of [["webkit", webkit], ["chromium", chromium]]) {
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         await page.route("**/*", serve(lang));
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         await page.waitForFunction(() => typeof locale === "string" && document.documentElement.lang);
         const got = await page.evaluate(() => ({
           locale, lang: document.documentElement.lang,

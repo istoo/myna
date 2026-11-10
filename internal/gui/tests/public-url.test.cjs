@@ -1,8 +1,8 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// MYNA_PUBLIC_URL is the address other machines are told to reach the
+// OWL_PUBLIC_URL is the address other machines are told to reach the
 // gateway at: the connect page offers it beside this computer's loopback
 // address, and its hint tells the truth about the states — loopback, on the
-// network (MYNA_ADDR beyond loopback with nothing shared, which is the
+// network (OWL_ADDR beyond loopback with nothing shared, which is the
 // Docker image's default: its host and other machines need a gateway key,
 // and no "This computer · any key" is offered), and a network address that
 // needs a gateway key.
@@ -15,7 +15,7 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
-const network = "https://myna.example.com";
+const network = "https://owl.example.com";
 const cases = [
   {
     name: "loopback",
@@ -74,7 +74,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const context = await browser.newContext({ viewport: { width: 1100, height: 1000 }, reducedMotion: "reduce" });
         t.after(() => context.close());
         const page = await context.newPage();
-        await page.addInitScript(() => { try { localStorage.setItem("myna.gwConnectFolded", "0"); } catch {} }); // Connect opened, as a user who reads it
+        await page.addInitScript(() => { try { localStorage.setItem("owl.gwConnectFolded", "0"); } catch {} }); // Connect opened, as a user who reads it
         page.setDefaultTimeout(6000);
         page.setDefaultNavigationTimeout(60000);
         const errors = [];
@@ -86,10 +86,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         for (const c of cases) {
           await t.test(c.name, async () => {
             Object.assign(gateway, c.gateway);
-            await page.goto("http://myna.test/?view=gateway");
+            await page.goto("http://owl.test/?view=gateway");
             await note.waitFor();
             assert.equal(await note.textContent(), w[c.note]);
-            if (c.noAnyKey) assert.equal(await page.locator("#connect code", { hasText: /^myna$/ }).count(), 0, "a key-less myna is offered");
+            if (c.noAnyKey) assert.equal(await page.locator("#connect code", { hasText: /^owl$/ }).count(), 0, "a key-less owl is offered");
             if (!c.picks) return;
             await page.locator("#connectAddress").click();
             await page.locator(".proto-menu .pm-item", { hasText: network }).click();

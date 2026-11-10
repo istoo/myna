@@ -59,7 +59,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, saved));
         await watchSettingsReads(page);
-        await page.goto("http://myna.test/?view=settings&tab=privacy");
+        await page.goto("http://owl.test/?view=settings&tab=privacy");
         const row = page.locator("#redactWordsAnyCaseRow");
         await row.waitFor();
         await settingsDrawn(page);

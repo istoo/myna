@@ -16,13 +16,13 @@ import (
 	"github.com/wailsapp/wails/v3/pkg/events"
 )
 
-// myna out of the Dock, activated by its quick panel, opens its window
+// owl out of the Dock, activated by its quick panel, opens its window
 // and joins the Dock (Settings › Show in Dock › while the window is open): it leads
 // Command-Tab's order, so one Command-Tab away comes back to it (#1381). It
 // joined while active and stayed last, behind every app, though in front.
 // The order is the Mac's front-to-back list, which `lsappinfo` prints.
 func TestDockJoinLeadsCommandTab(t *testing.T) {
-	out, err := runAppKit(t, 30*time.Second, []string{"MYNA_TEST_DOCK_ORDER=1"})
+	out, err := runAppKit(t, 30*time.Second, []string{"OWL_TEST_DOCK_ORDER=1"})
 	if strings.Contains(string(out), "dock order: skip") {
 		t.Skipf("this session can't keep an app in front:\n%s", out)
 	}
@@ -31,10 +31,10 @@ func TestDockJoinLeadsCommandTab(t *testing.T) {
 	}
 }
 
-// dockVerdict is what a check of myna's place in Command-Tab's order came
+// dockVerdict is what a check of owl's place in Command-Tab's order came
 // to: "" when it is first; "skip" when another app took the front while the
 // check ran (one the user was using), where the order says nothing about
-// myna's own, as #1651 is about myna front and not first; and why when myna
+// owl's own, as #1651 is about owl front and not first; and why when owl
 // is front but not first. Both outcomes are checked without a session of
 // any kind (TestDockVerdict).
 func dockVerdict(first, front bool) string {
@@ -44,7 +44,7 @@ func dockVerdict(first, front bool) string {
 	if !front {
 		return "skip"
 	}
-	return "myna isn't first in Command-Tab's order"
+	return "owl isn't first in Command-Tab's order"
 }
 
 // TestDockVerdict checks each of the three outcomes, including the skip a
@@ -57,7 +57,7 @@ func TestDockVerdict(t *testing.T) {
 	}{
 		{"first", true, true, ""},
 		{"another app took the front", false, false, "skip"},
-		{"front but not first", false, true, "myna isn't first in Command-Tab's order"},
+		{"front but not first", false, true, "owl isn't first in Command-Tab's order"},
 	} {
 		if got := dockVerdict(c.first, c.front); got != c.want {
 			t.Errorf("%s: %q, want %q", c.name, got, c.want)
@@ -84,23 +84,23 @@ func lsFirst(pid int) (first, front bool, out string) {
 }
 
 func init() {
-	if os.Getenv("MYNA_TEST_DOCK_ORDER") != "1" {
+	if os.Getenv("OWL_TEST_DOCK_ORDER") != "1" {
 		return
 	}
 	app := application.New(application.Options{
-		Name: "myna dock order regression",
+		Name: "owl dock order regression",
 		Mac:  application.MacOptions{ActivationPolicy: application.ActivationPolicyAccessory},
 		Assets: application.AssetOptions{Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "text/html")
-			fmt.Fprint(w, `<p>myna</p>`)
+			fmt.Fprint(w, `<p>owl</p>`)
 		})},
 	})
 	app.Event.OnApplicationEvent(events.Common.ApplicationStarted, func(*application.ApplicationEvent) {
 		go func() {
 			defer app.Quit()
-			// The quick panel's Focus activates myna out of the Dock, and
+			// The quick panel's Focus activates owl out of the Dock, and
 			// its Open (openMain) joins the Dock, then shows the window. The
-			// Mac makes myna the front app at once, but NSApp says it is
+			// Mac makes owl the front app at once, but NSApp says it is
 			// active only once the main thread has taken the activation in,
 			// which on a busy Mac can be after the join (#1651). Both are
 			// done in one turn of the main thread here, so the join always

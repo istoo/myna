@@ -10,11 +10,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/agentenv"
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/sessions"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/agentenv"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/sessions"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // sessionsHome is a sandbox HOME with the sessions package's fixtures as
@@ -81,7 +81,7 @@ func wantAll(t *testing.T, out string, want ...string) {
 	}
 }
 
-// myna sessions lists the latest sessions; --days sums them day by day
+// owl sessions lists the latest sessions; --days sums them day by day
 // with the top models and folders; --model and --folder narrow both.
 func TestSessionsCmd(t *testing.T) {
 	now := sessionsHome(t)

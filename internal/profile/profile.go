@@ -10,12 +10,12 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/lastgood"
-	"github.com/istoo/myna/internal/library"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/lastgood"
+	"github.com/istoo/owl/internal/library"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // Profile is every agent's fields, and the library's setup.
@@ -27,7 +27,7 @@ type Profile struct {
 	// or before profiles kept it, which leaves the library as it is.
 	Library *library.Setup
 	// Models are the agents' model lists (#1368), by the id their lists are
-	// kept under (agent.ListsFor): which of myna's models each shows and
+	// kept under (agent.ListsFor): which of owl's models each shows and
 	// in what order. An agent not named, every one in a profile saved
 	// before profiles kept them, keeps the list it has.
 	Models map[string]provider.ModelList

@@ -14,7 +14,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // A switch of the global proxy left the exporter on the old one: its

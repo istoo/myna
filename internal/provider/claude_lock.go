@@ -5,8 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/claudelock"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/claudelock"
 )
 
 // Claude Code refreshes its sign-in under two of its own locks, in this
@@ -15,7 +15,7 @@ import (
 // the sign-in again, posts the refresh token, and writes back the new
 // pair. A switch that read the sign-in it was replacing while a refresh
 // ran kept that account's refresh token as it was before the refresh:
-// spent, and the account signed out of myna on its next use (#4532).
+// spent, and the account signed out of owl on its next use (#4532).
 // It saves ~/.claude.json under <that file>.lock, stale after 10s, while
 // it may hold the refresh locks: so it is taken after them, as Claude
 // Code does. The locks are mkdir locks, taken as Claude Code takes them
@@ -25,7 +25,7 @@ import (
 var errClaudeLocked = errors.New("Claude Code is refreshing its sign-in: try again in a moment")
 
 // claudeRefreshLocks takes the locks Claude Code refreshes its sign-in
-// under, for the config directory myna reads the sign-in of. The
+// under, for the config directory owl reads the sign-in of. The
 // release lets them go in the reverse order. A directory not there yet
 // (Claude Code never run) has no refresh to wait for.
 func claudeRefreshLocks() (release func(), err error) {

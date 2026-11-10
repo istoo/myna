@@ -7,11 +7,11 @@ import (
 	"time"
 )
 
-// TestTerminalUpdateRestartsTheHost (#952): `myna plugin update` in a
+// TestTerminalUpdateRestartsTheHost (#952): `owl plugin update` in a
 // terminal installs a newer version without changing plugins.json, so the
 // app running beside it went on with the host it had (0.1.17's code after
 // the update to 0.1.18) until that was killed. What bun installs in Dir()
-// counts as a change another myna made; this myna's own restart does
+// counts as a change another owl made; this owl's own restart does
 // not.
 func TestTerminalUpdateRestartsTheHost(t *testing.T) {
 	storeSandbox(t)
@@ -59,11 +59,11 @@ func TestTerminalUpdateRestartsTheHost(t *testing.T) {
 		t.Fatal("the plugins installed changed, and the running host is not stale: it goes on with the old version")
 	}
 
-	// this myna's own install restarts the host itself: no second restart
+	// this owl's own install restarts the host itself: no second restart
 	write(lock, `"@magpie-community/opencode-factory-auth@0.1.19"`, then.Add(2*time.Minute))
 	Restart()
 	checkList()
 	if hostStale.Load() {
-		t.Fatal("this myna's own restart was taken for another myna's change")
+		t.Fatal("this owl's own restart was taken for another owl's change")
 	}
 }

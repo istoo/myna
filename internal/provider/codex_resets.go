@@ -28,7 +28,7 @@ type ResetCredits struct {
 	Until *time.Time `json:"until,omitempty"`
 	// ByWindow: each reset is for one window, FiveHour of the five hours'
 	// and Weekly of the week's, and is spent on the vendor's own page (a
-	// GLM Coding team plan's, zcode_team.go), not from myna
+	// GLM Coding team plan's, zcode_team.go), not from owl
 	ByWindow bool `json:"byWindow,omitempty"`
 	FiveHour int  `json:"fiveHour,omitempty"`
 	Weekly   int  `json:"weekly,omitempty"`
@@ -251,7 +251,7 @@ func UseCodexResetCard(ctx context.Context, user, credit string) (ResetOutcome, 
 
 // SpendCodexReset is a reset used by hand wherever it is asked: the Usage
 // page's "Use a reset" and the gateway's RemoteCodexResetPath, for another
-// myna's card or an app holding a gateway key (#3850, prgrmrwy). It is
+// owl's card or an app holding a gateway key (#3850, prgrmrwy). It is
 // UseCodexResetCard, then, when the windows started again, a wait of up
 // to 10s for routing and the Providers page to know so (#1491).
 func SpendCodexReset(ctx context.Context, user, credit string) (ResetOutcome, error) {
@@ -316,7 +316,7 @@ func spendCodexReset(ctx context.Context, user, credit, why string) (ResetOutcom
 }
 
 // codexUserToken signs in as the Codex account user: the one Codex itself
-// is signed in to, or one myna keeps — and says which it was.
+// is signed in to, or one owl keeps — and says which it was.
 func codexUserToken(ctx context.Context, user string) (who, tok, accountID string, err error) {
 	who, tok, accountID, _, err = codexUserSign(ctx, user)
 	return who, tok, accountID, err

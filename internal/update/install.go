@@ -9,17 +9,17 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/istoo/myna/internal/appdir"
+	"github.com/istoo/owl/internal/appdir"
 )
 
 // The Windows app is one exe with no installer, and the site's download
-// lands it in Downloads as myna-windows-amd64.exe. Left there, the Start
-// menu shortcut, Open at login and the `myna` command all name a file
-// the user tidies away, and the command came from a myna.com written
+// lands it in Downloads as owl-windows-amd64.exe. Left there, the Start
+// menu shortcut, Open at login and the `owl` command all name a file
+// the user tidies away, and the command came from a owl.com written
 // beside it in Downloads (lucky_eagle_38410 on Discord). So the desktop
 // app, opened from a folder downloads land in, installs itself the way a
 // Mac app is moved into Applications: it copies itself to
-// %LOCALAPPDATA%\Programs\myna\myna.exe — the user's own programs
+// %LOCALAPPDATA%\Programs\owl\owl.exe — the user's own programs
 // folder, no administrator — puts that folder on the user's PATH, and
 // opens the copy there, which makes the shortcut, Open at login and its
 // updates name it. The download is left where it is: it is the user's
@@ -29,18 +29,18 @@ import (
 // It is left alone, and runs where it is as before, when it runs from
 // anywhere else (a folder the user chose: D:\Tools, a USB drive), when it
 // is portable (a data folder or .portable file beside it, appdir), or
-// with MYNA_NO_INSTALL=1.
+// with OWL_NO_INSTALL=1.
 
-// NoInstallEnv, set to 1, keeps a myna run from Downloads there.
-const NoInstallEnv = "MYNA_NO_INSTALL"
+// NoInstallEnv, set to 1, keeps a owl run from Downloads there.
+const NoInstallEnv = "OWL_NO_INSTALL"
 
 // installedFromEnv names, for the installed copy started in its place,
 // the exe it was installed from, whose leftovers it clears (Settled).
-const installedFromEnv = "MYNA_INSTALLED_FROM"
+const installedFromEnv = "OWL_INSTALLED_FROM"
 
 // What Settle asks of the system; tests set them.
 var (
-	// installTarget is %LOCALAPPDATA%\Programs\myna\myna.exe, "" off
+	// installTarget is %LOCALAPPDATA%\Programs\owl\owl.exe, "" off
 	// Windows
 	installTarget = installPath
 	// downloadFolder says whether dir is one downloads land in:
@@ -50,9 +50,9 @@ var (
 	downloadFolder = isDownloadFolder
 	// fileVersion is the version in an exe's resources, 0 when unknown
 	fileVersion = exeVersion
-	// portableData is a portable myna's data folder, "" installed
+	// portableData is a portable owl's data folder, "" installed
 	portableData = appdir.Portable
-	// webViewHome is the folder WebView2 keeps an installed myna's
+	// webViewHome is the folder WebView2 keeps an installed owl's
 	// profile in by default, %APPDATA%\<exe name>; "" off Windows
 	webViewHome = webViewDefault
 	// installCLI puts the installed folder on the user's PATH with the
@@ -119,7 +119,7 @@ func settle(exe string) (string, error) {
 }
 
 // installFresh puts a copy of exe at to, puts its folder on the user's
-// PATH with the `myna` command a terminal runs there (cliPlace), and
+// PATH with the `owl` command a terminal runs there (cliPlace), and
 // points the installed copy at the webview profile exe had, which is kept
 // by its file name.
 func installFresh(exe, to string) error {
@@ -139,13 +139,13 @@ func installFresh(exe, to string) error {
 	if err := installCLI(to, dir); err != nil {
 		// the app runs the same without the command; Settings' Command
 		// line says it isn't there and offers it again
-		log.Println("install: the myna command:", err)
+		log.Println("install: the owl command:", err)
 	}
 	return nil
 }
 
 // keepWebView has the copy at to keep the webview profile exe had: the
-// pages' storage there would be lost to a new profile under myna.exe's
+// pages' storage there would be lost to a new profile under owl.exe's
 // name. Nothing when that one has a profile already.
 func keepWebView(exe, to string) {
 	home := webViewHome
@@ -166,7 +166,7 @@ func copyBeside(exe, to string) (string, error) {
 		return "", err
 	}
 	defer src.Close()
-	f, err := os.CreateTemp(filepath.Dir(to), ".myna-install-*")
+	f, err := os.CreateTemp(filepath.Dir(to), ".owl-install-*")
 	if err != nil {
 		return "", err
 	}
@@ -181,13 +181,13 @@ func copyBeside(exe, to string) (string, error) {
 	return f.Name(), nil
 }
 
-// Forward opens the installed myna at to with this one's arguments, and
+// Forward opens the installed owl at to with this one's arguments, and
 // waits for it to say it is up; the caller then quits. A restart to
-// update waits on this one for that word (MYNA_STARTED): it is passed on
+// update waits on this one for that word (OWL_STARTED): it is passed on
 // once the installed one has said it. When to can't be started, this one
 // runs on.
 func Forward(from, to string) error {
-	marker := filepath.Join(os.TempDir(), fmt.Sprintf("myna-installed-%d", os.Getpid()))
+	marker := filepath.Join(os.TempDir(), fmt.Sprintf("owl-installed-%d", os.Getpid()))
 	os.Remove(marker)
 	defer os.Remove(marker)
 	var env []string
@@ -208,10 +208,10 @@ func Forward(from, to string) error {
 	return nil
 }
 
-// Settled clears, in the installed myna Forward opened, what myna left
+// Settled clears, in the installed owl Forward opened, what owl left
 // beside the exe it was installed from: what updates moved aside there,
-// an update downloaded for it (myna.exe.new), and the myna.com or myna.cmd myna wrote there to run it, which
-// the `myna` on PATH is now. A file it didn't write, or wrote for
+// an update downloaded for it (owl.exe.new), and the owl.com or owl.cmd owl wrote there to run it, which
+// the `owl` on PATH is now. A file it didn't write, or wrote for
 // another program, is left.
 func Settled() {
 	from := os.Getenv(installedFromEnv)
@@ -242,7 +242,7 @@ func clearBeside(from string) {
 }
 
 // forwards says whether exe is a download Settle opens the installed
-// myna in place of: nothing is written beside it for a terminal, which
+// owl in place of: nothing is written beside it for a terminal, which
 // runs the installed one.
 func forwards(exe string) bool {
 	if runtime.GOOS != "windows" || os.Getenv(NoInstallEnv) == "1" {

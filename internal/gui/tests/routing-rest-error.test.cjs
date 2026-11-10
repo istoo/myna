@@ -80,7 +80,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           }
           await browser.close();
         });
-        await page.goto("http://myna.test/?view=routing");
+        await page.goto("http://owl.test/?view=routing");
         await page.locator(".rt-act").first().waitFor();
 
         const stage = (user) => page.locator("li", { has: page.locator("code.mdl") }).filter({ has: page.locator(".who", { hasText: user }) });

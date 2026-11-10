@@ -14,7 +14,7 @@ import (
 // system: each distro named in probes is installed and running, answers
 // the probe with what probes has for it (wslProbeScript's output: "home:/
 // home/me\ndir:.codex\n…") and is opened at roots' folder for it. What
-// myna remembers of WSL is forgotten, before and after; the returned
+// owl remembers of WSL is forgotten, before and after; the returned
 // func puts everything back.
 func FakeWSL(probes, roots map[string]string) func() {
 	on, run, root, exec := wslOn, wslRun, wslRoot, wslExec
@@ -109,7 +109,7 @@ func StartFakeWSL(name string) {
 	}
 }
 
-// FakeWSLRuns is how many commands myna ran in FakeWSL's distro name
+// FakeWSLRuns is how many commands owl ran in FakeWSL's distro name
 // (wsl.exe -d name …), each of which starts a stopped distro.
 func FakeWSLRuns(name string) int {
 	fakeCalls.Lock()

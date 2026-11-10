@@ -1,7 +1,7 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // Jason on Discord: "多个账号提示路由失败，保留一个账号也会出现这种情况". A
-// Codex turn myna held while it was masked, before routing it, showed
-// on the Routing page as "myna · 0 on" over the one-account hint ("only
+// Codex turn owl held while it was masked, before routing it, showed
+// on the Routing page as "owl · 0 on" over the one-account hint ("only
 // one account or key is on") and "Nothing could take ." — a held request
 // has no one weighed for it yet, and the card read it as a provider with
 // nothing on. Held, it says it is being masked (or routed) and that who
@@ -19,12 +19,12 @@ const ago = (minutes) => new Date(now.getTime() - minutes * 60e3).toISOString();
 
 const routes = {
   // held before routing while masked: what the gateway's watch shows
-  masking: { id: 1, seq: 1, time: ago(0.3), agent: "AirbuildEnvironment", model: "gpt-6-astra", provider: "myna", phase: "redact", done: false, order: [], tries: [] },
+  masking: { id: 1, seq: 1, time: ago(0.3), agent: "AirbuildEnvironment", model: "gpt-6-astra", provider: "owl", phase: "redact", done: false, order: [], tries: [] },
   // held, not masking: still read
-  routing: { id: 1, seq: 1, time: ago(0.3), agent: "AirbuildEnvironment", model: "", provider: "myna", done: false, order: [], tries: [] },
+  routing: { id: 1, seq: 1, time: ago(0.3), agent: "AirbuildEnvironment", model: "", provider: "owl", done: false, order: [], tries: [] },
   // given up on with nobody weighed: its error says why
-  ended: { id: 1, seq: 1, time: ago(1), agent: "AirbuildEnvironment", model: "gpt-6-astra", provider: "myna", done: true, status: 504, ms: 120000,
-    error: "myna held this request for 2m0s without routing it to any provider", order: [], tries: [] },
+  ended: { id: 1, seq: 1, time: ago(1), agent: "AirbuildEnvironment", model: "gpt-6-astra", provider: "owl", done: true, status: 504, ms: 120000,
+    error: "owl held this request for 2m0s without routing it to any provider", order: [], tries: [] },
 };
 
 function serve(lang, scene) {
@@ -51,18 +51,18 @@ function serve(lang, scene) {
 // the words, as each language says them
 const said = {
   masking: {
-    en: "myna is masking this request before routing it (Settings › Privacy), so who takes it isn't picked yet.",
-    zh: "myna 正在给这个请求脱敏（设置 › 隐私），脱敏完才路由，所以还没选出由谁处理。",
-    "zh-TW": "myna 正在為這個請求脫敏（設定 › 隱私），脫敏完才路由，所以還沒選出由誰處理。",
-    ja: "myna はルーティングの前にこのリクエストをマスクしています（設定 › プライバシー）。誰が処理するかはまだ決まっていません。",
-    de: "myna maskiert diese Anfrage vor der Weiterleitung (Einstellungen › Datenschutz), daher steht noch nicht fest, wer sie übernimmt.",
+    en: "owl is masking this request before routing it (Settings › Privacy), so who takes it isn't picked yet.",
+    zh: "owl 正在给这个请求脱敏（设置 › 隐私），脱敏完才路由，所以还没选出由谁处理。",
+    "zh-TW": "owl 正在為這個請求脫敏（設定 › 隱私），脫敏完才路由，所以還沒選出由誰處理。",
+    ja: "owl はルーティングの前にこのリクエストをマスクしています（設定 › プライバシー）。誰が処理するかはまだ決まっていません。",
+    de: "owl maskiert diese Anfrage vor der Weiterleitung (Einstellungen › Datenschutz), daher steht noch nicht fest, wer sie übernimmt.",
   },
   routing: {
-    en: "myna hasn't routed this request yet, so who takes it isn't picked yet.",
-    zh: "myna 还没开始路由这个请求，所以还没选出由谁处理。",
-    "zh-TW": "myna 還沒開始路由這個請求，所以還沒選出由誰處理。",
-    ja: "myna はまだこのリクエストをルーティングしていないため、誰が処理するかはまだ決まっていません。",
-    de: "myna hat diese Anfrage noch nicht weitergeleitet, daher steht noch nicht fest, wer sie übernimmt.",
+    en: "owl hasn't routed this request yet, so who takes it isn't picked yet.",
+    zh: "owl 还没开始路由这个请求，所以还没选出由谁处理。",
+    "zh-TW": "owl 還沒開始路由這個請求，所以還沒選出由誰處理。",
+    ja: "owl はまだこのリクエストをルーティングしていないため、誰が処理するかはまだ決まっていません。",
+    de: "owl hat diese Anfrage noch nicht weitergeleitet, daher steht noch nicht fest, wer sie übernimmt.",
   },
   ended: {
     en: "Nothing took this request: " + routes.ended.error,
@@ -100,7 +100,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const errors = [];
           page.on("pageerror", (error) => errors.push(error.message));
           await page.route("**/*", serve(lang, scene));
-          await page.goto("http://myna.test/?view=routing");
+          await page.goto("http://owl.test/?view=routing");
           await page.locator(".rt-req").first().waitFor();
           const want = said[scene][lang];
           await page.waitForFunction((s) => document.querySelector(".rt-mode")?.textContent.trim() === s, want);

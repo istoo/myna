@@ -5,11 +5,11 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/testenv"
 )
 
-// A data folder beside myna takes every file of its own (#508): the
+// A data folder beside owl takes every file of its own (#508): the
 // settings land in it, whatever HOME and XDG_CONFIG_HOME say, and the
 // files of an install from before the rename aren't copied in.
 func TestPortableSettings(t *testing.T) {
@@ -23,8 +23,8 @@ func TestPortableSettings(t *testing.T) {
 	t.Setenv("APPIMAGE", "")
 	t.Cleanup(func() { appdir.UseExecutable("") })
 
-	exe := filepath.Join(r, "Myna", "myna.exe")
-	data := filepath.Join(r, "Myna", "data")
+	exe := filepath.Join(r, "Owl", "owl.exe")
+	data := filepath.Join(r, "Owl", "data")
 	if err := os.MkdirAll(data, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -55,13 +55,13 @@ func TestPortableSettings(t *testing.T) {
 	if _, err := os.Stat(filepath.Join(data, "settings.json")); err != nil {
 		t.Fatalf("settings not saved in the data folder: %v", err)
 	}
-	if _, err := os.Stat(filepath.Join(r, "home", ".config", "myna")); !os.IsNotExist(err) {
-		t.Fatalf("the profile's ~/.config/myna was touched: %v", err)
+	if _, err := os.Stat(filepath.Join(r, "home", ".config", "owl")); !os.IsNotExist(err) {
+		t.Fatalf("the profile's ~/.config/owl was touched: %v", err)
 	}
 
 	// without the data folder it's the profile again
 	appdir.UseExecutable("")
-	if got, want := Path(), filepath.Join(r, "home", ".config", "myna", "settings.json"); got != want {
+	if got, want := Path(), filepath.Join(r, "home", ".config", "owl", "settings.json"); got != want {
 		t.Fatalf("installed Path() = %q, want %q", got, want)
 	}
 }

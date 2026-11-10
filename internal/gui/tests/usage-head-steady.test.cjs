@@ -8,14 +8,14 @@
 // Every height around the one where the page just fits is tried, each with a
 // refresh, and the head's right edge, the interval's place and the view's
 // width are read every frame. WebKit showed it, Chromium never did; both
-// engines, every language. MYNA_ASSETS can point at older assets.
+// engines, every language. OWL_ASSETS can point at older assets.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MYNA_ASSETS || path.resolve(__dirname, "../assets"));
+const assets = path.resolve(process.env.OWL_ASSETS || path.resolve(__dirname, "../assets"));
 const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
 // the reporter's page: a few Codex rows, a day of hourly points, a year's heatmap
@@ -101,9 +101,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.setDefaultNavigationTimeout(60000);
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
-      await page.addInitScript(() => { localStorage.setItem("myna.navLayout", "top"); localStorage.setItem("myna.usageTab", "requests"); });
+      await page.addInitScript(() => { localStorage.setItem("owl.navLayout", "top"); localStorage.setItem("owl.usageTab", "requests"); });
       await page.route("**/*", serve(lang));
-      await page.goto("http://myna.test/?view=usage");
+      await page.goto("http://owl.test/?view=usage");
       await page.waitForFunction(() => !document.querySelector("#ledHeat").hidden && document.querySelector("table.led tbody tr") && document.querySelector("#usageEvery").offsetWidth);
       assert.equal(await page.locator("#period .opt").first().evaluate((b) => b.classList.contains("on")), true, "Today is picked");
       assert.equal(await page.evaluate(() => document.querySelector(".usage-head").offsetWidth > 0), true);

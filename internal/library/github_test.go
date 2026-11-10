@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/ghtoken"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/ghtoken"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // fakeGitHub stands in for GitHub's API and codeload: it notes the

@@ -89,7 +89,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           return p;
         };
         try {
-          const p = await open("http://myna.test/?view=usage");
+          const p = await open("http://owl.test/?view=usage");
           const say = (s, v) => p.evaluate(([s, v]) => t(s, v), [s, v]);
           const n1 = await p.evaluate(() => ledNum(1));
           const leftOut = await say(LEFT_OUT, { n: n1 }), notCounted = await say(NOT_COUNTED);
@@ -134,7 +134,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           assert(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), "the page scrolls sideways");
 
           // the tray panel's card
-          const panel = await open("http://myna.test/?mode=panel");
+          const panel = await open("http://owl.test/?mode=panel");
           await panel.locator('[data-ptab="stats"]').click();
           await panel.locator("#panelUsage .pu-tot").waitFor();
           const blk = await panel.locator("#panelUsage .pu-tot .blk").evaluateAll((bs) => bs.map((b) => b.textContent));

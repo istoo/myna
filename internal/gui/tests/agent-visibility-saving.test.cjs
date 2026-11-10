@@ -44,7 +44,7 @@ async function fixture(t, engine) {
     try { return await route.fulfill({body:await fs.readFile(file),contentType:{'.js':'text/javascript','.css':'text/css','.html':'text/html','.svg':'image/svg+xml'}[path.extname(file)]}); }
     catch { return route.fulfill({status:404,body:''}); }
   });
-  await page.goto('http://myna.test/');
+  await page.goto('http://owl.test/');
   await page.getByRole('button',{name:'Manage agents',exact:true}).click();
   return f;
 }

@@ -11,8 +11,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/testenv"
 	"github.com/tidwall/gjson"
 )
 
@@ -54,7 +54,7 @@ func namesAt(body, path string) []string {
 	return out
 }
 
-// noEmptySystem fails when a system text myna sent upstream is empty, or
+// noEmptySystem fails when a system text owl sent upstream is empty, or
 // when the two system texts were joined around an empty one.
 func noEmptySystem(t *testing.T, texts []string) {
 	t.Helper()
@@ -177,7 +177,7 @@ func TestPiAddedToolReachesEveryRoute(t *testing.T) {
 }
 
 // Through a Claude subscription, whose Claude Code is offered the client's
-// tools by myna's MCP helper, the added tool is offered too, once.
+// tools by owl's MCP helper, the added tool is offered too, once.
 func TestPiAddedToolOfferedToClaudeCode(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("a shell script stands in for Claude Code")

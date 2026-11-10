@@ -12,7 +12,7 @@ import (
 // A reply that says the account Codex is signed in to is out has its
 // allowance read again at once, not at the next look five minutes on
 // (MasterYi on Discord: the Codex app greyed Send meanwhile): once per
-// codexRecheckEvery, for the active account alone, and only in a myna
+// codexRecheckEvery, for the active account alone, and only in a owl
 // that keeps Codex on an account with room.
 func TestCodexMayBeUsedUpReadsAtOnce(t *testing.T) {
 	signIn(t) // me@example.com, active
@@ -69,7 +69,7 @@ func TestCodexMayBeUsedUpReadsAtOnce(t *testing.T) {
 // The reading a reply's word asks for signs Codex in to the next account
 // with room as soon as the one it is on is out, not at the loop's next
 // look up to five minutes on: the Codex app greys Send once it is out, so
-// no request comes to tell myna again (danzi002 on Discord restarted the
+// no request comes to tell owl again (danzi002 on Discord restarted the
 // app every time instead).
 func TestCodexReadNowSwitchesAtOnce(t *testing.T) {
 	home := signIn(t) // me@example.com, acct-1
@@ -99,7 +99,7 @@ func TestCodexReadNowSwitchesAtOnce(t *testing.T) {
 	}
 }
 
-// Whether myna has anything to serve Codex's own model on while the
+// Whether owl has anything to serve Codex's own model on while the
 // account Codex is signed in to is out (xiaoq6285 on Discord, one Plus
 // account): with that account alone and no fallback, nothing; another
 // ChatGPT account not known out, or a fallback on the Codex

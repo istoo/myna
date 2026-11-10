@@ -8,23 +8,23 @@ import (
 // A Mac restart by itself with no window up opens the app as a login launch
 // does, its menu bar icon only (#2096); one with the window opens it. Both
 // ask for a new instance (-n), so LaunchServices launches the bundle rather
-// than send a reopen to the myna that has just exited (Linka's -600).
+// than send a reopen to the owl that has just exited (Linka's -600).
 //
 // Only a restart the user asked for, with its window coming back, brings
-// myna to the front. One myna made by itself (quiet), or one with only
+// owl to the front. One owl made by itself (quiet), or one with only
 // the menu bar icon to come back, opens in the background (-g): without
 // it, Settings' AutoRestart took the focus from the app the user was
 // typing in (xyxyxy_15591 on Discord).
 func TestRelaunchOpen(t *testing.T) {
-	const app = "/Applications/myna.app"
+	const app = "/Applications/owl.app"
 	for _, c := range []struct {
 		window, quiet bool
 		want          string
 	}{
-		{true, false, `open -n "/Applications/myna.app"`},
-		{true, true, `open -n -g "/Applications/myna.app"`},
-		{false, false, `open -n -g "/Applications/myna.app" --args tray`},
-		{false, true, `open -n -g "/Applications/myna.app" --args tray`},
+		{true, false, `open -n "/Applications/owl.app"`},
+		{true, true, `open -n -g "/Applications/owl.app"`},
+		{false, false, `open -n -g "/Applications/owl.app" --args tray`},
+		{false, true, `open -n -g "/Applications/owl.app" --args tray`},
 	} {
 		if got := relaunchOpen(app, c.window, c.quiet); got != c.want {
 			t.Errorf("relaunch, window %v quiet %v: %s, want %s", c.window, c.quiet, got, c.want)
@@ -42,20 +42,20 @@ func TestRelaunchOpen(t *testing.T) {
 // exit (it would wait while this one waits for it), and gets the args
 // RelaunchBinary gives.
 func TestStartBesideWaitsForNothing(t *testing.T) {
-	t.Setenv("MYNA_REPLACES", "")
+	t.Setenv("OWL_REPLACES", "")
 	var gotArgs, gotEnv []string
 	stubLaunch(t, func(exe string, args, env []string) (<-chan struct{}, func(), error) {
 		gotArgs, gotEnv = args, env
 		return nil, nil, nil
 	})
-	if err := StartBeside("/opt/myna", true, "routing"); err != nil {
+	if err := StartBeside("/opt/owl", true, "routing"); err != nil {
 		t.Fatal(err)
 	}
 	if strings.Join(gotArgs, " ") != "gui routing" {
 		t.Errorf("args %q", gotArgs)
 	}
 	for _, e := range gotEnv {
-		if strings.HasPrefix(e, "MYNA_REPLACES=") && e != "MYNA_REPLACES=" {
+		if strings.HasPrefix(e, "OWL_REPLACES=") && e != "OWL_REPLACES=" {
 			t.Errorf("told to wait: %s", e)
 		}
 	}

@@ -52,7 +52,7 @@ async function open(engine, t, lang, reads) {
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", serve(lang, reads));
-  await page.goto("http://myna.test/?view=providers");
+  await page.goto("http://owl.test/?view=providers");
   return { page, errors };
 }
 

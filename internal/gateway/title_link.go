@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/owl/internal/sessions"
 	"github.com/tidwall/gjson"
 )
 

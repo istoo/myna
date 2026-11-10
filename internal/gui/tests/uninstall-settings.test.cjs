@@ -4,20 +4,20 @@ const { chromium, webkit } = require("playwright");
 const { fixture } = require("./fixtures/caller-keys.cjs");
 const { openPart } = require("./reader.cjs");
 
-// Jevik_AI on X deleted myna's folders by hand, and Codex kept pointing
-// at a gateway that was gone. Settings › About › Uninstall myna asks
+// Jevik_AI on X deleted owl's folders by hand, and Codex kept pointing
+// at a gateway that was gone. Settings › About › Uninstall owl asks
 // first, disconnects every agent and removes the service (POST
-// /api/uninstall), and only then has myna quit and its files deleted
+// /api/uninstall), and only then has owl quit and its files deleted
 // (POST /api/uninstall/finish). A failure is said and nothing more is
-// removed; the Codex app still on the old settings is said before myna
-// quits. myna web never offers it.
+// removed; the Codex app still on the old settings is said before owl
+// quits. owl web never offers it.
 const LANGS = ["en", "zh", "zh-TW", "ja", "de"];
 const words = {
-  en: { row: "Uninstall myna", title: "Uninstall myna?", go: "Uninstall", cancel: "Cancel", again: "Try again", quit: "Quit myna" },
-  zh: { row: "卸载 myna", title: "卸载 myna？", go: "卸载", cancel: "取消" },
-  "zh-TW": { row: "解除安裝 myna", title: "解除安裝 myna？", go: "解除安裝", cancel: "取消" },
-  ja: { row: "myna をアンインストール", title: "myna をアンインストールしますか？", go: "アンインストール", cancel: "キャンセル" },
-  de: { row: "myna deinstallieren", title: "myna deinstallieren?", go: "Deinstallieren", cancel: "Abbrechen" },
+  en: { row: "Uninstall owl", title: "Uninstall owl?", go: "Uninstall", cancel: "Cancel", again: "Try again", quit: "Quit owl" },
+  zh: { row: "卸载 owl", title: "卸载 owl？", go: "卸载", cancel: "取消" },
+  "zh-TW": { row: "解除安裝 owl", title: "解除安裝 owl？", go: "解除安裝", cancel: "取消" },
+  ja: { row: "owl をアンインストール", title: "owl をアンインストールしますか？", go: "アンインストール", cancel: "キャンセル" },
+  de: { row: "owl deinstallieren", title: "owl deinstallieren?", go: "Deinstallieren", cancel: "Abbrechen" },
 };
 
 async function setup(t, engine, lang, width, { web = false, reply = { failed: false, says: [] } } = {}) {
@@ -35,7 +35,7 @@ async function setup(t, engine, lang, width, { web = false, reply = { failed: fa
     if (p === "/api/uninstall/finish") return route.fulfill({ status: 204 });
     return route.fulfill({ json: { agents: [], system: [], data: [], ...reply } });
   });
-  await page.goto("http://myna.test/?view=gateway");
+  await page.goto("http://owl.test/?view=gateway");
   await page.locator("#prefs").click();
   await openPart(page, "about");
   await page.locator("#about .row").first().waitFor();
@@ -48,7 +48,7 @@ const scrolled = (page) => page.evaluate(() => document.querySelector("#view-set
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   for (const lang of LANGS) {
     for (const width of [1100, 420]) {
-      test(`${engine} ${lang} ${width}: Uninstall myna asks, then disconnects and quits`, async (t) => {
+      test(`${engine} ${lang} ${width}: Uninstall owl asks, then disconnects and quits`, async (t) => {
         const { page, errors, posts } = await setup(t, engine, lang, width);
         const w = words[lang];
         const row = page.locator("#uninstallRow");
@@ -91,19 +91,19 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     assert.deepEqual(errors, []);
   });
 
-  test(`${engine}: the Codex app on its old settings is said before myna quits`, async (t) => {
+  test(`${engine}: the Codex app on its old settings is said before owl quits`, async (t) => {
     const { page, errors, posts } = await setup(t, engine, "en", 1100, { reply: { failed: false, codexApp: true, says: [] } });
     await page.locator("#uninstallRow button").click();
     await dialog(page).getByRole("button", { name: "Uninstall", exact: true }).click();
-    await dialog(page).getByRole("button", { name: "Quit myna", exact: true }).waitFor();
+    await dialog(page).getByRole("button", { name: "Quit owl", exact: true }).waitFor();
     assert.deepEqual(posts, ["/api/uninstall"]);
-    await dialog(page).getByRole("button", { name: "Quit myna", exact: true }).click();
+    await dialog(page).getByRole("button", { name: "Quit owl", exact: true }).click();
     await waitFor(() => posts.length === 2);
     assert.deepEqual(posts, ["/api/uninstall", "/api/uninstall/finish"]);
     assert.deepEqual(errors, []);
   });
 
-  test(`${engine}: myna web never offers it`, async (t) => {
+  test(`${engine}: owl web never offers it`, async (t) => {
     const { page, errors } = await setup(t, engine, "en", 1100, { web: true });
     assert.equal(await page.locator("#uninstallRow").count(), 0);
     assert.doesNotMatch(await page.locator("#about").textContent(), /Uninstall/);

@@ -31,7 +31,7 @@ const LINE = "npx " + ARGS.join(" ");
 
 function server(lang, calls) {
   const lib = {
-    dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
+    dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
     agents: [agent("claude", "Claude Code")],
     instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [],
     servers: [{ name: "db", transport: "stdio", command: "npx", args: ARGS, env: { DB_TOKEN: "${DB_TOKEN}" }, agents: ["claude"] }],
@@ -52,7 +52,7 @@ function server(lang, calls) {
     if (url.pathname === "/api/library/mcp/check") return route.fulfill({ json: { servers: {} } });
     if (url.pathname === "/api/library/skill") {
       const name = url.searchParams.get("name");
-      return route.fulfill({ json: { file: "SKILL.md", files: ["SKILL.md"], text: "---\nname: " + name + "\n---\n\nWrite it up.\n", path: `${HOME}/.myna/library/skills/${name}` } });
+      return route.fulfill({ json: { file: "SKILL.md", files: ["SKILL.md"], text: "---\nname: " + name + "\n---\n\nWrite it up.\n", path: `${HOME}/.owl/library/skills/${name}` } });
     }
     if (url.pathname === "/api/library/servers/save") {
       const { old, server: s } = req.postDataJSON();
@@ -94,13 +94,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const calls = [];
           const ctx = await browser.newContext({ viewport: { width, height: 800 } });
           // the MCP tab first; the skills' once the test has picked it
-          await ctx.addInitScript(() => { try { if (!localStorage.getItem("myna.libTab")) localStorage.setItem("myna.libTab", "mcp"); } catch {} });
+          await ctx.addInitScript(() => { try { if (!localStorage.getItem("owl.libTab")) localStorage.setItem("owl.libTab", "mcp"); } catch {} });
           const page = await ctx.newPage();
           page.setDefaultTimeout(5000);
           page.setDefaultNavigationTimeout(60000);
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", server(lang, calls));
-          await page.goto("http://myna.test/");
+          await page.goto("http://owl.test/");
           await navTo(page, "library");
           const row = page.locator("#view-library .lib-server", { has: page.locator('.lib-health[data-server="db"]') });
           const ed = page.locator("#modal .lib-editor");
@@ -171,7 +171,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           assert.equal(await row.locator(".sub.mono").count(), 0);
 
           // a skill's note, over its SKILL.md
-          await page.evaluate(() => { try { localStorage.setItem("myna.libTab", "skills"); } catch {} });
+          await page.evaluate(() => { try { localStorage.setItem("owl.libTab", "skills"); } catch {} });
           await page.reload();
           await navTo(page, "library");
           const skill = (name) => page.locator("#view-library .lib-skill", { has: page.locator(".name", { hasText: new RegExp("^" + name + "$") }) });

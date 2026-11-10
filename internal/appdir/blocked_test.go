@@ -9,7 +9,7 @@ import (
 )
 
 // A ~/.config the user can't write (sudo made it root's) is named as what
-// blocks myna; a writable one, or one not there yet under a writable
+// blocks owl; a writable one, or one not there yet under a writable
 // home, isn't; and a folder outside the home folder is never named.
 func TestBlockedNamesTheFolderInTheWay(t *testing.T) {
 	if os.Getuid() == 0 {
@@ -32,8 +32,8 @@ func TestBlockedNamesTheFolderInTheWay(t *testing.T) {
 	if !Mine(cfg) {
 		t.Fatal("Mine = false for the user's own folder")
 	}
-	if Own(cfg) || !Own(filepath.Join(cfg, "myna")) || !Own(filepath.Join(cfg, "myna", "x")) {
-		t.Fatal("Own: only myna's own folder and what is in it")
+	if Own(cfg) || !Own(filepath.Join(cfg, "owl")) || !Own(filepath.Join(cfg, "owl", "x")) {
+		t.Fatal("Own: only owl's own folder and what is in it")
 	}
 	os.Chmod(cfg, 0o755)
 	if b := Blocked(); b != "" {

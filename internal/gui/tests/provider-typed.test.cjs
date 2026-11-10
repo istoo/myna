@@ -66,7 +66,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const calls = [];
       const relayWithAccounts = { ...relay, keyList: [{ id: "k1", name: "", masked: "sk-…one", on: true, active: true }] };
       await page.route("**/*", serve(lang, calls));
-      await page.goto("http://myna.test/?view=providers");
+      await page.goto("http://owl.test/?view=providers");
       const missing = await page.evaluate((w) => Object.values(w).filter((s) => /[a-z]/i.test(s) && !I18N.zh[s] && !["optional"].includes(s)), words.en);
       if (lang === "en") assert.deepEqual(missing, [], "every string has its Chinese");
       await page.locator(".row.provider", { hasText: "Relay" }).click();
@@ -108,7 +108,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // provider with none yet, which is why this page is read again
       await page.unrouteAll({ behavior: "ignoreErrors" });
       await page.route("**/*", serve(lang, calls, relayWithAccounts));
-      await page.goto("http://myna.test/?view=providers");
+      await page.goto("http://owl.test/?view=providers");
       await page.locator(".row.provider", { hasText: "Relay" }).click();
       await ed.locator(".ehead b", { hasText: "Relay" }).waitFor();
       await ed.getByRole("button", { name: w.addKey }).click();

@@ -6,13 +6,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A model of DeepSeek's own picked in dsh's /model, which dsh saves in its
-// settings over the patch list, leaves dsh connected: myna's route is
+// settings over the patch list, leaves dsh connected: owl's route is
 // still in its list, beside DeepSeek's (Fate on Discord: DSH went back to
-// Not connected). Disconnect then takes the route, myna's start and its
+// Not connected). Disconnect then takes the route, owl's start and its
 // key out, and the model picked in dsh stays.
 func TestDshOwnPickStaysConnected(t *testing.T) {
 	home := t.TempDir()
@@ -36,11 +36,11 @@ func TestDshOwnPickStaysConnected(t *testing.T) {
 	if a.Wired() {
 		t.Fatal("wired before anything")
 	}
-	if err := a.Pick("model", "myna/glm/glm-5.3"); err != nil {
+	if err := a.Pick("model", "owl/glm/glm-5.3"); err != nil {
 		t.Fatal(err)
 	}
 	if !a.Wired() {
-		t.Fatal("not wired on myna's model")
+		t.Fatal("not wired on owl's model")
 	}
 
 	// picked in dsh: DeepSeek's own
@@ -49,7 +49,7 @@ func TestDshOwnPickStaysConnected(t *testing.T) {
 		t.Fatalf("model: %q", got)
 	}
 	if !a.Wired() {
-		t.Fatal("dsh went back to Not connected with myna's route still in its list")
+		t.Fatal("dsh went back to Not connected with owl's route still in its list")
 	}
 	if d := a.Drift(); d != nil {
 		t.Fatalf("drift: %+v", d)
@@ -77,12 +77,12 @@ func TestDshOwnPickStaysConnected(t *testing.T) {
 
 // Since 0.2 dsh keeps no pick in settings.yaml: its /model, and the one-time
 // import that renames a settings.yaml to settings.yaml.imported, write the
-// config of the profile's last agent-default-model entry — myna's, mark
+// config of the profile's last agent-default-model entry — owl's, mark
 // and all (#1392). The entry below is as dsh 0.2.0-rc.2 left it after
 // importing a settings.yaml whose pick was DeepSeek's own. Disconnect takes
-// myna's route and key out and leaves that pick, not the entry myna
+// owl's route and key out and leaves that pick, not the entry owl
 // stashed from before it was connected.
-func TestDshPickSavedIntoMynasEntryOutlivesDisconnect(t *testing.T) {
+func TestDshPickSavedIntoOwlsEntryOutlivesDisconnect(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
 	t.Setenv("USERPROFILE", home)
@@ -101,17 +101,17 @@ func TestDshPickSavedIntoMynasEntryOutlivesDisconnect(t *testing.T) {
 	read := func(p string) string { b, _ := os.ReadFile(p); return string(b) }
 
 	a := dsh(home)
-	if err := a.Pick("model", "myna/deepseek/pro"); err != nil {
+	if err := a.Pick("model", "owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	// dsh 0.2.0-rc.2's ConfigEditor.edit: the last agent-default-model
-	// entry's config replaced, its id line (and myna's mark) kept
+	// entry's config replaced, its id line (and owl's mark) kept
 	s := read(headless)
-	ours := "- id: agent-default-model # myna\n  config:\n    provider: myna\n    model: \"deepseek/pro\"\n"
+	ours := "- id: agent-default-model # owl\n  config:\n    provider: owl\n    model: \"deepseek/pro\"\n"
 	if !strings.Contains(s, ours) {
-		t.Fatalf("myna's start:\n%s", s)
+		t.Fatalf("owl's start:\n%s", s)
 	}
-	s = strings.Replace(s, ours, "- id: agent-default-model # myna\n  config:\n    provider: deepseek-official\n    model: deepseek-v4-flash\n", 1)
+	s = strings.Replace(s, ours, "- id: agent-default-model # owl\n  config:\n    provider: deepseek-official\n    model: deepseek-v4-flash\n", 1)
 	os.WriteFile(headless, []byte(s), 0o600)
 	os.WriteFile(filepath.Join(dir, "settings.yaml.imported"), []byte("agent-default-model:\n  provider: deepseek-official\n  model: deepseek-v4-flash\n"), 0o600)
 
@@ -119,14 +119,14 @@ func TestDshPickSavedIntoMynasEntryOutlivesDisconnect(t *testing.T) {
 		t.Fatalf("model picked in dsh: %q", got)
 	}
 	if !a.Wired() {
-		t.Fatal("not connected with myna's route still in the list")
+		t.Fatal("not connected with owl's route still in the list")
 	}
 	if err := a.Disconnect(); err != nil {
 		t.Fatal(err)
 	}
 	s = read(headless)
 	if a.Wired() || strings.Contains(s, "llm-pi-ai") || strings.Contains(s, dshMark) {
-		t.Fatalf("myna's wiring outlived Disconnect:\n%s", s)
+		t.Fatalf("owl's wiring outlived Disconnect:\n%s", s)
 	}
 	if got := a.Field("model").Get(); got != "deepseek-v4-flash" || !strings.Contains(s, "model: deepseek-v4-flash") || strings.Contains(s, "deepseek-v4-pro") {
 		t.Fatalf("the pick made in dsh was lost (model %q):\n%s", got, s)
@@ -134,14 +134,14 @@ func TestDshPickSavedIntoMynasEntryOutlivesDisconnect(t *testing.T) {
 	if strings.Contains(read(filepath.Join(dir, ".env")), dshKeyRef) {
 		t.Fatal("the key outlived the route")
 	}
-	// the user back on myna and out again: nothing of the old stash returns
-	if err := a.Pick("model", "myna/deepseek/flash"); err != nil {
+	// the user back on owl and out again: nothing of the old stash returns
+	if err := a.Pick("model", "owl/deepseek/flash"); err != nil {
 		t.Fatal(err)
 	}
 	if err := a.Pick("model", ""); err != nil {
 		t.Fatal(err)
 	}
 	if s := read(headless); strings.Contains(s, dshMark) || !strings.Contains(s, "model: deepseek-v4-flash") {
-		t.Fatalf("after myna's model and back:\n%s", s)
+		t.Fatalf("after owl's model and back:\n%s", s)
 	}
 }

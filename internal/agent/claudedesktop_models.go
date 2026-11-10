@@ -7,19 +7,19 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/gateway"
 )
 
-// While a model is picked for one of Claude Desktop's tiers, myna's
+// While a model is picked for one of Claude Desktop's tiers, owl's
 // profile carries inferenceModels (gateway.DesktopInferenceModels): the
 // list Desktop's Code tab hands Claude Code each pick's behavesAs from,
 // so a pick runs with the prompt of the Claude model of its tier
-// (moer2831). Without a pick there is none, and Desktop finds myna's
-// models on its own as before. The list is myna's only while it is what
-// myna wrote: desktopModelsMark keeps the hash of each list myna
+// (moer2831). Without a pick there is none, and Desktop finds owl's
+// models on its own as before. The list is owl's only while it is what
+// owl wrote: desktopModelsMark keeps the hash of each list owl
 // wrote (the one before a write too, until the write is done), and a list
-// with any other hash is the user's, which myna never writes over or
+// with any other hash is the user's, which owl never writes over or
 // takes away. Desktop reads its profile at start-up only.
 const desktopModelsMark = "claude-desktop.models"
 
@@ -34,8 +34,8 @@ func desktopModelsHash(raw []byte) string {
 	return hex.EncodeToString(sum[:])
 }
 
-// desktopSyncModels writes p's inferenceModels as myna lists them now,
-// takes away the one myna wrote when nothing is picked, and leaves the
+// desktopSyncModels writes p's inferenceModels as owl lists them now,
+// takes away the one owl wrote when nothing is picked, and leaves the
 // user's own alone.
 func desktopSyncModels(p desktopPaths) error {
 	if !desktopWired(p) {
@@ -73,7 +73,7 @@ func desktopSyncModels(p desktopPaths) error {
 		stash(map[string]string{key: h})
 		return nil
 	}
-	// marked before it is written: a write cut short leaves a list myna
+	// marked before it is written: a write cut short leaves a list owl
 	// still knows for its own
 	stash(map[string]string{key: strings.Join(append(marks, h), " ")})
 	if err := edit.SetJSON(p.prof, edit.KV{Path: "inferenceModels", Value: json.RawMessage(next)}); err != nil {

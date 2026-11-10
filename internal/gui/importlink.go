@@ -8,10 +8,10 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// An import link (myna://import?…, see provider.ParseImport) is parsed
+// An import link (owl://import?…, see provider.ParseImport) is parsed
 // here, parked under a random id, and the window opens on the Providers tab
 // with that id; the page fetches it once and asks the user before saving
 // anything.

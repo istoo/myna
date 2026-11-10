@@ -8,10 +8,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/proc"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/proc"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // portJSON is what setting the gateway's port did: the port it is on, the
@@ -32,13 +32,13 @@ var portFree = func(addr string) error {
 	return ln.Close()
 }
 
-// mynaOnPort says whether a myna program of this user's listens on
+// owlOnPort says whether a owl program of this user's listens on
 // port: the one serving the gateway is then this computer's, whose port is
 // set there. Not when the program listening is another one answering for
-// a myna inside a container (OrbStack Helper, docker-proxy) or none this
+// a owl inside a container (OrbStack Helper, docker-proxy) or none this
 // user can see; when the processes can't be listed at all, it is taken to
 // be one.
-func mynaOnPort(port string) bool {
+func owlOnPort(port string) bool {
 	n, _ := strconv.Atoi(port)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -50,7 +50,7 @@ func mynaOnPort(port string) bool {
 		if pid == os.Getpid() {
 			continue
 		}
-		if path, err := proc.Executable(pid); err == nil && proc.IsMyna(path) {
+		if path, err := proc.Executable(pid); err == nil && proc.IsOwl(path) {
 			return true
 		}
 	}
@@ -65,19 +65,19 @@ func errPortTaken(p int) error {
 // setPort moves the gateway to port p (0 for the default) — the port in
 // Settings' Gateway address (Magic_zero on Discord: 3425 was taken, and a port of one's
 // own is easier to tell apart): it checks nothing listens there, saves it,
-// moves the gateway this myna serves (or starts it, when the port it was
-// on was taken), and then every agent connected to myna, whose configs
-// have the gateway's URL in them. A myna of this computer's serving the
+// moves the gateway this owl serves (or starts it, when the port it was
+// on was taken), and then every agent connected to owl, whose configs
+// have the gateway's URL in them. A owl of this computer's serving the
 // gateway has it moved there; one out of this one's reach — in a container
-// (leslie_luo on Discord: an old myna in OrbStack held 3425, so the port
+// (leslie_luo on Discord: an old owl in OrbStack held 3425, so the port
 // could be changed neither there nor here), another user's — is left on
 // its port, and this one serves on the new one.
 func setPort(p int) (portJSON, error) {
 	if err := settings.CheckPort(p); err != nil {
 		return portJSON{}, err
 	}
-	if a := os.Getenv("MYNA_ADDR"); a != "" {
-		return portJSON{}, fmt.Errorf("MYNA_ADDR=%s sets the gateway's address, which comes before Settings: unset it to set the port here", a)
+	if a := os.Getenv("OWL_ADDR"); a != "" {
+		return portJSON{}, fmt.Errorf("OWL_ADDR=%s sets the gateway's address, which comes before Settings: unset it to set the port here", a)
 	}
 	want := p
 	if want == 0 {
@@ -95,8 +95,8 @@ func setPort(p int) (portJSON, error) {
 		return portJSON{Port: want}, nil
 	}
 	gw := served.Load()
-	if gw == nil && gateway.Running() && mynaOnPort(gateway.Port()) {
-		return portJSON{}, fmt.Errorf("another myna serves the gateway at %s: set its port there, or quit it first", gateway.URL())
+	if gw == nil && gateway.Running() && owlOnPort(gateway.Port()) {
+		return portJSON{}, fmt.Errorf("another owl serves the gateway at %s: set its port there, or quit it first", gateway.URL())
 	}
 	host := "127.0.0.1"
 	if cur.LAN {

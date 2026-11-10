@@ -13,7 +13,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit, devices } = require("playwright");
 
-const assets = path.resolve(process.env.MYNA_LEDGER_ASSETS || path.join(__dirname, "../assets"));
+const assets = path.resolve(process.env.OWL_LEDGER_ASSETS || path.join(__dirname, "../assets"));
 const now = Date.now();
 const ROWS = Array.from({ length: 40 }, (_, i) => ({
   route_id: 500 + i, t: new Date(now - (i + 1) * 60e3).toISOString(), agent: "trae", agentName: "Trae CN", icon: "generic",
@@ -90,7 +90,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         p.on("pageerror", (e) => errors.push(e.message));
         await p.addInitScript(count);
         await p.route("**/*", server(lang));
-        await p.goto("http://myna.test/?view=usage");
+        await p.goto("http://owl.test/?view=usage");
         await p.waitForSelector("#view-usage", { state: "visible" });
         await p.locator(":is(#usageTab .opt, .nav-s):visible").nth(1).click();
         await p.locator("#ledWrap .led tbody tr").first().waitFor();

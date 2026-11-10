@@ -7,12 +7,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/provider"
 	"gopkg.in/yaml.v3"
 )
 
-// ompScopeHome is a home with omp's agent folder and a provider of myna's.
+// ompScopeHome is a home with omp's agent folder and a provider of owl's.
 func ompScopeHome(t *testing.T) (home, configPath, modelsPath string) {
 	t.Helper()
 	home = t.TempDir()
@@ -40,20 +40,20 @@ func ompScopeRead(t *testing.T, p string) (map[string]any, string) {
 }
 
 // The reporter's case (#1769): omp's config.yml already has a non-empty
-// enabledModels, and the default role is set to one of myna's models
+// enabledModels, and the default role is set to one of owl's models
 // outside it. omp would start new sessions on a model from the list, and
-// its picker and Ctrl+P show only the list's models, so myna/** joins its
-// end: every model myna gives omp, the one picked among them. The user's
+// its picker and Ctrl+P show only the list's models, so owl/** joins its
+// end: every model owl gives omp, the one picked among them. The user's
 // entries, their order and comments stay. Only the default role is held to
 // the list (omp resolves its other roles against every model it has).
 func TestOmpDefaultJoinsEnabledModels(t *testing.T) {
 	home, configPath, _ := ompScopeHome(t)
 	os.WriteFile(configPath, []byte("# mine\nenabledModels:\n  - provider-a/model-a # first\n  - provider-b/model-b\nmodelRoles:\n  default: provider-a/model-a\n"), 0o644)
 	a := omp(home)
-	if err := a.Field("model").Set("myna/deepseek/pro:high"); err != nil {
+	if err := a.Field("model").Set("owl/deepseek/pro:high"); err != nil {
 		t.Fatal(err)
 	}
-	want := []string{"provider-a/model-a", "provider-b/model-b", "myna/**"}
+	want := []string{"provider-a/model-a", "provider-b/model-b", "owl/**"}
 	if got := edit.GetYAMLList(configPath, "enabledModels"); !slices.Equal(got, want) {
 		t.Fatalf("enabledModels: %q, want %q", got, want)
 	}
@@ -63,11 +63,11 @@ func TestOmpDefaultJoinsEnabledModels(t *testing.T) {
 	if _, raw := ompScopeRead(t, configPath); !strings.Contains(raw, "# mine") || !strings.Contains(raw, "# first") {
 		t.Fatalf("comments lost:\n%s", raw)
 	}
-	if v, _ := edit.GetYAML(configPath, "modelRoles.default"); v != "myna/deepseek/pro:high" {
+	if v, _ := edit.GetYAML(configPath, "modelRoles.default"); v != "owl/deepseek/pro:high" {
 		t.Fatalf("default: %q", v)
 	}
 	// set again, or at another level: listed once
-	for _, v := range []string{"myna/deepseek/pro:high", "myna/deepseek/pro:low"} {
+	for _, v := range []string{"owl/deepseek/pro:high", "owl/deepseek/pro:low"} {
 		if err := a.Field("model").Set(v); err != nil {
 			t.Fatal(err)
 		}
@@ -76,7 +76,7 @@ func TestOmpDefaultJoinsEnabledModels(t *testing.T) {
 		t.Fatalf("set again: %q", got)
 	}
 	// a role other than the default isn't held to the list
-	if err := a.Field("small").Set("myna/deepseek/flash"); err != nil {
+	if err := a.Field("small").Set("owl/deepseek/flash"); err != nil {
 		t.Fatal(err)
 	}
 	if got := edit.GetYAMLList(configPath, "enabledModels"); !slices.Equal(got, want) {
@@ -101,10 +101,10 @@ func TestOmpEnabledModelsLeftAlone(t *testing.T) {
 		{"none", "modelRoles:\n  default: a/b\n"},
 		{"empty", "enabledModels: []\nmodelRoles:\n  default: a/b\n"},
 		{"folders only", "enabledModels:\n  - path: /work\n    models:\n      - a/b\n"},
-		{"same at a level", "enabledModels:\n  - a/b\n  - myna/deepseek/pro:max\n"},
-		{"glob", "enabledModels:\n  - a/b\n  - myna/deepseek/*\n"},
+		{"same at a level", "enabledModels:\n  - a/b\n  - owl/deepseek/pro:max\n"},
+		{"glob", "enabledModels:\n  - a/b\n  - owl/deepseek/*\n"},
 		// omp matches a glob against provider/id and the id alone (Bun.Glob,
-		// whose * stops at a slash), and a model of myna's id is
+		// whose * stops at a slash), and a model of owl's id is
 		// provider/model
 		{"glob on the id", "enabledModels:\n  - a/b\n  - deepseek/*\n"},
 	}
@@ -113,7 +113,7 @@ func TestOmpEnabledModelsLeftAlone(t *testing.T) {
 			home, configPath, _ := ompScopeHome(t)
 			os.WriteFile(configPath, []byte(c.config), 0o644)
 			before, _ := ompScopeRead(t, configPath)
-			if err := omp(home).Field("model").Set("myna/deepseek/pro"); err != nil {
+			if err := omp(home).Field("model").Set("owl/deepseek/pro"); err != nil {
 				t.Fatal(err)
 			}
 			after, raw := ompScopeRead(t, configPath)
@@ -126,20 +126,20 @@ func TestOmpEnabledModelsLeftAlone(t *testing.T) {
 	}
 }
 
-// Once nothing else is on myna, its models leave the list with its
+// Once nothing else is on owl, its models leave the list with its
 // provider; a list left with nothing goes, never written as []. One scoped
 // to folders is the user's and keeps the provider.
 func TestOmpEnabledModelsCleared(t *testing.T) {
-	hasMyna := func(modelsPath string) bool {
+	hasOwl := func(modelsPath string) bool {
 		m, _ := ompScopeRead(t, modelsPath)
 		p, _ := m["providers"].(map[string]any)
-		return p["myna"] != nil
+		return p["owl"] != nil
 	}
 
 	home, configPath, modelsPath := ompScopeHome(t)
 	os.WriteFile(configPath, []byte("enabledModels:\n  - provider-a/model-a # mine\nmodelRoles:\n  default: provider-a/model-a\n"), 0o644)
 	f := omp(home).Field("model")
-	if err := f.Set("myna/deepseek/pro"); err != nil {
+	if err := f.Set("owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	if err := f.Set(""); err != nil {
@@ -154,12 +154,12 @@ func TestOmpEnabledModelsCleared(t *testing.T) {
 	if _, raw := ompScopeRead(t, configPath); !strings.Contains(raw, "# mine") {
 		t.Fatalf("comment lost:\n%s", raw)
 	}
-	if hasMyna(modelsPath) {
-		t.Fatal("myna's provider stayed")
+	if hasOwl(modelsPath) {
+		t.Fatal("owl's provider stayed")
 	}
 
-	// the list had only myna's model: the key goes
-	os.WriteFile(configPath, []byte("enabledModels:\n  - myna/deepseek/flash\nmodelRoles:\n  default: myna/deepseek/flash\n"), 0o644)
+	// the list had only owl's model: the key goes
+	os.WriteFile(configPath, []byte("enabledModels:\n  - owl/deepseek/flash\nmodelRoles:\n  default: owl/deepseek/flash\n"), 0o644)
 	if err := f.Set(""); err != nil {
 		t.Fatal(err)
 	}
@@ -167,29 +167,29 @@ func TestOmpEnabledModelsCleared(t *testing.T) {
 		t.Fatalf("emptied list kept:\n%s", raw)
 	}
 
-	// a folder's own list on myna keeps it, and its entries
-	os.WriteFile(configPath, []byte("enabledModels:\n  - myna/deepseek/flash\n  - path: /work\n    models:\n      - myna/deepseek/pro\nmodelRoles:\n  default: myna/deepseek/flash\n"), 0o644)
-	if err := f.Set("myna/deepseek/flash"); err != nil {
+	// a folder's own list on owl keeps it, and its entries
+	os.WriteFile(configPath, []byte("enabledModels:\n  - owl/deepseek/flash\n  - path: /work\n    models:\n      - owl/deepseek/pro\nmodelRoles:\n  default: owl/deepseek/flash\n"), 0o644)
+	if err := f.Set("owl/deepseek/flash"); err != nil {
 		t.Fatal(err)
 	}
 	if err := f.Set(""); err != nil {
 		t.Fatal(err)
 	}
-	if !hasMyna(modelsPath) {
-		t.Fatal("a folder's list on myna lost myna's provider")
+	if !hasOwl(modelsPath) {
+		t.Fatal("a folder's list on owl lost owl's provider")
 	}
-	if _, raw := ompScopeRead(t, configPath); !strings.Contains(raw, "myna/deepseek/pro") {
+	if _, raw := ompScopeRead(t, configPath); !strings.Contains(raw, "owl/deepseek/pro") {
 		t.Fatalf("folder's entry dropped:\n%s", raw)
 	}
 }
 
-// A default role on myna that a list written by hand leaves out shows as
+// A default role on owl that a list written by hand leaves out shows as
 // a model that won't start, and setting it again (Reapply) mends it.
 func TestOmpEnabledModelsLeavingOutIsDrift(t *testing.T) {
 	home, configPath, _ := ompScopeHome(t)
 	os.WriteFile(configPath, []byte("modelRoles:\n  default: provider-a/model-a\n"), 0o644)
 	a := omp(home)
-	if err := a.Field("model").Set("myna/deepseek/pro:high"); err != nil {
+	if err := a.Field("model").Set("owl/deepseek/pro:high"); err != nil {
 		t.Fatal(err)
 	}
 	if d := a.Check(); d != "" {
@@ -198,7 +198,7 @@ func TestOmpEnabledModelsLeavingOutIsDrift(t *testing.T) {
 	if err := edit.SetYAML(configPath, edit.KV{Path: "enabledModels", Value: []string{"provider-a/model-a"}}); err != nil {
 		t.Fatal(err)
 	}
-	if d := a.Check(); !strings.Contains(d, "enabledModels") || !strings.Contains(d, "myna/deepseek/pro") {
+	if d := a.Check(); !strings.Contains(d, "enabledModels") || !strings.Contains(d, "owl/deepseek/pro") {
 		t.Fatalf("check: %q", d)
 	}
 	if err := a.Field("model").Set(a.Field("model").Get()); err != nil {
@@ -210,30 +210,30 @@ func TestOmpEnabledModelsLeavingOutIsDrift(t *testing.T) {
 }
 
 // real-jacket on #1769, after v0.1.1214: the default role started, but
-// omp's picker and Ctrl+P listed only the old list and the one model myna
-// had added, while myna's Agents page offers its whole catalog. Their
-// config as v0.1.1214 left it: the model picked again puts myna/** in
-// place of the one model, so omp's picker has all of myna's; the other
+// omp's picker and Ctrl+P listed only the old list and the one model owl
+// had added, while owl's Agents page offers its whole catalog. Their
+// config as v0.1.1214 left it: the model picked again puts owl/** in
+// place of the one model, so omp's picker has all of owl's; the other
 // roles' models with it, without a list entry each.
-func TestOmpEnabledModelsTakeEveryMynaModel(t *testing.T) {
+func TestOmpEnabledModelsTakeEveryOwlModel(t *testing.T) {
 	home, configPath, modelsPath := ompScopeHome(t)
-	os.WriteFile(configPath, []byte("enabledModels:\n  - provider-a/model-a\n  - provider-b/model-b\n  - myna/deepseek/pro\nmodelRoles:\n  default: myna/deepseek/pro:high\n"), 0o644)
+	os.WriteFile(configPath, []byte("enabledModels:\n  - provider-a/model-a\n  - provider-b/model-b\n  - owl/deepseek/pro\nmodelRoles:\n  default: owl/deepseek/pro:high\n"), 0o644)
 	a := omp(home)
-	if err := a.Field("model").Set("myna/deepseek/flash:high"); err != nil {
+	if err := a.Field("model").Set("owl/deepseek/flash:high"); err != nil {
 		t.Fatal(err)
 	}
-	want := []string{"provider-a/model-a", "provider-b/model-b", "myna/**"}
+	want := []string{"provider-a/model-a", "provider-b/model-b", "owl/**"}
 	if got := edit.GetYAMLList(configPath, "enabledModels"); !slices.Equal(got, want) {
 		t.Fatalf("enabledModels: %q, want %q", got, want)
 	}
-	// every model myna wrote for omp is one the list takes in
+	// every model owl wrote for omp is one the list takes in
 	m, _ := ompScopeRead(t, modelsPath)
-	ms, _ := m["providers"].(map[string]any)["myna"].(map[string]any)["models"].([]any)
+	ms, _ := m["providers"].(map[string]any)["owl"].(map[string]any)["models"].([]any)
 	if len(ms) < 2 {
 		t.Fatalf("models.yml: %v", m)
 	}
 	for _, x := range ms {
-		id := "myna/" + x.(map[string]any)["id"].(string)
+		id := "owl/" + x.(map[string]any)["id"].(string)
 		if !ompScopeTakes(want, id) {
 			t.Errorf("%s isn't in omp's list", id)
 		}
@@ -245,13 +245,13 @@ func TestOmpEnabledModelsTakeEveryMynaModel(t *testing.T) {
 		t.Fatalf("check: %q", d)
 	}
 	// picked again, it is there once
-	if err := a.Field("model").Set("myna/deepseek/pro"); err != nil {
+	if err := a.Field("model").Set("owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	if got := edit.GetYAMLList(configPath, "enabledModels"); !slices.Equal(got, want) {
 		t.Fatalf("set again: %q", got)
 	}
-	// disconnected, it goes with myna's provider
+	// disconnected, it goes with owl's provider
 	if err := a.Field("model").Set(""); err != nil {
 		t.Fatal(err)
 	}

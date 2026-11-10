@@ -29,7 +29,7 @@ func sharedAt(t *testing.T, id string) Group {
 }
 
 // laincatx on X: a routing group is shared as text and pasted into
-// another myna. What goes is the group's routing, rules and members,
+// another owl. What goes is the group's routing, rules and members,
 // never a key; pasted back, it is the same group under a name of its own.
 func TestSharedGroupRoundTrip(t *testing.T) {
 	const secret = "sk-shared-secret-0123456789"
@@ -91,7 +91,7 @@ func TestSharedGroupRoundTrip(t *testing.T) {
 // to it; a rule by intent goes when its classifier does.
 func TestSharedGroupMissingMembers(t *testing.T) {
 	shareHome(t, Provider{ID: "mine", Name: "Mine", Key: "k", Chat: "http://127.0.0.1:1/v1", Models: []string{"x"}})
-	text, _ := json.Marshal(SharedGroup{Myna: ShareMark, Version: ShareVersion, Group: Group{
+	text, _ := json.Marshal(SharedGroup{Owl: ShareMark, Version: ShareVersion, Group: Group{
 		ID: "theirs", Name: "Theirs", Members: []string{"relay/x", "gone/y", "group/nested"}, Routing: Ordered,
 		Off: []string{"gone/y"}, Classifier: "gone/judge",
 		Rules: []Rule{
@@ -121,7 +121,7 @@ func TestSharedGroupMissingMembers(t *testing.T) {
 	}
 
 	// nothing of it here: nothing is added, and the reader is told why
-	none, _ := json.Marshal(SharedGroup{Myna: ShareMark, Version: ShareVersion, Group: Group{Name: "N", Members: []string{"gone/y"}}})
+	none, _ := json.Marshal(SharedGroup{Owl: ShareMark, Version: ShareVersion, Group: Group{Name: "N", Members: []string{"gone/y"}}})
 	n := len(Groups())
 	if _, err := ImportGroup(string(none)); err == nil || !strings.Contains(err.Error(), "gone/y") {
 		t.Fatalf("none here: %v", err)
@@ -134,10 +134,10 @@ func TestSharedGroupMissingMembers(t *testing.T) {
 func TestSharedGroupBadText(t *testing.T) {
 	shareHome(t, Provider{ID: "a", Name: "A", Key: "k", Chat: "http://127.0.0.1:1/v1", Models: []string{"x"}})
 	for _, c := range []struct{ text, says string }{
-		{"", "not a routing group shared from myna"},
-		{"hello {not json}", "not a routing group shared from myna"},
-		{`{"magpie":"something-else","version":1,"group":{"members":["a/x"]}}`, "not a routing group shared from myna"},
-		{`{"magpie":"routing-group","version":2,"group":{"members":["a/x"]}}`, "newer myna (format 2)"},
+		{"", "not a routing group shared from owl"},
+		{"hello {not json}", "not a routing group shared from owl"},
+		{`{"magpie":"something-else","version":1,"group":{"members":["a/x"]}}`, "not a routing group shared from owl"},
+		{`{"magpie":"routing-group","version":2,"group":{"members":["a/x"]}}`, "newer owl (format 2)"},
 		{`{"magpie":"routing-group","group":{"members":["a/x"]}}`, "no format"},
 		{`{"magpie":"routing-group","version":1,"group":{"members":"a/x"}}`, "can't be read"},
 	} {

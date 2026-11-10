@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/usage"
 	"github.com/tidwall/gjson"
 )
 
@@ -22,10 +22,10 @@ func zooCodeHere(t *testing.T, home string) (*Agent, string) {
 	return zooCodeAt(dir, exts), dir
 }
 
-// switched on, myna's file is what zoo-code.autoImportSettingsPath names,
+// switched on, owl's file is what zoo-code.autoImportSettingsPath names,
 // in the shape Zoo Code's importSettingsFromPath takes, its profile on the
 // gateway with Zoo Code's key; switched off, settings.json is as it was,
-// the user's own import path back, and myna's file gone
+// the user's own import path back, and owl's file gone
 func TestZooCode(t *testing.T) {
 	home := syncHome(t)
 	a, _ := zooCodeHere(t, home)
@@ -44,7 +44,7 @@ func TestZooCode(t *testing.T) {
 		t.Fatal(err)
 	}
 	file := zooCodeImportPath(filepath.Dir(a.Path))
-	if f.Get() != "myna/relay/glm-4.6" || !a.Wired() || a.Check() != "" || a.Notice() == "" {
+	if f.Get() != "owl/relay/glm-4.6" || !a.Wired() || a.Check() != "" || a.Notice() == "" {
 		t.Fatalf("connected: %q %v %q %q", f.Get(), a.Wired(), a.Check(), a.Notice())
 	}
 	if v, _ := edit.GetJSON(a.Path, zooImport); v != file {
@@ -63,42 +63,42 @@ func TestZooCode(t *testing.T) {
 	// a current profile that is one of apiConfigs, and a modelInfo with
 	// contextWindow and supportsPromptCache
 	for k, want := range map[string]string{
-		"providerProfiles.currentApiConfigName":                                      "myna",
-		"providerProfiles.apiConfigs.myna.apiProvider":                               "openai",
-		"providerProfiles.apiConfigs.myna.openAiBaseUrl":                             gatewayV1(),
-		"providerProfiles.apiConfigs.myna.openAiApiKey":                              agentKey("zoo-code"),
-		"providerProfiles.apiConfigs.myna.openAiModelId":                             "relay/glm-4.6",
-		"providerProfiles.apiConfigs.myna.openAiCustomModelInfo.contextWindow":       "204800",
-		"providerProfiles.apiConfigs.myna.openAiCustomModelInfo.supportsPromptCache": "false",
+		"providerProfiles.currentApiConfigName":                                      "owl",
+		"providerProfiles.apiConfigs.owl.apiProvider":                               "openai",
+		"providerProfiles.apiConfigs.owl.openAiBaseUrl":                             gatewayV1(),
+		"providerProfiles.apiConfigs.owl.openAiApiKey":                              agentKey("zoo-code"),
+		"providerProfiles.apiConfigs.owl.openAiModelId":                             "relay/glm-4.6",
+		"providerProfiles.apiConfigs.owl.openAiCustomModelInfo.contextWindow":       "204800",
+		"providerProfiles.apiConfigs.owl.openAiCustomModelInfo.supportsPromptCache": "false",
 	} {
 		if got := gjson.Get(b, k).String(); got != want {
 			t.Errorf("%s = %q, want %q", k, got, want)
 		}
 	}
 	if gjson.Get(b, "globalSettings").Exists() {
-		t.Fatalf("myna's import sets Zoo Code's own settings:\n%s", b)
+		t.Fatalf("owl's import sets Zoo Code's own settings:\n%s", b)
 	}
 	// the catalog gives glm-4.6 no output limit: Zoo Code's own default
 	// stands, not a 0 that would cap every reply
-	if r := gjson.Get(b, "providerProfiles.apiConfigs.myna.openAiCustomModelInfo.maxTokens"); r.Exists() {
+	if r := gjson.Get(b, "providerProfiles.apiConfigs.owl.openAiCustomModelInfo.maxTokens"); r.Exists() {
 		t.Fatalf("maxTokens %s with no output limit known", r.Raw)
 	}
 
-	// another model: the file follows, the setting stays myna's
+	// another model: the file follows, the setting stays owl's
 	if err := provider.Save(provider.Provider{ID: "relay", Name: "Relay", Key: "k", Chat: "http://127.0.0.1:1/v1", Models: []string{"glm-4.6", "other"}}); err != nil {
 		t.Fatal(err)
 	}
-	if err := a.Apply("model", "myna/relay/other"); err != nil {
+	if err := a.Apply("model", "owl/relay/other"); err != nil {
 		t.Fatal(err)
 	}
-	if f.Get() != "myna/relay/other" {
+	if f.Get() != "owl/relay/other" {
 		t.Fatalf("other: %q\n%s", f.Get(), readFile(file))
 	}
 
 	// the key in the file written over: Sync writes it again, as Zoo Code
 	// reads the file on each start
 	writeFile(t, file, strings.ReplaceAll(readFile(file), agentKey("zoo-code"), "stale"))
-	if c := a.Check(); !strings.Contains(c, "myna-import.json") {
+	if c := a.Check(); !strings.Contains(c, "owl-import.json") {
 		t.Fatalf("check: %q", c)
 	}
 	if err := a.Sync(); err != nil {
@@ -115,18 +115,18 @@ func TestZooCode(t *testing.T) {
 		t.Fatalf("disconnected: %v %q\n%s", a.Wired(), f.Get(), readFile(a.Path))
 	}
 	if _, err := os.Stat(file); !os.IsNotExist(err) {
-		t.Fatalf("myna's import file left: %v", err)
+		t.Fatalf("owl's import file left: %v", err)
 	}
 }
 
-// with no settings.json: made, and emptied of myna's setting again
+// with no settings.json: made, and emptied of owl's setting again
 func TestZooCodeFresh(t *testing.T) {
 	home := syncHome(t)
 	a, _ := zooCodeHere(t, home)
 	if err := a.Connect(); err != nil {
 		t.Fatal(err)
 	}
-	if a.Field("model").Get() != "myna/relay/glm-4.6" || a.Check() != "" {
+	if a.Field("model").Get() != "owl/relay/glm-4.6" || a.Check() != "" {
 		t.Fatalf("fresh: %q\n%s", a.Field("model").Get(), readFile(a.Path))
 	}
 	if err := a.Disconnect(); err != nil {
@@ -168,7 +168,7 @@ func TestZooCodeProfiles(t *testing.T) {
 		t.Fatalf("work profile not as it was:\n%s", readFile(filepath.Join(work, "settings.json")))
 	}
 	if _, ok := edit.GetJSON(newSettings, zooImport); ok {
-		t.Fatalf("new profile kept myna's import path:\n%s", readFile(newSettings))
+		t.Fatalf("new profile kept owl's import path:\n%s", readFile(newSettings))
 	}
 }
 

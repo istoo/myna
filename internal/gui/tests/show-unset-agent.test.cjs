@@ -60,7 +60,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang));
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         await page.locator(".agent-more").click();
         const showOf = async (name) => {
           const btns = page.locator(".agent-fold .ag-show");

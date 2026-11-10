@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // the vendor's reply headers, each kind of them: request ids passed on by
@@ -146,7 +146,7 @@ func TestReplyHeadersPassedOn(t *testing.T) {
 	}
 }
 
-// A request myna took to a second provider after the first refused it
+// A request owl took to a second provider after the first refused it
 // carries the second's headers alone (#4145).
 func TestReplyHeadersOfTheReplyGiven(t *testing.T) {
 	fresh(t)

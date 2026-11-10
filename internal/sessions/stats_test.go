@@ -10,7 +10,7 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // inZone runs the test with the local time zone at a fixed offset. The

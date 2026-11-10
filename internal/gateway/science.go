@@ -10,19 +10,19 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // Claude Science (Anthropic's research app, 0.1.62, "operon" inside) is a
 // daemon that serves its UI on localhost and asks Anthropic's Messages API
 // at the base URL its environment's ANTHROPIC_BASE_URL names (ky() in its
 // bundle: https anywhere, http only on a loopback address), else at
-// api.anthropic.com. Myna starts the daemon with that variable set to
+// api.anthropic.com. Owl starts the daemon with that variable set to
 // the gateway (package agent, claudescience.go). It still needs its own
 // Claude sign-in: with none it asks nothing ("This build requires signing
 // in with your Claude account. API keys are not supported.", yz()), and
-// with one it sends Authorization: Bearer sk-ant-oat…, which myna never
+// with one it sends Authorization: Bearer sk-ant-oat…, which owl never
 // passes on (claudeSignIn), beside its client's default headers
 // X-Anthropic-Surface: operon and anthropic-beta: oauth-2025-04-20. That
 // header is how its requests are known here: its User-Agent is the
@@ -31,11 +31,11 @@ import (
 // Its model picker (ops.system.models) lists from GET /v1/models only an
 // id that starts with "claude-" whose display_name isn't a lower-case
 // slug (H7 and kor in its bundle), so every model is listed to it by an
-// alias, claude-myna-<number> (aliasNumber, as Claude Desktop's), named
+// alias, claude-owl-<number> (aliasNumber, as Claude Desktop's), named
 // as the agents' lists name it. And it asks for Claude models by their own
 // ids where no pick of the user's is in play — its default model before
 // one is picked (claude-opus-5), claude-haiku-… for its small tasks — so a
-// model myna doesn't serve goes to the one its last turn was on
+// model owl doesn't serve goes to the one its last turn was on
 // (scienceTurn).
 
 // ScienceID is Claude Science's agent id.
@@ -46,8 +46,8 @@ const ScienceID = "claude-science"
 const scienceSurface = "operon"
 
 // scienceAlias is the prefix of the id a model is listed to Claude Science
-// by: claude-myna-<number>, the number a hash of myna's id.
-const scienceAlias = "claude-myna-"
+// by: claude-owl-<number>, the number a hash of owl's id.
+const scienceAlias = "claude-owl-"
 
 // isClaudeScience is a request from Claude Science's own client.
 func isClaudeScience(r *http.Request) bool {
@@ -103,7 +103,7 @@ var sciencePicked struct {
 func sciencePickedPath() string { return filepath.Join(settings.Dir(), "claude-science.model") }
 
 // scienceTurn is the model a Claude Science request for asked is served
-// by: asked when myna serves it, a turn's (it carries tools) noted as
+// by: asked when owl serves it, a turn's (it carries tools) noted as
 // the one picked; else the model picked last, else the first one listed
 // to it.
 func scienceTurn(asked string, body []byte) string {

@@ -7,13 +7,13 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // #4558 (MYCF711): a plugin installed from git whose package.json says
-// myna.name ("华为云 HUAWEI") read as its dependency key
-// (myna-officeace) in Settings → Plugins. Bun takes no non-ASCII key, so
+// owl.name ("华为云 HUAWEI") read as its dependency key
+// (owl-officeace) in Settings → Plugins. Bun takes no non-ASCII key, so
 // the package's own name is the only readable one it has. The row is told
 // it (ownName), as is the sidebar's title for a page that names none; a
 // package that gives none is told none, and the community's list still
@@ -24,7 +24,7 @@ func TestPluginsStateGivesAGitPackagesOwnName(t *testing.T) {
 	t.Setenv("USERPROFILE", h)
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(h, ".config"))
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(h, ".cache"))
-	t.Setenv("MYNA_BUN", "")
+	t.Setenv("OWL_BUN", "")
 	t.Setenv("PATH", "")
 	write := func(path string, v any) {
 		t.Helper()
@@ -37,29 +37,29 @@ func TestPluginsStateGivesAGitPackagesOwnName(t *testing.T) {
 		}
 	}
 	const (
-		office = "github:example/myna-officeace"
-		plain  = "github:example/myna-loomy-auth"
-		bidi   = "github:example/myna-bidi"
+		office = "github:example/owl-officeace"
+		plain  = "github:example/owl-loomy-auth"
+		bidi   = "github:example/owl-bidi"
 	)
 	dir := plugin.Dir()
 	// the reporter's: the dependency key bun installed it under, and the
 	// installed copy's package.json carrying the field
 	write(filepath.Join(dir, "package.json"), map[string]any{"dependencies": map[string]string{
-		"myna-officeace": office, "myna-loomy-auth": plain, "myna-bidi": bidi,
+		"owl-officeace": office, "owl-loomy-auth": plain, "owl-bidi": bidi,
 	}})
-	write(filepath.Join(dir, "node_modules", "myna-officeace", "package.json"), map[string]any{
-		"name": "myna-officeace", "version": "0.2.4", "main": "index.js",
+	write(filepath.Join(dir, "node_modules", "owl-officeace", "package.json"), map[string]any{
+		"name": "owl-officeace", "version": "0.2.4", "main": "index.js",
 		"magpie": map[string]any{"name": "华为云 HUAWEI", "summary": "…", "page": map[string]any{"file": "page.html"}},
 	})
-	if err := os.WriteFile(filepath.Join(dir, "node_modules", "myna-officeace", "page.html"), []byte("<p>hi</p>"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "node_modules", "owl-officeace", "page.html"), []byte("<p>hi</p>"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	write(filepath.Join(dir, "node_modules", "myna-loomy-auth", "package.json"), map[string]any{
-		"name": "myna-loomy-auth", "version": "0.1.0", "main": "index.js",
+	write(filepath.Join(dir, "node_modules", "owl-loomy-auth", "package.json"), map[string]any{
+		"name": "owl-loomy-auth", "version": "0.1.0", "main": "index.js",
 	})
 	// a right-to-left override would show it as another name
-	write(filepath.Join(dir, "node_modules", "myna-bidi", "package.json"), map[string]any{
-		"name": "myna-bidi", "version": "0.1.0", "main": "index.js", "magpie": map[string]any{"name": "Qoder‮"},
+	write(filepath.Join(dir, "node_modules", "owl-bidi", "package.json"), map[string]any{
+		"name": "owl-bidi", "version": "0.1.0", "main": "index.js", "magpie": map[string]any{"name": "Qoder‮"},
 	})
 	write(filepath.Join(settings.Dir(), "plugins.json"), map[string]any{"plugins": []map[string]any{{"spec": office}, {"spec": plain}, {"spec": bidi}}})
 
@@ -70,8 +70,8 @@ func TestPluginsStateGivesAGitPackagesOwnName(t *testing.T) {
 	if len(got) != 3 {
 		t.Fatalf("plugins: %v", got)
 	}
-	if o := got[office]; o.OwnName != "华为云 HUAWEI" || o.Package != "myna-officeace" {
-		t.Errorf("the reporter's: ownName %q, package %q; want 华为云 HUAWEI, myna-officeace", o.OwnName, o.Package)
+	if o := got[office]; o.OwnName != "华为云 HUAWEI" || o.Package != "owl-officeace" {
+		t.Errorf("the reporter's: ownName %q, package %q; want 华为云 HUAWEI, owl-officeace", o.OwnName, o.Package)
 	}
 	if n := got[plain].OwnName; n != "" {
 		t.Errorf("one that gives no name: ownName %q, want none", n)

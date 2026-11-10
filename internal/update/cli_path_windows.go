@@ -23,8 +23,8 @@ func cliDir(exe string, _ []string, _ string) string { return filepath.Dir(exe) 
 
 // cliPlace puts dir first in the user's PATH in the registry, where a
 // terminal opened from now on takes it up, and tells Explorer. The app's
-// myna.com goes there first (com.go), which a terminal waits for; a
-// build without it gives an app not named myna.exe a myna.cmd
+// owl.com goes there first (com.go), which a terminal waits for; a
+// build without it gives an app not named owl.exe a owl.cmd
 // (writeShim).
 func cliPlace(exe, dir string) error {
 	if comLauncher != nil {

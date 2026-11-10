@@ -6,12 +6,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// #1387 (worksyang): MiniMax Code names a model under myna with one
-// slash in the whole, so myna writes "bb-codex/gpt-6.1-sol" there as
+// #1387 (worksyang): MiniMax Code names a model under owl with one
+// slash in the whole, so owl writes "bb-codex/gpt-6.1-sol" there as
 // "bb-codex~gpt-6.1-sol". The gateway takes that to the one provider's
 // model it stands for — not the first provider serving gpt-6.1-sol, as a
 // bare name is — on every route, a gateway key's models holding it as
@@ -68,7 +68,7 @@ func TestFlatModelIDsReachTheirProvider(t *testing.T) {
 	if w := messages(secrets[1], "bb-codex~gpt-6.1-sol"); w.Code != 200 || codex.calls != 1 || sentModel(codex) != "gpt-6.1-sol" {
 		t.Fatalf("bb-codex~gpt-6.1-sol: %d %s", w.Code, w.Body.String())
 	}
-	// as are the routing groups myna found
+	// as are the routing groups owl found
 	groups := 0
 	for _, e := range provider.Catalog() {
 		if e.Group == "" {

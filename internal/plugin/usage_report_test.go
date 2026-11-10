@@ -10,8 +10,8 @@ import (
 )
 
 // A plugin reports a request it sent its vendor on its own (Devin's cache
-// keepalive ping, plugins#592) through input.myna.usage, from its own
-// timer: myna is told its provider, the account it names (one of the
+// keepalive ping, plugins#592) through input.owl.usage, from its own
+// timer: owl is told its provider, the account it names (one of the
 // provider's; else the request's in hand, else the provider's own id) and
 // the call, its tokens whole numbers from 0. A call with no provider, no
 // kind of [a-z0-9_-] or no model throws, and nothing is told of it.
@@ -38,12 +38,12 @@ func TestPluginReportsOwnUsage(t *testing.T) {
 	src := `export default async (input) => {
   let threw = 0
   for (const bad of [[5, { kind: "x", model: "m" }], ["usageco", null], ["usageco", [1]], ["usageco", { model: "m" }], ["usageco", { kind: "Bad Kind", model: "m" }], ["usageco", { kind: "cache_keepalive" }], ["", { kind: "x", model: "m" }]]) {
-    try { input.myna.usage(...bad) } catch (e) { if (e instanceof TypeError) threw++ }
+    try { input.owl.usage(...bad) } catch (e) { if (e instanceof TypeError) threw++ }
   }
   setTimeout(() => {
-    input.myna.usage("usageco", { kind: "cache_keepalive", model: " sonnet ", input: 3.7, output: 1, cacheRead: 10984, cacheWrite: -5, status: 200, ms: 812, account: "usageco#ab" })
-    input.myna.usage("usageco", { kind: "cache_keepalive", model: "sonnet", input: NaN, output: "1", cacheRead: Infinity, status: 0, error: "fetch failed", account: "other#cd" })
-    input.myna.usage("usageco", { kind: "threw", model: String(threw) })
+    input.owl.usage("usageco", { kind: "cache_keepalive", model: " sonnet ", input: 3.7, output: 1, cacheRead: 10984, cacheWrite: -5, status: 200, ms: 812, account: "usageco#ab" })
+    input.owl.usage("usageco", { kind: "cache_keepalive", model: "sonnet", input: NaN, output: "1", cacheRead: Infinity, status: 0, error: "fetch failed", account: "other#cd" })
+    input.owl.usage("usageco", { kind: "threw", model: String(threw) })
   }, 50)
   return {}
 }

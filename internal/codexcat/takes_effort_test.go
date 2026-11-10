@@ -8,13 +8,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 // TakesEffort is asked per model each window poll; it reads Codex's
 // models_cache.json again only when the file changes, and still says what
 // the cache says: its level for Codex's own and a ChatGPT account's model,
-// none for one myna added, the levels' default for one not in it.
+// none for one owl added, the levels' default for one not in it.
 func TestTakesEffortReadsTheCacheOnChange(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
@@ -24,7 +24,7 @@ func TestTakesEffortReadsTheCacheOnChange(t *testing.T) {
 	path := filepath.Join(home, ".codex", "models_cache.json")
 	write := func(level string, at time.Time) {
 		var b strings.Builder
-		fmt.Fprintf(&b, `{"etag":"e","models":[{"slug":"gpt-6.1-sol","default_reasoning_level":%q},{"slug":"myna/x","description":"X via myna","default_reasoning_level":"high"}`, level)
+		fmt.Fprintf(&b, `{"etag":"e","models":[{"slug":"gpt-6.1-sol","default_reasoning_level":%q},{"slug":"owl/x","description":"X via owl","default_reasoning_level":"high"}`, level)
 		for i := range 300 {
 			fmt.Fprintf(&b, `,{"slug":"m-%d","description":"%s","default_reasoning_level":"medium"}`, i, strings.Repeat("words ", 40))
 		}
@@ -36,15 +36,15 @@ func TestTakesEffortReadsTheCacheOnChange(t *testing.T) {
 	}
 	write("low", time.Now().Add(-time.Hour))
 	efforts := []string{"low", "medium", "high"}
-	ms := []catalog.Model{{ID: "gpt-6.1-sol", Efforts: efforts}, {ID: "codex/gpt-6.1-sol", Efforts: efforts}, {ID: "myna/x", Efforts: efforts}, {ID: "other", Efforts: efforts}}
+	ms := []catalog.Model{{ID: "gpt-6.1-sol", Efforts: efforts}, {ID: "codex/gpt-6.1-sol", Efforts: efforts}, {ID: "owl/x", Efforts: efforts}, {ID: "other", Efforts: efforts}}
 	if got := TakesEffort(ms, "gpt-6.1-sol"); got != "low" {
 		t.Errorf("Codex's own: %q, want low", got)
 	}
 	if got := TakesEffort(ms, "codex/gpt-6.1-sol"); got != "low" {
 		t.Errorf("a ChatGPT account's: %q, want low", got)
 	}
-	if got, want := TakesEffort(ms, "myna/x"), DefaultEffort(efforts); got != want {
-		t.Errorf("one myna added: %q, want the default %q", got, want)
+	if got, want := TakesEffort(ms, "owl/x"), DefaultEffort(efforts); got != want {
+		t.Errorf("one owl added: %q, want the default %q", got, want)
 	}
 	if got, want := TakesEffort(ms, "other"), DefaultEffort(efforts); got != want {
 		t.Errorf("not in the cache: %q, want %q", got, want)

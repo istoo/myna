@@ -18,13 +18,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/browserext"
+	"github.com/istoo/owl/internal/browserext"
 )
 
 // The fixture page the real browser works in, served from this test.
 const browserFixture = `<!doctype html>
 <title>Fixture</title>
-<h1>Myna fixture</h1>
+<h1>Owl fixture</h1>
 <input aria-label="Name" id="name">
 <button onclick="out.textContent = 'clicked ' + document.getElementById('name').value">Go</button>
 <select aria-label="Colour" onchange="out.textContent = 'colour ' + this.value"><option value="r">Red</option><option value="g">Green</option></select>
@@ -106,7 +106,7 @@ func TestBrowserFramesAndFailuresInARealBrowser(t *testing.T) {
 	for end := time.Now().Add(10 * time.Second); !strings.Contains(page, `button "Pay"`) && time.Now().Before(end); time.Sleep(200 * time.Millisecond) {
 		page = ok("browser_snapshot", nil)
 	}
-	if strings.Contains(page, "doesn't let Myna Browser read") {
+	if strings.Contains(page, "doesn't let Owl Browser read") {
 		t.Fatalf("the frame from the other site isn't read:\n%s", page)
 	}
 	ok("browser_type", map[string]any{"ref": ref(page, "textbox", "Card"), "text": "4242"}, "Typed into")
@@ -137,9 +137,9 @@ func TestBrowserFramesAndFailuresInARealBrowser(t *testing.T) {
 	failed("browser_navigate", map[string]any{"url": "http://127.0.0.1:1/"}, "LOAD_FAILED")
 }
 
-// Myna Browser in a real Chromium: the extension myna writes, loaded
+// Owl Browser in a real Chromium: the extension owl writes, loaded
 // as a user loads it, connects to the gateway, and every tool an agent
-// calls is carried out in a real tab. Set MYNA_BROWSER_CHROME to a
+// calls is carried out in a real tab. Set OWL_BROWSER_CHROME to a
 // Chromium that takes --load-extension (Chrome for Testing, as Playwright
 // has it) to run it.
 func TestBrowserToolsInARealBrowser(t *testing.T) {
@@ -158,9 +158,9 @@ func TestBrowserToolsInARealBrowser(t *testing.T) {
 		ok("browser_evaluate", map[string]any{"script": "() => document.getElementById('out').textContent"}, want)
 	}
 
-	page := ok("browser_tabs", map[string]any{"action": "new", "url": site.URL}, "Opened t", "Tab t", "Fixture", "Myna fixture")
+	page := ok("browser_tabs", map[string]any{"action": "new", "url": site.URL}, "Opened t", "Tab t", "Fixture", "Owl fixture")
 	ok("browser_tabs", nil, "* t", site.URL)
-	page = ok("browser_snapshot", nil, `heading "Myna fixture"`)
+	page = ok("browser_snapshot", nil, `heading "Owl fixture"`)
 	ok("browser_snapshot", map[string]any{"interactive": true}, `button "Go"`)
 
 	ok("browser_type", map[string]any{"ref": ref(page, "textbox", "Name"), "text": "Ada"}, "Typed into")
@@ -208,7 +208,7 @@ func TestBrowserToolsInARealBrowser(t *testing.T) {
 	} {
 		ok("browser_evaluate", map[string]any{"script": script}, `"awaited"`)
 	}
-	ok("browser_text", nil, "Myna fixture", "Bottom of the page")
+	ok("browser_text", nil, "Owl fixture", "Bottom of the page")
 
 	shot := call("browser_screenshot", nil)
 	if shot.Result.IsError || shot.Result.Content[0].Type != "image" || shot.Result.Content[0].MimeType != "image/jpeg" {
@@ -223,8 +223,8 @@ func TestBrowserToolsInARealBrowser(t *testing.T) {
 	}
 
 	ok("browser_navigate", map[string]any{"url": site.URL + "/two"}, "Opened", "Page two")
-	ok("browser_navigate", map[string]any{"go": "back"}, "Went back", "Myna fixture")
-	page = ok("browser_navigate", map[string]any{"go": "reload"}, "Reloaded", "Myna fixture")
+	ok("browser_navigate", map[string]any{"go": "back"}, "Went back", "Owl fixture")
+	page = ok("browser_navigate", map[string]any{"go": "reload"}, "Reloaded", "Owl fixture")
 
 	// a link that opens a tab: the session goes on in it
 	two := ok("browser_click", map[string]any{"ref": ref(page, "link", "Open two")}, "opened a new tab", "Page two")
@@ -235,7 +235,7 @@ func TestBrowserToolsInARealBrowser(t *testing.T) {
 	}
 }
 
-// realBrowser starts a Chromium with the extension myna writes loaded
+// realBrowser starts a Chromium with the extension owl writes loaded
 // in a profile of its own, pointed at a gateway of the test's, and waits
 // for it to connect; site serves browserFixture (and /two).
 func realBrowser(t *testing.T) (srv, site *httptest.Server) {
@@ -254,9 +254,9 @@ func realBrowser(t *testing.T) (srv, site *httptest.Server) {
 // ext writes, and the gateway's Server too.
 func realBrowserFrom(t *testing.T, ext func(*httptest.Server) string) (srv, site *httptest.Server, s *Server) {
 	t.Helper()
-	chrome := os.Getenv("MYNA_BROWSER_CHROME")
+	chrome := os.Getenv("OWL_BROWSER_CHROME")
 	if chrome == "" {
-		t.Skip("MYNA_BROWSER_CHROME names no Chromium")
+		t.Skip("OWL_BROWSER_CHROME names no Chromium")
 	}
 	fresh(t)
 
@@ -365,7 +365,7 @@ func browserCaller(t *testing.T, srv *httptest.Server, session string) (call fun
 // Two agent sessions at once in a real Chromium (packinggoodsllc_07668 on
 // Discord: two agents behind one router took one tab): each works in a
 // new tab of its own; each opens its tabs in a group of its own
-// ("Myna", "Myna 2"), and each sees the other's tab marked ~.
+// ("Owl", "Owl 2"), and each sees the other's tab marked ~.
 func TestBrowserSessionsApartInARealBrowser(t *testing.T) {
 	srv, site := realBrowser(t)
 	_, a := browserCaller(t, srv, "agent-a")
@@ -378,7 +378,7 @@ func TestBrowserSessionsApartInARealBrowser(t *testing.T) {
 		}
 		return m[1]
 	}
-	ta := tabOf(a("browser_navigate", map[string]any{"url": site.URL}, "Myna fixture"))
+	ta := tabOf(a("browser_navigate", map[string]any{"url": site.URL}, "Owl fixture"))
 	tb := tabOf(b("browser_navigate", map[string]any{"url": site.URL + "/two"}, "Page two"))
 	if ta == tb {
 		t.Fatalf("both sessions work in %s", ta)
@@ -398,9 +398,9 @@ func TestBrowserSessionsApartInARealBrowser(t *testing.T) {
 	// the group of the tab a list marks mark with the page title
 	groupOf := func(list, mark, title string) string {
 		t.Helper()
-		m := regexp.MustCompile(`(?m)^` + regexp.QuoteMeta(mark) + ` t\d+ \[(Myna(?: \d+)?)\] "` + title + `"`).FindStringSubmatch(list)
+		m := regexp.MustCompile(`(?m)^` + regexp.QuoteMeta(mark) + ` t\d+ \[(Owl(?: \d+)?)\] "` + title + `"`).FindStringSubmatch(list)
 		if m == nil {
-			t.Fatalf("no %s tab %q in a Myna group:\n%s", mark, title, list)
+			t.Fatalf("no %s tab %q in a Owl group:\n%s", mark, title, list)
 		}
 		return m[1]
 	}
@@ -444,9 +444,9 @@ func TestBrowserToolActionsInARealBrowser(t *testing.T) {
 	ok("browser", map[string]any{"action": "tab_close"}, "Closed t")
 }
 
-// Agents leave the user's tab alone (the owner, 11-03: Myna Browser
+// Agents leave the user's tab alone (the owner, 11-03: Owl Browser
 // "老是会代替掉用户正在浏览的网页"): a call that names no tab works in a
-// new one, behind the tab the user is looking at, in the session's Myna
+// new one, behind the tab the user is looking at, in the session's Owl
 // group; a link that opens a tab, and tab_new, open behind it too, and a
 // screenshot gives the window its shown tab back.
 func TestBrowserLeavesTheUsersTabAlone(t *testing.T) {
@@ -463,13 +463,13 @@ func TestBrowserLeavesTheUsersTabAlone(t *testing.T) {
 			t.Fatalf("%s, the user's tab %s isn't shown and unchanged:\n%s", when, users[1], list)
 		}
 	}
-	page := ok("browser_navigate", map[string]any{"url": site.URL}, "Myna fixture")
+	page := ok("browser_navigate", map[string]any{"url": site.URL}, "Owl fixture")
 	if strings.Contains(page, users[1]+":") {
 		t.Fatalf("navigated the user's tab:\n%s", page)
 	}
 	shown("after a navigate")
-	if list := ok("browser_tabs", nil); !regexp.MustCompile(`(?m)^\* t\d+ \[Myna\] "Fixture"`).MatchString(list) {
-		t.Fatalf("the agent's tab isn't in its Myna group:\n%s", list)
+	if list := ok("browser_tabs", nil); !regexp.MustCompile(`(?m)^\* t\d+ \[Owl\] "Fixture"`).MatchString(list) {
+		t.Fatalf("the agent's tab isn't in its Owl group:\n%s", list)
 	}
 	link := regexp.MustCompile(`- link "Open two"(?: \[[a-z=, ]+\])? \[ref=(e\d+)\]`).FindStringSubmatch(page)
 	if link == nil {
@@ -477,7 +477,7 @@ func TestBrowserLeavesTheUsersTabAlone(t *testing.T) {
 	}
 	ok("browser_click", map[string]any{"ref": link[1]}, "opened a new tab", "Page two")
 	shown("after a link opened a tab")
-	if list := ok("browser_tabs", nil); !regexp.MustCompile(`(?m)^\* t\d+ \[Myna\] "Two"`).MatchString(list) {
+	if list := ok("browser_tabs", nil); !regexp.MustCompile(`(?m)^\* t\d+ \[Owl\] "Two"`).MatchString(list) {
 		t.Fatalf("the tab the link opened isn't the agent's, in its group:\n%s", list)
 	}
 	ok("browser_tabs", map[string]any{"action": "new", "url": site.URL + "/two"}, "Page two")
@@ -490,13 +490,13 @@ func TestBrowserLeavesTheUsersTabAlone(t *testing.T) {
 	shown("after the one tool's tab_new")
 }
 
-// An older extension, loaded from the folder myna writes, has the folder
-// written with this myna's when it connects, for the browser to read
+// An older extension, loaded from the folder owl writes, has the folder
+// written with this owl's when it connects, for the browser to read
 // when it starts again.
 func TestBrowserOlderExtensionsFolderWritten(t *testing.T) {
 	var man string
 	realBrowserFrom(t, func(srv *httptest.Server) string {
-		t.Setenv("MYNA_ADDR", srv.Listener.Addr().String())
+		t.Setenv("OWL_ADDR", srv.Listener.Addr().String())
 		dir := browserext.Dir()
 		if err := browserext.Write(dir, srv.URL); err != nil {
 			t.Fatal(err)

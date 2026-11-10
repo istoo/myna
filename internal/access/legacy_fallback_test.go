@@ -6,23 +6,23 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 func TestLegacyLANFallbackBeforeMigration(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
-	s := settings.Settings{LAN: true, LANKey: "sk-myna-old-client"}
+	s := settings.Settings{LAN: true, LANKey: "sk-owl-old-client"}
 	if err := settings.Save(s); err != nil {
 		t.Fatal(err)
 	}
 	before, ok := Authenticate(s.LANKey)
-	if !ok || before.KeyID == "" || before.KeyName != "Myna" {
+	if !ok || before.KeyID == "" || before.KeyName != "Owl" {
 		t.Fatal("unmigrated legacy key lost access", before, ok)
 	}
 	if _, err := os.Stat(Path()); !errors.Is(err, os.ErrNotExist) {
 		t.Fatal("authentication must not create a key store", err)
 	}
-	for _, secret := range []string{"", "wrong", "myna", s.LANKey + "x"} {
+	for _, secret := range []string{"", "wrong", "owl", s.LANKey + "x"} {
 		if _, ok := Authenticate(secret); ok {
 			t.Fatal("legacy fallback accepted another token")
 		}
@@ -67,7 +67,7 @@ func TestLegacyLANFallbackDoesNotBypassRevocation(t *testing.T) {
 
 func TestLegacyLANFallbackWithReadOnlyDirectory(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
-	s := settings.Settings{LAN: true, LANKey: "sk-myna-readonly"}
+	s := settings.Settings{LAN: true, LANKey: "sk-owl-readonly"}
 	if err := settings.Save(s); err != nil {
 		t.Fatal(err)
 	}
@@ -81,7 +81,7 @@ func TestLegacyLANFallbackWithReadOnlyDirectory(t *testing.T) {
 		t.Fatal(err)
 	}
 	for range 3 {
-		if who, ok := Authenticate(s.LANKey); !ok || who.KeyID == "" || who.KeyName != "Myna" {
+		if who, ok := Authenticate(s.LANKey); !ok || who.KeyID == "" || who.KeyName != "Owl" {
 			t.Fatal("failed key-store creation broke legacy access", who, ok)
 		}
 	}

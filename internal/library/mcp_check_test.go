@@ -22,20 +22,20 @@ import (
 )
 
 // The fake stdio server is this test binary, started again with
-// MYNA_FAKE_MCP saying how it behaves.
-const fakeMode = "MYNA_FAKE_MCP"
+// OWL_FAKE_MCP saying how it behaves.
+const fakeMode = "OWL_FAKE_MCP"
 
 func TestFakeMCPServer(t *testing.T) {
 	mode := os.Getenv(fakeMode)
 	if mode == "" {
 		t.Skip("run by the checker's tests")
 	}
-	if f := os.Getenv("MYNA_FAKE_MCP_LOG"); f != "" {
+	if f := os.Getenv("OWL_FAKE_MCP_LOG"); f != "" {
 		l, _ := os.OpenFile(f, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
 		fmt.Fprintf(l, "%d\n", os.Getpid())
 		l.Close()
 	}
-	if f := os.Getenv("MYNA_FAKE_MCP_CWD"); f != "" {
+	if f := os.Getenv("OWL_FAKE_MCP_CWD"); f != "" {
 		wd, _ := os.Getwd()
 		os.WriteFile(f, []byte(wd+"\n"+os.Getenv("PWD")), 0o644)
 	}
@@ -66,9 +66,9 @@ func TestFakeMCPServer(t *testing.T) {
 		os.Exit(0)
 	}
 	// a server that needs its token, as GitHub's does: it exits when the
-	// token isn't the one MYNA_FAKE_MCP_WANT names
-	if want, ok := os.LookupEnv("MYNA_FAKE_MCP_WANT"); ok && os.Getenv("MYNA_FAKE_MCP_TOKEN") != want {
-		fmt.Fprintf(os.Stderr, "Error: bad token %q\n", os.Getenv("MYNA_FAKE_MCP_TOKEN"))
+	// token isn't the one OWL_FAKE_MCP_WANT names
+	if want, ok := os.LookupEnv("OWL_FAKE_MCP_WANT"); ok && os.Getenv("OWL_FAKE_MCP_TOKEN") != want {
+		fmt.Fprintf(os.Stderr, "Error: bad token %q\n", os.Getenv("OWL_FAKE_MCP_TOKEN"))
 		os.Exit(4)
 	}
 	// ok: a log line on stdout first, as some servers write
@@ -106,10 +106,10 @@ func TestFakeMCPServer(t *testing.T) {
 		case "initialize":
 			fmt.Printf(`{"jsonrpc":"2.0","id":%d,"result":{"protocolVersion":"2025-06-18","capabilities":{"tools":{}},"serverInfo":{"name":"fake","version":"1"}}}`+"\n", *m.ID)
 		case "notifications/initialized":
-			os.WriteFile(os.Getenv("MYNA_FAKE_MCP_INIT"), []byte("yes"), 0o644)
+			os.WriteFile(os.Getenv("OWL_FAKE_MCP_INIT"), []byte("yes"), 0o644)
 		case "tools/list":
 			// file: the reply a real server gave, under this request's id
-			if f := os.Getenv("MYNA_FAKE_MCP_TOOLS"); f != "" {
+			if f := os.Getenv("OWL_FAKE_MCP_TOOLS"); f != "" {
 				var r map[string]any
 				b, _ := os.ReadFile(f)
 				json.Unmarshal(b, &r)
@@ -147,7 +147,7 @@ func short(t *testing.T, d time.Duration) {
 func TestCheckStdio(t *testing.T) {
 	t.Run("ok", func(t *testing.T) {
 		initFile := filepath.Join(t.TempDir(), "init")
-		h := CheckServer(context.Background(), fakeStdio(t, "ok", map[string]string{"MYNA_FAKE_MCP_INIT": initFile}))
+		h := CheckServer(context.Background(), fakeStdio(t, "ok", map[string]string{"OWL_FAKE_MCP_INIT": initFile}))
 		if h.State != "ok" || h.Tools != 3 {
 			t.Fatalf("got %+v, want ok with 3 tools", h)
 		}
@@ -162,8 +162,8 @@ func TestCheckStdio(t *testing.T) {
 		}
 	})
 	t.Run("not found", func(t *testing.T) {
-		h := CheckServer(context.Background(), &Server{Name: "x", Transport: "stdio", Command: "myna-no-such-mcp-server"})
-		if h.State != "error" || h.Why != "notfound" || h.Detail != "myna-no-such-mcp-server" {
+		h := CheckServer(context.Background(), &Server{Name: "x", Transport: "stdio", Command: "owl-no-such-mcp-server"})
+		if h.State != "error" || h.Why != "notfound" || h.Detail != "owl-no-such-mcp-server" {
 			t.Fatalf("got %+v, want notfound", h)
 		}
 	})
@@ -183,7 +183,7 @@ func TestCheckStdio(t *testing.T) {
 		work := t.TempDir()
 		h := ownHome(t, work)
 		cwdFile := filepath.Join(t.TempDir(), "cwd")
-		got := CheckServer(context.Background(), fakeStdio(t, "ok", map[string]string{"MYNA_FAKE_MCP_CWD": cwdFile}))
+		got := CheckServer(context.Background(), fakeStdio(t, "ok", map[string]string{"OWL_FAKE_MCP_CWD": cwdFile}))
 		if got.State != "ok" {
 			t.Fatalf("got %+v, want ok", got)
 		}
@@ -223,7 +223,7 @@ func TestCheckStdio(t *testing.T) {
 		short(t, 1500*time.Millisecond)
 		pids := filepath.Join(t.TempDir(), "pids")
 		start := time.Now()
-		h := CheckServer(context.Background(), fakeStdio(t, "hang", map[string]string{"MYNA_FAKE_MCP_LOG": pids}))
+		h := CheckServer(context.Background(), fakeStdio(t, "hang", map[string]string{"OWL_FAKE_MCP_LOG": pids}))
 		if h.State != "error" || h.Why != "timeout" {
 			t.Fatalf("got %+v, want timeout", h)
 		}
@@ -431,12 +431,12 @@ func TestCheckServersOnce(t *testing.T) {
 	checked.m = map[string]checkedServer{}
 	checked.Unlock()
 	pids := filepath.Join(t.TempDir(), "pids")
-	s := fakeStdio(t, "ok", map[string]string{"MYNA_FAKE_MCP_LOG": pids})
+	s := fakeStdio(t, "ok", map[string]string{"OWL_FAKE_MCP_LOG": pids})
 	s.Agents = []string{}
 	if _, err := SaveServer("", *s); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := SaveServer("", Server{Name: "gone", Transport: "stdio", Command: "myna-no-such-mcp-server", Agents: []string{}}); err != nil {
+	if _, err := SaveServer("", Server{Name: "gone", Transport: "stdio", Command: "owl-no-such-mcp-server", Agents: []string{}}); err != nil {
 		t.Fatal(err)
 	}
 	starts := func() int {

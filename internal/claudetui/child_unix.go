@@ -8,7 +8,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/proc"
 	"golang.org/x/sys/unix"
 )
 

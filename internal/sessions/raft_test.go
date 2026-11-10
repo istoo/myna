@@ -23,7 +23,7 @@ const (
 	raftAgentB = "7c2e1d3f-9e4b-4a7c-8d6f-2b3c4d5e6f70"
 	raftParent = "01a1343b-2288-73d4-b1b4-6fb13abf0069"
 	raftFork   = "01a1343b-9a0f-7603-b371-4124126b8b05"
-	raftViaUs  = "01a1343b-e8a8-704d-b6cd-046b86c5bf00" // its later calls through myna
+	raftViaUs  = "01a1343b-e8a8-704d-b6cd-046b86c5bf00" // its later calls through owl
 )
 
 // raftSetup puts the sessions in slock's folder, the home's .slock unless
@@ -115,13 +115,13 @@ func TestRaftSessions(t *testing.T) {
 		t.Fatalf("prompts %q in %+v", said, tr.Parts)
 	}
 
-	// its calls are Raft's on the Usage page, those through myna the
+	// its calls are Raft's on the Usage page, those through owl the
 	// gateway's
 	by, relay := map[string]int{}, 0
 	for _, c := range Calls(time.Time{}) {
 		by[c.Agent]++
-		if c.Agent == "raft" && (c.Upstream == "myna" || c.Upstream == "dead") {
-			t.Errorf("a call through myna or one that failed: %+v", c)
+		if c.Agent == "raft" && (c.Upstream == "owl" || c.Upstream == "dead") {
+			t.Errorf("a call through owl or one that failed: %+v", c)
 		}
 		if c.Agent == "raft" && (c.Session == raftParent || c.Session == raftFork) && c.Upstream == "relay" && c.Cwd == a {
 			relay++
@@ -140,7 +140,7 @@ func TestRaftSessions(t *testing.T) {
 	}
 }
 
-// Raft's Pi uses the user's own Pi folder, so one sent through myna says
+// Raft's Pi uses the user's own Pi folder, so one sent through owl says
 // it is Pi to the gateway under the same id: that is the Raft session, and
 // not listed a second time.
 func TestRaftIsPiToTheGateway(t *testing.T) {

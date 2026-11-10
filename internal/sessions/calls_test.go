@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/agentenv"
-	"github.com/istoo/myna/internal/desktopdir"
+	"github.com/istoo/owl/internal/agentenv"
+	"github.com/istoo/owl/internal/desktopdir"
 )
 
 var callT0 = time.Date(2026, 9, 20, 10, 0, 0, 0, time.UTC)

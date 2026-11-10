@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A plugin's model is listed with every kind of input and output the

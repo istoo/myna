@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // Speed lately, for Speed first (routes.Fastest): of each account or key

@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/testenv"
 )
 
-// Saved accounts of an agent not signed in where myna looks (a myna
+// Saved accounts of an agent not signed in where owl looks (a owl
 // serve under another HOME) are said to be left out, not dropped silently.
 func TestSavedButSignedOut(t *testing.T) {
 	isolate(t)
@@ -42,11 +42,11 @@ func TestSavedButSignedOut(t *testing.T) {
 		t.Fatalf("no keyring set, yet: %s", codex.Why)
 	}
 	// Codex set to keep its sign-in in the keychain (#2312, #2367). Where
-	// myna reads the item (macOS), an empty one is signed out, said of
+	// owl reads the item (macOS), an empty one is signed out, said of
 	// the item; a read the keychain refused is not known, and the reason
-	// says how to let myna in. Where it doesn't (Linux, Windows, or
+	// says how to let owl in. Where it doesn't (Linux, Windows, or
 	// Codex's encrypted auth storage), it is signed in only not where
-	// myna looks, and the reason says how to put it there.
+	// owl looks, and the reason says how to put it there.
 	os.MkdirAll(filepath.Join(home, ".codex"), 0o700)
 	excluded := func() *Exclusion {
 		resetCodexKeychain()
@@ -73,7 +73,7 @@ func TestSavedButSignedOut(t *testing.T) {
 		// an item there, which the keychain won't give
 		codexKeychain = &fakeKeychain{findErr: errKeychainUnread, items: map[string][]byte{codexKeychainAccount(filepath.Join(home, ".codex")): []byte(`{}`)}}
 		if codex = excluded(); codex == nil || strings.Contains(codex.Why, "isn't signed in here") || !codex.Retry ||
-			!strings.Contains(codex.Why, "Allow myna") || !strings.Contains(codex.Why, `cli_auth_credentials_store = "file"`) {
+			!strings.Contains(codex.Why, "Allow owl") || !strings.Contains(codex.Why, `cli_auth_credentials_store = "file"`) {
 			t.Fatalf("%s, item not read: %+v", store, codex)
 		}
 
@@ -104,7 +104,7 @@ func TestSavedButSignedOut(t *testing.T) {
 	}
 }
 
-// Claude accounts saved in myna are offered while Claude Code is signed
+// Claude accounts saved in owl are offered while Claude Code is signed
 // out — no credentials, or credentials Claude Code says are signed out —
 // and are not said to be left out; one whose saved sign-in is gone is
 // listed as signed out, not dropped.
@@ -144,8 +144,8 @@ func TestSavedButSignedOutClaudeServed(t *testing.T) {
 }
 
 // A saved Claude account whose Claude Code is signed out (a banned account
-// logged out, say) is listed, so it can be removed from myna; removing
-// one drops it from myna's store and leaves Claude Code's own files as
+// logged out, say) is listed, so it can be removed from owl; removing
+// one drops it from owl's store and leaves Claude Code's own files as
 // they are.
 func TestSavedButSignedOutCanBeRemoved(t *testing.T) {
 	home := claudeHome(t)
@@ -174,9 +174,9 @@ func TestSavedButSignedOutCanBeRemoved(t *testing.T) {
 }
 
 // The keychain item under the account is the sign-in Claude Code goes by,
-// emptied or not: it reads no file beside it (istoo/myna#1742). So an
+// emptied or not: it reads no file beside it (istoo/owl#1742). So an
 // emptied item beside a still-parseable file is signed out, and a sign-in
-// made in myna is put in the item, not beside it.
+// made in owl is put in the item, not beside it.
 func TestClaudeEmptiedKeychainItemIsTheSignInBesideAFile(t *testing.T) {
 	shellFakes(t)
 	home := claudeHome(t)
@@ -289,7 +289,7 @@ esac
 	}
 }
 
-// An item myna wrote over lines comes back from `security -w` as hex,
+// An item owl wrote over lines comes back from `security -w` as hex,
 // which Claude Code reads as no item at all (#70): beside a file that holds
 // a sign-in, the file is the one it goes by, and the item is left alone.
 // With no file, the item is the sign-in, written again on one line.

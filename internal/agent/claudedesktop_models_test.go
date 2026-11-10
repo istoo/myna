@@ -7,16 +7,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // moer2831 on Discord: a model picked for a Claude Desktop tier ran in its
 // Code tab on Claude Code's generic prompt. While a tier is picked,
-// myna's profile lists Desktop's models in inferenceModels, the pick's
+// owl's profile lists Desktop's models in inferenceModels, the pick's
 // with behavesAs, and Claude Code is told the pick's window, since it
 // would take the behavesAs model's. The list follows the picks and the
 // catalog, is written only when it changes, goes when nothing is picked,
@@ -71,7 +71,7 @@ func TestClaudeDesktopModelsList(t *testing.T) {
 		return nil
 	}
 
-	set("provider", "myna")
+	set("provider", "owl")
 	if l := list(); l != nil {
 		t.Fatalf("nothing picked: %v", l)
 	}

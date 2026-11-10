@@ -9,19 +9,19 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/usage"
 )
 
-// A remote myna asked for one of its routing groups answers with the
+// A remote owl asked for one of its routing groups answers with the
 // member the group routed to: that is the group picking, not the vendor
 // serving another model, so neither the route nor the usage row is marked
 // swapped, and both say the group routed it (莫 on Discord: group/auto-…
 // answered by deepseek/deepseek-v4.1-flash, shown amber). A vendor that
-// does serve another model is still marked, through the remote myna or
+// does serve another model is still marked, through the remote owl or
 // through a group of the computer's own. Here the gateway is both
-// computers', as in TestRemoteMynaNativeAPI.
-func TestRemoteMynaGroupNotSwapped(t *testing.T) {
+// computers', as in TestRemoteOwlNativeAPI.
+func TestRemoteOwlGroupNotSwapped(t *testing.T) {
 	fresh(t)
 	// the vendor names deepseek-v4.1-flash with its maker, as a relay
 	// does, and answers sol with luna
@@ -50,7 +50,7 @@ func TestRemoteMynaGroupNotSwapped(t *testing.T) {
 	h := s.Handler()
 	remote := httptest.NewServer(h)
 	t.Cleanup(remote.Close)
-	id, err := provider.Add(provider.Provider{ID: "office", Name: "Office", Preset: provider.RemoteMynaPreset, Chat: strings.TrimPrefix(remote.URL, "http://")})
+	id, err := provider.Add(provider.Provider{ID: "office", Name: "Office", Preset: provider.RemoteOwlPreset, Chat: strings.TrimPrefix(remote.URL, "http://")})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -114,9 +114,9 @@ func TestRemoteMynaGroupNotSwapped(t *testing.T) {
 
 // A call recorded as swapped before reads as routed once ledgered again:
 // the ledger judges each row as it lists it.
-func TestRemoteMynaGroupLedgerRow(t *testing.T) {
+func TestRemoteOwlGroupLedgerRow(t *testing.T) {
 	fresh(t)
-	if err := provider.Save(provider.Provider{ID: "office", Name: "Office", Key: "k", Preset: provider.RemoteMynaPreset, Chat: "http://192.0.2.1:3425/v1", Models: []string{"group/auto-deepseek-v4-1-flash"}}); err != nil {
+	if err := provider.Save(provider.Provider{ID: "office", Name: "Office", Key: "k", Preset: provider.RemoteOwlPreset, Chat: "http://192.0.2.1:3425/v1", Models: []string{"group/auto-deepseek-v4-1-flash"}}); err != nil {
 		t.Fatal(err)
 	}
 	usage.Append(usage.Record{Time: time.Now(), Agent: "claude", Provider: "office", Model: "group/auto-deepseek-v4-1-flash",
@@ -128,9 +128,9 @@ func TestRemoteMynaGroupLedgerRow(t *testing.T) {
 }
 
 // A route kept in the Routing page's history before Routed was, marked
-// swapped for the member a remote myna's group answered with, reads as
+// swapped for the member a remote owl's group answered with, reads as
 // routed; a real swap kept beside it is still one.
-func TestRemoteMynaGroupHistory(t *testing.T) {
+func TestRemoteOwlGroupHistory(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	now := historyNoon(t)
 	saveRoute(Route{ID: 1, Time: now, Model: "office/group/auto-deepseek-v4-1-flash", Done: true, Status: 200,

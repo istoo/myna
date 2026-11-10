@@ -16,16 +16,16 @@ package agent
 // GROK_HOME at agent-home, switching itself to its independent mode
 // (grok-app's providers.rs, ensure_independent_for_custom_route).
 //
-// So myna adds itself as the channel "myna", written as the App writes
+// So owl adds itself as the channel "owl", written as the App writes
 // one (upsert_custom_provider): the gateway as base_url with Grok App's own
-// key, chat completions, app_models a JSON list of myna's models with each
+// key, chat completions, app_models a JSON list of owl's models with each
 // one's context window, images and effort levels, so Accounts › Custom
 // providers lists it and the composer can offer the models and their
 // efforts. It does not set [models] default. That key is the route, and
-// making it "myna" takes the App over: the App then drops its own sign-in
+// making it "owl" takes the App over: the App then drops its own sign-in
 // and the session no longer runs. The route stays whatever the App had.
 // Pressing Use on the provider in the App is what switches the route, and
-// that choice is the App's. A myna that already set the route puts the
+// that choice is the App's. A owl that already set the route puts the
 // old one back once, on the next sync or connect. A model the user picks in
 // the App's composer since is theirs and stays through a sync.
 
@@ -38,18 +38,18 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/edit"
 )
 
-// grokAppChannel is myna's channel's table in the App's config.toml.
-const grokAppChannel = "model." + mynaID
+// grokAppChannel is owl's channel's table in the App's config.toml.
+const grokAppChannel = "model." + owlID
 
 // what Grok App says after a change (notice.go)
-var noticeGrokApp = newNotice("Myna is a custom provider in Grok App's Settings › Account. A chat can pick myna's models in its model picker, and Grok App stays on its current route until you press Use on myna there.")
+var noticeGrokApp = newNotice("Owl is a custom provider in Grok App's Settings › Account. A chat can pick owl's models in its model picker, and Grok App stays on its current route until you press Use on owl there.")
 
-// grokAppReleased marks that this myna has already put back a route an
-// older one set to myna. One restore: a Use the user presses after that
+// grokAppReleased marks that this owl has already put back a route an
+// older one set to owl. One restore: a Use the user presses after that
 // stays until they disconnect.
 const grokAppReleased = "grok-app:released-route"
 
@@ -112,7 +112,7 @@ type grokAppModel struct {
 	Efforts        []grokAppEffort `json:"efforts,omitempty"`
 }
 
-// grokAppWant is myna's models as the App is told them, was the
+// grokAppWant is owl's models as the App is told them, was the
 // app_models the channel has now. Grok Build has no effort "none" of a
 // channel's: the levels are the model's others, and the one the composer
 // starts on is the default the user marked in the App's Providers page
@@ -155,7 +155,7 @@ func grokAppWant(was string) []grokAppModel {
 	return out
 }
 
-// grokAppRead is the App's config.toml's [models] default and myna's
+// grokAppRead is the App's config.toml's [models] default and owl's
 // channel's keys, nil when there is none. A file that doesn't parse is an
 // error, never taken as empty.
 func grokAppRead(path string) (def string, ch map[string]string, err error) {
@@ -176,21 +176,21 @@ func grokApp(home string) *Agent {
 	get := func() string {
 		_, ch, _ := grokAppRead(path)
 		if ch != nil && ch["model"] != "" {
-			return mynaID + "/" + ch["model"]
+			return owlID + "/" + ch["model"]
 		}
 		def, _, _ := grokAppRead(path)
 		return def
 	}
 	// setDefault names the route the App starts on, the key taken out for "".
-	// Myna calls it only to put a route back, never to name itself.
+	// Owl calls it only to put a route back, never to name itself.
 	setDefault := func(v string) error {
 		if v == "" {
 			return edit.DelTOMLKey(path, "models", "default")
 		}
 		return edit.SetTOMLKey(path, "models", "default", v)
 	}
-	// releaseRoute puts back a route an older myna set to itself, once.
-	// The App stops working when that route is myna. A route the user
+	// releaseRoute puts back a route an older owl set to itself, once.
+	// The App stops working when that route is owl. A route the user
 	// picks in the App after this stays.
 	releaseRoute := func() error {
 		if stashShared()[grokAppReleased] == "1" {
@@ -200,7 +200,7 @@ func grokApp(home string) *Agent {
 		if err != nil {
 			return err
 		}
-		if def == mynaID {
+		if def == owlID {
 			if err := setDefault(unstash(keyDefault)); err != nil {
 				return err
 			}
@@ -208,7 +208,7 @@ func grokApp(home string) *Agent {
 		stash(map[string]string{grokAppReleased: "1"})
 		return nil
 	}
-	// wire writes myna's channel, model, if given, its model, and
+	// wire writes owl's channel, model, if given, its model, and
 	// nothing when the file has it all already. The channel's own extras
 	// (context window, images, efforts) are the model's, as the App copies
 	// them onto the channel when a model is picked in its composer.
@@ -226,7 +226,7 @@ func grokApp(home string) *Agent {
 		}
 		i := slices.IndexFunc(want, func(m grokAppModel) bool { return m.ID == model })
 		if i < 0 {
-			// a model myna no longer has: the channel moves to its first
+			// a model owl no longer has: the channel moves to its first
 			i = 0
 		}
 		picked := want[i]
@@ -245,7 +245,7 @@ func grokApp(home string) *Agent {
 		kvs := []kv{
 			{"model", picked.ID, false},
 			{"base_url", at.v1(), false},
-			{"name", "myna", false},
+			{"name", "owl", false},
 			{"api_key", key(), false},
 			{"api_backend", "chat_completions", false},
 			{"app_provider_mode", "generic", false},
@@ -295,26 +295,26 @@ func grokApp(home string) *Agent {
 		return nil
 	}
 	// rememberRoute keeps the App's route so a later disconnect can put it
-	// back if the route was myna. An empty route can't be stashed (the
-	// stash drops an empty value), and myna's own route is never remembered
+	// back if the route was owl. An empty route can't be stashed (the
+	// stash drops an empty value), and owl's own route is never remembered
 	// over the one it replaced.
 	rememberRoute := func() error {
 		def, _, err := grokAppRead(path)
-		if err != nil || def == "" || def == mynaID || stashShared()[keyDefault] != "" {
+		if err != nil || def == "" || def == owlID || stashShared()[keyDefault] != "" {
 			return err
 		}
 		stash(map[string]string{keyDefault: def})
 		return nil
 	}
-	// unwire takes myna's channel out. The route is touched only when it
-	// still names myna, which is a route that doesn't run: put back the
+	// unwire takes owl's channel out. The route is touched only when it
+	// still names owl, which is a route that doesn't run: put back the
 	// one remembered, or clear it. Any other route is the App's and stays.
 	unwire := func() error {
 		def, _, err := grokAppRead(path)
 		if err != nil {
 			return err
 		}
-		if def == mynaID {
+		if def == owlID {
 			if err := setDefault(unstash(keyDefault)); err != nil {
 				return err
 			}
@@ -333,11 +333,11 @@ func grokApp(home string) *Agent {
 			return ""
 		},
 		Sync: func() error {
-			// Nothing of myna's in the App: nothing to keep, nothing
-			// written. A route an older myna left on itself is still
+			// Nothing of owl's in the App: nothing to keep, nothing
+			// written. A route an older owl left on itself is still
 			// put back, since the App doesn't run on it.
 			def, ch, err := grokAppRead(path)
-			if err != nil || (ch == nil && def != mynaID) {
+			if err != nil || (ch == nil && def != owlID) {
 				return err
 			}
 			if err := rememberRoute(); err != nil {
@@ -357,8 +357,8 @@ func grokApp(home string) *Agent {
 				return err.Error()
 			}
 			if ch == nil {
-				if def == mynaID {
-					return "Grok App's route is myna, but its [" + grokAppChannel + "] (config.toml) is gone, so it no longer reaches myna"
+				if def == owlID {
+					return "Grok App's route is owl, but its [" + grokAppChannel + "] (config.toml) is gone, so it no longer reaches owl"
 				}
 				return ""
 			}
@@ -366,19 +366,19 @@ func grokApp(home string) *Agent {
 				"base_url", at.v1(), "api_key", key())
 		},
 		Fields: []Field{{
-			// the model on myna's custom provider, not the route the App
-			// starts on. One of myna's models is myna/<provider>/<model>
+			// the model on owl's custom provider, not the route the App
+			// starts on. One of owl's models is owl/<provider>/<model>
 			// written into the channel, and never the route: the App's own
 			// route stays in [models] default until the user presses Use in
 			// Settings › Account. One of the App's own routes picked here
-			// is written as the route, with myna's channel taken out.
+			// is written as the route, with owl's channel taken out.
 			Key: "model", Label: "model",
 			Get: get,
 			Set: func(v string) error {
 				if _, _, err := grokAppRead(path); err != nil {
 					return err
 				}
-				if ref, ok := strings.CutPrefix(v, mynaID+"/"); ok && isMyna(ref) {
+				if ref, ok := strings.CutPrefix(v, owlID+"/"); ok && isOwl(ref) {
 					if err := rememberRoute(); err != nil {
 						return err
 					}
@@ -390,8 +390,8 @@ func grokApp(home string) *Agent {
 				if v == "" {
 					return unwire()
 				}
-				// one of the App's own routes: myna's channel goes, the
-				// way picking another provider leaves myna elsewhere, and
+				// one of the App's own routes: owl's channel goes, the
+				// way picking another provider leaves owl elsewhere, and
 				// the route is the one picked. Disconnect comes here to put
 				// back the route the App had before.
 				def, ch, err := grokAppRead(path)
@@ -412,7 +412,7 @@ func grokApp(home string) *Agent {
 				return setDefault(v)
 			},
 			Options: func(cur map[string]string) []Option {
-				return withVia(grokAppOwn(path, keyDefault, cur["model"]), "grok-app", mynaID+"/")
+				return withVia(grokAppOwn(path, keyDefault, cur["model"]), "grok-app", owlID+"/")
 			},
 		}},
 	}, path)
@@ -420,11 +420,11 @@ func grokApp(home string) *Agent {
 
 // grokAppOwn is the App's own routes for the picker: its official one
 // ("grok", Grok Build's sign-in), the channels the user added, and the one
-// it was on before myna.
+// it was on before owl.
 func grokAppOwn(path, keyDefault, cur string) []Option {
 	var out []Option
 	add := func(v, label, direct string) {
-		if v == "" || v == mynaID || prefixed(v) || slices.ContainsFunc(out, func(o Option) bool { return o.Value == v }) {
+		if v == "" || v == owlID || prefixed(v) || slices.ContainsFunc(out, func(o Option) bool { return o.Value == v }) {
 			return
 		}
 		o := Option{Value: v, Icon: "xai", Direct: direct}

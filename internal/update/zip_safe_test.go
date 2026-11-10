@@ -32,11 +32,11 @@ func writeZip(t *testing.T, path string, names ...string) {
 func TestZipSafeRefusesEscapingEntry(t *testing.T) {
 	dir := t.TempDir()
 	good := filepath.Join(dir, "good.zip")
-	writeZip(t, good, "myna.app/Contents/Info.plist", "myna.app/Contents/MacOS/myna")
+	writeZip(t, good, "owl.app/Contents/Info.plist", "owl.app/Contents/MacOS/owl")
 	if err := zipSafe(good); err != nil {
 		t.Fatalf("a plain bundle: %v", err)
 	}
-	for i, name := range []string{"../evil", "/tmp/evil", "myna.app/../../evil", `..\evil`} {
+	for i, name := range []string{"../evil", "/tmp/evil", "owl.app/../../evil", `..\evil`} {
 		p := filepath.Join(dir, "bad"+string(rune('a'+i))+".zip")
 		writeZip(t, p, name)
 		if err := zipSafe(p); err == nil {

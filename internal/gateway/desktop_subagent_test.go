@@ -10,9 +10,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // desktopElectronUA is Desktop's own client (its titles, isClaudeDesktop);
@@ -191,7 +191,7 @@ func TestDesktopSubagentResolvedModel(t *testing.T) {
 }
 
 // A subagent on a tier (Claude Code's own haiku id, which the tier picked
-// in myna serves) goes on the model set all the same.
+// in owl serves) goes on the model set all the same.
 func TestDesktopSubagentTierMoved(t *testing.T) {
 	u := desktopSubagentSetup(t)
 	if err := SetDesktopTier("haiku", "fake/m1"); err != nil {
@@ -226,14 +226,14 @@ func TestDesktopSubagentGroupTarget(t *testing.T) {
 	}
 }
 
-// A model set that myna doesn't serve, that the user disabled, or that
+// A model set that owl doesn't serve, that the user disabled, or that
 // a gateway key held to some models may not use, leaves the subagent on
 // the model it asked for, for its turn and its token count, and the trace
 // says why.
 func TestDesktopSubagentKept(t *testing.T) {
 	for _, tc := range []struct{ name, why, target string }{
-		{"unserved", "myna doesn't serve it now", "fake/missing"},
-		{"disabled", "it is disabled in myna", "fake/m2"},
+		{"unserved", "owl doesn't serve it now", "fake/missing"},
+		{"disabled", "it is disabled in owl", "fake/m2"},
 		{"held model", "the gateway key may not use it", "fake/m2"},
 		{"held group", "the gateway key may not use it", "group/workers"},
 	} {
@@ -242,9 +242,9 @@ func TestDesktopSubagentKept(t *testing.T) {
 			u := desktopSubagentSetup(t)
 			target, key := tc.target, Token+"-claude-desktop"
 			switch why {
-			case "myna doesn't serve it now":
+			case "owl doesn't serve it now":
 				target = "fake/missing"
-			case "it is disabled in myna":
+			case "it is disabled in owl":
 				if err := provider.DisableModels("fake/m2"); err != nil {
 					t.Fatal(err)
 				}

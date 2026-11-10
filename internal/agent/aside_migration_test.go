@@ -5,12 +5,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/owl/internal/edit"
 )
 
 func TestAsideLegacyRestorePointIsReadWithoutMigrationWrites(t *testing.T) {
 	settings, models := asideHome(t)
-	if err := edit.SetJSON(settings, edit.KV{Path: "defaultModel.provider", Value: "myna"}, edit.KV{Path: "defaultModel.modelId", Value: "relay/glm-4.6"}); err != nil {
+	if err := edit.SetJSON(settings, edit.KV{Path: "defaultModel.provider", Value: "owl"}, edit.KV{Path: "defaultModel.modelId", Value: "relay/glm-4.6"}); err != nil {
 		t.Fatal(err)
 	}
 	stash(map[string]string{"aside.was": "native/native-model"})
@@ -36,7 +36,7 @@ func TestAsideLegacyRestorePointIsReadWithoutMigrationWrites(t *testing.T) {
 func TestAsideRuntimeWinsOverSavedModelAndPlanRefusesMismatch(t *testing.T) {
 	settings, _ := asideHome(t)
 	a := mustFindAside(t)
-	if err := a.Apply("model", "myna/relay/glm-4.6"); err != nil {
+	if err := a.Apply("model", "owl/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	plan, err := a.Native.Disconnect()
@@ -57,7 +57,7 @@ func TestAsideRuntimeWinsOverSavedModelAndPlanRefusesMismatch(t *testing.T) {
 func TestAsideReadbackConfirmsRestoreSettings(t *testing.T) {
 	settings, _ := asideHome(t)
 	a := mustFindAside(t)
-	if err := a.Apply("model", "myna/relay/glm-4.6"); err != nil {
+	if err := a.Apply("model", "owl/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	inner := asideSet

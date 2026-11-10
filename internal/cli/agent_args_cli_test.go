@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // cliHome is groupsHome with every other folder an agent keeps files in
@@ -32,11 +32,11 @@ func cliHome(t *testing.T) {
 	t.Setenv("APPDATA", filepath.Join(home, "AppData", "Roaming"))
 	t.Setenv("LOCALAPPDATA", filepath.Join(home, "AppData", "Local"))
 	t.Setenv("CLAUDE_CONFIG_DIR", "")
-	t.Setenv("MYNA_ADDR", "127.0.0.1:1")
+	t.Setenv("OWL_ADDR", "127.0.0.1:1")
 }
 
 // homeFiles is every folder and file in the test's home, config and cache
-// folders, with each file's contents. Not myna's cli-identity.json: who
+// folders, with each file's contents. Not owl's cli-identity.json: who
 // Cursor's and Devin's CLIs say is signed in, asked again behind a look a
 // minute after the last answer and kept when it comes, which may be during
 // a later command, or in a later test's home.
@@ -99,7 +99,7 @@ func writeHomeFile(t *testing.T, rel, s string) string {
 }
 
 // codexOnAdvanced is the reporter's machine: Codex's own config.toml, a
-// routing group advanced, and Codex put on it with myna codex
+// routing group advanced, and Codex put on it with owl codex
 // group/advanced. It gives the config's path.
 func codexOnAdvanced(t *testing.T) string {
 	t.Helper()
@@ -108,7 +108,7 @@ func codexOnAdvanced(t *testing.T) string {
 		"model = \"gpt-5.5\"\nmodel_reasoning_effort = \"high\"\n\n[projects.\"/Users/me/work\"]\ntrust_level = \"trusted\"\n")
 	for _, args := range [][]string{{"group", "add", "advanced", "models=a/m,b/gpt-5.5"}, {"codex", "group/advanced"}} {
 		if _, err := printed(t, func() error { return run(args) }); err != nil {
-			t.Fatalf("myna %s: %v", strings.Join(args, " "), err)
+			t.Fatalf("owl %s: %v", strings.Join(args, " "), err)
 		}
 	}
 	if b, _ := os.ReadFile(path); !strings.Contains(string(b), `"group/advanced"`) || !strings.Contains(string(b), "trust_level") {
@@ -117,16 +117,16 @@ func codexOnAdvanced(t *testing.T) string {
 	return path
 }
 
-// myna codex --help printed "✓ Codex model --help" and wrote model =
-// "--help" into ~/.codex/config.toml, myna taken out with it (reported
+// owl codex --help printed "✓ Codex model --help" and wrote model =
+// "--help" into ~/.codex/config.toml, owl taken out with it (reported
 // on 0.1.1082, Codex on group/advanced). --help, -h and help, wherever
 // they come, now show how to set Codex, and any other word that starts
 // with "-" is refused as a flag: neither writes a thing.
-// myna codex model wrote model = "model" into Codex's config, myna
-// taken out with it, and myna codex effort model = "effort" (reported
-// with myna codex --help, on 0.1.1082). A field's name alone, as typed
+// owl codex model wrote model = "model" into Codex's config, owl
+// taken out with it, and owl codex effort model = "effort" (reported
+// with owl codex --help, on 0.1.1082). A field's name alone, as typed
 // or as shown, now says what the field is set to, and a field's name is
-// refused as a value: myna codex subagent effort ran the subagents on a
+// refused as a value: owl codex subagent effort ran the subagents on a
 // model called effort. Neither writes a thing.
 func TestAgentFieldNameShowsIt(t *testing.T) {
 	codexOnAdvanced(t)
@@ -142,50 +142,50 @@ func TestAgentFieldNameShowsIt(t *testing.T) {
 	} {
 		args := strings.Fields(c.args)
 		if c.want == "" {
-			// what tells a write: taking myna out still does
+			// what tells a write: taking owl out still does
 			if _, err := printed(t, func() error { return run(args) }); err != nil || filesChanged(before, homeFiles(t)) == "" {
-				t.Fatalf("myna %s: %v, and wrote nothing", c.args, err)
+				t.Fatalf("owl %s: %v, and wrote nothing", c.args, err)
 			}
 			continue
 		}
 		out, err := printed(t, func() error { return run(args) })
 		if err != nil || out != c.want {
-			t.Errorf("myna %s: %v %q, want %q", c.args, err, out, c.want)
+			t.Errorf("owl %s: %v %q, want %q", c.args, err, out, c.want)
 		}
 		if diff := filesChanged(before, homeFiles(t)); diff != "" {
-			t.Fatalf("myna %s wrote:\n%s", c.args, diff)
+			t.Fatalf("owl %s wrote:\n%s", c.args, diff)
 		}
 	}
 	codexOnAdvanced(t)
 	before = homeFiles(t)
 	for _, c := range []struct{ args, want string }{
-		{"codex subagent effort", `"subagent effort" is one field of Codex's: myna codex subagent_effort shows it`},
-		{"codex subagents Effort", `"subagent effort" is one field of Codex's: myna codex subagent_effort shows it`},
-		{"codex model effort", `"effort" is a field of Codex's, not a value for its model: myna codex effort shows it`},
-		{"codex model Effort", `"Effort" is a field of Codex's, not a value for its model: myna codex effort shows it`},
-		{"codex effort model", `"model" is a field of Codex's, not a value for its effort: myna codex model shows it`},
-		{"codex model sign-in", `"sign-in" is a field of Codex's, not a value for its model: myna codex login shows it`},
+		{"codex subagent effort", `"subagent effort" is one field of Codex's: owl codex subagent_effort shows it`},
+		{"codex subagents Effort", `"subagent effort" is one field of Codex's: owl codex subagent_effort shows it`},
+		{"codex model effort", `"effort" is a field of Codex's, not a value for its model: owl codex effort shows it`},
+		{"codex model Effort", `"Effort" is a field of Codex's, not a value for its model: owl codex effort shows it`},
+		{"codex effort model", `"model" is a field of Codex's, not a value for its effort: owl codex model shows it`},
+		{"codex model sign-in", `"sign-in" is a field of Codex's, not a value for its model: owl codex login shows it`},
 	} {
 		args := strings.Fields(c.args)
 		out, err := printed(t, func() error { return run(args) })
 		if err == nil || err.Error() != c.want || out != "" {
-			t.Errorf("myna %s: %v %q, want %s", c.args, err, out, c.want)
+			t.Errorf("owl %s: %v %q, want %s", c.args, err, out, c.want)
 		}
 		if diff := filesChanged(before, homeFiles(t)); diff != "" {
-			t.Fatalf("myna %s wrote:\n%s", c.args, diff)
+			t.Fatalf("owl %s wrote:\n%s", c.args, diff)
 		}
 	}
 	// a field's name in any case sets it too
 	out, err := printed(t, func() error { return run([]string{"codex", "EFFORT", "low"}) })
 	if err != nil || out != "✓ Codex effort low\n" || filesChanged(before, homeFiles(t)) == "" {
-		t.Errorf("myna codex EFFORT low: %v %q", err, out)
+		t.Errorf("owl codex EFFORT low: %v %q", err, out)
 	}
 }
 
 // Every agent's fields go by their names the same way: alone, each shows
 // its field; after any field, each is refused. They were written as most
 // agents' model, and connected Claude Desktop, Cursor Private Inference,
-// Pencil, T3 Code, WorkBuddy and ZCode to myna. Claude Code's opus,
+// Pencil, T3 Code, WorkBuddy and ZCode to owl. Claude Code's opus,
 // sonnet, haiku and fable name its model as well as its tiers, and stay
 // the model's (TestClaudeTierNamesSetTheModel).
 func TestEveryAgentFieldNameWritesNothing(t *testing.T) {
@@ -199,10 +199,10 @@ func TestEveryAgentFieldNameWritesNothing(t *testing.T) {
 		t.Helper()
 		out, err := printed(t, func() error { return run(args) })
 		if !ok(out, err) {
-			t.Errorf("myna %s: %v %q, want %s", strings.Join(args, " "), err, out, want)
+			t.Errorf("owl %s: %v %q, want %s", strings.Join(args, " "), err, out, want)
 		}
 		if diff := filesChanged(before, homeFiles(t)); diff != "" {
-			t.Errorf("myna %s wrote:\n%s", strings.Join(args, " "), diff)
+			t.Errorf("owl %s wrote:\n%s", strings.Join(args, " "), diff)
 			before = homeFiles(t)
 		}
 	}
@@ -230,9 +230,9 @@ func TestEveryAgentFieldNameWritesNothing(t *testing.T) {
 	}
 }
 
-// Claude Code's tiers are named as its model's aliases are: myna claude
+// Claude Code's tiers are named as its model's aliases are: owl claude
 // opus sets its model to opus, as the docs have it, where another field's
-// name alone shows that field; myna claude help says so.
+// name alone shows that field; owl claude help says so.
 func TestClaudeTierNamesSetTheModel(t *testing.T) {
 	cliHome(t)
 	path := writeHomeFile(t, filepath.Join(".claude", "settings.json"), "{\n  \"model\": \"claude-opus-4-5\",\n  \"theme\": \"dark\"\n}\n")
@@ -240,18 +240,18 @@ func TestClaudeTierNamesSetTheModel(t *testing.T) {
 		want := args[len(args)-1]
 		out, err := printed(t, func() error { return run(args) })
 		if b, _ := os.ReadFile(path); err != nil || out != "✓ Claude Code model "+want+"\n" || !strings.Contains(string(b), `"model": "`+want+`"`) {
-			t.Errorf("myna %s: %v %q\n%s", strings.Join(args, " "), err, out, b)
+			t.Errorf("owl %s: %v %q\n%s", strings.Join(args, " "), err, out, b)
 		}
 	}
 	out, err := printed(t, func() error { return run([]string{"claude", "help"}) })
-	if err != nil || !strings.Contains(out, "\n  opus, sonnet, haiku and fable alone name the model: myna claude opus sets its model to opus\n") {
-		t.Errorf("myna claude help: %v\n%s", err, out)
+	if err != nil || !strings.Contains(out, "\n  opus, sonnet, haiku and fable alone name the model: owl claude opus sets its model to opus\n") {
+		t.Errorf("owl claude help: %v\n%s", err, out)
 	}
 	// in another case too, where Claude Code takes its aliases as they are
 	// spelled: the tier's field isn't shown for it
 	out, err = printed(t, func() error { return run([]string{"claude", "Opus"}) })
 	if err == nil || !strings.HasPrefix(err.Error(), `"Opus" is no model of Claude Code's`) || out != "" {
-		t.Errorf("myna claude Opus: %v %q, want it refused as a model", err, out)
+		t.Errorf("owl claude Opus: %v %q, want it refused as a model", err, out)
 	}
 }
 
@@ -267,24 +267,24 @@ func TestClaudeUltracodeNamedAsAValue(t *testing.T) {
 	before := homeFiles(t)
 	for _, args := range [][]string{{"claude", "model", "ultracode"}, {"claude", "effort", "ultracode"}, {"claude", "effort", "Ultracode"}} {
 		out, err := printed(t, func() error { return run(args) })
-		if err == nil || !strings.HasSuffix(err.Error(), ": myna claude ultracode on") || out != "" {
-			t.Errorf("myna %s: %v %q, want it to say myna claude ultracode on", strings.Join(args, " "), err, out)
+		if err == nil || !strings.HasSuffix(err.Error(), ": owl claude ultracode on") || out != "" {
+			t.Errorf("owl %s: %v %q, want it to say owl claude ultracode on", strings.Join(args, " "), err, out)
 		}
 		if diff := filesChanged(before, homeFiles(t)); diff != "" {
-			t.Fatalf("myna %s wrote:\n%s", strings.Join(args, " "), diff)
+			t.Fatalf("owl %s wrote:\n%s", strings.Join(args, " "), diff)
 		}
 	}
 	if _, err := printed(t, func() error { return run([]string{"claude", "ultracode", "on"}) }); err != nil {
 		t.Fatal(err)
 	}
 	if b, _ := os.ReadFile(path); !strings.Contains(string(b), `"ultracode": true`) {
-		t.Errorf("myna claude ultracode on wrote:\n%s", b)
+		t.Errorf("owl claude ultracode on wrote:\n%s", b)
 	}
 }
 
-// myna codex DEFAULT wrote model = "DEFAULT" into Codex's config, myna
-// taken out with it, and myna codex effort Default wrote
-// model_reasoning_effort = "Default". default is myna's word in any
+// owl codex DEFAULT wrote model = "DEFAULT" into Codex's config, owl
+// taken out with it, and owl codex effort Default wrote
+// model_reasoning_effort = "Default". default is owl's word in any
 // case, as help and a field's name are, and does what default does.
 func TestAgentDefaultInAnyCase(t *testing.T) {
 	path := codexOnAdvanced(t)
@@ -298,58 +298,58 @@ func TestAgentDefaultInAnyCase(t *testing.T) {
 		out, err := printed(t, func() error { return run(strings.Fields(c.args)) })
 		b, _ := os.ReadFile(path)
 		if err != nil || out != c.want || c.gone.Match(b) {
-			t.Errorf("myna %s: %v %q, want %q\n%s", c.args, err, out, c.want, b)
+			t.Errorf("owl %s: %v %q, want %q\n%s", c.args, err, out, c.want, b)
 		}
 	}
 	for _, word := range []string{"DEFAULT", "Default"} {
 		path := codexOnAdvanced(t)
 		out, err := printed(t, func() error { return run([]string{"codex", word}) })
 		b, _ := os.ReadFile(path)
-		if err != nil || out != "✓ Codex model gpt-5.5\n  disconnected from myna, back to what it had before\n" ||
+		if err != nil || out != "✓ Codex model gpt-5.5\n  disconnected from owl, back to what it had before\n" ||
 			!strings.Contains(string(b), "model = \"gpt-5.5\"\nmodel_reasoning_effort = \"high\"\n") || strings.Contains(string(b), "model_provider = ") {
-			t.Errorf("myna codex %s: %v %q, want Codex back on gpt-5.5\n%s", word, err, out, b)
+			t.Errorf("owl codex %s: %v %q, want Codex back on gpt-5.5\n%s", word, err, out, b)
 		}
 	}
 }
 
-// myna claude sonnet, run by an agent that took it for a query of the
+// owl claude sonnet, run by an agent that took it for a query of the
 // sonnet tier, put Claude Code back on the DeepSeek endpoint it had before
-// myna, which refused Sonnet with a 400, and printed only "✓ Claude Code
+// owl, which refused Sonnet with a 400, and printed only "✓ Claude Code
 // model sonnet" (#2000, marshalys). An alias set while Claude Code is on
-// myna now says it took myna out, and how to connect it again; help
+// owl now says it took owl out, and how to connect it again; help
 // says so beside the aliases.
-func TestClaudeAliasSaysItTookMynaOut(t *testing.T) {
+func TestClaudeAliasSaysItTookOwlOut(t *testing.T) {
 	for _, alias := range []string{"opus", "sonnet", "haiku", "fable"} {
 		cliHome(t)
 		path := writeHomeFile(t, filepath.Join(".claude", "settings.json"),
 			"{\n  \"model\": \"deepseek-chat\",\n  \"env\": {\n    \"ANTHROPIC_BASE_URL\": \"https://deepseek.invalid/anthropic\",\n    \"ANTHROPIC_AUTH_TOKEN\": \"sk-own\"\n  }\n}\n")
 		for _, args := range [][]string{{"group", "add", "advanced", "models=a/m"}, {"claude", "group/advanced"}} {
 			if _, err := printed(t, func() error { return run(args) }); err != nil {
-				t.Fatalf("myna %s: %v", strings.Join(args, " "), err)
+				t.Fatalf("owl %s: %v", strings.Join(args, " "), err)
 			}
 		}
 		if b, _ := os.ReadFile(path); strings.Contains(string(b), "deepseek.invalid") {
-			t.Fatalf("Claude Code isn't on myna:\n%s", b)
+			t.Fatalf("Claude Code isn't on owl:\n%s", b)
 		}
 		out, err := printed(t, func() error { return run([]string{"claude", alias}) })
 		b, _ := os.ReadFile(path)
-		if err != nil || !strings.HasPrefix(out, "✓ Claude Code model "+alias+"\n  disconnected from myna: "+alias+" is Claude Code's own") ||
-			!strings.Contains(out, "myna claude <model>") || !strings.Contains(string(b), "deepseek.invalid") {
-			t.Errorf("myna claude %s: %v %q, want it to say myna is out\n%s", alias, err, out, b)
+		if err != nil || !strings.HasPrefix(out, "✓ Claude Code model "+alias+"\n  disconnected from owl: "+alias+" is Claude Code's own") ||
+			!strings.Contains(out, "owl claude <model>") || !strings.Contains(string(b), "deepseek.invalid") {
+			t.Errorf("owl claude %s: %v %q, want it to say owl is out\n%s", alias, err, out, b)
 		}
-		// set again, off myna already: nothing to say
+		// set again, off owl already: nothing to say
 		out, err = printed(t, func() error { return run([]string{"claude", alias}) })
 		if err != nil || strings.Contains(out, "disconnected") {
-			t.Errorf("myna claude %s, off myna: %v %q", alias, err, out)
+			t.Errorf("owl claude %s, off owl: %v %q", alias, err, out)
 		}
 	}
 	out, err := printed(t, func() error { return run([]string{"claude", "help"}) })
-	if err != nil || !strings.Contains(out, "they are Claude Code's own models, not myna's: setting one takes myna out") {
-		t.Errorf("myna claude help: %v\n%s", err, out)
+	if err != nil || !strings.Contains(out, "they are Claude Code's own models, not owl's: setting one takes owl out") {
+		t.Errorf("owl claude help: %v\n%s", err, out)
 	}
 }
 
-// `myna codex effort highish` printed "✓ Codex effort highish" and wrote
+// `owl codex effort highish` printed "✓ Codex effort highish" and wrote
 // model_reasoning_effort = "highish" into config.toml, a level Codex
 // refuses at start-up. A closed field refuses a value its picker doesn't
 // offer and writes nothing; the levels Codex takes, and default, still work.
@@ -360,15 +360,15 @@ func TestUnknownEffortWritesNothing(t *testing.T) {
 
 	out, err := printed(t, func() error { return run([]string{"codex", "effort", "highish"}) })
 	if err == nil || out != "" {
-		t.Fatalf("myna codex effort highish: %v %q, want refused", err, out)
+		t.Fatalf("owl codex effort highish: %v %q, want refused", err, out)
 	}
-	for _, want := range []string{"highish", "one of", "try: myna codex effort"} {
+	for _, want := range []string{"highish", "one of", "try: owl codex effort"} {
 		if !strings.Contains(err.Error(), want) {
 			t.Errorf("error %q doesn't name %q", err, want)
 		}
 	}
 	if diff := filesChanged(before, homeFiles(t)); diff != "" {
-		t.Fatalf("myna codex effort highish wrote:\n%s", diff)
+		t.Fatalf("owl codex effort highish wrote:\n%s", diff)
 	}
 	if now, _ := os.ReadFile(path); string(now) != string(was) {
 		t.Fatalf("config.toml changed:\n%s", now)
@@ -376,11 +376,11 @@ func TestUnknownEffortWritesNothing(t *testing.T) {
 
 	out, err = printed(t, func() error { return run([]string{"codex", "effort", "high"}) })
 	if err != nil || !strings.Contains(out, "✓ Codex effort high") {
-		t.Errorf("myna codex effort high: %v %q", err, out)
+		t.Errorf("owl codex effort high: %v %q", err, out)
 	}
 	out, err = printed(t, func() error { return run([]string{"codex", "effort", "default"}) })
 	if err != nil || !strings.Contains(out, "✓ Codex effort default") {
-		t.Errorf("myna codex effort default: %v %q", err, out)
+		t.Errorf("owl codex effort default: %v %q", err, out)
 	}
 }
 
@@ -408,10 +408,10 @@ func TestEveryClosedFieldRefusesAnUnknownValue(t *testing.T) {
 			before := homeFiles(t)
 			out, err := printed(t, func() error { return run([]string{a.ID, f.Key, "zz-bogus-closed"}) })
 			if err == nil || out != "" {
-				t.Errorf("myna %s %s zz-bogus-closed: %v %q, want refused", a.ID, f.Key, err, out)
+				t.Errorf("owl %s %s zz-bogus-closed: %v %q, want refused", a.ID, f.Key, err, out)
 			}
 			if diff := filesChanged(before, homeFiles(t)); diff != "" {
-				t.Errorf("myna %s %s zz-bogus-closed wrote:\n%s", a.ID, f.Key, diff)
+				t.Errorf("owl %s %s zz-bogus-closed wrote:\n%s", a.ID, f.Key, diff)
 			}
 		}
 	}

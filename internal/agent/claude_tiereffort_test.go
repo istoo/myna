@@ -5,14 +5,14 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // Claude Code's tiers and its subagents can each run at an effort of their
 // own (#536): the model the tier is given is "<model>:<level>" (before its
-// [1m] mark), which myna's gateway sends that model at that level. The
+// [1m] mark), which owl's gateway sends that model at that level. The
 // effort stays with the tier through a model of its own, back to the main
 // model, and a new main model; the main model's effort is untouched.
 func TestClaudeTierEffort(t *testing.T) {
@@ -136,7 +136,7 @@ func TestClaudeTierEffort(t *testing.T) {
 		t.Fatalf("subagents on flash, effort cleared: %v", a.Values())
 	}
 	set("subagent", "")
-	// back to Claude Code as installed: nothing of myna's left
+	// back to Claude Code as installed: nothing of owl's left
 	set("model", "")
 	for _, k := range claudeEnv {
 		if env(k) != "" {

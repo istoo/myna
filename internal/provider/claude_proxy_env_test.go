@@ -9,11 +9,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/owl/internal/edit"
 )
 
 // claudeTwoAccounts signs Claude Code in to a@example.com, then to
-// b@example.com, as myna sees both, and answers its settings.json.
+// b@example.com, as owl sees both, and answers its settings.json.
 func claudeTwoAccounts(t *testing.T) string {
 	t.Helper()
 	home := claudeHome(t)
@@ -95,8 +95,8 @@ func jsonGetT(t *testing.T, path, k string) string {
 	return v
 }
 
-// A proxy the user set in Claude Code's env is theirs: myna writes no
-// account's beside it, and never takes it out (LESSONS: myna's default
+// A proxy the user set in Claude Code's env is theirs: owl writes no
+// account's beside it, and never takes it out (LESSONS: owl's default
 // never overrides a value the user set).
 func TestClaudeAccountProxyKeepsTheUsersOwn(t *testing.T) {
 	settingsPath := claudeTwoAccounts(t)
@@ -123,7 +123,7 @@ func TestClaudeAccountProxyKeepsTheUsersOwn(t *testing.T) {
 	}
 }
 
-// One myna wrote that the user then changed is the user's from then on:
+// One owl wrote that the user then changed is the user's from then on:
 // a switch to an account without a proxy leaves it.
 func TestClaudeAccountProxyEditedByTheUserStays(t *testing.T) {
 	settingsPath := claudeTwoAccounts(t)
@@ -139,9 +139,9 @@ func TestClaudeAccountProxyEditedByTheUserStays(t *testing.T) {
 	if v := claudeEnvOf(t, settingsPath, "HTTPS_PROXY"); v != "http://mine:7890" {
 		t.Fatalf("the user's HTTPS_PROXY = %q", v)
 	}
-	// what was still myna's goes
+	// what was still owl's goes
 	if v := claudeEnvOf(t, settingsPath, "HTTP_PROXY"); v != "" {
-		t.Fatalf("myna's HTTP_PROXY = %q stayed", v)
+		t.Fatalf("owl's HTTP_PROXY = %q stayed", v)
 	}
 	// and with the user's own there, b's isn't written over it
 	claudeSwitch(t, "b@example.com")
@@ -198,7 +198,7 @@ func TestClaudeAccountProxyLeavesABrokenSettings(t *testing.T) {
 	}
 }
 
-// claudeLog is what myna logs while f runs.
+// claudeLog is what owl logs while f runs.
 func claudeLog(t *testing.T, f func()) string {
 	t.Helper()
 	var buf bytes.Buffer

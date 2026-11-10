@@ -11,7 +11,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // toolsEffortChat is JJ-Lin's mock of a Chat-only relay (#2670): function

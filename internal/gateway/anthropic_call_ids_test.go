@@ -10,7 +10,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // devinRawID is the call id Devin's SWE-2 gave in #1304 (StarMoonCity's
@@ -173,7 +173,7 @@ func TestAnthropicSafeCallIDsUnchanged(t *testing.T) {
 			t.Errorf("anthropicInID(%q) = %q, want it as it came", id, got)
 		}
 	}
-	// a client's own id that looks like one of myna's goes back as it came
+	// a client's own id that looks like one of owl's goes back as it came
 	for _, id := range []string{"mp_", "mp_!!", "mp_abc"} {
 		if anthropicInID(id) != id && anthropicOutID(anthropicInID(id)) != id {
 			t.Errorf("anthropicInID(%q) = %q, which doesn't go back to it", id, anthropicInID(id))

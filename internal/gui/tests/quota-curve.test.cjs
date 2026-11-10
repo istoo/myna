@@ -1,6 +1,6 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // What was left over time (#651): under an account's meters on the Usage
-// page, a line a window from myna's readings — broken where the 5-hour
+// page, a line a window from owl's readings — broken where the 5-hour
 // window started again — a dashed even burn from each window's start to its
 // reset, and an upright line at now. One pick in the allowances' head, the
 // app's own menu, turns every card at once: "2 days" / "Cycle", or "Off"
@@ -20,7 +20,7 @@ const { test } = require("node:test");
 const vm = require("node:vm");
 const { chromium, webkit } = require("playwright");
 
-const assets = process.env.MYNA_QUOTA_ASSETS || path.resolve(__dirname, "../assets");
+const assets = process.env.OWL_QUOTA_ASSETS || path.resolve(__dirname, "../assets");
 const H = 3600e3;
 const iso = (ms) => new Date(ms).toISOString();
 
@@ -96,7 +96,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const reads = [];
       const handler = serve(lang, "light", false, data);
       await page.route("**/*", (r) => { if (r.request().url().includes("/quotas/history")) reads.push(r.request().url()); return handler(r); });
-      await page.goto("http://myna.test/?view=usage");
+      await page.goto("http://owl.test/?view=usage");
       const card = page.locator('.subscription-card[data-key="codex"]');
       const curve = card.locator(".quota-curve").first();
       await curve.waitFor();
@@ -283,7 +283,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
       const strokes = {};
       for (const theme of ["light", "dark"]) {
-        const page = await open(theme, "http://myna.test/?view=usage", theme, { width: 900, height: 620 });
+        const page = await open(theme, "http://owl.test/?view=usage", theme, { width: 900, height: 620 });
         const card = page.locator(".subscription-card", { hasText: "Codex" });
         const curve = card.locator(".quota-curve").first();
         await curve.waitFor();
@@ -342,7 +342,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           assert.notEqual(await curve.locator('path.qc-line[data-name="5 hours"]').getAttribute("d"), five);
           assert.equal(await curve.locator("line.qc-even").count(), 2, "over two days the 5-hour window has its even burn");
           assert.equal(await page.evaluate(() => document.scrollingElement.scrollTop), scroller, "the click moved the page");
-          assert.equal(await page.evaluate(() => localStorage.getItem("myna.quotaRange")), "2d");
+          assert.equal(await page.evaluate(() => localStorage.getItem("owl.quotaRange")), "2d");
           // Off: no card draws a curve, the pick stays where it was, kept
           // across a reload; back on, the curves come back
           const at = (await pick.boundingBox()).y;
@@ -351,14 +351,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           assert.equal(await pick.textContent(), w.trend(w.off));
           assert.equal((await pick.boundingBox()).y, at, "the pick moved");
           assert.equal(await page.evaluate(() => document.scrollingElement.scrollTop), scroller, "the click moved the page");
-          assert.equal(await page.evaluate(() => localStorage.getItem("myna.quotaRange")), "off");
+          assert.equal(await page.evaluate(() => localStorage.getItem("owl.quotaRange")), "off");
           await page.reload();
           await page.locator(".subscription-card", { hasText: "Codex" }).locator(".quota-windows").first().waitFor();
           assert.equal(await page.locator(".quota-curve").count(), 0, "Off is kept across a restart");
           assert.equal(await pick.textContent(), w.trend(w.off));
           await choose(w.cycle);
           await curve.waitFor();
-          assert.equal(await page.evaluate(() => localStorage.getItem("myna.quotaRange")), "cycle");
+          assert.equal(await page.evaluate(() => localStorage.getItem("owl.quotaRange")), "cycle");
         }
       }
       assert.notEqual(strokes.light, strokes.dark, "dark has its own line colour");
@@ -371,7 +371,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         { at: iso(t0 - 24 * H), left: 40, start: iso(rw - 168 * H), resetsAt: iso(rw) },
         { at: iso(t0), left: 20, start: iso(rw - 168 * H), resetsAt: iso(rw) },
       ];
-      const counting = await open("counting", "http://myna.test/?view=usage", "light", { width: 900, height: 620 });
+      const counting = await open("counting", "http://owl.test/?view=usage", "light", { width: 900, height: 620 });
       const countingCurve = counting.locator(".subscription-card", { hasText: "Codex" }).locator(".quota-curve").first();
       await countingCurve.waitFor();
       assert.match(await countingCurve.locator(".qc-pace").textContent(), w.runsOut);
@@ -386,7 +386,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         { at: iso(p0 - 2 * H), left: 85, start: iso(p0 - 3 * H), resetsAt: iso(p0 + 2 * H) },
         { at: iso(p0 - 1 * H), left: 70, start: iso(p0 - 3 * H), resetsAt: iso(p0 + 2 * H) },
       ];
-      const panel = await open("panel", "http://myna.test/?mode=panel", "dark", { width: 440, height: 640 });
+      const panel = await open("panel", "http://owl.test/?mode=panel", "dark", { width: 440, height: 640 });
       await panel.locator('#ptabs [data-ptab="usage"]').click();
       const pcard = panel.locator(".pq-card", { hasText: "a@x.com" });
       const spark = pcard.locator(".pq-spark");
@@ -400,16 +400,16 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // the 5-hour window the only one begun: its pace, by its deadline
       const single = JSON.parse(JSON.stringify(data));
       single.quotas[0].windows[1].used = 0;
-      const one = await open("one", "http://myna.test/?mode=panel", "dark", { width: 440, height: 640 }, single);
+      const one = await open("one", "http://owl.test/?mode=panel", "dark", { width: 440, height: 640 }, single);
       await one.locator('#ptabs [data-ptab="usage"]').click();
       const ocard = one.locator(".pq-card", { hasText: "a@x.com" });
       await ocard.waitFor();
       assert.equal(await ocard.locator(".pq-pace").textContent(), " · " + w.lasts);
-      // a window myna has read nothing of this cycle says nothing, rather
+      // a window owl has read nothing of this cycle says nothing, rather
       // than reading a pace from nothing (#2079)
       const quiet = JSON.parse(JSON.stringify(single));
       quiet.history[0].lines[0].points = [];
-      const silent = await open("silent", "http://myna.test/?mode=panel", "dark", { width: 440, height: 640 }, quiet);
+      const silent = await open("silent", "http://owl.test/?mode=panel", "dark", { width: 440, height: 640 }, quiet);
       await silent.locator('#ptabs [data-ptab="usage"]').click();
       const scard = silent.locator(".pq-card", { hasText: "a@x.com" });
       await scard.waitFor();
@@ -444,11 +444,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // turned off in the window, the tray's line goes too, and stays gone
       const win = await panel.context().newPage();
       await win.route("**/*", serve(lang, "dark", false, data));
-      // a page of myna's origin, only for its storage: served as a 404
+      // a page of owl's origin, only for its storage: served as a 404
       // with no body, Chromium refused to open it (ERR_HTTP_RESPONSE_CODE_FAILURE)
-      await win.route("http://myna.test/blank", (r) => r.fulfill({ contentType: "text/html", body: "<!doctype html><title>blank</title>" }));
-      await win.goto("http://myna.test/blank");
-      await win.evaluate(() => localStorage.setItem("myna.quotaRange", "off"));
+      await win.route("http://owl.test/blank", (r) => r.fulfill({ contentType: "text/html", body: "<!doctype html><title>blank</title>" }));
+      await win.goto("http://owl.test/blank");
+      await win.evaluate(() => localStorage.setItem("owl.quotaRange", "off"));
       await panel.waitForFunction(() => !document.querySelector(".pq-spark"));
       assert.ok(await pcard.locator(".pq-dial").count() > 0, "the card is still there");
       await panel.reload();
@@ -547,7 +547,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const { page, st, posts, errors } = await colorblindPage(browser, lang, fixtures(Date.now()), false);
 
       // off by default: the dots and solid lines of before
-      await page.goto("http://myna.test/?view=usage");
+      await page.goto("http://owl.test/?view=usage");
       await page.locator(codexCurve).first().waitFor();
       let got = await readCurve(page, codexCurve);
       assert.equal(got.cb, "");
@@ -556,7 +556,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.ok(got.title.startsWith(w.solid), got.title);
       const plainEven = got.evens[0].dash;
 
-      await page.goto("http://myna.test/?view=settings&tab=general");
+      await page.goto("http://owl.test/?view=settings&tab=general");
       const row = page.locator("#colorblindRow");
       await row.waitFor();
       assert.equal(await row.locator(".name").innerText(), w.label);
@@ -569,7 +569,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.waitForFunction(() => document.documentElement.dataset.colorblind === "1");
 
       // a reload takes it from boot.js
-      await page.goto("http://myna.test/?view=usage");
+      await page.goto("http://owl.test/?view=usage");
       await page.locator(codexCurve).first().waitFor();
       for (const theme of ["light", "dark"]) {
         await page.evaluate((th) => { document.documentElement.dataset.theme = th; }, theme);
@@ -641,7 +641,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
       // and Settings turns it off for good
       st.colorblind = true;
-      await page.goto("http://myna.test/?view=settings&tab=general");
+      await page.goto("http://owl.test/?view=settings&tab=general");
       await row.waitFor();
       assert.equal(await page.evaluate(() => document.documentElement.dataset.colorblind), "1", "kept across reload via boot.js");
       assert.equal(await row.locator("#colorblindSegs [role=switch]").getAttribute("aria-checked"), "true");
@@ -662,7 +662,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     data.quotas[0].windows = names.map((name, i) => ({ name, used: 10 + i * 5, resetsAt: iso(rw) }));
     data.history[0].lines = names.map((name, i) => ({ name, points: [90, 60, 30, 0].map((h) => ({ at: iso(now - h * H), left: 95 - i * 6 - (90 - h) / 9, start: iso(rw - 168 * H), resetsAt: iso(rw) })) }));
     const { page, errors } = await colorblindPage(browser, "en", data, true);
-    await page.goto("http://myna.test/?view=usage");
+    await page.goto("http://owl.test/?view=usage");
     await page.locator(codexCurve).first().waitFor();
     const got = await readCurve(page, codexCurve);
     const say = JSON.stringify(got);
@@ -703,7 +703,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       return answer(777000);
     };
     await page.route("**/*", serve("en", "light", false, data));
-    await page.goto("http://myna.test/?view=usage");
+    await page.goto("http://owl.test/?view=usage");
     const card = page.locator('.subscription-card[data-key="codex"]');
     const pick = card.getByRole("button", { name: "Choose a recorded cycle" });
     await pick.click();
@@ -728,7 +728,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     data.historyHolds = () => [{ provider: "codex", user: "a@x.com", windows: [{ name: "Weekly", holdsWhy: "log" }] }];
     await card.locator(".quota-refresh").click();
     await page.waitForFunction(() => document.querySelector(".quota-holds-why")?.textContent === "Whole: not enough data");
-    assert.match(await card.locator(".quota-holds-why").getAttribute("title"), /before myna's request log/);
+    assert.match(await card.locator(".quota-holds-why").getAttribute("title"), /before owl's request log/);
     assert.equal(await card.locator(".quota-holds").count(), 0);
     // and one with no estimate and no reason shows nothing, like a live card
     data.historyHolds = () => [];

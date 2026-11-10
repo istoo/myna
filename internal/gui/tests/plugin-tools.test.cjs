@@ -1,6 +1,6 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // Plugins that give tools on the Plugins page: the row lists each tool by
-// the name myna's plugin tools MCP server gives it, its description on
+// the name owl's plugin tools MCP server gives it, its description on
 // hover, and a button that copies the server's address. A plugin of tools
 // alone wears no Provider chip and isn't said to sign in to nothing; one
 // that signs in too keeps its line; one switched off lists none. Every
@@ -70,7 +70,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           window.__copied = [];
           Object.defineProperty(navigator, "clipboard", { value: { writeText: async (s) => { window.__copied.push(s); } }, configurable: true });
         });
-        await page.goto("http://myna.test/?view=plugins");
+        await page.goto("http://owl.test/?view=plugins");
         const view = page.locator("#view-plugins");
         await view.page().locator(":is(.lib-tabs .opt, .nav-s):visible", { hasText: w.installed }).click();
         const row = (name) => view.locator(".pm-row").filter({ has: page.locator(".name", { hasText: name }) });
@@ -86,7 +86,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await line.locator(".copy").click();
         await page.waitForFunction(() => window.__copied.length > 0 || document.querySelector(".toast, #status"));
         const copied = await page.evaluate(() => window.__copied);
-        if (copied.length) assert.equal(copied[0], "http://127.0.0.1:3425/mcp/myna/tools");
+        if (copied.length) assert.equal(copied[0], "http://127.0.0.1:3425/mcp/owl/tools");
 
         const both = row("both");
         assert.ok((await both.innerText()).includes("Acme"));

@@ -15,12 +15,12 @@ const { chromium, webkit } = require("playwright");
 const { watchSettingsReads, openAgentSettings } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
-// Codex's field options as internal/agent builds them: a myna model's
+// Codex's field options as internal/agent builds them: a owl model's
 // group is its provider's name, a routing group's "Routing groups"
 const opts = [
-  { value: "gpt-5.5", label: "GPT-5.5", note: "OpenAI · via myna", group: "OpenAI", ref: "openai/gpt-5.5", icon: "openai" },
-  { value: "mygw/gpt-6-luna", label: "GPT-6 Luna", note: "MyGateway · via myna", group: "MyGateway", ref: "mygw/gpt-6-luna", icon: "openai" },
-  { value: "group/cheap", label: "cheap", note: "routing group · via myna", group: "Routing groups", ref: "group/cheap" },
+  { value: "gpt-5.5", label: "GPT-5.5", note: "OpenAI · via owl", group: "OpenAI", ref: "openai/gpt-5.5", icon: "openai" },
+  { value: "mygw/gpt-6-luna", label: "GPT-6 Luna", note: "MyGateway · via owl", group: "MyGateway", ref: "mygw/gpt-6-luna", icon: "openai" },
+  { value: "group/cheap", label: "cheap", note: "routing group · via owl", group: "Routing groups", ref: "group/cheap" },
 ];
 const agents = (memories, sub) => [{
   id: "codex", name: "Codex", path: "/test/config.toml", icon: "codex-color", wired: true,
@@ -37,7 +37,7 @@ const settings = (lang) => ({
   dock: false, dockWindow: false, proxy: "", redact: false, redactPersonal: false, redactWords: [],
   codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", workbuddyCheckin: false, noStats: false,
   trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "",
-  version: "0.1.400", dir: "~/.config/myna", gateway: "http://127.0.0.1:3425",
+  version: "0.1.400", dir: "~/.config/owl", gateway: "http://127.0.0.1:3425",
   proxyNow: "none", proxySource: "none", login: false,
   visionModels: [], imageGenModels: [], workbuddyCheckins: [], lanURLs: [], titleModels,
   codexPredictions: "mygw/gpt-6-luna", codexAutoReview: "mygw/gpt-6-luna",
@@ -94,7 +94,7 @@ async function open(engine, width, lang, memories, sub, t) {
     await browser.close();
   });
   await watchSettingsReads(page);
-  await page.goto("http://myna.test/?view=agents");
+  await page.goto("http://owl.test/?view=agents");
   await openAgentSettings(page);
   await page.locator("#codexMemoriesPick button").waitFor();
   return { page, errors };

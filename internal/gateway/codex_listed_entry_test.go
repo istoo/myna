@@ -11,14 +11,14 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/istoo/myna/internal/codexcat"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/codexcat"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // terraEntry is one model as a relay built for Codex (sub2api) lists it
 // when asked with Codex's client_version: Codex's own catalog shape
-// (codex-rs ModelInfo), with values myna never writes itself, so an
-// entry made up by myna can't pass for it.
+// (codex-rs ModelInfo), with values owl never writes itself, so an
+// entry made up by owl can't pass for it.
 const terraEntry = `{"slug":"gpt-6.1-terra","display_name":"GPT-6.1 Terra","description":"Frontier agentic coding model.",` +
 	`"default_reasoning_level":"medium","supported_reasoning_levels":[` +
 	`{"effort":"low","description":"Fast responses with lighter reasoning"},` +
@@ -74,7 +74,7 @@ func newRelay(t *testing.T) (*relayList, string) {
 	return r, srv.URL + "/v1"
 }
 
-// codexEntry is the entry of id in the catalog a Codex naming myna its
+// codexEntry is the entry of id in the catalog a Codex naming owl its
 // model_provider reads (/v1/codex/models).
 func codexEntry(t *testing.T, id string) map[string]any {
 	t.Helper()
@@ -112,7 +112,7 @@ func fetchRelay(t *testing.T) {
 // A provider the user added by its address, a relay that lists its models
 // in Codex's own shape when asked as Codex asks (sub2api, ctopsc on
 // Discord), has each model's entry handed to Codex as the relay gave it —
-// its instructions, window, levels, tools and tiers — and not one myna
+// its instructions, window, levels, tools and tiers — and not one owl
 // made up from models.dev's guess for the id. The user's own window and
 // levels still win, a model the shaped list leaves out is made as before,
 // and a shaped list that can't be read keeps what the last one said.
@@ -133,7 +133,7 @@ func TestCodexListedEntry(t *testing.T) {
 		for k, v := range upstream {
 			switch k {
 			case "slug", "display_name", "priority", "description", "availability_nux", "upgrade":
-				continue // myna's id, name and place; the notices name slugs it doesn't have
+				continue // owl's id, name and place; the notices name slugs it doesn't have
 			}
 			if strings.Contains(strings.Join(except, ","), k) {
 				continue
@@ -147,13 +147,13 @@ func TestCodexListedEntry(t *testing.T) {
 	t.Run("the relay's entry", func(t *testing.T) {
 		e := codexEntry(t, "relay/gpt-6.1-terra")
 		verbatim(t, e)
-		if d, _ := e["description"].(string); d != "Frontier agentic coding model. via myna" {
-			t.Errorf("description %q, want the relay's with via myna", d)
+		if d, _ := e["description"].(string); d != "Frontier agentic coding model. via owl" {
+			t.Errorf("description %q, want the relay's with via owl", d)
 		}
 		// the one it doesn't list in Codex's shape is made as before
 		g := codexEntry(t, "relay/glm-5")
 		if g["base_instructions"] != codexcat.Prompt {
-			t.Errorf("glm-5's instructions aren't myna's own: %.80v", g["base_instructions"])
+			t.Errorf("glm-5's instructions aren't owl's own: %.80v", g["base_instructions"])
 		}
 	})
 

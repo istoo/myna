@@ -7,50 +7,50 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // Every agent's model picker has two halves: the models the agent reaches
-// on its own (its sign-in, its own keys), and myna's catalog — every model
+// on its own (its sign-in, its own keys), and owl's catalog — every model
 // of every provider the user added, reached through the local gateway.
 // A catalog model is spelled "provider/model"; an agent that sends that to
 // the gateway gets the vendor's reply in whichever API the agent speaks.
 
-// mynaID is the provider id agents know the gateway by. The id stays
-// "myna": an agent's config already written by upstream keeps pointing
-// at its gateway, and a model it picked keeps its "myna/model" spelling.
-// The name shown beside it is Myna's.
-const mynaID = "myna"
+// owlID is the provider id agents know the gateway by. The id stays
+// "owl": an agent's config already written by upstream keeps pointing
+// at its gateway, and a model it picked keeps its "owl/model" spelling.
+// The name shown beside it is Owl's.
+const owlID = "owl"
 
 // RoutingGroups is the picker's group of routing groups.
 const RoutingGroups = "Routing groups"
 
-// viaMyna lists the catalog as agent is shown it, for a picker: the
+// viaOwl lists the catalog as agent is shown it, for a picker: the
 // routing groups first, in one group of their own, then one group per
 // provider. Built again only when provider.StampNow moved, or
-// mynaModelsFor after it was; each caller is given its own copy.
-func viaMyna(agent, prefix string) []Option {
-	return slices.Clone(viaMynaShared(agent, prefix))
+// owlModelsFor after it was; each caller is given its own copy.
+func viaOwl(agent, prefix string) []Option {
+	return slices.Clone(viaOwlShared(agent, prefix))
 }
 
-// viaMynaShared is viaMyna without a copy of its own, for a caller
+// viaOwlShared is viaOwl without a copy of its own, for a caller
 // that only reads it or appends it onto a list of its own: a copy for each
 // of an agent's fields was 42 MB of what twenty window polls allocated.
 // An append onto it makes a copy, but its Options are never written into.
-func viaMynaShared(agent, prefix string) []Option {
+func viaOwlShared(agent, prefix string) []Option {
 	return builtOptions.shared(agent+"\x00"+prefix, func() []Option { return buildVia(agent, prefix) })
 }
 
-// withVia is append(own, viaMynaShared(agent, prefix)...), the list a
+// withVia is append(own, viaOwlShared(agent, prefix)...), the list a
 // model field offers, kept while own reads the same and the catalog's list
 // is the one kept: the append copied the whole catalog for each field of
 // each agent, every poll, about 60 MB of what forty polls of the Agents
-// page allocated with real accounts. Read only, as viaMynaShared's.
+// page allocated with real accounts. Read only, as viaOwlShared's.
 func withVia(own []Option, agent, prefix string) []Option {
-	via := viaMynaShared(agent, prefix)
+	via := viaOwlShared(agent, prefix)
 	if len(own) == 0 {
 		return via
 	}
@@ -100,14 +100,14 @@ func sameOption(a, b Option) bool {
 		a.own == b.own && a.sub == b.sub
 }
 
-// builtOptions is what viaMyna built last, per agent and prefix. Each
+// builtOptions is what viaOwl built last, per agent and prefix. Each
 // agent's model field offers it, and the window's drift poll asked every
 // field's options of every agent each 15s: Claude Code's alone
-// (claudeViaMyna) allocated 4.7 GB of the 33 GB a live myna did in 53
+// (claudeViaOwl) allocated 4.7 GB of the 33 GB a live owl did in 53
 // minutes.
 var builtOptions stampedLists[Option]
 
-// buildVia is viaMyna built afresh.
+// buildVia is viaOwl built afresh.
 func buildVia(agent, prefix string) []Option {
 	var out, groups []Option
 	shown, _ := provider.CatalogFor(agent)
@@ -133,10 +133,10 @@ func buildVia(agent, prefix string) []Option {
 	// firstUser: the account a request for a subscription's model goes to
 	// first, which the note names. A Codex or Claude Code subscription is
 	// the account the agent is signed in to (Account.User), but its
-	// requests go to the first in myna's order: another one when that
+	// requests go to the first in owl's order: another one when that
 	// one is paused, or when the agent is kept signed in to an account
 	// that isn't first (#1957, parkavenue9639: every codex/gpt-* read
-	// "A · via myna" while each went to B). Asked once a provider.
+	// "A · via owl" while each went to B). Asked once a provider.
 	firsts := map[string]string{}
 	firstUser := func(p provider.Provider) string {
 		a := p.Account
@@ -155,13 +155,13 @@ func buildVia(agent, prefix string) []Option {
 	var tiered map[string]bool // provider.UltraModels, read at the first fast model
 	for _, e := range shown {
 		if e.Group != "" {
-			groups = append(groups, Option{Value: prefix + e.ID, Label: e.Name, Note: "routing group · via myna",
+			groups = append(groups, Option{Value: prefix + e.ID, Label: e.Name, Note: "routing group · via owl",
 				Icon: e.Provider.Icon, Icons: e.Icons, Group: RoutingGroups, Ref: e.ID})
 			continue
 		}
-		note := e.Provider.Name + " · via myna"
+		note := e.Provider.Name + " · via owl"
 		if a := e.Provider.Account; a != nil {
-			note = firstUser(e.Provider) + " · via myna"
+			note = firstUser(e.Provider) + " · via owl"
 		}
 		o := Option{Value: prefix + e.ID, Label: e.Name, Note: note,
 			Icon: e.Provider.Icon, Group: e.Provider.Name, Ref: e.ID, Free: e.Free, Rate: e.Rate, RateWas: e.RateWas, Context: e.Context, own: own[e.Provider.ID],
@@ -187,7 +187,7 @@ func buildVia(agent, prefix string) []Option {
 
 // listLabels are the names the agent's own list calls the catalog's models
 // by, by id: provider.Labels, which follows the Provider in model names
-// setting, where an Option's Label is the name alone for myna's picker.
+// setting, where an Option's Label is the name alone for owl's picker.
 func listLabels(agent string) map[string]string {
 	shown, _ := provider.CatalogFor(agent)
 	labels := provider.Labels(shown)
@@ -198,26 +198,26 @@ func listLabels(agent string) map[string]string {
 	return out
 }
 
-// isMyna reports whether a model value is a catalog reference.
-func isMyna(v string) bool {
+// isOwl reports whether a model value is a catalog reference.
+func isOwl(v string) bool {
 	if pid, _, ok := strings.Cut(v, "/"); ok && dryProviders[pid] {
 		return true
 	}
 	if !strings.Contains(v, "/") {
 		return false
 	}
-	return mynaRefs.get(v, func() bool {
+	return owlRefs.get(v, func() bool {
 		_, _, ok := provider.Resolve(v)
 		return ok
 	})
 }
 
-// mynaRefs keeps isMyna's answers while provider.StampNow stays the
+// owlRefs keeps isOwl's answers while provider.StampNow stays the
 // same, for a minute at most. Outside a request that holds the catalog,
 // each Resolve built every provider's entries again: the window's drift
 // poll, every 15s, asked it for each agent's values, ~6 MB a poll (the
 // procmem heap profile: 235 MB of 1.37 GB in 10 minutes of GUI use).
-var mynaRefs stampedRefs
+var owlRefs stampedRefs
 
 // stampedRefs is a model value → answer, dropped when the stamp moves,
 // after a minute (what the stamp can't see: an account another program
@@ -265,15 +265,15 @@ func firstOf(xs []string) string {
 	return ""
 }
 
-// mynaModels is the catalog as agent is shown it, as catalog.Models, for
+// owlModels is the catalog as agent is shown it, as catalog.Models, for
 // agents that keep their own model files: built again only when
-// provider.StampNow moved, or mynaModelsFor after it was, each caller
+// provider.StampNow moved, or owlModelsFor after it was, each caller
 // given its own copy of the list.
-func mynaModels(agent string) []catalog.Model {
+func owlModels(agent string) []catalog.Model {
 	return builtModels.get(agent, func() []catalog.Model { return buildModels(agent) })
 }
 
-// sharedModels is mynaModels without the caller's own copy, for one
+// sharedModels is owlModels without the caller's own copy, for one
 // that only reads it: a range over it copies each model, so it can't
 // write into the list kept. A copy per call was 37 MB of what forty polls
 // of the window allocated with real accounts, most of it Pi's and Claude
@@ -282,15 +282,15 @@ func sharedModels(agent string) []catalog.Model {
 	return builtModels.shared(agent, func() []catalog.Model { return buildModels(agent) })
 }
 
-// builtModels is what mynaModels built last, per agent. The window asks
+// builtModels is what owlModels built last, per agent. The window asks
 // /api/drift every 15s, and each agent's Drift asked for its list again
 // per field, each built whole with its prices and Vision's ranking of the
-// models that see: 14.5 GB of the 33 GB a live myna allocated in 53
+// models that see: 14.5 GB of the 33 GB a live owl allocated in 53
 // minutes, the garbage its footprint peaks on.
 var builtModels stampedLists[catalog.Model]
 
 // stampedLists keeps a list built per key while provider.StampNow stays
-// the same, mynaModelsFor at most, and gives each caller a copy.
+// the same, owlModelsFor at most, and gives each caller a copy.
 type stampedLists[T any] struct {
 	sync.Mutex
 	m map[string]stampedList[T]
@@ -314,7 +314,7 @@ func (s *stampedLists[T]) shared(key string, build func() []T) []T {
 	// the stamp is read before the list is built: a change while it is
 	// moves it past the one kept, and the next call builds it again
 	stamp := provider.StampNow()
-	if !ok || b.stamp != stamp || time.Since(b.at) >= mynaModelsFor {
+	if !ok || b.stamp != stamp || time.Since(b.at) >= owlModelsFor {
 		b = stampedList[T]{build(), stamp, time.Now()}
 		s.Lock()
 		if s.m == nil {
@@ -326,13 +326,13 @@ func (s *stampedLists[T]) shared(key string, build func() []T) []T {
 	return slices.Clip(b.list)
 }
 
-// mynaModelsFor is how long a list is kept while provider.StampNow says
+// owlModelsFor is how long a list is kept while provider.StampNow says
 // nothing changed: what the stamp can't see (another app rewriting an
 // account's file, a model retired by its date, a provider resting, which
 // Vision's pick of a model that sees follows) reaches the lists within it.
-const mynaModelsFor = time.Minute
+const owlModelsFor = time.Minute
 
-// buildModels is mynaModels built afresh. A model's own lists are
+// buildModels is owlModels built afresh. A model's own lists are
 // clipped, so a caller appending to one in its copy makes a new one and
 // never writes into the list kept.
 func buildModels(agent string) []catalog.Model {
@@ -342,7 +342,7 @@ func buildModels(agent string) []catalog.Model {
 	var out []catalog.Model
 	shown, _ := provider.CatalogFor(agent)
 	labels := provider.Labels(shown)
-	// a model myna describes images to takes them (provider.Described)
+	// a model owl describes images to takes them (provider.Described)
 	seen := describedNow()
 	st, find := settings.Load(), provider.GroupFinder()
 	priceOf := provider.AgentPricer(st, find)
@@ -353,7 +353,7 @@ func buildModels(agent string) []catalog.Model {
 	for i, e := range shown {
 		efforts := e.Efforts
 		if agent == "codex" {
-			// the levels Codex's picker offers, a model myna has no
+			// the levels Codex's picker offers, a model owl has no
 			// word on included (provider.CodexEfforts)
 			efforts = provider.CodexEfforts(e)
 		}
@@ -396,8 +396,8 @@ func buildModels(agent string) []catalog.Model {
 			m.APIs = []string{string(provider.Responses)}
 		}
 		// the service tiers Codex is offered on it, as the gateway's own
-		// lists offer them: Fast in the Codex CLI myna writes
-		// myna-models.json for (#1530)
+		// lists offer them: Fast in the Codex CLI owl writes
+		// owl-models.json for (#1530)
 		provider.CodexTiers(&m, e, members)
 		if agent == "codex" {
 			// the entry its vendor lists the model under in Codex's own
@@ -421,10 +421,10 @@ func buildModels(agent string) []catalog.Model {
 }
 
 // describedNow is provider.Described, asked once for every agent's list
-// while provider.StampNow stays the same, mynaModelsFor at most, as the
+// while provider.StampNow stays the same, owlModelsFor at most, as the
 // lists are kept: each list built asked the gateway's Vision pick again,
 // which ranks every provider's models that see, 553 MB of what a live
-// myna allocated in 37 minutes for the same answer a dozen times over.
+// owl allocated in 37 minutes for the same answer a dozen times over.
 func describedNow() bool {
 	return builtSeen.shared("", func() []bool {
 		return []bool{provider.Described != nil && provider.Described()}
@@ -455,7 +455,7 @@ func maxTokens(m catalog.Model) int { return provider.OutputWithin(m.Context, m.
 
 // outputOr is the output limit an agent is handed for m: the Max output the
 // user set for it (catalog.Model.OutputSet), kept within its window, else
-// capped, the agent's own trim of the vendor's figure. A cap of myna's
+// capped, the agent's own trim of the vendor's figure. A cap of owl's
 // never overrides the user's number: DeepSeek V4.1 Flash set to 384k reached
 // VS Code as 250000 and WorkBuddy as 128000 (#2064).
 func outputOr(m catalog.Model, capped int) int {

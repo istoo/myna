@@ -37,15 +37,15 @@ func deskListIs(t *testing.T, list *string) {
 }
 
 // laddieyao on Discord: Codex joined beside its ChatGPT sign-in, the Codex
-// app's picker showed GPT alone while the CLI listed myna's models. The
+// app's picker showed GPT alone while the CLI listed owl's models. The
 // app shows only the models of Codex's list a flag of OpenAI's names,
 // unless Codex reads its list from a file: where the app is installed,
-// myna writes the list it hands Codex there and names it; the CLI alone
+// owl writes the list it hands Codex there and names it; the CLI alone
 // keeps the list the gateway hands it.
 func TestCodexDesktopListBesideSignIn(t *testing.T) {
 	home, read := codexHome(t, `{"tokens":{"access_token":"x","id_token":"x.e30.x"}}`, `model = "gpt-5.5"`+"\n")
 	dir := filepath.Join(home, ".codex")
-	desk := filepath.Join(dir, "myna-desktop-models.json")
+	desk := filepath.Join(dir, "owl-desktop-models.json")
 	app := true
 	codexAppReads(t, &app)
 	list := `{"models":[{"slug":"gpt-6-sol","base_instructions":"theirs"},{"slug":"fake/m1"}]}`
@@ -56,7 +56,7 @@ func TestCodexDesktopListBesideSignIn(t *testing.T) {
 		t.Fatalf("join: %v %v", ok, err)
 	}
 	cfg := read()
-	if !strings.Contains(cfg, `model_catalog_json = "`) || !strings.Contains(cfg, "myna-desktop-models.json") {
+	if !strings.Contains(cfg, `model_catalog_json = "`) || !strings.Contains(cfg, "owl-desktop-models.json") {
 		t.Fatalf("joined with the Codex app here, no list named for it:\n%s", cfg)
 	}
 	if strings.Contains(cfg, "model_provider =") {
@@ -65,7 +65,7 @@ func TestCodexDesktopListBesideSignIn(t *testing.T) {
 	if b, err := os.ReadFile(desk); err != nil || string(b) != list {
 		t.Fatalf("the app's list: %q %v", b, err)
 	}
-	// connected beside the sign-in, as before: not myna as its provider
+	// connected beside the sign-in, as before: not owl as its provider
 	if !cx.Joined() || cx.AppOut() {
 		t.Fatalf("joined %v, app out %v\n%s", cx.Joined(), cx.AppOut(), cfg)
 	}
@@ -73,7 +73,7 @@ func TestCodexDesktopListBesideSignIn(t *testing.T) {
 		t.Fatalf("check: %s", msg)
 	}
 
-	// myna's models changed: written again at the next sync
+	// owl's models changed: written again at the next sync
 	list = `{"models":[{"slug":"gpt-6-sol","base_instructions":"theirs"},{"slug":"fake/m2"}]}`
 	if err := cx.Sync(); err != nil {
 		t.Fatal(err)
@@ -89,26 +89,26 @@ func TestCodexDesktopListBesideSignIn(t *testing.T) {
 	if err := cx.Sync(); err != nil {
 		t.Fatal(err)
 	}
-	if b, _ := os.ReadFile(desk); string(b) != was || !strings.Contains(read(), "myna-desktop-models.json") {
+	if b, _ := os.ReadFile(desk); string(b) != was || !strings.Contains(read(), "owl-desktop-models.json") {
 		t.Fatalf("unknown list: %s\n%s", b, read())
 	}
 	list = was
 
-	// a myna model picked beside the sign-in: still Codex's provider,
+	// a owl model picked beside the sign-in: still Codex's provider,
 	// the list still the app's
 	if err := cx.Fields[0].Set("fake/m1"); err != nil {
 		t.Fatal(err)
 	}
-	if cfg := read(); !cx.Beside() || !strings.Contains(cfg, "myna-desktop-models.json") || strings.Contains(cfg, "model_provider =") {
+	if cfg := read(); !cx.Beside() || !strings.Contains(cfg, "owl-desktop-models.json") || strings.Contains(cfg, "model_provider =") {
 		t.Fatalf("beside: %v\n%s", cx.Beside(), cfg)
 	}
 
-	// myna API: myna's own catalog, as myna is Codex's provider, and
+	// owl API: owl's own catalog, as owl is Codex's provider, and
 	// the app's list gone
 	if err := cx.Field("login").Set("api"); err != nil {
 		t.Fatal(err)
 	}
-	if cfg := read(); !strings.Contains(cfg, `model_provider = "myna"`) || strings.Contains(cfg, "myna-desktop-models.json") {
+	if cfg := read(); !strings.Contains(cfg, `model_provider = "owl"`) || strings.Contains(cfg, "owl-desktop-models.json") {
 		t.Fatalf("api:\n%s", cfg)
 	}
 	if _, err := os.Stat(desk); !os.IsNotExist(err) {
@@ -117,7 +117,7 @@ func TestCodexDesktopListBesideSignIn(t *testing.T) {
 	if err := cx.Field("login").Set(""); err != nil {
 		t.Fatal(err)
 	}
-	if cfg := read(); !strings.Contains(cfg, "myna-desktop-models.json") || strings.Contains(cfg, "model_provider =") {
+	if cfg := read(); !strings.Contains(cfg, "owl-desktop-models.json") || strings.Contains(cfg, "model_provider =") {
 		t.Fatalf("back beside the sign-in:\n%s", cfg)
 	}
 
@@ -138,7 +138,7 @@ func TestCodexDesktopListBesideSignIn(t *testing.T) {
 // Codex app was installed goes once it isn't.
 func TestCodexDesktopListCLIOnly(t *testing.T) {
 	home, read := codexHome(t, `{"tokens":{"access_token":"x","id_token":"x.e30.x"}}`, `model = "gpt-5.5"`+"\n")
-	desk := filepath.Join(home, ".codex", "myna-desktop-models.json")
+	desk := filepath.Join(home, ".codex", "owl-desktop-models.json")
 	app := false
 	codexAppReads(t, &app)
 	list := `{"models":[{"slug":"gpt-6-sol"}]}`
@@ -157,7 +157,7 @@ func TestCodexDesktopListCLIOnly(t *testing.T) {
 	if err := cx.Sync(); err != nil {
 		t.Fatal(err)
 	}
-	if cfg := read(); !strings.Contains(cfg, "myna-desktop-models.json") {
+	if cfg := read(); !strings.Contains(cfg, "owl-desktop-models.json") {
 		t.Fatalf("the app installed:\n%s", cfg)
 	}
 	app = false
@@ -173,13 +173,13 @@ func TestCodexDesktopListCLIOnly(t *testing.T) {
 }
 
 // A model_catalog_json the user set while joined is theirs: it stands, and
-// no list of myna's is written beside it. And a key naming myna's list
+// no list of owl's is written beside it. And a key naming owl's list
 // with the file gone (removed by hand) goes, as Codex loads no config then,
 // while the list isn't known to write it again.
 func TestCodexDesktopListKeepsTheirs(t *testing.T) {
 	home, read := codexHome(t, `{"tokens":{"access_token":"x","id_token":"x.e30.x"}}`, `model = "gpt-5.5"`+"\n")
 	dir := filepath.Join(home, ".codex")
-	desk := filepath.Join(dir, "myna-desktop-models.json")
+	desk := filepath.Join(dir, "owl-desktop-models.json")
 	app := true
 	codexAppReads(t, &app)
 	list := `{"models":[{"slug":"gpt-6-sol"}]}`

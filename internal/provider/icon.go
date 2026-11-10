@@ -18,8 +18,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/iconproxy"
-	"github.com/istoo/myna/internal/netguard"
+	"github.com/istoo/owl/internal/iconproxy"
+	"github.com/istoo/owl/internal/netguard"
 )
 
 // A provider's own picture lives in the icons folder beside providers.json,
@@ -27,7 +27,7 @@ import (
 // built-in icons are plain names ("deepseek-color").
 const iconPrefix = "file:"
 
-// MaxIcon is the largest picture myna keeps for a provider.
+// MaxIcon is the largest picture owl keeps for a provider.
 const MaxIcon = 1 << 20
 
 var iconName = regexp.MustCompile(`^[0-9a-f]{16}\.(png|jpg|gif|webp|ico|svg)$`)
@@ -55,7 +55,7 @@ func StoreIcon(data []byte) (string, error) {
 	}
 	ext := iconExt(data)
 	if ext == "" {
-		return "", errors.New("not a picture myna can show: use PNG, JPEG, GIF, WebP, ICO or SVG")
+		return "", errors.New("not a picture owl can show: use PNG, JPEG, GIF, WebP, ICO or SVG")
 	}
 	sum := sha256.Sum256(data)
 	name := hex.EncodeToString(sum[:8]) + "." + ext
@@ -71,10 +71,10 @@ func StoreIcon(data []byte) (string, error) {
 // FetchIcon downloads the picture an import link named and keeps it like
 // any other, returning the Icon value that points at it. It runs when the
 // user confirms the import, never at parse time; the URL is re-checked here
-// so a crafted request can't point myna at anything but a public https
+// so a crafted request can't point owl at anything but a public https
 // picture, and the read stops one byte past MaxIcon so a huge body is
 // refused rather than buffered. The picture is asked for through
-// github.com/istoo/myna's icon proxy, so its host never sees the user's IP.
+// github.com/istoo/owl's icon proxy, so its host never sees the user's IP.
 func FetchIcon(ctx context.Context, rawURL string) (string, error) {
 	u, err := iconURL(rawURL)
 	if err != nil {
@@ -96,7 +96,7 @@ var iconClient = guardClient
 // Through a proxy the connection goes to the proxy, often on this computer
 // (Clash's 127.0.0.1:7890), so the proxy's own address is dialed as it is;
 // the site's name is judged before the proxy is asked for, since the proxy
-// resolves it where myna can't see.
+// resolves it where owl can't see.
 func guardClient() *http.Client {
 	c := *http.DefaultClient
 	t := http.DefaultTransport.(*http.Transport).Clone()

@@ -7,7 +7,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // tokenFieldRefused is the unfit entry for a provider whose Chat
@@ -18,7 +18,7 @@ const tokenFieldRefused = "token-field-refused:"
 // chatTokenField names a Chat Completions request's reply length as p's
 // API reads it: max_completion_tokens on OpenAI's own API, whose newer
 // models turn max_tokens away (GoxxKintBlade on X: a client's, or
-// myna's image describer's, max_tokens 400 "Use 'max_completion_tokens'
+// owl's image describer's, max_tokens 400 "Use 'max_completion_tokens'
 // instead"), and on any other the name it asked for once it turned the
 // other away (forward). Every other vendor's body goes as it came:
 // DeepSeek, Zhipu and most relays read max_tokens alone.

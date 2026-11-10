@@ -6,12 +6,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A model asked for at an effort of its own, "<model>:<level>" — a Claude
-// Code tier myna set one on (#536) — is that model, asked for that effort
+// Code tier owl set one on (#536) — is that model, asked for that effort
 // at its nearest level whatever the agent asked, as a group's member fixed
 // at one is (#189); the trace says it was fixed. A member's own effort wins
 // over it, and a model whose own id ends in a level is taken whole.

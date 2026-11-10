@@ -18,7 +18,7 @@ for (const engine of process.env.BROWSER ? [process.env.BROWSER] : ["chromium", 
           await page.route("**/*", (route) => route.request().isNavigationRequest()
             ? route.fulfill({ contentType: "text/html", body: '<div class="modal"><div class="dialog">Provider editor</div></div><dialog class="action-confirm"><h2>Remove?</h2></dialog>' })
             : route.abort());
-          await page.goto(`http://myna.test/?mode=${mode}`);
+          await page.goto(`http://owl.test/?mode=${mode}`);
           await page.evaluate(({ platform, web }) => {
             Object.defineProperty(navigator, "platform", { value: platform });
             window.bootPrefs = { web };

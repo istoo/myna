@@ -3,7 +3,7 @@
 // sight. With Agents selected — #view-routing.hidden, the window drawing
 // frames, the tab in sight — the loop must stop asking for frames: the
 // function frame that drew the page every frame until now asked for the
-// next one whatever the page was showing, so the mynas were posed (and
+// next one whatever the page was showing, so the owls were posed (and
 // the loop kept awake) forever while nobody looked at Routing. In sight
 // again the view is picked and the loop resumes. What the poll lists came
 // in meanwhile is another test's business (routing-flood); this one counts
@@ -13,7 +13,7 @@
 // idle Routing page asked for a frame every vsync, and the live dot beside
 // its title pulsed forever, which on Linux without a GPU (xrdp, llvmpipe)
 // cost the renderer 459%–830% CPU. Idle, the loop asks for no frames and
-// the dot rests; a request under way wakes both. MYNA_ROUTING_ASSETS
+// the dot rests; a request under way wakes both. OWL_ROUTING_ASSETS
 // points the page at an older asset tree, to watch this go red there.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -23,7 +23,7 @@ const { chromium, webkit } = require("playwright");
 const { navTo } = require("./reader.cjs");
 const engines = process.env.BROWSER ? [process.env.BROWSER] : ["webkit"];
 
-const assets = path.resolve(process.env.MYNA_ROUTING_ASSETS || path.join(__dirname, "../assets"));
+const assets = path.resolve(process.env.OWL_ROUTING_ASSETS || path.join(__dirname, "../assets"));
 const routing = path.join(assets, "plugins/routing/client.js");
 const iso = (ms) => new Date(ms).toISOString();
 const acct = (n) => ({ id: `acct-${n}`, provider: `prov${n}`, name: `Provider ${n}`, who: `user${n}@example.com`, kind: "account", model: `model-${n}`, known: true, used: 10 * n, plan: "Pro" });
@@ -134,7 +134,7 @@ for (const engine of engines) for (const lang of ["en", "zh"]) {
       }
       await browser.close();
     });
-    await page.goto("http://myna.test/?view=routing");
+    await page.goto("http://owl.test/?view=routing");
     await page.locator(".rt-req").first().waitFor();
     // Routing in sight: the loop ran, and it is this loop we count
     await page.waitForFunction(() => window.__seenFrame, null, { timeout: 5000 });
@@ -212,7 +212,7 @@ async function routingPage(t, engine, lang, feed, view = "routing") {
   const errors = [];
   page.on("pageerror", e => errors.push(e.message));
   await page.route("**/*", serve(lang, feed));
-  await page.goto(`http://myna.test/?view=${view}`);
+  await page.goto(`http://owl.test/?view=${view}`);
   // out of sight the list isn't drawn (routing-hidden-stage.test.cjs): the
   // trace is in once the live dot says a request is under way
   if (view === "routing") await page.waitForFunction(() => document.querySelectorAll(".rt-req").length > 0);

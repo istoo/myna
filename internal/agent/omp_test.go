@@ -7,10 +7,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/usage"
 	"gopkg.in/yaml.v3"
 )
 
@@ -45,17 +45,17 @@ func TestOmp(t *testing.T) {
 	if f.Get() != "anthropic/claude-opus-5" {
 		t.Fatalf("get: %q", f.Get())
 	}
-	if err := f.Set("myna/deepseek/pro"); err != nil {
+	if err := f.Set("owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	c, raw := read(configPath)
-	if roles(c)["default"] != "myna/deepseek/pro" || roles(c)["smol"] != "openai/gpt-6-mini" || c["theme"] != "dark" ||
+	if roles(c)["default"] != "owl/deepseek/pro" || roles(c)["smol"] != "openai/gpt-6-mini" || c["theme"] != "dark" ||
 		!strings.Contains(raw, "# mine") || !strings.Contains(raw, "# main") {
 		t.Fatalf("config:\n%s", raw)
 	}
 	m, raw := read(modelsPath)
 	ps := providers(m)
-	mp, ok := ps["myna"].(map[string]any)
+	mp, ok := ps["owl"].(map[string]any)
 	if !ok || ps["mine"] == nil || mp["auth"] != "none" || mp["api"] != "openai-completions" || !strings.HasSuffix(mp["baseUrl"].(string), "/v1") {
 		t.Fatalf("models:\n%s", raw)
 	}
@@ -67,43 +67,43 @@ func TestOmp(t *testing.T) {
 		t.Fatalf("models: %v", ids)
 	}
 
-	// its own model: myna steps out
+	// its own model: owl steps out
 	if err := f.Set("moonshotai/kimi-k3"); err != nil {
 		t.Fatal(err)
 	}
 	c, _ = read(configPath)
 	m, _ = read(modelsPath)
-	if roles(c)["default"] != "moonshotai/kimi-k3" || providers(m)["myna"] != nil || providers(m)["mine"] == nil {
+	if roles(c)["default"] != "moonshotai/kimi-k3" || providers(m)["owl"] != nil || providers(m)["mine"] == nil {
 		t.Fatalf("own: %v %v", c, m)
 	}
 
-	// another role through myna keeps it in models.yml; the reset puts
-	// back the model default had before myna took it over
-	f.Set("myna/deepseek/flash")
-	os.WriteFile(configPath, []byte("modelRoles:\n  default: myna/deepseek/flash\n  smol: myna/deepseek/pro\n"), 0o644)
+	// another role through owl keeps it in models.yml; the reset puts
+	// back the model default had before owl took it over
+	f.Set("owl/deepseek/flash")
+	os.WriteFile(configPath, []byte("modelRoles:\n  default: owl/deepseek/flash\n  smol: owl/deepseek/pro\n"), 0o644)
 	if err := f.Set(""); err != nil {
 		t.Fatal(err)
 	}
 	c, _ = read(configPath)
 	m, _ = read(modelsPath)
-	if roles(c)["default"] != "moonshotai/kimi-k3" || roles(c)["smol"] != "myna/deepseek/pro" || providers(m)["myna"] == nil {
+	if roles(c)["default"] != "moonshotai/kimi-k3" || roles(c)["smol"] != "owl/deepseek/pro" || providers(m)["owl"] == nil {
 		t.Fatalf("reset with smol: %v %v", c, m)
 	}
 
-	// reset with nothing stashed: only default goes, and myna with it
-	os.WriteFile(configPath, []byte("theme: dark\nmodelRoles:\n  default: myna/deepseek/flash\n  smol: openai/gpt-6-mini\n"), 0o644)
+	// reset with nothing stashed: only default goes, and owl with it
+	os.WriteFile(configPath, []byte("theme: dark\nmodelRoles:\n  default: owl/deepseek/flash\n  smol: openai/gpt-6-mini\n"), 0o644)
 	if err := f.Set(""); err != nil {
 		t.Fatal(err)
 	}
 	c, _ = read(configPath)
 	m, _ = read(modelsPath)
-	if roles(c)["default"] != nil || roles(c)["smol"] != "openai/gpt-6-mini" || c["theme"] != "dark" || providers(m)["myna"] != nil || providers(m)["mine"] == nil {
+	if roles(c)["default"] != nil || roles(c)["smol"] != "openai/gpt-6-mini" || c["theme"] != "dark" || providers(m)["owl"] != nil || providers(m)["mine"] == nil {
 		t.Fatalf("reset: %v %v", c, m)
 	}
 }
 
 // omp names models beyond modelRoles.default: the other roles, the retry
-// fallback chains, enabledModels and the task agents' overrides. myna
+// fallback chains, enabledModels and the task agents' overrides. owl
 // stays in models.yml while any of them is on it, and a provider renamed
 // takes them along, their thinking levels and the comments around kept.
 func TestOmpRefsBeyondDefault(t *testing.T) {
@@ -121,62 +121,62 @@ func TestOmpRefsBeyondDefault(t *testing.T) {
 	dir := filepath.Join(home, ".omp", "agent")
 	configPath, modelsPath := filepath.Join(dir, "config.yml"), filepath.Join(dir, "models.yml")
 	os.MkdirAll(dir, 0o755)
-	hasMyna := func() bool {
+	hasOwl := func() bool {
 		var m struct{ Providers map[string]any }
 		b, _ := os.ReadFile(modelsPath)
 		yaml.Unmarshal(b, &m)
-		return m.Providers["myna"] != nil
+		return m.Providers["owl"] != nil
 	}
 	f := omp(home).Field("model")
 
-	// the last role leaves myna; a fallback chain still goes through it
-	os.WriteFile(configPath, []byte("modelRoles:\n  default: myna/deepseek/flash\nretry:\n  fallbackChains:\n    default:\n      - myna/deepseek/pro:max\n"), 0o644)
-	if err := f.Set("myna/deepseek/flash"); err != nil {
+	// the last role leaves owl; a fallback chain still goes through it
+	os.WriteFile(configPath, []byte("modelRoles:\n  default: owl/deepseek/flash\nretry:\n  fallbackChains:\n    default:\n      - owl/deepseek/pro:max\n"), 0o644)
+	if err := f.Set("owl/deepseek/flash"); err != nil {
 		t.Fatal(err)
 	}
 	if err := f.Set(""); err != nil {
 		t.Fatal(err)
 	}
-	if !hasMyna() {
-		t.Fatal("a fallback chain on myna/deepseek/pro:max lost myna's provider")
+	if !hasOwl() {
+		t.Fatal("a fallback chain on owl/deepseek/pro:max lost owl's provider")
 	}
 	// none left: it goes
-	os.WriteFile(configPath, []byte("modelRoles:\n  default: myna/deepseek/flash\nretry:\n  fallbackChains:\n    default:\n      - openai/gpt-6\n"), 0o644)
+	os.WriteFile(configPath, []byte("modelRoles:\n  default: owl/deepseek/flash\nretry:\n  fallbackChains:\n    default:\n      - openai/gpt-6\n"), 0o644)
 	if err := f.Set(""); err != nil {
 		t.Fatal(err)
 	}
-	if hasMyna() {
-		t.Fatal("myna's provider stayed with nothing on it")
+	if hasOwl() {
+		t.Fatal("owl's provider stayed with nothing on it")
 	}
 
 	const before = `# mine
 modelRoles:
-  default: myna/deepseek/pro
-  slow: myna/deepseek/pro:max, openai/gpt-6 # slow ones
+  default: owl/deepseek/pro
+  slow: owl/deepseek/pro:max, openai/gpt-6 # slow ones
   plan:
-    - myna/deepseek/flash:high
+    - owl/deepseek/flash:high
     - openai/gpt-6
 retry:
   fallbackChains:
     # tried in order
     default:
-      - myna/deepseek/flash:max
-      - myna/deepseekx/flash
-    myna/deepseek/pro:
-      - myna/deepseek/*
+      - owl/deepseek/flash:max
+      - owl/deepseekx/flash
+    owl/deepseek/pro:
+      - owl/deepseek/*
 enabledModels:
-  - myna/deepseek/pro
+  - owl/deepseek/pro
   - path: /work
     models:
-      - myna/deepseek/flash
+      - owl/deepseek/flash
 task:
   agentModelOverrides:
-    explore: myna/deepseek/flash,openai/gpt-6
-    review: [myna/deepseek/pro:low]
+    explore: owl/deepseek/flash,openai/gpt-6
+    review: [owl/deepseek/pro:low]
 `
 	os.WriteFile(configPath, []byte(before), 0o644)
-	setUpInMyna("omp")
-	if err := f.Set("myna/deepseek/pro"); err != nil {
+	setUpInOwl("omp")
+	if err := f.Set("owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	moved, err := RenameProvider("deepseek", "ds")
@@ -185,17 +185,17 @@ task:
 	}
 	b, _ := os.ReadFile(configPath)
 	got := string(b)
-	// the default role set on myna, its one model on the list became
-	// every model of myna's (#1769)
-	want := strings.NewReplacer("myna/deepseek/", "myna/ds/").Replace(strings.Replace(before,
-		"  - myna/deepseek/pro\n  - path: /work\n    models:\n      - myna/deepseek/flash\n",
-		"  - path: /work\n    models:\n      - myna/deepseek/flash\n  - myna/**\n", 1))
+	// the default role set on owl, its one model on the list became
+	// every model of owl's (#1769)
+	want := strings.NewReplacer("owl/deepseek/", "owl/ds/").Replace(strings.Replace(before,
+		"  - owl/deepseek/pro\n  - path: /work\n    models:\n      - owl/deepseek/flash\n",
+		"  - path: /work\n    models:\n      - owl/deepseek/flash\n  - owl/**\n", 1))
 	var gotDoc, wantDoc any
 	yaml.Unmarshal(b, &gotDoc)
 	yaml.Unmarshal([]byte(want), &wantDoc)
 	gotY, _ := yaml.Marshal(gotDoc)
 	wantY, _ := yaml.Marshal(wantDoc)
-	if string(gotY) != string(wantY) || strings.Contains(got, "myna/deepseek/") || !strings.Contains(got, "myna/deepseekx/flash") ||
+	if string(gotY) != string(wantY) || strings.Contains(got, "owl/deepseek/") || !strings.Contains(got, "owl/deepseekx/flash") ||
 		!strings.Contains(got, "# mine") || !strings.Contains(got, "# slow ones") || !strings.Contains(got, "# tried in order") {
 		t.Fatalf("renamed:\n%s", got)
 	}
@@ -205,7 +205,7 @@ task:
 }
 
 // omp 16.x asks with Bun's User-Agent (Bun/1.3.14), which the gateway can't
-// tell for omp's; myna's provider names it, and the gateway knows that
+// tell for omp's; owl's provider names it, and the gateway knows that
 // name for omp.
 func TestOmpNamedToTheGateway(t *testing.T) {
 	home := t.TempDir()
@@ -219,7 +219,7 @@ func TestOmpNamedToTheGateway(t *testing.T) {
 	if err := provider.Save(provider.Provider{ID: "deepseek", Name: "DeepSeek", Chat: "https://api.deepseek.com/v1", Key: "k", Models: []string{"pro"}}); err != nil {
 		t.Fatal(err)
 	}
-	if err := omp(home).Field("model").Set("myna/deepseek/pro"); err != nil {
+	if err := omp(home).Field("model").Set("owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	var m struct {
@@ -231,9 +231,9 @@ func TestOmpNamedToTheGateway(t *testing.T) {
 	if err := yaml.Unmarshal(b, &m); err != nil {
 		t.Fatal(err)
 	}
-	ua := m.Providers[mynaID].Headers["User-Agent"]
+	ua := m.Providers[owlID].Headers["User-Agent"]
 	if ua == "" || usage.AgentOf(ua) != "omp" {
-		t.Fatalf("myna's provider names omp as %q, which the gateway takes for %q:\n%s", ua, usage.AgentOf(ua), b)
+		t.Fatalf("owl's provider names omp as %q, which the gateway takes for %q:\n%s", ua, usage.AgentOf(ua), b)
 	}
 	if usage.AgentOf("Bun/1.3.14") == "omp" {
 		t.Fatal("Bun's own User-Agent is taken for omp's, so the header proves nothing")
@@ -241,7 +241,7 @@ func TestOmpNamedToTheGateway(t *testing.T) {
 }
 
 // omp's own agents pick their models apart from the main one: through
-// myna on its own, a role brings myna's provider in, has its wiring
+// owl on its own, a role brings owl's provider in, has its wiring
 // checked, and takes the provider out again when it is the last.
 func TestOmpRoles(t *testing.T) {
 	home := t.TempDir()
@@ -266,7 +266,7 @@ func TestOmpRoles(t *testing.T) {
 		r, _ := c["modelRoles"].(map[string]any)
 		return r
 	}
-	mynaIn := func() bool { v, ok := edit.GetYAML(modelsPath, "providers.myna.baseUrl"); return ok && v != "" }
+	owlIn := func() bool { v, ok := edit.GetYAML(modelsPath, "providers.owl.baseUrl"); return ok && v != "" }
 
 	a := omp(home)
 	sub, small := a.Field("subagent"), a.Field("small")
@@ -278,20 +278,20 @@ func TestOmpRoles(t *testing.T) {
 			t.Fatalf("field %s: %+v", k, f)
 		}
 	}
-	if err := sub.Set("myna/deepseek/flash"); err != nil {
+	if err := sub.Set("owl/deepseek/flash"); err != nil {
 		t.Fatal(err)
 	}
-	if r := roles(); r["task"] != "myna/deepseek/flash" || r["default"] != "anthropic/claude-opus-5" || !mynaIn() {
-		t.Fatalf("subagent on myna: %v, myna in models.yml: %v", r, mynaIn())
+	if r := roles(); r["task"] != "owl/deepseek/flash" || r["default"] != "anthropic/claude-opus-5" || !owlIn() {
+		t.Fatalf("subagent on owl: %v, owl in models.yml: %v", r, owlIn())
 	}
-	if sub.Get() != "myna/deepseek/flash" {
+	if sub.Get() != "owl/deepseek/flash" {
 		t.Fatalf("get: %q", sub.Get())
 	}
-	// the main model isn't myna's, the subagents' is: its wiring is checked
+	// the main model isn't owl's, the subagents' is: its wiring is checked
 	if a.Check() != "" {
 		t.Fatalf("check, wired: %q", a.Check())
 	}
-	edit.SetYAML(modelsPath, edit.KV{Path: "providers.myna.baseUrl", Value: "http://127.0.0.1:1/v1"})
+	edit.SetYAML(modelsPath, edit.KV{Path: "providers.owl.baseUrl", Value: "http://127.0.0.1:1/v1"})
 	if a.Check() == "" {
 		t.Fatal("check missed the subagents' broken wiring")
 	}
@@ -300,20 +300,20 @@ func TestOmpRoles(t *testing.T) {
 	if err := small.Set("openai/gpt-6-mini"); err != nil {
 		t.Fatal(err)
 	}
-	if r := roles(); r["smol"] != "openai/gpt-6-mini" || !mynaIn() {
+	if r := roles(); r["smol"] != "openai/gpt-6-mini" || !owlIn() {
 		t.Fatalf("small, own: %v", r)
 	}
-	// the last role on myna goes: so does myna's provider
+	// the last role on owl goes: so does owl's provider
 	if err := sub.Set(""); err != nil {
 		t.Fatal(err)
 	}
-	if r := roles(); r["task"] != nil || r["smol"] != "openai/gpt-6-mini" || r["default"] != "anthropic/claude-opus-5" || mynaIn() {
-		t.Fatalf("subagent reset: %v, myna in models.yml: %v", r, mynaIn())
+	if r := roles(); r["task"] != nil || r["smol"] != "openai/gpt-6-mini" || r["default"] != "anthropic/claude-opus-5" || owlIn() {
+		t.Fatalf("subagent reset: %v, owl in models.yml: %v", r, owlIn())
 	}
 }
 
 // A role's thinking level ("…:max") stays with it when another model is
-// picked, and the model the user had before myna comes back, level and
+// picked, and the model the user had before owl comes back, level and
 // all, when the role is reset.
 func TestOmpLevels(t *testing.T) {
 	home := t.TempDir()
@@ -350,53 +350,53 @@ func TestOmpLevels(t *testing.T) {
 	}
 
 	// deepseek/pro has no max of its own: omp clamps it, so it stays
-	apply("model", "myna/deepseek/pro", "myna/deepseek/pro:max")
+	apply("model", "owl/deepseek/pro", "owl/deepseek/pro:max")
 	if d := a.Drift(); d != nil {
-		t.Fatalf("drift on what myna set: %+v", d)
+		t.Fatalf("drift on what owl set: %+v", d)
 	}
-	apply("model", "myna/deepseek/flash", "myna/deepseek/flash:max")
-	apply("model", "myna/deepseek/pro:low", "myna/deepseek/pro:low") // its own level wins
+	apply("model", "owl/deepseek/flash", "owl/deepseek/flash:max")
+	apply("model", "owl/deepseek/pro:low", "owl/deepseek/pro:low") // its own level wins
 	// offered at its level beside the model: that keeps the level, the
 	// model alone clears it
 	var at, plain bool
 	for _, o := range a.Field("model").Options(a.Values()) {
-		at = at || o.Value == "myna/deepseek/pro:low" && strings.HasSuffix(o.Label, " · low")
-		plain = plain || o.Value == "myna/deepseek/pro"
+		at = at || o.Value == "owl/deepseek/pro:low" && strings.HasSuffix(o.Label, " · low")
+		plain = plain || o.Value == "owl/deepseek/pro"
 	}
 	if !at || !plain {
 		t.Fatalf("options: at its level %v, the model %v", at, plain)
 	}
-	apply("model", "myna/deepseek/pro:low", "myna/deepseek/pro:low")
-	apply("model", "myna/deepseek/pro", "myna/deepseek/pro")
-	apply("model", "myna/deepseek/flash", "myna/deepseek/flash")
-	apply("model", "myna/deepseek/pro:low", "myna/deepseek/pro:low")
-	apply("slow", "myna/deepseek/pro", "myna/deepseek/pro:auto")
+	apply("model", "owl/deepseek/pro:low", "owl/deepseek/pro:low")
+	apply("model", "owl/deepseek/pro", "owl/deepseek/pro")
+	apply("model", "owl/deepseek/flash", "owl/deepseek/flash")
+	apply("model", "owl/deepseek/pro:low", "owl/deepseek/pro:low")
+	apply("slow", "owl/deepseek/pro", "owl/deepseek/pro:auto")
 
-	// the first model stashed, not the myna ones after it
+	// the first model stashed, not the owl ones after it
 	apply("model", "", "anthropic/claude-opus-5:max")
 	apply("slow", "", "openai/gpt-6:auto")
 	// a colon that is no level is the model's
 	apply("model", "ollama/qwen3:8b", "ollama/qwen3:8b:max")
 
 	// a model of the user's own in between is the one put back
-	apply("model", "myna/deepseek/pro", "myna/deepseek/pro:max")
+	apply("model", "owl/deepseek/pro", "owl/deepseek/pro:max")
 	apply("model", "openai/gpt-6", "openai/gpt-6:max")
-	apply("model", "myna/deepseek/pro", "myna/deepseek/pro:max")
+	apply("model", "owl/deepseek/pro", "owl/deepseek/pro:max")
 	apply("model", "", "openai/gpt-6:max")
 
 	// a provider removed moves the role to the same model elsewhere, level
 	// and all
-	apply("model", "myna/deepseek/pro", "myna/deepseek/pro:max")
+	apply("model", "owl/deepseek/pro", "owl/deepseek/pro:max")
 	if _, err := Reseat(func() error { return provider.Delete("deepseek") }); err != nil {
 		t.Fatal(err)
 	}
-	if got := get("model"); got != "myna/other/pro:max" {
+	if got := get("model"); got != "owl/other/pro:max" {
 		t.Fatalf("reseated: %q", got)
 	}
 }
 
-// A role on one of myna's models with a thinking level is that model
-// wherever myna matches a value against the picker: offered once, typed
+// A role on one of owl's models with a thinking level is that model
+// wherever owl matches a value against the picker: offered once, typed
 // at a level on the command line, missed when omp puts it back to its own,
 // and moved, level and all, when its provider is renamed.
 func TestOmpLevelSuffix(t *testing.T) {
@@ -419,40 +419,40 @@ func TestOmpLevelSuffix(t *testing.T) {
 	a := omp(home)
 	f := a.Field("model")
 
-	v, err := a.Spell("model", "myna/deepseek/pro:high")
-	if err != nil || v != "myna/deepseek/pro:high" {
+	v, err := a.Spell("model", "owl/deepseek/pro:high")
+	if err != nil || v != "owl/deepseek/pro:high" {
 		t.Fatalf("spell at a level: %q %v", v, err)
 	}
 	if err := a.Apply("model", v); err != nil {
 		t.Fatal(err)
 	}
 	// the subagents on the same model at another level: moved with it too
-	if err := a.Apply("subagent", "myna/deepseek/pro:max"); err != nil {
+	if err := a.Apply("subagent", "owl/deepseek/pro:max"); err != nil {
 		t.Fatal(err)
 	}
 	if d := a.Drift(); d != nil {
-		t.Fatalf("drift on what myna set: %+v", d)
+		t.Fatalf("drift on what owl set: %+v", d)
 	}
 	// omp's own /model puts the role back on the user's model
 	edit.SetYAML(configPath, edit.KV{Path: "modelRoles.default", Value: "anthropic/claude-opus-5:high"})
-	if d := a.Drift(); d == nil || d.Kind != "replaced" || d.Want != "myna/deepseek/pro:high" {
+	if d := a.Drift(); d == nil || d.Kind != "replaced" || d.Want != "owl/deepseek/pro:high" {
 		t.Fatalf("drift, replaced: %+v", d)
 	}
-	if err := a.Reapply(); err != nil || f.Get() != "myna/deepseek/pro:high" {
+	if err := a.Reapply(); err != nil || f.Get() != "owl/deepseek/pro:high" {
 		t.Fatalf("reapplied: %q %v", f.Get(), err)
 	}
 
 	if _, err := RenameProvider("deepseek", "ds"); err != nil {
 		t.Fatal(err)
 	}
-	if f.Get() != "myna/ds/pro:high" || a.Field("subagent").Get() != "myna/ds/pro:max" {
+	if f.Get() != "owl/ds/pro:high" || a.Field("subagent").Get() != "owl/ds/pro:max" {
 		t.Fatalf("renamed: %q, subagent %q", f.Get(), a.Field("subagent").Get())
 	}
 }
 
 // A role omp falls back through, a list of models (a YAML list or the
 // comma-separated string omp also takes), is the user's to have back when
-// myna lets go of the role; a level on its last model is no role's level.
+// owl lets go of the role; a level on its last model is no role's level.
 func TestOmpRoleList(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
@@ -474,11 +474,11 @@ func TestOmpRoleList(t *testing.T) {
 		if got := a.Field(k).Get(); got != "openai/gpt-6,anthropic/claude-opus-5:high" {
 			t.Fatalf("%s reads %q", k, got)
 		}
-		if err := a.Apply(k, "myna/deepseek/pro"); err != nil {
+		if err := a.Apply(k, "owl/deepseek/pro"); err != nil {
 			t.Fatal(err)
 		}
-		if got := a.Field(k).Get(); got != "myna/deepseek/pro" {
-			t.Fatalf("%s on myna: %q", k, got)
+		if got := a.Field(k).Get(); got != "owl/deepseek/pro" {
+			t.Fatalf("%s on owl: %q", k, got)
 		}
 		if err := a.Apply(k, ""); err != nil {
 			t.Fatal(err)
@@ -489,9 +489,9 @@ func TestOmpRoleList(t *testing.T) {
 	}
 }
 
-// A role on myna at a thinking level that a fallback chain names too: a
+// A role on owl at a thinking level that a fallback chain names too: a
 // provider renamed moves each once, the level kept. The role back on omp's
-// own, the chain alone keeps myna's provider, has its wiring checked, and
+// own, the chain alone keeps owl's provider, has its wiring checked, and
 // applying again mends it.
 func TestOmpRoleAndChain(t *testing.T) {
 	home := t.TempDir()
@@ -508,26 +508,26 @@ func TestOmpRoleAndChain(t *testing.T) {
 	dir := filepath.Join(home, ".omp", "agent")
 	configPath, modelsPath := filepath.Join(dir, "config.yml"), filepath.Join(dir, "models.yml")
 	os.MkdirAll(dir, 0o755)
-	os.WriteFile(configPath, []byte("modelRoles:\n  default: anthropic/claude-opus-5\nretry:\n  fallbackChains:\n    slow:\n      - myna/deepseek/pro:max\n      - openai/gpt-6\n"), 0o644)
+	os.WriteFile(configPath, []byte("modelRoles:\n  default: anthropic/claude-opus-5\nretry:\n  fallbackChains:\n    slow:\n      - owl/deepseek/pro:max\n      - openai/gpt-6\n"), 0o644)
 	a := omp(home)
-	if err := a.Apply("slow", "myna/deepseek/pro:max"); err != nil {
+	if err := a.Apply("slow", "owl/deepseek/pro:max"); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := RenameProvider("deepseek", "ds"); err != nil {
 		t.Fatal(err)
 	}
 	chain := edit.GetYAMLList(configPath, "retry.fallbackChains.slow")
-	if s := a.Field("slow").Get(); s != "myna/ds/pro:max" || !slices.Equal(chain, []string{"myna/ds/pro:max", "openai/gpt-6"}) {
+	if s := a.Field("slow").Get(); s != "owl/ds/pro:max" || !slices.Equal(chain, []string{"owl/ds/pro:max", "openai/gpt-6"}) {
 		t.Fatalf("renamed: slow %q, chain %v", s, chain)
 	}
 
 	if err := a.Apply("slow", ""); err != nil {
 		t.Fatal(err)
 	}
-	if v, _ := edit.GetYAML(modelsPath, "providers.myna.baseUrl"); v == "" || a.Field("slow").Get() != "" {
-		t.Fatalf("the chain lost myna's provider, or slow stayed: %q", a.Field("slow").Get())
+	if v, _ := edit.GetYAML(modelsPath, "providers.owl.baseUrl"); v == "" || a.Field("slow").Get() != "" {
+		t.Fatalf("the chain lost owl's provider, or slow stayed: %q", a.Field("slow").Get())
 	}
-	edit.SetYAML(modelsPath, edit.KV{Path: "providers.myna.baseUrl", Value: "http://127.0.0.1:1/v1"})
+	edit.SetYAML(modelsPath, edit.KV{Path: "providers.owl.baseUrl", Value: "http://127.0.0.1:1/v1"})
 	if d := a.Drift(); d == nil || d.Kind != "unwired" {
 		t.Fatalf("a chain's broken wiring: %+v", d)
 	}
@@ -540,14 +540,14 @@ func TestOmpRoleAndChain(t *testing.T) {
 }
 
 // A role that is a list of models omp falls back through is the user's own,
-// even when it starts on one of myna's: myna taking the role over
+// even when it starts on one of owl's: owl taking the role over
 // stashes it, and a reset puts it back written as it was — a YAML list or a
 // comma-separated string.
 func TestOmpListRole(t *testing.T) {
 	for _, slow := range []string{
-		" [myna/deepseek/flash, openai/gpt-6]",
-		" myna/deepseek/flash, openai/gpt-6",
-		"\n    - myna/deepseek/flash\n    - openai/gpt-6",
+		" [owl/deepseek/flash, openai/gpt-6]",
+		" owl/deepseek/flash, openai/gpt-6",
+		"\n    - owl/deepseek/flash\n    - openai/gpt-6",
 	} {
 		t.Run(slow, func(t *testing.T) {
 			home := t.TempDir()
@@ -567,7 +567,7 @@ func TestOmpListRole(t *testing.T) {
 			before := "modelRoles:\n  default: anthropic/claude-opus-5\n  slow:" + slow + "\n"
 			os.WriteFile(configPath, []byte(before), 0o644)
 			a := omp(home)
-			if err := a.Apply("slow", "myna/deepseek/pro"); err != nil {
+			if err := a.Apply("slow", "owl/deepseek/pro"); err != nil {
 				t.Fatal(err)
 			}
 			if err := a.Apply("slow", ""); err != nil {
@@ -581,8 +581,8 @@ func TestOmpListRole(t *testing.T) {
 	}
 }
 
-// A provider renamed moves the myna models in a list role once, the list
-// written as it was, and in the list the stash keeps for a role myna took
+// A provider renamed moves the owl models in a list role once, the list
+// written as it was, and in the list the stash keeps for a role owl took
 // over, which a reset then puts back.
 func TestOmpListRoleRenamed(t *testing.T) {
 	home := t.TempDir()
@@ -599,9 +599,9 @@ func TestOmpListRoleRenamed(t *testing.T) {
 	dir := filepath.Join(home, ".omp", "agent")
 	configPath := filepath.Join(dir, "config.yml")
 	os.MkdirAll(dir, 0o755)
-	os.WriteFile(configPath, []byte("modelRoles:\n  default: anthropic/claude-opus-5\n  slow: [myna/deepseek/flash, openai/gpt-6]\n  task: [myna/deepseek/pro:high, openai/gpt-6]\n"), 0o644)
+	os.WriteFile(configPath, []byte("modelRoles:\n  default: anthropic/claude-opus-5\n  slow: [owl/deepseek/flash, openai/gpt-6]\n  task: [owl/deepseek/pro:high, openai/gpt-6]\n"), 0o644)
 	a := omp(home)
-	if err := a.Apply("slow", "myna/deepseek/pro:max"); err != nil {
+	if err := a.Apply("slow", "owl/deepseek/pro:max"); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := RenameProvider("deepseek", "ds"); err != nil {
@@ -609,21 +609,21 @@ func TestOmpListRoleRenamed(t *testing.T) {
 	}
 	b, _ := os.ReadFile(configPath)
 	task := edit.GetYAMLList(configPath, "modelRoles.task")
-	if s := a.Field("slow").Get(); s != "myna/ds/pro:max" || !slices.Equal(task, []string{"myna/ds/pro:high", "openai/gpt-6"}) || !strings.Contains(string(b), "task: [") {
+	if s := a.Field("slow").Get(); s != "owl/ds/pro:max" || !slices.Equal(task, []string{"owl/ds/pro:high", "openai/gpt-6"}) || !strings.Contains(string(b), "task: [") {
 		t.Fatalf("renamed: slow %q\n%s", s, b)
 	}
 	if err := a.Apply("slow", ""); err != nil {
 		t.Fatal(err)
 	}
 	b, _ = os.ReadFile(configPath)
-	if !strings.Contains(string(b), "slow: [myna/ds/flash, openai/gpt-6]") {
+	if !strings.Contains(string(b), "slow: [owl/ds/flash, openai/gpt-6]") {
 		t.Fatalf("reset:\n%s", b)
 	}
 }
 
 // The model picker offers the models of the providers the user added to
 // models.yml, beside models.dev's for the current provider, spelled as
-// ownOptions spells them (the name as the note): not myna's own entry, nor
+// ownOptions spells them (the name as the note): not owl's own entry, nor
 // a provider whose models omp only discovers at run time. A model named in
 // both keeps what models.dev knows of it, and a provider in both stays one
 // group. Every role offers them, the subagents' as the model's.
@@ -662,7 +662,7 @@ func TestOmpOwnModels(t *testing.T) {
   zzrelay:
     models:
       - id: m1
-  myna:
+  owl:
     baseUrl: http://127.0.0.1:1/v1
     auth: none
     models:
@@ -687,9 +687,9 @@ func TestOmpOwnModels(t *testing.T) {
 	if o := byValue["zai/glm-5"]; o.Note != "GLM-5" || o.Icon == "" {
 		t.Fatalf("zai/glm-5 lost models.dev's name or icon: %+v in %+v", o, opts)
 	}
-	// myna has no provider here, so its entry's model comes from nowhere else
+	// owl has no provider here, so its entry's model comes from nowhere else
 	for v := range byValue {
-		if strings.HasPrefix(v, "lan/") || v == "myna/deepseek/pro" {
+		if strings.HasPrefix(v, "lan/") || v == "owl/deepseek/pro" {
 			t.Fatalf("%s offered: %+v", v, opts)
 		}
 	}
@@ -712,11 +712,11 @@ func TestOmpOwnModels(t *testing.T) {
 	}
 }
 
-// What the user set on myna's provider in omp's models.yml stays through
+// What the user set on owl's provider in omp's models.yml stays through
 // every sync and pick (#2030's siblings): a model's override, discovery's
 // timeouts, strict tools turned off, a header or compat flag beside
-// myna's. The address, API, auth and model list stay myna's, and a key
-// myna doesn't write goes.
+// owl's. The address, API, auth and model list stay owl's, and a key
+// owl doesn't write goes.
 func TestOmpKeepsTheUsersSettings(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
@@ -735,17 +735,17 @@ func TestOmpKeepsTheUsersSettings(t *testing.T) {
 	os.WriteFile(filepath.Join(dir, "config.yml"), []byte("modelRoles:\n  default: anthropic/claude-opus-5\n"), 0o644)
 	a := omp(home)
 	f := a.Field("model")
-	if err := f.Set("myna/deepseek/pro"); err != nil {
+	if err := f.Set("owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	if err := edit.SetYAML(modelsPath,
-		edit.KV{Path: "providers.myna.modelOverrides", Value: map[string]any{"deepseek/pro": map[string]any{"contextWindow": 64000}}},
-		edit.KV{Path: "providers.myna.disableStrictTools", Value: true},
-		edit.KV{Path: "providers.myna.headers.X-Mine", Value: "1"},
-		edit.KV{Path: "providers.myna.compat.supportsStore", Value: false},
-		edit.KV{Path: "providers.myna.baseUrl", Value: "http://127.0.0.1:1/v1"},
-		edit.KV{Path: "providers.myna.apiKey", Value: "stale"},
-		edit.KV{Path: "providers.myna.models", Value: []any{map[string]any{"id": "gone/old"}}},
+		edit.KV{Path: "providers.owl.modelOverrides", Value: map[string]any{"deepseek/pro": map[string]any{"contextWindow": 64000}}},
+		edit.KV{Path: "providers.owl.disableStrictTools", Value: true},
+		edit.KV{Path: "providers.owl.headers.X-Mine", Value: "1"},
+		edit.KV{Path: "providers.owl.compat.supportsStore", Value: false},
+		edit.KV{Path: "providers.owl.baseUrl", Value: "http://127.0.0.1:1/v1"},
+		edit.KV{Path: "providers.owl.apiKey", Value: "stale"},
+		edit.KV{Path: "providers.owl.models", Value: []any{map[string]any{"id": "gone/old"}}},
 	); err != nil {
 		t.Fatal(err)
 	}
@@ -777,7 +777,7 @@ func TestOmpKeepsTheUsersSettings(t *testing.T) {
 		if err := yaml.Unmarshal([]byte(raw), &c); err != nil {
 			t.Fatalf("%v\n%s", err, raw)
 		}
-		mp := c.Providers[mynaID]
+		mp := c.Providers[owlID]
 		if mp.Overrides["deepseek/pro"]["contextWindow"] != 64000 || !mp.NoStrict || mp.Headers["X-Mine"] != "1" || mp.Compat["supportsStore"] != false {
 			t.Errorf("%s: the user's settings not kept:\n%s", when, raw)
 		}
@@ -787,11 +787,11 @@ func TestOmpKeepsTheUsersSettings(t *testing.T) {
 		}
 		if mp.BaseURL == "http://127.0.0.1:1/v1" || mp.Auth != "none" || mp.APIKey != nil || mp.Headers["User-Agent"] != "omp" ||
 			slices.Contains(ids, "gone/old") || !slices.Contains(ids, "kimi/k3") {
-			t.Errorf("%s: myna's own parts not written:\n%s", when, raw)
+			t.Errorf("%s: owl's own parts not written:\n%s", when, raw)
 		}
 	}
 	check("sync")
-	if err := f.Set("myna/kimi/k3"); err != nil {
+	if err := f.Set("owl/kimi/k3"); err != nil {
 		t.Fatal(err)
 	}
 	check("pick")

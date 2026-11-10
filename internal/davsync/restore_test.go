@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/backup"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/backup"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // Sync can be set to run by itself less often, or never — only when asked

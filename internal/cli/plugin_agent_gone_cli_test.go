@@ -6,24 +6,24 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/agentplug"
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/agentplug"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // goneAgentSrc is an agent plugin as agent-kilo is: a JSONC file, the
 // model under "model", a provider block of its own.
 const goneAgentSrc = `
-export const agent = { id: "kilo", name: "Kilo", config: "~/.config/kilo/kilo.jsonc", model: "model", prefix: "myna/" };
+export const agent = { id: "kilo", name: "Kilo", config: "~/.config/kilo/kilo.jsonc", model: "model", prefix: "owl/" };
 export function connect({ gateway }) {
-  return { "provider.myna": { npm: "@ai-sdk/openai-compatible", options: { baseURL: gateway.v1, apiKey: gateway.key } } };
+  return { "provider.owl": { npm: "@ai-sdk/openai-compatible", options: { baseURL: gateway.v1, apiKey: gateway.key } } };
 }
 `
 
 const goneAgentMine = "{\n  // mine\n  \"model\": \"anthropic/claude-sonnet-4-5\", // mine\n  \"provider\": {\n    \"anthropic\": {}\n  }\n}\n"
 
 // goneAgentHome has the kilo plugin, its kilo.jsonc as the user wrote it,
-// and kilo on myna's a/m through `myna kilo a/m`; it returns the file
+// and kilo on owl's a/m through `owl kilo a/m`; it returns the file
 // and the plugin's folder.
 func goneAgentHome(t *testing.T) (string, string) {
 	t.Helper()
@@ -59,7 +59,7 @@ func fileIs(t *testing.T, path, want string) {
 	}
 }
 
-// `myna plugin off` and `myna plugin rm` put the agent's config back
+// `owl plugin off` and `owl plugin rm` put the agent's config back
 // byte for byte before the plugin goes (#3810).
 func TestPluginOffAndRemovePutTheAgentBack(t *testing.T) {
 	for _, op := range []string{"off", "rm"} {
@@ -73,8 +73,8 @@ func TestPluginOffAndRemovePutTheAgentBack(t *testing.T) {
 	}
 }
 
-// With the plugin deleted on disk, `myna kilo default` puts kilo.jsonc
-// back from what myna stashed, where it said "unknown agent".
+// With the plugin deleted on disk, `owl kilo default` puts kilo.jsonc
+// back from what owl stashed, where it said "unknown agent".
 func TestGoneAgentDefault(t *testing.T) {
 	path, dir := goneAgentHome(t)
 	os.RemoveAll(dir)

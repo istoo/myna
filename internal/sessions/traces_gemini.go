@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/appdir"
+	"github.com/istoo/owl/internal/appdir"
 )
 
 // Gemini moved from rewritten JSON snapshots to append-only JSONL metadata,

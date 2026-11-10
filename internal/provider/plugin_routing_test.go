@@ -7,7 +7,7 @@ import (
 
 // A routing a plugin serves ("<plugin>/<name>") is kept as saved, on a
 // provider and a group alike, whether a plugin serves it now or not; what
-// is neither myna's nor a plugin's is Smart again.
+// is neither owl's nor a plugin's is Smart again.
 func TestPluginRoutingKept(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
@@ -15,7 +15,7 @@ func TestPluginRoutingKept(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
 	for _, c := range []struct{ in, want string }{
 		{"spread/fewest-tokens", "spread/fewest-tokens"},
-		{"myna-fastest/byTTFT", "myna-fastest/byTTFT"},
+		{"owl-fastest/byTTFT", "owl-fastest/byTTFT"},
 		{"rotate", "rotate"},
 		{"bogus", ""},
 		{"a b/c", ""},

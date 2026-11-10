@@ -9,14 +9,14 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/pii/guard"
-	"github.com/istoo/myna/internal/redact"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/pii/guard"
+	"github.com/istoo/owl/internal/redact"
 )
 
 // AstrLink Guard (QuantumNous/astrlink-guard, Apache-2.0) is the second
 // local model: a 37 MB int8 token classifier for Chinese and English,
-// run in myna's own process by internal/pii/guard, on the CPU of every
+// run in owl's own process by internal/pii/guard, on the CPU of every
 // system and through CoreML on a Mac, with nothing native to download. Its files are fetched from
 // Hugging Face at the revision their sha256 were pinned at (the
 // publisher's own listing), and are loaded on the first request that
@@ -41,7 +41,7 @@ var guardBase = "https://huggingface.co/QuantumNous/astrlink-guard/resolve/"
 
 func guardURL(f pinned) string { return guardBase + guardRev + "/" + f.path }
 
-// guardRoot is where AstrLink Guard's files are kept, in myna's cache
+// guardRoot is where AstrLink Guard's files are kept, in owl's cache
 // beside Privacy Filter's folder: a folder per revision, and the found
 // file (cache.go).
 var guardRoot = func() string { return filepath.Join(appdir.Cache(), "astrlink-guard") }

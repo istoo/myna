@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // What the usage log keeps of a call besides its tokens: the path it came

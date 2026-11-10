@@ -4,8 +4,8 @@
 package warmups
 
 import (
-	"github.com/istoo/myna/internal/pluginrt"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/pluginrt"
+	"github.com/istoo/owl/internal/settings"
 )
 
 func init() {

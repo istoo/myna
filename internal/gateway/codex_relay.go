@@ -5,32 +5,32 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/istoo/myna/internal/masking"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/masking"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // CodexRelay is what serves Codex's own ChatGPT sign-in at the gateway's
-// address once myna has quit, for the Codex threads still open then
-// (codexrelay). myna takes the failover base URL out of Codex's config
+// address once owl has quit, for the Codex threads still open then
+// (codexrelay). owl takes the failover base URL out of Codex's config
 // at quit (agent.EndCodexFailover), but a thread open in the Codex app,
 // and the app-server holding it, keep the URL they started with: every
 // turn after went to a port nobody listened on, and a system proxy in
-// between answered 503 "Unknown error" until myna was opened again
+// between answered 503 "Unknown error" until owl was opened again
 // (idkatbro on X). The relay passes those turns on to the ChatGPT backend
 // as the gateway does a turn on one of Codex's own models, signed by the
 // caller's own Authorization; it adds no credential of its own. What only
-// the running myna could do is refused with a reason Codex shows: a
-// myna model, a turn on one of myna's accounts, masking (Settings ›
+// the running owl could do is refused with a reason Codex shows: a
+// owl model, a turn on one of owl's accounts, masking (Settings ›
 // Privacy) that would have masked it. Its answer at "/" never says it is
-// myna (ServedBy), so the next myna starting asks it to leave.
+// owl (ServedBy), so the next owl starting asks it to leave.
 func CodexRelay() http.Handler {
 	client := &http.Client{Transport: upstreamTransport()}
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !loopbackHost(r.Host) || r.Header.Get("Origin") != "" {
 			// as the gateway's corsGuard: a rebound or foreign page, or
 			// a frame's null, never reaches the sign-in Codex sends
-			relayError(w, http.StatusForbidden, "myna's Codex relay serves Codex on this computer only")
+			relayError(w, http.StatusForbidden, "owl's Codex relay serves Codex on this computer only")
 			return
 		}
 		if !strings.HasPrefix(r.URL.Path, CodexPath+"/") {
@@ -38,7 +38,7 @@ func CodexRelay() http.Handler {
 			return
 		}
 		if strings.EqualFold(r.Header.Get("Upgrade"), "websocket") {
-			http.Error(w, "myna speaks HTTP", http.StatusUpgradeRequired)
+			http.Error(w, "owl speaks HTTP", http.StatusUpgradeRequired)
 			return
 		}
 		rest := strings.TrimPrefix(r.URL.Path, CodexPath)
@@ -81,7 +81,7 @@ func CodexRelay() http.Handler {
 		provider.CodexCompressed(req, body)
 		res, err := client.Do(req)
 		if err != nil {
-			relayError(w, http.StatusBadGateway, "OpenAI can't be reached ("+err.Error()+"). myna isn't running, so this thread goes to OpenAI on Codex's own sign-in.")
+			relayError(w, http.StatusBadGateway, "OpenAI can't be reached ("+err.Error()+"). owl isn't running, so this thread goes to OpenAI on Codex's own sign-in.")
 			return
 		}
 		defer res.Body.Close()
@@ -109,21 +109,21 @@ func CodexRelay() http.Handler {
 }
 
 // relayGone is the relay's answer to anything but Codex's own turns.
-const relayGone = "myna isn't running: only Codex threads open when it quit are passed on, on Codex's own ChatGPT sign-in. Open myna for everything else."
+const relayGone = "owl isn't running: only Codex threads open when it quit are passed on, on Codex's own ChatGPT sign-in. Open owl for everything else."
 
-// relayRefuses says why a turn can't be passed on with myna gone, ""
+// relayRefuses says why a turn can't be passed on with owl gone, ""
 // when it can: what only the running gateway serves, and a turn masking
 // would have masked, which never goes unmasked.
 func relayRefuses(r *http.Request, body []byte) string {
 	model := modelOf(body)
 	if strings.Contains(model, "/") {
-		return model + " is one of myna's models, and myna isn't running. Open myna to go on with this thread, or pick one of Codex's own models."
+		return model + " is one of owl's models, and owl isn't running. Open owl to go on with this thread, or pick one of Codex's own models."
 	}
 	if r.Header.Get(AccountHeader) != "" {
-		return AccountHeader + " names one of myna's Codex accounts, and myna isn't running. Open myna to go on with this thread."
+		return AccountHeader + " names one of owl's Codex accounts, and owl isn't running. Open owl to go on with this thread."
 	}
 	if masking.Wanted(settings.Load()) {
-		return "myna isn't running, and Settings › Privacy masks what is sent: this turn is not sent unmasked. Open myna to go on with this thread."
+		return "owl isn't running, and Settings › Privacy masks what is sent: this turn is not sent unmasked. Open owl to go on with this thread."
 	}
 	return ""
 }

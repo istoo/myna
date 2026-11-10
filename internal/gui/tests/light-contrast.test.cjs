@@ -50,7 +50,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     page.setDefaultTimeout(5000);
     page.setDefaultNavigationTimeout(60000);
     await page.route("**/*", server("light"));
-    await page.goto("http://myna.test/?view=settings");
+    await page.goto("http://owl.test/?view=settings");
     await page.locator("#themeSegs").waitFor();
     const pairs = await page.evaluate(() => {
       const box = document.createElement("span");

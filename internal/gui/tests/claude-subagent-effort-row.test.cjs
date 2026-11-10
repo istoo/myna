@@ -3,7 +3,7 @@
 // opened row's Tiers, laid out as the Opus, Sonnet, Haiku and Fable rows'
 // efforts are, and no longer as a square under New sessions. While the
 // subagents are on Claude Code's pick (no model of their own) it reads
-// Default and can't be used: myna writes no effort then, as the main model
+// Default and can't be used: owl writes no effort then, as the main model
 // at an effort pinned every subagent to it (KorenKrita on Discord). Given a
 // model, it opens the effort slider and posts the level picked. In Chromium
 // and WebKit, wide and narrow, in English and Chinese. No backend: the API is
@@ -15,13 +15,13 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
-const models = [{ value: "myna/v/glm", label: "GLM", ref: "v/glm" }, { value: "myna/v/flash", label: "Flash", ref: "v/flash" }];
+const models = [{ value: "owl/v/glm", label: "GLM", ref: "v/glm" }, { value: "owl/v/flash", label: "Flash", ref: "v/flash" }];
 const levels = ["", "low", "medium", "high"].map((value) => ({ value }));
 const tiers = ["opus", "sonnet", "haiku", "fable"];
 const claude = (sub) => ({
   id: "claude", name: "Claude Code", path: "/test/settings.json", icon: "claudecode-color", wired: true,
   fields: [
-    { key: "model", label: "model", value: "myna/v/glm", options: models },
+    { key: "model", label: "model", value: "owl/v/glm", options: models },
     { key: "effort", label: "effort", value: "high", options: levels },
     ...tiers.map((tier) => ({ key: tier, label: tier, value: "", options: models })),
     ...tiers.map((tier) => ({ key: tier + "_effort", label: tier + " effort", value: "", options: levels })),
@@ -67,7 +67,7 @@ const cc = '.row.agent[data-id="claude"]';
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   for (const lang of ["en", "zh"]) {
     for (const width of [1100, 560]) {
-      for (const sub of ["", "myna/v/flash"]) {
+      for (const sub of ["", "owl/v/flash"]) {
         test(`${engine} ${lang} ${width}px: the subagent effort is on the Subagents row, ${sub ? "with a model" : "disabled with none"}`, async (t) => {
           const w = W[lang];
           const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
@@ -84,7 +84,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             }
             await browser.close();
           });
-          await page.goto("http://myna.test/");
+          await page.goto("http://owl.test/");
           await page.locator(cc).waitFor();
           await page.locator(`${cc} .ag-link`).click();
           await page.locator(`${cc} .ag-exp`).waitFor();

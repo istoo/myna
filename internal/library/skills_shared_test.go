@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/agent"
+	"github.com/istoo/owl/internal/agent"
 )
 
 func setOmpVersion(t *testing.T, v string) {
@@ -98,9 +98,9 @@ func TestPiReadsSharedSkillsFromItsVersion(t *testing.T) {
 }
 
 // usrname1833: the library's skills can go into ~/.agents/skills too, as
-// myna's links to the library's folders, so every agent and tool that
+// owl's links to the library's folders, so every agent and tool that
 // reads that folder has every skill. Off (the default) is as before;
-// turning it off takes out myna's links there and nothing else.
+// turning it off takes out owl's links there and nothing else.
 func TestSkillsWhereShared(t *testing.T) {
 	h := sandbox(t)
 	os.RemoveAll(filepath.Join(h, ".config/goose"))
@@ -111,7 +111,7 @@ func TestSkillsWhereShared(t *testing.T) {
 	skill(t, filepath.Join(src, "pdf"), "pdf", "Read PDFs")
 	skill(t, filepath.Join(src, "mine"), "mine", "Mine")
 	shared := filepath.Join(h, ".agents/skills")
-	// the user's own skills there: one myna has no skill by, and one by
+	// the user's own skills there: one owl has no skill by, and one by
 	// a name the library has, with other files
 	skill(t, filepath.Join(shared, "theirs"), "theirs", "Theirs")
 	write(t, filepath.Join(shared, "mine", "SKILL.md"), "---\nname: mine\ndescription: Not the library's\n---\n")
@@ -134,7 +134,7 @@ func TestSkillsWhereShared(t *testing.T) {
 	}
 	ok(t)(SetSkillsWhere(SkillsInShared))
 	if !ours(pdf, "pdf") || !linked(pdf) {
-		t.Fatal("pdf isn't myna's link in ~/.agents/skills")
+		t.Fatal("pdf isn't owl's link in ~/.agents/skills")
 	}
 	// a sync leaves the link as it is, not taken out and made again,
 	// which a reader of the folder would find missing in between
@@ -194,7 +194,7 @@ func TestSkillsWhereShared(t *testing.T) {
 		t.Error("unticked, pdf left ~/.agents/skills")
 	}
 
-	// back to each agent's folder: myna's links there go, nothing else
+	// back to each agent's folder: owl's links there go, nothing else
 	ok(t)(SkillAgents("pdf", []string{"claude", "pi"}))
 	r, err := SetSkillsWhere(SkillsInAgents)
 	if err != nil {

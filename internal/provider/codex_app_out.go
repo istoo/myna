@@ -9,8 +9,8 @@ import (
 	"time"
 )
 
-// The Codex app greys its Send for every model, myna's included, while
-// the ChatGPT account it is on is out (MasterYi on Discord), till myna is
+// The Codex app greys its Send for every model, owl's included, while
+// the ChatGPT account it is on is out (MasterYi on Discord), till owl is
 // its provider and its app-server restarted (codex_app_server.go). What
 // follows tells the account is out as soon as a reply says so, not at the
 // next look five minutes on.
@@ -34,7 +34,7 @@ var codexRecheck struct {
 // codexReadNow reads whether Codex's account is out, and signs Codex in
 // to the next account with room when it is, as KeepOnAnAccountWithRoom's
 // look does: the Codex app greys its Send once its account is out, so no
-// request comes to tell myna again, and that look could be five minutes
+// request comes to tell owl again, and that look could be five minutes
 // off (danzi002 on Discord restarted the app each time instead). A var
 // for tests.
 var codexReadNow = func(user string) {
@@ -76,11 +76,11 @@ func CodexMayBeUsedUp(user string) {
 	go codexReadNow(active)
 }
 
-// CodexServesWhileOut says myna has something to serve Codex's own
+// CodexServesWhileOut says owl has something to serve Codex's own
 // model on while the ChatGPT account Codex is signed in to is out: the
-// Codex subscription's fallbacks, set in myna, or another of its
+// Codex subscription's fallbacks, set in owl, or another of its
 // ChatGPT accounts not known out or lapsed. With neither, every turn
-// myna took over would be refused on that same account, so taking over
+// owl took over would be refused on that same account, so taking over
 // would only hide the account and its reset from the app and restart the
 // app's app-server twice (xiaoq6285 on Discord, one Plus account).
 func CodexServesWhileOut(model string) bool {

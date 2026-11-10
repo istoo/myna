@@ -1,8 +1,8 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// @jiahao_jayden on X: every skill's row had a chip for each agent myna
+// @jiahao_jayden on X: every skill's row had a chip for each agent owl
 // knew of, WorkBuddy among them though it wasn't installed (一排有点密恐了).
 // The library lists an agent gone from this computer (gone: true) only
-// while it still has something myna gave it, so that can be taken out:
+// while it still has something owl gave it, so that can be taken out:
 // its chip is on the rows of what it has, lit, and a click takes it away;
 // it is on no other row, All leaves it out, and By agent lists it as Not
 // installed with nothing to turn on. Chromium and WebKit, 1100px and
@@ -21,7 +21,7 @@ const agent = (id, name, more = {}) => ({ id, name, icon: "", skills: `${HOME}/.
 const local = (name, agents) => ({ name, description: name + " does a thing", kind: "local", agents });
 // as Read lists them: one gone from here only while it has something
 const lib = (skills) => ({
-  dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
+  dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
   agents: [agent("claude", "Claude Code"), agent("codex", "Codex"),
     ...(skills.some((s) => s.agents.includes("workbuddy")) ? [agent("workbuddy", "WorkBuddy", { gone: true })] : [])],
   instructions: { agents: [] }, servers: [], skills, foundServers: [], projects: [], foundSkills: [], problems: [],
@@ -59,7 +59,7 @@ function server(lang, state, posts) {
     if (url.pathname === "/api/groups") return json({ groups: [] });
     if (url.pathname === "/api/providers") return json({ providers: [], gateway: { running: true } });
     if (url.pathname.startsWith("/api/")) return json({});
-    if (url.host !== "myna.test") return route.fulfill({ status: 404, body: "" });
+    if (url.host !== "owl.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -89,14 +89,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const state = { skills: [local("pdf", ["claude", "workbuddy"]), local("csv", ["claude"]), local("notes", ["claude", "codex"])] };
         const posts = [], errors = [];
         const ctx = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: "reduce" });
-        await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "skills"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("owl.libTab", "skills"); } catch {} });
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         page.on("dialog", (d) => { errors.push("a browser dialog: " + d.message()); d.dismiss(); });
         await page.route("**/*", server(lang, state, posts));
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         await navTo(page, "library");
         const v = page.locator("#view-library");
         const row = (name) => v.locator(".lib-skill").filter({ has: page.locator(".name", { hasText: new RegExp("^" + name) }) });

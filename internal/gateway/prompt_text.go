@@ -8,7 +8,7 @@ package gateway
 // read again from the request's body, which the trace holds for the last
 // few requests: in memory only, never written to disk or sent anywhere,
 // and masked as the vendor got it (redacted), the same body the Recent
-// calls keep. When myna quits, or a request is older than the last
+// calls keep. When owl quits, or a request is older than the last
 // promptBodies, its text is gone.
 
 import (
@@ -21,7 +21,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 const (

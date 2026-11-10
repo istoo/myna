@@ -5,10 +5,10 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// myna search add, with a key and an address in either order, and rm.
+// owl search add, with a key and an address in either order, and rm.
 func TestSearchCLI(t *testing.T) {
 	t.Setenv("HOME", t.TempDir())
 	t.Setenv("USERPROFILE", os.Getenv("HOME"))
@@ -69,7 +69,7 @@ func TestSearchCLI(t *testing.T) {
 	}
 }
 
-// myna search add you, with no key, adds You.com's free search (#1626).
+// owl search add you, with no key, adds You.com's free search (#1626).
 func TestSearchCLIYouWithoutKey(t *testing.T) {
 	t.Setenv("HOME", t.TempDir())
 	t.Setenv("USERPROFILE", os.Getenv("HOME"))
@@ -82,7 +82,7 @@ func TestSearchCLIYouWithoutKey(t *testing.T) {
 	}
 }
 
-// myna search off keeps an API, key and all, out of every search, on
+// owl search off keeps an API, key and all, out of every search, on
 // puts it back, and move puts it at another place in the order (#2286).
 func TestSearchCLIOffAndMove(t *testing.T) {
 	t.Setenv("HOME", t.TempDir())

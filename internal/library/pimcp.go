@@ -13,9 +13,9 @@ import (
 
 	"github.com/tidwall/jsonc"
 
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/edit"
 )
 
 // Pi 0.99 (2026-09-29) has MCP of its own, a built-in extension, builtin:mcp
@@ -33,7 +33,7 @@ import (
 //
 // Before 0.99 Pi had none; two extensions give it one, each with its own
 // file (the same entries: command/args/env, url/headers, and the
-// transport each names differently, which myna writes both of):
+// transport each names differently, which owl writes both of):
 //
 //   - pi-mcp-adapter 3 (3.0.0, 2026-09-26; 3.1.0 now) reads
 //     <agent dir>/mcp-adapter.json after ~/.config/mcp/mcp.json and
@@ -97,7 +97,7 @@ var piGlobalRoots = func() []string {
 		"/usr/local/lib/node_modules", "/opt/homebrew/lib/node_modules", "/usr/lib/node_modules")
 }
 
-// wslPiRoots are piGlobalRoots for a Pi in a WSL distro whose home myna
+// wslPiRoots are piGlobalRoots for a Pi in a WSL distro whose home owl
 // opens at h (\\wsl.localhost\<distro>\home\<user>): the distro's own
 // npm folders, under its root, never this machine's. npm's prefix there is
 // the distro's variable, which isn't read.
@@ -258,7 +258,7 @@ func piDetectIn(d string, roots []string) piPlugins {
 //     nothing loaded only Pi's own MCP reads servers, and every Pi since
 //     0.99 (1.1.0 now) reads mcp.json (extensions/mcp/config.js,
 //     loadMcpConfig); a Pi before it has no MCP to read either file. The
-//     servers mcp-adapter.json has, which no one reads now (myna's for
+//     servers mcp-adapter.json has, which no one reads now (owl's for
 //     pi-mcp-adapter 3, or the user's), are moved into it, the file backed
 //     up; one mcp.json has differently, and the adapter's own settings,
 //     stay there, still found. An mcp.json written for pi-mcp-adapter
@@ -295,7 +295,7 @@ func piMCP(h, d, version string, roots []string) (*mcpFile, string) {
 // saying the Pi may be 0.99 or later:
 //   - pi-mcp-adapter 3, or one whose version isn't known (a fresh install
 //     is 5), or mcp-adapter.json already there: mcp-adapter.json. The
-//     servers myna or the user put in mcp.json are moved over, as
+//     servers owl or the user put in mcp.json are moved over, as
 //     adapter 3 and 4 ask, unless pi-mcp-extension reads that file, no
 //     adapter is loaded (mcp.json may then be Pi 0.99's own), or the
 //     adapter is 5 (or not known) on a Pi that may be 0.99: adapter 5

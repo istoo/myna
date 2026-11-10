@@ -7,16 +7,16 @@ import (
 
 // wztlink1013 on Discord (Windows, Codex 0.162.0): switching Codex's model
 // on the Agents page failed with "config.toml: edited TOML is invalid: toml:
-// key http_headers should be a table, not a value". The config held myna's
+// key http_headers should be a table, not a value". The config held owl's
 // provider headers as their own table, which a rewrite of
-// [model_providers.myna] leaves in place, and the inline http_headers
+// [model_providers.owl] leaves in place, and the inline http_headers
 // written beside it defined the key twice. The header is now set in that
 // table, the user's other headers and comments kept.
-func TestCodexMynaHeadersAsOwnTable(t *testing.T) {
+func TestCodexOwlHeadersAsOwnTable(t *testing.T) {
 	for _, crlf := range []bool{false, true} {
 		config := "model = \"gpt-5.5\"\n\n" +
-			"[model_providers.myna]\nname = \"myna\"\nbase_url = \"http://127.0.0.1:1/v1\"\nwire_api = \"responses\"\n\n" +
-			"[model_providers.myna.http_headers]\n# my proxy\n\"x-org\" = \"acme\"\n\"x-openai-actor-authorization\" = \"myna\"\n"
+			"[model_providers.owl]\nname = \"owl\"\nbase_url = \"http://127.0.0.1:1/v1\"\nwire_api = \"responses\"\n\n" +
+			"[model_providers.owl.http_headers]\n# my proxy\n\"x-org\" = \"acme\"\n\"x-openai-actor-authorization\" = \"owl\"\n"
 		if crlf {
 			config = strings.ReplaceAll(config, "\n", "\r\n")
 		}
@@ -29,7 +29,7 @@ func TestCodexMynaHeadersAsOwnTable(t *testing.T) {
 		if strings.Contains(cfg, "http_headers = {") {
 			t.Fatalf("crlf %v: inline http_headers beside the table:\n%s", crlf, cfg)
 		}
-		for _, w := range []string{"[model_providers.myna.http_headers]", "# my proxy", `"x-org" = "acme"`, `"x-openai-actor-authorization" = "myna"`} {
+		for _, w := range []string{"[model_providers.owl.http_headers]", "# my proxy", `"x-org" = "acme"`, `"x-openai-actor-authorization" = "owl"`} {
 			if !strings.Contains(cfg, w) {
 				t.Fatalf("crlf %v: no %q:\n%s", crlf, w, cfg)
 			}

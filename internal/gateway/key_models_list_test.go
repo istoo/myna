@@ -9,10 +9,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // listedBefore is keyAllowed as it was before #1762, every group read
@@ -206,7 +206,7 @@ func TestKeyListSeesChangesNextRequest(t *testing.T) {
 }
 
 // BenchmarkHeldKeyListsModels is #1762's catalog: two providers of 500
-// models each serving the same ids, so myna finds 500 groups for them,
+// models each serving the same ids, so owl finds 500 groups for them,
 // listed for a key held to some models, one held to some accounts, and
 // one held to none.
 func BenchmarkHeldKeyListsModels(b *testing.B) {

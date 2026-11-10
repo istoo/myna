@@ -13,13 +13,13 @@ import (
 // dependency, and the file as it was stays beside it. A file whose start
 // isn't an object, and one that parses, are left as they are.
 func TestPackageJSONTailIsCut(t *testing.T) {
-	const kept = "{\n  \"name\": \"myna-plugins\",\n  \"private\": true,\n  \"dependencies\": {\n    \"@magpie-community/opencode-qoder-auth\": \"0.2.33\",\n    \"@magpie-community/opencode-workbuddy-auth\": \"0.1.29\"\n  }\n}\n"
+	const kept = "{\n  \"name\": \"owl-plugins\",\n  \"private\": true,\n  \"dependencies\": {\n    \"@magpie-community/opencode-qoder-auth\": \"0.2.33\",\n    \"@magpie-community/opencode-workbuddy-auth\": \"0.1.29\"\n  }\n}\n"
 	const reported = kept + "@magpie-community/opencode-zcode-auth\": \"^0.1.27\"\n  }\n}\n"
 	for _, tc := range []struct{ name, body, want string }{
 		{"a tail after the object", reported, kept},
 		{"whole", kept, kept},
-		{"no object to keep", "@myna\": 1\n}\n", "@myna\": 1\n}\n"},
-		{"cut short", "{\n  \"name\": \"myna-plugins\",\n", "{\n  \"name\": \"myna-plugins\",\n"},
+		{"no object to keep", "@owl\": 1\n}\n", "@owl\": 1\n}\n"},
+		{"cut short", "{\n  \"name\": \"owl-plugins\",\n", "{\n  \"name\": \"owl-plugins\",\n"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			storeSandbox(t)

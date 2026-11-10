@@ -7,16 +7,16 @@ import (
 
 	"github.com/pelletier/go-toml/v2"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// Sorghum on Discord: each of myna's models in Kimi Code has the name
-// myna shows for it (display_name) and, where myna knows it, its most
+// Sorghum on Discord: each of owl's models in Kimi Code has the name
+// owl shows for it (display_name) and, where owl knows it, its most
 // output (max_output_size, the new Kimi Code's max_completion_tokens); a
-// value the user set in the table themselves stays, while one myna wrote
-// follows myna's catalog. kimi-cli, which has no max_output_size, gets the
+// value the user set in the table themselves stays, while one owl wrote
+// follows owl's catalog. kimi-cli, which has no max_output_size, gets the
 // name only.
 func TestKimiNamesAndOutput(t *testing.T) {
 	type model struct {
@@ -71,7 +71,7 @@ func TestKimiNamesAndOutput(t *testing.T) {
 			return c.Models
 		}
 		labels := map[string]string{}
-		for _, m := range mynaModels("kimi") {
+		for _, m := range owlModels("kimi") {
 			labels[m.ID] = m.Name
 		}
 		out := func(m model) int {
@@ -82,7 +82,7 @@ func TestKimiNamesAndOutput(t *testing.T) {
 		}
 		want := func(id string, name string, output int) {
 			t.Helper()
-			m := read()["myna/"+id]
+			m := read()["owl/"+id]
 			if legacy {
 				output = 0
 			}
@@ -92,7 +92,7 @@ func TestKimiNamesAndOutput(t *testing.T) {
 			}
 		}
 		f := a.Field("model")
-		if err := f.Set("myna/relay/big"); err != nil {
+		if err := f.Set("owl/relay/big"); err != nil {
 			t.Fatal(err)
 		}
 		if labels["relay/big"] == "" || labels["relay/big"] == "relay/big" {
@@ -100,16 +100,16 @@ func TestKimiNamesAndOutput(t *testing.T) {
 		}
 		want("relay/big", labels["relay/big"], 32000)
 		want("relay/wide", labels["relay/wide"], 128000)
-		// a model myna knows no output for has no max_output_size
+		// a model owl knows no output for has no max_output_size
 		want("relay/bare", labels["relay/bare"], 0)
 
 		// the user names big themselves and caps wide, by hand in config.toml
-		edit.SetTOMLKey(a.Path, `models."myna/relay/big"`, "display_name", "My Big")
+		edit.SetTOMLKey(a.Path, `models."owl/relay/big"`, "display_name", "My Big")
 		if !legacy {
-			edit.SetTOMLKey(a.Path, `models."myna/relay/wide"`, "max_output_size", 8000)
-			edit.SetTOMLKey(a.Path, `models."myna/relay/bare"`, "max_output_size", 4096)
+			edit.SetTOMLKey(a.Path, `models."owl/relay/wide"`, "max_output_size", 8000)
+			edit.SetTOMLKey(a.Path, `models."owl/relay/bare"`, "max_output_size", 4096)
 		}
-		// and myna's catalog changes big's output
+		// and owl's catalog changes big's output
 		live(64000)
 		if err := a.Sync(); err != nil {
 			t.Fatal(err)
@@ -118,20 +118,20 @@ func TestKimiNamesAndOutput(t *testing.T) {
 		want("relay/wide", labels["relay/wide"], 8000)
 		want("relay/bare", labels["relay/bare"], 4096)
 		// and they stay through another write
-		if err := f.Set("myna/relay/wide"); err != nil {
+		if err := f.Set("owl/relay/wide"); err != nil {
 			t.Fatal(err)
 		}
 		want("relay/big", "My Big", 64000)
 		want("relay/wide", labels["relay/wide"], 8000)
 
-		// a value myna wrote that its catalog no longer has goes
+		// a value owl wrote that its catalog no longer has goes
 		live(0)
 		if err := a.Sync(); err != nil {
 			t.Fatal(err)
 		}
 		want("relay/big", "My Big", 0)
 
-		// out of myna: its tables and what it wrote in them are gone
+		// out of owl: its tables and what it wrote in them are gone
 		if err := f.Set(""); err != nil {
 			t.Fatal(err)
 		}

@@ -15,7 +15,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 func claudeWarmPath() string { return filepath.Join(filepath.Dir(Path()), "claude-warmup.json") }
@@ -70,7 +70,7 @@ func claudeWarmedNow(user string) {
 	StaleAllowance("claude", user)
 }
 
-// ClaudeWarmed is when myna last started a window of each Claude account,
+// ClaudeWarmed is when owl last started a window of each Claude account,
 // by user as kept (lower-cased).
 func ClaudeWarmed() map[string]time.Time { return codexWarmedIn(claudeWarmPath()) }
 

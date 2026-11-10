@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // limitsHome keeps a test off the machine's own settings, providers and
@@ -27,7 +27,7 @@ func limitsHome(t *testing.T) {
 // start-up, so setting them has to tell them, as a name does, and to tell
 // them once: the two paths save different files, and each of them already
 // ends in a telling. Saving them quietly would leave every agent a limit
-// behind that myna no longer serves; telling twice rewrites every agent's
+// behind that owl no longer serves; telling twice rewrites every agent's
 // model lists over again for nothing.
 func TestLimitsReachTheAgents(t *testing.T) {
 	limitsHome(t)
@@ -118,7 +118,7 @@ func TestLimitsRefuseAModelTheProviderHasNot(t *testing.T) {
 	}
 }
 
-// A model taken off a provider — myna provider set relay models=sol —
+// A model taken off a provider — owl provider set relay models=sol —
 // leaves a window and a reply limit keyed by an id the provider no longer
 // serves, and both have to be clearable: refusing a --reset for it is a
 // number the user can only take off by hand, with nothing to say why.
@@ -139,7 +139,7 @@ func TestLimitsComeOffAModelThatHasGone(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// myna provider set relay models=sol: the model is off its list
+	// owl provider set relay models=sol: the model is off its list
 	p, err = Find("relay")
 	if err != nil {
 		t.Fatal(err)
@@ -189,9 +189,9 @@ func TestOutputComesOffAProviderThatIsGone(t *testing.T) {
 		t.Fatal(err)
 	}
 	// the spellings a caller has: the id itself, the provider's own
-	// every-model one, and the "myna/" the agents put in front of the
+	// every-model one, and the "owl/" the agents put in front of the
 	// gateway's ids. Each is a key of the one map.
-	ids := []string{"relay/mystery-x", "relay/*", "myna/relay/sol"}
+	ids := []string{"relay/mystery-x", "relay/*", "owl/relay/sol"}
 	for _, id := range ids {
 		if err := SetModelOutput(id, 131072); err != nil {
 			t.Fatal(err)
@@ -214,7 +214,7 @@ func TestOutputComesOffAProviderThatIsGone(t *testing.T) {
 		if !dropped {
 			t.Errorf("%s --reset: took a limit off that was not there", id)
 		}
-		if want := strings.TrimPrefix(id, "myna/"); key != want {
+		if want := strings.TrimPrefix(id, "owl/"); key != want {
 			t.Errorf("%s --reset: cleared %q; want %q, the key it is stored at", id, key, want)
 		}
 	}
@@ -679,7 +679,7 @@ func TestEveryModelOutputKeysByTheProvidersIdNow(t *testing.T) {
 }
 
 // What is checked is what is stored. splitRef takes the spellings a caller
-// has — the provider's name, the "myna/" the agents put in front of the
+// has — the provider's name, the "owl/" the agents put in front of the
 // gateway's ids — and hands back the provider's own id, and that is the
 // only one the maps are read by.
 func TestOutputChecksTheKeyItStores(t *testing.T) {
@@ -688,7 +688,7 @@ func TestOutputChecksTheKeyItStores(t *testing.T) {
 		Key: "k", Models: []string{"sol"}}); err != nil {
 		t.Fatal(err)
 	}
-	for _, id := range []string{"myna/my-relay/sol", "My Relay/sol"} {
+	for _, id := range []string{"owl/my-relay/sol", "My Relay/sol"} {
 		if err := SetModelOutput(id, 4096); err != nil {
 			t.Fatalf("%s: %v", id, err)
 		}

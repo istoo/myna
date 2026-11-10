@@ -1,5 +1,5 @@
 // Package usage keeps the token count of every call the gateway serves, so
-// myna can show what each agent and model consumed and roughly what it cost.
+// owl can show what each agent and model consumed and roughly what it cost.
 // Records go to one JSON-lines file next to providers.json. Metadata leaves
 // the machine only when OTLP export is explicitly enabled.
 package usage
@@ -22,8 +22,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // Record is one call.
@@ -31,7 +31,7 @@ type Record struct {
 	Operation       string    `json:"operation,omitempty"`
 	RouteID         int64     `json:"route_id,omitempty"` // the gateway Route, shared by its attempts
 	Time            time.Time `json:"t"`
-	Agent           string    `json:"agent"` // myna agent id, or the client's product name
+	Agent           string    `json:"agent"` // owl agent id, or the client's product name
 	Provider        string    `json:"provider"`
 	Host            string    `json:"host,omitempty"`          // where the call went: provider.Where then
 	ProviderKeyID   string    `json:"providerKeyId,omitempty"` // fingerprint of the API key actually used
@@ -56,7 +56,7 @@ type Record struct {
 	// metadata, not this call's endpoint or billing authentication.
 	SessionOfficialLogin bool   `json:"session_official_login,omitempty"`
 	Model                string `json:"model"` // the provider's model id
-	// Requested is the model id the agent asked for (a myna alias, a
+	// Requested is the model id the agent asked for (a owl alias, a
 	// routing group, provider/model…), and Served the model the vendor's
 	// reply says answered, when it named one: a ledger to set beside the
 	// vendor's own bill. Neither is in a record written before they were.
@@ -82,7 +82,7 @@ type Record struct {
 	// were.
 	CacheWrite1h int `json:"cache_write_1h,omitempty"`
 	// CacheUnknown: the vendor counted no cache tokens for this call (a
-	// plugin's myna_cache_unknown: Kiro caches but tells only credits),
+	// plugin's owl_cache_unknown: Kiro caches but tells only credits),
 	// so its CacheRead of 0 is not a miss. A hit rate leaves its prompt
 	// out (Totals.CacheUnknown, #3464). A record from before it was kept
 	// has none: its 0 still reads as a miss.
@@ -122,18 +122,18 @@ type Record struct {
 	// (Decode).
 	ReasoningHidden bool `json:"reasoning_hidden,omitempty"`
 	// Sent: ms from the request to its answering try going out to the
-	// vendor, its body written, as TTFT is counted: myna's own time and
+	// vendor, its body written, as TTFT is counted: owl's own time and
 	// the tries that failed first are before it, and TTFT-Sent is how
 	// long the vendor took to its first content. 0 where it isn't known
-	// (a reply not streamed, or a vendor myna doesn't reach over HTTP).
+	// (a reply not streamed, or a vendor owl doesn't reach over HTTP).
 	Sent int64 `json:"sent_ms,omitempty"`
-	// Of Sent, what was myna's: Own is myna's own work on the request
+	// Of Sent, what was owl's: Own is owl's own work on the request
 	// (reading it, translating it, choosing whom to ask), Retried the
 	// tries that failed first and the pauses after them, Queued the wait
 	// for a slot of a key's or account's MaxConcurrency or MaxRPM; the
 	// rest, Sent-Own-Retried-Queued, is connecting to the vendor and
 	// sending it the body. #1532: a vendor that held a try ~100 s and
-	// said 503 read as 104 s "In myna". 0 in a record written before
+	// said 503 read as 104 s "In owl". 0 in a record written before
 	// they were, where Sent is all that is known.
 	Own int64 `json:"own_ms,omitempty"`
 	// Masking: the ms of Own that went on masking the request (Settings
@@ -210,9 +210,9 @@ type Record struct {
 	// Kind is what the agent made the call for when it isn't a turn of
 	// the conversation: a Codex subagent's (review, compact, guardian…)
 	Kind string `json:"kind,omitempty"`
-	// Via is the computer whose myna passed the call on to this one (a
-	// Remote myna provider there), Agent being the agent's on it; "" when
-	// no other myna forwarded it (including direct LAN/container clients).
+	// Via is the computer whose owl passed the call on to this one (a
+	// Remote owl provider there), Agent being the agent's on it; "" when
+	// no other owl forwarded it (including direct LAN/container clients).
 	Via string `json:"via,omitempty"`
 	// Archive is where the request archive keeps the call, "<date>/<id>"
 	// (gateway/archive.go), when it was on: the Usage page reads it back
@@ -222,14 +222,14 @@ type Record struct {
 	// a call brought here by sync (#542); "" for one made here, as every
 	// call in usage.jsonl is
 	Computer string `json:"computer,omitempty"`
-	// Source is SourceReported for a call a client told myna of through
-	// POST /v1/myna/usage/requests (#1874), one that went straight to its
-	// vendor and that myna never saw; "" for the gateway's own. Reported
+	// Source is SourceReported for a call a client told owl of through
+	// POST /v1/owl/usage/requests (#1874), one that went straight to its
+	// vendor and that owl never saw; "" for the gateway's own. Reported
 	// calls count in the totals and are told apart, and filtered, on the
 	// page.
 	Source string `json:"source,omitempty"`
 	// OwnCost is what such a client said the call cost, in USD. nil when it
-	// said nothing: the call is then priced at myna's own prices, as the
+	// said nothing: the call is then priced at owl's own prices, as the
 	// gateway's calls are, and priced again when those change.
 	OwnCost *float64 `json:"cost,omitempty"`
 	// Credits is what the vendor said the call cost in its plan's own
@@ -273,7 +273,7 @@ func (r Record) priceID() string {
 	return r.Provider
 }
 
-// Path is the log file: ~/.config/myna/usage.jsonl (XDG-aware).
+// Path is the log file: ~/.config/owl/usage.jsonl (XDG-aware).
 func Path() string { return filepath.Join(filepath.Dir(provider.Path()), "usage.jsonl") }
 
 var mu sync.Mutex
@@ -288,7 +288,7 @@ func Append(r Record) {
 	if r.Time.IsZero() {
 		r.Time = Clock()
 	}
-	if !r.IsProbe() { // myna's own test is no call to export
+	if !r.IsProbe() { // owl's own test is no call to export
 		observeLedger(r)
 	}
 	defer codexUsedNew(r)
@@ -366,11 +366,11 @@ func openLog(path string) (*os.File, os.FileInfo) {
 func (r Record) IsRejected() bool { return r.Rejected || r.Provider == "" && r.Status >= 400 }
 
 // IsReported is a call an app reported itself (#1874), which never went
-// through myna. It is shown and counted on the Usage page only: nothing
+// through owl. It is shown and counted on the Usage page only: nothing
 // that acts on live traffic (a key's budget, a window's holds, the Sessions
 // page's gateway sessions, what a session was routed to, Codex's sealed
 // answers or remembered model) reads it, since it may be a backfill of
-// calls long past and none of them were myna's to route.
+// calls long past and none of them were owl's to route.
 func (r Record) IsReported() bool { return r.Source == SourceReported }
 
 // Load streams complete records from the log. Historical request bodies are
@@ -406,7 +406,7 @@ type Known struct {
 	UA    []string // what its User-Agent begins with
 }
 
-// Agents lists the agents myna knows. Package agent sets it from each
+// Agents lists the agents owl knows. Package agent sets it from each
 // agent's own description, so they are listed in one place only.
 var Agents func() []Known
 
@@ -421,7 +421,7 @@ var builtinAgents = sync.OnceValue(func() []Known {
 	return Agents()
 })
 
-// knownAgents are myna's own agents, then those plugins add.
+// knownAgents are owl's own agents, then those plugins add.
 func knownAgents() []Known {
 	own := builtinAgents()
 	if PluginAgents == nil {
@@ -434,7 +434,7 @@ func knownAgents() []Known {
 	return append(slices.Clip(own), more...)
 }
 
-// IsAgent says whether id is an agent myna knows, its own or a plugin's,
+// IsAgent says whether id is an agent owl knows, its own or a plugin's,
 // rather than the product name of some other client (Python-urllib).
 func IsAgent(id string) bool {
 	return slices.ContainsFunc(knownAgents(), func(k Known) bool { return k.ID == id || slices.Contains(k.Names, id) })
@@ -469,7 +469,7 @@ var libraries = map[string]bool{
 func IsLibrary(id string) bool { return libraries[strings.ToLower(strings.TrimSpace(id))] }
 
 // AgentOf names the agent behind a client User-Agent. Known agents map to
-// their myna id; anything else keeps its product name.
+// their owl id; anything else keeps its product name.
 func AgentOf(ua string) string {
 	ua = strings.TrimSpace(ua)
 	name, _, _ := strings.Cut(ua, "/")
@@ -527,7 +527,7 @@ type Totals struct {
 	Calls   int `json:"calls"`
 	Errors  int `json:"errors"`
 	Retried int `json:"retried,omitempty"`
-	// Loops are those of Errors myna ended for looping (LoopErrType):
+	// Loops are those of Errors owl ended for looping (LoopErrType):
 	// a model's count of them says how often it got stuck (#1858)
 	Loops      int `json:"loops,omitempty"`
 	Input      int `json:"input"`
@@ -769,7 +769,7 @@ func (t *Totals) countCache(r Record) {
 // CountsNoCache is whether a provider's vendor never counts cache tokens,
 // so a call of it with none recorded was not a miss: Kiro caches but tells
 // only credits. Calls kept before its plugin said so (opencode-kiro-auth
-// 0.1.16's myna_cache_unknown) carry no CacheUnknown, and are read as
+// 0.1.16's owl_cache_unknown) carry no CacheUnknown, and are read as
 // having it (#3464). The provider is the built-in's id, or the plugin's
 // own when it is signed in under that.
 func CountsNoCache(provider string) bool {
@@ -833,7 +833,7 @@ func (t *Totals) addFrom(row Row, price *catalog.Price) {
 	t.Cost += r.CostAt(*price)
 }
 
-// LoopErrType is a record's ErrType for a reply myna ended because the
+// LoopErrType is a record's ErrType for a reply owl ended because the
 // model was stuck in a loop (#1359), told apart from what vendors call
 // their errors.
 const LoopErrType = "reply_loop"
@@ -888,7 +888,7 @@ type Group struct {
 	// Agent is the agent a session is of (sessions only).
 	Agent string `json:"agent,omitempty"`
 	Totals
-	// Own is the share of these calls myna made by itself (Record.ByMyna):
+	// Own is the share of these calls owl made by itself (Record.ByOwl):
 	// a routing classifier's, a web search's or an image description's,
 	// counted in Totals too, since they went to the same key or account
 	// (#1839). Filled for models, keys and accounts; a value, so a
@@ -896,16 +896,16 @@ type Group struct {
 	Own OwnShare `json:"own,omitzero"`
 }
 
-// OwnShare is what myna's own calls of a group came to.
+// OwnShare is what owl's own calls of a group came to.
 type OwnShare struct {
 	Calls  int     `json:"calls"`
 	Tokens int     `json:"tokens"` // in and out, cache aside, as Totals.Tokens
 	Cost   float64 `json:"cost"`
 }
 
-// addOwn counts r in g's own share when myna made it by itself.
+// addOwn counts r in g's own share when owl made it by itself.
 func (g *Group) addOwn(r Record, price *catalog.Price) {
-	if !r.ByMyna() {
+	if !r.ByOwl() {
 		return
 	}
 	if !r.HandedOn {
@@ -917,14 +917,14 @@ func (g *Group) addOwn(r Record, price *catalog.Price) {
 	}
 }
 
-// ByMyna is whether myna made the call by itself rather than an agent:
+// ByOwl is whether owl made the call by itself rather than an agent:
 // its routing classifier, System One's decision, a web search or an
 // image description it asked for (#1839).
-func (r Record) ByMyna() bool {
+func (r Record) ByOwl() bool {
 	id := AgentOf(r.Agent)
-	// "myna" as the agents know it; its own User-Agents (myna-router/1,
-	// myna-search/1) where they aren't loaded
-	return id == "myna" || strings.HasPrefix(id, "myna-")
+	// "owl" as the agents know it; its own User-Agents (owl-router/1,
+	// owl-search/1) where they aren't loaded
+	return id == "owl" || strings.HasPrefix(id, "owl-")
 }
 
 // who is where a subscription's calls went as the account signed in

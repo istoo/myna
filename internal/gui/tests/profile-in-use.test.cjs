@@ -10,7 +10,7 @@
 // before. The reporter's own steps: save a profile under a name typed, then
 // apply another from the button's list. Every language, both engines, the
 // panel at its narrowest. No backend: the API is faked here, and which
-// profile is in use is myna's to say (profile.InUse, tested in Go).
+// profile is in use is owl's to say (profile.InUse, tested in Go).
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
@@ -25,7 +25,7 @@ const agent = (id, model) => ({
 });
 
 // server: profiles saved by name, each holding codex's model; the one whose
-// model codex has now is in use, as myna decides it
+// model codex has now is in use, as owl decides it
 function server(lang) {
   let model = "model-b";
   const profiles = [{ name: "工作", holds: "model-a" }, { name: "游戏", holds: "model-b-x" }];
@@ -78,7 +78,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.setDefaultNavigationTimeout(60000);
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", server(lang));
-      await page.goto("http://myna.test/" + (mode === "panel" ? "?mode=panel" : ""));
+      await page.goto("http://owl.test/" + (mode === "panel" ? "?mode=panel" : ""));
       await page.locator("#profiles .chip").first().waitFor({ state: "attached" });
       return page;
     };

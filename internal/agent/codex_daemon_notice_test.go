@@ -8,14 +8,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // Codex 0.162's TUI runs on a background app-server it starts once and
-// leaves running, which built its model list when it started: after myna
+// leaves running, which built its model list when it started: after owl
 // changes Codex's list, a new codex session still shows Codex's own models
 // until that app-server is restarted, while the desktop app, restarted,
-// shows myna's (TJHHHH, luci on Discord). Restarting the app and the open
+// shows owl's (TJHHHH, luci on Discord). Restarting the app and the open
 // sessions, as the advice said, leaves it; the advice after a change names
 // it and the command that restarts it, here and in WSL, where the Agents
 // row can't tell a stale copy.
@@ -40,19 +40,19 @@ func TestCodexAdviceNamesTheSharedAppServer(t *testing.T) {
 	}
 }
 
-// luci (Discord, Codex 0.162): after Codex was wired to myna every new
+// luci (Discord, Codex 0.162): after Codex was wired to owl every new
 // codex showed Codex's own models, since the background app-server they
 // attach to was started before, on the official config. Said after a
 // change (the GUI's and the CLI's), the advice first checks that
-// app-server against myna's change in this Codex's home: restarted by
-// myna when no session is on it, named with the Agents page's Restart
+// app-server against owl's change in this Codex's home: restarted by
+// owl when no session is on it, named with the Agents page's Restart
 // when one is.
 func TestCodexNoticeKeepsTheDaemonCurrent(t *testing.T) {
 	home, _ := codexHome(t, "", "")
 	dir := filepath.Join(home, ".codex")
-	cfg, list := filepath.Join(dir, "config.toml"), filepath.Join(dir, "myna-models.json")
-	os.WriteFile(cfg, []byte("model_provider = \"myna\"\nmodel_catalog_json = \""+list+"\"\n"), 0o600)
-	os.WriteFile(list, []byte(`{"models":[{"slug":"myna/a"}]}`), 0o644)
+	cfg, list := filepath.Join(dir, "config.toml"), filepath.Join(dir, "owl-models.json")
+	os.WriteFile(cfg, []byte("model_provider = \"owl\"\nmodel_catalog_json = \""+list+"\"\n"), 0o600)
+	os.WriteFile(list, []byte(`{"models":[{"slug":"owl/a"}]}`), 0o644)
 	then := time.Now().Add(-2 * time.Hour)
 	os.Chtimes(cfg, then, then)
 	os.Chtimes(list, then, then)
@@ -74,14 +74,14 @@ func TestCodexNoticeKeepsTheDaemonCurrent(t *testing.T) {
 	if len(asked) != 1 || asked[0] != dir || changed.Sub(then).Abs() > time.Second {
 		t.Fatalf("asked %v at %v, want %s at %v", asked, changed, dir, then)
 	}
-	// myna's list changes: the daemon is checked against now
-	os.WriteFile(list, []byte(`{"models":[{"slug":"myna/a"},{"slug":"myna/b"}]}`), 0o644)
+	// owl's list changes: the daemon is checked against now
+	os.WriteFile(list, []byte(`{"models":[{"slug":"owl/a"},{"slug":"owl/b"}]}`), 0o644)
 	answer = provider.CodexDaemonCheck{Behind: true, Restarted: true, Since: then}
 	n := codex(home).Notice()
 	if time.Since(changed) > time.Minute {
-		t.Fatalf("checked against %v, not myna's change", changed)
+		t.Fatalf("checked against %v, not owl's change", changed)
 	}
-	if !strings.Contains(n, "myna restarted") {
+	if !strings.Contains(n, "owl restarted") {
 		t.Fatalf("restarted: %q", n)
 	}
 	// a session on it: the user is told where to restart it

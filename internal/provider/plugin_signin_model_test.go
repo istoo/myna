@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // A plugin answering 401 for a model the account may not use, and saying
@@ -22,7 +22,7 @@ import (
 func TestPluginModel401KeepsSignIn(t *testing.T) {
 	bun := testenv.Bun(t)
 	claudeHome(t)
-	t.Setenv("MYNA_BUN", bun)
+	t.Setenv("OWL_BUN", bun)
 	t.Cleanup(plugin.Settle)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
@@ -88,7 +88,7 @@ func TestPluginModel401KeepsSignIn(t *testing.T) {
 		`{"error":{"message":"stale"}}`,                          // mimo
 		`{"error":{"message":"Invalid API Key"}}`,                // mimo
 		`no`, // cursor
-		`Unauthorized — sign in to Cursor again in myna`, // cursor
+		`Unauthorized — sign in to Cursor again in owl`, // cursor
 		`{"code":"unauthenticated","message":"Error","details":[{"debug":{"error":"ERROR_NOT_LOGGED_IN","details":{"title":"Authentication error","detail":"If you are logged in, try logging out and back in."}}}]}`, // cursor
 	} {
 		answer(http.StatusOK, "{}")

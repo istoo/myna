@@ -10,41 +10,41 @@ import (
 
 // The Windows app is linked as a GUI program, so a double click opens no
 // console window; but a shell doesn't wait for a GUI program either. In
-// PowerShell or cmd, `myna plugin login` gave the prompt back at once,
-// printed after it, and the shell and myna both read the keys typed:
-// a hidden password never reached myna (TomXPRIME, #3737). A shell looks
-// for `myna` by PATHEXT, which lists .COM before .EXE, so myna writes
-// myna.com beside the app: a small console program (./launcher) that
+// PowerShell or cmd, `owl plugin login` gave the prompt back at once,
+// printed after it, and the shell and owl both read the keys typed:
+// a hidden password never reached owl (TomXPRIME, #3737). A shell looks
+// for `owl` by PATHEXT, which lists .COM before .EXE, so owl writes
+// owl.com beside the app: a small console program (./launcher) that
 // the shell waits for, which runs the app with its console and exits with
-// the app's code. Double clicks and the Start menu still open myna.exe.
+// the app's code. Double clicks and the Start menu still open owl.exe.
 //
-// It is written wherever a terminal runs myna from: when the app's
-// folder is on PATH, where Settings › Command line puts it, or a myna.com
-// or myna.cmd is there already. On the Desktop or in Downloads only Add
+// It is written wherever a terminal runs owl from: when the app's
+// folder is on PATH, where Settings › Command line puts it, or a owl.com
+// or owl.cmd is there already. On the Desktop or in Downloads only Add
 // writes it, and a start only keeps one there up to date. The app writes it again as it starts
 // when its bytes differ, so an update brings it along. They differ only
 // when the launcher does: it is built without the release's commit in it
-// (the Makefile's -buildvcs=false), or every update wrote a new myna.com
+// (the Makefile's -buildvcs=false), or every update wrote a new owl.com
 // (lucky_eagle_38410 on Discord, TestLauncherSameAtEveryCommit).
 
-// ComEnv is set by myna.com for the app it runs: the standard handles it
+// ComEnv is set by owl.com for the app it runs: the standard handles it
 // hands over are the terminal's console or a redirection, and its console
 // is the one to borrow (cli's console_windows.go).
-const ComEnv = "MYNA_COM"
+const ComEnv = "OWL_COM"
 
-// comName is the companion's file name; it runs as `myna`.
-const comName = "myna.com"
+// comName is the companion's file name; it runs as `owl`.
+const comName = "owl.com"
 
-// comMagic ends myna.com; the app it runs is named just before it,
+// comMagic ends owl.com; the app it runs is named just before it,
 // after a NUL (launcher's targetName).
-const comMagic = "\x00myna-com-target"
+const comMagic = "\x00owl-com-target"
 
 // comLauncher is the launcher program, built for this system and put in
 // the Windows app by `make release-windows` (com_embed_windows_*.go); nil
-// in any other build, which writes no myna.com.
+// in any other build, which writes no owl.com.
 var comLauncher []byte
 
-// comText is the myna.com that runs the program exe in its folder.
+// comText is the owl.com that runs the program exe in its folder.
 func comText(launcher []byte, exe string) []byte {
 	name := filepath.Base(strings.ReplaceAll(exe, `\`, "/"))
 	out := make([]byte, 0, len(launcher)+1+len(name)+len(comMagic))
@@ -54,7 +54,7 @@ func comText(launcher []byte, exe string) []byte {
 	return append(out, comMagic...)
 }
 
-// comTarget is the program name in a myna.com's last bytes, "" when it
+// comTarget is the program name in a owl.com's last bytes, "" when it
 // has none.
 func comTarget(b []byte) string {
 	if !bytes.HasSuffix(b, []byte(comMagic)) {
@@ -64,7 +64,7 @@ func comTarget(b []byte) string {
 	return string(b[bytes.LastIndexByte(b, 0)+1:])
 }
 
-// comRuns says whether cmd is a myna.com beside exe that runs it.
+// comRuns says whether cmd is a owl.com beside exe that runs it.
 func comRuns(cmd, exe string) bool {
 	if !strings.EqualFold(filepath.Base(cmd), comName) || !strings.EqualFold(filepath.Dir(cmd), filepath.Dir(exe)) {
 		return false
@@ -86,23 +86,23 @@ func comRuns(cmd, exe string) bool {
 	return strings.EqualFold(comTarget(b), filepath.Base(exe))
 }
 
-// comOwner says whether exe is the program a myna.com in its folder
-// should run: a myna.exe there is what `myna` ran before, so another
-// copy beside it (myna-windows-amd64 (1).exe) leaves it be.
+// comOwner says whether exe is the program a owl.com in its folder
+// should run: a owl.exe there is what `owl` ran before, so another
+// copy beside it (owl-windows-amd64 (1).exe) leaves it be.
 func comOwner(exe string) bool {
-	if strings.EqualFold(filepath.Base(exe), "myna.exe") {
+	if strings.EqualFold(filepath.Base(exe), "owl.exe") {
 		return true
 	}
-	st, err := os.Stat(filepath.Join(filepath.Dir(exe), "myna.exe"))
+	st, err := os.Stat(filepath.Join(filepath.Dir(exe), "owl.exe"))
 	return err != nil || st.IsDir()
 }
 
-// EnsureCompanion writes the myna.com that runs exe beside it when a
-// terminal runs myna from that folder (on PATH, or a myna.com or
-// myna.cmd there), or brings one there up to this version. Nothing in
+// EnsureCompanion writes the owl.com that runs exe beside it when a
+// terminal runs owl from that folder (on PATH, or a owl.com or
+// owl.cmd there), or brings one there up to this version. Nothing in
 // a build without the launcher, or when it is as it should be already.
 func EnsureCompanion(exe string) error {
-	// a download that opens the installed myna (Settle) leaves the
+	// a download that opens the installed owl (Settle) leaves the
 	// command to that one, in its folder on PATH
 	if comLauncher == nil || !comOwner(exe) || forwards(exe) {
 		return nil
@@ -123,8 +123,8 @@ func EnsureCompanion(exe string) error {
 	return err
 }
 
-// writeCom writes the myna.com that runs exe beside it, unless it is
-// there already, and is its path. A myna.com running now (a `myna
+// writeCom writes the owl.com that runs exe beside it, unless it is
+// there already, and is its path. A owl.com running now (a `owl
 // serve` in a terminal) can't be written over, but can be moved aside,
 // as an update moves the running app; the next run clears it.
 func writeCom(launcher []byte, exe string) (string, error) {
@@ -135,9 +135,9 @@ func writeCom(launcher []byte, exe string) (string, error) {
 	if b, err := os.ReadFile(p); err == nil && bytes.Equal(b, want) {
 		return p, nil
 	}
-	f, err := os.CreateTemp(filepath.Dir(p), ".myna-com-*")
+	f, err := os.CreateTemp(filepath.Dir(p), ".owl-com-*")
 	if err != nil {
-		return "", fmt.Errorf("writing %s, which runs %s as myna: %w", p, filepath.Base(exe), err)
+		return "", fmt.Errorf("writing %s, which runs %s as owl: %w", p, filepath.Base(exe), err)
 	}
 	tmp := f.Name()
 	_, err = f.Write(want)
@@ -153,7 +153,7 @@ func writeCom(launcher []byte, exe string) (string, error) {
 	}
 	if err != nil {
 		os.Remove(tmp)
-		return "", fmt.Errorf("writing %s, which runs %s as myna: %w", p, filepath.Base(exe), err)
+		return "", fmt.Errorf("writing %s, which runs %s as owl: %w", p, filepath.Base(exe), err)
 	}
 	return p, nil
 }

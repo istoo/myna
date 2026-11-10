@@ -1,5 +1,5 @@
-// Who myna's releases came from: the people a commit credits, read from
-// what is already public in istoo/myna's history. Nothing here is made up
+// Who owl's releases came from: the people a commit credits, read from
+// what is already public in istoo/owl's history. Nothing here is made up
 // and no email is ever given out:
 //
 //   - a subject's parenthesised credit: "(hoobnn on Discord)",
@@ -22,7 +22,7 @@ export const MAINTAINERS = ["yetone"];
 // agents and bots that author or co-author commits
 const BOT = /\[bot\]$|^(claude( code| opus.*| sonnet.*| haiku.*)?|amp|codex|copilot|github copilot|cursor( agent)?|devin( ai)?|gemini|opencode|droid|factory-droid|dependabot|github-actions|renovate|jev)$/i;
 // agents and machine accounts that co-author commits: "Instinct Agent
-// <agent@instinct.com>", "glm-5.3-flash", "myna-fix <fix@localhost>"
+// <agent@instinct.com>", "glm-5.3-flash", "owl-fix <fix@localhost>"
 const AGENT_MAIL = /@(anthropic\.com|cursor\.com|openai\.com|instinct\.com|multica\.ai|factory\.ai|ampcode\.com|google\.com|localhost)$|^(noreply|agent|bot)@/i;
 const MODEL = /^(claude|gpt|glm|qwen|kimi|deepseek|gemini|grok|minimax|doubao|o\d)\b.*\d|\bagent$|^(admin|root|user|ubuntu|runner|test)$/i;
 const PLATFORMS = { discord: "Discord", x: "X", twitter: "X", github: "GitHub", v2ex: "V2EX", wechat: "WeChat", 微信: "WeChat", telegram: "Telegram", reddit: "Reddit", "linux.do": "LINUX DO", 即刻: "Jike", 小红书: "Xiaohongshu" };
@@ -86,8 +86,8 @@ function group(text, out) {
       if (by) { out.names.push({ name: by[1], via: "GitHub", sure: true }); context = true; }
       // "#12", "plugins#12", "plugins #12", "magpie-community/plugins#12"
       p = p.replace(/(?:\b(plugins)\s+|([\w.-]+\/)?([\w.-]+))?#(\d+)\b/g, (_, spaced, owner, repo, n) => {
-        const r = spaced || (!repo ? "istoo/myna" : `${owner || ""}${repo}`);
-        const known = { "istoo/myna": "istoo/myna", myna: "istoo/myna", plugins: "magpie-community/plugins", "magpie-community/plugins": "magpie-community/plugins" }[r];
+        const r = spaced || (!repo ? "istoo/owl" : `${owner || ""}${repo}`);
+        const known = { "istoo/owl": "istoo/owl", owl: "istoo/owl", plugins: "magpie-community/plugins", "magpie-community/plugins": "magpie-community/plugins" }[r];
         if (known) out.refs.push({ repo: known, n: +n });
         context = true;
         return " ";
@@ -199,7 +199,7 @@ export function everyone(perCommit) {
 // markdown that shows a name as written: tjhhhh_84378, not tjhhhh84378 in italics
 const md = (s) => s.replace(/([\\`*_{}\[\]<>()#+!|~])/g, "\\$1");
 
-export const WALL = { en: "https://github.com/istoo/myna/blob/main/docs/contributors", zh: "https://github.com/istoo/myna/blob/main/docs/zh/contributors" };
+export const WALL = { en: "https://github.com/istoo/owl/blob/main/docs/contributors", zh: "https://github.com/istoo/owl/blob/main/docs/zh/contributors" };
 
 // the release notes' last line, or "" when nobody is credited
 export function thanks(people, lang) {
@@ -234,7 +234,7 @@ const WORDS = {
   ja: { name: "誰が", led: "そこから生まれた変更（新しい順）", more: (n) => `ほか ${n} 件`, none: "一覧は今は表示できません。" },
 };
 const SHOWN = 3;
-const RELEASE = (v) => `https://github.com/istoo/myna/releases/tag/v${encodeURIComponent(v)}`;
+const RELEASE = (v) => `https://github.com/istoo/owl/releases/tag/v${encodeURIComponent(v)}`;
 
 // The table the page shows from contributors.json's data.
 export function renderWall(data, lang) {

@@ -15,10 +15,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/sessions"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/sessions"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // ctxRoute is a done request of agent in session whose prompt holds base
@@ -244,7 +244,7 @@ func TestContextSessionTitles(t *testing.T) {
 
 // Kumo31 on Discord: dsh sends no session id on its chat-completions and
 // messages routes, so its requests reach the page keyed by the gateway's
-// hash of their first prompt, and its sessions were listed as "myna-a…".
+// hash of their first prompt, and its sessions were listed as "owl-a…".
 // They go under the session that prompt was read from, by the title the
 // Sessions page shows; its title call, with no tools, is no turn of it.
 // The ids are the real requests' beside the fixture
@@ -280,22 +280,22 @@ func TestContextDshSessionTitles(t *testing.T) {
 		return r
 	}
 	out := contextOf([]gateway.Route{
-		conv(1, "myna-950998433c3e70e50dc32994", true),  // chat-completions turn
-		conv(2, "myna-3dc58631c53e0df2e657ee2c", false), // its title call
-		conv(3, "myna-be31a0561e12cf603d3e79d9", true),  // messages turn
-		conv(4, "myna-a2ca3891cf83d335f4a635fa", false), // its title call
-		conv(5, "myna-000000000000000000000000", true),  // no file's
+		conv(1, "owl-950998433c3e70e50dc32994", true),  // chat-completions turn
+		conv(2, "owl-3dc58631c53e0df2e657ee2c", false), // its title call
+		conv(3, "owl-be31a0561e12cf603d3e79d9", true),  // messages turn
+		conv(4, "owl-a2ca3891cf83d335f4a635fa", false), // its title call
+		conv(5, "owl-000000000000000000000000", true),  // no file's
 	}, 7)
 	titles := map[string]string{}
 	for _, s := range out.Sessions {
 		titles[s.Key] = s.Title
 	}
-	want := map[string]string{chat: listed["dsh "+chat], msgs: listed["dsh "+msgs], "myna-000000000000000000000000": ""}
+	want := map[string]string{chat: listed["dsh "+chat], msgs: listed["dsh "+msgs], "owl-000000000000000000000000": ""}
 	if !maps.Equal(titles, want) {
 		t.Fatalf("titles %v, want %v", titles, want)
 	}
 	for _, s := range out.Sessions {
-		if s.Key != "myna-000000000000000000000000" && s.Requests != 1 {
+		if s.Key != "owl-000000000000000000000000" && s.Requests != 1 {
 			t.Fatalf("%s: %d requests, its title call counted as a turn", s.Key, s.Requests)
 		}
 	}

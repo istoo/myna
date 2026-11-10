@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/library"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/library"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A server kept to one computer (huhuy72219405 on X: "有些mcp属于本地的，

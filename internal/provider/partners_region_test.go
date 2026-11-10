@@ -14,7 +14,7 @@ import (
 // that can't be read keeps the list's first, a partner whose regions are
 // no places (APIKEY.FAN's Default and Direct) keeps its own endpoints, and
 // a provider added before keeps its region when the user moves. The feed
-// is github.com/istoo/myna/api/partners as served on 2026-10-27.
+// is github.com/istoo/owl/api/partners as served on 2026-10-27.
 func TestPartnerStartsAtTheUsersRegion(t *testing.T) {
 	feed, err := os.ReadFile("testdata/partners-2026-10-27.json")
 	if err != nil {
@@ -26,7 +26,7 @@ func TestPartnerStartsAtTheUsersRegion(t *testing.T) {
 	fetchPartnerIcon = func(context.Context, string) (string, error) { return "", os.ErrNotExist }
 	var body atomic.Value
 	body.Store(string(feed))
-	t.Setenv("MYNA_PARTNERS", partnerFeedServer(t, &body).URL)
+	t.Setenv("OWL_PARTNERS", partnerFeedServer(t, &body).URL)
 
 	at := func(where int) Provider {
 		t.Helper()
@@ -40,8 +40,8 @@ func TestPartnerStartsAtTheUsersRegion(t *testing.T) {
 		return p
 	}
 	type want struct{ chat, anthropic, keys, site, siteHost, catalog string }
-	cn := want{"https://api.kimi.com/coding/v1", "https://api.kimi.com/coding", "https://github.com/istoo/myna/go/kimi/keys/cn", "https://github.com/istoo/myna/go/kimi/site/cn", "www.kimi.com", "kimi-code-plan-cn"}
-	global := want{"https://api.kimi.ai/coding/v1", "https://api.kimi.ai/coding", "https://github.com/istoo/myna/go/kimi/keys/global", "https://github.com/istoo/myna/go/kimi/site/global", "www.kimi.ai", "kimi-code-plan-global"}
+	cn := want{"https://api.kimi.com/coding/v1", "https://api.kimi.com/coding", "https://github.com/istoo/owl/go/kimi/keys/cn", "https://github.com/istoo/owl/go/kimi/site/cn", "www.kimi.com", "kimi-code-plan-cn"}
+	global := want{"https://api.kimi.ai/coding/v1", "https://api.kimi.ai/coding", "https://github.com/istoo/owl/go/kimi/keys/global", "https://github.com/istoo/owl/go/kimi/site/global", "www.kimi.ai", "kimi-code-plan-global"}
 	for _, c := range []struct {
 		name  string
 		where int

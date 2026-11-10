@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/owl/internal/edit"
 )
 
 // The hub turned on for OpenCode and off again (chenxiang0010 on Discord,
@@ -51,7 +51,7 @@ func TestHubToggleKeepsOpenCodeJSONCValid(t *testing.T) {
 			}
 			for range 2 {
 				ok(t)(SetMCPHub(true))
-				check("hub on", `"myna"`, "// mine")
+				check("hub on", `"owl"`, "// mine")
 				ok(t)(SetMCPHub(false))
 				check("hub off", `"fs"`, "// mine")
 			}

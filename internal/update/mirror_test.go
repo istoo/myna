@@ -14,7 +14,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 func updateHome(t *testing.T) {
@@ -29,15 +29,15 @@ func updateHome(t *testing.T) {
 }
 
 // A release's file comes through a GitHub download mirror only when one is
-// given (myna update --mirror, or Settings' UpdateMirror): its prefix
+// given (owl update --mirror, or Settings' UpdateMirror): its prefix
 // before the github.com URL. The feed, with the file's SHA-256, is never
 // asked through it, and a file the mirror changed is refused (akic404 on
 // Discord: install and update without a proxy).
 func TestUpdateThroughAMirror(t *testing.T) {
 	updateHome(t)
-	body := []byte("new myna")
+	body := []byte("new owl")
 	sum := sha256.Sum256(body)
-	asset := Asset{URL: "https://github.com/istoo/myna/releases/download/v9.9.9/myna-cli-linux-amd64", SHA256: hex.EncodeToString(sum[:])}
+	asset := Asset{URL: "https://github.com/istoo/owl/releases/download/v9.9.9/owl-cli-linux-amd64", SHA256: hex.EncodeToString(sum[:])}
 
 	var mu sync.Mutex
 	var seen []string
@@ -48,7 +48,7 @@ func TestUpdateThroughAMirror(t *testing.T) {
 		bad := tamper
 		mu.Unlock()
 		if bad {
-			w.Write([]byte("not myna"))
+			w.Write([]byte("not owl"))
 			return
 		}
 		w.Write(body)
@@ -58,9 +58,9 @@ func TestUpdateThroughAMirror(t *testing.T) {
 		json.NewEncoder(w).Encode(Release{Version: "9.9.9", Assets: map[string]Asset{BinaryAsset(): asset}})
 	}))
 	defer feed.Close()
-	t.Setenv("MYNA_UPDATE_FEED", feed.URL+"/api/latest")
+	t.Setenv("OWL_UPDATE_FEED", feed.URL+"/api/latest")
 
-	// none unless given: no mirror is myna's own
+	// none unless given: no mirror is owl's own
 	if m := Mirror(context.Background()); m != "" {
 		t.Fatalf("a mirror by default: %q", m)
 	}
@@ -69,7 +69,7 @@ func TestUpdateThroughAMirror(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	path := filepath.Join(t.TempDir(), "myna.new")
+	path := filepath.Join(t.TempDir(), "owl.new")
 	if err := download(ctx, rel.Assets[BinaryAsset()], path); err != nil {
 		t.Fatal(err)
 	}
@@ -118,11 +118,11 @@ func TestUpdateThroughAMirror(t *testing.T) {
 	}
 }
 
-// myna update --proxy takes the feed and the download through the proxy
+// owl update --proxy takes the feed and the download through the proxy
 // given, over Settings' and the environment's.
 func TestUpdateThroughAProxyGiven(t *testing.T) {
 	updateHome(t)
-	body := []byte("new myna")
+	body := []byte("new owl")
 	sum := sha256.Sum256(body)
 	var mu sync.Mutex
 	var seen []string
@@ -135,25 +135,25 @@ func TestUpdateThroughAProxyGiven(t *testing.T) {
 			return
 		}
 		json.NewEncoder(w).Encode(Release{Version: "9.9.9", Assets: map[string]Asset{
-			BinaryAsset(): {URL: "http://releases.myna.invalid/asset", SHA256: hex.EncodeToString(sum[:])},
+			BinaryAsset(): {URL: "http://releases.owl.invalid/asset", SHA256: hex.EncodeToString(sum[:])},
 		}})
 	}))
 	defer px.Close()
 	if err := settings.Save(settings.Settings{Proxy: "direct"}); err != nil {
 		t.Fatal(err)
 	}
-	t.Setenv("MYNA_UPDATE_FEED", "http://feed.myna.invalid/api/latest")
+	t.Setenv("OWL_UPDATE_FEED", "http://feed.owl.invalid/api/latest")
 	ctx := WithProxy(context.Background(), px.URL)
 	rel, err := Latest(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := download(ctx, rel.Assets[BinaryAsset()], filepath.Join(t.TempDir(), "myna.new")); err != nil {
+	if err := download(ctx, rel.Assets[BinaryAsset()], filepath.Join(t.TempDir(), "owl.new")); err != nil {
 		t.Fatal(err)
 	}
 	mu.Lock()
 	defer mu.Unlock()
-	if want := []string{"http://feed.myna.invalid/api/latest", "http://releases.myna.invalid/asset"}; !slices.Equal(seen, want) {
+	if want := []string{"http://feed.owl.invalid/api/latest", "http://releases.owl.invalid/asset"}; !slices.Equal(seen, want) {
 		t.Fatalf("through the proxy: %v, want %v", seen, want)
 	}
 	for _, bad := range []string{"ftp://127.0.0.1:21", "socks4://127.0.0.1:1080"} {
@@ -199,10 +199,10 @@ func TestCheckProxyErrorShowsNoCredentials(t *testing.T) {
 // mirror's. Settings take a full https:// mirror only.
 func TestMirrorFailuresAreTheMirrors(t *testing.T) {
 	updateHome(t)
-	body := []byte("new myna")
+	body := []byte("new owl")
 	sum := sha256.Sum256(body)
-	asset := Asset{URL: "https://github.com/istoo/myna/releases/download/v9.9.9/myna-cli-linux-amd64", SHA256: hex.EncodeToString(sum[:])}
-	tampered := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("not myna")) }))
+	asset := Asset{URL: "https://github.com/istoo/owl/releases/download/v9.9.9/owl-cli-linux-amd64", SHA256: hex.EncodeToString(sum[:])}
+	tampered := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("not owl")) }))
 	defer tampered.Close()
 	missing := httptest.NewServer(http.NotFoundHandler())
 	defer missing.Close()
@@ -210,7 +210,7 @@ func TestMirrorFailuresAreTheMirrors(t *testing.T) {
 	// closed server's port can be handed to the next server at once
 	gone := "http://127.0.0.1:1/"
 	for _, m := range []string{tampered.URL + "/", missing.URL + "/", gone} {
-		path := filepath.Join(t.TempDir(), "myna.new")
+		path := filepath.Join(t.TempDir(), "owl.new")
 		err := fetch(WithMirror(context.Background(), m), asset, path)
 		if err == nil || MirrorOf(err) != m || !strings.Contains(err.Error(), strings.TrimSuffix(m, "/")) {
 			t.Errorf("through %s: %v (mirror %q)", m, err, MirrorOf(err))

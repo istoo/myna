@@ -1,8 +1,8 @@
 // A browser tab's fonts: the ones on the computer the browser runs on,
-// which may not be the one myna runs on (Norcleeh on Discord: myna in
+// which may not be the one owl runs on (Norcleeh on Discord: owl in
 // Docker, its web GUI listed the container's fonts, never his own). Only
 // a tab loads this (app.js loadFonts imports it); the app's windows list the
-// installed fonts myna reads itself.
+// installed fonts owl reads itself.
 //
 // A tab's list is the server's families it draws, plus:
 // - its computer's own, from the Local Font Access API (Chromium, on

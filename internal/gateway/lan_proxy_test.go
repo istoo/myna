@@ -6,21 +6,21 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // A tunnel or proxy on this computer (cloudflared, ngrok, Tailscale serve,
 // frp, Caddy) reaches the gateway on loopback for clients anywhere (#1022).
 // What it forwards carries a forwarding header, and is answered as from
-// another machine: refused while myna isn't shared, and with sharing on
+// another machine: refused while owl isn't shared, and with sharing on
 // only with an enabled gateway key — on every route, the model calls, the
 // quotas, the MCP sign-ins. An agent on loopback without those headers is
 // let in as before, with any token.
 func TestProxiedLoopbackNeedsTheKey(t *testing.T) {
 	fresh(t)
-	t.Setenv("MYNA_ADDR", "")
-	t.Setenv("MYNA_TRUST_PROXY", "")
+	t.Setenv("OWL_ADDR", "")
+	t.Setenv("OWL_TRUST_PROXY", "")
 	reached := ""
 	h := lanGuard(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		reached = access.Caller(r.Context()).KeyID + "|" + r.Header.Get("Authorization")
@@ -46,24 +46,24 @@ func TestProxiedLoopbackNeedsTheKey(t *testing.T) {
 		"Tailscale serve": {"Tailscale-User-Login", "someone@example.com"},
 	}
 
-	if c, _ := call("/v1/messages", "Authorization", "Bearer myna"); c != 200 || reached != "|Bearer myna" {
+	if c, _ := call("/v1/messages", "Authorization", "Bearer owl"); c != 200 || reached != "|Bearer owl" {
 		t.Fatal("an agent on loopback:", c, reached)
 	}
 	for name, hdr := range tunnels {
-		c, body := call("/v1/messages", append([]string{"Authorization", "Bearer myna"}, hdr...)...)
+		c, body := call("/v1/messages", append([]string{"Authorization", "Bearer owl"}, hdr...)...)
 		if c != http.StatusForbidden || reached != "" || !strings.Contains(body, "proxy or tunnel") || !strings.Contains(body, "Share on local network") {
-			t.Fatalf("%s, myna not shared: %d %q reached=%q", name, c, body, reached)
+			t.Fatalf("%s, owl not shared: %d %q reached=%q", name, c, body, reached)
 		}
 	}
 
-	keys, secrets := newCaller(t, "Tunnel client") // shares myna
+	keys, secrets := newCaller(t, "Tunnel client") // shares owl
 	for name, hdr := range tunnels {
-		for _, bad := range [][]string{nil, {"Authorization", "Bearer myna"}, {"x-api-key", "sk-myna-wrong"}} {
+		for _, bad := range [][]string{nil, {"Authorization", "Bearer owl"}, {"x-api-key", "sk-owl-wrong"}} {
 			if c, _ := call("/v1/messages", append(append([]string{}, bad...), hdr...)...); c != http.StatusUnauthorized || reached != "" {
 				t.Fatalf("%s with %v: %d reached=%q", name, bad, c, reached)
 			}
 		}
-		if c, _ := call("/v1/messages", append([]string{"Authorization", "Bearer " + secrets[0]}, hdr...)...); c != 200 || reached != keys[0].ID+"|Bearer myna" {
+		if c, _ := call("/v1/messages", append([]string{"Authorization", "Bearer " + secrets[0]}, hdr...)...); c != 200 || reached != keys[0].ID+"|Bearer owl" {
 			t.Fatalf("%s with the key: %d reached=%q", name, c, reached)
 		}
 	}
@@ -76,24 +76,24 @@ func TestProxiedLoopbackNeedsTheKey(t *testing.T) {
 	}
 
 	// a proxy that signs its own clients in is said to be trusted
-	t.Setenv("MYNA_TRUST_PROXY", "1")
+	t.Setenv("OWL_TRUST_PROXY", "1")
 	s := settings.Load()
 	s.LAN = false
 	settings.Save(s)
-	if c, _ := call("/v1/messages", "Authorization", "Bearer myna", "X-Forwarded-For", "10.0.0.2"); c != 200 {
-		t.Fatal("MYNA_TRUST_PROXY:", c)
+	if c, _ := call("/v1/messages", "Authorization", "Bearer owl", "X-Forwarded-For", "10.0.0.2"); c != 200 {
+		t.Fatal("OWL_TRUST_PROXY:", c)
 	}
-	t.Setenv("MYNA_TRUST_PROXY", "")
+	t.Setenv("OWL_TRUST_PROXY", "")
 
-	// MYNA_ADDR on loopback is closed to a tunnel; one on the network
+	// OWL_ADDR on loopback is closed to a tunnel; one on the network
 	// asks it for a gateway key, as it asks everyone else
-	t.Setenv("MYNA_ADDR", "127.0.0.1:4555")
+	t.Setenv("OWL_ADDR", "127.0.0.1:4555")
 	if c, _ := call("/v1/messages", "Cf-Connecting-IP", "203.0.113.9"); c != http.StatusForbidden {
-		t.Fatal("MYNA_ADDR on loopback, through a tunnel:", c)
+		t.Fatal("OWL_ADDR on loopback, through a tunnel:", c)
 	}
-	t.Setenv("MYNA_ADDR", "0.0.0.0:4555")
-	if c, _ := call("/v1/messages", "Authorization", "Bearer myna", "Cf-Connecting-IP", "203.0.113.9"); c != http.StatusUnauthorized {
-		t.Fatal("MYNA_ADDR on the network, through a tunnel, no key:", c)
+	t.Setenv("OWL_ADDR", "0.0.0.0:4555")
+	if c, _ := call("/v1/messages", "Authorization", "Bearer owl", "Cf-Connecting-IP", "203.0.113.9"); c != http.StatusUnauthorized {
+		t.Fatal("OWL_ADDR on the network, through a tunnel, no key:", c)
 	}
 }
 
@@ -101,8 +101,8 @@ func TestProxiedLoopbackNeedsTheKey(t *testing.T) {
 // MCP sign-ins, the Omarchy theme — don't take a tunnel's request for one.
 func TestProxiedLoopbackRoutes(t *testing.T) {
 	fresh(t)
-	t.Setenv("MYNA_ADDR", "")
-	t.Setenv("MYNA_TRUST_PROXY", "")
+	t.Setenv("OWL_ADDR", "")
+	t.Setenv("OWL_TRUST_PROXY", "")
 	h := lanGuard(New().Handler())
 	call := func(method, path string, hdr ...string) int {
 		r := httptest.NewRequest(method, path, nil)
@@ -114,11 +114,11 @@ func TestProxiedLoopbackRoutes(t *testing.T) {
 		h.ServeHTTP(w, r)
 		return w.Code
 	}
-	cf := []string{"Cf-Connecting-IP", "203.0.113.9", "Host", "myna.example.com"}
-	if c := call("GET", "/v1/myna/quotas"); c != 200 {
+	cf := []string{"Cf-Connecting-IP", "203.0.113.9", "Host", "owl.example.com"}
+	if c := call("GET", "/v1/owl/quotas"); c != 200 {
 		t.Fatal("quotas on loopback:", c)
 	}
-	for _, p := range []string{"/v1/myna/quotas", "/v1/myna/quotas/history", "/v1/models", "/v1/myna/omarchy"} {
+	for _, p := range []string{"/v1/owl/quotas", "/v1/owl/quotas/history", "/v1/models", "/v1/owl/omarchy"} {
 		if c := call("GET", p, cf...); c != http.StatusForbidden {
 			t.Fatal(p, "through a tunnel, not shared:", c)
 		}
@@ -127,13 +127,13 @@ func TestProxiedLoopbackRoutes(t *testing.T) {
 		t.Fatal("MCP through a tunnel, not shared:", c)
 	}
 	_, secrets := newCaller(t, "Tunnel client")
-	if c := call("GET", "/v1/myna/quotas", cf...); c != http.StatusUnauthorized {
+	if c := call("GET", "/v1/owl/quotas", cf...); c != http.StatusUnauthorized {
 		t.Fatal("quotas through a tunnel without the key:", c)
 	}
-	if c := call("GET", "/v1/myna/quotas", append([]string{"x-api-key", secrets[0]}, cf...)...); c != 200 {
+	if c := call("GET", "/v1/owl/quotas", append([]string{"x-api-key", secrets[0]}, cf...)...); c != 200 {
 		t.Fatal("quotas through a tunnel with the key:", c)
 	}
-	if c := call("GET", "/v1/myna/omarchy", append([]string{"x-api-key", secrets[0]}, cf...)...); c != http.StatusForbidden {
+	if c := call("GET", "/v1/owl/omarchy", append([]string{"x-api-key", secrets[0]}, cf...)...); c != http.StatusForbidden {
 		t.Fatal("the Omarchy theme is this machine's only:", c)
 	}
 	if c := call("POST", "/mcp/docs", cf...); c != http.StatusUnauthorized {
@@ -141,15 +141,15 @@ func TestProxiedLoopbackRoutes(t *testing.T) {
 	}
 }
 
-// Sharing keeps a host MYNA_ADDR names (#1112): a gateway kept on
+// Sharing keeps a host OWL_ADDR names (#1112): a gateway kept on
 // loopback behind Tailscale Serve asks what Serve forwards for a gateway
 // key once shared, and still listens on loopback alone; the addresses it
 // offers other machines are the one it listens on, or none on loopback.
 func TestSharedKeepsPinnedAddr(t *testing.T) {
 	fresh(t)
-	t.Setenv("MYNA_TRUST_PROXY", "")
-	t.Setenv("MYNA_PUBLIC_URL", "")
-	t.Setenv("MYNA_ADDR", "127.0.0.1:4555")
+	t.Setenv("OWL_TRUST_PROXY", "")
+	t.Setenv("OWL_PUBLIC_URL", "")
+	t.Setenv("OWL_ADDR", "127.0.0.1:4555")
 	reached := false
 	h := lanGuard(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { reached = true }))
 	call := func(hdr ...string) int {
@@ -165,14 +165,14 @@ func TestSharedKeepsPinnedAddr(t *testing.T) {
 	}
 	serve := []string{"Tailscale-User-Login", "someone@example.com", "X-Forwarded-For", "100.64.0.7"}
 
-	_, secrets := newCaller(t, "Tailnet laptop") // shares myna
+	_, secrets := newCaller(t, "Tailnet laptop") // shares owl
 	if a := listenAddr(); a != "127.0.0.1:4555" {
-		t.Fatal("shared, MYNA_ADDR on loopback, listens on", a)
+		t.Fatal("shared, OWL_ADDR on loopback, listens on", a)
 	}
 	if u := LANURLs(); len(u) != 0 {
 		t.Fatal("shared on loopback offers", u)
 	}
-	for _, bad := range [][]string{nil, {"Authorization", "Bearer myna"}, {"x-api-key", "sk-myna-wrong"}} {
+	for _, bad := range [][]string{nil, {"Authorization", "Bearer owl"}, {"x-api-key", "sk-owl-wrong"}} {
 		if c := call(append(append([]string{}, bad...), serve...)...); c != http.StatusUnauthorized || reached {
 			t.Fatalf("through Serve with %v: %d reached=%v", bad, c, reached)
 		}
@@ -184,21 +184,21 @@ func TestSharedKeepsPinnedAddr(t *testing.T) {
 		t.Fatal("an agent on loopback:", c)
 	}
 
-	t.Setenv("MYNA_ADDR", "100.64.0.1:4555")
+	t.Setenv("OWL_ADDR", "100.64.0.1:4555")
 	if a := listenAddr(); a != "100.64.0.1:4555" {
-		t.Fatal("shared, MYNA_ADDR on one address, listens on", a)
+		t.Fatal("shared, OWL_ADDR on one address, listens on", a)
 	}
 	if u := LANURLs(); len(u) != 1 || u[0] != "http://100.64.0.1:4555" {
 		t.Fatal("shared on one address offers", u)
 	}
 	// every interface, said or left to Settings, is every interface still
 	for _, a := range []string{"0.0.0.0:4555", "[::]:4555", ":4555"} {
-		t.Setenv("MYNA_ADDR", a)
+		t.Setenv("OWL_ADDR", a)
 		if got := listenAddr(); got != "0.0.0.0:4555" {
-			t.Fatal("shared, MYNA_ADDR", a, "listens on", got)
+			t.Fatal("shared, OWL_ADDR", a, "listens on", got)
 		}
 	}
-	t.Setenv("MYNA_ADDR", "")
+	t.Setenv("OWL_ADDR", "")
 	if got := listenAddr(); got != "0.0.0.0:"+Port() {
 		t.Fatal("shared from Settings listens on", got)
 	}

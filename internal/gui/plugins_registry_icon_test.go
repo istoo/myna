@@ -7,14 +7,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/owl/internal/plugin"
 )
 
 // registry.json can give a listing a picture as its icon (Kilo Code's
 // https://github.com/Kilo-Org.png) where most give a bundled icon's name.
 // The page drew icon(<url>) as the generic cube. Both of Discover's
 // answers now give such a picture kept as a file, as a package's own
-// myna.icon is, and leave a bundled name as it is. A data:image URI
+// owl.icon is, and leave a bundled name as it is. A data:image URI
 // stands in for the URL here, so nothing is fetched; the https fetch is
 // provider.TestMarketIconURLKept's.
 func TestRegistryIconPictureKept(t *testing.T) {
@@ -23,7 +23,7 @@ func TestRegistryIconPictureKept(t *testing.T) {
 	t.Setenv("USERPROFILE", h)
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
-	t.Setenv("MYNA_BUN", "")
+	t.Setenv("OWL_BUN", "")
 	t.Setenv("PATH", "")
 	const png = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -34,7 +34,7 @@ func TestRegistryIconPictureKept(t *testing.T) {
 		]}`))
 	}))
 	defer srv.Close()
-	t.Setenv("MYNA_PLUGIN_MARKET", srv.URL)
+	t.Setenv("OWL_PLUGIN_MARKET", srv.URL)
 	plugin.RefreshMarket()
 	t.Cleanup(plugin.RefreshMarket)
 	plugin.ReloadInfo()
@@ -63,7 +63,7 @@ func TestRegistryIconPictureKept(t *testing.T) {
 		t.Errorf("a bundled name = %q", ic)
 	}
 	if ic := got["@magpie-community/tools-plain"]; ic != "" {
-		t.Errorf("a picture myna doesn't take = %q", ic)
+		t.Errorf("a picture owl doesn't take = %q", ic)
 	}
 	// the whole market at once (pluginMarketState), npm not asked here
 	var asked []pluginListingJSON

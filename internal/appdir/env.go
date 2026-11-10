@@ -10,7 +10,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/istoo/myna/internal/agentenv"
+	"github.com/istoo/owl/internal/agentenv"
 )
 
 // homeVar is the variable Go's os.UserHomeDir reads the home folder from.
@@ -35,13 +35,13 @@ func rooted(p string) bool {
 
 // Home is the user's home folder, or an error when its variable is unset,
 // empty or relative. os.UserHomeDir hands back "" there, which
-// filepath.Join turns into a path under the folder myna was started in,
+// filepath.Join turns into a path under the folder owl was started in,
 // and on Android it falls back to the shared /sdcard.
 func Home() (string, error) {
 	v := homeVar()
 	switch h := os.Getenv(v); {
 	case h == "":
-		return "", fmt.Errorf("%s is not set: myna needs the home folder to find its own files and the agents'", v)
+		return "", fmt.Errorf("%s is not set: owl needs the home folder to find its own files and the agents'", v)
 	case !rooted(h):
 		return "", fmt.Errorf("%s is %q, not an absolute path", v, h)
 	default:
@@ -70,14 +70,14 @@ func mustHome() string {
 }
 
 // pathVars are the variables folders and files are built from: the XDG
-// folders, Windows' application data folders, myna's own and every
+// folders, Windows' application data folders, owl's own and every
 // agent's.
 var pathVars = sync.OnceValue(func() map[string]bool {
 	vs := map[string]bool{}
 	for _, v := range []string{
 		"XDG_CONFIG_HOME", "XDG_CACHE_HOME", "XDG_DATA_HOME", "XDG_STATE_HOME", "XDG_RUNTIME_DIR",
 		"APPDATA", "LOCALAPPDATA",
-		"MYNA_BIN_DIR", "OMARCHY_PATH", "OPENCODE_CONFIG",
+		"OWL_BIN_DIR", "OMARCHY_PATH", "OPENCODE_CONFIG",
 	} {
 		vs[v] = true
 	}
@@ -104,13 +104,13 @@ func usable(name, v string) bool {
 	return false
 }
 
-// LookupEnv is os.LookupEnv for what myna itself reads: a folder variable
+// LookupEnv is os.LookupEnv for what owl itself reads: a folder variable
 // (pathVars) holding a relative path reads as unset, as the XDG spec asks of
-// one, so no file of myna's or an agent's is written under the working
-// folder. The environment is left as it is: the programs myna starts get
+// one, so no file of owl's or an agent's is written under the working
+// folder. The environment is left as it is: the programs owl starts get
 // the variable as the user set it. The variables a login shell lends the
 // desktop app (proc.UserPath) are read through here too. On Windows an
-// agent's variable is the registry's now, not the one myna started with
+// agent's variable is the registry's now, not the one owl started with
 // (follow.go).
 func LookupEnv(name string) (string, bool) {
 	v, ok := lookupEnv(name)
@@ -140,7 +140,7 @@ func CheckEnv() (ignored []string, err error) {
 }
 
 // GoneError is a folder an agent's variable names that isn't there, so
-// what myna writes into it isn't written: making it again would put
+// what owl writes into it isn't written: making it again would put
 // the agent's config where the agent no longer looks, as Pi's models.json
 // and settings.json went back into the AgentDir bm_rabbit had moved and
 // deleted. The variable is fixed, or the folder made, by the user.

@@ -16,7 +16,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/desktopdir"
+	"github.com/istoo/owl/internal/desktopdir"
 	"github.com/tidwall/gjson"
 )
 
@@ -345,7 +345,7 @@ func callSourcesInto(out []file, codex []file) []file {
 // desktopDataDirs are Claude Desktop's folders on this computer that
 // hold sessions: its own (%APPDATA%\Claude on Windows, or the MSIX
 // package's, and the real ones beside a package's), the Claude folder
-// myna writes and Claude-3p, as desktopdir finds them.
+// owl writes and Claude-3p, as desktopdir finds them.
 func desktopDataDirs() []string { return desktopdir.Everywhere() }
 
 // headLen is how much of a file's start is kept to know it again.
@@ -454,9 +454,9 @@ func cxAnswerItem(b []byte) bool {
 		return false
 	}
 	switch typeAfter(h, cxPayload) {
-	// myna_reasoning: a reasoning item of myna's, written so as Codex let
-	// myna go (PortCodexRolloutsLeft)
-	case "reasoning", "myna_reasoning", "function_call", "custom_tool_call", "web_search_call", "local_shell_call", "tool_search_call", "image_generation_call":
+	// owl_reasoning: a reasoning item of owl's, written so as Codex let
+	// owl go (PortCodexRolloutsLeft)
+	case "reasoning", "owl_reasoning", "function_call", "custom_tool_call", "web_search_call", "local_shell_call", "tool_search_call", "image_generation_call":
 		return true
 	case "message":
 		return typeAfter(h, cxRole) == "assistant"
@@ -1343,7 +1343,7 @@ func ReadCallSource(s CallSource) []Call {
 // desktopEntrypoint is a Claude Code transcript's entrypoint when Claude
 // Desktop ran it for its Code tab: "claude-desktop", or
 // "claude-desktop-3p" in its third-party inference mode (Desktop 2.7032's
-// nK: type "3p"), the mode a gateway such as myna's is set in.
+// nK: type "3p"), the mode a gateway such as owl's is set in.
 func desktopEntrypoint(e string) bool {
 	return e == "claude-desktop" || e == "claude-desktop-3p"
 }

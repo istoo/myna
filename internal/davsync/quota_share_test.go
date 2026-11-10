@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // Two computers sharing usage share what they read of their accounts'
@@ -62,7 +62,7 @@ func TestQuotaHistorySharedBetweenComputers(t *testing.T) {
 	var sealed []byte
 	for _, f := range fake.usageFiles() {
 		if strings.HasSuffix(f, quotasExt) {
-			sealed = fake.files["/dav/myna/usage/"+f]
+			sealed = fake.files["/dav/owl/usage/"+f]
 		}
 	}
 	if sealed == nil || strings.Contains(string(sealed), "a@x.com") {

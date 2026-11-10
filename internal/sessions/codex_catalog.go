@@ -23,7 +23,7 @@ import (
 // in threads updated since its watermark. A row leaves the catalog only on
 // the app-server's thread/deleted or thread/archived notification
 // (removeThreadFromCatalog), which Codex's own delete sends. A rollout
-// myna moved to its trash was no longer listed by the app-server
+// owl moved to its trash was no longer listed by the app-server
 // (thread/list skips a thread whose rollout is gone), but its catalog row
 // stayed, so the app went on listing it (zhuddan on Discord, Codex
 // 26.1023).
@@ -34,7 +34,7 @@ import (
 // app's own. Only threads Codex's state database names with a rollout
 // under that Codex folder's sessions or archived_sessions, and neither it
 // nor its packed twin there, are forgotten; a rollout that can't be
-// looked at counts as there. The rows of a thread in myna's trash are
+// looked at counts as there. The rows of a thread in owl's trash are
 // kept in its note, and Restore puts them back, since the app wouldn't
 // take in a thread that old again.
 
@@ -361,7 +361,7 @@ func restoreIn(path string, rows []codexCatalogRow) error {
 }
 
 // tidyCodexCatalog forgets, in each Codex folder, the catalog rows of the
-// threads whose rollout is gone, and keeps the rows of those in myna's
+// threads whose rollout is gone, and keeps the rows of those in owl's
 // trash in their notes. The caller holds mu.
 func tidyCodexCatalog(homes []string) error {
 	var first error
@@ -408,7 +408,7 @@ func sameDirKey(p string) string {
 var tidyOnce sync.Once
 
 // TidyCodexCatalog takes the Codex app's catalog rows of the threads whose
-// rollout is gone out of it, once a run of myna: those myna deleted
+// rollout is gone out of it, once a run of owl: those owl deleted
 // before it did so itself.
 func TidyCodexCatalog() {
 	if !Reads("codex") {

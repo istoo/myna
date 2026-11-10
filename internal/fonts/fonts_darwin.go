@@ -5,7 +5,7 @@ package fonts
 /*
 #cgo LDFLAGS: -framework AppKit -framework CoreText
 #include <stdlib.h>
-char *mynaInstalledFonts(void);
+char *owlInstalledFonts(void);
 */
 import "C"
 
@@ -18,7 +18,7 @@ import (
 const Available = true
 
 func installed() ([]Face, error) {
-	raw := C.mynaInstalledFonts()
+	raw := C.owlInstalledFonts()
 	if raw == nil {
 		return nil, errors.New("CoreText could not list installed fonts")
 	}

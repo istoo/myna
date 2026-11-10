@@ -32,7 +32,7 @@ import (
 // v7: reconcile recent Claude message revisions.
 // v8: a Claude Code call's 1-hour cache writes.
 // v9: a dsh call carries the provider it named and the model that answered,
-// and a call through myna's own gateway is left out of dsh's (the gateway
+// and a call through owl's own gateway is left out of dsh's (the gateway
 // logs it itself).
 // v10: the calls ZCode's and WorkBuddy's session files hold are read too, and
 // WorkBuddy's that went through the gateway are left out of them as a dsh
@@ -58,7 +58,7 @@ const callCacheVersion = "calls-v15"
 // long history (~16,000 files, minutes of CPU) after an update. An agent
 // not named here is at 0, as every shard written before this was.
 //
-// cindy 1: a call through myna's link (provider "myna-<8 hex>") is
+// cindy 1: a call through owl's link (provider "owl-<8 hex>") is
 // the gateway's, and left out (cindyGatewayProvider).
 // codex 1, zcode 1: a fork's copies of its parent's calls are the
 // parent's (codex_fork.go, zcDB.copied).

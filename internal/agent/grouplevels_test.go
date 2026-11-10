@@ -6,8 +6,8 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A routing group's levels as it names them (#295) are what agents are
@@ -32,11 +32,11 @@ func TestGroupLevelsReachAgents(t *testing.T) {
 	if err := provider.SaveGroup(provider.Group{Name: "mix", Members: []string{"a/sol", "a/flash"}, Levels: all}); err != nil {
 		t.Fatal(err)
 	}
-	i := slices.IndexFunc(mynaModels("codex"), func(m catalog.Model) bool { return m.ID == "group/mix" })
-	if i < 0 || !slices.Equal(mynaModels("codex")[i].Efforts, all) {
-		t.Fatalf("codex: %+v", mynaModels("codex"))
+	i := slices.IndexFunc(owlModels("codex"), func(m catalog.Model) bool { return m.ID == "group/mix" })
+	if i < 0 || !slices.Equal(owlModels("codex")[i].Efforts, all) {
+		t.Fatalf("codex: %+v", owlModels("codex"))
 	}
-	pi, _ := json.Marshal(mynaProviderJSON("pi"))
+	pi, _ := json.Marshal(owlProviderJSON("pi"))
 	type piModel struct {
 		ID     string         `json:"id"`
 		Levels map[string]any `json:"thinkingLevelMap"`

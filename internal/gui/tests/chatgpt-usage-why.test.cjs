@@ -25,10 +25,10 @@ const cases = [
     "ChatGPT answered HTTP {status} — hover for what it said", { status: "403" }],
   ["net@example.com", "couldn't reach chatgpt.com for the usage read: dial tcp: lookup chatgpt.com: no such host",
     "Couldn't reach ChatGPT — check the network or the proxy", {}],
-  ["json@example.com", "ChatGPT's usage reply isn't one myna reads: unexpected end of JSON input",
-    "ChatGPT answered in a form myna doesn't read — hover for what it sent", {}],
-  ["asked@example.com", "not read yet: myna reads allowances only when you ask (Settings → Usage)",
-    "Not read yet — myna reads allowances only when you ask; refresh this card to read it", {}],
+  ["json@example.com", "ChatGPT's usage reply isn't one owl reads: unexpected end of JSON input",
+    "ChatGPT answered in a form owl doesn't read — hover for what it sent", {}],
+  ["asked@example.com", "not read yet: owl reads allowances only when you ask (Settings → Usage)",
+    "Not read yet — owl reads allowances only when you ask; refresh this card to read it", {}],
   ["other@example.com", "something nobody has words for",
     "Allowance unavailable — hover for why", {}],
 ];
@@ -69,7 +69,7 @@ for (const [engine, browserType] of [["chromium", chromium], ["webkit", webkit]]
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, web));
-      await page.goto("http://myna.test/?view=providers");
+      await page.goto("http://owl.test/?view=providers");
       await page.locator(".row.provider", { hasText: "Codex" }).first().click();
       const rows = page.locator(".editor .accts .acc[data-account-id]");
       await rows.nth(cases.length - 1).locator(".aq-none").waitFor();

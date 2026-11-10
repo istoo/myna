@@ -2,5 +2,5 @@
 
 package pii
 
-// translated says myna runs under Rosetta, which only macOS has.
+// translated says owl runs under Rosetta, which only macOS has.
 var translated = func() bool { return false }

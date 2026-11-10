@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 func TestWorkBuddy(t *testing.T) {
@@ -42,7 +42,7 @@ func TestWorkBuddy(t *testing.T) {
 	if f.Get() != "" {
 		t.Fatalf("get: %q", f.Get())
 	}
-	if err := f.Set("myna"); err != nil {
+	if err := f.Set("owl"); err != nil {
 		t.Fatal(err)
 	}
 	ms := read()
@@ -50,11 +50,11 @@ func TestWorkBuddy(t *testing.T) {
 		t.Fatalf("models: %v", ms)
 	}
 	pro := ms[1]
-	if pro["id"] != "deepseek/pro" || pro["vendor"] != "myna" || pro["apiKey"] != "myna-workbuddy" ||
+	if pro["id"] != "deepseek/pro" || pro["vendor"] != "owl" || pro["apiKey"] != "owl-workbuddy" ||
 		pro["url"] != gatewayV1()+"/chat/completions" || pro["supportsToolCall"] != true || pro["maxInputTokens"] == nil {
-		t.Fatalf("myna model: %v", pro)
+		t.Fatalf("owl model: %v", pro)
 	}
-	if f.Get() != "myna" {
+	if f.Get() != "owl" {
 		t.Fatalf("get: %q", f.Get())
 	}
 
@@ -83,12 +83,12 @@ func TestWorkBuddy(t *testing.T) {
 		t.Fatal(err)
 	}
 	if len(read()) != 1 {
-		t.Fatal("sync put myna back")
+		t.Fatal("sync put owl back")
 	}
 
 	// the CLI's object form, with a list of the models to show
 	os.WriteFile(path, []byte(`{"models":[{"id":"mine","url":"https://x/v1/chat/completions"}],"availableModels":["mine"],"other":1}`), 0o600)
-	if err := f.Set("myna"); err != nil {
+	if err := f.Set("owl"); err != nil {
 		t.Fatal(err)
 	}
 	var doc struct {
@@ -141,9 +141,9 @@ func TestWorkBuddyContextChoice(t *testing.T) {
 	}
 }
 
-// WorkBuddy pointed at a myna on another machine stays there through a
-// sync, with that myna's key (悠悠哥 on Discord: models moved to the
-// myna on a NAS were put back on this machine's), while one on this
+// WorkBuddy pointed at a owl on another machine stays there through a
+// sync, with that owl's key (悠悠哥 on Discord: models moved to the
+// owl on a NAS were put back on this machine's), while one on this
 // machine's loopback follows the gateway.
 func TestWorkBuddyKeepsRemoteAddress(t *testing.T) {
 	home := t.TempDir()
@@ -158,7 +158,7 @@ func TestWorkBuddyKeepsRemoteAddress(t *testing.T) {
 	path := filepath.Join(home, ".workbuddy", "models.json")
 	os.MkdirAll(filepath.Dir(path), 0o755)
 	a := workbuddy(home)
-	if err := a.Field("provider").Set(mynaID); err != nil {
+	if err := a.Field("provider").Set(owlID); err != nil {
 		t.Fatal(err)
 	}
 	read := func() []map[string]any {
@@ -195,13 +195,13 @@ func TestWorkBuddyKeepsRemoteAddress(t *testing.T) {
 		}
 	}
 
-	// an address on this machine is myna's own and follows the gateway
+	// an address on this machine is owl's own and follows the gateway
 	point("http://localhost:9999/v1/chat/completions", "old")
 	if err := a.Sync(); err != nil {
 		t.Fatal(err)
 	}
 	for _, m := range read() {
-		if m["url"] != gatewayV1()+"/chat/completions" || m["apiKey"] != "myna-workbuddy" {
+		if m["url"] != gatewayV1()+"/chat/completions" || m["apiKey"] != "owl-workbuddy" {
 			t.Fatalf("local address not followed: %v", m)
 		}
 	}
@@ -209,7 +209,7 @@ func TestWorkBuddyKeepsRemoteAddress(t *testing.T) {
 
 // WorkBuddy AI, the international build, reads ~/.workbuddy-ai/models.json
 // (its product.json's dataFolderName), not ~/.workbuddy's (#1494, ysicing):
-// myna's models go there, as a bare list, under its own key, and the
+// owl's models go there, as a bare list, under its own key, and the
 // China build's file is left as it was.
 func TestWorkBuddyAIWritesItsOwnFolder(t *testing.T) {
 	home := t.TempDir()
@@ -239,7 +239,7 @@ func TestWorkBuddyAIWritesItsOwnFolder(t *testing.T) {
 	if !a.Detected() {
 		t.Fatal("not detected")
 	}
-	if err := a.Field("provider").Set("myna"); err != nil {
+	if err := a.Field("provider").Set("owl"); err != nil {
 		t.Fatal(err)
 	}
 	var ms []map[string]any
@@ -247,10 +247,10 @@ func TestWorkBuddyAIWritesItsOwnFolder(t *testing.T) {
 	if err := json.Unmarshal(b, &ms); err != nil {
 		t.Fatalf("not a bare list: %v\n%s", err, b)
 	}
-	if len(ms) != 1 || ms[0]["id"] != "deepseek/pro" || ms[0]["apiKey"] != "myna-workbuddy-ai" {
+	if len(ms) != 1 || ms[0]["id"] != "deepseek/pro" || ms[0]["apiKey"] != "owl-workbuddy-ai" {
 		t.Fatalf("models: %v", ms)
 	}
-	if got := a.Field("provider").Get(); got != "myna" {
+	if got := a.Field("provider").Get(); got != "owl" {
 		t.Fatalf("get: %q", got)
 	}
 	if b, _ := os.ReadFile(cn); string(b) != `[{"id":"qwen-local","local":true}]` {

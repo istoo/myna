@@ -34,10 +34,10 @@ func TestConfigNeverRelative(t *testing.T) {
 	t.Setenv(homeVar(), home)
 	t.Setenv("XDG_CONFIG_HOME", "relative/cfg")
 	t.Setenv("XDG_CACHE_HOME", "relative/cache")
-	if got, want := Config(), filepath.Join(home, ".config", "myna"); got != want {
+	if got, want := Config(), filepath.Join(home, ".config", "owl"); got != want {
 		t.Errorf("Config() = %q, want %q", got, want)
 	}
-	if got, want := Cache(), filepath.Join(home, ".cache", "myna"); got != want {
+	if got, want := Cache(), filepath.Join(home, ".cache", "owl"); got != want {
 		t.Errorf("Cache() = %q, want %q", got, want)
 	}
 	t.Setenv(homeVar(), "")
@@ -49,8 +49,8 @@ func TestConfigNeverRelative(t *testing.T) {
 	Config()
 }
 
-// A relative folder variable reads as unset inside myna and stays in the
-// environment for the programs myna starts; one a login shell lends later
+// A relative folder variable reads as unset inside owl and stays in the
+// environment for the programs owl starts; one a login shell lends later
 // (proc.UserPath sets it with os.Setenv) is read the same way.
 func TestRelativeFolderVariablesIgnoredNotUnset(t *testing.T) {
 	t.Setenv(homeVar(), t.TempDir())
@@ -60,19 +60,19 @@ func TestRelativeFolderVariablesIgnoredNotUnset(t *testing.T) {
 	t.Setenv("CODEX_HOME", "./codex")
 	t.Setenv("HANA_HOME", "~/.hanako")
 	t.Setenv("PI_PROFILE", "work")
-	t.Setenv("MYNA_ZED_CONFIG_DIR", "./zedg-config")
-	t.Setenv("MYNA_ZED_BIN", "zedg")
-	t.Setenv("MYNA_ZED_PROCESS_NAMES", "zedg,ZedG")
+	t.Setenv("OWL_ZED_CONFIG_DIR", "./zedg-config")
+	t.Setenv("OWL_ZED_BIN", "zedg")
+	t.Setenv("OWL_ZED_PROCESS_NAMES", "zedg,ZedG")
 	t.Setenv("KIMI_SHARE_DIR", "")
 	ignored, err := CheckEnv()
 	if err != nil {
 		t.Fatal(err)
 	}
 	slices.Sort(ignored)
-	if want := []string{"CODEX_HOME", "MYNA_ZED_CONFIG_DIR", "XDG_DATA_HOME"}; !slices.Equal(ignored, want) {
+	if want := []string{"CODEX_HOME", "OWL_ZED_CONFIG_DIR", "XDG_DATA_HOME"}; !slices.Equal(ignored, want) {
 		t.Errorf("ignored %v, want %v", ignored, want)
 	}
-	for v, want := range map[string]string{"XDG_CONFIG_HOME": abs, "HANA_HOME": "~/.hanako", "PI_PROFILE": "work", "MYNA_ZED_CONFIG_DIR": "", "MYNA_ZED_BIN": "zedg", "MYNA_ZED_PROCESS_NAMES": "zedg,ZedG", "XDG_DATA_HOME": "", "CODEX_HOME": ""} {
+	for v, want := range map[string]string{"XDG_CONFIG_HOME": abs, "HANA_HOME": "~/.hanako", "PI_PROFILE": "work", "OWL_ZED_CONFIG_DIR": "", "OWL_ZED_BIN": "zedg", "OWL_ZED_PROCESS_NAMES": "zedg,ZedG", "XDG_DATA_HOME": "", "CODEX_HOME": ""} {
 		if got := Getenv(v); got != want {
 			t.Errorf("Getenv(%s) = %q, want %q", v, got, want)
 		}
@@ -106,7 +106,7 @@ func TestTildeFolderVariables(t *testing.T) {
 		{"XDG_RUNTIME_DIR", "~/run", false},
 		{"APPDATA", "~/AppData/Roaming", false},
 		{"LOCALAPPDATA", "~/AppData/Local", false},
-		{"MYNA_BIN_DIR", "~/.local/bin", false},
+		{"OWL_BIN_DIR", "~/.local/bin", false},
 		{"CODEX_HOME", "~/.codex", false},
 		{"OPENCODE_CONFIG_DIR", "~/opencode", false},
 		{"OPENCHAMBER_DATA_DIR", "~", false},

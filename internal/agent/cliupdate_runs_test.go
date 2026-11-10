@@ -9,12 +9,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // An npm update that exits 0 but leaves Claude Code without its native
 // package (#2128): the package says 2.1.299, and bin/claude.exe is the
-// stub that only says the native binary isn't installed. myna installs
+// stub that only says the native binary isn't installed. owl installs
 // that version again with its optional packages, and when that doesn't
 // mend it either, the update fails, saying how to reinstall it.
 func TestUpdateCLIChecksItRuns(t *testing.T) {

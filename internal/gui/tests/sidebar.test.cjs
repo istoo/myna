@@ -53,7 +53,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, reads));
-      await page.goto("http://myna.test/");
+      await page.goto("http://owl.test/");
       await page.waitForSelector("#nav button.on");
 
       // at 1024 points the pages are down the left, in their groups
@@ -161,7 +161,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const context = await browser.newContext({ viewport: { width: 900, height: 700 }, reducedMotion: "reduce" });
       const page = await context.newPage();
       await page.route("**/*", serve("en", reads));
-      await page.goto("http://myna.test/");
+      await page.goto("http://owl.test/");
       await page.waitForSelector("#nav button.on");
       await page.waitForTimeout(2000);
       // the providers list is read once after the start, for the
@@ -186,7 +186,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(60000);
       await page.route("**/*", serve("en", reads, { url: "http://127.0.0.1:3490", running: false }));
-      await page.goto("http://myna.test/");
+      await page.goto("http://owl.test/");
       await page.waitForSelector("#nav button.on");
       assert.match(await page.locator("#sideGw").textContent(), /127\.0\.0\.1:3425/, "boot.js's line first");
       await page.waitForFunction(() => document.querySelector("#sideGw span")?.textContent === "Gateway stopped");
@@ -200,7 +200,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const context = await browser.newContext({ viewport: { width: 1200, height: 760 } });
       const page = await context.newPage();
       await page.route("**/*", serve("en", []));
-      await page.goto("http://myna.test/");
+      await page.goto("http://owl.test/");
       await page.waitForSelector("#nav button.on");
       await page.locator("#prefs").click();
       const box = page.locator("#side .nav-sub").first();

@@ -7,40 +7,40 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// The web search APIs, from the terminal: myna search (#419).
+// The web search APIs, from the terminal: owl search (#419).
 
 const searchUsage = `usage:
-  myna search                              the search APIs a model's web search goes to
-  myna search add <api> <key> [url=<address>] [pick=turns|order]
+  owl search                              the search APIs a model's web search goes to
+  owl search add <api> <key> [url=<address>] [pick=turns|order]
                                              add one, or give one a new key
                                              (several keys as k1,k2: searches take them in turn,
                                              or with pick=order the first until it is refused)
-  myna search add searxng url=<address> [<key>]
-  myna search add you [<key>]              You.com: free with no key (100 searches a day)
-  myna search off <api>                    keep one, key and all, but never ask it
-  myna search on <api>                     ask it again
-  myna search move <api> <n>               put one at place n in the order they are asked
-  myna search rm <api>                     take one away
+  owl search add searxng url=<address> [<key>]
+  owl search add you [<key>]              You.com: free with no key (100 searches a day)
+  owl search off <api>                    keep one, key and all, but never ask it
+  owl search on <api>                     ask it again
+  owl search move <api> <n>               put one at place n in the order they are asked
+  owl search rm <api>                     take one away
 
   apis: tavily, brave, exa, firecrawl, you, deepseek, volcengine, wsa, searxng
-        and the ones a plugin gives (its search hook), as <plugin>:<id> in myna's Settings
+        and the ones a plugin gives (its search hook), as <plugin>:<id> in owl's Settings
         › Models › Web search; a plugin that is off gives none
 
   url= is the API's base URL, for an endpoint of your own that answers as that API
   does (e.g. url=https://search.example.com/tavily). Without it the vendor's own is
   used; a new key alone keeps the url set before, and url= with nothing after it puts
-  the vendor's own back. myna puts the API's path after it (/search for Tavily), so
+  the vendor's own back. owl puts the API's path after it (/search for Tavily), so
   a url given with that path at its end is taken as its base. The key is sent only
   to that url.
 
   With several keys, a key the API refused lately (turned away, out of credit, rate
   limited) rests and is asked only after the others: a rate limit for as long as the API
   says (30s to 10m), a key turned away for 10 minutes, one out of credit for an hour.
-  For Tavily, myna search shows what each key has used of its limit (GET /usage).
+  For Tavily, owl search shows what each key has used of its limit (GET /usage).
 
   A client's web search (Claude Code's WebSearch, Codex's web_search) is done by the
   model's provider when it can search, then by a provider that can (a Claude or ChatGPT
@@ -49,15 +49,15 @@ const searchUsage = `usage:
   to the model as it is, and no model is asked to read it.
   Without any of them, the client's search is left out.
 
-  e.g. myna search add tavily tvly-…
-       myna search add searxng url=https://searx.example.com
-       myna search add you`
+  e.g. owl search add tavily tvly-…
+       owl search add searxng url=https://searx.example.com
+       owl search add you`
 
 func searchCmd(args []string) error {
 	if len(args) == 0 {
 		as := provider.StoredSearchAPIs()
 		if len(as) == 0 {
-			fmt.Println(muted.Render("  no search API · myna search add <tavily|brave|exa|firecrawl|you|deepseek|volcengine|wsa|searxng> <key>"))
+			fmt.Println(muted.Render("  no search API · owl search add <tavily|brave|exa|firecrawl|you|deepseek|volcengine|wsa|searxng> <key>"))
 			return nil
 		}
 		for i, a := range as {
@@ -95,7 +95,7 @@ func searchCmd(args []string) error {
 		return nil
 	case "add", "set":
 		if len(args) < 2 {
-			return fmt.Errorf("myna search add <api> <key> [url=<address>]")
+			return fmt.Errorf("owl search add <api> <key> [url=<address>]")
 		}
 		a := provider.SearchAPI{Vendor: strings.ToLower(args[1])}
 		// a new key alone keeps the address set before (#1580); url= with
@@ -111,7 +111,7 @@ func searchCmd(args []string) error {
 			} else if a.Key == "" {
 				a.Key = v
 			} else {
-				return fmt.Errorf("myna search add <api> <key> [url=<address>] [pick=turns|order]")
+				return fmt.Errorf("owl search add <api> <key> [url=<address>] [pick=turns|order]")
 			}
 		}
 		if i := slices.IndexFunc(provider.StoredSearchAPIs(), func(x provider.SearchAPI) bool { return x.Vendor == a.Vendor }); i >= 0 && !urlGiven {
@@ -126,7 +126,7 @@ func searchCmd(args []string) error {
 		return nil
 	case "on", "off":
 		if len(args) != 2 {
-			return fmt.Errorf("myna search %s <api>", args[0])
+			return fmt.Errorf("owl search %s <api>", args[0])
 		}
 		if err := provider.SwitchSearchAPI(strings.ToLower(args[1]), args[0] == "on"); err != nil {
 			return err
@@ -141,7 +141,7 @@ func searchCmd(args []string) error {
 		as := provider.StoredSearchAPIs()
 		i := slices.IndexFunc(as, func(x provider.SearchAPI) bool { return len(args) > 1 && x.Vendor == strings.ToLower(args[1]) })
 		if len(args) != 3 || n < 1 || n > len(as) {
-			return fmt.Errorf("myna search move <api> <n>, n from 1 to %d", len(as))
+			return fmt.Errorf("owl search move <api> <n>, n from 1 to %d", len(as))
 		}
 		if i < 0 {
 			return fmt.Errorf("no %s search API is set up", strings.ToLower(args[1]))
@@ -159,7 +159,7 @@ func searchCmd(args []string) error {
 		return nil
 	case "rm", "remove":
 		if len(args) != 2 {
-			return fmt.Errorf("myna search rm <api>")
+			return fmt.Errorf("owl search rm <api>")
 		}
 		if err := provider.RemoveSearchAPI(strings.ToLower(args[1])); err != nil {
 			return err
@@ -167,10 +167,10 @@ func searchCmd(args []string) error {
 		fmt.Println(green.Render("✓"), "removed")
 		return nil
 	}
-	return fmt.Errorf("myna search [add|on|off|move|rm] (myna search help)")
+	return fmt.Errorf("owl search [add|on|off|move|rm] (owl search help)")
 }
 
-// quotaLine is what one key has used of its limit, as myna search lists
+// quotaLine is what one key has used of its limit, as owl search lists
 // it: unknown, with why, when it couldn't be read, and never 0.
 func quotaLine(q gateway.SearchKeyQuota) string {
 	var line string

@@ -1,12 +1,12 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // Claude Code on its own sign-in (StringKe on Discord): with "model":
 // "sonnet" in its settings.json the row showed a bare "sonnet", and with a
-// Claude model picked myna writes no ANTHROPIC_BASE_URL, so the file read
-// as if myna had failed to set it up. The alias now shows as the model it
-// stands for, with Claude's logo (the option is myna's, agent.Option), and
+// Claude model picked owl writes no ANTHROPIC_BASE_URL, so the file read
+// as if owl had failed to set it up. The alias now shows as the model it
+// stands for, with Claude's logo (the option is owl's, agent.Option), and
 // a model Claude Code asks Anthropic for itself says so: the row's tooltip
-// says it isn't through myna and why the file names no myna endpoint,
-// and picking one says "straight to Anthropic". A myna model says neither.
+// says it isn't through owl and why the file names no owl endpoint,
+// and picking one says "straight to Anthropic". A owl model says neither.
 // The model is picked beside the connected row's switch. No click
 // moves the page. In English and Chinese, Chromium and WebKit.
 const assert = require("node:assert/strict");
@@ -20,11 +20,11 @@ const options = [
   { value: "sonnet", label: "sonnet · claude-sonnet-5-5", note: "Claude Sonnet 5.5", icon: "claude-color", group: "Claude Code", direct: "Anthropic" },
   { value: "claude-sonnet-5-5", note: "Claude Sonnet 5.5", icon: "claude-color", group: "Claude Code", direct: "Anthropic" },
   { value: "claude-opus-5-5", note: "Claude Opus 5.5", icon: "claude-color", group: "Claude Code", direct: "Anthropic" },
-  { value: "myna/deepseek/pro", label: "DeepSeek Pro", icon: "deepseek-color", group: "DeepSeek", ref: "deepseek/pro" },
+  { value: "owl/deepseek/pro", label: "DeepSeek Pro", icon: "deepseek-color", group: "DeepSeek", ref: "deepseek/pro" },
 ];
 // the other agents, so Claude Code sits down a list that scrolls; on a
-// myna model, so connected and in view (#726)
-const filler = [{ key: "model", label: "model", value: "myna/deepseek/pro", options: [options[3]] }];
+// owl model, so connected and in view (#726)
+const filler = [{ key: "model", label: "model", value: "owl/deepseek/pro", options: [options[3]] }];
 const fresh = () => ({
   agents: [
     ...Array.from({ length: 5 }, (_, i) => ({ id: "agent-" + i, name: "Agent " + i, path: "/test/" + i, wired: true, fields: filler })),
@@ -64,12 +64,12 @@ function server(lang, sets) {
 
 const words = {
   en: {
-    tip: "Not through myna: Claude Code asks Anthropic for it directly, with its own sign-in or key, so ~/.claude/settings.json has no myna endpoint — that is expected.",
-    said: "straight to Anthropic, not through myna",
+    tip: "Not through owl: Claude Code asks Anthropic for it directly, with its own sign-in or key, so ~/.claude/settings.json has no owl endpoint — that is expected.",
+    said: "straight to Anthropic, not through owl",
   },
   zh: {
-    tip: "不经过 myna：Claude Code 用自己的登录或密钥直接向 Anthropic 请求，因此 ~/.claude/settings.json 中没有 myna 地址，属正常。",
-    said: "直连 Anthropic，不经过 myna",
+    tip: "不经过 owl：Claude Code 用自己的登录或密钥直接向 Anthropic 请求，因此 ~/.claude/settings.json 中没有 owl 地址，属正常。",
+    said: "直连 Anthropic，不经过 owl",
   },
 };
 const row = '.row.agent[data-id="claude"]';
@@ -87,7 +87,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       const sets = [];
       await page.route("**/*", server(lang, sets));
-      await page.goto("http://myna.test/");
+      await page.goto("http://owl.test/");
       // beside the switch, one click away
       const field = page.locator(`${row} > .field.ag-start[data-key="model"]`);
       await field.waitFor();
@@ -96,7 +96,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.equal(await field.locator(".v").textContent(), "sonnet · claude-sonnet-5-5");
       assert.equal(await field.locator('.ic[data-icon="claude-color"]').count(), 1);
       const title = await field.getAttribute("title");
-      assert(title.includes(w.tip), `the tooltip says it isn't through myna: ${title}`);
+      assert(title.includes(w.tip), `the tooltip says it isn't through owl: ${title}`);
 
       // the page scrolled, a pick moves nothing and says where it goes
       const view = page.locator("#view-agents");
@@ -114,7 +114,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.equal(await view.evaluate((v) => v.scrollTop), top, "the pick moved the page");
       assert((await field.getAttribute("title")).includes(w.tip));
 
-      // a myna model says neither
+      // a owl model says neither
       await field.click();
       await page.locator("#pop:not([hidden]) #list li").first().waitFor();
       await page.locator("#list li").filter({ hasText: "DeepSeek Pro" }).first().click();

@@ -10,12 +10,12 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/edit"
 )
 
-const zedProvider = "language_models.openai_compatible.myna"
+const zedProvider = "language_models.openai_compatible.owl"
 const zedModel = "agent.default_model"
 
 // Zed stores API keys in the OS credential store, keyed by the API URL.
@@ -23,12 +23,12 @@ var zedCredential = saveZedCredential
 
 // Zed uses ~/.config on macOS, XDG on Linux and Roaming AppData on Windows.
 func zed(home, cfg string) *Agent {
-	bin := os.Getenv("MYNA_ZED_BIN")
+	bin := os.Getenv("OWL_ZED_BIN")
 	if bin == "" {
 		bin = "zed"
 	}
 	processes := zedProcessNames()
-	if custom := appdir.Getenv("MYNA_ZED_CONFIG_DIR"); custom != "" {
+	if custom := appdir.Getenv("OWL_ZED_CONFIG_DIR"); custom != "" {
 		return zedAtWith(custom, bin, processes)
 	}
 	switch runtime.GOOS {
@@ -57,7 +57,7 @@ func zedAtWith(dir, bin string, processes []string) *Agent {
 		ID: "zed", Name: "Zed", Icon: "zed", Bin: bin, Dir: dir, Path: path, Spelled: prefixed,
 		UA: []string{"zed"},
 		Notice: func() string {
-			if usesMyna(model()) && Running(processes...) {
+			if usesOwl(model()) && Running(processes...) {
 				return noticeZed.String()
 			}
 			return ""
@@ -71,7 +71,7 @@ func zedAtWith(dir, bin string, processes []string) *Agent {
 			})
 		},
 		Check: func() string {
-			if !usesMyna(model()) {
+			if !usesOwl(model()) {
 				return ""
 			}
 			return wiringOff("Zed", path, func(k string) (string, bool) { return edit.GetJSON(path, zedProvider+"."+k) }, "api_url", gatewayV1())
@@ -79,11 +79,11 @@ func zedAtWith(dir, bin string, processes []string) *Agent {
 		Fields: []Field{{
 			Key: "model", Label: "model", Get: model,
 			Set: func(v string) error {
-				if ref, ok := strings.CutPrefix(v, mynaID+"/"); ok && isMyna(ref) {
+				if ref, ok := strings.CutPrefix(v, owlID+"/"); ok && isOwl(ref) {
 					if err := zedCredential(gatewayV1()); err != nil {
 						return fmt.Errorf("configure Zed gateway credential: %w", err)
 					}
-					if !usesMyna(model()) {
+					if !usesOwl(model()) {
 						previous := map[string]string{key + "model": get(zedModel)}
 						if get(zedProvider+".api_url") != gatewayV1() {
 							previous[key+"provider"] = get(zedProvider)
@@ -92,16 +92,16 @@ func zedAtWith(dir, bin string, processes []string) *Agent {
 					}
 					return edit.SetJSON(path,
 						edit.KV{Path: zedProvider, Value: zedProviderJSON(path)},
-						edit.KV{Path: zedModel, Value: map[string]string{"provider": mynaID, "model": ref}})
+						edit.KV{Path: zedModel, Value: map[string]string{"provider": owlID, "model": ref}})
 				}
-				// Validate a native selection before removing myna's wiring.
+				// Validate a native selection before removing owl's wiring.
 				p, m, ok := strings.Cut(v, "/")
 				if v != "" && (!ok || p == "" || m == "") {
 					return fmt.Errorf("expected provider/model, got %q", v)
 				}
-				if get(zedProvider+".api_url") == gatewayV1() || usesMyna(model()) {
+				if get(zedProvider+".api_url") == gatewayV1() || usesOwl(model()) {
 					for _, entry := range []struct{ name, field string }{{"provider", zedProvider}, {"model", zedModel}} {
-						if entry.name == "model" && !usesMyna(model()) {
+						if entry.name == "model" && !usesOwl(model()) {
 							forget(key + entry.name)
 							continue
 						}
@@ -109,7 +109,7 @@ func zedAtWith(dir, bin string, processes []string) *Agent {
 							if err := edit.SetJSON(path, edit.KV{Path: entry.field, Value: json.RawMessage(was)}); err != nil {
 								return err
 							}
-						} else if entry.name == "provider" || usesMyna(model()) {
+						} else if entry.name == "provider" || usesOwl(model()) {
 							if err := edit.DelJSON(path, entry.field); err != nil {
 								return err
 							}
@@ -125,17 +125,17 @@ func zedAtWith(dir, bin string, processes []string) *Agent {
 			},
 			Options: func(cur map[string]string) []Option {
 				var own []Option
-				if v := cur["model"]; v != "" && !usesMyna(v) {
+				if v := cur["model"]; v != "" && !usesOwl(v) {
 					own = append(own, Option{Value: v, Icon: modelIcon("", v)})
 				}
-				return withVia(group("Zed", own), "zed", mynaID+"/")
+				return withVia(group("Zed", own), "zed", owlID+"/")
 			},
 		}},
 	}, path, stashPath())
 }
 
 func zedProcessNames() []string {
-	value := os.Getenv("MYNA_ZED_PROCESS_NAMES")
+	value := os.Getenv("OWL_ZED_PROCESS_NAMES")
 	if value == "" {
 		return []string{`(^|/)(zed|zeditor|zed-editor)( |$)`}
 	}
@@ -152,7 +152,7 @@ func zedProcessNames() []string {
 	return out
 }
 
-// zedLevels are the reasoning_effort values myna writes for Zed, weakest
+// zedLevels are the reasoning_effort values owl writes for Zed, weakest
 // first: those every Zed that reads the field takes. Its settings take
 // language_model_core's ReasoningEffort, lowercase; max and none came after
 // it (Zed 0.233 has minimal to xhigh), and a value a Zed doesn't know is
@@ -185,7 +185,7 @@ func zedEffort(m catalog.Model) string {
 	return zedLevels[best]
 }
 
-// zedProviderJSON is myna's provider in Zed's settings at path. A
+// zedProviderJSON is owl's provider in Zed's settings at path. A
 // reasoning_effort already on a model there is kept: the user may have
 // picked another level, or "none" to keep it from thinking.
 func zedProviderJSON(path string) map[string]any {
@@ -243,5 +243,5 @@ func zedProviderJSON(path string) map[string]any {
 
 // what zed says after a change (notice.go)
 var (
-	noticeZed = newNotice("Restart Zed if it still asks for an API key: myna has configured its gateway credential in the system credential store.")
+	noticeZed = newNotice("Restart Zed if it still asks for an API key: owl has configured its gateway credential in the system credential store.")
 )

@@ -5,9 +5,9 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/netproxy"
-	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/netproxy"
+	"github.com/istoo/owl/internal/plugin"
 )
 
 // movedGrok is Grok moved onto its plugin, which lists grok-new.

@@ -19,23 +19,23 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/filelock"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/filelock"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
-const Prefix = "sk-myna-key-"
-const legacyLANPrefix = "sk-myna-"
-const revokedLANPrefix = "sk-myna-revoked-"
+const Prefix = "sk-owl-key-"
+const legacyLANPrefix = "sk-owl-"
+const revokedLANPrefix = "sk-owl-revoked-"
 
 func Managed(secret string) bool {
 	return strings.HasPrefix(secret, legacyLANPrefix)
 }
 
-// Named: secret has a named gateway key's form (sk-myna-…), or is the
+// Named: secret has a named gateway key's form (sk-owl-…), or is the
 // key's own value a user gave it (Change.Secret), so a request from this
-// computer with one is counted and limited as that key, as a sk-myna-
+// computer with one is counted and limited as that key, as a sk-owl-
 // key is.
 func Named(secret string) bool {
 	if Managed(secret) {
@@ -99,7 +99,7 @@ func ownSecret(secret string, keys []Key) (string, error) {
 		}
 	}
 	if strings.HasPrefix(secret, legacyLANPrefix) {
-		return "", errors.New("A key of your own can't start with sk-myna-: leave the key empty and myna makes one")
+		return "", errors.New("A key of your own can't start with sk-owl-: leave the key empty and owl makes one")
 	}
 	for _, k := range keys {
 		if subtle.ConstantTimeCompare([]byte(secret), []byte(k.Secret)) == 1 {
@@ -112,7 +112,7 @@ func ownSecret(secret string, keys []Key) (string, error) {
 	return secret, nil
 }
 
-// upstreamKey: secret is a key myna sends a provider, which a gateway
+// upstreamKey: secret is a key owl sends a provider, which a gateway
 // key handed to others must never be.
 func upstreamKey(secret string) bool {
 	for _, p := range provider.All() {
@@ -139,7 +139,7 @@ type Key struct {
 	Limit *Limit `json:"limit,omitempty"`
 	// More are its limits after the first (#2227), each a window of its
 	// own: a request passes only while every one has something left. A
-	// key has them only beside a Limit, which an older myna still reads.
+	// key has them only beside a Limit, which an older owl still reads.
 	More []Limit `json:"moreLimits,omitempty"`
 	// Models are the models the key may use (#882): "<provider>/<model>",
 	// "<provider>/*" or a group's "group/<name>"; none for every model,
@@ -154,7 +154,7 @@ type Key struct {
 	// every model it may use, of the accounts and keys it may use, names
 	// and balances included. Off, it is told none (#1981).
 	Quotas bool `json:"quotas,omitempty"`
-	// ReadOnly holds the key to reading this myna's stats (Steven on
+	// ReadOnly holds the key to reading this owl's stats (Steven on
 	// Discord: a desk display polling quotas and usage, its key kept in
 	// a device's flash): the gateway answers it only the routes in its
 	// readOnlyRoutes and refuses it every other, every model, MCP and
@@ -167,7 +167,7 @@ type Key struct {
 	// (issue.go); "" for one the user made or issued themselves.
 	Issuer string `json:"issuer,omitempty"`
 	// Issues lets the key issue short-lived keys under itself
-	// (POST /v1/myna/keys); an issued key never can.
+	// (POST /v1/owl/keys); an issued key never can.
 	Issues bool `json:"issues,omitempty"`
 }
 
@@ -196,7 +196,7 @@ type Identity struct {
 	Issuer *Identity
 	// Issues: the key may issue keys under itself.
 	Issues bool
-	// Default: the key is the sharing key myna made itself (Default),
+	// Default: the key is the sharing key owl made itself (Default),
 	// the one it writes into this computer's own agents that reach the
 	// gateway from beyond loopback, never one the user made for someone
 	// else.
@@ -213,7 +213,7 @@ func WithIdentity(ctx context.Context, who Identity) context.Context {
 func Caller(ctx context.Context) Identity { who, _ := ctx.Value(contextKey{}).(Identity); return who }
 
 // mu is held for every read of caller-keys.json a change is made from,
-// and the write, across mynas too (#1674): a key revoked with myna
+// and the write, across owls too (#1674): a key revoked with owl
 // keys while the window adds one is never written back.
 var mu = filelock.Mutex{Path: func() string { return Path() + ".lock" }}
 
@@ -260,7 +260,7 @@ func List() ([]Key, error) {
 	return keys, nil
 }
 
-// LANSecret is the key myna shares the gateway on the local network with
+// LANSecret is the key owl shares the gateway on the local network with
 // (the default key ConfigureLAN made), for an agent of this computer's that
 // reaches it from beyond loopback — one in a WSL distro under NAT, whose
 // requests the gateway takes only with a named key; "" while the gateway
@@ -294,12 +294,12 @@ func LANSecret() string {
 	return ""
 }
 
-// Default says secret is the sharing key myna itself made (the default
-// key ConfigureLAN keeps), whether sharing is on now or not: myna's own,
+// Default says secret is the sharing key owl itself made (the default
+// key ConfigureLAN keeps), whether sharing is on now or not: owl's own,
 // never one the user brought, so a write that keeps "a caller key of the
 // gateway's own the user put there" must not keep it (#2545: with sharing
 // off the key stays enabled in the store, Authenticate still took it, and
-// Rekey could no longer bring gateway.Token back). An older myna kept it
+// Rekey could no longer bring gateway.Token back). An older owl kept it
 // in the settings alone; that value answers too, short of its revoked
 // mirror.
 func Default(secret string) bool {
@@ -368,7 +368,7 @@ type Change struct {
 	Issues bool `json:"issues,omitempty"`
 	// Secret is the value "add-key" gives the new key, one its clients
 	// already send (love1sbug on X: keys handed out from another gateway),
-	// or "rotate-key" gives the key; "" for one myna makes.
+	// or "rotate-key" gives the key; "" for one owl makes.
 	Secret string `json:"secret,omitempty"`
 }
 
@@ -421,7 +421,7 @@ func Update(action string, in Change) (string, error) {
 		case "rotate-key":
 			// a value of the user's own (isaac_bai on Discord: one easy to
 			// remember and pass on), checked as add-key's is; none, a new
-			// one myna makes
+			// one owl makes
 			if in.Secret != "" {
 				if secret, err = ownSecret(in.Secret, slices.Delete(slices.Clone(keys), i, i+1)); err != nil {
 					return "", err
@@ -517,17 +517,17 @@ func Update(action string, in Change) (string, error) {
 		case "quotas-key":
 			keys[i].Quotas = in.Quotas
 		case "issuer-key":
-			// may issue short-lived keys under itself (POST /v1/myna/keys)
+			// may issue short-lived keys under itself (POST /v1/owl/keys)
 			if in.Issues && (keys[i].Issuer != "" || !keys[i].Expires.IsZero()) {
 				return "", errors.New("An issued key can't issue keys of its own: let a key of yours issue them")
 			}
 			keys[i].Issues = in.Issues
 		case "access-key":
-			// the sharing key is the one myna gives its own agents (a
+			// the sharing key is the one owl gives its own agents (a
 			// WSL distro's under NAT, LANSecret): read-only, they could
 			// no longer use a model
 			if in.ReadOnly && defaultKey {
-				return "", errors.New("The sharing key is the one myna gives agents that reach it from elsewhere, so it can't be read-only: add a key of its own for reading stats")
+				return "", errors.New("The sharing key is the one owl gives agents that reach it from elsewhere, so it can't be read-only: add a key of its own for reading stats")
 			}
 			keys[i].ReadOnly = in.ReadOnly
 		case "on-key", "off-key":
@@ -564,7 +564,7 @@ func Update(action string, in Change) (string, error) {
 		}
 		// Revoke the old-version mirror before changing the active key store.
 		if err := settings.Save(s); err != nil {
-			return "", fmt.Errorf("Cannot change the default gateway key without updating settings.json: older Myna versions may still accept its old credential. Make the settings file writable and retry; the key is unchanged: %w", err)
+			return "", fmt.Errorf("Cannot change the default gateway key without updating settings.json: older Owl versions may still accept its old credential. Make the settings file writable and retry; the key is unchanged: %w", err)
 		}
 	}
 	if err := save(keys); err != nil {
@@ -626,11 +626,11 @@ func On(id string) bool {
 func legacyLANKey(secret string) Key {
 	// The fallback and eventual persisted key must share their usage identity.
 	sum := sha256.Sum256([]byte(secret))
-	return Key{ID: "lan-" + hex.EncodeToString(sum[:12]), Name: "Myna", LAN: true, Secret: secret}
+	return Key{ID: "lan-" + hex.EncodeToString(sum[:12]), Name: "Owl", LAN: true, Secret: secret}
 }
 
 // MigrateLegacyLANKey makes the old Settings key a normal, revocable caller
-// key. Keep LANKey for older Myna versions; LANKeyID marks a completed
+// key. Keep LANKey for older Owl versions; LANKeyID marks a completed
 // migration so the retained credential cannot resurrect a removed key.
 func MigrateLegacyLANKey() error {
 	mu.Lock()
@@ -640,7 +640,7 @@ func MigrateLegacyLANKey() error {
 
 func MigrateLegacyLANKeyBestEffort() {
 	if err := MigrateLegacyLANKey(); err != nil {
-		log.Printf("myna: could not migrate LAN key: %v", err)
+		log.Printf("owl: could not migrate LAN key: %v", err)
 	}
 }
 
@@ -700,7 +700,7 @@ func configureLAN(on, rotate bool) error {
 		}
 		i := slices.IndexFunc(keys, func(k Key) bool { return k.ID == s.LANKeyID || k.LAN })
 		// a default key the user removed stays removed when sharing is
-		// turned on again: making a fresh "Myna" key then read as a
+		// turned on again: making a fresh "Owl" key then read as a
 		// default key that keeps coming back beside the user's own
 		// (#1655, GradientLive). Only an explicit new key makes one.
 		if i < 0 && !rotate && removedDefault(s) {
@@ -717,7 +717,7 @@ func configureLAN(on, rotate bool) error {
 				if err != nil {
 					return err
 				}
-				keys = append(keys, Key{ID: id, Name: "Myna", LAN: true})
+				keys = append(keys, Key{ID: id, Name: "Owl", LAN: true})
 				i = len(keys) - 1
 			}
 			keys[i].Secret = Prefix + token
@@ -735,7 +735,7 @@ func configureLAN(on, rotate bool) error {
 }
 
 // removedDefault: sharing made a default key before and it is no longer in
-// the store — its id is recorded (LANKeyID), or an older myna that
+// the store — its id is recorded (LANKeyID), or an older owl that
 // drops that id kept only the revoked mirror Update leaves behind.
 func removedDefault(s settings.Settings) bool {
 	return s.LANKeyID != "" || strings.HasPrefix(s.LANKey, revokedLANPrefix)

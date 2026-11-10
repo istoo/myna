@@ -1,7 +1,7 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // Plugin updates: a plugin whose update waits for the reader (someone
 // else's, or one pinned) puts a dot on Plugins, which goes once it's
-// updated; a plugin myna updated by itself says so on its row. The dot
+// updated; a plugin owl updated by itself says so on its row. The dot
 // says itself in the sidebar: under Plugins, Installed reads "1 update" in
 // its count's place while it waits, and Plugins opens on Installed, where
 // the plugins with an update are named above the list. Every language, wide and narrow; the
@@ -36,7 +36,7 @@ function server(lang) {
     if (url.pathname === "/api/plugins/market" || url.pathname === "/api/plugins" || url.pathname === "/api/plugins/listings") { const m = { listings: [], state: { bun: true, bunVersion: "1.3.0", plugins: installed } }; return json(url.pathname === "/api/plugins" ? m.state : url.pathname === "/api/plugins/listings" ? { listings: m.listings } : m); }
     if (url.pathname === "/api/plugins/upgrade") { installed[0].version = "0.0.9"; return json({}); }
     if (url.pathname.startsWith("/api/")) return json({});
-    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "myna.test") return route.fulfill({ status: 404, body: "" });
+    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "owl.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -65,7 +65,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang));
 
-        await page.goto("http://myna.test/?view=providers");
+        await page.goto("http://owl.test/?view=providers");
         const nav = page.locator('#nav button[data-view="plugins"]');
         await page.waitForFunction(() => document.querySelector('#nav button[data-view="plugins"]')?.classList.contains("has-dot"));
         assert.equal(await nav.getAttribute("title"), w.out);

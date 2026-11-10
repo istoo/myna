@@ -18,7 +18,7 @@ const assets = path.resolve(__dirname, "../assets");
 
 function serve(lang, sync, posts) {
   const settings = {
-    theme: "light", lang, tray: "panel", version: "test", dir: "/tmp/myna",
+    theme: "light", lang, tray: "panel", version: "test", dir: "/tmp/owl",
     gateway: "http://127.0.0.1:3425", visionModels: [], imageGenModels: [],
     fx: { rate: 7.2, stale: false },
   };
@@ -73,7 +73,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     });
     page.setDefaultTimeout(5000);
     page.setDefaultNavigationTimeout(60000);
-    await page.goto("http://myna.test/");
+    await page.goto("http://owl.test/");
     await page.locator("#prefs").click();
     await openPart(page, "sync");
     await page.locator("#syncList .row").first().waitFor({ state: "visible" });

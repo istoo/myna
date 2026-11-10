@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/owl/internal/gateway"
 )
 
 // fakeWSLNet makes cidr the WSL network Windows has an address on.
@@ -24,7 +24,7 @@ func fakeWSLNet(t *testing.T, cidr string) {
 	t.Cleanup(func() { gateway.WSLNets = old })
 }
 
-// zaidu259434 on X: Codex in WSL (NAT) failed to connect with myna's
+// zaidu259434 on X: Codex in WSL (NAT) failed to connect with owl's
 // sharing off. At Windows' address on the WSL network, where the gateway
 // now listens itself, every agent is given the WSL key, sharing on or off,
 // and Codex, signed in or not, has it as its provider's key. Elsewhere off
@@ -41,9 +41,9 @@ func TestWSLAgentsGetTheWSLKey(t *testing.T) {
 		t.Error("the WSL key given beyond the WSL network")
 	}
 	if !ourKey(k) || !gatewayKey(k) || !gatewayKey(agentKeyAt("qoder", nat)) || agentKeyAt("qoder", nat) != k+"-qoder" {
-		t.Errorf("WSL keys not known as myna's: %q", agentKeyAt("qoder", nat))
+		t.Errorf("WSL keys not known as owl's: %q", agentKeyAt("qoder", nat))
 	}
-	if oc := mynaProviderJSONAt("opencode", "opencode", nat).(map[string]any)["options"].(map[string]any); oc["apiKey"] != k {
+	if oc := owlProviderJSONAt("opencode", "opencode", nat).(map[string]any)["options"].(map[string]any); oc["apiKey"] != k {
 		t.Errorf("OpenCode in WSL: %v", oc["apiKey"])
 	}
 

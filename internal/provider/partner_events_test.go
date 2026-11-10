@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 func countsLine(cs []PartnerCount) string {
@@ -29,12 +29,12 @@ func TestCountPartner(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(home, ".cache"))
 	t.Setenv("DO_NOT_TRACK", "")
-	t.Setenv("MYNA_NO_STATS", "")
+	t.Setenv("OWL_NO_STATS", "")
 	resetPartners()
 	t.Cleanup(resetPartners)
 	var body atomic.Value
 	body.Store(`{"partners":[{"id":"acme","name":"Acme","chat":"https://a.example/v1"}]}`)
-	t.Setenv("MYNA_PARTNERS", partnerFeedServer(t, &body).URL)
+	t.Setenv("OWL_PARTNERS", partnerFeedServer(t, &body).URL)
 	fetchPartnersNow()
 
 	for range 25 {
@@ -65,7 +65,7 @@ func TestCountPartner(t *testing.T) {
 		t.Fatalf("sent days kept: %v", got)
 	}
 
-	// what myna is used with turned off, or all stats: nothing counted
+	// what owl is used with turned off, or all stats: nothing counted
 	settings.Save(settings.Settings{NoUsageStats: true})
 	CountPartner(PartnerShown, "acme")
 	settings.Save(settings.Settings{NoStats: true})

@@ -3,7 +3,7 @@ package usage
 import (
 	"testing"
 
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // TestMain gives the package a home of its own (testenv): a test that

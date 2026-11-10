@@ -3,8 +3,8 @@ package provider
 import (
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // A provider's price rate (#819) scales the list price a call is counted

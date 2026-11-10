@@ -7,7 +7,7 @@ import (
 	"context"
 	"slices"
 
-	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/owl/internal/plugin"
 )
 
 // handOver is HandOver: a var so a test can see it asked.
@@ -33,7 +33,7 @@ func Restore(ps []Provider) (added, replaced int, err error) {
 	}
 	for _, p := range ps {
 		p.IconURL = ""
-		if p.ID == "" || p.ID != Slug(p.ID) || p.ID == "myna" {
+		if p.ID == "" || p.ID != Slug(p.ID) || p.ID == "owl" {
 			continue
 		}
 		i := -1
@@ -108,7 +108,7 @@ func Mirror(ps []Provider, gs []Group) error {
 	out := []Provider{}
 	for _, p := range ps {
 		p.IconURL = ""
-		if p.ID == "" || p.ID != Slug(p.ID) || p.ID == "myna" {
+		if p.ID == "" || p.ID != Slug(p.ID) || p.ID == "owl" {
 			continue
 		}
 		if h, ok := here[p.ID]; ok {
@@ -217,7 +217,7 @@ func AddPlugins(ctx context.Context, es []plugin.Entry) (added []string, failed 
 // NotSignedIn is the subscriptions among ps (as a backup or a sync brings
 // them: their model picks and settings alone) that no account here is
 // signed in to: they are listed once one is, and are to be signed in to on
-// this computer. A subscription the user removed from myna is not one.
+// this computer. A subscription the user removed from owl is not one.
 func NotSignedIn(ps []Provider) []string {
 	have := map[string]bool{}
 	for _, p := range All() {

@@ -8,13 +8,13 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/istoo/myna/internal/agent"
+	"github.com/istoo/owl/internal/agent"
 )
 
 // A stopped WSL distro's agents are no targets (wslTargetOf): their files
 // can't be opened without starting the distro (#3896). The page lists them
 // all the same (cybercaius on Discord: the MCP page knew a distro's agents
-// only once WSL had started), from what myna learnt of them while the
+// only once WSL had started), from what owl learnt of them while the
 // distro ran (the places it gives each one instructions, MCP servers and
 // skills, kept in wsl.json beside the probe's memory: shape), with the
 // ticks the library has for them. A tick there is kept as any is, in
@@ -68,7 +68,7 @@ func keepShape(t *Target) {
 }
 
 // shapeOf is the shape kept for a, an agent in a stopped distro; nil when
-// myna never saw it with an instructions file, an MCP file or a skills
+// owl never saw it with an instructions file, an MCP file or a skills
 // folder.
 func shapeOf(a *agent.Agent) *shape {
 	var sh shape
@@ -115,7 +115,7 @@ func (l *Library) asleepView(a *agent.Agent) (AgentView, bool) {
 	av.MCP, av.Skills, av.SkillsAlso, av.MCPVia = sh.MCP, sh.Skills, sh.SkillsAlso, sh.MCPVia
 	av.NoSSE, av.NoRemote, av.NoEnvRefs, av.ToolsOff, av.Startup = sh.NoSSE, sh.NoRemote, sh.NoEnvRefs, sh.ToolsOff, sh.Startup
 	if sh.Skills != "" {
-		// as a running one's: links to myna's copy there, or copies
+		// as a running one's: links to owl's copy there, or copies
 		_, av.HowOwn = l.SkillHow[a.ID]
 		av.How = l.howOf(a.ID)
 	}
@@ -123,9 +123,9 @@ func (l *Library) asleepView(a *agent.Agent) (AgentView, bool) {
 }
 
 // asleepInstructions is a stopped distro's agent as the Instructions page
-// lists it: at the file myna last saw it read, switched on as the
-// library has it, with what it gets besides (kept in myna's own folder);
-// what its file holds isn't read. One switched on whose file myna never
+// lists it: at the file owl last saw it read, switched on as the
+// library has it, with what it gets besides (kept in owl's own folder);
+// what its file holds isn't read. One switched on whose file owl never
 // saw is listed as Unseen, to be kept on; false for one the page leaves
 // out.
 func (l *Library) asleepInstructions(a *agent.Agent) (AgentInstructions, bool) {

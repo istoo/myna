@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // onAlerts is told when the Settings page turns a usage or balance alert
@@ -16,8 +16,8 @@ import (
 // at once; set by the process that has the tray.
 var onAlerts func()
 
-// notifyProblem says why myna's notifications can't be shown, "" when
-// they can or it isn't known: "denied" (turned off for myna in the
+// notifyProblem says why owl's notifications can't be shown, "" when
+// they can or it isn't known: "denied" (turned off for owl in the
 // system's settings) or "unavailable" (a build or desktop without them).
 // Set by the process that has the tray.
 var notifyProblem func() string

@@ -3,16 +3,16 @@ package gateway
 import (
 	"net/http"
 
-	"github.com/istoo/myna/internal/gwtool"
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/gwtool"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
-// OwnMCPPath lists the MCP servers myna serves itself (web search,
+// OwnMCPPath lists the MCP servers owl serves itself (web search,
 // image recognition, image generation, the plugins' tools) that are on
 // now, for an app that gives a model the Library's servers and wants
-// myna's own beside them: the community chat page (ferock on Discord),
+// owl's own beside them: the community chat page (ferock on Discord),
 // which read only library.json. A server is listed while an agent that
 // mounts it would get its tools to work: the search while plugins/search
 // serves and something searches (canSearch), image recognition while a
@@ -21,9 +21,9 @@ import (
 // and a plugin that is on gives a tool. Each is named as its own
 // initialize names it, with its path on this gateway; nothing in it is a
 // secret.
-const OwnMCPPath = "/v1/myna/mcp"
+const OwnMCPPath = "/v1/owl/mcp"
 
-// OwnMCP is one of myna's own MCP servers, as OwnMCPPath lists it.
+// OwnMCP is one of owl's own MCP servers, as OwnMCPPath lists it.
 type OwnMCP struct {
 	Name  string `json:"name"`
 	Title string `json:"title"`
@@ -34,23 +34,23 @@ type OwnMCP struct {
 // host keeps (never starting it); a variable for tests.
 var toolsOn = plugin.ToolsOn
 
-// ownMCP are myna's own MCP servers that are on now.
+// ownMCP are owl's own MCP servers that are on now.
 func ownMCP() []OwnMCP {
 	out := []OwnMCP{}
 	if canSearch() {
-		out = append(out, OwnMCP{"myna-web-search", "Myna Web Search", SearchMCPPath})
+		out = append(out, OwnMCP{"owl-web-search", "Owl Web Search", SearchMCPPath})
 	}
 	if _, ok := seer(); ok {
-		out = append(out, OwnMCP{"myna-vision", "Myna Image Recognition", VisionMCPPath})
+		out = append(out, OwnMCP{"owl-vision", "Owl Image Recognition", VisionMCPPath})
 	}
 	if _, ok := drawer(); ok {
-		out = append(out, OwnMCP{imageServerName, "Myna Image", ImageMCPPath})
+		out = append(out, OwnMCP{imageServerName, "Owl Image", ImageMCPPath})
 	}
 	if gwtool.Served(gwtool.PluginTools) {
 		// a note that can't be read says nothing: the server is listed,
 		// and its tools/list tells
 		if n, err := toolsOn(); err != nil || n > 0 {
-			out = append(out, OwnMCP{"myna-tools", "Myna Plugin Tools", ToolsMCPPath})
+			out = append(out, OwnMCP{"owl-tools", "Owl Plugin Tools", ToolsMCPPath})
 		}
 	}
 	return out
@@ -60,14 +60,14 @@ func (s *Server) ownMCPList(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, 200, map[string]any{"servers": ownMCP()})
 }
 
-// OwnUnready is why myna's own server name (Myna Web Search, Myna
-// Image Recognition, Myna Image) can't answer yet, in English for the
+// OwnUnready is why owl's own server name (Owl Web Search, Owl
+// Image Recognition, Owl Image) can't answer yet, in English for the
 // Library's Discover to say on its row: "" while ownMCP lists it, and for
 // any other name. Its tools answer all the same, with how to set it up
 // (matrix0487 on Discord: all three in Discover, never a dead tool).
 func OwnUnready(name string) string {
 	switch name {
-	case "myna-web-search":
+	case "owl-web-search":
 		switch {
 		case canSearch():
 			return ""
@@ -75,7 +75,7 @@ func OwnUnready(name string) string {
 			return "Web search is off in Plugins › Built-in: its tools say so until it is turned on"
 		}
 		return "Nothing searches yet: add a search API in Settings → Models → Web search, or a provider that can search. Until then its tools say so"
-	case "myna-vision":
+	case "owl-vision":
 		if _, ok := seer(); ok {
 			return ""
 		}

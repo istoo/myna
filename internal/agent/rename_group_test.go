@@ -6,13 +6,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A routing group given another id takes the agents on it along, as a
 // provider's rename does: Codex, Claude Code (its model and tiers),
-// OpenCode and Pi were left on group/<old>, a group myna no longer had,
+// OpenCode and Pi were left on group/<old>, a group owl no longer had,
 // and the user had to pick it again in each (lucis0116 on X).
 func TestRenameGroupMovesTheAgentsOnIt(t *testing.T) {
 	home := syncHome(t)
@@ -20,16 +20,16 @@ func TestRenameGroupMovesTheAgentsOnIt(t *testing.T) {
 		t.Fatal(err)
 	}
 	codexCfg := filepath.Join(home, ".codex", "config.toml")
-	codexCat := filepath.Join(home, ".codex", "myna-models.json")
-	writeFile(t, codexCfg, "model = \"group/smart\"\nmodel_provider = \"myna\"\nmodel_catalog_json = '"+codexCat+"'\n")
+	codexCat := filepath.Join(home, ".codex", "owl-models.json")
+	writeFile(t, codexCfg, "model = \"group/smart\"\nmodel_provider = \"owl\"\nmodel_catalog_json = '"+codexCat+"'\n")
 	writeFile(t, codexCat, `{"models":[]}`)
 	piModels := filepath.Join(home, ".pi", "agent", "models.json")
 	piSettings := filepath.Join(home, ".pi", "agent", "settings.json")
-	writeFile(t, piModels, `{"providers":{"myna":{"name":"myna","models":[]}}}`)
-	writeFile(t, piSettings, `{"defaultProvider":"myna","defaultModel":"group/smart"}`)
+	writeFile(t, piModels, `{"providers":{"owl":{"name":"owl","models":[]}}}`)
+	writeFile(t, piSettings, `{"defaultProvider":"owl","defaultModel":"group/smart"}`)
 	oc := filepath.Join(home, ".config", "opencode", "opencode.json")
-	writeFile(t, oc, `{"model":"myna/group/smart"}`)
-	setUpInMyna("pi", "opencode")
+	writeFile(t, oc, `{"model":"owl/group/smart"}`)
+	setUpInOwl("pi", "opencode")
 	claudeCfg := filepath.Join(home, ".claude", "settings.json")
 	writeFile(t, claudeCfg, `{}`)
 	cc, err := Find("claude")
@@ -56,7 +56,7 @@ func TestRenameGroupMovesTheAgentsOnIt(t *testing.T) {
 	if v, _ := edit.GetJSON(piSettings, "defaultModel"); v != "group/clever" {
 		t.Errorf("pi defaultModel = %v", v)
 	}
-	if v, _ := edit.GetJSON(oc, "model"); v != "myna/group/clever" {
+	if v, _ := edit.GetJSON(oc, "model"); v != "owl/group/clever" {
 		t.Errorf("opencode model = %v", v)
 	}
 	claude := readFile(claudeCfg)
@@ -75,8 +75,8 @@ func TestRenameGroupMovesTheAgentsOnIt(t *testing.T) {
 // at its next launch (TestCodexEffortPickKeepsTheAppRunning says why).
 func TestCodexAppRouteIgnoresARename(t *testing.T) {
 	home := syncHome(t)
-	codexCat := filepath.Join(home, ".codex", "myna-models.json")
-	writeFile(t, filepath.Join(home, ".codex", "config.toml"), "model = \"relay/glm-4.6\"\nmodel_provider = \"myna\"\nmodel_catalog_json = '"+codexCat+"'\n")
+	codexCat := filepath.Join(home, ".codex", "owl-models.json")
+	writeFile(t, filepath.Join(home, ".codex", "config.toml"), "model = \"relay/glm-4.6\"\nmodel_provider = \"owl\"\nmodel_catalog_json = '"+codexCat+"'\n")
 	writeFile(t, codexCat, `{"models":[]}`)
 	SyncCatalog()
 	before, _, known := codexAppRoute()

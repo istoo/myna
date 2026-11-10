@@ -8,7 +8,7 @@
 //
 // The files grow long (hundreds of MB), so each one's parse is kept by path,
 // size and time, and a file that only grew is read on from where it was left.
-// The parses are kept on disk too, in myna's cache folder.
+// The parses are kept on disk too, in owl's cache folder.
 package sessions
 
 import (
@@ -33,12 +33,12 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/dirent"
-	"github.com/istoo/myna/internal/proc"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/dirent"
+	"github.com/istoo/owl/internal/proc"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 	"github.com/klauspost/compress/zstd"
 )
 
@@ -117,10 +117,10 @@ type CodexIdentity struct {
 // Session is one agent session.
 type Session struct {
 	ReadOnly bool `json:"read_only,omitempty"`
-	// Gateway: seen only through myna's gateway, with no file of the
+	// Gateway: seen only through owl's gateway, with no file of the
 	// agent's on this computer (external.go)
 	Gateway       bool          `json:"gateway,omitempty"`
-	Agent         string        `json:"agent"` // myna agent id: claude, codex, opencode, pi, omp, zcode, dsh, cline, qoder, qoder-cn, grok, workbuddy, workbuddy-ai, codebuddy, droid, cursor, hermes, alma, kimi, agy
+	Agent         string        `json:"agent"` // owl agent id: claude, codex, opencode, pi, omp, zcode, dsh, cline, qoder, qoder-cn, grok, workbuddy, workbuddy-ai, codebuddy, droid, cursor, hermes, alma, kimi, agy
 	ID            string        `json:"id"`
 	Cwd           string        `json:"cwd"`
 	Title         string        `json:"title"` // the name it was given, else the agent's own title, else the first prompt
@@ -153,7 +153,7 @@ type Session struct {
 	// WSL is the WSL distro the session ran in, its files read through
 	// \\wsl.localhost (see wsl.go); "" for this computer's own
 	WSL string `json:"wsl,omitempty"`
-	// Convs are the ids myna's gateway keys the session's requests by
+	// Convs are the ids owl's gateway keys the session's requests by
 	// when they carry no session id of their own (dshConvs)
 	Convs []string `json:"-"`
 	// Copies are the ids of the sessions that are copies of its
@@ -1083,7 +1083,7 @@ var (
 func CachePath() string { return filepath.Join(filepath.Dir(catalog.CachePath()), "sessions.json") }
 
 // cacheVersion changes when a parse would come out differently, so the
-// parses kept by an older myna are read again.
+// parses kept by an older owl are read again.
 // 2: each file's usage by day, and its active time
 // 3: the active time by hour of the day
 // 4: the tool calls and skills a day
@@ -1115,7 +1115,7 @@ func CachePath() string { return filepath.Join(filepath.Dir(catalog.CachePath())
 const cacheVersion = 29
 
 // parseVersions is cacheVersion for one agent's parses, 0 when not listed:
-// raised, the parses of that agent's files kept by an older myna are read
+// raised, the parses of that agent's files kept by an older owl are read
 // again, and the rest stand.
 //
 // codex 1, zcode 1: a fork's copies of its parent's usage are the
@@ -1235,7 +1235,7 @@ var saveGap = time.Minute
 // lost or outdated index), not a poll catching up with a live session. Its
 // checkpoints wait scanSaveGap, not saveGap, and its last save waits for
 // nothing: under saveGap a scan's later checkpoints and its end waited a
-// minute after its first checkpoint, and a myna quit or updated within
+// minute after its first checkpoint, and a owl quit or updated within
 // it kept a few hundred of 17,000 files, so each start read 22 GB of
 // rollouts again (15 to 28 s before Sessions showed, 70 to 94 s of CPU).
 var (
@@ -1338,7 +1338,7 @@ func refresh(want, all []file) {
 			parsing[f.path] = make(chan struct{})
 			todo = append(todo, f)
 		} else if s.Agent != f.agent && parsing[f.path] == nil {
-			// kept by a myna that didn't name the agent: named now, so
+			// kept by a owl that didn't name the agent: named now, so
 			// a raise of another agent's parseVersions keeps it
 			n := *s
 			n.Agent = f.agent
@@ -1445,7 +1445,7 @@ func refresh(want, all []file) {
 	}
 	// What is read is kept on disk every checkpointEvery, not only at the
 	// end: a first read of a long history on a slow disk runs for minutes,
-	// and a myna quit before the end (its CPU full, #1665) kept nothing
+	// and a owl quit before the end (its CPU full, #1665) kept nothing
 	// of it, so the next start read it all again.
 	checkpointGap, endGap := saveGap, saveGap
 	if len(jobs) >= scanFiles {
@@ -1793,7 +1793,7 @@ func assemble(fs []file, price func(string) *catalog.Price, codexTitle func(stri
 // to resume it, its subagents): whether List lists the session, and its
 // agent, id, title and usage. The stats ask it of every session on each
 // poll, and building every session's subagents there read each Claude Code
-// subagent's file again (3.5 GB of a live myna's 6.3 GB of scans).
+// subagent's file again (3.5 GB of a live owl's 6.3 GB of scans).
 func assembleListed(fs []file, price func(string) *catalog.Price, codexTitle func(string) string) (Session, bool) {
 	sortSessionFiles(fs)
 	s := Session{Agent: fs[0].agent, Path: fs[0].path, Models: []Model{}, WSL: fs[0].m().wsl}
@@ -2284,7 +2284,7 @@ func scanBuffer(f io.Reader, off int64) int {
 
 // lineReaders keep scanAt's read buffers between scans, one pool per
 // power-of-two size from scanBuffer's 16 KiB to its 1 MiB. Every scan
-// allocated its own: a live myna's start read ~3,200 Claude Code subagent
+// allocated its own: a live owl's start read ~3,200 Claude Code subagent
 // files for their first lines (ccTask), most over 1 MiB, and with the
 // session and call reads scanAt allocated 6.3 GB in 48 minutes, 3.8 GB of
 // it these buffers, while ~157 MB was live. A pool keeps about one buffer
@@ -2361,7 +2361,7 @@ func openLines(path string) (io.ReadCloser, error) {
 
 // streams holds decoders between packed reads. A decoder made for each
 // read allocated its window (a packed rollout's is 2 MiB, held in 3 MiB at
-// low memory) and its block buffers every time: 75 GB of a live myna's
+// low memory) and its block buffers every time: 75 GB of a live owl's
 // first read of 11,591 rollouts. One kept here keeps them, and is let go
 // with the pool's other idle ones by the garbage collector. streamShelf
 // keeps a few first, across collections.
@@ -2496,7 +2496,7 @@ func title(s string) string {
 
 var dated = regexp.MustCompile(`-\d{8}$`)
 
-// priceOf prices a model as a session names it: one through myna as
+// priceOf prices a model as a session names it: one through owl as
 // "<provider>/<model>" at the price the gateway counts it at — what the user
 // set for that provider and model, else that provider's own list price, else
 // its maker's on models.dev — and a bare id only ever at its maker's, which is
@@ -2615,7 +2615,7 @@ func resumeCommand(distro, agent, id, cwd, path string) string {
 		run = "kimi --session " + id
 	case "agy":
 		// --conversation picks it up from any folder; one started on
-		// myna's gateway needs the variables and --model it was
+		// owl's gateway needs the variables and --model it was
 		// started with
 		run = "agy --conversation " + id
 		if AgyStart != nil && distro == "" {

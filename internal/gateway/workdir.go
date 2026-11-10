@@ -25,7 +25,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 var (
@@ -74,7 +74,7 @@ func workPlace(req *Request) (dir, git string) {
 // it is in a git repository (provider.WorkGitHeader), as far as body, in
 // protocol to, says: a plugin that tells its vendor the user's
 // environment, as ZCode's Start Plan does, says the agent's own and not
-// myna's (magpie-community/plugins#86). A folder not said leaves both
+// owl's (magpie-community/plugins#86). A folder not said leaves both
 // off: unknown. Whether it is a git repository is the agent's word, else
 // looked at on disk.
 func tellWorkPlace(h http.Header, to provider.Protocol, body []byte) {

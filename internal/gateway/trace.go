@@ -22,9 +22,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // traceKeep is how many requests the trace keeps.
@@ -93,7 +93,7 @@ type Route struct {
 	// the model set for its subagents, or kept on the one asked for and why
 	Subagent *SubagentPick `json:"subagent,omitempty"`
 	// Moved: the request was served on another model than Model names,
-	// by one of myna's stand-ins, and why (ModelMove); nil when it went
+	// by one of owl's stand-ins, and why (ModelMove); nil when it went
 	// where it asked, or to a routing group by its name
 	Moved *ModelMove `json:"moved,omitempty"`
 	// Sub: the Claude Code subagent the request is of (subagentOf), whose
@@ -138,7 +138,7 @@ type Route struct {
 	// Flow: the ms its content took to come (Call.Flow)
 	Flow int64 `json:"flow,omitempty"`
 	// Sent: ms from the request to its answering try's request written
-	// to the vendor, and of it Own myna's, Retried the tries that
+	// to the vendor, and of it Own owl's, Retried the tries that
 	// failed first, Queued waiting for a slot, as the usage record has
 	// them (Record.Sent); the rest of Sent is connecting and sending
 	Sent    int64 `json:"sent,omitempty"`
@@ -152,11 +152,11 @@ type Route struct {
 	Phase   string `json:"phase,omitempty"`
 	Masking int64  `json:"masking,omitempty"`
 	// Held: the file name, in HeldDir, of the report saved of a request
-	// myna held too long before routing it and stopped (giveUp)
+	// owl held too long before routing it and stopped (giveUp)
 	Held string `json:"held,omitempty"`
 	// Served: the model the reply says answered, as the last try has it;
 	// Swapped: another than the one that try asked for; Routed: that try
-	// asked another myna's routing group, and Served is its member
+	// asked another owl's routing group, and Served is its member
 	Served  string `json:"served,omitempty"`
 	Swapped bool   `json:"swapped,omitempty"`
 	Routed  bool   `json:"routed,omitempty"`
@@ -207,7 +207,7 @@ func (u RouteUsage) PricingRecord() usage.Record {
 type GroupRef struct {
 	ID string `json:"id"`
 	// Ref: the id agents pick it by (provider.Group.Ref), auto/<model>
-	// for a group myna found, which the Routing page names it by
+	// for a group owl found, which the Routing page names it by
 	Ref      string   `json:"ref,omitempty"`
 	Name     string   `json:"name"`
 	Routing  string   `json:"routing"`
@@ -427,7 +427,7 @@ type Try struct {
 	// try still streams (firstContent); the route-events feed's alone,
 	// TTFT being told once the try is done
 	firstMs int64
-	// SentBy: what sent its request to the vendor when myna's own
+	// SentBy: what sent its request to the vendor when owl's own
 	// client didn't, so it has no Net and the Routing page says why
 	// (sentBy)
 	SentBy string `json:"sentBy,omitempty"`
@@ -438,7 +438,7 @@ type Try struct {
 	Flow int64 `json:"flow,omitempty"`
 	// Served: the model its reply said answered, when it named one;
 	// Swapped: another model than Model, not just its dated name; Routed:
-	// Model is another myna's routing group, and Served the member it
+	// Model is another owl's routing group, and Served the member it
 	// routed to (usage.GroupRouted)
 	Served  string `json:"served,omitempty"`
 	Swapped bool   `json:"swapped,omitempty"`
@@ -493,7 +493,7 @@ type Try struct {
 
 // AutoReset is a Codex reset spent by itself, on Who's account. (Claude's
 // resets were taken out in 9bf6d4352 and aren't coming back: reading or
-// spending one means myna calling Anthropic with the account's token,
+// spending one means owl calling Anthropic with the account's token,
 // #1972.)
 type AutoReset struct {
 	Who   string `json:"who"`
@@ -638,9 +638,9 @@ type TraceState struct {
 	// stopped reading while out of sight drops a request it last heard of
 	// under way that has since ended and gone from the trace
 	IDs []int64 `json:"ids,omitempty"`
-	// By is the myna whose routing this is, when it is another myna's
+	// By is the owl whose routing this is, when it is another owl's
 	// (OwnerTrace): the console names it from here, so the name follows the
-	// trace when another myna takes the gateway over (#2606)
+	// trace when another owl takes the gateway over (#2606)
 	By *TraceBy `json:"by,omitempty"`
 	// Lifted is when each rest lifted before its time was lifted, by the
 	// key it rested by (Rest.Key): the routes kept from before still say
@@ -648,7 +648,7 @@ type TraceState struct {
 	Lifted map[string]time.Time `json:"lifted,omitempty"`
 }
 
-// TraceBy names the myna a trace was read from.
+// TraceBy names the owl a trace was read from.
 type TraceBy struct {
 	Pid    int    `json:"pid"`
 	Serves string `json:"serves"`
@@ -844,16 +844,16 @@ func (t *trace) update(r *Route, f func(r *Route)) {
 	}
 }
 
-// gatewayTrace tells this gateway's routing to another myna on the same
+// gatewayTrace tells this gateway's routing to another owl on the same
 // computer, which does not serve the gateway and so has no trace of its own
-// (#2606, fatcutegg: the trace is the serving process's, and a second myna
+// (#2606, fatcutegg: the trace is the serving process's, and a second owl
 // showed none of it). Its console reads this to show the same Routing page.
 // This computer alone, and never to a held key: the trace names accounts,
 // what they served, folders and why accounts rest. A request through a proxy
 // or tunnel on this computer isn't local, nor is a LAN one while shared.
 func (s *Server) gatewayTrace(w http.ResponseWriter, r *http.Request) {
 	if !local(r) {
-		writeError(w, provider.Chat, http.StatusForbidden, "myna's routing is told to this computer alone")
+		writeError(w, provider.Chat, http.StatusForbidden, "owl's routing is told to this computer alone")
 		return
 	}
 	if refuseHeld(w, r, heldRefused) {
@@ -868,10 +868,10 @@ func (s *Server) gatewayTrace(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, 200, map[string]any{"object": "trace", "now": time.Now(), "seq": st.Seq, "routes": st.Routes, "totals": st.Totals, "ids": st.IDs, "lifted": st.Lifted, "pid": os.Getpid(), "serves": Serves})
 }
 
-// ownerURL is the gateway's address on loopback, where the myna serving
-// it is read by another myna on this computer (OwnerTrace, OwnerLanes).
+// ownerURL is the gateway's address on loopback, where the owl serving
+// it is read by another owl on this computer (OwnerTrace, OwnerLanes).
 // An address on another interface, or another host, gives "": the trace is
-// read from this computer alone, never from wherever MYNA_ADDR points.
+// read from this computer alone, never from wherever OWL_ADDR points.
 func ownerURL() string {
 	h, p, err := net.SplitHostPort(Addr())
 	if err != nil {
@@ -887,11 +887,11 @@ func ownerURL() string {
 	return ""
 }
 
-// OwnerTrace reads the routing the myna serving the gateway's address has
-// decided, for a myna on this computer that doesn't serve it: its console
+// OwnerTrace reads the routing the owl serving the gateway's address has
+// decided, for a owl on this computer that doesn't serve it: its console
 // reads this and shows the same Routing page (#2606: the trace is the
-// serving process's alone, so a second myna showed none of it). ok is
-// false when nothing answers there, or a myna too old to tell its trace,
+// serving process's alone, so a second owl showed none of it). ok is
+// false when nothing answers there, or a owl too old to tell its trace,
 // or one that refuses: unknown, never an empty trace.
 func OwnerTrace(ctx context.Context, after int64, wait time.Duration) (TraceState, bool) {
 	base := ownerURL()
@@ -905,10 +905,10 @@ func OwnerTrace(ctx context.Context, after int64, wait time.Duration) (TraceStat
 	if wait > 0 {
 		q.Set("wait", "1")
 	}
-	// the serving myna holds a long poll up to 25s; a hung one is let go
+	// the serving owl holds a long poll up to 25s; a hung one is let go
 	// a few seconds past that, and at once when the page stops asking
 	c := &http.Client{Timeout: wait + 5*time.Second}
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, base+"/v1/myna/trace?"+q.Encode(), nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, base+"/v1/owl/trace?"+q.Encode(), nil)
 	if err != nil {
 		return TraceState{}, false
 	}
@@ -940,7 +940,7 @@ func OwnerTrace(ctx context.Context, after int64, wait time.Duration) (TraceStat
 	return TraceState{Seq: out.Seq, Routes: out.Routes, Totals: out.Totals, IDs: out.IDs, Lifted: out.Lifted, By: &TraceBy{Pid: out.Pid, Serves: out.Serves}}, true
 }
 
-// OwnerLanes reads the lanes of the myna serving the gateway's address, for
+// OwnerLanes reads the lanes of the owl serving the gateway's address, for
 // a console that doesn't serve it (the providers' rows show the same pills
 // wherever the gateway runs). ok is false when nothing answers there. It is
 // asked on every state read, so it waits no longer than ServedBy does.
@@ -950,7 +950,7 @@ func OwnerLanes() (map[string]Lane, bool) {
 		return nil, false
 	}
 	c := &http.Client{Timeout: 700 * time.Millisecond}
-	res, err := c.Get(base + "/v1/myna/concurrency")
+	res, err := c.Get(base + "/v1/owl/concurrency")
 	if err != nil {
 		return nil, false
 	}

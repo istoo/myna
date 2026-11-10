@@ -6,10 +6,10 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/testenv"
 )
 
-// Claude Code installed off myna's PATH, in ~/.local/bin as its
+// Claude Code installed off owl's PATH, in ~/.local/bin as its
 // installer puts it, is found for a sign-in (#839: on Windows, where it is
 // claude.exe, the sign-in said "install Claude Code first").
 func TestClaudeFoundInLocalBin(t *testing.T) {

@@ -80,7 +80,7 @@ async function drawn(page) {
   });
 }
 async function open(page, id) {
-  await page.goto(`http://myna.test/?view=providers&edit=${id}`);
+  await page.goto(`http://owl.test/?view=providers&edit=${id}`);
   await drawn(page);
 }
 async function point(row) {
@@ -198,7 +198,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     assert(await page.evaluate(() => { const row = document.querySelector(".acc.dragging"); renderProviders(); return row === document.querySelector(".acc.dragging") && accountRenderPending; }));
     await page.mouse.up(); await settled(page); await checkFirst(page, f, "antigravity");
     // Existing Agent sorting still works, with no unused landing styles.
-    await page.goto("http://myna.test/?view=agents");
+    await page.goto("http://owl.test/?view=agents");
     await page.locator("#agents > .agent").first().waitFor();
     const agents = await page.locator("#agents > .agent").evaluateAll(rs => rs.map(r => ({ id: r.dataset.id, box: r.querySelector(".ag-handle").getBoundingClientRect().toJSON() })));
     const h = agents[0].box, target = agents[1].box;

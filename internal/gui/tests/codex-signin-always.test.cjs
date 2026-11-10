@@ -1,8 +1,8 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // Codex's sign-in has three ways: ChatGPT (the default), which says that
-// myna is Codex's provider while the Codex app blocks the ChatGPT account
+// owl is Codex's provider while the Codex app blocks the ChatGPT account
 // (out of allowance, no credits left), so the app still sends; Always
-// ChatGPT, which never does that and says what it costs; and myna API,
+// ChatGPT, which never does that and says what it costs; and owl API,
 // which says the Codex app keeps its ChatGPT account, Chrome control
 // included, while it has room (#1824, Qyburn3 on X).
 // The square opens the app's picker with each way's sentence whole, in
@@ -20,9 +20,9 @@ const assets = path.resolve(__dirname, "../assets");
 const models = [{ value: "gpt-5.5", label: "GPT-5.5", ref: "openai/gpt-5.5" }];
 // as internal/agent/codex.go has them
 const ways = [
-  { value: "", label: "ChatGPT", note: "myna's models join Codex's own; Codex stays signed in to ChatGPT, and while the Codex app blocks its account (out of allowance, no credits left) myna is Codex's provider, so the app still sends" },
-  { value: "chatgpt", label: "Always ChatGPT", note: "as ChatGPT, and kept so while the Codex app blocks its account: myna never becomes Codex's provider. The Codex app may then send nothing till the account has room; Codex CLI goes on through myna" },
-  { value: "api", label: "myna API", note: "myna is Codex's provider, with myna's models only; the Codex app keeps its ChatGPT account (its chats, projects and Chrome control) while the account has room" },
+  { value: "", label: "ChatGPT", note: "owl's models join Codex's own; Codex stays signed in to ChatGPT, and while the Codex app blocks its account (out of allowance, no credits left) owl is Codex's provider, so the app still sends" },
+  { value: "chatgpt", label: "Always ChatGPT", note: "as ChatGPT, and kept so while the Codex app blocks its account: owl never becomes Codex's provider. The Codex app may then send nothing till the account has room; Codex CLI goes on through owl" },
+  { value: "api", label: "owl API", note: "owl is Codex's provider, with owl's models only; the Codex app keeps its ChatGPT account (its chats, projects and Chrome control) while the account has room" },
 ];
 const fresh = () => ({
   agents: [{
@@ -83,11 +83,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], sets = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, sets));
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         await page.locator(codex).waitFor();
         const words = await page.evaluate(([ways, lang]) => ways.map((w) => lang === "en" ? [w.label, w.note] : [I18N[lang][w.label] || w.label, I18N[lang][w.note]]), [ways, lang]);
         assert(words.every(([, n]) => n), `every sentence has its ${lang}`);
-        assert.match(words[2][1], /ChatGPT.*Chrome/, `myna API says the app keeps its ChatGPT account, Chrome control too, in ${lang}`);
+        assert.match(words[2][1], /ChatGPT.*Chrome/, `owl API says the app keeps its ChatGPT account, Chrome control too, in ${lang}`);
         assert.equal(words[1][0] === "Always ChatGPT", lang === "en", `"Always ChatGPT" has its ${lang}`);
         await page.locator(`${codex} .ag-link`).click();
         await page.locator(`${codex} .ag-exp`).waitFor();

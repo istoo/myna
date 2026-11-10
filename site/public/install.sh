@@ -1,58 +1,58 @@
 #!/bin/sh
-# myna installer: curl -fsSL https://github.com/istoo/myna/releases/latest/download/install.sh | sh
+# owl installer: curl -fsSL https://github.com/istoo/owl/releases/latest/download/install.sh | sh
 #
-# macOS: puts myna.app in /Applications (~/Applications when that is not
-# writable) and links the myna command into ~/.local/bin.
-# Linux: puts myna in ~/.local/bin — the desktop app (with a menu entry)
+# macOS: puts owl.app in /Applications (~/Applications when that is not
+# writable) and links the owl command into ~/.local/bin.
+# Linux: puts owl in ~/.local/bin — the desktop app (with a menu entry)
 # when GTK 3 and WebKitGTK 4.1 are installed, the terminal build otherwise.
 # A computer with a desktop but without them has WebKitGTK 4.1 installed
 # with its package manager (apt-get, dnf, pacman or zypper, through sudo,
 # which asks for the password) when someone is at the terminal, then gets
 # the desktop app; with no terminal, no sudo or a failed install, the
 # terminal build and the command that installs them. --gui and --tui
-# choose instead (MYNA_CLI=1 is --tui).
+# choose instead (OWL_CLI=1 is --tui).
 # Termux: installs the Android terminal build into $PREFIX/bin.
 # Every download is checked against the release's SHA-256.
 #
-# Options (curl -fsSL https://github.com/istoo/myna/releases/latest/download/install.sh | sh -s -- --proxy …):
+# Options (curl -fsSL https://github.com/istoo/owl/releases/latest/download/install.sh | sh -s -- --proxy …):
 #   --proxy <url>      a proxy for every download: http://, https://,
-#                      socks5:// or socks5h:// (MYNA_PROXY= does the same;
+#                      socks5:// or socks5h:// (OWL_PROXY= does the same;
 #                      without either, curl's own https_proxy / HTTPS_PROXY /
 #                      ALL_PROXY are used as usual)
 #   --mirror <prefix>  a GitHub download mirror: the release file is fetched
-#                      from <prefix><its github.com URL> (MYNA_MIRROR= does
+#                      from <prefix><its github.com URL> (OWL_MIRROR= does
 #                      the same). None is used unless given. The release
-#                      list and its SHA-256 still come from github.com/istoo/myna,
+#                      list and its SHA-256 still come from github.com/istoo/owl,
 #                      never from the mirror, so a file the mirror changed is
 #                      refused.
 #   --gui              the desktop app, on Linux even when its libraries can't
 #                      be installed now (it opens once they are)
 #   --tui              the terminal build (TUI, web UI and CLI), on Linux even
-#                      with a desktop (MYNA_CLI=1 does the same)
-#   --uninstall        takes off what this script put there: the myna
+#                      with a desktop (OWL_CLI=1 does the same)
+#   --uninstall        takes off what this script put there: the owl
 #                      command, and the app (macOS) or its menu entry, icon
-#                      and myna:// handler (Linux), and the service and
-#                      opening at login that would start a myna no longer
+#                      and owl:// handler (Linux), and the service and
+#                      opening at login that would start a owl no longer
 #                      there. Your settings, providers and usage in
-#                      ~/.config/myna stay, for when you install again.
-#   --purge            --uninstall, and before it `myna uninstall --yes`:
+#                      ~/.config/owl stay, for when you install again.
+#   --purge            --uninstall, and before it `owl uninstall --yes`:
 #                      every agent disconnected and put back as it was, and
-#                      myna's settings, providers and usage deleted.
+#                      owl's settings, providers and usage deleted.
 set -eu
 
-site=https://github.com/istoo/myna
-raw=https://raw.githubusercontent.com/istoo/myna/main
+site=https://github.com/istoo/owl
+raw=https://raw.githubusercontent.com/istoo/owl/main
 install=$site/releases/latest/download/install.sh
-bin="${MYNA_BIN_DIR:-$HOME/.local/bin}"
-proxy="${MYNA_PROXY:-}"
-mirror="${MYNA_MIRROR:-}"
+bin="${OWL_BIN_DIR:-$HOME/.local/bin}"
+proxy="${OWL_PROXY:-}"
+mirror="${OWL_MIRROR:-}"
 uninstall=
 build=
 nolibs=
-[ -z "${MYNA_CLI:-}" ] || build=tui
+[ -z "${OWL_CLI:-}" ] || build=tui
 
 say() { printf '  %s\n' "$*"; }
-die() { printf 'myna: %s\n' "$*" >&2; exit 1; }
+die() { printf 'owl: %s\n' "$*" >&2; exit 1; }
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -67,13 +67,13 @@ while [ $# -gt 0 ]; do
     -h|--help)
       printf '%s\n' "usage: curl -fsSL $install | sh -s -- [--gui | --tui] [--proxy <url>] [--mirror <prefix>]" \
         "       curl -fsSL $install | sh -s -- --uninstall [--purge]" \
-        "  --proxy <url>      http://, https://, socks5:// or socks5h:// proxy for the downloads (or MYNA_PROXY=)" \
-        "  --mirror <prefix>  GitHub download mirror put before the release's github.com URL (or MYNA_MIRROR=);" \
+        "  --proxy <url>      http://, https://, socks5:// or socks5h:// proxy for the downloads (or OWL_PROXY=)" \
+        "  --mirror <prefix>  GitHub download mirror put before the release's github.com URL (or OWL_MIRROR=);" \
         "                     the SHA-256 is still checked against $site's" \
         "  --gui              Linux: the desktop app, even when GTK 3 and WebKitGTK 4.1 can't be installed now" \
-        "  --tui              Linux: the terminal build (TUI, web UI, CLI), even on a desktop (or MYNA_CLI=1)" \
-        "  --uninstall        take off what this script installed; your settings in ~/.config/myna stay" \
-        "  --purge            with --uninstall: also disconnect every agent and delete myna's settings (myna uninstall)"
+        "  --tui              Linux: the terminal build (TUI, web UI, CLI), even on a desktop (or OWL_CLI=1)" \
+        "  --uninstall        take off what this script installed; your settings in ~/.config/owl stay" \
+        "  --purge            with --uninstall: also disconnect every agent and delete owl's settings (owl uninstall)"
       exit 0 ;;
     *) die "unknown option $1 (--gui, --tui, --proxy <url>, --mirror <prefix>, --uninstall, --purge)" ;;
   esac
@@ -101,7 +101,7 @@ case "$(uname -s)" in
     if [ -n "$termux" ]; then
       [ -n "${PREFIX:-}" ] || die "Termux requires PREFIX to locate its bin directory"
       os=android
-      bin="${MYNA_BIN_DIR:-$PREFIX/bin}"
+      bin="${OWL_BIN_DIR:-$PREFIX/bin}"
     else
       os=linux
     fi ;;
@@ -118,61 +118,61 @@ runs() {
 
 # --uninstall: what the install below puts there, and nothing of the
 # user's. The service and login entry go too while they start this
-# myna: left, they would start a program that is gone at each login.
+# owl: left, they would start a program that is gone at each login.
 if [ -n "$uninstall" ]; then
-  exe="$bin/myna"
+  exe="$bin/owl"
   if [ "$uninstall" = purge ]; then
-    # myna disconnects the agents it connected and deletes its own
+    # owl disconnects the agents it connected and deletes its own
     # folders; deleting them here by hand would leave the agents pointed
     # at a gateway that is gone
-    [ -x "$exe" ] || die "no myna at $exe to disconnect your agents and delete its settings: install it again and run this again, or run --uninstall alone to keep them"
-    "$exe" uninstall --yes || die "myna uninstall didn't finish (see above), so the myna command and app are left: run this again once it does"
+    [ -x "$exe" ] || die "no owl at $exe to disconnect your agents and delete its settings: install it again and run this again, or run --uninstall alone to keep them"
+    "$exe" uninstall --yes || die "owl uninstall didn't finish (see above), so the owl command and app are left: run this again once it does"
   fi
   removed=
   gone() { rm -rf "$1"; removed=1; say "removed $1"; }
   if [ "$os" = darwin ]; then
     for apps in /Applications "$HOME/Applications"; do
-      [ ! -d "$apps/myna.app" ] || gone "$apps/myna.app"
+      [ ! -d "$apps/owl.app" ] || gone "$apps/owl.app"
     done
     case "$(readlink "$exe" 2>/dev/null)" in
-      */myna.app/Contents/MacOS/myna) gone "$exe" ;;
+      */owl.app/Contents/MacOS/owl) gone "$exe" ;;
     esac
   else
     if [ "$os" = linux ]; then
-      unit="$config/systemd/user/myna.service"
+      unit="$config/systemd/user/owl.service"
       if [ "$(runs "$unit" ExecStart)" = "$exe" ]; then
         if ! "$exe" daemon uninstall >/dev/null 2>&1; then
-          command -v systemctl >/dev/null && systemctl --user disable --now myna.service >/dev/null 2>&1 || true
+          command -v systemctl >/dev/null && systemctl --user disable --now owl.service >/dev/null 2>&1 || true
           rm -f "$unit"
         fi
-        removed=1; say "removed myna's service ($unit)"
+        removed=1; say "removed owl's service ($unit)"
       fi
-      login="$config/autostart/myna.desktop"
+      login="$config/autostart/owl.desktop"
       [ "$(runs "$login" Exec)" != "$exe" ] || gone "$login"
     fi
     [ ! -f "$exe" ] || gone "$exe"
     if [ "$os" = linux ]; then
       apps="$share/applications"
-      # the menu entry and its icon while they start this myna, or one
-      # that is gone; another myna's stays
-      run=$(runs "$apps/myna.desktop" Exec)
-      if [ -f "$apps/myna.desktop" ] && { [ "$run" = "$exe" ] || [ ! -e "$run" ]; }; then
-        gone "$apps/myna.desktop"
+      # the menu entry and its icon while they start this owl, or one
+      # that is gone; another owl's stays
+      run=$(runs "$apps/owl.desktop" Exec)
+      if [ -f "$apps/owl.desktop" ] && { [ "$run" = "$exe" ] || [ ! -e "$run" ]; }; then
+        gone "$apps/owl.desktop"
       fi
-      # with no menu entry (this one, or the one myna uninstall took),
-      # what came with it: the icon, the myna:// default xdg-mime set
+      # with no menu entry (this one, or the one owl uninstall took),
+      # what came with it: the icon, the owl:// default xdg-mime set
       # (that line only) and the menu's cache when it lists nothing else
-      if [ ! -e "$apps/myna.desktop" ]; then
+      if [ ! -e "$apps/owl.desktop" ]; then
         icons="$share/icons/hicolor/256x256/apps"
-        [ ! -f "$icons/myna.png" ] || gone "$icons/myna.png"
+        [ ! -f "$icons/owl.png" ] || gone "$icons/owl.png"
         rmdir "$icons" "$share/icons/hicolor/256x256" "$share/icons/hicolor" "$share/icons" 2>/dev/null || true
         list="$config/mimeapps.list"
-        if [ -f "$list" ] && grep -qx 'x-scheme-handler/myna=myna\.desktop;\{0,1\}' "$list"; then
-          grep -vx 'x-scheme-handler/myna=myna\.desktop;\{0,1\}' "$list" > "$list.myna-new" || true
-          mv "$list.myna-new" "$list"
+        if [ -f "$list" ] && grep -qx 'x-scheme-handler/owl=owl\.desktop;\{0,1\}' "$list"; then
+          grep -vx 'x-scheme-handler/owl=owl\.desktop;\{0,1\}' "$list" > "$list.owl-new" || true
+          mv "$list.owl-new" "$list"
           # a list left with no entry at all (the one xdg-mime made) goes
           grep -qv -e '^\[.*\]$' -e '^[[:space:]]*$' "$list" || rm -f "$list"
-          removed=1; say "removed myna:// from $list"
+          removed=1; say "removed owl:// from $list"
         fi
         if [ -d "$apps" ] && ! ls "$apps" | grep -q '\.desktop$'; then
           rm -f "$apps/mimeinfo.cache"
@@ -183,15 +183,15 @@ if [ -n "$uninstall" ]; then
       fi
     fi
   fi
-  [ "$removed" ] || say "no myna installed by this script at $exe"
+  [ "$removed" ] || say "no owl installed by this script at $exe"
   if [ "$uninstall" != purge ]; then
-    say "kept your settings, providers and usage in $config/myna: install again to have them back, or run with --purge to delete them"
+    say "kept your settings, providers and usage in $config/owl: install again to have them back, or run with --purge to delete them"
     if pid=$(pgrep -f "^$exe( |\$)" 2>/dev/null) && [ -n "$pid" ]; then
-      say "myna is still running (pid $(printf '%s' "$pid" | tr '\n' ' ' | sed 's/ $//')) and ends when you quit it; agents connected to it reach its gateway until then"
+      say "owl is still running (pid $(printf '%s' "$pid" | tr '\n' ' ' | sed 's/ $//')) and ends when you quit it; agents connected to it reach its gateway until then"
     fi
   fi
-  # myna uninstall said so already
-  [ "$uninstall" = purge ] || say "myna is uninstalled"
+  # owl uninstall said so already
+  [ "$uninstall" = purge ] || say "owl is uninstalled"
   exit 0
 fi
 
@@ -261,8 +261,8 @@ has_desktop() {
 gui_packages() {
   pkg='' pm='' hint=''
   id='' like=''
-  # MYNA_OS_RELEASE: another os-release, for the installer's tests
-  rel=${MYNA_OS_RELEASE:-/etc/os-release}
+  # OWL_OS_RELEASE: another os-release, for the installer's tests
+  rel=${OWL_OS_RELEASE:-/etc/os-release}
   [ -r "$rel" ] || rel=/usr/lib/os-release
   if [ -r "$rel" ]; then
     id=$(sed -n 's/^ID=//p' "$rel" | tr -d "\"'" | head -n 1)
@@ -294,12 +294,12 @@ gui_packages() {
 # script the pipe for stdin, so the terminal is /dev/tty, and every command
 # here reads it. Fails, and the caller falls back to the terminal build,
 # with no terminal, no sudo, a package manager we don't run, or a failed
-# install. MYNA_TTY: another terminal, for the installer's tests.
+# install. OWL_TTY: another terminal, for the installer's tests.
 install_gui_libs() {
   tried=
   gui_packages
   [ -n "$pm" ] && command -v "$pm" >/dev/null 2>&1 || return 1
-  tty=${MYNA_TTY:-/dev/tty}
+  tty=${OWL_TTY:-/dev/tty}
   # a subshell: a redirection that fails would end the script itself
   (: <"$tty") 2>/dev/null || return 1
   as=
@@ -329,19 +329,19 @@ case "$(uname -m)" in
   *) die "unsupported CPU: $(uname -m)" ;;
 esac
 case "$os" in
-  darwin) file="myna-darwin-$arch.zip" ;;
-  android) file="myna-cli-android-$arch" ;;
+  darwin) file="owl-darwin-$arch.zip" ;;
+  android) file="owl-cli-android-$arch" ;;
   *)
-    file="myna-cli-linux-$arch"
+    file="owl-cli-linux-$arch"
     case "$build" in
       gui) ! musl || die "the desktop app is built for glibc and can't run on musl (Alpine): install the terminal build with --tui"
-           file="myna-linux-$arch"
+           file="owl-linux-$arch"
            has_gui_libs || install_gui_libs || true ;;
       tui) ;;
       *) if musl; then :
-         elif has_gui_libs; then file="myna-linux-$arch"
+         elif has_gui_libs; then file="owl-linux-$arch"
          elif has_desktop; then
-           if install_gui_libs; then file="myna-linux-$arch"; else nolibs=1; fi
+           if install_gui_libs; then file="owl-linux-$arch"; else nolibs=1; fi
          fi ;;
     esac ;;
 esac
@@ -361,8 +361,8 @@ if [ "$os" = android ] && { [ -z "$url" ] || [ -z "$sum" ]; }; then
 fi
 # a release without the desktop app still installs the terminal build,
 # when the user didn't ask for --gui
-if [ -z "$url" ] && [ -z "$build" ] && [ "$os" != darwin ] && [ "$file" = "myna-linux-$arch" ]; then
-  file="myna-cli-linux-$arch"
+if [ -z "$url" ] && [ -z "$build" ] && [ "$os" != darwin ] && [ "$file" = "owl-linux-$arch" ]; then
+  file="owl-cli-linux-$arch"
   say "this release has no Linux desktop build; installing the terminal build"
   entry=$(printf '%s' "$feed" | sed -n "s/.*\"$file\":{\([^}]*\)}.*/\1/p")
   url=$(printf '%s' "$entry" | sed -n 's/.*"url":"\([^"]*\)".*/\1/p')
@@ -374,8 +374,8 @@ from=$url
 case "$url" in
   https://github.com/*) [ -z "$mirror" ] || from="$mirror$url" ;;
 esac
-if [ "$from" != "$url" ]; then say "downloading myna $version ($file) through $mirror"
-else say "downloading myna $version ($file)"; fi
+if [ "$from" != "$url" ]; then say "downloading owl $version ($file) through $mirror"
+else say "downloading owl $version ($file)"; fi
 get -o "$tmp/$file" "$from" || die "could not download $from"
 if command -v sha256sum >/dev/null; then got=$(sha256sum "$tmp/$file" | cut -d' ' -f1)
 else got=$(shasum -a 256 "$tmp/$file" | cut -d' ' -f1); fi
@@ -391,53 +391,53 @@ if [ "$os" = darwin ]; then
   ditto -x -k "$tmp/$file" "$tmp/x"
   # the new app beside the old one first: a move failing (a full disk)
   # leaves the old app in place
-  rm -rf "$apps/.myna.app.new"
-  mv "$tmp/x/myna.app" "$apps/.myna.app.new"
-  rm -rf "$apps/myna.app"
-  mv "$apps/.myna.app.new" "$apps/myna.app"
-  ln -sf "$apps/myna.app/Contents/MacOS/myna" "$bin/myna"
-  say "installed $apps/myna.app"
+  rm -rf "$apps/.owl.app.new"
+  mv "$tmp/x/owl.app" "$apps/.owl.app.new"
+  rm -rf "$apps/owl.app"
+  mv "$apps/.owl.app.new" "$apps/owl.app"
+  ln -sf "$apps/owl.app/Contents/MacOS/owl" "$bin/owl"
+  say "installed $apps/owl.app"
 else
-  install -m 755 "$tmp/$file" "$bin/myna"
-  if [ "$file" = "myna-linux-$arch" ]; then
+  install -m 755 "$tmp/$file" "$bin/owl"
+  if [ "$file" = "owl-linux-$arch" ]; then
     mkdir -p "$share/applications" "$share/icons/hicolor/256x256/apps"
-    get -o "$share/icons/hicolor/256x256/apps/myna.png" "$raw/site/public/img/icon-256.png" || true
-    cat > "$share/applications/myna.desktop" <<EOF
+    get -o "$share/icons/hicolor/256x256/apps/owl.png" "$raw/site/public/img/icon-256.png" || true
+    cat > "$share/applications/owl.desktop" <<EOF
 [Desktop Entry]
 Type=Application
-Name=myna
+Name=owl
 Comment=Every agent's model. One place.
-Exec=$bin/myna %u
-Icon=myna
-StartupWMClass=myna
+Exec=$bin/owl %u
+Icon=owl
+StartupWMClass=owl
 Categories=Development;Utility;
-MimeType=x-scheme-handler/myna;
+MimeType=x-scheme-handler/owl;
 Terminal=false
 EOF
-    # myna://import links open in myna
+    # owl://import links open in owl
     command -v update-desktop-database >/dev/null && update-desktop-database "$share/applications" 2>/dev/null || true
-    command -v xdg-mime >/dev/null && xdg-mime default myna.desktop x-scheme-handler/myna 2>/dev/null || true
-    say "installed the myna desktop app (menu entry: myna)"
+    command -v xdg-mime >/dev/null && xdg-mime default owl.desktop x-scheme-handler/owl 2>/dev/null || true
+    say "installed the owl desktop app (menu entry: owl)"
   elif [ "$os" = android ]; then
-    say "installed the Termux build; use myna web for the browser UI or myna tui for the terminal UI"
+    say "installed the Termux build; use owl web for the browser UI or owl tui for the terminal UI"
   else
     say "installed the terminal build (TUI, web UI and CLI)"
   fi
 fi
-say "installed $bin/myna"
+say "installed $bin/owl"
 case ":$PATH:" in
   *":$bin:"*) ;;
-  *) say "add $bin to your PATH to run myna from a terminal" ;;
+  *) say "add $bin to your PATH to run owl from a terminal" ;;
 esac
 case "$file" in
-  *.zip) say "open it: open -a myna" ;;
-  myna-cli-android-*) say "run it: myna web" ;;
-  myna-linux-*) say "open it from your app menu, or run: myna app" ;;
-  *) say "run it: myna" ;;
+  *.zip) say "open it: open -a owl" ;;
+  owl-cli-android-*) say "run it: owl web" ;;
+  owl-linux-*) say "open it from your app menu, or run: owl app" ;;
+  *) say "run it: owl" ;;
 esac
 # the desktop app without what it needs: what installs it, said last so it
 # is what the user reads
-if [ "$file" = "myna-linux-$arch" ] && ! has_gui_libs; then
+if [ "$file" = "owl-linux-$arch" ] && ! has_gui_libs; then
   gui_packages
   say ""
   if [ -n "${tried:-}" ]; then say "installing GTK 3 and WebKitGTK 4.1 didn't work (see above); the desktop app opens once they are installed:"

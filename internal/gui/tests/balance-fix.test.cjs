@@ -70,7 +70,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await browser.close();
     });
 
-    await page.goto("http://myna.test/?view=providers");
+    await page.goto("http://owl.test/?view=providers");
     await page.locator(".row.provider", { hasText: "Relay" }).click();
     const fix = page.locator(".editor .bal-fix");
     await fix.waitFor();
@@ -185,7 +185,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     await page.route("**/*", server([]));
     t.after(() => browser.close());
 
-    await page.goto("http://myna.test/?view=providers");
+    await page.goto("http://owl.test/?view=providers");
     await page.locator("#providers .row.provider").first().waitFor();
     await page.evaluate(() => { adding = true; editing = { custom: true }; draft = null; renderProviders(); });
     // the token's own box: the Proxy field's password comes before it (#4683)
@@ -218,7 +218,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     await page.route("**/*", server(posted, { provider: { ...relay, balanceURL: "https://relay.example.com/v1/usage", balancePath: "$remaining" } }));
     t.after(() => browser.close());
 
-    await page.goto("http://myna.test/?view=providers");
+    await page.goto("http://owl.test/?view=providers");
     await page.locator(".row.provider", { hasText: "Relay" }).click();
     const fix = page.locator(".editor .bal-fix");
     await fix.waitFor();
@@ -260,7 +260,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             const errors = [], posted = [];
             page.on("pageerror", (e) => errors.push(e.message));
             await page.route("**/*", server(posted, { lang, provider: scenario.isNew ? relay : { ...relay, balanceURL: scenario.balanceURL, balancePath: scenario.balancePath } }));
-            await page.goto("http://myna.test/?view=providers");
+            await page.goto("http://owl.test/?view=providers");
             await page.locator(".row.provider", { hasText: "Relay" }).waitFor();
             if (scenario.isNew) {
               await page.evaluate(() => { adding = true; editing = { custom: true }; draft = null; renderProviders(); });
@@ -342,7 +342,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           }
           await browser.close();
         });
-        await page.goto("http://myna.test/?view=providers");
+        await page.goto("http://owl.test/?view=providers");
         await page.locator(".row.provider", { hasText: "Relay" }).click();
         const fix = page.locator(".editor .bal-fix");
         const uid = fix.locator(".bal-uid input");
@@ -400,7 +400,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const posted = [], errors = [];
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", server(posted));
-          await page.goto("http://myna.test/?view=providers");
+          await page.goto("http://owl.test/?view=providers");
           await page.locator(".row.provider", { hasText: "Relay" }).click();
           await page.locator(".editor details.more:not(.advanced) > summary").click();
           await page.locator(".editor .bal-path").fill(typed);

@@ -15,11 +15,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/budget"
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/usage"
-	"github.com/istoo/myna/internal/usageapi"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/budget"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/usage"
+	"github.com/istoo/owl/internal/usageapi"
 )
 
 type ingestReply struct {
@@ -37,14 +37,14 @@ type ingestReply struct {
 func ingestServer(t *testing.T) func(from, body string, hdr ...string) (int, ingestReply, string) {
 	t.Helper()
 	fresh(t)
-	t.Setenv("MYNA_ADDR", "")
+	t.Setenv("OWL_ADDR", "")
 	os.MkdirAll(filepath.Dir(catalog.CachePath()), 0o755)
 	os.WriteFile(catalog.CachePath(), []byte(`{"anthropic":{"id":"anthropic","models":{"claude-opus-5-5":{"id":"claude-opus-5-5","cost":{"input":4,"output":20,"cache_read":0.2,"cache_write":5}}}}}`), 0o644)
 	catalog.Reset()
 	t.Cleanup(catalog.Reset)
 	h := lanGuard(New().Handler())
 	return func(from, body string, hdr ...string) (int, ingestReply, string) {
-		r := httptest.NewRequest("POST", "/v1/myna/usage/requests", strings.NewReader(body))
+		r := httptest.NewRequest("POST", "/v1/owl/usage/requests", strings.NewReader(body))
 		r.RemoteAddr = from
 		r.Host = "127.0.0.1:3425" // the address a client on this computer uses
 		r.Header.Set("Content-Type", "application/json")
@@ -74,8 +74,8 @@ func reportedLines(t *testing.T) int {
 	return bytes.Count(b, []byte(`"source":"reported"`))
 }
 
-// POST /v1/myna/usage/requests (#1874): this computer reports a call
-// it made itself and it is counted, priced at myna's prices, as
+// POST /v1/owl/usage/requests (#1874): this computer reports a call
+// it made itself and it is counted, priced at owl's prices, as
 // reported; the same rid again is skipped; a call's own cost is kept; and
 // the page and GET tell the reported ones apart and filter them.
 func TestUsageIngest(t *testing.T) {
@@ -94,7 +94,7 @@ func TestUsageIngest(t *testing.T) {
 
 	h := lanGuard(New().Handler())
 	get := func(q string) usageapi.Ledger {
-		r := httptest.NewRequest("GET", "/v1/myna/usage/requests?period=all"+q, nil)
+		r := httptest.NewRequest("GET", "/v1/owl/usage/requests?period=all"+q, nil)
 		r.RemoteAddr = "127.0.0.1:5000"
 		w := httptest.NewRecorder()
 		h.ServeHTTP(w, r)
@@ -205,7 +205,7 @@ func TestUsageIngestAccess(t *testing.T) {
 	if c, _, b := do("192.168.1.9:5000", rec); c != http.StatusUnauthorized {
 		t.Fatal("another machine with no key:", c, b)
 	}
-	if c, _, b := do("192.168.1.9:5000", rec, "Authorization", "Bearer sk-myna-wrong-wrong-wrong"); c != http.StatusUnauthorized {
+	if c, _, b := do("192.168.1.9:5000", rec, "Authorization", "Bearer sk-owl-wrong-wrong-wrong"); c != http.StatusUnauthorized {
 		t.Fatal("another machine with a wrong key:", c, b)
 	}
 	pages := [][]string{
@@ -372,7 +372,7 @@ func TestUsageIngestTellsSpeed(t *testing.T) {
 	}
 
 	h := lanGuard(New().Handler())
-	r := httptest.NewRequest("GET", "/v1/myna/usage/requests?period=all&via=reported", nil)
+	r := httptest.NewRequest("GET", "/v1/owl/usage/requests?period=all&via=reported", nil)
 	r.RemoteAddr = "127.0.0.1:5000"
 	w := httptest.NewRecorder()
 	h.ServeHTTP(w, r)

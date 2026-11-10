@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // love1sbug on X: switching Names in agents' lists between Off, Not on
@@ -18,7 +18,7 @@ import (
 // modelPicker labelled every model by its name alone. Each row is now
 // labelled as every agent's list names the model (provider.Labels), and
 // written again when the setting changes; a description that would repeat
-// the provider the label says is left "via myna".
+// the provider the label says is left "via owl".
 func TestClaudePickerFollowsSuffixMode(t *testing.T) {
 	home := syncHome(t)
 	if err := provider.Save(provider.Provider{ID: "relay", Name: "Relay", Key: "k", Chat: "http://127.0.0.1:1/v1", Models: []string{"glm-4.6", "glm-5"}}); err != nil {
@@ -57,10 +57,10 @@ func TestClaudePickerFollowsSuffixMode(t *testing.T) {
 		glm, mine, mix  string
 		glmNote, mixNot string
 	}{
-		{provider.SuffixOn, "GLM-4.6 · Relay", "My GLM · Relay", "Mix · routing group", "via myna", "via myna"},
-		{provider.SuffixOwn, "GLM-4.6 · Relay", "My GLM", "Mix", "via myna", "routing group · via myna"},
-		{provider.SuffixOff, "GLM-4.6", "My GLM", "Mix", "Relay · via myna", "routing group · via myna"},
-		{provider.SuffixOn, "GLM-4.6 · Relay", "My GLM · Relay", "Mix · routing group", "via myna", "via myna"},
+		{provider.SuffixOn, "GLM-4.6 · Relay", "My GLM · Relay", "Mix · routing group", "via owl", "via owl"},
+		{provider.SuffixOwn, "GLM-4.6 · Relay", "My GLM", "Mix", "via owl", "routing group · via owl"},
+		{provider.SuffixOff, "GLM-4.6", "My GLM", "Mix", "Relay · via owl", "routing group · via owl"},
+		{provider.SuffixOn, "GLM-4.6 · Relay", "My GLM · Relay", "Mix · routing group", "via owl", "via owl"},
 	} {
 		if err := provider.SetSuffixMode(c.mode); err != nil {
 			t.Fatal(err)
@@ -116,8 +116,8 @@ func TestClaudePickerSubscriptionSaysItsProvider(t *testing.T) {
 	catalog.Changed = SyncCatalog
 	t.Cleanup(func() { catalog.Changed = nil })
 	for _, c := range []struct{ mode, label, note string }{
-		{provider.SuffixOn, "GPT-5.5 · Codex", "me@example.com · via myna"},
-		{provider.SuffixOff, "GPT-5.5", "Codex · me@example.com · via myna"},
+		{provider.SuffixOn, "GPT-5.5 · Codex", "me@example.com · via owl"},
+		{provider.SuffixOff, "GPT-5.5", "Codex · me@example.com · via owl"},
 	} {
 		if err := provider.SetSuffixMode(c.mode); err != nil {
 			t.Fatal(err)

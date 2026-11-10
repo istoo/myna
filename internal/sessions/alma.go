@@ -35,7 +35,7 @@ import (
 //	               output_tokens (reasoning included), timestamp
 //	aux_usage_records  the same for side work (titles, memory), by thread
 //
-// myna only reads it, through a read-only connection, and never deletes
+// owl only reads it, through a read-only connection, and never deletes
 // or moves a chat: a chat is rows in Alma's live database, with triggers,
 // a full-text index and other tables pointing at it, which only Alma can
 // change safely. Alma has no command to pick a chat up again, so its
@@ -190,7 +190,7 @@ func almaColumn(cols map[string]bool, names ...string) string {
 	return "''"
 }
 
-// almaMessage is what myna reads of a message: who said it, and its parts'
+// almaMessage is what owl reads of a message: who said it, and its parts'
 // kinds, words and tools.
 type almaMessage struct {
 	Role  string `json:"role"`

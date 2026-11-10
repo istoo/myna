@@ -1,20 +1,20 @@
-// Package search is myna's web search for a model that can't search by
+// Package search is owl's web search for a model that can't search by
 // itself: the agent's web_search tool, answered by a provider that can
 // search or a search API set up in Settings. While a search API is set up
 // or a searcher is picked, it stays on.
 //
 // It serves gwtool.WebSearch on the gateway's tool point (P3 of
-// docs/subsystems/plugin-runtime.md). Off, myna offers and answers no
+// docs/subsystems/plugin-runtime.md). Off, owl offers and answers no
 // search of its own: the stand-in tool, the search MCP server and Codex's
 // search in ChatGPT's place say there is no searcher, and a vendor that
 // searches by itself still does.
 package search
 
 import (
-	"github.com/istoo/myna/internal/gwtool"
-	"github.com/istoo/myna/internal/pluginrt"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/gwtool"
+	"github.com/istoo/owl/internal/pluginrt"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 func init() {
@@ -31,7 +31,7 @@ func init() {
 }
 
 // InUse counts the search APIs set up, and a searcher picked in Settings
-// (neither myna's pick nor off); a providers.json or settings that can't
+// (neither owl's pick nor off); a providers.json or settings that can't
 // be read are not known, so it stays on.
 func InUse() (int, error) {
 	n, err := provider.SearchAPIsSet()

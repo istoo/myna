@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // codexDeskReset forgets the backend's list for the Codex app, before the
@@ -53,7 +53,7 @@ func codexDeskAsked(t *testing.T) {
 // The list the Codex app reads from a file beside the ChatGPT sign-in
 // (laddieyao on Discord): the backend's entries as it sent them, its
 // base_instructions untouched, asked for with Codex's own sign-in, and
-// myna's models after them. Not known until the backend has answered,
+// owl's models after them. Not known until the backend has answered,
 // and a failed ask after that keeps the last list it gave: unknown, never
 // an empty list.
 func TestCodexDesktopCatalog(t *testing.T) {
@@ -108,7 +108,7 @@ func TestCodexDesktopCatalog(t *testing.T) {
 		t.Fatalf("the backend's entry: %v", m)
 	}
 	if slugs["relay/claude-opus-5.5"] == nil {
-		t.Fatalf("myna's models missing: %s", b)
+		t.Fatalf("owl's models missing: %s", b)
 	}
 
 	// an ask that fails keeps the list the backend gave last
@@ -174,7 +174,7 @@ func TestCodexDesktopCatalogFollowsTheSignIn(t *testing.T) {
 		t.Fatalf("the Plus account's list: %v\n%s", ok, b)
 	}
 
-	// Codex signed in to the Pro account now, as myna's switch writes it
+	// Codex signed in to the Pro account now, as owl's switch writes it
 	claims := func(m map[string]any) string {
 		b, _ := json.Marshal(m)
 		return "h." + base64.RawURLEncoding.EncodeToString(b) + ".s"

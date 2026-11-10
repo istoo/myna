@@ -8,12 +8,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // The notes on a server and a skill (youyo.p on Discord: with many of
 // them, which is which and when to use it) are the library's alone:
-// nothing myna writes for an agent holds them, whichever format the
+// nothing owl writes for an agent holds them, whichever format the
 // agent reads, through the MCP router or not.
 func TestNoteNeverGiven(t *testing.T) {
 	h := sandbox(t)
@@ -45,7 +45,7 @@ func TestNoteNeverGiven(t *testing.T) {
 				return nil
 			}
 			if d.IsDir() && filepath.Clean(p) == own {
-				return filepath.SkipDir // myna's own: library.json, its backups
+				return filepath.SkipDir // owl's own: library.json, its backups
 			}
 			if !d.Type().IsRegular() {
 				return nil

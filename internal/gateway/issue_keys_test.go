@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/budget"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/budget"
 )
 
 // keysCall is a request to h from from ("127.0.0.1:5000" or another
@@ -63,7 +63,7 @@ const (
 // otherwise get every one by its key expiring.
 func TestIssuedKeyExpiresOnEveryRoute(t *testing.T) {
 	fresh(t)
-	t.Setenv("MYNA_ADDR", "")
+	t.Setenv("OWL_ADDR", "")
 	budget.Forget()
 	calls := limitedUpstream(t, 0)
 	newCaller(t, "Laptop")
@@ -88,7 +88,7 @@ func TestIssuedKeyExpiresOnEveryRoute(t *testing.T) {
 	access.Now = func() time.Time { return old().Add(61 * time.Minute) }
 	for _, from := range []string{fromThere, fromHere} {
 		for _, rq := range [][2]string{{"POST", "/v1/chat/completions"}, {"POST", "/v1/messages"}, {"POST", "/v1/responses"}, {"GET", "/v1/models"},
-			{"GET", "/v1/myna/usage"}, {"GET", "/v1/myna/quotas"}, {"GET", "/v1/myna/limit"}, {"GET", "/"}, {"POST", KeysPath}} {
+			{"GET", "/v1/owl/usage"}, {"GET", "/v1/owl/quotas"}, {"GET", "/v1/owl/limit"}, {"GET", "/"}, {"POST", KeysPath}} {
 			body := ""
 			if rq[0] == "POST" {
 				body = chatReq
@@ -114,7 +114,7 @@ func TestIssuedKeyExpiresOnEveryRoute(t *testing.T) {
 // it.
 func TestKeysEndpointWhoMayIssue(t *testing.T) {
 	fresh(t)
-	t.Setenv("MYNA_ADDR", "")
+	t.Setenv("OWL_ADDR", "")
 	budget.Forget()
 	limitedUpstream(t, 0)
 	keys, secrets := newCaller(t, "Orchestrator")
@@ -182,7 +182,7 @@ func TestKeysEndpointWhoMayIssue(t *testing.T) {
 // they were issued under may.
 func TestIssuedKeysSpendTheirIssuersLimit(t *testing.T) {
 	fresh(t)
-	t.Setenv("MYNA_ADDR", "")
+	t.Setenv("OWL_ADDR", "")
 	budget.Forget()
 	pinLimitClock(t)
 	calls := limitedUpstream(t, 0) // 350 tokens a call
@@ -207,7 +207,7 @@ func TestIssuedKeysSpendTheirIssuersLimit(t *testing.T) {
 	if calls.Load() != 2 {
 		t.Fatal("calls past the issuer's limit reached the provider:", calls.Load())
 	}
-	w := keysCall(h, "GET", "/v1/myna/limit", fromThere, a.Key, "")
+	w := keysCall(h, "GET", "/v1/owl/limit", fromThere, a.Key, "")
 	var lim struct {
 		Expires      time.Time
 		IssuerLimits []budget.Status

@@ -8,8 +8,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/istoo/myna/internal/netproxy"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/netproxy"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // Via is ctx for requests made on the provider's behalf: they go through

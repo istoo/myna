@@ -11,7 +11,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // The login Settings › Proxy saves (微雨南山 on Discord): a username and
@@ -96,7 +96,7 @@ func TestProxyLoginWithReservedCharacters(t *testing.T) {
 		if body, code := throughSaved(t, "http://vendor.example/v1/models"); code != 200 || body != "carried http://vendor.example/v1/models" {
 			t.Fatalf("through the HTTP proxy: %d %q", code, body)
 		}
-		// a CLI myna starts gets the same login in its *_PROXY
+		// a CLI owl starts gets the same login in its *_PROXY
 		for _, e := range EnvWith("", []string{}) {
 			if k, v, _ := strings.Cut(e, "="); k == "HTTPS_PROXY" {
 				eu, err := url.Parse(v)
@@ -180,9 +180,9 @@ func assertHidden(t *testing.T) {
 
 // Bun, which the plugin host's fetches and Claude Code run on, signs in
 // to an HTTP proxy with the same login: it decodes the userinfo as Go
-// does. Run when a bun is at hand ($MYNA_BUN or on PATH).
+// does. Run when a bun is at hand ($OWL_BUN or on PATH).
 func TestBunProxyLoginWithReservedCharacters(t *testing.T) {
-	bun := os.Getenv("MYNA_BUN")
+	bun := os.Getenv("OWL_BUN")
 	if bun == "" {
 		bun, _ = exec.LookPath("bun")
 	}

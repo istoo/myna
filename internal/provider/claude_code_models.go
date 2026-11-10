@@ -10,7 +10,7 @@ package provider
 // state file (.claude.json): additionalModelOptionsCache, the models its
 // /model picker offers beyond its own; modelAccessCache, the models the
 // account is or isn't entitled to; additionalModelCostsCache, their
-// prices. myna reads them back, as it reads the account's identity from
+// prices. owl reads them back, as it reads the account's identity from
 // the same file: nothing is asked of Anthropic in Claude Code's name
 // (iebb on Discord: "最好以 claude code 返回为准").
 
@@ -21,9 +21,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/filememo"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/filememo"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // claudeCodeModels is what Claude Code keeps of an account's models.
@@ -127,7 +127,7 @@ func readClaudeCodeModels(path string) (claudeCodeModels, bool) {
 	return m, err == nil
 }
 
-// claudeCodeFiles are the state files of every Claude Code myna knows of
+// claudeCodeFiles are the state files of every Claude Code owl knows of
 // an account in: the one Claude Code itself is signed in to, then each
 // saved account's own config directory (claude_dirs.go).
 func claudeCodeFiles() []string {

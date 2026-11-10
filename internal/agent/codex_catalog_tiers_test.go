@@ -6,12 +6,12 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/istoo/myna/internal/codexcat"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/codexcat"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// The Codex CLI that names myna its provider reads its models from
-// myna-models.json (model_catalog_json), which Codex prefers over any
+// The Codex CLI that names owl its provider reads its models from
+// owl-models.json (model_catalog_json), which Codex prefers over any
 // model_catalog_url. Its /fast is there only when the model's entry has
 // service_tiers. A provider the user added by its address was offered
 // Fast in the gateway's lists (#1234) but every entry in the file had
@@ -35,7 +35,7 @@ func TestCodexCatalogTiersReachDisk(t *testing.T) {
 			} `json:"service_tiers"`
 		} `json:"models"`
 	}
-	raw := readFile(filepath.Join(home, ".codex", "myna-models.json"))
+	raw := readFile(filepath.Join(home, ".codex", "owl-models.json"))
 	if err := json.Unmarshal([]byte(raw), &got); err != nil {
 		t.Fatalf("%v: %s", err, raw)
 	}
@@ -49,15 +49,15 @@ func TestCodexCatalogTiersReachDisk(t *testing.T) {
 	}
 	for slug, want := range map[string]string{"sub/gpt-6.1-sol": "priority:Fast ", "sub/glm-4.6": "", "relay/glm-4.6": ""} {
 		if g, ok := tiers[slug]; !ok {
-			t.Errorf("%s is not in myna-models.json: %s", slug, raw)
+			t.Errorf("%s is not in owl-models.json: %s", slug, raw)
 		} else if g != want {
-			t.Errorf("myna-models.json offers %s %q, want %q", slug, g, want)
+			t.Errorf("owl-models.json offers %s %q, want %q", slug, g, want)
 		}
 	}
 
 	// the file offers each model what GET /v1/codex/models offers it
 	shown, _ := provider.CatalogFor("codex")
-	if disk, api := codexcat.ServiceTiers(mynaModels("codex")), codexcat.ServiceTiers(provider.CodexCatalog(shown)); !reflect.DeepEqual(disk, api) {
-		t.Errorf("tiers in myna-models.json %v, in /v1/codex/models %v", disk, api)
+	if disk, api := codexcat.ServiceTiers(owlModels("codex")), codexcat.ServiceTiers(provider.CodexCatalog(shown)); !reflect.DeepEqual(disk, api) {
+		t.Errorf("tiers in owl-models.json %v, in /v1/codex/models %v", disk, api)
 	}
 }

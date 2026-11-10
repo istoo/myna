@@ -6,7 +6,7 @@
 // request Settings' Warm up now sends (POST /api/warm-now {agent, user}).
 // Not running: nothing used and its reset a whole window away, a reset gone
 // by, or a Claude account with no window read. One running, or an account
-// myna isn't signed in to, has none. Once warmed it goes; refused, the
+// owl isn't signed in to, has none. Once warmed it goes; refused, the
 // reason is in the status line and the button comes back. en, zh, zh-TW,
 // ja, de at 1100px and 390px; the API is faked here.
 const assert = require("node:assert/strict");
@@ -28,7 +28,7 @@ const quotas = [
   { provider: "codex", name: "Codex", icon: "codex-color", plan: "Plus", user: "Ran-Out@Example.com", windows: [{ name: "5 hours", used: 100, resetsAt: iso(now - H) }] },
   // unused, but started a while ago: running
   { provider: "codex", name: "Codex", icon: "codex-color", plan: "Plus", user: "zero@example.com", windows: [{ name: "5 hours", used: 0, resetsAt: iso(now + 3 * H) }] },
-  // not one myna is signed in to
+  // not one owl is signed in to
   { provider: "codex", name: "Codex", icon: "codex-color", plan: "Plus", user: "elsewhere@example.com", windows: [{ name: "5 hours", used: 0, resetsAt: iso(now + 5 * H) }] },
   // a Claude account never used: no window read
   { provider: "claude", name: "Claude Code", icon: "claude-color", plan: "Max", user: "claude@example.com", windows: [] },
@@ -108,7 +108,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], asked = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, asked));
-        await page.goto("http://myna.test/?view=usage");
+        await page.goto("http://owl.test/?view=usage");
 
         const idle = warmOf(page, "idle-account-with-a-long-name@example.com");
         await idle.waitFor();

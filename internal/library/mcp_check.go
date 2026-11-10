@@ -20,11 +20,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/mcpauth"
-	"github.com/istoo/myna/internal/netproxy"
-	"github.com/istoo/myna/internal/proc"
-	"github.com/istoo/myna/internal/wslrun"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/mcpauth"
+	"github.com/istoo/owl/internal/netproxy"
+	"github.com/istoo/owl/internal/proc"
+	"github.com/istoo/owl/internal/wslrun"
 )
 
 // The Library page says of each server whether it works, found the only
@@ -45,21 +45,21 @@ type ServerHealth struct {
 	ToolList []Tool `json:"toolList,omitempty"`
 	// Why is the kind of error, for the page to put in its own words:
 	// notfound, start, exited, timeout, http, refused, unreachable,
-	// protocol, novar (a ${NAME} myna's environment hasn't: Detail names
+	// protocol, novar (a ${NAME} owl's environment hasn't: Detail names
 	// them), wsldown (a command only agents in WSL start, whose distros,
 	// Detail, aren't running: it wasn't checked)
 	Why    string `json:"why,omitempty"`
 	Code   int    `json:"code,omitempty"`   // the exit code, or the HTTP status
 	Detail string `json:"detail,omitempty"` // the last line it wrote to stderr, or the error's text
 	// OAuth is a refusal that named a sign-in (WWW-Authenticate), which
-	// myna can do itself for a streamable HTTP server
+	// owl can do itself for a streamable HTTP server
 	OAuth bool `json:"oauth,omitempty"`
-	// SignIn is myna's sign-in to a streamable HTTP server as the check
+	// SignIn is owl's sign-in to a streamable HTTP server as the check
 	// left it: one whose renewed token the server refused has run out
 	// since, and the page's tag says so (新v学员 on Discord)
 	SignIn *mcpauth.Status `json:"signIn,omitempty"`
 	// AgentSignIn are the agents signed in to a server that refused
-	// myna's check on their own (Claude Code's /mcp, mcp_agent_signin.go),
+	// owl's check on their own (Claude Code's /mcp, mcp_agent_signin.go),
 	// by id: they use it, though the check, without their tokens, was asked
 	// to sign in (CyberCaius on Discord)
 	AgentSignIn []string `json:"agentSignIn,omitempty"`
@@ -225,7 +225,7 @@ func checkServer(ctx context.Context, s *Server, own ownSignIns) ServerHealth {
 	}
 	h.At = time.Now().UnixMilli()
 	if s.Transport == "http" {
-		// only a server myna is signed in to has one to report
+		// only a server owl is signed in to has one to report
 		if st := mcpauth.StatusOf(s.Name, s.URL); st.SignedIn || st.Dead {
 			h.SignIn = &st
 		}
@@ -306,7 +306,7 @@ func initParams() map[string]any {
 	return map[string]any{
 		"protocolVersion": mcpProtocol,
 		"capabilities":    map[string]any{},
-		"clientInfo":      map[string]any{"name": "myna", "version": gateway.Version},
+		"clientInfo":      map[string]any{"name": "owl", "version": gateway.Version},
 	}
 }
 
@@ -495,7 +495,7 @@ func checkStdio(ctx context.Context, s *Server) ServerHealth {
 }
 
 // stdioProgram is the program checkStdio starts for a server's command,
-// and the folder it was found in when myna's PATH lacks it. A bare name
+// and the folder it was found in when owl's PATH lacks it. A bare name
 // PATH doesn't have is looked for as a terminal would find it
 // (proc.FindTool: the folders a user's tools are installed in, fnm's Nodes
 // among them, #2685), and that folder goes on the child's PATH, as it is
@@ -532,7 +532,7 @@ func withPath(env []string, dir string) []string {
 }
 
 // startServer starts the command s runs as the agents start it, on this
-// machine or in WSL distro: in the environment myna has, with the
+// machine or in WSL distro: in the environment owl has, with the
 // server's own variables over it, in home. Its stdin and stdout are the
 // MCP connection; what it writes to stderr is kept in errs; stop ends a
 // run in a distro (call it beside tree.Kill). The check starts it so, and
@@ -571,7 +571,7 @@ func startServer(ctx context.Context, s *Server, distro string) (tree *proc.Tree
 		rctx, stop = context.WithCancel(context.WithoutCancel(ctx))
 		cmd = wslCommand(rctx, t, s.Args...)
 	}
-	// Agents start MCP servers from a project or home directory. A myna
+	// Agents start MCP servers from a project or home directory. A owl
 	// launched from a shortcut (Windows Start menu) often has C:\Windows\system32
 	// as its own cwd, which is not writable; inherit that and a server that
 	// writes into "." dies as "exited (1)" with no log. Pin the check to HOME.
@@ -579,7 +579,7 @@ func startServer(ctx context.Context, s *Server, distro string) (tree *proc.Tree
 	if d := home(); d != "" {
 		cmd.Dir = d
 		// and PWD with it, as exec does itself only when Env is nil: a
-		// shell-script server that reads $PWD would otherwise see myna's
+		// shell-script server that reads $PWD would otherwise see owl's
 		// own folder while it runs in home (Windows doesn't use PWD)
 		if runtime.GOOS != "windows" && distro == "" {
 			cmd.Env = append(cmd.Env, "PWD="+d)
@@ -730,7 +730,7 @@ func exitHealth(err error, errs *tail) ServerHealth {
 
 // ---- a URL -------------------------------------------------------------------
 
-// remoteHeaders are the server's own headers, with myna's token when it
+// remoteHeaders are the server's own headers, with owl's token when it
 // is signed in to it: the agents reach it with that too.
 func remoteHeaders(ctx context.Context, s *Server) (http.Header, *ServerHealth) {
 	h := http.Header{}
@@ -784,7 +784,7 @@ func statusHealth(res *http.Response) ServerHealth {
 }
 
 // httpSession is a connection to a streamable HTTP server: its headers,
-// with myna's token when it is signed in to it, and the session the
+// with owl's token when it is signed in to it, and the session the
 // server gave. A check holds one for its few requests, the hub for as long
 // as the server is used (mcp_hub.go).
 type httpSession struct {
@@ -792,7 +792,7 @@ type httpSession struct {
 
 	mu  sync.Mutex
 	hdr http.Header
-	// tok is myna's own token, when it is signed in: one the server
+	// tok is owl's own token, when it is signed in: one the server
 	// refuses is renewed once and asked again with, as the gateway's
 	// relay does, and one refused just after it was renewed is a sign-in
 	// that has run out

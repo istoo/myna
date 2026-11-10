@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// The Gateway page's Connect speaks myna's own System One API too (ARNO on
+// The Gateway page's Connect speaks owl's own System One API too (ARNO on
 // Discord: gateway添加system one api 有想法吗): a System One tab whose
 // snippets POST …/v1/systemone with a decision model, picked from the
 // decision models alone; a click on one in the list switches to it, a click
@@ -61,7 +61,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
         const context = await browser.newContext({ viewport: { width: 900, height: 1000 }, reducedMotion: "reduce", colorScheme: theme });
         const page = await context.newPage();
-        await page.addInitScript(() => { try { localStorage.setItem("myna.gwConnectFolded", "0"); } catch {} }); // Connect opened, as a user who reads it
+        await page.addInitScript(() => { try { localStorage.setItem("owl.gwConnectFolded", "0"); } catch {} }); // Connect opened, as a user who reads it
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         const errors = [];
@@ -75,7 +75,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           await browser.close();
         });
 
-        await page.goto("http://myna.test/?view=gateway&lang=curl");
+        await page.goto("http://owl.test/?view=gateway&lang=curl");
         await page.locator("#gwModels .row.model").first().waitFor();
         assert(await page.getByText(w.five).first().isVisible(), "the head names the one address");
         const connect = page.locator("#connect");
@@ -96,7 +96,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.match(s, /curl http:\/\/127\.0\.0\.1:3999\/v1\/systemone/);
         assert.match(s, /"model": "cf\/@cf\/typesafe\/jev"/);
         assert.match(s, /"questions"/);
-        assert.match(s, /Authorization: Bearer myna/);
+        assert.match(s, /Authorization: Bearer owl/);
         await connect.locator(".segs").nth(1).locator(".opt", { hasText: "Python" }).click();
         assert.match(await snippet(), /requests\.post\("http:\/\/127\.0\.0\.1:3999\/v1\/systemone"/);
         await connect.locator(".segs").nth(1).locator(".opt", { hasText: "Node" }).click();

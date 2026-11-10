@@ -63,7 +63,7 @@ func SetEnvFile(path string, kvs ...KV) error {
 }
 
 // DelEnvFile removes keys from a dotenv file, and the file when they were
-// all it held (Gemini CLI's .env, made by myna for its key).
+// all it held (Gemini CLI's .env, made by owl for its key).
 func DelEnvFile(path string, keys ...string) error {
 	raw, err := Read(path)
 	if err != nil || len(raw) == 0 {
@@ -85,7 +85,7 @@ func DelEnvFile(path string, keys ...string) error {
 	if !changed {
 		return nil
 	}
-	// a note myna put above a key goes with it
+	// a note owl put above a key goes with it
 	out = markEnv(out, string(raw))
 	if strings.TrimSpace(strings.Join(withoutNotes(out), "")) == "" {
 		return Remove(path)

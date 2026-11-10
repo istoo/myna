@@ -1,6 +1,6 @@
 package cli
 
-// `myna provider pool`: a subscription's accounts as one pool, the
+// `owl provider pool`: a subscription's accounts as one pool, the
 // GUI's account list in one command (plugins#349) — which take part and in
 // what order, each one's cap, whether a request ends at the caps or goes
 // on to the fallbacks, and whether usage is read again near a cap.
@@ -11,11 +11,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/provider"
 )
 
-const poolUsage = "myna provider pool <id> [--accounts a,b,…] [--cap percent|off] [--stop on|off] [--careful on|off]"
+const poolUsage = "owl provider pool <id> [--accounts a,b,…] [--cap percent|off] [--stop on|off] [--careful on|off]"
 
 // poolCmd shows a subscription's pool, after setting what the flags say:
 // --accounts puts those accounts in use in that order, the rest out of
@@ -241,6 +241,6 @@ func printPool(p provider.Provider, ls []provider.Login) {
 	fmt.Println("stop at caps ·", stop)
 	fmt.Println("check usage near the cap ·", careful)
 	if uncapped > 0 {
-		fmt.Println(muted.Render(fmt.Sprintf("%d account(s) in use have no cap, so nothing holds them before the vendor does: myna provider pool %s --cap 90", uncapped, p.ID)))
+		fmt.Println(muted.Render(fmt.Sprintf("%d account(s) in use have no cap, so nothing holds them before the vendor does: owl provider pool %s --cap 90", uncapped, p.ID)))
 	}
 }

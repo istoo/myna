@@ -16,13 +16,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/filelock"
+	"github.com/istoo/owl/internal/filelock"
 )
 
 // savedTokenMu keeps two requests from refreshing one saved account at
 // once: the second would spend a refresh token the first just rotated. It
-// holds across mynas too (#1674): the gateway's refresh and one by a
-// myna run from a terminal would each spend the same refresh token.
+// holds across owls too (#1674): the gateway's refresh and one by a
+// owl run from a terminal would each spend the same refresh token.
 var savedTokenMu = filelock.Mutex{Path: func() string { return loginsPath() + ".renew.lock" }}
 
 // SetLoginOn puts a saved account in use beside the agent's own, or takes
@@ -248,14 +248,14 @@ func renewSaved(ctx context.Context, agent, user string, force bool, stale strin
 	if home := codexHeldIn(*l); home != "" {
 		// the same for an account Codex is signed in to in another of
 		// its folders (CODEX_HOME=~/.codex-work): Codex there refreshes
-		// it too, so myna renews it in that folder, never in a copy
+		// it too, so owl renews it in that folder, never in a copy
 		// whose refresh token would sign that Codex out
 		tok, accountID, err := codexTokenRenewing(ctx, home, stale)
 		if err != nil {
 			// said with no command to run (charliepu on Discord, Windows:
 			// "run CODEX_HOME=… codex login"): a refusal marks the account
 			// signed out on its row (codexSignInRead), whose Sign in again
-			// runs myna's own sign-in and writes it back to home (addLogin)
+			// runs owl's own sign-in and writes it back to home (addLogin)
 			err = fmt.Errorf("%s, signed in to Codex in %s: %w", user, home, err)
 			if errors.As(err, new(refreshRefused)) {
 				err = codexHeldRefusal{err}
@@ -328,7 +328,7 @@ func heldByCodex(l savedLogin) bool {
 
 // codexHeldRefusal is a refresh OpenAI refused for an account Codex is
 // signed in to in another of its folders (codexHeldIn). savedRefreshFailed
-// doesn't mark it, myna's copy not being the sign-in, so codexSignInRead
+// doesn't mark it, owl's copy not being the sign-in, so codexSignInRead
 // marks it signed out as it does Codex's own.
 type codexHeldRefusal struct{ error }
 
@@ -336,7 +336,7 @@ func (e codexHeldRefusal) Unwrap() error { return e.error }
 
 // savedRefreshFailed words a saved account's failed refresh. One the vendor
 // refused is marked lapsed on the account: that sign-in is gone and has to be
-// made again, in myna; the agent's own login command would sign the agent
+// made again, in owl; the agent's own login command would sign the agent
 // in, not this account. A refresh that never got an answer marks nothing.
 func savedRefreshFailed(agent, user string, err error) error {
 	var refused refreshRefused

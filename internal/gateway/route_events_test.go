@@ -11,12 +11,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
-// displayKey is a read-only gateway key, myna shared on the LAN, as a
+// displayKey is a read-only gateway key, owl shared on the LAN, as a
 // display on another machine is given (#3387).
 func displayKey(t *testing.T) (access.Key, string) {
 	t.Helper()
@@ -28,7 +28,7 @@ func displayKey(t *testing.T) (access.Key, string) {
 }
 
 // The feed is told as the usage log is: to this computer, and to another
-// machine with an enabled gateway key while myna is shared; a
+// machine with an enabled gateway key while owl is shared; a
 // read-only key reads it and nothing it may not; a key held to a budget,
 // models or accounts is told no one else's routing; and a page reaching
 // the gateway (Origin null, a *.localhost name, a rebound name, a
@@ -36,8 +36,8 @@ func displayKey(t *testing.T) (access.Key, string) {
 // every other route is.
 func TestRouteEventsTold(t *testing.T) {
 	fresh(t)
-	t.Setenv("MYNA_ADDR", "")
-	t.Setenv("MYNA_PUBLIC_URL", "")
+	t.Setenv("OWL_ADDR", "")
+	t.Setenv("OWL_PUBLIC_URL", "")
 	_, display := displayKey(t)
 	keys, secrets := newCaller(t, "Laptop", "Held")
 	full, held := secrets[0], secrets[1]
@@ -73,7 +73,7 @@ func TestRouteEventsTold(t *testing.T) {
 		{"this computer, read-only key", here, gw, display, routeEventsPath, 409},
 		{"another machine, no key", lan, "192.168.1.10:3425", "", routeSnapshotPath, 401},
 		{"another machine, no key, stream", lan, "192.168.1.10:3425", "", routeEventsPath, 401},
-		{"another machine, a wrong key", lan, "192.168.1.10:3425", "sk-myna-wrong", routeSnapshotPath, 401},
+		{"another machine, a wrong key", lan, "192.168.1.10:3425", "sk-owl-wrong", routeSnapshotPath, 401},
 		{"held key, LAN", lan, "192.168.1.10:3425", held, routeSnapshotPath, 403},
 		{"held key, LAN, stream", lan, "192.168.1.10:3425", held, routeEventsPath, 403},
 		{"held key, this computer", here, gw, held, routeSnapshotPath, 403},
@@ -106,7 +106,7 @@ func TestRouteEventsTold(t *testing.T) {
 	// the read-only key reaches nothing else it didn't before
 	for _, tc := range []struct{ method, path string }{
 		{"POST", "/v1/chat/completions"}, {"POST", "/v1/responses"}, {"POST", "/v1/messages"},
-		{"GET", "/v1/models"}, {"GET", "/v1/myna/trace"}, {"POST", "/mcp/myna/web-search"},
+		{"GET", "/v1/models"}, {"GET", "/v1/owl/trace"}, {"POST", "/mcp/owl/web-search"},
 	} {
 		if w := do(tc.method, tc.path, lan, "192.168.1.10:3425", display); w.Code != http.StatusForbidden || !strings.Contains(w.Body.String(), ReadOnlyCode) {
 			t.Errorf("read-only key: %s %s: %d %.200s", tc.method, tc.path, w.Code, w.Body)

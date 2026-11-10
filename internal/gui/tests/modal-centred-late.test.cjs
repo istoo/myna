@@ -31,7 +31,7 @@ function server(reply) {
     if (url.pathname === "/api/plugins/search") return json({ hits: [{ package: "opencode-copilot-auth", version: "0.0.9" }] });
     if (url.pathname === "/api/plugins/page") return json(await reply());
     if (url.pathname.startsWith("/api/")) return json({});
-    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "myna.test") return route.fulfill({ status: 404, body: "" });
+    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "owl.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -62,7 +62,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         let next = gate();
         await page.route("**/*", server(() => next));
 
-        await page.goto("http://myna.test/?view=plugins");
+        await page.goto("http://owl.test/?view=plugins");
         await page.locator("#view-plugins .pm-find input").fill("copilot");
         const card = page.locator('.pm-card[data-pkg="opencode-copilot-auth"]');
         // the search's hits and npm's facts draw the card again: pressed
@@ -106,7 +106,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         let release;
         const next = new Promise((r) => { release = r; });
         await page.route("**/*", server(() => next));
-        await page.goto("http://myna.test/?view=plugins");
+        await page.goto("http://owl.test/?view=plugins");
         await page.locator("#view-plugins .pm-find input").fill("copilot");
         const card = page.locator('.pm-card[data-pkg="opencode-copilot-auth"]');
         await card.locator(".pm-dl", { hasText: "48k/week" }).waitFor();

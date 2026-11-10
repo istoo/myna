@@ -1,9 +1,9 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // Another computer's quotas (莫 on Discord): a computer whose provider is
-// another's myna (remote-myna) shows that myna's cards, each named
+// another's owl (remote-owl) shows that owl's cards, each named
 // with the computer ("Codex · Office"), without the buttons that would act
 // on this computer's accounts. The remote's own card says why it has none
-// (nothing read there yet, or a myna too old to share) in the reader's
+// (nothing read there yet, or a owl too old to share) in the reader's
 // language, and its refresh asks for it by its id (?provider=office), the
 // remote's card by its own (?provider=office/codex). English, Chinese,
 // Japanese and German; no backend, the API is faked here.
@@ -23,17 +23,17 @@ function fixtures(now) {
       windows: [{ name: "5 hours", used: 50, resetsAt: iso(now + 2 * H) }], resets: { count: 1 } },
     { provider: "office/codex", name: "Codex · Office", icon: "openai", plan: "Pro", user: "a@x.com", from: "Office", kind: "subscription", readAt: iso(now - 40 * M),
       windows: [{ name: "5 hours", used: 30, resetsAt: iso(now + 2 * H) }] },
-    { provider: "home", name: "Home", icon: "myna", from: "Home", kind: "subscription", windows: [],
-      error: "nothing read on that myna yet; refresh to have it read" },
-    { provider: "attic", name: "Attic", icon: "myna", from: "Attic", kind: "subscription", windows: [],
-      error: "remote myna doesn't share its quotas; update myna on that computer" },
+    { provider: "home", name: "Home", icon: "owl", from: "Home", kind: "subscription", windows: [],
+      error: "nothing read on that owl yet; refresh to have it read" },
+    { provider: "attic", name: "Attic", icon: "owl", from: "Attic", kind: "subscription", windows: [],
+      error: "remote owl doesn't share its quotas; update owl on that computer" },
     // Fim980 on X: these said only "Allowance unavailable"
-    { provider: "kestrel", name: "Kestrel", icon: "myna", from: "Kestrel", kind: "subscription", windows: [],
-      error: "remote myna isn't shared; turn on Share on local network on that computer" },
-    { provider: "osprey", name: "Osprey", icon: "myna", from: "Osprey", kind: "subscription", windows: [],
-      error: "remote myna didn't take this key; use one of its enabled gateway keys" },
-    { provider: "heron", name: "Heron", icon: "myna", from: "Heron", kind: "subscription", windows: [],
-      error: "couldn't reach the remote myna Heron: dial tcp 10.0.0.9:3425: connect: connection refused" },
+    { provider: "kestrel", name: "Kestrel", icon: "owl", from: "Kestrel", kind: "subscription", windows: [],
+      error: "remote owl isn't shared; turn on Share on local network on that computer" },
+    { provider: "osprey", name: "Osprey", icon: "owl", from: "Osprey", kind: "subscription", windows: [],
+      error: "remote owl didn't take this key; use one of its enabled gateway keys" },
+    { provider: "heron", name: "Heron", icon: "owl", from: "Heron", kind: "subscription", windows: [],
+      error: "couldn't reach the remote owl Heron: dial tcp 10.0.0.9:3425: connect: connection refused" },
   ];
 }
 
@@ -69,10 +69,10 @@ function serve(lang, state) {
 }
 
 const words = {
-  en: { none: "Nothing read on that computer yet — refresh this card to have it read", old: "That computer's myna doesn't share its quotas yet — update myna there", shed: "That computer's myna isn't shared — turn on Settings → Network and sharing → Share on local network there", den: "That computer's myna didn't take this key — use one of its gateway keys in this provider", barn: "Couldn't reach that computer's myna — check that it is running and its address" },
-  zh: { none: "那台电脑还没有读过额度 — 刷新这张卡片让它读取", old: "那台电脑的 myna 还不能共享额度 — 请在那台电脑上更新 myna", shed: "那台电脑的 myna 没有共享 — 请在那台电脑上打开 设置 → 网络与共享 → 局域网共享", den: "那台电脑的 myna 不认这个密钥 — 请在这个服务商里填它的一个网关密钥", barn: "连不上那台电脑的 myna — 请确认它在运行、地址正确" },
-  ja: { none: "そのコンピューターではまだ読み取っていません — このカードを更新すると読み取ります", old: "そのコンピューターの myna はまだ利用枠を共有できません — そちらの myna を更新してください", shed: "そのコンピューターの myna は共有されていません — そちらで 設定 → ネットワークと共有 → ローカルネットワークで共有 をオンにしてください", den: "そのコンピューターの myna はこのキーを受け付けませんでした — このプロバイダーにそちらのゲートウェイキーを入れてください", barn: "そのコンピューターの myna に接続できません — 起動しているか、アドレスが正しいか確認してください" },
-  de: { none: "Auf diesem Computer wurde noch nichts gelesen — diese Karte aktualisieren, um es lesen zu lassen", old: "Das myna dieses Computers teilt seine Kontingente noch nicht — aktualisiere myna dort", shed: "Das myna dieses Computers ist nicht freigegeben — schalte dort Einstellungen → Netzwerk und Freigabe → Im lokalen Netzwerk freigeben ein", den: "Das myna dieses Computers hat diesen Schlüssel nicht angenommen — trage bei diesem Anbieter einen seiner Zugangsschlüssel ein", barn: "Das myna dieses Computers ist nicht erreichbar — prüfe, ob es läuft und die Adresse stimmt" },
+  en: { none: "Nothing read on that computer yet — refresh this card to have it read", old: "That computer's owl doesn't share its quotas yet — update owl there", shed: "That computer's owl isn't shared — turn on Settings → Network and sharing → Share on local network there", den: "That computer's owl didn't take this key — use one of its gateway keys in this provider", barn: "Couldn't reach that computer's owl — check that it is running and its address" },
+  zh: { none: "那台电脑还没有读过额度 — 刷新这张卡片让它读取", old: "那台电脑的 owl 还不能共享额度 — 请在那台电脑上更新 owl", shed: "那台电脑的 owl 没有共享 — 请在那台电脑上打开 设置 → 网络与共享 → 局域网共享", den: "那台电脑的 owl 不认这个密钥 — 请在这个服务商里填它的一个网关密钥", barn: "连不上那台电脑的 owl — 请确认它在运行、地址正确" },
+  ja: { none: "そのコンピューターではまだ読み取っていません — このカードを更新すると読み取ります", old: "そのコンピューターの owl はまだ利用枠を共有できません — そちらの owl を更新してください", shed: "そのコンピューターの owl は共有されていません — そちらで 設定 → ネットワークと共有 → ローカルネットワークで共有 をオンにしてください", den: "そのコンピューターの owl はこのキーを受け付けませんでした — このプロバイダーにそちらのゲートウェイキーを入れてください", barn: "そのコンピューターの owl に接続できません — 起動しているか、アドレスが正しいか確認してください" },
+  de: { none: "Auf diesem Computer wurde noch nichts gelesen — diese Karte aktualisieren, um es lesen zu lassen", old: "Das owl dieses Computers teilt seine Kontingente noch nicht — aktualisiere owl dort", shed: "Das owl dieses Computers ist nicht freigegeben — schalte dort Einstellungen → Netzwerk und Freigabe → Im lokalen Netzwerk freigeben ein", den: "Das owl dieses Computers hat diesen Schlüssel nicht angenommen — trage bei diesem Anbieter einen seiner Zugangsschlüssel ein", barn: "Das owl dieses Computers ist nicht erreichbar — prüfe, ob es läuft und die Adresse stimmt" },
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -88,7 +88,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       const state = { quotas: fixtures(Date.now()), gets: 0, refreshes: [], gate: Promise.resolve() };
       await page.route("**/*", serve(lang, state));
-      await page.goto("http://myna.test/?view=usage");
+      await page.goto("http://owl.test/?view=usage");
 
       const office = page.locator(".subscription-card", { hasText: "Codex · Office" });
       await office.waitFor();

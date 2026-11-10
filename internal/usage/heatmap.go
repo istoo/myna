@@ -14,7 +14,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/owl/internal/sessions"
 )
 
 // HeatmapWeeks is how many weeks the heatmap shows, this one the last.
@@ -317,7 +317,7 @@ var heatBefores struct {
 var heatBeforeOpening func(*rowChunk)
 
 // heatSplit is heatDaysOf of the rows of every chunk, paired. A call through
-// myna changes the gateway's newest block and a session file, and the
+// owl changes the gateway's newest block and a session file, and the
 // heatmap paired a year of calls again for it: ~1.8 s and most of the
 // GC of each refresh of the Usage page while an agent worked (#2278). The
 // days before the last heatRecent are taken from the last pairing of

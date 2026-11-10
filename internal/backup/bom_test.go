@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/owl/internal/edit"
 )
 
 // A backup file an editor saved over with a byte order mark (a Windows
@@ -42,8 +42,8 @@ func TestOpenReadsThroughABOM(t *testing.T) {
 	}
 }
 
-// myna's own round trip: `myna backup f` writes through edit.WriteAtomic,
-// which keeps the mark of a file already at f, and `myna restore f` reads
+// owl's own round trip: `owl backup f` writes through edit.WriteAtomic,
+// which keeps the mark of a file already at f, and `owl restore f` reads
 // the file as it is on disk.
 func TestBackupSavedOverAMarkedFileRestores(t *testing.T) {
 	home(t)

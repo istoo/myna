@@ -4,8 +4,8 @@ import (
 	"maps"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // A provider's editor sets where Codex and Claude Code compact on its
@@ -43,7 +43,7 @@ func TestModelCompactsSetFromTheEditor(t *testing.T) {
 	}
 	for id, n := range map[string]int{
 		"deepseek/deepseek-v4-flash":    272000,
-		"myna/deepseek/deepseek-v4-pro": 500000,
+		"owl/deepseek/deepseek-v4-pro": 500000,
 		"deepseek/deepseek-v4-pro[1m]":  500000,
 		"other/deepseek-v4-flash":       0,
 		"other/deepseek-v4-pro":         300000,

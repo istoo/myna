@@ -13,14 +13,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/agent"
+	"github.com/istoo/owl/internal/agent"
 )
 
-// The fake server myna runs for Codex: this test binary again, with
-// MYNA_FAKE_RUN naming a log it writes a line to for each start (its
+// The fake server owl runs for Codex: this test binary again, with
+// OWL_FAKE_RUN naming a log it writes a line to for each start (its
 // pid and the client named in the initialize it was given).
 func TestFakeRunServer(t *testing.T) {
-	logf := os.Getenv("MYNA_FAKE_RUN")
+	logf := os.Getenv("OWL_FAKE_RUN")
 	if logf == "" {
 		t.Skip("run by the run tests")
 	}
@@ -77,7 +77,7 @@ func runFixture(t *testing.T) (*httptest.Server, string, runSpec) {
 		t.Fatal(err)
 	}
 	logf := filepath.Join(t.TempDir(), "starts")
-	spec := runSpec{Command: self, Args: []string{"-test.run=^TestFakeRunServer$"}, Env: map[string]string{"MYNA_FAKE_RUN": logf}}
+	spec := runSpec{Command: self, Args: []string{"-test.run=^TestFakeRunServer$"}, Env: map[string]string{"OWL_FAKE_RUN": logf}}
 	resetRuns(t)
 	runGiven(map[string]runSpec{"fake": spec})
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -344,8 +344,8 @@ func TestRunGivenChanged(t *testing.T) {
 	}
 }
 
-// A session myna didn't see start (Codex kept it over a restart of
-// myna's) is taken up as it is.
+// A session owl didn't see start (Codex kept it over a restart of
+// owl's) is taken up as it is.
 func TestRunUnknownSession(t *testing.T) {
 	srv, logf, _ := runFixture(t)
 	got, sid := call(t, srv, "old-session", `{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"echo"}}`)
@@ -357,8 +357,8 @@ func TestRunUnknownSession(t *testing.T) {
 	}
 }
 
-// Codex on myna is given a command's server as the gateway's, and a
-// sync after reads it back as myna's own; off myna it gets the
+// Codex on owl is given a command's server as the gateway's, and a
+// sync after reads it back as owl's own; off owl it gets the
 // command again.
 func TestRunCodexEntry(t *testing.T) {
 	h := sandbox(t)
@@ -371,15 +371,15 @@ func TestRunCodexEntry(t *testing.T) {
 	if _, err := SaveServer("", Server{Name: "mem", Transport: "stdio", Command: "node", Args: []string{"server.js"}, Agents: []string{"codex", "claude"}}); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := SaveServer("", Server{Name: "keyed", Transport: "stdio", Command: "node", Env: map[string]string{"MYNA_TEST_UNSET_VAR": "${MYNA_TEST_UNSET_VAR}"}, Agents: []string{"codex"}}); err != nil {
+	if _, err := SaveServer("", Server{Name: "keyed", Transport: "stdio", Command: "node", Env: map[string]string{"OWL_TEST_UNSET_VAR": "${OWL_TEST_UNSET_VAR}"}, Agents: []string{"codex"}}); err != nil {
 		t.Fatal(err)
 	}
 	codex := read(t, filepath.Join(h, ".codex/config.toml"))
 	if !strings.Contains(codex, RunPath+"mem") || strings.Contains(codex, `"server.js"`) {
-		t.Fatalf("codex on myna:\n%s", codex)
+		t.Fatalf("codex on owl:\n%s", codex)
 	}
-	if !strings.Contains(codex, `MYNA_TEST_UNSET_VAR`) || strings.Contains(codex, RunPath+"keyed") {
-		t.Fatalf("a server with a variable myna hasn't:\n%s", codex)
+	if !strings.Contains(codex, `OWL_TEST_UNSET_VAR`) || strings.Contains(codex, RunPath+"keyed") {
+		t.Fatalf("a server with a variable owl hasn't:\n%s", codex)
 	}
 	if claude := read(t, filepath.Join(h, ".claude.json")); !strings.Contains(claude, `"server.js"`) || strings.Contains(claude, RunPath) {
 		t.Fatalf("claude:\n%s", claude)
@@ -406,7 +406,7 @@ func TestRunCodexEntry(t *testing.T) {
 	}
 	codex = read(t, filepath.Join(h, ".codex/config.toml"))
 	if strings.Contains(codex, RunPath) || !strings.Contains(codex, `"server.js"`) {
-		t.Fatalf("codex off myna:\n%s", codex)
+		t.Fatalf("codex off owl:\n%s", codex)
 	}
 	runs.Lock()
 	_, given = runs.given["mem"]
@@ -417,9 +417,9 @@ func TestRunCodexEntry(t *testing.T) {
 }
 
 // A server the user keeps direct (#4382, cuipengcx90: cocoindex reads its
-// project from the folder it starts in) is given to Codex on myna as its
+// project from the folder it starts in) is given to Codex on owl as its
 // command, as to every other agent, with the hub on or off: Codex starts it
-// in the thread's folder, where myna's /mcp/run would start it from home.
+// in the thread's folder, where owl's /mcp/run would start it from home.
 // No cwd is written, which is what makes Codex use the thread's.
 func TestRunDirectServerIsCodexsCommand(t *testing.T) {
 	h := sandbox(t)
@@ -468,13 +468,13 @@ func TestRunDirectServerIsCodexsCommand(t *testing.T) {
 	}
 	check("hub off")
 	if codex := read(t, filepath.Join(h, ".codex/config.toml")); !strings.Contains(codex, RunPath+"mem") {
-		t.Fatalf("a shared server isn't run by myna any more:\n%s", codex)
+		t.Fatalf("a shared server isn't run by owl any more:\n%s", codex)
 	}
 	if _, err := SetMCPHub(true); err != nil {
 		t.Fatal(err)
 	}
 	check("hub on")
-	// shared again: myna runs it for Codex, as before
+	// shared again: owl runs it for Codex, as before
 	if _, err := ServerHub("cocoindex", false); err != nil {
 		t.Fatal(err)
 	}

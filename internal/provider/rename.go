@@ -13,12 +13,12 @@ import (
 
 	"golang.org/x/net/publicsuffix"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // Rename gives a provider another id, the one its models are picked by
-// (<id>/<model>). What myna keeps that names it by id follows: the
+// (<id>/<model>). What owl keeps that names it by id follows: the
 // routing groups it is in and their rules and classifiers, the other
 // providers' fallbacks, which agents are shown it, and its StepFun sign-in. The old id stays
 // with it (Was), so an agent still running on a config that names it the
@@ -49,8 +49,8 @@ func Rename(from, to string) error {
 		return fmt.Errorf("%s is a subscription: its id is its agent's", from)
 	}
 	switch {
-	case to == "myna" || to == "magpie":
-		return errors.New(`"myna" is what agents call the gateway itself; pick another id`)
+	case to == "owl" || to == "magpie":
+		return errors.New(`"owl" is what agents call the gateway itself; pick another id`)
 	case to == strings.TrimSuffix(GroupPrefix, "/"):
 		return errors.New(`"group" starts the ids of routing groups; pick another id`)
 	case to == autoID:
@@ -152,12 +152,12 @@ func mapModelRefs(f *file, to func(string) string) {
 	}
 }
 
-// renamedRef is a model id ("provider/model", "myna/provider/model")
+// renamedRef is a model id ("provider/model", "owl/provider/model")
 // with the provider from named to instead.
 func renamedRef(ref, from, to string) string {
 	pre, rest := "", ref
-	if r, ok := strings.CutPrefix(ref, "myna/"); ok {
-		pre, rest = "myna/", r
+	if r, ok := strings.CutPrefix(ref, "owl/"); ok {
+		pre, rest = "owl/", r
 	}
 	if m, ok := strings.CutPrefix(rest, from+"/"); ok {
 		return pre + to + "/" + m
@@ -245,7 +245,7 @@ func (d Deleted) UsageID() string { return d.ID + "~" + d.At.UTC().Format("20060
 type Renames struct {
 	now  map[string]string
 	gave map[string][]gaveTo
-	// hosts are the providers by the host each is on, for myna's own
+	// hosts are the providers by the host each is on, for owl's own
 	// requests to a provider being added, which has no id yet (ProbeOf)
 	hosts map[string]string
 	// sites are the providers by the site (SiteOf) of each host they are
@@ -303,7 +303,7 @@ func (r Renames) Own(id string, at time.Time) string {
 	return id
 }
 
-// ProbeOf is Of for one of myna's own requests (probelog): one sent
+// ProbeOf is Of for one of owl's own requests (probelog): one sent
 // while a provider was being added, its Detect or Test before it had an
 // id, is recorded under its host, and is the provider's on that host now.
 // yyddbds on Discord: 大灰狼, on dahuilang.best, was listed twice in the

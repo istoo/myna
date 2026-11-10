@@ -13,8 +13,8 @@ import (
 	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/wailsapp/wails/v3/pkg/events"
 
-	"github.com/istoo/myna/internal/omarchy"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/omarchy"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // The windows, h.main and h.panel, are nil while lightweight mode has let
@@ -40,10 +40,10 @@ func (h *host) makeMain(url string) *application.WebviewWindow {
 	}
 	// Windows' title bar in the page's colour from the first frame; the
 	// page keeps it so as its theme changes (TintTitleBar)
-	winOpts, winBg := windowChrome(cmp.Or(os.Getenv("MYNA_THEME"), settings.Load().Theme))
+	winOpts, winBg := windowChrome(cmp.Or(os.Getenv("OWL_THEME"), settings.Load().Theme))
 	w := h.app.Window.NewWithOptions(application.WebviewWindowOptions{
 		Name:             "main",
-		Title:            "myna",
+		Title:            "owl",
 		URL:              url,
 		Width:            width,
 		Height:           height,
@@ -109,7 +109,7 @@ func (h *host) makeMain(url string) *application.WebviewWindow {
 		}
 		h.hideMain()
 	})
-	// Out of full screen, myna leaves the Dock again if it was there only
+	// Out of full screen, owl leaves the Dock again if it was there only
 	// for that (dockOnFullscreen).
 	w.OnWindowEvent(events.Mac.WindowDidExitFullScreen, func(*application.WindowEvent) {
 		if h.closing.Swap(false) {
@@ -140,7 +140,7 @@ func (h *host) makePanel() *application.WebviewWindow {
 	// The system's close hides the panel, as Escape does: a title bar's X
 	// (KWin's, #1283), Alt+F4 or the window manager's close key. Closed, it
 	// was gone while the tray still opened it, and the icon did nothing
-	// until myna restarted. One lightweight mode let go (no longer
+	// until owl restarted. One lightweight mode let go (no longer
 	// h.panel by then) is closed.
 	w.RegisterHook(events.Common.WindowClosing, func(e *application.WindowEvent) {
 		if !application.InvokeSyncWithResult(func() bool { return h.panel == w }) {
@@ -215,7 +215,7 @@ func (h *host) lighten() {
 	<-h.ready
 	var ticks [2]int // the main window's, the panel's
 	for range time.Tick(lightEvery) {
-		// a myna that handed the gateway to the new version lets its
+		// a owl that handed the gateway to the new version lets its
 		// hidden pages go as lightweight mode does: their polls kept it
 		// asking for usage beside the new one while it drained (#4938)
 		on := settings.Load().LightweightOn() || handedOver.Load()
@@ -265,7 +265,7 @@ func (h *host) panelWin() (w *application.WebviewWindow, again bool) {
 // lightShown says whether lightweight mode keeps w: it is up (windowUp),
 // or it is the main window leaving full screen to be closed; on the main
 // thread. A window open under another app's was let go as closed, and
-// Command-Tab back to myna found it blank or gone (#1381).
+// Command-Tab back to owl found it blank or gone (#1381).
 func (h *host) lightShown(w *application.WebviewWindow) bool {
 	return windowUp(w) || w == h.main && h.closing.Load()
 }
@@ -304,8 +304,8 @@ func (h *host) openMain(url string) {
 	showHere(h.main, !quiet)
 }
 
-// reopenMain answers a click on myna's Dock icon (#1252). A window that is
-// open, on whichever Space, is left there, and myna is activated as any
+// reopenMain answers a click on owl's Dock icon (#1252). A window that is
+// open, on whichever Space, is left there, and owl is activated as any
 // app is: the Mac takes the user to the window's Space. One closed or
 // minimised is shown as openMain shows it, on the Space the user is on.
 func (h *host) reopenMain() {
@@ -325,7 +325,7 @@ const spaceSettle = 500 * time.Millisecond
 
 // showHere shows w and makes it key on the Space the user is on, wherever it
 // was last; on the main thread. It moves only while being shown: left on,
-// activating myna in any way (the Dock, Command-Tab) would pull the open
+// activating owl in any way (the Dock, Command-Tab) would pull the open
 // window off its own Space onto the user's (#1252). Without focus, it is
 // shown and left behind the app the user is in (a restart by itself).
 func showHere(w *application.WebviewWindow, focus bool) {

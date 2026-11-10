@@ -12,8 +12,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/ghtoken"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/ghtoken"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // bingqilinweimaotai (#1942): a GitHub token saved in Settings did nothing

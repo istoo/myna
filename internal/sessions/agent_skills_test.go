@@ -9,7 +9,7 @@ import (
 )
 
 // The sessions under testdata/opencode-skills, cline-skills and dsh-skills
-// are real ones, run in a sandbox home through myna's gateway, each
+// are real ones, run in a sandbox home through owl's gateway, each
 // with a skill greet-user: one where the model runs a command and then
 // calls the skill tool, one where the user picks or types the skill, and
 // one with /nonexistentzz, which no skill has. They are byte for byte as

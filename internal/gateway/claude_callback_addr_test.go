@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // ownIPv4 is an IPv4 address of one of this computer's interfaces that
@@ -33,7 +33,7 @@ func ownIPv4() string {
 	return ""
 }
 
-// #1546 (jiayeZhu): with MYNA_ADDR on one of this computer's addresses
+// #1546 (jiayeZhu): with OWL_ADDR on one of this computer's addresses
 // that isn't loopback (a LAN, Tailscale or loopback-alias IP) and gateway
 // keys on, the MCP helper of a Claude Code the subscription bridge runs
 // called back to that address without a key, lanGuard answered 401, its
@@ -63,11 +63,11 @@ func TestClaudeToolCallbackOnANonLoopbackAddress(t *testing.T) {
 	srv.Start()
 	t.Cleanup(srv.Close)
 	t.Cleanup(s.subscription.abortAll) // before srv.Close: a run's MCP call holds a request open
-	t.Setenv("MYNA_ADDR", ln.Addr().String())
-	t.Setenv("MYNA_TRUST_PROXY", "")
+	t.Setenv("OWL_ADDR", ln.Addr().String())
+	t.Setenv("OWL_TRUST_PROXY", "")
 	newCaller(t, "Host") // gateway keys on, and shared
 	if !OnNetwork() {
-		t.Fatal("MYNA_ADDR", ln.Addr(), "isn't on the network")
+		t.Fatal("OWL_ADDR", ln.Addr(), "isn't on the network")
 	}
 	h := &rewindHarness{t: t, s: s, log: log,
 		p: provider.Provider{ID: "claude", Account: &provider.Account{Agent: "claude", User: "u"}}}
@@ -123,8 +123,8 @@ func TestClaudeToolCallbackOnANonLoopbackAddress(t *testing.T) {
 // live.
 func TestOnlyALiveRunsCallbackSkipsTheKey(t *testing.T) {
 	fresh(t)
-	t.Setenv("MYNA_ADDR", "0.0.0.0:3425")
-	t.Setenv("MYNA_TRUST_PROXY", "")
+	t.Setenv("OWL_ADDR", "0.0.0.0:3425")
+	t.Setenv("OWL_TRUST_PROXY", "")
 	if err := settings.Save(settings.Settings{LAN: false}); err != nil {
 		t.Fatal(err)
 	}
@@ -157,7 +157,7 @@ func TestOnlyALiveRunsCallbackSkipsTheKey(t *testing.T) {
 		{"POST", "/x" + claudeMCPPath + token},
 		{"GET", claudeMCPPath + token},
 		{"POST", "/v1/messages"}, {"POST", "/v1/chat/completions"}, {"GET", "/v1/models"},
-		{"GET", "/v1/myna/quotas"}, {"POST", "/mcp/neon"},
+		{"GET", "/v1/owl/quotas"}, {"POST", "/mcp/neon"},
 	} {
 		if c, b := call(p[0], p[1]); c != http.StatusUnauthorized {
 			t.Errorf("%s %s: %d %.120s", p[0], p[1], c, b)

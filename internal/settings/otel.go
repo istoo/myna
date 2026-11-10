@@ -54,14 +54,14 @@ func (o OTel) Check() error {
 	return nil
 }
 
-// OTelExport applies explicit MYNA_OTEL_* overrides without changing the
+// OTelExport applies explicit OWL_OTEL_* overrides without changing the
 // saved preferences. Merely setting an endpoint never enables export.
 func OTelExport() (OTel, error) {
 	o := Load().OTel
 	for _, x := range []struct {
 		name string
 		dst  *bool
-	}{{"MYNA_OTEL_ENABLED", &o.Enabled}, {"MYNA_OTEL_METRICS", &o.Metrics}, {"MYNA_OTEL_BODIES", &o.Bodies}, {"MYNA_OTEL_BODIES_WHOLE", &o.BodiesWhole}, {"MYNA_OTEL_SESSIONS", &o.Sessions}} {
+	}{{"OWL_OTEL_ENABLED", &o.Enabled}, {"OWL_OTEL_METRICS", &o.Metrics}, {"OWL_OTEL_BODIES", &o.Bodies}, {"OWL_OTEL_BODIES_WHOLE", &o.BodiesWhole}, {"OWL_OTEL_SESSIONS", &o.Sessions}} {
 		if v, ok := os.LookupEnv(x.name); ok {
 			b, err := strconv.ParseBool(v)
 			if err != nil {
@@ -70,17 +70,17 @@ func OTelExport() (OTel, error) {
 			*x.dst = b
 		}
 	}
-	if v, ok := os.LookupEnv("MYNA_OTEL_ENDPOINT"); ok {
+	if v, ok := os.LookupEnv("OWL_OTEL_ENDPOINT"); ok {
 		o.Endpoint = strings.TrimRight(strings.TrimSpace(v), "/")
 	}
-	if v, ok := os.LookupEnv("MYNA_OTEL_HEADERS"); ok {
+	if v, ok := os.LookupEnv("OWL_OTEL_HEADERS"); ok {
 		o.Headers = map[string]string{}
 		if v != "" {
 			for _, h := range strings.Split(v, ",") {
 				k, value, ok := strings.Cut(h, "=")
 				value, err := url.PathUnescape(strings.TrimSpace(value))
 				if !ok || err != nil {
-					return OTel{}, fmt.Errorf("MYNA_OTEL_HEADERS must be comma-separated name=value pairs")
+					return OTel{}, fmt.Errorf("OWL_OTEL_HEADERS must be comma-separated name=value pairs")
 				}
 				o.Headers[strings.TrimSpace(k)] = value
 			}

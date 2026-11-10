@@ -5,7 +5,7 @@ package agent
 import (
 	"strings"
 
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/proc"
 )
 
 // listRunningNow lists the processes a pgrep -f pattern matches, with how

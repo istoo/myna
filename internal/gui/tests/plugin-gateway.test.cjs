@@ -5,7 +5,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = process.env.MYNA_GATEWAY_ASSETS || path.resolve(__dirname, "../assets");
+const assets = process.env.OWL_GATEWAY_ASSETS || path.resolve(__dirname, "../assets");
 
 function server(lang, pluginState) {
   return async (route) => {
@@ -48,7 +48,7 @@ for (const engine of ["chromium", "webkit"]) {
           state.plugins[0].options=data.options;
           return r.fulfill({json:state});
         });
-        await page.goto("http://myna.test/?view=plugins");
+        await page.goto("http://owl.test/?view=plugins");
         const installed = {en:"Installed",zh:"已安装","zh-TW":"已安裝",ja:"インストール済み",de:"Installiert"}[lang];
         await page.locator(":is(.lib-tabs .opt, .nav-s):visible",{hasText:installed}).click();
         const row=page.locator("#view-plugins .pm-row");

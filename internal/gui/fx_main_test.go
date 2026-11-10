@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/istoo/myna/internal/fx"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/fx"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // TestMain keeps the rate off the network: a state read with no rate cached
@@ -14,8 +14,8 @@ import (
 // endpoint and land in whatever test runs next. And the tests run in a
 // home of their own, never the user's real files.
 func TestMain(m *testing.M) {
-	// started by TestGatewayFixQuitsOnlyAMyna as an older myna
-	if addr := os.Getenv("MYNA_TEST_FAKE_GATEWAY"); addr != "" {
+	// started by TestGatewayFixQuitsOnlyAOwl as an older owl
+	if addr := os.Getenv("OWL_TEST_FAKE_GATEWAY"); addr != "" {
 		fakeOlderGateway(addr)
 		return
 	}

@@ -8,32 +8,32 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // modelsHome is the sandbox with a provider of three models and Codex set up
-// with myna as its provider, whose model list myna writes into
-// myna-models.json, and the agents' files following a change of the
-// catalog as they do in myna (main sets catalog.Changed).
+// with owl as its provider, whose model list owl writes into
+// owl-models.json, and the agents' files following a change of the
+// catalog as they do in owl (main sets catalog.Changed).
 func modelsHome(t *testing.T) (catalogFile string) {
 	t.Helper()
 	h := sandbox(t)
 	if err := provider.Save(provider.Provider{ID: "relay", Name: "Relay", Key: "k", Chat: "http://127.0.0.1:1/v1", Models: []string{"m1", "m2", "m3"}}); err != nil {
 		t.Fatal(err)
 	}
-	catalogFile = filepath.Join(h, ".codex", "myna-models.json")
-	// the catalog named as myna names it: by its full path, and on
+	catalogFile = filepath.Join(h, ".codex", "owl-models.json")
+	// the catalog named as owl names it: by its full path, and on
 	// Windows relative to config.toml (#816). A C:/ spelling isn't one
-	// myna writes or takes for its own list, so on Windows Codex's list
+	// owl writes or takes for its own list, so on Windows Codex's list
 	// was never written and these tests failed there (#1517).
 	ref := "'" + catalogFile + "'"
 	if runtime.GOOS == "windows" {
-		ref = `"myna-models.json"`
+		ref = `"owl-models.json"`
 	}
-	write(t, filepath.Join(h, ".codex", "config.toml"), "model = \"relay/m1\"\nmodel_provider = \"myna\"\nmodel_catalog_json = "+ref+"\n\n[model_providers.myna]\nname = \"myna\"\nbase_url = \"http://127.0.0.1:1/v1\"\nwire_api = \"responses\"\n")
+	write(t, filepath.Join(h, ".codex", "config.toml"), "model = \"relay/m1\"\nmodel_provider = \"owl\"\nmodel_catalog_json = "+ref+"\n\n[model_providers.owl]\nname = \"owl\"\nbase_url = \"http://127.0.0.1:1/v1\"\nwire_api = \"responses\"\n")
 	was := catalog.Changed
 	catalog.Changed = agent.SyncCatalog
 	t.Cleanup(func() { catalog.Changed = was })
@@ -41,7 +41,7 @@ func modelsHome(t *testing.T) (catalogFile string) {
 	return catalogFile
 }
 
-// lists is which of the relay's models myna-models.json gives Codex.
+// lists is which of the relay's models owl-models.json gives Codex.
 func lists(t *testing.T, file string) []string {
 	t.Helper()
 	var out []string

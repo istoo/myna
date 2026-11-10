@@ -7,27 +7,27 @@ import (
 	"net/http"
 	"sync/atomic"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// RestartPath is where `myna update`, once it has put a new version in,
-// asks the myna serving the gateway to restart into it
-// (gaubeebangeel on X: an agent served by myna runs the update at 4am,
+// RestartPath is where `owl update`, once it has put a new version in,
+// asks the owl serving the gateway to restart into it
+// (gaubeebangeel on X: an agent served by owl runs the update at 4am,
 // and the app stayed on the old version until someone quit and reopened
 // it, which cut whatever the agents had in flight). The app restarts the
 // way its own update does: on a Mac or Linux it hands the gateway to the
 // new version, so the request that ran the update, and every other,
 // goes on. Loopback only, from a program, never a page.
-const RestartPath = "/v1/myna/restart"
+const RestartPath = "/v1/owl/restart"
 
 // RestartReply is what RestartPath answers.
 type RestartReply struct {
 	// restarting: at once; waiting: once what a restart would cut short
-	// (Busy) is done; current: this myna wasn't the one updated (another
-	// copy, or nothing put in); unsupported: this myna (myna serve)
+	// (Busy) is done; current: this owl wasn't the one updated (another
+	// copy, or nothing put in); unsupported: this owl (owl serve)
 	// doesn't restart itself, and is restarted the way it was started
 	State string `json:"state"`
-	// Version is this myna's, the one restarting
+	// Version is this owl's, the one restarting
 	Version string `json:"version"`
 	// Handover: the new version takes the gateway over while this one
 	// finishes its requests (Busy is then the Claude subscription's turns)
@@ -37,7 +37,7 @@ type RestartReply struct {
 
 var restarter atomic.Pointer[func(version string) RestartReply]
 
-// SetRestarter has RestartPath call f with the version `myna update`
+// SetRestarter has RestartPath call f with the version `owl update`
 // put in; the gui's updater sets it. Without one the answer is
 // "unsupported".
 func SetRestarter(f func(version string) RestartReply) {
@@ -48,17 +48,17 @@ func SetRestarter(f func(version string) RestartReply) {
 	restarter.Store(&f)
 }
 
-// restartRefused says why r may not restart this myna, "" when it may:
+// restartRefused says why r may not restart this owl, "" when it may:
 // as heapRefused, only a program on this computer calling localhost or a
 // loopback address, never another machine, a page, or another Host.
 func restartRefused(r *http.Request) string {
 	switch {
 	case !local(r):
-		return "myna restarts to update only when a program on this computer asks, over loopback: run myna update there"
+		return "owl restarts to update only when a program on this computer asks, over loopback: run owl update there"
 	case fromBrowser(r):
-		return "myna doesn't restart when a web page asks: run myna update in a terminal"
+		return "owl doesn't restart when a web page asks: run owl update in a terminal"
 	case !loopbackHost(r.Host):
-		return "myna restarts to update only on a call to localhost or a loopback address, not " + r.Host + ": run myna update"
+		return "owl restarts to update only on a call to localhost or a loopback address, not " + r.Host + ": run owl update"
 	}
 	return ""
 }

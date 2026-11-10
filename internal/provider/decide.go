@@ -24,9 +24,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/probelog"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/probelog"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // JevLatest is the Jev a decision provider is asked with when the user
@@ -144,7 +144,7 @@ func (p Provider) DecidesModel(model string) bool {
 	// decideListed's answer, without its list copied for each model
 	// asked about: a provider's every model was asked, a copy of the whole
 	// list each time (0.4 GB of a real config's 4 GB over 20 polls)
-	if p.IsRemoteMyna() {
+	if p.IsRemoteOwl() {
 		return slices.ContainsFunc(catalog.LiveByID(p.ID, model), func(m catalog.Model) bool { return m.Decides })
 	}
 	if p.listsDecisions() {
@@ -160,7 +160,7 @@ func (p Provider) DecidesModel(model string) bool {
 // isDecision uses a listed remote model's marker without reading its whole
 // list again. Other providers keep their endpoint and name-based rules.
 func (p Provider) isDecision(m catalog.Model) bool {
-	if p.IsRemoteMyna() {
+	if p.IsRemoteOwl() {
 		return m.Decides
 	}
 	if p.IsPlugin() && p.Decides() && m.Decides {
@@ -244,7 +244,7 @@ func decisionsID(id string) string { return id + ".decisions" }
 
 // DecisionModels are the decision models listed separately from a provider's
 // conversations: OpenRouter's own list, a Bailian Token Plan's decision
-// model, or a remote myna's or a plugin's marked models.
+// model, or a remote owl's or a plugin's marked models.
 func (p Provider) DecisionModels() []catalog.Model {
 	if p.IsPlugin() {
 		if !p.Decides() {
@@ -252,14 +252,14 @@ func (p Provider) DecisionModels() []catalog.Model {
 		}
 		return p.decideModels()
 	}
-	if !p.IsRemoteMyna() && (p.DecideOnly() || !p.listsDecisions() && !p.bailianApart()) {
+	if !p.IsRemoteOwl() && (p.DecideOnly() || !p.listsDecisions() && !p.bailianApart()) {
 		return nil
 	}
 	return p.decideModels()
 }
 
 // decideListDue reports whether p's list of decision models at OpenRouter
-// is still to be fetched, or was fetched before myna kept each model's
+// is still to be fetched, or was fetched before owl kept each model's
 // window and input (they show on the Providers page and the Gateway list
 // only once it is fetched again).
 func (p Provider) decideListDue() bool {
@@ -328,7 +328,7 @@ const (
 // the gateway's own path (Vercel's /typesafe or /v4/ai, Cloudflare's
 // /client/v4).
 func (p Provider) DecideVia() string {
-	if p.IsRemoteMyna() {
+	if p.IsRemoteOwl() {
 		return ViaSystemOne
 	}
 	base := strings.TrimRight(p.Decide, "/")
@@ -346,7 +346,7 @@ func (p Provider) DecideVia() string {
 // Jev is the model a decision provider is asked with when the user picked
 // none: TypeSafe's latest stable one, or the one Jev a gateway serves.
 func (p Provider) Jev() string {
-	if p.IsRemoteMyna() || p.IsPlugin() {
+	if p.IsRemoteOwl() || p.IsPlugin() {
 		if models := p.decideListed(); len(models) > 0 {
 			return models[0].ID
 		}
@@ -460,7 +460,7 @@ func withDecideFacts(ms []catalog.Model) []catalog.Model {
 }
 
 func (p Provider) decideListed() []catalog.Model {
-	if p.IsRemoteMyna() {
+	if p.IsRemoteOwl() {
 		live, _, _ := catalog.Live(p.ID)
 		// Live returns a filtered copy, so it can be compacted in place.
 		return slices.DeleteFunc(live, func(m catalog.Model) bool { return !m.Decides })
@@ -637,7 +637,7 @@ func Deciders() []Entry {
 
 // OfferedDeciders are the Deciders a routing group's pickers and templates
 // offer: of a provider whose decision models are listed beside its chat
-// models (OpenRouter's, a Bailian plan's, a plugin's, a remote myna's),
+// models (OpenRouter's, a Bailian plan's, a plugin's, a remote owl's),
 // with picks saved, those among the picks alone, as its editor shows the
 // rest unpicked (coeo91 on Discord: two OpenRouter models picked, and a
 // new group's picker listed OpenRouter's twenty-odd decision models after
@@ -662,7 +662,7 @@ func deciders(keep func(id string) bool) []Entry {
 			continue
 		}
 		ms := p.Exposed()
-		if !p.DecideOnly() && (len(p.Models) == 0 || p.listsDecisions() || p.bailianApart() || p.IsRemoteMyna() || p.IsPlugin()) {
+		if !p.DecideOnly() && (len(p.Models) == 0 || p.listsDecisions() || p.bailianApart() || p.IsRemoteOwl() || p.IsPlugin()) {
 			ms = p.decideModels() // the conversation picker's limit does not hide Jev
 			if keep != nil && len(p.Models) > 0 {
 				ms = slices.DeleteFunc(slices.Clone(ms), func(m catalog.Model) bool {
@@ -672,7 +672,7 @@ func deciders(keep func(id string) bool) []Entry {
 		}
 		for _, m := range ms {
 			if p.isDecision(m) && !off(p.ID, m.ID) { // a disabled one isn't offered (#1867)
-				if p.IsRemoteMyna() {
+				if p.IsRemoteOwl() {
 					out = append(out, entryFor(p, m, s))
 				} else {
 					out = append(out, Entry{ID: p.ID + "/" + m.ID, Model: m.ID, Name: m.Name, Provider: p})
@@ -708,7 +708,7 @@ func RouteDecider(model string) (Provider, string, error) {
 	if pid, rest, ok := strings.Cut(model, "/"); ok && rest != "" {
 		if p, ok := deciderByID(pid); ok {
 			if !p.On() {
-				return Provider{}, "", decideBadRequest("%s is switched off in myna", p.Name)
+				return Provider{}, "", decideBadRequest("%s is switched off in owl", p.Name)
 			}
 			m, ok := resolveDecideModel(p, rest)
 			if !ok {
@@ -719,7 +719,7 @@ func RouteDecider(model string) (Provider, string, error) {
 	}
 	if p, ok := deciderByID(model); ok {
 		if !p.On() {
-			return Provider{}, "", decideBadRequest("%s is switched off in myna", p.Name)
+			return Provider{}, "", decideBadRequest("%s is switched off in owl", p.Name)
 		}
 		if m := p.Jev(); m != "" {
 			return p, m, nil
@@ -757,9 +757,9 @@ func RouteDecider(model string) (Provider, string, error) {
 		return hits[0].p, hits[0].m, nil
 	case 0:
 		if len(on) == 0 {
-			return Provider{}, "", decideNotFound("myna has no Jev provider")
+			return Provider{}, "", decideNotFound("owl has no Jev provider")
 		}
-		return Provider{}, "", decideNotFound("myna knows no Jev model %q; name the provider before it, like %s/%s", model, on[0].ID, on[0].Jev())
+		return Provider{}, "", decideNotFound("owl knows no Jev model %q; name the provider before it, like %s/%s", model, on[0].ID, on[0].Jev())
 	default:
 		ps := make([]Provider, len(hits))
 		for i, h := range hits {
@@ -779,7 +779,7 @@ func decideAmbiguous(model string, ps []Provider) error {
 }
 
 // decideRouteError is a System One routing failure, with the HTTP status
-// myna answers.
+// owl answers.
 type decideRouteError struct {
 	msg    string
 	status int
@@ -796,7 +796,7 @@ func decideNotFound(format string, a ...any) error {
 }
 
 // DecideRouteStatus is the HTTP status a System One request gets for err
-// from RouteDecider: 400 when the model is named badly, 404 when myna
+// from RouteDecider: 400 when the model is named badly, 404 when owl
 // has no such Jev provider.
 func DecideRouteStatus(err error) int {
 	var e *decideRouteError
@@ -850,7 +850,7 @@ func deciderByID(id string) (Provider, bool) {
 // account's Workers AI models, or by finding its account) and Jev is the
 // model.
 func (p Provider) fetchDecide(ctx context.Context) ([]catalog.Model, error) {
-	if p.IsRemoteMyna() {
+	if p.IsRemoteOwl() {
 		if _, err := p.fetch(ctx); err != nil {
 			return nil, err
 		}
@@ -998,7 +998,7 @@ func (p Provider) decideAsked(ctx context.Context) ([]catalog.Model, error) {
 // decision API, and says why it wasn't answered.
 func (p Provider) AskSystemOne(ctx context.Context, model string) error {
 	if pat, off := ModelDisabled(p.ID, model); off { // never asked (#1867)
-		return fmt.Errorf("model %s/%s is disabled in myna (it matches %q)", p.ID, model, pat)
+		return fmt.Errorf("model %s/%s is disabled in owl (it matches %q)", p.ID, model, pat)
 	}
 	u, err := p.DecideModelURL(ctx, model)
 	if err != nil {

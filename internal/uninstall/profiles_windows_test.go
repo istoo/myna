@@ -6,27 +6,27 @@ import (
 	"testing"
 )
 
-// A myna installed from a download keeps the profile it had there;
+// A owl installed from a download keeps the profile it had there;
 // uninstalling it removes that one too, and never a folder a note names
 // outside %APPDATA%.
 func TestProfilesTakeTheNotedOne(t *testing.T) {
 	appData := t.TempDir()
-	own := filepath.Join(appData, "myna.exe")
-	kept := filepath.Join(appData, "myna-windows-amd64.exe")
+	own := filepath.Join(appData, "owl.exe")
+	kept := filepath.Join(appData, "owl-windows-amd64.exe")
 	other := filepath.Join(t.TempDir(), "elsewhere")
 	for _, p := range []string{own, kept, other} {
 		if err := os.MkdirAll(filepath.Join(p, "EBWebView"), 0o755); err != nil {
 			t.Fatal(err)
 		}
 	}
-	got := profiles(appData, "myna.exe", kept)
+	got := profiles(appData, "owl.exe", kept)
 	if len(got) != 2 || got[0] != own || got[1] != kept {
 		t.Fatalf("profiles = %q, want %q and %q", got, own, kept)
 	}
-	if got := profiles(appData, "myna.exe", other); len(got) != 1 || got[0] != own {
+	if got := profiles(appData, "owl.exe", other); len(got) != 1 || got[0] != own {
 		t.Fatalf("a note outside AppData: profiles = %q, want only %q", got, own)
 	}
-	if got := profiles(appData, "myna.exe", own); len(got) != 1 {
+	if got := profiles(appData, "owl.exe", own); len(got) != 1 {
 		t.Fatalf("the note naming the exe's own: profiles = %q, want it once", got)
 	}
 	plain := filepath.Join(appData, "plain")

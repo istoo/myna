@@ -10,10 +10,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/update"
+	"github.com/istoo/owl/internal/update"
 )
 
-// `myna update` in the Docker image (/myna, run as nonroot) failed with
+// `owl update` in the Docker image (/owl, run as nonroot) failed with
 // the rename's "permission denied"; it now says to pull the new image.
 // Outside a container it goes on to the download as before.
 func TestUpdateInContainerSaysPullTheImage(t *testing.T) {
@@ -22,14 +22,14 @@ func TestUpdateInContainerSaysPullTheImage(t *testing.T) {
 	}
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// no checksum: a download is refused before anything is fetched or written
-		json.NewEncoder(w).Encode(update.Release{Version: "0.1.11", URL: "https://github.com/istoo/myna/releases/tag/v0.1.11",
+		json.NewEncoder(w).Encode(update.Release{Version: "0.1.11", URL: "https://github.com/istoo/owl/releases/tag/v0.1.11",
 			Assets: map[string]update.Asset{update.BinaryAsset(): {URL: "http://" + r.Host + "/asset"}}})
 	}))
 	defer srv.Close()
-	t.Setenv("MYNA_UPDATE_FEED", srv.URL)
+	t.Setenv("OWL_UPDATE_FEED", srv.URL)
 	dir := t.TempDir()
-	exe := filepath.Join(dir, "myna")
-	if err := os.WriteFile(exe, []byte("myna"), 0o755); err != nil {
+	exe := filepath.Join(dir, "owl")
+	if err := os.WriteFile(exe, []byte("owl"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.Chmod(dir, 0o555); err != nil {
@@ -44,7 +44,7 @@ func TestUpdateInContainerSaysPullTheImage(t *testing.T) {
 
 	updateInContainer = func() bool { return true }
 	err := updateCmd([]string{"update"})
-	if err == nil || !strings.Contains(err.Error(), "docker pull ghcr.io/istoo/myna:latest") {
+	if err == nil || !strings.Contains(err.Error(), "docker pull ghcr.io/istoo/owl:latest") {
 		t.Fatalf("in a container: %v", err)
 	}
 

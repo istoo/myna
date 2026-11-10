@@ -9,17 +9,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // #1515: a plugin's signed-in account (ZCode's, through
-// opencode-zcode-auth) takes a name of the user's own. It is myna's,
+// opencode-zcode-auth) takes a name of the user's own. It is owl's,
 // in providers.json: plugin-auth.json and logins.json are not written.
 func TestAccountNameOfAPluginAccount(t *testing.T) {
 	bun := testenv.Bun(t)
 	claudeHome(t)
-	t.Setenv("MYNA_BUN", bun)
+	t.Setenv("OWL_BUN", bun)
 	t.Cleanup(plugin.Settle)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()

@@ -17,11 +17,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 	"github.com/tidwall/gjson"
 )
 
-// OpenCode Zen's free models are listed: myna asks them as OpenCode does
+// OpenCode Zen's free models are listed: owl asks them as OpenCode does
 // (gateway/zenfree.go), so they answer.
 func TestOpenCodeZenListsFreeModels(t *testing.T) {
 	p, err := FromPreset("opencode-zen")

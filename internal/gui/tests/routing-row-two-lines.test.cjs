@@ -62,7 +62,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang));
-      await page.goto("http://myna.test/?view=routing");
+      await page.goto("http://owl.test/?view=routing");
       const rows = page.locator(".rt-req");
       await rows.nth(fixtures.length - 1).waitFor();
       // 1500: the list ~840px beside the accounts, the reporter's; 1300 and

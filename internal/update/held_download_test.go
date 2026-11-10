@@ -31,7 +31,7 @@ func releaseHost(t *testing.T, body []byte, first func(w http.ResponseWriter) bo
 		if n == 1 && first != nil && first(w) {
 			return
 		}
-		http.ServeContent(w, r, "myna.exe", time.Time{}, bytes.NewReader(body))
+		http.ServeContent(w, r, "owl.exe", time.Time{}, bytes.NewReader(body))
 	}))
 	t.Cleanup(srv.Close)
 	return srv, func() []string {
@@ -52,7 +52,7 @@ func asset(url string, body []byte) Asset {
 // every update got after the first), and the file is the release's.
 func TestDownloadWholeFileAsksNoRangePastTheEnd(t *testing.T) {
 	quickRetries(t)
-	body := bytes.Repeat([]byte("myna!"), 40<<10)
+	body := bytes.Repeat([]byte("owl!"), 40<<10)
 	srv, ranges := releaseHost(t, body, func(w http.ResponseWriter) bool {
 		w.Header().Set("Content-Length", strconv.Itoa(len(body)+100))
 		w.Write(body)
@@ -63,7 +63,7 @@ func TestDownloadWholeFileAsksNoRangePastTheEnd(t *testing.T) {
 	})
 	var done, total int64
 	ctx := WithProgress(context.Background(), func(d, t int64) { done, total = d, t })
-	path := filepath.Join(t.TempDir(), "myna.exe.new")
+	path := filepath.Join(t.TempDir(), "owl.exe.new")
 	if err := download(ctx, asset(srv.URL, body), path); err != nil {
 		t.Fatalf("download: %v (asked %q)", err, ranges())
 	}
@@ -82,7 +82,7 @@ func TestDownloadWholeFileAsksNoRangePastTheEnd(t *testing.T) {
 // it) is fetched again from the start, not asked past its end.
 func TestDownloadWholeFileOfOtherBytesStartsOver(t *testing.T) {
 	quickRetries(t)
-	body := bytes.Repeat([]byte("myna!"), 40<<10)
+	body := bytes.Repeat([]byte("owl!"), 40<<10)
 	srv, ranges := releaseHost(t, body, func(w http.ResponseWriter) bool {
 		w.Header().Set("Content-Length", strconv.Itoa(len(body)+100))
 		w.Write(bytes.Repeat([]byte("x"), len(body)))
@@ -91,7 +91,7 @@ func TestDownloadWholeFileOfOtherBytesStartsOver(t *testing.T) {
 		conn.Close()
 		return true
 	})
-	path := filepath.Join(t.TempDir(), "myna.exe.new")
+	path := filepath.Join(t.TempDir(), "owl.exe.new")
 	if err := download(context.Background(), asset(srv.URL, body), path); err != nil {
 		t.Fatalf("download: %v (asked %q)", err, ranges())
 	}
@@ -133,7 +133,7 @@ func TestDownload416StartsOverOnce(t *testing.T) {
 	defer srv.Close()
 	a := asset(srv.URL, body)
 	a.Size = 0 // the feed doesn't always say
-	path := filepath.Join(t.TempDir(), "myna.exe.new")
+	path := filepath.Join(t.TempDir(), "owl.exe.new")
 	if err := download(context.Background(), a, path); err != nil {
 		t.Fatalf("download: %v (asked %q)", err, ranges)
 	}
@@ -145,7 +145,7 @@ func TestDownload416StartsOverOnce(t *testing.T) {
 	}
 
 	ranges, always = nil, true
-	err := download(context.Background(), a, filepath.Join(t.TempDir(), "myna.exe.new"))
+	err := download(context.Background(), a, filepath.Join(t.TempDir(), "owl.exe.new"))
 	if err == nil || !strings.Contains(err.Error(), "416") {
 		t.Fatalf("err = %v, want the 416", err)
 	}
@@ -180,7 +180,7 @@ func holdRemove(t *testing.T, path string) func() {
 func TestDownloadSaysAHeldLeftover(t *testing.T) {
 	body := []byte("MZ the next version")
 	srv, ranges := releaseHost(t, body, nil)
-	path := filepath.Join(t.TempDir(), "myna.exe.new")
+	path := filepath.Join(t.TempDir(), "owl.exe.new")
 	os.WriteFile(path, body[:5], 0o644)
 	holdRemove(t, path)
 	err := download(context.Background(), asset(srv.URL, body), path)
@@ -205,7 +205,7 @@ func TestStageStepsRoundAHeldLeftover(t *testing.T) {
 	if err := os.MkdirAll(d, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	left := filepath.Join(d, "myna.exe.new")
+	left := filepath.Join(d, "owl.exe.new")
 	os.WriteFile(left, []byte("MZ an older"), 0o755) // a download of before
 	letGo := holdRemove(t, left)
 
@@ -213,7 +213,7 @@ func TestStageStepsRoundAHeldLeftover(t *testing.T) {
 	if err != nil {
 		t.Fatalf("stage: %v (asked %q)", err, ranges())
 	}
-	if staged == left || filepath.Dir(staged) != d || !strings.HasPrefix(filepath.Base(staged), "myna.exe.new-") {
+	if staged == left || filepath.Dir(staged) != d || !strings.HasPrefix(filepath.Base(staged), "owl.exe.new-") {
 		t.Fatalf("staged at %s, want a name of its own beside %s", staged, left)
 	}
 	if got := ranges(); !slices.Equal(got, []string{""}) {

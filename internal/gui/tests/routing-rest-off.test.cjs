@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// A provider set never to rest after an unknown failure (`myna provider
+// A provider set never to rest after an unknown failure (`owl provider
 // rest-cap <id> off`; Kismet Alan on Discord: a relay's 5xx comes now and
 // then and the next request goes through): the Routing page tells its 502
 // as not resting, the request gone on to the next, and its row isn't shown
@@ -84,7 +84,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           }
           await browser.close();
         });
-        await page.goto("http://myna.test/?view=routing");
+        await page.goto("http://owl.test/?view=routing");
         await page.locator(".rt-days .rt-day").nth(1).click();
         await page.locator(".rt-req").first().waitFor();
         await page.locator(".rt-req").first().click();

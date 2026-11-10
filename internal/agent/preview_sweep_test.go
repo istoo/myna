@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-// TestDisconnectPreviewSweepsStaleSandboxes: a sandbox an earlier myna
+// TestDisconnectPreviewSweepsStaleSandboxes: a sandbox an earlier owl
 // was killed holding (#3136) is gone after the next preview, and a sandbox
 // a live preview could be using is left alone.
 func TestDisconnectPreviewSweepsStaleSandboxes(t *testing.T) {
@@ -20,8 +20,8 @@ func TestDisconnectPreviewSweepsStaleSandboxes(t *testing.T) {
 	for _, k := range []string{"TMPDIR", "TMP", "TEMP"} {
 		t.Setenv(k, tmp)
 	}
-	stale := filepath.Join(tmp, "myna-preview-sweeptest-stale")
-	fresh := filepath.Join(tmp, "myna-preview-sweeptest-fresh")
+	stale := filepath.Join(tmp, "owl-preview-sweeptest-stale")
+	fresh := filepath.Join(tmp, "owl-preview-sweeptest-fresh")
 	for _, d := range []string{stale, fresh} {
 		if err := os.MkdirAll(d, 0o700); err != nil {
 			t.Fatal(err)

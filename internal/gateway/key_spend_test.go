@@ -10,14 +10,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // sparkling_lemur_62868 on Discord: a team's OpenAI key with credits that
-// other services spend from too, and myna to stop at a share of them. A
-// key that has spent its spend cap, as the Usage page prices myna's calls
+// other services spend from too, and owl to stop at a share of them. A
+// key that has spent its spend cap, as the Usage page prices owl's calls
 // on it, is passed over: the provider's next key serves the request, then
 // its fallback; with neither, the request is answered 429 with which key is
 // at which cap and how to go on. The key never reaches the upstream. A

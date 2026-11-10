@@ -12,8 +12,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // OpenCode keeps a session as rows, not a file of lines: since 1.2 in its
@@ -85,7 +85,7 @@ type ocMessage struct {
 	// ZCode's newer messages say modelId, which the key matches too (the
 	// decoder takes a key in any case when none is spelt as it is)
 	ModelID string `json:"modelID"`
-	// the provider the reply came from: myna's gateway is "myna"
+	// the provider the reply came from: owl's gateway is "owl"
 	ProviderID string `json:"providerID,omitempty"`
 	// a reply's variant: the reasoning effort picked in OpenCode's model
 	// menu for its prompt (high, max, low …; "default" or none when none

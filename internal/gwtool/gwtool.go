@@ -1,26 +1,26 @@
 // Package gwtool is the gateway's tool point (P3 of
-// docs/subsystems/plugin-runtime.md): the tools myna answers itself for
+// docs/subsystems/plugin-runtime.md): the tools owl answers itself for
 // an agent, in place of the vendor. A plugin serves a tool by its name
 // while it is on (Serve). In the process serving the gateway (Gate), a
 // tool no plugin serves is neither offered nor answered; a process not
 // serving the gateway (the CLI, the TUI) has them all, as before the
 // point was there.
 //
-// WebSearch is plugins/search's: myna's web search for a model that
+// WebSearch is plugins/search's: owl's web search for a model that
 // can't search by itself. Off, a vendor that searches by itself still
-// does; myna offers no search of its own. PluginTools is plugins/tools':
+// does; owl offers no search of its own. PluginTools is plugins/tools':
 // the tools community plugins give, served to every agent over MCP. Off,
 // the server lists none and runs none.
 package gwtool
 
 import "sync"
 
-// WebSearch is myna's web search: the stand-in web_search tool, the
+// WebSearch is owl's web search: the stand-in web_search tool, the
 // search MCP server and Codex's search when ChatGPT can't answer it.
 const WebSearch = "web_search"
 
 // PluginTools are the tools the user's plugins give (their OpenCode tool
-// hook), served over myna's plugin tools MCP server.
+// hook), served over owl's plugin tools MCP server.
 const PluginTools = "plugin_tools"
 
 var gate struct {

@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-// A package's myna.name is its own word on its row (#4558): one short
+// A package's owl.name is its own word on its row (#4558): one short
 // line, as written, and nothing that could make it read as another name.
 func TestOwnNameBounds(t *testing.T) {
 	for said, want := range map[string]string{

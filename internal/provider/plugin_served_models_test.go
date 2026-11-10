@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // A plugin provider offers the models any account switched on serves,
@@ -19,7 +19,7 @@ import (
 // its own list for routing.
 func TestPluginProviderOffersEveryOnAccountsModels(t *testing.T) {
 	claudeHome(t)
-	t.Setenv("MYNA_BUN", "")
+	t.Setenv("OWL_BUN", "")
 	spec := "@example/opencode-acme-auth"
 	write := func(name string, v any) {
 		t.Helper()

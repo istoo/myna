@@ -7,8 +7,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/istoo/myna/internal/netproxy"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/netproxy"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // TestMain gives the package a home of its own (testenv). A home an agent is
@@ -69,9 +69,9 @@ func TestMain(m *testing.M) {
 	claudeShellEnv = func(string) string { return "" }
 	codexSystemProxy = func() netproxy.Proxy { return netproxy.Proxy{} }
 	proxyProbe = func(string, string) bool { return true }
-	// nor an address of the agent's own asked whether myna answers
-	// there (a reverse proxy, #1985): known, and not myna, as for a
+	// nor an address of the agent's own asked whether owl answers
+	// there (a reverse proxy, #1985): known, and not owl, as for a
 	// relay; the proxy-kept tests answer it
-	mynaAt = func(string) (bool, bool) { return false, true }
+	owlAt = func(string) (bool, bool) { return false, true }
 	os.Exit(testenv.Run(m))
 }

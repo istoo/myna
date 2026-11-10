@@ -1,12 +1,12 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // #2091 (nailuoGG): under the Essentials preset the Library is switched off
 // and leaves the window, but Settings › Images' Image generation still said
-// "Give an agent the tool from Library → MCP servers → Discover → Myna
+// "Give an agent the tool from Library → MCP servers → Discover → Owl
 // Image", a page that isn't there. The row now says where the tool comes
 // from as things are: with the Library off it says it is off and offers
 // Turn on the Library, which switches it on (Plugins › Built-in's switch)
-// and brings its page back; with it on, Give agents Myna Image… opens the
-// Library on MCP servers with Myna Image's sheet up, to pick the agents.
+// and brings its page back; with it on, Give agents Owl Image… opens the
+// Library on MCP servers with Owl Image's sheet up, to pick the agents.
 // One already in the library opens the tab with nothing over it. Gateway
 // mode, which has no Library, and an Image generation turned Off offer no
 // way there. Every language, Chromium and WebKit, at 1100 and 420 wide,
@@ -32,7 +32,7 @@ function fixture(lang, { libOn, have = false, imageGen = "", gateway = false }) 
   const settings = () => ({
     theme: "light", lang, tray: "panel", currency: "usd", textSize: 100, redactWords: [],
     codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "",
-    version: "0.1.400", dir: "~/.config/myna", gateway: "http://127.0.0.1:3425",
+    version: "0.1.400", dir: "~/.config/owl", gateway: "http://127.0.0.1:3425",
     proxyNow: "none", proxySource: "none", vision: "", imageGen,
     visionModels: [], workbuddyCheckins: [], lanURLs: [],
     imageGenModels: [{ id: "codex/gpt-image-2", name: "GPT Image 2", provider: "codex", providerName: "Codex", icon: "openai" }],
@@ -42,10 +42,10 @@ function fixture(lang, { libOn, have = false, imageGen = "", gateway = false }) 
     ...(gateway ? { web: true, gatewayMode: "on", gatewayOn: true } : {}),
   });
   const lib = () => ({
-    dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
+    dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
     agents: [{ id: "pi", name: "Pi", icon: "generic", mcp: `${HOME}/.pi/mcp.json`, skills: `${HOME}/.pi/skills` }],
     instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [], skills: [], problems: [],
-    servers: have ? [{ name: "myna-image", transport: "stdio", command: "/Applications/myna.app/Contents/MacOS/myna", args: ["mcp", "image"], agents: ["pi"] }] : [],
+    servers: have ? [{ name: "owl-image", transport: "stdio", command: "/Applications/owl.app/Contents/MacOS/owl", args: ["mcp", "image"], agents: ["pi"] }] : [],
   });
   const route = async (route) => {
     const req = route.request(), url = new URL(req.url());
@@ -65,7 +65,7 @@ function fixture(lang, { libOn, have = false, imageGen = "", gateway = false }) 
     if (url.pathname === "/api/library") return json(lib());
     if (url.pathname === "/api/library/market/servers") {
       return json({ items: [
-        { id: "myna-image", name: "myna-image", title: "Myna Image", publisher: "Myna", description: "Generate and edit images with the image model set in Myna.", transport: "stdio", runs: "myna", featured: true, optIn: true, have: have ? "myna-image" : "" },
+        { id: "owl-image", name: "owl-image", title: "Owl Image", publisher: "Owl", description: "Generate and edit images with the image model set in Owl.", transport: "stdio", runs: "owl", featured: true, optIn: true, have: have ? "owl-image" : "" },
         { id: "fetch", name: "fetch", title: "Fetch", description: "Read the web.", transport: "stdio", runs: "uvx", featured: true, have: "" },
       ] });
     }
@@ -95,7 +95,7 @@ const libNav = (page) => page.evaluate(() => {
 });
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
-  test(engine + ": Image generation says the way to the Myna Image tool as the Library is", async (t) => {
+  test(engine + ": Image generation says the way to the Owl Image tool as the Library is", async (t) => {
     assert(["chromium", "webkit"].includes(engine), "BROWSER must be chromium or webkit");
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     const shots = [];
@@ -116,7 +116,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => page.errors.push(e.message));
       await page.route("**/*", f.route);
       await watchSettingsReads(page);
-      await page.goto("http://myna.test/?view=settings&tab=models");
+      await page.goto("http://owl.test/?view=settings&tab=models");
       // Settings is drawn from each read of the settings, and a page opened
       // on it reads them twice (its own read and load()'s): the row is held
       // for a screenshot once the last of them is drawn, or the one it
@@ -131,7 +131,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await t.test(`${lang} at ${width}px: the Library off is said, and Turn on the Library brings it back`, async () => {
           const { page, posts } = await open(lang, width, { libOn: false });
           const sub = await row(page).locator(".who > .sub").first().textContent();
-          assert.equal(sub, w("The model Myna Image draws with. Agents get the Myna Image tool from the Library, which is turned off in Plugins › Built-in; images are saved in their project"));
+          assert.equal(sub, w("The model Owl Image draws with. Agents get the Owl Image tool from the Library, which is turned off in Plugins › Built-in; images are saved in their project"));
           assert.doesNotMatch(sub, /Discover|发现|發現|発見|Entdecken/);
           assert.equal(await libNav(page), false);
           const go = row(page).locator("button.image-gen-tool");
@@ -141,24 +141,24 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           await go.click();
           await page.waitForFunction(() => { const b = document.querySelector('#nav button[data-view="library"]'); return !!b && !b.hidden && (getComputedStyle(b).display !== "none" || b.classList.contains("nav-over")); });
           assert.deepEqual(posts, [{ id: "library", on: true }]);
-          await page.waitForFunction((s) => document.querySelector("#imageGenRow button.image-gen-tool")?.textContent.trim() === s, w("Give agents Myna Image…"));
-          assert.equal(await row(page).locator(".who > .sub").first().textContent(), w("The model Myna Image draws with. Agents get the Myna Image tool from the Library; images are saved in their project"));
+          await page.waitForFunction((s) => document.querySelector("#imageGenRow button.image-gen-tool")?.textContent.trim() === s, w("Give agents Owl Image…"));
+          assert.equal(await row(page).locator(".who > .sub").first().textContent(), w("The model Owl Image draws with. Agents get the Owl Image tool from the Library; images are saved in their project"));
           assert.equal(await wide(page), 0);
           assert.deepEqual(page.errors, []);
           await page.context().close();
         });
-        await t.test(`${lang} at ${width}px: Give agents Myna Image… opens its sheet in the Library`, async () => {
+        await t.test(`${lang} at ${width}px: Give agents Owl Image… opens its sheet in the Library`, async () => {
           const { page } = await open(lang, width, { libOn: true });
           assert.equal(await libNav(page), true);
           const go = row(page).locator("button.image-gen-tool");
-          assert.equal((await go.textContent()).trim(), w("Give agents Myna Image…"));
+          assert.equal((await go.textContent()).trim(), w("Give agents Owl Image…"));
           assert.equal(await wide(page), 0);
           shots.push([`${lang}-${width}-on`, await row(page).screenshot()]);
           await go.click();
           const sheet = page.locator("#modal .mk-sheet");
           await sheet.waitFor();
           assert.equal(await page.locator("#view-library").isVisible(), true);
-          assert.equal((await sheet.locator(".mk-name.big").textContent()).trim(), "Myna Image");
+          assert.equal((await sheet.locator(".mk-name.big").textContent()).trim(), "Owl Image");
           // on MCP servers, whose market is under it
           assert.equal(await page.locator('#view-library .mk[data-market="mcp"]').count(), 1);
           assert.equal(await wide(page), 0);
@@ -170,7 +170,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await t.test(`${lang}: one already in the library opens MCP servers with nothing over it`, async () => {
         const { page } = await open(lang, 1100, { libOn: true, have: true });
         await row(page).locator("button.image-gen-tool").click();
-        await page.locator('#view-library .mk[data-market="mcp"] .mk-card[data-id="myna-image"]').waitFor();
+        await page.locator('#view-library .mk[data-market="mcp"] .mk-card[data-id="owl-image"]').waitFor();
         assert.equal(await page.locator("#view-library").isVisible(), true);
         assert.equal(await page.locator("#modal .mk-sheet").count(), 0);
         assert.deepEqual(page.errors, []);
@@ -183,7 +183,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const sub = await row(page).locator(".who > .sub").first().textContent();
           assert.equal(sub, opts.gateway
             ? w("The model the Image generation MCP server below draws with, for the agents that add it; images come back in their answer")
-            : w("Agents given Myna Image can't generate images or videos: the tool says it is off"));
+            : w("Agents given Owl Image can't generate images or videos: the tool says it is off"));
           assert.deepEqual(page.errors, []);
           await page.context().close();
         }

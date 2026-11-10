@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // #374: Codex offering web search to a Responses provider goes through
-// myna's search, rebuilt; the request its provider gets still carries
+// owl's search, rebuilt; the request its provider gets still carries
 // Codex's client_metadata, which a relay may check, and its text (an
 // answer's schema), as a request passed through does.
 func TestCodexSearchKeepsClientMetadata(t *testing.T) {

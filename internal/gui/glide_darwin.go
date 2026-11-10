@@ -63,12 +63,12 @@ static int tintPanel(void *w, int r, int g, int b, int a, int ms) {
 		}
 		NSView *tint = nil;
 		for (NSView *v in host.subviews) {
-			if ([v.identifier isEqualToString:@"myna-tint"]) tint = v;
+			if ([v.identifier isEqualToString:@"owl-tint"]) tint = v;
 		}
 		CGColorRef colour = CGColorCreateSRGB(r / 255.0, g / 255.0, b / 255.0, a / 255.0);
 		if (tint == nil) {
 			tint = [[NSView alloc] initWithFrame:host.bounds];
-			tint.identifier = @"myna-tint";
+			tint.identifier = @"owl-tint";
 			tint.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
 			// a layer of its own, which AppKit leaves alone
 			tint.layer = [CALayer layer];
@@ -107,7 +107,7 @@ static void activate(void) { [NSApp activateIgnoringOtherApps:YES]; }
 // Command-Tab's order, behind every other app, though it is in front: one
 // Command-Tab away can't come back to it (#1381). Activating it again does
 // nothing while it is active. Activating the Dock, which has no windows or
-// menu bar of its own, and then myna at once puts myna first.
+// menu bar of its own, and then owl at once puts owl first.
 static void activateAgain(void) {
 	NSRunningApplication *dock = [NSRunningApplication runningApplicationsWithBundleIdentifier:@"com.apple.dock"].firstObject;
 	if (dock != nil) [dock activateWithOptions:0];
@@ -182,7 +182,7 @@ func dockPolicy(on bool) application.ActivationPolicy {
 	return application.ActivationPolicyAccessory
 }
 
-// setDock shows myna in the Dock or takes it out, at once, bringing it to
+// setDock shows owl in the Dock or takes it out, at once, bringing it to
 // the front after when front (dockStep); on the main thread or off it. On
 // it, it is done before what the caller shows next, so a window shown after
 // is shown by an app already in the Dock.
@@ -202,8 +202,8 @@ func setDock(on, front bool) {
 	})
 }
 
-// dockOnFullscreen puts myna in the Dock whenever a window goes full
-// screen; leaving it, the window puts myna back as the settings say.
+// dockOnFullscreen puts owl in the Dock whenever a window goes full
+// screen; leaving it, the window puts owl back as the settings say.
 func dockOnFullscreen() { C.dockOnFullscreen() }
 
 func boolInt(b bool) int {

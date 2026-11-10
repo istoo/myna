@@ -13,9 +13,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/proc"
 )
 
 // LodyScheme opens Lody's local-machine provider confirmation dialog.
@@ -63,7 +63,7 @@ func LodyLink(base string) string {
 		Auth      map[string]string `json:"auth"`
 		Endpoints []endpoint        `json:"endpoints"`
 	}{
-		Kind: "custom", ID: "myna", Name: "Myna",
+		Kind: "custom", ID: "owl", Name: "Owl",
 		Auth: map[string]string{"method": "apiKey", "apiKey": gateway.TokenFor("lody")},
 		Endpoints: []endpoint{
 			{"anthropic-messages", base, []string{"claude-code"}, base + "/v1/models"},

@@ -66,7 +66,7 @@ for (const [name, engine] of [["webkit", webkit], ["chromium", chromium]]) {
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         await page.route("**/*", serve(lang));
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         await page.waitForFunction(() => typeof locale === "string" && document.documentElement.lang);
         const got = await page.evaluate(() => ({
           locale, lang: document.documentElement.lang, sys: navigator.language,
@@ -92,7 +92,7 @@ for (const [name, engine] of [["webkit", webkit], ["chromium", chromium]]) {
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         await page.route("**/*", serve("zh-TW"));
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         await page.locator("#prefs").click();
         await page.locator("#langPick span").first().waitFor();
         const fit = await page.evaluate(() => {

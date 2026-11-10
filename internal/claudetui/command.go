@@ -4,11 +4,11 @@ package claudetui
 const Command = "claude-tui-helper"
 
 // TrustEnv, "1", has the shim tell Claude Code yes when it asks whether
-// to trust the folder it runs in: the bridge sets it for myna's own
-// folder, and for a caller's in an account folder of myna's, whose
+// to trust the folder it runs in: the bridge sets it for owl's own
+// folder, and for a caller's in an account folder of owl's, whose
 // Claude Code no one else runs. Otherwise the question is the user's to
 // answer in their own Claude Code, and the run ends, saying so.
-const TrustEnv = "MYNA_CLAUDE_TUI_TRUST"
+const TrustEnv = "OWL_CLAUDE_TUI_TRUST"
 
 // DeadlineEnv holds, in Unix milliseconds, when a one-off run's caller
 // (a /usage read, a test's "hi") stops waiting for it. The helper ends
@@ -16,16 +16,16 @@ const TrustEnv = "MYNA_CLAUDE_TUI_TRUST"
 // what it last drew. Killed at the caller's deadline instead, it said
 // nothing, and the reading's error was its exit code alone, "exit status
 // 1" on Windows (#4830).
-const DeadlineEnv = "MYNA_CLAUDE_TUI_BY"
+const DeadlineEnv = "OWL_CLAUDE_TUI_BY"
 
 // Untrusted begins what the helper says, on its stderr, as it ends over a
 // folder it wasn't told to trust: the bridge then runs the turn in a
-// folder of myna's.
+// folder of owl's.
 const Untrusted = "Claude Code asks whether to trust the folder"
 
 // WSLEnv holds, as JSON (WSL), how to run a Claude Code that is in a WSL
 // distro: the helper, on Windows, runs wsl.exe in its pseudo console.
-const WSLEnv = "MYNA_CLAUDE_TUI_WSL"
+const WSLEnv = "OWL_CLAUDE_TUI_WSL"
 
 // WSL is a Claude Code in a WSL distro, as the helper runs it.
 type WSL struct {
@@ -42,8 +42,8 @@ type WSL struct {
 	Distro string `json:"distro,omitempty"`
 }
 
-// MCPCommand is the hidden subcommand of myna's tool server, the MCP
-// server a run's --mcp-config names "myna" (claudebridge.RunMCP). Its
+// MCPCommand is the hidden subcommand of owl's tool server, the MCP
+// server a run's --mcp-config names "owl" (claudebridge.RunMCP). Its
 // arguments are the callback's file, the tools' file and, for the
 // interactive mode, a file it writes once Claude Code has listed its
 // tools: the first message waits for it (MinhuWang on X: a first message

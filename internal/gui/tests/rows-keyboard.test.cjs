@@ -44,7 +44,7 @@ async function open(engine, t, lang) {
   page.errors = [];
   page.on("pageerror", (e) => page.errors.push(e.message));
   await page.route("**/*", server(lang));
-  await page.goto("http://myna.test/?view=providers");
+  await page.goto("http://owl.test/?view=providers");
   await page.locator("#providers .row.provider:not(.pv-sk-row)").first().waitFor();
   return page;
 }

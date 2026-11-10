@@ -13,7 +13,7 @@ import (
 // memoRules remembers what the rules found in a long text. An agent sends
 // its whole history on every turn, so without it every turn ran each rule
 // over every message before it again: on a long Claude Code session, with
-// masking on, most of myna's CPU went to the rules' regexps (#4353). What
+// masking on, most of owl's CPU went to the rules' regexps (#4353). What
 // they find in a text depends on the text, what o covers, the user's own
 // rules and the day (dateOK: a date over a year ago can be a birthday),
 // and on nothing a request changes, so it is kept by a hash of those. Only

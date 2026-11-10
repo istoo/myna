@@ -4,7 +4,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // RenameProvider gives a provider another id (provider.Rename) and moves
@@ -43,7 +43,7 @@ func RenameProvider(from, to string) ([]string, error) {
 
 // RenameGroup gives a routing group another id (provider.RenameGroup) and
 // moves the agents on it to group/<to>, as RenameProvider does a
-// provider's: left on group/<from>, each agent named a group myna no
+// provider's: left on group/<from>, each agent named a group owl no
 // longer has, and the user had to pick the group again in every agent
 // (lucis0116 on X). It answers the agents it moved.
 func RenameGroup(from, to string) ([]string, error) {
@@ -74,7 +74,7 @@ func renameRefs(renamed func(ref string) (string, bool), rename func() error) ([
 	}
 	var moves []move
 	for _, a := range Detected() {
-		// a provider named myna written by hand is the user's, the
+		// a provider named owl written by hand is the user's, the
 		// models it names too (handWired)
 		if a.handWired() {
 			continue
@@ -104,15 +104,15 @@ func renameRefs(renamed func(ref string) (string, bool), rename func() error) ([
 					}
 				}
 			}
-			if ref, ok := strings.CutPrefix(v, mynaID+"/"); nv == "" && ok {
-				// the agent's value names myna's model outright
-				// (myna/<ref>), with its suffix after it
-				for _, r := range []string{ref, strings.TrimPrefix(model, mynaID+"/")} {
+			if ref, ok := strings.CutPrefix(v, owlID+"/"); nv == "" && ok {
+				// the agent's value names owl's model outright
+				// (owl/<ref>), with its suffix after it
+				for _, r := range []string{ref, strings.TrimPrefix(model, owlID+"/")} {
 					if !strings.HasPrefix(ref, r) {
 						continue
 					}
 					if now, ok := renamed(r); ok {
-						nv = mynaID + "/" + now + strings.TrimPrefix(ref, r)
+						nv = owlID + "/" + now + strings.TrimPrefix(ref, r)
 						break
 					}
 				}
@@ -141,7 +141,7 @@ func renameRefs(renamed func(ref string) (string, bool), rename func() error) ([
 // subscription's id (provider.OnAccountIDs) to a free one, the agents on it
 // with it, so the subscription is listed once signed in: a "WorkBuddy" key
 // saved as workbuddy before WorkBuddy's plan was a subscription hid it, and
-// signing in to it said "signed in, but myna can't list it". Run at
+// signing in to it said "signed in, but owl can't list it". Run at
 // start-up; errors are swallowed as RenameLegacy's are.
 func MoveOffAccountIDs() {
 	for _, id := range provider.OnAccountIDs() {
@@ -150,17 +150,17 @@ func MoveOffAccountIDs() {
 }
 
 // renameRef is one entry of an agent's enabledModels (StepCode's, Pi's
-// and its forks') with myna's provider from renamed to to. A glob or a thinking level after the model stays. An entry that
+// and its forks') with owl's provider from renamed to to. A glob or a thinking level after the model stays. An entry that
 // does not name that provider is the user's and is left as it is.
 func renameRef(s, from, to string) (string, bool) {
-	rest, ok := strings.CutPrefix(s, mynaID+"/"+from+"/")
+	rest, ok := strings.CutPrefix(s, owlID+"/"+from+"/")
 	if !ok {
 		return s, false
 	}
-	return mynaID + "/" + to + "/" + rest, true
+	return owlID + "/" + to + "/" + rest, true
 }
 
-// renameRefList renames myna/<from>/ entries. The model just set is
+// renameRefList renames owl/<from>/ entries. The model just set is
 // appended before the old entry is renamed onto the same text, so that
 // second copy is dropped. A list that names nothing of that provider is
 // returned unchanged, a repeated entry of the user's included.

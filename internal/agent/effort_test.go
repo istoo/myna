@@ -6,13 +6,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// effortHome is a sandbox HOME with a provider for myna to serve.
+// effortHome is a sandbox HOME with a provider for owl to serve.
 func effortHome(t *testing.T) string {
 	t.Helper()
 	home := t.TempDir()
@@ -78,7 +78,7 @@ func TestEffortFields(t *testing.T) {
 	writeFile(t, filepath.Join(home, ".claude", "settings.json"), `{"theme":"dark","model":"opus"}`)
 	c := claude(home)
 	setEffort(t, c, "xhigh", `"theme"`)
-	// max lasts a session in Claude Code's /effort; myna keeps it as its
+	// max lasts a session in Claude Code's /effort; owl keeps it as its
 	// env (TestClaudeEffortMax)
 	setEffort(t, c, "max", `"theme"`)
 
@@ -109,11 +109,11 @@ func TestEffortFields(t *testing.T) {
 	if err := cr.Field("effort").Set("high"); err == nil {
 		t.Fatal("crush took an effort without a large model")
 	}
-	if err := cr.Field("model").Set("myna/deepseek/pro"); err != nil {
+	if err := cr.Field("model").Set("owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	setEffort(t, cr, "medium", `"debug"`)
-	if cr.Field("model").Get() != "myna/deepseek/pro" {
+	if cr.Field("model").Get() != "owl/deepseek/pro" {
 		t.Fatalf("crush model: %s", readFile(cr.Path))
 	}
 }
@@ -127,7 +127,7 @@ func TestCommandCodeEffort(t *testing.T) {
 	if err := f.Set("high"); err == nil {
 		t.Fatal("took an effort without a model")
 	}
-	if err := a.Field("model").Set("myna/deepseek/pro"); err != nil {
+	if err := a.Field("model").Set("owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	setEffort(t, a, "max", `"theme"`)
@@ -155,7 +155,7 @@ func TestCommandCodeEffort(t *testing.T) {
 	}
 }
 
-// #473: a model through myna listing no levels (LongCat-2.5-Preview) had
+// #473: a model through owl listing no levels (LongCat-2.5-Preview) had
 // dsh's own off, low, high and max offered on the Agents page, and each was
 // turned away with "takes an effort of  for this model". It has none in dsh:
 // none is offered, and one asked for says so.
@@ -171,10 +171,10 @@ func TestDshEffortModelWithoutLevels(t *testing.T) {
 	writeFile(t, patch, "[]\n")
 	a := dsh(home)
 	f := a.Field("effort")
-	if err := a.Field("model").Set("myna/deepseek/plain"); err != nil {
+	if err := a.Field("model").Set("owl/deepseek/plain"); err != nil {
 		t.Fatal(err)
 	}
-	cur := map[string]string{"model": "myna/deepseek/plain"}
+	cur := map[string]string{"model": "owl/deepseek/plain"}
 	if got := f.Options(cur); len(got) != 0 {
 		t.Fatalf("offered %+v for a model with no levels", got)
 	}
@@ -186,7 +186,7 @@ func TestDshEffortModelWithoutLevels(t *testing.T) {
 		t.Fatalf("default: %v %q", err, f.Get())
 	}
 	// every level offered for any model is one dsh takes
-	for _, m := range []string{"myna/deepseek/pro", "myna/deepseek/plain", "deepseek-v4-pro"} {
+	for _, m := range []string{"owl/deepseek/pro", "owl/deepseek/plain", "deepseek-v4-pro"} {
 		if err := a.Field("model").Set(m); err != nil {
 			t.Fatal(err)
 		}
@@ -223,14 +223,14 @@ func TestDshEffort(t *testing.T) {
 	if err := f.Set("max"); err != nil || f.Get() != "max" {
 		t.Fatalf("max: %v, effort %q\n%s", err, f.Get(), readFile(patch))
 	}
-	// a model through myna offers its own levels, off for its none
-	if err := a.Field("model").Set("myna/deepseek/pro"); err != nil {
+	// a model through owl offers its own levels, off for its none
+	if err := a.Field("model").Set("owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	if f.Get() != "max" {
 		t.Fatalf("effort: %q\n%s", f.Get(), readFile(patch))
 	}
-	if got := f.Options(map[string]string{"model": "myna/deepseek/pro"}); len(got) != 4 || got[0].Value != "off" || got[3].Value != "max" {
+	if got := f.Options(map[string]string{"model": "owl/deepseek/pro"}); len(got) != 4 || got[0].Value != "off" || got[3].Value != "max" {
 		t.Fatalf("levels: %+v", got)
 	}
 	if err := f.Set("medium"); err == nil {
@@ -246,7 +246,7 @@ func TestDshEffort(t *testing.T) {
 		t.Fatal(err)
 	}
 	// kept when the model changes and when the catalog is synced
-	if err := a.Field("model").Set("myna/deepseek/flash"); err != nil {
+	if err := a.Field("model").Set("owl/deepseek/flash"); err != nil {
 		t.Fatal(err)
 	}
 	if err := a.Sync(); err != nil {
@@ -257,13 +257,13 @@ func TestDshEffort(t *testing.T) {
 		t.Fatalf("patch:\n%s", raw)
 	}
 	// one the model hasn't goes when it changes
-	if err := a.Field("model").Set("myna/deepseek/pro"); err != nil {
+	if err := a.Field("model").Set("owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	if err := f.Set("low"); err != nil {
 		t.Fatal(err)
 	}
-	if err := a.Field("model").Set("myna/deepseek/flash"); err != nil || f.Get() != "" {
+	if err := a.Field("model").Set("owl/deepseek/flash"); err != nil || f.Get() != "" {
 		t.Fatalf("flash has no low: %v %q", err, f.Get())
 	}
 	if err := f.Set("high"); err != nil {

@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/provider"
 )
 
 func TestAgy(t *testing.T) {
@@ -24,7 +24,7 @@ func TestAgy(t *testing.T) {
 	path := filepath.Join(home, ".gemini", "antigravity-cli", "settings.json")
 	os.MkdirAll(filepath.Dir(path), 0o755)
 	// the user's own: a model of theirs on their own Gemini key, and a
-	// setting myna has nothing to do with
+	// setting owl has nothing to do with
 	orig := `{
   "customModelsConfig": {
     "customModels": {
@@ -56,19 +56,19 @@ func TestAgy(t *testing.T) {
 	if a.Launch() != "" {
 		t.Fatalf("launch while on the user's own model: %q", a.Launch())
 	}
-	if err := a.Apply("model", "myna/deepseek/pro"); err != nil {
+	if err := a.Apply("model", "owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	m := read()
-	if m["model"] != "myna/deepseek/pro" || m["modelProvider"] != "gemini" {
+	if m["model"] != "owl/deepseek/pro" || m["modelProvider"] != "gemini" {
 		t.Fatalf("not wired: %v", m)
 	}
 	cm := m["customModelsConfig"].(map[string]any)["customModels"].(map[string]any)
 	want := map[string]any{"apiProvider": "API_PROVIDER_GOOGLE_GEMINI", "modelName": "deepseek/pro"}
-	if got, _ := json.Marshal(cm["myna/deepseek/pro"]); string(got) != agyJSON(want) {
+	if got, _ := json.Marshal(cm["owl/deepseek/pro"]); string(got) != agyJSON(want) {
 		t.Fatalf("custom model: %s", got)
 	}
-	if cm["myna/deepseek/flash"] == nil || cm["mine"] == nil {
+	if cm["owl/deepseek/flash"] == nil || cm["mine"] == nil {
 		t.Fatalf("custom models: %v", cm)
 	}
 	if ws, _ := m["trustedWorkspaces"].([]any); len(ws) != 1 {
@@ -78,14 +78,14 @@ func TestAgy(t *testing.T) {
 		t.Fatalf("drift: %+v", d)
 	}
 	l := a.Launch()
-	if want := "GEMINI_API_KEY=" + gateway.TokenFor("agy") + " GOOGLE_GEMINI_BASE_URL=" + gateway.URL() + " agy --model 'myna/deepseek/pro'"; runtime.GOOS != "windows" && l != want {
+	if want := "GEMINI_API_KEY=" + gateway.TokenFor("agy") + " GOOGLE_GEMINI_BASE_URL=" + gateway.URL() + " agy --model 'owl/deepseek/pro'"; runtime.GOOS != "windows" && l != want {
 		t.Fatalf("launch: %q", l)
 	}
 	if n := a.Notice(); !strings.Contains(n, l) {
 		t.Fatalf("notice: %q", n)
 	}
-	// another of myna's keeps the user's stashed
-	if err := a.Apply("model", "myna/deepseek/flash"); err != nil {
+	// another of owl's keeps the user's stashed
+	if err := a.Apply("model", "owl/deepseek/flash"); err != nil {
 		t.Fatal(err)
 	}
 	// something else sets modelProvider back: agy asks Google directly
@@ -93,12 +93,12 @@ func TestAgy(t *testing.T) {
 	if d := a.Drift(); d == nil || d.Kind != "unwired" {
 		t.Fatalf("drift: %+v", d)
 	}
-	// the options: the user's own, then myna's
+	// the options: the user's own, then owl's
 	opts := a.Field("model").Options(a.Values())
 	if len(opts) == 0 || opts[0].Value != "mine" || opts[0].Group != "Antigravity CLI" {
 		t.Fatalf("options: %+v", opts)
 	}
-	// as installed: the user's model and provider back, myna's models out
+	// as installed: the user's model and provider back, owl's models out
 	if err := a.Apply("model", ""); err != nil {
 		t.Fatal(err)
 	}
@@ -112,9 +112,9 @@ func TestAgy(t *testing.T) {
 		t.Fatal("launch after reset")
 	}
 
-	// with nothing of the user's, reset leaves nothing of myna's
+	// with nothing of the user's, reset leaves nothing of owl's
 	os.WriteFile(path, []byte("{\n  \"trustedWorkspaces\": []\n}\n"), 0o644)
-	a.Apply("model", "myna/deepseek/pro")
+	a.Apply("model", "owl/deepseek/pro")
 	a.Apply("model", "")
 	if got := strings.TrimSpace(agyRead(t, path)); got != "{\n  \"trustedWorkspaces\": []\n}" {
 		t.Fatalf("left behind:\n%s", got)

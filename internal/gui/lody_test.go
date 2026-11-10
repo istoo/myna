@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/agent"
+	"github.com/istoo/owl/internal/agent"
 )
 
 type importWindows struct {
@@ -29,7 +29,7 @@ func linksOpen(t *testing.T) {
 	appLink = func(link string, open func(string) error) error { return open(link) }
 }
 
-// sungt (10-29): Add myna on Cindy did nothing when nothing on the
+// sungt (10-29): Add owl on Cindy did nothing when nothing on the
 // computer opened cindy:// links. /api/open says so, by code and app, and
 // hands nothing over.
 func TestImportLinkNothingOpens(t *testing.T) {
@@ -92,7 +92,7 @@ func TestLodyImportHandoff(t *testing.T) {
 	if err := os.WriteFile(catalog, []byte(`{"workspaces":[]}`), 0600); err != nil {
 		t.Fatal(err)
 	}
-	// Cindy, beside it, still says whether it has myna: false is said,
+	// Cindy, beside it, still says whether it has owl: false is said,
 	// not left out as unknown
 	cfg, err := os.UserConfigDir()
 	if err != nil {
@@ -121,7 +121,7 @@ func TestLodyImportHandoff(t *testing.T) {
 		t.Fatalf("Lody's row says added: %s", b)
 	}
 	if cindy == nil || cindy.Added == nil || *cindy.Added {
-		t.Fatalf("Cindy without myna: %+v, want added false", cindy)
+		t.Fatalf("Cindy without owl: %+v, want added false", cindy)
 	}
 	if b, _ := json.Marshal(cindy); !strings.Contains(string(b), `"added":false`) {
 		t.Fatalf("Cindy's row leaves added out: %s", b)
@@ -152,7 +152,7 @@ func TestLodyImportHandoff(t *testing.T) {
 	}
 }
 
-// On Linux the window's Add myna runs Lody with its link, as Lody's
+// On Linux the window's Add owl runs Lody with its link, as Lody's
 // desktop entry says, rather than handing lody:// to xdg-open, which turned
 // it away while Lody ran (Atlas, 10-25: "failed to open uri"): Lody's
 // AppImage makes itself the default only for ai.lody.stable://. The entry

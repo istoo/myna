@@ -14,7 +14,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // rotateModelsUp answers with the model it was asked for, so every member

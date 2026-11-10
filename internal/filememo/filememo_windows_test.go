@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/steady"
+	"github.com/istoo/owl/internal/steady"
 )
 
-// Another myna replacing the file (a write is a temp file renamed over
+// Another owl replacing the file (a write is a temp file renamed over
 // it) has Windows say, for a moment, that the file isn't there at all: read
 // so, a file of accounts was no accounts, and the next write left them out
 // (Packing1 on Discord, Windows 11: Antigravity's provider and its account

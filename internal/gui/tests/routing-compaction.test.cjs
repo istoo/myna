@@ -1,6 +1,6 @@
 // Routing says a conversation stays on the account that compacted it
 // natively (#1099), not that the account is the only one on for the model,
-// which read as myna not moving to the others (#2639).
+// which read as owl not moving to the others (#2639).
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
@@ -69,7 +69,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (error) => errors.push(error.message));
       await page.route("**/*", serve(lang));
-      await page.goto("http://myna.test/?view=routing");
+      await page.goto("http://owl.test/?view=routing");
       await page.locator(".rt-req").nth(routes.length - 1).waitFor();
       const pinned = { en: /compacted this conversation natively/, zh: /原生压缩了这条对话/, "zh-TW": /原生壓縮了這條對話/, ja: /ネイティブに圧縮/, de: /nativ komprimiert/ }[lang];
       const only = { en: /only account on for/, zh: /唯一启用的账号/, "zh-TW": /唯一啟用的帳號/, ja: /有効なアカウントは/, de: /einzige/ }[lang];

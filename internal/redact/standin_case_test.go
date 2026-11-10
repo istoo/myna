@@ -119,7 +119,7 @@ func TestShapedKeyPutBackOnlyAsWritten(t *testing.T) {
 	}
 }
 
-// What myna remembers of placeholders is in memory, but a placeholder is
+// What owl remembers of placeholders is in memory, but a placeholder is
 // made from its value and a key kept on disk (SetKeyPath), so after a
 // restart (an update in the background) the same value goes as the same
 // placeholder, and the conversation the agent sends again has its values
@@ -147,7 +147,7 @@ func TestPlaceholdersOutliveARestart(t *testing.T) {
 	p := placeholderRe.FindString(before)
 	reply := "好的，已发给 " + p + "，并抄送 " + p + " 的主管。"
 
-	// myna starts again: nothing in memory, the key read from disk
+	// owl starts again: nothing in memory, the key read from disk
 	Forget()
 	mu.Lock()
 	keyOf = nil

@@ -6,17 +6,17 @@ import (
 	"testing"
 )
 
-// #3737: myna.com hands the app what was typed after `myna` as it
+// #3737: owl.com hands the app what was typed after `owl` as it
 // was typed, runs the program its trailer names, and leaves a command that
 // opens the window to run on its own.
 func TestArgsOf(t *testing.T) {
 	for line, want := range map[string]string{
-		`myna`:                                  ``,
-		`myna plugin login`:                     `plugin login`,
-		`myna   version`:                        `version`,
-		`"C:\Program Files\m\myna.com" "a b" c`: `"a b" c`,
-		`"C:\m\myna" x`:                         `x`,
-		`C:\m\myna.com	-v`:                      `-v`,
+		`owl`:                                  ``,
+		`owl plugin login`:                     `plugin login`,
+		`owl   version`:                        `version`,
+		`"C:\Program Files\m\owl.com" "a b" c`: `"a b" c`,
+		`"C:\m\owl" x`:                         `x`,
+		`C:\m\owl.com	-v`:                      `-v`,
 		`"unclosed`:                             ``,
 	} {
 		if got := argsOf(line); got != want {
@@ -26,7 +26,7 @@ func TestArgsOf(t *testing.T) {
 }
 
 func TestOpensWindow(t *testing.T) {
-	for _, a := range [][]string{nil, {"app"}, {"gui"}, {"tray"}, {"panel"}, {"-Embedding"}, {"MYNA://open"}} {
+	for _, a := range [][]string{nil, {"app"}, {"gui"}, {"tray"}, {"panel"}, {"-Embedding"}, {"OWL://open"}} {
 		if !opensWindow(a) {
 			t.Errorf("%q waited for as a terminal command", a)
 		}
@@ -40,7 +40,7 @@ func TestOpensWindow(t *testing.T) {
 
 func TestTargetName(t *testing.T) {
 	dir := t.TempDir()
-	com := filepath.Join(dir, "myna.com")
+	com := filepath.Join(dir, "owl.com")
 	body := make([]byte, 4096)
 	write := func(b []byte) {
 		t.Helper()
@@ -48,17 +48,17 @@ func TestTargetName(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	write(append(append(append(body, 0), "myna-windows-amd64 (1).exe"...), magic...))
-	if got := targetName(com); got != "myna-windows-amd64 (1).exe" {
+	write(append(append(append(body, 0), "owl-windows-amd64 (1).exe"...), magic...))
+	if got := targetName(com); got != "owl-windows-amd64 (1).exe" {
 		t.Fatalf("trailer's name: %q", got)
 	}
 	// no trailer, or one naming a path: its own name with .exe
 	write(body)
-	if got := targetName(com); got != "myna.exe" {
+	if got := targetName(com); got != "owl.exe" {
 		t.Fatalf("no trailer: %q", got)
 	}
 	write(append(append(append(body, 0), "../evil.exe"...), magic...))
-	if got := targetName(com); got != "myna.exe" {
+	if got := targetName(com); got != "owl.exe" {
 		t.Fatalf("a path in the trailer: %q", got)
 	}
 }

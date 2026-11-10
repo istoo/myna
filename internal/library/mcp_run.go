@@ -1,7 +1,7 @@
 package library
 
-// A server run by a command is given to Codex, while Codex is on myna,
-// as the gateway's /mcp/run/<name>, which myna serves over streamable
+// A server run by a command is given to Codex, while Codex is on owl,
+// as the gateway's /mcp/run/<name>, which owl serves over streamable
 // HTTP by running the command itself. Codex starts every server of its
 // config once for each thread it has loaded, and keeps them for as long
 // as the thread is: 204 node processes, 21 GB, beside one user's Codex
@@ -12,12 +12,12 @@ package library
 // has a server of its own, as it had: what a server keeps for its client
 // (a browser, a page) is still kept per thread.
 //
-// Codex not on myna, in WSL, or reaching the gateway with a key of its
-// own (another machine), a server with a variable myna hasn't, and one
+// Codex not on owl, in WSL, or reaching the gateway with a key of its
+// own (another machine), a server with a variable owl hasn't, and one
 // the user keeps direct (Server.Hub), are given the command as before: a
 // direct one reads its project from the folder it starts in, which Codex
 // makes the thread's (codex-mcp's LocalStdioServerLauncher, with no `cwd`
-// in the entry), and myna's would be home (#4382, cuipengcx90).
+// in the entry), and owl's would be home (#4382, cuipengcx90).
 
 import (
 	"bufio"
@@ -38,12 +38,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/proc"
 )
 
-// RunPath is where the gateway serves a server myna runs for Codex.
+// RunPath is where the gateway serves a server owl runs for Codex.
 const RunPath = "/mcp/run/"
 
 // runIdle is how long a session's server is kept with nothing asked of it.
@@ -58,8 +58,8 @@ type runSpec struct {
 
 func (r runSpec) key() string { b, _ := json.Marshal(r); return string(b) }
 
-// specOf is the command myna runs s with, false for a server it doesn't
-// run: a remote one, or one with a variable myna's environment hasn't.
+// specOf is the command owl runs s with, false for a server it doesn't
+// run: a remote one, or one with a variable owl's environment hasn't.
 func specOf(s *Server) (runSpec, bool) {
 	if s.Remote() || s.Command == "" {
 		return runSpec{}, false
@@ -85,14 +85,14 @@ var runs struct {
 }
 
 // runsFor says whether t's agent is given servers through the gateway at
-// base: Codex on this machine, on myna, reaching the gateway as this
+// base: Codex on this machine, on owl, reaching the gateway as this
 // machine does.
 func runsFor(t *Target, base string) bool {
 	return runOn && t.MCP != nil && t.MCP.Format == fmtCodex && !t.MCP.WSL && t.Agent != nil &&
 		t.Agent.WSL == "" && agent.KeyAt(base) == gateway.Token && runWired(t.Agent)
 }
 
-// runWired says the agent is on myna, which it is given servers through
+// runWired says the agent is on owl, which it is given servers through
 // only while it is; a var for tests.
 var runWired = func(a *agent.Agent) bool { return a.Wired() && !a.Disconnected() }
 
@@ -102,7 +102,7 @@ var runOn = true
 func init() {
 	gateway.RunMCP = ServeRun
 	// a Codex connected or disconnected is given its servers the other
-	// way: through the gateway on myna, by their commands off it
+	// way: through the gateway on owl, by their commands off it
 	agent.Rewired = func(id string) {
 		if !runOn {
 			return
@@ -127,7 +127,7 @@ func init() {
 }
 
 // runVia is s as an agent that runsFor is given it, and the spec it is
-// run with; false for one myna doesn't run.
+// run with; false for one owl doesn't run.
 func runVia(s *Server, base string) (*Server, runSpec, bool) {
 	spec, ok := specOf(s)
 	if !ok {
@@ -211,7 +211,7 @@ func newSessionID() string {
 }
 
 // session is the session sid of name, made with init when there is none:
-// one myna was restarted under is taken up as it is.
+// one owl was restarted under is taken up as it is.
 func session(sid, name string, spec runSpec, init json.RawMessage) *runSession {
 	runs.Lock()
 	defer runs.Unlock()
@@ -289,7 +289,7 @@ func (s *runSession) ensure() (*runChild, json.RawMessage, error) {
 	spec, init, gone := s.spec, s.init, s.gone
 	s.mu.Unlock()
 	if gone {
-		return nil, nil, fmt.Errorf("myna gives Codex no server called %s now", s.name)
+		return nil, nil, fmt.Errorf("owl gives Codex no server called %s now", s.name)
 	}
 	c, res, err := runStart(s, spec, init)
 	if err != nil {
@@ -347,7 +347,7 @@ func (s *runSession) close(ch chan []byte) {
 	s.mu.Unlock()
 }
 
-// runChild is a server myna started for a session.
+// runChild is a server owl started for a session.
 type runChild struct {
 	tree  *proc.Tree
 	in    io.WriteCloser
@@ -403,14 +403,14 @@ func (c *runChild) unwait(id json.RawMessage) {
 
 func idKey(id json.RawMessage) string { return string(bytes.TrimSpace(id)) }
 
-const runInitID = `"myna-run-init"`
+const runInitID = `"owl-run-init"`
 
 // runStart starts the session's server and initializes it with the
 // session's own params, as Codex would have.
 func runStart(s *runSession, spec runSpec, init json.RawMessage) (*runChild, json.RawMessage, error) {
 	prog, found := stdioProgram(spec.Command)
 	cmd := proc.Command(prog, spec.Args...)
-	// as checkStdioAt starts it: from home, in myna's environment with
+	// as checkStdioAt starts it: from home, in owl's environment with
 	// the server's own variables over it
 	cmd.Env = os.Environ()
 	if d := home(); d != "" {
@@ -572,7 +572,7 @@ type rpcIn struct {
 }
 
 // ServeRun is the gateway's RunPath<name>: the server called name, run by
-// myna, over streamable HTTP. The gateway lets only this machine's
+// owl, over streamable HTTP. The gateway lets only this machine's
 // agents here.
 func ServeRun(w http.ResponseWriter, r *http.Request, name string) {
 	sid := r.Header.Get("Mcp-Session-Id")
@@ -607,7 +607,7 @@ func ServeRun(w http.ResponseWriter, r *http.Request, name string) {
 	}
 	var m rpcIn
 	if t := bytes.TrimSpace(body); len(t) > 0 && t[0] == '[' {
-		http.Error(w, "myna takes one JSON-RPC message a request", http.StatusBadRequest)
+		http.Error(w, "owl takes one JSON-RPC message a request", http.StatusBadRequest)
 		return
 	}
 	if json.Unmarshal(body, &m) != nil {
@@ -621,7 +621,7 @@ func ServeRun(w http.ResponseWriter, r *http.Request, name string) {
 	}
 	spec, ok := runSpecOf(name)
 	if !ok {
-		http.Error(w, "myna gives Codex no server called "+name, http.StatusNotFound)
+		http.Error(w, "owl gives Codex no server called "+name, http.StatusNotFound)
 		return
 	}
 	if m.Method == "initialize" {
@@ -640,7 +640,7 @@ func ServeRun(w http.ResponseWriter, r *http.Request, name string) {
 	if len(m.ID) == 0 || m.Method == "" {
 		// a notification, or the client's answer to the server's request:
 		// for the server, if it runs (it is told it is initialized when
-		// myna starts it)
+		// owl starts it)
 		if c := s.running(); c != nil && m.Method != "notifications/initialized" {
 			_ = c.send(line.Bytes())
 		}
@@ -807,7 +807,7 @@ func runStream(w http.ResponseWriter, r *http.Request, name, sid string) {
 	}
 }
 
-// defaultInit is the initialize params a session myna didn't see start
+// defaultInit is the initialize params a session owl didn't see start
 // (one from before a restart) starts its server with.
 func defaultInit() json.RawMessage {
 	var m struct {

@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // These connections belong to the trace reader, not the Sessions listing cache.

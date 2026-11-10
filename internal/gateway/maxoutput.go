@@ -9,7 +9,7 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // outputLimit is the most a reply of a provider's model may hold, where
@@ -29,7 +29,7 @@ func outputLimit(p provider.Provider, model string) int {
 // userOutput is the Max output the user set for p's model (provider ›
 // model, or the provider's "*"), 0 when they set none. A request asking
 // for more is lowered to it on any route, not only in a group: Claude Code
-// asks claude-* models for their full 128000 and isn't told myna's
+// asks claude-* models for their full 128000 and isn't told owl's
 // figure for them (claudeOutput), so a key whose quota is held per request
 // as max_tokens times the price turned every turn away, and the field the
 // editor says caps max_tokens did nothing (YaCo on Discord).
@@ -165,7 +165,7 @@ const leastReplyLeft = 8192
 // withReplyCap is body asking for a reply of at most limit tokens, in
 // proto's words, whether or not it named a limit before: a request that
 // named none was given the vendor's own, which was too large. false when
-// it asked for no more already, or proto keeps no such field myna sets.
+// it asked for no more already, or proto keeps no such field owl sets.
 func withReplyCap(proto provider.Protocol, body []byte, limit int) ([]byte, bool) {
 	if limit <= 0 {
 		return nil, false
@@ -259,13 +259,13 @@ func withOwnOutput(p provider.Provider, model string, proto provider.Protocol, b
 // API reads none as the model's whole, which another vendor's needn't
 // (DeepSeek's reads it as 8K, shortByDefault). Anthropic's always is, as
 // it needs one. An account's own backend (the ChatGPT one turns
-// max_output_tokens away) and another myna, which fills its own, aren't.
+// max_output_tokens away) and another owl, which fills its own, aren't.
 func fillsOutput(p provider.Provider, to provider.Protocol) bool {
 	if to == provider.Anthropic {
 		return true
 	}
 	return (to == provider.Chat || to == provider.Responses) &&
-		(p.Account == nil || p.IsPlugin()) && !p.IsRemoteMyna()
+		(p.Account == nil || p.IsPlugin()) && !p.IsRemoteOwl()
 }
 
 // outputFieldRefused is a request error about the reply limit itself
@@ -285,6 +285,6 @@ func outputFieldRefused(status int, body []byte) bool {
 }
 
 // outputFillRefused names, for markUnfit, a model whose vendor turned
-// away the reply limit myna filled in: a request naming none is sent
+// away the reply limit owl filled in: a request naming none is sent
 // none there from then on, as before.
 func outputFillRefused(model string) string { return "filled-output:" + model }

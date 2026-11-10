@@ -12,7 +12,7 @@
 // at a time over forty listed: worked out again for every row, that is
 // forty and more an update; kept, it is one for the new row. A request
 // that changed (answered after it was under way) and a new language are
-// still drawn anew. MYNA_ROUTING_ASSETS points the page at an older
+// still drawn anew. OWL_ROUTING_ASSETS points the page at an older
 // asset tree, to watch this go red there.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -21,7 +21,7 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 const engines = process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"];
 
-const assets = path.resolve(process.env.MYNA_ROUTING_ASSETS || path.join(__dirname, "../assets"));
+const assets = path.resolve(process.env.OWL_ROUTING_ASSETS || path.join(__dirname, "../assets"));
 const iso = (ms) => new Date(ms).toISOString();
 const acct = (n) => ({ id: `acct-${n}`, provider: `prov${n}`, name: `Provider ${n}`, who: `user${n}@example.com`, kind: "account", model: `model-${n}`, known: true, used: 10 * n, plan: "Pro" });
 const agentsOf = ["codex", "claude", "opencode", "kimi"];
@@ -89,7 +89,7 @@ for (const engine of engines) for (const lang of ["en", "zh"]) {
     page.on("pageerror", (e) => errors.push(e.message));
     const feed = Array.from({ length: 40 }, (_, i) => req(i + 1)), next = [];
     await page.route("**/*", serve(lang, feed, next));
-    await page.goto("http://myna.test/?view=routing");
+    await page.goto("http://owl.test/?view=routing");
     await page.waitForFunction(() => document.querySelectorAll(".rt-req").length >= 40);
     // what the first draw settles into: the days, the agents' names
     await page.waitForTimeout(800);

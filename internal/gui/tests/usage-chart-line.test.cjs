@@ -121,7 +121,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       p.setDefaultNavigationTimeout(60000);
       p.on("pageerror", (e) => errors.push(e.message));
       await p.route("**/*", serve(lang, theme, empty));
-      await p.goto("http://myna.test/");
+      await p.goto("http://owl.test/");
       await navTo(p, "usage");
       await p.locator(":is(#usageTab .opt, .nav-s):visible").nth(1).click();
       await p.locator("#ledStyle .opt").first().waitFor();
@@ -245,8 +245,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
     await t.test("a kept value that isn't line, or a read that throws, is columns", async () => {
       for (const init of [
-        () => localStorage.setItem("myna.ledChart", "pie"),
-        () => { const get = Storage.prototype.getItem; Storage.prototype.getItem = function (k) { if (k === "myna.ledChart") throw new Error("denied"); return get.call(this, k); }; },
+        () => localStorage.setItem("owl.ledChart", "pie"),
+        () => { const get = Storage.prototype.getItem; Storage.prototype.getItem = function (k) { if (k === "owl.ledChart") throw new Error("denied"); return get.call(this, k); }; },
       ]) {
         const ctx = await browser.newContext({ viewport: { width: 1180, height: 760 }, reducedMotion: "reduce" });
         await ctx.addInitScript(init);

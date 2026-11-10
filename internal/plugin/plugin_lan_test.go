@@ -23,11 +23,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // lanAddr is a private IPv4 address of this computer: one on the user's
-// own network, as a Remote myna or a NAS is.
+// own network, as a Remote owl or a NAS is.
 func lanAddr(t *testing.T) net.IP {
 	t.Helper()
 	addrs, _ := net.InterfaceAddrs()
@@ -117,8 +117,8 @@ func certFor(t *testing.T, ip net.IP) (tls.Certificate, []byte) {
 }
 
 // #1572: a plugin's requests to a host on the user's own network — a
-// Remote myna, an LLM relay on the NAS — went through the proxy myna
-// gave the host, which can't reach it (502 Bad Gateway), while myna's
+// Remote owl, an LLM relay on the NAS — went through the proxy owl
+// gave the host, which can't reach it (502 Bad Gateway), while owl's
 // own requests leave such a host direct (netproxy.onLAN, #982). The
 // plugin's fetches, http:// (sent to the proxy in absolute form) and
 // https:// (a CONNECT), and its HTTP/2 sessions now go direct too; a

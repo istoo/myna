@@ -10,7 +10,7 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // Claude's thinking block is signed for the conversation it was made in
@@ -19,7 +19,7 @@ import (
 // plugin): 400 "messages.3.content.20: Invalid signature in thinking
 // block. The block is bound to a different conversation. Remove the
 // block, or set thinking.block_binding.prefix_mismatch_behavior to
-// "drop_block"" (that setting needs a beta myna doesn't send for an
+// "drop_block"" (that setting needs a beta owl doesn't send for an
 // agent). Such a block comes from a conversation that moved between
 // accounts or providers (a routing group's fallback, an account switch,
 // a relay that serves Claude from more than one account of its own) or

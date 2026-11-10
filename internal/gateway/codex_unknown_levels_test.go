@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// ccdcn on X: Codex now offers low, medium and high for a model myna
+// ccdcn on X: Codex now offers low, medium and high for a model owl
 // has no word on (provider.CodexEfforts, XJAI's model-test). Each reaches
 // the vendor as Codex picked it, on its Responses: the levels offered are
 // ones the gateway sends, not a picker that changes nothing.

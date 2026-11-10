@@ -7,7 +7,7 @@ import (
 
 func TestURLCarriesThePictureWholeThroughAProxy(t *testing.T) {
 	proxy := "https://icons.example/fetch"
-	t.Setenv("MYNA_ICON_PROXY", proxy)
+	t.Setenv("OWL_ICON_PROXY", proxy)
 	pic := "https://github.com/magpie-community.png?size=96&x=a b#c"
 	got := URL(pic)
 	u, err := url.Parse(got)
@@ -23,9 +23,9 @@ func TestURLCarriesThePictureWholeThroughAProxy(t *testing.T) {
 }
 
 func TestURLAsksTheHostWithoutAProxy(t *testing.T) {
-	t.Setenv("MYNA_ICON_PROXY", "")
+	t.Setenv("OWL_ICON_PROXY", "")
 	for _, u := range []string{
-		"https://github.com/istoo/myna/partners/x.png",
+		"https://github.com/istoo/owl/partners/x.png",
 		"https://example.com/x.png?a=1&b=2",
 	} {
 		if got := URL(u); got != u {

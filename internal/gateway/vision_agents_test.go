@@ -5,11 +5,11 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/codexcat"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/codexcat"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// A text-only model is offered to agents as taking images while myna
+// A text-only model is offered to agents as taking images while owl
 // describes images to it (Discord, Fate: Codex turned an image away for a
 // text model although Settings › Vision was set), and as text-only again
 // with Vision off.

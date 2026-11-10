@@ -8,8 +8,8 @@ import (
 // Codex writes its memories with models of its own, gpt-5.6-luna for a
 // thread's summary and gpt-5.6-terra to consolidate them, whatever its
 // model (Yc on Discord). The memories square sets both [memories] keys to
-// one pick, Default removes them, a myna model needs Codex on myna,
-// and stepping out of myna drops one of myna's while keeping the
+// one pick, Default removes them, a owl model needs Codex on owl,
+// and stepping out of owl drops one of owl's while keeping the
 // user's other [memories] settings.
 func TestCodexMemoriesModel(t *testing.T) {
 	home, read := codexHome(t, `{"tokens":{"access_token":"x","id_token":"x.e30.x"}}`,
@@ -26,11 +26,11 @@ func TestCodexMemoriesModel(t *testing.T) {
 		t.Fatalf("unset memories model = %q", got)
 	}
 	if err := mem.Set("fake/m1"); err == nil {
-		t.Error("a myna model was taken before Codex runs through myna")
+		t.Error("a owl model was taken before Codex runs through owl")
 	}
 	for _, o := range mem.Options(nil) {
-		if isMyna(o.Value) {
-			t.Errorf("myna model offered before Codex runs through myna: %s", o.Value)
+		if isOwl(o.Value) {
+			t.Errorf("owl model offered before Codex runs through owl: %s", o.Value)
 		}
 	}
 	if err := mem.Set("gpt-5.4-mini"); err != nil {
@@ -52,15 +52,15 @@ func TestCodexMemoriesModel(t *testing.T) {
 		t.Fatal(err)
 	}
 	if cfg := read(); !strings.Contains(cfg, `extract_model = "fake/m1"`) || !strings.Contains(cfg, `consolidation_model = "fake/m1"`) {
-		t.Fatalf("myna model:\n%s", cfg)
+		t.Fatalf("owl model:\n%s", cfg)
 	}
-	// one of Codex's own again: Codex can't find myna's model any more
+	// one of Codex's own again: Codex can't find owl's model any more
 	if err := cx.Fields[0].Set("gpt-5.4"); err != nil {
 		t.Fatal(err)
 	}
 	if cfg := read(); strings.Contains(cfg, "extract_model") || strings.Contains(cfg, "consolidation_model") ||
 		!strings.Contains(cfg, "max_raw_memories_for_consolidation = 64") {
-		t.Fatalf("stepping out of myna:\n%s", cfg)
+		t.Fatalf("stepping out of owl:\n%s", cfg)
 	}
 
 	// Default: the keys go, and a table left empty with them
@@ -87,7 +87,7 @@ func TestCodexMemoriesModel(t *testing.T) {
 	}
 }
 
-// A myna memories model goes when Codex is disconnected from myna too.
+// A owl memories model goes when Codex is disconnected from owl too.
 func TestCodexMemoriesUnwire(t *testing.T) {
 	home, read := codexHome(t, `{"tokens":{"access_token":"x","id_token":"x.e30.x"}}`, "model = \"gpt-5.5\"\n")
 	cx := codex(home)
@@ -101,6 +101,6 @@ func TestCodexMemoriesUnwire(t *testing.T) {
 		t.Fatal(err)
 	}
 	if cfg := read(); strings.Contains(cfg, "fake/m1") {
-		t.Fatalf("myna model kept after disconnecting:\n%s", cfg)
+		t.Fatalf("owl model kept after disconnecting:\n%s", cfg)
 	}
 }

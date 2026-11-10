@@ -10,7 +10,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/owl/internal/sessions"
 )
 
 // statsAnswer writes the stats answer a day at a time, and the answer is
@@ -68,7 +68,7 @@ func TestSameAnswerNotHeldWhole(t *testing.T) {
 	}
 	var before, after runtime.MemStats
 	w = httptest.NewRecorder()
-	w.Body.Grow(len(big) + 1<<20) // the recorder's copy isn't myna's
+	w.Body.Grow(len(big) + 1<<20) // the recorder's copy isn't owl's
 	runtime.ReadMemStats(&before)
 	writeSame(w, httptest.NewRequest("GET", "/x", nil), write)
 	runtime.ReadMemStats(&after)
@@ -99,7 +99,7 @@ func TestJSONRowsNotHeldWhole(t *testing.T) {
 	writeJSONRows(w, httptest.NewRequest("GET", "/x", nil), "rows", rows, struct{}{}) // warm
 	var before, after runtime.MemStats
 	w = httptest.NewRecorder()
-	w.Body.Grow(len(rows)*len(big) + 1<<20) // the recorder's copy isn't myna's
+	w.Body.Grow(len(rows)*len(big) + 1<<20) // the recorder's copy isn't owl's
 	runtime.ReadMemStats(&before)
 	writeJSONRows(w, httptest.NewRequest("GET", "/x", nil), "rows", rows, struct{}{})
 	runtime.ReadMemStats(&after)

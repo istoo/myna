@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/library"
+	"github.com/istoo/owl/internal/library"
 )
 
 // Crispin on Discord: a skill's PowerPoint template didn't come with a

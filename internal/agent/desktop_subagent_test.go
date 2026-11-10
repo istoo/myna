@@ -3,12 +3,12 @@ package agent
 import (
 	"testing"
 
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// Claude Desktop's subagent model field: offered myna's models once
-// Desktop is on myna, a pick connecting it as any model pick does, an
+// Claude Desktop's subagent model field: offered owl's models once
+// Desktop is on owl, a pick connecting it as any model pick does, an
 // alias kept by its catalog id, one not served now kept, a bare name
 // refused. Desktop's tiers and Codex's subagent model aren't Live, and a
 // stopped WSL copy keeps the flag.
@@ -76,7 +76,7 @@ func TestDesktopSubagentEffortField(t *testing.T) {
 	if len(f.Options(nil)) != 0 || f.Set("high") != nil || a.Wired() {
 		t.Fatal("saving an unwired effort offered choices or connected Desktop")
 	}
-	if err := a.Pick("provider", "myna"); err != nil {
+	if err := a.Pick("provider", "owl"); err != nil {
 		t.Fatal(err)
 	}
 	if len(f.Options(nil)) != len(provider.MemberEfforts) {

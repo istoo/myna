@@ -5,11 +5,11 @@ package agent
 // Python kimi-cli's in ~/.kimi ($KIMI_SHARE_DIR), in the same shape (see
 // KimiDir): the model sessions start with as default_model, a key
 // of its [models."<key>"] tables, each naming a [providers.<name>] table and
-// the model to ask it for. myna adds itself as the provider "myna" (the
+// the model to ask it for. owl adds itself as the provider "owl" (the
 // gateway, spoken to as Kimi's own chat completions, so the thinking goes
 // both ways as reasoning_content) and one model table per catalog model,
-// keyed "myna/<provider>/<model>", so the catalog joins Kimi's /model
-// picker. The default the user had is stashed and put back when myna steps
+// keyed "owl/<provider>/<model>", so the catalog joins Kimi's /model
+// picker. The default the user had is stashed and put back when owl steps
 // out. Kimi refuses a config whose default_model or a model's provider is
 // missing, so the provider goes in before the models and the default after,
 // and out the other way round.
@@ -21,13 +21,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/owl/internal/edit"
 )
 
-// kimiModelTable is the header prefix of every model table myna writes.
-var kimiModelTable = `models."` + mynaID + "/"
+// kimiModelTable is the header prefix of every model table owl writes.
+var kimiModelTable = `models."` + owlID + "/"
 
-// kimiContext is what Kimi is told of a model whose context myna doesn't
+// kimiContext is what Kimi is told of a model whose context owl doesn't
 // know: it has to be told one, and compacts as it nears it.
 const kimiContext = 128000
 
@@ -58,16 +58,16 @@ func kimiDir(at place) (dir string, legacy bool) {
 	return code, false
 }
 
-// kimiModelTables are myna's model tables; the new Kimi Code is told of
+// kimiModelTables are owl's model tables; the new Kimi Code is told of
 // tool calling too, which kimi-cli has no word for and refuses. wrote is
-// what myna wrote in them last (kimiOwn), and the tables come back with
+// what owl wrote in them last (kimiOwn), and the tables come back with
 // what this write puts there.
 func kimiModelTables(path string, legacy bool, wrote map[string]map[string]string) ([]edit.Table, map[string]map[string]string) {
 	var out []edit.Table
 	now := map[string]map[string]string{}
 	names, _ := edit.TOMLTables(path)
 	for _, m := range sharedModels("kimi") {
-		name := "models." + strconv.Quote(mynaID+"/"+m.ID)
+		name := "models." + strconv.Quote(owlID+"/"+m.ID)
 		ctx := m.Context
 		if ctx <= 0 {
 			ctx = kimiContext
@@ -77,7 +77,7 @@ func kimiModelTables(path string, legacy bool, wrote map[string]map[string]strin
 			was, _ = edit.GetTOMLTable(path, name)
 		}
 		kvs := []edit.KV{
-			{Path: "provider", Value: mynaID},
+			{Path: "provider", Value: owlID},
 			{Path: "model", Value: m.ID},
 			{Path: "max_context_size", Value: ctx},
 		}
@@ -103,7 +103,7 @@ func kimiModelTables(path string, legacy bool, wrote map[string]map[string]strin
 		// switch, and one that loads tools mid-conversation does with
 		// Kimi Code's tool select on. video_in is left out: Kimi Code
 		// uploads a video to its provider's /files and sends the ms://
-		// id, which myna's gateway has no route for (#4485)
+		// id, which owl's gateway has no route for (#4485)
 		if !legacy && m.AlwaysThinks {
 			caps = append(caps, strconv.Quote("always_thinking"))
 		}
@@ -121,7 +121,7 @@ func kimiModelTables(path string, legacy bool, wrote map[string]map[string]strin
 		}
 		if !legacy {
 			// the new Kimi Code's cap on a reply (max_completion_tokens),
-			// where myna knows the model's; kimi-cli has no such key
+			// where owl knows the model's; kimi-cli has no such key
 			if was["max_output_size"] != "" && !kimiInt(was["max_output_size"]) {
 				delete(was, "max_output_size")
 			}
@@ -147,9 +147,9 @@ func kimiModelTables(path string, legacy bool, wrote map[string]map[string]strin
 	return out, now
 }
 
-// kimiOwn is the value of key in one of myna's model tables: one the user
-// set there themselves (was, other than what myna wrote last) stays,
-// else myna's own (mine, "" for none), and by says it is myna's.
+// kimiOwn is the value of key in one of owl's model tables: one the user
+// set there themselves (was, other than what owl wrote last) stays,
+// else owl's own (mine, "" for none), and by says it is owl's.
 func kimiOwn(was, wrote map[string]string, key, mine string) (v string, by bool) {
 	if v, ok := was[key]; ok && v != "" && v != wrote[key] {
 		return v, false
@@ -171,7 +171,7 @@ func setWrote(m map[string]map[string]string, table, key, v string) {
 	m[table][key] = v
 }
 
-// kimiWroteKey is where the stash keeps what myna last wrote in its model
+// kimiWroteKey is where the stash keeps what owl last wrote in its model
 // tables of the config at path, as JSON: {table: {key: value}}.
 func kimiWroteKey(path string) string { return "kimi:" + path + ":wrote" }
 
@@ -191,8 +191,8 @@ func kimiWrote(path string) map[string]map[string]string {
 // has it. Without them it offers thinking on or off only and asks for no
 // level at all. none is left out: Kimi Code's own off turns thinking off.
 // kimi-cli has neither key. was is the table's default_effort now and
-// wrote what myna wrote in the table last (kimiOwn): one set by hand
-// stays while the model has it. def is myna's own default, "" when the
+// wrote what owl wrote in the table last (kimiOwn): one set by hand
+// stays while the model has it. def is owl's own default, "" when the
 // table keeps the user's.
 func kimiEfforts(efforts []string, vendor, was string, wrote map[string]string) (kvs []edit.KV, def string) {
 	var levels, quoted []string
@@ -212,7 +212,7 @@ func kimiEfforts(efforts []string, vendor, was string, wrote map[string]string) 
 	} else if slices.Contains(levels, "high") {
 		mine = "high"
 	}
-	// high in a table myna kept no record of is the one it wrote before
+	// high in a table owl kept no record of is the one it wrote before
 	// it kept one (it wrote high on every model that had it)
 	if _, ok := wrote["default_effort"]; !ok && was == "high" {
 		was = ""
@@ -233,7 +233,7 @@ func kimiEfforts(efforts []string, vendor, was string, wrote map[string]string) 
 
 func kimi(home string) *Agent { return kimiIn(here(home)) }
 
-// kimiProvider writes myna's keys into its provider table, each in place
+// kimiProvider writes owl's keys into its provider table, each in place
 // when the table is there, so the rest of it stays: custom_headers, env or a
 // default_model the user set on it (Kimi Code's ProviderConfig,
 // packages/agent-core-v2/src/app/kosongConfig/configSection.ts), which a
@@ -257,8 +257,8 @@ func kimiIn(at place) *Agent {
 	path := filepath.Join(dir, "config.toml")
 	key := "kimi:" + path + ":default_model"
 	get := func() string { v, _ := edit.GetTOMLTop(path, "default_model"); return v }
-	providerTable := "providers." + mynaID
-	writeMyna := func() error {
+	providerTable := "providers." + owlID
+	writeOwl := func() error {
 		if err := kimiProvider(path, providerTable,
 			edit.KV{Path: "type", Value: "kimi"},
 			edit.KV{Path: "base_url", Value: at.v1()},
@@ -274,7 +274,7 @@ func kimiIn(at place) *Agent {
 		stash(map[string]string{kimiWroteKey(path): string(b)})
 		return nil
 	}
-	dropMyna := func() error {
+	dropOwl := func() error {
 		if err := edit.SetTOMLTables(path, []string{kimiModelTable}, nil); err != nil {
 			return err
 		}
@@ -305,7 +305,7 @@ func kimiIn(at place) *Agent {
 			if err != nil || t == nil {
 				return err
 			}
-			return writeMyna()
+			return writeOwl()
 		},
 		Notice: func() string {
 			if Running(`(^|/)kimi( |$)`, `(^|/)kimi-cli( |$)`) {
@@ -315,7 +315,7 @@ func kimiIn(at place) *Agent {
 		},
 		Check: func() string {
 			v := get()
-			if !usesMyna(v) {
+			if !usesOwl(v) {
 				return ""
 			}
 			m, err := kimiModelTableForKey(path, v)
@@ -323,14 +323,14 @@ func kimiIn(at place) *Agent {
 				return err.Error()
 			}
 			if m == nil {
-				return "Kimi Code's [models." + strconv.Quote(v) + "] (config.toml) is gone, so it no longer reaches myna"
+				return "Kimi Code's [models." + strconv.Quote(v) + "] (config.toml) is gone, so it no longer reaches owl"
 			}
 			t, err := edit.GetTOMLTable(path, providerTable)
 			if err != nil {
 				return err.Error()
 			}
 			if t == nil {
-				return "Kimi Code's [" + providerTable + "] (config.toml) is gone, so it no longer reaches myna"
+				return "Kimi Code's [" + providerTable + "] (config.toml) is gone, so it no longer reaches owl"
 			}
 			return wiringOff("Kimi Code", path, func(k string) (string, bool) { v, ok := t[k]; return v, ok },
 				"base_url", at.v1(), "api_key", at.gwKey())
@@ -340,28 +340,28 @@ func kimiIn(at place) *Agent {
 			Get: get,
 			Set: func(v string) error {
 				cur := get()
-				if ref, ok := strings.CutPrefix(v, mynaID+"/"); ok && isMyna(ref) {
-					if !usesMyna(cur) {
+				if ref, ok := strings.CutPrefix(v, owlID+"/"); ok && isOwl(ref) {
+					if !usesOwl(cur) {
 						stash(map[string]string{key: cur})
 					}
-					if err := writeMyna(); err != nil {
+					if err := writeOwl(); err != nil {
 						return err
 					}
 					return setDefault(v)
 				}
-				if v == "" && usesMyna(cur) {
+				if v == "" && usesOwl(cur) {
 					// back to the default the user had, if Kimi still has it
-					if was := unstash(key); was != "" && !usesMyna(was) && ownModel(was) {
+					if was := unstash(key); was != "" && !usesOwl(was) && ownModel(was) {
 						v = was
 					}
 				}
 				if err := setDefault(v); err != nil {
 					return err
 				}
-				return dropMyna()
+				return dropOwl()
 			},
 			Options: func(cur map[string]string) []Option {
-				return withVia(kimiOwnOptions(path, cur["model"]), "kimi", mynaID+"/")
+				return withVia(kimiOwnOptions(path, cur["model"]), "kimi", owlID+"/")
 			},
 		}},
 	}, path)
@@ -378,7 +378,7 @@ func kimiOwnOptions(path, cur string) []Option {
 		if !ok {
 			continue
 		}
-		if seen[k] || strings.HasPrefix(k, mynaID+"/") {
+		if seen[k] || strings.HasPrefix(k, owlID+"/") {
 			continue
 		}
 		seen[k] = true
@@ -389,7 +389,7 @@ func kimiOwnOptions(path, cur string) []Option {
 		}
 		out = append(out, Option{Value: k, Icon: icon})
 	}
-	if cur != "" && !seen[cur] && !strings.HasPrefix(cur, mynaID+"/") {
+	if cur != "" && !seen[cur] && !strings.HasPrefix(cur, owlID+"/") {
 		out = append([]Option{{Value: cur, Icon: modelIcon("", cur)}}, out...)
 	}
 	return group("Kimi Code", out)

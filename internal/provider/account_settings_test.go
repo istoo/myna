@@ -10,7 +10,7 @@ import (
 // TestAccountSettingsKept: what the user sets on a signed-in account's
 // provider is written by Save and read back by Find, every setting alike.
 // Save and withPicks kept two lists, and a setting on one alone was lost
-// (#4738: `myna provider set codex additional-tools=on` was on neither,
+// (#4738: `owl provider set codex additional-tools=on` was on neither,
 // so the setting seemed taken and nothing changed; an account's extraBody
 // and reply headers were read back but never written; its rests were
 // written but never read back, so the next Save cleared them).

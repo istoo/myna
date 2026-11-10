@@ -11,9 +11,9 @@ import (
 // OpenCode 2 keeps its servers under mcp.servers (its own `opencode mcp
 // add` writes them there), beside the V1 mcp.<name> entries it still
 // reads. liam_8829 (Discord #feedback, 10-27) turned off every MCP server
-// in myna and found a "servers" node with no type and no enabled left
-// in opencode.json: myna read mcp.servers as nothing at all, so the
-// servers in it were never found, never taken off, and myna's own went
+// in owl and found a "servers" node with no type and no enabled left
+// in opencode.json: owl read mcp.servers as nothing at all, so the
+// servers in it were never found, never taken off, and owl's own went
 // in beside them in the other shape.
 func TestOpenCode2Servers(t *testing.T) {
 	h := sandbox(t)

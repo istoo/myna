@@ -5,7 +5,7 @@ import (
 	"context"
 	"strings"
 
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/proc"
 )
 
 // keychainPut adds or replaces a generic password without putting the

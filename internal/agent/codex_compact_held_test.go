@@ -8,7 +8,7 @@ import (
 )
 
 // A model_context_window or model_auto_compact_token_limit in Codex's
-// config.toml comes before the window and threshold myna's catalog gives
+// config.toml comes before the window and threshold owl's catalog gives
 // (zgjfjfl on Discord: 128000 there, Long conversations at 544K, and Codex
 // compacted every conversation near 128K). Long conversations names each
 // one, top-level or in the profile the config picks, and takes them out
@@ -21,14 +21,14 @@ func TestCodexCompactHeldNamedAndTakenOut(t *testing.T) {
 		t.Fatal(err)
 	}
 	path := filepath.Join(dir, "config.toml")
-	cfg := `model = "myna/relay/big"
-model_provider = "myna"
+	cfg := `model = "owl/relay/big"
+model_provider = "owl"
 model_context_window = 128_000 # from a guide
 profile = "work"
 
 [profiles.work]
 model_auto_compact_token_limit = 120000
-model = "myna/relay/big"
+model = "owl/relay/big"
 
 [profiles.other]
 model_context_window = 64000
@@ -58,7 +58,7 @@ model_context_window = 64000
 	}
 	b, _ := os.ReadFile(path)
 	out := string(b)
-	for _, keep := range []string{`model_provider = "myna"`, `profile = "work"`, "[profiles.work]", "[profiles.other]", "model_context_window = 64000"} {
+	for _, keep := range []string{`model_provider = "owl"`, `profile = "work"`, "[profiles.work]", "[profiles.other]", "model_context_window = 64000"} {
 		if !strings.Contains(out, keep) {
 			t.Fatalf("taking them out lost %q:\n%s", keep, out)
 		}

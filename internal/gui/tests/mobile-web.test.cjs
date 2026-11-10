@@ -40,7 +40,7 @@ const agentRows = [
     modelField("model", "model", "gpt-6.1-sol"),
     { key: "effort", label: "effort", value: "high", options: [{ value: "high", label: "High" }] },
     modelField("subagent", "subagents"),
-    { key: "signin", label: "sign-in", value: "myna", options: [{ value: "myna", label: "myna" }, { value: "chatgpt", label: "ChatGPT" }] },
+    { key: "signin", label: "sign-in", value: "owl", options: [{ value: "owl", label: "owl" }, { value: "chatgpt", label: "ChatGPT" }] },
   ] },
   { id: "omp", name: "omp", path: "/test/omp.json", icon: "omp", wired: true, fields: [
     modelField("model", "model", "gpt-6.1-sol"), modelField("subagent", "subagents"),
@@ -131,8 +131,8 @@ async function open(browser, lang, width, { original = false, touch = true, open
       static now() { return new RealDate(at).getTime(); }
     };
   }, at);
-  await page.route("http://myna.test/**", server(lang, original, opened));
-  await page.goto("http://myna.test/");
+  await page.route("http://owl.test/**", server(lang, original, opened));
+  await page.goto("http://owl.test/");
   await page.locator("#nav button").first().waitFor();
   return page;
 }
@@ -269,7 +269,7 @@ async function usageFits(page) {
 }
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
-  test(engine + ": myna web on phones", async t => {
+  test(engine + ": owl web on phones", async t => {
     assert(["chromium", "webkit"].includes(engine), "BROWSER must be chromium or webkit");
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     t.after(() => browser.close());
@@ -307,7 +307,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           // Settings now has separate parts. Its Usage part in a short phone
           // viewport has real content to scroll; General fits without scrolling.
           await page.setViewportSize({ width: 390, height: 600 });
-          await page.goto("http://myna.test/?view=settings&tab=usage");
+          await page.goto("http://owl.test/?view=settings&tab=usage");
           await go(page, "settings");
           await page.waitForTimeout(500);
           const view = page.locator("#view-settings");
@@ -399,9 +399,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
                 await current.addStyleTag({ content: ".row.pref .sub { white-space: nowrap; overflow-wrap: normal; }" });
                 await current.waitForTimeout(350);
               }
-              // The sidebar's button sits ahead of the myna in both layouts
+              // The sidebar's button sits ahead of the owl in both layouts
               // (ztf4080 on X), so the header beside the sidebar no longer
-              // starts with it: until BASE_REF has it, the button, the myna
+              // starts with it: until BASE_REF has it, the button, the owl
               // and the header beside the sidebar are left out of both pictures and the rest
               // compared as ever; side-toggle.test.cjs covers where they are.
               if (!baselineFile("app.js").includes("append(btn, brand)")) {

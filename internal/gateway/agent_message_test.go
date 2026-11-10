@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // MultiAgentV2 reads a namespaced call's message as sealed unless the call
-// says none of its arguments are; nothing myna serves seals them.
+// says none of its arguments are; nothing owl serves seals them.
 func TestNamespacedCallArgsArePlain(t *testing.T) {
 	res := Result{Parts: []Part{
 		{Kind: ToolCall, ID: "c1", Name: "collaboration__spawn_agent", Args: json.RawMessage(`{"message":"hi"}`)},

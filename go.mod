@@ -1,4 +1,4 @@
-module github.com/istoo/myna
+module github.com/istoo/owl
 
 go 1.26.10
 

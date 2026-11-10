@@ -129,7 +129,7 @@ func TestUserFolderXDGConfigHome(t *testing.T) {
 }
 
 // Windows' Downloads is the known folder (moved to D:\ or OneDrive), when
-// myna's home is the profile Windows keeps it for.
+// owl's home is the profile Windows keeps it for.
 func TestUserFolderWindows(t *testing.T) {
 	h := userDirsHome(t, userDirsZH) // not read on Windows
 	moved := filepath.Join(t.TempDir(), "OneDrive", "Downloads")
@@ -145,7 +145,7 @@ func TestUserFolderWindows(t *testing.T) {
 	if got, want := userFolderOn("windows", h, DesktopFolder), filepath.Join(h, "Desktop"); got != want {
 		t.Errorf("lookup failed: %q, want %q", got, want)
 	}
-	// Another home's known folder: myna's own home keeps home\Downloads.
+	// Another home's known folder: owl's own home keeps home\Downloads.
 	other := t.TempDir()
 	if got, want := userFolderOn("windows", other, DownloadsFolder), filepath.Join(other, "Downloads"); got != want {
 		t.Errorf("another home: %q, want %q", got, want)
@@ -179,14 +179,14 @@ func TestSharedFolderMovedDownloads(t *testing.T) {
 	if !sharedFolder(filepath.Join(h, "Downloads")) {
 		t.Error("home's Downloads not shared")
 	}
-	if movedFolder(filepath.Join(moved, "myna")) || sharedFolder(filepath.Join(moved, "myna")) {
+	if movedFolder(filepath.Join(moved, "owl")) || sharedFolder(filepath.Join(moved, "owl")) {
 		t.Error("a folder inside shared")
 	}
 }
 
-// jwaitq on Discord: updated from v0.1.2630 to v0.1.2670, myna showed
-// the setup of long ago. A data folder beside myna in a moved Downloads
-// (D:\Downloads, OneDrive, ~/下载) holding myna's files is where every
+// jwaitq on Discord: updated from v0.1.2630 to v0.1.2670, owl showed
+// the setup of long ago. A data folder beside owl in a moved Downloads
+// (D:\Downloads, OneDrive, ~/下载) holding owl's files is where every
 // release before v0.1.2648 kept them, an installed folder with files of
 // its own or not; one holding none of them (another app's, or emptied by
 // an archiver) isn't taken.
@@ -210,7 +210,7 @@ func TestResolveMovedDownloadsKeepsData(t *testing.T) {
 	}
 	t.Cleanup(func() { userFolder = was })
 
-	exe := filepath.Join(moved, "myna.exe")
+	exe := filepath.Join(moved, "owl.exe")
 	data := filepath.Join(moved, "data")
 	for _, p := range []string{exe, filepath.Join(data, "report.json")} {
 		os.MkdirAll(filepath.Dir(p), 0o755)
@@ -219,15 +219,15 @@ func TestResolveMovedDownloadsKeepsData(t *testing.T) {
 		}
 	}
 	if got := Resolve(exe); got != "" {
-		t.Errorf("no myna files in data: %q, want installed", got)
+		t.Errorf("no owl files in data: %q, want installed", got)
 	}
 	os.WriteFile(filepath.Join(data, "providers.json"), []byte("{}"), 0o600)
 	if got := Resolve(exe); got != data {
 		t.Errorf("nothing installed: %q, want %q", got, data)
 	}
 	// the setup of long ago, in the installed folder
-	os.MkdirAll(filepath.Join(h, ".config", "myna"), 0o700)
-	os.WriteFile(filepath.Join(h, ".config", "myna", "settings.json"), []byte("{}"), 0o600)
+	os.MkdirAll(filepath.Join(h, ".config", "owl"), 0o700)
+	os.WriteFile(filepath.Join(h, ".config", "owl", "settings.json"), []byte("{}"), 0o600)
 	if got := Resolve(exe); got != data {
 		t.Errorf("installed has old files: %q, want the data folder %q", got, data)
 	}

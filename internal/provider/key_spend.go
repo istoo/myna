@@ -1,10 +1,10 @@
 package provider
 
-// A key's spend cap: how much an API key may spend, in USD, as myna's
+// A key's spend cap: how much an API key may spend, in USD, as owl's
 // own usage prices its calls (sparkling_lemur_62868 on Discord: a team's
 // OpenAI key, credits granted to it, that other services spend from too,
-// with nothing on OpenAI's side to stop myna at a share of it). Once
-// what myna sent on the key in the cap's period costs the cap or more,
+// with nothing on OpenAI's side to stop owl at a share of it). Once
+// what owl sent on the key in the cap's period costs the cap or more,
 // routing takes the key for used up — as a usage cap holds an account —
 // and goes on to the provider's other keys and its fallbacks; with none,
 // the request is answered 429 with why. The key is used again when the
@@ -12,7 +12,7 @@ package provider
 // it is raised or lifted.
 //
 // What is counted is what the Usage page prices the key's calls at
-// (usage.KeySpent), not the vendor's bill: a price myna doesn't know
+// (usage.KeySpent), not the vendor's bill: a price owl doesn't know
 // counts nothing, and requests already under way when the cap is reached
 // still finish, so the key can go a little past it.
 
@@ -79,7 +79,7 @@ func SetKeySpendCap(id, ref string, c *SpendCap) error {
 		return err
 	}
 	if p.Account != nil {
-		return fmt.Errorf("%s is a subscription: a spend cap is for an API key (an account's cap is a share of its usage windows, myna provider account-cap)", p.Name)
+		return fmt.Errorf("%s is a subscription: a spend cap is for an API key (an account's cap is a share of its usage windows, owl provider account-cap)", p.Name)
 	}
 	r, ok := p.accountRef(ref)
 	if !ok {

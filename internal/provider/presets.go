@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-// A preset is a vendor myna already knows: adding one only asks for the key.
+// A preset is a vendor owl already knows: adding one only asks for the key.
 
 // Kind groups presets in the picker.
 type Kind string
@@ -15,7 +15,7 @@ const (
 	KindVendor Kind = "vendor" // the model's own maker
 	KindRelay  Kind = "relay"  // an aggregator / API relay reselling many vendors
 	KindLocal  Kind = "local"  // something running on this machine
-	// KindRemote is another computer's myna: not a relay, so the add
+	// KindRemote is another computer's owl: not a relay, so the add
 	// lists give it a heading of its own, after this machine's
 	KindRemote Kind = "remote"
 )
@@ -32,7 +32,7 @@ type PresetDef struct {
 	Decide    string   `json:"decide,omitempty"` // a decision API: the provider only routes (see decide.go)
 	Catalog   string   `json:"catalog,omitempty"`
 	Website   string   `json:"website,omitempty"`
-	SiteHost  string   `json:"siteHost,omitempty"` // a partner's: the host its github.com/istoo/myna/go Website sends the browser to, which the editor's link reads
+	SiteHost  string   `json:"siteHost,omitempty"` // a partner's: the host its github.com/istoo/owl/go Website sends the browser to, which the editor's link reads
 	KeysURL   string   `json:"keysUrl,omitempty"`
 	NoKey     bool     `json:"noKey,omitempty"`     // local servers: a key is optional
 	KeyHint   string   `json:"keyHint,omitempty"`   // the key field's placeholder, when it says more than NoKey's
@@ -201,24 +201,24 @@ var presets = []PresetDef{
 	{ID: "xai", Name: "xAI", Icon: "xai", Kind: KindVendor, Catalog: "xai",
 		Chat: "https://api.x.ai/v1", Responses: "https://api.x.ai/v1", Anthropic: "https://api.x.ai",
 		Website: "https://console.x.ai", KeysURL: "https://console.x.ai"},
-	// Kimi's key pages and sites carry its referral (aff=myna), as its
-	// partner card's do: Kimi sponsors myna
+	// Kimi's key pages and sites carry its referral (aff=owl), as its
+	// partner card's do: Kimi sponsors owl
 	{ID: "moonshot", Name: "Kimi", Icon: "kimi", Kind: KindVendor, Catalog: "moonshotai",
 		Chat: "https://api.moonshot.ai/v1", Anthropic: "https://api.moonshot.ai/anthropic",
-		Website: "https://platform.kimi.ai?aff=myna", KeysURL: "https://platform.kimi.ai/console/api-keys?aff=myna"},
+		Website: "https://platform.kimi.ai?aff=owl", KeysURL: "https://platform.kimi.ai/console/api-keys?aff=owl"},
 	{ID: "moonshot-cn", Name: "Kimi (China)", Icon: "kimi", Kind: KindVendor, Catalog: "moonshotai",
 		Chat: "https://api.moonshot.cn/v1", Anthropic: "https://api.moonshot.cn/anthropic",
-		Website: "https://platform.kimi.com?aff=myna", KeysURL: "https://platform.kimi.com/console/api-keys?aff=myna"},
+		Website: "https://platform.kimi.com?aff=owl", KeysURL: "https://platform.kimi.com/console/api-keys?aff=owl"},
 	// a Kimi Code membership's own endpoints (k3, kimi-for-coding …): Kimi
 	// lets members use them from third-party tools, keyed at its console
 	{ID: "kimi-code", Name: "Kimi Code", Icon: "kimi", Kind: KindVendor, Catalog: "kimi-code-plan-global",
 		Chat: "https://api.kimi.ai/coding/v1", Anthropic: "https://api.kimi.ai/coding",
 		Note:    "Membership",
-		Website: "https://www.kimi.ai/code?aff=myna", KeysURL: "https://www.kimi.ai/code/console?aff=myna"},
+		Website: "https://www.kimi.ai/code?aff=owl", KeysURL: "https://www.kimi.ai/code/console?aff=owl"},
 	{ID: "kimi-code-cn", Name: "Kimi Code (China)", Icon: "kimi", Kind: KindVendor, Catalog: "kimi-code-plan-cn",
 		Chat: "https://api.kimi.com/coding/v1", Anthropic: "https://api.kimi.com/coding",
 		Note:    "Membership",
-		Website: "https://www.kimi.com/code?aff=myna", KeysURL: "https://www.kimi.com/code/console?aff=myna"},
+		Website: "https://www.kimi.com/code?aff=owl", KeysURL: "https://www.kimi.com/code/console?aff=owl"},
 	{ID: "zhipu", Name: "Zhipu GLM", Icon: "zhipu-color", Kind: KindVendor, Catalog: "zhipuai",
 		Chat: "https://open.bigmodel.cn/api/paas/v4", Anthropic: "https://open.bigmodel.cn/api/anthropic",
 		Website: "https://open.bigmodel.cn", KeysURL: "https://open.bigmodel.cn/usercenter/proj-mgmt/apikeys",
@@ -496,7 +496,7 @@ var presets = []PresetDef{
 	{ID: AzurePreset, Name: "Azure OpenAI", Icon: "azure-color", Kind: KindVendor, Catalog: "azure, openai", Hosts: true,
 		Note:         "your resource's endpoint and key",
 		Endpoint:     "https://<resource>.openai.azure.com",
-		EndpointHint: "Your resource's endpoint, from Keys and Endpoint in the Azure portal. Once added, myna asks the resource for its deployments with this key, over its v1 API; the deployments' names are the model ids.",
+		EndpointHint: "Your resource's endpoint, from Keys and Endpoint in the Azure portal. Once added, owl asks the resource for its deployments with this key, over its v1 API; the deployments' names are the model ids.",
 		Website:      "https://ai.azure.com", KeysURL: "https://portal.azure.com/#view/Microsoft_Azure_ProjectOxford/CognitiveServicesHub/~/OpenAI"},
 	// Ollama's own hosted models: the local server's API, at ollama.com with
 	// a key. Its decision models (Clef), served at /v1/systemone, are the
@@ -552,7 +552,7 @@ var presets = []PresetDef{
 		// so it routes groups like TypeSafe's own (#609's mixed provider)
 		Decide: "https://opencode.ai/zen/v1",
 		// its free models (-free, big-pickle) are served to OpenCode
-		// alone, which myna asks them as (OpenCodeFree)
+		// alone, which owl asks them as (OpenCodeFree)
 		Website: "https://opencode.ai/docs/zen", KeysURL: "https://opencode.ai/auth"},
 	// Kilo Code's gateway, at the OpenRouter-style API its own clients use
 	// (kilo.go): its free models (isFree, ":free") are served with no key,
@@ -686,14 +686,14 @@ var presets = []PresetDef{
 		Decide: "http://localhost:11234/v1",
 		Note:   "local server, port 11234 by default", Website: "https://github.com/ddalcu/mlx-serve"},
 
-	// another computer's myna, shared on its network (remote_myna.go):
+	// another computer's owl, shared on its network (remote_owl.go):
 	// its providers, routing groups and usage stay there, each request
 	// goes on in the API the agent spoke
-	{ID: RemoteMynaPreset, Name: "Remote myna", Icon: "myna", Kind: KindRemote,
-		Note:           "another computer's myna, shared on its network",
+	{ID: RemoteOwlPreset, Name: "Remote owl", Icon: "owl", Kind: KindRemote,
+		Note:           "another computer's owl, shared on its network",
 		Endpoint:       "http://192.168.1.20:3425",
-		EndpointHint:   "The address and API key the other computer's myna shows in Settings → Network and sharing, under Share on local network. Its models and routing groups are listed here; each request goes on in the API the agent spoke.",
-		EndpointNeeded: "The other myna's address is needed"},
+		EndpointHint:   "The address and API key the other computer's owl shows in Settings → Network and sharing, under Share on local network. Its models and routing groups are listed here; each request goes on in the API the agent spoke.",
+		EndpointNeeded: "The other owl's address is needed"},
 }
 
 func bedrockChat(region string) string {
@@ -856,7 +856,7 @@ func Preset(id string) *PresetDef {
 	return partnerPreset(id)
 }
 
-// builtinPreset is the preset of that id built into myna, partners'
+// builtinPreset is the preset of that id built into owl, partners'
 // aside.
 func builtinPreset(id string) *PresetDef {
 	if a, ok := presetAliases[id]; ok {
@@ -875,7 +875,7 @@ func builtinPreset(id string) *PresetDef {
 func FromPreset(id string) (Provider, error) {
 	pr := Preset(id)
 	if pr == nil {
-		return Provider{}, errorf("no preset %q — myna presets lists them", id)
+		return Provider{}, errorf("no preset %q — owl presets lists them", id)
 	}
 	p := Provider{
 		ID: pr.ID, Name: pr.Name, Icon: pr.Icon, Preset: pr.ID,

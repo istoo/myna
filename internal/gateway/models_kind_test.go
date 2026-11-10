@@ -49,7 +49,7 @@ func TestModelsListMediaOnlyWhenAsked(t *testing.T) {
 		"claude-desktop": {"User-Agent": "Mozilla/5.0 (Macintosh) Claude/1.2.3 Chrome/130"},
 		"science":        {"X-Anthropic-Surface": "operon", "User-Agent": "Anthropic/JS 0.60.0"},
 		"cursor":         {"User-Agent": "Cursor-CLI/1.0"},
-		"myna-key":       {"Authorization": "Bearer myna-acme"},
+		"owl-key":       {"Authorization": "Bearer owl-acme"},
 	}
 	for name, header := range agents {
 		rows := list("/v1/models", header)

@@ -11,11 +11,11 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A client's web search, offered to a model that can't search: the model
-// is given myna's web_search tool, the search is done by a provider that
+// is given owl's web_search tool, the search is done by a provider that
 // can, and the client gets one reply with what was found.
 func TestWebSearchForAModelThatCannot(t *testing.T) {
 	var mu sync.Mutex
@@ -484,7 +484,7 @@ func TestMovedGrokSearchesItself(t *testing.T) {
 }
 
 // A relay in front of Anthropic's API searches as Anthropic does, which
-// myna can't tell from its host (#359). One that serves only Claude Code
+// owl can't tell from its host (#359). One that serves only Claude Code
 // refuses a request without Claude Code's metadata.user_id. Set as
 // searching by itself, it is sent Claude Code's WebSearch as it was sent;
 // not set, the request built again for it keeps the metadata.
@@ -551,13 +551,13 @@ func TestWebSearchOfARelayThatSearches(t *testing.T) {
 	if err := provider.Save(p); err != nil {
 		t.Fatal(err)
 	}
-	// it searches for Claude Code, not for myna's other models: it would
-	// spend the relay's quota, and refuse myna's request without metadata
+	// it searches for Claude Code, not for owl's other models: it would
+	// spend the relay's quota, and refuse owl's request without metadata
 	if _, err := p.Fetch(context.Background()); err != nil {
 		t.Fatal(err)
 	}
 	if sp, _, ok := searcher(); ok {
-		t.Fatalf("myna searches with %s", sp.ID)
+		t.Fatalf("owl searches with %s", sp.ID)
 	}
 	if rec := ask(); rec.Code != 200 || !strings.Contains(rec.Body.String(), "Go 1.27.1 is out.") {
 		t.Fatalf("%d %s", rec.Code, rec.Body.String())
@@ -570,7 +570,7 @@ func TestWebSearchOfARelayThatSearches(t *testing.T) {
 		t.Fatalf("sent %s %s", got[0]["tools"], got[0]["system"])
 	}
 
-	// not said to search, it is given no search of its own: myna has no
+	// not said to search, it is given no search of its own: owl has no
 	// searcher here, so the request is built again, without the tool
 	got = nil
 	p.Searches = false
@@ -596,8 +596,8 @@ func TestWebSearchOfARelayThatSearches(t *testing.T) {
 // A plugin whose config hook says its upstream searches by itself (#2027),
 // as a plugin in front of Claude's API does, is sent the client's
 // web_search as sent, on Anthropic's API, as a relay said to search is
-// (#359); it is never myna's searcher for other models, and its Chat
-// models don't search. A plugin that doesn't say so is given myna's
+// (#359); it is never owl's searcher for other models, and its Chat
+// models don't search. A plugin that doesn't say so is given owl's
 // search (none here, so the request goes without the tool).
 func TestPluginSaidToSearch(t *testing.T) {
 	for _, said := range []bool{true, false} {
@@ -669,17 +669,17 @@ func TestSearchAskedLooksCheaply(t *testing.T) {
 	asks := []byte(`{"model":"gpt-5","input":"` + long + `","tools":[{"type":"web_search"}]}`)
 	codex := provider.Provider{ID: "codex", Responses: provider.CodexBase, Account: &provider.Account{Agent: "codex"}}
 	if searchedForIt(context.Background(), codex, provider.Responses, "gpt-5", asks) {
-		t.Error("Codex searches by itself, and myna searched for it")
+		t.Error("Codex searches by itself, and owl searched for it")
 	}
 	if n := testing.AllocsPerRun(20, func() { searchedForIt(context.Background(), codex, provider.Responses, "gpt-5", asks) }); n > 20 {
 		t.Errorf("a provider that searches by itself: %v allocations, the body parsed", n)
 	}
 	other := provider.Provider{ID: "x", Responses: "https://example.test/v1"}
 	if !searchedForIt(context.Background(), other, provider.Responses, "gpt-5", asks) {
-		t.Error("a provider that doesn't search: myna didn't search for it")
+		t.Error("a provider that doesn't search: owl didn't search for it")
 	}
 	if searchedForIt(context.Background(), other, provider.Responses, "gpt-5", plain) {
-		t.Error("a body offering no search: myna searched for it")
+		t.Error("a body offering no search: owl searched for it")
 	}
 }
 

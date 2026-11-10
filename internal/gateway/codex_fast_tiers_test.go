@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // Codex sends /fast's service_tier only on a model whose entry lists it
@@ -13,7 +13,7 @@ import (
 // model with a fast mode that isn't a ChatGPT account's GPT is offered
 // Fast in the list too, and one with no member that has a fast mode is
 // offered none (cute_lynx_36404 on Discord: /fast did nothing through
-// myna, only the Routing page's default did).
+// owl, only the Routing page's default did).
 func TestCodexFastOfferedWhereAMemberHasIt(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())

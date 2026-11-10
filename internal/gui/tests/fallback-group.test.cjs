@@ -56,7 +56,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [], posts = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, posts));
-      await page.goto("http://myna.test/?view=providers");
+      await page.goto("http://owl.test/?view=providers");
       const W = words[lang];
       const missing = await page.evaluate(() => {
         const keys = ["add a model or routing group: filter, or type provider/model…", "No routing group {id} now; it is skipped", "No model or routing group matches", "routing group"];

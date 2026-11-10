@@ -11,17 +11,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/sessions"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/sessions"
+	"github.com/istoo/owl/internal/usage"
 )
 
-// Jumy (Discord, 10-30): an omp task through myna's gateway was counted
+// Jumy (Discord, 10-30): an omp task through owl's gateway was counted
 // far past what it spent. omp's subagent (the task tool's Kid.jsonl) asks
 // with its own session id in x-session-affinity, so the gateway records
 // its calls under that id, while the main session counts the same calls
 // from Kid.jsonl. The Usage page's sessions count them once: the main
 // session's, with no gateway session beside it for the subagent. The
-// lines are omp 18.9.1's, as it wrote them for a task run through myna.
+// lines are omp 18.9.1's, as it wrote them for a task run through owl.
 func TestOmpSubagentCountedOnceWithTheGateway(t *testing.T) {
 	h := sandboxHome(t)
 	const (
@@ -37,7 +37,7 @@ func TestOmpSubagentCountedOnceWithTheGateway(t *testing.T) {
 	at := func(d time.Duration) string { return now.Add(d).UTC().Format("2006-01-02T15:04:05.000Z") }
 	title := `{"type":"title","v":1,"title":"","updatedAt":%q,"pad":"                "}` + "\n"
 	user := `{"type":"message","id":"u%d","parentId":null,"timestamp":%q,"message":{"role":"user","content":[{"type":"text","text":"spawn a child"}],"timestamp":%d}}` + "\n"
-	reply := `{"type":"message","id":"a%d","parentId":"u0","timestamp":%q,"message":{"role":"assistant","content":[{"type":"text","text":"ok"}],"api":"openai-completions","provider":"myna","model":"fake-model","usage":{"input":200,"output":50,"cacheRead":800,"cacheWrite":0,"totalTokens":1050,"cost":{"input":0,"output":0,"cacheRead":0,"cacheWrite":0,"total":0}},"stopReason":"stop","timestamp":%d,"responseId":"x"}}` + "\n"
+	reply := `{"type":"message","id":"a%d","parentId":"u0","timestamp":%q,"message":{"role":"assistant","content":[{"type":"text","text":"ok"}],"api":"openai-completions","provider":"owl","model":"fake-model","usage":{"input":200,"output":50,"cacheRead":800,"cacheWrite":0,"totalTokens":1050,"cost":{"input":0,"output":0,"cacheRead":0,"cacheWrite":0,"total":0}},"stopReason":"stop","timestamp":%d,"responseId":"x"}}` + "\n"
 	write := func(path, header string, replies int, start time.Duration) {
 		var b strings.Builder
 		fmt.Fprintf(&b, title, at(start))

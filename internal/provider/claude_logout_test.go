@@ -8,9 +8,9 @@ import (
 	"time"
 )
 
-// Claude Code wired to myna, its accounts served by myna: the user logs
-// out of Claude Code (it says to, over myna's ANTHROPIC_AUTH_TOKEN), and
-// the accounts saved in myna are still served — the one it was signed in
+// Claude Code wired to owl, its accounts served by owl: the user logs
+// out of Claude Code (it says to, over owl's ANTHROPIC_AUTH_TOKEN), and
+// the accounts saved in owl are still served — the one it was signed in
 // to first, in a config directory of its own, the others on behind it — and
 // none of them is dropped from the list (StringKe on Discord: all six went).
 func TestClaudeAccountsOutliveLogout(t *testing.T) {
@@ -45,7 +45,7 @@ func TestClaudeAccountsOutliveLogout(t *testing.T) {
 	loginsMu.Unlock()
 
 	// the one Claude Code held went with its /logout, which revokes the
-	// refresh token it holds — myna's copy of it too (StringKe on
+	// refresh token it holds — owl's copy of it too (StringKe on
 	// Discord: all six had to be signed in again). The others are sign-ins
 	// of their own: one on stands in, never the revoked one.
 	p, ok := find(All(), "claude")
@@ -112,7 +112,7 @@ func TestClaudeAccountsOutliveLogout(t *testing.T) {
 	}
 }
 
-// A switch in myna takes Claude Code off one account and puts it on
+// A switch in owl takes Claude Code off one account and puts it on
 // another, saving the first's sign-in as it was: nothing revoked it, and it
 // isn't taken for logged out.
 func TestClaudeSwitchIsNoLogout(t *testing.T) {
@@ -142,9 +142,9 @@ func TestClaudeSwitchIsNoLogout(t *testing.T) {
 	}
 }
 
-// Logged out of Claude Code with accounts in myna, an account signed in
-// in myna stays myna's: Claude Code isn't signed in to it again, which
-// would only bring back its warning over myna's token.
+// Logged out of Claude Code with accounts in owl, an account signed in
+// in owl stays owl's: Claude Code isn't signed in to it again, which
+// would only bring back its warning over owl's token.
 func TestClaudeSignInWhileLoggedOut(t *testing.T) {
 	home := claudeHome(t)
 	t.Setenv("CLAUDE_CONFIG_DIR", "")
@@ -242,7 +242,7 @@ func TestClaudeAllSignedOutStaysListed(t *testing.T) {
 	if u := InUseLogin("claude"); u != "own@example.com" && u != "" {
 		t.Fatalf("in use %q", u)
 	}
-	// what myna providers, the TUI and the app's row say of it
+	// what owl providers, the TUI and the app's row say of it
 	if !p.SignedOut() {
 		t.Fatal("listed on a signed-out account, the provider doesn't say it is signed out")
 	}

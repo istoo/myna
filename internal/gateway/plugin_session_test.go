@@ -9,7 +9,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A plugin's fetch is told the session the agent named and the Claude Code
@@ -54,7 +54,7 @@ func TestPluginToldTheSession(t *testing.T) {
 		}{
 			{"claude code's lead", map[string]string{"X-Claude-Code-Session-Id": "cc-s1"}, "cc-s1", ""},
 			{"claude code's subagent", map[string]string{"X-Claude-Code-Session-Id": "cc-s1", "X-Claude-Code-Agent-Id": "agent-7"}, "cc-s1", "agent-7"},
-			{"myna's own session header first", map[string]string{"X-Magpie-Session": "mine", "X-Claude-Code-Session-Id": "cc-s1"}, "mine", ""},
+			{"owl's own session header first", map[string]string{"X-Magpie-Session": "mine", "X-Claude-Code-Session-Id": "cc-s1"}, "mine", ""},
 			{"opencode", map[string]string{"X-Opencode-Session": "ses_1"}, "ses_1", ""},
 			{"no session named", nil, "", ""},
 		} {

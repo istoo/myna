@@ -5,10 +5,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/provider"
 )
 
 func saveDeepseek(t *testing.T) {
@@ -18,14 +18,14 @@ func saveDeepseek(t *testing.T) {
 	}
 }
 
-// Claude Code running through myna can keep its claude.ai sign-in: its
+// Claude Code running through owl can keep its claude.ai sign-in: its
 // sign-in field at claudeai leaves ANTHROPIC_AUTH_TOKEN empty, which Claude
 // Code reads as no key, so it stays signed in to claude.ai and sends that
-// sign-in to myna. Every later write — a model, a tier, the subagents,
+// sign-in to owl. Every later write — a model, a tier, the subagents,
 // a /model pick followed, Reapply — keeps it so, and a key put there by
-// hand is said, not taken for myna's.
+// hand is said, not taken for owl's.
 func TestClaudeKeepsItsClaudeAISignIn(t *testing.T) {
-	t.Setenv("MYNA_ADDR", "")
+	t.Setenv("OWL_ADDR", "")
 	home, path := claudeSettings(t, `{"theme":"dark"}`)
 	saveDeepseek(t)
 	env := func(k string) (string, bool) { return edit.GetJSON(path, "env."+k) }
@@ -35,16 +35,16 @@ func TestClaudeKeepsItsClaudeAISignIn(t *testing.T) {
 		t.Fatal("Claude Code has no sign-in field")
 	}
 	if o := login.Options(a.Values()); len(o) != 0 {
-		t.Fatalf("sign-ins offered before Claude Code runs through myna: %v", o)
+		t.Fatalf("sign-ins offered before Claude Code runs through owl: %v", o)
 	}
 	if err := login.Set("claudeai"); err == nil {
-		t.Fatal("a sign-in kept before Claude Code runs through myna")
+		t.Fatal("a sign-in kept before Claude Code runs through owl")
 	}
 	if err := a.Apply("model", "deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	if tok, _ := env("ANTHROPIC_AUTH_TOKEN"); tok != gateway.Token {
-		t.Fatalf("myna's key by default, got %q", tok)
+		t.Fatalf("owl's key by default, got %q", tok)
 	}
 	if o := login.Options(a.Values()); len(o) != 2 {
 		t.Fatalf("sign-ins %v", o)
@@ -97,7 +97,7 @@ func TestClaudeKeepsItsClaudeAISignIn(t *testing.T) {
 	if err := edit.SetJSON(path, edit.KV{Path: "env.ANTHROPIC_AUTH_TOKEN", Value: "sk-other"}); err != nil {
 		t.Fatal(err)
 	}
-	if c := a.Check(); !strings.Contains(c, "sends myna that key, not its claude.ai sign-in") {
+	if c := a.Check(); !strings.Contains(c, "sends owl that key, not its claude.ai sign-in") {
 		t.Fatalf("a key beside the sign-in kept: %q", c)
 	}
 	if err := a.Reapply(); err != nil {
@@ -105,25 +105,25 @@ func TestClaudeKeepsItsClaudeAISignIn(t *testing.T) {
 	}
 	kept("reapplied over a key")
 
-	// back to myna's key
+	// back to owl's key
 	if err := a.Apply("login", ""); err != nil {
 		t.Fatal(err)
 	}
 	if tok, _ := env("ANTHROPIC_AUTH_TOKEN"); tok != gateway.Token || a.Values()["login"] != "" || a.Drift() != nil {
-		t.Fatalf("myna's key again: token %q, values %v, drift %+v", tok, a.Values(), a.Drift())
+		t.Fatalf("owl's key again: token %q, values %v, drift %+v", tok, a.Values(), a.Drift())
 	}
-	// myna's key emptied or taken out by hand: said, with the way to keep it so
+	// owl's key emptied or taken out by hand: said, with the way to keep it so
 	if err := edit.SetJSON(path, edit.KV{Path: "env.ANTHROPIC_AUTH_TOKEN", Value: ""}); err != nil {
 		t.Fatal(err)
 	}
 	if c := a.Check(); !strings.Contains(c, "is empty") || !strings.Contains(c, "set its sign-in to claude.ai") {
-		t.Fatalf("myna's key emptied: %q", c)
+		t.Fatalf("owl's key emptied: %q", c)
 	}
 	if err := edit.DelJSON(path, "env.ANTHROPIC_AUTH_TOKEN"); err != nil {
 		t.Fatal(err)
 	}
 	if c := a.Check(); !strings.Contains(c, "is gone") {
-		t.Fatalf("myna's key gone: %q", c)
+		t.Fatalf("owl's key gone: %q", c)
 	}
 	if v, _ := edit.GetJSON(path, "theme"); v != "dark" {
 		t.Fatal("theme lost")
@@ -133,7 +133,7 @@ func TestClaudeKeepsItsClaudeAISignIn(t *testing.T) {
 // Switched off, Claude Code gets back its own endpoint and key; switched
 // on again, it keeps its claude.ai sign-in as it did.
 func TestClaudeSignInThroughDisconnect(t *testing.T) {
-	t.Setenv("MYNA_ADDR", "")
+	t.Setenv("OWL_ADDR", "")
 	home, path := claudeSettings(t, `{"theme":"dark","env":{"ANTHROPIC_BASE_URL":"https://relay.example","ANTHROPIC_AUTH_TOKEN":"sk-relay"}}`)
 	saveDeepseek(t)
 	env := func(k string) string { v, _ := edit.GetJSON(path, "env."+k); return v }
@@ -151,7 +151,7 @@ func TestClaudeSignInThroughDisconnect(t *testing.T) {
 		t.Fatalf("switched off:\n%s", readFile(path))
 	}
 	if v := a.Values()["login"]; v != "" {
-		t.Fatalf("sign-in %q off myna", v)
+		t.Fatalf("sign-in %q off owl", v)
 	}
 	if err := a.Connect(); err != nil {
 		t.Fatal(err)
@@ -161,11 +161,11 @@ func TestClaudeSignInThroughDisconnect(t *testing.T) {
 	}
 }
 
-// An empty key at an endpoint the user set after myna stepped out is
-// theirs, though Claude Code kept its claude.ai sign-in through myna
+// An empty key at an endpoint the user set after owl stepped out is
+// theirs, though Claude Code kept its claude.ai sign-in through owl
 // before: its model default leaves it (yetone on #1218).
 func TestClaudeOwnEndpointWithAnEmptyKey(t *testing.T) {
-	t.Setenv("MYNA_ADDR", "")
+	t.Setenv("OWL_ADDR", "")
 	home, path := claudeSettings(t, `{"theme":"dark","env":{"ANTHROPIC_BASE_URL":"https://relay.example","ANTHROPIC_AUTH_TOKEN":"sk-relay"}}`)
 	saveDeepseek(t)
 	env := func(k string) (string, bool) { return edit.GetJSON(path, "env."+k) }
@@ -192,9 +192,9 @@ func TestClaudeOwnEndpointWithAnEmptyKey(t *testing.T) {
 }
 
 // Moved to another port, Claude Code keeps its sign-in; left at an old
-// one, its model default takes out myna's empty key with the address.
+// one, its model default takes out owl's empty key with the address.
 func TestClaudeSignInAcrossPorts(t *testing.T) {
-	t.Setenv("MYNA_ADDR", "")
+	t.Setenv("OWL_ADDR", "")
 	home, path := claudeSettings(t, `{"theme":"dark"}`)
 	saveDeepseek(t)
 	setPort(t, 3591)
@@ -226,7 +226,7 @@ func TestClaudeSignInAcrossPorts(t *testing.T) {
 	}
 }
 
-// From a WSL distro under NAT, with myna shared on the network, the
+// From a WSL distro under NAT, with owl shared on the network, the
 // gateway takes only the sharing key: Claude Code there can't keep its
 // sign-in, and isn't offered it. Mirrored, it reaches loopback and can.
 func TestWSLClaudeSignInWhereTheGatewayTakesAnyKey(t *testing.T) {
@@ -258,7 +258,7 @@ func TestWSLClaudeSignInWhereTheGatewayTakesAnyKey(t *testing.T) {
 	}
 }
 
-// A stopped distro's Claude Code on myna's model is offered its claude.ai
+// A stopped distro's Claude Code on owl's model is offered its claude.ai
 // sign-in only where the gateway takes any key, as a running one is.
 func TestWSLClaudeStoppedSignIn(t *testing.T) {
 	t.Cleanup(func() { access.ConfigureLAN(false, false) })
@@ -279,13 +279,13 @@ func TestWSLClaudeStoppedSignIn(t *testing.T) {
 	}
 }
 
-// Wired in, then the gateway moved without myna following (it wasn't
-// running): a myna model picked at the older address takes nothing of
-// myna's there for the user's, with its key or its claude.ai sign-in.
+// Wired in, then the gateway moved without owl following (it wasn't
+// running): a owl model picked at the older address takes nothing of
+// owl's there for the user's, with its key or its claude.ai sign-in.
 // Switched off, Claude Code gets its own endpoint and key back; on its own
 // model, no gateway address is left.
 func TestClaudeAtAnOlderGatewayAddress(t *testing.T) {
-	t.Setenv("MYNA_ADDR", "")
+	t.Setenv("OWL_ADDR", "")
 	for _, login := range []string{"", "claudeai"} {
 		for _, off := range []string{"disconnect", "default"} {
 			home, path := claudeSettings(t, `{"theme":"dark","env":{"ANTHROPIC_BASE_URL":"https://relay.example","ANTHROPIC_AUTH_TOKEN":"sk-relay"}}`)
@@ -324,7 +324,7 @@ func TestClaudeAtAnOlderGatewayAddress(t *testing.T) {
 
 // A stopped distro's Claude Code offers a tier's effort, and the
 // subagents', the levels of its model as a running one does, not
-// myna's models: picking one of those as an effort is refused (cybercaius).
+// owl's models: picking one of those as an effort is refused (cybercaius).
 func TestWSLClaudeStoppedEfforts(t *testing.T) {
 	root, _ := claudeDistroHome(t, `{}`)
 	saveDeepseek(t)
@@ -350,7 +350,7 @@ func TestWSLClaudeStoppedEfforts(t *testing.T) {
 			}
 		}
 	}
-	// a tier still offers myna's models
+	// a tier still offers owl's models
 	if len(a.Field("opus").Options(cur)) == 0 {
 		t.Fatal("opus offers no model")
 	}

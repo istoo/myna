@@ -7,12 +7,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A defective upstream stitches the fragments of a streamed tool call's
 // arguments with CR: the JSON \r escape in the text is a CR it put at a
-// token boundary (istoo/myna#4256), and the client reads one broken
+// token boundary (istoo/owl#4256), and the client reads one broken
 // line a CR. The deltas a client stitches say what it should have.
 
 // stitched is the arguments a defective relay sends, its CR at the token
@@ -80,7 +80,7 @@ func TestRelayedToolArgsLoseStitchedCR(t *testing.T) {
 }
 
 // TestTranslatedToolArgsLoseStitchedCR is the same call from an upstream
-// myna speaks Chat to, translated for the Messages client.
+// owl speaks Chat to, translated for the Messages client.
 func TestTranslatedToolArgsLoseStitchedCR(t *testing.T) {
 	fresh(t)
 	f := &fake{t: t, reply: sse(

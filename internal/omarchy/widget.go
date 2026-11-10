@@ -11,17 +11,22 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/proc"
 )
 
-// The bar widget: myna's icon in Omarchy's own bar, where Omarchy's
+// The bar widget: owl's icon in Omarchy's own bar, where Omarchy's
 // widgets are, rather than in the tray's drawer, which Omarchy keeps tray
 // icons behind until each is pinned. It is a third-party Omarchy plugin,
 // put in by hand the way Omarchy's shell README says (the files under
 // ~/.config/omarchy/plugins/<id>/, then rescanPlugins and plugin enable),
 // and only when the user asks for it in Settings.
-const WidgetID = "usemyna.myna"
+const WidgetID = "useowl.owl"
+
+// legacyWidgetID is the widget this fork wrote as myna (until it became
+// owl): left in, it sits beside the new one in the bar and opens the old
+// app.
+const legacyWidgetID = "usemyna.myna"
 
 //go:embed widget
 var widgetFiles embed.FS
@@ -41,9 +46,12 @@ func WidgetOn() bool {
 	return err == nil
 }
 
-// AddWidget puts the widget in Omarchy's bar, running exe (myna) when
+// AddWidget puts the widget in Omarchy's bar, running exe (owl) when
 // clicked, or brings it up to date.
 func AddWidget(exe string) error {
+	// the old one goes first: two widgets in one bar, one of them opening
+	// an app this build replaced
+	_ = os.RemoveAll(filepath.Join(filepath.Dir(widgetDir()), legacyWidgetID))
 	dir := widgetDir()
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return err
@@ -65,7 +73,7 @@ func AddWidget(exe string) error {
 	return run("omarchy", "plugin", "enable", WidgetID)
 }
 
-// KeepWidget brings a widget that is in the bar up to date with this myna,
+// KeepWidget brings a widget that is in the bar up to date with this owl,
 // which may have moved or been updated since it was put in.
 func KeepWidget(exe string) error {
 	if !WidgetOn() {
@@ -93,7 +101,7 @@ func widget(exe string) (map[string][]byte, error) {
 		}
 		if name == "Widget.qml" {
 			// a QML string, quoted as JSON is
-			b = []byte(strings.Replace(string(b), `"__MYNA__"`, strconv.Quote(exe), 1))
+			b = []byte(strings.Replace(string(b), `"__OWL__"`, strconv.Quote(exe), 1))
 		}
 		files[name] = b
 	}

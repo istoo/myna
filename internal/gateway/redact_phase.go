@@ -85,7 +85,7 @@ func (f *inflight) maskedFor() time.Duration {
 	return d
 }
 
-// maskingMs is the ms of own, myna's own time before the request went
+// maskingMs is the ms of own, owl's own time before the request went
 // out (splitSent), that went on masking it: what masking took it, at
 // most own. Under a ms is still said, as 1; none is 0. With own unknown
 // (0: a plugin's fetch or Claude Code sent it, or no first token came)

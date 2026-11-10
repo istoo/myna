@@ -8,9 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/agentenv"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/agentenv"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // claudeCloudHome is claudeAboutHome with the managed settings in the
@@ -29,7 +29,7 @@ func claudeCloudHome(t *testing.T, settings string) (home, path string, parse fu
 
 // claudeClouded is each settings.json of a Claude Code on a cloud, as jw1dev
 // on X had Bedrock: the switch on beside the cloud's own variables, and an
-// endpoint and Bedrock main model of the user's own for myna to give back.
+// endpoint and Bedrock main model of the user's own for owl to give back.
 var claudeClouded = []struct {
 	name, settings, key, raw string
 	cloud                    []string
@@ -46,13 +46,13 @@ var claudeClouded = []struct {
 		"CLAUDE_CODE_USE_FOUNDRY", `"yes"`, []string{"ANTHROPIC_FOUNDRY_RESOURCE", "ANTHROPIC_FOUNDRY_API_KEY"}},
 }
 
-// jw1dev on X: myna wired Claude Code (ANTHROPIC_BASE_URL and its model)
+// jw1dev on X: owl wired Claude Code (ANTHROPIC_BASE_URL and its model)
 // while CLAUDE_CODE_USE_BEDROCK=1 stayed in the same env, so Claude Code
-// went on to Bedrock, which refused myna's model, and myna showed
-// nothing wrong. Routed through myna, the switch is out and the cloud's
-// own variables stay; through Sync too; and myna stepping out, by
+// went on to Bedrock, which refused owl's model, and owl showed
+// nothing wrong. Routed through owl, the switch is out and the cloud's
+// own variables stay; through Sync too; and owl stepping out, by
 // Disconnect or Claude Code's own model, gives the switch back as written.
-func TestClaudeCloudSwitchStepsAsideForMyna(t *testing.T) {
+func TestClaudeCloudSwitchStepsAsideForOwl(t *testing.T) {
 	for _, c := range claudeClouded {
 		for _, out := range []string{"disconnect", "default"} {
 			t.Run(c.name+"/"+out, func(t *testing.T) {
@@ -65,7 +65,7 @@ func TestClaudeCloudSwitchStepsAsideForMyna(t *testing.T) {
 				routed := func(when string) {
 					t.Helper()
 					if v, has := edit.GetJSONRaw(path, "env."+c.key); has {
-						t.Fatalf("%s: %s left at %s beside myna's wiring:\n%s", when, c.key, v, readFile(path))
+						t.Fatalf("%s: %s left at %s beside owl's wiring:\n%s", when, c.key, v, readFile(path))
 					}
 					for _, k := range c.cloud {
 						if _, has := edit.GetJSON(path, "env."+k); !has {
@@ -99,7 +99,7 @@ func TestClaudeCloudSwitchStepsAsideForMyna(t *testing.T) {
 				}
 				got := parse()
 				if out == "default" {
-					// Claude Code's own model: the one myna took over
+					// Claude Code's own model: the one owl took over
 					// isn't the user's to have back
 					delete(want, "model")
 					delete(got, "model")
@@ -140,8 +140,8 @@ func TestClaudeCloudSwitchOffStays(t *testing.T) {
 	}
 }
 
-// A switch turned on in settings.json while Claude Code is on myna is
-// drift, saying which and where; myna's next Sync takes it out (and
+// A switch turned on in settings.json while Claude Code is on owl is
+// drift, saying which and where; owl's next Sync takes it out (and
 // Apply again would), and Disconnect gives it back. One the user writes
 // again before that stays as they wrote it.
 func TestClaudeCloudSwitchTurnedOnWhileRouted(t *testing.T) {
@@ -189,7 +189,7 @@ func TestClaudeCloudSwitchTurnedOnWhileRouted(t *testing.T) {
 	}
 }
 
-// A switch myna doesn't write over, where Claude Code still reads it, is
+// A switch owl doesn't write over, where Claude Code still reads it, is
 // drift that says where: an administrator's managed settings (which win
 // over the user's), ~/.claude.json's env (which the user's settings win
 // over), and the login shell (which every settings file wins over).
@@ -234,10 +234,10 @@ func TestClaudeCloudSwitchElsewhereIsSaid(t *testing.T) {
 			}
 			// the template's own words, its slots filled, for the GUI to
 			// translate (tNotice)
-			if !strings.HasSuffix(d.Detail, "to go through myna.") {
+			if !strings.HasSuffix(d.Detail, "to go through owl.") {
 				t.Fatalf("%q isn't one of the notices", d.Detail)
 			}
-			// where myna can't write it, it doesn't: the file stays
+			// where owl can't write it, it doesn't: the file stays
 			if c.managed != "" && !strings.Contains(readFile(claudeManaged()), `"1"`) {
 				t.Fatalf("managed settings written: %s", readFile(claudeManaged()))
 			}
@@ -291,9 +291,9 @@ func TestClaudeCloudSwitchInWSL(t *testing.T) {
 	}
 }
 
-// T3 Code's myna instance runs Claude Code with the user's ~/.claude
-// settings env put over its own, so a switch on there takes it past myna
-// too: drift that says so. One the user put on myna's own instance goes
+// T3 Code's owl instance runs Claude Code with the user's ~/.claude
+// settings env put over its own, so a switch on there takes it past owl
+// too: drift that says so. One the user put on owl's own instance goes
 // at its next write.
 func TestT3CodeSaysAClaudeCloudSwitch(t *testing.T) {
 	home := syncHome(t)
@@ -308,9 +308,9 @@ func TestT3CodeSaysAClaudeCloudSwitch(t *testing.T) {
 	writeFile(t, claudePath, `{"env":{"CLAUDE_CODE_USE_BEDROCK":"1"}}`)
 	a := t3code(home)
 	if a.Check() != "" {
-		t.Fatal("drift before myna's instance is there")
+		t.Fatal("drift before owl's instance is there")
 	}
-	if err := a.Field("provider").Set(mynaID); err != nil {
+	if err := a.Field("provider").Set(owlID); err != nil {
 		t.Fatal(err)
 	}
 	if got := a.Check(); !strings.Contains(got, "CLAUDE_CODE_USE_BEDROCK") || !strings.Contains(got, "Amazon Bedrock") {
@@ -321,7 +321,7 @@ func TestT3CodeSaysAClaudeCloudSwitch(t *testing.T) {
 		t.Fatalf("check %q with the switch gone", got)
 	}
 
-	// put on myna's instance in T3's own editor
+	// put on owl's instance in T3's own editor
 	path := filepath.Join(home, ".t3", "userdata", "settings.json")
 	raw, _ := edit.GetJSON(path, t3Instance+".environment")
 	var env []map[string]any
@@ -339,7 +339,7 @@ func TestT3CodeSaysAClaudeCloudSwitch(t *testing.T) {
 	raw, _ = edit.GetJSON(path, t3Instance+".environment")
 	for _, k := range agentenv.ClaudeProviders {
 		if strings.Contains(raw, k) {
-			t.Fatalf("%s left on myna's instance: %s", k, raw)
+			t.Fatalf("%s left on owl's instance: %s", k, raw)
 		}
 	}
 	if !strings.Contains(raw, "MY_OWN") {

@@ -8,14 +8,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/claudecode"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/claudecode"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // A machine with no Claude Code of its own (a server, a container) answers
-// a Claude subscription's request with the one `myna claude-code install`
-// downloaded into myna's cache (Jorben on Discord): before, the request
+// a Claude subscription's request with the one `owl claude-code install`
+// downloaded into owl's cache (Jorben on Discord): before, the request
 // failed "Claude Code is not installed" with that build right there.
 func TestClaudeSubscriptionRunsTheDownloadedClaudeCode(t *testing.T) {
 	if runtime.GOOS == "windows" {
@@ -47,7 +47,7 @@ echo '{"type":"stream_event","event":{"type":"message_stop"}}'
 	}
 }
 
-// With neither, the error says how to have myna download it.
+// With neither, the error says how to have owl download it.
 func TestClaudeSubscriptionWithoutClaudeCodeSaysHowToGetIt(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("WSL may have one")
@@ -55,7 +55,7 @@ func TestClaudeSubscriptionWithoutClaudeCodeSaysHowToGetIt(t *testing.T) {
 	t.Setenv("PATH", t.TempDir())
 	_ = os.RemoveAll(claudecode.Root())
 	_, err := claudeBinary()
-	if err == nil || !strings.Contains(err.Error(), "myna claude-code install") {
+	if err == nil || !strings.Contains(err.Error(), "owl claude-code install") {
 		t.Fatalf("claudeBinary() error = %v", err)
 	}
 }

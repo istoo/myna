@@ -10,14 +10,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // Run the public command in a fresh process, with only a fake account,
 // fake /usage and an on-disk snapshot in a temporary home.
 func TestAccountsCachedReading(t *testing.T) {
-	if mode := os.Getenv("MYNA_TEST_ACCOUNTS_READING"); mode != "" {
+	if mode := os.Getenv("OWL_TEST_ACCOUNTS_READING"); mode != "" {
 		provider.UsageClaudeVia(func(context.Context, string) (string, error) {
 			if strings.HasPrefix(mode, "fresh") {
 				return "Current session: 25% used", nil
@@ -36,7 +36,7 @@ func TestAccountsCachedReading(t *testing.T) {
 	for _, mode := range []string{"cached-text", "cached-json", "fresh-text", "fresh-json"} {
 		t.Run(mode, func(t *testing.T) {
 			home := t.TempDir()
-			config := filepath.Join(home, ".config", "myna")
+			config := filepath.Join(home, ".config", "owl")
 			at := time.Now().Add(-2 * time.Hour).UTC().Truncate(time.Second)
 			reset := at.Add(time.Hour)
 			write := func(path string, value any) {
@@ -66,10 +66,10 @@ func TestAccountsCachedReading(t *testing.T) {
 			}
 			cmd := exec.Command(self, "-test.run=^TestAccountsCachedReading$")
 			// A minimal environment prevents discovering real sign-ins or tools.
-			cmd.Env = []string{"MYNA_TEST_ACCOUNTS_READING=" + mode, "HOME=" + home, "USERPROFILE=" + home,
+			cmd.Env = []string{"OWL_TEST_ACCOUNTS_READING=" + mode, "HOME=" + home, "USERPROFILE=" + home,
 				"XDG_CONFIG_HOME=" + filepath.Dir(config), "XDG_CACHE_HOME=" + filepath.Join(home, ".cache"),
 				"CLAUDE_CONFIG_DIR=" + filepath.Join(home, ".claude"), "CODEX_HOME=" + filepath.Join(home, ".codex"), "PATH=" + home,
-				"SystemRoot=" + os.Getenv("SystemRoot"), "USER=myna-test", "NO_COLOR=1",
+				"SystemRoot=" + os.Getenv("SystemRoot"), "USER=owl-test", "NO_COLOR=1",
 				// so that the binary keeps this home instead of a sandbox of its own
 				testenv.Marker + "=" + os.Getenv(testenv.Marker),
 				"TMP=" + os.Getenv("TMP"), "TEMP=" + os.Getenv("TEMP"), "TMPDIR=" + os.Getenv("TMPDIR")}
@@ -202,7 +202,7 @@ func TestAccountRowsPoolsAntigravity(t *testing.T) {
 }
 
 // A ChatGPT account's credits are in its row beside its windows, as on the
-// usage page and in myna quota.
+// usage page and in owl quota.
 func TestAccountRowsTellCredits(t *testing.T) {
 	now := time.Date(2026, 10, 1, 9, 0, 0, 0, time.UTC)
 	provider.LoginUsageVia(func(context.Context, string) map[string]provider.SubscriptionQuota {

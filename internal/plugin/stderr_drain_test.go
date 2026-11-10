@@ -10,10 +10,10 @@ import (
 	"time"
 )
 
-// The test binary stands in for a plugin's child when MYNA_STDERR_CHILD is
+// The test binary stands in for a plugin's child when OWL_STDERR_CHILD is
 // set: 8 MiB to stderr with no newline, then a marker line, then it exits.
 func init() {
-	if os.Getenv("MYNA_STDERR_CHILD") == "1" {
+	if os.Getenv("OWL_STDERR_CHILD") == "1" {
 		chunk := strings.Repeat("x", 64<<10)
 		for range 128 {
 			os.Stderr.WriteString(chunk)
@@ -32,7 +32,7 @@ func TestDrainStderrKeepsTheChildGoing(t *testing.T) {
 	t.Cleanup(func() { log.SetOutput(old) })
 
 	cmd := exec.Command(os.Args[0], "-test.run=^TestDrainStderrKeepsTheChildGoing$")
-	cmd.Env = append(os.Environ(), "MYNA_STDERR_CHILD=1")
+	cmd.Env = append(os.Environ(), "OWL_STDERR_CHILD=1")
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
 		t.Fatal(err)

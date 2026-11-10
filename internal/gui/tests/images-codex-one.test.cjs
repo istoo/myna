@@ -23,7 +23,7 @@ function settingsPayload(lang, over) {
     dock: false, dockWindow: false, proxy: "", redact: false, redactPersonal: false, redactWords: [],
     codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", workbuddyCheckin: false, noStats: false,
     trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "",
-    version: "0.1.400", dir: "~/.config/myna", gateway: "http://127.0.0.1:3425",
+    version: "0.1.400", dir: "~/.config/owl", gateway: "http://127.0.0.1:3425",
     proxyNow: "none", proxySource: "none", login: false,
     visionModels: [], workbuddyCheckins: [], lanURLs: [],
     imageGenAuto: "codex/gpt-image-2",
@@ -92,7 +92,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.errors = [];
       page.on("pageerror", (e) => page.errors.push(e.message));
       await page.route("**/*", server(lang, cur, posted));
-      await page.goto("http://myna.test/?view=settings&tab=models");
+      await page.goto("http://owl.test/?view=settings&tab=models");
       await page.locator("#imagesList .row").nth(1).waitFor();
       return page;
     };

@@ -99,7 +99,7 @@ func newBase(skills []*Skill) string {
 	return base
 }
 
-// maxTree is the most of a repository's file list myna reads; a list can
+// maxTree is the most of a repository's file list owl reads; a list can
 // be tens of MB for a big app (stablyai/orca's is ~10 MB, and GitHub
 // answers one whole under its own 100,000-entry cap).
 const maxTree = 64 << 20

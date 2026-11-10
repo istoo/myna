@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/owl/internal/edit"
 )
 
 // claudeStatusAt makes the status line written run exe.
@@ -17,7 +17,7 @@ func claudeStatusAt(t *testing.T, exe string) {
 }
 
 // steven_4422 on Discord: the 5h and 7d use in Claude Code. The Agents
-// page's switch writes settings.json's statusLine to run this myna's
+// page's switch writes settings.json's statusLine to run this owl's
 // statusline by its full path, beside what else is there, and takes it
 // out again; nothing else in the file moves.
 func TestClaudeStatusLineSwitch(t *testing.T) {
@@ -27,7 +27,7 @@ func TestClaudeStatusLineSwitch(t *testing.T) {
 }
 `
 	home, path := claudeSettings(t, before)
-	claudeStatusAt(t, "/Applications/Myna.app/Contents/MacOS/myna")
+	claudeStatusAt(t, "/Applications/Owl.app/Contents/MacOS/owl")
 	a := claude(home)
 	f := a.Field("statusline")
 	if f == nil {
@@ -43,7 +43,7 @@ func TestClaudeStatusLineSwitch(t *testing.T) {
 		t.Fatal(err)
 	}
 	get := func(k string) string { v, _ := edit.GetJSON(path, k); return v }
-	if get("statusLine.type") != "command" || get("statusLine.command") != "/Applications/Myna.app/Contents/MacOS/myna statusline" ||
+	if get("statusLine.type") != "command" || get("statusLine.command") != "/Applications/Owl.app/Contents/MacOS/owl statusline" ||
 		get("model") != "opus" || get("env.FOO") != "1" {
 		t.Fatalf("on:\n%s", readFile(path))
 	}
@@ -74,11 +74,11 @@ func TestClaudeStatusLineLeavesTheUsers(t *testing.T) {
 }
 `
 	home, path := claudeSettings(t, theirs)
-	claudeStatusAt(t, "/usr/local/bin/myna")
+	claudeStatusAt(t, "/usr/local/bin/owl")
 	a := claude(home)
 	f := a.Field("statusline")
 	if f.Get() != "" {
-		t.Fatalf("the user's read as myna's: %q", f.Get())
+		t.Fatalf("the user's read as owl's: %q", f.Get())
 	}
 	if opts := f.Options(nil); opts != nil {
 		t.Fatalf("offered over the user's own: %+v", opts)
@@ -97,18 +97,18 @@ func TestClaudeStatusLineLeavesTheUsers(t *testing.T) {
 	}
 }
 
-// Disconnect takes myna's status line out with the rest of myna.
+// Disconnect takes owl's status line out with the rest of owl.
 func TestClaudeStatusLineGoesOnDisconnect(t *testing.T) {
-	home, path := claudeSettings(t, `{"statusLine": {"type": "command", "command": "myna statusline"}, "model": "opus"}`)
+	home, path := claudeSettings(t, `{"statusLine": {"type": "command", "command": "owl statusline"}, "model": "opus"}`)
 	a := claude(home)
 	if a.Field("statusline").Get() != "on" {
-		t.Fatal("the reference's hand-written `myna statusline` isn't read as myna's")
+		t.Fatal("the reference's hand-written `owl statusline` isn't read as owl's")
 	}
 	if err := a.Unwire(); err != nil {
 		t.Fatal(err)
 	}
 	if _, ok := edit.GetJSONRaw(path, "statusLine"); ok {
-		t.Fatalf("myna's status line left after Disconnect:\n%s", readFile(path))
+		t.Fatalf("owl's status line left after Disconnect:\n%s", readFile(path))
 	}
 }
 
@@ -127,39 +127,39 @@ func TestClaudeStatusLineUnreadable(t *testing.T) {
 
 func TestClaudeStatusCommand(t *testing.T) {
 	for _, c := range []struct{ exe, goos, want string }{
-		{"/Applications/Myna.app/Contents/MacOS/myna", "darwin", "/Applications/Myna.app/Contents/MacOS/myna statusline"},
-		{"/home/me/Jo's Apps/Myna-x86_64.AppImage", "linux", `'/home/me/Jo'\''s Apps/Myna-x86_64.AppImage' statusline`},
-		{`C:\Users\Me Too\AppData\Local\Programs\myna\myna.exe`, "windows", `'C:/Users/Me Too/AppData/Local/Programs/myna/myna.exe' statusline`},
-		{`C:\Users\me\myna.exe`, "windows", `C:/Users/me/myna.exe statusline`},
+		{"/Applications/Owl.app/Contents/MacOS/owl", "darwin", "/Applications/Owl.app/Contents/MacOS/owl statusline"},
+		{"/home/me/Jo's Apps/Owl-x86_64.AppImage", "linux", `'/home/me/Jo'\''s Apps/Owl-x86_64.AppImage' statusline`},
+		{`C:\Users\Me Too\AppData\Local\Programs\owl\owl.exe`, "windows", `'C:/Users/Me Too/AppData/Local/Programs/owl/owl.exe' statusline`},
+		{`C:\Users\me\owl.exe`, "windows", `C:/Users/me/owl.exe statusline`},
 	} {
 		got := claudeStatusCommand(c.exe, c.goos)
 		if got != c.want {
 			t.Errorf("claudeStatusCommand(%q, %s) = %q, want %q", c.exe, c.goos, got, c.want)
 		}
 		if !claudeStatusOurs(got) {
-			t.Errorf("%q, written by myna, isn't read as myna's", got)
+			t.Errorf("%q, written by owl, isn't read as owl's", got)
 		}
 	}
 	for cmd, want := range map[string]bool{
-		"myna statusline":              true,
-		"myna statusline claude":       true,
-		`"C:/x/myna.exe" statusline`:   true,
-		"myna-darwin-arm64 statusline": true,
-		"myna":                         false,
-		"myna status":                  false,
-		"myna statuslinex":             false,
-		"notmyna statusline":           false,
+		"owl statusline":              true,
+		"owl statusline claude":       true,
+		`"C:/x/owl.exe" statusline`:   true,
+		"owl-darwin-arm64 statusline": true,
+		"owl":                         false,
+		"owl status":                  false,
+		"owl statuslinex":             false,
+		"notowl statusline":           false,
 		"~/.claude/statusline.sh":      false,
-		"bash -c 'myna statusline'":    false,
-		`'/x/myna`:                     false,
+		"bash -c 'owl statusline'":    false,
+		`'/x/owl`:                     false,
 		"":                             false,
-		`/x/my\ apps/myna statusline`:  true,
-		"myna statusline; rm -rf ~":    false,
-		"myna;statusline":              false,
-		"myna statusline && echo hi":   false,
-		"myna statusline | tr a b":     false,
-		"$(which myna) statusline":     false,
-		"'/x/myna' 'statusline'":       true,
+		`/x/my\ apps/owl statusline`:  true,
+		"owl statusline; rm -rf ~":    false,
+		"owl;statusline":              false,
+		"owl statusline && echo hi":   false,
+		"owl statusline | tr a b":     false,
+		"$(which owl) statusline":     false,
+		"'/x/owl' 'statusline'":       true,
 	} {
 		if got := claudeStatusOurs(cmd); got != want {
 			t.Errorf("claudeStatusOurs(%q) = %v, want %v", cmd, got, want)
@@ -167,8 +167,8 @@ func TestClaudeStatusCommand(t *testing.T) {
 	}
 }
 
-// A WSL distro's Claude Code isn't offered myna's status line, running
-// or stopped (a stopped one's fields fall back to myna's models), and on
+// A WSL distro's Claude Code isn't offered owl's status line, running
+// or stopped (a stopped one's fields fall back to owl's models), and on
 // is refused there.
 func TestWSLClaudeNoStatusLine(t *testing.T) {
 	root, _ := claudeDistroHome(t, `{}`)

@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/sessions"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/sessions"
+	"github.com/istoo/owl/internal/usage"
 )
 
 func TestUsageRequestAPIsReturnCodexCompactionStates(t *testing.T) {
@@ -42,7 +42,7 @@ func TestUsageRequestAPIsReturnCodexCompactionStates(t *testing.T) {
 		"gateway": httptest.NewRecorder(),
 	}
 	guiMux.ServeHTTP(responses["GUI"], httptest.NewRequest("GET", "/api/usage/requests?period=all", nil))
-	gatewayRequest := httptest.NewRequest("GET", "/v1/myna/usage/requests?period=all", nil)
+	gatewayRequest := httptest.NewRequest("GET", "/v1/owl/usage/requests?period=all", nil)
 	gatewayRequest.RemoteAddr = "127.0.0.1:5000"
 	gateway.New().Handler().ServeHTTP(responses["gateway"], gatewayRequest)
 	for name, response := range responses {

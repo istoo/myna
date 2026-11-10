@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Settings → Allowances → Allowance reads (#1518, RooobinYe): myna
+// Settings → Allowances → Allowance reads (#1518, RooobinYe): owl
 // started at login before the proxy app read allowances by itself, direct.
 // The row offers Automatic (the default) or When I ask; When I ask posts
 // settings/quota-reads {reads:"asked"} and is drawn chosen, Automatic takes
@@ -21,7 +21,7 @@ function settingsPayload(over) {
     dock: false, dockWindow: false, proxy: "", redact: false, redactPersonal: false, redactWords: [],
     codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", workbuddyCheckin: false, noStats: false,
     trayUsage: "", trayUsages: [], trayUsageEvery: 3, vision: "", imageGen: "",
-    version: "0.1.400", dir: "~/.config/myna", gateway: "http://127.0.0.1:3425",
+    version: "0.1.400", dir: "~/.config/owl", gateway: "http://127.0.0.1:3425",
     proxyNow: "none", proxySource: "none", login: false,
     visionModels: [], imageGenModels: [], workbuddyCheckins: [], lanURLs: [],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
@@ -61,7 +61,7 @@ function server(lang, posts) {
 const view = (page) => page.locator("#view-settings").evaluate((v) => v.scrollTop);
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
-  test(engine + ": allowances read by myna, or only when asked", async (t) => {
+  test(engine + ": allowances read by owl, or only when asked", async (t) => {
     assert(["chromium", "webkit"].includes(engine), "BROWSER must be chromium or webkit");
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     t.after(() => browser.close());
@@ -82,7 +82,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           page.setDefaultNavigationTimeout(60000);
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", server(lang, posts));
-          await page.goto("http://myna.test/?view=usage");
+          await page.goto("http://owl.test/?view=usage");
           await page.locator("#prefs").click();
           await openPart(page, "usage");
           const row = page.locator("#quotaReadsRow");
@@ -90,7 +90,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           await opts.first().waitFor();
           assert.equal((await row.locator(".name").textContent()).trim(), name);
           const sub = (await row.locator(".sub").textContent()).trim();
-          assert(sub.includes("myna quota"), "the sub says what counts as asking: " + sub);
+          assert(sub.includes("owl quota"), "the sub says what counts as asking: " + sub);
           if (lang !== "en") assert(!sub.startsWith("When I ask"), lang + " sub not translated");
           assert.deepEqual((await opts.allTextContents()).map((s) => s.trim()), [auto, asked]);
           assert.equal(await opts.nth(0).evaluate((b) => b.classList.contains("on")), true, "Automatic by default");

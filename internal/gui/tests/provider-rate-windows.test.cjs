@@ -79,7 +79,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       const posts = [];
       await page.route("**/*", serve(lang, posts));
-      await page.goto("http://myna.test/?view=providers");
+      await page.goto("http://owl.test/?view=providers");
       await page.locator(".row.provider", { hasText: name }).click();
       await unfold(page);
       // ratewindows.js is imported as the field is drawn: its hint is there
@@ -99,7 +99,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const { page, errors, posts } = await open(t, "Relay");
       const zh = await page.evaluate(() => ({
         label: I18N.zh["Rate windows"], add: I18N.zh["Add a window"],
-        hint: I18N.zh["Inside a window a call costs the official price times its rate, on top of the price rate; outside every window the price rate alone counts. The first window that holds a call wins. Times are on the clock of the computer myna runs on, and 22:00–6:00 crosses midnight. No day ticked is every day. A price you set for a model is scaled by the window too. Changing the windows prices the calls already counted again, as a changed price rate does."],
+        hint: I18N.zh["Inside a window a call costs the official price times its rate, on top of the price rate; outside every window the price rate alone counts. The first window that holds a call wins. Times are on the clock of the computer owl runs on, and 22:00–6:00 crosses midnight. No day ticked is every day. A price you set for a model is scaled by the window too. Changing the windows prices the calls already counted again, as a changed price rate does."],
         bad: I18N.zh["Rate windows: every window is days, a time like 09:00, another time for it to end, and a rate from 0 to 1000 with at most three decimals"],
       }));
       assert(zh.label && zh.add && zh.hint && zh.bad, "every string has its Chinese");
@@ -181,7 +181,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       const allDay = [{ days: [], start: "00:00", end: "24:00", rate: 3 }];
       await page.route("**/*", serve(lang, [], [{ ...relay, rateNow: 6 }, { ...codex, rateWindows: allDay }]));
-      await page.goto("http://myna.test/?view=providers");
+      await page.goto("http://owl.test/?view=providers");
       await page.locator(".row.provider", { hasText: "Relay" }).waitFor();
       assert.equal(await page.locator(".row.provider", { hasText: "Relay" }).locator(".badge.rate-now").textContent(), "×6");
       assert.equal(await page.locator(".row.provider", { hasText: "Codex" }).locator(".badge.rate-now").count(), 0);

@@ -271,7 +271,7 @@ func linesFile(s Session) bool {
 	return true
 }
 
-// SearchGateway finds needle in what myna recorded of a gateway session,
+// SearchGateway finds needle in what owl recorded of a gateway session,
 // the parts as its transcript shows them.
 func SearchGateway(ctx context.Context, agent, id, needle string) (Hit, bool, error) {
 	if err := ctx.Err(); err != nil {
@@ -299,12 +299,12 @@ var gatewayTitles sync.Map // path -> string
 const gatewayTitleLines = 8
 
 // GatewayTitle is what a gateway session was first asked, made one short
-// line, from the first turns myna recorded of it; "" when it recorded
+// line, from the first turns owl recorded of it; "" when it recorded
 // none or nothing the user wrote.
 func GatewayTitle(agent, id string) string { return GatewayTitler()(agent, id) }
 
 // GatewayTitler is GatewayTitle for a listing's many sessions: whether
-// myna recorded anything at all is asked once, not once a session. A
+// owl recorded anything at all is asked once, not once a session. A
 // Stat and the folder's name for each of ~5000 gateway sessions on each
 // poll were ~80 MB of 90 s of polls (#2278).
 func GatewayTitler() func(agent, id string) string {

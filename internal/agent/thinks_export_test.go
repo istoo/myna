@@ -5,14 +5,14 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// #2380: Trae CN's kimi-k3-max thinks with no levels myna knows, and
+// #2380: Trae CN's kimi-k3-max thinks with no levels owl knows, and
 // /v1/models said reasoning: true for it, but Pi's models.json was written
 // reasoning: false (the export read the levels alone), so Pi offered off
-// alone and `myna pi effort high` was clamped to off. Every export that
+// alone and `owl pi effort high` was clamped to off. Every export that
 // writes a reasoning flag says what /v1/models says.
 func TestThinkingWithoutLevelsReachesTheExports(t *testing.T) {
 	syncHome(t)
@@ -39,11 +39,11 @@ func TestThinkingWithoutLevelsReachesTheExports(t *testing.T) {
 		t.Fatalf("the fixture is a model that thinks with no levels, as /v1/models says it: %+v", entry)
 	}
 
-	if got := piOffered("pi", "myna/"+id); !reflect.DeepEqual(got, []string{"off", "minimal", "low", "medium", "high"}) {
+	if got := piOffered("pi", "owl/"+id); !reflect.DeepEqual(got, []string{"off", "minimal", "low", "medium", "high"}) {
 		t.Fatalf("Pi offers %v for %s, want its own off to high", got, id)
 	}
-	if got := piClamp("high", piOffered("pi", "myna/"+id)); got != "high" {
-		t.Fatalf("myna pi effort high runs at %q", got)
+	if got := piClamp("high", piOffered("pi", "owl/"+id)); got != "high" {
+		t.Fatalf("owl pi effort high runs at %q", got)
 	}
 
 	ms := ccProviderJSONAt("http://127.0.0.1:1/v1").(map[string]any)["models"].(map[string]any)
@@ -52,6 +52,6 @@ func TestThinkingWithoutLevelsReachesTheExports(t *testing.T) {
 		t.Fatalf("Command Code's entry: %v", cc)
 	}
 	if _, set := cc["reasoningEfforts"]; set {
-		t.Fatalf("Command Code was told levels myna doesn't know: %v", cc)
+		t.Fatalf("Command Code was told levels owl doesn't know: %v", cc)
 	}
 }

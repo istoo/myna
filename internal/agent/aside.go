@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/proc"
 )
 
 func aside(home string) *Agent { return asideIn(here(home)) }
@@ -54,11 +54,11 @@ func asideIn(at place) *Agent {
 				}
 				return opts
 			}
-			return withVia(asideOwnOptions(c.models, cur[key]), "aside", "myna/")
+			return withVia(asideOwnOptions(c.models, cur[key]), "aside", "owl/")
 		}
 		a.Fields = append(a.Fields, f)
 	}
-	// which of Aside's accounts myna configures: empty follows the one
+	// which of Aside's accounts owl configures: empty follows the one
 	// Aside has active (#1499)
 	a.Fields = append(a.Fields, Field{Key: "account", Label: "account", Quiet: true,
 		Get: func() string {
@@ -77,13 +77,13 @@ var asideRoles = []string{"fast", "standard", "deep", "visual"}
 
 const asideImageKey = "imageGenerationModel"
 
-// asideDir is the folder of the Aside account myna configures
+// asideDir is the folder of the Aside account owl configures
 // (asideChoice).
 func asideDir(at place) string { return asideAccountDir(at, asideChoice(at)) }
 
 var asideTimeout = 10 * time.Second
 
-const asideOK = "MYNA_ASIDE_OK"
+const asideOK = "OWL_ASIDE_OK"
 
 var asideSet = func(account, expr string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), asideTimeout)

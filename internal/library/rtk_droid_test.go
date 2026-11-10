@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // fakeRTKDroid acts as rtk 1.1.0's rtk init -g --agent droid does
@@ -56,7 +56,7 @@ func droidRow(t *testing.T, id string) *RTKAgent {
 // lml0664 on Discord: the RTK page offered a fixed few agents, though rtk
 // 1.1.0 has a hook for Factory's Droid too. Droid is listed, switched on
 // with rtk's own installer (told Droid's folder), and switched off by
-// myna taking rtk's group out of whichever of Droid's hook files has it,
+// owl taking rtk's group out of whichever of Droid's hook files has it,
 // leaving the user's own hooks and settings; an rtk before 0.44, which has
 // no Droid agent, isn't run for it.
 func TestRTKDroid(t *testing.T) {
@@ -192,7 +192,7 @@ func TestRTKNoHookQoderClineKimi(t *testing.T) {
 			t.Errorf("%s switched on: %v", c.id, err)
 		}
 		if _, err := RTKTakes(c.id); err == nil || !strings.Contains(err.Error(), c.why) {
-			t.Errorf("myna library rtk on %s: %v", c.id, err)
+			t.Errorf("owl library rtk on %s: %v", c.id, err)
 		}
 	}
 }

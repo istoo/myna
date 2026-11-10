@@ -13,8 +13,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 func TestClaudeSubscriptionPromptKeepsForeignHarnessOutOfSystem(t *testing.T) {
@@ -435,14 +435,14 @@ func TestSweepBridgeProjectsTakesOnlyTheBridgesFolders(t *testing.T) {
 	claudeDir := filepath.Join(base, "claude")
 	projects := filepath.Join(claudeDir, "projects")
 	gone := []string{
-		claudeProjectName(filepath.Join(real, "myna-claude-1097091858")),
-		claudeProjectName(filepath.Join(link, "T", "myna-claude-42")),
+		claudeProjectName(filepath.Join(real, "owl-claude-1097091858")),
+		claudeProjectName(filepath.Join(link, "T", "owl-claude-42")),
 	}
 	kept := []string{
-		claudeProjectName(filepath.Join(real, "myna-claude-")),
-		claudeProjectName(filepath.Join(real, "myna-claude-12-x")),
+		claudeProjectName(filepath.Join(real, "owl-claude-")),
+		claudeProjectName(filepath.Join(real, "owl-claude-12-x")),
 		claudeProjectName(filepath.Join(real, "other")),
-		claudeProjectName("/Users/me/code/myna-claude-7"),
+		claudeProjectName("/Users/me/code/owl-claude-7"),
 	}
 	for _, d := range append(append([]string{}, gone...), kept...) {
 		if err := os.MkdirAll(filepath.Join(projects, d), 0o755); err != nil {
@@ -488,12 +488,12 @@ func TestBridgeTempsSwept(t *testing.T) {
 		}
 		return dir
 	}
-	gone := []string{mk("myna-claude-1097091858", true), mk("myna-claude-42", true)}
+	gone := []string{mk("owl-claude-1097091858", true), mk("owl-claude-42", true)}
 	kept := []string{
-		mk("myna-claude-777", false), // a run still going
-		mk("myna-claude-work-501", true),
-		mk("myna-claude-", true),
-		mk("myna-claude-12-x", true),
+		mk("owl-claude-777", false), // a run still going
+		mk("owl-claude-work-501", true),
+		mk("owl-claude-", true),
+		mk("owl-claude-12-x", true),
 		mk("other-1", true),
 	}
 	sweepBridgeTemps(tmp)
@@ -630,7 +630,7 @@ done
 	}
 }
 
-// A run's Claude Code has the caller's tools only as mcp__myna__<Name>:
+// A run's Claude Code has the caller's tools only as mcp__owl__<Name>:
 // its built-ins are off. A run started anew on a long conversation was told
 // every past call by its bare name ([tool call Bash …]), so the model
 // called Bash, Claude Code answered "Bash is disabled for this session, in
@@ -659,8 +659,8 @@ func TestClaudePromptTellsPastCallsByTheRunsNames(t *testing.T) {
 	}
 	check := func(what, got string) {
 		t.Helper()
-		if !strings.Contains(got, "[tool call mcp__myna__Bash id=toolu_1 ") || strings.Contains(got, "[tool call Bash ") {
-			t.Errorf("%s: a call of the caller's Bash isn't told as the run's mcp__myna__Bash: %q", what, got)
+		if !strings.Contains(got, "[tool call mcp__owl__Bash id=toolu_1 ") || strings.Contains(got, "[tool call Bash ") {
+			t.Errorf("%s: a call of the caller's Bash isn't told as the run's mcp__owl__Bash: %q", what, got)
 		}
 		if !strings.Contains(got, "[tool call team_sync id=toolu_2 ") {
 			t.Errorf("%s: a call of a tool the caller doesn't offer lost its name: %q", what, got)
@@ -674,7 +674,7 @@ func TestClaudePromptTellsPastCallsByTheRunsNames(t *testing.T) {
 	check("next turn", text(renderClaudeTurn(msgs[1:], tools)))
 
 	blocks, _ = renderClaudePrompt(&Request{Messages: msgs[:1], Tools: tools, ToolChoice: "name:Read"})
-	if got := text(blocks); !strings.Contains(got, "You must call the mcp__myna__Read tool.") {
+	if got := text(blocks); !strings.Contains(got, "You must call the mcp__owl__Read tool.") {
 		t.Errorf("a forced tool is named as the caller has it, not as the run can call it: %q", got)
 	}
 }

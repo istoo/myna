@@ -2,7 +2,7 @@
 
 package provider
 
-// refreshPath has nothing to do: myna looks for the CLIs where their
+// refreshPath has nothing to do: owl looks for the CLIs where their
 // installers put them.
 func refreshPath() {}
 

@@ -1,6 +1,6 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // Settings › Network and sharing › Browser access (jiakun_zhao on X: the
-// page managed through a Cloudflare tunnel took `myna web` kept running in
+// page managed through a Cloudflare tunnel took `owl web` kept running in
 // a terminal beside the app). Off, This computer or Local network, posted to
 // /api/web-page; once on, the link (its key shown as "…", copied whole), a
 // New key, the port with Apply, and why it isn't served when a port is
@@ -24,7 +24,7 @@ function server(lang, web, posts, gets) {
   const say = () => {
     if (!wp.mode) return { mode: "", port: wp.port, serving: false };
     const s = { ...wp, link: `http://127.0.0.1:${wp.port}/?k=${wp.key}` };
-    if (wp.port === 3500) Object.assign(s, { serving: false, error: "port 3500 can't be taken (address already in use): myna tries again every few seconds" });
+    if (wp.port === 3500) Object.assign(s, { serving: false, error: "port 3500 can't be taken (address already in use): owl tries again every few seconds" });
     else s.serving = true;
     if (wp.mode === "lan") s.network = [`http://192.168.1.20:${wp.port}/?k=${wp.key}`];
     return s;
@@ -45,7 +45,7 @@ function server(lang, web, posts, gets) {
       if (body.newKey || !wp.key) wp.key = body.newKey && wp.key ? "fedcba9876543210fedcba9876543210" : KEY;
       return json(say());
     }
-    if (url.pathname === "/api/settings") return json({ lang, theme: "light", gateway: "http://127.0.0.1:3425", lan: false, lanURLs: [], version: "0.1.900", dir: "/config/myna", fx: { rate: 7.2, at: new Date().toISOString(), stale: false } });
+    if (url.pathname === "/api/settings") return json({ lang, theme: "light", gateway: "http://127.0.0.1:3425", lan: false, lanURLs: [], version: "0.1.900", dir: "/config/owl", fx: { rate: 7.2, at: new Date().toISOString(), stale: false } });
     if (url.pathname === "/api/plugins") return json({ plugins: [] });
     if (url.pathname === "/api/usage/quotas") return json([]);
     if (url.pathname === "/api/groups") return json({ groups: [], models: [] });
@@ -94,8 +94,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal((await head.textContent()).trim(), await tr("Browser access"));
         if (lang !== "en") assert.notEqual(await tr("Browser access"), "Browser access", "translated");
         const first = list.locator(".row.pref").first();
-        assert.equal((await first.locator(".name").textContent()).trim(), await tr("Open myna in a browser"));
-        assert.equal((await first.locator(".sub").textContent()).trim(), await tr("The app serves this window’s page with a key in its link, as myna web does, while it runs. For a tunnel such as Cloudflare Tunnel, point it at http://127.0.0.1:{port}", { port: 3430 }));
+        assert.equal((await first.locator(".name").textContent()).trim(), await tr("Open owl in a browser"));
+        assert.equal((await first.locator(".sub").textContent()).trim(), await tr("The app serves this window’s page with a key in its link, as owl web does, while it runs. For a tunnel such as Cloudflare Tunnel, point it at http://127.0.0.1:{port}", { port: 3430 }));
         assert.equal(await list.locator(".row.pref").count(), 1, "off: one row");
 
         const local = first.getByRole("button", { name: await tr("This computer") });
@@ -123,7 +123,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await reach(page, field);
         await field.fill("3500");
         await list.getByRole("button", { name: await tr("Apply") }).click();
-        const why = await tr("Port {p} is taken by another program, myna web perhaps: myna tries again every few seconds", { p: 3500 });
+        const why = await tr("Port {p} is taken by another program, owl web perhaps: owl tries again every few seconds", { p: 3500 });
         await list.locator(".web-page-link-row .sub.err").filter({ hasText: why }).waitFor();
         assert.deepEqual(posts.at(-1), { port: 3500 });
 

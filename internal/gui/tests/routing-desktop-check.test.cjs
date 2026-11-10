@@ -1,6 +1,6 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // Claude Desktop's connection check names its model itself, the first
-// model listed to it when none is Claude-named, while myna sends it to
+// model listed to it when none is Claude-named, while owl sends it to
 // the model chosen in Desktop's menu. Its row in the Routing page's
 // Requests list says it is the check, so "requested deepseek-flash" with
 // gpt-6.1-sol answering reads as it is (cybercaius on Discord: 对话里选的
@@ -78,7 +78,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         }
         await browser.close();
       });
-      await page.goto("http://myna.test/?view=routing");
+      await page.goto("http://owl.test/?view=routing");
       await page.locator(".rt-days .rt-day").nth(1).click();
       await page.locator(".rt-req").nth(rows.length - 1).waitFor();
 

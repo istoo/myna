@@ -9,7 +9,7 @@ import (
 // charliepu on Discord (Windows, 10-31): an account Codex was signed in to
 // in C:\Users\charl\.codex-db-backup-20260803, a backup no Codex runs in,
 // couldn't be removed: "sign it out there (CODEX_HOME=… codex logout) to
-// remove it". Now Remove takes it out of myna, the folder's files left
+// remove it". Now Remove takes it out of owl, the folder's files left
 // as they are, and it isn't read back from there at the next look. A
 // sign-in made in that folder again is listed again.
 func TestCodexHeldFolderAccountRemoved(t *testing.T) {

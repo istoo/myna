@@ -39,11 +39,11 @@ function server(lang, asked) {
       const { url: u } = body();
       asked.push(u);
       if (u && !/^https?:\/\/[^/]/.test(u)) return json({ error: `"${u}" isn't a registry's address: give an http:// or https:// one, like https://registry.npmmirror.com` }, 400);
-      registry = u ? { url: u.replace(/\/+$/, ""), from: "myna" } : { ...NPMRC };
+      registry = u ? { url: u.replace(/\/+$/, ""), from: "owl" } : { ...NPMRC };
       return json({ registry });
     }
     if (url.pathname.startsWith("/api/")) return json({});
-    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "myna.test") return route.fulfill({ status: 404, body: "" });
+    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "owl.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -72,7 +72,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const errors = [], asked = [];
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", server(lang, asked));
-          await page.goto("http://myna.test/?view=plugins");
+          await page.goto("http://owl.test/?view=plugins");
           const row = page.locator("#view-plugins .pm-registry");
           await row.waitFor();
           assert.equal((await row.locator(".pm-mlabel").innerText()).trim(), w.label);

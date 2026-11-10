@@ -9,9 +9,9 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // t3User is ~/.t3/userdata/settings.json as T3 Code writes it sparse: its
@@ -33,7 +33,7 @@ const t3User = `{
 `
 
 // t3Envelope is T3 Code's ProviderInstanceConfig, with the claudeAgent
-// config myna writes; nothing else taken.
+// config owl writes; nothing else taken.
 type t3Envelope struct {
 	Driver      string `json:"driver"`
 	DisplayName string `json:"displayName"`
@@ -66,7 +66,7 @@ type t3Envelope struct {
 	} `json:"config"`
 }
 
-// t3Format decodes myna's instance strictly as T3 Code's schema has it:
+// t3Format decodes owl's instance strictly as T3 Code's schema has it:
 // an instance id of its slug pattern, a claudeAgent envelope, environment
 // variable names of its pattern, custom models with a slug.
 func t3Format(t *testing.T, raw []byte) t3Envelope {
@@ -77,8 +77,8 @@ func t3Format(t *testing.T, raw []byte) t3Envelope {
 	if err := d.Decode(&e); err != nil {
 		t.Fatalf("not T3 Code's instance: %v\n%s", err, raw)
 	}
-	if !regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9_-]*$`).MatchString(mynaID) {
-		t.Errorf("instance id %q", mynaID)
+	if !regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9_-]*$`).MatchString(owlID) {
+		t.Errorf("instance id %q", owlID)
 	}
 	if e.Driver != "claudeAgent" || e.DisplayName == "" || e.Enabled == nil || !*e.Enabled {
 		t.Errorf("envelope: %s", raw)
@@ -115,10 +115,10 @@ func t3Format(t *testing.T, raw []byte) t3Envelope {
 	return e
 }
 
-// T3 Code (KevinXC on Discord) gets myna as a provider of its own: a
-// claudeAgent instance on the gateway with every myna model as a custom
+// T3 Code (KevinXC on Discord) gets owl as a provider of its own: a
+// claudeAgent instance on the gateway with every owl model as a custom
 // model, the user's instances, their Claude's binary path and T3's keys
-// kept; off takes only myna's out, and the catalog sync leaves it off.
+// kept; off takes only owl's out, and the catalog sync leaves it off.
 func TestT3CodeInstance(t *testing.T) {
 	home := syncHome(t)
 	t.Setenv("T3CODE_HOME", "")
@@ -151,10 +151,10 @@ func TestT3CodeInstance(t *testing.T) {
 	if f == nil || f.Get() != "" {
 		t.Fatalf("provider field: %+v", f)
 	}
-	if err := f.Set(mynaID); err != nil {
+	if err := f.Set(owlID); err != nil {
 		t.Fatal(err)
 	}
-	if f.Get() != mynaID {
+	if f.Get() != owlID {
 		t.Fatalf("get: %q", f.Get())
 	}
 
@@ -175,7 +175,7 @@ func TestT3CodeInstance(t *testing.T) {
 		t.Errorf("the user's instance changed: %s", insts["codex_work"])
 	}
 
-	e := t3Format(t, insts[mynaID])
+	e := t3Format(t, insts[owlID])
 	env := map[string]string{}
 	for _, v := range e.Environment {
 		env[v.Name] = v.Value
@@ -203,7 +203,7 @@ func TestT3CodeInstance(t *testing.T) {
 	json.Unmarshal([]byte(readFile(path)), &file)
 	insts = nil
 	json.Unmarshal(file["providerInstances"], &insts)
-	t3Format(t, insts[mynaID])
+	t3Format(t, insts[owlID])
 	if _, ok := insts["codex_work"]; !ok {
 		t.Fatal("the user's instance is gone after a sync")
 	}
@@ -217,7 +217,7 @@ func TestT3CodeInstance(t *testing.T) {
 	file, insts = nil, nil
 	json.Unmarshal([]byte(readFile(path)), &file)
 	json.Unmarshal(file["providerInstances"], &insts)
-	if _, ok := insts[mynaID]; ok || !sameJSON(string(insts["codex_work"]), userInsts["codex_work"]) ||
+	if _, ok := insts[owlID]; ok || !sameJSON(string(insts["codex_work"]), userInsts["codex_work"]) ||
 		!sameJSON(string(file["providers"]), user["providers"]) {
 		t.Errorf("after off: %s", readFile(path))
 	}
@@ -242,21 +242,21 @@ func TestT3CodeHomeAndInstance(t *testing.T) {
 		t.Fatalf("path %s, want %s", a.Path, path)
 	}
 	f := a.Field("provider")
-	if err := f.Set(mynaID); err != nil {
+	if err := f.Set(owlID); err != nil {
 		t.Fatal(err)
 	}
 	var file map[string]map[string]json.RawMessage
 	if err := json.Unmarshal([]byte(readFile(path)), &file); err != nil {
 		t.Fatalf("%v\n%s", err, readFile(path))
 	}
-	t3Format(t, file["providerInstances"][mynaID])
+	t3Format(t, file["providerInstances"][owlID])
 
 	os.WriteFile(path, []byte(`{"providerInstances":{"claudeAgent":{"driver":"claudeAgent","config":{"homePath":"~/.claude-t3"}}}}`), 0o600)
-	if err := f.Set(mynaID); err != nil {
+	if err := f.Set(owlID); err != nil {
 		t.Fatal(err)
 	}
 	json.Unmarshal([]byte(readFile(path)), &file)
-	if e := t3Format(t, file["providerInstances"][mynaID]); e.Config.HomePath != "~/.claude-t3" || e.Config.BinaryPath != "" {
+	if e := t3Format(t, file["providerInstances"][owlID]); e.Config.HomePath != "~/.claude-t3" || e.Config.BinaryPath != "" {
 		t.Errorf("config: %+v", e.Config)
 	}
 	if _, ok := file["providerInstances"]["claudeAgent"]; !ok {
@@ -264,7 +264,7 @@ func TestT3CodeHomeAndInstance(t *testing.T) {
 	}
 }
 
-// Each myna model in T3 Code has a Reasoning pick of the levels it takes
+// Each owl model in T3 Code has a Reasoning pick of the levels it takes
 // that Claude Code can send, medium chosen first, else the lowest (KevinXC
 // on Discord: every model ran at medium with no way to change it), and a
 // model that thinks at some level a Thinking switch, on at first, as T3's
@@ -330,12 +330,12 @@ func TestT3CodeEfforts(t *testing.T) {
 	}
 }
 
-// What the user set on myna's instance in T3 Code's own settings stays
+// What the user set on owl's instance in T3 Code's own settings stays
 // through every sync (#2030, Kanscape): its name, Auto-compact after,
 // launch arguments, a variable of their own and whether it is on, while
-// the models and the gateway's variables stay myna's. T3's own Claude,
+// the models and the gateway's variables stay owl's. T3's own Claude,
 // an instance beside it with a name and window of its own, neither changes
-// nor lends myna's instance anything.
+// nor lends owl's instance anything.
 func TestT3CodeKeepsTheUsersSettings(t *testing.T) {
 	home := syncHome(t)
 	t.Setenv("T3CODE_HOME", "")
@@ -345,7 +345,7 @@ func TestT3CodeKeepsTheUsersSettings(t *testing.T) {
 	const claude = `{"driver":"claudeAgent","displayName":"Claude (sub)","enabled":true,"config":{"autoCompactWindow":"200000","launchArgs":"--chrome"}}`
 	os.WriteFile(path, []byte(`{"providerInstances":{"claudeAgent":`+claude+`}}`), 0o600)
 	f := a.Field("provider")
-	if err := f.Set(mynaID); err != nil {
+	if err := f.Set(owlID); err != nil {
 		t.Fatal(err)
 	}
 	read := func() map[string]json.RawMessage {
@@ -358,17 +358,17 @@ func TestT3CodeKeepsTheUsersSettings(t *testing.T) {
 		return file.ProviderInstances
 	}
 	var mine map[string]any
-	json.Unmarshal(read()[mynaID], &mine)
-	if mine["displayName"] != "myna" {
+	json.Unmarshal(read()[owlID], &mine)
+	if mine["displayName"] != "owl" {
 		t.Fatalf("first written as %v", mine["displayName"])
 	}
 	cfg := mine["config"].(map[string]any)
 	if _, ok := cfg["autoCompactWindow"]; ok {
-		t.Fatalf("the Claude instance's window lent to myna's: %v", cfg)
+		t.Fatalf("the Claude instance's window lent to owl's: %v", cfg)
 	}
 
-	// the user edits myna's instance in T3 Code, as T3 saves it
-	mine["displayName"] = "Myna GW"
+	// the user edits owl's instance in T3 Code, as T3 saves it
+	mine["displayName"] = "Owl GW"
 	mine["enabled"] = false
 	mine["accentColor"] = "#ff8800"
 	cfg["autoCompactWindow"] = "300000"
@@ -409,11 +409,11 @@ func TestT3CodeKeepsTheUsersSettings(t *testing.T) {
 			} `json:"customModels"`
 		} `json:"config"`
 	}
-	if err := json.Unmarshal(insts[mynaID], &got); err != nil {
+	if err := json.Unmarshal(insts[owlID], &got); err != nil {
 		t.Fatal(err)
 	}
-	if got.DisplayName != "Myna GW" || got.Enabled == nil || *got.Enabled || got.AccentColor != "#ff8800" {
-		t.Errorf("the user's name, switch or colour not kept: %s", insts[mynaID])
+	if got.DisplayName != "Owl GW" || got.Enabled == nil || *got.Enabled || got.AccentColor != "#ff8800" {
+		t.Errorf("the user's name, switch or colour not kept: %s", insts[owlID])
 	}
 	if got.Config.AutoCompactWindow != "300000" || got.Config.LaunchArgs != "--verbose" {
 		t.Errorf("the user's config not kept: %+v", got.Config)
@@ -430,6 +430,6 @@ func TestT3CodeKeepsTheUsersSettings(t *testing.T) {
 	}) bool {
 		return m.Slug == "gone/old"
 	}) || len(got.Config.CustomModels) == 0 {
-		t.Errorf("custom models not myna's: %+v", got.Config.CustomModels)
+		t.Errorf("custom models not owl's: %+v", got.Config.CustomModels)
 	}
 }

@@ -1,9 +1,9 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Coming back to the Routing page after myna ran out of sight doesn't let
-// loose a flock of mynas (#302, JoeyMa-zh: after myna had been in the
+// Coming back to the Routing page after owl ran out of sight doesn't let
+// loose a flock of owls (#302, JoeyMa-zh: after owl had been in the
 // background a while, opening Routing again showed a flood of birds flying
 // at once). Out of sight — the window hidden, a covered window drawing no
-// frames without saying it is hidden, or another tab of myna's open —
+// frames without saying it is hidden, or another tab of owl's open —
 // many requests come and are answered; then the page is seen again. What
 // was answered meanwhile is listed, not flown: at most the few requests
 // still under way fly, and the flights of the ones past never play.
@@ -114,7 +114,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           feed.closed = true;
           await browser.close();
         });
-        await page.goto("http://myna.test/?view=routing");
+        await page.goto("http://owl.test/?view=routing");
         await page.locator(".rt-req").first().waitFor();
         await page.waitForTimeout(2500); // the first request's play ends
 
@@ -136,7 +136,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.waitForTimeout(3000);
         const most = await page.evaluate(() => { clearInterval(window.__look); return window.__most; });
         // at most the ones under way: a carrier each, and one let go
-        assert(most <= 2 * LIVE, `${most} mynas flew at once after coming back (at most ${2 * LIVE})`);
+        assert(most <= 2 * LIVE, `${most} owls flew at once after coming back (at most ${2 * LIVE})`);
         assert(most >= 1, "the requests still under way must fly");
         // and every request is listed
         await page.waitForFunction((n) => document.querySelectorAll(".rt-req").length === n, 1 + DONE + LIVE);

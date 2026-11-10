@@ -10,10 +10,10 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/agentenv"
+	"github.com/istoo/owl/internal/agentenv"
 )
 
-// isolateFetchHome keeps a fetch's fixtures out of the user's own myna
+// isolateFetchHome keeps a fetch's fixtures out of the user's own owl
 // home: the list a fetch reads and writes is under HOME, and the tests
 // below save providers of their own.
 func isolateFetchHome(t *testing.T) {
@@ -98,7 +98,7 @@ func TestFetchAsksEachAuthenticationAtOneBase(t *testing.T) {
 	}
 }
 
-// Two bases are not two lists (#1006). A remote myna is configured with
+// Two bases are not two lists (#1006). A remote owl is configured with
 // its Chat base at …/v1 and its Anthropic base at the bare host beside
 // it, and both resolve to one list URL, GET /v1/models: the test of a
 // saved remote is to fetch that list once, because its decision models

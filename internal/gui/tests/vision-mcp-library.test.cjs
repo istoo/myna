@@ -1,10 +1,10 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// matrix0487 on Discord: of myna's three own MCP servers, image
+// matrix0487 on Discord: of owl's three own MCP servers, image
 // recognition, image generation and search, the Library's Discover had
-// Myna Image and Myna Web Search but not image recognition. It now has
-// Myna Image Recognition beside them, given only to the agents picked
+// Owl Image and Owl Web Search but not image recognition. It now has
+// Owl Image Recognition beside them, given only to the agents picked
 // for it, and Settings' Image recognition row says the way there as the
-// Library is: Give agents Myna Image Recognition… opens its sheet, which
+// Library is: Give agents Owl Image Recognition… opens its sheet, which
 // says where each image goes; with the Library off, Turn on the Library
 // switches it on; with recognition off, or in gateway mode, there is none.
 // One that can't answer yet says why on its Discover card and sheet, so
@@ -26,8 +26,8 @@ const tr = (lang, s) => (lang === "en" ? s : I18N[lang]?.[s] ?? s);
 const HOME = "/Users/tester";
 const HINT = "Pick the agents that may read images with it: each image goes to the Image recognition model set in Settings → Models → Images, and costs what that model charges.";
 const UNREADY = "No model that sees images is set up yet: it reads images once a provider with one is added, and says so until then";
-const ABOUT = "Read an image (a file, a URL, a screenshot) with the image recognition model set in Myna (Settings → Models → Images), for a model that can't see.";
-const SEARCH = "Search the web with the search set in Myna (Settings → Models → Web search), and read a page by its URL.";
+const ABOUT = "Read an image (a file, a URL, a screenshot) with the image recognition model set in Owl (Settings → Models → Images), for a model that can't see.";
+const SEARCH = "Search the web with the search set in Owl (Settings → Models → Web search), and read a page by its URL.";
 
 function fixture(lang, { libOn, have = false, gateway = false, unready = "", vision = "" }) {
   const st = { libOn };
@@ -35,7 +35,7 @@ function fixture(lang, { libOn, have = false, gateway = false, unready = "", vis
   const builtins = () => [{ id: "library", name: "Library", sub: "Instructions, MCP servers and skills for every agent", on: st.libOn, chosen: st.libOn, source: "preset", state: st.libOn ? "active" : "off", inUse: 0 }];
   const settings = () => ({
     theme: "light", lang, tray: "panel", currency: "usd", textSize: 100, redactWords: [],
-    version: "0.1.400", dir: "~/.config/myna", gateway: "http://127.0.0.1:3999", port: 3999,
+    version: "0.1.400", dir: "~/.config/owl", gateway: "http://127.0.0.1:3999", port: 3999,
     proxyNow: "none", proxySource: "none", vision, imageGen: "", lanURLs: [], visionAuto: "probe/eye",
     visionModels: [], imageGenModels: [], workbuddyCheckins: [],
     searcher: "", searchChoices: [],
@@ -46,10 +46,10 @@ function fixture(lang, { libOn, have = false, gateway = false, unready = "", vis
     ...(gateway ? { web: true, gatewayMode: "on", gatewayOn: true } : {}),
   });
   const lib = () => ({
-    dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
+    dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
     agents: [{ id: "pi", name: "Pi", icon: "generic", mcp: `${HOME}/.pi/mcp.json`, skills: `${HOME}/.pi/skills` }],
     instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [], skills: [], problems: [],
-    servers: have ? [{ name: "myna-vision", transport: "stdio", command: "/Applications/myna.app/Contents/MacOS/myna", args: ["mcp", "vision"], agents: ["pi"] }] : [],
+    servers: have ? [{ name: "owl-vision", transport: "stdio", command: "/Applications/owl.app/Contents/MacOS/owl", args: ["mcp", "vision"], agents: ["pi"] }] : [],
   });
   const route = async (route) => {
     const req = route.request(), url = new URL(req.url());
@@ -69,9 +69,9 @@ function fixture(lang, { libOn, have = false, gateway = false, unready = "", vis
     if (url.pathname === "/api/library") return json(lib());
     if (url.pathname === "/api/library/market/servers") {
       return json({ items: [
-        { id: "myna-image", name: "myna-image", title: "Myna Image", publisher: "Myna", description: "Generate and edit images with the image model set in Myna.", transport: "stdio", runs: "myna", featured: true, optIn: true, have: "" },
-        { id: "myna-web-search", name: "myna-web-search", title: "Myna Web Search", publisher: "Myna", description: SEARCH, transport: "stdio", runs: "myna", featured: true, optIn: true, have: "" },
-        { id: "myna-vision", name: "myna-vision", title: "Myna Image Recognition", publisher: "Myna", description: ABOUT, transport: "stdio", runs: "myna", featured: true, optIn: true, have: have ? "myna-vision" : "", ...(unready ? { unready } : {}) },
+        { id: "owl-image", name: "owl-image", title: "Owl Image", publisher: "Owl", description: "Generate and edit images with the image model set in Owl.", transport: "stdio", runs: "owl", featured: true, optIn: true, have: "" },
+        { id: "owl-web-search", name: "owl-web-search", title: "Owl Web Search", publisher: "Owl", description: SEARCH, transport: "stdio", runs: "owl", featured: true, optIn: true, have: "" },
+        { id: "owl-vision", name: "owl-vision", title: "Owl Image Recognition", publisher: "Owl", description: ABOUT, transport: "stdio", runs: "owl", featured: true, optIn: true, have: have ? "owl-vision" : "", ...(unready ? { unready } : {}) },
       ] });
     }
     if (url.pathname === "/api/library/market/skills") return json({ items: [] });
@@ -114,7 +114,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => page.errors.push(e.message));
       await page.route("**/*", f.route);
       await watchSettingsReads(page);
-      await page.goto("http://myna.test/?view=settings&tab=models");
+      await page.goto("http://owl.test/?view=settings&tab=models");
       await settingsDrawn(page);
       await row(page).waitFor();
       return { page, posts: f.posts };
@@ -122,17 +122,17 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     for (const lang of LANGS) {
       const w = (s) => tr(lang, s);
       for (const width of [1100, 420]) {
-        await t.test(`${lang} at ${width}px: Give agents Myna Image Recognition… opens its sheet in the Library`, async () => {
+        await t.test(`${lang} at ${width}px: Give agents Owl Image Recognition… opens its sheet in the Library`, async () => {
           const { page } = await open(lang, width, { libOn: true, unready: UNREADY });
           const go = row(page).locator(".who button.vision-mcp-lib");
-          assert.equal((await go.textContent()).trim(), w("Give agents Myna Image Recognition…"));
+          assert.equal((await go.textContent()).trim(), w("Give agents Owl Image Recognition…"));
           assert.equal(await wide(page), 0);
           shots.push([`${lang}-${width}-row`, await row(page).screenshot()]);
           await go.click();
           const sheet = page.locator("#modal .mk-sheet");
           await sheet.waitFor();
           assert.equal(await page.locator("#view-library").isVisible(), true);
-          assert.equal((await sheet.locator(".mk-name.big").textContent()).trim(), "Myna Image Recognition");
+          assert.equal((await sheet.locator(".mk-name.big").textContent()).trim(), "Owl Image Recognition");
           assert.equal((await sheet.locator(".mk-about").textContent()).trim(), w(ABOUT));
           assert.equal((await sheet.locator(".mk-hint").first().textContent()).trim(), w(HINT));
           // nothing sees yet: the sheet says so, and still adds it
@@ -150,27 +150,27 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           assert.equal((await go.textContent()).trim(), w("Turn on the Library"));
           assert.equal(await wide(page), 0);
           await go.click();
-          await page.waitForFunction((s) => document.querySelector("#imagesList button.vision-mcp-lib")?.textContent.trim() === s, w("Give agents Myna Image Recognition…"));
+          await page.waitForFunction((s) => document.querySelector("#imagesList button.vision-mcp-lib")?.textContent.trim() === s, w("Give agents Owl Image Recognition…"));
           assert.deepEqual(posts, [{ id: "library", on: true }]);
           assert.deepEqual(page.errors, []);
           await page.context().close();
         });
       }
-      for (const width of [1100, 420]) await t.test(`${lang} at ${width}px: one already in the library opens Discover, all three of myna's own there, the one not set up saying so`, async () => {
+      for (const width of [1100, 420]) await t.test(`${lang} at ${width}px: one already in the library opens Discover, all three of owl's own there, the one not set up saying so`, async () => {
         const { page } = await open(lang, width, { libOn: true, have: true, unready: UNREADY });
         await row(page).locator("button.vision-mcp-lib").click();
         const card = (id) => page.locator(`#view-library .mk[data-market="mcp"] .mk-card[data-id="${id}"]`);
-        await card("myna-vision").waitFor();
+        await card("owl-vision").waitFor();
         assert.equal(await page.locator("#modal .mk-sheet").count(), 0);
-        for (const id of ["myna-image", "myna-web-search"]) {
+        for (const id of ["owl-image", "owl-web-search"]) {
           assert.equal(await card(id).count(), 1, id);
           assert.equal(await card(id).locator(".mk-unready").count(), 0, id);
         }
-        const badge = card("myna-vision").locator(".mk-badge.mk-unready");
+        const badge = card("owl-vision").locator(".mk-badge.mk-unready");
         assert.equal((await badge.textContent()).trim(), w("Not set up yet"));
         assert.equal(await badge.getAttribute("title"), w(UNREADY));
         // the badge gives way inside its card
-        const [c, b] = await Promise.all([card("myna-vision").boundingBox(), badge.boundingBox()]);
+        const [c, b] = await Promise.all([card("owl-vision").boundingBox(), badge.boundingBox()]);
         assert(b.x + b.width <= c.x + c.width + 0.5, `badge ${JSON.stringify(b)} past card ${JSON.stringify(c)}`);
         assert.equal(await wide(page), 0);
         shots.push([`${lang}-${width}-discover`, await page.screenshot()]);

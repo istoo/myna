@@ -5,11 +5,11 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/agent"
+	"github.com/istoo/owl/internal/agent"
 	"gopkg.in/yaml.v3"
 )
 
-// `myna omp auto` asks for omp's own thinking level, auto (omp picks one
+// `owl omp auto` asks for omp's own thinking level, auto (omp picks one
 // each turn), and so goes to the thinking field: taken as a model, it made
 // modelRoles.default the literal "auto", which omp has no model by.
 func TestOmpAutoIsAThinkingLevel(t *testing.T) {

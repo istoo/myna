@@ -1,10 +1,10 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // An Image recognition or Image generation model picked in Settings › Models
-// that myna can't find any more (its provider removed or off, the model
+// that owl can't find any more (its provider removed or off, the model
 // gone) is said where the setting shows: the picker names the model picked
 // as missing, and a line under the row says what describes or draws in its
 // place — the automatic choice, or nothing — and to pick another. Before,
-// the picker showed the gone model's id as if it were in use, and myna
+// the picker showed the gone model's id as if it were in use, and owl
 // quietly described with its own pick. A model that is found shows as
 // before. English and Chinese; wide and at a phone's width, nothing running
 // off to the side; no backend, the API is faked here.
@@ -22,7 +22,7 @@ function settingsPayload(lang, over) {
     dock: false, dockWindow: false, proxy: "", redact: false, redactPersonal: false, redactWords: [],
     codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", workbuddyCheckin: false, noStats: false,
     trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "",
-    version: "0.1.400", dir: "~/.config/myna", gateway: "http://127.0.0.1:3425",
+    version: "0.1.400", dir: "~/.config/owl", gateway: "http://127.0.0.1:3425",
     proxyNow: "none", proxySource: "none", login: false,
     visionModels: [{ id: "codex/gpt-6.1-sol", name: "GPT-6.1 Sol", provider: "codex", providerName: "Codex", icon: "openai" }],
     visionAuto: "codex/gpt-6.1-sol",
@@ -87,7 +87,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.errors = [];
       page.on("pageerror", (e) => page.errors.push(e.message));
       await page.route("**/*", server(lang, cur));
-      await page.goto("http://myna.test/?view=settings&tab=models");
+      await page.goto("http://owl.test/?view=settings&tab=models");
       await page.locator("#imagesList .row").nth(1).waitFor();
       return page;
     };

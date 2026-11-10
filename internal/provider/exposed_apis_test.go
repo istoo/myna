@@ -11,7 +11,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 // #2094 (wangjianjq): Command Code's Provider API lists its Claude models on

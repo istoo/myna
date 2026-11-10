@@ -7,7 +7,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // An LM Studio on another computer (mengxiangziyou on X: "baseUrl 不能改"):

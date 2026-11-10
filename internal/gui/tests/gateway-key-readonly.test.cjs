@@ -1,7 +1,7 @@
 // A read-only gateway key (Steven on Discord: an ESP32 desk display that
 // polls quotas and usage and uses no model) is made so from its row's menu,
 // says so in its row, and is given full access the same way; the sharing
-// key, which myna gives its own agents, can't be made read-only.
+// key, which owl gives its own agents, can't be made read-only.
 const assert = require("node:assert/strict");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
@@ -16,9 +16,9 @@ const words = {
 };
 
 const keys = () => [
-  { id: "laptop", name: "Laptop", masked: "sk-myna-key-…111111", readOnly: true },
-  { id: "server", name: "Server", masked: "sk-myna-key-…222222" },
-  { id: "myna", name: "Myna", masked: "sk-myna-key-…444444", lan: true },
+  { id: "laptop", name: "Laptop", masked: "sk-owl-key-…111111", readOnly: true },
+  { id: "server", name: "Server", masked: "sk-owl-key-…222222" },
+  { id: "owl", name: "Owl", masked: "sk-owl-key-…444444", lan: true },
 ];
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -33,7 +33,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const events = [], errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", fixture(lang, "light", events, { lan: true, keys: keys() }));
-        await page.goto("http://myna.test/?view=gateway");
+        await page.goto("http://owl.test/?view=gateway");
         await page.locator("#gatewayKeys .acc[data-key]").last().waitFor();
         const row = (id) => page.locator(`#gatewayKeys .acc[data-key="${id}"]`);
         const tag = (id) => row(id).locator(".key-readonly");
@@ -69,12 +69,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal((await page.locator("#status").textContent()).trim(), w.given);
 
         // the sharing key: the item is there, off, and says why
-        await menu("myna");
+        await menu("owl");
         const off = item(w.make);
         assert.equal(await off.isDisabled(), true);
         assert.equal((await off.locator(".rm-why").textContent()).trim(), w.why);
         await page.keyboard.press("Escape");
-        assert.equal(events.filter((e) => e.action === "access-key" && e.body.key === "myna").length, 0);
+        assert.equal(events.filter((e) => e.action === "access-key" && e.body.key === "owl").length, 0);
         assert.deepEqual(await scrolled(), before, "a click moved the page");
 
         // the row still fits: nothing runs past the window's edge

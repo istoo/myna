@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 // The headers a third-party Anthropic API's key goes in (Provider.AuthHeader).

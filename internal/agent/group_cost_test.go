@@ -4,14 +4,14 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // taotao7 on Discord: omp on a group/* model counted every call at 0. omp's
 // custom provider prices a call by the cost in its models.yml alone, and
-// myna wrote none, for any model; a group whose members cost differently
-// had no price in myna's list at all, so Pi, OpenCode and Crush got none
+// owl wrote none, for any model; a group whose members cost differently
+// had no price in owl's list at all, so Pi, OpenCode and Crush got none
 // either. A group is now priced at the member it sends to first, and that
 // price follows the group's members.
 func TestGroupModelsCarryTheirFirstMembersPrice(t *testing.T) {
@@ -48,7 +48,7 @@ func TestGroupModelsCarryTheirFirstMembersPrice(t *testing.T) {
 		return nil
 	}
 	modelsOf := func(shape, id string) map[string]any {
-		switch v := mynaProviderJSONAt(shape, shape, "http://127.0.0.1:3425").(map[string]any)["models"].(type) {
+		switch v := owlProviderJSONAt(shape, shape, "http://127.0.0.1:3425").(map[string]any)["models"].(type) {
 		case map[string]any:
 			m, _ := v[id].(map[string]any)
 			return m

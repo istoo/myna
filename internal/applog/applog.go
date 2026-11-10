@@ -1,14 +1,14 @@
 // Package applog writes the desktop app's log to a file, as well as to
 // stderr. The app opened from the Finder, the Dock, the Start menu or a
 // desktop launcher has no terminal: what it logged went nowhere, so a user
-// asked for myna's log had none to send (rayem1w on X, a Codex "hit a
+// asked for owl's log had none to send (rayem1w on X, a Codex "hit a
 // snag" through the gateway, 0.1.2330). Only the launch agent
-// (`myna daemon install`, serve.log) and a `myna tui` that left the
-// gateway running (serve.log in myna's cache) kept one.
+// (`owl daemon install`, serve.log) and a `owl tui` that left the
+// gateway running (serve.log in owl's cache) kept one.
 //
 // The file is app.log in appdir.Logs. It is the app's alone: the launch
 // agent's serve.log, in the same folder on a Mac, is written by launchd for
-// `myna serve`, a process of its own. At 5 MiB app.log becomes
+// `owl serve`, a process of its own. At 5 MiB app.log becomes
 // app.old.log, over the one before, so two files at most are kept. A
 // panic or fatal error's trace goes to the file too (debug.SetCrashOutput),
 // so a crash is in it.
@@ -31,7 +31,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/istoo/myna/internal/appdir"
+	"github.com/istoo/owl/internal/appdir"
 )
 
 const (
@@ -54,7 +54,7 @@ var (
 )
 
 // Current is the log this process writes, or "" when it writes none (the
-// TUI, `myna serve`, a command).
+// TUI, `owl serve`, a command).
 func Current() string {
 	if p := current.Load(); p != nil {
 		return *p
@@ -63,7 +63,7 @@ func Current() string {
 }
 
 // Start sends the standard logger's output, and a crash's trace, to the
-// log as well as to stderr, and logs that this myna started. It answers
+// log as well as to stderr, and logs that this owl started. It answers
 // the log's path; when the file can't be opened, the error, and the log
 // goes to stderr alone as before.
 func Start(version, how string) (string, error) {
@@ -77,7 +77,7 @@ func Start(version, how string) (string, error) {
 		was.Close()
 	}
 	current.Store(&path)
-	log.Printf("myna %s started (%s, pid %d, %s/%s); this log: %s", version, how, os.Getpid(), runtime.GOOS, runtime.GOARCH, path)
+	log.Printf("owl %s started (%s, pid %d, %s/%s); this log: %s", version, how, os.Getpid(), runtime.GOOS, runtime.GOARCH, path)
 	return path, nil
 }
 
@@ -158,7 +158,7 @@ func (w *file) Write(p []byte) (int, error) {
 }
 
 // rotate makes the log app.old.log and starts a new one. When another
-// myna rotated it already (an update's new process beside the old one),
+// owl rotated it already (an update's new process beside the old one),
 // the log at w.path is already new and is only opened. When it can't be
 // moved (Windows, while another process has it open), it is emptied, so
 // it stays bounded either way.

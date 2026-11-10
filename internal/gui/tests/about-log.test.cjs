@@ -4,15 +4,15 @@ const { chromium, webkit } = require("playwright");
 const { fixture } = require("./fixtures/caller-keys.cjs");
 const { openPart } = require("./reader.cjs");
 
-// A user asked for myna's log had none: the app opened from the Finder
+// A user asked for owl's log had none: the app opened from the Finder
 // wrote it nowhere (rayem1w on X). It writes app.log now, and Settings ›
 // About names it with a Log row whose Open shows its folder, in every
-// language and at the tray panel's width. myna web writes none, and
+// language and at the tray panel's width. owl web writes none, and
 // shows no row.
 const words = {
   en: ["Log", "Open"], zh: ["日志", "打开"], "zh-TW": ["日誌", "開啟"], ja: ["ログ", "開く"], de: ["Protokoll", "Öffnen"],
 };
-const logPath = "~/Library/Logs/myna/app.log";
+const logPath = "~/Library/Logs/owl/app.log";
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   for (const lang of Object.keys(words)) {
@@ -35,7 +35,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           // the fixture's settings, with the log this app writes
           return base({ request: () => req, fulfill: (o) => route.fulfill(o.json ? { ...o, json: { ...o.json, log: logPath } } : o) });
         });
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         await page.locator("#prefs").click();
         await openPart(page, "about");
         const row = page.locator("#logRow");
@@ -50,14 +50,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       });
     }
   }
-  test(`${engine}: myna web writes no log, and About names none`, async (t) => {
+  test(`${engine}: owl web writes no log, and About names none`, async (t) => {
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     t.after(() => browser.close());
     const page = await (await browser.newContext({ viewport: { width: 1100, height: 800 }, reducedMotion: "reduce" })).newPage();
     page.setDefaultTimeout(6000);
     page.setDefaultNavigationTimeout(60000);
     await page.route("**/*", fixture("en", "light", []));
-    await page.goto("http://myna.test/");
+    await page.goto("http://owl.test/");
     await page.locator("#prefs").click();
     await openPart(page, "about");
     await page.locator("#about .row", { has: page.locator(".who", { hasText: "Config folder" }) }).waitFor();

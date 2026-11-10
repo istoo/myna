@@ -73,7 +73,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (error) => errors.push(error.message));
         await page.route("**/*", serve(lang));
-        await page.goto("http://myna.test/?view=routing");
+        await page.goto("http://owl.test/?view=routing");
         await page.locator(".rt-accts li.rt-fold").first().waitFor();
         await page.waitForFunction(() => document.querySelector(".rt-accts li.rt-fold em")?.textContent.trim());
         const say = (key, vars = {}) => page.evaluate(([lang, key, vars]) => {

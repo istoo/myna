@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/redact"
+	"github.com/istoo/owl/internal/redact"
 )
 
 // person is a name at [s, e), as sure as the fake pf-serve says (main_test.go).
@@ -198,7 +198,7 @@ func TestGPULoadBudgetFitsARequest(t *testing.T) {
 	}
 }
 
-// pf-serve that myna ended for taking too long says so, not ggml's
+// pf-serve that owl ended for taking too long says so, not ggml's
 // startup lines, which were all lazyeo's Settings showed ("pf-serve
 // ended: ggml_metal_device_init: tensor API disabled for pre-M5 …").
 func TestEndedForSlownessSaysSo(t *testing.T) {
@@ -207,8 +207,8 @@ func TestEndedForSlownessSaysSo(t *testing.T) {
 	classifyTimeout = func(int) time.Duration { return 300 * time.Millisecond }
 	t.Cleanup(func() { classifyTimeout = was })
 	_, err := Find([]string{"hi Alice"})
-	if err == nil || !strings.Contains(err.Error(), "didn't answer in 300ms (1 KB") || !strings.Contains(err.Error(), "myna ended it") {
-		t.Fatalf("err = %v, want it said myna ended it for not answering", err)
+	if err == nil || !strings.Contains(err.Error(), "didn't answer in 300ms (1 KB") || !strings.Contains(err.Error(), "owl ended it") {
+		t.Fatalf("err = %v, want it said owl ended it for not answering", err)
 	}
 	if strings.Contains(err.Error(), "ggml_metal") || strings.Contains(Now().Failed, "ggml_metal") {
 		t.Fatalf("err = %v, want no ggml startup lines", err)
@@ -536,7 +536,7 @@ func TestGPUHungTwiceMovesToCPU(t *testing.T) {
 }
 
 // A GPU lost is tried again when its time comes (gpuRetryAfter), with
-// no restart of myna: the CPU's pf-serve makes way for the GPU's, and a
+// no restart of owl: the CPU's pf-serve makes way for the GPU's, and a
 // GPU that answers is the model's again.
 func TestLostGPUTriedAgain(t *testing.T) {
 	log, gpu := gpuInstall(t, "gpudiesonce")

@@ -70,7 +70,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             const errors = [];
             page.on("pageerror", (e) => errors.push(e.message));
             await page.route("**/*", serve(lang));
-            await page.goto("http://myna.test/?view=routing");
+            await page.goto("http://owl.test/?view=routing");
             const row = page.locator(`.rt-accts > li[title^="${small.id}"]`).first();
             await row.locator("em").filter({ hasText: /\S/ }).waitFor();
             const [rowWord, why] = words[lang];

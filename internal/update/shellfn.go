@@ -10,15 +10,15 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/owl/internal/edit"
 )
 
-// A command an agent is typed by, given to it by myna: agy takes
-// myna's gateway, its key and the model only from how it is started
-// (agent/agy.go), so myna puts a function named agy in the profile of
-// each shell the user has, which starts it through this myna (bestony on
+// A command an agent is typed by, given to it by owl: agy takes
+// owl's gateway, its key and the model only from how it is started
+// (agent/agy.go), so owl puts a function named agy in the profile of
+// each shell the user has, which starts it through this owl (bestony on
 // Discord: no command to copy at each start). The function sits in a
-// block of its own between two marked lines, which is all myna ever
+// block of its own between two marked lines, which is all owl ever
 // writes or takes out of the profile; the rest of the file is the user's.
 //
 // The shells are those ReadCLI asks about: zsh (its .zshrc in ZDOTDIR when
@@ -30,7 +30,7 @@ import (
 // keeps it from the real one.
 
 // ShellBody is a function's text for one shell: "posix" (zsh, bash),
-// "fish" or "powershell"; prog is this myna, by a path that stays put.
+// "fish" or "powershell"; prog is this owl, by a path that stays put.
 type ShellBody func(kind, prog string) string
 
 // ShellProfile is one shell's profile a function goes in.
@@ -53,8 +53,8 @@ var (
 
 var fnMu sync.Mutex
 
-func fnOpen(name string) string  { return "# >>> myna " + name + " >>>" }
-func fnClose(name string) string { return "# <<< myna " + name + " <<<" }
+func fnOpen(name string) string  { return "# >>> owl " + name + " >>>" }
+func fnClose(name string) string { return "# <<< owl " + name + " <<<" }
 
 // ShellFunction puts the function name, as body gives it for each shell,
 // in the profile of every shell the user has, or brings one there up to
@@ -68,7 +68,7 @@ func ShellFunction(name string, body ShellBody) ([]string, error) {
 	return ShellFunctionAt(homeProfiles(), name, func(kind string) string { return body(kind, prog) })
 }
 
-// DropShellFunction takes the function name out of every profile myna
+// DropShellFunction takes the function name out of every profile owl
 // put it in.
 func DropShellFunction(name string) error { return DropShellFunctionAt(homeProfiles(), name) }
 
@@ -88,7 +88,7 @@ func homeProfiles() []ShellProfile {
 
 // ShellFunctionAt is ShellFunction for the profiles ps of another home,
 // which the caller names: a WSL distro's, opened from Windows, whose
-// shells this myna doesn't run in. body takes the shell's kind alone.
+// shells this owl doesn't run in. body takes the shell's kind alone.
 func ShellFunctionAt(ps []ShellProfile, name string, body func(kind string) string) ([]string, error) {
 	fnMu.Lock()
 	defer fnMu.Unlock()
@@ -218,7 +218,7 @@ func withFnBlock(text, name, body string, crlf bool) string {
 		}
 		if end < 0 {
 			// opened and never closed: someone cut it; the open line alone
-			// is myna's
+			// is owl's
 			end = i
 		}
 		if body != "" {

@@ -6,15 +6,15 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/library"
+	"github.com/istoo/owl/internal/library"
 )
 
-// A profile's details are its fields by agent, in the order myna lists the
+// A profile's details are its fields by agent, in the order owl lists the
 // agents and their fields, under the agents' names and the fields' labels,
 // with what the library gives each; an empty quiet field is left out, but
 // Claude Code's four tiers are all there, an empty one following the main
 // model (#480: opus and fable, following it, were missing); an
-// agent myna no longer knows comes last by id, and nothing that reads as a
+// agent owl no longer knows comes last by id, and nothing that reads as a
 // key or a token is in them (#467).
 func TestDetails(t *testing.T) {
 	sandbox(t)
@@ -26,7 +26,7 @@ func TestDetails(t *testing.T) {
 			"claude.model":  "opus",
 			"claude.haiku":  "",
 			"claude.opus":   "",
-			"claude.sonnet": "myna/a/s",
+			"claude.sonnet": "owl/a/s",
 			"claude.fable":  "",
 			"gone.model":    "m",
 			"gone.apiKey":   "plain-looking",
@@ -48,7 +48,7 @@ func TestDetails(t *testing.T) {
 	}
 	ci, xi := slices.Index(ids, "claude"), slices.Index(ids, "codex")
 	if ci < 0 || xi < 0 || ids[len(ids)-1] != "gone" || len(ids) != 3 {
-		t.Fatalf("groups %v, want claude and codex in myna's order, then gone", ids)
+		t.Fatalf("groups %v, want claude and codex in owl's order, then gone", ids)
 	}
 	claude, codex, gone := gs[ci], gs[xi], gs[2]
 	if claude.Name != "Claude Code" || codex.Name != "Codex" || gone.Name != "gone" {
@@ -79,7 +79,7 @@ func TestDetails(t *testing.T) {
 			tiers = append(tiers, it.Key)
 			want := Item{Key: it.Key, Label: it.Key, Follows: "model"}
 			if it.Key == "sonnet" {
-				want = Item{Key: "sonnet", Label: "sonnet", Value: "myna/a/s"}
+				want = Item{Key: "sonnet", Label: "sonnet", Value: "owl/a/s"}
 			}
 			if it != want {
 				t.Errorf("tier %+v, want %+v", it, want)

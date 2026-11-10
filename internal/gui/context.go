@@ -21,9 +21,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/sessions"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/sessions"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // defaultWindow is the window a prompt is measured against when the
@@ -270,7 +270,7 @@ func sessionOfRec(r *ctxRec) string {
 // its conversation id was read from (sessions' Convs): dsh's
 // chat-completions and messages routes send no session id, so the gateway
 // keys each request by its first prompt's hash, and the page showed
-// "myna-a…" where the Sessions page shows the session's title (Kumo31
+// "owl-a…" where the Sessions page shows the session's title (Kumo31
 // on Discord). An id two sessions share stays as it is.
 func joinConvs(routes []ctxRec, list func() []sessions.Session) {
 	loose := false
@@ -732,7 +732,7 @@ func contextRecsLocked(r *http.Request, days int) (out []ctxRec, stamp string) {
 			}
 		}
 	}
-	// a group myna found by the id agents pick it by (publicRoute)
+	// a group owl found by the id agents pick it by (publicRoute)
 	pub := publicRefs()
 	for i := range out {
 		out[i].Model = pub(out[i].Model)

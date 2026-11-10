@@ -1,9 +1,9 @@
-// Package netproxy decides which proxy myna's own requests to vendors go
+// Package netproxy decides which proxy owl's own requests to vendors go
 // through. An app started from the Dock or the Start menu has no
 // HTTPS_PROXY in its environment, so without this every call to a vendor
 // that is only reachable through a proxy hangs until the agent gives up.
 //
-// In order: the proxy set in myna's settings (or "direct" for none), the
+// In order: the proxy set in owl's settings (or "direct" for none), the
 // usual *_PROXY variables, then the system's proxy (macOS network
 // settings, Windows Internet Options). Loopback is never proxied, nor,
 // unless a provider has a proxy of its own, a host on the user's own
@@ -20,22 +20,22 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/probelog"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/probelog"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // Install routes http.DefaultTransport (and so http.DefaultClient) through
 // Func, and http.DefaultClient's requests made on a provider's behalf
 // (With) through a transport of that provider's proxy (Dispatch). Its
 // HTTP/2 connections are checked as the gateway's are (HTTP2Health), and
-// the requests myna sends on its own are written down (probelog).
+// the requests owl sends on its own are written down (probelog).
 func Install() {
 	if t, ok := http.DefaultTransport.(*http.Transport); ok {
 		t.Proxy = Func
 		if t.HTTP2 == nil {
 			t.HTTP2 = HTTP2Health()
 		}
-		// a request myna sends a provider on its own (a Test, a model
+		// a request owl sends a provider on its own (a Test, a model
 		// list) is written into the request log as it goes (probelog)
 		http.DefaultClient.Transport = probelog.Transport(Dispatch(t))
 	}
@@ -82,7 +82,7 @@ type choiceKey struct{}
 
 type holdKey struct{}
 
-// Hold is ctx for work myna was not asked to do and must not send: no
+// Hold is ctx for work owl was not asked to do and must not send: no
 // request made with it through Func, or a transport Dispatch made, leaves
 // the machine; each fails with err before it dials (#1518, allowance
 // reads while the user has them read only when asked).
@@ -106,7 +106,7 @@ func Held(ctx context.Context) error {
 // the proxy's address (http://, https://, socks5://; host:port means
 // http). Requests made with it through Func, or through a transport
 // Dispatch made, take that proxy. A choice ctx already names is replaced,
-// "" too: a request myna makes for one provider while serving another's
+// "" too: a request owl makes for one provider while serving another's
 // (a web search asked of Codex in a turn served by a provider set to
 // "direct", #1522) goes through its own provider's proxy, never the one
 // it was made under. A provider's leave not to check its certificate
@@ -198,7 +198,7 @@ func (d *dispatch) RoundTrip(req *http.Request) (*http.Response, error) {
 }
 
 // Watch is a check a transport of its own makes before each request: it
-// says the global proxy in myna's settings moved since the check's last
+// says the global proxy in owl's settings moved since the check's last
 // call, and the caller closes its transport's idle connections, which
 // would carry the request after a switch through the old proxy. The
 // setting is read at dial time (Func), but a transport pools by target
@@ -300,14 +300,14 @@ func For(u *url.URL) (*url.URL, error) {
 	return Parse(sys.URL)
 }
 
-// Env is env (the process's own when nil) for an agent's CLI that myna
+// Env is env (the process's own when nil) for an agent's CLI that owl
 // starts — a sign-in, or a subscription's run — told to use the proxy
-// myna's own requests would: the CLI reads only *_PROXY, which an app
+// owl's own requests would: the CLI reads only *_PROXY, which an app
 // started from the Dock or the Start menu doesn't have, so a proxy set in
-// myna or the system's alone left it trying the vendor directly. A
-// proxy set in myna replaces any in env and "direct" drops them; the
+// owl or the system's alone left it trying the vendor directly. A
+// proxy set in owl replaces any in env and "direct" drops them; the
 // system's is only added where env names none. Loopback never goes
-// through it, since a CLI calls back to myna there.
+// through it, since a CLI calls back to owl there.
 func Env(env []string) []string { return EnvWith("", env) }
 
 // EnvWith is Env for a CLI run on one provider's behalf, whose own proxy
@@ -409,7 +409,7 @@ func Describe() (proxy, source string) {
 	return "", "none"
 }
 
-// Redact is a proxy address as myna may show it: in a log line, an
+// Redact is a proxy address as owl may show it: in a log line, an
 // error, a status or the GUI (#852, #1886). Its user and password are
 // left out, and the rest kept as it was written (no scheme added to one
 // written without). A malformed address is "", because its userinfo
@@ -434,7 +434,7 @@ func Redact(raw string) string {
 // fromEnv is the proxy the environment names for u: HTTPS_PROXY or
 // HTTP_PROXY as Go reads them, else ALL_PROXY (curl's, which Go doesn't
 // read: a shell with only ALL_PROXY=socks5://… set has curl go through it,
-// and myna, its updates among its requests, too). NO_PROXY is kept for
+// and owl, its updates among its requests, too). NO_PROXY is kept for
 // it as well.
 func fromEnv(u *url.URL) (*url.URL, error) {
 	if p, err := http.ProxyFromEnvironment(&http.Request{URL: u}); p != nil || err != nil {
@@ -504,7 +504,7 @@ var sysCache struct {
 }
 
 // How long a system proxy read stands: a proxy that is set, 15 seconds;
-// none, 2. myna started at login comes up before the proxy app does
+// none, 2. owl started at login comes up before the proxy app does
 // (#1518), and its requests went direct for up to 15 seconds after the
 // proxy app had set the system's proxy. A request waits for a read until
 // readWait after the read began, then takes what was read before: a

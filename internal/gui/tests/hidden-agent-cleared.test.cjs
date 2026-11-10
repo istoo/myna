@@ -83,7 +83,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [], arranged = [], w = words[lang];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", server(lang, arranged));
-      await page.goto("http://myna.test/?view=agents");
+      await page.goto("http://owl.test/?view=agents");
       await page.locator(".agent-more").click();
       const hanako = page.locator('.agent-fold .row.agent[data-id="hanako"]');
       await hanako.locator(".ag-show").waitFor();

@@ -19,8 +19,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/istoo/myna/internal/ghtoken"
-	"github.com/istoo/myna/internal/source"
+	"github.com/istoo/owl/internal/ghtoken"
+	"github.com/istoo/owl/internal/source"
 )
 
 // ---- which skills GitHub has changed --------------------------------------
@@ -87,7 +87,7 @@ func forgetCheck(name string) {
 }
 
 // checkedAt is when the skills were last checked for updates (unix
-// nanoseconds), 0 before the first check since myna started.
+// nanoseconds), 0 before the first check since owl started.
 var checkedAt atomic.Int64
 
 // checkEvery is how long the Library page goes before it checks for
@@ -95,7 +95,7 @@ var checkedAt atomic.Int64
 const checkEvery = 12 * time.Hour
 
 // checkDue is whether the page should check the library's skills from
-// GitHub for updates: none checked since myna started, or not for
+// GitHub for updates: none checked since owl started, or not for
 // checkEvery.
 func checkDue(l *Library) bool {
 	if !slices.ContainsFunc(l.Skills, func(s *Skill) bool { return s.Source.remote() }) {
@@ -160,7 +160,7 @@ func lastCommit(src Source) (*commit, error) {
 const cacheBody = 8 << 20
 
 // errOverCap is an answer over the most its caller reads (apiGet's max).
-var errOverCap = errors.New("over the most myna reads")
+var errOverCap = errors.New("over the most owl reads")
 
 // apiGet asks GitHub's API for u, with the ETag of the answer it had
 // before, if any: GitHub's 304 for an unchanged one doesn't count against
@@ -171,7 +171,7 @@ var errOverCap = errors.New("over the most myna reads")
 // a cut-off body handed to a caller, and no answer over cacheBody is kept.
 func apiGet(u string, max int64) ([]byte, int, bool, error) {
 	req, _ := http.NewRequest("GET", u, nil)
-	req.Header.Set("User-Agent", "myna")
+	req.Header.Set("User-Agent", "owl")
 	req.Header.Set("Accept", "application/vnd.github+json")
 	etags.Lock()
 	had, cached := etags.m[u]
@@ -230,7 +230,7 @@ func hashFiles(dir string, noFinder bool) string {
 }
 
 // leave is what a hash of a skill's folder leaves aside, beyond its .git
-// and myna's mark.
+// and owl's mark.
 type leave uint8
 
 const (
@@ -493,7 +493,7 @@ func checkSkill(s *Skill, f *fetcher, asked map[string]*commit, limited *atomic.
 	}
 	have := s.Hash
 	if have == "" {
-		have = hashDir(skillDir(s.Name)) // installed before myna kept it
+		have = hashDir(skillDir(s.Name)) // installed before owl kept it
 	}
 	if theirs := s.fetchedHash(from); theirs == "" || theirs != have {
 		c.Status, c.URL = "update", history

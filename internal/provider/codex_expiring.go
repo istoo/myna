@@ -26,7 +26,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // resetLead is how long before a reset runs out it is spent: the user's

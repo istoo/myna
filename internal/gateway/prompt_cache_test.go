@@ -7,10 +7,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// codexTurn is a Codex request as it reaches myna: its instructions, its
+// codexTurn is a Codex request as it reaches owl: its instructions, its
 // developer and context messages, the conversation so far, its tools and its
 // thread's id as prompt_cache_key.
 func codexTurn(input string) string {

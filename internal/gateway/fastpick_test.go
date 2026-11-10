@@ -5,11 +5,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // postAs sends body to path with agent's own token, as the agent wired to
-// myna does.
+// owl does.
 func postFrom(t *testing.T, s *Server, agent, path, body string) Route {
 	t.Helper()
 	rec := httptest.NewRecorder()

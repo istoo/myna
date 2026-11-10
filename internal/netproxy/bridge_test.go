@@ -207,9 +207,9 @@ func TestBridgeNeverCarriesToItself(t *testing.T) {
 }
 
 // Bun itself, the plugin host's runtime, fetches through the bridge: run
-// when a bun is at hand ($MYNA_BUN or on PATH).
+// when a bun is at hand ($OWL_BUN or on PATH).
 func TestBunThroughBridge(t *testing.T) {
-	bun := os.Getenv("MYNA_BUN")
+	bun := os.Getenv("OWL_BUN")
 	if bun == "" {
 		bun, _ = exec.LookPath("bun")
 	}
@@ -222,7 +222,7 @@ func TestBunThroughBridge(t *testing.T) {
 	defer tls.Close()
 	socks, n := fakeSOCKS(t, "me", "pw")
 	b, _ := Bridge(socks)
-	// loopback is never proxied by myna, but the test's servers are on it:
+	// loopback is never proxied by owl, but the test's servers are on it:
 	// Bun is given the proxy outright
 	js := `for (const u of process.env.URLS.split(" ")) console.log(await (await fetch(u, { proxy: "` + b + `", tls: { rejectUnauthorized: false } })).text())`
 	cmd := exec.Command(bun, "-e", js)

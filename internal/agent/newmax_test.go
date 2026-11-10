@@ -12,8 +12,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // newMaxUser is the `app` row as NewMax 1.1.22 saves it: JSON.stringify of
@@ -53,9 +53,9 @@ func newMaxRow(t *testing.T, path string) (string, bool) {
 	return string(b), had
 }
 
-// newMaxMyna is myna's entry in the row app, checked as NewMax's
+// newMaxOwl is owl's entry in the row app, checked as NewMax's
 // mergeProviders reads one.
-func newMaxMyna(t *testing.T, app string) (e newMaxEntry, raw map[string]json.RawMessage) {
+func newMaxOwl(t *testing.T, app string) (e newMaxEntry, raw map[string]json.RawMessage) {
 	t.Helper()
 	var doc struct {
 		Providers []json.RawMessage `json:"providers"`
@@ -72,12 +72,12 @@ func newMaxMyna(t *testing.T, app string) (e newMaxEntry, raw map[string]json.Ra
 			return e, raw
 		}
 	}
-	t.Fatalf("no myna entry in %s", app)
+	t.Fatalf("no owl entry in %s", app)
 	return
 }
 
 // NewMax (newmax.cc) lists the providers of its settings row in its model
-// picker. myna adds itself as "myna-gateway" on the gateway's Anthropic
+// picker. owl adds itself as "owl-gateway" on the gateway's Anthropic
 // Messages with the key naming NewMax, keeps every other byte of the row,
 // writes nothing when nothing changed, keeps the user's name, off and
 // NewMax's own fields on its entry through a sync, and off gives back the
@@ -106,40 +106,40 @@ func TestNewMaxProvider(t *testing.T) {
 	if f.Get() != "" {
 		t.Fatalf("get: %q", f.Get())
 	}
-	if err := f.Set(mynaID); err != nil {
+	if err := f.Set(owlID); err != nil {
 		t.Fatal(err)
 	}
-	if f.Get() != mynaID {
+	if f.Get() != owlID {
 		t.Fatalf("get after set: %q", f.Get())
 	}
 
 	gw := gateway.URL()
 	app, _ := newMaxRow(t, a.Path)
-	e, _ := newMaxMyna(t, app)
+	e, _ := newMaxOwl(t, app)
 	key := agentKeyAt("newmax", gw)
 	if e.BaseURL != gw || strings.HasSuffix(e.BaseURL, "/v1") || e.APIKey != key || !slices.Equal(e.APIKeys, []string{key}) ||
-		e.APIFormat != "anthropic" || e.APIKeyField != "ANTHROPIC_AUTH_TOKEN" || !e.Enabled || e.Name != "myna" {
+		e.APIFormat != "anthropic" || e.APIKeyField != "ANTHROPIC_AUTH_TOKEN" || !e.Enabled || e.Name != "owl" {
 		t.Errorf("entry: %+v", e)
 	}
 	var want []string
-	for _, m := range mynaModels("newmax") {
+	for _, m := range owlModels("newmax") {
 		want = append(want, m.ID)
 	}
 	if len(want) < 2 || !slices.Equal(e.Models, want) || !slices.Equal(e.EnabledModels, want) {
 		t.Errorf("models %v enabled %v, want %v", e.Models, e.EnabledModels, want)
 	}
-	// the rest of the row as it was, myna's entry after the user's and
+	// the rest of the row as it was, owl's entry after the user's and
 	// its id after theirs
-	if !strings.HasPrefix(app, newMaxUser[:strings.Index(newMaxUser, `}],"providerOrder"`)+1]+`,{"id":"myna-gateway",`) ||
-		!strings.HasSuffix(app, `],"providerOrder":["default","deepseek","myna-gateway"],"settingsConfig":{"env":{"FOO":"1"}},"autoUpdate":true}`) {
-		t.Errorf("the row around myna's entry changed:\n%s\n%s", newMaxUser, app)
+	if !strings.HasPrefix(app, newMaxUser[:strings.Index(newMaxUser, `}],"providerOrder"`)+1]+`,{"id":"owl-gateway",`) ||
+		!strings.HasSuffix(app, `],"providerOrder":["default","deepseek","owl-gateway"],"settingsConfig":{"env":{"FOO":"1"}},"autoUpdate":true}`) {
+		t.Errorf("the row around owl's entry changed:\n%s\n%s", newMaxUser, app)
 	}
 
 	// nothing changed: nothing written
 	if err := a.Sync(); err != nil {
 		t.Fatal(err)
 	}
-	if err := f.Set(mynaID); err != nil {
+	if err := f.Set(owlID); err != nil {
 		t.Fatal(err)
 	}
 	if again, _ := newMaxRow(t, a.Path); again != app {
@@ -148,12 +148,12 @@ func TestNewMaxProvider(t *testing.T) {
 
 	// renamed, turned off and tested in NewMax, a model gone from the
 	// list: a sync keeps the user's and NewMax's, and puts the model back
-	at := strings.Index(app, `{"id":"myna-gateway",`)
-	mine := strings.Replace(app[at:], `{"id":"myna-gateway","name":"myna",`, `{"id":"myna-gateway","name":"My myna","modelCapabilities":{"x":{"vision":true}},`, 1)
+	at := strings.Index(app, `{"id":"owl-gateway",`)
+	mine := strings.Replace(app[at:], `{"id":"owl-gateway","name":"owl",`, `{"id":"owl-gateway","name":"My owl","modelCapabilities":{"x":{"vision":true}},`, 1)
 	mine = strings.Replace(mine, `"enabled":true,"canDelete":true`, `"enabled":false,"canDelete":true`, 1)
 	mine = strings.Replace(mine, `"models":["`+want[0]+`",`, `"models":[`, 1)
 	edited := app[:at] + mine
-	if edited == app || strings.Count(edited, "My myna") != 1 {
+	if edited == app || strings.Count(edited, "My owl") != 1 {
 		t.Fatalf("fixture: %s", edited)
 	}
 	newMaxSetRow(t, a.Path, edited)
@@ -161,17 +161,17 @@ func TestNewMaxProvider(t *testing.T) {
 		t.Fatal(err)
 	}
 	app, _ = newMaxRow(t, a.Path)
-	e, raw := newMaxMyna(t, app)
-	if e.Name != "My myna" || e.Enabled || string(raw["modelCapabilities"]) != `{"x":{"vision":true}}` {
+	e, raw := newMaxOwl(t, app)
+	if e.Name != "My owl" || e.Enabled || string(raw["modelCapabilities"]) != `{"x":{"vision":true}}` {
 		t.Errorf("the user's name, off and NewMax's fields not kept: %s", app)
 	}
 	if !slices.Equal(e.Models, want) {
 		t.Errorf("models after sync %v, want %v", e.Models, want)
 	}
 
-	// picked in NewMax, then off: myna's entry and id go, the pick goes
+	// picked in NewMax, then off: owl's entry and id go, the pick goes
 	// back to NewMax's default, and the rest is the row it found
-	newMaxSetRow(t, a.Path, strings.Replace(app, `{"providerId":"deepseek","model":"deepseek-chat",`, `{"providerId":"myna-gateway","model":"`+want[1]+`",`, 1))
+	newMaxSetRow(t, a.Path, strings.Replace(app, `{"providerId":"deepseek","model":"deepseek-chat",`, `{"providerId":"owl-gateway","model":"`+want[1]+`",`, 1))
 	if err := f.Set(""); err != nil {
 		t.Fatal(err)
 	}
@@ -184,7 +184,7 @@ func TestNewMaxProvider(t *testing.T) {
 	}
 	// and on then off, untouched since, is the row byte for byte
 	newMaxSetRow(t, a.Path, newMaxUser)
-	if err := f.Set(mynaID); err != nil {
+	if err := f.Set(owlID); err != nil {
 		t.Fatal(err)
 	}
 	if err := f.Set(""); err != nil {
@@ -209,10 +209,10 @@ func newMaxSetRow(t *testing.T, path, app string) {
 	}
 }
 
-// NewMax started once and left at its defaults has no row app: myna
+// NewMax started once and left at its defaults has no row app: owl
 // makes one with its entry alone (NewMax lays its defaults and presets
 // under it), and off takes the row out again. Before NewMax has made its
-// database at all, myna says to open it once.
+// database at all, owl says to open it once.
 func TestNewMaxMakesItsRow(t *testing.T) {
 	home := syncHome(t)
 	t.Setenv("NEWMAX_USER_DATA_DIR", "")
@@ -221,7 +221,7 @@ func TestNewMaxMakesItsRow(t *testing.T) {
 	a := newMax(home)
 	f := a.Field("provider")
 
-	if err := f.Set(mynaID); !errors.Is(err, errNewMaxNoDB) {
+	if err := f.Set(owlID); !errors.Is(err, errNewMaxNoDB) {
 		t.Fatalf("no database: %v", err)
 	}
 	if _, err := os.Stat(a.Path); !errors.Is(err, os.ErrNotExist) {
@@ -229,14 +229,14 @@ func TestNewMaxMakesItsRow(t *testing.T) {
 	}
 
 	newMaxDB(t, a.Path, "")
-	if err := f.Set(mynaID); err != nil {
+	if err := f.Set(owlID); err != nil {
 		t.Fatal(err)
 	}
 	app, had := newMaxRow(t, a.Path)
-	if !had || !strings.HasPrefix(app, `{"providers":[{"id":"myna-gateway",`) || !strings.HasSuffix(app, `}],"providerOrder":["default","myna-gateway"]}`) {
+	if !had || !strings.HasPrefix(app, `{"providers":[{"id":"owl-gateway",`) || !strings.HasSuffix(app, `}],"providerOrder":["default","owl-gateway"]}`) {
 		t.Fatalf("row made: %s", app)
 	}
-	newMaxMyna(t, app)
+	newMaxOwl(t, app)
 	if err := f.Set(""); err != nil {
 		t.Fatal(err)
 	}
@@ -265,7 +265,7 @@ func openNewMaxForTest(path string) (*sql.DB, func(), error) {
 
 // A row NewMax wouldn't read as its settings — not JSON, providers that
 // aren't a list — is left alone, and nothing is changed while NewMax runs,
-// as it writes its settings back over myna's when one changes.
+// as it writes its settings back over owl's when one changes.
 func TestNewMaxLeavesAlone(t *testing.T) {
 	home := syncHome(t)
 	t.Setenv("NEWMAX_USER_DATA_DIR", "")
@@ -276,7 +276,7 @@ func TestNewMaxLeavesAlone(t *testing.T) {
 	newMaxDB(t, a.Path, "")
 	for _, bad := range []string{`{"providers":`, `[]`, `{"providers":{"id":"x"}}`, `{"providers":[],"providerOrder":"default"}`} {
 		newMaxSetRow(t, a.Path, bad)
-		if err := f.Set(mynaID); err == nil {
+		if err := f.Set(owlID); err == nil {
 			t.Errorf("%s: no error", bad)
 		}
 		if got, _ := newMaxRow(t, a.Path); got != bad {
@@ -289,14 +289,14 @@ func TestNewMaxLeavesAlone(t *testing.T) {
 
 	newMaxSetRow(t, a.Path, newMaxUser)
 	newMaxRunning = func() bool { return true }
-	if err := f.Set(mynaID); err != errNewMaxRunning {
+	if err := f.Set(owlID); err != errNewMaxRunning {
 		t.Fatalf("set while running: %v", err)
 	}
 	if got, _ := newMaxRow(t, a.Path); got != newMaxUser {
 		t.Errorf("written while running: %s", got)
 	}
 	newMaxRunning = func() bool { return false }
-	if err := f.Set(mynaID); err != nil {
+	if err := f.Set(owlID); err != nil {
 		t.Fatal(err)
 	}
 	on, _ := newMaxRow(t, a.Path)
@@ -328,7 +328,7 @@ func TestNewMaxDir(t *testing.T) {
 	}
 }
 
-// NewMax keeps 20 models of a provider (a primary and 19 back-ups); myna
+// NewMax keeps 20 models of a provider (a primary and 19 back-ups); owl
 // writes the first 20, so what it wrote and what NewMax saves back agree.
 func TestNewMaxModelCap(t *testing.T) {
 	syncHome(t)
@@ -339,7 +339,7 @@ func TestNewMaxModelCap(t *testing.T) {
 	if err := provider.Save(provider.Provider{ID: "many", Name: "Many", Chat: "https://api.example/v1", Key: "k", Models: ms}); err != nil {
 		t.Fatal(err)
 	}
-	if n := len(mynaModels("newmax")); n <= newMaxMaxModels {
+	if n := len(owlModels("newmax")); n <= newMaxMaxModels {
 		t.Fatalf("fixture: %d models", n)
 	}
 	e := newMaxEntryFor(gateway.URL())

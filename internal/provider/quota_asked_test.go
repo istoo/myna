@@ -10,11 +10,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/netproxy"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/netproxy"
+	"github.com/istoo/owl/internal/settings"
 )
 
-// dialsOut has myna's own requests go as netproxy.Install has them, and
+// dialsOut has owl's own requests go as netproxy.Install has them, and
 // tells every host dialed that isn't this machine's, never dialing it.
 func dialsOut(t *testing.T) func() []string {
 	t.Helper()
@@ -55,7 +55,7 @@ func setQuotaReads(t *testing.T, v string) {
 }
 
 // #1518 (RooobinYe): with Settings → Usage → Allowance reads at "When I
-// ask", nothing myna does by itself asks a vendor for an allowance —
+// ask", nothing owl does by itself asks a vendor for an allowance —
 // the switch to an account with room (CodexUsedUp), routing
 // (Allowances), the Usage page's and tray's timed reads, the menu bar
 // (Quotas) — and each shows the reading kept from the last time, as of
@@ -104,7 +104,7 @@ func TestAllowancesReadOnlyWhenAsked(t *testing.T) {
 	t.Cleanup(restart)
 	bg := context.Background()
 
-	// read once, as myna does by itself, before the setting
+	// read once, as owl does by itself, before the setting
 	if CodexUsedUp(bg) {
 		t.Fatal("used up at 37%")
 	}
@@ -112,7 +112,7 @@ func TestAllowancesReadOnlyWhenAsked(t *testing.T) {
 		t.Fatalf("ChatGPT asked %d times, want 1", n)
 	}
 
-	// then allowances read only when asked, and myna started again (at
+	// then allowances read only when asked, and owl started again (at
 	// login, before the proxy app)
 	setQuotaReads(t, "asked")
 	t.Cleanup(func() { setQuotaReads(t, "") })
@@ -135,7 +135,7 @@ func TestAllowancesReadOnlyWhenAsked(t *testing.T) {
 		t.Fatalf("nobody asked, and ChatGPT was asked %d more times", n-1)
 	}
 	if d := out(); len(d) > 0 {
-		t.Fatalf("nobody asked, and myna dialed %v", d)
+		t.Fatalf("nobody asked, and owl dialed %v", d)
 	}
 
 	// the vendor turns the account away for its quota: read, asked or not
@@ -157,7 +157,7 @@ func TestAllowancesReadOnlyWhenAsked(t *testing.T) {
 	}
 }
 
-// Automatic, as before: myna reads by itself.
+// Automatic, as before: owl reads by itself.
 func TestAllowancesReadByThemselvesByDefault(t *testing.T) {
 	signIn(t)
 	rememberLogins(true)
@@ -180,7 +180,7 @@ func TestAllowancesReadByThemselvesByDefault(t *testing.T) {
 	t.Cleanup(forget)
 	LoginUsage(context.Background(), "codex")
 	if asked.Load() != 1 {
-		t.Fatal("myna no longer reads an allowance by itself while set to")
+		t.Fatal("owl no longer reads an allowance by itself while set to")
 	}
 }
 
@@ -197,7 +197,7 @@ func TestKeyReadsOnlyWhenAsked(t *testing.T) {
 	}
 	setQuotaReads(t, "asked")
 	t.Cleanup(func() { setQuotaReads(t, "") })
-	dialsOut(t) // myna's own transport, which holds what nobody asked for
+	dialsOut(t) // owl's own transport, which holds what nobody asked for
 	bg := context.Background()
 	KeyBalances(bg)
 	PlanQuotas(bg)

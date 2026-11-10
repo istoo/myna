@@ -3,7 +3,7 @@ package provider
 // A saved Claude account in use beside the one Claude Code is signed in to
 // runs Claude Code in a config directory of its own (CLAUDE_CONFIG_DIR): its
 // sign-in is put there once, from logins.json, and from then on Claude Code
-// keeps it, refreshing it as it does its own. myna never refreshes a
+// keeps it, refreshing it as it does its own. owl never refreshes a
 // Claude sign-in nor asks Anthropic anything with one; it only reads back
 // what Claude Code left, so logins.json follows.
 
@@ -22,9 +22,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/istoo/myna/internal/filelock"
-	"github.com/istoo/myna/internal/proc"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/filelock"
+	"github.com/istoo/owl/internal/proc"
+	"github.com/istoo/owl/internal/settings"
 	"golang.org/x/text/unicode/norm"
 )
 
@@ -103,7 +103,7 @@ func forgetClaudeDir(user string) {
 	_ = os.RemoveAll(dir)
 }
 
-// claudeDirRuns are the runs myna waits on in a saved Claude account's
+// claudeDirRuns are the runs owl waits on in a saved Claude account's
 // config directory (inSavedClaudeDir), by account: its /usage, a warm-up.
 // Claude Code may refresh the sign-in it keeps there as it runs, spending
 // the refresh token, so the account isn't handed over to Claude Code
@@ -131,8 +131,8 @@ func claudeDirRun(user string) *sync.RWMutex {
 	return mu
 }
 
-// claudeDirRun is this myna's own runs only: a switch from another
-// myna process (`myna accounts switch` while the app reads a card)
+// claudeDirRun is this owl's own runs only: a switch from another
+// owl process (`owl accounts switch` while the app reads a card)
 // didn't wait for them, and handed Claude Code the refresh token a run of
 // the app's could still spend (#4532). So each run also holds a lock file
 // of its own beside the account's directory, for as long as it runs, and
@@ -163,10 +163,10 @@ func markClaudeRun(user string) (release func()) {
 }
 
 // errClaudeRunning is a run in the account's directory past claudeRunWait.
-var errClaudeRunning = errors.New("Claude Code is still running on this account for myna (its usage or a warm-up): try again in a moment")
+var errClaudeRunning = errors.New("Claude Code is still running on this account for owl (its usage or a warm-up): try again in a moment")
 
 // waitClaudeRuns waits until no process runs Claude Code in user's
-// directory for myna.
+// directory for owl.
 func waitClaudeRuns(user string) error {
 	marks, _ := filepath.Glob(claudeRunMarks(user))
 	deadline := time.Now().Add(claudeRunWait)
@@ -311,7 +311,7 @@ func claudeSavedDir(user string) (string, error) {
 // it. Without the mark its interactive mode starts on its first-run
 // screens, and from 2.1.316 on one that asks for a login method beside a
 // sign-in that works (Jaxxxxnn on X), which a run can only end on. A
-// directory -p alone ran in, or one made before myna wrote the mark,
+// directory -p alone ran in, or one made before owl wrote the mark,
 // has a .claude.json without it, so the mark is added to what is there,
 // every other key kept. A new file gets the account's profile (acct) too.
 // A file that can't be read or parsed, which Claude Code may be writing,
@@ -353,14 +353,14 @@ func claudeOnboarded(dir string, acct map[string]any) {
 var claudeTrustMu sync.Mutex
 
 // ClaudeTrustFolder records, in saved account config directory dir, that
-// Claude Code may work in myna's own folder, which keys names as Claude
+// Claude Code may work in owl's own folder, which keys names as Claude
 // Code keys its projects (2.1.316: the folder's path, on Windows with
-// forward slashes, "C:/Users/<me>/AppData/Local/Temp/myna-claude-work"),
+// forward slashes, "C:/Users/<me>/AppData/Local/Temp/owl-claude-work"),
 // as Claude Code itself records it once the trust question is answered
 // yes. On mydosu's Windows (#4830) a saved account's directory had no
 // such entry, and every /usage read of that account waited out its time
 // on the question.
-// Only a directory of myna's saved accounts is written, never the
+// Only a directory of owl's saved accounts is written, never the
 // user's own ~/.claude.json; every other key is kept, and a file that
 // can't be read or parsed, which Claude Code may be writing, is left as it
 // is.
@@ -459,9 +459,9 @@ func takeClaudeDir(l *savedLogin, c claudeCredentials) (bool, error) {
 
 // claudeStandIn is the saved account served in the place of Claude Code's
 // own while Claude Code is signed out — the user logged out of it, as it
-// tells them to when myna's token is set beside a claude.ai sign-in.
-// myna keeps the other accounts' sign-ins itself, each its own, so a
-// logout signs none of them out of myna: the stand-in runs Claude Code
+// tells them to when owl's token is set beside a claude.ai sign-in.
+// owl keeps the other accounts' sign-ins itself, each its own, so a
+// logout signs none of them out of owl: the stand-in runs Claude Code
 // in a config directory of its own, as the others on do. Never the one
 // Claude Code was signed in to, whose sign-in went with it
 // (claudeLoggedOut, or still Held before rememberLogins next looks: it is
@@ -516,9 +516,9 @@ func claudeListed(ls []savedLogin) string {
 // claudeLogoutLapse is why the account Claude Code was signed in to can't
 // be used once Claude Code let go of it: logged out, which revokes the
 // sign-in it held, or emptied that sign-in once Anthropic refused it.
-const claudeLogoutLapse = "Claude Code is no longer signed in; sign in again in myna"
+const claudeLogoutLapse = "Claude Code is no longer signed in; sign in again in owl"
 
-// legacyClaudeLogoutLapse is claudeLogoutLapse as myna wrote it before,
+// legacyClaudeLogoutLapse is claudeLogoutLapse as owl wrote it before,
 // which took every such lapse for a /logout.
 const legacyClaudeLogoutLapse = "Claude Code's /logout signed it out (it revokes the sign-in it holds); sign in again"
 
@@ -527,12 +527,12 @@ const legacyClaudeLogoutLapse = "Claude Code's /logout signed it out (it revokes
 const claudeGoneLapse = "its sign-in is gone; sign in again"
 
 // claudeLoggedOut marks the account Claude Code held, now that it holds no
-// sign-in, as lapsed: myna's copy of that account is the same sign-in,
+// sign-in, as lapsed: owl's copy of that account is the same sign-in,
 // gone too — revoked by a /logout (POST <token URL>/revoke, Claude Code
 // 2.1.x's performLogout), or refused by Anthropic, as the sign-in Claude
 // Code emptied was. Which it was can't be told from here. Signed in to it
 // again, Claude Code holds it once more (rememberLogins). The accounts
-// myna keeps in config directories of their own are sign-ins of their own
+// owl keeps in config directories of their own are sign-ins of their own
 // and stay. It says whether ls changed.
 func claudeLoggedOut(ls []savedLogin) bool {
 	changed := false
@@ -587,7 +587,7 @@ func claudeStandInAccount() (Provider, bool) {
 
 // AgentsOwn says the account is the one the agent itself is signed in to,
 // run in the agent's own home with what it keeps there, not with a sign-in
-// myna hands it. Which account that is moves with a switch (SwitchLogin):
+// owl hands it. Which account that is moves with a switch (SwitchLogin):
 // a Claude Code started on it before goes on as whatever Claude Code is
 // signed in to by then, as it reads its keychain again every half minute.
 func (a *Account) AgentsOwn() bool { return a != nil && a.token == nil }
@@ -610,7 +610,7 @@ func ClaudeCodeMovedOff(user string) bool {
 }
 
 // claudeCodeOn is the account Claude Code itself is signed in to now, as
-// myna names it; "" when signed out or unknown. named: the name is from
+// owl names it; "" when signed out or unknown. named: the name is from
 // its profile (~/.claude.json), whole, not the email alone `claude auth
 // status` gives.
 func claudeCodeOn() (user string, named bool) {
@@ -621,7 +621,7 @@ func claudeCodeOn() (user string, named bool) {
 	return l.User, len(l.Profile) > 0
 }
 
-// sameClaudeUser: a and b name one account, the one as myna names a Team
+// sameClaudeUser: a and b name one account, the one as owl names a Team
 // or Enterprise seat ("me@x.com · Org") and the other as its email alone,
 // as `claude auth status` gives it.
 func sameClaudeUser(a, b string) bool {

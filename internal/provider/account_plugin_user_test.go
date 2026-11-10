@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // #4416: a plugin keeps the vendor's id as accountId, the key the user's
@@ -20,7 +20,7 @@ import (
 func TestPluginAccountShownByItsUsageUser(t *testing.T) {
 	bun := testenv.Bun(t)
 	claudeHome(t)
-	t.Setenv("MYNA_BUN", bun)
+	t.Setenv("OWL_BUN", bun)
 	// a month's window of no model's own, so the reading is kept on disk
 	// as quotas.json keeps any (a pool of some models' isn't)
 	ws := filepath.Join(t.TempDir(), "windows.json")

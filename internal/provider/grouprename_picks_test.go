@@ -4,7 +4,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // A routing group picked for an agent shown only its picks stays picked

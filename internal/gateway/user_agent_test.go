@@ -9,11 +9,11 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// uaVendor is a key+URL vendor on every API myna forwards to one: it
+// uaVendor is a key+URL vendor on every API owl forwards to one: it
 // keeps the User-Agent each path was asked with, and answers each as its
 // API does.
 type uaVendor struct {
@@ -57,7 +57,7 @@ func (v *uaVendor) sent(path string) (string, bool) {
 }
 
 // uaRoutes are the routes a request reaches a key+URL provider by: what an
-// agent posts myna, and the path the vendor is asked at.
+// agent posts owl, and the path the vendor is asked at.
 var uaRoutes = []struct{ name, path, body, upstream string }{
 	{"anthropic", "/v1/messages", `{"model":"ua/m1","max_tokens":8,"messages":[{"role":"user","content":"hi"}]}`, "/v1/messages"},
 	{"count_tokens", "/v1/messages/count_tokens", `{"model":"ua/m1","messages":[{"role":"user","content":"hi"}]}`, "/v1/messages/count_tokens"},
@@ -65,7 +65,7 @@ var uaRoutes = []struct{ name, path, body, upstream string }{
 	{"responses", "/v1/responses", `{"model":"ua/m1","input":"hi"}`, "/v1/responses"},
 	{"gemini", "/v1beta/models/ug/m1:generateContent", `{"contents":[{"role":"user","parts":[{"text":"hi"}]}]}`, "/v1beta/models/m1:streamGenerateContent"},
 	{"embeddings", "/v1/embeddings", `{"model":"ua/embed-1","input":"hi"}`, "/v1/embeddings"},
-	{"images", "/v1/images/generations", `{"model":"ua/gpt-image-1","prompt":"a myna"}`, "/v1/images/generations"},
+	{"images", "/v1/images/generations", `{"model":"ua/gpt-image-1","prompt":"a owl"}`, "/v1/images/generations"},
 }
 
 // uaSetup saves a key+URL provider "ua" on every API, at a uaVendor, with
@@ -113,13 +113,13 @@ func askAs(t *testing.T, s *Server, path, body, ua string) {
 // A key+URL provider set to pass the agent's User-Agent on (#1851) is
 // asked with the one the agent sent, on every route that reaches it: a
 // coding plan that serves only agents it names knows them by it. Off, the
-// default, it is asked as myna; so it is when the agent sent none, and
-// on myna's own requests (its classifier's, the image tool's), which no
+// default, it is asked as owl; so it is when the agent sent none, and
+// on owl's own requests (its classifier's, the image tool's), which no
 // agent sent. A User-Agent the user set in the provider's headers stands
 // over both.
 func TestUserAgentPassedOn(t *testing.T) {
 	const pi = "pi-coding-agent/0.9.1 (darwin; arm64)"
-	myna := "myna/" + Version
+	owl := "owl/" + Version
 	for _, tt := range []struct {
 		name    string
 		pass    bool
@@ -127,11 +127,11 @@ func TestUserAgentPassedOn(t *testing.T) {
 		ua      string // what the agent sent
 		want    string
 	}{
-		{"off", false, nil, pi, myna},
+		{"off", false, nil, pi, owl},
 		{"on", true, nil, pi, pi},
-		{"on, the agent sent none", true, nil, "", myna},
-		{"on, myna's classifier", true, nil, RouterAgent, myna},
-		{"on, myna's image tool", true, nil, "claude-code/2.1.0 " + DrawAgent, myna},
+		{"on, the agent sent none", true, nil, "", owl},
+		{"on, owl's classifier", true, nil, RouterAgent, owl},
+		{"on, owl's image tool", true, nil, "claude-code/2.1.0 " + DrawAgent, owl},
 		{"on, the user's own header", true, map[string]string{"User-Agent": "mine/1"}, pi, "mine/1"},
 		{"off, the user's own header", false, map[string]string{"User-Agent": "mine/1"}, pi, "mine/1"},
 	} {
@@ -168,24 +168,24 @@ func TestUserAgentClaudeCodeAsBefore(t *testing.T) {
 
 // Which providers pass it on: a key+URL one set to, and not a signed-in
 // account (ZCode's Coding Plan signs without a User-Agent of its own, and
-// goes as myna), a plugin's, a vendor's own client's gateway (OpenCode,
-// Cline, Kilo) or another myna, each of which goes as the client it
+// goes as owl), a plugin's, a vendor's own client's gateway (OpenCode,
+// Cline, Kilo) or another owl, each of which goes as the client it
 // signs as.
 func TestUserAgentFor(t *testing.T) {
 	const pi = "pi/1"
-	myna := "myna/" + Version
+	owl := "owl/" + Version
 	for _, tt := range []struct {
 		name string
 		p    provider.Provider
 		want string
 	}{
 		{"key", provider.Provider{Chat: "https://api.example.com/v1", PassUserAgent: true}, pi},
-		{"key, off", provider.Provider{Chat: "https://api.example.com/v1"}, myna},
-		{"account", provider.Provider{Chat: "https://api.z.ai/api/coding/paas/v4", PassUserAgent: true, Account: &provider.Account{Agent: "zcode"}}, myna},
-		{"opencode", provider.Provider{Chat: "https://opencode.ai/zen/v1", PassUserAgent: true}, myna},
-		{"cline", provider.Provider{Preset: "clinepass", Chat: "https://api.cline.bot/api/v1", PassUserAgent: true}, myna},
-		{"kilo", provider.Provider{Preset: "kilo", Chat: "https://api.kilo.ai/api/gateway", PassUserAgent: true}, myna},
-		{"remote myna", provider.Provider{Preset: provider.RemoteMynaPreset, Chat: "http://10.0.0.2:3425/v1", PassUserAgent: true}, myna},
+		{"key, off", provider.Provider{Chat: "https://api.example.com/v1"}, owl},
+		{"account", provider.Provider{Chat: "https://api.z.ai/api/coding/paas/v4", PassUserAgent: true, Account: &provider.Account{Agent: "zcode"}}, owl},
+		{"opencode", provider.Provider{Chat: "https://opencode.ai/zen/v1", PassUserAgent: true}, owl},
+		{"cline", provider.Provider{Preset: "clinepass", Chat: "https://api.cline.bot/api/v1", PassUserAgent: true}, owl},
+		{"kilo", provider.Provider{Preset: "kilo", Chat: "https://api.kilo.ai/api/gateway", PassUserAgent: true}, owl},
+		{"remote owl", provider.Provider{Preset: provider.RemoteOwlPreset, Chat: "http://10.0.0.2:3425/v1", PassUserAgent: true}, owl},
 	} {
 		if got := userAgentFor(tt.p, pi); got != tt.want {
 			t.Errorf("%s: %q, want %q", tt.name, got, tt.want)

@@ -12,11 +12,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/budget"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/budget"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // limitedUpstream is a provider whose every call uses 300 input and 50
@@ -145,7 +145,7 @@ func TestKeyLimitRefusesBeforeUpstream(t *testing.T) {
 	}
 	// the key asks after its own limit
 	setLimit(t, keys[0].ID, &access.Limit{Period: "week", Tokens: 5000})
-	r := httptest.NewRequest("GET", "/v1/myna/limit", nil)
+	r := httptest.NewRequest("GET", "/v1/owl/limit", nil)
 	r.Header.Set("Authorization", "Bearer "+secrets[0])
 	lw := httptest.NewRecorder()
 	h.ServeHTTP(lw, r)
@@ -447,7 +447,7 @@ func TestKeyLimitCalendarReset(t *testing.T) {
 }
 
 // A key on a 5-hour cycle (#2102) is refused once spent, named so, until
-// 5 hours after the limit was set; /v1/myna/limit tells the key its
+// 5 hours after the limit was set; /v1/owl/limit tells the key its
 // cycle; Reset lets it in again with a new 5 hours from then.
 func TestKeyLimitHoursCycle(t *testing.T) {
 	fresh(t)
@@ -488,9 +488,9 @@ func TestKeyLimitHoursCycle(t *testing.T) {
 	if got := w.Header().Get("X-Magpie-Limit-Reset"); got != set.Add(5*time.Hour).Format(time.RFC3339) {
 		t.Fatal("resets at", got, "not 5 hours after", set)
 	}
-	lim := call("GET", "/v1/myna/limit", "")
+	lim := call("GET", "/v1/owl/limit", "")
 	if lim.Code != 200 || !strings.Contains(lim.Body.String(), `"period":"hours"`) || !strings.Contains(lim.Body.String(), `"hours":5`) {
-		t.Fatal("/v1/myna/limit:", lim.Code, lim.Body.String())
+		t.Fatal("/v1/owl/limit:", lim.Code, lim.Body.String())
 	}
 	ks, _ := access.List()
 	who := access.Identity{KeyID: keys[0].ID, KeyName: "Family", Limit: ks[0].Limit}
@@ -518,7 +518,7 @@ func TestKeyLimitHoursCycle(t *testing.T) {
 // A key with several limits (#2227) is let in only while every one has
 // something left: any one spent refuses it, and the 429 names the spent
 // one that resets last, as the key is refused until then. A request held
-// in flight counts in each limit's window; /v1/myna/limit reports each.
+// in flight counts in each limit's window; /v1/owl/limit reports each.
 func TestKeyLimitSeveralLimits(t *testing.T) {
 	fresh(t)
 	budget.Forget()
@@ -581,10 +581,10 @@ func TestKeyLimitSeveralLimits(t *testing.T) {
 		Limit   budget.Status
 		Limits  []budget.Status
 	}
-	lim := call("GET", "/v1/myna/limit", "")
+	lim := call("GET", "/v1/owl/limit", "")
 	json.Unmarshal(lim.Body.Bytes(), &got)
 	if !got.Limited || len(got.Limits) != 2 || got.Limit.Period != "week" || !got.Limits[0].Spent || !got.Limits[1].Spent || got.Limits[0].Tokens != 700 {
-		t.Fatal("/v1/myna/limit:", lim.Body.String())
+		t.Fatal("/v1/owl/limit:", lim.Body.String())
 	}
 	// the day's limit raised: the week still refuses
 	at(0, &access.Limit{Period: "day", Tokens: 5000})

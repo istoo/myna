@@ -17,25 +17,25 @@ import (
 // The main window open under another window is open (#1381). Lightweight
 // mode took the occlusion state for shown, so the window the user had
 // switched away from with Command-Tab was let go as closed, and switching
-// back found it blank or gone. Hidden with myna (Command-H) or minimised,
-// it is open too; closed by myna, it isn't.
+// back found it blank or gone. Hidden with owl (Command-H) or minimised,
+// it is open too; closed by owl, it isn't.
 func TestCoveredWindowStaysUp(t *testing.T) {
-	out, err := runAppKit(t, 30*time.Second, []string{"MYNA_TEST_WINDOW_UP=1"})
+	out, err := runAppKit(t, 30*time.Second, []string{"OWL_TEST_WINDOW_UP=1"})
 	if err != nil || !strings.Contains(string(out), "window up: ok") {
 		t.Fatalf("window up: %v\n%s", err, out)
 	}
 }
 
 func init() {
-	if os.Getenv("MYNA_TEST_WINDOW_UP") != "1" {
+	if os.Getenv("OWL_TEST_WINDOW_UP") != "1" {
 		return
 	}
 	app := application.New(application.Options{
-		Name: "myna window up regression",
+		Name: "owl window up regression",
 		Mac:  application.MacOptions{ActivationPolicy: application.ActivationPolicyAccessory},
 		Assets: application.AssetOptions{Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "text/html")
-			fmt.Fprint(w, `<p>myna</p>`)
+			fmt.Fprint(w, `<p>owl</p>`)
 		})},
 	})
 	h := &host{app: app}
@@ -85,13 +85,13 @@ func init() {
 			expect("covered", true)
 			application.InvokeSync(func() { cover.Close() })
 
-			// hidden with myna, as by Command-H. Opening asked the Mac to
-			// activate myna (Focus), and on a loaded CI machine that
-			// activation can land after the hide, which unhides myna and
+			// hidden with owl, as by Command-H. Opening asked the Mac to
+			// activate owl (Focus), and on a loaded CI machine that
+			// activation can land after the hide, which unhides owl and
 			// shows the window again: the hide and the check are one step on
 			// the main thread, and a hide undone that way is done again.
 			var hiddenUp bool
-			waitFor("myna is hidden", func() bool {
+			waitFor("owl is hidden", func() bool {
 				if windowOpen(h.main) {
 					app.Hide()
 				}
@@ -99,10 +99,10 @@ func init() {
 				return !windowOpen(h.main)
 			})
 			if !hiddenUp {
-				fail("hidden with myna: the window counts as up=false, want true")
+				fail("hidden with owl: the window counts as up=false, want true")
 			}
 			application.InvokeSync(app.Show)
-			waitFor("myna is shown again", func() bool { return windowOpen(h.main) })
+			waitFor("owl is shown again", func() bool { return windowOpen(h.main) })
 
 			// minimised
 			application.InvokeSync(func() { h.main.Minimise() })
@@ -111,15 +111,15 @@ func init() {
 			application.InvokeSync(func() { h.main.UnMinimise() })
 			waitFor("the window is back", func() bool { return windowOpen(h.main) })
 
-			// closed by myna
+			// closed by owl
 			h.hideMain()
 			waitFor("the window is closed", func() bool { return !windowOpen(h.main) })
 			expect("closed", false)
 
-			// closed, then myna hidden: still closed
+			// closed, then owl hidden: still closed
 			application.InvokeSync(app.Hide)
 			time.Sleep(300 * time.Millisecond)
-			expect("closed, myna hidden", false)
+			expect("closed, owl hidden", false)
 			application.InvokeSync(app.Show)
 
 			fmt.Println("window up: ok")

@@ -9,11 +9,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // What the ChatGPT backend says of a Codex account as it answers one of
-// myna's turns is kept as the account's usage (provider.NoteCodexLimits),
+// owl's turns is kept as the account's usage (provider.NoteCodexLimits),
 // so its usage cap holds it from the next turn on rather than once
 // /wham/usage is read again (#1295). It says it as Codex 0.160.1 reads it
 // (codex-api's rate-limit parsing, RateLimitEvent): headers

@@ -1,10 +1,10 @@
 # The recipes (clean's rm -rf too) name paths relative to the working
-# folder, so they run only in myna's own, known by its go.mod: run from
+# folder, so they run only in owl's own, known by its go.mod: run from
 # another one (make -f path/to/Makefile) they would act there. make -C
 # works. go.mod is read relative to the working folder, so a path with
 # spaces (or a symlinked Makefile) changes nothing.
-ifneq ($(shell sed -n 's/^module //p' go.mod 2>/dev/null),github.com/istoo/myna)
-  $(error run make in myna's folder (make -C path/to/myna), not in $(CURDIR))
+ifneq ($(shell sed -n 's/^module //p' go.mod 2>/dev/null),github.com/istoo/owl)
+  $(error run make in owl's folder (make -C path/to/owl), not in $(CURDIR))
 endif
 
 # A tag may hold $, ( or `, which the shell lines below would run: the
@@ -15,7 +15,7 @@ TAGS     = production
 TARGETS  = darwin/arm64 darwin/amd64 linux/amd64 linux/arm64 windows/amd64 windows/arm64 android/arm64
 
 # The GUI links the platform webview through cgo, so it is built natively.
-# `nogui` builds the terminal-only myna, which cross-compiles anywhere.
+# `nogui` builds the terminal-only owl, which cross-compiles anywhere.
 # macOS 12 is the oldest Go (1.25 and later) runs on; Info.plist says so too.
 ifeq ($(shell uname -s),Darwin)
   export CGO_CFLAGS  = -mmacosx-version-min=12.0
@@ -35,10 +35,10 @@ endif
 .PHONY: build cli install test test-ui app icons release release-cli release-windows release-linux clean dev dev-once
 
 build:
-	go build -tags "$(TAGS)" -trimpath -ldflags="$(LDFLAGS)" -o myna .
+	go build -tags "$(TAGS)" -trimpath -ldflags="$(LDFLAGS)" -o owl .
 
 cli:
-	CGO_ENABLED=0 go build -tags nogui -trimpath -ldflags="$(LDFLAGS)" -o myna .
+	CGO_ENABLED=0 go build -tags nogui -trimpath -ldflags="$(LDFLAGS)" -o owl .
 
 install:
 	go install -tags "$(TAGS)" -trimpath -ldflags="$(LDFLAGS)" .
@@ -58,21 +58,21 @@ test-ui:
 
 # macOS bundle: menu bar app with no Dock icon (LSUIElement).
 app: build
-	@rm -rf myna.app
-	@mkdir -p myna.app/Contents/MacOS myna.app/Contents/Resources
-	@cp myna myna.app/Contents/MacOS/myna
-	@cp build/darwin/myna.icns myna.app/Contents/Resources/myna.icns
-	@cp build/darwin/Assets.car myna.app/Contents/Resources/Assets.car
-	@cp THIRD_PARTY_NOTICES myna.app/Contents/Resources/THIRD_PARTY_NOTICES
-	@sed 's/@VERSION@/$(VERSION)/' build/darwin/Info.plist > myna.app/Contents/Info.plist
+	@rm -rf owl.app
+	@mkdir -p owl.app/Contents/MacOS owl.app/Contents/Resources
+	@cp owl owl.app/Contents/MacOS/owl
+	@cp build/darwin/owl.icns owl.app/Contents/Resources/owl.icns
+	@cp build/darwin/Assets.car owl.app/Contents/Resources/Assets.car
+	@cp THIRD_PARTY_NOTICES owl.app/Contents/Resources/THIRD_PARTY_NOTICES
+	@sed 's/@VERSION@/$(VERSION)/' build/darwin/Info.plist > owl.app/Contents/Info.plist
 ifeq ($(shell uname -s),Darwin)
 	@# The updater checks a downloaded app's signature and refuses one that
 	@# doesn't verify. There is no Developer ID here, so every build is
 	@# signed ad hoc, after the resources are in place.
-	@codesign --force --deep --sign - myna.app
-	@codesign --verify --deep --strict myna.app
+	@codesign --force --deep --sign - owl.app
+	@codesign --verify --deep --strict owl.app
 endif
-	@echo "  myna.app"
+	@echo "  owl.app"
 
 icons:
 	@go run build/icon/gen.go tray internal/gui/tray.png
@@ -85,16 +85,16 @@ icons:
 	@go run build/icon/gen.go win-ico internal/gui/icon-windows.ico
 	@go run build/icon/gen.go app 1024 internal/gui/icon-1024.png
 	@go run build/icon/gen.go app 256 internal/gui/icon-256.png
-	@rm -rf build/darwin/myna.iconset && mkdir -p build/darwin/myna.iconset
+	@rm -rf build/darwin/owl.iconset && mkdir -p build/darwin/owl.iconset
 	@for s in 16 32 128 256 512; do \
-		go run build/icon/gen.go app $$s build/darwin/myna.iconset/icon_$${s}x$${s}.png; \
-		go run build/icon/gen.go app $$((s*2)) build/darwin/myna.iconset/icon_$${s}x$${s}@2x.png; \
+		go run build/icon/gen.go app $$s build/darwin/owl.iconset/icon_$${s}x$${s}.png; \
+		go run build/icon/gen.go app $$((s*2)) build/darwin/owl.iconset/icon_$${s}x$${s}@2x.png; \
 	done
-	@iconutil -c icns build/darwin/myna.iconset -o build/darwin/myna.icns && rm -rf build/darwin/myna.iconset
+	@iconutil -c icns build/darwin/owl.iconset -o build/darwin/owl.icns && rm -rf build/darwin/owl.iconset
 	@# macOS 26 draws the Dock icon from AppIcon.icon (Xcode 26's actool) in every icon
 	@# style: light, dark, and clear or tinted, where the bird's luminance takes the tint;
 	@# the compiled Assets.car is kept in the tree so a release needn't have it
-	@go run build/icon/gen.go glyph 1024 build/darwin/AppIcon.icon/Assets/myna.png
+	@go run build/icon/gen.go glyph 1024 build/darwin/AppIcon.icon/Assets/owl.png
 	@rm -rf build/darwin/actool && mkdir -p build/darwin/actool
 	@xcrun actool build/darwin/AppIcon.icon --compile build/darwin/actool --platform macosx \
 		--minimum-deployment-target 11.0 --app-icon AppIcon --output-partial-info-plist build/darwin/actool/partial.plist >/dev/null
@@ -102,7 +102,7 @@ icons:
 
 release: clean build
 	@mkdir -p dist
-	@cp myna dist/myna-$(shell go env GOOS)-$(shell go env GOARCH)
+	@cp owl dist/owl-$(shell go env GOOS)-$(shell go env GOARCH)
 	@$(MAKE) --no-print-directory release-cli
 
 release-cli:
@@ -110,16 +110,16 @@ release-cli:
 	@for t in $(TARGETS); do \
 		os=$${t%/*}; arch=$${t#*/}; ext=""; [ $$os = windows ] && ext=.exe; \
 		echo "  $$os/$$arch (cli)"; \
-		CGO_ENABLED=0 GOOS=$$os GOARCH=$$arch go build -tags nogui -trimpath -ldflags="$(LDFLAGS)" -o dist/myna-cli-$$os-$$arch$$ext . || exit 1; \
+		CGO_ENABLED=0 GOOS=$$os GOARCH=$$arch go build -tags nogui -trimpath -ldflags="$(LDFLAGS)" -o dist/owl-cli-$$os-$$arch$$ext . || exit 1; \
 	done
 
 # The desktop app for Windows: the system WebView2 needs no cgo, so both
 # arches cross-compile. Linked as a GUI program (no console window), with
 # the icon, version and a DPI-aware manifest from build/windows. It carries
-# myna.com, the console program a terminal runs for `myna` and waits
+# owl.com, the console program a terminal runs for `owl` and waits
 # for, which it writes beside itself (internal/update/com.go, #3737).
 # The launcher is built without the commit stamped in (-buildvcs=false):
-# myna.com is written again whenever its bytes differ, and with the
+# owl.com is written again whenever its bytes differ, and with the
 # commit in them every release wrote a new one though the launcher was the
 # same (TestLauncherSameAtEveryCommit).
 WINVER = $(shell echo $(VERSION) | sed -E 's/^v//; s/[^0-9.].*//')
@@ -130,7 +130,7 @@ release-windows:
 	@for arch in amd64 arm64; do \
 		echo "  windows/$$arch (app)"; \
 		CGO_ENABLED=0 GOOS=windows GOARCH=$$arch go build -trimpath -buildvcs=false -ldflags="-s -w" -o internal/update/launcher-$$arch.com ./internal/update/launcher || exit 1; \
-		CGO_ENABLED=0 GOOS=windows GOARCH=$$arch go build -tags production,comlauncher -trimpath -ldflags="$(LDFLAGS) -H windowsgui" -o dist/myna-windows-$$arch.exe . || exit 1; \
+		CGO_ENABLED=0 GOOS=windows GOARCH=$$arch go build -tags production,comlauncher -trimpath -ldflags="$(LDFLAGS) -H windowsgui" -o dist/owl-windows-$$arch.exe . || exit 1; \
 	done; rm -f rsrc_windows_*.syso internal/update/launcher-*.com
 
 # The desktop app for Linux links GTK 3 and WebKitGTK 4.1 through cgo, so it
@@ -138,25 +138,25 @@ release-windows:
 release-linux:
 	@mkdir -p dist
 	@echo "  linux/$(shell go env GOARCH) (app)"
-	@go build -tags "$(TAGS)" -trimpath -ldflags="$(LDFLAGS)" -o dist/myna-linux-$(shell go env GOARCH) .
+	@go build -tags "$(TAGS)" -trimpath -ldflags="$(LDFLAGS)" -o dist/owl-linux-$(shell go env GOARCH) .
 
 clean:
-	rm -rf myna myna.exe myna.app dist rsrc_windows_*.syso internal/update/launcher-*.com
+	rm -rf owl owl.exe owl.app dist rsrc_windows_*.syso internal/update/launcher-*.com
 
 # Development: the UI is served from internal/gui/assets and the window
 # reloads itself when a file there is saved. With fswatch installed, the
 # windows stay up and a Go change rebuilds and restarts only the backend
 # behind them (build/dev.sh); without it, dev-once runs the app as one
-# process. Uses its own ports so a running myna keeps serving the agents.
+# process. Uses its own ports so a running owl keeps serving the agents.
 DEV_ADDR ?= 127.0.0.1:3426
 DEV_UI ?= 127.0.0.1:3427
 DEV_BACKEND ?= 127.0.0.1:3428
 DEV_CONTROL ?= 127.0.0.1:3429
 dev:
 	@if command -v fswatch >/dev/null; then \
-	  MYNA_ADDR=$(DEV_ADDR) MYNA_DEV_UI=$(DEV_UI) MYNA_DEV_BACKEND=$(DEV_BACKEND) MYNA_DEV_CONTROL=$(DEV_CONTROL) build/dev.sh; \
+	  OWL_ADDR=$(DEV_ADDR) OWL_DEV_UI=$(DEV_UI) OWL_DEV_BACKEND=$(DEV_BACKEND) OWL_DEV_CONTROL=$(DEV_CONTROL) build/dev.sh; \
 	else $(MAKE) --no-print-directory dev-once; fi
 
 dev-once:
-	@go build -tags dev -o myna-dev . && echo "  myna-dev · UI from internal/gui/assets, reload on save · gateway $(DEV_ADDR)"
-	@MYNA_ADDR=$(DEV_ADDR) MYNA_DEV_UI=$(DEV_UI) ./myna-dev app
+	@go build -tags dev -o owl-dev . && echo "  owl-dev · UI from internal/gui/assets, reload on save · gateway $(DEV_ADDR)"
+	@OWL_ADDR=$(DEV_ADDR) OWL_DEV_UI=$(DEV_UI) ./owl-dev app

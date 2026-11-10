@@ -12,7 +12,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/istoo/myna/internal/probelog"
+	"github.com/istoo/owl/internal/probelog"
 )
 
 // probeRows catches what probelog writes down while the test runs, through
@@ -131,7 +131,7 @@ func TestDetectWritesItsRequestsDown(t *testing.T) {
 	}
 	res.Body.Close()
 	if len(rows()) != before {
-		t.Fatal("an agent's request was written down as myna's own")
+		t.Fatal("an agent's request was written down as owl's own")
 	}
 }
 

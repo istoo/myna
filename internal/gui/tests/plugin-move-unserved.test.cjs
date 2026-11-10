@@ -2,7 +2,7 @@
 // A move held back by a model the plugin doesn't offer says for which
 // account (and its plan) the built-in serves it, so a reader can tell a
 // model really lost from one their plan never had; a why with no account
-// (an older myna's) still reads as before. In English and Chinese; the
+// (an older owl's) still reads as before. In English and Chinese; the
 // API is faked here.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -87,7 +87,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], posts = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, posts, why));
-        await page.goto("http://myna.test/?view=providers");
+        await page.goto("http://owl.test/?view=providers");
         const line = page.locator("#movable");
         await line.locator("button", { hasText: w.look }).click();
         const ed = page.locator("#modal .editor");
@@ -116,7 +116,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [], posts = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, posts, { code: "unserved", args: { models: "Model 0" } }));
-      await page.goto("http://myna.test/?view=providers");
+      await page.goto("http://owl.test/?view=providers");
       await page.locator("#movable button", { hasText: L[lang].look }).click();
       const ed = page.locator("#modal .editor");
       await ed.locator(".move button").click();

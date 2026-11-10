@@ -13,9 +13,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/gwmw"
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/gwmw"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // use makes plugins.json list entries, and the middleware load afresh.
@@ -367,7 +367,7 @@ func TestStreamUnchangedPassesBytes(t *testing.T) {
 }
 
 // A keepalive comment goes to the agent as it is written, not with the
-// event after it: held, a proxy in front of myna heard nothing while the
+// event after it: held, a proxy in front of owl heard nothing while the
 // vendor reasoned silently and hung up (#2402).
 func TestStreamKeepaliveNotHeld(t *testing.T) {
 	use(t, file(t, `export function onEvent(ev) { ev.seen = true; return ev; }`))

@@ -1,4 +1,4 @@
-// Package agent describes every coding agent myna can drive: where its config
+// Package agent describes every coding agent owl can drive: where its config
 // lives, which fields matter (model, effort, …) and which values to offer.
 package agent
 
@@ -16,10 +16,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/proc"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/suggest"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/proc"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/suggest"
 )
 
 // Option is one value the picker offers for a field.
@@ -52,18 +52,18 @@ type Option struct {
 	// default_reasoning_level), shown beside "default"
 	Takes string `json:"takes,omitempty"`
 	// Direct names who the agent asks for this model itself, on its own
-	// sign-in or key, with myna not in the way ("Anthropic"): its config
-	// then names no myna endpoint, which is right, not a failed setup
+	// sign-in or key, with owl not in the way ("Anthropic"): its config
+	// then names no owl endpoint, which is right, not a failed setup
 	Direct string `json:"direct,omitempty"`
-	// Via is a model of the agent's own it asks through myna's gateway,
+	// Via is a model of the agent's own it asks through owl's gateway,
 	// on its own sign-in all the same (Codex's while routed by its base
-	// URL): the picker says via myna by it, as by a catalog model's
+	// URL): the picker says via owl by it, as by a catalog model's
 	Via bool `json:"via,omitempty"`
-	// Same is a model myna serves on the very account the agent is
+	// Same is a model owl serves on the very account the agent is
 	// signed in to itself, so the agent reaches it on its own too: the
 	// picker folds these into one row a click opens (Claude Code, #496)
 	Same bool `json:"same,omitempty"`
-	// Served is a model of the agent's own that myna's list shows it
+	// Served is a model of the agent's own that owl's list shows it
 	// too, on the very account it is signed in to (Codex's ChatGPT
 	// models, its list's Codex section): not left out with the agent's
 	// own models (Picks), as the list's tick decides it (shiqi_40904: a
@@ -89,15 +89,15 @@ type Option struct {
 	UltraOK bool `json:"ultraOk,omitempty"`
 	Ultra   bool `json:"ultra,omitempty"`
 
-	// own: served on the agent's own sign-in (viaMyna), for Same
+	// own: served on the agent's own sign-in (viaOwl), for Same
 	own bool
-	// sub: served on a subscription signed in in myna, not a key; a
+	// sub: served on a subscription signed in in owl, not a key; a
 	// Claude account only for Claude Code, which alone may use it safely
 	sub bool
 }
 
 // Field is one tunable setting of an agent. Set with an empty value puts
-// the field back to the agent's own default: anything myna wired in (the
+// the field back to the agent's own default: anything owl wired in (the
 // gateway as a provider, its model catalog) comes out and the key is removed.
 type Field struct {
 	Key     string
@@ -108,14 +108,14 @@ type Field struct {
 	// Quiet fields are left out of listings while empty: they follow
 	// another field until set (Claude Code's per-tier models).
 	Quiet bool
-	// Live fields are myna's own settings, read by the gateway on each
+	// Live fields are owl's own settings, read by the gateway on each
 	// request (Claude Desktop's subagent model): a change to one needs no
 	// restart of the agent, so its Notice isn't shown after it, unless
-	// the pick connected the agent to myna as well.
+	// the pick connected the agent to owl as well.
 	Live bool
 	// Closed fields take only the values Options offers: a level, a switch,
 	// a sign-in choice. Spell refuses any other value, naming the ones the
-	// agent takes, so `myna codex effort highish` doesn't write a level
+	// agent takes, so `owl codex effort highish` doesn't write a level
 	// Codex would refuse at start-up. A model field stays open: a model may
 	// be one the agent reaches on its own that isn't listed here. An empty
 	// Options list means the agent's values aren't known here (nothing is
@@ -136,9 +136,9 @@ type Agent struct {
 	Aliases []string
 	Bin     string // executable name, used for detection
 	Dir     string // config directory, used for detection
-	Path    string // config file myna edits
+	Path    string // config file owl edits
 	// Plugin is the spec of the plugin that adds this agent (plugged.go),
-	// "" for myna's own
+	// "" for owl's own
 	Plugin string
 	Fields []Field
 	Native *NativeConnection
@@ -148,115 +148,115 @@ type Agent struct {
 	// UA is what the agent's User-Agent begins with, lower-case: how the
 	// gateway tells its requests from others'
 	UA []string
-	// ListsModels: the agent's own model menu is myna's models as picked
+	// ListsModels: the agent's own model menu is owl's models as picked
 	// on the Agents page for it (settings.HiddenModels, PickedModels),
 	// though no field of its picks among the catalog: the gateway's
 	// /v1/models as asked with its key (Cursor Private Inference), or the
-	// list myna writes into its files, mynaModels(id), where its only
-	// field puts myna in its picker (ZCode, Pencil: #1508)
+	// list owl writes into its files, owlModels(id), where its only
+	// field puts owl in its picker (ZCode, Pencil: #1508)
 	ListsModels bool
-	// NoNames: the agent's own list doesn't name myna's models as
-	// Names in agents' lists says (provider.Labels): myna hands it the
+	// NoNames: the agent's own list doesn't name owl's models as
+	// Names in agents' lists says (provider.Labels): owl hands it the
 	// models' ids alone, its format having no name for one (Goose, Hermes,
-	// jcode …), it lists no models of myna's at all (Gemini CLI, Snow),
+	// jcode …), it lists no models of owl's at all (Gemini CLI, Snow),
 	// or it reads the gateway's /v1/models itself, whose display_name is
 	// the name alone (Empryo, Cursor Private Inference). The setting says
 	// so for each one connected, rather than seeming to do nothing.
 	NoNames bool
-	// Sync, for an agent that reads myna's models from a file of its own
+	// Sync, for an agent that reads owl's models from a file of its own
 	// rather than asking the gateway, rewrites that list as the catalog is
-	// now — where myna wrote one; nothing else changes (see SyncCatalog).
+	// now — where owl wrote one; nothing else changes (see SyncCatalog).
 	Sync func() error
-	// ListOnly: Sync does nothing but bring a block of myna's name in the
+	// ListOnly: Sync does nothing but bring a block of owl's name in the
 	// agent's files up to the catalog. A catalog sync runs it only while
 	// the agent is connected (Wired), as its switch on the Agents page
-	// says: switched off, nothing of myna's writes its files. A custom
-	// provider the user named myna in the agent, with a few models picked
+	// says: switched off, nothing of owl's writes its files. A custom
+	// provider the user named owl in the agent, with a few models picked
 	// by hand (yyddbds on Discord, Xiaomi MiMo), was written over with the
-	// whole catalog at every start. A list myna wrote while connected
+	// whole catalog at every start. A list owl wrote while connected
 	// waits, while the agent runs a model of its own, until a model of
-	// myna's is picked again.
+	// owl's is picked again.
 	ListOnly bool
 	// Unwire, for an agent whose fields' default is the agent as installed
-	// rather than what it had before myna (Codex, Claude Code, Gemini
-	// CLI), takes myna out of its config and puts back what the stash
+	// rather than what it had before owl (Codex, Claude Code, Gemini
+	// CLI), takes owl out of its config and puts back what the stash
 	// kept: the endpoint, provider and model the user had. Disconnect runs
 	// it before the fields' defaults.
 	Unwire func() error
-	// Restore, for an agent whose files myna copied aside before its
-	// first write (beforeMyna), puts them back as they were where what
+	// Restore, for an agent whose files owl copied aside before its
+	// first write (beforeOwl), puts them back as they were where what
 	// Disconnect left says the same. Disconnect runs it last.
 	Restore func() error
-	// Join, for an agent that can have myna's models in its own list
+	// Join, for an agent that can have owl's models in its own list
 	// while it stays on the model it was on (Codex signed in with ChatGPT),
 	// connects it so, its model left as its own last pick; false where it
-	// can't, and Connect then picks one of myna's.
+	// can't, and Connect then picks one of owl's.
 	Join func() (bool, error)
-	// Joined reports an agent Join connected: myna is in its config
-	// though no field is on one of myna's models.
+	// Joined reports an agent Join connected: owl is in its config
+	// though no field is on one of owl's models.
 	Joined func() bool
-	// Beside reports an agent set on one of myna's models beside its own
+	// Beside reports an agent set on one of owl's models beside its own
 	// (Codex by the base URL beside its ChatGPT sign-in), now on one of its
 	// own written in by the agent: still connected, as joined (#940), and
 	// a pick in the agent rather than drift (#2424).
 	Beside func() bool
-	// OwnVia is the catalog id myna serves one of the agent's own models
+	// OwnVia is the catalog id owl serves one of the agent's own models
 	// by on a sign-in of the user's, which its model field lists as its
-	// own rather than as myna's ("codex/gpt-5.5" for Codex's gpt-5.5),
-	// "" for none: Connect keeps the agent on that model through myna
+	// own rather than as owl's ("codex/gpt-5.5" for Codex's gpt-5.5),
+	// "" for none: Connect keeps the agent on that model through owl
 	// where it can't Join (#940: Codex went to an unrelated model).
 	OwnVia func(model string) string
-	// AppOut reports myna made Codex's provider for a ChatGPT sign-in
+	// AppOut reports owl made Codex's provider for a ChatGPT sign-in
 	// whose account is used up (codex.out): the Codex app, which reads
 	// its sign-in only as it opens, sends nothing on it till it is opened
 	// again (MasterYi on Discord).
 	AppOut func() bool
-	// HoldMatters reports Codex takes myna's models beside a ChatGPT
-	// sign-in, so that myna is its provider while the Codex app holds
+	// HoldMatters reports Codex takes owl's models beside a ChatGPT
+	// sign-in, so that owl is its provider while the Codex app holds
 	// the account (out), or is that already: what the app holds is read
-	// for it even with Codex switched off in myna
+	// for it even with Codex switched off in owl
 	// (provider.CodexHoldMatters).
 	HoldMatters func() bool
-	// SideModel is the model Codex is set to when it is one of myna's,
-	// picked beside its ChatGPT sign-in (by the base URL, myna not its
+	// SideModel is the model Codex is set to when it is one of owl's,
+	// picked beside its ChatGPT sign-in (by the base URL, owl not its
 	// provider), "" otherwise: the gateway answers the Codex app's hidden
 	// side turns (titles, descriptions, summaries), which it asks for on a
 	// model of its own, on it rather than on the ChatGPT account.
 	SideModel func() string
 	// Routed reports that the agent's config sends whatever model it
-	// names to myna's gateway (Codex's openai_base_url or myna as its
+	// names to owl's gateway (Codex's openai_base_url or owl as its
 	// provider), so a model's name the gateway takes as a routing group
 	// is that group's (#750).
 	Routed func() bool
 	// FailingOver reports an agent that isn't connected whose requests
-	// still go through myna's gateway, for account failover alone (Codex
-	// signed in to ChatGPT with more of its accounts on in myna, #1385):
+	// still go through owl's gateway, for account failover alone (Codex
+	// signed in to ChatGPT with more of its accounts on in owl, #1385):
 	// the Agents page says so and what turns it off, and the gateway lists
 	// it only its own models.
 	FailingOver func() bool
-	// EndFailover takes out what account failover wrote, for myna
+	// EndFailover takes out what account failover wrote, for owl
 	// quitting: left there, the agent would be pointed at a gateway that
-	// no longer answers, and retry till myna is open again (Leon920717
+	// no longer answers, and retry till owl is open again (Leon920717
 	// on X). The next start's Sync writes it again.
 	EndFailover func() error
 	// Follow, for an agent whose own picker moves its main model where
-	// myna keeps other settings following it (Claude Code's /model and
+	// owl keeps other settings following it (Claude Code's /model and
 	// its tiers), brings those along to the model picked there. Run as the
 	// Agents page is drawn.
 	Follow func() error
-	// RenameRefs, for an agent whose config names myna's models beyond
+	// RenameRefs, for an agent whose config names owl's models beyond
 	// its fields (omp's other roles and fallback chains), moves those names
 	// off provider from onto to, the rest of each kept; it answers whether
 	// any moved. The fields themselves are RenameProvider's.
 	RenameRefs func(from, to string) (bool, error)
-	// Check, for an agent myna wires in beyond its model field, says what
-	// of that wiring is gone while the model is still one of myna's —
+	// Check, for an agent owl wires in beyond its model field, says what
+	// of that wiring is gone while the model is still one of owl's —
 	// something else rewrote the config — or "" when it is all there
 	// (see Drift).
 	Check func() string
 	// LastUsed, for an agent that keeps a log of its own prompts, is when
 	// it was last used — each prompt a request the gateway should have
-	// seen, so one it didn't went round myna (see Drift). Zero if unknown.
+	// seen, so one it didn't went round owl (see Drift). Zero if unknown.
 	LastUsed func() time.Time
 	// Reached, for an agent that logs where its model requests go, is its
 	// newest one since a time: when, the address it went to, and whether
@@ -265,7 +265,7 @@ type Agent struct {
 	// WSL is the distro an agent inside WSL lives in, "" for this
 	// machine's own (see wsl.go).
 	WSL string
-	// Home is a WSL agent's $HOME in its distro as myna opens it
+	// Home is a WSL agent's $HOME in its distro as owl opens it
 	// (\\wsl.localhost\<distro>\home\me), where its other files are; ""
 	// for this machine's, and while the distro is stopped: opening it
 	// would start it.
@@ -273,20 +273,20 @@ type Agent struct {
 	// Gateway is the gateway's address as the agent reaches it, a WSL
 	// distro's own way to it; nil is gateway.URL.
 	Gateway func() string
-	// Import, for an app that takes myna only through an import link of
+	// Import, for an app that takes owl only through an import link of
 	// its own, which the user confirms there (Cindy), is that link; the app
-	// has no fields myna sets. Added says whether it has myna already,
+	// has no fields owl sets. Added says whether it has owl already,
 	// known false when what it is read from couldn't be read: unknown,
 	// never "not added". nil means the app exposes no way to read that
 	// status.
 	Import func() string
 	Added  func() (added, known bool)
 	// Launch, for an agent that takes the gateway only from its
-	// environment (agy), is the command that starts it on myna, while
-	// it is on one of myna's models; "" otherwise.
+	// environment (agy), is the command that starts it on owl, while
+	// it is on one of owl's models; "" otherwise.
 	Launch func() string
 	// Typed, for such an agent, is what the user types in a new terminal
-	// to start it on myna, a function myna gave their shells (agy);
+	// to start it on owl, a function owl gave their shells (agy);
 	// "" when there is none, and Launch is the way.
 	Typed func() string
 	// SplitSuffix, for an agent whose model values carry something of its
@@ -298,19 +298,19 @@ type Agent struct {
 	// the same for a model (Claude Code's [1m]) rides on the option instead.
 	// one is false for a value that is no one model but a list the agent
 	// falls back through (omp's "a,b"): that is the user's own whatever it
-	// names, never taken for one of myna's models nor moved by what
+	// names, never taken for one of owl's models nor moved by what
 	// matches the picker (RenameRefs moves the names in it).
 	SplitSuffix func(v string) (model, suffix string, one bool)
 	// Spelled, when set, says whether a value of the agent's fields is
-	// spelled as one of myna's there (prefixed: it starts with
-	// "myna/", its provider in the agent): one that isn't is a model of
-	// one of the agent's own providers, never myna's, even when myna
+	// spelled as one of owl's there (prefixed: it starts with
+	// "owl/", its provider in the agent): one that isn't is a model of
+	// one of the agent's own providers, never owl's, even when owl
 	// has a provider of the same name (OpenHanako's own
-	// deepseek/deepseek-v4-pro read as myna's deepseek, #835).
+	// deepseek/deepseek-v4-pro read as owl's deepseek, #835).
 	Spelled func(v string) bool
 	// ModelAliases are the names the agent's model takes besides ids
 	// (Claude Code's opus, best, opusplan). One that names a field as well
-	// is the model's on the command line: myna claude opus sets the
+	// is the model's on the command line: owl claude opus sets the
 	// model, where another field's name alone shows that field.
 	ModelAliases []string
 	// detect, when set, says whether the agent is here in place of looking
@@ -373,12 +373,12 @@ func (a *Agent) binsOwn(bin string) bool {
 // Running reports whether a process whose command line matches any pattern
 // (an extended regexp, as for pgrep -f) is alive. Windows can't be asked
 // what runs, so anything may be: every caller is the advice an agent's own
-// lists need after myna changed what it reads at start ("restart Codex",
+// lists need after owl changed what it reads at start ("restart Codex",
 // "open a new dsh session"), and a Windows that answered no here dropped
-// that advice silently — a model picked in myna looked like it had done
+// that advice silently — a model picked in owl looked like it had done
 // nothing at all. claudeRunning and Pencil's own check already say they
 // can't be told, and say yes for the same reason. A var so tests can say
-// what runs, as claudeRunning is: myna's own CLI tests printed "restart
+// what runs, as claudeRunning is: owl's own CLI tests printed "restart
 // the Codex app" on a Mac with Codex open, and on every Windows.
 var Running = func(patterns ...string) bool {
 	if runtime.GOOS == "windows" {
@@ -442,11 +442,11 @@ func (a *Agent) Detected() bool {
 	return false
 }
 
-// binAt is where the agent's command name is, as myna runs it: on
-// myna's own PATH, else, on Windows, where a terminal opened now finds it
+// binAt is where the agent's command name is, as owl runs it: on
+// owl's own PATH, else, on Windows, where a terminal opened now finds it
 // or a user's tools are installed (proc.FindTool: the registry's PATH now,
 // ~/.local/bin, npm's, bun's, Volta's, pnpm's). Windows has no login shell
-// to lend myna its PATH (proc.UserPath does nothing there), so a myna
+// to lend owl its PATH (proc.UserPath does nothing there), so a owl
 // started before Claude Code's installer put claude.exe in ~/.local/bin
 // and added that to the user's PATH, or a self-update restarting with the
 // PATH it had then, never listed it, while the sign-in, which asked
@@ -575,7 +575,7 @@ var goPrograms struct {
 }
 
 // Field looks a field up by key, in any case, as Find looks an agent up
-// (myna codex Model was written as the model).
+// (owl codex Model was written as the model).
 func (a *Agent) Field(key string) *Field {
 	for i := range a.Fields {
 		if strings.EqualFold(a.Fields[i].Key, key) {
@@ -583,7 +583,7 @@ func (a *Agent) Field(key string) *Field {
 		}
 	}
 	for i := range a.Fields {
-		if strings.EqualFold(a.Fields[i].Label, key) { // `myna gemini auth …`: the label as shown
+		if strings.EqualFold(a.Fields[i].Label, key) { // `owl gemini auth …`: the label as shown
 			return &a.Fields[i]
 		}
 	}
@@ -600,8 +600,8 @@ func (a *Agent) Values() map[string]string {
 }
 
 // Picks are the options f's picker offers: all of them, unless the user
-// asked a's pickers to offer myna's models alone (#1642, MizuIro-H). Then
-// a field that picks among myna's catalog leaves out the models the agent
+// asked a's pickers to offer owl's models alone (#1642, MizuIro-H). Then
+// a field that picks among owl's catalog leaves out the models the agent
 // reaches on its own (DeepSeek Harness's DeepSeek ones), but for its
 // default and the one it is set to.
 func (a *Agent) Picks(f Field, cur map[string]string) []Option {
@@ -613,11 +613,11 @@ func (a *Agent) Picks(f Field, cur map[string]string) []Option {
 }
 
 // Own reports whether o is a model the agent reaches on its own, not one of
-// myna's catalog: what Picks leaves out on the user's word. One myna's
+// owl's catalog: what Picks leaves out on the user's word. One owl's
 // list shows the agent too (Served) is the list's to show or not.
 func Own(o Option) bool { return o.Ref == "" && o.Value != "" && !o.Served }
 
-// OwnModels reports whether one of a's pickers that picks among myna's
+// OwnModels reports whether one of a's pickers that picks among owl's
 // catalog offers models of the agent's own too, which Picks can leave out.
 func (a *Agent) OwnModels(cur map[string]string) bool {
 	for _, f := range a.Fields {
@@ -668,7 +668,7 @@ func FindIn(all []*Agent, q string) (*Agent, error) {
 		if near := suggest.Close(q, ids(all), 3); len(near) > 0 {
 			msg += "; did you mean " + strings.Join(near, ", ") + "?"
 		}
-		return nil, fmt.Errorf("%s · myna ls lists the agents on this machine; myna agents lists every one myna supports", msg)
+		return nil, fmt.Errorf("%s · owl ls lists the agents on this machine; owl agents lists every one owl supports", msg)
 	}
 	return nil, fmt.Errorf("%q is ambiguous: %s", q, strings.Join(ids(prefix), ", "))
 }
@@ -683,12 +683,12 @@ func ids(as []*Agent) []string {
 }
 
 // Spell puts a value typed for field key the way this agent spells it: a
-// catalog model is "copilot/gpt-6" in some agents and "myna/copilot/gpt-6"
+// catalog model is "copilot/gpt-6" in some agents and "owl/copilot/gpt-6"
 // in others, and either is taken in both. A value the picker offers as is
 // stays, and so does one it doesn't know (a model the agent reaches on its
-// own that isn't listed); a "myna/…" value the catalog doesn't have is an
+// own that isn't listed); a "owl/…" value the catalog doesn't have is an
 // error rather than a model the agent would ask its own vendor for, and so
-// is one of myna's the agent isn't shown (notOffered). The
+// is one of owl's the agent isn't shown (notOffered). The
 // agent's suffix after the model (SplitSuffix) stays as typed, and so does
 // a list of models, the user's own. A closed field is the exception: only
 // the values its Options offers are taken (Field.Closed).
@@ -723,7 +723,7 @@ func (a *Agent) Spell(key, v string) (string, error) {
 			return v, nil
 		}
 	}
-	ref, prefixed := strings.CutPrefix(model, mynaID+"/")
+	ref, prefixed := strings.CutPrefix(model, owlID+"/")
 	// a provider renamed since (a profile saved before) is the same one
 	refs := []string{ref}
 	if r := provider.RenamedRef(ref); r != ref {
@@ -741,7 +741,7 @@ func (a *Agent) Spell(key, v string) (string, error) {
 		}
 	}
 	if prefixed {
-		return "", fmt.Errorf("%s isn't a model in myna's catalog (myna models lists them)", ref)
+		return "", fmt.Errorf("%s isn't a model in owl's catalog (owl models lists them)", ref)
 	}
 	if err := a.notOffered(ref, opts); err != nil {
 		return "", err
@@ -759,19 +759,19 @@ func (a *Agent) closedValueError(f *Field, opts []Option, v string) error {
 		}
 	}
 	if len(vals) == 0 {
-		return fmt.Errorf("%s's %s takes no value but default, not %q (try: myna %s %s default)", a.Name, f.Key, v, a.ID, f.Key)
+		return fmt.Errorf("%s's %s takes no value but default, not %q (try: owl %s %s default)", a.Name, f.Key, v, a.ID, f.Key)
 	}
-	return fmt.Errorf("%s's %s is one of %s, not %q (try: myna %s %s %s)",
+	return fmt.Errorf("%s's %s is one of %s, not %q (try: owl %s %s %s)",
 		a.Name, f.Key, strings.Join(vals, ", "), v, a.ID, f.Key, vals[0])
 }
 
-// notOffered refuses a value that names one of myna's models, or one of
+// notOffered refuses a value that names one of owl's models, or one of
 // its providers or routing groups, that the agent isn't shown: kept from
-// the agent (myna visible, a model not ticked for it) or not on its
-// provider's list yet (a remote myna's group added there since the list
+// the agent (owl visible, a model not ticked for it) or not on its
+// provider's list yet (a remote owl's group added there since the list
 // was fetched). Taken as the agent's own, Pi read remote/group/smart as
 // its own provider "remote" and model "group/smart", and was taken out of
-// myna for a provider it doesn't have (#2376). A provider id the agent's
+// owl for a provider it doesn't have (#2376). A provider id the agent's
 // own models go by too (openai/… in Pi) stays the agent's.
 func (a *Agent) notOffered(ref string, opts []Option) error {
 	pid, model, ok := strings.Cut(ref, "/")
@@ -788,14 +788,14 @@ func (a *Agent) notOffered(ref string, opts []Option) error {
 	}
 	for _, e := range provider.Catalog() {
 		if slices.Contains(ids, e.ID) {
-			return fmt.Errorf("%s is one of myna's models, but %s isn't shown it: myna models %s says why, and myna visible %s all shows it every model", ref, a.Name, a.ID, a.ID)
+			return fmt.Errorf("%s is one of owl's models, but %s isn't shown it: owl models %s says why, and owl visible %s all shows it every model", ref, a.Name, a.ID, a.ID)
 		}
 	}
 	if pid+"/" == provider.GroupPrefix || provider.IsGroupRef(ref) {
-		return fmt.Errorf("myna has no routing group %s (myna models lists them)", ref)
+		return fmt.Errorf("owl has no routing group %s (owl models lists them)", ref)
 	}
 	if p, err := provider.Find(pid); err == nil && (p.ID == pid || slices.Contains(p.Was, pid)) {
-		return fmt.Errorf("%s's model list has no %s: myna provider refresh %s fetches the list again (or add the model to it in its editor), and myna models %s lists what %s is shown", p.ID, model, p.ID, a.ID, a.Name)
+		return fmt.Errorf("%s's model list has no %s: owl provider refresh %s fetches the list again (or add the model to it in its editor), and owl models %s lists what %s is shown", p.ID, model, p.ID, a.ID, a.Name)
 	}
 	return nil
 }
@@ -812,7 +812,7 @@ func (a *Agent) split(v string) (model, suffix string, one bool) {
 
 // atomic makes each of an agent's field sets, and its Sync, one edit of the
 // files at paths: one that fails part way puts them all back as they were,
-// rather than leaving, say, Codex's config.toml with myna's provider table
+// rather than leaving, say, Codex's config.toml with owl's provider table
 // written but its model not (#253).
 func atomic(a *Agent, paths ...string) *Agent {
 	for i := range a.Fields {

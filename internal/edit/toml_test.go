@@ -59,15 +59,15 @@ func TestTOMLTables(t *testing.T) {
 
 func TestTOMLTablesOnlyListsOrdinaryHeaders(t *testing.T) {
 	const input = `note = """
-[model."myna/top-fake"]
+[model."owl/top-fake"]
 """
 
 [[skills.config]]
 path = "/skill"
 
-  [ model."myna/a]b" ] # keep the quoted bracket
+  [ model."owl/a]b" ] # keep the quoted bracket
 note = '''
-[model."myna/body-fake"]
+[model."owl/body-fake"]
 [[another.fake]]
 '''
 matrix = [
@@ -81,10 +81,10 @@ path = "/other-skill"
 enabled = true
 `
 	p := tmpFile(t, "config.toml", input)
-	if got := strings.Join(readTOMLTables(t, p), ","); got != `model."myna/a]b",last` {
+	if got := strings.Join(readTOMLTables(t, p), ","); got != `model."owl/a]b",last` {
 		t.Fatalf("tables = %q", got)
 	}
-	if got := readTOMLTable(t, p, `model."myna/a]b"`); got["note"] != "[model.\"myna/body-fake\"]\n[[another.fake]]\n" {
+	if got := readTOMLTable(t, p, `model."owl/a]b"`); got["note"] != "[model.\"owl/body-fake\"]\n[[another.fake]]\n" {
 		t.Fatalf("table lookup disagrees with the header list: %v", got)
 	}
 }
@@ -95,7 +95,7 @@ enabled = true
 func TestTOMLTableWithSpacedDots(t *testing.T) {
 	const input = `top = 1
 
-[ model_providers . myna ] # keep the spaces
+[ model_providers . owl ] # keep the spaces
 name = "old"
 wire_api = "responses"
 
@@ -106,10 +106,10 @@ path = "/skill"
 note = "spaces are the key"
 `
 	p := tmpFile(t, "config.toml", input)
-	if got := strings.Join(readTOMLTables(t, p), ","); got != `model_providers.myna,"a . b"` {
+	if got := strings.Join(readTOMLTables(t, p), ","); got != `model_providers.owl,"a . b"` {
 		t.Fatalf("tables = %q", got)
 	}
-	if got := readTOMLTable(t, p, "model_providers.myna"); !maps.Equal(got, map[string]string{"name": "old", "wire_api": "responses"}) {
+	if got := readTOMLTable(t, p, "model_providers.owl"); !maps.Equal(got, map[string]string{"name": "old", "wire_api": "responses"}) {
 		t.Fatalf("table = %v", got)
 	}
 	if got := readTOMLTable(t, p, `"a . b"`); !maps.Equal(got, map[string]string{"note": "spaces are the key"}) {
@@ -126,14 +126,14 @@ note = "spaces are the key"
 	}
 
 	// an edit finds the table it names instead of appending a second one
-	if err := SetTOMLKey(p, "model_providers.myna", "name", "new"); err != nil {
+	if err := SetTOMLKey(p, "model_providers.owl", "name", "new"); err != nil {
 		t.Fatal(err)
 	}
 	assertTOMLContent(t, p, strings.Replace(input, `"old"`, `"new"`, 1))
-	if err := SetTOMLTable(p, "model_providers.myna", KV{Path: "name", Value: "DeepSeek"}); err != nil {
+	if err := SetTOMLTable(p, "model_providers.owl", KV{Path: "name", Value: "DeepSeek"}); err != nil {
 		t.Fatal(err)
 	}
-	want := strings.Replace(input, "[ model_providers . myna ] # keep the spaces\nname = \"old\"\nwire_api = \"responses\"\n", "[model_providers.myna]\nname = \"DeepSeek\"\n", 1)
+	want := strings.Replace(input, "[ model_providers . owl ] # keep the spaces\nname = \"old\"\nwire_api = \"responses\"\n", "[model_providers.owl]\nname = \"DeepSeek\"\n", 1)
 	assertTOMLContent(t, p, want)
 	// and an array table under a spaced header is owned by its normalised name
 	if err := SetTOMLTables(p, []string{"skills."}, nil); err != nil {
@@ -197,7 +197,7 @@ func TestTOMLTablePreservesFollowingArrayTables(t *testing.T) {
 name = "before"
 
 `
-	const table = "[model_providers.myna]\nname = \"old\"\n\n"
+	const table = "[model_providers.owl]\nname = \"old\"\n\n"
 	const arrays = `  [[skills.config]] # keep the first skill
 name = "skill-one"
 path = "/skills/one"
@@ -218,7 +218,7 @@ enabled = true
 			t.Run("read", func(t *testing.T) {
 				input := prefix + table + arrays + ending.text
 				p := tmpFile(t, "config.toml", input)
-				got := readTOMLTable(t, p, "model_providers.myna")
+				got := readTOMLTable(t, p, "model_providers.owl")
 				if !maps.Equal(got, map[string]string{"name": "old"}) {
 					t.Fatalf("provider contains keys from following array tables: %v", got)
 				}
@@ -230,16 +230,16 @@ enabled = true
 				want string
 			}{
 				{"replace table", func(p string) error {
-					return SetTOMLTable(p, "model_providers.myna", KV{Path: "name", Value: "new"})
-				}, "[model_providers.myna]\nname = \"new\"\n\n"},
+					return SetTOMLTable(p, "model_providers.owl", KV{Path: "name", Value: "new"})
+				}, "[model_providers.owl]\nname = \"new\"\n\n"},
 				{"delete table", func(p string) error {
-					return DelTOMLTable(p, "model_providers.myna")
+					return DelTOMLTable(p, "model_providers.owl")
 				}, ""},
 				{"set key shared with array", func(p string) error {
-					return SetTOMLKey(p, "model_providers.myna", "path", "/provider")
-				}, "[model_providers.myna]\nname = \"old\"\npath = \"/provider\"\n\n"},
+					return SetTOMLKey(p, "model_providers.owl", "path", "/provider")
+				}, "[model_providers.owl]\nname = \"old\"\npath = \"/provider\"\n\n"},
 				{"delete last key", func(p string) error {
-					return DelTOMLKey(p, "model_providers.myna", "name")
+					return DelTOMLKey(p, "model_providers.owl", "name")
 				}, ""},
 			} {
 				t.Run(tc.name, func(t *testing.T) {
@@ -264,14 +264,14 @@ func TestTOMLTableIgnoresHeadersInsideValues(t *testing.T) {
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			const tail = "[[skills.config]]\npath = \"/skills/one\"\n"
-			p := tmpFile(t, "config.toml", "[model_providers.myna]\nvalue = "+tc.value+"\nwire_api = \"responses\"\n\n"+tail)
-			if got := readTOMLTable(t, p, "model_providers.myna")["wire_api"]; got != "responses" {
+			p := tmpFile(t, "config.toml", "[model_providers.owl]\nvalue = "+tc.value+"\nwire_api = \"responses\"\n\n"+tail)
+			if got := readTOMLTable(t, p, "model_providers.owl")["wire_api"]; got != "responses" {
 				t.Errorf("stopped inside a multiline value: wire_api = %q", got)
 			}
-			if err := SetTOMLTable(p, "model_providers.myna", KV{Path: "name", Value: "new"}); err != nil {
+			if err := SetTOMLTable(p, "model_providers.owl", KV{Path: "name", Value: "new"}); err != nil {
 				t.Fatal(err)
 			}
-			if got, want := read(t, p), "[model_providers.myna]\nname = \"new\"\n\n"+tail; got != want {
+			if got, want := read(t, p), "[model_providers.owl]\nname = \"new\"\n\n"+tail; got != want {
 				t.Fatalf("got:\n%s\nwant:\n%s", got, want)
 			}
 		})
@@ -280,10 +280,10 @@ func TestTOMLTableIgnoresHeadersInsideValues(t *testing.T) {
 
 func TestTOMLTableParseErrorLeavesFileUntouched(t *testing.T) {
 	for _, input := range []string{
-		"invalid = [\n[model_providers.myna]\nname = \"old\"\n",
-		"[model_providers.myna]\ninvalid = [\n[[skills.config]]\n",
-		"[model_providers.myna]\ninvalid = [\n",
-		"[model_providers.myna]\nname = \"old\"\n\n[other]\ninvalid = [\n",
+		"invalid = [\n[model_providers.owl]\nname = \"old\"\n",
+		"[model_providers.owl]\ninvalid = [\n[[skills.config]]\n",
+		"[model_providers.owl]\ninvalid = [\n",
+		"[model_providers.owl]\nname = \"old\"\n\n[other]\ninvalid = [\n",
 	} {
 		for _, edit := range []func(string) error{
 			func(p string) error {
@@ -293,15 +293,15 @@ func TestTOMLTableParseErrorLeavesFileUntouched(t *testing.T) {
 				}
 				return err
 			},
-			func(p string) error { _, err := GetTOMLTable(p, "model_providers.myna"); return err },
+			func(p string) error { _, err := GetTOMLTable(p, "model_providers.owl"); return err },
 			func(p string) error {
-				return SetTOMLTables(p, []string{"model_providers."}, []Table{{Name: "model_providers.myna", KVs: []KV{{Path: "name", Value: "new"}}}})
+				return SetTOMLTables(p, []string{"model_providers."}, []Table{{Name: "model_providers.owl", KVs: []KV{{Path: "name", Value: "new"}}}})
 			},
 			func(p string) error { return SetTOMLTables(p, []string{"model_providers."}, nil) },
-			func(p string) error { return SetTOMLTable(p, "model_providers.myna", KV{Path: "name", Value: "new"}) },
-			func(p string) error { return DelTOMLTable(p, "model_providers.myna") },
-			func(p string) error { return SetTOMLKey(p, "model_providers.myna", "name", "new") },
-			func(p string) error { return DelTOMLKey(p, "model_providers.myna", "name") },
+			func(p string) error { return SetTOMLTable(p, "model_providers.owl", KV{Path: "name", Value: "new"}) },
+			func(p string) error { return DelTOMLTable(p, "model_providers.owl") },
+			func(p string) error { return SetTOMLKey(p, "model_providers.owl", "name", "new") },
+			func(p string) error { return DelTOMLKey(p, "model_providers.owl", "name") },
 		} {
 			p := tmpFile(t, "config.toml", input)
 			err := edit(p)
@@ -398,7 +398,7 @@ func TestGetTOMLTableAbsent(t *testing.T) {
 					t.Fatal(err)
 				}
 			}
-			if got, err := GetTOMLTable(p, "model_providers.myna"); got != nil || err != nil {
+			if got, err := GetTOMLTable(p, "model_providers.owl"); got != nil || err != nil {
 				t.Fatalf("expected an absent table without error, got %v, %v", got, err)
 			}
 		})
@@ -651,34 +651,34 @@ func TestSetTOMLTables(t *testing.T) {
 
 func TestSetTOMLTablesUsesParsedBlocks(t *testing.T) {
 	const before = `note = """
-[model."myna/top-fake"]
+[model."owl/top-fake"]
 """
 
 [user]
 note = '''
-[model."myna/body-fake"]
+[model."owl/body-fake"]
 '''
 matrix = [
 [[1, 2], [3, 4]]
 ]
 
 `
-	const old = `[model."myna/old"]
+	const old = `[model."owl/old"]
 note = '''
 [user.fake]
 '''
 
-[model."myna/old".sub]
+[model."owl/old".sub]
 value = "old"
 
-[[model."myna/array"]]
+[[model."owl/array"]]
 value = "owned array"
 
 `
 	const after = `  [[skills.config]] # keep this array table
 path = "/skill"
 note = '''
-[model."myna/another-fake"]
+[model."owl/another-fake"]
 '''
 
 [last]
@@ -690,13 +690,13 @@ enabled = true
 		tables []Table
 		want   string
 	}{
-		{"replace", before + old + after, []Table{{Name: `model."myna/new"`, KVs: []KV{{Path: "model", Value: "new"}}}}, before + after + "\n[model.\"myna/new\"]\nmodel = \"new\"\n"},
+		{"replace", before + old + after, []Table{{Name: `model."owl/new"`, KVs: []KV{{Path: "model", Value: "new"}}}}, before + after + "\n[model.\"owl/new\"]\nmodel = \"new\"\n"},
 		{"remove", before + old + after, nil, before + after},
 		{"only fake headers", before + after, nil, before + after},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			p := tmpFile(t, "config.toml", tc.input)
-			if err := SetTOMLTables(p, []string{`model."myna/`}, tc.tables); err != nil {
+			if err := SetTOMLTables(p, []string{`model."owl/`}, tc.tables); err != nil {
 				t.Fatal(err)
 			}
 			assertTOMLContent(t, p, tc.want)

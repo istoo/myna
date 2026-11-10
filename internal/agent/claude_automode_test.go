@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // claudeAutoModeHome is a sandbox HOME with a provider serving a Claude
@@ -35,8 +35,8 @@ func claudeAutoModeHome(t *testing.T, before string) (*Agent, string, func(strin
 
 // Claude Code's auto mode classifier can have a model of its own
 // (CLAUDE_CODE_AUTO_MODE_MODEL, 2.1.302; Linka on Discord): only while
-// myna routes Claude Code, only one of myna's models, never one Claude
-// Code refuses to run its classifier on, and gone again with myna.
+// owl routes Claude Code, only one of owl's models, never one Claude
+// Code refuses to run its classifier on, and gone again with owl.
 func TestClaudeAutoModeModel(t *testing.T) {
 	a, _, env := claudeAutoModeHome(t, `{}`)
 	f := a.Field("auto_mode")
@@ -52,13 +52,13 @@ func TestClaudeAutoModeModel(t *testing.T) {
 	if err := a.Field("model").Set("relay/deepseek-pro"); err != nil {
 		t.Fatal(err)
 	}
-	// unset, Claude Code's own pick: myna writes nothing for it
+	// unset, Claude Code's own pick: owl writes nothing for it
 	if f.Get() != "" || env(claudeAutoModeEnv) != "" {
 		t.Fatalf("auto mode should be unset: %v", a.Values())
 	}
 	opts := f.Options(nil)
 	if !containsOption(opts, "relay/claude-haiku-4-5") || !containsOption(opts, "relay/deepseek-pro") {
-		t.Fatalf("options miss myna's models: %v", opts)
+		t.Fatalf("options miss owl's models: %v", opts)
 	}
 	if containsOption(opts, "relay/claude-opus-5-5") {
 		t.Fatalf("Opus 5.5 is offered, which Claude Code won't classify with: %v", opts)
@@ -67,7 +67,7 @@ func TestClaudeAutoModeModel(t *testing.T) {
 		t.Fatalf("Opus 5.5 taken: %v %q", err, env(claudeAutoModeEnv))
 	}
 	if err := f.Set("claude-haiku-4-5"); err == nil || env(claudeAutoModeEnv) != "" {
-		t.Fatalf("a model myna doesn't serve taken: %v %q", err, env(claudeAutoModeEnv))
+		t.Fatalf("a model owl doesn't serve taken: %v %q", err, env(claudeAutoModeEnv))
 	}
 	if err := f.Set("relay/claude-haiku-4-5"); err != nil {
 		t.Fatal(err)
@@ -95,7 +95,7 @@ func TestClaudeAutoModeModel(t *testing.T) {
 	if err := f.Set("relay/deepseek-pro"); err != nil {
 		t.Fatal(err)
 	}
-	// back to Claude Code as installed: myna's pick goes with it
+	// back to Claude Code as installed: owl's pick goes with it
 	if err := a.Field("model").Set(""); err != nil {
 		t.Fatal(err)
 	}
@@ -107,10 +107,10 @@ func TestClaudeAutoModeModel(t *testing.T) {
 	}
 }
 
-// An auto mode model the user set before myna routed Claude Code waits
-// out of the env while myna is wired in (it would name a model myna
-// doesn't serve) and comes back after; one they set while myna is wired
-// in is theirs, and myna never takes it out.
+// An auto mode model the user set before owl routed Claude Code waits
+// out of the env while owl is wired in (it would name a model owl
+// doesn't serve) and comes back after; one they set while owl is wired
+// in is theirs, and owl never takes it out.
 func TestClaudeAutoModeUserValue(t *testing.T) {
 	t.Run("before", func(t *testing.T) {
 		a, path, env := claudeAutoModeHome(t, `{"env":{"CLAUDE_CODE_AUTO_MODE_MODEL":"claude-sonnet-4-6"}}`)

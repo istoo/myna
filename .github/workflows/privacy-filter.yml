@@ -4,7 +4,7 @@ name: Privacy Filter
 # 1.6 GB local model), built for each system and published as a release's
 # assets. internal/pii pins a tag (serveTag) and each system's sha256; a
 # run of this workflow on a pf-v* tag makes the release that pin names.
-# The model is not here: LocalAI's q8 GGUF is downloaded by myna itself.
+# The model is not here: LocalAI's q8 GGUF is downloaded by owl itself.
 #
 # A repository with no pf-v* release yet, as this fork was, gives the
 # model's download a 404 and Privacy Filter can't be turned on (the first

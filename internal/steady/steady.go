@@ -96,7 +96,7 @@ func ReadThere(p string) ([]byte, error) {
 
 // ReadThereInto is ReadThere into buf's room, grown when the file needs
 // more: for a caller that reads one file again and again only to compare
-// it, which a new buffer each time made the bulk of what myna allocated
+// it, which a new buffer each time made the bulk of what owl allocated
 // as it started (a 1.5 MB config.toml read 150 times over).
 func ReadThereInto(p string, buf []byte) ([]byte, error) {
 	var b []byte

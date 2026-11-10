@@ -5,7 +5,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // probeServer is the gateway a translated test is asked through; a var so

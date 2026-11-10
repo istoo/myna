@@ -5,12 +5,12 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/istoo/myna/internal/beat"
-	"github.com/istoo/myna/internal/filememo"
-	"github.com/istoo/myna/internal/redact"
-	"github.com/istoo/myna/internal/sessions"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/beat"
+	"github.com/istoo/owl/internal/filememo"
+	"github.com/istoo/owl/internal/redact"
+	"github.com/istoo/owl/internal/sessions"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/usage"
 )
 
 type sessionAvailability struct {
@@ -121,7 +121,7 @@ func (e *otelExporter) watchSessions(ctx context.Context, started time.Time, eve
 	}
 	// while sessions aren't exported, a save here turns them on at once
 	// (Written), and OthersEvery only catches the CLI's (#3185: a 2s tick
-	// woke an idle myna that exports nothing)
+	// woke an idle owl that exports nothing)
 	wait := every
 	for {
 		select {

@@ -4,17 +4,17 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A model picked in Claude Code's /model holds for its next sessions (the
-// owner: 去掉 ANTHROPIC_MODEL，让 /model 的选择对新会话也生效): myna names the
+// owner: 去掉 ANTHROPIC_MODEL，让 /model 的选择对新会话也生效): owl names the
 // main model in settings.json's model alone, which /model saves, and no
 // ANTHROPIC_MODEL outranks it. The tiers that followed the main model go
 // with the pick (Follow); one with a model of its own keeps it. An older
-// myna's ANTHROPIC_MODEL comes out the same way.
+// owl's ANTHROPIC_MODEL comes out the same way.
 func TestClaudeModelPickedInClaudeCode(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
@@ -73,8 +73,8 @@ func TestClaudeModelPickedInClaudeCode(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// an older myna's ANTHROPIC_MODEL comes out, the model kept
-	writeFile(t, path, `{"model": "deepseek/pro", "env": {"ANTHROPIC_BASE_URL": "`+gateway.URL()+`", "ANTHROPIC_AUTH_TOKEN": "myna", "ANTHROPIC_MODEL": "deepseek/pro", "ANTHROPIC_DEFAULT_OPUS_MODEL": "deepseek/pro", "CLAUDE_CODE_SUBAGENT_MODEL": "deepseek/pro"}}`)
+	// an older owl's ANTHROPIC_MODEL comes out, the model kept
+	writeFile(t, path, `{"model": "deepseek/pro", "env": {"ANTHROPIC_BASE_URL": "`+gateway.URL()+`", "ANTHROPIC_AUTH_TOKEN": "owl", "ANTHROPIC_MODEL": "deepseek/pro", "ANTHROPIC_DEFAULT_OPUS_MODEL": "deepseek/pro", "CLAUDE_CODE_SUBAGENT_MODEL": "deepseek/pro"}}`)
 	forget(a.ID + ".main")
 	forget("claude.main")
 	if err := a.Follow(); err != nil {

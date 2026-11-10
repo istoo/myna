@@ -14,15 +14,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/redact"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/redact"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // Each mode needs a fresh process: the redaction key is cached after its
 // first use, so another test's masking would hide initialization races.
 func TestConcurrentRedactedCountTokens(t *testing.T) {
-	const modeEnv = "MYNA_TEST_REDACT_CONCURRENCY"
+	const modeEnv = "OWL_TEST_REDACT_CONCURRENCY"
 	mode := os.Getenv(modeEnv)
 	if mode == "" {
 		exe, err := os.Executable()

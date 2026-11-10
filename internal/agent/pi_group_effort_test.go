@@ -7,16 +7,16 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // #597: Pi on a routing group of DeepSeek V4 Pro (TokenHub's, and the Token
-// Plan's deepseek-v4-pro-202606 that nothing myna reads knows) was
+// Plan's deepseek-v4-pro-202606 that nothing owl reads knows) was
 // written the group without reasoning, so its /thinking offered off alone,
-// while myna's thinking field offered every level and showed max — which
+// while owl's thinking field offered every level and showed max — which
 // Pi clamped to off, sending no reasoning_effort. The group now gets the
-// levels verified for TokenHub's model, so Pi and myna offer the same
+// levels verified for TokenHub's model, so Pi and owl offer the same
 // levels instead of borrowing DeepSeek's unverified off level.
 func TestPiGroupThinkingIsWhatPiRuns(t *testing.T) {
 	home := syncHome(t)
@@ -42,7 +42,7 @@ func TestPiGroupThinkingIsWhatPiRuns(t *testing.T) {
 		t.Fatal(err)
 	}
 	a := pi(home)
-	if err := a.Field("model").Set("myna/group/deepseek"); err != nil {
+	if err := a.Field("model").Set("owl/group/deepseek"); err != nil {
 		t.Fatal(err)
 	}
 	if err := a.Field("effort").Set("max"); err != nil {
@@ -54,7 +54,7 @@ func TestPiGroupThinkingIsWhatPiRuns(t *testing.T) {
 		t.Fatal(err)
 	}
 	var entry map[string]any
-	for _, raw := range file["providers"].(map[string]any)["myna"].(map[string]any)["models"].([]any) {
+	for _, raw := range file["providers"].(map[string]any)["owl"].(map[string]any)["models"].([]any) {
 		if m := raw.(map[string]any); m["id"] == "group/deepseek" {
 			entry = m
 		}
@@ -74,7 +74,7 @@ func TestPiGroupThinkingIsWhatPiRuns(t *testing.T) {
 		return out
 	}
 	effort := a.Field("effort")
-	if got := values(effort.Options(map[string]string{"model": "myna/group/deepseek"})); !reflect.DeepEqual(got, []string{"low", "high", "max"}) {
+	if got := values(effort.Options(map[string]string{"model": "owl/group/deepseek"})); !reflect.DeepEqual(got, []string{"low", "high", "max"}) {
 		t.Fatalf("offered %v", got)
 	}
 	if got := effort.Get(); got != "max" {
@@ -82,10 +82,10 @@ func TestPiGroupThinkingIsWhatPiRuns(t *testing.T) {
 	}
 
 	// on a group Pi can't reason with, max is shown as the off Pi runs at
-	if err := a.Field("model").Set("myna/group/plan"); err != nil {
+	if err := a.Field("model").Set("owl/group/plan"); err != nil {
 		t.Fatal(err)
 	}
-	if got := values(effort.Options(map[string]string{"model": "myna/group/plan"})); !reflect.DeepEqual(got, []string{"off"}) {
+	if got := values(effort.Options(map[string]string{"model": "owl/group/plan"})); !reflect.DeepEqual(got, []string{"off"}) {
 		t.Fatalf("plan: offered %v", got)
 	}
 	if got := effort.Get(); got != "off" {

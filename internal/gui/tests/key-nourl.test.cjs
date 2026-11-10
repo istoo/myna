@@ -62,7 +62,7 @@ async function open(t, engine, lang, view, width) {
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", serve(lang));
-  await page.goto(`http://myna.test/?view=${view}`);
+  await page.goto(`http://owl.test/?view=${view}`);
   // what a string says in lang, its {names} filled in
   const say = (key, vars = {}) => page.evaluate(([lang, key, vars]) => {
     const s = (lang !== "en" && I18N[lang]?.[key]) || key;

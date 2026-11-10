@@ -3,22 +3,22 @@ package agent
 import (
 	"strings"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// A group myna found is listed as auto/<model> (provider.Group.Ref); it
-// was group/auto-<slug>, and agents myna set to it then still say so.
-// The gateway serves that id as it did, but the lists myna writes into
+// A group owl found is listed as auto/<model> (provider.Group.Ref); it
+// was group/auto-<slug>, and agents owl set to it then still say so.
+// The gateway serves that id as it did, but the lists owl writes into
 // an agent's files name the group by its new id only, so an agent that
 // checks its model against its list (OpenCode) would find it gone. On its
-// next write of the agent's lists (SyncCatalog), myna moves each field
+// next write of the agent's lists (SyncCatalog), owl moves each field
 // it set to the old id onto the new one; a field the user set themselves,
-// or changed since myna set it, stays as they left it. So does a field
-// myna set to an auto/<model> spelt as the group is listed no longer
+// or changed since owl set it, stays as they left it. So does a field
+// owl set to an auto/<model> spelt as the group is listed no longer
 // (auto/glm-5-3-flash, now auto/glm-5.3-flash: the spelling follows
 // models.dev's, Group.Spelled), which the gateway serves as ever.
 
-// setToFoundGroups are the agents myna set a field of to a found
+// setToFoundGroups are the agents owl set a field of to a found
 // group's group/auto-<slug> or auto/<model>, by id: those
 // renameFoundGroups looks at, so
 // a sync reads no other agent's files for it. None while a provider of
@@ -44,7 +44,7 @@ func setToFoundGroups() map[string]bool {
 	return out
 }
 
-// renameFoundGroups moves a's fields that myna set to a found group's
+// renameFoundGroups moves a's fields that owl set to a found group's
 // group/auto-<slug>, or to an auto/<model> it is listed by no longer,
 // onto the group's auto/<model> now, the agent's prefix and suffix kept. It answers whether it moved any.
 func (a *Agent) renameFoundGroups() bool {
@@ -59,7 +59,7 @@ func (a *Agent) renameFoundGroups() bool {
 	vals := a.Values()
 	for _, f := range a.Fields {
 		v := vals[f.Key]
-		// what myna set, as it set it: a value of the user's own, or
+		// what owl set, as it set it: a value of the user's own, or
 		// one changed since, is theirs
 		if want, ok := rec[f.Key]; !ok || v == "" || v != want || f.Set == nil {
 			continue
@@ -78,9 +78,9 @@ func (a *Agent) renameFoundGroups() bool {
 
 // publicValue is v, an agent's value for a field, with a found group's
 // group/auto-<slug>, or an auto/<model> spelt otherwise than the group is
-// listed now, in it as the group's auto/<model>: its prefix (myna/), an
+// listed now, in it as the group's auto/<model>: its prefix (owl/), an
 // effort or [1m] after the id, and the agent's own suffix kept. ok is
-// false when v names no such group, one myna has no group for now, or
+// false when v names no such group, one owl has no group for now, or
 // the group as it is listed already.
 func (a *Agent) publicValue(v string) (string, bool) {
 	model, suffix, one := a.split(v)

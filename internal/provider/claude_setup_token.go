@@ -2,7 +2,7 @@ package provider
 
 // A Claude account added by a setup-token: the long-lived token `claude
 // setup-token` prints, which Claude Code takes in CLAUDE_CODE_OAUTH_TOKEN.
-// myna keeps it in logins.json as it keeps a sign-in, and hands it to the
+// owl keeps it in logins.json as it keeps a sign-in, and hands it to the
 // real Claude Code, in that variable, for runs in the account's own config
 // directory only (ClaudeDirToken); it never asks Anthropic anything with it.
 //
@@ -25,7 +25,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // claudeTokenAuth is a setup-token as savedLogin.Auth keeps it.
@@ -67,7 +67,7 @@ var errClaudeSetupToken = errors.New("unknown: a setup-token can't read the allo
 
 // errClaudeTokenSwitch is the answer to signing Claude Code in to a
 // setup-token account.
-const errClaudeTokenSwitch = "%s was added by a setup-token: myna's requests use it, but Claude Code itself can't be signed in to it"
+const errClaudeTokenSwitch = "%s was added by a setup-token: owl's requests use it, but Claude Code itself can't be signed in to it"
 
 // checkClaudeSetupToken is token trimmed, or why it isn't a setup-token.
 func checkClaudeSetupToken(token string) (string, error) {

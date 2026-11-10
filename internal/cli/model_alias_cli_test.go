@@ -4,10 +4,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
-// myna model alias counts a model's usage under another id, shows it,
+// owl model alias counts a model's usage under another id, shows it,
 // lists it under aliases and takes it off with --reset; it refuses a
 // model aliased to itself, a loop, and a flag taken as a model id.
 func TestModelAliasCmd(t *testing.T) {
@@ -37,7 +37,7 @@ func TestModelAliasCmd(t *testing.T) {
 			t.Fatalf("took %v", bad)
 		}
 	}
-	if out, err = runOut(t, "model", "alias", "--help"); err != nil || !strings.Contains(out, "myna model alias <model> <name>") {
+	if out, err = runOut(t, "model", "alias", "--help"); err != nil || !strings.Contains(out, "owl model alias <model> <name>") {
 		t.Fatalf("--help: %q %v", out, err)
 	}
 	if got := settings.Load().UsageAliases; len(got) != 1 {

@@ -1,12 +1,12 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// jojonas_xyz on X: a Codex account's allowance ran out and myna moved to
+// jojonas_xyz on X: a Codex account's allowance ran out and owl moved to
 // another account by itself, with no setting to be found to keep spending
 // the first one's credits. Under Use credits, while it is on, a line says
 // "Before moving to another account" with its switch: off until turned on,
 // it posts settings/codex-credits with first for that account, says so,
 // and turns; it and "Only after every other account, key and fallback"
 // are never on together. The same row is under the account's ⋯ on
-// Providers, where its other settings are, and the account myna moved
+// Providers, where its other settings are, and the account owl moved
 // off says, on its tag, where the setting is. The panel's folded line says
 // it. At narrow widths nothing is cut off or wider than its card, a click
 // moves nothing, no native select, no left-border accent. Every language,
@@ -25,7 +25,7 @@ const quotas = [
     windows: [{ name: "5 hours", used: 100, resetsAt: later }, { name: "7 days", used: 40, resetsAt: later }],
     balance: "1.2K credits" },
 ];
-// myna moved Codex off Me@example.com (returns) to work@example.com
+// owl moved Codex off Me@example.com (returns) to work@example.com
 const logins = [
   { user: "work@example.com", plan: "PLUS", active: true, on: true },
   { user: "Me@example.com", plan: "PLUS", on: true, returns: true },
@@ -146,7 +146,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // the Usage page's card
       for (const width of [900, 440]) {
         const posts = [];
-        const page = await open("http://myna.test/?view=usage", { width, height: 760 }, posts);
+        const page = await open("http://owl.test/?view=usage", { width, height: 760 }, posts);
         const row = '.quota-credits[data-user="Me@example.com"]';
         await page.locator(row + " .ar-credits-first").waitFor();
         assert.equal(await text(page.locator(row + " .ar-credits-first")), w.line);
@@ -179,10 +179,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       }
 
       // Providers: the account's ⋯, where its other settings are, and the
-      // account myna moved off says where it is
+      // account owl moved off says where it is
       for (const width of [900, 440]) {
         const posts = [];
-        const page = await open("http://myna.test/?view=providers", { width, height: 760 }, posts);
+        const page = await open("http://owl.test/?view=providers", { width, height: 760 }, posts);
         await page.locator(".row.provider", { hasText: "Codex" }).first().click();
         const acc = page.locator(".editor .acc", { hasText: "Me@example.com" });
         await acc.waitFor();
@@ -207,7 +207,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // the menu bar panel's folded line says it
       {
         const posts = [];
-        const panel = await open("http://myna.test/?mode=panel", { width: 360, height: 640 }, posts);
+        const panel = await open("http://owl.test/?mode=panel", { width: 360, height: 640 }, posts);
         const row = '.pq-credits[data-user="Me@example.com"]';
         await panel.locator('#ptabs [data-ptab="usage"]').click();
         await panel.locator(row + " .ar-credits-first").waitFor();

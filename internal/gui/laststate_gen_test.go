@@ -3,10 +3,10 @@ package gui
 import (
 	"testing"
 
-	"github.com/istoo/myna/internal/filememo"
+	"github.com/istoo/owl/internal/filememo"
 )
 
-// The last-known state is myna's own cache, and nothing a request reads
+// The last-known state is owl's own cache, and nothing a request reads
 // is built from it. Its write dropped every file filememo held, so each
 // poll of the Agents page that wrote it had each agent's model list and
 // picker, and every provider's catalog, built anew on the next look.

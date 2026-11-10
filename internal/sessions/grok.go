@@ -14,7 +14,7 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/istoo/myna/internal/appdir"
+	"github.com/istoo/owl/internal/appdir"
 )
 
 // Grok Build keeps a session in a folder of its own under its sessions
@@ -145,7 +145,7 @@ type grokUsage struct {
 	CacheWrite int `json:"cacheCreationTokens"`
 }
 
-// tokens are Grok's counts as myna keeps them: input without the cache.
+// tokens are Grok's counts as owl keeps them: input without the cache.
 func (u grokUsage) tokens() Tokens {
 	return Tokens{Input: max(0, u.Input-u.CacheRead-u.CacheWrite), Output: u.Output, CacheRead: u.CacheRead, CacheWrite: u.CacheWrite}
 }

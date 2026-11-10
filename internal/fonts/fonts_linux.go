@@ -6,7 +6,7 @@ package fonts
 #cgo pkg-config: fontconfig
 #include <fontconfig/fontconfig.h>
 
-static FcFontSet *mynaFonts(void) {
+static FcFontSet *owlFonts(void) {
     FcPattern *pattern = FcPatternCreate();
     if (!pattern) return NULL;
     FcPatternAddBool(pattern, FC_SCALABLE, FcTrue);
@@ -17,23 +17,23 @@ static FcFontSet *mynaFonts(void) {
     FcPatternDestroy(pattern);
     return fonts;
 }
-static FcPattern *mynaFontAt(FcFontSet *set, int i) { return set->fonts[i]; }
-static const char *mynaFontString(FcPattern *font, const char *key) {
+static FcPattern *owlFontAt(FcFontSet *set, int i) { return set->fonts[i]; }
+static const char *owlFontString(FcPattern *font, const char *key) {
     FcChar8 *value = NULL;
     return FcPatternGetString(font, key, 0, &value) == FcResultMatch ? (const char *)value : "";
 }
-static double mynaFontNumber(FcPattern *font, const char *key, double fallback) {
+static double owlFontNumber(FcPattern *font, const char *key, double fallback) {
     FcValue value;
     if (FcPatternGet(font, key, 0, &value) != FcResultMatch) return fallback;
     if (value.type == FcTypeInteger) return value.u.i;
     if (value.type == FcTypeDouble) return value.u.d;
     return fallback;
 }
-static const char *mynaFontFamily(FcPattern *f) { return mynaFontString(f, FC_FAMILY); }
-static const char *mynaFontStyle(FcPattern *f) { return mynaFontString(f, FC_STYLE); }
-static double mynaFontWeight(FcPattern *f) { return mynaFontNumber(f, FC_WEIGHT, -1); }
-static double mynaFontSlant(FcPattern *f) { return mynaFontNumber(f, FC_SLANT, FC_SLANT_ROMAN); }
-static double mynaFontWidth(FcPattern *f) { return mynaFontNumber(f, FC_WIDTH, 100); }
+static const char *owlFontFamily(FcPattern *f) { return owlFontString(f, FC_FAMILY); }
+static const char *owlFontStyle(FcPattern *f) { return owlFontString(f, FC_STYLE); }
+static double owlFontWeight(FcPattern *f) { return owlFontNumber(f, FC_WEIGHT, -1); }
+static double owlFontSlant(FcPattern *f) { return owlFontNumber(f, FC_SLANT, FC_SLANT_ROMAN); }
+static double owlFontWidth(FcPattern *f) { return owlFontNumber(f, FC_WIDTH, 100); }
 */
 import "C"
 
@@ -42,32 +42,32 @@ import "errors"
 const Available = true
 
 func installed() ([]Face, error) {
-	set := C.mynaFonts()
+	set := C.owlFonts()
 	if set == nil {
 		return nil, errors.New("Fontconfig could not list installed fonts")
 	}
 	defer C.FcFontSetDestroy(set)
 	faces := make([]Face, 0, int(set.nfont))
 	for i := C.int(0); i < set.nfont; i++ {
-		font := C.mynaFontAt(set, i)
+		font := C.owlFontAt(set, i)
 		// A variable font's range is not a named instance. Its enumerated
 		// named instances have numeric weights and are included normally.
-		weight := C.mynaFontWeight(font)
+		weight := C.owlFontWeight(font)
 		if weight < 0 {
 			continue
 		}
 		style := "normal"
-		switch int(C.mynaFontSlant(font)) {
+		switch int(C.owlFontSlant(font)) {
 		case C.FC_SLANT_ITALIC:
 			style = "italic"
 		case C.FC_SLANT_OBLIQUE:
 			style = "oblique"
 		}
 		faces = append(faces, Face{
-			Family: C.GoString(C.mynaFontFamily(font)),
-			Name:   C.GoString(C.mynaFontStyle(font)),
+			Family: C.GoString(C.owlFontFamily(font)),
+			Name:   C.GoString(C.owlFontStyle(font)),
 			Weight: float64(C.FcWeightToOpenTypeDouble(weight)),
-			Style:  style, Stretch: float64(C.mynaFontWidth(font)),
+			Style:  style, Stretch: float64(C.owlFontWidth(font)),
 		})
 	}
 	return faces, nil

@@ -17,10 +17,10 @@ func valueOf(o ordered, k string) (any, bool) {
 }
 
 // generate_video waits up to ten minutes for its video; Codex gives a tool a
-// minute and Goose five unless the entry says more, so myna-image's entry
+// minute and Goose five unless the entry says more, so owl-image's entry
 // does, and no other server's does.
 func TestSelfServerIsGivenTimeToMakeAVideo(t *testing.T) {
-	self := &Server{Name: selfServerName, Transport: "stdio", Command: "/opt/myna", Args: []string{"mcp", "image"}}
+	self := &Server{Name: selfServerName, Transport: "stdio", Command: "/opt/owl", Args: []string{"mcp", "image"}}
 	other := &Server{Name: "other", Transport: "stdio", Command: "x"}
 	codex := &mcpFile{Format: fmtCodex}
 	if v, ok := valueOf(codex.encode(self), "tool_timeout_sec"); !ok || v != 660 {
@@ -49,17 +49,17 @@ func TestSelfServerIsGivenTimeToMakeAVideo(t *testing.T) {
 	}
 }
 
-// myna-image is already installed for many users, as main wrote it: no
+// owl-image is already installed for many users, as main wrote it: no
 // tool_timeout_sec in Codex, the 300 every server had in Goose. Syncing after
 // an upgrade gives those entries the timeout; one the user chose stays.
 func TestSyncGivesAnInstalledSelfServerItsTimeout(t *testing.T) {
 	h := sandbox(t)
 	codex, goose := filepath.Join(h, ".codex", "config.toml"), filepath.Join(h, ".config", "goose", "config.yaml")
-	s := Server{Name: selfServerName, Transport: "stdio", Command: "/opt/myna", Args: []string{"mcp", "image"}, Agents: []string{"codex", "goose"}}
+	s := Server{Name: selfServerName, Transport: "stdio", Command: "/opt/owl", Args: []string{"mcp", "image"}, Agents: []string{"codex", "goose"}}
 	ok(t)(SaveServer("", s))
 	installed := func(codexExtra, gooseTimeout string) {
-		write(t, codex, "[mcp_servers.myna-image]\ncommand = \"/opt/myna\"\nargs = [\"mcp\", \"image\"]\n"+codexExtra)
-		write(t, goose, "extensions:\n  myna-image:\n    enabled: true\n    name: myna-image\n    type: stdio\n    cmd: /opt/myna\n    args:\n      - mcp\n      - image\n    timeout: "+gooseTimeout+"\n")
+		write(t, codex, "[mcp_servers.owl-image]\ncommand = \"/opt/owl\"\nargs = [\"mcp\", \"image\"]\n"+codexExtra)
+		write(t, goose, "extensions:\n  owl-image:\n    enabled: true\n    name: owl-image\n    type: stdio\n    cmd: /opt/owl\n    args:\n      - mcp\n      - image\n    timeout: "+gooseTimeout+"\n")
 	}
 	want := func(what, file, key, val string) {
 		t.Helper()

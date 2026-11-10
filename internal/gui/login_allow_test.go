@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/autostart"
+	"github.com/istoo/owl/internal/autostart"
 )
 
 // Open at login switched off in System Settings, its launch agent still

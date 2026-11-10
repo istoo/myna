@@ -313,7 +313,7 @@ func TestFetchIconLeavesNoIdleConnection(t *testing.T) {
 	}
 	srv.Start()
 	t.Cleanup(srv.Close)
-	t.Setenv("MYNA_ICON_PROXY", srv.URL+"/api/icon")
+	t.Setenv("OWL_ICON_PROXY", srv.URL+"/api/icon")
 	old := iconClient
 	iconClient = srv.Client
 	t.Cleanup(func() { iconClient = old })

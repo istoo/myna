@@ -12,7 +12,7 @@ import (
 // OpenCode's desktop app is OpenCode.exe in
 // %LOCALAPPDATA%\Programs\ai.opencode.desktop, an Electron program; with
 // that folder on PATH, Windows' case-blind search finds it as opencode,
-// and myna's version check put OpenCode's window up at every start and
+// and owl's version check put OpenCode's window up at every start and
 // after each update (saint carol on Discord). Its CLI (resources\
 // opencode-cli.exe), npm's, bun's and scoop's shims are console programs
 // and are run. Anything that isn't a PE, or whose header can't be read,

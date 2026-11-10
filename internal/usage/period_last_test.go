@@ -7,7 +7,7 @@ import (
 
 // A rolling window (#2075) is a period of its own: it ends now and began
 // that long ago, where the presets begin at a local midnight — what
-// `myna usage --last 24h` asks for when today is 35 minutes old and a
+// `owl usage --last 24h` asks for when today is 35 minutes old and a
 // preset would give a whole calendar day.
 func TestRollingWindowIsAPeriod(t *testing.T) {
 	pageHome(t)

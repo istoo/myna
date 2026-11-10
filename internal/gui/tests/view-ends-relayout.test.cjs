@@ -101,7 +101,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           await page.route("**/*", serve(lang, web));
 
           // Routing: a screen down, the capsule in sight
-          await page.goto("http://myna.test/?view=routing");
+          await page.goto("http://owl.test/?view=routing");
           await page.locator(".rt-group").nth(15).waitFor();
           const v = "#view-routing";
           await page.mouse.move(width / 2, 300);
@@ -145,7 +145,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           // What goes is a block at the list's end, made for the test: the
           // foot must stay below the window, or the browser moves the page
           // up itself, which is a scroll
-          await page.goto("http://myna.test/?view=agents");
+          await page.goto("http://owl.test/?view=agents");
           await page.locator("#view-agents .ag-lead").first().waitFor();
           await page.waitForFunction(() => { const v = document.getElementById("view-agents"); return v.scrollHeight > v.clientHeight * 3; });
           await page.evaluate(() => {

@@ -8,9 +8,9 @@ import (
 	"time"
 )
 
-// A plugin reports its models' loads through input.myna.load (axelburks
+// A plugin reports its models' loads through input.owl.load (axelburks
 // on Discord: an in-house vendor's busy models queue requests), when it
-// likes, from its own timer: myna keeps each, a percent from 0 up, past
+// likes, from its own timer: owl keeps each, a percent from 0 up, past
 // 100 for a vendor that queues (axelburks again: 200% happens), capped at
 // LoadMost,
 // matched by id whatever its case, and a null clears one. What isn't a
@@ -28,11 +28,11 @@ func TestPluginReportsModelLoad(t *testing.T) {
 	src := `export default async (input) => {
   let threw = 0
   for (const bad of [[5, {}], ["loadco", null], ["loadco", [1]], ["", {}]]) {
-    try { input.myna.load(...bad) } catch (e) { if (e instanceof TypeError) threw++ }
+    try { input.owl.load(...bad) } catch (e) { if (e instanceof TypeError) threw++ }
   }
-  const n = input.myna.load("loadco", { Big: 87.5, small: 0, over: 250, huge: 1e9, under: -3, word: "busy", nan: NaN, inf: Infinity, threw })
-  input.myna.load("loadco", { taken: n })
-  setTimeout(() => input.myna.load("loadco", { small: null, later: 12 }), 50)
+  const n = input.owl.load("loadco", { Big: 87.5, small: 0, over: 250, huge: 1e9, under: -3, word: "busy", nan: NaN, inf: Infinity, threw })
+  input.owl.load("loadco", { taken: n })
+  setTimeout(() => input.owl.load("loadco", { small: null, later: 12 }), 50)
   return {}
 }
 `

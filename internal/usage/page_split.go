@@ -11,7 +11,7 @@ import (
 	"time"
 	"unique"
 
-	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/owl/internal/sessions"
 )
 
 // A page's cells of the rows before its last few days are kept as the

@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/usage"
 )
 
 func main() {

@@ -12,8 +12,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // specUp is a Chat vendor that keeps each body it was sent.
@@ -44,7 +44,7 @@ func (u *specUp) last(t *testing.T) map[string]any {
 }
 
 // Dani Ariyanto on Discord: a relay's models came with nothing known —
-// no window, no reply limit, no levels. What myna model spec sets is
+// no window, no reply limit, no levels. What owl model spec sets is
 // what the gateway lists and asks by: /v1/models has the window, the
 // reply limit and the levels, a request asking more than the reply limit
 // is lowered to it, and one asking a level the model wasn't given is
@@ -124,8 +124,8 @@ func TestModelSpecReachesTheGateway(t *testing.T) {
 	}
 }
 
-// Levels the user keeps of a model's own (myna model efforts, Names &
-// levels, myna model spec --reasoning) only narrow what agents are
+// Levels the user keeps of a model's own (owl model efforts, Names &
+// levels, owl model spec --reasoning) only narrow what agents are
 // offered (#92, 47e12df41): the vendor is still asked at any level it
 // has, so an agent's xhigh goes as xhigh. Only a model with no levels
 // known is fitted to the ones the user declared
@@ -173,7 +173,7 @@ func TestNarrowedVendorLevelsAskAsBefore(t *testing.T) {
 }
 
 // AutoVision, which picks the model that describes an image for one that
-// can't see, takes the user's word on which see (myna model spec
+// can't see, takes the user's word on which see (owl model spec
 // --vision): one marked text-only is passed over, one marked seeing is
 // picked.
 func TestAutoVisionTakesTheUsersVision(t *testing.T) {

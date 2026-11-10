@@ -11,9 +11,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/claudetui"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/wslrun"
+	"github.com/istoo/owl/internal/claudetui"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/wslrun"
 )
 
 // A Claude run is Claude Code's interactive mode on macOS, Linux and

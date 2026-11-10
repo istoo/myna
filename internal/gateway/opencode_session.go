@@ -9,7 +9,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 	"github.com/tidwall/gjson"
 )
 
@@ -38,7 +38,7 @@ func openCodeSeed(in http.Header, body []byte) string {
 	return conversationID(in, body)
 }
 
-// logOpenCodeRefusal writes to myna's log what went to OpenCode's
+// logOpenCodeRefusal writes to owl's log what went to OpenCode's
 // gateway with a request it refused: where, the names of the headers sent
 // (never a value), and whether x-opencode-session was among them, by its
 // first 8 characters. OpenCode answers a request without one 400

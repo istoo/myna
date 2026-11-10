@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // airHome is a sandbox home with Air's config folder and an OpenCode at a
@@ -23,11 +23,11 @@ func airHome(t *testing.T, bin string) (home, dir string) {
 	return home, dir
 }
 
-// Air's model menu is the ACP agent's: myna adds one, Myna, to
+// Air's model menu is the ACP agent's: owl adds one, Owl, to
 // acp.json beside the user's own agents — OpenCode's ACP server on a config
-// of myna's that has myna's provider alone — and taking it off takes
+// of owl's that has owl's provider alone — and taking it off takes
 // out that entry and that file, the user's agents kept.
-func TestAirAddsMynaAgent(t *testing.T) {
+func TestAirAddsOwlAgent(t *testing.T) {
 	home, dir := airHome(t, "/opt/bin/opencode")
 	acp := filepath.Join(dir, "acp.json")
 	writeFile(t, acp, `{
@@ -50,37 +50,37 @@ func TestAirAddsMynaAgent(t *testing.T) {
 			want = o.Value
 		}
 	}
-	if want != "myna/fake/m1" {
+	if want != "owl/fake/m1" {
 		t.Fatalf("options: %+v", opts)
 	}
 	if err := a.Apply("model", want); err != nil {
 		t.Fatal(err)
 	}
-	cfg := filepath.Join(dir, "myna-opencode.json")
+	cfg := filepath.Join(dir, "owl-opencode.json")
 	for k, v := range map[string]string{
 		"agent_servers.Goose.command":            "goose",
-		"agent_servers.Myna.command":             "/opt/bin/opencode",
-		"agent_servers.Myna.args.0":              "acp",
-		"agent_servers.Myna.env.OPENCODE_CONFIG": cfg,
+		"agent_servers.Owl.command":             "/opt/bin/opencode",
+		"agent_servers.Owl.args.0":              "acp",
+		"agent_servers.Owl.env.OPENCODE_CONFIG": cfg,
 	} {
 		if got, _ := edit.GetJSON(acp, k); got != v {
 			t.Fatalf("%s = %q, want %q\n%s", k, got, v, readFile(acp))
 		}
 	}
 	for k, v := range map[string]string{
-		"model":                         "myna/fake/m1",
-		"small_model":                   "myna/fake/m1",
-		"enabled_providers":             `["myna"]`,
-		"provider.myna.options.baseURL": gatewayV1(),
-		"provider.myna.options.apiKey":  "myna",
-		"provider.myna.npm":             "@ai-sdk/openai-compatible",
+		"model":                         "owl/fake/m1",
+		"small_model":                   "owl/fake/m1",
+		"enabled_providers":             `["owl"]`,
+		"provider.owl.options.baseURL": gatewayV1(),
+		"provider.owl.options.apiKey":  "owl",
+		"provider.owl.npm":             "@ai-sdk/openai-compatible",
 	} {
 		if got, _ := edit.GetJSON(cfg, k); strings.Join(strings.Fields(got), "") != v {
 			t.Fatalf("%s = %q, want %q\n%s", k, got, v, readFile(cfg))
 		}
 	}
-	if _, ok := edit.GetJSON(cfg, `provider.myna.models.fake/m1`); !ok {
-		t.Fatalf("no fake/m1 in myna's models: %s", readFile(cfg))
+	if _, ok := edit.GetJSON(cfg, `provider.owl.models.fake/m1`); !ok {
+		t.Fatalf("no fake/m1 in owl's models: %s", readFile(cfg))
 	}
 	if v := a.Field("model").Get(); v != want {
 		t.Fatalf("model = %q", v)
@@ -88,24 +88,24 @@ func TestAirAddsMynaAgent(t *testing.T) {
 	if d := a.Drift(); d != nil {
 		t.Fatalf("drift: %+v", d)
 	}
-	if n := a.Notice(); !strings.Contains(n, "pick Myna") {
+	if n := a.Notice(); !strings.Contains(n, "pick Owl") {
 		t.Fatalf("notice: %q", n)
 	}
 	// one of Air's own agents isn't set from here
 	if err := a.Apply("model", "anthropic/claude-sonnet-5"); err == nil {
-		t.Fatal("took a model that isn't myna's")
+		t.Fatal("took a model that isn't owl's")
 	}
 	if err := a.Apply("model", ""); err != nil {
 		t.Fatal(err)
 	}
-	if _, ok := edit.GetJSON(acp, "agent_servers.Myna"); ok {
-		t.Fatalf("Myna still in acp.json: %s", readFile(acp))
+	if _, ok := edit.GetJSON(acp, "agent_servers.Owl"); ok {
+		t.Fatalf("Owl still in acp.json: %s", readFile(acp))
 	}
 	if v, _ := edit.GetJSON(acp, "agent_servers.Goose.command"); v != "goose" {
 		t.Fatalf("the user's agent went: %s", readFile(acp))
 	}
 	if _, err := os.Stat(cfg); !os.IsNotExist(err) {
-		t.Fatalf("myna's OpenCode config left: %v", err)
+		t.Fatalf("owl's OpenCode config left: %v", err)
 	}
 	if v := a.Field("model").Get(); v != "" {
 		t.Fatalf("model after = %q", v)
@@ -113,17 +113,17 @@ func TestAirAddsMynaAgent(t *testing.T) {
 }
 
 // With no acp.json yet (Air makes it on the first "Edit ACP JSON File"),
-// myna writes one; without OpenCode found it names it by its command and
+// owl writes one; without OpenCode found it names it by its command and
 // the notice says to install it.
 func TestAirWithoutOpenCode(t *testing.T) {
 	home, dir := airHome(t, "")
 	os.MkdirAll(dir, 0o755)
 	a := air(home, filepath.Join(home, ".config"))
-	if err := a.Apply("model", "myna/fake/m1"); err != nil {
+	if err := a.Apply("model", "owl/fake/m1"); err != nil {
 		t.Fatal(err)
 	}
 	acp := filepath.Join(dir, "acp.json")
-	if v, _ := edit.GetJSON(acp, "agent_servers.Myna.command"); v != "opencode" {
+	if v, _ := edit.GetJSON(acp, "agent_servers.Owl.command"); v != "opencode" {
 		t.Fatalf("command = %q\n%s", v, readFile(acp))
 	}
 	if n := a.Notice(); !strings.Contains(n, "install OpenCode") {
@@ -131,21 +131,21 @@ func TestAirWithoutOpenCode(t *testing.T) {
 	}
 }
 
-// Myna's entry taken out of acp.json by hand while its config still
-// names one of myna's models is wiring gone, which setting it again puts
+// Owl's entry taken out of acp.json by hand while its config still
+// names one of owl's models is wiring gone, which setting it again puts
 // back; providers added later reach the config's model list, and Sync
-// writes no config myna never set up.
+// writes no config owl never set up.
 func TestAirCheckAndSync(t *testing.T) {
 	home, dir := airHome(t, "/opt/bin/opencode")
 	a := air(home, filepath.Join(home, ".config"))
-	acp, cfg := filepath.Join(dir, "acp.json"), filepath.Join(dir, "myna-opencode.json")
+	acp, cfg := filepath.Join(dir, "acp.json"), filepath.Join(dir, "owl-opencode.json")
 	if err := a.Sync(); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := os.Stat(cfg); !os.IsNotExist(err) {
-		t.Fatal("Sync wrote a config myna never set up")
+		t.Fatal("Sync wrote a config owl never set up")
 	}
-	if err := a.Apply("model", "myna/fake/m1"); err != nil {
+	if err := a.Apply("model", "owl/fake/m1"); err != nil {
 		t.Fatal(err)
 	}
 	if err := provider.Save(provider.Provider{ID: "fake2", Name: "Fake 2", Key: "k", Chat: "http://127.0.0.1:1/v1", Models: []string{"m2"}}); err != nil {
@@ -154,19 +154,19 @@ func TestAirCheckAndSync(t *testing.T) {
 	if err := a.Sync(); err != nil {
 		t.Fatal(err)
 	}
-	if _, ok := edit.GetJSON(cfg, `provider.myna.models.fake2/m2`); !ok {
+	if _, ok := edit.GetJSON(cfg, `provider.owl.models.fake2/m2`); !ok {
 		t.Fatalf("a provider added later isn't listed: %s", readFile(cfg))
 	}
-	if err := edit.DelJSON(acp, "agent_servers.Myna"); err != nil {
+	if err := edit.DelJSON(acp, "agent_servers.Owl"); err != nil {
 		t.Fatal(err)
 	}
-	if d := a.Drift(); d == nil || d.Kind != "unwired" || !strings.Contains(d.Detail, "Myna agent") {
+	if d := a.Drift(); d == nil || d.Kind != "unwired" || !strings.Contains(d.Detail, "Owl agent") {
 		t.Fatalf("drift: %+v", d)
 	}
 	if err := a.Reapply(); err != nil {
 		t.Fatal(err)
 	}
-	if v, _ := edit.GetJSON(acp, "agent_servers.Myna.env.OPENCODE_CONFIG"); v != cfg {
+	if v, _ := edit.GetJSON(acp, "agent_servers.Owl.env.OPENCODE_CONFIG"); v != cfg {
 		t.Fatalf("not put back: %s", readFile(acp))
 	}
 	if d := a.Drift(); d != nil {
@@ -174,24 +174,24 @@ func TestAirCheckAndSync(t *testing.T) {
 	}
 }
 
-// Sync and a model pick keep the user's provider fields, while myna's
+// Sync and a model pick keep the user's provider fields, while owl's
 // endpoint, key and complete model list still follow the gateway.
 func TestAirProviderWritesKeepCustomFields(t *testing.T) {
 	for _, action := range []string{"sync", "pick"} {
 		t.Run(action, func(t *testing.T) {
 			home, dir := airHome(t, "/opt/bin/opencode")
 			a := air(home, filepath.Join(home, ".config"))
-			cfg := filepath.Join(dir, "myna-opencode.json")
-			if err := a.Apply("model", "myna/fake/m1"); err != nil {
+			cfg := filepath.Join(dir, "owl-opencode.json")
+			if err := a.Apply("model", "owl/fake/m1"); err != nil {
 				t.Fatal(err)
 			}
 			writeFile(t, cfg, `{
   // the user's configuration
   "theme": "dark",
-  "model": "myna/fake/m1",
+  "model": "owl/fake/m1",
   "provider": {
     "mine": {"name": "mine"},
-    "myna": {
+    "owl": {
       "name": "old",
       "npm": "old",
       "options": {
@@ -209,12 +209,12 @@ func TestAirProviderWritesKeepCustomFields(t *testing.T) {
 `)
 			kept := map[string]string{}
 			for _, field := range []string{"compat", "marker", "options.timeout", "options.headers"} {
-				kept[field], _ = edit.GetJSON(cfg, "provider.myna."+field)
+				kept[field], _ = edit.GetJSON(cfg, "provider.owl."+field)
 			}
 			check := func() {
 				t.Helper()
 				for field, was := range kept {
-					if v, ok := edit.GetJSON(cfg, "provider.myna."+field); !ok || !sameOrder(v, json.RawMessage(was)) {
+					if v, ok := edit.GetJSON(cfg, "provider.owl."+field); !ok || !sameOrder(v, json.RawMessage(was)) {
 						t.Errorf("custom %s lost or changed: got %q, want %q", field, v, was)
 					}
 				}
@@ -226,14 +226,14 @@ func TestAirProviderWritesKeepCustomFields(t *testing.T) {
 						t.Errorf("%s = %q, want %q", k, got, want)
 					}
 				}
-				want := mynaProviderJSONFor("opencode", "air").(map[string]any)
+				want := owlProviderJSONFor("opencode", "air").(map[string]any)
 				for k, v := range want["options"].(map[string]any) {
-					if got, _ := edit.GetJSON(cfg, "provider.myna.options."+k); got != v {
+					if got, _ := edit.GetJSON(cfg, "provider.owl.options."+k); got != v {
 						t.Errorf("options.%s = %q, want %v", k, got, v)
 					}
 				}
 				for _, k := range []string{"name", "npm", "models"} {
-					got, _ := edit.GetJSON(cfg, "provider.myna."+k)
+					got, _ := edit.GetJSON(cfg, "provider.owl."+k)
 					if k != "models" {
 						b, _ := json.Marshal(got)
 						got = string(b)
@@ -247,7 +247,7 @@ func TestAirProviderWritesKeepCustomFields(t *testing.T) {
 				if err := a.Sync(); err != nil {
 					t.Fatal(err)
 				}
-			} else if err := a.Apply("model", "myna/fake/m1"); err != nil {
+			} else if err := a.Apply("model", "owl/fake/m1"); err != nil {
 				t.Fatal(err)
 			}
 			check()

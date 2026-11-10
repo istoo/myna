@@ -10,7 +10,7 @@
 // - one the system refuses says so in the status line, the saved one kept;
 // - the clear button takes it away; nothing the row does scrolls the page;
 // - on Wayland the field is off and the row says the command to bind;
-// - a browser tab (myna web) has no row; a narrow window keeps it inside.
+// - a browser tab (owl web) has no row; a narrow window keeps it inside.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
@@ -75,7 +75,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const posted = [];
           await page.route("**/*", serve(lang, web, posted, st));
           await watchSettingsReads(page);
-          await page.goto("http://myna.test/?view=settings&tab=general");
+          await page.goto("http://owl.test/?view=settings&tab=general");
           await settingsDrawn(page);
           return { page, posted, errors };
         };
@@ -142,16 +142,16 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal(await top(), at, "the row moved on the screen");
         assert.deepEqual(errors, []);
 
-        // the saved one the system refused as myna started is said
+        // the saved one the system refused as owl started is said
         const taken = await open({ panelShortcut: "Ctrl+Alt+K", panelKeys: { can: true, taken: "Ctrl+Alt+K" } });
         assert.equal(await taken.page.locator("#panelKeyRow .sub").textContent(), w.taken);
 
         // Wayland: off, with the command to bind
-        const way = await open({ panelKeys: { can: false, command: "/usr/bin/myna panel" } });
+        const way = await open({ panelKeys: { can: false, command: "/usr/bin/owl panel" } });
         assert.equal(await way.page.locator("#panelKey .key-rec").isDisabled(), true);
         const sub = way.page.locator("#panelKeyRow .sub");
         assert.equal(await sub.isVisible(), true);
-        assert.ok((await sub.textContent()).includes("/usr/bin/myna panel"), await sub.textContent());
+        assert.ok((await sub.textContent()).includes("/usr/bin/owl panel"), await sub.textContent());
         assert.ok(lang === "en" || !(await sub.textContent()).includes("keyboard settings"), "the Wayland line isn't translated");
         assert.deepEqual(way.errors, []);
 

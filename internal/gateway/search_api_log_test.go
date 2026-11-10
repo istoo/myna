@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/usage"
 )
 
 func searchRows(t *testing.T) ([]usage.Record, string) {
@@ -69,7 +69,7 @@ func TestSearchAPIAsksAreLogged(t *testing.T) {
 	search("tvly-spent-0001\ntvly-good-0002")
 	search("tvly-echo-0003")
 	search("tvly-empty-0004")
-	if _, _, err := s.apiSearch(context.Background(), query); err != nil { // no CallFor: myna's own
+	if _, _, err := s.apiSearch(context.Background(), query); err != nil { // no CallFor: owl's own
 		t.Log(err)
 	}
 
@@ -84,7 +84,7 @@ func TestSearchAPIAsksAreLogged(t *testing.T) {
 			t.Errorf("row %d: %+v", i, r)
 		}
 		if want := "claude"; i == 4 {
-			if r.Agent != "myna" {
+			if r.Agent != "owl" {
 				t.Errorf("row %d agent %q", i, r.Agent)
 			}
 		} else if r.Agent != want {

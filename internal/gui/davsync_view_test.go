@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/istoo/myna/internal/davsync"
+	"github.com/istoo/owl/internal/davsync"
 )
 
 // The Settings page re-reads the WebDAV view when it is redrawn (the CLI
@@ -35,7 +35,7 @@ func TestDavsyncViewFollowsTheSetup(t *testing.T) {
 		t.Fatalf("off: %v", v)
 	}
 
-	// what `myna webdav on … agents=no library=no` leaves (the CLI's own
+	// what `owl webdav on … agents=no library=no` leaves (the CLI's own
 	// defaults for what it isn't told: keys yes), behind the window's back
 	no := false
 	if err := davsync.Configure(davsync.Config{URL: "https://dav.jianguoyun.com/dav/", Passphrase: "correct horse", Keys: true, Agents: false, Library: &no}); err != nil {
@@ -45,7 +45,7 @@ func TestDavsyncViewFollowsTheSetup(t *testing.T) {
 		t.Fatalf("after the CLI change: %v", v)
 	}
 
-	// what `myna s3 on …` leaves: the same re-read, a bucket's view
+	// what `owl s3 on …` leaves: the same re-read, a bucket's view
 	if err := davsync.Off(); err != nil {
 		t.Fatal(err)
 	}
@@ -57,7 +57,7 @@ func TestDavsyncViewFollowsTheSetup(t *testing.T) {
 		t.Fatalf("after an S3 change: %v", v)
 	}
 
-	// and what `myna webdav off` leaves: off, the defaults back
+	// and what `owl webdav off` leaves: off, the defaults back
 	if err := davsync.Off(); err != nil {
 		t.Fatal(err)
 	}

@@ -8,7 +8,7 @@ import (
 )
 
 // plugin-updates.json is read as no updates when it doesn't parse, and the
-// next check wrote that over it: Updated, the plugins myna updated by
+// next check wrote that over it: Updated, the plugins owl updated by
 // itself, can't be found again (#2263). What was there is copied aside
 // first.
 func TestUnreadUpdatesKeptAside(t *testing.T) {

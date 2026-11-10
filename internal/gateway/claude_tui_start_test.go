@@ -7,12 +7,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/claudetui"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/claudetui"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // tuiHelperHarness is a script harness whose runs in Claude Code's
-// interactive mode start a stand-in for myna's claude-tui-helper: it
+// interactive mode start a stand-in for owl's claude-tui-helper: it
 // notes each start in started, waits as hold says (a shell command), and
 // runs the stand-in Claude Code it was handed.
 func tuiHelperHarness(t *testing.T, hold string) (*resumeHarness, string) {
@@ -21,7 +21,7 @@ func tuiHelperHarness(t *testing.T, hold string) (*resumeHarness, string) {
 	claudeTUIRuns = true
 	t.Cleanup(func() { claudeTUIRuns = false })
 	started := filepath.Join(t.TempDir(), "started")
-	helper := filepath.Join(t.TempDir(), "myna")
+	helper := filepath.Join(t.TempDir(), "owl")
 	testenv.Program(t, helper, `#!/bin/sh
 [ "$1" = "`+claudetui.Command+`" ] || exit 9
 echo start >> '`+started+`'
@@ -43,7 +43,7 @@ func helperStarts(path string) int {
 // 10s to show its prompt is waited for: the bridge gave the helper 10s to
 // answer initialize and ended it as it waited, before it became -p on its
 // own (claudetui.ReadyWait, 45s), and every try was answered 502 "Claude
-// Code has not answered myna's initialize request in 10s" (#4504,
+// Code has not answered owl's initialize request in 10s" (#4504,
 // derrors: 2 vCPU, Claude Code in Docker).
 func TestClaudeTUISlowStartAnswered(t *testing.T) {
 	h, started := tuiHelperHarness(t, "sleep 12")
@@ -82,7 +82,7 @@ func TestClaudeTUIHungHelperNeverPrint(t *testing.T) {
 // A caller's folder the user hasn't trusted in their own Claude Code is
 // one only they answer for: the interactive mode asked and ended there,
 // and the turn was a 502, which a Claude Code client (paseo) asked again
-// and again, so the turn hung (lwjef on X). The turn goes in myna's own
+// and again, so the turn hung (lwjef on X). The turn goes in owl's own
 // folder, told the caller's, and that folder is passed over for the
 // conversation's next turns rather than asked about again.
 func TestClaudeTUIUntrustedFolderAnswered(t *testing.T) {
@@ -100,7 +100,7 @@ pwd >> '`+cwds+`'`)
 		t.Fatalf("the answered run ran in %q, the caller's folder %s", ran, caller)
 	}
 	if n := helperStarts(started); n != 2 {
-		t.Fatalf("the helper started %d times, want twice: in the caller's folder, then myna's", n)
+		t.Fatalf("the helper started %d times, want twice: in the caller's folder, then owl's", n)
 	}
 	h.ask("Primary working directory: "+caller, "another")
 	if n := helperStarts(started); n != 3 {

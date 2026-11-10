@@ -5,7 +5,7 @@ package gui
 import (
 	"fmt"
 
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/proc"
 	"github.com/wailsapp/wails/v3/pkg/application"
 )
 

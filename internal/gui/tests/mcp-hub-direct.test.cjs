@@ -3,7 +3,7 @@
 // server can stay each agent's own entry. Its editor has a switch,
 // "Through the MCP router", on for a server shared as before; off saves it
 // with hub "direct", the row says so with a tag, and the hub's line
-// counts it as given directly. myna's own image server is behind the hub
+// counts it as given directly. owl's own image server is behind the hub
 // as the others are, and can be kept direct the same way. With the
 // hub off there is neither switch nor tag. Every language, Chromium and
 // WebKit, 1100 and 390 wide; nothing scrolls sideways. No backend: the
@@ -25,13 +25,13 @@ const WORDS = ["Through the MCP router", "Not through the router", "Each agent i
 
 function server(lang, calls, hubOn) {
   const lib = {
-    dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
-    agents, mcpHub: hubOn, hubPath: "/mcp/myna/hub/",
+    dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
+    agents, mcpHub: hubOn, hubPath: "/mcp/owl/hub/",
     instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [], skills: [],
     servers: [
       { name: "index", transport: "stdio", command: "/opt/index/mcp", agents: ["claude"] },
       { name: "web", transport: "http", url: "https://example.com/mcp", agents: ["claude"] },
-      { name: "myna-image", transport: "stdio", command: "/Applications/myna.app/Contents/MacOS/myna", args: ["mcp", "image"], agents: ["claude"] },
+      { name: "owl-image", transport: "stdio", command: "/Applications/owl.app/Contents/MacOS/owl", args: ["mcp", "image"], agents: ["claude"] },
     ],
   };
   return async (route) => {
@@ -77,13 +77,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           for (const hubOn of [true, false]) {
             const calls = [];
             const ctx = await browser.newContext({ viewport: { width, height: 800 } });
-            await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "mcp"); } catch {} });
+            await ctx.addInitScript(() => { try { localStorage.setItem("owl.libTab", "mcp"); } catch {} });
             const page = await ctx.newPage();
             page.setDefaultTimeout(5000);
             page.setDefaultNavigationTimeout(60000);
             page.on("pageerror", (e) => errors.push(e.message));
             await page.route("**/*", server(lang, calls, hubOn));
-            await page.goto("http://myna.test/");
+            await page.goto("http://owl.test/");
             await navTo(page, "library");
             const rowOf = (name) => page.locator("#view-library .lib-server", { has: page.locator(`.lib-health[data-server="${name}"]`) });
             const row = rowOf("index");
@@ -129,9 +129,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             await save();
             assert.deepEqual(calls, ['index "direct"', 'index ""']);
             await tag.waitFor({ state: "detached" });
-            // myna's own image server is behind the hub too, on like the others
-            await open(rowOf("myna-image"));
-            assert.equal(await sw.getAttribute("aria-checked"), "true", "myna's own image server's switch");
+            // owl's own image server is behind the hub too, on like the others
+            await open(rowOf("owl-image"));
+            assert.equal(await sw.getAttribute("aria-checked"), "true", "owl's own image server's switch");
             await ed.locator(":scope > .bar button", { hasText: w("Cancel") }).click();
             await ed.waitFor({ state: "detached" });
             // Cancel keeps it as it was

@@ -65,7 +65,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     const feed = { on: false, n: 0 };
     await page.route("**/*", serve(feed));
     t.after(async () => { feed.closed = true; feed.wake?.(); await browser.close(); });
-    await page.goto("http://myna.test/?view=routing");
+    await page.goto("http://owl.test/?view=routing");
     await page.locator(".rt-req").nth(first.length - 1).waitFor();
     await page.waitForTimeout(2500); // the first request's play
 

@@ -105,7 +105,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang));
         t.after(() => browser.close());
-        await page.goto("http://myna.test/?view=routing");
+        await page.goto("http://owl.test/?view=routing");
         await page.locator(".rt-days .rt-day").nth(1).click();
         await page.locator(".rt-req").nth(routes.length - 1).waitFor();
         const row = page.locator(".rt-req").nth(0);

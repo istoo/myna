@@ -5,11 +5,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// myna model disable, disabled and enable (#1867): a glob and an id are
+// owl model disable, disabled and enable (#1867): a glob and an id are
 // saved as written, each said with the models it turns off now, listed,
 // and taken off again; one not on the list is said so.
 func TestModelDisableCmd(t *testing.T) {
@@ -19,7 +19,7 @@ func TestModelDisableCmd(t *testing.T) {
 		t.Fatal("no model named")
 	}
 	out := saidArgs(t, "disable", "*opus*", "b/gpt-5.5")
-	if !strings.Contains(out, "*opus*") || !strings.Contains(out, "a/claude-opus-5-5") || !strings.Contains(out, "b/gpt-5.5") || !strings.Contains(out, "only requests through myna") {
+	if !strings.Contains(out, "*opus*") || !strings.Contains(out, "a/claude-opus-5-5") || !strings.Contains(out, "b/gpt-5.5") || !strings.Contains(out, "only requests through owl") {
 		t.Fatal(out)
 	}
 	if got := provider.DisabledModels(); !slices.Equal(got, []string{"*opus*", "b/gpt-5.5"}) {

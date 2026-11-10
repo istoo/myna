@@ -6,11 +6,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/owl/internal/sessions"
 )
 
 // The warm-up's garbage goes back to the system when it ends, not over the
-// scavenger's next minutes: an idle myna that just started read ~470 MB.
+// scavenger's next minutes: an idle owl that just started read ~470 MB.
 func TestWarmUpReturnsItsGarbage(t *testing.T) {
 	var keep [][]byte
 	warmUp(func() {

@@ -28,7 +28,7 @@ async function fixture(t, engine, lang = "en", options = {}) {
     ...["alpha", "beta"].map((ref) => ({ ref, fingerprint: `${ref}-${control.revisions[ref] || 1}`, from: "config.toml", status: imported.has(ref) ? "same" : "new",
       provider: { id: ref, name: ref === "alpha" ? "Alpha Relay" : "Beta Relay", responses: `https://${ref}.example/v1`, key: "sk-…1234", models: ["fixture-model"] } })),
     { ref: "existing", status: "same", existing: "Existing Relay", provider: { name: "Already here" } },
-    { ref: "myna", skip: "it points at myna itself", provider: { name: "myna" } },
+    { ref: "owl", skip: "it points at owl itself", provider: { name: "owl" } },
   ] }];
   page.on("pageerror", (e) => errors.push(e.stack || e.message));
   await page.route("**/*", async (route) => {
@@ -74,7 +74,7 @@ for (const engine of engines) {
   for (const lang of ["en", "zh"]) {
     test(`${engine} ${lang}: discover in the background, review picks, and refresh after import`, async (t) => {
       const { page, control, go } = await fixture(t, engine, lang, { defer: true });
-      await page.goto("http://myna.test/?view=agents");
+      await page.goto("http://owl.test/?view=agents");
       await page.waitForFunction(() => !!document.querySelector('#nav button[data-view="agents"].on'));
       assert.equal(control.scans, 0, "other pages do not scan local configs");
       await go("providers");
@@ -117,7 +117,7 @@ for (const engine of engines) {
       assert.equal(control.reads, 1);
       assert.equal(await picker.locator('.approw input:disabled').count(), 2);
       // one already added names the provider that holds it (#1486)
-      assert.equal(await picker.locator(".approw", { hasText: "Already here" }).locator(".sub", { hasText: lang === "zh" ? "myna 里已有 Existing Relay" : "myna has Existing Relay already" }).count(), 1);
+      assert.equal(await picker.locator(".approw", { hasText: "Already here" }).locator(".sub", { hasText: lang === "zh" ? "owl 里已有 Existing Relay" : "owl has Existing Relay already" }).count(), 1);
       await picker.locator(".approw", { hasText: "Beta Relay" }).locator("input").uncheck();
       await picker.locator(".bar .primary").click();
       await page.waitForFunction(() => document.querySelector("#providerDiscoveryCount").textContent.includes("1") && !document.querySelector("#providerDiscovery").hidden);
@@ -135,7 +135,7 @@ for (const engine of engines) {
 
   test(`${engine}: ignored configurations stay quiet across reloads, removal and partial import`, async (t) => {
     const { page, control, go } = await fixture(t, engine);
-    await page.goto("http://myna.test/?view=providers");
+    await page.goto("http://owl.test/?view=providers");
     await page.locator("#providerDiscovery").waitFor();
     await page.locator("#dismissProviderDiscovery").click();
     await page.locator("#providerDiscovery").waitFor({ state: "hidden" });
@@ -178,7 +178,7 @@ for (const engine of engines) {
 
   test(`${engine}: first use offers discovered configs beside the automatic Add sheet`, async (t) => {
     const { page, control } = await fixture(t, engine, "en", { firstUse: true });
-    await page.goto("http://myna.test/?view=providers");
+    await page.goto("http://owl.test/?view=providers");
     await page.locator("#providerDiscovery").waitFor();
     assert.equal(await page.locator("#addSheet").isVisible(), true);
     assert.equal(await page.locator("#view-providers > #providerDiscovery:not(.compact)").count(), 1);
@@ -201,7 +201,7 @@ for (const engine of engines) {
 
   test(`${engine}: reviewing a new offer does not select previously ignored configurations`, async (t) => {
     const { page, control } = await fixture(t, engine);
-    await page.goto("http://myna.test/?view=providers");
+    await page.goto("http://owl.test/?view=providers");
     await page.locator("#providerDiscovery").waitFor();
     await page.locator("#dismissProviderDiscovery").click();
     control.revisions.beta = 2;
@@ -222,7 +222,7 @@ for (const engine of engines) {
     test(`${engine} ${lang}: the compact entry fits a narrow window`, async (t) => {
       const { page } = await fixture(t, engine, lang);
       await page.setViewportSize({ width: 390, height: 800 });
-      await page.goto("http://myna.test/?view=providers");
+      await page.goto("http://owl.test/?view=providers");
       await page.locator("#providerDiscovery").waitFor();
       assert(await page.locator("#providerDiscovery").evaluate((el) => {
         const r = el.getBoundingClientRect();
@@ -236,7 +236,7 @@ for (const engine of engines) {
     const now = Date.now();
     await page.clock.setFixedTime(now);
     control.empty = true;
-    await page.goto("http://myna.test/?view=providers");
+    await page.goto("http://owl.test/?view=providers");
     await page.waitForFunction(() => discoveryAt > 0);
     assert.equal(await page.locator("#providerDiscovery").isHidden(), true);
     control.empty = false;
@@ -250,7 +250,7 @@ for (const engine of engines) {
 
   test(`${engine}: a late scan cannot restore the hint after importing`, async (t) => {
     const { page, control } = await fixture(t, engine, "en", { defer: true });
-    await page.goto("http://myna.test/?view=providers");
+    await page.goto("http://owl.test/?view=providers");
     await page.locator('#providers .row[data-id="existing"]').waitFor();
     await page.locator("#addProvider").click();
     await page.locator("#addSheet").getByRole("button", { name: "Import…", exact: true }).click();
@@ -270,7 +270,7 @@ for (const engine of engines) {
     test(`${engine}: ${result} discovery leaves manual setup usable`, async (t) => {
       const { page, control } = await fixture(t, engine);
       control[result] = true;
-      await page.goto("http://myna.test/?view=providers");
+      await page.goto("http://owl.test/?view=providers");
       await page.locator('#providers .row[data-id="existing"]').waitFor();
       await page.waitForFunction(() => discoveryAt > 0);
       assert.equal(await page.locator("#providerDiscovery").isHidden(), true);
@@ -284,7 +284,7 @@ for (const engine of engines) {
   for (const manualOnly of ["collision", "off"]) {
     test(`${engine}: only ${manualOnly} entries leave the hint hidden and remain in manual import`, async (t) => {
       const { page, control } = await fixture(t, engine, "en", { manualOnly, firstUse: manualOnly === "off" });
-      await page.goto("http://myna.test/?view=providers");
+      await page.goto("http://owl.test/?view=providers");
       await page.waitForFunction(() => discoveryAt > 0 && !discoveryPending);
       assert.equal(await page.locator("#providerDiscovery").isHidden(), true);
       assert.equal(control.reads, 0);

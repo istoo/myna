@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/redact"
+	"github.com/istoo/owl/internal/redact"
 )
 
 // Settings lists the kinds of personal data the gateway masks, in

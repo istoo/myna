@@ -50,7 +50,7 @@ func codexUsageWords(err error) error {
 	case errors.As(err, &ue):
 		return &codexUsageFailed{err, "couldn't reach chatgpt.com for the usage read: " + ue.Err.Error()}
 	case errors.As(err, &syn), errors.As(err, &te):
-		return &codexUsageFailed{err, "ChatGPT's usage reply isn't one myna reads: " + err.Error()}
+		return &codexUsageFailed{err, "ChatGPT's usage reply isn't one owl reads: " + err.Error()}
 	}
 	return err
 }
@@ -87,7 +87,7 @@ func cloudflareChallenge(body []byte) bool {
 // codexSaid is the backend's own words in an error body: its detail, as
 // a string ({"detail":"…"}) or an object ({"detail":{"message","code"}}),
 // or an OpenAI-style {"error":{"message","code"}}; "" when it said none
-// myna can find. Cut to a line's length.
+// owl can find. Cut to a line's length.
 func codexSaid(body []byte) string {
 	var v struct {
 		Detail json.RawMessage `json:"detail"`

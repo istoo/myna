@@ -1,6 +1,6 @@
 {
-  "name": "myna",
-  "short_name": "myna",
+  "name": "owl",
+  "short_name": "owl",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

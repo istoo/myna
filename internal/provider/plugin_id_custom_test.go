@@ -6,18 +6,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // #867: a provider of the user's own saved before a plugin with its id was
 // installed (zenmux, then @zenmux/pi-zenmux-oauth) hid the plugin's
-// subscription once signed in — "signed in, but myna can't list it". The
+// subscription once signed in — "signed in, but owl can't list it". The
 // plugin's is id-plugin then, and the user's own keeps its id.
 func TestPluginIDBesideCustomProvider(t *testing.T) {
 	bun := testenv.Bun(t)
 	claudeHome(t)
-	t.Setenv("MYNA_BUN", bun)
+	t.Setenv("OWL_BUN", bun)
 	t.Cleanup(plugin.Settle)
 	if err := Save(Provider{ID: "fakeco", Name: "fakeco", Chat: "http://127.0.0.1:1/v1", Key: "k", Models: []string{"mine-1", "mine-2"}}); err != nil {
 		t.Fatal(err)

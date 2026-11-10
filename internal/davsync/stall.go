@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/netproxy"
+	"github.com/istoo/owl/internal/netproxy"
 )
 
 // A sync is never given a time to end in: a backup of tens of MB to a

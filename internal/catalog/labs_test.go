@@ -153,7 +153,7 @@ func TestSyncKeepsLabs(t *testing.T) {
 		t.Errorf("a failed lab fetch lost the kept labs: window %d", got)
 	}
 
-	// a cache kept before myna read labs is fetched again at once
+	// a cache kept before owl read labs is fetched again at once
 	os.Remove(LabsPath())
 	labsTried.Store(false)
 	if !Stale() {

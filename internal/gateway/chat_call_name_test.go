@@ -10,7 +10,7 @@ import (
 // call whose function.name was no string, and the client that checks the
 // shape of every frame (the AI SDK) refused the whole reply — "Expected
 // 'function.name' to be a string" — the turn not retryable and the call
-// already in the history, so the session was dead; myna's own log said
+// already in the history, so the session was dead; owl's own log said
 // status=200, done=true. A call no client can read runs nowhere, so it is
 // no call: it is dropped, its later fragments with it, and a finish of
 // tool_calls with no call left ends stop — what textcalls' parser does

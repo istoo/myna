@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/applog"
+	"github.com/istoo/owl/internal/applog"
 )
 
 // The desktop app, its window and its panel each write their log to

@@ -17,7 +17,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/owl/internal/gateway"
 )
 
 var png = []byte("\x89PNG\r\n\x1a\n fake")
@@ -39,7 +39,7 @@ func (g *gw) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	g.mu.Lock()
 	g.path, g.body, g.ua = append(g.path, r.URL.Path), append(g.body, string(b)), append(g.ua, r.Header.Get("User-Agent"))
 	g.mu.Unlock()
-	if r.Header.Get("Authorization") != "Bearer myna" {
+	if r.Header.Get("Authorization") != "Bearer owl" {
 		w.WriteHeader(401)
 		return
 	}
@@ -96,7 +96,7 @@ func start(t *testing.T, g http.Handler, root string) *client {
 	t.Cleanup(up.Close)
 	inR, inW := io.Pipe()
 	outR, outW := io.Pipe()
-	s := &server{gateway: up.URL, client: http.DefaultClient, enc: json.NewEncoder(outW), agent: "myna-image/1", pending: map[string]chan rpc{}}
+	s := &server{gateway: up.URL, client: http.DefaultClient, enc: json.NewEncoder(outW), agent: "owl-image/1", pending: map[string]chan rpc{}}
 	go s.serve(inR)
 	t.Cleanup(func() { inW.Close(); outW.Close() })
 	c := &client{t: t, in: inW, out: bufio.NewScanner(outR), root: root}
@@ -161,19 +161,19 @@ func TestGenerateSavesInTheProject(t *testing.T) {
 	if b, _ := json.Marshal(tools); !strings.Contains(string(b), `"generate_image"`) || !strings.Contains(string(b), `"enum":["art/gpt-image-1","art/painter"]`) {
 		t.Fatalf("tools %s", b)
 	}
-	r := c.call("tools/call", map[string]any{"name": "generate_image", "arguments": map[string]any{"prompt": "A Myna, on a branch!", "n": 2}})
+	r := c.call("tools/call", map[string]any{"name": "generate_image", "arguments": map[string]any{"prompt": "A Owl, on a branch!", "n": 2}})
 	out := text(r)
 	if r["isError"] == true || strings.Count(out, filepath.Join(project, Folder)) != 2 {
 		t.Fatalf("%v", r)
 	}
-	files, _ := filepath.Glob(filepath.Join(project, Folder, "a-myna-on-a-branch-*.png"))
+	files, _ := filepath.Glob(filepath.Join(project, Folder, "a-owl-on-a-branch-*.png"))
 	if len(files) != 2 {
 		t.Fatalf("saved %v", files)
 	}
 	if b, _ := os.ReadFile(files[0]); string(b) != string(png) {
 		t.Fatalf("file %q", b)
 	}
-	if g.ua[0] != "claude-code/2.1.0 myna-image/1" || g.path[0] != "/v1/images/generations" {
+	if g.ua[0] != "claude-code/2.1.0 owl-image/1" || g.path[0] != "/v1/images/generations" {
 		t.Fatalf("asked %v as %v", g.path, g.ua)
 	}
 	// a path, and a reference image: an edit, the file sent as a data URL
@@ -288,7 +288,7 @@ func startVideo(t *testing.T, g *vgw, root string) *client {
 	t.Cleanup(up.Close)
 	inR, inW := io.Pipe()
 	outR, outW := io.Pipe()
-	s := &server{gateway: up.URL, client: http.DefaultClient, enc: json.NewEncoder(outW), agent: "myna-image/1", pending: map[string]chan rpc{}}
+	s := &server{gateway: up.URL, client: http.DefaultClient, enc: json.NewEncoder(outW), agent: "owl-image/1", pending: map[string]chan rpc{}}
 	go s.serve(inR)
 	t.Cleanup(func() { inW.Close(); outW.Close() })
 	c := &client{t: t, in: inW, out: bufio.NewScanner(outR), root: root}
@@ -326,7 +326,7 @@ func TestVideoToolSaysEveryVideoModel(t *testing.T) {
 	if desc == "" {
 		t.Fatalf("no generate_video in %v", res)
 	}
-	for _, want := range []string{"Grok", "Seedance", "MiniMax H3", "another Myna", "model list marks video models"} {
+	for _, want := range []string{"Grok", "Seedance", "MiniMax H3", "another Owl", "model list marks video models"} {
 		if !strings.Contains(desc, want) {
 			t.Errorf("description leaves out %q: %s", want, desc)
 		}
@@ -536,15 +536,15 @@ func TestGenerateTakesTheModel(t *testing.T) {
 	project := t.TempDir()
 	c := start(t, g, project)
 	c.call("initialize", map[string]any{"protocolVersion": "2025-06-18", "capabilities": map[string]any{"roots": map[string]any{}}, "clientInfo": map[string]any{"name": "claude-code", "version": "2.1.0"}})
-	r := c.call("tools/call", map[string]any{"name": "generate_image", "arguments": map[string]any{"prompt": "a myna", "model": "painter"}})
+	r := c.call("tools/call", map[string]any{"name": "generate_image", "arguments": map[string]any{"prompt": "a owl", "model": "painter"}})
 	if r["isError"] == true || len(g.body) != 1 || !strings.Contains(g.body[0], `"model":"art/painter"`) {
 		t.Fatalf("%v: asked %v", r, g.body)
 	}
-	r = c.call("tools/call", map[string]any{"name": "generate_image", "arguments": map[string]any{"prompt": "a myna", "model": "art/nope"}})
+	r = c.call("tools/call", map[string]any{"name": "generate_image", "arguments": map[string]any{"prompt": "a owl", "model": "art/nope"}})
 	if r["isError"] != true || !strings.Contains(text(r), "art/gpt-image-1, art/painter") || len(g.body) != 1 {
 		t.Fatalf("%v: asked %v", r, g.body)
 	}
-	r = c.call("tools/call", map[string]any{"name": "generate_image", "arguments": map[string]any{"prompt": "a myna"}})
+	r = c.call("tools/call", map[string]any{"name": "generate_image", "arguments": map[string]any{"prompt": "a owl"}})
 	if r["isError"] == true || len(g.body) != 2 || strings.Contains(g.body[1], `"model"`) {
 		t.Fatalf("%v: asked %v", r, g.body)
 	}

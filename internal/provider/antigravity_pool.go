@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 // Antigravity rolls models out per account. The first account's catalog

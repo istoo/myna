@@ -4,13 +4,13 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// A read-only gateway key (access.Key.ReadOnly) reads this myna's stats
+// A read-only gateway key (access.Key.ReadOnly) reads this owl's stats
 // and uses nothing (Steven on Discord: an ESP32 desk display polling
-// /v1/myna/quotas and /v1/myna/usage every 15s, its key kept in the
+// /v1/owl/quotas and /v1/owl/usage every 15s, its key kept in the
 // device's flash, which had to be a key that could spend every account).
 // It is answered the routes below alone, by the pattern the request is
 // routed to, so a route added later is refused it until it is put here:
@@ -29,15 +29,15 @@ var readOnlyRoutes = map[string]bool{
 	"GET /{$}":                        true,
 	"GET /v1":                         true,
 	"GET /v1/{$}":                     true,
-	"GET /v1/myna/quotas":             true,
-	"GET /v1/myna/quotas/history":     true,
+	"GET /v1/owl/quotas":             true,
+	"GET /v1/owl/quotas/history":     true,
 	"GET " + StatuslinePath:           true,
 	"POST " + StatuslinePath:          true,
 	"GET " + provider.RemoteCardsPath: true,
-	"GET /v1/myna/usage":              true,
-	"GET /v1/myna/usage/requests":     true,
-	"GET /v1/myna/limit":              true,
-	"GET /v1/myna/concurrency":        true,
+	"GET /v1/owl/usage":              true,
+	"GET /v1/owl/usage/requests":     true,
+	"GET /v1/owl/limit":              true,
+	"GET /v1/owl/concurrency":        true,
 	"GET " + routeSnapshotPath:        true,
 	"GET " + routeEventsPath:          true,
 	"GET " + OwnMCPPath:               true,
@@ -70,7 +70,7 @@ func readOnlyGuard(mux *routeMux, next http.Handler) http.Handler {
 			if _, pattern := mux.Handler(r); !readOnlyRoutes[pattern] {
 				log.Printf("refused %s %s: gateway key %q is read-only", r.Method, r.URL.Path, who.KeyName)
 				writeJSON(w, http.StatusForbidden, map[string]any{"error": map[string]any{
-					"message": "this gateway key is read-only: it may read myna's quotas and usage (GET /v1/myna/quotas, /v1/myna/quotas/history, /v1/myna/usage, /v1/myna/usage/requests, /v1/myna/limit, /v1/myna/route-events) and use no model, MCP server or write. Use a key with full access for that (Gateway → Gateway keys, or myna gateway-key access <id> full)",
+					"message": "this gateway key is read-only: it may read owl's quotas and usage (GET /v1/owl/quotas, /v1/owl/quotas/history, /v1/owl/usage, /v1/owl/usage/requests, /v1/owl/limit, /v1/owl/route-events) and use no model, MCP server or write. Use a key with full access for that (Gateway → Gateway keys, or owl gateway-key access <id> full)",
 					"type":    "permission_error", "code": ReadOnlyCode}})
 				return
 			}

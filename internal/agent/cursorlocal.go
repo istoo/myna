@@ -8,7 +8,7 @@ package agent
 // Private Inference"). The endpoint it takes from a model's own settings,
 // else its Open configuration dialog's (kept in the state.vscdb regular
 // Cursor shares), else from its environment: CURSOR_LOCAL_AGENT_BASE_URL
-// and CURSOR_LOCAL_AGENT_API_KEY. myna writes nothing of Cursor's — the
+// and CURSOR_LOCAL_AGENT_API_KEY. owl writes nothing of Cursor's — the
 // Open configuration's base URL and key are regular Cursor's own override
 // settings too, so writing them would move regular Cursor as well. It sets
 // the two variables, which only this build reads, for the user instead
@@ -33,10 +33,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/proc"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/proc"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // CursorLocalID is the agent's id, which its key names (TokenFor).
@@ -228,9 +228,9 @@ func cursorLocalEnv(gw string) map[string]string {
 	return map[string]string{cursorLocalVars[0]: gw + "/v1", cursorLocalVars[1]: agentKeyAt(CursorLocalID, gw)}
 }
 
-// cursorLocalMark is myna's own note that the variables are set for the
+// cursorLocalMark is owl's own note that the variables are set for the
 // user, which the row reads as connected: the Mac forgets launchctl's at a
-// restart, and myna sets them again when it starts (KeepCursorLocalEnv).
+// restart, and owl sets them again when it starts (KeepCursorLocalEnv).
 func cursorLocalMark() string { return filepath.Join(appdir.Config(), "cursor-local.env") }
 
 func cursorLocalWired() bool { return isFile(cursorLocalMark()) }
@@ -296,13 +296,13 @@ func cursorLocal() *Agent {
 			Key: "provider", Label: "provider",
 			Get: func() string {
 				if cursorLocalWired() {
-					return mynaID
+					return owlID
 				}
 				return ""
 			},
 			Set: func(v string) error { return cursorLocalOn(v != "") },
 			Options: func(map[string]string) []Option {
-				return []Option{{Value: mynaID, Label: "myna", Icon: "myna",
+				return []Option{{Value: owlID, Label: "owl", Icon: "owl",
 					Note: "CURSOR_LOCAL_AGENT_BASE_URL and _API_KEY set for your user, which only this build reads (quit it and open it again)"}}
 			},
 		}, {
@@ -325,7 +325,7 @@ func cursorLocal() *Agent {
 	}
 }
 
-// pickedEfforts are the levels an agent's effort picked in myna
+// pickedEfforts are the levels an agent's effort picked in owl
 // (provider.AgentEffort: Cursor Private Inference, Antigravity) is picked
 // among: the default, its requests going as it asks, then every level a
 // model its list shows has (low, medium and high for models that reason
@@ -350,4 +350,4 @@ func pickedEfforts(agent string) []Option {
 }
 
 // what Cursor Private Inference says after a change (notice.go)
-var noticeCursorLocal = newNotice("{agent} reads myna's gateway from CURSOR_LOCAL_AGENT_BASE_URL and CURSOR_LOCAL_AGENT_API_KEY, now set for your user: quit it (the app, not only its window) and open it again, as it keeps the model list it was first given until it quits. A base URL or API key set in its Open configuration or a model's settings comes first, so leave both empty (or set the base URL to {url} and the key to {key}).")
+var noticeCursorLocal = newNotice("{agent} reads owl's gateway from CURSOR_LOCAL_AGENT_BASE_URL and CURSOR_LOCAL_AGENT_API_KEY, now set for your user: quit it (the app, not only its window) and open it again, as it keeps the model list it was first given until it quits. A base URL or API key set in its Open configuration or a model's settings comes first, so leave both empty (or set the base URL to {url} and the key to {key}).")

@@ -17,7 +17,7 @@ import (
 
 // Claude Code fits an image it reads from a file before it sends one
 // (Claude Code 2.1.316: 2000 px a side and 5 MiB of base64 at most), as it
-// does with the files myna pastes into its prompt. An image myna hands
+// does with the files owl pastes into its prompt. An image owl hands
 // it as an image block is sent as it is: the earlier turns' images in a
 // transcript a run resumes (replaySession), a -p run's stream-json
 // message, and, fitted here too, a tool's images in its MCP result. The API refuses an image over 8000 px a side, and Claude Code

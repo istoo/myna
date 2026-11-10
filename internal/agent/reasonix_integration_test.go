@@ -13,17 +13,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/proc"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/proc"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // An opt-in contract check against the released client. Everything it reads and
 // writes is isolated; the upstream is a fixture, with no vendor credentials.
 func TestReasonixStudioCLIIntegration(t *testing.T) {
-	bin := os.Getenv("MYNA_TEST_REASONIX_CLI")
+	bin := os.Getenv("OWL_TEST_REASONIX_CLI")
 	if bin == "" {
-		t.Skip("set MYNA_TEST_REASONIX_CLI to a Studio 2.x native CLI")
+		t.Skip("set OWL_TEST_REASONIX_CLI to a Studio 2.x native CLI")
 	}
 	if !reasonixCLI(bin) {
 		t.Fatal("integration client must be a native Reasonix 2.x CLI")
@@ -32,7 +32,7 @@ func TestReasonixStudioCLIIntegration(t *testing.T) {
 	t.Setenv(reasonixKey, "unused-shell-credential")
 	t.Setenv("REASONIX_STATE_HOME", filepath.Join(t.TempDir(), "state"))
 	work := t.TempDir()
-	const sentinel = "MYNA_REASONIX_TOOL_RESULT"
+	const sentinel = "OWL_REASONIX_TOOL_RESULT"
 	// low is also the SDK's fallback for this declared list, so it cannot
 	// prove that the model-specific setting survived SDK override resolution.
 	const expectedEffort = "xhigh"
@@ -103,8 +103,8 @@ func TestReasonixStudioCLIIntegration(t *testing.T) {
 	s := gateway.New()
 	gw := httptest.NewServer(s.Handler())
 	defer gw.Close()
-	t.Setenv("MYNA_ADDR", strings.TrimPrefix(gw.URL, "http://"))
-	if err := a.Field("model").Set("myna/group/code"); err != nil {
+	t.Setenv("OWL_ADDR", strings.TrimPrefix(gw.URL, "http://"))
+	if err := a.Field("model").Set("owl/group/code"); err != nil {
 		t.Fatal(err)
 	}
 	if err := a.Field("effort").Set(expectedEffort); err != nil {

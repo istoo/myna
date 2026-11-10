@@ -12,9 +12,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // fakeChatGPT stands in for the ChatGPT backend: its search answers with
@@ -113,8 +113,8 @@ func TestChatGPTAccountSearchesByItsWebSearch(t *testing.T) {
 		set["external_web_access"] != true || !slices.Equal(set["allowed_callers"].([]any), []any{"direct"}) {
 		t.Fatalf("body %v", q)
 	}
-	if strings.Contains(string(mustJSON(q)), "myna") {
-		t.Fatalf("myna's own words went to the vendor: %v", q)
+	if strings.Contains(string(mustJSON(q)), "owl") {
+		t.Fatalf("owl's own words went to the vendor: %v", q)
 	}
 	urls := []string{}
 	for _, h := range hits {
@@ -173,7 +173,7 @@ func TestChatGPTAccountSearchesByItsWebSearch(t *testing.T) {
 	}
 }
 
-// Codex's web_search tool's mode reaches the search myna makes for a
+// Codex's web_search tool's mode reaches the search owl makes for a
 // model that can't (#5018).
 func TestResponsesWebSearchModeKept(t *testing.T) {
 	for _, c := range []struct{ tool, want string }{

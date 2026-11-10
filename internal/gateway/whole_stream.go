@@ -6,7 +6,7 @@ import (
 	"maps"
 	"net/http"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // wholeAsStream writes a reply its vendor gave whole, in proto's own shape,
@@ -368,7 +368,7 @@ func orNull(r json.RawMessage) json.RawMessage {
 // output_text annotations that lack the offsets OpenAI's schema wants on
 // every annotation — another vendor's Responses endpoint writes its
 // citations so (Volcengine Ark's url_citation, #4921) — and reports
-// whether it took any. What myna hands a client must be something it
+// whether it took any. What owl hands a client must be something it
 // could send again (#2855): the client stores the reply and replays it,
 // and where that schema holds the replay is refused whole, every turn of
 // the thread after ("Missing required parameter:
@@ -419,7 +419,7 @@ func dropOffsetlessCitations(output []obj) bool {
 // kind OpenAI's schema wants a start and end index of (url_citation,
 // container_file_citation), lacks either, as absent or null. A
 // file_citation or file_path places itself by its one index and is kept
-// as it came; one that isn't an object lacks nothing myna can read.
+// as it came; one that isn't an object lacks nothing owl can read.
 func annotationLacksOffsets(a json.RawMessage) bool {
 	var note map[string]json.RawMessage
 	if json.Unmarshal(a, &note) != nil || note == nil {

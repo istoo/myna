@@ -37,7 +37,7 @@ func TestMissingCommandsReadEachFolderOnce(t *testing.T) {
 	looks := countLooks(t)
 	read := listingRead
 	for i := 0; i < 100; i++ {
-		name := fmt.Sprintf("myna-missing-%d", i)
+		name := fmt.Sprintf("owl-missing-%d", i)
 		if p, err := Look(name); err == nil {
 			t.Fatalf("%s found at %s", name, p)
 		} else if !isNotFound(err) {
@@ -61,18 +61,18 @@ func TestCommandListedIsLookedFor(t *testing.T) {
 	d := t.TempDir()
 	t.Setenv("PATH", d)
 	lookWindowFor(t, 0)
-	want := installTool(t, d, "myna-fake-agent")
+	want := installTool(t, d, "owl-fake-agent")
 	looks := countLooks(t)
-	if p, err := Look("myna-fake-agent"); err != nil || p != want {
+	if p, err := Look("owl-fake-agent"); err != nil || p != want {
 		t.Fatalf("Look = %q, %v; want %q", p, err, want)
 	}
 	if *looks != 1 {
 		t.Fatalf("looked %d times, want 1", *looks)
 	}
-	for _, n := range []string{"myna-fake-agent.cmd", "Myna-Fake-Agent.EXE"} {
+	for _, n := range []string{"owl-fake-agent.cmd", "Owl-Fake-Agent.EXE"} {
 		os.WriteFile(filepath.Join(d, n), nil, 0o755)
-		if !mayBeIn("myna-fake-agent", []string{d}) {
-			t.Errorf("with %s there, myna-fake-agent isn't thought to be", n)
+		if !mayBeIn("owl-fake-agent", []string{d}) {
+			t.Errorf("with %s there, owl-fake-agent isn't thought to be", n)
 		}
 	}
 }
@@ -83,14 +83,14 @@ func TestUnreadableFolderMayHoldIt(t *testing.T) {
 		t.Skip("needs a folder this user can't list")
 	}
 	d := t.TempDir()
-	installTool(t, d, "myna-fake-agent")
+	installTool(t, d, "owl-fake-agent")
 	if err := os.Chmod(d, 0o311); err != nil { // searchable, not listable
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { os.Chmod(d, 0o755) })
 	t.Setenv("PATH", d)
 	lookWindowFor(t, 0)
-	if _, err := Look("myna-fake-agent"); err != nil {
+	if _, err := Look("owl-fake-agent"); err != nil {
 		t.Fatalf("a command in a folder that can't be listed wasn't found: %v", err)
 	}
 }

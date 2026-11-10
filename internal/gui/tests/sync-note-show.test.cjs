@@ -19,13 +19,13 @@ const FAILED = 'failed to open the file explorer: exec: "xdg-open": executable f
 
 function serve(lang, posts) {
   const settings = {
-    theme: "light", lang, tray: "panel", version: "test", dir: "/tmp/myna",
+    theme: "light", lang, tray: "panel", version: "test", dir: "/tmp/owl",
     gateway: "http://127.0.0.1:3425", visionModels: [], imageGenModels: [],
     fx: { rate: 7.2, stale: false },
   };
   const sync = { on: true, kind: "webdav", url: "https://dav.jianguoyun.com/dav/", user: "me", passwordSet: true, passphraseSet: true,
     keys: true, agents: true, library: true, auto: 3, last: new Date().toISOString(),
-    notice: { at: new Date().toISOString(), here: ["providers"], saved: "/tmp/myna/sync" } };
+    notice: { at: new Date().toISOString(), here: ["providers"], saved: "/tmp/owl/sync" } };
   return async (route) => {
     const request = route.request();
     const pathname = new URL(request.url()).pathname;
@@ -69,7 +69,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(60000);
 
-      await page.goto("http://myna.test/");
+      await page.goto("http://owl.test/");
       await page.locator("#prefs").click();
       await openPart(page, "sync");
       const note = page.locator("#syncList .sync-note");

@@ -10,7 +10,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A search API set at a base URL of the user's own (#1580: an endpoint
@@ -114,7 +114,7 @@ func TestSearchKeyStaysAtItsBaseURL(t *testing.T) {
 	}
 }
 
-// A base URL given with the path myna puts after it (…/search for
+// A base URL given with the path owl puts after it (…/search for
 // Tavily) is asked at that path once, never /search/search (plugins#509,
 // chenjiangzi): for every vendor, whether Settings saved it so or
 // providers.json held it so from before; and Settings keeps it as its base.

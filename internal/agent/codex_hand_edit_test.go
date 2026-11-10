@@ -7,8 +7,8 @@ import (
 	"testing"
 )
 
-// Disconnect puts back only what myna changed: a key the user edited by
-// hand while Codex was on myna keeps the user's value, though myna had
+// Disconnect puts back only what owl changed: a key the user edited by
+// hand while Codex was on owl keeps the user's value, though owl had
 // saved what was there before it connected (yhwangl on X).
 func TestCodexDisconnectKeepsHandEdits(t *testing.T) {
 	home, read := codexHome(t, "", "model = \"gpt-5.5\"\nmodel_reasoning_effort = \"low\"\nmodel_catalog_json = \"/x/old-list.json\"\n")
@@ -19,10 +19,10 @@ func TestCodexDisconnectKeepsHandEdits(t *testing.T) {
 		t.Fatal(err)
 	}
 	cfg := read()
-	if !strings.Contains(cfg, "model_provider = \"myna\"") {
-		t.Fatalf("not myna's provider:\n%s", cfg)
+	if !strings.Contains(cfg, "model_provider = \"owl\"") {
+		t.Fatalf("not owl's provider:\n%s", cfg)
 	}
-	// by hand, with myna connected: an effort and a model list of their own
+	// by hand, with owl connected: an effort and a model list of their own
 	cfg = strings.Replace(cfg, "model_reasoning_effort = \"low\"", "model_reasoning_effort = \"high\"", 1)
 	lines := strings.Split(cfg, "\n")
 	for i, l := range lines {
@@ -40,13 +40,13 @@ func TestCodexDisconnectKeepsHandEdits(t *testing.T) {
 			t.Errorf("missing %q after Disconnect:\n%s", want, cfg)
 		}
 	}
-	if strings.Contains(cfg, "model_provider = \"myna\"") {
-		t.Errorf("still on myna:\n%s", cfg)
+	if strings.Contains(cfg, "model_provider = \"owl\"") {
+		t.Errorf("still on owl:\n%s", cfg)
 	}
 }
 
-// What myna changed and the user didn't is put back as it was.
-func TestCodexDisconnectPutsBackWhatMynaChanged(t *testing.T) {
+// What owl changed and the user didn't is put back as it was.
+func TestCodexDisconnectPutsBackWhatOwlChanged(t *testing.T) {
 	home, read := codexHome(t, "", "model = \"gpt-5.5\"\nmodel_reasoning_effort = \"low\"\n")
 	if err := codex(home).Fields[0].Set("fake/m1"); err != nil {
 		t.Fatal(err)
@@ -61,7 +61,7 @@ func TestCodexDisconnectPutsBackWhatMynaChanged(t *testing.T) {
 		}
 	}
 	if strings.Contains(cfg, "model_catalog_json") || strings.Contains(cfg, "model_provider =") {
-		t.Errorf("myna's keys left:\n%s", cfg)
+		t.Errorf("owl's keys left:\n%s", cfg)
 	}
 }
 

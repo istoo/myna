@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // modelscopeNoProvider400 is ModelScope's answer to a model id none of its
@@ -52,7 +52,7 @@ func TestGroupFailsOverAModelWithNoProvider(t *testing.T) {
 		want   bool
 	}{
 		{400, modelscopeNoProvider400, true},
-		// as myna tells it on, with the provider's name before, and
+		// as owl tells it on, with the provider's name before, and
 		// ModelScope's own invalid_request_error type around it
 		{400, `ModelScope: ` + modelscopeNoProvider400, true},
 		{400, `{"error":{"message":"Model id : deepseek-ai/DeepSeek-V4.1-Flash , has no provider supported","type":"invalid_request_error"}}`, true},

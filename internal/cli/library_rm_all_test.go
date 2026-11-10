@@ -7,10 +7,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/library"
+	"github.com/istoo/owl/internal/library"
 )
 
-// myna library skill rm --all (#449): with nobody at a terminal to ask,
+// owl library skill rm --all (#449): with nobody at a terminal to ask,
 // it takes nothing unless --yes says so; with --yes, every skill goes, a
 // folder of the user's only unlinked.
 func TestLibrarySkillRmAll(t *testing.T) {
@@ -65,9 +65,9 @@ func TestLibrarySkillRmAll(t *testing.T) {
 	}
 }
 
-// myna library mcp add without agents= gives the server to no agent,
+// owl library mcp add without agents= gives the server to no agent,
 // and says so: it said "every agent already has it" (found writing the
-// myna-setup skill). With agents= it names the agents written into.
+// owl-setup skill). With agents= it names the agents written into.
 func TestLibraryMCPAddNoAgents(t *testing.T) {
 	h := t.TempDir()
 	for k, v := range map[string]string{"HOME": h, "USERPROFILE": h, "XDG_CONFIG_HOME": filepath.Join(h, ".config"), "CLAUDE_CONFIG_DIR": "", "CODEX_HOME": "", "APPDATA": "", "LOCALAPPDATA": ""} {
@@ -100,7 +100,7 @@ func TestLibraryMCPAddNoAgents(t *testing.T) {
 		return s
 	}
 	got := out("add", "ctx7", "https://mcp.example.com/mcp")
-	if strings.Contains(got, "every agent") || !strings.Contains(got, "given to no agent yet") || !strings.Contains(got, "myna library mcp agents ctx7") {
+	if strings.Contains(got, "every agent") || !strings.Contains(got, "given to no agent yet") || !strings.Contains(got, "owl library mcp agents ctx7") {
 		t.Fatalf("added to none: %q", got)
 	}
 	if got := out("agents", "ctx7", "claude"); !strings.Contains(got, "written into claude") {

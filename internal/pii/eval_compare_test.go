@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/redact"
+	"github.com/istoo/owl/internal/redact"
 )
 
 // The two local models on one set of hand-marked requests (testdata/eval.json,
@@ -159,9 +159,9 @@ func measure(t *testing.T, f func([]string) [][]redact.Found, cs []evalCase) sco
 // Settings: it skips a model that isn't on this machine (CI has neither).
 func TestEvalBothModels(t *testing.T) {
 	// the models live in the real home's cache, not the test's own home:
-	// this one-off comparison runs with MYNA_EVAL_HOME=$HOME (CI has no
+	// this one-off comparison runs with OWL_EVAL_HOME=$HOME (CI has no
 	// models, and skips)
-	if h := os.Getenv("MYNA_EVAL_HOME"); h != "" {
+	if h := os.Getenv("OWL_EVAL_HOME"); h != "" {
 		os.Setenv("HOME", h)
 		os.Setenv("XDG_CACHE_HOME", filepath.Join(h, ".cache"))
 	}

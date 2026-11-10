@@ -8,7 +8,7 @@ import (
 	"testing"
 	"unicode/utf8"
 
-	"github.com/istoo/myna/internal/redact"
+	"github.com/istoo/owl/internal/redact"
 )
 
 // alices are where each "Alice" in t is, as the stand-in finds them.
@@ -81,7 +81,7 @@ func TestPiecesCut(t *testing.T) {
 // Text that isn't UTF-8 is cut too: a run of stray continuation bytes
 // has no rune's start to cut at, and the scan for one read past the
 // text's end and panicked on the model's goroutine (#4553's class: a
-// malformed request ended myna). Its pieces still cover the text, each
+// malformed request ended owl). Its pieces still cover the text, each
 // overlapping the one before, none over pieceSize.
 func TestPiecesCutMalformed(t *testing.T) {
 	for name, text := range map[string]string{

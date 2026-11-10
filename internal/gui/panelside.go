@@ -37,10 +37,10 @@ func panelOpenAt(goos string, panel, screen panelRect, known bool) string {
 	return "head"
 }
 
-// panelOpenAtJS tells the panel's page the side (app.js mynaPanelOpenAt).
+// panelOpenAtJS tells the panel's page the side (app.js owlPanelOpenAt).
 func panelOpenAtJS(side string) string {
 	if side != "foot" {
 		side = "head"
 	}
-	return `window.mynaPanelOpenAt && window.mynaPanelOpenAt("` + side + `")`
+	return `window.owlPanelOpenAt && window.owlPanelOpenAt("` + side + `")`
 }

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // hermesOldSystem is Hermes Agent's earlier default persona, the SOUL.md it
@@ -120,7 +120,7 @@ func fakeGoogle(sent *string) func(w http.ResponseWriter, r *http.Request) {
 }
 
 // hermesTurn is a Hermes Agent turn on Antigravity's model, on the Chat
-// Completions API it reaches myna by, with system as its system prompt.
+// Completions API it reaches owl by, with system as its system prompt.
 func hermesTurn(s *Server, system string) (int, string) {
 	body := `{"model":"antigravity/gemini-3-flash","stream":false,"messages":[{"role":"system","content":` + quote(system) + `},{"role":"user","content":"hi"}]}`
 	rec := httptest.NewRecorder()

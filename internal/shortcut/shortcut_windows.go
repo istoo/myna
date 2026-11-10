@@ -12,12 +12,12 @@ import (
 	"golang.org/x/sys/windows"
 	"golang.org/x/sys/windows/registry"
 
-	"github.com/istoo/myna/internal/appdir"
+	"github.com/istoo/owl/internal/appdir"
 )
 
-// appPath is where Win+R and `start myna` look myna.exe up: the user's
+// appPath is where Win+R and `start owl` look owl.exe up: the user's
 // own, no administrator needed
-const appPath = `Software\Microsoft\Windows\CurrentVersion\App Paths\myna.exe`
+const appPath = `Software\Microsoft\Windows\CurrentVersion\App Paths\owl.exe`
 
 func registerAppPath(exe string) {
 	if k, _, err := registry.CreateKey(registry.CURRENT_USER, appPath, registry.SET_VALUE); err == nil {
@@ -123,7 +123,7 @@ func write(lnk, exe string) (bool, error) {
 	return true, nil
 }
 
-// unregisterAppPath takes myna's App Paths entry out while it opens exe,
+// unregisterAppPath takes owl's App Paths entry out while it opens exe,
 // or an exe that is gone.
 func unregisterAppPath(exe string) error {
 	k, err := registry.OpenKey(registry.CURRENT_USER, appPath, registry.QUERY_VALUE)
@@ -134,7 +134,7 @@ func unregisterAppPath(exe string) error {
 	k.Close()
 	if err == nil && v != "" && !strings.EqualFold(filepath.Clean(v), filepath.Clean(exe)) {
 		if _, err := os.Stat(v); err == nil {
-			return nil // another myna's
+			return nil // another owl's
 		}
 	}
 	return registry.DeleteKey(registry.CURRENT_USER, appPath)

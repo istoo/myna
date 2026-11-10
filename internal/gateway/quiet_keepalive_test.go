@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // quietFast makes watch keep a quiet stream's agent alive within
@@ -124,7 +124,7 @@ func aliveAfter(body, after string) int {
 // A vendor that sent its 200 and response.created, then nothing while it
 // reasoned: the stream was held for its first content with nothing sent,
 // and with no event to scan, the agent heard nothing — no headers — until
-// the vendor spoke again; Cloudflare in front of a remote myna ended it
+// the vendor spoke again; Cloudflare in front of a remote owl ended it
 // at 125s (#947, jorben's repro). The agent now gets the stream's 200 and
 // comments meanwhile, and the reply after them.
 func TestSilentHeldStreamKeptAlive(t *testing.T) {
@@ -310,7 +310,7 @@ func TestQuietStreamsKeptAliveEveryProtocol(t *testing.T) {
 
 // A vendor slow to answer at all gets its stream's agent kept alive from
 // watch's goroutine while the try, once the vendor answers, copies the
-// vendor's headers in: keepAlive reads only myna's notes until the try
+// vendor's headers in: keepAlive reads only owl's notes until the try
 // has its status, so the two never touch one map (a race, and in a build
 // without -race "concurrent map iteration and map write").
 func TestKeepAliveBeforeTheVendorsHeaders(t *testing.T) {
@@ -339,7 +339,7 @@ func TestKeepAliveBeforeTheVendorsHeaders(t *testing.T) {
 		t.Fatal("no comment went out")
 	}
 	if got := rec.Header().Get(providerHeader); got != "q" {
-		t.Fatalf("the stream's headers before its reply lack myna's notes: %q", got)
+		t.Fatalf("the stream's headers before its reply lack owl's notes: %q", got)
 	}
 	if !strings.Contains(rec.Body.String(), ": keepalive") {
 		t.Fatalf("body: %q", rec.Body.String())

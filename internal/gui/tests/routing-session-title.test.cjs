@@ -89,7 +89,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             if (r) r.fulfill({ json: d }); else live.queued.push(d);
           };
           const say = (key) => page.evaluate(([lang, key]) => (lang !== "en" && I18N[lang]?.[key]) || key, [lang, key]);
-          await page.goto("http://myna.test/?view=routing");
+          await page.goto("http://owl.test/?view=routing");
           const em = page.locator(".rt-accts li:not(.rt-fold) > em");
 
           // in flight: answering…, then its session's title once asked for

@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/provider"
 )
 
 func TestRenameLegacy(t *testing.T) {
@@ -55,34 +55,34 @@ func TestRenameLegacy(t *testing.T) {
 		return string(b)
 	}
 	oc := read(".config/opencode/opencode.jsonc")
-	if v, _ := edit.GetJSON(filepath.Join(home, ".config/opencode/opencode.jsonc"), "model"); v != "myna/deepseek/deepseek-flash" {
+	if v, _ := edit.GetJSON(filepath.Join(home, ".config/opencode/opencode.jsonc"), "model"); v != "owl/deepseek/deepseek-flash" {
 		t.Fatalf("opencode model: %q", v)
 	}
-	if !strings.Contains(oc, `"myna": {`) || strings.Contains(oc, `"dial"`) || !strings.Contains(oc, "// keep me") || !strings.Contains(oc, `"mine"`) {
+	if !strings.Contains(oc, `"owl": {`) || strings.Contains(oc, `"dial"`) || !strings.Contains(oc, "// keep me") || !strings.Contains(oc, `"mine"`) {
 		t.Fatalf("opencode:\n%s", oc)
 	}
 	cx := read(".codex/config.toml")
-	if strings.Contains(cx, "dial") || !strings.Contains(cx, "[model_providers.myna]") || !strings.Contains(cx, `model_provider = "myna"`) || !strings.Contains(cx, `[projects."/x"]`) {
+	if strings.Contains(cx, "dial") || !strings.Contains(cx, "[model_providers.owl]") || !strings.Contains(cx, `model_provider = "owl"`) || !strings.Contains(cx, `[projects."/x"]`) {
 		t.Fatalf("codex:\n%s", cx)
 	}
 	if _, err := os.Stat(filepath.Join(home, ".codex", "dial-models.json")); err == nil {
 		t.Fatal("dial-models.json still there")
 	}
-	if _, err := os.Stat(filepath.Join(home, ".codex", "myna-models.json")); err != nil {
-		t.Fatal("myna-models.json missing")
+	if _, err := os.Stat(filepath.Join(home, ".codex", "owl-models.json")); err != nil {
+		t.Fatal("owl-models.json missing")
 	}
 	if b := stashLoad(); b["codex.provider"] == "dial" {
 		t.Fatal("dial stashed as the provider to go back to")
 	}
-	if v, _ := edit.GetJSON(filepath.Join(home, ".pi/agent/settings.json"), "defaultProvider"); v != "myna" {
+	if v, _ := edit.GetJSON(filepath.Join(home, ".pi/agent/settings.json"), "defaultProvider"); v != "owl" {
 		t.Fatalf("pi provider: %q", v)
 	}
 	pm := read(".pi/agent/models.json")
-	if strings.Contains(pm, `"dial"`) || !strings.Contains(pm, `"myna"`) {
+	if strings.Contains(pm, `"dial"`) || !strings.Contains(pm, `"owl"`) {
 		t.Fatalf("pi models:\n%s", pm)
 	}
 	cl := read(".claude/settings.json")
-	if strings.Contains(cl, `"dial"`) || !strings.Contains(cl, `"ANTHROPIC_AUTH_TOKEN": "myna"`) || !strings.Contains(cl, `"theme": "dark"`) {
+	if strings.Contains(cl, `"dial"`) || !strings.Contains(cl, `"ANTHROPIC_AUTH_TOKEN": "owl"`) || !strings.Contains(cl, `"theme": "dark"`) {
 		t.Fatalf("claude:\n%s", cl)
 	}
 
@@ -99,9 +99,9 @@ func TestRenameLegacy(t *testing.T) {
 	}
 }
 
-// An agent set to one of Cursor's ids at an effort, from before myna
+// An agent set to one of Cursor's ids at an effort, from before owl
 // offered the family as one model, is set to that model, at that effort
-// where its own is unset; an id myna offers no model for is left.
+// where its own is unset; an id owl offers no model for is left.
 func TestMoveCursorEfforts(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
@@ -131,28 +131,28 @@ func TestMoveCursorEfforts(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	write(`{"defaultProvider": "myna", "defaultModel": "curs/grok-4.7-low", "theme": "dark"}`)
-	setUpInMyna("pi")
+	write(`{"defaultProvider": "owl", "defaultModel": "curs/grok-4.7-low", "theme": "dark"}`)
+	setUpInOwl("pi")
 	moveEfforts("curs", base)
-	for k, want := range map[string]string{"defaultProvider": "myna", "defaultModel": "curs/grok-4.7", "defaultThinkingLevel": "low", "theme": "dark"} {
+	for k, want := range map[string]string{"defaultProvider": "owl", "defaultModel": "curs/grok-4.7", "defaultThinkingLevel": "low", "theme": "dark"} {
 		if v, _ := edit.GetJSON(pi, k); v != want {
 			t.Errorf("%s = %q, want %q", k, v, want)
 		}
 	}
 	// an effort of its own stays; a model the picker doesn't offer stays
-	write(`{"defaultProvider": "myna", "defaultModel": "curs/grok-4.7-low", "defaultThinkingLevel": "high"}`)
+	write(`{"defaultProvider": "owl", "defaultModel": "curs/grok-4.7-low", "defaultThinkingLevel": "high"}`)
 	moveEfforts("curs", base)
 	if v, _ := edit.GetJSON(pi, "defaultThinkingLevel"); v != "high" {
 		t.Errorf("thinking level %q", v)
 	}
-	write(`{"defaultProvider": "myna", "defaultModel": "curs/gone-low"}`)
+	write(`{"defaultProvider": "owl", "defaultModel": "curs/gone-low"}`)
 	moveEfforts("curs", base)
 	if v, _ := edit.GetJSON(pi, "defaultModel"); v != "curs/gone-low" {
 		t.Errorf("model %q", v)
 	}
-	// a provider named myna the user wrote by hand is theirs: left as it is
+	// a provider named owl the user wrote by hand is theirs: left as it is
 	stash(map[string]string{"pi.connect.was": ""})
-	mine := `{"defaultProvider": "myna", "defaultModel": "curs/grok-4.7-low"}`
+	mine := `{"defaultProvider": "owl", "defaultModel": "curs/grok-4.7-low"}`
 	write(mine)
 	moveEfforts("curs", base)
 	if b, _ := os.ReadFile(pi); string(b) != mine {

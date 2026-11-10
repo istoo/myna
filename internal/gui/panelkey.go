@@ -11,12 +11,12 @@ import (
 
 // The quick panel's global shortcut (Settings › General): a key
 // combination the user records, which opens the tray's panel from any app
-// (ben hanks on Discord). There is none by default, so nothing myna
+// (ben hanks on Discord). There is none by default, so nothing owl
 // takes clashes with another app's until the user picks it.
 
 // onPanelShortcut binds the shortcut s ("" for none) in the running app in
 // place of the one before, and says why it couldn't; the app sets it
-// (app.go). Off the app (myna web, tests) it is nil and the choice is
+// (app.go). Off the app (owl web, tests) it is nil and the choice is
 // only saved.
 var onPanelShortcut func(s string) error
 
@@ -31,12 +31,12 @@ var errPanelKeyTaken = errors.New("Another app already uses this shortcut")
 
 // panelKeysJSON is what Settings' row needs beside the saved shortcut.
 type panelKeysJSON struct {
-	// Can is whether this system lets myna take a global shortcut at all
+	// Can is whether this system lets owl take a global shortcut at all
 	Can bool `json:"can"`
 	// Command opens the panel from a shortcut the desktop binds itself,
-	// where myna can't (Wayland)
+	// where owl can't (Wayland)
 	Command string `json:"command,omitempty"`
-	// Taken is the saved shortcut the system refused as myna started
+	// Taken is the saved shortcut the system refused as owl started
 	Taken string `json:"taken,omitempty"`
 }
 
@@ -45,7 +45,7 @@ func panelKeysState() panelKeysJSON {
 	if !st.Can {
 		exe, err := os.Executable()
 		if err != nil || exe == "" {
-			exe = "myna"
+			exe = "owl"
 		}
 		st.Command = shellWord(exe) + " panel"
 	}
@@ -141,6 +141,6 @@ func panelShortcut(s, goos string) (string, error) {
 
 // errNotShortcut is what the page is told of a combination it shouldn't
 // have sent: the page checks each press itself first.
-var errNotShortcut = errors.New("Not a shortcut myna can use")
+var errNotShortcut = errors.New("Not a shortcut owl can use")
 
 var fKeys = []string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"}

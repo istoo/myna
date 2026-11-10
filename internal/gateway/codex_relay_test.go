@@ -10,8 +10,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // relayUp is a fake ChatGPT backend for the relay: what it was sent.
@@ -62,8 +62,8 @@ func relayDo(h http.Handler, method, host, path, body string, hdr map[string]str
 	return rec
 }
 
-// A Codex thread open when myna quit keeps sending its turns to the
-// gateway's address (idkatbro on X: 503 "Unknown error" until myna was
+// A Codex thread open when owl quit keeps sending its turns to the
+// gateway's address (idkatbro on X: 503 "Unknown error" until owl was
 // opened again). The relay passes one on Codex's own model to the ChatGPT
 // backend with the caller's own sign-in, and its reply comes back whole.
 func TestCodexRelayPassesOwnTurnOn(t *testing.T) {
@@ -86,12 +86,12 @@ func TestCodexRelayPassesOwnTurnOn(t *testing.T) {
 	}
 }
 
-// What only the running myna serves is refused with a reason Codex
+// What only the running owl serves is refused with a reason Codex
 // shows at once (a 4xx; a 5xx it retries five times over), and nothing
-// goes to OpenAI: a myna model, a turn on one of
-// myna's accounts, and one masking would have masked, never sent
+// goes to OpenAI: a owl model, a turn on one of
+// owl's accounts, and one masking would have masked, never sent
 // unmasked.
-func TestCodexRelayRefusesWhatNeedsMyna(t *testing.T) {
+func TestCodexRelayRefusesWhatNeedsOwl(t *testing.T) {
 	fresh(t)
 	up := newRelayUp(t)
 	h := CodexRelay()
@@ -102,8 +102,8 @@ func TestCodexRelayRefusesWhatNeedsMyna(t *testing.T) {
 		mask       bool
 		want       string
 	}{
-		{"myna model", `{"model":"openrouter/kimi-k2","input":"hi"}`, auth, false, "one of myna's models"},
-		{"myna account", `{"model":"gpt-5.5","input":"hi"}`, map[string]string{"Authorization": "Bearer t", AccountHeader: "a@b.c"}, false, "myna's Codex accounts"},
+		{"owl model", `{"model":"openrouter/kimi-k2","input":"hi"}`, auth, false, "one of owl's models"},
+		{"owl account", `{"model":"gpt-5.5","input":"hi"}`, map[string]string{"Authorization": "Bearer t", AccountHeader: "a@b.c"}, false, "owl's Codex accounts"},
 		{"masking", `{"model":"gpt-5.5","input":"DB_PASSWORD=hunter2"}`, auth, true, "not sent unmasked"},
 	} {
 		if err := settings.Save(settings.Settings{Redact: c.mask}); err != nil {
@@ -114,7 +114,7 @@ func TestCodexRelayRefusesWhatNeedsMyna(t *testing.T) {
 			Error struct{ Message string } `json:"error"`
 		}
 		json.Unmarshal(rec.Body.Bytes(), &e)
-		if rec.Code != http.StatusBadRequest || !strings.Contains(e.Error.Message, c.want) || !strings.Contains(e.Error.Message, "myna isn't running") {
+		if rec.Code != http.StatusBadRequest || !strings.Contains(e.Error.Message, c.want) || !strings.Contains(e.Error.Message, "owl isn't running") {
 			t.Errorf("%s: %d %s", c.name, rec.Code, rec.Body.String())
 		}
 	}
@@ -135,7 +135,7 @@ func TestCodexRelayOnlyThisComputer(t *testing.T) {
 		{"127.0.0.1:3425", "null"},
 		{"127.0.0.1:3425", "https://evil.example"},
 		{"evil.example:3425", ""},
-		{"myna.localhost:3425", ""},
+		{"owl.localhost:3425", ""},
 	} {
 		hdr := map[string]string{"Authorization": "Bearer chatgpt-token"}
 		if c.origin != "" {
@@ -153,12 +153,12 @@ func TestCodexRelayOnlyThisComputer(t *testing.T) {
 	}
 }
 
-// Anything but Codex's turns says myna isn't running, readably; and
-// the relay's answer at "/" is never taken for myna's (ServedBy), so
-// the next myna starting still serves the gateway. An OpenAI that
+// Anything but Codex's turns says owl isn't running, readably; and
+// the relay's answer at "/" is never taken for owl's (ServedBy), so
+// the next owl starting still serves the gateway. An OpenAI that
 // can't be reached is said too, never an empty body Codex shows as
 // "Unknown error".
-func TestCodexRelayIsNotMyna(t *testing.T) {
+func TestCodexRelayIsNotOwl(t *testing.T) {
 	fresh(t)
 	newRelayUp(t)
 	h := CodexRelay()
@@ -169,7 +169,7 @@ func TestCodexRelayIsNotMyna(t *testing.T) {
 			Name string `json:"name"`
 		}
 		json.Unmarshal(b, &info)
-		if rec.Code != 503 || info.Name == "myna" || bytes.Contains(b, []byte(`"myna"`)) || !strings.Contains(string(b), "myna isn't running") {
+		if rec.Code != 503 || info.Name == "owl" || bytes.Contains(b, []byte(`"owl"`)) || !strings.Contains(string(b), "owl isn't running") {
 			t.Errorf("%s: %d %s", p, rec.Code, b)
 		}
 	}

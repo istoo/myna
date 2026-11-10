@@ -8,10 +8,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// wishSeikouudoku on X (2026-11-02): Alma, through a myna group that
+// wishSeikouudoku on X (2026-11-02): Alma, through a owl group that
 // sends it on to DeepSeek, got <｜｜DSML｜｜ calls>, invoke name="…" and
 // parameter as its reply's text, and no tool ran. Alma's provider of type
 // openai speaks Responses (/v1/responses, streamed), and DeepSeek's preset
@@ -156,7 +156,7 @@ func TestDSMLAlmaResponsesPlugin(t *testing.T) {
 	for _, model := range []string{pid + "/fake-1", "group/ds"} {
 		req := httptest.NewRequest("POST", "/v1/responses", strings.NewReader(`{"model":"`+model+`","stream":true,"input":[{"role":"user","content":[{"type":"input_text","text":"What is the latest Python?"}]}],`+
 			`"tools":[{"type":"function","name":"web_search","parameters":{"type":"object","properties":{"query":{"type":"string"}}},"strict":false}],"tool_choice":"auto"}`))
-		req.Header.Set("Authorization", "Bearer myna")
+		req.Header.Set("Authorization", "Bearer owl")
 		rec := httptest.NewRecorder()
 		h.ServeHTTP(rec, req)
 		raw := rec.Body.String()

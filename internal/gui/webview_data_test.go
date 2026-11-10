@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/appdir"
+	"github.com/istoo/owl/internal/appdir"
 )
 
-// #508: a portable myna on Windows still made %APPDATA%\myna.exe,
+// #508: a portable owl on Windows still made %APPDATA%\owl.exe,
 // WebView2's profile at Wails' default. Portable, the app's options put it
 // in data\webview2; installed, they leave the default (and what is there).
 func TestWindowsOptionsWebViewData(t *testing.T) {
@@ -26,8 +26,8 @@ func TestWindowsOptionsWebViewData(t *testing.T) {
 		t.Fatalf("installed: %+v, want WebView2's default folder and no quit on last close", o)
 	}
 
-	exe := filepath.Join(r, "Myna", "myna.exe")
-	if err := os.MkdirAll(filepath.Join(r, "Myna", "data"), 0o755); err != nil {
+	exe := filepath.Join(r, "Owl", "owl.exe")
+	if err := os.MkdirAll(filepath.Join(r, "Owl", "data"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.WriteFile(exe, nil, 0o755); err != nil {
@@ -35,7 +35,7 @@ func TestWindowsOptionsWebViewData(t *testing.T) {
 	}
 	appdir.UseExecutable(exe)
 	o := windowsOptions()
-	if want := filepath.Join(r, "Myna", "data", "webview2"); o.WebviewUserDataPath != want {
+	if want := filepath.Join(r, "Owl", "data", "webview2"); o.WebviewUserDataPath != want {
 		t.Fatalf("portable: WebviewUserDataPath = %q, want %q", o.WebviewUserDataPath, want)
 	}
 	if !o.DisableQuitOnLastWindowClosed {

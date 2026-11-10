@@ -15,14 +15,14 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/jsonc"
 
-	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/owl/internal/edit"
 )
 
 // StepCode keeps its configuration in ~/.stepcode/config.toml (or
 // the parent of an absolute STEP_CODING_AGENT_DIR) and its models in
 // models.json using Pi's provider format.
-// myna manages defaultProvider and defaultModel in config.toml, and one
-// providers.myna entry in models.json.
+// owl manages defaultProvider and defaultModel in config.toml, and one
+// providers.owl entry in models.json.
 
 func stepcode(home string) *Agent { return stepcodeIn(here(home)) }
 
@@ -45,7 +45,7 @@ func stepcodeProvider(at place) any {
 		ms = append(ms, piModelJSON(piAsked("stepcode", m), at.gw(), true))
 	}
 	return map[string]any{
-		"name":    "myna",
+		"name":    "owl",
 		"baseUrl": at.v1(),
 		"api":     "openai-completions",
 		"apiKey":  agentKeyAt("stepcode", at.gw()),
@@ -126,9 +126,9 @@ func stepcodeValidateModels(path string) error {
 		if !prov.IsObject() {
 			return fmt.Errorf("%s: 'providers' must be a JSON object", path)
 		}
-		if mag := prov.Get(mynaID); mag.Exists() {
+		if mag := prov.Get(owlID); mag.Exists() {
 			if !mag.IsObject() {
-				return fmt.Errorf("%s: 'providers.%s' must be a JSON object", path, mynaID)
+				return fmt.Errorf("%s: 'providers.%s' must be a JSON object", path, owlID)
 			}
 		}
 	}
@@ -163,7 +163,7 @@ type stepcodeState struct {
 	LastHasScope        bool     `json:"last_has_scope"`
 	LastScope           []string `json:"last_scope,omitempty"`
 	AppendedScope       []string `json:"appended_scope,omitempty"`
-	OrigMynaRaw         *string  `json:"orig_myna_raw,omitempty"`
+	OrigOwlRaw         *string  `json:"orig_owl_raw,omitempty"`
 	ConfigFileExisted   bool     `json:"config_file_existed"`
 	ModelsFileExisted   bool     `json:"models_file_existed"`
 	ProvidersMapExisted bool     `json:"providers_map_existed"`
@@ -257,7 +257,7 @@ func stepcodeStartup(cfg stepcodeTOML) string {
 
 // stepcodeRenameRefs moves enabledModels off a renamed provider, in the
 // file and in the scope disconnect remembers, so a reset does not put the
-// old id back and still takes out only what myna appended.
+// old id back and still takes out only what owl appended.
 func stepcodeRenameRefs(at place, path, from, to string) (bool, error) {
 	cur, err := readStepcodeTOML(path)
 	if err != nil {
@@ -312,7 +312,7 @@ func stepcodeIn(at place) *Agent {
 	modelsPath := filepath.Join(dir, "models.json")
 	authPath := filepath.Join(dir, "auth.json")
 
-	block := theirsKept(modelsPath, "providers."+mynaID, func() any { return stepcodeProvider(at) }, "models")
+	block := theirsKept(modelsPath, "providers."+owlID, func() any { return stepcodeProvider(at) }, "models")
 	// the entries of enabledModels a sync took out (scope_gone.go)
 	gone := at.key("stepcode.scope.gone")
 
@@ -340,7 +340,7 @@ func stepcodeIn(at place) *Agent {
 			return err
 		}
 
-		if stepcodeValue(curTOML.Provider) == mynaID {
+		if stepcodeValue(curTOML.Provider) == owlID {
 			if err := stepcodeSetString(path, "defaultProvider", state.OrigProvider); err != nil {
 				return err
 			}
@@ -388,12 +388,12 @@ func stepcodeIn(at place) *Agent {
 			}
 		}
 
-		if state.OrigMynaRaw != nil {
-			if err := edit.SetJSON(modelsPath, edit.KV{Path: "providers." + mynaID, Value: json.RawMessage(*state.OrigMynaRaw)}); err != nil {
+		if state.OrigOwlRaw != nil {
+			if err := edit.SetJSON(modelsPath, edit.KV{Path: "providers." + owlID, Value: json.RawMessage(*state.OrigOwlRaw)}); err != nil {
 				return err
 			}
 		} else {
-			if err := edit.DelJSON(modelsPath, "providers."+mynaID); err != nil {
+			if err := edit.DelJSON(modelsPath, "providers."+owlID); err != nil {
 				return err
 			}
 			if !state.ProvidersMapExisted {
@@ -454,11 +454,11 @@ func stepcodeIn(at place) *Agent {
 			if err := stepcodeValidateModels(modelsPath); err != nil {
 				return "StepCode's models.json is unreadable or malformed"
 			}
-			if stepcodeValue(cur.Provider) != mynaID {
+			if stepcodeValue(cur.Provider) != owlID {
 				return ""
 			}
 			return wiringOff("StepCode", modelsPath, func(k string) (string, bool) {
-				return edit.GetJSON(modelsPath, "providers."+mynaID+"."+k)
+				return edit.GetJSON(modelsPath, "providers."+owlID+"."+k)
 			}, "baseUrl", at.v1(), "apiKey", agentKeyAt("stepcode", at.gw()))
 		},
 		Sync: func() error {
@@ -472,10 +472,10 @@ func stepcodeIn(at place) *Agent {
 			if err := stepcodeValidateModels(modelsPath); err != nil {
 				return err
 			}
-			if err := syncJSON(modelsPath, "providers."+mynaID, block); err != nil {
+			if err := syncJSON(modelsPath, "providers."+owlID, block); err != nil {
 				return err
 			}
-			// an entry on a model myna no longer gives StepCode names
+			// an entry on a model owl no longer gives StepCode names
 			// nothing (#2055, scope_gone.go)
 			return stepcodeScopeSynced(at, path, modelsPath, gone)
 		},
@@ -494,8 +494,8 @@ func stepcodeIn(at place) *Agent {
 					if v == "" {
 						return unwire()
 					}
-					ref, isMag := strings.CutPrefix(v, mynaID+"/")
-					if !isMag || !isMyna(ref) {
+					ref, isMag := strings.CutPrefix(v, owlID+"/")
+					if !isMag || !isOwl(ref) {
 						p, m, ok := strings.Cut(v, "/")
 						if !ok || p == "" || m == "" {
 							return fmt.Errorf("expected provider/model, got %q", v)
@@ -543,8 +543,8 @@ func stepcodeIn(at place) *Agent {
 						if rawP, ok := edit.GetJSON(modelsPath, "providers"); ok && rawP != "" {
 							state.ProvidersMapExisted = true
 						}
-						if rawMyna, ok := edit.GetJSON(modelsPath, "providers."+mynaID); ok {
-							state.OrigMynaRaw = &rawMyna
+						if rawOwl, ok := edit.GetJSON(modelsPath, "providers."+owlID); ok {
+							state.OrigOwlRaw = &rawOwl
 						}
 						state.OrigProvider = curTOML.Provider
 						state.OrigModel = curTOML.Model
@@ -553,7 +553,7 @@ func stepcodeIn(at place) *Agent {
 							state.OrigScope = slices.Clone(*curTOML.Scope)
 						}
 					} else {
-						if stepcodeValue(curTOML.Provider) != mynaID {
+						if stepcodeValue(curTOML.Provider) != owlID {
 							state.OrigProvider = curTOML.Provider
 							state.OrigModel = curTOML.Model
 						}
@@ -607,10 +607,10 @@ func stepcodeIn(at place) *Agent {
 						return err
 					}
 
-					if err := edit.SetJSON(modelsPath, edit.KV{Path: "providers." + mynaID, Value: block()}); err != nil {
+					if err := edit.SetJSON(modelsPath, edit.KV{Path: "providers." + owlID, Value: block()}); err != nil {
 						return err
 					}
-					if err := edit.SetTOMLTopPreserving(path, edit.KV{Path: "defaultProvider", Value: mynaID}, edit.KV{Path: "defaultModel", Value: ref}); err != nil {
+					if err := edit.SetTOMLTopPreserving(path, edit.KV{Path: "defaultProvider", Value: owlID}, edit.KV{Path: "defaultModel", Value: ref}); err != nil {
 						return err
 					}
 					if state.LastHasScope && (curTOML.Scope == nil || !slices.Equal(*curTOML.Scope, state.LastScope)) {
@@ -626,7 +626,7 @@ func stepcodeIn(at place) *Agent {
 					return nil
 				},
 				Options: func(cur map[string]string) []Option {
-					return withVia(ownOptions(authPath, cur["model"]), "stepcode", mynaID+"/")
+					return withVia(ownOptions(authPath, cur["model"]), "stepcode", owlID+"/")
 				},
 			},
 		},

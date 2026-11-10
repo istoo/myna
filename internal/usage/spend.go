@@ -35,14 +35,14 @@ type spendSum struct {
 // by Append, before it is read again.
 const spendFresh = 5 * time.Minute
 
-// spendCounts reports whether r spends from its key: a call myna sent
+// spendCounts reports whether r spends from its key: a call owl sent
 // on it from this computer, not one turned away before it went out nor
 // one an agent reported.
 func spendCounts(r Record) bool {
 	return r.ProviderKeyID != "" && !r.IsRejected() && !r.IsReported() && r.Computer == ""
 }
 
-// KeySpent is what the calls myna sent on the API key keyID (its
+// KeySpent is what the calls owl sent on the API key keyID (its
 // provider.KeyID) from start on cost, in USD at the Usage page's prices,
 // under whichever provider sent them. A call with no known price counts
 // nothing.

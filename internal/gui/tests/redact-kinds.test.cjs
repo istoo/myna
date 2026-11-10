@@ -68,7 +68,7 @@ async function open(engine, lang, width, personal, saved) {
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", serve(lang, personal, saved));
   await watchSettingsReads(page);
-  await page.goto("http://myna.test/?view=settings&tab=privacy");
+  await page.goto("http://owl.test/?view=settings&tab=privacy");
   await page.locator("#redactList .row").first().waitFor();
   await settingsDrawn(page); // the rows found are the ones that stay (#1653)
   return { browser, page, errors };

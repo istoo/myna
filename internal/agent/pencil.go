@@ -12,14 +12,14 @@ package agent
 // Its settings offer a custom provider on OpenAI Completions, OpenAI
 // Responses or Anthropic Messages (docs.pen.dev, Authentication) — Pi's
 // openai-completions, openai-responses and anthropic-messages — set for the
-// provider as a whole. So myna's models are Pi's entries (piModelJSON)
+// provider as a whole. So owl's models are Pi's entries (piModelJSON)
 // with every model on the provider's openai-completions at the gateway's
 // /v1, which the gateway takes for every model: a model's own api and
 // baseUrl, which Pi reads but Pencil's own editor never writes, are left
 // out. Each model carries every field Pencil writes for one. The model is
-// picked in Pencil's agent composer, not in a file myna knows of, so what
-// myna sets is whether its models are in that picker; the user's other
-// providers stay as they are. Its requests carry myna-pencil, as its
+// picked in Pencil's agent composer, not in a file owl knows of, so what
+// owl sets is whether its models are in that picker; the user's other
+// providers stay as they are. Its requests carry owl-pencil, as its
 // User-Agent isn't known.
 
 import (
@@ -27,14 +27,14 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/gateway"
 )
 
 func pencil(home string) *Agent {
 	dir := filepath.Join(home, ".pencil")
 	path := filepath.Join(dir, "models.json")
-	key := "providers." + mynaID
+	key := "providers." + owlID
 	wired := func() bool { _, ok := edit.GetJSON(path, key); return ok }
 	return &Agent{
 		ID: "pencil", Name: "Pencil", Icon: "generic", Aliases: []string{"pen.dev", "pen-dev", "pendev"},
@@ -59,7 +59,7 @@ func pencil(home string) *Agent {
 			Key: "provider", Label: "provider",
 			Get: func() string {
 				if wired() {
-					return mynaID
+					return owlID
 				}
 				return ""
 			},
@@ -70,7 +70,7 @@ func pencil(home string) *Agent {
 				return edit.SetJSON(path, edit.KV{Path: key, Value: theirsKept(path, key, func() any { return pencilProviderJSON(gateway.URL()) }, "models")()})
 			},
 			Options: func(map[string]string) []Option {
-				return []Option{{Value: mynaID, Label: "myna", Icon: "myna", Note: "every myna model in Pencil's model picker"}}
+				return []Option{{Value: owlID, Label: "owl", Icon: "owl", Note: "every owl model in Pencil's model picker"}}
 			},
 		}},
 	}
@@ -92,11 +92,11 @@ func pencilApp(home string) bool {
 	return false
 }
 
-// pencilProviderJSON is myna's provider in Pencil's models.json: Pi's
+// pencilProviderJSON is owl's provider in Pencil's models.json: Pi's
 // entries (piModelJSON), on the provider's openai-completions throughout,
 // each with the fields Pencil writes for a model — Pi's defaults where
-// myna knows no better (a 128K window, 16K out) and no cost, myna's
-// spend being counted by myna.
+// owl knows no better (a 128K window, 16K out) and no cost, owl's
+// spend being counted by owl.
 func pencilProviderJSON(gw string) map[string]any {
 	ms := []map[string]any{}
 	for _, m := range sharedModels("pencil") {
@@ -114,11 +114,11 @@ func pencilProviderJSON(gw string) map[string]any {
 		e["compat"] = map[string]any{}
 		ms = append(ms, e)
 	}
-	return map[string]any{"name": "myna", "baseUrl": gw + "/v1", "api": "openai-completions",
+	return map[string]any{"name": "owl", "baseUrl": gw + "/v1", "api": "openai-completions",
 		"apiKey": agentKeyAt("pencil", gw), "models": ms}
 }
 
 // what pencil says after a change (notice.go)
 var (
-	noticePencil = newNotice("Pencil reads its custom models at start-up — restart Pencil to see myna's models in its model picker.")
+	noticePencil = newNotice("Pencil reads its custom models at start-up — restart Pencil to see owl's models in its model picker.")
 )

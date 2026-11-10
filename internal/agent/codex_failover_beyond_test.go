@@ -9,14 +9,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A Codex signed in to ChatGPT that reaches the gateway from another
-// machine (MYNA_ADDR pinned beyond loopback; a WSL distro under NAT is
+// machine (OWL_ADDR pinned beyond loopback; a WSL distro under NAT is
 // the same to it) is never pointed at the gateway's Codex path for account
 // failover either: from there the gateway takes a named key alone, so the
-// turn failover handed myna came back a 401 — the shape #2145 took out
+// turn failover handed owl came back a 401 — the shape #2145 took out
 // of the joined case, still written by failover for a Codex not connected.
 func TestCodexFailoverBeyondLoopbackNotWritten(t *testing.T) {
 	claims := func(m map[string]any) string {
@@ -35,7 +35,7 @@ func TestCodexFailoverBeyondLoopbackNotWritten(t *testing.T) {
 		"seen": time.Now(), "auth": auth("spare@example.com", "acct-2")}})
 	os.MkdirAll(filepath.Dir(provider.Path()), 0o755)
 	os.WriteFile(filepath.Join(filepath.Dir(provider.Path()), "logins.json"), b, 0o600)
-	t.Setenv("MYNA_ADDR", "172.23.80.1:3425")
+	t.Setenv("OWL_ADDR", "172.23.80.1:3425")
 	cx := codex(home)
 	if err := cx.Sync(); err != nil {
 		t.Fatal(err)
@@ -47,7 +47,7 @@ func TestCodexFailoverBeyondLoopbackNotWritten(t *testing.T) {
 		t.Fatalf("failover marked beyond loopback: %v", s)
 	}
 
-	// one a myna before this wrote there is taken off again by Sync
+	// one a owl before this wrote there is taken off again by Sync
 	home, read = codexHome(t, string(me), "model = \"gpt-5.5\"\nopenai_base_url = \"http://172.23.80.1:3425/backend-api/codex\"\n")
 	stash(map[string]string{"codex.failover": "1"})
 	if err := codex(home).Sync(); err != nil {

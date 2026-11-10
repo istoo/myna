@@ -3,7 +3,7 @@ package backup
 import (
 	"testing"
 
-	"github.com/istoo/myna/internal/library"
+	"github.com/istoo/owl/internal/library"
 )
 
 func libServer(t *testing.T, name string) *library.Server {

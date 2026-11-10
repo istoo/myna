@@ -39,7 +39,7 @@ func TestOpenFolderDoesNotWaitForTheFileManager(t *testing.T) {
 	}
 	t.Cleanup(func() { syscall.Kill(pid, syscall.SIGKILL) })
 	if sid, err := sidOf(pid); err != nil || sid == mustSid() {
-		t.Fatalf("the opener shares myna's session: %d %v", sid, err)
+		t.Fatalf("the opener shares owl's session: %d %v", sid, err)
 	}
 	if err := syscall.Kill(pid, 0); err != nil {
 		t.Fatalf("the opener is gone: %v", err)

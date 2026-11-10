@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-// #4938: the service's myna serve, started by launchd beside the app
+// #4938: the service's owl serve, started by launchd beside the app
 // serving the gateway, ran the start-up moves, the plugin host and every
 // account's model fetch, failed to bind, exited 1 and was started again
 // 5s later, thousands of times. It now waits for the port before any of
@@ -22,10 +22,10 @@ func TestServeWaitsForTheGatewayBeforeStartingUp(t *testing.T) {
 			asked.Add(1)
 		}
 		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(`{"name":"myna","version":"0.1.2770","pid":4242,"serves":"app","window":true}`))
+		w.Write([]byte(`{"name":"owl","version":"0.1.2770","pid":4242,"serves":"app","window":true}`))
 	}))
 	defer app.Close()
-	t.Setenv("MYNA_ADDR", strings.TrimPrefix(app.URL, "http://"))
+	t.Setenv("OWL_ADDR", strings.TrimPrefix(app.URL, "http://"))
 
 	wasEvery, wasStartUp := gatewayFreeEvery, startUp
 	gatewayFreeEvery = 20 * time.Millisecond
@@ -43,35 +43,35 @@ func TestServeWaitsForTheGatewayBeforeStartingUp(t *testing.T) {
 		_ = run([]string{"serve"})
 	}()
 
-	// the app is asked who serves, and asked again: myna serve waits
+	// the app is asked who serves, and asked again: owl serve waits
 	deadline := time.After(30 * time.Second)
 	for asked.Load() < 3 {
 		select {
 		case <-started:
-			t.Fatal("myna serve ran the start-up moves while another myna served the gateway")
+			t.Fatal("owl serve ran the start-up moves while another owl served the gateway")
 		case <-deadline:
-			t.Fatalf("the myna serving was asked %d times in 30s", asked.Load())
+			t.Fatalf("the owl serving was asked %d times in 30s", asked.Load())
 		case <-time.After(5 * time.Millisecond):
 		}
 	}
 	select {
 	case <-started:
-		t.Fatal("myna serve ran the start-up moves while another myna served the gateway")
+		t.Fatal("owl serve ran the start-up moves while another owl served the gateway")
 	default:
 	}
 
-	// the app quits: the port is free, and myna serve goes on to serve
+	// the app quits: the port is free, and owl serve goes on to serve
 	app.Close()
 	select {
 	case <-started:
 	case <-time.After(30 * time.Second):
-		t.Fatal("myna serve didn't start up once the port was free")
+		t.Fatal("owl serve didn't start up once the port was free")
 	}
 	<-ended
 }
 
-// Only myna serve for the gateway waits: --web shows the gateway another
-// myna serves, and a mistyped flag is refused at once, not after the
+// Only owl serve for the gateway waits: --web shows the gateway another
+// owl serves, and a mistyped flag is refused at once, not after the
 // app has quit.
 func TestPlainServe(t *testing.T) {
 	for _, c := range []struct {

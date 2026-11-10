@@ -7,8 +7,8 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/upstream"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/upstream"
 )
 
 // /api/upstream says what the vendor's page says for the providers that

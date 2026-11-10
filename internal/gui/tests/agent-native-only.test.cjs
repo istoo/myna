@@ -2,8 +2,8 @@
 // @G_Z_Y on X installed cursor-agent and didn't find it on the Agents page:
 // its row was "Cursor", with no version, and "Only Cursor's own models"
 // beside "Can't connect". The row is Cursor CLI, with what cursor-agent
-// --version says, and its line says why myna can't connect it, whole,
-// never cut. So for every agent with no way onto myna. In the window,
+// --version says, and its line says why owl can't connect it, whole,
+// never cut. So for every agent with no way onto owl. In the window,
 // wide and narrow, in every language. No backend: the API is faked here.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -21,10 +21,10 @@ const AGENTS = [
 ];
 const CLIS = { cursor: { version: "2026.10.01-e373342", path: "/Users/me/.local/bin/cursor-agent" } };
 const WHY = {
-  cursor: "Uses only Cursor's own models, so myna can't connect it",
-  copilot: "Uses only GitHub Copilot's own models, so myna can't connect it",
-  goose: "Uses only Goose's own providers, so myna can't connect it",
-  devin: "Uses only Devin's own models, so myna can't connect it",
+  cursor: "Uses only Cursor's own models, so owl can't connect it",
+  copilot: "Uses only GitHub Copilot's own models, so owl can't connect it",
+  goose: "Uses only Goose's own providers, so owl can't connect it",
+  devin: "Uses only Devin's own models, so owl can't connect it",
 };
 
 function server(lang) {
@@ -51,7 +51,7 @@ const said = (page, lang, key) => page.evaluate(([lang, key]) => (lang === "en" 
 const noSideScroll = (page) => page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1);
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
-  test(engine + ": an agent myna can't connect says why, whole, and Cursor CLI is called so", async (t) => {
+  test(engine + ": an agent owl can't connect says why, whole, and Cursor CLI is called so", async (t) => {
     assert(["chromium", "webkit"].includes(engine), "BROWSER must be chromium or webkit");
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     const errors = [];
@@ -67,15 +67,15 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           page.setDefaultNavigationTimeout(60000);
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", server(lang));
-          await page.goto("http://myna.test/");
+          await page.goto("http://owl.test/");
           await page.locator(`${row("cursor")} .ag-ver`).waitFor();
           assert.equal(await page.locator(`${row("cursor")} .name`).first().textContent(), "Cursor CLI");
           assert.equal(await page.locator(`${row("cursor")} .ag-ver`).textContent(), "2026.10.01-e373342");
           for (const id of Object.keys(WHY)) {
             const want = await said(page, lang, WHY[id]);
             assert(want, `${id}'s reason has no ${lang}`);
-            // it says that myna is what can't connect it
-            assert(want.includes("myna"), `${lang} ${id}: ${want}`);
+            // it says that owl is what can't connect it
+            assert(want.includes("owl"), `${lang} ${id}: ${want}`);
             const words = page.locator(`${row(id)} .ag-st-t`);
             assert(await words.isVisible(), `${id}'s reason isn't shown`);
             assert.equal(await words.textContent(), want, id);

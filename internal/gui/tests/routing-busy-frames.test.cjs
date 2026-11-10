@@ -101,7 +101,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const feed = { q: [], closed: false };
       await page.route("**/*", serve(lang, feed));
       t.after(async () => { feed.closed = true; await browser.close(); });
-      await page.goto("http://myna.test/?view=routing");
+      await page.goto("http://owl.test/?view=routing");
       await page.locator(".rt-req").first().waitFor();
       await page.waitForTimeout(2500); // the first play ends
 

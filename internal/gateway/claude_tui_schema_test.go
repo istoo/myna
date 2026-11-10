@@ -11,7 +11,7 @@ import (
 )
 
 // schemaTUI is a run in the interactive mode answering a request with a
-// schema through myna's answer tool.
+// schema through owl's answer tool.
 func schemaTUI(t *testing.T, schema string) *tuiCalls {
 	t.Helper()
 	c := newTUICalls(t)
@@ -41,11 +41,11 @@ func (c *tuiCalls) answerCall(id, args string) mcpToolResult {
 }
 
 func answerRow(id, input string) string {
-	return tuiRow("msg_"+id, `{"type":"tool_use","id":"`+id+`","name":"mcp__myna__`+answerToolName+`","input":`+input+`}`, "tool_use", 9)
+	return tuiRow("msg_"+id, `{"type":"tool_use","id":"`+id+`","name":"mcp__owl__`+answerToolName+`","input":`+input+`}`, "tool_use", 9)
 }
 
 // Claude Code's interactive mode ignores --json-schema: the answer is the
-// call of myna's answer tool that fits the schema. One that doesn't is
+// call of owl's answer tool that fits the schema. One that doesn't is
 // told why, to be made again, and neither call, nor the words around
 // them, is told to the client.
 func TestClaudeTUISchemaAnswer(t *testing.T) {

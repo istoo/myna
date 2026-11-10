@@ -14,9 +14,9 @@ const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
 const SLOW = 2500;
-const models = ["claude-sonnet-5-5", "claude-opus-5-5", "myna/deepseek/pro", "myna/kimi/k3"].map((m) => ({ value: m, ref: m.replace(/^myna\//, ""), label: "Label " + m }));
+const models = ["claude-sonnet-5-5", "claude-opus-5-5", "owl/deepseek/pro", "owl/kimi/k3"].map((m) => ({ value: m, ref: m.replace(/^owl\//, ""), label: "Label " + m }));
 const agent = (id, name) => ({
-  id, name, path: "/test/" + id, wired: true, // on myna models (#726: a connected one is in view)
+  id, name, path: "/test/" + id, wired: true, // on owl models (#726: a connected one is in view)
   fields: [{ key: "model", label: "model", value: "claude-sonnet-5-5", options: models }],
 });
 const fresh = () => ({
@@ -94,7 +94,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     for (const lang of ["en", "zh"]) {
       await t.test(lang + ": the window", async () => {
         const sets = [];
-        const page = await open("http://myna.test/", lang, sets);
+        const page = await open("http://owl.test/", lang, sets);
         const view = page.locator("#view-agents");
         const field = page.locator(`${row} > .field.ag-start[data-key="model"]`);
         await toPicker(page, field, 2);
@@ -102,40 +102,40 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert(top > 0, "the list must be scrolled");
         await field.click();
         await page.locator("#pop:not([hidden]) #list li").first().waitFor();
-        const at = await pickModel(page, "myna/deepseek/pro");
-        await page.waitForFunction((r) => document.querySelector(r + ' .field[data-key="model"] .v')?.textContent === "Label myna/deepseek/pro", row, { timeout: 600 });
+        const at = await pickModel(page, "owl/deepseek/pro");
+        await page.waitForFunction((r) => document.querySelector(r + ' .field[data-key="model"] .v')?.textContent === "Label owl/deepseek/pro", row, { timeout: 600 });
         assert(Date.now() - at < SLOW, "shown before the answer came");
         assert.equal(sets.length, 1);
-        assert.deepEqual(sets[0], { agent: "claude", field: "model", value: "myna/deepseek/pro" });
+        assert.deepEqual(sets[0], { agent: "claude", field: "model", value: "owl/deepseek/pro" });
         assert.equal(await view.evaluate((v) => v.scrollTop), top, "the pick moved the page");
         // the answer, drawn, keeps it
         await page.waitForTimeout(SLOW + 300);
-        assert.equal(await field.locator(".v").textContent(), "Label myna/deepseek/pro");
-        assert.match(await page.locator("#status").textContent(), /Claude Code .*Label myna\/deepseek\/pro/);
+        assert.equal(await field.locator(".v").textContent(), "Label owl/deepseek/pro");
+        assert.match(await page.locator("#status").textContent(), /Claude Code .*Label owl\/deepseek\/pro/);
         assert.equal(await view.evaluate((v) => v.scrollTop), top, "the answer moved the page");
       });
     }
 
     await t.test("the tray panel: in the opened row and its line", async () => {
       const sets = [];
-      const page = await open("http://myna.test/?mode=panel", "en", sets, { viewport: { width: 440, height: 560 } });
+      const page = await open("http://owl.test/?mode=panel", "en", sets, { viewport: { width: 440, height: 560 } });
       await page.locator(`${row} .ag-sum`).click();
       await page.waitForTimeout(700);
       await page.locator(`${row} .ag-open .field[data-key="model"]`).click();
       await page.locator("#pop:not([hidden]) #list li").first().waitFor();
-      const at = await pickModel(page, "myna/kimi/k3");
-      await page.waitForFunction((r) => document.querySelector(r + " .ag-sum .vt")?.textContent === "Label myna/kimi/k3", row, { timeout: 600 });
+      const at = await pickModel(page, "owl/kimi/k3");
+      await page.waitForFunction((r) => document.querySelector(r + " .ag-sum .vt")?.textContent === "Label owl/kimi/k3", row, { timeout: 600 });
       assert(Date.now() - at < SLOW, "shown before the answer came");
-      assert.equal(await page.locator(`${row} .ag-open .field[data-key="model"] .v`).textContent(), "Label myna/kimi/k3");
+      assert.equal(await page.locator(`${row} .ag-open .field[data-key="model"] .v`).textContent(), "Label owl/kimi/k3");
       assert.equal(await page.locator(`${row}.open`).count(), 1, "the row stays open");
       await page.waitForTimeout(SLOW + 300);
-      assert.equal(await page.locator(`${row} .ag-sum .vt`).textContent(), "Label myna/kimi/k3");
+      assert.equal(await page.locator(`${row} .ag-sum .vt`).textContent(), "Label owl/kimi/k3");
       assert.equal(sets.length, 1);
     });
 
     await t.test("a refused pick puts the old model back", async () => {
       const sets = [];
-      const page = await open("http://myna.test/", "en", sets, { refuse: true });
+      const page = await open("http://owl.test/", "en", sets, { refuse: true });
       const field = page.locator(`${row} > .field.ag-start[data-key="model"]`);
       await toPicker(page, field);
       await field.click();

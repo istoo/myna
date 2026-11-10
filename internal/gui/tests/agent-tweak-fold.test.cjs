@@ -85,7 +85,7 @@ async function open(t, engine, first) {
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", serve(first));
-  await page.goto("http://myna.test/");
+  await page.goto("http://owl.test/");
   await page.locator('.row.agent[data-id="claude"]').waitFor();
   return { page, errors };
 }

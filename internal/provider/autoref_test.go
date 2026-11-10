@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // autoRefHome is a sandbox HOME with two providers serving Claude Opus 5.5,
@@ -39,7 +39,7 @@ func autoRefHome(t *testing.T) {
 	}
 }
 
-// A group myna found is listed as auto/<model>, the model's id as a
+// A group owl found is listed as auto/<model>, the model's id as a
 // vendor spells it (ZeroClover on X), so a client looking the part after
 // the slash up on models.dev finds the model; its old group/auto-<slug> is
 // the same group, and a group the user made stays group/<id>.

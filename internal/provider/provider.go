@@ -1,9 +1,9 @@
-// Package provider holds the model vendors myna can reach: where each one
+// Package provider holds the model vendors owl can reach: where each one
 // lives, which protocols it speaks, the API key the user typed in, and which
 // of its models should show up in the agents' pickers.
 //
 // Provider keys are never read from environment variables. A provider is
-// exactly what the user entered, kept in ~/.config/myna/providers.json
+// exactly what the user entered, kept in ~/.config/owl/providers.json
 // (mode 0600).
 package provider
 
@@ -25,15 +25,15 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/filememo"
-	"github.com/istoo/myna/internal/lastgood"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/steady"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/filememo"
+	"github.com/istoo/owl/internal/lastgood"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/steady"
 )
 
-// Protocol is a wire API myna can speak to an upstream.
+// Protocol is a wire API owl can speak to an upstream.
 type Protocol string
 
 const (
@@ -43,7 +43,7 @@ const (
 	Gemini    Protocol = "gemini"    // Google Gemini's generateContent: served to clients; spoken upstream at a custom provider's Gemini URL, Vertex AI and Factory's generate route
 )
 
-// Protocols in the order myna prefers them when it has to translate.
+// Protocols in the order owl prefers them when it has to translate.
 var Protocols = []Protocol{Chat, Responses, Anthropic}
 
 // Provider is one configured vendor.
@@ -88,7 +88,7 @@ type Provider struct {
 	// KeyPlan is the first key's plan (see KeyAccount.Plan).
 	KeyPlan string `json:"keyPlan,omitempty"`
 
-	// Base URLs, one per protocol the vendor serves natively. myna appends
+	// Base URLs, one per protocol the vendor serves natively. owl appends
 	// the usual paths: chat/responses bases end in /v1 (OpenAI style),
 	// the Anthropic base is the root (what ANTHROPIC_BASE_URL takes).
 	Chat      string `json:"chat,omitempty"`
@@ -99,7 +99,7 @@ type Provider struct {
 	// under it, with the key in x-goog-api-key, and models under it lists
 	// them (#1346).
 	Gemini string `json:"gemini,omitempty"`
-	// GeminiFilled is that myna filled Gemini in once, for a provider
+	// GeminiFilled is that owl filled Gemini in once, for a provider
 	// at AI Studio's OpenAI-compatible URL (aiStudioNative): a Gemini URL
 	// the user cleared after that stays empty.
 	GeminiFilled bool `json:"geminiFilled,omitempty"`
@@ -149,7 +149,7 @@ type Provider struct {
 	Affinity string `json:"affinity,omitempty"`
 
 	// KeepLogin, on Codex's or Claude Code's subscription, keeps the agent
-	// signed in to the account the user made first: myna doesn't sign it
+	// signed in to the account the user made first: owl doesn't sign it
 	// in to another when that one runs low or out (#524). The gateway still
 	// spreads its requests over the accounts that are on, as Routing says.
 	KeepLogin bool `json:"keepLogin,omitempty"`
@@ -158,15 +158,15 @@ type Provider struct {
 	// the user uses the agent as, while the first is only the one whose
 	// allowance is spent first (#524). Empty, it is the first.
 	KeepLoginAs string `json:"keepLoginAs,omitempty"`
-	// SwitchOnly, on Codex's subscription, has myna only move Codex's
+	// SwitchOnly, on Codex's subscription, has owl only move Codex's
 	// own sign-in (auth.json) to the next account with room and back:
 	// Codex's requests then go straight to OpenAI, never through the
 	// gateway for account failover, however many of its accounts are on
 	// (#1907). On Claude's subscription it keeps the accounts to Claude
-	// Code's own sign-in, which myna still moves: the gateway serves no
+	// Code's own sign-in, which owl still moves: the gateway serves no
 	// request on them (KeptToAgent; myduso on Discord).
 	SwitchOnly bool `json:"switchOnly,omitempty"`
-	// RestartApp, on Codex's subscription, has myna restart the Codex
+	// RestartApp, on Codex's subscription, has owl restart the Codex
 	// app's own app-server for a change it makes by itself that the app
 	// works without: the switch back once the account it moved off has
 	// room (SwitchWhenSpent), and giving Codex its account back at the
@@ -239,7 +239,7 @@ type Provider struct {
 	// they are out of quota or answers 429 (zoecats on Discord: a local
 	// aggregator says "quota exhausted" for a moment while it switches
 	// upstreams, and a rest of half an hour held every request back until
-	// myna restarted). Off by default: such a refusal rests it as ever.
+	// owl restarted). Off by default: such a refusal rests it as ever.
 	LimitRestOff bool `json:"limitRestOff,omitempty"`
 
 	// PriceRate is what the provider charges against the official price
@@ -264,7 +264,7 @@ type Provider struct {
 
 	// Headers are extra HTTP request headers sent to the vendor, as the user
 	// typed them but for ${sessionId} and ${threadId} in a value, the
-	// request's conversation ids (SentHeaders, conversation.go). They ride on every request myna makes to a plain
+	// request's conversation ids (SentHeaders, conversation.go). They ride on every request owl makes to a plain
 	// key+URL provider — forwarded calls, connectivity tests, and model-list
 	// fetches — applied after the auth headers, so the user can override those
 	// when a gateway insists on a private scheme. Signed-in agent accounts
@@ -282,8 +282,8 @@ type Provider struct {
 	// relay's own request id (X-Oneapi-Request-Id), for the agent's side
 	// to match with the relay's logs. Streamed or whole, an error too, on
 	// every API, translated or not; only the reply the agent is given
-	// has its headers passed on. One myna writes itself, or that would
-	// act on myna's address, never is (ReplyHeaderPassable).
+	// has its headers passed on. One owl writes itself, or that would
+	// act on owl's address, never is (ReplyHeaderPassable).
 	ReplyHeaders []string `json:"replyHeaders,omitempty"`
 
 	// PassHeaders are headers of the agent's request passed on to the
@@ -292,21 +292,21 @@ type Provider struct {
 	// can't give. The client's stands over a Header of the same name;
 	// with none sent the Header goes. Every API, count_tokens, a group's
 	// member, a plugin's fetch; a signed-in account's signing has the
-	// last word. One that carries myna's key or the connection's own
+	// last word. One that carries owl's key or the connection's own
 	// never is (RequestHeaderPassable).
 	PassHeaders []string `json:"passHeaders,omitempty"`
 
 	// Searches says the vendor answers a web search tool offered on its
 	// Anthropic or Responses API by itself (web_search_20250305,
 	// web_search): a relay in front of Anthropic's or OpenAI's API, which
-	// myna can't tell from its host. A request offering one then goes to
-	// it as the client sent it, rather than given myna's search (#359).
+	// owl can't tell from its host. A request offering one then goes to
+	// it as the client sent it, rather than given owl's search (#359).
 	Searches bool `json:"searches,omitempty"`
 
 	// CodexAsSent has a request Codex sends on the Responses API go to it
 	// as Codex sent it, its model name alone swapped: a relay that checks
 	// it is Codex's own (#1758: "Codex 客户端请求特征无效", 10014), which
-	// the shape myna fits it to for another backend (Responses Lite's
+	// the shape owl fits it to for another backend (Responses Lite's
 	// additional_tools lifted into tools, the tool search as a function,
 	// OpenAI-only fields left out) fails. Off, the default, keeps that
 	// fitting, which a backend that isn't OpenAI's needs (#350).
@@ -319,7 +319,7 @@ type Provider struct {
 	// identity line, Codex's GPT-5 identity lines, Hermes Agent's earlier
 	// default persona) go with a zero-width space inside them, which Google
 	// lets through and the model reads the same (gateway's
-	// antigravityCloak). Set with `myna provider set antigravity
+	// antigravityCloak). Set with `owl provider set antigravity
 	// prompt=as-written`; prompt=default turns it back.
 	PromptAsWritten bool `json:"promptAsWritten,omitempty"`
 
@@ -334,7 +334,7 @@ type Provider struct {
 	// (#350).
 	AdditionalTools bool `json:"additionalTools,omitempty"`
 	// AdditionalToolsOff, `additional-tools=off`, sends a loaded tool in
-	// the top-level tools even where myna's default would send the item.
+	// the top-level tools even where owl's default would send the item.
 	AdditionalToolsOff bool `json:"additionalToolsOff,omitempty"`
 
 	// Patience is how many seconds more a request to this provider alone,
@@ -343,28 +343,28 @@ type Provider struct {
 	// same-one retries are spent, as a group's Patience is (zoecats on
 	// Discord): 0 keeps it PatienceDefault, PatienceOff hands the agent
 	// the error at once, and it is at most PatienceLongest. Set with
-	// `myna provider set <id> patience=`; a group it is in keeps the
+	// `owl provider set <id> patience=`; a group it is in keeps the
 	// group's own.
 	Patience int `json:"patience,omitempty"`
 
 	// NativeCompaction has Codex's compaction_trigger go to the provider
 	// as Codex sent it, and the compaction the provider writes back go to
-	// Codex as it came (#1099), where myna otherwise asks the model for
-	// a summary and hands Codex that (its "myna1:" compaction). Only a
+	// Codex as it came (#1099), where owl otherwise asks the model for
+	// a summary and hands Codex that (its "owl1:" compaction). Only a
 	// provider whose wire carries it takes it (CarriesCompaction): a
-	// Responses API (Sub2API, a remote myna), a ChatGPT account, GitHub
+	// Responses API (Sub2API, a remote owl), a ChatGPT account, GitHub
 	// Copilot's GPT models. Such a compaction is sealed by the key or
 	// account that wrote it, so its conversation stays there, or is
 	// refused, never sent elsewhere to be dropped. Off, the default,
-	// keeps myna's summary.
+	// keeps owl's summary.
 	NativeCompaction bool `json:"nativeCompaction,omitempty"`
 
 	// PassUserAgent has a request go to the vendor with the User-Agent the
 	// agent that sent it gave (pi, opencode, Claude Code…), in place of
-	// myna's own (#1851): a coding plan that serves only agents it names
-	// knows them by it. One the agent didn't give, or myna's own
-	// requests, go as myna. Off, the default, every request goes as
-	// myna. Only a key+URL provider takes it: a signed-in account, a
+	// owl's own (#1851): a coding plan that serves only agents it names
+	// knows them by it. One the agent didn't give, or owl's own
+	// requests, go as owl. Off, the default, every request goes as
+	// owl. Only a key+URL provider takes it: a signed-in account, a
 	// plugin's and one that goes as a client of its vendor's own keep the
 	// identity their signing gives (see PassesUserAgent).
 	PassUserAgent bool `json:"passUserAgent,omitempty"`
@@ -397,14 +397,14 @@ type Provider struct {
 	// SkipsRedaction.
 	Unredacted bool `json:"unredacted,omitempty"`
 
-	// InsecureTLS has myna take the certificate of the provider's own
+	// InsecureTLS has owl take the certificate of the provider's own
 	// HTTPS host as it is, unchecked (#2383, fangzhengjin: a vLLM on the
 	// LAN, Ollama behind a self-signed cert). Only a provider the user
 	// added takes it (TakesInsecureTLS), and only for the hosts of its own
 	// base URLs (UncheckedHosts); see Via.
 	InsecureTLS bool `json:"insecureTLS,omitempty"`
 
-	// Proxy is the proxy myna's requests to this provider go through
+	// Proxy is the proxy owl's requests to this provider go through
 	// (#237: Codex through one, a vendor at home without): "" follows
 	// the global one (Settings' Proxy, the environment's, the system's),
 	// "direct" none, anything else the proxy's address (http://, https://,
@@ -446,7 +446,7 @@ type Provider struct {
 	// AccountNames is, for a subscription, the name the user gave each
 	// account they named (#1515: a team's seats told apart by who holds
 	// them, not by a masked email), by the account's name in lower case.
-	// It is myna's own: the vendor's or plugin's sign-in never sees it
+	// It is owl's own: the vendor's or plugin's sign-in never sees it
 	// (see account_names.go).
 	AccountNames map[string]string `json:"accountNames,omitempty"`
 	// KeySpendCaps is, for a provider of API keys, how much each key the
@@ -458,7 +458,7 @@ type Provider struct {
 	// BalanceURL, when set, is where the vendor tells what is left on a
 	// key, asked with the key the way a chat request carries it; BalancePath
 	// picks the amount out of the JSON reply (see balance.go). The vendors
-	// myna knows need neither.
+	// owl knows need neither.
 	BalanceURL  string `json:"balanceURL,omitempty"`
 	BalancePath string `json:"balancePath,omitempty"`
 	// BalanceMethod is how BalanceURL is asked: "" (or GET), or POST with
@@ -539,7 +539,7 @@ type Provider struct {
 	Unlisted bool `json:"unlisted,omitempty"`
 	// HiddenDrawers are the provider's image models the user unticked in
 	// its editor (321sssrt on X: an OpenAI key lists a dozen): left out of
-	// every list one is picked from (Settings › Images, another myna's
+	// every list one is picked from (Settings › Images, another owl's
 	// list, Aside's) and of Automatic's choice, as an unticked chat model
 	// is left out of the agents' lists. A deny list beside Models, not in
 	// it: Models is what agents chat with, empty meaning the vendor's list,
@@ -552,7 +552,7 @@ type Provider struct {
 	// HiddenDrawers are its image models (axelburks on Discord: a
 	// Volcengine Ark key lists a dozen Seedance models): left out of
 	// what lists video models to pick from (generate_video's, another
-	// myna's, /v1/models' ?kind=video) and of Automatic's choice. A
+	// owl's, /v1/models' ?kind=video) and of Automatic's choice. A
 	// request that names one still makes its video.
 	HiddenVideomakers []string `json:"hiddenVideomakers,omitempty"`
 	// Off switches the provider off without removing it: its keys and
@@ -577,8 +577,8 @@ type Provider struct {
 	// fetch: Save drops it, so it never reaches providers.json.
 	IconURL string `json:"iconUrl,omitempty"`
 
-	// Hidden is set on an account the user removed from myna; the
-	// agent stays signed in, myna just leaves it alone.
+	// Hidden is set on an account the user removed from owl; the
+	// agent stays signed in, owl just leaves it alone.
 	Hidden bool `json:"hidden,omitempty"`
 	// Quiet is set on a removed account whose "Add it back" line the user
 	// dismissed: it is offered again only from the Add sheet (#116).
@@ -603,11 +603,11 @@ type file struct {
 	// Searches are the web search APIs a model's search goes to when no
 	// provider can search (see search_api.go).
 	Searches []SearchAPI `json:"searches,omitempty"`
-	// NoAutoGroups: the user turned off the groups myna finds on its
+	// NoAutoGroups: the user turned off the groups owl finds on its
 	// own (SetAutoGroups); the groups they made or changed stay.
 	NoAutoGroups bool `json:"noAutoGroups,omitempty"`
 	// AutoGroupSkip are the providers, by id, the user keeps out of the
-	// groups myna finds (SetAutoGroupSkip; chenxiang0010 on Discord):
+	// groups owl finds (SetAutoGroupSkip; chenxiang0010 on Discord):
 	// their models are in none, so a model only one other provider serves
 	// is no group. The groups the user made or changed keep them.
 	AutoGroupSkip []string `json:"autoGroupSkip,omitempty"`
@@ -644,7 +644,7 @@ func load() file {
 // file changes: the gateway asked for one provider's proxy (storedPicks)
 // and whether it is left alone (leftAlone) for each request and each
 // background look, each a parse of the whole file, 3.6 GB of a live
-// myna's 33 GB in 53 minutes. What it returns is shared: the caller
+// owl's 33 GB in 53 minutes. What it returns is shared: the caller
 // must not change it, nor a list or map in it.
 func storedFile() file {
 	f, err := filememo.Read("providers", Path(), parseProviders)
@@ -672,7 +672,7 @@ type unreadableError struct {
 }
 
 func (e *unreadableError) Error() string {
-	return fmt.Sprintf("%s can't be read (%v); myna left it unchanged — fix it or move it aside", e.path, e.err)
+	return fmt.Sprintf("%s can't be read (%v); owl left it unchanged — fix it or move it aside", e.path, e.err)
 }
 
 func (e *unreadableError) Unwrap() []error { return []error{ErrUnreadable, e.err} }
@@ -784,8 +784,8 @@ func All() []Provider {
 	out := make([]Provider, 0, len(held))
 	// asked once, from the settings a held look has read already: asked for
 	// each account, settings.json was parsed for every account of every
-	// model's price (agent.mynaModels, the GUI's drift every 15s and dsh's
-	// round every 30s), most of an idle myna's CPU (xsw on Discord)
+	// model's price (agent.owlModels, the GUI's drift every 15s and dsh's
+	// round every 30s), most of an idle owl's CPU (xsw on Discord)
 	off := sync.OnceValue(func() bool { return settings.AccountDiscoveryOffIn(heldSettings()) })
 	for _, p := range held {
 		if p.Account != nil && off() && !p.publicAccount() {
@@ -914,7 +914,7 @@ func accountSettings(a, pk Provider) Provider {
 	a.NativeCompaction = pk.NativeCompaction
 	a.PromptAsWritten = pk.PromptAsWritten
 	// a deferred tool a tool search loaded goes where it was loaded, set
-	// with `myna provider set <id> additional-tools=on` (#2660, #4738)
+	// with `owl provider set <id> additional-tools=on` (#2660, #4738)
 	a.AdditionalTools, a.AdditionalToolsOff = pk.AdditionalTools, pk.AdditionalToolsOff
 	// Send requests unmasked, the user's for a subscription and a
 	// plugin's provider too (isee1_1 on Discord)
@@ -942,7 +942,7 @@ func accountSettings(a, pk Provider) Provider {
 	// keeps them for the account like the rest of these
 	a.RateWindows = pk.RateWindows
 	// the extra body fields written for it, which a ChatGPT account's
-	// requests take (WithExtraBody, myna-releases#18)
+	// requests take (WithExtraBody, owl-releases#18)
 	a.ExtraBody = pk.ExtraBody
 	// the image models unticked in its editor (HiddenDrawers)
 	a.HiddenDrawers = pk.HiddenDrawers
@@ -954,7 +954,7 @@ func accountSettings(a, pk Provider) Provider {
 	return a
 }
 
-// Hidden lists the signed-in accounts the user removed from myna. The
+// Hidden lists the signed-in accounts the user removed from owl. The
 // file is read once, as parsed until it changes: a parse of it for each
 // account was 68 MB of the Providers page's 1.4 GB in twenty loads.
 func Hidden() []Provider {
@@ -989,11 +989,11 @@ func findIn(all []Provider, id string) (*Provider, error) {
 	if p := lookIn(all, id); p != nil {
 		return p, nil
 	}
-	return nil, fmt.Errorf("no provider %q — myna providers lists them%s", id, readElsewhere())
+	return nil, fmt.Errorf("no provider %q — owl providers lists them%s", id, readElsewhere())
 }
 
 // lookIn is findIn without its error, which looks on disk for where else
-// this myna's files may be (readElsewhere): a request's model not found
+// this owl's files may be (readElsewhere): a request's model not found
 // among the providers asked it twice, for nothing (#3394).
 func lookIn(all []Provider, id string) *Provider {
 	q := strings.ToLower(strings.TrimSpace(id))
@@ -1015,16 +1015,16 @@ func lookIn(all []Provider, id string) *Provider {
 	return nil
 }
 
-// readElsewhere says, for a provider not found, that this myna reads its
+// readElsewhere says, for a provider not found, that this owl reads its
 // files from another folder than the app's when XDG_CONFIG_HOME moves them
-// and the app's has some (蒙面人 on Discord: a terminal's myna had no
+// and the app's has some (蒙面人 on Discord: a terminal's owl had no
 // Antigravity, which the window showed signed in).
 func readElsewhere() string {
 	def := appdir.Redirected()
 	if def == "" || !isFile(filepath.Join(def, "providers.json")) && !isFile(filepath.Join(def, "logins.json")) {
 		return ""
 	}
-	return fmt.Sprintf("\n  this myna reads its files from %s, as XDG_CONFIG_HOME says; the app opened from the Dock or Start menu keeps them in %s. Run it with XDG_CONFIG_HOME unset (env -u XDG_CONFIG_HOME myna …) to use those", appdir.Config(), def)
+	return fmt.Sprintf("\n  this owl reads its files from %s, as XDG_CONFIG_HOME says; the app opened from the Dock or Start menu keeps them in %s. Run it with XDG_CONFIG_HOME unset (env -u XDG_CONFIG_HOME owl …) to use those", appdir.Config(), def)
 }
 
 var idRe = regexp.MustCompile(`[^a-z0-9]+`)
@@ -1036,7 +1036,7 @@ func Slug(name string) string {
 
 // Save adds or replaces a provider.
 // ErrNeedsKey is Save's refusal of a provider with no key that needs one.
-// The CLI adds the command that gives it (myna provider add <preset> <key>);
+// The CLI adds the command that gives it (owl provider add <preset> <key>);
 // the editor and the TUI, which ask for the key in a field, don't.
 var ErrNeedsKey = errors.New("needs an API key")
 
@@ -1062,8 +1062,8 @@ func Save(p Provider) error {
 	if p.ID == "" || p.ID != Slug(p.ID) && !stored(p.ID) {
 		return fmt.Errorf("provider id must be lowercase letters, digits and dashes, not %q", p.ID)
 	}
-	if p.ID == "myna" {
-		return errors.New(`"myna" is what agents call the gateway itself; pick another id`)
+	if p.ID == "owl" {
+		return errors.New(`"owl" is what agents call the gateway itself; pick another id`)
 	}
 	if p.ID == strings.TrimSuffix(GroupPrefix, "/") {
 		return errors.New(`"group" starts the ids of routing groups; pick another id`)
@@ -1272,7 +1272,7 @@ func add(p Provider, once bool) (string, error) {
 	// for is taken (AddCopy).
 	for _, h := range All() {
 		if once && h.Account == nil && sameProvider(h, normalize(p)) && servesAll(h, normalize(p)) {
-			return "", fmt.Errorf("%s is already added with that key (%s); myna provider key %s <key> changes its key", h.Name, h.ID, h.ID)
+			return "", fmt.Errorf("%s is already added with that key (%s); owl provider key %s <key> changes its key", h.Name, h.ID, h.ID)
 		}
 	}
 	p.ID, p.Name = freeID(p.ID), freeName(p.Name)
@@ -1399,7 +1399,7 @@ func freeName(name string) string {
 	}
 }
 
-// accountIDs are the ids of the subscriptions myna can list (account.go).
+// accountIDs are the ids of the subscriptions owl can list (account.go).
 var accountIDs = []string{"antigravity", "claude", "codex", CommandCodePlanID, "copilot", "cursor", "devin", "factory", "gemini", "grok", "kiro", MiMoID, ChatGPTAPIID, "qoder", QoderCNID, "workbuddy", WorkBuddyAIID, "zcode", "zed"}
 
 func stored(id string) bool {
@@ -1439,7 +1439,7 @@ func tuckedAccount(id string) bool {
 }
 
 // TuckAccount hides a removed account from the Add sheet's "Removed from
-// myna" too (on), or lists it there again (off). Tucked, it is quiet as
+// owl" too (on), or lists it there again (off). Tucked, it is quiet as
 // well: no reminder line either (#116).
 func TuckAccount(id string, on bool) error {
 	f, err := read()
@@ -1475,7 +1475,7 @@ func QuietAccount(id string) error {
 }
 
 // ShowAccount brings back the signed-in account of an agent the user had
-// removed from myna.
+// removed from owl.
 func ShowAccount(id string) error {
 	f, err := read()
 	if err != nil {
@@ -1491,7 +1491,7 @@ func ShowAccount(id string) error {
 }
 
 // Delete removes a provider. An account, a built-in's or a plugin's, is
-// only hidden from myna (its accounts and model picks kept, shown again
+// only hidden from owl (its accounts and model picks kept, shown again
 // from Hidden or by signing in); signing out is each account's Remove.
 func Delete(id string) error {
 	f, err := read()
@@ -1602,7 +1602,7 @@ func normalize(p Provider) Provider {
 		p.Chat, p.Responses, p.Anthropic, p.Gemini, p.Decide = "", "", "", "", ""
 		p.Key, p.KeyName, p.Keys, p.KeyProtocol, p.KeyWeight, p.KeyPlan = "", "", nil, "", 0, ""
 	}
-	p.remoteMynaEndpoints()
+	p.remoteOwlEndpoints()
 	for _, u := range []*string{&p.Chat, &p.Responses, &p.Anthropic, &p.Gemini, &p.Decide, &p.Website, &p.KeysURL} {
 		*u = strings.TrimRight(strings.TrimSpace(*u), "/")
 		if *u != "" && !strings.Contains(*u, "://") {
@@ -1726,7 +1726,7 @@ func normalize(p Provider) Provider {
 			p.KeysURL = cmp.Or(r.KeysURL, p.KeysURL)
 			p.Website = cmp.Or(r.Website, p.Website)
 			// the catalog follows the region unless the user gave one
-			// of their own: the preset's or a region's is myna's
+			// of their own: the preset's or a region's is owl's
 			if slices.ContainsFunc(pr.Regions, func(x Region) bool { return x.Catalog != "" }) &&
 				(p.Catalog == pr.Catalog || slices.ContainsFunc(pr.Regions, func(x Region) bool { return x.Catalog == p.Catalog })) {
 				p.Catalog = cmp.Or(r.Catalog, pr.Catalog)
@@ -1771,7 +1771,7 @@ func cleanHeaders(h map[string]string) map[string]string {
 
 // userIDHeader is h with a header named by digits alone and no value
 // read as the new-api user id it is, New-Api-User: the user id typed in
-// a header's name box, where myna's old hint asked for a header
+// a header's name box, where owl's old hint asked for a header
 // (zxc56823 on Discord, "272298" with its value left empty). Sent as it
 // was, the relay is told a header it never reads and still no user. One
 // with a New-Api-User of its own already has it; the digits are dropped.
@@ -2254,7 +2254,7 @@ func (p Provider) On() bool { return p.Ready() && !p.Off && !p.KeptToAgent() }
 
 // KeptToAgent is whether the provider is Claude's subscription with
 // SwitchOnly on: its accounts are Claude Code's own sign-in alone, which
-// myna moves to the next account with room and back, and the gateway
+// owl moves to the next account with room and back, and the gateway
 // sends no request to them, so none goes through Claude Code's SDK run,
 // which spends more of the allowance than Claude Code's own sessions
 // (myduso on Discord). Codex's SwitchOnly only keeps failover out of its
@@ -2274,9 +2274,9 @@ func SetOff(id string, off bool) error {
 	return Save(*p)
 }
 
-// SwitchedOff is the provider switched off in myna that a model id
+// SwitchedOff is the provider switched off in owl that a model id
 // names: as "provider/model", or a model only switched-off providers list.
-// A request for it is refused as that, not as a model myna doesn't know.
+// A request for it is refused as that, not as a model owl doesn't know.
 func SwitchedOff(id string) (Provider, bool) {
 	id = strings.TrimSuffix(strings.TrimSpace(id), "[1m]")
 	if pid, _, ok := strings.Cut(id, "/"); ok {

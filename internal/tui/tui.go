@@ -1,4 +1,4 @@
-// Package tui is myna in the terminal: one row per agent, arrow keys to pick
+// Package tui is owl in the terminal: one row per agent, arrow keys to pick
 // a field, enter to change it; and pages for providers and usage beside it
 // (pages.go), routing groups (routing.go), sessions (sessions.go) and the
 // library (library.go), 1–6 to go between them.
@@ -17,14 +17,14 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/library"
-	"github.com/istoo/myna/internal/profile"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/sessions"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/library"
+	"github.com/istoo/owl/internal/profile"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/sessions"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // ---- styling ---------------------------------------------------------------
@@ -104,7 +104,7 @@ type model struct {
 	w, h    int
 	syncing bool
 
-	// failover: what an agent going through myna for account failover
+	// failover: what an agent going through owl for account failover
 	// alone, not connected, says of it (agent.FailoverSaid, #1385)
 	failover []string
 
@@ -155,7 +155,7 @@ type flashMsg struct {
 
 type syncedMsg struct{ err error }
 
-// Run starts myna in the terminal. ready is called once the model is
+// Run starts owl in the terminal. ready is called once the model is
 // made: making it asks agents' CLIs (claude auth status, up to seconds),
 // and a signal then is the caller's to handle, as bubbletea starts
 // listening only as the program runs.
@@ -181,7 +181,7 @@ func Run(ready func()) error {
 
 func newModel() model {
 	// in the order the app lists them, those hidden there last
-	// an app myna has no fields in (Cindy, which takes it by a link) has
+	// an app owl has no fields in (Cindy, which takes it by a link) has
 	// nothing to pick here, nor one whose CLI is gone, its folder left
 	// behind (#2177): nothing would read what is picked
 	var set []*agent.Agent
@@ -871,7 +871,7 @@ func (m model) View() string {
 }
 
 func (m model) header(crumbs ...string) string {
-	s := pad + sTitle.Render("◉ myna")
+	s := pad + sTitle.Render("◉ owl")
 	if len(crumbs) == 0 {
 		// the pages, this one marked
 		s += "  "

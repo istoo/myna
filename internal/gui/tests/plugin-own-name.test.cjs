@@ -1,7 +1,7 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // #4558 (MYCF711): a plugin installed from git whose package.json gives
-// itself a name in myna.name ("华为云 HUAWEI") read as its dependency key
-// (myna-officeace) on Installed. Bun takes no non-ASCII key, so the
+// itself a name in owl.name ("华为云 HUAWEI") read as its dependency key
+// (owl-officeace) on Installed. Bun takes no non-ASCII key, so the
 // package's own name is the only readable one it has. Its row and its page
 // say that name, with the package beside it on the page; a git one that
 // gives none still says its package; a package the community's list names
@@ -14,10 +14,10 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
-const OFFICE = "github:example/myna-officeace", LOOMY = "github:example/myna-loomy-auth", LISTED = "@magpie-community/opencode-qoder-auth";
+const OFFICE = "github:example/owl-officeace", LOOMY = "github:example/owl-loomy-auth", LISTED = "@magpie-community/opencode-qoder-auth";
 const state = { bun: true, bunVersion: "1.3.0", picker: false, movable: [], plugins: [
-  { spec: OFFICE, package: "myna-officeace", ownName: "华为云 HUAWEI", version: "0.2.4", commit: "c594984", head: "c594984", providers: [], moved: [] },
-  { spec: LOOMY, package: "myna-loomy-auth", version: "0.1.0", commit: "8fd2d9a", head: "8fd2d9a", providers: [], moved: [] },
+  { spec: OFFICE, package: "owl-officeace", ownName: "华为云 HUAWEI", version: "0.2.4", commit: "c594984", head: "c594984", providers: [], moved: [] },
+  { spec: LOOMY, package: "owl-loomy-auth", version: "0.1.0", commit: "8fd2d9a", head: "8fd2d9a", providers: [], moved: [] },
   { spec: LISTED, ownName: "Not the list's", version: "0.3.0", providers: [], moved: [] },
 ] };
 const listings = [{ package: LISTED, name: "Qoder", summary: "Qoder's plan", providers: ["qoder"], community: true, github: { owner: "magpie-community", repo: "plugins" } }];
@@ -38,7 +38,7 @@ function server(lang) {
     if (url.pathname === "/api/plugins/search") return json({ hits: [] });
     if (url.pathname === "/api/plugins/updates") return json({ waiting: [], updated: [] });
     if (url.pathname === "/api/plugins/git") return json({ heads: { [OFFICE]: "c594984", [LOOMY]: "8fd2d9a" } });
-    if (url.pathname === "/api/plugins/page") return json({ readme: "# myna-officeace", updated: "2026-10-01T10:00:00Z" });
+    if (url.pathname === "/api/plugins/page") return json({ readme: "# owl-officeace", updated: "2026-10-01T10:00:00Z" });
     if (url.pathname.startsWith("/api/")) return json({});
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
@@ -58,13 +58,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang));
-        await page.goto("http://myna.test/?view=plugins");
+        await page.goto("http://owl.test/?view=plugins");
         const view = page.locator("#view-plugins");
         const installed = await page.evaluate((l) => l === "en" ? "Installed" : I18N[l]["Installed"], lang);
         await view.page().locator(":is(.lib-tabs .opt, .nav-s):visible", { hasText: installed }).click();
         await view.locator(".pm-row").nth(2).waitFor();
         const names = await view.locator(".pm-row .name > span:first-child").allTextContents();
-        assert.deepEqual([...names].sort(), ["Qoder", "myna-loomy-auth", "华为云 HUAWEI"].sort(), "the package's own name, the package where it gives none, the list's where it lists one");
+        assert.deepEqual([...names].sort(), ["Qoder", "owl-loomy-auth", "华为云 HUAWEI"].sort(), "the package's own name, the package where it gives none, the list's where it lists one");
         const row = view.locator(".pm-row").filter({ has: page.locator(".name", { hasText: "华为云 HUAWEI" }) });
         const box = await row.boundingBox();
         assert.ok(box.x >= 0 && box.x + box.width <= width, `the row fits: ${JSON.stringify(box)}`);

@@ -11,9 +11,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/sessions"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/sessions"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // WorkBuddy 5.8.2's bundled ModelProvider sends the session as
@@ -136,7 +136,7 @@ func TestWorkBuddySessionThroughGateway(t *testing.T) {
 			t.Errorf("session %s captured %d turns, want %d: %v", id, transcript.Captured, want, err)
 		}
 	}
-	get := httptest.NewRequest("GET", "/v1/myna/route", nil)
+	get := httptest.NewRequest("GET", "/v1/owl/route", nil)
 	get.RemoteAddr = "127.0.0.1:5000"
 	get.Header.Set("X-Conversation-ID", "chat-a")
 	rec := httptest.NewRecorder()

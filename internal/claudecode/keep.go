@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/proc"
 )
 
 // When KeepCurrent first looks, and how often after that; vars for tests.
@@ -25,15 +25,15 @@ var keep = struct {
 	latest: Latest,
 }
 
-// KeepCurrent keeps the Claude Code myna downloaded at Claude Code's
-// newest release while myna serves: a minute after it starts and every six
-// hours after. Every run myna starts sets DISABLE_AUTOUPDATER, so nothing
+// KeepCurrent keeps the Claude Code owl downloaded at Claude Code's
+// newest release while owl serves: a minute after it starts and every six
+// hours after. Every run owl starts sets DISABLE_AUTOUPDATER, so nothing
 // else updates it, and a container's download (in /config/cache, on the
 // volume) would otherwise stay at the version first installed, image
 // update after image update (alextjy on Discord). It does nothing when
-// myna downloaded none, when the machine has a Claude Code of its own
+// owl downloaded none, when the machine has a Claude Code of its own
 // (that one is run, and updates itself), or when DISABLE_AUTOUPDATER is set
-// for myna: Claude Code's own way of holding a version.
+// for owl: Claude Code's own way of holding a version.
 func KeepCurrent(ctx context.Context) {
 	t := time.NewTimer(keepFirst)
 	defer t.Stop()
@@ -44,7 +44,7 @@ func KeepCurrent(ctx context.Context) {
 		case <-t.C:
 		}
 		if said, err := keepOnce(ctx); err != nil {
-			log.Printf("Claude Code: keeping myna's download current: %v", err)
+			log.Printf("Claude Code: keeping owl's download current: %v", err)
 		} else if said != "" {
 			log.Print(said)
 		}
@@ -52,7 +52,7 @@ func KeepCurrent(ctx context.Context) {
 	}
 }
 
-// keepOnce updates myna's download when a newer release is out, and says
+// keepOnce updates owl's download when a newer release is out, and says
 // what it did ("" for nothing). The version an earlier look replaced goes
 // first: no run has been started on it since then.
 func keepOnce(ctx context.Context) (string, error) {
@@ -77,5 +77,5 @@ func keepOnce(ctx context.Context) (string, error) {
 	if _, err := install(dctx, r, nil); err != nil {
 		return "", fmt.Errorf("Claude Code %s: %w", r.Version, err)
 	}
-	return fmt.Sprintf("Claude Code: myna's download updated from %s to %s", v, r.Version), nil
+	return fmt.Sprintf("Claude Code: owl's download updated from %s to %s", v, r.Version), nil
 }

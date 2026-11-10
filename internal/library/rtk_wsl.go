@@ -10,15 +10,15 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/wslrun"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/wslrun"
 )
 
 // RTK for an agent in a WSL distro (lex on Discord: Claude Code in WSL
-// couldn't have the RTK of a myna on Windows). Its hook runs in the
+// couldn't have the RTK of a owl on Windows). Its hook runs in the
 // distro, where a Windows rtk.exe is no command, so it is the distro's own
 // rtk that is installed (rtk's own Linux script, run there), found, and
-// run for rtk init, with its files under the distro's home as myna
+// run for rtk init, with its files under the distro's home as owl
 // opens it (\\wsl.localhost\<distro>\home\<user>). A distro that isn't
 // running is never started for it: its agents are listed asleep.
 
@@ -45,7 +45,7 @@ func rtkKind(id string) string {
 }
 
 // rtkHome is the home rtk's installer writes under for a: the distro's for
-// one in WSL, as myna opens it; this machine's otherwise.
+// one in WSL, as owl opens it; this machine's otherwise.
 func rtkHome(a *agent.Agent) string {
 	if a != nil && a.WSL != "" {
 		return a.Home
@@ -69,7 +69,7 @@ func rtkAt(a *agent.Agent, elem ...string) string {
 }
 
 // rtkClaudeDir is Claude Code's folder for a: ~/.claude in a distro, whose
-// CLAUDE_CONFIG_DIR myna can't read (as wslTargetOf).
+// CLAUDE_CONFIG_DIR owl can't read (as wslTargetOf).
 func rtkClaudeDir(a *agent.Agent) string {
 	if a != nil && a.WSL != "" {
 		return rtkAt(a, ".claude")
@@ -213,7 +213,7 @@ func shq(s string) string { return "'" + strings.ReplaceAll(s, "'", `'\''`) + "'
 
 // rtkInstallWSL runs rtk's installer in a's distro, by the distro's rtk
 // (bin, its path there). It runs in a login shell, with what that gives the
-// distro's agents; HOME is the distro's, so it writes under the home myna
+// distro's agents; HOME is the distro's, so it writes under the home owl
 // reads a's files at. Claude Code is pointed at a folder of its own made
 // and taken away there, as on this machine. An agent's folder variable
 // (HERMES_HOME) isn't set: the distro's own, if any, is what its agent
@@ -276,7 +276,7 @@ func InstallRTKIn(distro string) (*RTKView, error) {
 	}
 	if !agent.WSLRunning(distro) {
 		rtkMu.Unlock()
-		return nil, fmt.Errorf("WSL %s isn't running, and myna doesn't start it to install RTK: start the distro (open its terminal), then install again", distro)
+		return nil, fmt.Errorf("WSL %s isn't running, and owl doesn't start it to install RTK: start the distro (open its terminal), then install again", distro)
 	}
 	if d := rtkDistroOf(distro, true); d.Path != "" {
 		rtkMu.Unlock()

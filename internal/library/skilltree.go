@@ -16,7 +16,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/source"
+	"github.com/istoo/owl/internal/source"
 )
 
 // ---- fetching only a repository's skills ----------------------------------
@@ -271,7 +271,7 @@ func fetchBlob(c *http.Client, src Source, path, sha, dst string, exec bool) err
 	token := false
 	get := func(u, accept string) (*http.Response, error) {
 		req, _ := http.NewRequest("GET", u, nil)
-		req.Header.Set("User-Agent", "myna")
+		req.Header.Set("User-Agent", "owl")
 		if accept != "" {
 			req.Header.Set("Accept", accept)
 		}

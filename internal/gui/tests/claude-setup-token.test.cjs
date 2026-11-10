@@ -3,7 +3,7 @@
 // "Use a setup-token instead…", which ends the browser sign-in and asks for
 // the token `claude setup-token` printed, said whole in the page's
 // language. A refused token says why and stays to be fixed; one taken is
-// added. The account it makes is myna's only: Remove and "myna only",
+// added. The account it makes is owl's only: Remove and "owl only",
 // no Use or Make first.
 // Chromium and WebKit, English, Chinese (both), Japanese and German, at
 // 420px; no backend, the API is faked here.
@@ -50,8 +50,8 @@ for (const engine of engines) for (const lang of ["en", "zh", "zh-TW", "ja", "de
       const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
       return route.fulfill({ body: await fs.readFile(file), contentType });
     });
-    await page.context().route((url) => url.hostname !== "myna.test", (route) => route.fulfill({ contentType: "text/html", body: "" }));
-    await page.goto("http://myna.test/");
+    await page.context().route((url) => url.hostname !== "owl.test", (route) => route.fulfill({ contentType: "text/html", body: "" }));
+    await page.goto("http://owl.test/");
     await page.waitForFunction((l) => state.settings.lang === l, lang);
     await page.evaluate(() => {
       providers = providers || { providers: [], presets: [], plugins: [] };
@@ -81,7 +81,7 @@ for (const engine of engines) for (const lang of ["en", "zh", "zh-TW", "ja", "de
     assert.deepEqual(canceled, ["c1"]);
     const text = await box.innerText();
     assert.ok(text.includes(await translated("Add a Claude account by setup-token")), text);
-    assert.ok(text.includes(await translated("Paste the token {cmd} printed. myna gives it to Claude Code for this account's requests only; Claude Code itself stays signed in as it is.", { cmd: "claude setup-token" })), text);
+    assert.ok(text.includes(await translated("Paste the token {cmd} printed. owl gives it to Claude Code for this account's requests only; Claude Code itself stays signed in as it is.", { cmd: "claude setup-token" })), text);
     assert.ok(text.includes(await translated("A setup-token can't tell its email or allowance: the account is named by the token, and its allowance shows once a reply tells it.")), text);
     const field = box.locator(".claude-token input");
     const add = box.locator('.claude-token button[type="submit"]');
@@ -107,7 +107,7 @@ for (const engine of engines) for (const lang of ["en", "zh", "zh-TW", "ja", "de
     assert.deepEqual(await page.evaluate(() => window.signedInWith), [{ agent: "claude", user: "Claude setup-token 3204d0", token: true }]);
     assert.equal(await box.innerText().then((s) => s.includes(TOKEN)), false);
 
-    // its row is myna's only
+    // its row is owl's only
     const row = await page.evaluate(() => {
       const ls = [{ user: "pro@x.com", active: true, plan: "max" }, { user: "Claude setup-token 3204d0", on: true, token: true }];
       const a = { agent: "claude", agentName: "Claude Code", logins: ls };
@@ -118,7 +118,7 @@ for (const engine of engines) for (const lang of ["en", "zh", "zh-TW", "ja", "de
       return r ? { text: r.innerText, buttons: [...r.querySelectorAll("button")].map((b) => b.textContent) } : null;
     }).catch((e) => ({ error: e.message }));
     assert.ok(row && !row.error, JSON.stringify(row));
-    assert.ok(row.text.includes(await translated("myna only")), row.text);
+    assert.ok(row.text.includes(await translated("owl only")), row.text);
     assert.ok(!row.buttons.includes(await said("Make first")) && !row.buttons.includes(await said("Use")), row.buttons.join(","));
     assert.deepEqual(errors, []);
   });

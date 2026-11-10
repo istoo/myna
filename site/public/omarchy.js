@@ -1,28 +1,28 @@
-// github.com/istoo/myna on Omarchy (omarchy.org), the Hyprland desktop: the pages draw
+// github.com/istoo/owl on Omarchy (omarchy.org), the Hyprland desktop: the pages draw
 // themselves in Omarchy's own look (its theme's palette, its monospace font,
-// square flat surfaces framed in the accent) and, where myna runs on the
+// square flat surfaces framed in the accent) and, where owl runs on the
 // same computer, in the very theme Omarchy has on, followed as it changes.
 // Each page loads this only in a Linux desktop browser, or once a reader
 // turned it on (?omarchy=1); elsewhere nothing here runs.
 //
 // Omarchy is told by its font: it installs "omarchy" (its logo, U+E900)
 // system-wide, and a page may load a local font by name. The theme comes from
-// myna's gateway, GET http://127.0.0.1:3425/v1/myna/omarchy, which only
-// github.com/istoo/myna may read. Chrome asks the reader before a site reaches this
-// computer, so the page asks myna by itself only once that was allowed;
+// owl's gateway, GET http://127.0.0.1:3425/v1/owl/omarchy, which only
+// github.com/istoo/owl may read. Chrome asks the reader before a site reaches this
+// computer, so the page asks owl by itself only once that was allowed;
 // until then it takes Omarchy's default theme for light or dark, and the chip
 // in the corner offers to follow the computer, or any built-in theme.
 //
 // localStorage "omarchy": {on: true|false (unset: when Omarchy is found),
 // seen: Omarchy was found here, pick: a built-in theme's name ("" follows the
-// computer), live: what myna last told, painted at once next time}.
+// computer), live: what owl last told, painted at once next time}.
 // ?omarchy=1|0|<theme> sets it.
 (() => {
   const root = document.documentElement;
   const lang = (root.lang || "en").slice(0, 2);
   const T = (en, zh, ja, de) => ({ zh, ja, de })[lang] ?? en;
   const KEY = "omarchy";
-  const GATEWAY = "http://127.0.0.1:3425/v1/myna/omarchy";
+  const GATEWAY = "http://127.0.0.1:3425/v1/owl/omarchy";
   // Omarchy 4's themes (/usr/share/omarchy/themes/*/colors.toml): mode,
   // background, foreground, bright foreground, dim text, accent, green, red,
   // yellow
@@ -82,10 +82,10 @@
     };
   }
 
-  // what myna's windows draw with (internal/omarchy Vars), as the page's
+  // what owl's windows draw with (internal/omarchy Vars), as the page's
   // palette; a value that isn't a plain colour, length or font list is refused
   const plain = /^[\w\s#%.,()"'-]{1,200}$/;
-  function fromMyna(th) {
+  function fromOwl(th) {
     const v = (th && th.vars) || {};
     const p = {
       name: String(th.name || ""), mode: th.mode === "light" ? "light" : "dark",
@@ -127,7 +127,7 @@
     shots();
   }
 
-  // myna's screenshots as myna draws itself on Omarchy: its own windows
+  // owl's screenshots as owl draws itself on Omarchy: its own windows
   // shot in each of Omarchy's themes (/img/omarchy/<theme>/), in place of the
   // page's, as wide as before, and shot again as the theme turns; a theme of
   // the reader's own takes Omarchy's default for its light or dark; shots not
@@ -175,15 +175,15 @@
 
   function choose() {
     if (st.pick && THEMES[st.pick]) return builtin(st.pick);
-    const live = st.live && fromMyna(st.live);
+    const live = st.live && fromOwl(st.live);
     if (live) return live;
     return builtin(GUESS[scheme()]);
   }
   const light = matchMedia("(prefers-color-scheme: light)");
   function scheme() { return light.matches ? "light" : "dark"; }
 
-  // myna on this computer: "live" (it answered), "ask" (the browser will
-  // ask the reader first), "denied" (the reader said no), "absent" (no myna
+  // owl on this computer: "live" (it answered), "ask" (the browser will
+  // ask the reader first), "denied" (the reader said no), "absent" (no owl
   // answered), "" (not asked yet)
   let status = "", timer = 0, reached = false, missed = 0, asks = 0;
   async function allowed() {
@@ -207,7 +207,7 @@
       clearTimeout(t);
       if (!r.ok) throw new Error(r.status);
       const th = await r.json();
-      const p = fromMyna(th);
+      const p = fromOwl(th);
       if (!p) throw new Error("theme");
       status = "live";
       missed = 0;
@@ -219,7 +219,7 @@
       if (!st.pick && (changed || !cur || cur.name !== p.name)) paint(p); else render();
     } catch {
       // once reached, one slow answer (Omarchy setting a theme reloads
-      // Hyprland meanwhile) isn't myna gone: asked again as often
+      // Hyprland meanwhile) isn't owl gone: asked again as often
       if (byReader || !reached || ++missed > 1) {
         status = byReader && (await allowed()) === "denied" ? "denied" : "absent";
         render();
@@ -235,7 +235,7 @@
     if (document.visibilityState === "visible" && cur && !st.pick && status !== "ask" && status !== "denied") ask(false);
   });
 
-  // until myna answers, Omarchy's default for light or dark follows the
+  // until owl answers, Omarchy's default for light or dark follows the
   // desktop as it turns (a theme set in Omarchy's menu turns it), and a page
   // the browser lets through later (its prompt, its site settings) starts
   // following then, both without a reload
@@ -245,8 +245,8 @@
     watching = true;
     light.addEventListener("change", () => {
       if (!cur || st.pick || status === "live") return;
-      const live = st.live && st.live.mode === scheme() && fromMyna(st.live);
-      // the theme myna last told is off the desktop now: a reload shows
+      const live = st.live && st.live.mode === scheme() && fromOwl(st.live);
+      // the theme owl last told is off the desktop now: a reload shows
       // what this shows, not that one
       if (!live && st.live) { delete st.live; save(); }
       paint(live || builtin(GUESS[scheme()]));
@@ -289,11 +289,11 @@
     }
     const following = !st.pick;
     const note = {
-      live: T(`Following ${cur.name} via myna`, `正在跟随 ${cur.name}（来自 myna）`, `myna 経由で ${cur.name} に追従中`, `Folgt ${cur.name} über myna`),
-      ask: T("Ask myna on this computer for the theme", "向本机的 myna 询问当前主题", "このコンピュータの myna にテーマを尋ねる", "myna auf diesem Rechner nach dem Theme fragen"),
-      denied: T("The browser blocks this page from reaching myna", "浏览器禁止了本页访问本机的 myna", "ブラウザがこのページから myna への接続をブロックしています", "Der Browser verhindert, dass diese Seite myna erreicht"),
-      absent: T("myna isn't running on this computer", "本机没有运行 myna", "このコンピュータで myna が動いていません", "myna läuft auf diesem Rechner nicht"),
-      "": T("Asking myna…", "正在询问 myna…", "myna に問い合わせ中…", "Frage myna …"),
+      live: T(`Following ${cur.name} via owl`, `正在跟随 ${cur.name}（来自 owl）`, `owl 経由で ${cur.name} に追従中`, `Folgt ${cur.name} über owl`),
+      ask: T("Ask owl on this computer for the theme", "向本机的 owl 询问当前主题", "このコンピュータの owl にテーマを尋ねる", "owl auf diesem Rechner nach dem Theme fragen"),
+      denied: T("The browser blocks this page from reaching owl", "浏览器禁止了本页访问本机的 owl", "ブラウザがこのページから owl への接続をブロックしています", "Der Browser verhindert, dass diese Seite owl erreicht"),
+      absent: T("owl isn't running on this computer", "本机没有运行 owl", "このコンピュータで owl が動いていません", "owl läuft auf diesem Rechner nicht"),
+      "": T("Asking owl…", "正在询问 owl…", "owl に問い合わせ中…", "Frage owl …"),
     }[status];
     const rows = Object.keys(THEMES).map((n) => {
       const [mode, bg, fg, , , accent] = THEMES[n].split(" ");
@@ -302,13 +302,13 @@
     }).join("");
     // not let through yet: the chip says what one click does
     const cta = status === "ask" && following && !open
-      ? `<button class="om-cta" type="button" data-ask title="${esc(T("Your browser will ask to let this page reach myna on this computer", "浏览器会询问是否允许本页访问本机的 myna", "このページがこのコンピュータの myna に接続してよいか、ブラウザが尋ねます", "Ihr Browser fragt, ob diese Seite myna auf diesem Rechner erreichen darf"))}">${esc(T("Follow my Omarchy theme", "跟随 Omarchy 主题", "Omarchy のテーマに合わせる", "Meinem Omarchy-Theme folgen"))}</button>`
+      ? `<button class="om-cta" type="button" data-ask title="${esc(T("Your browser will ask to let this page reach owl on this computer", "浏览器会询问是否允许本页访问本机的 owl", "このページがこのコンピュータの owl に接続してよいか、ブラウザが尋ねます", "Ihr Browser fragt, ob diese Seite owl auf diesem Rechner erreichen darf"))}">${esc(T("Follow my Omarchy theme", "跟随 Omarchy 主题", "Omarchy のテーマに合わせる", "Meinem Omarchy-Theme folgen"))}</button>`
       : "";
     bar.innerHTML = cta + `<button class="om-chip${status === "live" && following ? " live" : ""}" type="button" aria-haspopup="menu" aria-expanded="${open}"><span class="om-logo" aria-hidden="true"></span><span class="om-name">${esc(cur.name || "omarchy")}</span></button>`
       + (open ? `<div class="om-menu" role="menu">
         <div class="om-h">Omarchy</div>
         <button class="om-row${following ? " on" : ""}" type="button" role="menuitemradio" aria-checked="${following}" data-pick=""><span class="om-sw om-follow"></span>${esc(T("Follow this computer", "跟随这台电脑", "このコンピュータに合わせる", "Diesem Rechner folgen"))}</button>
-        <div class="om-note">${status === "ask" ? `<button class="om-ask" type="button" data-ask>${esc(note)} →</button>` : esc(note)}${status === "absent" ? ` · <a href="/#download">${esc(T("Get myna", "下载 myna", "myna を入手", "myna holen"))}</a>` : ""}</div>
+        <div class="om-note">${status === "ask" ? `<button class="om-ask" type="button" data-ask>${esc(note)} →</button>` : esc(note)}${status === "absent" ? ` · <a href="/#download">${esc(T("Get owl", "下载 owl", "owl を入手", "owl holen"))}</a>` : ""}</div>
         <div class="om-h">${esc(T("Themes", "主题", "テーマ", "Themes"))}</div>
         <div class="om-list">${rows}</div>
         <button class="om-row om-quit" type="button" data-off>${esc(T("Turn off Omarchy look", "关闭 Omarchy 风格", "Omarchy スタイルをオフ", "Omarchy-Look ausschalten"))}</button>

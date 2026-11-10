@@ -4,12 +4,12 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// Default picked for Claude Code on myna takes out what myna wrote, its
-// tiers and subagent model too: myna's own doing, not a change from
+// Default picked for Claude Code on owl takes out what owl wrote, its
+// tiers and subagent model too: owl's own doing, not a change from
 // outside, so no drift is left behind to keep the row up among the
 // connected ones while it says Not connected (EZN7L2C3, #834).
 func TestClaudeDefaultLeavesNoDrift(t *testing.T) {
@@ -38,7 +38,7 @@ func TestClaudeDefaultLeavesNoDrift(t *testing.T) {
 		t.Fatalf("drift left: %+v", *d)
 	}
 
-	// a tier changed outside myna before is still said to be
+	// a tier changed outside owl before is still said to be
 	home2, _ := codexHome(t, "", "")
 	if err := provider.Save(provider.Provider{ID: "aaa", Name: "AAA", Chat: "https://a.example/v1", Key: "k", Models: []string{"first", "claude-opus-5-5"}}); err != nil {
 		t.Fatal(err)

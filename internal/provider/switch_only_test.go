@@ -15,7 +15,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 // #1907 (foobra): Codex Desktop and the CLI on their own ChatGPT
@@ -27,7 +27,7 @@ import (
 // leave the next part used (returnsToFirst). A providers.json
 // that can't be read
 // says switch-only: the user's choice is unknown, and failover through the
-// gateway, myna's own idea, isn't taken up on it.
+// gateway, owl's own idea, isn't taken up on it.
 func TestCodexSwitchOnlyStillSwitchesTheSignIn(t *testing.T) {
 	home := signIn(t) // me@example.com, acct-1
 	rememberLogins(true)
@@ -111,7 +111,7 @@ func TestCodexSwitchOnlyStillSwitchesTheSignIn(t *testing.T) {
 }
 
 // myduso on Discord: Claude's subscription kept to Claude Code alone.
-// myna still signs Claude Code in to the next account with room, by
+// owl still signs Claude Code in to the next account with room, by
 // writing Claude Code's own sign-in, and serves nothing on the accounts:
 // they leave the catalog, a request naming them is refused as switched
 // off, and none of it is the raw Off a user's switch writes.
@@ -257,7 +257,7 @@ func TestSwitchOnlyMovesASignInKeptOnOne(t *testing.T) {
 			if err := SetLoginOn("codex", "spare@example.com", true); err != nil {
 				t.Fatal(err)
 			}
-			// the one Codex is signed in to, by the name myna gives it
+			// the one Codex is signed in to, by the name owl gives it
 			as := ""
 			for _, l := range Logins("codex") {
 				if l.Active && chosen {
@@ -353,10 +353,10 @@ func TestClaudeSwitchOnlyMovesASignInKeptOnOne(t *testing.T) {
 	}
 }
 
-// cn_Vincentzyx on X: Claude Code not connected to myna, only its
+// cn_Vincentzyx on X: Claude Code not connected to owl, only its
 // sign-in switched, the accounts in the order Make first gave them. The
 // account Claude Code was on ran out and it stayed there: no request of a
-// saved account passes myna then, so one Claude Code wasn't signed in
+// saved account passes owl then, so one Claude Code wasn't signed in
 // to since had no reading, and the switch counted no account known to
 // have room. A saved account with no reading is read by Claude Code's own
 // /usage, in its own directory, in order and only till one has room, and

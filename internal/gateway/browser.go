@@ -14,35 +14,35 @@ import (
 	"time"
 
 	"github.com/coder/websocket"
-	"github.com/istoo/myna/internal/browserext"
+	"github.com/istoo/owl/internal/browserext"
 )
 
-// Myna Browser: the agents myna serves use the user's own browser,
-// its tabs signed in to whatever the user is, through the Myna Browser
-// extension (internal/browserext). Not a browser of myna's own: a fresh
+// Owl Browser: the agents owl serves use the user's own browser,
+// its tabs signed in to whatever the user is, through the Owl Browser
+// extension (internal/browserext). Not a browser of owl's own: a fresh
 // profile is signed in to nothing, and an agent's own browser tool stops
 // working when its account changes.
 //
 // The extension holds a WebSocket to BrowserExtensionPath, taken only from
 // its own origin on this computer. An agent calls the tools at
-// BrowserMCPPath (Streamable HTTP, or `myna mcp browser` over stdio),
+// BrowserMCPPath (Streamable HTTP, or `owl mcp browser` over stdio),
 // and each call is handed to the extension, which carries it out with the
 // DevTools protocol in the tab and answers with MCP content. Only this
-// computer's agents may: unlike the other servers of myna's own, it is
+// computer's agents may: unlike the other servers of owl's own, it is
 // never served to another machine, shared or not, since it acts as the
 // user wherever they are signed in.
 
 // BrowserMCPPath is where the browser MCP server is served.
-const BrowserMCPPath = "/mcp/myna/browser"
+const BrowserMCPPath = "/mcp/owl/browser"
 
 // BrowserExtensionPath is where the extension connects.
-const BrowserExtensionPath = "/v1/myna/browser/extension"
+const BrowserExtensionPath = "/v1/owl/browser/extension"
 
 // BrowserStatusPath tells whether the extension is connected.
-const BrowserStatusPath = "/v1/myna/browser"
+const BrowserStatusPath = "/v1/owl/browser"
 
 // BrowserSessionHeader names the agent session a call is from, so each
-// one goes on in the tab it was working in; `myna mcp browser` sends one
+// one goes on in the tab it was working in; `owl mcp browser` sends one
 // a process.
 const BrowserSessionHeader = "X-Magpie-Browser-Session"
 
@@ -51,7 +51,7 @@ const BrowserSessionHeader = "X-Magpie-Browser-Session"
 // page to settle.
 const browserCallWait = 100 * time.Second
 
-// browserRelay is the extensions connected: each browser that has Myna
+// browserRelay is the extensions connected: each browser that has Owl
 // Browser (Chrome and Edge both, two profiles of one). A session goes on in
 // the one it picked (browser_tabs use), else the last to connect.
 type browserRelay struct {
@@ -66,7 +66,7 @@ type browserRelay struct {
 
 type browserConn struct {
 	c       *websocket.Conn
-	id      string // b1, b2: in the order they connected, while myna runs
+	id      string // b1, b2: in the order they connected, while owl runs
 	version string
 	agent   string
 	since   time.Time
@@ -216,7 +216,7 @@ func (b *browserRelay) call(ctx context.Context, session, tool string, args json
 		args = json.RawMessage("{}")
 	}
 	if err := c.send(ctx, map[string]any{"id": id, "session": session, "tool": tool, "args": args}); err != nil {
-		return nil, errors.New("couldn't reach Myna Browser: " + err.Error())
+		return nil, errors.New("couldn't reach Owl Browser: " + err.Error())
 	}
 	t := time.NewTimer(browserCallWait)
 	defer t.Stop()
@@ -224,18 +224,18 @@ func (b *browserRelay) call(ctx context.Context, session, tool string, args json
 	case r := <-ch:
 		return r, nil
 	case <-t.C:
-		return nil, errors.New("Myna Browser didn't answer in " + browserCallWait.String() + ": the page may be stuck; take a snapshot or a screenshot to see where it is")
+		return nil, errors.New("Owl Browser didn't answer in " + browserCallWait.String() + ": the page may be stuck; take a snapshot or a screenshot to see where it is")
 	case <-ctx.Done():
 		return nil, ctx.Err()
 	}
 }
 
-var errBrowserAway = errors.New("Myna Browser isn't connected, so there is no browser to use. Ask the user to set it up: myna's Library → Myna Browser → Set up, which loads the extension in Chrome, Edge or another Chromium browser. Once installed it connects by itself whenever that browser and myna are both running.")
+var errBrowserAway = errors.New("Owl Browser isn't connected, so there is no browser to use. Ask the user to set it up: owl's Library → Owl Browser → Set up, which loads the extension in Chrome, Edge or another Chromium browser. Once installed it connects by itself whenever that browser and owl are both running.")
 
 // browserExtension takes the extension's WebSocket.
 func (s *Server) browserExtension(w http.ResponseWriter, r *http.Request) {
 	if !local(r) || !loopbackHost(r.Host) || r.Header.Get("Origin") != browserext.Origin {
-		http.Error(w, "only the Myna Browser extension, on this computer, connects here", http.StatusForbidden)
+		http.Error(w, "only the Owl Browser extension, on this computer, connects here", http.StatusForbidden)
 		return
 	}
 	ws, err := websocket.Accept(w, r, &websocket.AcceptOptions{OriginPatterns: []string{"chrome-extension://" + browserext.ID}})
@@ -251,7 +251,7 @@ func (s *Server) browserExtension(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if added {
 			s.browser.remove(c)
-			log.Printf("Myna Browser disconnected")
+			log.Printf("Owl Browser disconnected")
 		}
 	}()
 	for {
@@ -275,10 +275,10 @@ func (s *Server) browserExtension(w http.ResponseWriter, r *http.Request) {
 			if !added {
 				s.browser.add(c)
 				added = true
-				log.Printf("Myna Browser %s connected", m.Version)
+				log.Printf("Owl Browser %s connected", m.Version)
 			}
 			if browserext.Older(m.Version, browserext.Version()) {
-				// an older extension: its folder gets this myna's, which
+				// an older extension: its folder gets this owl's, which
 				// the browser reads when it starts again (or the extension's
 				// reload on chrome://extensions). The extension isn't told
 				// to reload itself: an unpacked one that calls
@@ -297,7 +297,7 @@ func (s *Server) browserExtension(w http.ResponseWriter, r *http.Request) {
 // browserStatus says whether the extension is connected, for the GUI.
 func (s *Server) browserStatus(w http.ResponseWriter, r *http.Request) {
 	if !local(r) || fromBrowser(r) {
-		http.Error(w, "Myna Browser's state is told to this computer's myna only", http.StatusForbidden)
+		http.Error(w, "Owl Browser's state is told to this computer's owl only", http.StatusForbidden)
 		return
 	}
 	out := map[string]any{"connected": false, "version": browserext.Version()}
@@ -315,10 +315,10 @@ func (s *Server) browserMCP(w http.ResponseWriter, r *http.Request) {
 	// user wherever their browser is signed in; and no web page's, whatever
 	// Settings lists
 	if !local(r) || fromBrowser(r) {
-		http.Error(w, "myna's browser MCP server answers agents on this computer only", http.StatusForbidden)
+		http.Error(w, "owl's browser MCP server answers agents on this computer only", http.StatusForbidden)
 		return
 	}
-	serveMCP(w, r, "myna's browser", "myna-browser", 1<<20, s.browserMCPCall)
+	serveMCP(w, r, "owl's browser", "owl-browser", 1<<20, s.browserMCPCall)
 }
 
 func (s *Server) browserMCPCall(r *http.Request, m mcpMessage) (any, map[string]any) {
@@ -327,7 +327,7 @@ func (s *Server) browserMCPCall(r *http.Request, m mcpMessage) (any, map[string]
 		return map[string]any{
 			"protocolVersion": mcpVersion(m),
 			"capabilities":    map[string]any{"tools": map[string]any{}},
-			"serverInfo":      map[string]any{"name": "myna-browser", "title": "Myna Browser", "version": Version},
+			"serverInfo":      map[string]any{"name": "owl-browser", "title": "Owl Browser", "version": Version},
 			"instructions":    browserInstructions,
 		}, nil
 	case "ping":
@@ -384,7 +384,7 @@ func (s *Server) browserMCPCall(r *http.Request, m mcpMessage) (any, map[string]
 		}
 		var result map[string]any
 		if json.Unmarshal(out, &result) != nil || result["content"] == nil {
-			return toolResult("Myna Browser answered with something that isn't a tool result: update it (myna's Library → Myna Browser)", true), nil
+			return toolResult("Owl Browser answered with something that isn't a tool result: update it (owl's Library → Owl Browser)", true), nil
 		}
 		// with two browsers connected, the list of tabs says whose they are
 		if p.Name == "browser_tabs" && (tabs.Action == "" || tabs.Action == "list") {
@@ -459,7 +459,7 @@ func (b *browserRelay) list(session string) string {
 		return errBrowserAway.Error()
 	}
 	mine := b.forSession(session)
-	lines := []string{fmt.Sprintf("%d browsers with Myna Browser are connected (* is the one calls go to; browser_tabs with action use and browser picks another, by id or name):", len(all))}
+	lines := []string{fmt.Sprintf("%d browsers with Owl Browser are connected (* is the one calls go to; browser_tabs with action use and browser picks another, by id or name):", len(all))}
 	for _, c := range all {
 		mark := " "
 		if c == mine {

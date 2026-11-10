@@ -12,10 +12,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/gui"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/gui"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A routing group or a provider saved answers before the agents' model
@@ -50,12 +50,12 @@ func TestSaveAnswersBeforeTheAgentsSync(t *testing.T) {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	// Pi runs a model of myna's: connected, so a sync writes its list
-	if err := os.WriteFile(filepath.Join(dir, "settings.json"), []byte(`{"defaultProvider":"myna","defaultModel":"a/m1"}`), 0o600); err != nil {
+	// Pi runs a model of owl's: connected, so a sync writes its list
+	if err := os.WriteFile(filepath.Join(dir, "settings.json"), []byte(`{"defaultProvider":"owl","defaultModel":"a/m1"}`), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	// Pi as myna connected it (Connect's connect.was stash): a sync
-	// writes only an agent connected in myna
+	// Pi as owl connected it (Connect's connect.was stash): a sync
+	// writes only an agent connected in owl
 	if err := os.WriteFile(filepath.Join(filepath.Dir(provider.Path()), "stash.json"), []byte(`{"pi.connect.was":"{}"}`), 0o600); err != nil {
 		t.Fatal(err)
 	}

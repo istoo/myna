@@ -5,11 +5,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/probelog"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/probelog"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// SourceProbe is Record.Source for a request myna sent a provider on its
+// SourceProbe is Record.Source for a request owl sent a provider on its
 // own, outside any agent's turn (probelog): the editor's Test, Detect
 // APIs, a model list's refresh. Its Kind says which (probelog.KindTest,
 // KindDetect, KindList). Such a row is listed on the request log, told
@@ -19,8 +19,8 @@ import (
 const SourceProbe = "probe"
 
 // SourceMCP is Record.Source for an agent's call to a tool of one of
-// myna's own MCP servers: the gateway's (image, vision, web search,
-// plugin tools, the MCP hub) and the Myna Image server an agent runs
+// owl's own MCP servers: the gateway's (image, vision, web search,
+// plugin tools, the MCP hub) and the Owl Image server an agent runs
 // (ferock on Discord). Its Kind is KindMCP, Requested the tool's name as
 // it was called, Host the server's, Provider and Model what the tool used
 // when it used a model, Millis how long the call took and Error what a
@@ -30,7 +30,7 @@ const SourceProbe = "probe"
 const SourceMCP = "mcp"
 
 // SourceSearch is Record.Source for one ask of a search API (Tavily,
-// Brave, …) by a web search myna ran (cybercaius on Discord: which
+// Brave, …) by a web search owl ran (cybercaius on Discord: which
 // search API each search used couldn't be seen). Its Kind is
 // "web_search", Agent the agent the search was for, Requested the API's
 // name, Host where it was asked, ProviderKeyID and ProviderKeyName the key
@@ -45,7 +45,7 @@ const SourceSearch = "search"
 // them by.
 const KindMCP = "mcp"
 
-// IsProbe is a request myna sent on its own (SourceProbe), an MCP tool
+// IsProbe is a request owl sent on its own (SourceProbe), an MCP tool
 // call (SourceMCP) or a search API's (SourceSearch): a row listed and
 // counted nowhere.
 func (r Record) IsProbe() bool {
@@ -67,7 +67,7 @@ type probeRow struct {
 
 func init() {
 	probelog.Sink = func(p probelog.Row) {
-		r := Record{Time: p.Time, Agent: "myna", Provider: p.Provider, ProviderAccount: p.Account,
+		r := Record{Time: p.Time, Agent: "owl", Provider: p.Provider, ProviderAccount: p.Account,
 			Host: p.Host, Model: p.Model, Requested: p.Model, Status: p.Status, Millis: p.Millis,
 			Error: clipProbeError(p.Error), Endpoint: p.Endpoint, Kind: p.Kind, Source: SourceProbe}
 		if quietProbe(r) {
@@ -77,10 +77,10 @@ func init() {
 	}
 }
 
-// quietProbe is a request of myna's own the request log leaves out: a
-// model list that was answered. myna asks for one by itself, at start-up,
+// quietProbe is a request of owl's own the request log leaves out: a
+// model list that was answered. owl asks for one by itself, at start-up,
 // behind the panel and the Providers page, and on a schedule (a Remote
-// myna's every 10 minutes, RemoteMynaEvery), so the Requests page
+// owl's every 10 minutes, RemoteOwlEvery), so the Requests page
 // filled with rows of 0 tokens that no agent sent (ferock on Discord). One
 // that failed is listed, as is every Test and Detect APIs: a list that
 // couldn't be fetched is why models are missing, and the row says why.

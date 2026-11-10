@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/owl/internal/edit"
 )
 
 // stage is an explicit offline write, separate from confirmed runtime apply.
@@ -43,16 +43,16 @@ func (c *asideConnection) stage(key, value string) error {
 		return err
 	}
 	owned, had := r.Fields[key]
-	if had && !strings.HasPrefix(asideSelection(before), "myna/") {
+	if had && !strings.HasPrefix(asideSelection(before), "owl/") {
 		delete(r.Fields, key)
 		had = false
 		owned = asideOwned{}
 	}
-	if p == "myna" {
+	if p == "owl" {
 		if err := c.connectLocked(); err != nil {
 			return err
 		}
-		if !had && !strings.HasPrefix(asideSelection(before), "myna/") {
+		if !had && !strings.HasPrefix(asideSelection(before), "owl/") {
 			owned.Before = append(json.RawMessage(nil), before...)
 		}
 	}

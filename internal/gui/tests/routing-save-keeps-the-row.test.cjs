@@ -89,10 +89,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang));
-      await page.goto("http://myna.test/?view=routing");
+      await page.goto("http://owl.test/?view=routing");
       await page.locator(".rt-group[data-id=big]").waitFor();
 
-      // narrow, the row is below the window's foot; myna moves the page
+      // narrow, the row is below the window's foot; owl moves the page
       // only for the reader, so it is wheeled to as a reader would
       const row = page.locator(".rt-group[data-id=big]");
       const vb = await page.locator("#view-routing").boundingBox();

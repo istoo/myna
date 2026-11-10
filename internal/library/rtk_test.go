@@ -9,13 +9,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // fakeRTK is an rtk on PATH that acts as rtk 0.50's installer does for
 // Claude Code, OpenCode and Cursor: installing OpenCode or Cursor gives it to
-// Claude Code as well. Its uninstaller isn't there: myna doesn't use it.
+// Claude Code as well. Its uninstaller isn't there: owl doesn't use it.
 const fakeRTK = `#!/bin/sh
 c="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
 claude() { [ -d "$c" ] && echo '{"hooks":{"PreToolUse":[{"hooks":[{"command":"rtk hook claude"}]}]}}' > "$c/settings.json"; }
@@ -214,7 +214,7 @@ func TestRTKRemove(t *testing.T) {
 // hook under hooks.PostToolUse too, when the rtk pipeline has after_tool
 // rules (its src/hooks/init/claude.rs: "enabling rtk:posthook adds
 // PostToolUse"), and its uninstaller takes its entries out of PreToolUse,
-// PostToolUse and SessionStart alike. myna says Claude Code has rtk by
+// PostToolUse and SessionStart alike. owl says Claude Code has rtk by
 // the file whole, so an entry under another event kept the row on: turning
 // it off took only PreToolUse out, then said "rtk's hook is still in
 // Claude". The user's own hooks under those events stay.
@@ -374,7 +374,7 @@ func TestRTKOpenCode2(t *testing.T) {
 	if exists(plugin) {
 		t.Fatal("rtk 0.51's plugin was written for OpenCode 2")
 	}
-	// one written before (by an older myna, or rtk init by hand) is on,
+	// one written before (by an older owl, or rtk init by hand) is on,
 	// and goes
 	write(t, plugin, "export const RtkOpenCodePlugin: Plugin = async ({ $ }) => {\n")
 	if !row().On {
@@ -548,7 +548,7 @@ func TestRTKGainRead(t *testing.T) {
 		t.Fatalf("failed: gain %+v, err %q", v.Gain, v.GainErr)
 	}
 	gain(`echo 'No tracking data yet.'; exit 0`)
-	if v := ReadRTK(); v.Gain != nil || v.GainErr != "rtk gain printed no summary myna can read: No tracking data yet." {
+	if v := ReadRTK(); v.Gain != nil || v.GainErr != "rtk gain printed no summary owl can read: No tracking data yet." {
 		t.Fatalf("not JSON: gain %+v, err %q", v.Gain, v.GainErr)
 	}
 }
@@ -578,7 +578,7 @@ func TestCodexSandbox(t *testing.T) {
 
 // TestRTKNoHookListed (Discord, lc: rtk 没有识别 deepseek harness): an
 // agent RTK has no hook for, DeepSeek Harness, is listed all the same with
-// why, not left out as if myna hadn't seen it, and it can't be switched on.
+// why, not left out as if owl hadn't seen it, and it can't be switched on.
 func TestRTKNoHookListed(t *testing.T) {
 	h := sandbox(t)
 	bin := filepath.Join(h, "bin")
@@ -601,7 +601,7 @@ func TestRTKNoHookListed(t *testing.T) {
 		t.Fatalf("switched on: %v", err)
 	}
 	if _, err := RTKTakes("dsh"); err == nil || !strings.Contains(err.Error(), "rewriting the shell command") {
-		t.Fatalf("myna library rtk on dsh: %v", err)
+		t.Fatalf("owl library rtk on dsh: %v", err)
 	}
 }
 
@@ -628,7 +628,7 @@ echo "Test with: git status"
 
 // TestRTKHermesHome (新v学员 on Discord, native Windows): Hermes's folder is
 // %LOCALAPPDATA%\hermes there, and rtk's installer wrote its plugin into it,
-// while myna looked for the plugin in ~/.hermes: "rtk's installer didn't
+// while owl looked for the plugin in ~/.hermes: "rtk's installer didn't
 // add its hook to Hermes Agent". The plugin is looked for, and taken out,
 // in Hermes's own folder (appdir.HermesHome), and the installer is told
 // that folder, since rtk itself knows only $HERMES_HOME and ~/.hermes.
@@ -714,7 +714,7 @@ func TestRTKNoHookGrokApp(t *testing.T) {
 		t.Fatalf("switched on: %v", err)
 	}
 	if _, err := RTKTakes("grok-app"); err == nil || !strings.Contains(err.Error(), "no Grok or Grok App agent") {
-		t.Fatalf("myna library rtk on grok-app: %v", err)
+		t.Fatalf("owl library rtk on grok-app: %v", err)
 	}
 }
 
@@ -739,6 +739,6 @@ func TestRTKNoHookGrokBuild(t *testing.T) {
 		t.Fatalf("switched on: %v", err)
 	}
 	if _, err := RTKTakes("grok"); err == nil || !strings.Contains(err.Error(), "no Grok agent") {
-		t.Fatalf("myna library rtk on grok: %v", err)
+		t.Fatalf("owl library rtk on grok: %v", err)
 	}
 }

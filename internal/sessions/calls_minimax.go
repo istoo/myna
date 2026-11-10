@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/istoo/myna/internal/appdir"
+	"github.com/istoo/owl/internal/appdir"
 )
 
 // MiniMax Code's calls (#1605, LukeZ1988: MiniMax Code was missing from
@@ -27,7 +27,7 @@ import (
 //	 "provider":"custom_provider:relay","model":"m2","usage":{"input":123,
 //	 "output":7,"cacheRead":50,"cacheWrite":20,…},"timestamp":1791717525043,…}}
 //
-// A call MiniMax Code made through myna's entry (custom_provider:myna,
+// A call MiniMax Code made through owl's entry (custom_provider:owl,
 // which internal/agent's minimax.go writes) is the gateway's to count: it
 // logged the call itself, with the provider and account that answered.
 
@@ -43,8 +43,8 @@ func MiniMaxDir() string {
 
 func minimaxSessions() string { return filepath.Join(MiniMaxDir(), "v2", "sessions") }
 
-// mcodeGateway is the provider MiniMax Code names a call to myna's entry by.
-const mcodeGateway = "custom_provider:myna"
+// mcodeGateway is the provider MiniMax Code names a call to owl's entry by.
+const mcodeGateway = "custom_provider:owl"
 
 // minimaxCallFiles are each session's messages files: messages.jsonl, and
 // any other generation of it the session's history-catalog.json keeps

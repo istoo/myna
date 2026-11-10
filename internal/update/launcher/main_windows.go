@@ -1,18 +1,18 @@
-// Command launcher is myna.com, the console program myna writes
+// Command launcher is owl.com, the console program owl writes
 // beside the Windows app (update.EnsureCompanion, #3737).
 //
 // The app is linked with -H windowsgui so that a double click opens no
-// console window, and a shell doesn't wait for such a program: `myna
+// console window, and a shell doesn't wait for such a program: `owl
 // plugin login` in PowerShell or cmd gave the prompt back at once, printed
-// after it, and the shell and myna read the same keys. A shell looks for
-// `myna` by PATHEXT, which lists .COM before .EXE, so it runs this
+// after it, and the shell and owl read the same keys. A shell looks for
+// `owl` by PATHEXT, which lists .COM before .EXE, so it runs this
 // instead: a console program, which the shell waits for. It runs the app
 // with this console's standard handles, waits for it and exits with its
 // code. A command that opens the app's window (none, app, gui, tray,
-// panel, a myna:// link) is started and left to run, as it was.
+// panel, a owl:// link) is started and left to run, as it was.
 //
 // The app it runs is named in this file's last bytes (update.comText),
-// so a download kept as myna-windows-amd64.exe is run by its own name.
+// so a download kept as owl-windows-amd64.exe is run by its own name.
 package main
 
 import (
@@ -66,7 +66,7 @@ func main() {
 	// update.ComEnv: the app keeps these handles and borrows this console
 	p, err := os.StartProcess(target, nil, &os.ProcAttr{
 		Files: files,
-		Env:   append(os.Environ(), "MYNA_COM=1"),
+		Env:   append(os.Environ(), "OWL_COM=1"),
 		Sys:   &syscall.SysProcAttr{CmdLine: cmdline},
 	})
 	if err != nil {
@@ -80,6 +80,6 @@ func main() {
 }
 
 func fail(err error) {
-	os.Stderr.WriteString("myna: " + err.Error() + "\n")
+	os.Stderr.WriteString("owl: " + err.Error() + "\n")
 	os.Exit(1)
 }

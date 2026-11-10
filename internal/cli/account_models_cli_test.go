@@ -5,10 +5,10 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// myna provider account-models gives one key, by its name or its id, the
+// owl provider account-models gives one key, by its name or its id, the
 // models it alone serves; all gives it every one again, and a key the
 // provider doesn't have is an error (#474).
 func TestAccountModelsCmd(t *testing.T) {

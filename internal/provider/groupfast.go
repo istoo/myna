@@ -45,7 +45,7 @@ func (g Group) IsFast(id string) bool {
 	return slices.Contains(g.Fast, id)
 }
 
-// CanFast reports whether model, as p serves it, has a fast mode myna
+// CanFast reports whether model, as p serves it, has a fast mode owl
 // can ask for: a ChatGPT account's GPT models (Codex's Fast), Cursor's
 // models with a -fast one, an OpenAI key's GPT and o-series models on its
 // Responses API (priority processing), an Anthropic key's Opus models with
@@ -88,12 +88,12 @@ func CanFast(p Provider, model string) bool {
 		_, ok = pluginModel(pp, model+"-fast")
 		return ok
 	}
-	if p.IsRemoteMyna() {
-		// another myna's model it offers its own Codex Fast on (its
+	if p.IsRemoteOwl() {
+		// another owl's model it offers its own Codex Fast on (its
 		// list's service_tiers, #1234): a pick sent fast here goes on to
 		// it with service_tier "priority", which it sends its vendor as
 		// its own Codex's turn would be (littlekk88 on Discord: the
-		// picker had no Fast for a remote myna's model)
+		// picker had no Fast for a remote owl's model)
 		return slices.Contains(RemoteTiers(p, model), "priority")
 	}
 	if p.Account != nil {
@@ -123,10 +123,10 @@ func CanFast(p Provider, model string) bool {
 	return OwnFast(p, model)
 }
 
-// RemoteTiers are the service tiers another myna's list says it offers
+// RemoteTiers are the service tiers another owl's list says it offers
 // on model (#1234), nil for a provider that isn't one.
 func RemoteTiers(p Provider, model string) []string {
-	if !p.IsRemoteMyna() {
+	if !p.IsRemoteOwl() {
 		return nil
 	}
 	for _, m := range p.liveByID(model) {
@@ -139,7 +139,7 @@ func RemoteTiers(p Provider, model string) []string {
 
 // OwnFast reports whether model has a fast mode only as the user's own
 // provider may serve it (#1615): a GPT model on a provider they added by
-// its address, on an OpenAI API, which myna can't tell serves priority
+// its address, on an OpenAI API, which owl can't tell serves priority
 // and asks for it all the same when the user switches it fast. Not where
 // CanFast knows the vendor's (OpenAI's own API).
 func OwnFast(p Provider, model string) bool {
@@ -208,7 +208,7 @@ func cleanFast(entries []Entry, g *Group) error {
 			return fmt.Errorf("%s is a group: its models are sent as it says, so it takes no :%s", model, FastWord)
 		}
 		if p, m, ok := resolveIn(entries, model); ok && !CanFast(p, m) {
-			return fmt.Errorf("%s has no fast mode myna can ask for (ChatGPT and OpenAI GPT models, a GPT model on a provider you added by its address, Cursor's with a fast one, a plugin's it says are served at priority, another myna's it offers Fast on, and Claude Opus 4.8 and 5 on an Anthropic key have)", model)
+			return fmt.Errorf("%s has no fast mode owl can ask for (ChatGPT and OpenAI GPT models, a GPT model on a provider you added by its address, Cursor's with a fast one, a plugin's it says are served at priority, another owl's it offers Fast on, and Claude Opus 4.8 and 5 on an Anthropic key have)", model)
 		}
 		out = append(out, f)
 	}

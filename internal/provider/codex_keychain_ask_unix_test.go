@@ -11,10 +11,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/testenv"
 )
 
-// macOS' `security` as myna runs it: the secret is read with room for
+// macOS' `security` as owl runs it: the secret is read with room for
 // the user (keychainAsk, not keychainWait), and its exits are told apart
 // (SecBase.h: errSecItemNotFound -25300 → 44, errSecAuthFailed -25293 →
 // 51, errSecUserCanceled -128 → 128). A fake `security` on PATH; never

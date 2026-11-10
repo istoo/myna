@@ -16,13 +16,13 @@ package provider
 // organizationName, credentials: {claudeAiOauth: {…}}, config:
 // {oauthAccount: {…}}, alias, kind}]} (see cswapEntry). A bare refresh token
 // a line is taken too. They all sign in with the agents' own OAuth clients, the ones
-// myna uses.
+// owl uses.
 //
 // A ChatGPT one is checked the way a sign-in is finished: its refresh token
 // traded for new tokens and the account asked for. That rotates the token,
-// so the file it came from stops working: the account is myna's from then
-// on, as a sign-in in myna would make it. A Claude one is kept as it
-// came, myna asking Anthropic nothing; Claude Code refreshes it the first
+// so the file it came from stops working: the account is owl's from then
+// on, as a sign-in in owl would make it. A Claude one is kept as it
+// came, owl asking Anthropic nothing; Claude Code refreshes it the first
 // time it runs on it. Tokens are never logged or sent back.
 
 import (
@@ -35,7 +35,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // loginImport is one account read from a file.
@@ -91,7 +91,7 @@ func parseLoginImport(agent, data string) ([]loginImport, error) {
 				return nil, errors.New("an encrypted claude-swap export: decrypt it first (gpg -d), then import what that gives")
 			}
 			if n, ok := x["version"].(float64); !ok || n != 1 {
-				return nil, fmt.Errorf("a claude-swap export of format %v: myna reads format 1 (claude-swap 0.29)", x["version"])
+				return nil, fmt.Errorf("a claude-swap export of format %v: owl reads format 1 (claude-swap 0.29)", x["version"])
 			}
 		}
 		var walk func(v any)
@@ -360,7 +360,7 @@ func ImportLogins(ctx context.Context, agent string, files []string) ([]Imported
 	if len(all) > maxGoogleImport {
 		return nil, fmt.Errorf("%d accounts; at most %d at a time", len(all), maxGoogleImport)
 	}
-	// the refresh tokens myna holds already, the agent's own included
+	// the refresh tokens owl holds already, the agent's own included
 	have := map[string]string{}
 	loginsMu.Lock()
 	ls := readLogins()
@@ -470,10 +470,10 @@ func loginRefreshToken(l savedLogin) string {
 }
 
 // claudeImportOlder is why a Claude sign-in in a file wasn't taken.
-const claudeImportOlder = "myna has a newer sign-in for this account (Claude Code's own, when it is signed in to it): kept, not replaced by this file's"
+const claudeImportOlder = "owl has a newer sign-in for this account (Claude Code's own, when it is signed in to it): kept, not replaced by this file's"
 
 // claudeNewerKept is the account in kept that l, a Claude sign-in read
-// from a file, is the same account as, when what myna has for it is no
+// from a file, is the same account as, when what owl has for it is no
 // older than the file's and can still be used. Its refresh token differs
 // (ImportLogins answers "exists" for the same one), so one of the two is
 // spent or about to be: Claude Code refreshes its own and the tool the
@@ -535,13 +535,13 @@ func importLogin(ctx context.Context, agent string, e loginImport, name string, 
 			scopes = claudeImportScopes
 		}
 		// kept as it came, not tried: trying it would ask Anthropic, which
-		// myna never does with a Claude sign-in. Claude Code refreshes it
+		// owl never does with a Claude sign-in. Claude Code refreshes it
 		// the first time it runs on the account, its access token taken
 		// for spent.
 		c := claudeCredentials{raw: map[string]any{}, OAuth: claudeAuth{AccessToken: e.accessToken, RefreshToken: e.refreshToken,
 			ExpiresAt: 1, Scopes: scopes}}
 		if e.email == "" {
-			return fail("the file doesn't say which Claude account this is; sign in to it from myna instead")
+			return fail("the file doesn't say which Claude account this is; sign in to it from owl instead")
 		}
 		acct := map[string]any{"emailAddress": e.email}
 		if e.claudeAccount != "" {

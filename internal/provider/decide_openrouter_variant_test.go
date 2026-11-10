@@ -74,7 +74,7 @@ func fakeOpenRouterLists(t *testing.T) (asked func() []string) {
 // to chat/completions and OpenRouter refused it 400 ("is a decisions
 // model … Use the /api/alpha/decisions endpoint instead"). OpenRouter's
 // decisions list names the model once, without its :free variant, so
-// myna took the variant for a chat model. It is a decision model now:
+// owl took the variant for a chat model. It is a decision model now:
 // kept from agents, its group a decision group, asked at /systemone. A
 // free chat model's :free stays a chat model.
 func TestOpenRouterDecisionModelVariant(t *testing.T) {

@@ -4,13 +4,13 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
-// TestClaudeCompactWindow: on myna Claude Code compacts at the working
+// TestClaudeCompactWindow: on owl Claude Code compacts at the working
 // window (CLAUDE_CODE_AUTO_COMPACT_WINDOW), another vendor's [1m] model too, so a 1M model's
 // conversation isn't run to 1M with every turn sending all of it (X: Chen);
 // settings.FullContext takes it away, a Claude model runs to its own, a value the user set is theirs, and
@@ -41,7 +41,7 @@ func TestClaudeCompactWindow(t *testing.T) {
 
 	must(a.Field("model").Set("v/big[1m]"))
 	if compact() != "272000" {
-		t.Fatalf("on myna: %q", compact())
+		t.Fatalf("on owl: %q", compact())
 	}
 	must(settings.Save(settings.Settings{FullContext: true}))
 	must(a.Sync())
@@ -131,7 +131,7 @@ func TestClaudeCompactAt(t *testing.T) {
 		return s
 	}
 	if s := tuned(); s.Value != "400000" || s.Source != TuneLong || s.Locked != "" {
-		t.Fatalf("tune reads myna's 400K as %+v", s)
+		t.Fatalf("tune reads owl's 400K as %+v", s)
 	}
 	must(provider.SetModelCompacts("v", map[string]int{"*": 600000, "flash": 200000}))
 	must(a.Sync())
@@ -155,8 +155,8 @@ func TestClaudeCompactAt(t *testing.T) {
 
 // An auto-compact window the user set in Claude Code (autoCompactWindow,
 // or modelSettings.<model>.autoCompactWindow as /autocompact saves it) is
-// theirs: myna's default doesn't write the env that would take
-// precedence over it; a size typed in myna, or on the model or its
+// theirs: owl's default doesn't write the env that would take
+// precedence over it; a size typed in owl, or on the model or its
 // provider, still does (#876, hisiling).
 func TestClaudeCompactYieldsToOwnSetting(t *testing.T) {
 	home := t.TempDir()
@@ -202,18 +202,18 @@ func TestClaudeCompactYieldsToOwnSetting(t *testing.T) {
 	expect("another model's", "272000")
 	must(a.Field("model").Set("v/flash[1m]"))
 	expect("this model's", "")
-	// a size typed in myna, or the model's own there, comes first
+	// a size typed in owl, or the model's own there, comes first
 	must(provider.SetModelCompacts("v", map[string]int{"flash": 200000}))
 	must(a.Sync())
-	expect("the model's own in myna", "200000")
+	expect("the model's own in owl", "200000")
 	must(provider.SetModelCompacts("v", nil))
 	must(provider.SetCompactAt(400000))
 	must(a.Sync())
-	expect("typed in myna", "400000")
+	expect("typed in owl", "400000")
 }
 
 // A routing group made only of Claude models runs as a Claude model does,
-// to its own window: Claude Code isn't handed myna's default 272000 for
+// to its own window: Claude Code isn't handed owl's default 272000 for
 // it (#1741, yanjieee: a group of Claude [1m] models was, its id's last
 // part not starting with "claude"), a group in it of Claude models too.
 // A group with another vendor's model in it keeps the default, a
@@ -286,7 +286,7 @@ func TestClaudeGroupCompactWindow(t *testing.T) {
 
 // A Claude model runs to its whole window whatever name its provider gives
 // it: Amazon Bedrock names Claude Opus us.anthropic.claude-…, which
-// myna's [1m] Claude Opus there was not taken for, so Claude Code was
+// owl's [1m] Claude Opus there was not taken for, so Claude Code was
 // held to 272K on a 1M Claude model (划船不靠桨 on Discord), while a group
 // of the same model ran to 1M (provider.ClaudeGroup). Another vendor's 1M
 // model on the same provider is still compacted at the working window.

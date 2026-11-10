@@ -65,8 +65,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const page = await browser.newPage({ viewport: { width, height: 760 } });
           const errors = [];
           page.on("pageerror", (e) => errors.push(e.message));
-          await page.route("http://myna.test/**", serve(lang));
-          await page.goto("http://myna.test/");
+          await page.route("http://owl.test/**", serve(lang));
+          await page.goto("http://owl.test/");
           await navTo(page, "agents");
           await page.locator('#agents [data-key="model"]').first().click();
           await page.locator("#list .badge.speed").first().waitFor();

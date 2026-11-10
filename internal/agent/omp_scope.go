@@ -3,7 +3,7 @@ package agent
 import (
 	"strings"
 
-	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/owl/internal/edit"
 	"gopkg.in/yaml.v3"
 )
 
@@ -11,13 +11,13 @@ import (
 // session is held to while it names anything: the default role starts only
 // when the list takes its model in, else omp picks another model from the
 // list (main.ts buildSessionOptions, sdk.ts resolveAllowedModels and
-// pickDefaultAvailableModel), so a model myna picks outside it never
+// pickDefaultAvailableModel), so a model owl picks outside it never
 // starts (#1769). omp's other roles are resolved against every model it has
 // (task/executor.ts resolveModelOverride, session/model-controls.ts
 // resolveRoleModelFull, both on modelRegistry.getAvailable()), so only the
 // default role is held to the list.
 //
-// The list is the user's: myna adds the default role's model to it as Pi's
+// The list is the user's: owl adds the default role's model to it as Pi's
 // fix did (#160), keeps the entries, their order and comments,
 // and never makes a list where there is none or an empty one. Its plain
 // entries hold in every folder; an entry scoped to folders ({path, models})
@@ -37,13 +37,13 @@ func ompScopePlain(n *yaml.Node) []string {
 	return out
 }
 
-// ompEvery is the entry myna adds to enabledModels for its own models:
-// every model myna writes into models.yml for omp, which are the ones its
+// ompEvery is the entry owl adds to enabledModels for its own models:
+// every model owl writes into models.yml for omp, which are the ones its
 // Agents page offers. omp matches a glob with Bun.Glob, whose * stops at a
-// slash, and a model of myna's is myna/<provider>/<model>, so it takes
+// slash, and a model of owl's is owl/<provider>/<model>, so it takes
 // **. With the default role's model alone there, omp's picker and Ctrl+P
-// left out every other model myna gives it (#1769, real-jacket).
-const ompEvery = mynaID + "/**"
+// left out every other model owl gives it (#1769, real-jacket).
+const ompEvery = owlID + "/**"
 
 // ompTakes reports whether an enabledModels entry surely takes in model, a
 // provider/model with no level: Pi's rules (piTakes), with the levels omp
@@ -71,15 +71,15 @@ func ompScopeTakes(plain []string, model string) bool {
 	return false
 }
 
-// ompScopeOwnMyna says whether the user chose for themselves which of
-// myna's models the list holds: an entry on myna with a glob or a
+// ompScopeOwnOwl says whether the user chose for themselves which of
+// owl's models the list holds: an entry on owl with a glob or a
 // thinking level, or a glob of theirs that takes model in (deepseek/*,
-// which omp matches against the id alone), is theirs, not one myna added.
-func ompScopeOwnMyna(plain []string, model string) bool {
+// which omp matches against the id alone), is theirs, not one owl added.
+func ompScopeOwnOwl(plain []string, model string) bool {
 	for _, p := range plain {
 		m, level := ompLevel(strings.TrimSpace(p))
 		glob := strings.ContainsAny(m, "*?[")
-		if glob && ompTakes(m, model) || strings.HasPrefix(strings.ToLower(m), mynaID+"/") && (glob || level != "") {
+		if glob && ompTakes(m, model) || strings.HasPrefix(strings.ToLower(m), owlID+"/") && (glob || level != "") {
 			return true
 		}
 	}
@@ -88,11 +88,11 @@ func ompScopeOwnMyna(plain []string, model string) bool {
 
 // ompScopeWith lets a session start on model, a provider/model, when
 // config.yml's enabledModels has plain entries and none takes it in. For
-// one of myna's it is ompEvery that joins the end, in place of the
-// models of myna's the list names one by one (what myna added before),
-// so omp's picker has every model myna offers it beside the user's own;
-// unless the user picked which of myna's the list holds
-// (ompScopeOwnMyna), when only model joins it. Another model joins as
+// one of owl's it is ompEvery that joins the end, in place of the
+// models of owl's the list names one by one (what owl added before),
+// so omp's picker has every model owl offers it beside the user's own;
+// unless the user picked which of owl's the list holds
+// (ompScopeOwnOwl), when only model joins it. Another model joins as
 // itself.
 func ompScopeWith(cfg, model string) error {
 	return edit.EditYAMLNode(cfg, "enabledModels", func(n *yaml.Node) (bool, bool) {
@@ -100,8 +100,8 @@ func ompScopeWith(cfg, model string) error {
 		if len(plain) == 0 {
 			return false, false
 		}
-		onMyna := strings.HasPrefix(strings.ToLower(model), mynaID+"/")
-		if !onMyna || ompScopeOwnMyna(plain, model) {
+		onOwl := strings.HasPrefix(strings.ToLower(model), owlID+"/")
+		if !onOwl || ompScopeOwnOwl(plain, model) {
 			if ompScopeTakes(plain, model) {
 				return false, false
 			}
@@ -110,7 +110,7 @@ func ompScopeWith(cfg, model string) error {
 		}
 		kept := n.Content[:0:0]
 		for _, c := range n.Content {
-			if c.Kind == yaml.ScalarNode && ompScopeMynaOne(c.Value) {
+			if c.Kind == yaml.ScalarNode && ompScopeOwlOne(c.Value) {
 				continue
 			}
 			kept = append(kept, c)
@@ -120,16 +120,16 @@ func ompScopeWith(cfg, model string) error {
 	})
 }
 
-// ompScopeMynaOne is a plain entry naming one of myna's models, with
-// no glob or level: what myna adds, or ompEvery takes in all the same.
-func ompScopeMynaOne(v string) bool {
+// ompScopeOwlOne is a plain entry naming one of owl's models, with
+// no glob or level: what owl adds, or ompEvery takes in all the same.
+func ompScopeOwlOne(v string) bool {
 	v = strings.TrimSpace(v)
-	return !strings.ContainsAny(v, "*?[") && strings.HasPrefix(strings.ToLower(v), mynaID+"/")
+	return !strings.ContainsAny(v, "*?[") && strings.HasPrefix(strings.ToLower(v), owlID+"/")
 }
 
-// ompScopeWithout takes myna's models out of enabledModels's plain
+// ompScopeWithout takes owl's models out of enabledModels's plain
 // entries, ompEvery among them, once nothing else in config.yml is on
-// myna, and its provider leaves models.yml: there they would name
+// owl, and its provider leaves models.yml: there they would name
 // nothing. A list left empty is removed, never written as [].
 func ompScopeWithout(cfg string) error {
 	return edit.EditYAMLNode(cfg, "enabledModels", func(n *yaml.Node) (bool, bool) {
@@ -139,7 +139,7 @@ func ompScopeWithout(cfg string) error {
 		kept := n.Content[:0:0]
 		for _, c := range n.Content {
 			if c.Kind == yaml.ScalarNode && (strings.EqualFold(strings.TrimSpace(c.Value), ompEvery) ||
-				!strings.ContainsAny(c.Value, "*?[") && strings.HasPrefix(strings.ToLower(strings.TrimSpace(c.Value)), mynaID+"/")) {
+				!strings.ContainsAny(c.Value, "*?[") && strings.HasPrefix(strings.ToLower(strings.TrimSpace(c.Value)), owlID+"/")) {
 				continue
 			}
 			kept = append(kept, c)
@@ -183,10 +183,10 @@ func ompScopeOnce(cfg string) error {
 	})
 }
 
-// ompScopeFoldersOnMyna says whether an entry of enabledModels scoped to
-// folders names one of myna's models: the user's own, which keeps
-// myna's provider as a role on it does.
-func ompScopeFoldersOnMyna(cfg string) (used bool, err error) {
+// ompScopeFoldersOnOwl says whether an entry of enabledModels scoped to
+// folders names one of owl's models: the user's own, which keeps
+// owl's provider as a role on it does.
+func ompScopeFoldersOnOwl(cfg string) (used bool, err error) {
 	err = edit.EditYAMLNode(cfg, "enabledModels", func(n *yaml.Node) (bool, bool) {
 		if n == nil || n.Kind != yaml.SequenceNode {
 			return false, false
@@ -198,7 +198,7 @@ func ompScopeFoldersOnMyna(cfg string) (used bool, err error) {
 			var walk func(*yaml.Node)
 			walk = func(n *yaml.Node) {
 				if n.Kind == yaml.ScalarNode {
-					ompRefs(n.Value, func(m string) string { used = used || usesMyna(m); return m })
+					ompRefs(n.Value, func(m string) string { used = used || usesOwl(m); return m })
 				}
 				for _, c := range n.Content {
 					walk(c)

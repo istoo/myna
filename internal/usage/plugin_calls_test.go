@@ -5,12 +5,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/plugin"
 )
 
 // A cache keepalive ping the Devin plugin sent on its own (plugins#592) is
-// a row of myna's on the request log, labelled by its kind, and counted:
+// a row of owl's on the request log, labelled by its kind, and counted:
 // its cache read is in the totals and priced as the plugin's turns are
 // (here at the model's maker's list price), as the user who turned the
 // keepalive on is to see what it costs (zelong77).
@@ -26,7 +26,7 @@ func TestPluginKeepaliveIsCounted(t *testing.T) {
 	if p.Total != 1 || len(p.Rows) != 1 || p.Sum.Calls != 1 || p.Sum.CacheRead != 10984 || p.Sum.Input != 3 || p.Sum.Output != 1 || p.Sum.Cost <= 0 {
 		t.Fatalf("keepalive page = %+v", p)
 	}
-	if row := p.Rows[0]; row.Kind != KindKeepalive || row.Agent != "myna" || row.Provider != "devin" || row.Model != "claude-sonnet-4-5" || row.Failed() || row.IsProbe() {
+	if row := p.Rows[0]; row.Kind != KindKeepalive || row.Agent != "owl" || row.Provider != "devin" || row.Model != "claude-sonnet-4-5" || row.Failed() || row.IsProbe() {
 		t.Fatalf("keepalive row = %+v", row)
 	}
 	if all := QueryPage(Today, Filter{}, 0, 10); all.Sum.Calls != 2 || all.Sum.CacheRead != 10984 {

@@ -8,7 +8,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/istoo/myna/internal/agent"
+	"github.com/istoo/owl/internal/agent"
 )
 
 // sinkWriter is a ResponseWriter that keeps what is written, or only

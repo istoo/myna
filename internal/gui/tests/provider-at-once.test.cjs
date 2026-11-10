@@ -101,7 +101,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       const posts = [];
       await page.route("**/*", serve(lang, posts, wait));
-      await page.goto(`http://myna.test/?view=${view}`);
+      await page.goto(`http://owl.test/?view=${view}`);
       return { page, errors, posts };
     };
     const box = (page) => page.locator(".editor input.max-accounts");

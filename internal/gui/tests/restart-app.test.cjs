@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// atom0964 on Discord: with both of Codex's sign-in ticks off, myna still
+// atom0964 on Discord: with both of Codex's sign-in ticks off, owl still
 // restarted the Codex app (its app-server ended, which the ChatGPT app
 // shows as an error and relaunches) whenever it switched Codex's account by
 // itself. Now that is a tick of its own under Codex's accounts, off unless
@@ -53,16 +53,16 @@ function serve(lang, first, posts) {
 }
 
 const label = {
-  en: "Restart the Codex app when myna switches its account back",
-  zh: "myna 切回原账号时自动重启 Codex 应用",
-  ja: "myna が元のアカウントに戻したら Codex アプリを再起動する",
-  de: "Codex-App neu starten, wenn myna zum Konto zurückwechselt",
+  en: "Restart the Codex app when owl switches its account back",
+  zh: "owl 切回原账号时自动重启 Codex 应用",
+  ja: "owl が元のアカウントに戻したら Codex アプリを再起動する",
+  de: "Codex-App neu starten, wenn owl zum Konto zurückwechselt",
 };
 const strings = [
-  "Restart the {agent} app when myna switches its account back",
+  "Restart the {agent} app when owl switches its account back",
   "Off, the {agent} app stays on its account until you restart it. A used-up account restarts it anyway.",
-  "myna restarts the {agent} app when it switches accounts back",
-  "myna leaves the {agent} app running when it switches accounts back",
+  "owl restarts the {agent} app when it switches accounts back",
+  "owl leaves the {agent} app running when it switches accounts back",
 ];
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -77,13 +77,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], posts = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, codex(opts), posts));
-        await page.goto("http://myna.test/?view=providers");
+        await page.goto("http://owl.test/?view=providers");
         await page.locator(".row.provider", { hasText: "Codex" }).first().click();
         await page.locator(".editor .acc").first().waitFor();
         return { page, errors, posts };
       };
 
-      test(`${engine} ${width} ${lang}: a tick has myna restart the Codex app for its own switches`, async (t) => {
+      test(`${engine} ${width} ${lang}: a tick has owl restart the Codex app for its own switches`, async (t) => {
         const { page, errors, posts } = await open(t, {});
         const only = page.locator(".editor .accts .restart-app label");
         assert.equal((await only.textContent()).trim(), label[lang]);

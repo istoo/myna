@@ -55,7 +55,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang));
       await watchSettingsReads(page);
-      await page.goto("http://myna.test/?view=settings&tab=usage");
+      await page.goto("http://owl.test/?view=settings&tab=usage");
       await settingsDrawn(page);
       for (const id of ["#warmSub", "#claudeWarmSub"]) {
         const sub = page.locator(id);

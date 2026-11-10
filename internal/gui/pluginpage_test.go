@@ -12,8 +12,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // pagePlugins writes plugins.json with the example page plugin
@@ -27,7 +27,7 @@ func pagePlugins(t *testing.T) (on, off string) {
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(h, ".config"))
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(h, ".cache"))
 	t.Setenv("XDG_DATA_HOME", filepath.Join(h, ".local", "share"))
-	t.Setenv("MYNA_BUN", "")
+	t.Setenv("OWL_BUN", "")
 	t.Setenv("PATH", "")
 	copyDir := func(to string) {
 		t.Helper()
@@ -98,7 +98,7 @@ func TestPluginPageServedShutIn(t *testing.T) {
 		t.Fatalf("pages: %s %v", w.Body, err)
 	}
 	p := pages[0]
-	if p.Spec != on || p.Key != "plugin-myna-usage-glance" || p.Title != "Usage glance" || len(p.Reads) != 1 || p.Reads[0] != "usage:summary" {
+	if p.Spec != on || p.Key != "plugin-owl-usage-glance" || p.Title != "Usage glance" || len(p.Reads) != 1 || p.Reads[0] != "usage:summary" {
 		t.Fatalf("page %+v", p)
 	}
 	tok := strings.Split(strings.TrimPrefix(p.URL, pluginPagePrefix), "/")[0]
@@ -192,7 +192,7 @@ func TestPluginPageReadsWhatItDeclared(t *testing.T) {
 }
 
 // A page whose plugin has a part for the host too has the host up before
-// its HTML is served: Magiczerowxy/myna-chat's page sends its frame to
+// its HTML is served: Magiczerowxy/owl-chat's page sends its frame to
 // the chat server that part starts, and with the host stopped (after a
 // Restart, nothing else asking) WebKit left the frame on "connecting…"
 // for good (guesssssssswhat on X). A page-only plugin starts no host,
@@ -326,12 +326,12 @@ func TestPluginPageNoAPI(t *testing.T) {
 	}
 }
 
-// myna web's guard lets a page's files through without the cookie a
+// owl web's guard lets a page's files through without the cookie a
 // sandboxed frame never sends, and only those: a made-up token is served
 // nothing, and the rest of the page still wants the key.
 func TestPluginPageWebGuard(t *testing.T) {
 	pagePlugins(t)
-	g := webGuard("myna_web_1", "key", 0, pageMux())
+	g := webGuard("owl_web_1", "key", 0, pageMux())
 	var pages []pluginPage
 	_ = json.Unmarshal(do(pageMux(), httptest.NewRequest("GET", "/api/plugin-pages", nil)).Body.Bytes(), &pages)
 	if len(pages) != 1 {
@@ -348,13 +348,13 @@ func TestPluginPageWebGuard(t *testing.T) {
 	}
 }
 
-// A page's actions (myna.actions) come with it to the window, one that
+// A page's actions (owl.actions) come with it to the window, one that
 // names no title by the page's own in each language; a plugin switched
 // off adds no item to any menu.
 func TestPluginPageActions(t *testing.T) {
 	on, off := pagePlugins(t)
 	for _, dir := range []string{on, off} {
-		pkg := `{"name":"myna-usage-glance","magpie":{"page":{"title":"Usage glance","titles":{"zh":"用量速览"},"file":"page/index.html"},
+		pkg := `{"name":"owl-usage-glance","magpie":{"page":{"title":"Usage glance","titles":{"zh":"用量速览"},"file":"page/index.html"},
 			"actions":[{"id":"check","menu":"provider","title":"Check balance","titles":{"ja":"残高を確認"}},{"id":"logs","menu":"agent"}]}}`
 		if err := os.WriteFile(filepath.Join(dir, "package.json"), []byte(pkg), 0o644); err != nil {
 			t.Fatal(err)

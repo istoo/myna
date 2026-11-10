@@ -2,7 +2,7 @@
 // The add sheet's Partners (yetone: 在订阅上面加上一栏是「合作伙伴」): the
 // services that pay to be listed, first and under a heading that says so,
 // each one quiet row with no badge of its own. Who they are comes from
-// github.com/istoo/myna through /api/providers (internal/provider/partners.go); one
+// github.com/istoo/owl through /api/providers (internal/provider/partners.go); one
 // that names its languages is listed in those only, and its tagline, in
 // the row's title and the editor, is its own in the page's language, else
 // its English one. Searching finds one by its tagline. With no partner
@@ -20,10 +20,10 @@ const partner = (id, name, extra = {}) => ({ id, name, icon: "generic", kind: "p
 const partners = [
   partner("acme", "Acme AI", { notes: { en: "Fast relay", zh: "快速中转", ja: "高速な中継" },
     // its pages are /go links, named by the host they send the browser to
-    website: "https://github.com/istoo/myna/go/acme/site", siteHost: "www.acme.example",
+    website: "https://github.com/istoo/owl/go/acme/site", siteHost: "www.acme.example",
     regions: [
-      { id: "cn", name: "China", chat: "https://api.acme.example.com/v1", website: "https://github.com/istoo/myna/go/acme/site/cn", siteHost: "cn.acme.example" },
-      { id: "global", name: "Global", chat: "https://global.acme.example.com/v1", website: "https://github.com/istoo/myna/go/acme/site/global", siteHost: "global.acme.example" },
+      { id: "cn", name: "China", chat: "https://api.acme.example.com/v1", website: "https://github.com/istoo/owl/go/acme/site/cn", siteHost: "cn.acme.example" },
+      { id: "global", name: "Global", chat: "https://global.acme.example.com/v1", website: "https://github.com/istoo/owl/go/acme/site/global", siteHost: "global.acme.example" },
     ], splitAccounts: true }),
   partner("zhonly", "China Only", { langs: ["zh"], notes: { en: "Mainland relay", zh: "国内中转" } }),
   partner("taken", "Taken", { added: true }),
@@ -55,14 +55,14 @@ function server(lang, list, counted) {
 }
 
 const L = {
-  en: { head: ["Partners", "myna's sponsors"], subs: "Subscriptions", rows: ["Acme AI", "Taken"], note: "Fast relay", region: "pick the region of your Acme AI account" },
-  zh: { head: ["合作伙伴", "赞助 myna 的服务"], subs: "订阅", rows: ["Acme AI", "China Only", "Taken"], note: "快速中转", region: "按你的 Acme AI 账号所在区域选择" },
-  ja: { head: ["パートナー", "myna のスポンサー"], subs: null, rows: ["Acme AI", "Taken"], note: "高速な中継", region: "Acme AI アカウントのリージョンを選んでください" },
-  de: { head: ["Partner", "Sponsoren von myna"], subs: null, rows: ["Acme AI", "Taken"], note: "Fast relay", region: "die Region deines Acme AI-Kontos wählen" },
+  en: { head: ["Partners", "owl's sponsors"], subs: "Subscriptions", rows: ["Acme AI", "Taken"], note: "Fast relay", region: "pick the region of your Acme AI account" },
+  zh: { head: ["合作伙伴", "赞助 owl 的服务"], subs: "订阅", rows: ["Acme AI", "China Only", "Taken"], note: "快速中转", region: "按你的 Acme AI 账号所在区域选择" },
+  ja: { head: ["パートナー", "owl のスポンサー"], subs: null, rows: ["Acme AI", "Taken"], note: "高速な中継", region: "Acme AI アカウントのリージョンを選んでください" },
+  de: { head: ["Partner", "Sponsoren von owl"], subs: null, rows: ["Acme AI", "Taken"], note: "Fast relay", region: "die Region deines Acme AI-Kontos wählen" },
 };
 
 async function openSheet(page) {
-  await page.goto("http://myna.test/?view=providers");
+  await page.goto("http://owl.test/?view=providers");
   await page.locator("#addProvider").click();
   const sheet = page.locator("#addSheet");
   await sheet.locator(".tile").first().waitFor();
@@ -117,7 +117,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await sheet.locator(".tile", { hasText: "Acme AI" }).click();
         await page.locator("#modal .editor .ehead .note").waitFor();
         assert.equal(await page.locator("#modal .editor .ehead .note").textContent(), w.note);
-        // and its site by the partner's own host, not github.com/istoo/myna's,
+        // and its site by the partner's own host, not github.com/istoo/owl's,
         // following the region picked
         const site = page.locator("#modal .editor .ehead .link.site");
         assert.equal(await site.textContent(), "cn.acme.example ↗");
@@ -126,7 +126,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal(await page.locator("#modal .editor .segs.regions").locator("xpath=following-sibling::div[contains(@class,'hint')]").textContent(), w.region);
         await page.locator("#modal .editor .segs.regions .opt").nth(1).click();
         assert.equal(await site.textContent(), "global.acme.example ↗");
-        assert.equal(await site.getAttribute("data-url"), "https://github.com/istoo/myna/go/acme/site/global");
+        assert.equal(await site.getAttribute("data-url"), "https://github.com/istoo/owl/go/acme/site/global");
         assert.deepEqual(errors, []);
         await page.context().close();
       });
@@ -165,7 +165,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const counted = [];
         const list = partners.map((p) => ({ ...p, new: true }));
         await page.route("**/*", server(lang, list, counted));
-        await page.goto("http://myna.test/?view=providers");
+        await page.goto("http://owl.test/?view=providers");
         const add = page.locator("#addProvider");
         await add.waitFor();
         await page.waitForFunction(() => document.querySelector("#addProvider").classList.contains("has-new"));
@@ -242,7 +242,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       const counted = [];
       await page.route("**/*", server(lang, partners.map((p) => ({ ...p, new: true })), counted));
-      await page.goto("http://myna.test/?view=agents");
+      await page.goto("http://owl.test/?view=agents");
       const nav = page.locator('#nav button[data-view="providers"]');
       await nav.waitFor();
       await page.waitForFunction(() => document.querySelector('#nav button[data-view="providers"]').classList.contains("has-dot"));

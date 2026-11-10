@@ -10,7 +10,7 @@ import (
 
 	"github.com/MoeForge/moejs"
 
-	"github.com/istoo/myna/internal/gwmw"
+	"github.com/istoo/owl/internal/gwmw"
 )
 
 func jsonMarshal(v any) ([]byte, error) { return json.Marshal(v) }

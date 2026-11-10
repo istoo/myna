@@ -18,7 +18,7 @@ import (
 // matches it. Matched as known, it goes as the same placeholder again.
 //
 // What is known is what values holds (in memory only, bounded by
-// maxValues): the values of the placeholders made since myna started,
+// maxValues): the values of the placeholders made since owl started,
 // for every request alike, since a placeholder is the same for the same
 // value whichever conversation it is in.
 
@@ -142,7 +142,7 @@ func (o Options) coversKind(kind string) bool {
 // A value the model alone found is known at the score it had: it is
 // masked again as known only while the user's slider (Options.MinScore)
 // is at or below that. Moving the slider up did nothing to what the model
-// had found at a lower score, until myna started again ("即使把匹配拉到
+// had found at a lower score, until owl started again ("即使把匹配拉到
 // 0.95，也是一样行为", _kaichen on X, 10-28). One any other finder found
 // (a rule, the user's words or rules) is known whatever the slider says,
 // as it was.
@@ -212,7 +212,7 @@ func knownSpans(s string, o Options) []span {
 			}
 			if scored && sc < ruleFound && k.kind == "SECRET" && wordsOnly(k.v) && !assignedSecret(s, i) {
 				// words the model alone took for a secret, as modelFits
-				// lets go now: what a myna before it had remembered
+				// lets go now: what a owl before it had remembered
 				// (drizzle-orm, dniray on Discord, v0.1.1976)
 				continue
 			}
@@ -305,7 +305,7 @@ func standsAlone(kind, s string, a, b int) bool {
 //
 // What is remembered is a hash of the route, the text and of what o
 // covers, and the places masked in it; nothing of a value. A text no
-// longer remembered (sentEntries, or myna started again) is masked with
+// longer remembered (sentEntries, or owl started again) is masked with
 // what is known and found then; a change to what o covers (a kind turned
 // on, the model's threshold, the model itself) is another text.
 const sentEntries = 1 << 17 // a text's model finds and its known values are two

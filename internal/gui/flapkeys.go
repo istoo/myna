@@ -8,9 +8,10 @@ import (
 )
 
 // The Dock tile's flap is the header logo's (assets/app.css, .logo.wag), as
-// the tray's frames are (build/icon/gen.go): the drawing cut into body,
-// tail and wing by index.html's clip paths, each piece turned about the
-// same point through the same keyframes over the same .9s,
+// the tray's frames are (build/icon/gen.go): the owl cut into body, tail
+// and a wing piece by index.html's clip paths (the last barely turns: its
+// two folded wings lie on the body), each piece turned about the same
+// point through the same keyframes over the same .9s,
 // cubic-bezier(.3, 0, .3, 1) between each two of them, and the whole bird
 // bobbing about its feet. TestDockFlapIsTheLogos holds them to app.css.
 const (
@@ -22,11 +23,11 @@ const (
 type flapKey struct{ at, deg float64 }
 
 var (
-	wingKeys = []flapKey{{0, 0}, {.12, 10}, {.26, -3}, {.40, 8}, {.56, -2}, {.72, 3}, {1, 0}}
-	tailKeys = []flapKey{{0, 0}, {.18, 16}, {.36, -7}, {.54, 9}, {.72, -3}, {.86, 2}, {1, 0}}
+	wingKeys = []flapKey{{0, 0}, {.12, 1}, {.26, -1}, {.40, 1}, {.56, -1}, {.72, 1}, {1, 0}}
+	tailKeys = []flapKey{{0, 0}, {.18, 9}, {.36, -4}, {.54, 5}, {.72, -2}, {.86, 1}, {1, 0}}
 	bobKeys  = []flapKey{{0, 0}, {.18, -4}, {.40, 2}, {.62, -1}, {1, 0}}
 	// transform-origin, in the 44-unit viewBox
-	wingAt, tailAt, bobAt = [2]float64{30, 19.8}, [2]float64{14, 22}, [2]float64{26, 38}
+	wingAt, tailAt, bobAt = [2]float64{22, 24}, [2]float64{22, 35}, [2]float64{22, 41}
 )
 
 // flapAt is the bob, tail and wing turns at t, 0..1 of the flap.

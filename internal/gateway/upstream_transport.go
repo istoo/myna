@@ -12,7 +12,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/istoo/myna/internal/netproxy"
+	"github.com/istoo/owl/internal/netproxy"
 )
 
 // upstreamTLS is what the gateway's transports dial TLS with: nil, the
@@ -154,7 +154,7 @@ func lostPing(err error) bool {
 // idle (#2136: Pi's Codex turn through Clash, "write: broken pipe" then
 // "EOF", 14.5s before the third try). The mark is an X-Idempotency-Key with
 // no value, which Go reads and never sends: the vendor sees the request as
-// before. myna already asked the same request again after these errors,
+// before. owl already asked the same request again after these errors,
 // so nothing is sent that wasn't before, only sooner.
 type replayable struct{ http.RoundTripper }
 

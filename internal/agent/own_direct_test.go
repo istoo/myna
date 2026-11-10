@@ -6,20 +6,20 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/edit"
 )
 
-// maxleebeta in #feedback: Pi connected to myna, picking one of Pi's own
+// maxleebeta in #feedback: Pi connected to owl, picking one of Pi's own
 // models in the OPENCODE GO section (opencode-go/<model>, Pi signed in to
 // OpenCode Go itself) turned 「接入」 off, with nothing said. The pick
 // writes defaultProvider opencode-go, so Pi asks OpenCode Go itself and
-// myna isn't in its config any more; what was missing is that the model
+// owl isn't in its config any more; what was missing is that the model
 // said so. Each of an agent's own models now says who it asks (Direct), as
 // Claude Code's and Codex's do, so the picker tags it "direct, not via
-// myna" and asks before a pick takes the agent off myna. Every agent
+// owl" and asks before a pick takes the agent off owl. Every agent
 // whose own models come from ownOptions shares this, so OpenCode, Crush
-// and omp are held to it too; myna's own models stay unmarked.
+// and omp are held to it too; owl's own models stay unmarked.
 func TestOwnModelsSayTheyGoDirect(t *testing.T) {
 	home := syncHome(t)
 	os.MkdirAll(filepath.Dir(catalog.CachePath()), 0o755)
@@ -34,7 +34,7 @@ func TestOwnModelsSayTheyGoDirect(t *testing.T) {
 
 	piDir := filepath.Join(home, ".pi", "agent")
 	writeFile(t, filepath.Join(piDir, "auth.json"), auth)
-	writeFile(t, filepath.Join(piDir, "settings.json"), `{"defaultProvider": "myna", "defaultModel": "deepseek/deepseek-v4.1-flash"}`)
+	writeFile(t, filepath.Join(piDir, "settings.json"), `{"defaultProvider": "owl", "defaultModel": "deepseek/deepseek-v4.1-flash"}`)
 	writeFile(t, filepath.Join(home, ".local", "share", "opencode", "auth.json"), auth)
 	cfg := filepath.Join(home, ".config")
 	writeFile(t, filepath.Join(cfg, "crush", "crush.json"), `{"providers": {"opencode-go": {"api_key": "test-key"}}}`)
@@ -54,7 +54,7 @@ func TestOwnModelsSayTheyGoDirect(t *testing.T) {
 					t.Errorf("%s: own model %s says it goes direct to %q, want OpenCode Go", a.ID, o.Value, o.Direct)
 				}
 			} else if o.Ref != "" && o.Direct != "" {
-				t.Errorf("%s: myna's %s said to go direct to %q", a.ID, o.Value, o.Direct)
+				t.Errorf("%s: owl's %s said to go direct to %q", a.ID, o.Value, o.Direct)
 			}
 		}
 		if own == 0 {

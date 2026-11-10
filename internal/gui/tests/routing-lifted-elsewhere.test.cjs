@@ -2,7 +2,7 @@
 // A rest lifted outside the Routing page (zoecats on Discord): a key rate
 // limited (429) and another sent to the back of the order, then Try now
 // pressed in the provider's editor. Before, Routing kept saying 429 and
-// "at the back" on its stage and under Accounts and keys until myna
+// "at the back" on its stage and under Accounts and keys until owl
 // restarted, as the requests it keeps still say so. Now the trace tells the
 // page what was lifted and when (lifted), and the page shows neither
 // resting, with no request since. In every language, at a wide and a
@@ -81,7 +81,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           }
           await browser.close();
         });
-        await page.goto("http://myna.test/?view=routing");
+        await page.goto("http://owl.test/?view=routing");
         await page.locator(".rt-act").first().waitFor();
 
         // the three keys fold under their provider; the fold says one rests

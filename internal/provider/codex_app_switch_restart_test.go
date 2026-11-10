@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/proc"
 )
 
 // The Restart on the Codex app's "still signed in as" notice (nb5p_hQ on
@@ -98,7 +98,7 @@ func TestRestartSwitchedCodexApp(t *testing.T) {
 // TestCodexSwitchAppHelper is TestRestartSwitchedCodexAppReal's fake
 // app-server: it waits to be ended.
 func TestCodexSwitchAppHelper(t *testing.T) {
-	if os.Getenv("MYNA_CODEX_SWITCH_HELPER") != "1" {
+	if os.Getenv("OWL_CODEX_SWITCH_HELPER") != "1" {
 		return
 	}
 	os.Stdout.WriteString("running\n")
@@ -121,7 +121,7 @@ func (f *fakeCodexApp) start() {
 	cmd := proc.CommandContext(ctx, os.Args[0], "-test.run=^TestCodexSwitchAppHelper$")
 	// TMPDIR is this test's: given no testenv.Marker, the helper makes a
 	// test home of its own there, which it never removes once ended
-	cmd.Env = []string{"MYNA_CODEX_SWITCH_HELPER=1", "TMPDIR=" + f.t.TempDir(), "HOME=" + f.t.TempDir()}
+	cmd.Env = []string{"OWL_CODEX_SWITCH_HELPER=1", "TMPDIR=" + f.t.TempDir(), "HOME=" + f.t.TempDir()}
 	out, _ := cmd.StdoutPipe()
 	if err := cmd.Start(); err != nil {
 		cancel()

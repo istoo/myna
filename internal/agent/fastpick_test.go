@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A catalog model with a fast mode says, in an agent's picker, which agent
@@ -30,7 +30,7 @@ func TestFastPickOptions(t *testing.T) {
 	}
 	of := func(agent string) map[string]Option {
 		out := map[string]Option{}
-		for _, o := range viaMyna(agent, "myna/") {
+		for _, o := range viaOwl(agent, "owl/") {
 			out[o.Ref] = o
 		}
 		return out

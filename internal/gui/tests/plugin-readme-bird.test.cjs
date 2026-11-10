@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// A plugin's README loads under myna's bird: it drops onto the skeleton's
+// A plugin's README loads under owl's bird: it drops onto the skeleton's
 // lines, each one bending under it as it bounces down them. When the README
 // comes the bird flies off and the box goes, but not before it has landed
 // on three lines, however soon the README came (the owner, 10-30). With
@@ -35,7 +35,7 @@ function server(reply, noBird) {
     if (url.pathname === "/api/plugins/search") return json({ hits: [{ package: "opencode-copilot-auth", version: "0.0.9" }] });
     if (url.pathname === "/api/plugins/page") return json(await reply());
     if (url.pathname.startsWith("/api/")) return json({});
-    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "myna.test") return route.fulfill({ status: 404, body: "" });
+    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "owl.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -63,7 +63,7 @@ async function open(browser, reduced, noBird) {
   const pend = () => { next = new Promise((r) => { release = r; }); };
   pend();
   await page.route("**/*", server(() => next, noBird));
-  await page.goto("http://myna.test/?view=plugins");
+  await page.goto("http://owl.test/?view=plugins");
   await page.locator("#view-plugins .pm-find input").fill("copilot");
   const card = page.locator('.pm-card[data-pkg="opencode-copilot-auth"]');
   await card.locator(".pm-dl", { hasText: "48k/week" }).waitFor();

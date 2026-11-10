@@ -38,11 +38,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/gwbudget"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/gwbudget"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // sums is what a key's calls came to in a window.
@@ -97,7 +97,7 @@ func slot(keyID string) string { return usage.Path() + "\x00" + keyID }
 
 // counts reports whether r is a call a key's budget counts.
 // A call an app reported itself (#1874) never counts: it didn't go through
-// myna, and may be a backfill of calls long past. Nor does an MCP tool
+// owl, and may be a backfill of calls long past. Nor does an MCP tool
 // call (usage.SourceMCP): the model requests it made are calls of their own.
 func counts(r usage.Record) bool {
 	return !r.IsRejected() && !r.IsReported() && !r.IsProbe() && r.Computer == ""
@@ -324,7 +324,7 @@ func (r *Refusal) Error() string {
 	if !r.Spent {
 		what += fmt.Sprintf(", with %d requests in flight holding the rest", r.InFlight)
 	}
-	return fmt.Sprintf("myna gateway key %q has used %s for this %s; it resets at %s",
+	return fmt.Sprintf("owl gateway key %q has used %s for this %s; it resets at %s",
 		r.Key, what, (&access.Limit{Period: r.Period, Days: r.Days, Hours: r.Hours}).Per(), r.Reset.Format("2006-01-02 15:04 MST"))
 }
 

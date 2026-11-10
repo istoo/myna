@@ -4,16 +4,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/owl/internal/sessions"
 )
 
-// #2097: an agy step that went through myna is counted once. agy 1.2.16,
+// #2097: an agy step that went through owl is counted once. agy 1.2.16,
 // run in a sandbox through a fake Gemini endpoint, sent no session header
 // (only User-Agent google-genai-sdk/…, X-Goog-Api-Key), so the gateway's
 // record names no session; its transcript's step began at 06:12:41Z, to
 // the second, and counted input 702, cache read 300, output 9. A long step
 // ends well past the 2 s every other session file's end time is held to.
-func TestAgyStepThroughMynaCountedOnce(t *testing.T) {
+func TestAgyStepThroughOwlCountedOnce(t *testing.T) {
 	began := time.Date(2026, 10, 14, 6, 12, 41, 0, time.UTC)
 	rec := Record{Time: began.Add(990 * time.Millisecond), Agent: "agy", Provider: "relay", Model: "m",
 		Input: 702, CacheRead: 300, Output: 9, Millis: 95_000, Status: 200}
@@ -27,7 +27,7 @@ func TestAgyStepThroughMynaCountedOnce(t *testing.T) {
 		t.Error("the step the gateway logged is counted again as agy's own call")
 	}
 	if m[1] {
-		t.Error("a step agy made without myna was taken for the gateway's")
+		t.Error("a step agy made without owl was taken for the gateway's")
 	}
 
 	// a step the gateway's call ended before is not that call

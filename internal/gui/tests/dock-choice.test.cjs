@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// ShouguangCao on X: with Settings › Show in Dock left as it came, myna's
+// ShouguangCao on X: with Settings › Show in Dock left as it came, owl's
 // window was out of Command-Tab, so going back to it to paste a key copied
 // in another app took the menu bar. The choice now reads With window unless
 // Hide or Show was chosen (inDock in app.go), on a Mac, in both engines and
@@ -65,7 +65,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const posted = [];
         await page.route("**/*", serve(lang, posted, st));
         await watchSettingsReads(page);
-        await page.goto("http://myna.test/?view=settings&tab=general");
+        await page.goto("http://owl.test/?view=settings&tab=general");
         await settingsDrawn(page);
         await page.locator("#dockSegs .opt").first().waitFor();
         return { page, posted, errors };
@@ -107,7 +107,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.equal(posted.at(-1).dockNever, false);
       assert.deepEqual(errors, []);
 
-      // an older myna's file
+      // an older owl's file
       for (const [st, want] of [[{ dockWindow: true }, 1], [{ dock: true }, 2], [{ dockNever: true }, 0]]) {
         const o = await open(st);
         assert.equal(await on(o.page), want, `${JSON.stringify(st)} reads ${await on(o.page)}`);

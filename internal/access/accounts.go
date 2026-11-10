@@ -5,7 +5,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // CleanAccounts is a key's account list as kept (#905): each entry

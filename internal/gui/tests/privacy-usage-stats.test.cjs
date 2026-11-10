@@ -42,7 +42,7 @@ const words = {
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   for (const lang of ["en", "zh"]) {
     const w = words[lang];
-    test(`${engine} ${lang}: Privacy switches off sharing what myna is used with`, async (t) => {
+    test(`${engine} ${lang}: Privacy switches off sharing what owl is used with`, async (t) => {
       const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
       t.after(() => browser.close());
       const errors = [];
@@ -54,7 +54,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, settings, saved));
       await watchSettingsReads(page);
-      await page.goto("http://myna.test/?view=settings&tab=privacy");
+      await page.goto("http://owl.test/?view=settings&tab=privacy");
       await settingsDrawn(page); // rows found are the ones that stay (#1659)
       const row = (name) => page.locator("#setPage-privacy .list .row", { has: page.locator(".name", { hasText: new RegExp("^" + name + "$") }) });
       const isOn = (name) => page.waitForFunction(([name, on]) => [...document.querySelectorAll("#setPage-privacy .list .row")].some((r) => r.querySelector(".name")?.textContent === name && r.querySelector(".opt.on")?.textContent === on), [name, w.on]);

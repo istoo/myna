@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Myna Browser's sheet in the Library's Discover: the agents it gives the
+// Owl Browser's sheet in the Library's Discover: the agents it gives the
 // browser act in the user's own tabs, so the sheet says so, and sets up the
 // extension it needs in the browser the user is signed in to. Not set up,
 // it offers Set up the extension…, which writes the folder (in the home
@@ -22,8 +22,8 @@ const { I18N } = strings();
 const LANGS = ["en", "zh", "zh-TW", "ja", "de"];
 const tr = (lang, s, vars = {}) => Object.entries(vars).reduce((o, [k, v]) => o.replace(`{${k}}`, v), lang === "en" ? s : I18N[lang]?.[s] ?? s);
 const HOME = "/Users/tester";
-const DIR = `${HOME}/Myna Browser Extension`;
-const ABOUT = "Use your own browser: your tabs, signed in to the sites you use. Open pages, click, type, upload, read and take screenshots, through the Myna Browser extension.";
+const DIR = `${HOME}/Owl Browser Extension`;
+const ABOUT = "Use your own browser: your tabs, signed in to the sites you use. Open pages, click, type, upload, read and take screenshots, through the Owl Browser extension.";
 
 function fixture(lang, drag) {
   const st = { written: false, connected: false, setups: 0, drags: 0 };
@@ -39,14 +39,14 @@ function fixture(lang, drag) {
     if (url.pathname === "/api/plugins") return json({ plugins: [] });
     if (url.pathname === "/api/library") {
       return json({
-        dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
+        dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
         agents: [{ id: "claude", name: "Claude Code", icon: "claudecode-color", mcp: `${HOME}/.claude.json`, skills: `${HOME}/.claude/skills` }],
         instructions: { agents: [], sets: [] }, servers: [], foundServers: [], projects: [], foundSkills: [], skills: [], problems: [],
       });
     }
     if (url.pathname === "/api/library/market/servers") {
       return json({ items: [
-        { id: "myna-browser", name: "myna-browser", title: "Myna Browser", publisher: "Myna", description: ABOUT, transport: "stdio", runs: "myna", featured: true, optIn: true, have: "" },
+        { id: "owl-browser", name: "owl-browser", title: "Owl Browser", publisher: "Owl", description: ABOUT, transport: "stdio", runs: "owl", featured: true, optIn: true, have: "" },
         { id: "fetch", name: "fetch", title: "Fetch", description: "Read the web.", transport: "stdio", runs: "uvx", featured: true, have: "" },
       ] });
     }
@@ -76,7 +76,7 @@ function fixture(lang, drag) {
 const wide = (page) => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
-  test(engine + ": Myna Browser's sheet sets up the extension in the user's browser", async (t) => {
+  test(engine + ": Owl Browser's sheet sets up the extension in the user's browser", async (t) => {
     assert(["chromium", "webkit"].includes(engine), "BROWSER must be chromium or webkit");
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     const shots = [];
@@ -99,12 +99,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const errors = [];
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", f.route);
-          await page.addInitScript(() => { localStorage.setItem("myna.libTab", "mcp"); });
-          await page.goto("http://myna.test/?view=library");
-          await page.locator('#view-library .mk[data-market="mcp"] .mk-card[data-id="myna-browser"]').click();
+          await page.addInitScript(() => { localStorage.setItem("owl.libTab", "mcp"); });
+          await page.goto("http://owl.test/?view=library");
+          await page.locator('#view-library .mk[data-market="mcp"] .mk-card[data-id="owl-browser"]').click();
           const sheet = page.locator("#modal .mk-sheet");
           await sheet.waitFor();
-          assert.equal((await sheet.locator(".mk-name.big").textContent()).trim(), "Myna Browser");
+          assert.equal((await sheet.locator(".mk-name.big").textContent()).trim(), "Owl Browser");
           assert.equal(await sheet.locator(".mk-about").textContent(), w(ABOUT));
           const hints = await sheet.locator(".mk-hint").allTextContents();
           assert(hints.includes(w("Pick the agents that may use your browser: they act in your tabs, signed in as you are.")), hints.join(" | "));
@@ -132,13 +132,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             w("Open chrome://extensions (edge://extensions in Edge) in the browser you use every day."),
             w("Turn on Developer mode."),
             drag ? w("Drag the folder below onto that page.")
-              : w("Drag the folder from the window that opened onto that page, or click Load unpacked and choose {dir}.", { dir: "~/Myna Browser Extension" }),
+              : w("Drag the folder from the window that opened onto that page, or click Load unpacked and choose {dir}.", { dir: "~/Owl Browser Extension" }),
           ]);
           assert.equal(await box.locator(".mk-browser-steps").isVisible(), true);
           const folder = box.locator(".mk-browser-folder");
           assert.equal(await folder.isVisible(), drag);
           if (drag) {
-            assert.equal(await folder.locator(".mk-browser-folder-path").textContent(), "~/Myna Browser Extension");
+            assert.equal(await folder.locator(".mk-browser-folder-path").textContent(), "~/Owl Browser Extension");
             assert.equal(await folder.getAttribute("title"), w("Drag onto chrome://extensions"));
             // a click is not a drag; a press that moves is, once
             await folder.click();

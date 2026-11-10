@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // The group page keeps the row picked in view, and its header with it: a
@@ -52,7 +52,7 @@ func pageKeepsThePick(t *testing.T, g provider.Group) {
 			if n := strings.Count(v, "\n"); n > room {
 				t.Fatalf("%s, %d rows: pick %d draws %d lines, a short group's page %d:\n%s", g.ID, h, pick, n, room, v)
 			}
-			if !strings.Contains(v, "◉ myna") {
+			if !strings.Contains(v, "◉ owl") {
 				t.Fatalf("%s, %d rows: pick %d scrolled the header off:\n%s", g.ID, h, pick, v)
 			}
 			want := ""

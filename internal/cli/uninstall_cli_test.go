@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/daemon"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/uninstall"
+	"github.com/istoo/owl/internal/daemon"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/uninstall"
 )
 
 func fakeUninstall(t *testing.T, served gateway.Served, service daemon.Status) *int {
@@ -23,13 +23,13 @@ func fakeUninstall(t *testing.T, served gateway.Served, service daemon.Status) *
 	return &ran
 }
 
-// A myna still serving that isn't the background service, which
+// A owl still serving that isn't the background service, which
 // uninstalling removes first, would keep writing its files after its
 // folders are gone: it is quit first, and nothing is changed.
-func TestUninstallRefusesWhileMynaRuns(t *testing.T) {
+func TestUninstallRefusesWhileOwlRuns(t *testing.T) {
 	ran := fakeUninstall(t, gateway.Served{Running: true, Pid: 4242, Serves: "app"}, daemon.Status{})
 	err := uninstallCmd([]string{"--yes"})
-	if err == nil || !strings.Contains(err.Error(), "myna's app is running (pid 4242)") || *ran != 0 {
+	if err == nil || !strings.Contains(err.Error(), "owl's app is running (pid 4242)") || *ran != 0 {
 		t.Fatalf("err %v, ran %d", err, *ran)
 	}
 	// the background service itself is stopped and removed by uninstalling
@@ -37,7 +37,7 @@ func TestUninstallRefusesWhileMynaRuns(t *testing.T) {
 	if err := uninstallCmd([]string{"--yes"}); err != nil || *ran != 1 {
 		t.Fatalf("err %v, ran %d", err, *ran)
 	}
-	// a myna serve beside an installed service is another one
+	// a owl serve beside an installed service is another one
 	ran = fakeUninstall(t, gateway.Served{Running: true, Pid: 4242, Serves: "serve"}, daemon.Status{Installed: true, Running: true, PID: 99})
 	if err := uninstallCmd([]string{"--yes"}); err == nil || *ran != 0 {
 		t.Fatalf("err %v, ran %d", err, *ran)
@@ -62,7 +62,7 @@ func TestUninstallAsksFirst(t *testing.T) {
 // --help prints its usage and uninstalls nothing.
 func TestUninstallHelp(t *testing.T) {
 	ran := fakeUninstall(t, gateway.Served{}, daemon.Status{})
-	if !helpAsked([]string{"uninstall", "--help"}) || !strings.Contains(helpFor([]string{"uninstall"}), "myna uninstall [--yes]") || *ran != 0 {
+	if !helpAsked([]string{"uninstall", "--help"}) || !strings.Contains(helpFor([]string{"uninstall"}), "owl uninstall [--yes]") || *ran != 0 {
 		t.Fatal("no help for uninstall")
 	}
 }

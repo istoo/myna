@@ -13,11 +13,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/netproxy"
+	"github.com/istoo/owl/internal/netproxy"
 )
 
 // Settings › Proxy's Test (#2076, c4ex): whether the proxy in force is the
-// way myna's requests leave. One request to Cloudflare's trace page goes
+// way owl's requests leave. One request to Cloudflare's trace page goes
 // as a vendor request would (the proxy Settings, *_PROXY or the system
 // names), and one goes direct; each says the address Cloudflare saw it
 // from and the country, and the request through the proxy says whether

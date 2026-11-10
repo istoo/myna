@@ -78,7 +78,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("dialog", (d) => { errors.push("a browser dialog: " + d.message()); d.dismiss(); });
       const calls = [];
       await page.route("**/*", serve(lang, calls));
-      await page.goto("http://myna.test/?view=providers");
+      await page.goto("http://owl.test/?view=providers");
       const tr = (k, v) => page.evaluate(([k, v]) => t(k, v), [k, v]);
       await page.waitForFunction(() => typeof t === "function" && typeof I18N === "object");
       await page.locator("#nav").getByRole("button", { name: words[lang]?.nav || await tr("Sessions"), exact: true }).click();

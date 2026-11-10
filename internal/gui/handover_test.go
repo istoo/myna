@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/owl/internal/gateway"
 )
 
 // A restart that hands the gateway over waits only for the bridge's
@@ -52,12 +52,12 @@ func TestHandsOverOnlyWhereItCan(t *testing.T) {
 	}
 	oldExe := startExe
 	t.Cleanup(func() { startExe = oldExe; handoverHost.Store(false) })
-	startExe = "/apps/myna"
+	startExe = "/apps/owl"
 	handoverHost.Store(true)
 	if handsOver() {
-		t.Fatal("hands over a gateway this myna doesn't serve")
+		t.Fatal("hands over a gateway this owl doesn't serve")
 	}
-	if beginHandover("", "/apps/myna", false, "", false) || pending.Load() != nil {
+	if beginHandover("", "/apps/owl", false, "", false) || pending.Load() != nil {
 		t.Fatal("began a handover it can't make")
 	}
 }

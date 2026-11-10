@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/usage"
 	"github.com/tidwall/gjson"
 )
 
@@ -28,7 +28,7 @@ func relayNeedsCacheKey(body []byte) (int, string) {
 // Claude Desktop checks the gateway as it starts, and from Test
 // connection, with {"max_tokens":1,"messages":[{"role":"user",
 // "content":"."}]} on the shortest haiku it is listed:
-// myna-0958175816.anthropic.claude-haiku-5-5[1m], leee's haiku, for
+// owl-0958175816.anthropic.claude-haiku-5-5[1m], leee's haiku, for
 // CyberCaius on Discord (v0.1.1838). It goes to Desktop's default model,
 // the first listed (his routing group 天翼云), not to leee nor to the
 // relay's GPT model a session ran on last, and is answered there. A
@@ -87,12 +87,12 @@ func TestClaudeDesktopProbeToDefaultModel(t *testing.T) {
 		t.Fatalf("turn: %d %s", code, body)
 	}
 	first := gjson.GetBytes(relay.got, "prompt_cache_key").String()
-	if first == "" || strings.Contains(strings.ToLower(first), "myna") {
+	if first == "" || strings.Contains(strings.ToLower(first), "owl") {
 		t.Fatalf("turn's cache key %q", first)
 	}
 
 	// Desktop's check, by the id it was listed leee's haiku by
-	const probe = `{"model":"myna-0958175816.anthropic.claude-haiku-5-5[1m]","max_tokens":1,"messages":[{"role":"user","content":"."}]}`
+	const probe = `{"model":"owl-0958175816.anthropic.claude-haiku-5-5[1m]","max_tokens":1,"messages":[{"role":"user","content":"."}]}`
 	relay.calls, relay.got, claude.got = 0, nil, nil
 	if code, body := send(probe); code != 200 {
 		t.Fatalf("probe: %d %s", code, body)
@@ -103,7 +103,7 @@ func TestClaudeDesktopProbeToDefaultModel(t *testing.T) {
 
 	// a title still goes to the session's model
 	relay.got = nil
-	if code, body := send(`{"model":"myna-0958175816.anthropic.claude-haiku-5-5[1m]","max_tokens":200,"stream":true,"system":"You write short session titles.","messages":[{"role":"user","content":"hi"}]}`); code != 200 {
+	if code, body := send(`{"model":"owl-0958175816.anthropic.claude-haiku-5-5[1m]","max_tokens":200,"stream":true,"system":"You write short session titles.","messages":[{"role":"user","content":"hi"}]}`); code != 200 {
 		t.Fatalf("title: %d %s", code, body)
 	}
 	if modelOf(relay.got) != "gpt-6.1-sol" {
@@ -135,7 +135,7 @@ func TestClaudeDesktopProbeToDefaultModel(t *testing.T) {
 // desktopProbe knows Desktop's check alone, not a title or a turn.
 func TestDesktopProbe(t *testing.T) {
 	for body, want := range map[string]bool{
-		`{"model":"myna-0958175816.anthropic.claude-haiku-5-5[1m]","max_tokens":1,"messages":[{"role":"user","content":"."}]}`: true,
+		`{"model":"owl-0958175816.anthropic.claude-haiku-5-5[1m]","max_tokens":1,"messages":[{"role":"user","content":"."}]}`: true,
 		`{"model":"x","max_tokens":200,"messages":[{"role":"user","content":"."}]}`:                                            false,
 		`{"model":"x","max_tokens":1,"system":"You write short session titles.","messages":[{"role":"user","content":"."}]}`:   false,
 		`{"model":"x","max_tokens":1,"messages":[{"role":"user","content":"hi"}]}`:                                             false,
@@ -147,7 +147,7 @@ func TestDesktopProbe(t *testing.T) {
 	}
 }
 
-// myna's own cache key goes only to OpenAI's API and a provider the user
+// owl's own cache key goes only to OpenAI's API and a provider the user
 // added by its address; a vendor's preset, a signed-in account and a
 // plugin get none. A relay that turns the field away is asked again
 // without it, once.
@@ -218,7 +218,7 @@ func TestClaudeDesktopProbeAsksNoClassifier(t *testing.T) {
 		s.Handler().ServeHTTP(rec, req)
 		return rec.Code, rec.Body.String()
 	}
-	const probe = `{"model":"myna-claude-haiku-5-5","max_tokens":1,"messages":[{"role":"user","content":"."}]}`
+	const probe = `{"model":"owl-claude-haiku-5-5","max_tokens":1,"messages":[{"role":"user","content":"."}]}`
 	if code, body := send(probe); code != 200 {
 		t.Fatalf("probe: %d %s", code, body)
 	}
@@ -249,9 +249,9 @@ func TestClaudeDesktopProbeAsksNoClassifier(t *testing.T) {
 }
 
 // ctyunRefusal is the body Desktop showed (cybercaius, v0.1.1862) as
-// myna's message after "天翼云: ": a relay's error whose message is
+// owl's message after "天翼云: ": a relay's error whose message is
 // its own upstream's refusal. The 天翼云 relay wraps that whole body as
-// its message in turn, so myna's reading of it said it word for word.
+// its message in turn, so owl's reading of it said it word for word.
 const ctyunRefusal = `{"error":{"message":"{\"code\":\"400\",\"message\":\"thinking.type must be \\\"enabled\\\" (type: invalid_request_error)\",\"type\":\"invalid_request_error\"} (request id: 20261028170149123456789)","type":"upstream_error","code":"Invalid_request"}}`
 
 // ctyunNeedsThinking answers as cybercaius's 天翼云 did a Messages request
@@ -273,7 +273,7 @@ func ctyunRefused() (int, string) {
 
 // Desktop's check to a routing group whose member's upstream takes the
 // model only thinking (cybercaius, v0.1.1862: "thinking.type must be
-// \"enabled\""): myna sent it thinking off (a vendor's model) or none
+// \"enabled\""): owl sent it thinking off (a vendor's model) or none
 // (a Claude's name), the refusal is read, and the check asked again
 // thinking at 1024 under a raised max_tokens, so Desktop gets 200. It is
 // remembered for the model: the next check, and a title, go thinking in
@@ -348,7 +348,7 @@ func TestClaudeDesktopProbeThinkingNeeded(t *testing.T) {
 				srv.Handler().ServeHTTP(rec, req)
 				return rec.Code, rec.Body.String()
 			}
-			const probe = `{"model":"myna-0958175816.anthropic.claude-haiku-5-5[1m]","max_tokens":1,"messages":[{"role":"user","content":"."}]}`
+			const probe = `{"model":"owl-0958175816.anthropic.claude-haiku-5-5[1m]","max_tokens":1,"messages":[{"role":"user","content":"."}]}`
 			if code, body := send(probe); code != 200 {
 				t.Fatalf("check: %d %s (sent %s)", code, body, ctyun.got)
 			}
@@ -397,7 +397,7 @@ func TestWithThinkingEnabled(t *testing.T) {
 // (__model_selector_state), not to the first model listed: cybercaius
 // on Discord (v0.1.2033) had DeepSeek in the Code tab and Cowork off,
 // and the check as Desktop started went to another provider's model.
-// The menu the last session ran on comes first; a choice myna no
+// The menu the last session ran on comes first; a choice owl no
 // longer serves, or no file, leaves it to the first listed.
 func TestClaudeDesktopProbeToChosenModel(t *testing.T) {
 	claude := &fake{t: t, reply: sse(
@@ -515,12 +515,12 @@ func TestClaudeDesktopProbeToChosenModel(t *testing.T) {
 	choose(`{"code":{"model":"` + dsID + `"}}`)
 	pick(kimiID)
 	check(kimi, "kimi-k3", "a turn after the menu was set")
-	// such a turn on a model myna no longer serves leaves it to the menu
-	pick("anthropic/myna-0000000001")
+	// such a turn on a model owl no longer serves leaves it to the menu
+	pick("anthropic/owl-0000000001")
 	check(ds, "deepseek-v4-flash", "a newer turn on an unserved model")
 	pick("")
-	// a choice myna no longer serves leaves it to the first listed
-	choose(`{"code":{"model":"anthropic/myna-0000000001"}}`)
+	// a choice owl no longer serves leaves it to the first listed
+	choose(`{"code":{"model":"anthropic/owl-0000000001"}}`)
 	check(claude, "", "unserved choice")
 	// a half-written file is no choice
 	choose(`{"code":{"model":"` + dsID)

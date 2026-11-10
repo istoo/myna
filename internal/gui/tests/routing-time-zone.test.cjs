@@ -1,7 +1,7 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // A rule's hours are kept in the zone they were set in (gaubeebangeel on
-// X: myna on a cloud server in UTC, its user in Beijing, the hours 8
-// off). When myna's clock (/api/groups' clock) is in another zone than
+// X: owl on a cloud server in UTC, its user in Beijing, the hours 8
+// off). When owl's clock (/api/groups' clock) is in another zone than
 // the hours, the zone is told beside them: on the group's rules and in the
 // editor, the zone's name for hours that have one, the server's offset for
 // hours set before zones were kept. Hours changed in the editor take the
@@ -79,7 +79,7 @@ async function open(t, engine, lang, clock, width) {
   const errors = [], posts = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", serve(lang, clock, posts));
-  await page.goto("http://myna.test/?view=routing");
+  await page.goto("http://owl.test/?view=routing");
   const group = page.locator(".rt-group").first();
   await group.waitFor();
   const titles = () => group.evaluate((g) => [...g.querySelectorAll("[title]")].map((e) => e.title).join("\n"));
@@ -130,7 +130,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.deepEqual(errors, []);
     });
 
-    test(`${engine} ${lang}: nothing added when myna's clock is the hours' zone`, async (t) => {
+    test(`${engine} ${lang}: nothing added when owl's clock is the hours' zone`, async (t) => {
       const { page, group, errors, titles } = await open(t, engine, lang, BEIJING, 420);
       await page.waitForFunction(() => document.querySelector(".rt-group [title]"));
       const said = await titles();

@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// yi_time on Discord, myna in Chinese on Windows (v0.1.2777): the tray
+// yi_time on Discord, owl in Chinese on Windows (v0.1.2777): the tray
 // icon's tooltip said "WorkBuddy / Credits 0 / 500 credits · 已用 0% · 27
 // 天 13 小时 后重置". The window's name and unit come from the WorkBuddy
 // plugin in English; the Usage page's card says them in the page's

@@ -9,7 +9,7 @@ import (
 )
 
 // Kabubu01 (X): with no Claude Code on the computer, the GUI's Claude
-// sign-in failed with "install Claude Code first … or run `myna
+// sign-in failed with "install Claude Code first … or run `owl
 // claude-code install`". The sign-in downloads it now, as Devin's,
 // Cursor's and Grok's install their CLIs, and goes on to the sign-in page.
 func TestClaudeSignInDownloadsClaudeCode(t *testing.T) {
@@ -57,7 +57,7 @@ func TestClaudeSignInDownloadFails(t *testing.T) {
 		t.Fatal(err)
 	}
 	st = waitPast(t, st.ID, "installing")
-	if st.State != "failed" || !strings.Contains(st.Error, "403 Forbidden") || !strings.Contains(st.Error, "myna claude-code install") {
+	if st.State != "failed" || !strings.Contains(st.Error, "403 Forbidden") || !strings.Contains(st.Error, "owl claude-code install") {
 		t.Fatalf("state %+v", st)
 	}
 }

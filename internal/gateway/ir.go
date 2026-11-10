@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 // The APIs are close cousins; everything below is the shape they have
@@ -223,7 +223,7 @@ type Request struct {
 	// request is Claude Code's interactive mode, not claude -p: what a
 	// refusal it ends in is told with (thirdPartyRefused, #4503)
 	interactive bool
-	// hourMarks has the cache marks myna adds on Anthropic's Messages
+	// hourMarks has the cache marks owl adds on Anthropic's Messages
 	// (anthropicBody) last an hour: a Responses client's (Codex's), whose
 	// turns are often more than five minutes apart and whose own vendor
 	// keeps a thread's prompt cached an hour (chatGPTCold). Off when the
@@ -259,7 +259,7 @@ type Request struct {
 	WebSearch bool  // the client offered its provider's own web search
 	// WebAccess is the external_web_access of the client's web_search
 	// tool, as it sent it: Codex's web_search mode (false for "cached",
-	// true for "live"), which myna's own search for a model that can't
+	// true for "live"), which owl's own search for a model that can't
 	// is made in (withWebAccess, #5018)
 	WebAccess json.RawMessage
 	Fast      bool // the client asked for priority processing: service_tier priority (Codex's Fast mode)
@@ -269,14 +269,14 @@ type Request struct {
 	Ultrafast bool
 	// Tier is the service_tier the client sent, as it sent it. It goes on
 	// as it is to a provider the user added by its address (OwnTier):
-	// a relay of theirs may serve Fast and Ultrafast where myna can't
+	// a relay of theirs may serve Fast and Ultrafast where owl can't
 	// tell (hsiangron on X: both were left out)
 	Tier string
 	// OwnTier is set for such a provider (gateway.go, as each attempt is
 	// built); one that turns the field away is asked again without it
 	// (optionalFields)
 	OwnTier bool
-	// OwnEffort is set when Effort is myna's own ask, not the client's:
+	// OwnEffort is set when Effort is owl's own ask, not the client's:
 	// auto mode's classifier asked to reason least of a model whose levels
 	// aren't known (fitAutoModeClassifier). An upstream that turns it away
 	// is asked at low, or without it, as it would have been
@@ -304,7 +304,7 @@ type Request struct {
 	// was sent, null and all, when the request is built again for a
 	// Responses upstream, whose answer to a value it doesn't take
 	// (invalid_access_program) is the client's to read; no other API takes
-	// it (myna-releases#18). Only OpenAI's upstreams are sent it
+	// it (owl-releases#18). Only OpenAI's upstreams are sent it
 	// (keepsAccessPrograms, #3172).
 	AccessPrograms json.RawMessage
 	// Metadata is an Anthropic client's metadata (Claude Code's user_id),
@@ -458,7 +458,7 @@ type Usage struct {
 	// It is never accumulated from earlier usage.
 	cacheCreationHasCounts bool
 	// cacheUnknown: the reply said its vendor counts no cache tokens
-	// (a plugin's myna_cache_unknown), so a CacheRead of 0 is not a miss
+	// (a plugin's owl_cache_unknown), so a CacheRead of 0 is not a miss
 	cacheUnknown bool
 	// searches: the web searches the reply says its model ran with its
 	// provider's own tool (searchTally), for the request log's Web search
@@ -488,7 +488,7 @@ type Usage struct {
 	Tier string `json:"tier,omitempty"`
 	// Deferred is what the reply counted of earlier requests of its
 	// conversation, which their own replies couldn't (cUsage's
-	// MynaDeferred): billed with this one, never told as its prompt
+	// OwlDeferred): billed with this one, never told as its prompt
 	Deferred *Usage `json:"deferred,omitempty"`
 	// Credits is what the reply said the request cost in its plan's own
 	// credits, nil when it said none: WorkBuddy's usage.credit, the
@@ -936,7 +936,7 @@ func ByStrength(efforts []string) []string {
 // and max only.
 //
 // Codex's ultra is no API's level, whatever a list says (ChatGPT's lists
-// it for Codex's picker; myna offers it on Copilot's gpt-6.1-sol, #656):
+// it for Codex's picker; owl offers it on Copilot's gpt-6.1-sol, #656):
 // it is sent as max, or the nearest the model has below it.
 func fitEffort(want string, levels []string) string {
 	if want == "ultra" {

@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/proc"
 )
 
 // Open in terminal on an Agents row (coolmantou on Discord): the page
@@ -114,7 +114,7 @@ func TestAgentCommandNeedsAProgram(t *testing.T) {
 			t.Errorf("%s: %q", a.ID, run)
 		}
 	}
-	// one that starts on myna by its environment (agy) opens on that
+	// one that starts on owl by its environment (agy) opens on that
 	if run := agentCommand(&agent.Agent{ID: "agy", Bin: "agy", Launch: func() string { return "X=1 agy" }}); run != "X=1 agy" {
 		t.Errorf("agy: %q", run)
 	}

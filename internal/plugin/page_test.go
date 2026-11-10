@@ -7,9 +7,9 @@ import (
 	"testing"
 )
 
-// A plugin's page (myna.page) is a file inside the plugin's folder: one
+// A plugin's page (owl.page) is a file inside the plugin's folder: one
 // that names a path out of it, by "..", an absolute path or a symbolic
-// link, is no page. Its reads are those myna has, and a plugin that is
+// link, is no page. Its reads are those owl has, and a plugin that is
 // only a page is nothing for the host to load, nor "not a plugin".
 func TestWindowPageStaysInside(t *testing.T) {
 	root := t.TempDir()
@@ -38,10 +38,10 @@ func TestWindowPageStaysInside(t *testing.T) {
 	}
 	p := w.Page
 	if !slices.Equal(w.Reads, []string{"usage:summary"}) {
-		t.Errorf("reads %v, want only the one myna has, once", w.Reads)
+		t.Errorf("reads %v, want only the one owl has, once", w.Reads)
 	}
-	if !InMynaOnly(good) || notPlugin(good) != nil {
-		t.Errorf("a page-only plugin: InMynaOnly %v, notPlugin %v", InMynaOnly(good), notPlugin(good))
+	if !InOwlOnly(good) || notPlugin(good) != nil {
+		t.Errorf("a page-only plugin: InOwlOnly %v, notPlugin %v", InOwlOnly(good), notPlugin(good))
 	}
 	if _, only := Window(mk("main", `{"name":"m","main":"index.js","magpie":{"page":{"file":"page/index.html"}}}`)); only {
 		t.Error("a plugin with a main is more than its page")
@@ -71,10 +71,10 @@ func TestWindowPageStaysInside(t *testing.T) {
 	}
 }
 
-// A plugin's panels (myna.panels) go only where myna has a slot, each
+// A plugin's panels (owl.panels) go only where owl has a slot, each
 // an .html inside the plugin's folder, at most maxPanels of them; a page
 // replaces only a built-in page that can be replaced. A plugin that is
-// only panels is a window plugin all the same: in myna only, and a
+// only panels is a window plugin all the same: in owl only, and a
 // plugin.
 func TestWindowPanels(t *testing.T) {
 	root := t.TempDir()
@@ -118,8 +118,8 @@ func TestWindowPanels(t *testing.T) {
 	if !slices.Equal(w.Reads, []string{"providers:list"}) {
 		t.Errorf("reads %v", w.Reads)
 	}
-	if !InMynaOnly(d) || notPlugin(d) != nil {
-		t.Errorf("a panels-only plugin: InMynaOnly %v, notPlugin %v", InMynaOnly(d), notPlugin(d))
+	if !InOwlOnly(d) || notPlugin(d) != nil {
+		t.Errorf("a panels-only plugin: InOwlOnly %v, notPlugin %v", InOwlOnly(d), notPlugin(d))
 	}
 
 	many := `{"slot":"usage","file":"ui/usage.html"}`
@@ -139,7 +139,7 @@ func TestWindowPanels(t *testing.T) {
 		}
 	}
 
-	// myna.page.keepAlive is true or not there: a value of another kind
+	// owl.page.keepAlive is true or not there: a value of another kind
 	// is false, and the page is still read
 	for keep, want := range map[string]bool{`true`: true, `false`: false, `"true"`: false, `1`: false, `{}`: false, `null`: false} {
 		write(`{"name":"p","magpie":{"page":{"file":"ui/page.html","keepAlive":` + keep + `}}}`)
@@ -150,7 +150,7 @@ func TestWindowPanels(t *testing.T) {
 	}
 }
 
-// A page's and a panel's titles by language (myna.page.titles) are kept
+// A page's and a panel's titles by language (owl.page.titles) are kept
 // trimmed, without the empty ones; titles that aren't an object of strings
 // leave the page as it was, with its title.
 func TestWindowTitles(t *testing.T) {
@@ -184,14 +184,14 @@ func TestWindowTitles(t *testing.T) {
 	}
 }
 
-// A plugin's actions (myna.actions) are items in a provider's or an
+// A plugin's actions (owl.actions) are items in a provider's or an
 // agent's row menu that open its page: a plugin with no page has none,
-// an action in a menu myna hasn't, or with an id the page couldn't
+// an action in a menu owl hasn't, or with an id the page couldn't
 // switch on, is dropped, an id given twice is the first's, and there are
 // eight at most.
 func TestWindowActions(t *testing.T) {
 	root := t.TempDir()
-	mk := func(name, myna string) string {
+	mk := func(name, owl string) string {
 		t.Helper()
 		d := filepath.Join(root, name)
 		if err := os.MkdirAll(d, 0o755); err != nil {
@@ -200,7 +200,7 @@ func TestWindowActions(t *testing.T) {
 		if err := os.WriteFile(filepath.Join(d, "index.html"), []byte("<p>hi</p>"), 0o644); err != nil {
 			t.Fatal(err)
 		}
-		if err := os.WriteFile(filepath.Join(d, "package.json"), []byte(`{"name":"`+name+`","magpie":`+myna+`}`), 0o644); err != nil {
+		if err := os.WriteFile(filepath.Join(d, "package.json"), []byte(`{"name":"`+name+`","magpie":`+owl+`}`), 0o644); err != nil {
 			t.Fatal(err)
 		}
 		return d

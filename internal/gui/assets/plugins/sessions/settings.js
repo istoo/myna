@@ -38,7 +38,7 @@ function renderSessionTerminal(s, keep) {
   };
 }
 
-// renderSessionReads: which agents' own session history myna reads
+// renderSessionReads: which agents' own session history owl reads
 // (RustCats on X: a new install showed every agent's sessions before
 // anyone agreed). The Sessions page asks once; here it changes later.
 // "Agents found later" is whether an agent with no row of its own is
@@ -68,7 +68,7 @@ function renderSessionReads(s) {
     rw.append(who, val);
     return rw;
   };
-  const rows = [row(t("Agents found later"), t("Read the session history of an agent with no row here, one installed later too. Off, myna reads only the agents turned on below; what its gateway served is counted either way"),
+  const rows = [row(t("Agents found later"), t("Read the session history of an agent with no row here, one installed later too. Off, owl reads only the agents turned on below; what its gateway served is counted either way"),
     r.asked && r.all, (on) => {
       // the agents with a row keep what their rows show
       const agents = {};

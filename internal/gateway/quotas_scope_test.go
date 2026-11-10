@@ -13,12 +13,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// #2216 (Kenoia): a key held to models or accounts on a shared myna was
-// told no quota at all (#1981), so the remote myna it was set up on
+// #2216 (Kenoia): a key held to models or accounts on a shared owl was
+// told no quota at all (#1981), so the remote owl it was set up on
 // showed none of the providers it may use. A key whose owner turns its
 // quotas on is told the cards of the providers whose every model it may
 // use, of the accounts and keys it may use, and nothing else: not another
@@ -26,7 +26,7 @@ import (
 // account's it may not use.
 func TestHeldKeyToldItsOwnQuotas(t *testing.T) {
 	fresh(t)
-	t.Setenv("MYNA_ADDR", "")
+	t.Setenv("OWL_ADDR", "")
 	seedKeptBalances(t)
 
 	ref := func(id, user string) string {
@@ -99,7 +99,7 @@ func TestHeldKeyToldItsOwnQuotas(t *testing.T) {
 		// key's (Linka on Discord), so alpha's cards are not its
 		"BetaKey": {"beta:"},
 	}
-	for _, path := range []string{"/v1/myna/quotas?kept=1", provider.RemoteCardsPath} {
+	for _, path := range []string{"/v1/owl/quotas?kept=1", provider.RemoteCardsPath} {
 		for i, s := range secrets {
 			name := keys[i].Name
 			c, b := do("GET", path, s)
@@ -115,8 +115,8 @@ func TestHeldKeyToldItsOwnQuotas(t *testing.T) {
 					}
 				}
 			case "Nothing":
-				// told no card here: the other myna shows its own limit,
-				// not "nothing read on that myna yet"
+				// told no card here: the other owl shows its own limit,
+				// not "nothing read on that owl yet"
 				if path == provider.RemoteCardsPath {
 					if c != http.StatusForbidden || !strings.Contains(b, provider.KeyHeldCode) {
 						t.Errorf("%s %s: %d %s", name, path, c, b)
@@ -139,7 +139,7 @@ func TestHeldKeyToldItsOwnQuotas(t *testing.T) {
 		}
 	}
 	// the history and the report read afresh go by the same cards
-	for _, path := range []string{"/v1/myna/quotas", "/v1/myna/quotas/history"} {
+	for _, path := range []string{"/v1/owl/quotas", "/v1/owl/quotas/history"} {
 		for i, s := range secrets[1:5] {
 			name := keys[i+1].Name
 			c, b := do("GET", path, s)
@@ -221,13 +221,13 @@ func seedKeptBalances(t *testing.T) {
 
 }
 
-// #2216 from the other side: a myna with that myna as its provider,
+// #2216 from the other side: a owl with that owl as its provider,
 // through a key let see its quotas, shows the cards of what the key may
 // use beside the key's own; a key told none shows its own card alone, not
-// "nothing read on that myna yet", which a refresh wouldn't change.
-func TestRemoteMynaShowsHeldKeyItsQuotas(t *testing.T) {
+// "nothing read on that owl yet", which a refresh wouldn't change.
+func TestRemoteOwlShowsHeldKeyItsQuotas(t *testing.T) {
 	fresh(t)
-	t.Setenv("MYNA_ADDR", "")
+	t.Setenv("OWL_ADDR", "")
 	seedKeptBalances(t)
 	keys, secrets := newCaller(t, "AlphaTwo", "Nothing")
 	p, err := provider.Find("alpha")
@@ -259,7 +259,7 @@ func TestRemoteMynaShowsHeldKeyItsQuotas(t *testing.T) {
 	ctx := t.Context()
 	shown := func(secret string) []string {
 		t.Helper()
-		if err := provider.Save(provider.Provider{ID: "office", Name: "Office", Preset: provider.RemoteMynaPreset, Key: secret, Chat: gw.URL}); err != nil {
+		if err := provider.Save(provider.Provider{ID: "office", Name: "Office", Preset: provider.RemoteOwlPreset, Key: secret, Chat: gw.URL}); err != nil {
 			t.Fatal(err)
 		}
 		provider.ForgetRemoteCardsForTest()

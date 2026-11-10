@@ -7,10 +7,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/sessions"
-	stats "github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/sessions"
+	stats "github.com/istoo/owl/internal/usage"
 )
 
 // holdUsageClock stops the usage clock at at for the test and gives at back,
@@ -26,7 +26,7 @@ func holdUsageClock(t *testing.T, at time.Time) time.Time {
 
 // midnightUsageClock sets the usage clock to read a tenth of a second before
 // midnight the first time and a tenth of a second after it from then on, as
-// when midnight falls while myna usage is worked out.
+// when midnight falls while owl usage is worked out.
 func midnightUsageClock(t *testing.T, midnight time.Time) {
 	t.Helper()
 	var read atomic.Bool
@@ -40,7 +40,7 @@ func midnightUsageClock(t *testing.T, midnight time.Time) {
 	t.Cleanup(func() { stats.Clock = old })
 }
 
-// myna usage --csv writes the period's requests, newest first, one row
+// owl usage --csv writes the period's requests, newest first, one row
 // each, with the model asked for, sent and served.
 func TestUsageCSV(t *testing.T) {
 	groupsHome(t)
@@ -101,10 +101,10 @@ func TestUsageProviderKeys(t *testing.T) {
 	}
 }
 
-// myna usage shows, beside the gateway's calls, those the agents made on
+// owl usage shows, beside the gateway's calls, those the agents made on
 // their own, read from their session files, as the window's Usage page
-// does (Kumo31 on Discord: Codex used outside myna wasn't in it).
-func TestUsageShowsCallsNotThroughMyna(t *testing.T) {
+// does (Kumo31 on Discord: Codex used outside owl wasn't in it).
+func TestUsageShowsCallsNotThroughOwl(t *testing.T) {
 	groupsHome(t)
 	now := holdUsageClock(t, time.Date(2026, 9, 30, 12, 0, 0, 0, time.Local))
 	stats.Append(stats.Record{Time: now.Add(-time.Minute), Agent: "claude", Provider: "relay", Model: "m", Input: 5, Status: 200})
@@ -118,7 +118,7 @@ func TestUsageShowsCallsNotThroughMyna(t *testing.T) {
 		t.Fatal(err)
 	}
 	out := b.String()
-	gw, own, ok := strings.Cut(out, "not through myna")
+	gw, own, ok := strings.Cut(out, "not through owl")
 	if !ok || !strings.Contains(gw, "relay/m") || strings.Contains(gw, "gpt-6-luna") || !strings.Contains(own, "gpt-6-luna") || !strings.Contains(own, "1.5K") {
 		t.Fatal(out)
 	}
@@ -128,14 +128,14 @@ func TestUsageShowsCallsNotThroughMyna(t *testing.T) {
 		return []sessions.Call{{Time: now.AddDate(0, 0, -40), Agent: "codex", Model: "gpt-6-luna", Tokens: sessions.Tokens{Input: 7}}}
 	}
 	b.Reset()
-	if err := usageTo(&b, []string{"usage", "all"}); err != nil || !strings.Contains(b.String(), "not through myna") || !strings.Contains(b.String(), "gpt-6-luna") {
+	if err := usageTo(&b, []string{"usage", "all"}); err != nil || !strings.Contains(b.String(), "not through owl") || !strings.Contains(b.String(), "gpt-6-luna") {
 		t.Fatal(b.String(), err)
 	}
 }
 
-// myna usage asked as midnight falls shows the calls through myna and
+// owl usage asked as midnight falls shows the calls through owl and
 // those not through it of one day, the day it was asked on. Asked apart,
-// the calls not through myna were the next day's, none yet, and left out.
+// the calls not through owl were the next day's, none yet, and left out.
 func TestUsageAskedAtMidnight(t *testing.T) {
 	groupsHome(t)
 	midnight := time.Date(2026, 10, 1, 0, 0, 0, 0, time.Local)
@@ -150,13 +150,13 @@ func TestUsageAskedAtMidnight(t *testing.T) {
 	if err := usageTo(&b, []string{"usage", "today"}); err != nil {
 		t.Fatal(err)
 	}
-	gw, own, ok := strings.Cut(b.String(), "not through myna")
+	gw, own, ok := strings.Cut(b.String(), "not through owl")
 	if !ok || !strings.Contains(gw, "relay/m") || !strings.Contains(own, "gpt-6-luna") {
 		t.Fatal(b.String())
 	}
 }
 
-// myna usage's headline says how many calls its cost leaves out for
+// owl usage's headline says how many calls its cost leaves out for
 // having no known price, beside the sum, not only a "+" after it (#1856):
 // a Kimi K3 Auto that nobody prices is never read as costing nothing.
 func TestUsageSaysCallsUnpriced(t *testing.T) {
@@ -179,7 +179,7 @@ func TestUsageSaysCallsUnpriced(t *testing.T) {
 	}
 }
 
-// myna usage says what the requests cost in their plans' credits where
+// owl usage says what the requests cost in their plans' credits where
 // the replies said (WorkBuddy's usage.credit, #2512): in the summary, and
 // on each agent's, model's and session's row of them; nothing where none did.
 func TestUsageSaysCredits(t *testing.T) {

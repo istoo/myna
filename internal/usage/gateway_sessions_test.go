@@ -1,14 +1,14 @@
 package usage
 
 import (
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 	"math"
 	"os"
 	"path/filepath"
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 func resetUsageTest(t *testing.T) {
@@ -64,7 +64,7 @@ func TestGatewaySessionsCacheRefreshAndOwnership(t *testing.T) {
 	}
 }
 
-// myna makes up no session ids, so one starting "request-" is the
+// owl makes up no session ids, so one starting "request-" is the
 // client's own and is counted like any other (#1355).
 func TestClientRequestPrefixedSessionsCount(t *testing.T) {
 	resetUsageTest(t)

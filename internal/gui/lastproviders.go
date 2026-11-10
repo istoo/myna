@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/edit"
 )
 
 // The last-known providers list (#1519, fatkun): the Providers page asked

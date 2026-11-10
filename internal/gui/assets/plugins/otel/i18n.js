@@ -1,6 +1,6 @@
 // Settings › Observability's own words in each language, the English the
-// key: the kernel adds them to i18n.js's (myna.strings).
-myna.strings({
+// key: the kernel adds them to i18n.js's (owl.strings).
+owl.strings({
   zh: {
     "Langfuse needs only its host and your project's keys; any other OTLP/HTTP collector takes its address and headers": "Langfuse 只需要地址和项目密钥；其他 OTLP/HTTP 采集服务填地址和请求头",
     "Langfuse host": "Langfuse 地址",

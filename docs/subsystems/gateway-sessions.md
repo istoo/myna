@@ -5,11 +5,11 @@ projection of gateway usage records. A gateway session identity is exactly
 `AgentOf(record.Agent) + record.Session`, where the session is the one the
 client sent (`X-Magpie-Session`, or its own session header), whatever it starts
 with. The response returns that id in `X-Magpie-Session`; listed browser
-origins can read this header through CORS. myna never makes up an id for a
+origins can read this header through CORS. owl never makes up an id for a
 request without one, so such a request has no session and its text is not
 recorded: text kept under an id nothing lists couldn't be opened. Prompt text,
 caller keys and network addresses are never used to guess conversation ownership.
-So the configs myna writes have each agent name its session: Pi's provider
+So the configs owl writes have each agent name its session: Pi's provider
 block sets `compat.sendSessionAffinityHeaders` (`x-session-affinity` on Chat and
 Messages; Responses sends `session_id` anyway), and omp 16.0.6 and later gets
 `compat.promptCacheSessionHeader: x-session-affinity`. A user's own
@@ -29,17 +29,17 @@ per-message `X-Conversation-Message-ID` and `X-Parent-Conversation-ID` do not
 identify the current session. This lets Routing group requests by the same id
 the native WorkBuddy session reader already knows; old requests without a
 recorded session remain unnamed. See `TestWorkBuddySessionHeader`,
-`TestWorkBuddySessionThroughGateway` and `TestRemoteMynaKeepsTheSession`.
+`TestWorkBuddySessionThroughGateway` and `TestRemoteOwlKeepsTheSession`.
 
 DSH names its session in `x-deepseek-harness-session-id`, read the same way
 after the others, and marks a request that compacts its context with
 `x-deepseek-harness-compact` (#2505). `callKind` records such a call as
 `compact`, the Requests list's Compaction; a value of `0`, `false`, `no` or
 `off` is no mark, and a request without one is never taken for a compaction
-by its prompt. `passOnCaller` sends the mark on to a remote myna beside
+by its prompt. `passOnCaller` sends the mark on to a remote owl beside
 the session, and no vendor is sent either (`TestDshMarksSessionAndCompaction`).
 Both are read on Messages and Responses as on Chat Completions, which a
-user's own llm-deepseek row pointed at myna relies on (#3298,
+user's own llm-deepseek row pointed at owl relies on (#3298,
 `TestDshMarksOnEveryRoute`).
 
 When the same identity is present in a native session, the native session wins
@@ -49,7 +49,7 @@ agents run Pi in their folders under `$SLOCK_HOME` (else `~/.slock`,
 `%USERPROFILE%\.slock` on Windows), `agents/<id>/.pi-sessions/` and
 `.builtin-sessions/`, Pi's SDK files read as agent `raft`
 ([`raft.go`](../../internal/sessions/raft.go)). Raft's Pi reads the user's
-own Pi folder, so through myna it says it is Pi, and a Raft session is
+own Pi folder, so through owl it says it is Pi, and a Raft session is
 the gateway's `pi|<id>` too: in `MergeExternal`, the stats' native keys,
 the GUI's list and Via, and `NativeIDs` for `pi`. Raft's sessions are
 listed, read and deleted as Pi's (one file to the trash, nothing beside
@@ -100,7 +100,7 @@ Gateway projections have no path,
 resume command or terminal action: the agent's own files of them are not on
 this computer. Their rows carry `gateway: true`; the Sessions page groups them
 under "Seen through the gateway" rather than "No folder", and their size is the
-text myna recorded of them (`sessions.GatewaySizes`), shown only when there
+text owl recorded of them (`sessions.GatewaySizes`), shown only when there
 is some. The overview's top summaries (`MergeExternalStats`) carry
 `gateway: true` too, and Usage › Sessions names such a row "Gateway session"
 where a folder would be, with "(prompt not recorded)" when no text was kept,
@@ -119,7 +119,7 @@ models, token totals, start/last timestamps and effective prices come from the
 same usage records used by Usage and stats endpoints.
 
 A model the user counts under another id (`usageAliases` in settings.json,
-`myna model alias`; [`provider.UsageAlias`](../../internal/provider/usagealias.go))
+`owl model alias`; [`provider.UsageAlias`](../../internal/provider/usagealias.go))
 is merged after pricing, never before: `buildGatewaySessions` prices each
 record by its own model and keys its day and model rows by the alias, and
 `sessions.List`, `Get`, `Find` and the stats (`aliasStats` in
@@ -199,7 +199,7 @@ neither does a Codex request whose parent was only matched by its prompt
 
 A gateway projection can be deleted (lc on Discord). `sessions.DeleteGateway`
 moves its recorded text folders (`gateway-conversations/<date>/<identity hash>`)
-into myna's session trash under `trash/sessions/gateway/`, with a note
+into owl's session trash under `trash/sessions/gateway/`, with a note
 marked `gateway`, and adds `{agent, id, last}` to
 `gateway-sessions-hidden.json` in the config directory. `/api/sessions` and
 `/api/sessions/manage` leave out a hidden session up to that last request; a
@@ -242,7 +242,7 @@ Implementation: [`internal/usage/gateway_sessions.go`](../../internal/usage/gate
 [`internal/sessions/external.go`](../../internal/sessions/external.go), and
 [`internal/gui/sessions.go`](../../internal/gui/sessions.go).
 
-## Which agents' sessions myna reads
+## Which agents' sessions owl reads
 
 An agent's own session files are read only when the user allows that
 agent (RustCats on X: a new install showed every agent's history before
@@ -283,17 +283,17 @@ saves `all: false` with each agent picked or not, Allow all `all: true`.
 Settings › Privacy, *Agents' session history* (`renderSessionReads` in
 the sessions plugin's `settings.js`), has *Agents found later* (`all`, sent with each listed agent
 at the value its row shows) and a row per agent.
-`myna sessions read [on|off all|<agent>…]` shows and changes the same
+`owl sessions read [on|off all|<agent>…]` shows and changes the same
 choice from the CLI (`sessionReadsTo`); while it is not asked,
-`myna sessions` says so on stderr and the TUI's empty Sessions page
+`owl sessions` says so on stderr and the TUI's empty Sessions page
 says how (`sessNothing`). Tests: `TestSessionsRead`,
 `TestSessionsNotAskedSaysHow`.
 
 What is read either way: the gateway's own usage ledger, its
-projections and the conversations it recorded (they are myna's own),
+projections and the conversations it recorded (they are owl's own),
 the agents' config and sign-in files, Claude Code's and Codex's
 `history.jsonl` last-used time and a session file's mtime for a quota's first use, and
-Codex's newest rollout's last line before myna restarts Codex
+Codex's newest rollout's last line before owl restarts Codex
 (`codexTurnOpen`), none of which lists or shows a session. Tests:
 `TestFreshInstallReadsNoAgentUntilAllowed`,
 `TestSettleReadsKeepsWhatWasThere`, `TestSessionReadsRoutes`,
@@ -310,7 +310,7 @@ applies: on an agent whose list has gateway sessions (`gateway` on a
 is kept. Its "Delete saved conversations…" shows while
 `/api/sessions/manage`'s `recorded` says some text is kept
 (`sessions.HasGatewayConversations`, true when the folder can't be read), and
-asks in myna's own dialog first. `Settings.GatewayConversations` is machine-local consent:
+asks in owl's own dialog first. `Settings.GatewayConversations` is machine-local consent:
 `settings.SetGatewayConversations` updates it under the settings file lock.
 Other Settings saves retain the latest stored consent under that lock, so an
 older snapshot cannot re-enable recording after it is stopped. `KeepOwn`
@@ -340,7 +340,7 @@ session synchronization, and existing S3 archives are not imported.
 [`SaveGatewayTurn`](../../internal/sessions/gateway.go) stores normalized,
 scrubbed exchanges in one append-only `turns.jsonl` per
 `gateway-conversations/<UTC date>/<identity hash>/` under
-the Myna config directory, using 0700 directories and 0600 files. Each line is
+the Owl config directory, using 0700 directories and 0600 files. Each line is
 one bounded turn; legacy per-turn JSON files remain readable until they expire.
 An incomplete final append is omitted from reads (marked truncated) and removed
 before the next append; complete earlier lines remain available. No headers are
@@ -378,9 +378,9 @@ cannot replace content fetched after clearing the store.
 `GET /api/sessions/markdown` and `POST /api/sessions/export` take the same
 choice: a native session is written from its file (`sessions.WriteMarkdown`),
 and otherwise a known gateway session from what its transcript reads
-(`sessions.WriteGatewayMarkdown`, "Recorded by: myna's gateway", with a note
-when turns or a part's end weren't kept). A myna that others reach as a
-remote myna has no file of their agents' sessions, so this is the only way
+(`sessions.WriteGatewayMarkdown`, "Recorded by: owl's gateway", with a note
+when turns or a part's end weren't kept). A owl that others reach as a
+remote owl has no file of their agents' sessions, so this is the only way
 it can export them. Verification: `TestGatewaySessionExportsMarkdown`.
 
 A gateway session without a saved Desktop name is titled by what it was
@@ -475,7 +475,7 @@ What a conversion carries:
   custom tool, MCP tools) is written as the agent's own text: its name,
   input and result in fences. A result is cut at 64 KiB.
 - **Not carried:** thinking, reasoning, signatures and encrypted content, and
-  a compaction encrypted by OpenAI. Of compactions, only myna's own
+  a compaction encrypted by OpenAI. Of compactions, only owl's own
   summary is read.
 
 What it writes:
@@ -491,7 +491,7 @@ What it writes:
   (`CodexProviderIn`), so the thread is listed under the provider in use.
   `response_item`s are written, plus the `event_msg` user and agent messages
   the TUI shows as history. Codex indexes the file into its state database
-  itself on resume, so myna writes no index. `codex resume <id>` opens it.
+  itself on resume, so owl writes no index. `codex resume <id>` opens it.
 
 The source file is only read. The new file is written to a temp file
 beside it, synced and renamed, and is never written over an existing path.
@@ -510,12 +510,12 @@ Claude Code 2.1.310 and Codex 0.162.1 files in `testdata/carry`),
 
 ## Usage over the gateway, and subagents
 
-`GET /v1/myna/usage` and `GET /v1/myna/usage/requests`
+`GET /v1/owl/usage` and `GET /v1/owl/usage/requests`
 ([`internal/gateway/usage_api.go`](../../internal/gateway/usage_api.go)) serve
 the Usage page's summary and request ledger from the same builders as the
 window's `/api/usage` and `/api/usage/requests`
 ([`internal/usageapi`](../../internal/usageapi/usageapi.go)), read-only and
-without conversation text. They follow `/v1/myna/quotas`' guard: this
+without conversation text. They follow `/v1/owl/quotas`' guard: this
 machine, or another with an enabled gateway key, behind the same Host check.
 A key that is held (`heldKey`: a budget, models or accounts) is refused the
 summary and gets the ledger filtered to its own `CallerKey`, with its filter
@@ -523,8 +523,8 @@ lists cut to its own rows (`usageapi.OwnPage`): the ledger's facets are drawn
 from every call in the period, so without the cut they would name other keys.
 `TestUsageOverGateway` covers both, and a red when either cut is removed.
 A held key is refused (`refuseHeld`, 403 `provider.KeyHeldCode`) the
-quotas, their history, kept cards and refresh, and `/v1/myna/concurrency`
-(#1981); `/v1/myna/route` tells it only routes whose `callerKey` is its
+quotas, their history, kept cards and refresh, and `/v1/owl/concurrency`
+(#1981); `/v1/owl/route` tells it only routes whose `callerKey` is its
 own. `Route.callerKey` is set by `trace.beginFor` from the request's
 caller, so a route begun without it is told to no held key.
 `TestHeldKeyToldNoAccounts` covers every one of these from loopback and
@@ -544,7 +544,7 @@ only key, and a key told nothing, each red when its check is removed.
 
 ### Calls read from the agents' own files
 
-A call an agent made without myna reaches Usage only when its own files
+A call an agent made without owl reaches Usage only when its own files
 are read (`sessions.Calls`, from `callSources` in
 [`calls.go`](../../internal/sessions/calls.go)). The readers are Claude
 Code's, Claude Desktop's and Cowork's, Codex's (and both in WSL), and,
@@ -563,9 +563,9 @@ Code's (#1779; its sessions are on the Sessions page too, from the same
 [`calls_kimi.go`](../../internal/sessions/calls_kimi.go)) and Pi's,
 Raft's Pi agents' and omp's, here and in WSL (#1951,
 [`calls_pi.go`](../../internal/sessions/calls_pi.go)). Each skips the
-calls the agent made through myna's own entry, which the gateway logged
+calls the agent made through owl's own entry, which the gateway logged
 with the account that answered: Kimi Code's are the ones whose
-`usage.record` model begins `myna/`. Kimi Code's calls are its
+`usage.record` model begins `owl/`. Kimi Code's calls are its
 `usage.record`s in every agent's `wire.jsonl` under
 `$KIMI_CODE_HOME/sessions` (else `~/.kimi-code`), protocols 1.4 and 1.5;
 a fork repeats its parent's records, so each is keyed by agent, time,
@@ -573,7 +573,7 @@ model and usage and counted once. Pi's and omp's calls are the session
 files' assistant messages, and the calls beside them that Sessions counts
 too ("usage" and omp's "model_usage" entries, a compaction's, a branch
 summary's and a tool result's usage, on the model and provider in use);
-the provider `myna` (or `dial`) is myna's entry, a failed call has no
+the provider `owl` (or `dial`) is owl's entry, a failed call has no
 usage, and a fork's copy of its parent's entries (written before its
 header) is the parent's. A Codex fork (/fork, a spawn_agent with the
 parent's context) writes every line of its parent's rollout into its own
@@ -634,7 +634,7 @@ read keeps the rows read before. A row whose conversation has its
 `conversations/<id>.db` and no transcript (#1718; that database is protobuf,
 not read) is listed from the row alone: title, folder, `last_modified_time`,
 no tokens and no conversation to open (`readable`). Resume is `agy --conversation <id>`, which
-picks it up from any folder; when agy is set to use myna it is the
+picks it up from any folder; when agy is set to use owl it is the
 agent's launch command (the gateway's variables and `--model`) with
 `--conversation` after it (`sessions.AgyStart`, set by package agent).
 Subagents (`parent_conversation_id`) and agy in WSL are not read.
@@ -661,9 +661,9 @@ answer equals the whole ledger's), and `sessions-overview-once.test.cjs`.
 
 ### Calls an app reports itself
 
-`POST /v1/myna/usage/requests`
+`POST /v1/owl/usage/requests`
 ([`internal/gateway/usage_ingest.go`](../../internal/gateway/usage_ingest.go),
-#1874) takes calls that never went through myna, from an app that sends
+#1874) takes calls that never went through owl, from an app that sends
 them straight to its vendor, so the Usage page covers them too. The body is
 one record or an array of up to 5000 (32 MiB at most), in `usage.jsonl`'s
 shape: `t`, `agent`, `provider`, `model` and `rid` are required; `in`,
@@ -693,7 +693,7 @@ however old, so a client's history can be backfilled.
   each record's `index`, `rid` and `status`, so a re-run of a batch is
   safe.
 - **Pricing:** a record with `cost` keeps it (`Record.OwnCost`, the
-  `rowOwnCost` flag on a packed row). Without one it is priced at myna's
+  `rowOwnCost` flag on a packed row). Without one it is priced at owl's
   own prices, like a gateway row.
 - **Speed:** `first_text_ms` and `flow_ms` (#2637) mean what they do in
   `usage.jsonl` (`Record.FirstText`, `Record.Flow`), so a reported row's
@@ -722,18 +722,18 @@ however old, so a client's history can be backfilled.
 concurrent posts beside the gateway's own writes, and a backfill of a full
 5000-record batch landing on the right 7d/30d/all days.
 
-### Calls to myna's own MCP tools
+### Calls to owl's own MCP tools
 
-An agent's call to a tool of one of myna's own MCP servers is a row of
+An agent's call to a tool of one of owl's own MCP servers is a row of
 `usage.jsonl` too (ferock on Discord): the image server's
 `generate_image`, `generate_video` and `generation_result`, vision, web
 search, plugin tools and the router's. The row has `source: "mcp"`,
 `kind: "mcp"`, operation `execute_tool`, the tool's name as `req`, the
-server's name as `host` (`myna-image`, `myna-vision`,
-`myna-web-search`, `myna-tools`, or the Library server a router tool is
+server's name as `host` (`owl-image`, `owl-vision`,
+`owl-web-search`, `owl-tools`, or the Library server a router tool is
 of), the agent, the provider and model of the last gateway request the
 call made, its duration, its endpoint (the server's path, `stdio` for the
-Myna Image server an agent runs) and, when it failed, the JSON-RPC
+Owl Image server an agent runs) and, when it failed, the JSON-RPC
 error or the `isError` result's first text, clipped by `keepMsg`. Its
 arguments are never kept, not even masked.
 
@@ -743,11 +743,11 @@ arguments are never kept, not even masked.
   row's provider and model; the image server's jobs keep it, so a
   `generation_result` names the model of the job it waited on. A drawing
   still running when its call answers leaves that call's row without a
-  model. The stdio Myna Image server calls the gateway's `/v1/images`
+  model. The stdio Owl Image server calls the gateway's `/v1/images`
   and `/v1/videos` itself, so it reports each call it answered to the
-  gateway's image MCP server with the JSON-RPC method `myna/toolCalled`
+  gateway's image MCP server with the JSON-RPC method `owl/toolCalled`
   (`gateway.MCPCalledMethod`, params `MCPCalled`: tool, ms, model,
-  error); a tool not Myna Image's is -32602. Behind the [MCP router](mcp-router.md) it sends none: the router's `tools/call` is the row. An older gateway that
+  error); a tool not Owl Image's is -32602. Behind the [MCP router](mcp-router.md) it sends none: the router's `tools/call` is the row. An older gateway that
   doesn't know the method just leaves the call unlisted.
 - **Counted nowhere:** `Record.IsProbe` is true for these rows, so they
   ride the probe lane above: listed (`probeChunk`, kept as they are),
@@ -769,19 +769,19 @@ arguments are never kept, not even masked.
 
 A request a provider plugin sends its vendor by itself (Devin's cache
 keep-alive ping, plugins#592) never passes the gateway. The plugin
-reports it through `input.myna.usage` and `usage.pluginCall` writes it
-as a row of agent `myna` with the plugin's kind (`cache_keepalive`,
+reports it through `input.owl.usage` and `usage.pluginCall` writes it
+as a row of agent `owl` with the plugin's kind (`cache_keepalive`,
 "Cache keep-alive" in `purposeKinds`). Unlike a probe it is counted:
 priced and in every total (see
 [provider-plugins.md](provider-plugins.md#a-request-a-plugin-sends-by-itself)).
 `TestPluginKeepaliveIsCounted`.
 
-### Requests myna sends on its own
+### Requests owl sends on its own
 
 The provider editor's Test, Detect APIs and per-model detection, and a
 model list's refresh, reach the vendor outside any agent's turn (neiko and
 gys619 on Discord: a test left no trace). Each such request is one row of
-`usage.jsonl` with `source: "probe"`, agent `myna`, the provider's id
+`usage.jsonl` with `source: "probe"`, agent `owl`, the provider's id
 (the host for one not yet saved), its account, model, endpoint, status,
 time and the error clipped to 500 bytes, and a `kind` saying what it was
 for: `provider_test`, `api_detect` or `model_list`
@@ -805,9 +805,9 @@ for: `provider_test`, `api_detect` or `model_list`
   request page lists them as a chunk of their own (`probeChunk`) and adds
   them to no total, cell, group, chart or filter count; `?via=` other than
   all leaves them out.
-- **A model list answered is no row:** myna fetches lists by itself
+- **A model list answered is no row:** owl fetches lists by itself
   (start-up's `FetchNew`, the panel's and the Providers page's, and
-  `KeepListsFresh`, which asks a Remote myna every 10 minutes), so a
+  `KeepListsFresh`, which asks a Remote owl every 10 minutes), so a
   `model_list` row with a 2xx/3xx status and no error is neither written
   (`usage`'s `probelog.Sink`) nor read back from an older log
   (`quietProbe`, in the index's parse): ferock on Discord, a Requests page
@@ -831,7 +831,7 @@ for: `provider_test`, `api_detect` or `model_list`
   `TestProbesOfAProviderBeingAddedListItOnce` and
   `TestProbesOfADeletedProviderStayWithIt` cover it.
 - **Showing:** the row's badge is the kind's name ("Test", "Detect APIs",
-  "Model list", from `purposeKinds`), and its tooltip and the "myna's
+  "Model list", from `purposeKinds`), and its tooltip and the "owl's
   own" badge's say it counts in no total (`probeWhy` in
   `plugins/usage/page.js`).
 
@@ -971,7 +971,7 @@ one Codex is on runs as `codex resume -c model_provider=<its provider> <id>`
 while config.toml has that table, or it is a built-in (`openai`, `ollama`,
 …), and Codex runs it embedded, on its own provider; when the provider is
 gone, `MoveCodexProvider` moves it to the one Codex is on first (its files
-in myna's trash), and it resumes there (mrten_95615 on Discord). A WSL
+in owl's trash), and it resumes there (mrten_95615 on Discord). A WSL
 distro's Codex session is as listed. `TestCodexResumeOnItsProvider`; both
 cases were resumed by a real Codex 0.166.0 in a sandbox `CODEX_HOME`.
 
@@ -1027,7 +1027,7 @@ parent thread ID. `native_session` stays the recorded native header. The new
 unchanged. Ambiguous or unpaired calls do not inherit a relationship from shared
 session metadata.
 
-`GET /api/usage/requests` and `GET /v1/myna/usage/requests` expose Codex
+`GET /api/usage/requests` and `GET /v1/owl/usage/requests` expose Codex
 `compaction` as `true` or `false` when a native Codex call establishes the
 marker state, and omit it when there is no matching native evidence. Only a
 call read from a `token_usage_record` (it has a `response_id`) establishes it:
@@ -1038,4 +1038,4 @@ rather than saying `false`. A unique
 row's model, usage, cost and kind.
 Compaction is already included in Codex's total consumption, so this marker
 does not add tokens or cost. This is Codex-only; Claude behavior and the POST
-`/v1/myna/usage/requests` ingest allowlist are unchanged.
+`/v1/owl/usage/requests` ingest allowlist are unchanged.

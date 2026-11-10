@@ -16,29 +16,29 @@ import (
 
 // Mitsuha on Discord (v0.1.1364) and audie: after an update the Mac's menu
 // bar icon was gone, and quitting and reopening didn't bring it back. From
-// v0.1.1354 a restart to update hands the gateway over, and the myna
+// v0.1.1354 a restart to update hands the gateway over, and the owl
 // before hid its item with setVisible:NO. AppKit keeps that in the app's
 // defaults ("NSStatusItem VisibleCC Item-0" = 0), so the new version's item
 // and every later one started hidden. The hide leaves nothing kept, and a
-// hide an older myna kept is undone once per computer; a later one is
+// hide an older owl kept is undone once per computer; a later one is
 // the user's and stays.
-func TestHandoverLeavesTheMenuBarIconForTheNextMyna(t *testing.T) {
-	out, err := runAppKit(t, 30*time.Second, []string{"MYNA_TEST_TRAY_SHOWN=1"})
+func TestHandoverLeavesTheMenuBarIconForTheNextOwl(t *testing.T) {
+	out, err := runAppKit(t, 30*time.Second, []string{"OWL_TEST_TRAY_SHOWN=1"})
 	if err != nil || !strings.Contains(string(out), "tray shown: ok") {
 		t.Fatalf("tray shown: %v\n%s", err, out)
 	}
 }
 
 func init() {
-	if os.Getenv("MYNA_TEST_TRAY_SHOWN") != "1" {
+	if os.Getenv("OWL_TEST_TRAY_SHOWN") != "1" {
 		return
 	}
 	app := application.New(application.Options{
-		Name: "myna tray shown regression",
+		Name: "owl tray shown regression",
 		Mac:  application.MacOptions{ActivationPolicy: application.ActivationPolicyAccessory},
 		Assets: application.AssetOptions{Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "text/html")
-			fmt.Fprint(w, `<p>myna</p>`)
+			fmt.Fprint(w, `<p>owl</p>`)
 		})},
 	})
 	h := &host{app: app}
@@ -50,7 +50,7 @@ func init() {
 	}
 	app.Event.OnApplicationEvent(events.Common.ApplicationStarted, func(*application.ApplicationEvent) {
 		go func() {
-			// what a myna before this fix did as it handed over: the hide
+			// what a owl before this fix did as it handed over: the hide
 			// is kept for the app (the item is up a moment after the start)
 			for deadline := time.Now().Add(5 * time.Second); trayHidden() == 0; {
 				if time.Now().After(deadline) {
@@ -61,16 +61,16 @@ func init() {
 				time.Sleep(50 * time.Millisecond)
 			}
 			if still := bringTrayBack(); still || trayHidden() != 0 {
-				fail("the icon an older myna hid wasn't brought back (still hidden %v, %d kept)", still, trayHidden())
+				fail("the icon an older owl hid wasn't brought back (still hidden %v, %d kept)", still, trayHidden())
 			}
 			h.tray.Show()
 			mainSettled()
 
-			// this myna handing over
+			// this owl handing over
 			h.leaveMenuBar()
 			mainSettled()
 			if n := trayHidden(); n != 0 {
-				fail("handing over kept the menu bar icon hidden for the next myna (%d kept)", n)
+				fail("handing over kept the menu bar icon hidden for the next owl (%d kept)", n)
 			}
 
 			// the user's own hide, after the one-time bring-back (shown

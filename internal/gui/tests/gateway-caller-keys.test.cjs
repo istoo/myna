@@ -30,7 +30,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const w = lang === "zh"
         ? { create: "创建", name: "网关密钥名称", remove: "移除", copy: "复制网关密钥", disable: "停用密钥", enable: "启用密钥", requests: "请求", usage: "用量" }
         : { create: "Create", name: "Gateway key name", remove: "Remove", copy: "Copy gateway key", disable: "Disable key", enable: "Enable key", requests: "Requests", usage: "Usage" };
-      await page.goto("http://myna.test/?view=gateway");
+      await page.goto("http://owl.test/?view=gateway");
       await page.locator("#gatewayKeys .acc[data-key]").last().waitFor();
       assert.equal(await page.locator("#gatewayKeys .accts").count(), 1);
       assert.equal(await page.locator("#gatewayKeysBlock").isVisible(), true);
@@ -86,7 +86,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         "Settings does not duplicate key management");
       await page.locator("#nav").getByRole("button", { name: lang === "zh" ? "网关" : "Gateway", exact: true }).click();
       await page.waitForFunction(() => document.querySelectorAll("#gatewayKeys .acc[data-key]").length === 5);
-      let lanRow = page.locator("#gatewayKeys .acc[data-key]", { has: page.locator(".rename", { hasText: /^Myna$/ }) });
+      let lanRow = page.locator("#gatewayKeys .acc[data-key]", { has: page.locator(".rename", { hasText: /^Owl$/ }) });
       const lanID = await lanRow.getAttribute("data-key");
       const before = await lanRow.locator(".plan").textContent();
       await lanRow.getByRole("button", { name: w.copy, exact: true }).click();
@@ -127,7 +127,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.locator("#lanList .lan-address-row").waitFor();
       await page.locator("#nav").getByRole("button", { name: lang === "zh" ? "网关" : "Gateway", exact: true }).click();
       await page.waitForFunction(() => document.querySelectorAll("#gatewayKeys .acc[data-key]").length === 5);
-      lanRow = page.locator("#gatewayKeys .acc[data-key]", { has: page.locator(".rename", { hasText: /^Myna$/ }) });
+      lanRow = page.locator("#gatewayKeys .acc[data-key]", { has: page.locator(".rename", { hasText: /^Owl$/ }) });
       assert.notEqual(await lanRow.getAttribute("data-key"), lanID, "recreated LAN key appears without a page reload");
       assert.equal(await page.locator(`#gatewayKeys .acc[data-key="${lanID}"]`).count(), 0);
       tablet = page.locator("#gatewayKeys .acc[data-key]", { hasText: "Travel" });

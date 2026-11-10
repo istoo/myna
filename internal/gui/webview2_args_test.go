@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/webview2env"
+	"github.com/istoo/owl/internal/webview2env"
 	"github.com/wailsapp/wails/v3/pkg/application"
 )
 
@@ -32,10 +32,10 @@ func wailsBrowserArgs(o application.WindowsOptions) []string {
 	return append(args, o.AdditionalBrowserArgs...)
 }
 
-// #2753 (LuYquan): myna's own --disable-features made WebView2 skip the
+// #2753 (LuYquan): owl's own --disable-features made WebView2 skip the
 // user's WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS, so RendererCodeIntegrity
 // stayed on and an injected DLL got the renderer killed. Now the user's
-// arguments are merged into myna's: one --disable-features holding both
+// arguments are merged into owl's: one --disable-features holding both
 // lists (Chromium keeps only the last of two), one --enable-features, and
 // every other argument as written.
 func TestWebView2ArgsMergeTheUsers(t *testing.T) {
@@ -46,7 +46,7 @@ func TestWebView2ArgsMergeTheUsers(t *testing.T) {
 		{"none set", "", []string{"--disable-features=msSmartScreenProtection"}},
 		{"the reporter's", "--disable-features=RendererCodeIntegrity",
 			[]string{"--disable-features=msSmartScreenProtection,RendererCodeIntegrity"}},
-		{"twice, with myna's own and a repeat", `--disable-features=A,msSmartScreenProtection --disable-features="B, A"`,
+		{"twice, with owl's own and a repeat", `--disable-features=A,msSmartScreenProtection --disable-features="B, A"`,
 			[]string{"--disable-features=msSmartScreenProtection,A,B"}},
 		{"enable and others kept", "  --enable-features=X,Y\t--remote-debugging-port=9333 --proxy-server=\"http://h:1 x\" --enable-features=Y,Z --lang=de ",
 			[]string{"--disable-features=msSmartScreenProtection", "--enable-features=X,Y,Z", "--remote-debugging-port=9333", `--proxy-server="http://h:1 x"`, "--lang=de"}},
@@ -85,12 +85,12 @@ func TestWebView2KeepsCodeIntegrityByDefault(t *testing.T) {
 }
 
 // On Windows Wails' WebView2 loader blanks the variable in its init, which
-// runs before myna's code (#2753: the reporter's flag never arrived).
-// The value myna was started with still reaches the options: this test
+// runs before owl's code (#2753: the reporter's flag never arrived).
+// The value owl was started with still reaches the options: this test
 // starts its own binary with the variable set, where the loader's init has
 // run as in the app.
 func TestWebView2ArgsSurviveWailsInit(t *testing.T) {
-	if os.Getenv("MYNA_TEST_WEBVIEW2_CHILD") == "1" {
+	if os.Getenv("OWL_TEST_WEBVIEW2_CHILD") == "1" {
 		fmt.Printf("os=%q disabled=%q\n", os.Getenv(webview2env.Name), windowsOptions().DisabledFeatures)
 		return
 	}
@@ -99,7 +99,7 @@ func TestWebView2ArgsSurviveWailsInit(t *testing.T) {
 		t.Fatal(err)
 	}
 	cmd := exec.Command(exe, "-test.run=^TestWebView2ArgsSurviveWailsInit$", "-test.count=1")
-	cmd.Env = append(os.Environ(), "MYNA_TEST_WEBVIEW2_CHILD=1", webview2env.Name+"=--disable-features=RendererCodeIntegrity")
+	cmd.Env = append(os.Environ(), "OWL_TEST_WEBVIEW2_CHILD=1", webview2env.Name+"=--disable-features=RendererCodeIntegrity")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		t.Fatalf("child: %v\n%s", err, out)

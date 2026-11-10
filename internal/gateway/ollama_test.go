@@ -10,9 +10,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 	"github.com/tidwall/gjson"
 )
 
@@ -40,7 +40,7 @@ func ollamaPlan(t *testing.T, chat string) {
 // Studio's Copilot BYOK, wani on Discord; VS Code's Copilot Ollama
 // provider) asks /api/version, lists /api/tags and reads each model's
 // capabilities and window from /api/show, then chats on
-// /v1/chat/completions. The list is myna's catalog by its ids, and a
+// /v1/chat/completions. The list is owl's catalog by its ids, and a
 // model's window and what it takes are its catalog entry's.
 func TestOllamaModelRoutes(t *testing.T) {
 	fresh(t)
@@ -98,7 +98,7 @@ func TestOllamaModelRoutes(t *testing.T) {
 		!strings.Contains(fmt.Sprint(s.ModelInfo["general.basename"]), "seer") {
 		t.Fatalf("show seer: %d %+v", c, s)
 	}
-	// a client from before Ollama 0.5 names it "name"; a window myna
+	// a client from before Ollama 0.5 names it "name"; a window owl
 	// doesn't know is told as the one VS Code's Copilot assumes, never 0
 	c, s = show(`{"name":"plan/plain"}`)
 	if c != 200 || !slices.Equal(s.Capabilities, []string{"completion", "tools"}) || s.ModelInfo[arch+".context_length"] != float64(32768) {
@@ -174,14 +174,14 @@ func TestOllamaRoutesHoldAKey(t *testing.T) {
 // The Ollama routes are guarded as every gateway route is, through the
 // real server stack: with no key, a page elsewhere, a sandboxed frame
 // (Origin null), a page at a localhost subdomain, a page rebound to
-// loopback under its own name, and another machine while myna isn't
+// loopback under its own name, and another machine while owl isn't
 // shared or sends none are all refused, and none is told a model. An
 // agent on this computer, and a keyed call, are answered.
 func TestOllamaRoutesGuarded(t *testing.T) {
 	fresh(t)
-	t.Setenv("MYNA_ADDR", "")
-	t.Setenv("MYNA_PUBLIC_URL", "")
-	t.Setenv("MYNA_TRUST_PROXY", "")
+	t.Setenv("OWL_ADDR", "")
+	t.Setenv("OWL_PUBLIC_URL", "")
+	t.Setenv("OWL_TRUST_PROXY", "")
 	ollamaPlan(t, ollamaUpstream(t, nil).URL+"/v1")
 	srv := lanGuard(New().Handler())
 	routes := []struct{ method, path, body string }{
@@ -224,7 +224,7 @@ func TestOllamaRoutesGuarded(t *testing.T) {
 		}
 		refused(at+" rebound", do(rt.method, rt.path, rt.body, "127.0.0.1:50123", "rebind.attacker.example:3425", hdr...), http.StatusForbidden)
 		refused(at+" rebound at a localhost subdomain", do(rt.method, rt.path, rt.body, "127.0.0.1:50123", "evil.localhost:3425", hdr...), http.StatusForbidden)
-		// another machine, no Origin at all: myna not shared
+		// another machine, no Origin at all: owl not shared
 		refused(at+" from the LAN, not shared", do(rt.method, rt.path, rt.body, "192.168.1.9:5000", "192.168.1.2:3425"), http.StatusForbidden)
 		// a tunnel on loopback
 		refused(at+" through a tunnel, not shared", do(rt.method, rt.path, rt.body, "127.0.0.1:50123", gw, "X-Forwarded-For", "203.0.113.9"), http.StatusForbidden)
@@ -237,7 +237,7 @@ func TestOllamaRoutesGuarded(t *testing.T) {
 	_, secrets := newCaller(t, "Visual Studio")
 	for _, rt := range routes {
 		at := rt.method + " " + rt.path
-		for _, hdr := range [][]string{nil, {"Authorization", "Bearer myna"}, {"Authorization", "Bearer sk-myna-wrong"}} {
+		for _, hdr := range [][]string{nil, {"Authorization", "Bearer owl"}, {"Authorization", "Bearer sk-owl-wrong"}} {
 			resetAuthThrottle()
 			refused(at+" from the LAN with "+strings.Join(hdr, " "), do(rt.method, rt.path, rt.body, "192.168.1.9:5000", "192.168.1.2:3425", hdr...), http.StatusUnauthorized)
 		}

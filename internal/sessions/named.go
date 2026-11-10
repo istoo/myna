@@ -142,7 +142,7 @@ func (n *named[V]) UnmarshalJSON(b []byte) error {
 }
 
 // quick reads v into an int or Tokens without reflection when every number
-// in it is a plain integer, as a cache myna wrote has them; anything else
+// in it is a plain integer, as a cache owl wrote has them; anything else
 // is left to json.Unmarshal, and its errors.
 func quick(val any, v gjson.Result) bool {
 	switch p := val.(type) {

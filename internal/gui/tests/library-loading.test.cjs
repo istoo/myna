@@ -16,7 +16,7 @@ const assets = path.resolve(__dirname, "../assets");
 const HOME = "/Users/aimer";
 const agent = (id, name) => ({ id, name, icon: "", skills: `${HOME}/.${id}/skills`, mcp: `${HOME}/.${id}/mcp.json` });
 const lib = {
-  dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
+  dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
   agents: [agent("codex", "Codex"), agent("pi", "Pi")],
   instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [],
   skills: [{ name: "grilling", description: "Grill a plan", kind: "folder", agents: ["codex"], source: `${HOME}/skills/grilling` }],
@@ -47,7 +47,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     t.after(() => browser.close());
     // under the sidebar's width: the tabs here are the page's own strip
     const ctx = await browser.newContext({ viewport: { width: 860, height: 800 } });
-    await ctx.addInitScript(() => { try { if (!sessionStorage.getItem("seeded")) { localStorage.setItem("myna.libTab", "skills"); sessionStorage.setItem("seeded", "1"); } } catch {} });
+    await ctx.addInitScript(() => { try { if (!sessionStorage.getItem("seeded")) { localStorage.setItem("owl.libTab", "skills"); sessionStorage.setItem("seeded", "1"); } } catch {} });
     const page = await ctx.newPage();
     page.setDefaultTimeout(5000);
     page.setDefaultNavigationTimeout(60000);
@@ -55,7 +55,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     page.on("pageerror", (e) => errors.push(e.message));
     let open;
     await page.route("**/*", server(new Promise((r) => { open = r; })));
-    await page.goto("http://myna.test/");
+    await page.goto("http://owl.test/");
     // how the outline looks the moment it's put in the page
     await page.evaluate(() => {
       new MutationObserver((_, mo) => {
@@ -85,7 +85,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     await tabs.filter({ hasText: "Instructions" }).click();
     assert.equal(await v.locator(".lib-tabs .opt.on").textContent(), "Instructions");
     assert.equal(await v.locator(".lib-skel .row-head").count(), 1, "Instructions' outline has the Agents heading");
-    assert.equal(await page.evaluate(() => localStorage.getItem("myna.libTab")), "instructions");
+    assert.equal(await page.evaluate(() => localStorage.getItem("owl.libTab")), "instructions");
 
     const before = await v.locator(".lib-tabs").boundingBox();
     open();
@@ -93,7 +93,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     assert.equal(await v.locator(".lib-skel").count(), 0, "the outline goes");
     assert.deepEqual(await v.locator(".lib-tabs .opt").allTextContents(), ["Instructions", "MCP servers · 1", "Skills · 1", "Hooks", "Subagents", "RTK"]);
     assert.equal(await v.locator(".lib-tabs .opt.on").textContent(), "Instructions");
-    assert.equal(await v.locator(".lib-head .lib-more").getAttribute("title"), "~/.myna/library");
+    assert.equal(await v.locator(".lib-head .lib-more").getAttribute("title"), "~/.owl/library");
     const after = await v.locator(".lib-tabs").boundingBox();
     assert.deepEqual([after.x, after.y], [before.x, before.y], "the tabs don't move");
     await v.getByText("Write it once", { exact: false }).waitFor();
@@ -111,7 +111,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
       t.after(() => browser.close());
       const ctx = await browser.newContext({ viewport: { width, height: 800 } });
-      await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "skills"); } catch {} });
+      await ctx.addInitScript(() => { try { localStorage.setItem("owl.libTab", "skills"); } catch {} });
       const page = await ctx.newPage();
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(60000);
@@ -133,7 +133,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         }
         return rest(route);
       });
-      await page.goto("http://myna.test/");
+      await page.goto("http://owl.test/");
       await navTo(page, "library");
       const v = page.locator("#view-library");
       await v.locator(".lib-head .lib-more:not([disabled])").waitFor();

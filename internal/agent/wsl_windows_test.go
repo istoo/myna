@@ -7,17 +7,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/proc"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/proc"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// On a real WSL: MYNA_WSL_TEST_DISTRO names a throwaway distro with a
+// On a real WSL: OWL_WSL_TEST_DISTRO names a throwaway distro with a
 // ~/.codex of its own, which the test writes to.
 func TestWSLCodexLive(t *testing.T) {
-	name := os.Getenv("MYNA_WSL_TEST_DISTRO")
+	name := os.Getenv("OWL_WSL_TEST_DISTRO")
 	if name == "" {
-		t.Skip("MYNA_WSL_TEST_DISTRO not set")
+		t.Skip("OWL_WSL_TEST_DISTRO not set")
 	}
 	// the real wsl.exe, before testenv's failing stand-in
 	t.Setenv("PATH", filepath.Join(os.Getenv("SystemRoot"), "System32")+string(os.PathListSeparator)+os.Getenv("PATH"))
@@ -79,10 +79,10 @@ func TestWSLCodexLive(t *testing.T) {
 	if !strings.Contains(got, `model = "fake/m1"`) || !strings.Contains(got, `base_url = "`+d.base()+`/v1"`) {
 		t.Fatal("not written")
 	}
-	if !strings.Contains(before, "OPENAI_API_KEY") && !strings.Contains(got, `model_catalog_json = "`+d.Home+`/.codex/myna-models.json"`) {
+	if !strings.Contains(before, "OPENAI_API_KEY") && !strings.Contains(got, `model_catalog_json = "`+d.Home+`/.codex/owl-models.json"`) {
 		t.Fatal("catalog path")
 	}
-	if !strings.Contains(cat(d.Home+"/.codex/myna-models.json"), "fake/m1") {
+	if !strings.Contains(cat(d.Home+"/.codex/owl-models.json"), "fake/m1") {
 		t.Fatal("catalog not seen inside WSL")
 	}
 	if c := a.Check(); c != "" {

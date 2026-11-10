@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/ghtoken"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/ghtoken"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // The GitHub token is set and removed on its own, and the page is told it

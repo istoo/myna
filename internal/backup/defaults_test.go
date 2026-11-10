@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/edit"
 )
 
 // Defaults survive encryption and restore, while a legacy backup's

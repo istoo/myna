@@ -101,9 +101,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       // the Sessions tab over 7 days, as a reader who picked it is left
-      await page.addInitScript(() => { localStorage.setItem("myna.usageTab", "sessions"); localStorage.setItem("myna.sessRange", "7d"); });
+      await page.addInitScript(() => { localStorage.setItem("owl.usageTab", "sessions"); localStorage.setItem("owl.sessRange", "7d"); });
       await page.route("**/*", serve(lang));
-      await page.goto("http://myna.test/?view=usage");
+      await page.goto("http://owl.test/?view=usage");
       await page.locator("#sessGrid:not([hidden])").waitFor();
       const rows = page.locator("#sessList .row.sess");
       await rows.first().waitFor();
@@ -130,9 +130,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.setDefaultNavigationTimeout(60000);
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
-      await page.addInitScript(() => { localStorage.setItem("myna.usageTab", "sessions"); localStorage.setItem("myna.sessRange", "7d"); });
+      await page.addInitScript(() => { localStorage.setItem("owl.usageTab", "sessions"); localStorage.setItem("owl.sessRange", "7d"); });
       await page.route("**/*", serve(lang, false));
-      await page.goto("http://myna.test/?view=usage");
+      await page.goto("http://owl.test/?view=usage");
       const rows = page.locator("#sessList .row.sess");
       await rows.first().waitFor();
       assert.equal(await rows.count(), 2, "both sessions whose last line is in the range");

@@ -38,7 +38,7 @@ func TestMissingKeyIsErrNeedsKey(t *testing.T) {
 		if !errors.Is(err, ErrNeedsKey) {
 			t.Errorf("%s: %q isn't ErrNeedsKey", pr.ID, err)
 		}
-		if strings.Contains(err.Error(), "myna provider") {
+		if strings.Contains(err.Error(), "owl provider") {
 			t.Errorf("%s: %q names a CLI command the editor would show", pr.ID, err)
 		}
 	}

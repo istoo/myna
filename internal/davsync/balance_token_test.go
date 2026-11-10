@@ -6,8 +6,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/istoo/myna/internal/backup"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/backup"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A computer sending no keys leaves the server's balance token in place,
@@ -85,7 +85,7 @@ func TestSyncBalanceToken(t *testing.T) {
 			}
 			remote := func() backup.Bundle {
 				t.Helper()
-				got, err := backup.Open(f.objects["team x+y/myna/myna.myna-backup"], cfg.Passphrase)
+				got, err := backup.Open(f.objects["team x+y/owl/owl.owl-backup"], cfg.Passphrase)
 				if err != nil {
 					t.Fatal(err)
 				}

@@ -7,9 +7,9 @@ import (
 )
 
 // Every agent's own models say which way they go, as Claude Code's do
-// (EZN7L2C3, #834: Codex 下拉选项中没有 via myna; agy 和 grok 没有同步):
-// Codex's go to OpenAI directly until it is routed through myna, then
-// via myna; Grok Build lists the models it last listed itself, straight
+// (EZN7L2C3, #834: Codex 下拉选项中没有 via owl; agy 和 grok 没有同步):
+// Codex's go to OpenAI directly until it is routed through owl, then
+// via owl; Grok Build lists the models it last listed itself, straight
 // to xAI, and its own tables' to their endpoint; Antigravity CLI's own
 // custom models go to their provider; DeepSeek Harness's go to DeepSeek.
 func TestOwnModelsSayTheirPath(t *testing.T) {
@@ -49,7 +49,7 @@ func TestOwnModelsSayTheirPath(t *testing.T) {
 	os.WriteFile(cfg, []byte(`openai_base_url = "`+codexGatewayURL()+`"`+"\n"), 0o644)
 	for _, o := range ownOf(codex(home), "OpenAI") {
 		if !o.Via || o.Direct != "" {
-			t.Errorf("routed, %s goes via myna: %+v", o.Value, o)
+			t.Errorf("routed, %s goes via owl: %+v", o.Value, o)
 		}
 	}
 	os.WriteFile(cfg, []byte("model_provider = \"mine\"\n[model_providers.mine]\nbase_url = \"https://relay.example/v1\"\n"), 0o644)
@@ -59,7 +59,7 @@ func TestOwnModelsSayTheirPath(t *testing.T) {
 		}
 	}
 
-	// Grok Build, no Grok subscription in myna
+	// Grok Build, no Grok subscription in owl
 	g := filepath.Join(home, "grok")
 	os.MkdirAll(g, 0o755)
 	os.WriteFile(filepath.Join(g, "models_cache.json"), []byte(`{"models":{

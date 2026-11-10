@@ -15,19 +15,19 @@ import (
 	"testing/synctest"
 	"time"
 
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/usage"
 )
 
 func otelConfig(t *testing.T, config settings.OTel) {
 	t.Helper()
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(t.TempDir(), "config"))
-	t.Setenv("MYNA_OTEL_ENABLED", "true")
-	t.Setenv("MYNA_OTEL_ENDPOINT", config.Endpoint)
-	t.Setenv("MYNA_OTEL_HEADERS", "Authorization=Bearer%20collector-test")
-	t.Setenv("MYNA_OTEL_METRICS", "false")
+	t.Setenv("OWL_OTEL_ENABLED", "true")
+	t.Setenv("OWL_OTEL_ENDPOINT", config.Endpoint)
+	t.Setenv("OWL_OTEL_HEADERS", "Authorization=Bearer%20collector-test")
+	t.Setenv("OWL_OTEL_METRICS", "false")
 	if config.Metrics {
-		t.Setenv("MYNA_OTEL_METRICS", "true")
+		t.Setenv("OWL_OTEL_METRICS", "true")
 	}
 }
 
@@ -116,7 +116,7 @@ func TestOTelBatchWireAndPrivacy(t *testing.T) {
 	for _, a := range spans[0].Attributes {
 		values[a.Key] = a.Value["stringValue"] + a.Value["intValue"]
 	}
-	if values["gen_ai.usage.input_tokens"] != "15" || values["gen_ai.usage.output_tokens"] != "4" || values["myna.route.id"] != "42" || values["myna.ttft_ms"] != "200" {
+	if values["gen_ai.usage.input_tokens"] != "15" || values["gen_ai.usage.output_tokens"] != "4" || values["owl.route.id"] != "42" || values["owl.ttft_ms"] != "200" {
 		t.Fatalf("attributes: %v", values)
 	}
 	var metrics struct {
@@ -194,10 +194,10 @@ func TestOTelDisabledAndChangedDestination(t *testing.T) {
 	defer e.cancel()
 	cfg, _ := settings.OTelExport()
 	batch := []otelItem{{record: Record{Time: time.Now(), Status: 200}, config: cfg}}
-	t.Setenv("MYNA_OTEL_ENABLED", "false")
+	t.Setenv("OWL_OTEL_ENABLED", "false")
 	e.flush(batch)
-	t.Setenv("MYNA_OTEL_ENABLED", "true")
-	t.Setenv("MYNA_OTEL_ENDPOINT", collector.URL+"/other")
+	t.Setenv("OWL_OTEL_ENABLED", "true")
+	t.Setenv("OWL_OTEL_ENDPOINT", collector.URL+"/other")
 	e.flush(batch)
 	if calls.Load() != 0 {
 		t.Fatal("sent a disabled batch or sent it to a new destination")
@@ -405,7 +405,7 @@ func TestOTelQueueBodiesBudgetConcurrent(t *testing.T) {
 
 // Settings › Observability's Langfuse setup saves an endpoint and headers
 // made from the host and the project's keys (plugins/otel/page.js); sent
-// from saved settings, with no MYNA_OTEL_* in the way, a batch reaches
+// from saved settings, with no OWL_OTEL_* in the way, a batch reaches
 // Langfuse's OTLP traces path with the Basic sign-in and the ingestion
 // header, and metrics, off, send nothing.
 func TestOTelLangfuseSetup(t *testing.T) {
@@ -420,7 +420,7 @@ func TestOTelLangfuseSetup(t *testing.T) {
 	}))
 	defer collector.Close()
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(t.TempDir(), "config"))
-	for _, k := range []string{"MYNA_OTEL_ENABLED", "MYNA_OTEL_ENDPOINT", "MYNA_OTEL_HEADERS", "MYNA_OTEL_METRICS", "MYNA_OTEL_SESSIONS", "MYNA_OTEL_BODIES", "MYNA_OTEL_BODIES_WHOLE"} {
+	for _, k := range []string{"OWL_OTEL_ENABLED", "OWL_OTEL_ENDPOINT", "OWL_OTEL_HEADERS", "OWL_OTEL_METRICS", "OWL_OTEL_SESSIONS", "OWL_OTEL_BODIES", "OWL_OTEL_BODIES_WHOLE"} {
 		t.Setenv(k, "")
 		os.Unsetenv(k)
 	}

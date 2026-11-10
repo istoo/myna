@@ -10,7 +10,7 @@
 window.rateWindowsPaint = function paint(box, d) {
   box.replaceChildren();
   if (!box.nextElementSibling) {
-    const help = el("div", "hint", t("Inside a window a call costs the official price times its rate, on top of the price rate; outside every window the price rate alone counts. The first window that holds a call wins. Times are on the clock of the computer myna runs on, and 22:00–6:00 crosses midnight. No day ticked is every day. A price you set for a model is scaled by the window too. Changing the windows prices the calls already counted again, as a changed price rate does."));
+    const help = el("div", "hint", t("Inside a window a call costs the official price times its rate, on top of the price rate; outside every window the price rate alone counts. The first window that holds a call wins. Times are on the clock of the computer owl runs on, and 22:00–6:00 crosses midnight. No day ticked is every day. A price you set for a model is scaled by the window too. Changing the windows prices the calls already counted again, as a changed price rate does."));
     // a list price with the vendor's own peak has it already (#2463,
     // the author): a window over the same hours would double it again
     help.append(el("div", "", t("DeepSeek's own API, Command Code, OpenCode Go and Ollama Cloud already count their DeepSeek models' peak hours at double: don't add those hours as a window, or they count twice.")));

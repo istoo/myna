@@ -4,14 +4,14 @@
 // not changed (and restarted the skeleton's shimmer while loading); and
 // each draw also built the Usage page's cards and curves, which the panel
 // never shows. Real page, isolated responses: no vendor, account or
-// installed app is used. MYNA_QUOTA_ASSETS points at older assets to see
+// installed app is used. OWL_QUOTA_ASSETS points at older assets to see
 // it fail.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
-const assets = process.env.MYNA_QUOTA_ASSETS || path.resolve(__dirname, "../assets");
+const assets = process.env.OWL_QUOTA_ASSETS || path.resolve(__dirname, "../assets");
 const iso = n => new Date(n).toISOString();
 function fixtures() {
   const now = Date.now(), readAt = iso(now - 60000), resetsAt = iso(now + 2 * 3600000);
@@ -52,7 +52,7 @@ async function open(t, engine, lang, width) {
   const errors = [];
   page.on("pageerror", e => errors.push(e.message));
   await page.route("**/*", serve(lang, data));
-  await page.goto("http://myna.test/?mode=panel");
+  await page.goto("http://owl.test/?mode=panel");
   await page.locator('#ptabs [data-ptab="usage"]').click();
   return { page, data, errors, release };
 }

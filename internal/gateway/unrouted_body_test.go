@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-// heatonz on Discord (Hermes Agent to myna in Docker): requests held
+// heatonz on Discord (Hermes Agent to owl in Docker): requests held
 // 2m0s "without routing it to any provider", the report's one wait "body
 // 2m0s (under way)". A body that keeps coming, a byte at a time and never
 // idle for the read's own limit, reached unroutedMost while it was still
@@ -106,12 +106,12 @@ func isClosedConn(err error) bool {
 
 // A full run caught the trickle above red with a 504 (#4511): the hold
 // ran out between two of its reads, and the read's absence alone was
-// taken for a hold of myna's own. Less of the body having come than
+// taken for a hold of owl's own. Less of the body having come than
 // the request's own Content-Length says, once its read has begun, the
 // body is still arriving and the time is the client's, inside a read or
 // between two; so is a chunked body's until a read meets its end. Before
 // its first read, in the wait for body room, the
-// time is myna's own.
+// time is owl's own.
 func TestUnroutedBodyArrivingBetweenReads(t *testing.T) {
 	r := httptest.NewRequest("POST", "/v1/chat/completions", strings.NewReader(strings.Repeat(" ", 400)))
 	u := &unroutedHold{r: r}
@@ -145,7 +145,7 @@ func TestUnroutedBodyArrivingBetweenReads(t *testing.T) {
 }
 
 // A request waiting for body room before its first read is held by
-// myna, not by its client, whose body may all be sent: it is not
+// owl, not by its client, whose body may all be sent: it is not
 // answered 408 "its body was still arriving".
 func TestUnroutedBodyRoomWaitNot408(t *testing.T) {
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
@@ -182,7 +182,7 @@ func TestUnroutedBodyRoomWaitNot408(t *testing.T) {
 	b, _ := io.ReadAll(res.Body)
 	res.Body.Close()
 	if res.StatusCode == http.StatusRequestTimeout || strings.Contains(string(b), "its body was still arriving") {
-		t.Fatalf("a request waiting for myna's body room was answered %d %s", res.StatusCode, b)
+		t.Fatalf("a request waiting for owl's body room was answered %d %s", res.StatusCode, b)
 	}
 	// the report is saved after the answer: wait for it, so the test's
 	// temporary folder isn't removed under the save (CI's RemoveAll found
@@ -205,7 +205,7 @@ func waitHeldSaved(t *testing.T) {
 
 // A chunked body is arriving until a read meets its end, so the other
 // side of that must hold: one read whole, through its decoder too, is not
-// arriving, and a hold of myna's own after it (a lock routing needs) is
+// arriving, and a hold of owl's own after it (a lock routing needs) is
 // answered 504, not 408 "its body was still arriving".
 func TestUnroutedChunkedBodyReadWholeHeld504(t *testing.T) {
 	for _, encoding := range []string{"identity", "gzip", "zstd"} {

@@ -6,11 +6,11 @@ import (
 	"slices"
 	"sort"
 
-	"github.com/istoo/myna/internal/sessions"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/sessions"
+	"github.com/istoo/owl/internal/settings"
 )
 
-// Which agents' session history myna may read (RustCats on X): the
+// Which agents' session history owl may read (RustCats on X): the
 // Sessions page asks once on a fresh install, and Settings changes it per
 // agent later. sessions.Reads is the gate every reader asks.
 

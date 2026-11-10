@@ -6,15 +6,15 @@
 // docs/subsystems/plugin-runtime.md): Apply serves internal/budget's, and
 // the point fails closed: a request of a key held to a limit is not sent
 // while no limiter serves it. What a key has used is the core's, read
-// from the usage records, so the Settings page, `myna keys` and
-// /v1/myna/limit tell it either way.
+// from the usage records, so the Settings page, `owl keys` and
+// /v1/owl/limit tell it either way.
 package budget
 
 import (
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/budget"
-	"github.com/istoo/myna/internal/gwbudget"
-	"github.com/istoo/myna/internal/pluginrt"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/budget"
+	"github.com/istoo/owl/internal/gwbudget"
+	"github.com/istoo/owl/internal/pluginrt"
 )
 
 func init() {

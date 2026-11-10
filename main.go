@@ -1,18 +1,18 @@
-// myna — one place to pick every agent's model. The commands live in
+// owl — one place to pick every agent's model. The commands live in
 // internal/cli; this is only where the binary starts.
 package main
 
 import (
 	_ "embed"
 
-	"github.com/istoo/myna/internal/cli"
-	"github.com/istoo/myna/internal/notices"
+	"github.com/istoo/owl/internal/cli"
+	"github.com/istoo/owl/internal/notices"
 	// the built-in plugins, registered with the runtime (internal/pluginrt)
-	_ "github.com/istoo/myna/plugins/all"
+	_ "github.com/istoo/owl/plugins/all"
 )
 
 // version is set at build time: -ldflags "-X main.version=…" (Makefile,
-// Dockerfile, myna-releases), so it stays in package main.
+// Dockerfile, owl-releases), so it stays in package main.
 var version = "dev"
 
 // the notices of what is compiled into every build (moejs's Intl data and

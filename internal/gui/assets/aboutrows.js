@@ -27,7 +27,7 @@ export function aboutRows(ctx) {
   }
   // the header's Update pill, kept away for good or for one version; the
   // version row above still says what is out and offers it
-  const pill = row(t("Update reminder"), t("Shows in the title bar when a newer myna is out"),
+  const pill = row(t("Update reminder"), t("Shows in the title bar when a newer owl is out"),
     "", settingSwitch(t("Update reminder"), !s.noUpdatePill, (on) => savePrefs({ ...keep, noUpdatePill: !on }).then(renderUpdateBadge)));
   pill.classList.add("update-pill-row");
   if (s.updateSkip && !s.noUpdatePill) {
@@ -39,14 +39,14 @@ export function aboutRows(ctx) {
       pill.querySelector(".val").prepend(back);
     }, () => {});
   }
-  // whether myna asks for a newer version by itself, and how often;
+  // whether owl asks for a newer version by itself, and how often;
   // off, only the version row's Check asks (#472)
-  row(t("Automatic updates"), t("Checks for a newer myna by itself"),
+  row(t("Automatic updates"), t("Checks for a newer owl by itself"),
     "", settingSwitch(t("Automatic updates"), !s.noAutoUpdate, (on) => savePrefs({ ...keep, noAutoUpdate: !on }))).classList.add("update-auto-row");
   // kept in place while off, dimmed, its height the same (a row or a line
   // taken away would shorten the page under the click), for when they are
   // turned on again
-  row(t("Check every"), s.noAutoUpdate ? t("While automatic updates are on") : t("How often myna looks for a newer version"), "",
+  row(t("Check every"), s.noAutoUpdate ? t("While automatic updates are on") : t("How often owl looks for a newer version"), "",
     segs(UPDATE_EVERY.map((m) => [m, m < 60 ? t("{n} min", { n: m }) : t("{n} h", { n: m / 60 })]), s.updateEvery || 360,
       (updateEvery) => savePrefs({ ...keep, updateEvery }))).classList.add("update-every-row", ...(s.noAutoUpdate ? ["off"] : []));
   // which versions an update offers (ssharpcc on X): every one as it comes
@@ -70,31 +70,31 @@ export function aboutRows(ctx) {
   renderUpdateMirror(row(t("Download source"), "", ""), s);
   const open = el("button", "text", t("Open"));
   open.onclick = () => api("settings/reveal", {}).catch(statusErr);
-  // portable (a data folder beside myna, #508): everything is in there
-  row(t("Config folder"), s.portable ? t("Portable: everything myna keeps, in the data folder beside it") : t("providers, profiles and these settings"), s.dir, copyBtn(s.dir, t("Path")), open);
-  // app.log (applog); myna web writes none
+  // portable (a data folder beside owl, #508): everything is in there
+  row(t("Config folder"), s.portable ? t("Portable: everything owl keeps, in the data folder beside it") : t("providers, profiles and these settings"), s.dir, copyBtn(s.dir, t("Path")), open);
+  // app.log (applog); owl web writes none
   if (s.log) {
     const o = el("button", "text", t("Open"));
     o.onclick = () => api("settings/log/reveal", {}).catch(statusErr);
-    row(t("Log"), t("What myna has logged, to send with a bug report"), s.log, copyBtn(s.log, t("Path")), o).id = "logRow";
+    row(t("Log"), t("What owl has logged, to send with a bug report"), s.log, copyBtn(s.log, t("Path")), o).id = "logRow";
   }
   renderCLI(row(t("Command line"), t("Checking your shells…"), ""));
-  // served to other machines (myna web), the one they reach (noahhrreion)
+  // served to other machines (owl web), the one they reach (noahhrreion)
   const gw = web && s.publicURL || s.gateway;
   row(t("Gateway URL"), t("the address every agent is pointed at"), gw, copyBtn(gw, t("Gateway URL")));
   // Claude Code elsewhere (Docker): the host runs this curl
   if (web) {
-    const cmd = "curl -fsS -m 1 -H 'Authorization: Bearer <gateway key>' --data-binary @- " + gw + "/v1/myna/statusline || true";
+    const cmd = "curl -fsS -m 1 -H 'Authorization: Bearer <gateway key>' --data-binary @- " + gw + "/v1/owl/statusline || true";
     row(t("Status line on another computer"), t("statusLine's command in Claude Code's settings.json there; a read-only gateway key is enough"), cmd, copyBtn(cmd, t("Command"))).id = "statuslineRemoteRow";
   }
-  // MYNA_PUBLIC_URL, where other machines reach it (#1551)
-  if (s.publicURL && gw !== s.publicURL) row(t("Public address"), t("MYNA_PUBLIC_URL: where other computers reach the gateway, with a gateway key"), s.publicURL, copyBtn(s.publicURL, t("Public address"))).id = "publicURLRow";
+  // OWL_PUBLIC_URL, where other machines reach it (#1551)
+  if (s.publicURL && gw !== s.publicURL) row(t("Public address"), t("OWL_PUBLIC_URL: where other computers reach the gateway, with a gateway key"), s.publicURL, copyBtn(s.publicURL, t("Public address"))).id = "publicURLRow";
   const site = el("button", "text", t("Open"));
-  site.onclick = () => api("open", { url: "https://github.com/istoo/myna" }).catch(() => {});
-  row(t("Website"), t("downloads, docs and what's new"), "github.com/istoo/myna", site);
+  site.onclick = () => api("open", { url: "https://github.com/istoo/owl" }).catch(() => {});
+  row(t("Website"), t("downloads, docs and what's new"), "github.com/istoo/owl", site);
   const lic = el("button", "text", t("View"));
   lic.onclick = showNotices;
-  row(t("Open-source licenses"), t("the notices of the code and data myna is built with"), "", lic);
+  row(t("Open-source licenses"), t("the notices of the code and data owl is built with"), "", lic);
   const join = el("button", "discord");
   join.innerHTML = DISCORD_SVG;
   join.append(el("span", "", t("Join Discord")));
@@ -104,16 +104,16 @@ export function aboutRows(ctx) {
   const repo = el("button", "github");
   repo.innerHTML = GITHUB_SVG;
   repo.append(el("span", "", "GitHub"));
-  repo.title = "github.com/istoo/myna";
-  repo.onclick = () => api("open", { url: "https://github.com/istoo/myna" }).catch(() => {});
+  repo.title = "github.com/istoo/owl";
+  repo.onclick = () => api("open", { url: "https://github.com/istoo/owl" }).catch(() => {});
   row(t("Community"), t("questions, ideas and feedback, on Discord or GitHub"), "", join, repo);
-  // myna uninstall, from the app (Jevik_AI on X deleted myna's folders
+  // owl uninstall, from the app (Jevik_AI on X deleted owl's folders
   // by hand and Codex kept pointing at a gateway that was gone). Never in a
-  // browser: myna web would be taken off the computer serving the page.
+  // browser: owl web would be taken off the computer serving the page.
   if (!web) {
     const go = el("button", "text danger", t("Uninstall…"));
-    go.onclick = () => uninstallMyna(go);
-    row(t("Uninstall myna"), t("Disconnects every agent, putting back what each had, then removes myna's service and files"), "", go).id = "uninstallRow";
+    go.onclick = () => uninstallOwl(go);
+    row(t("Uninstall owl"), t("Disconnects every agent, putting back what each had, then removes owl's service and files"), "", go).id = "uninstallRow";
   }
   // gateway mode leaves out what is written into this computer's agents'
   // files, and the alerts its desktop would show

@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/istoo/myna/internal/redact"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/redact"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // Recent-call bodies are diagnostics, not an unbounded traffic log. Keeping the
@@ -90,7 +90,7 @@ func (s *spool) add(p []byte) {
 	if s.f == nil {
 		pattern := s.pattern
 		if pattern == "" {
-			pattern = "myna-archive-*"
+			pattern = "owl-archive-*"
 		}
 		f, err := os.CreateTemp("", pattern)
 		if err != nil {

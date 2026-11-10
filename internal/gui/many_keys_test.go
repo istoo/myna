@@ -5,10 +5,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// @NetRozee on X: a custom endpoint given a thousand keys froze myna.
+// @NetRozee on X: a custom endpoint given a thousand keys froze owl.
 // The Providers page asked, for each key, what it rests by, and that
 // listed every key on again: a thousand keys took 1.5s to draw, five
 // thousand 2m40s, and each answer of /api/keys/* (an import too) waited

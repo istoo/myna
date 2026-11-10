@@ -16,8 +16,8 @@ import (
 	"github.com/klauspost/compress/zstd"
 	"modernc.org/sqlite"
 
-	"github.com/istoo/myna/internal/filelock"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/filelock"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // codexState makes a Codex state database with a thread's row, as Codex
@@ -52,7 +52,7 @@ func threadProvider(t *testing.T, db, id string) (provider, title string, archiv
 }
 
 // A Codex session made with another provider (CC Switch's "custom") is
-// hidden from Codex's history once Codex uses myna (#887). The Sessions
+// hidden from Codex's history once Codex uses owl (#887). The Sessions
 // page says which provider each was made with and which Codex uses now;
 // MoveCodexProvider changes the provider in its files and in Codex's state
 // database and nothing else, keeps a copy of the files first, and moving
@@ -70,19 +70,19 @@ func TestMoveCodexProvider(t *testing.T) {
 	os.Chtimes(main, old, old)
 	seg := filepath.Join(codex, "sessions", "2026", "09", "23", "rollout-2026-09-23T00-27-05-"+mgCX+"_01a0c9f1-3d6f-7f33-b3bd-25c1dd14251b.jsonl")
 	segOrig, _ := os.ReadFile(seg)
-	os.WriteFile(filepath.Join(codex, "config.toml"), []byte("model = \"gpt-6\"\nmodel_provider = \"myna\"\n\n[model_providers.myna]\nname = \"myna\"\n"), 0o644)
+	os.WriteFile(filepath.Join(codex, "config.toml"), []byte("model = \"gpt-6\"\nmodel_provider = \"owl\"\n\n[model_providers.owl]\nname = \"owl\"\n"), 0o644)
 	db := codexStateDB(t, codex, mgCX, "custom")
 
 	m, ok := findManaged(ListAgent("codex"), mgCX)
-	if !ok || m.Provider != "custom" || m.UsesProvider != "myna" {
-		t.Fatalf("listed %q, uses %q; want custom, myna", m.Provider, m.UsesProvider)
+	if !ok || m.Provider != "custom" || m.UsesProvider != "owl" {
+		t.Fatalf("listed %q, uses %q; want custom, owl", m.Provider, m.UsesProvider)
 	}
 
-	mv, err := MoveCodexProvider(mgCX, "myna")
+	mv, err := MoveCodexProvider(mgCX, "owl")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if mv.From != "custom" || mv.To != "myna" || len(mv.Files) != 1 || mv.Files[0] != main || len(mv.DB) != 1 {
+	if mv.From != "custom" || mv.To != "owl" || len(mv.Files) != 1 || mv.Files[0] != main || len(mv.DB) != 1 {
 		t.Fatalf("moved %+v", mv)
 	}
 	now, _ := os.ReadFile(main)
@@ -92,7 +92,7 @@ func TestMoveCodexProvider(t *testing.T) {
 	if i := bytes.IndexByte(orig, '\n'); i >= 0 {
 		head = orig[:i]
 	}
-	line := bytes.Replace(head, []byte(`"model_provider":"custom"`), []byte(`"model_provider":"myna"`), 1)
+	line := bytes.Replace(head, []byte(`"model_provider":"custom"`), []byte(`"model_provider":"owl"`), 1)
 	line = padLine(head, line)
 	want := append(append([]byte{}, line...), orig[len(head):]...)
 	if !bytes.Equal(now, want) {
@@ -104,7 +104,7 @@ func TestMoveCodexProvider(t *testing.T) {
 	if b, _ := os.ReadFile(seg); !bytes.Equal(b, segOrig) {
 		t.Error("a segment naming no provider was changed")
 	}
-	if p, title, arch := threadProvider(t, db, mgCX); p != "myna" || title != "the title" || arch != 1 {
+	if p, title, arch := threadProvider(t, db, mgCX); p != "owl" || title != "the title" || arch != 1 {
 		t.Errorf("thread row %q %q %d", p, title, arch)
 	}
 	if p, _, _ := threadProvider(t, db, "other"); p != "custom" {
@@ -118,7 +118,7 @@ func TestMoveCodexProvider(t *testing.T) {
 	if !strings.HasPrefix(mv.Backup, os.Getenv("XDG_CONFIG_HOME")) || !strings.Contains(mv.Backup, filepath.Join("trash", "codex-provider")) {
 		t.Errorf("backup in %s", mv.Backup)
 	}
-	if m, _ := findManaged(ListAgent("codex"), mgCX); m.Provider != "myna" {
+	if m, _ := findManaged(ListAgent("codex"), mgCX); m.Provider != "owl" {
 		t.Fatalf("listed as %q after the move", m.Provider)
 	}
 
@@ -136,7 +136,7 @@ func TestMoveCodexProvider(t *testing.T) {
 	// one being written is left alone
 	hot := time.Now()
 	os.Chtimes(main, hot, hot)
-	if _, err := MoveCodexProvider(mgCX, "myna"); !errors.Is(err, ErrActive) {
+	if _, err := MoveCodexProvider(mgCX, "owl"); !errors.Is(err, ErrActive) {
 		t.Fatalf("err %v, want ErrActive", err)
 	}
 	if b, _ := os.ReadFile(main); !bytes.Equal(b, orig) {
@@ -189,8 +189,8 @@ func TestCodexProviderIn(t *testing.T) {
 	if p := CodexProviderIn(d); p != "openai" {
 		t.Fatalf("no config: %q", p)
 	}
-	os.WriteFile(filepath.Join(d, "config.toml"), []byte("model_provider = \"custom\"\nprofile = \"m\"\n[profiles.m]\nmodel_provider = \"myna\"\n"), 0o644)
-	if p := CodexProviderIn(d); p != "myna" {
+	os.WriteFile(filepath.Join(d, "config.toml"), []byte("model_provider = \"custom\"\nprofile = \"m\"\n[profiles.m]\nmodel_provider = \"owl\"\n"), 0o644)
+	if p := CodexProviderIn(d); p != "owl" {
 		t.Fatalf("profile: %q", p)
 	}
 }
@@ -260,7 +260,7 @@ func holdThread(t *testing.T, home, id string) (path string, letGo func()) {
 	return path, letGo
 }
 
-// providerTrash is what myna's trash keeps of Codex provider moves.
+// providerTrash is what owl's trash keeps of Codex provider moves.
 func providerTrash(t *testing.T) []string {
 	t.Helper()
 	kept, _ := filepath.Glob(filepath.Join(settings.Dir(), "trash", "codex-provider", "*"))
@@ -287,7 +287,7 @@ func TestMoveCodexProviderLeavesAnOpenThread(t *testing.T) {
 	db := codexStateDB(t, codex, mgCX, "custom")
 	lock, letGo := holdThread(t, codex, mgCX)
 
-	if _, err := MoveCodexProvider(mgCX, "myna"); !errors.Is(err, ErrActive) {
+	if _, err := MoveCodexProvider(mgCX, "owl"); !errors.Is(err, ErrActive) {
 		t.Fatalf("err %v, want ErrActive", err)
 	}
 	if b, _ := os.ReadFile(main); !bytes.Equal(b, orig) {
@@ -302,19 +302,19 @@ func TestMoveCodexProviderLeavesAnOpenThread(t *testing.T) {
 	if kept := providerTrash(t); len(kept) != 0 {
 		t.Errorf("a copy kept of a thread left as it was: %v", kept)
 	}
-	if left, _ := filepath.Glob(filepath.Join(filepath.Dir(main), ".myna-*")); len(left) > 0 {
+	if left, _ := filepath.Glob(filepath.Join(filepath.Dir(main), ".owl-*")); len(left) > 0 {
 		t.Errorf("left behind: %v", left)
 	}
 
 	letGo()
-	mv, err := MoveCodexProvider(mgCX, "myna")
+	mv, err := MoveCodexProvider(mgCX, "owl")
 	if err != nil || len(mv.Files) != 1 || len(mv.DB) != 1 {
 		t.Fatalf("after the Codex let go: %+v %v", mv, err)
 	}
-	if got := codexMetaProvider(main); got != "myna" {
+	if got := codexMetaProvider(main); got != "owl" {
 		t.Fatalf("file on %q", got)
 	}
-	if p, _, _ := threadProvider(t, db, mgCX); p != "myna" {
+	if p, _, _ := threadProvider(t, db, mgCX); p != "owl" {
 		t.Errorf("row on %q", p)
 	}
 	if _, err := os.Stat(lock); !errors.Is(err, fs.ErrNotExist) {
@@ -322,7 +322,7 @@ func TestMoveCodexProviderLeavesAnOpenThread(t *testing.T) {
 	}
 }
 
-// moveProbe is run by myna_move_probe(), which a test's state database
+// moveProbe is run by owl_move_probe(), which a test's state database
 // calls from a trigger as a move writes a thread's row.
 var (
 	moveProbeOnce sync.Once
@@ -334,7 +334,7 @@ var (
 func probeRowMove(t *testing.T, db string, probe func()) {
 	t.Helper()
 	moveProbeOnce.Do(func() {
-		sqlite.MustRegisterScalarFunction("myna_move_probe", 0, func(*sqlite.FunctionContext, []driver.Value) (driver.Value, error) {
+		sqlite.MustRegisterScalarFunction("owl_move_probe", 0, func(*sqlite.FunctionContext, []driver.Value) (driver.Value, error) {
 			if moveProbe != nil {
 				moveProbe()
 			}
@@ -348,7 +348,7 @@ func probeRowMove(t *testing.T, db string, probe func()) {
 		t.Fatal(err)
 	}
 	defer d.Close()
-	if _, err := d.Exec(`CREATE TRIGGER probe BEFORE UPDATE OF model_provider ON threads BEGIN SELECT myna_move_probe(); END`); err != nil {
+	if _, err := d.Exec(`CREATE TRIGGER probe BEFORE UPDATE OF model_provider ON threads BEGIN SELECT owl_move_probe(); END`); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -388,11 +388,11 @@ func TestMoveCodexProviderHoldsTheThread(t *testing.T) {
 		seen = append(seen, "file on "+codexMetaProvider(main))
 	})
 
-	if _, err := MoveCodexProvider(mgCX, "myna"); err != nil {
+	if _, err := MoveCodexProvider(mgCX, "owl"); err != nil {
 		t.Fatal(err)
 	}
-	if got := strings.Join(seen, ", "); got != "held, file on myna" {
-		t.Fatalf("as the row was written: %s; want held, file on myna", got)
+	if got := strings.Join(seen, ", "); got != "held, file on owl" {
+		t.Fatalf("as the row was written: %s; want held, file on owl", got)
 	}
 	if _, err := os.Stat(lock); !errors.Is(err, fs.ErrNotExist) {
 		t.Errorf("the thread's lock file is left: %v", err)

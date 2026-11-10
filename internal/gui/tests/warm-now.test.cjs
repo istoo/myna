@@ -80,7 +80,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], asked = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, asked, ["a@example.com", "B@Example.com"], ["own@example.com"]));
-        await page.goto("http://myna.test/?view=settings&tab=usage");
+        await page.goto("http://owl.test/?view=settings&tab=usage");
         const row = page.locator("#warmNowRow");
         await row.locator("button").waitFor();
         assert.equal((await row.locator(".name").innerText()).trim(), w.name);
@@ -150,7 +150,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     const errors = [];
     page.on("pageerror", (e) => errors.push(e.message));
     await page.route("**/*", serve("en", [], undefined, undefined));
-    await page.goto("http://myna.test/?view=settings&tab=usage");
+    await page.goto("http://owl.test/?view=settings&tab=usage");
     await page.locator("#warmAtSegs .opt").first().waitFor();
     assert.equal(await page.locator("#warmNowRow").isHidden(), true);
     assert.equal(await page.locator("#claudeWarmNowRow").isHidden(), true);

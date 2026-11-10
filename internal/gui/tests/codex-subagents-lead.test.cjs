@@ -29,9 +29,9 @@ const fresh = () => ({
   // isn't id "claude": that row's opened view moves the subagents square into
   // a tiers line of its own.
   agents: [codexRow("codex"), codexRow("codex@wsl:Ubuntu"), {
-    id: "cc-myna", name: "Claude Code", path: "/test/settings.json", icon: "claudecode-color", wired: true,
-    fields: [{ key: "model", label: "model", value: "myna/deepseek/pro", options: [{ value: "myna/deepseek/pro" }] },
-      { key: "subagent", label: "subagents", value: "", options: [{ value: "myna/deepseek/flash", label: "DeepSeek Flash", ref: "deepseek/flash" }] }],
+    id: "cc-owl", name: "Claude Code", path: "/test/settings.json", icon: "claudecode-color", wired: true,
+    fields: [{ key: "model", label: "model", value: "owl/deepseek/pro", options: [{ value: "owl/deepseek/pro" }] },
+      { key: "subagent", label: "subagents", value: "", options: [{ value: "owl/deepseek/flash", label: "DeepSeek Flash", ref: "deepseek/flash" }] }],
   }],
   profiles: [],
 });
@@ -106,7 +106,7 @@ for (const engine of engines) {
           }
           await browser.close();
         });
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         // a row's squares are in the row opened, one row open at a time; an
         // opened Codex row holds Codex's own settings and is tall, so the link
         // and the square are wheeled into sight
@@ -124,8 +124,8 @@ for (const engine of engines) {
         await open("codex@wsl:Ubuntu");
         assert.equal(await page.locator(square("codex@wsl:Ubuntu")).getAttribute("aria-label"), w.lead + "\n" + w.hint);
         // Claude Code's subagents follow the model as before
-        await open("cc-myna");
-        assert.equal(await page.locator(square("cc-myna")).getAttribute("aria-label"), w.same);
+        await open("cc-owl");
+        assert.equal(await page.locator(square("cc-owl")).getAttribute("aria-label"), w.same);
         await open("codex");
 
         const sq = page.locator(square("codex"));
@@ -156,8 +156,8 @@ for (const engine of engines) {
         assert.deepEqual(sets.at(-1), { agent: "codex", field: "subagent", value: "" });
 
         // Claude Code's picker still opens on Same as model
-        await open("cc-myna");
-        await page.locator(square("cc-myna")).click();
+        await open("cc-owl");
+        await page.locator(square("cc-owl")).click();
         await page.locator("#pop:not([hidden]) #list li").first().waitFor();
         const cc = await page.locator("#pop #list li").first().innerText();
         assert(!cc.includes(w.pick), cc);

@@ -9,11 +9,11 @@ package agent
 // reasoning). jcode starts on [provider] default_provider and default_model,
 // a profile's name and one of its models.
 //
-// myna adds itself as the profile "myna": the gateway, with one model
+// owl adds itself as the profile "owl": the gateway, with one model
 // entry per catalog model, so the catalog is in jcode's /model picker, and
 // jcode is started on the model picked. What [provider] named before is
-// stashed and put back when myna steps out. Every other key of the file is
-// the user's and stays as written, the user's own keys in myna's profile
+// stashed and put back when owl steps out. Every other key of the file is
+// the user's and stays as written, the user's own keys in owl's profile
 // too (headers, extra_body, a model's reasoning_effort).
 
 import (
@@ -27,20 +27,20 @@ import (
 
 	toml "github.com/pelletier/go-toml/v2"
 
-	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/owl/internal/edit"
 )
 
-// jcodeProfile is myna's profile's table in jcode's config.toml, and
+// jcodeProfile is owl's profile's table in jcode's config.toml, and
 // jcodeModels its models' array.
 const (
-	jcodeProfile = "providers." + mynaID
+	jcodeProfile = "providers." + owlID
 	jcodeModels  = jcodeProfile + ".models"
 )
 
 // what jcode says after a change (notice.go)
 var noticeJcode = newNotice("jcode reads its settings at start-up — restart open jcode sessions to use this.")
 
-// jcodeContext is what jcode is told of a model whose context myna
+// jcodeContext is what jcode is told of a model whose context owl
 // doesn't know; without one it takes 200k.
 const jcodeContext = 128000
 
@@ -63,7 +63,7 @@ type jcodeModel struct {
 	Input           []string `toml:"input,omitempty"`
 }
 
-// jcodeConf is what myna reads of jcode's config.toml.
+// jcodeConf is what owl reads of jcode's config.toml.
 type jcodeConf struct {
 	Provider struct {
 		DefaultProvider string `toml:"default_provider"`
@@ -88,15 +88,15 @@ func jcodeRead(path string) (jcodeConf, error) {
 		return c, err
 	}
 	if err := toml.Unmarshal(b, &c); err != nil {
-		return c, fmt.Errorf("jcode's %s isn't TOML myna can read; it was left as it is: %w", path, err)
+		return c, fmt.Errorf("jcode's %s isn't TOML owl can read; it was left as it is: %w", path, err)
 	}
 	return c, nil
 }
 
-// jcodeWant is myna's models as jcode is told them: the context window
-// (one myna doesn't know is jcodeContext), whether it takes images, and
+// jcodeWant is owl's models as jcode is told them: the context window
+// (one owl doesn't know is jcodeContext), whether it takes images, and
 // reasoning on for a model with effort levels, so jcode's /effort offers
-// them. A reasoning_effort the user set on one of myna's models stays
+// them. A reasoning_effort the user set on one of owl's models stays
 // while the model has that level.
 func jcodeWant(was []jcodeModel) []jcodeModel {
 	kept := map[string]string{}
@@ -169,7 +169,7 @@ func jcodeSame(a, b []jcodeModel) bool {
 	})
 }
 
-// jcodePick is what [provider] named before myna: a profile (or one of
+// jcodePick is what [provider] named before owl: a profile (or one of
 // jcode's providers) and a model, "" each for none.
 type jcodePick struct {
 	Provider string `json:"provider,omitempty"`
@@ -184,11 +184,11 @@ func jcodeAt(at place) *Agent {
 	keyPick := at.key("jcode:" + path + ":default")
 	key := func() string { return agentKeyAt("jcode", at.gw()) }
 	read := func() jcodeConf { c, _ := jcodeRead(path); return c }
-	ours := func(c jcodeConf) bool { return c.Provider.DefaultProvider == mynaID }
+	ours := func(c jcodeConf) bool { return c.Provider.DefaultProvider == owlID }
 	get := func() string {
 		c := read()
 		if ours(c) && c.Provider.DefaultModel != "" {
-			return mynaID + "/" + c.Provider.DefaultModel
+			return owlID + "/" + c.Provider.DefaultModel
 		}
 		return c.Provider.DefaultModel
 	}
@@ -208,7 +208,7 @@ func jcodeAt(at place) *Agent {
 		}
 		return nil
 	}
-	// wire writes myna's profile, its own keys set and the user's others
+	// wire writes owl's profile, its own keys set and the user's others
 	// left as they are, with model, if given, the profile's default; it
 	// writes nothing when the file has it all already
 	wire := func(model string) error {
@@ -216,7 +216,7 @@ func jcodeAt(at place) *Agent {
 		if err != nil {
 			return err
 		}
-		have, on := c.Providers[mynaID]
+		have, on := c.Providers[owlID]
 		want := jcodeWant(have.Models)
 		t, err := edit.GetTOMLTable(path, jcodeProfile)
 		if err != nil {
@@ -243,7 +243,7 @@ func jcodeAt(at place) *Agent {
 		if same {
 			return nil
 		}
-		// jcode writes the models as [[providers.myna.models]] when it
+		// jcode writes the models as [[providers.owl.models]] when it
 		// saves its settings itself: those go, for the one array below
 		if err := edit.SetTOMLTablesMatching(path, []string{jcodeModels}, nil, nil); err != nil {
 			return err
@@ -255,8 +255,8 @@ func jcodeAt(at place) *Agent {
 		}
 		return edit.SetTOMLKey(path, jcodeProfile, "models", jcodeArray(want))
 	}
-	// unwire takes myna's profile out, and jcode back to what it started
-	// on before — when it still starts on myna: a pick the user made in
+	// unwire takes owl's profile out, and jcode back to what it started
+	// on before — when it still starts on owl: a pick the user made in
 	// jcode since is theirs and stands
 	unwire := func(own string) error {
 		c, err := jcodeRead(path)
@@ -281,7 +281,7 @@ func jcodeAt(at place) *Agent {
 			}
 		}
 		// the profile whole: its models' tables and the user's own in it
-		// (headers, extra_body) are myna's profile's, and go with it
+		// (headers, extra_body) are owl's profile's, and go with it
 		return edit.SetTOMLTablesMatching(path, []string{jcodeProfile}, []string{jcodeProfile + "."}, nil)
 	}
 	return atomic(&Agent{
@@ -299,7 +299,7 @@ func jcodeAt(at place) *Agent {
 			if err != nil {
 				return err
 			}
-			if _, on := c.Providers[mynaID]; !on {
+			if _, on := c.Providers[owlID]; !on {
 				return nil
 			}
 			return wire("")
@@ -312,9 +312,9 @@ func jcodeAt(at place) *Agent {
 			if !ours(c) {
 				return ""
 			}
-			p, on := c.Providers[mynaID]
+			p, on := c.Providers[owlID]
 			if !on {
-				return "jcode's [" + jcodeProfile + "] (config.toml) is gone, so it no longer reaches myna"
+				return "jcode's [" + jcodeProfile + "] (config.toml) is gone, so it no longer reaches owl"
 			}
 			return wiringOff("jcode", path, func(k string) (string, bool) {
 				switch k {
@@ -327,8 +327,8 @@ func jcodeAt(at place) *Agent {
 			}, "base_url", at.v1(), "api_key", key())
 		},
 		Fields: []Field{{
-			// the model jcode starts on: one of myna's is
-			// myna/<provider>/<model>, myna's profile with the model's
+			// the model jcode starts on: one of owl's is
+			// owl/<provider>/<model>, owl's profile with the model's
 			// id in it
 			Key: "model", Label: "model",
 			Get: get,
@@ -337,7 +337,7 @@ func jcodeAt(at place) *Agent {
 				if err != nil {
 					return err
 				}
-				if ref, ok := strings.CutPrefix(v, mynaID+"/"); ok && isMyna(ref) {
+				if ref, ok := strings.CutPrefix(v, owlID+"/"); ok && isOwl(ref) {
 					if !ours(c) {
 						b, _ := json.Marshal(jcodePick{c.Provider.DefaultProvider, c.Provider.DefaultModel})
 						stash(map[string]string{keyPick: string(b)})
@@ -345,22 +345,22 @@ func jcodeAt(at place) *Agent {
 					if err := wire(ref); err != nil {
 						return err
 					}
-					return setPick(jcodePick{mynaID, ref})
+					return setPick(jcodePick{owlID, ref})
 				}
-				if _, on := c.Providers[mynaID]; on || ours(c) {
+				if _, on := c.Providers[owlID]; on || ours(c) {
 					return unwire(v)
 				}
 				return setPick(jcodePick{c.Provider.DefaultProvider, v})
 			},
 			Options: func(cur map[string]string) []Option {
-				return withVia(jcodeOwn(path, keyPick, cur["model"]), "jcode", mynaID+"/")
+				return withVia(jcodeOwn(path, keyPick, cur["model"]), "jcode", owlID+"/")
 			},
 		}},
 	}, path)
 }
 
-// jcodeOwn is the model jcode started on before myna, or starts on now,
-// for the picker: jcode's own providers are its sign-ins, which myna
+// jcodeOwn is the model jcode started on before owl, or starts on now,
+// for the picker: jcode's own providers are its sign-ins, which owl
 // can't list.
 func jcodeOwn(path, keyPick, cur string) []Option {
 	var was jcodePick

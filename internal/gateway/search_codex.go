@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A ChatGPT account searches the web for a model that can't by the ChatGPT

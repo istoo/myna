@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"slices"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 // codexEntries are ms, the models a provider the user added by its address
@@ -13,15 +13,15 @@ import (
 // where the vendor gives one (catalog.Model.Codex). A relay built for Codex
 // (sub2api) lists its models plainly at /v1/models, ids and owners alone,
 // and in Codex's shape — window, levels, instructions, tools — when asked
-// with the client_version Codex asks with; myna read the plain list, so
+// with the client_version Codex asks with; owl read the plain list, so
 // Codex was handed windows and levels models.dev guessed for the ids
 // (gpt-6.1-terra at 922000) where the relay had said its own (ctopsc on
 // Discord). So the list is asked once more as Codex asks it, at the URL it
 // answered at, when that list is fetched: a request more where the
 // provider is added, its key changed or its list refreshed, never one
-// each time Codex asks myna for its list. The answer only adds to
+// each time Codex asks owl for its list. The answer only adds to
 // the plain list: a model it has that the plain list hasn't is not added,
-// as the plain list is the one myna has always served (a relay's image
+// as the plain list is the one owl has always served (a relay's image
 // models are in it alone). A list already in Codex's shape is not asked
 // again. One that can't be read says nothing new: each model keeps the
 // entry the last list gave it, as a base that can't be asked keeps its

@@ -12,8 +12,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // stubLookup answers names from m for the test, and forgets what earlier
@@ -31,7 +31,7 @@ func stubLookup(t *testing.T, m map[string]string) {
 	t.Cleanup(func() { lanLookup = old; clear(lanCache.m) })
 }
 
-// #982: with a proxy set, a Remote myna on the user's network is asked
+// #982: with a proxy set, a Remote owl on the user's network is asked
 // directly; a vendor still goes through the proxy, and so does a provider
 // with a proxy of its own.
 func TestLANGoesAroundTheProxy(t *testing.T) {
@@ -58,8 +58,8 @@ func TestLANGoesAroundTheProxy(t *testing.T) {
 
 // The reporter's case end to end: a proxy that answers 502 Bad Gateway to
 // whatever it is asked (as Clash does for a host it can't reach), set in
-// myna, and another myna at this computer's LAN address. The list
-// comes from the other myna, not the proxy's 502.
+// owl, and another owl at this computer's LAN address. The list
+// comes from the other owl, not the proxy's 502.
 func TestLANModelListNotThroughProxy(t *testing.T) {
 	var lan net.IP
 	addrs, _ := net.InterfaceAddrs()
@@ -84,7 +84,7 @@ func TestLANModelListNotThroughProxy(t *testing.T) {
 		t.Skip("can't listen on", lan, err)
 	}
 	remote := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Header.Get("Authorization") != "Bearer sk-myna-key" {
+		if r.Header.Get("Authorization") != "Bearer sk-owl-key" {
 			http.Error(w, "no API key was sent", http.StatusUnauthorized)
 			return
 		}
@@ -99,7 +99,7 @@ func TestLANModelListNotThroughProxy(t *testing.T) {
 	clear(lanCache.m)
 	c := &http.Client{Transport: Dispatch(&http.Transport{Proxy: Func}), Timeout: 30 * time.Second}
 	req, _ := http.NewRequest("GET", remote.URL+"/v1/models", nil)
-	req.Header.Set("Authorization", "Bearer sk-myna-key")
+	req.Header.Set("Authorization", "Bearer sk-owl-key")
 	res, err := c.Do(req)
 	if err != nil {
 		t.Fatal(err)
@@ -110,6 +110,6 @@ func TestLANModelListNotThroughProxy(t *testing.T) {
 		t.Fatalf("%s: %s %s", remote.URL, res.Status, b)
 	}
 	if !strings.Contains(string(b), "codex/gpt-6.1-sol") {
-		t.Fatalf("not the other myna's list: %s", b)
+		t.Fatalf("not the other owl's list: %s", b)
 	}
 }

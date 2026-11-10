@@ -7,14 +7,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/proc"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/proc"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // #1823 (mdwsk88): HasApp read the developer's own /Applications, so on a
 // Mac with DeepSeek Harness.app installed
 // TestAsideOfflineDisconnectRestoresWithoutDaemon found dsh's app, and its
-// CLI was never missing. Every folder myna looks for installed apps in —
+// CLI was never missing. Every folder owl looks for installed apps in —
 // the desktop apps', Pencil's, T3 Code's, Reasonix Studio's, Cursor Private
 // Inference's — lies under the test's home, on every OS, and an app a test
 // installs in the sandbox's /Applications is the one found.
@@ -142,7 +142,7 @@ func TestCodexAppVersion(t *testing.T) {
 		}
 	}
 
-	// an agent with no app myna knows, and Codex's twin in WSL, have none
+	// an agent with no app owl knows, and Codex's twin in WSL, have none
 	if v := (&Agent{ID: "gemini", Bin: "gemini"}).AppVersion(); v != "" {
 		t.Fatalf("gemini: %q", v)
 	}

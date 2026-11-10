@@ -5,13 +5,13 @@ import (
 	"testing"
 )
 
-// An agent that spells a model provider/model, myna's as myna/<ref>:
-// one of its own providers named as one of myna's (its own relay, and
-// myna's relay) is its own model, not myna's. The row isn't connected
-// on it, and Disconnect from myna puts it back and is done, rather than
+// An agent that spells a model provider/model, owl's as owl/<ref>:
+// one of its own providers named as one of owl's (its own relay, and
+// owl's relay) is its own model, not owl's. The row isn't connected
+// on it, and Disconnect from owl puts it back and is done, rather than
 // leaving the row connected on the model it went back to (#835, OpenHanako's
 // own deepseek/deepseek-v4-pro).
-func TestOwnProviderNamedAsMynas(t *testing.T) {
+func TestOwnProviderNamedAsOwls(t *testing.T) {
 	ids := []string{"agy", "opencode", "openchamber", "mimocode", "deveco", "pi", "aside", "omo", "prime-agent", "goose", "zed", "vscode",
 		"crush", "dsh", "commandcode", "fx", "omp", "hermes", "morph", "kimi", "empryo", "minimax-code", "droid",
 		"qoder", "qoder-cn", "grok", "atomcode", "cline", "snow", "qwenpaw"}
@@ -38,7 +38,7 @@ func TestOwnProviderNamedAsMynas(t *testing.T) {
 				t.Fatalf("own model reads %q", v)
 			}
 			if a.Wired() {
-				t.Fatal("its own relay/glm-4.6 reads as myna's")
+				t.Fatal("its own relay/glm-4.6 reads as owl's")
 			}
 			if err := a.Connect(); err != nil {
 				t.Fatal(err)
@@ -59,11 +59,11 @@ func TestOwnProviderNamedAsMynas(t *testing.T) {
 	}
 }
 
-// OpenCode's own provider that sends to myna's gateway is myna's all
-// the same (openCodeRef names a model there by it), once myna set
+// OpenCode's own provider that sends to owl's gateway is owl's all
+// the same (openCodeRef names a model there by it), once owl set
 // OpenCode up: before that, it is a provider the user wrote by hand and
 // theirs (handWired, JFunfunfun on X).
-func TestOpenCodeGatewayProviderIsMynas(t *testing.T) {
+func TestOpenCodeGatewayProviderIsOwls(t *testing.T) {
 	syncHome(t)
 	a, err := Find("opencode")
 	if err != nil {
@@ -73,15 +73,15 @@ func TestOpenCodeGatewayProviderIsMynas(t *testing.T) {
 	if a.Wired() {
 		t.Fatalf("its own provider at the gateway, written by hand, reads as connected: %v", a.Values())
 	}
-	// as myna opencode relay/glm-4.6 sets it (9b1641a49)
+	// as owl opencode relay/glm-4.6 sets it (9b1641a49)
 	if err := a.Apply("model", "relay/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	if !a.Wired() {
-		t.Fatalf("a model through its own provider at the gateway isn't myna's: %v (%s)", a.Values(), filepath.Base(a.Path))
+		t.Fatalf("a model through its own provider at the gateway isn't owl's: %v (%s)", a.Values(), filepath.Base(a.Path))
 	}
 	hanakoWrite(t, a.Path, `{"provider":{"relay":{"options":{"baseURL":"https://x/v1"},"models":{"glm-4.6":{}}}},"model":"relay/glm-4.6"}`, 0o644)
 	if a.Wired() {
-		t.Fatalf("its own relay elsewhere reads as myna's: %v", a.Values())
+		t.Fatalf("its own relay elsewhere reads as owl's: %v", a.Values())
 	}
 }

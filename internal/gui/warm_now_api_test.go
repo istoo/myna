@@ -19,7 +19,7 @@ func TestWarmNowAPISaysWhy(t *testing.T) {
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(home, ".cache"))
 	t.Setenv("CODEX_HOME", filepath.Join(home, ".codex"))
 	t.Setenv("CLAUDE_CONFIG_DIR", filepath.Join(home, ".claude"))
-	t.Setenv("MYNA_NO_ACCOUNTS", "1") // no sign-in read, the Keychain's included
+	t.Setenv("OWL_NO_ACCOUNTS", "1") // no sign-in read, the Keychain's included
 	h := Handler(nil, nil)
 	for _, c := range []struct{ body, want string }{
 		{`{"agent":"codex","user":"nobody@example.com"}`, `no ChatGPT account "nobody@example.com"`},

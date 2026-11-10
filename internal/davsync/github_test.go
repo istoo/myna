@@ -18,8 +18,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/backup"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/backup"
+	"github.com/istoo/owl/internal/provider"
 )
 
 type githubFixture struct {
@@ -420,7 +420,7 @@ func TestGitHubNotBackup(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			f := newGithubFixture(t)
 			c := githubConfig()
-			f.objects["main|team/myna/"+file] = []byte(tc.body)
+			f.objects["main|team/owl/"+file] = []byte(tc.body)
 			newComputer(t).use(t)
 			if err := Configure(c); err != nil {
 				t.Fatal(err)
@@ -429,14 +429,14 @@ func TestGitHubNotBackup(t *testing.T) {
 			if err == nil || !strings.Contains(err.Error(), "GitHub") || !strings.Contains(err.Error(), "alice/private") || strings.Contains(err.Error(), "WebDAV") {
 				t.Fatalf("the recovery advice should name the GitHub repository: %v", err)
 			}
-			if tc.replace && !strings.Contains(err.Error(), "team/myna/"+file) || strings.Contains(err.Error(), "myna/myna/") {
-				t.Fatalf("the advice should name the file where it is, team/myna/%s: %v", file, err)
+			if tc.replace && !strings.Contains(err.Error(), "team/owl/"+file) || strings.Contains(err.Error(), "owl/owl/") {
+				t.Fatalf("the advice should name the file where it is, team/owl/%s: %v", file, err)
 			}
 			v := Status()
 			if v.File == nil || v.File.Replace != tc.replace {
 				t.Fatalf("the file's replacement status: %+v", v.File)
 			}
-			if v.File.Replace && !strings.Contains(err.Error(), "myna github upload") {
+			if v.File.Replace && !strings.Contains(err.Error(), "owl github upload") {
 				t.Fatalf("the recovery advice should name the GitHub upload command: %v", err)
 			}
 			if f.writes != 0 {
@@ -446,7 +446,7 @@ func TestGitHubNotBackup(t *testing.T) {
 				if err := Upload(context.Background()); err != nil {
 					t.Fatal(err)
 				}
-				if _, err := backup.Open(f.objects["main|team/myna/"+file], c.Passphrase); err != nil {
+				if _, err := backup.Open(f.objects["main|team/owl/"+file], c.Passphrase); err != nil {
 					t.Fatalf("the uploaded GitHub backup doesn't open: %v", err)
 				}
 			}
@@ -491,13 +491,13 @@ func TestGitHubRemote(t *testing.T) {
 	if b, _, err := g.get(ctx, version{}); err != nil || string(b) != string(large) {
 		t.Fatalf("a backup larger than 1 MB: size %d, %v", len(b), err)
 	}
-	if _, ok := f.objects["main|team/myna/"+file]; ok {
+	if _, ok := f.objects["main|team/owl/"+file]; ok {
 		t.Fatal("the selected branch was ignored")
 	}
-	if len(f.objects["sync/settings|team/myna/"+file]) != len(large) {
+	if len(f.objects["sync/settings|team/owl/"+file]) != len(large) {
 		t.Fatal("the prefix or branch was ignored")
 	}
-	for _, name := range []string{"computer-2026-10-06.myna-usage", "computer.myna-quotas"} {
+	for _, name := range []string{"computer-2026-10-06.owl-usage", "computer.owl-quotas"} {
 		if err := g.write(ctx, name, first); err != nil {
 			t.Fatal(err)
 		}
@@ -512,13 +512,13 @@ func TestGitHubRemote(t *testing.T) {
 	if err != nil || len(list) != 2 {
 		t.Fatalf("usage listing: %v %v", list, err)
 	}
-	if err := g.remove(ctx, "computer-2026-10-06.myna-usage"); err != nil {
+	if err := g.remove(ctx, "computer-2026-10-06.owl-usage"); err != nil {
 		t.Fatal(err)
 	}
-	if _, ok := f.objects["sync/settings|team/myna/usage/computer-2026-10-06.myna-usage"]; ok {
+	if _, ok := f.objects["sync/settings|team/owl/usage/computer-2026-10-06.owl-usage"]; ok {
 		t.Fatal("the usage file was not removed")
 	}
-	if err := g.remove(ctx, "computer-2026-10-06.myna-usage"); err != nil {
+	if err := g.remove(ctx, "computer-2026-10-06.owl-usage"); err != nil {
 		t.Fatalf("already removed: %v", err)
 	}
 }
@@ -538,7 +538,7 @@ func TestGitHubSync(t *testing.T) {
 	if err := Now(ctx); err != nil {
 		t.Fatal(err)
 	}
-	sealed := f.objects["main|team/myna/"+file]
+	sealed := f.objects["main|team/owl/"+file]
 	bundle, err := backup.Open(sealed, c.Passphrase)
 	if err != nil || len(bundle.Providers) != 1 || strings.Contains(string(sealed), "fixture-provider-key") {
 		t.Fatalf("encrypted backup on GitHub: %v", err)
@@ -597,7 +597,7 @@ func TestGitHubEmptyRepository(t *testing.T) {
 			if err := Now(ctx); err != nil {
 				t.Fatalf("the first encrypted backup must initialize the empty repository: %v", err)
 			}
-			sealed := f.objects[tc.defaultBranch+"|team/myna/"+file]
+			sealed := f.objects[tc.defaultBranch+"|team/owl/"+file]
 			bundle, err := backup.Open(sealed, c.Passphrase)
 			if err != nil || len(bundle.Providers) != 1 || strings.Contains(string(sealed), "fixture-provider-key") {
 				t.Fatalf("the initial commit must contain an encrypted backup: %v", err)
@@ -650,12 +650,12 @@ func TestGitHubEmptyRepositoryFailures(t *testing.T) {
 		other := []byte("another computer's sealed backup")
 		f.mu.Lock()
 		f.empty = false
-		f.objects["main|team/myna/"+file] = other
+		f.objects["main|team/owl/"+file] = other
 		f.mu.Unlock()
 		if _, err := g.put(ctx, []byte("this computer's sealed backup"), ""); !errors.Is(err, errChanged) {
 			t.Fatalf("a racing initial commit must require the normal merge: %v", err)
 		}
-		if f.writes != 0 || string(f.objects["main|team/myna/"+file]) != string(other) {
+		if f.writes != 0 || string(f.objects["main|team/owl/"+file]) != string(other) {
 			t.Fatal("the racing computer's backup was overwritten")
 		}
 	})
@@ -810,7 +810,7 @@ func TestGitHubLargeBackup(t *testing.T) {
 	if v.ETag != githubSHA(large) || f.writes != before+1 {
 		t.Fatalf("one commit per update, versioned by the blob: %+v, commits %d", v, f.writes-before)
 	}
-	if !bytesEqual(f.objects["main|team/myna/"+file], large) {
+	if !bytesEqual(f.objects["main|team/owl/"+file], large) {
 		t.Fatal("the branch doesn't hold the large backup")
 	}
 	b, got, err := g.get(ctx, version{})
@@ -825,7 +825,7 @@ func TestGitHubLargeBackup(t *testing.T) {
 			t.Fatalf("a repository with commits was written through the Contents API: %s", r)
 		}
 	}
-	if _, err := g.put(ctx, small, "old-sha"); !errors.Is(err, errChanged) || !bytesEqual(f.objects["main|team/myna/"+file], large) {
+	if _, err := g.put(ctx, small, "old-sha"); !errors.Is(err, errChanged) || !bytesEqual(f.objects["main|team/owl/"+file], large) {
 		t.Fatalf("a stale version must not replace the backup: %v", err)
 	}
 }
@@ -852,13 +852,13 @@ func TestGitHubBranchMovedMeanwhile(t *testing.T) {
 		f, g, v := setup(t)
 		f.beforeRef = func() {
 			f.beforeRef = nil
-			f.objects["main|team/myna/usage/other.myna-usage"] = []byte("other computer")
+			f.objects["main|team/owl/usage/other.owl-usage"] = []byte("other computer")
 			f.advance("main")
 		}
 		if _, err := g.put(context.Background(), []byte("second"), v.ETag); err != nil {
 			t.Fatal(err)
 		}
-		if string(f.objects["main|team/myna/"+file]) != "second" || string(f.objects["main|team/myna/usage/other.myna-usage"]) != "other computer" {
+		if string(f.objects["main|team/owl/"+file]) != "second" || string(f.objects["main|team/owl/usage/other.owl-usage"]) != "other computer" {
 			t.Fatal("both commits must be on the branch")
 		}
 	})
@@ -866,13 +866,13 @@ func TestGitHubBranchMovedMeanwhile(t *testing.T) {
 		f, g, v := setup(t)
 		f.beforeRef = func() {
 			f.beforeRef = nil
-			f.objects["main|team/myna/"+file] = []byte("other computer's backup")
+			f.objects["main|team/owl/"+file] = []byte("other computer's backup")
 			f.advance("main")
 		}
 		if _, err := g.put(context.Background(), []byte("second"), v.ETag); !errors.Is(err, errChanged) {
 			t.Fatalf("another computer's backup must go through the merge: %v", err)
 		}
-		if string(f.objects["main|team/myna/"+file]) != "other computer's backup" {
+		if string(f.objects["main|team/owl/"+file]) != "other computer's backup" {
 			t.Fatal("another computer's backup was written over")
 		}
 	})
@@ -905,7 +905,7 @@ func TestGitHubEmptyRepositoryLargeBackup(t *testing.T) {
 	if err != nil {
 		t.Fatalf("a large first backup in an empty repository: %v", err)
 	}
-	if f.writes != 2 || len(f.objects["main|team/myna/README.md"]) == 0 || string(f.objects["main|team/myna/"+file]) != string(large) {
+	if f.writes != 2 || len(f.objects["main|team/owl/README.md"]) == 0 || string(f.objects["main|team/owl/"+file]) != string(large) {
 		t.Fatalf("a note, then the backup: commits %d, files %v", f.writes, len(f.objects))
 	}
 	if b, got, err := g.get(ctx, version{}); err != nil || got != v || string(b) != string(large) {

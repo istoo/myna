@@ -173,7 +173,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           p.setDefaultNavigationTimeout(60000);
           p.on("pageerror", (e) => errors.push(e.message));
           await p.route("**/*", server(lang));
-          await p.goto("http://myna.test/");
+          await p.goto("http://owl.test/");
           await navTo(p, "usage");
 
           // the overview's lists: the measured speed and how many it is of

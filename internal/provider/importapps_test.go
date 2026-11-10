@@ -43,7 +43,7 @@ func itemsOf(t *testing.T, id string) map[string]AppImport {
 	return nil
 }
 
-// CC Switch keeps each agent's own settings; myna reads them as the
+// CC Switch keeps each agent's own settings; owl reads them as the
 // providers they point at, and adds only what the user picks.
 func TestImportCCSwitch(t *testing.T) {
 	isolate(t)
@@ -59,7 +59,7 @@ func TestImportCCSwitch(t *testing.T) {
 		`INSERT INTO providers VALUES ('relay','claude','Some Relay','{"env":{"ANTHROPIC_BASE_URL":"https://relay.example.com","ANTHROPIC_AUTH_TOKEN":"sk-relay","ANTHROPIC_MODEL":"claude-sonnet-5"}}','https://relay.example.com','custom',2,1)`,
 		`INSERT INTO providers VALUES ('relay','codex','Some Relay','{"auth":{"OPENAI_API_KEY":"sk-relay"},"config":"model_provider = \"relay\"\nmodel = \"gpt-5.5\"\n\n[model_providers.relay]\nname = \"relay\"\nbase_url = \"https://relay.example.com/v1\"\nwire_api = \"responses\"\n"}','','custom',3,0)`,
 		`INSERT INTO providers VALUES ('ds','claude','DeepSeek','{"env":{"ANTHROPIC_BASE_URL":"https://api.deepseek.com/anthropic","ANTHROPIC_AUTH_TOKEN":"sk-ds"}}','','cn_official',4,2)`,
-		`INSERT INTO providers VALUES ('dial','pi','dial','{"api":"openai-completions","apiKey":"myna","baseUrl":"http://127.0.0.1:3425/v1"}','','custom',5,0)`,
+		`INSERT INTO providers VALUES ('dial','pi','dial','{"api":"openai-completions","apiKey":"owl","baseUrl":"http://127.0.0.1:3425/v1"}','','custom',5,0)`,
 		`INSERT INTO providers VALUES ('g','gemini','Gemini relay','{"env":{"GOOGLE_GEMINI_BASE_URL":"https://g.example.com","GEMINI_API_KEY":"k","GEMINI_MODEL":"gemini-3.8-flash"}}','','custom',6,0)`,
 		`INSERT INTO providers VALUES ('g2','gemini','Gemini relay under a path','{"env":{"GOOGLE_GEMINI_BASE_URL":"https://g2.example.com/gemini/","GEMINI_API_KEY":"k2"}}','','custom',7,0)`,
 	)
@@ -73,13 +73,13 @@ func TestImportCCSwitch(t *testing.T) {
 		t.Fatalf("official sign-in offered: %+v", it)
 	}
 	if it := items["pi/dial"]; it.Skip == "" {
-		t.Fatalf("myna itself offered: %+v", it)
+		t.Fatalf("owl itself offered: %+v", it)
 	}
 	g := items["gemini/g"]
 	// a Gemini-protocol relay (#1346): the base goes to the provider's own
 	// Gemini endpoint, as the editor, the TUI and import links take one
 	// Gemini CLI puts v1beta after GOOGLE_GEMINI_BASE_URL on every request,
-	// so the base myna asks at is that one with v1beta, under a path too
+	// so the base owl asks at is that one with v1beta, under a path too
 	if g.Skip != "" || g.Provider.Gemini != "https://g.example.com/v1beta" || g.Provider.Key != "k" || !slices.Equal(g.Provider.Models, []string{"gemini-3.8-flash"}) {
 		t.Fatalf("gemini relay: %+v", g)
 	}
@@ -145,7 +145,7 @@ func TestImportAlma(t *testing.T) {
 		t.Fatalf("sign-in or junk offered: %+v %+v", items["a3"], items["a4"])
 	}
 	// a Gemini-protocol relay (#2413): Alma asks at its base_url with the
-	// version in it, as myna's Gemini base is
+	// version in it, as owl's Gemini base is
 	if it := items["a5"]; it.Skip != "" || it.Provider.Gemini != "https://ag.example.com/v1beta" || it.Provider.Key != "sk-g" || it.Provider.Chat != "" {
 		t.Fatalf("alma gemini relay: %+v", it)
 	}
@@ -169,13 +169,13 @@ func TestImportCodexConfig(t *testing.T) {
 	if err := os.MkdirAll(filepath.Dir(config), 0o700); err != nil {
 		t.Fatal(err)
 	}
-	data := `model_provider = "myna"
+	data := `model_provider = "owl"
 model = "deepseek/deepseek-chat"
-model_catalog_json = "myna-models.json"
+model_catalog_json = "owl-models.json"
 
-[model_providers.myna]
+[model_providers.owl]
 base_url = "http://127.0.0.1:3448/v1"
-experimental_bearer_token = "myna"
+experimental_bearer_token = "owl"
 
 [model_providers.deepseek]
 name = "DeepSeek"
@@ -215,10 +215,10 @@ model_catalog_json = "models.json"
 model_provider = "deepseek"
 model = "gpt-6-sol"
 
-[profiles.mynacatalog]
+[profiles.owlcatalog]
 model_provider = "deepseek"
 model = "gpt-6-sol"
-model_catalog_json = "myna-models.json"
+model_catalog_json = "owl-models.json"
 `
 	if err := os.WriteFile(config, []byte(data), 0o600); err != nil {
 		t.Fatal(err)
@@ -226,7 +226,7 @@ model_catalog_json = "myna-models.json"
 	if err := os.WriteFile(filepath.Join(filepath.Dir(config), "models.json"), []byte(`{"models":[{"slug":"deepseek-chat","visibility":"list"},{"slug":"deepseek-reasoner","visibility":"list"},{"slug":"old-model","visibility":"hide"}]}`), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(filepath.Dir(config), "myna-models.json"), []byte(`{"models":[{"slug":"openrouter/x-ai/grok-4.7","visibility":"list"},{"slug":"group/auto-glm-5-3","visibility":"list"}]}`), 0o600); err != nil {
+	if err := os.WriteFile(filepath.Join(filepath.Dir(config), "owl-models.json"), []byte(`{"models":[{"slug":"openrouter/x-ai/grok-4.7","visibility":"list"},{"slug":"group/auto-glm-5-3","visibility":"list"}]}`), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	items := itemsOf(t, "codex")
@@ -239,8 +239,8 @@ model_catalog_json = "myna-models.json"
 	if p := items["openrouter"].Provider; p.Preset != "openrouter" || p.Headers["X-Org"] != "preset" {
 		t.Fatalf("preset import should keep the preset and its headers: %+v", p)
 	}
-	if items["myna"].Skip == "" || items["unkeyed"].Skip == "" {
-		t.Fatalf("gateway or env-key provider offered: %+v %+v", items["myna"], items["unkeyed"])
+	if items["owl"].Skip == "" || items["unkeyed"].Skip == "" {
+		t.Fatalf("gateway or env-key provider offered: %+v %+v", items["owl"], items["unkeyed"])
 	}
 	ds := items["deepseek"]
 	if ds.Skip != "" || ds.Provider.Key != "sk-explicit" || ds.Provider.Responses != "https://relay.example.com/v1" || strings.Join(ds.Provider.Models, ",") != "deepseek-chat,deepseek-reasoner,gpt-6-sol" {
@@ -338,8 +338,8 @@ func TestCodexImportModelsSameBasename(t *testing.T) {
 	config := filepath.Join(home, "other", "config.toml")
 	models := []byte(`{"models":[{"slug":"custom-model","visibility":"list"}]}`)
 	for _, path := range []string{
-		filepath.Join(home, ".codex", "myna-models.json"),
-		filepath.Join(home, "other", "myna-models.json"),
+		filepath.Join(home, ".codex", "owl-models.json"),
+		filepath.Join(home, "other", "owl-models.json"),
 	} {
 		if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
 			t.Fatal(err)
@@ -348,10 +348,10 @@ func TestCodexImportModelsSameBasename(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if got := codexImportModels(config, "../.codex/myna-models.json"); len(got) != 0 {
-		t.Fatalf("myna's own catalog was imported: %v", got)
+	if got := codexImportModels(config, "../.codex/owl-models.json"); len(got) != 0 {
+		t.Fatalf("owl's own catalog was imported: %v", got)
 	}
-	if got := codexImportModels(config, "myna-models.json"); len(got) != 1 || got[0] != "custom-model" {
+	if got := codexImportModels(config, "owl-models.json"); len(got) != 1 || got[0] != "custom-model" {
 		t.Fatalf("user catalog with the same basename was skipped: %v", got)
 	}
 }
@@ -530,9 +530,9 @@ func TestGeminiURLIsItsHost(t *testing.T) {
 	}
 }
 
-// While myna routes Claude Code, its settings.json points at the
+// While owl routes Claude Code, its settings.json points at the
 // gateway and what the user had there stands by in the stash. The import
-// reads the stash back as myna stepping out would put it back: the
+// reads the stash back as owl stepping out would put it back: the
 // tier and subagent models beside the endpoint, token and main model.
 func TestClaudeImportWhileRoutedTakesTheStashedEnv(t *testing.T) {
 	isolate(t)
@@ -542,13 +542,13 @@ func TestClaudeImportWhileRoutedTakesTheStashedEnv(t *testing.T) {
 	t.Setenv("APPDATA", filepath.Join(home, "AppData", "Roaming"))
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(home, ".cache"))
-	t.Setenv("MYNA_ADDR", "127.0.0.1:49999")
+	t.Setenv("OWL_ADDR", "127.0.0.1:49999")
 	path := claudeSettingsPath()
 	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
 		t.Fatal(err)
 	}
-	// routed: myna wrote its own address and key over the user's relay
-	if err := os.WriteFile(path, []byte(`{"env":{"ANTHROPIC_BASE_URL":"http://127.0.0.1:49999","ANTHROPIC_AUTH_TOKEN":"sk-myna"}}`), 0o600); err != nil {
+	// routed: owl wrote its own address and key over the user's relay
+	if err := os.WriteFile(path, []byte(`{"env":{"ANTHROPIC_BASE_URL":"http://127.0.0.1:49999","ANTHROPIC_AUTH_TOKEN":"sk-owl"}}`), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.MkdirAll(filepath.Dir(Path()), 0o700); err != nil {

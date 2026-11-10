@@ -15,16 +15,16 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/autostart"
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/update"
-	"github.com/istoo/myna/internal/upstream"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/autostart"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/update"
+	"github.com/istoo/owl/internal/upstream"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // The providers page: the vendors the user added, the presets they can add
@@ -34,7 +34,7 @@ type modelJSON struct {
 	ID      string   `json:"id"`
 	Name    string   `json:"name"`              // the user's name for it, if they gave one
 	Default string   `json:"default,omitempty"` // its own name, when the user gave it another
-	Plain   string   `json:"plain,omitempty"`   // a remote myna's model's name there alone, when Name has its provider there after it (catalog.Model's)
+	Plain   string   `json:"plain,omitempty"`   // a remote owl's model's name there alone, when Name has its provider there after it (catalog.Model's)
 	Kept    []string `json:"kept,omitempty"`    // the reasoning levels the user keeps of Efforts, when not all
 	Efforts []string `json:"efforts,omitempty"`
 	Given   bool     `json:"given,omitempty"` // its levels aren't known: Efforts are those it can be given, Kept those it was
@@ -55,12 +55,12 @@ type modelJSON struct {
 	Rate       float64 `json:"rate,omitempty"`      // the credits a request costs the subscription, as a multiple
 	RateWas    float64 `json:"rateWas,omitempty"`   // the rate before a discount running now
 	// Load is how busy its plugin last said the model is, a percent, when
-	// that was within plugin.LoadFresh (myna.load); nil when unknown
+	// that was within plugin.LoadFresh (owl.load); nil when unknown
 	Load  *float64 `json:"load,omitempty"`
 	API   string   `json:"api,omitempty"`   // the one API the user said it is asked on
 	Auto  []string `json:"auto,omitempty"`  // the APIs its vendor's list says it is served on, what Auto asks it on
 	NoAPI bool     `json:"noAPI,omitempty"` // the provider has a URL for none of them: agents aren't offered it (provider.NoAPIFor, #2094)
-	Same  string   `json:"same,omitempty"`  // the model the user said it is the same as, for the groups myna finds (#583)
+	Same  string   `json:"same,omitempty"`  // the model the user said it is the same as, for the groups owl finds (#583)
 	Merge string   `json:"merge,omitempty"` // what those groups merge it by when the user says nothing
 	Kind  string   `json:"kind,omitempty"`  // what the user said it makes: image or video (#1399)
 	// Vendor is the provider's own id of a model the user lists by
@@ -78,8 +78,8 @@ type modelJSON struct {
 	// provider's price rate
 	Price *catalog.Price `json:"price,omitempty"`
 	List  *catalog.Price `json:"list,omitempty"`
-	// RemoteList says the list price is what the other myna counts the
-	// model at, as its list told (a Remote myna's), not models.dev's
+	// RemoteList says the list price is what the other owl counts the
+	// model at, as its list told (a Remote owl's), not models.dev's
 	RemoteList bool `json:"remoteList,omitempty"`
 }
 
@@ -133,7 +133,7 @@ type providerJSON struct {
 	// wire can carry it, so the editor offers it
 	NativeCompaction  bool `json:"nativeCompaction"`
 	CarriesCompaction bool `json:"carriesCompaction,omitempty"`
-	// requests go with the agent's own User-Agent, not myna's
+	// requests go with the agent's own User-Agent, not owl's
 	// (provider.PassUserAgent, #1851); OwnClient: they go as a client of
 	// the vendor's own whatever is set (provider.OwnClient), so the
 	// editor offers no such choice
@@ -213,7 +213,7 @@ type providerJSON struct {
 	// videos (provider.MarksKinds, #1399): a chip's right-click offers it
 	MarksKinds bool `json:"marksKinds,omitempty"`
 	// Deciders explicitly identifies decision models for OpenRouter and
-	// remote myna. An empty remote list suppresses name-based guessing.
+	// remote owl. An empty remote list suppresses name-based guessing.
 	Deciders *[]string `json:"deciders,omitempty"`
 
 	Key struct {
@@ -237,18 +237,18 @@ type providerJSON struct {
 	// Sink: a key or account rate limited with quota left goes to the
 	// back of the order (provider.Provider.Sink)
 	Sink bool `json:"sink,omitempty"`
-	// KeepLogin: myna keeps Codex or Claude Code signed in to the first
+	// KeepLogin: owl keeps Codex or Claude Code signed in to the first
 	// account rather than moving it on when that runs low (#524)
 	KeepLogin bool `json:"keepLogin,omitempty"`
 	// KeepLoginAs: the account it is kept signed in to instead of the
 	// first, the gateway still trying them in their order
 	KeepLoginAs string `json:"keepLoginAs,omitempty"`
-	// SwitchOnly: myna only moves Codex's own sign-in between its
+	// SwitchOnly: owl only moves Codex's own sign-in between its
 	// accounts, never routing its requests for failover (#1907); on
 	// Claude's, the accounts are kept to Claude Code's own sign-in and
-	// serve no request through myna (myduso on Discord)
+	// serve no request through owl (myduso on Discord)
 	SwitchOnly bool `json:"switchOnly,omitempty"`
-	// RestartApp: myna restarts the Codex app's app-server for an
+	// RestartApp: owl restarts the Codex app's app-server for an
 	// account change it makes by itself (provider.Provider.RestartApp)
 	RestartApp bool `json:"restartApp,omitempty"`
 	// CapStop and CapCareful: how its accounts end at their caps
@@ -387,7 +387,7 @@ type accountJSON struct {
 	Agent string `json:"agent"`     // the agent's id
 	Name  string `json:"agentName"` // the agent's name, for "from Codex CLI's sign-in"
 	Icon  string `json:"agentIcon"`
-	// Logins are the agent's accounts myna remembers, to switch between
+	// Logins are the agent's accounts owl remembers, to switch between
 	Logins []provider.Login `json:"logins,omitempty"`
 	// Builtin is a plugin's provider id, for a plugin beside a built-in
 	// subscription (cursor-plugin's cursor): its plan named as the built-in's
@@ -399,13 +399,13 @@ type accountJSON struct {
 // agentNamed is agent.Find among the agents built once for the request
 // (provider.Held). Each account's row named its agent, and Find built all
 // of them again for it: with the owner's config 58 MB of the 1.4 GB a
-// myna allocated over 20 window polls.
+// owl allocated over 20 window polls.
 func agentNamed(q string) (*agent.Agent, error) {
 	return agent.FindIn(provider.Held("agent.All", agent.All), q)
 }
 
 // accountLabel is the name and logo an account is shown with: its agent's,
-// the subscription's for one no agent myna configures, and a plugin's
+// the subscription's for one no agent owl configures, and a plugin's
 // provider's for a plugin's sign-in, whose agent is "plugin" (#694 listed a
 // removed Qoder as "plugin", with no logo).
 func accountLabel(p provider.Provider) (name, icon string) {
@@ -415,7 +415,7 @@ func accountLabel(p provider.Provider) (name, icon string) {
 	}
 	name, icon = a.Agent, "generic"
 	if a.Agent == "factory" {
-		// a Factory subscription is myna's own sign-in, not Droid's
+		// a Factory subscription is owl's own sign-in, not Droid's
 		name, icon = "Factory", "factory"
 	} else if a.Agent == provider.MiMoID {
 		// a Xiaomi MiMo account, not MiMo Code (the agent "mimo" also names)
@@ -426,15 +426,15 @@ func accountLabel(p provider.Provider) (name, icon string) {
 	} else if ag, err := agentNamed(a.Agent); err == nil {
 		name, icon = ag.Name, ag.Icon
 	} else if a.Agent == "cursor" {
-		// a Cursor subscription is served by the gateway, not an agent myna configures
+		// a Cursor subscription is served by the gateway, not an agent owl configures
 		name, icon = "Cursor CLI", "cursor"
 	} else if a.Agent == "kiro" {
-		// Kiro's sign-in is myna's own, kiro-cli's or the Kiro IDE's
+		// Kiro's sign-in is owl's own, kiro-cli's or the Kiro IDE's
 		name, icon = "Kiro", "kiro-color"
 	} else if a.Agent == "antigravity" {
 		name, icon = "Antigravity", "antigravity-color"
 	} else if a.Agent == provider.WorkBuddyAIID {
-		// WorkBuddy AI, the international build, isn't an agent myna configures
+		// WorkBuddy AI, the international build, isn't an agent owl configures
 		name, icon = "WorkBuddy AI", "workbuddy-color"
 	} else if a.Agent == provider.CommandCodePlanID {
 		// Command Code's CLI keeps the key its sign-in made
@@ -507,7 +507,7 @@ type gatewayJSON struct {
 	URL     string   `json:"url"`
 	LAN     bool     `json:"lan"`
 	LANURLs []string `json:"lanURLs,omitempty"`
-	// PublicURL is MYNA_PUBLIC_URL when it is among LANURLs: Connect
+	// PublicURL is OWL_PUBLIC_URL when it is among LANURLs: Connect
 	// starts there until the user picks an address (#1551)
 	PublicURL string `json:"publicURL,omitempty"`
 	// LANPublic are those of LANURLs at an internet address, which anyone
@@ -518,21 +518,21 @@ type gatewayJSON struct {
 	// page offers the host's it was opened at first (lanShown)
 	Container bool `json:"container,omitempty"`
 	// ContainerHost: where other containers on this host reach the
-	// gateway while myna runs in one (gateway.ContainerHostURL)
+	// gateway while owl runs in one (gateway.ContainerHostURL)
 	ContainerHost string `json:"containerHost,omitempty"`
-	// OnNetwork: MYNA_ADDR puts it beyond loopback (a server, a Docker
+	// OnNetwork: OWL_ADDR puts it beyond loopback (a server, a Docker
 	// image), so every caller is shown a gateway key, and LAN is true too:
 	// callers from elsewhere, a container's host among them, need one
 	OnNetwork bool `json:"onNetwork,omitempty"`
 	Running   bool `json:"running"`
 	Mine      bool `json:"mine"`   // this process serves it
-	Window    bool `json:"window"` // the myna serving it shows its routing
-	// Version is another myna's, serving it, and Older says it is older
+	Window    bool `json:"window"` // the owl serving it shows its routing
+	// Version is another owl's, serving it, and Older says it is older
 	// than this one: agents' requests are then sent as that version sends
 	// them, without this one's fixes (#506)
 	Version string `json:"version,omitempty"`
 	Older   bool   `json:"older,omitempty"`
-	// Pid and Serves are the serving myna's own: which process it is and
+	// Pid and Serves are the serving owl's own: which process it is and
 	// how it was started, for the Routing page to name the one that is
 	// routing (#2606)
 	Pid    int            `json:"pid,omitempty"`
@@ -572,7 +572,7 @@ type excludedJSON struct {
 type providersJSON struct {
 	Providers []providerJSON `json:"providers"`
 	Presets   []presetJSON   `json:"presets"`
-	Excluded  []excludedJSON `json:"excluded"` // sign-ins myna found but will not share
+	Excluded  []excludedJSON `json:"excluded"` // sign-ins owl found but will not share
 	Gateway   gatewayJSON    `json:"gateway"`
 	// CodexDaemon is the account Codex's background app-server is still
 	// signed in to after Codex was switched to another; "" when none is
@@ -588,7 +588,7 @@ type providersJSON struct {
 	// which the add sheet offers as the plugin's alone
 	OnPlugins []string `json:"onPlugins,omitempty"`
 	// Movable are the built-in subscriptions a community plugin can run,
-	// deprecated in myna itself: the add sheet marks them so
+	// deprecated in owl itself: the add sheet marks them so
 	Movable []string `json:"movable,omitempty"`
 	// MovesTo is the plugin each of them goes to, for the add sheet's
 	// offer to install it before signing in
@@ -614,12 +614,12 @@ type providersJSON struct {
 	Fetching bool `json:"fetching,omitempty"`
 }
 
-// agentModel is the model an agent is on, as myna's catalog names it.
+// agentModel is the model an agent is on, as owl's catalog names it.
 func agentModel(a *agent.Agent) string {
 	if len(a.Fields) == 0 {
 		return ""
 	}
-	return strings.TrimPrefix(a.Fields[0].Get(), "myna/")
+	return strings.TrimPrefix(a.Fields[0].Get(), "owl/")
 }
 
 // agentUse is what an agent is on now: read once for the page, not again
@@ -662,7 +662,7 @@ func agentUses(agents []*agent.Agent, findGroup func(string) (provider.Group, []
 
 // presetOwnClient says a provider added from pr goes as a client of its
 // vendor's own (provider.OwnClient): OpenCode's, Cline's, Kilo's, another
-// myna.
+// owl.
 func presetOwnClient(pr provider.PresetDef) bool {
 	return provider.Provider{Preset: pr.ID, Chat: pr.Chat, Responses: pr.Responses, Anthropic: pr.Anthropic}.OwnClient()
 }
@@ -862,7 +862,7 @@ func providerInfoWith(p provider.Provider, ls provider.Listing, agents []agentUs
 	// each provider was 16 MB of what twenty window polls allocated
 	held := settings.Shared()
 	sames := held.ModelSameAs
-	// a list fetched before myna kept each model's most: the one Codex
+	// a list fetched before owl kept each model's most: the one Codex
 	// CLI keeps says it
 	var most []catalog.Model
 	if p.Account != nil && p.Account.Agent == "codex" {
@@ -961,10 +961,10 @@ func providerInfoWith(p provider.Provider, ls provider.Listing, agents []agentUs
 	for _, m := range avail {
 		seen[m.ID] = true
 	}
-	// Keep an explicit empty list for remote myna: the editor must not
+	// Keep an explicit empty list for remote owl: the editor must not
 	// guess that a Jev Router chat model answers System One.
 	var deciders []string
-	if p.IsRemoteMyna() {
+	if p.IsRemoteOwl() {
 		deciders = []string{}
 	}
 	var unlisted []catalog.Model // decision models the vendor list lacks
@@ -1076,7 +1076,7 @@ func accountRests(id string) map[string][]provider.KeyRest {
 
 func providersState() providersJSON {
 	// an account signed in since start-up is listed with its vendor's
-	// models, not myna's own list of them (#204): asked behind the page,
+	// models, not owl's own list of them (#204): asked behind the page,
 	// which is told so and asks again, never waited for (#541)
 	provider.FetchNewBehind(8 * time.Second)
 	agents := agent.Detected()
@@ -1182,7 +1182,7 @@ func providersState() providersJSON {
 		s.Gateway.Running, s.Gateway.Window, s.Gateway.Version = o.Running, o.Window, o.Version
 		s.Gateway.Older = o.Running && update.Newer(gateway.Version, o.Version)
 		// the process that is routing, for the Routing page to name it
-		// (#2606): another myna on this computer, whose routing this
+		// (#2606): another owl on this computer, whose routing this
 		// console shows through OwnerTrace, and its lanes for the rows
 		s.Gateway.Pid, s.Gateway.Serves = o.Pid, o.Serves
 		if o.Running {
@@ -1207,9 +1207,9 @@ func failMove(rw http.ResponseWriter, err error) {
 	_ = json.NewEncoder(rw).Encode(map[string]any{"error": err.Error(), "why": provider.WhyOf(err)})
 }
 
-// errRetired answers a move back to a built-in subscription, which myna
+// errRetired answers a move back to a built-in subscription, which owl
 // no longer runs: its plugin does.
-var errRetired = errors.New("myna's built-in subscriptions are retired: their community plugins run them")
+var errRetired = errors.New("owl's built-in subscriptions are retired: their community plugins run them")
 
 // moveProvider and adoptProvider are provider.Move and Adopt, for tests
 // to stand in for.
@@ -1245,7 +1245,7 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 		if gw := served.Load(); gw != nil {
 			lanes = gw.Lanes()
 		} else if l, ok := gateway.OwnerLanes(); ok {
-			// another myna on this computer serves the gateway: its lanes
+			// another owl on this computer serves the gateway: its lanes
 			// are the ones to show (the rows read the same wherever it runs)
 			lanes = l
 		}
@@ -1513,7 +1513,7 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 			// one per endpoint
 			Test []string `json:"test"`
 			// As, for test: the agent the request is asked as
-			// (provider.TestAs: "codex", "claude-code"), "" as myna
+			// (provider.TestAs: "codex", "claude-code"), "" as owl
 			As string `json:"as"`
 			// Run, for test and teststop: the window's name for one
 			// test, which its Stop ends (testRuns)
@@ -1637,7 +1637,7 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 			}
 		case "tuck", "untuck":
 			// a removed account hidden from the Add sheet's "Removed from
-			// myna" too, or listed there again (#116)
+			// owl" too, or listed there again (#116)
 			if err := provider.TuckAccount(in.ID, r.PathValue("action") == "tuck"); err != nil {
 				fail(rw, err)
 				return
@@ -1707,12 +1707,12 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 				fail(rw, errors.New(why))
 				return
 			}
-			// and reply headers myna never passes on (#4145)
+			// and reply headers owl never passes on (#4145)
 			if why := provider.ReplyHeadersOK(in.ReplyHeaders); why != "" {
 				fail(rw, errors.New(why))
 				return
 			}
-			// and request headers that carry myna's key or the
+			// and request headers that carry owl's key or the
 			// connection's own
 			if why := provider.RequestHeadersOK(in.PassHeaders); why != "" {
 				fail(rw, errors.New(why))
@@ -1862,37 +1862,37 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 					in.RateWindows = old.RateWindows
 				}
 				// how long its keys rest out of quota is set in
-				// providers.json or with `myna provider quota-rest`,
+				// providers.json or with `owl provider quota-rest`,
 				// which the form doesn't show: kept as it was (#1772)
 				if in.QuotaRest == 0 && old != nil {
 					in.QuotaRest = old.QuotaRest
 				}
-				// and the time of day they are back, set with `myna
+				// and the time of day they are back, set with `owl
 				// provider quota-rest <id> until 08:00` (#2008)
 				if in.QuotaResetAt == "" && old != nil {
 					in.QuotaResetAt = old.QuotaResetAt
 				}
 				// and the most they sit out while they keep failing, set
-				// with `myna provider rest-cap` (#2008)
+				// with `owl provider rest-cap` (#2008)
 				if in.RestCap == 0 && old != nil {
 					in.RestCap = old.RestCap
 				}
-				// and Codex's requests as sent, set with `myna provider
+				// and Codex's requests as sent, set with `owl provider
 				// set <id> codex=as-sent` (#1758)
 				if !in.CodexAsSent && old != nil {
 					in.CodexAsSent = old.CodexAsSent
 				}
-				// and Antigravity's prompt as written, set with `myna
+				// and Antigravity's prompt as written, set with `owl
 				// provider set antigravity prompt=as-written`
 				if !in.PromptAsWritten && old != nil {
 					in.PromptAsWritten = old.PromptAsWritten
 				}
-				// and that myna filled the Gemini URL in once, which the
+				// and that owl filled the Gemini URL in once, which the
 				// form doesn't send: a URL cleared in it stays cleared
 				if !in.GeminiFilled && old != nil {
 					in.GeminiFilled = old.GeminiFilled
 				}
-				// and additional_tools taken, set with `myna provider
+				// and additional_tools taken, set with `owl provider
 				// set <id> additional-tools=on` (#2660)
 				if !in.AdditionalTools && old != nil {
 					in.AdditionalTools = old.AdditionalTools
@@ -1901,7 +1901,7 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 					in.AdditionalToolsOff = old.AdditionalToolsOff
 				}
 				// and how long a request to it alone is kept while it is
-				// busy, set with `myna provider set <id> patience=`
+				// busy, set with `owl provider set <id> patience=`
 				if in.Patience == 0 && old != nil {
 					in.Patience = old.Patience
 				}
@@ -2224,7 +2224,7 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 			}
 			agent.SyncCatalogSoon()
 		case "switchonly":
-			// myna only switches Codex's own sign-in, its requests going
+			// owl only switches Codex's own sign-in, its requests going
 			// straight to OpenAI, or routes them for failover again
 			// (#1907); the agent's config follows at once
 			if err := provider.SetSwitchOnly(in.ID, in.SwitchOnly); err != nil {
@@ -2234,7 +2234,7 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 			agent.SyncCatalogSoon()
 		case "restartapp":
 			// the Codex app's app-server restarted for an account change
-			// myna makes by itself, or left be (atom0964 on Discord)
+			// owl makes by itself, or left be (atom0964 on Discord)
 			if err := provider.SetRestartApp(in.ID, in.RestartApp); err != nil {
 				fail(rw, err)
 				return
@@ -2476,7 +2476,7 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 		defer cancel()
 		writeJSON(rw, provider.WithCapped(provider.LoginUsage(ctx, r.URL.Query().Get("agent"))))
 	})
-	// Switching the account an agent is signed in to, among those myna
+	// Switching the account an agent is signed in to, among those owl
 	// remembers, and forgetting one.
 	mux.HandleFunc("POST /api/login/{action}", func(rw http.ResponseWriter, r *http.Request) {
 		var in struct{ Agent, User string }
@@ -2503,7 +2503,7 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 			fail(rw, err)
 			return
 		}
-		// an agent on its own models goes through myna while more of
+		// an agent on its own models goes through owl while more of
 		// its accounts are on, and straight to its vendor again once not
 		agent.SyncCatalogSoon()
 		st := providersState()
@@ -2646,7 +2646,7 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 		st.Moved, st.Added, st.Had, st.Removed = moved, added, had, removed
 		writeJSON(rw, st)
 	})
-	// Adding a subscription: myna opens the vendor's sign-in in the
+	// Adding a subscription: owl opens the vendor's sign-in in the
 	// browser and the window follows it until the account is in.
 	mux.HandleFunc("POST /api/signin", func(rw http.ResponseWriter, r *http.Request) {
 		var in struct {
@@ -2757,7 +2757,7 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 		}{res, providersState()})
 	})
 	// StepFun's Step Plan windows: the session the user copied from their
-	// browser with myna's bookmarklet, the provider's own (two on one
+	// browser with owl's bookmarklet, the provider's own (two on one
 	// site can be two accounts, #2384), on the provider's platform
 	stepfunOf := func(rw http.ResponseWriter, r *http.Request) (string, string, bool) {
 		p, err := provider.Find(r.PathValue("id"))
@@ -2833,7 +2833,7 @@ func providerRoutes(mux *http.ServeMux, w Windows) {
 			open := w.OpenURL
 			// an app's import link is handed over only when something
 			// here opens it: the system says nothing when nothing does,
-			// and Add myna did nothing at all (sungt, 10-29)
+			// and Add owl did nothing at all (sungt, 10-29)
 			app := func(u string) error { return appLink(u, w.OpenURL) }
 			switch {
 			case strings.HasPrefix(in.URL, agent.LodyScheme):

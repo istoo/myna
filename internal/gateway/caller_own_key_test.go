@@ -8,16 +8,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/budget"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/budget"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // A key given its own value — one clients already send, from another
 // gateway (love1sbug on X) — is that key from another computer and from
-// this one, as a sk-myna- key is: counted as it, and never sent on.
+// this one, as a sk-owl- key is: counted as it, and never sent on.
 func TestOwnKeyValueIsTheKey(t *testing.T) {
 	fresh(t)
 	up := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -79,7 +79,7 @@ func TestOwnKeyValueIsTheKey(t *testing.T) {
 	}
 }
 
-// A key myna made, rotated to a value of the user's own (isaac_bai on
+// A key owl made, rotated to a value of the user's own (isaac_bai on
 // Discord), is still that key: from another computer and from this one
 // it is let in, counted as it and held to its limit, and its old value
 // is refused.

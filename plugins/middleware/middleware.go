@@ -13,10 +13,10 @@
 package middleware
 
 import (
-	"github.com/istoo/myna/internal/gwmw"
-	"github.com/istoo/myna/internal/middleware"
-	"github.com/istoo/myna/internal/pluginrt"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/gwmw"
+	"github.com/istoo/owl/internal/middleware"
+	"github.com/istoo/owl/internal/pluginrt"
+	"github.com/istoo/owl/internal/usage"
 )
 
 func init() {

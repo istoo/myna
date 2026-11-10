@@ -17,20 +17,20 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // A WSL distro in NAT networking (WSL's default) reaches Windows at the
 // address Windows has on the WSL network (vEthernet (WSL), 172.17.32.1 for
-// a distro at 172.17.38.240), not at 127.0.0.1. myna wrote that address
+// a distro at 172.17.38.240), not at 127.0.0.1. owl wrote that address
 // into the distro's agents, but the gateway listened on 127.0.0.1 alone, so
 // Codex and the other CLIs there were refused or timed out until the user
-// shared myna on the local network (zaidu259434 on X: "启动codex这些cli连接
-// 会失败，没自动启动myna的网关"). Now, while the gateway is on loopback, it
+// shared owl on the local network (zaidu259434 on X: "启动codex这些cli连接
+// 会失败，没自动启动owl的网关"). Now, while the gateway is on loopback, it
 // also listens on each address Windows has on a WSL network, and a request
 // that arrives there from that network with the WSL key (WSLKey, which
-// myna writes into those agents only) is this computer's, as it is from a
+// owl writes into those agents only) is this computer's, as it is from a
 // distro in mirrored networking, whose 127.0.0.1 is Windows'. Anything else
 // arriving there is judged as a request from another machine: a container
 // of Docker Desktop's, which shares that network, has no key.
@@ -85,8 +85,8 @@ func OnWSLNet(base string) bool {
 	return slices.ContainsFunc(WSLNets(), func(n *net.IPNet) bool { return n.IP.Equal(ip) })
 }
 
-// wslKeyPrefix starts the WSL key. Neither sk-myna- (a named gateway
-// key's, looked up among the keys) nor myna- (the token with an agent's
+// wslKeyPrefix starts the WSL key. Neither sk-owl- (a named gateway
+// key's, looked up among the keys) nor owl- (the token with an agent's
 // id after it, agentOf).
 const wslKeyPrefix = "wsl-"
 
@@ -97,8 +97,8 @@ var wslKey struct {
 
 func wslKeyPath() string { return filepath.Join(settings.Dir(), "wsl-key") }
 
-// WSLKey is the key myna gives the agents of a WSL distro that reaches
-// the gateway on the WSL network (OnWSLNet): made once, kept in myna's
+// WSLKey is the key owl gives the agents of a WSL distro that reaches
+// the gateway on the WSL network (OnWSLNet): made once, kept in owl's
 // folder, readable by this user only. "" when it can't be read or made, and
 // the agent is given the gateway's token as before.
 func WSLKey() string {
@@ -142,8 +142,8 @@ func WSLKey() string {
 // whether a key is it without making one.
 func WSLKeyMade() string { return wslKeyHeld() }
 
-// wslKeyHeld is the WSL key as the gateway takes it: the one in myna's
-// folder, read again when the cache is empty (another myna made it).
+// wslKeyHeld is the WSL key as the gateway takes it: the one in owl's
+// folder, read again when the cache is empty (another owl made it).
 func wslKeyHeld() string {
 	path := wslKeyPath()
 	wslKey.Lock()
@@ -286,7 +286,7 @@ func (s *Server) serveWSL(ctx context.Context, srv *http.Server) {
 var wslServeEverywhere = false
 
 // onLoopback: the gateway listens on loopback alone now — not shared on
-// every address, nor at an address MYNA_ADDR pins beyond loopback.
+// every address, nor at an address OWL_ADDR pins beyond loopback.
 func (s *Server) onLoopback() bool {
 	s.lnMu.Lock()
 	ln := s.ln

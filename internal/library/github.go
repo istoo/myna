@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/istoo/myna/internal/ghtoken"
+	"github.com/istoo/owl/internal/ghtoken"
 )
 
 // ---- asking GitHub's API with the user's token ----------------------------

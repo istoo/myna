@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // fakeDistroRTK stands in for wsl.exe -d <distro> -e sh -lc <script> on the

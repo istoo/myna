@@ -10,13 +10,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // keepBackups is how many changes' backups are kept.
 const keepBackups = 30
 
-// BackupDir is where a file is copied before myna first changes it in a
+// BackupDir is where a file is copied before owl first changes it in a
 // change: one folder a change, named by when, a folder an agent in it.
 func BackupDir() string { return filepath.Join(settings.Dir(), "backups") }
 

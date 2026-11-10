@@ -10,7 +10,7 @@ function drawEditor(p, presetID) {
   // more provider of it, under a name and id of its own
   const another = isNew && !!pr?.added;
   // an editor opened afresh has Names, prices & levels folded: it stayed open in
-  // every editor after, until myna was restarted (Hu9956, #868)
+  // every editor after, until owl was restarted (Hu9956, #868)
   if (!draft) naming = unpickedShown = picksLeft = null;
   draft = draft || (p
     ? draftOf(p)
@@ -260,13 +260,13 @@ function drawEditor(p, presetID) {
 
   let routePick = null;
   if (p?.account) {
-    // the sign-in belongs to the agent; myna only borrows it
+    // the sign-in belongs to the agent; owl only borrows it
     const a = p.account;
     if (subOf(a.agent)) {
       // no Claude Code on Windows: the gateway runs the one in WSL
       if (a.agent === "claude" && !p.switchOnly) ed.append(claudeModeRow());
       const via = a.wsl ? t("Runs through WSL · {distro}: Claude Code there signs in and answers; Windows has none of its own.", { distro: a.wsl }) + " " : "";
-      ed.append(...field(t("Accounts"), renderAccounts(a, p), via + (p.routing ? t("Tick every account to use; Routing says how requests spread over them.") : subOf(a.agent).single ? t("{agent} keeps one account; the gateway runs it for every request. Signing in to another replaces it.", { agent: a.agentName }) : subOf(a.agent).own && (a.logins || []).some((l) => l.own) ? t("The gateway uses the first. Tick more and it moves on to the next when the one before it is out of quota. {agent} itself stays signed in as it is.", { agent: a.agentName && a.agentName !== a.agent ? a.agentName : p.name }) : subOf(a.agent).own || subOf(a.agent).plugin ? t("The gateway uses the first. Tick more and it moves on to the next when the one before it is out of quota.") : t("{agent} signs in to the first. Tick more and myna moves on to the next when the one before it is out of quota. Sessions already running keep theirs until restarted.", { agent: a.agentName }))));
+      ed.append(...field(t("Accounts"), renderAccounts(a, p), via + (p.routing ? t("Tick every account to use; Routing says how requests spread over them.") : subOf(a.agent).single ? t("{agent} keeps one account; the gateway runs it for every request. Signing in to another replaces it.", { agent: a.agentName }) : subOf(a.agent).own && (a.logins || []).some((l) => l.own) ? t("The gateway uses the first. Tick more and it moves on to the next when the one before it is out of quota. {agent} itself stays signed in as it is.", { agent: a.agentName && a.agentName !== a.agent ? a.agentName : p.name }) : subOf(a.agent).own || subOf(a.agent).plugin ? t("The gateway uses the first. Tick more and it moves on to the next when the one before it is out of quota.") : t("{agent} signs in to the first. Tick more and owl moves on to the next when the one before it is out of quota. Sessions already running keep theirs until restarted.", { agent: a.agentName }))));
       if ((a.logins || []).filter((l) => l.active || l.on).length > 1) { routePick = renderRouting(p); ed.append(...routePick.nodes); }
       if (p.move) ed.append(...renderMove(p));
     } else {
@@ -297,16 +297,16 @@ function drawEditor(p, presetID) {
     if (p.cline) advIn.append(...upstreamField());
     advIn.append(...unmaskRow(""));
     ed.append(...pluginOptionsField(subOf(a.agent)));
-    // a plugin's provider is reached inside myna: its plugin:// URLs go
+    // a plugin's provider is reached inside owl: its plugin:// URLs go
     // nowhere to show or test
     const urls = [p.chat, p.responses, p.anthropic].filter(Boolean);
     if (urls.length && !urls.some((u) => u.startsWith("plugin://"))) ed.append(...field(t("Endpoints"), renderEndpoints(p, p)));
     ed.append(adv);
   mergeRouteAdv(adv, advIn, routePick);
     const bar = el("div", "bar");
-    // removing only hides it from myna; the agent stays signed in
+    // removing only hides it from owl; the agent stays signed in
     const del = el("button", "text danger", t("Remove"));
-    del.title = t("{agent} stays signed in; myna just stops offering it", { agent: a.agentName });
+    del.title = t("{agent} stays signed in; owl just stops offering it", { agent: a.agentName });
     del.onclick = () => providerAction("delete", { id: p.id }, t("{name} removed", { name: p.name }));
     bar.append(del, el("span", "grow"));
     const cancel = el("button", "text", t("Cancel"));
@@ -351,7 +351,7 @@ function drawEditor(p, presetID) {
 
   // a vendor reached at the user's own resource (Azure OpenAI): no URL of
   // the preset's, the one the resource is at is typed or pasted here, and
-  // myna puts it on the API the preset speaks when it is saved
+  // owl puts it on the API the preset speaks when it is saved
   let endpoint = null;
   if (pr?.endpoint) {
     if (draft.chat === undefined) { draft.chat = p?.chat || ""; draft.responses = p?.responses || ""; }
@@ -494,7 +494,7 @@ function drawEditor(p, presetID) {
   if (p?.keyList?.filter((k) => k.on).length > 1) { routePick = renderRouting(p); ed.append(...routePick.nodes); }
   else if (vertex) ed.append(...vertexFields());
   // keys are replaced in Accounts; the box is for no key yet (Kylin_Cloud on X)
-  else if (!p?.keyList?.length) ed.append(...field(t("API key"), keyWrap, isNew ? t("Kept in ~/.config/myna/providers.json, readable by you alone. Nothing is read from your shell.") : ""));
+  else if (!p?.keyList?.length) ed.append(...field(t("API key"), keyWrap, isNew ? t("Kept in ~/.config/owl/providers.json, readable by you alone. Nothing is read from your shell.") : ""));
 
   // A user-defined provider can have its own picture; presets keep theirs.
   if (custom) ed.append(...field(t("Icon"), iconPicker(ed), ""));
@@ -533,7 +533,7 @@ function drawEditor(p, presetID) {
   if (custom) {
     const [stk, scb] = tick(t("Searches the web by itself"), !!draft.searches);
     scb.onchange = () => { draft.searches = scb.checked; };
-    const row = field(t("Web search"), stk, t("For a relay in front of Anthropic's or OpenAI's own API: Claude Code's WebSearch and Codex's web_search go to it as they were sent, not through myna's search. myna doesn't automatically search with it for other models, but you can name it as the searcher."));
+    const row = field(t("Web search"), stk, t("For a relay in front of Anthropic's or OpenAI's own API: Claude Code's WebSearch and Codex's web_search go to it as they were sent, not through owl's search. owl doesn't automatically search with it for other models, but you can name it as the searcher."));
     showSearch = () => { for (const e of row) e.style.display = searchable() ? "" : "none"; };
     showSearch();
     advIn.append(...row);
@@ -552,7 +552,7 @@ function drawEditor(p, presetID) {
   if (!p?.account && !vertex) {
     const seg = segs([["", t("Both")], ["x-api-key", "x-api-key"], ["bearer", "Authorization: Bearer"]], draft.authHeader || "", (v) => { draft.authHeader = v; });
     seg.classList.add("auth-header");
-    const row = field(t("Key header"), seg, t("Which header the API key goes in on the Anthropic API. Most services take both; pick one for a service that refuses the two together. myna also switches to one by itself when a service says so."));
+    const row = field(t("Key header"), seg, t("Which header the API key goes in on the Anthropic API. Most services take both; pick one for a service that refuses the two together. owl also switches to one by itself when a service says so."));
     showAuth = () => { for (const e of row) e.style.display = twoKeyHeaders() ? "" : "none"; };
     showAuth();
     advIn.append(...row);
@@ -563,11 +563,11 @@ function drawEditor(p, presetID) {
   if (uaPassable()) {
     const [utk, ucb] = tick(t("Send the agent's own User-Agent"), !!draft.passUserAgent);
     ucb.onchange = () => { draft.passUserAgent = ucb.checked; };
-    advIn.append(...field(t("User-Agent"), utk, t("For a plan that serves only the coding agents it names: each request goes with the User-Agent the agent sent (pi, OpenCode, Claude Code…), not myna's. Requests myna makes itself, and ones the agent sent without one, still go as myna. A User-Agent set in Headers above always wins.")));
+    advIn.append(...field(t("User-Agent"), utk, t("For a plan that serves only the coding agents it names: each request goes with the User-Agent the agent sent (pi, OpenCode, Claude Code…), not owl's. Requests owl makes itself, and ones the agent sent without one, still go as owl. A User-Agent set in Headers above always wins.")));
   }
 
   const addressOf = (k) => (draft[k] ?? (isNew && pr ? pr[k] : "")) || "";
-  const unmaskable = () => (p?.preset || pr?.id) !== "remote-myna";
+  const unmaskable = () => (p?.preset || pr?.id) !== "remote-owl";
   if (unmaskable()) {
     advIn.append(...unmaskRow(t("For a model running on this computer or your local network: secrets, personal data and your masked words go to it as written. Leave it off for a local relay or proxy that passes requests on to a vendor."), () => ["chat", "responses", "anthropic", "gemini", "decide"].map(addressOf)));
   }
@@ -579,7 +579,7 @@ function drawEditor(p, presetID) {
     const [ctk, ccb] = tick(t("Don't check its certificate"), !!draft.insecureTLS);
     ctk.classList.add("insecure-tls");
     ccb.onchange = () => { draft.insecureTLS = ccb.checked; };
-    const row = field(t("Certificate"), ctk, t("For your own server with a self-signed certificate or one from your company's CA. myna then can't tell it from another machine answering at its address: turn it on only on a network you trust."));
+    const row = field(t("Certificate"), ctk, t("For your own server with a self-signed certificate or one from your company's CA. owl then can't tell it from another machine answering at its address: turn it on only on a network you trust."));
     showTLS = () => { for (const e of row) e.style.display = onHTTPS() ? "" : "none"; };
     showTLS();
     ed.append(...row);
@@ -622,8 +622,8 @@ function drawEditor(p, presetID) {
 
   // StepFun tells a Step Plan's 5-hour, weekly and credit windows only to
   // its platform's sign-in, never to a key: signed in once in a window of
-  // myna's, the Usage page shows them
-  if (p?.stepPlan) ed.append(...field(t("Step Plan allowances"), renderStepPlan(p.stepPlan, p.id), t("A key tells only the balance. The Step Plan's 5-hour, weekly and credit windows are told only to a StepFun sign-in: bring yours here once and myna keeps it (for 30 days), used for nothing else.")));
+  // owl's, the Usage page shows them
+  if (p?.stepPlan) ed.append(...field(t("Step Plan allowances"), renderStepPlan(p.stepPlan, p.id), t("A key tells only the balance. The Step Plan's 5-hour, weekly and credit windows are told only to a StepFun sign-in: bring yours here once and owl keeps it (for 30 days), used for nothing else.")));
 
   // a key on a team's GLM Coding Plan is told the team's windows only with
   // the team's organization and project, which the console shows (#236)
@@ -725,10 +725,10 @@ function drawEditor(p, presetID) {
     if (routePick) routePick.slot.append(...modelsField);
     else ed.append(...modelsField);
   }
-  // Azure OpenAI's models are its deployments, which myna lists with the
+  // Azure OpenAI's models are its deployments, which owl lists with the
   // key once the resource is added (#1995): said here, so no one takes the
   // add page for one where they must type them
-  else if (pr?.id === "azure") ed.append(...field(t("Models"), el("div", "hint azure-models", t("No need to type them: once added, myna lists the deployments this key can call. Type a deployment's name as a model id only if that list can't be fetched.")), ""));
+  else if (pr?.id === "azure") ed.append(...field(t("Models"), el("div", "hint azure-models", t("No need to type them: once added, owl lists the deployments this key can call. Type a deployment's name as a model id only if that list can't be fetched.")), ""));
   if (p?.drawIds?.length) ed.append(...renderDrawers(p));
   if (p?.filmIds?.length) ed.append(...renderVideomakers(p));
   {
@@ -754,12 +754,12 @@ function drawEditor(p, presetID) {
       ex.value = draft.extra.join(", ");
       pick.draw();
     };
-    ed.append(...field(t("Models"), pick.box, t("Optional: Fetch models to pick from the vendor's list, or type ids; none picked, myna asks for the list after saving.")));
+    ed.append(...field(t("Models"), pick.box, t("Optional: Fetch models to pick from the vendor's list, or type ids; none picked, owl asks for the list after saving.")));
   }
 
   // Jev's endpoint can be the one its gateway's docs give — Cloudflare's
   // names the account, …/accounts/<id>/ai/run — in place of the preset's
-  if (decides && !custom && (p?.preset || pr?.id) !== "remote-myna") {
+  if (decides && !custom && (p?.preset || pr?.id) !== "remote-owl") {
     if (draft.decide === undefined) draft.decide = p?.decide || pr?.decide || "";
     const du = input((address && movedURLs(draft)?.decide) || draft.decide, pr?.decide || "https://…", "url");
     du.classList.add("decide-url");
@@ -1019,8 +1019,8 @@ function drawEditor(p, presetID) {
   };
   saveBtn.onclick = save;
   bar.append(cancel, saveBtn);
-  // a plugin's panels for a provider (myna.panels' provider), told which
-  if (p) { const slot = myna.slot?.("provider", { provider: { id: p.id, name: p.name || p.id } }); if (slot) ed.append(slot); }
+  // a plugin's panels for a provider (owl.panels' provider), told which
+  if (p) { const slot = owl.slot?.("provider", { provider: { id: p.id, name: p.name || p.id } }); if (slot) ed.append(slot); }
   ed.append(bar);
   setTimeout(() => (isNew ? (custom || another ? name : endpoint || vertexProject || key) : null)?.focus(), 0);
   return ed;

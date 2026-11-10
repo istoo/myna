@@ -7,12 +7,12 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// myna provider refresh-every and auto-include set a provider's list
+// owl provider refresh-every and auto-include set a provider's list
 // schedule and rules (#2135); auto-include takes the listed models its
-// rules match at once, none clears the rules, and a time or a rule myna
+// rules match at once, none clears the rules, and a time or a rule owl
 // can't read is refused and changes nothing.
 func TestRefreshEveryAndAutoIncludeCmds(t *testing.T) {
 	home := t.TempDir()

@@ -15,8 +15,8 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // fakeCodex signs a ChatGPT account in to Codex, its models listed by a
@@ -157,8 +157,8 @@ func openModelPicker(t *testing.T, m model, view string) (model, string) {
 		m.reload()
 		m.openFieldPicker()
 		// Codex has no list of its own here (no models_cache.json), so the
-		// models myna serves on its ChatGPT account are offered via myna
-		// (codexViaMynaFor)
+		// models owl serves on its ChatGPT account are offered via owl
+		// (codexViaOwlFor)
 		return m, "codex/gpt-6-luna"
 	default:
 		m.page = pageGroups

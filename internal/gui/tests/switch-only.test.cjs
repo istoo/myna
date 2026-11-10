@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// #1907: under Codex's accounts, with more than one on, a tick has myna
+// #1907: under Codex's accounts, with more than one on, a tick has owl
 // only switch Codex's own sign-in between them, its requests going straight
 // to OpenAI instead of through the gateway. Ticking it posts
 // provider/switchonly, and the redraw keeps it ticked; unticking posts it
@@ -59,9 +59,9 @@ const label = {
 };
 const strings = [
   "Only switch {agent}'s sign-in",
-  "myna signs {agent} in to the next account with room when the one it is on is used up, and keeps it there till that one is used up too, by writing {agent}'s own sign-in; {agent}'s requests go straight to OpenAI, never through myna. A {agent} app or session already open stays on its account until it is opened again. Connected to myna, {agent}'s requests go through it as before.",
-  "myna only switches {agent}'s sign-in; its requests go straight to OpenAI",
-  "{agent}'s requests go through myna to fail over to your other accounts again",
+  "owl signs {agent} in to the next account with room when the one it is on is used up, and keeps it there till that one is used up too, by writing {agent}'s own sign-in; {agent}'s requests go straight to OpenAI, never through owl. A {agent} app or session already open stays on its account until it is opened again. Connected to owl, {agent}'s requests go through it as before.",
+  "owl only switches {agent}'s sign-in; its requests go straight to OpenAI",
+  "{agent}'s requests go through owl to fail over to your other accounts again",
 ];
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -76,13 +76,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], posts = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, codex(opts), posts));
-        await page.goto("http://myna.test/?view=providers");
+        await page.goto("http://owl.test/?view=providers");
         await page.locator(".row.provider", { hasText: "Codex" }).first().click();
         await page.locator(".editor .acc").first().waitFor();
         return { page, errors, posts };
       };
 
-      test(`${engine} ${width} ${lang}: a tick has myna only switch Codex's sign-in`, async (t) => {
+      test(`${engine} ${width} ${lang}: a tick has owl only switch Codex's sign-in`, async (t) => {
         const { page, errors, posts } = await open(t, {});
         const only = page.locator(".editor .accts .switch-only label");
         assert.equal((await only.textContent()).trim(), label[lang]);

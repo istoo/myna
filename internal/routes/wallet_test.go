@@ -78,7 +78,7 @@ func TestWalletsOfSeveralProvidersEachGoByWhatTheyHaveLeft(t *testing.T) {
 			t.Errorf("%s, reporter's: %v, want %v", st.name, got, want)
 		}
 	}
-	// least used: the kinds keep the order of what myna sent them lately
+	// least used: the kinds keep the order of what owl sent them lately
 	// between them, each kind in its places by what it has left
 	s := []Seat{wallet("632", 282, pts), wallet("wb", 50, credits), wallet("051", 6635, pts)}
 	s[0].Tokens, s[1].Tokens, s[2].Tokens = 10, 20, 30

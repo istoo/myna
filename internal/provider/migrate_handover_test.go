@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/owl/internal/plugin"
 )
 
 // A deprecated built-in whose plugin the user installed is handed to it

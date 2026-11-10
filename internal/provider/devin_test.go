@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 func TestParseDevinStatus(t *testing.T) {
@@ -110,7 +110,7 @@ func TestWithDevinContexts(t *testing.T) {
 	})
 	t.Cleanup(func() { devinFamiliesCached(nil) })
 	saved := withDevinContexts([]catalog.Model{
-		{ID: "glm-5-2", Context: 1000000, Output: 131072}, // an older myna's models.dev numbers
+		{ID: "glm-5-2", Context: 1000000, Output: 131072}, // an older owl's models.dev numbers
 		{ID: "glm-5-2-1m"},
 		{ID: "swe-2-high"},
 		{ID: "glm-5.2"},
@@ -256,7 +256,7 @@ func TestAskDevinStatus(t *testing.T) {
 	}
 }
 
-// the identity myna serves: an ask that fails keeps the account, and one
+// the identity owl serves: an ask that fails keeps the account, and one
 // that says nobody (or keeps no key) drops it, on disk too
 func TestDevinStatusKeepsTheAccount(t *testing.T) {
 	home := claudeHome(t)
@@ -308,7 +308,7 @@ func TestDevinStatusKeepsTheAccount(t *testing.T) {
 	}
 
 	// a token Devin's servers refused is signed out too, kept on disk as
-	// such: myna must not go on routing to a dead key
+	// such: owl must not go on routing to a dead key
 	ask(devinSigned)
 	if _, _, ok := devinStatus.get(); !ok {
 		t.Fatal("signed in again, not served")

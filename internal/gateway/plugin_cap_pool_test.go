@@ -14,9 +14,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // plugins#349 through a real plugin host: the fake plugin as Factory, two
@@ -29,7 +29,7 @@ import (
 func TestPluginCarefulPool(t *testing.T) {
 	bun := testenv.Bun(t)
 	fresh(t)
-	t.Setenv("MYNA_BUN", bun)
+	t.Setenv("OWL_BUN", bun)
 	t.Setenv("FAKE_ID", "factory")
 	windows := filepath.Join(t.TempDir(), "windows.json")
 	t.Setenv("FAKE_WINDOWS", windows)

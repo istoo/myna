@@ -9,19 +9,19 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// #1603 (SwimmingLiu): two Codex accounts on in myna, Codex on CC
-// Switch's custom relay and not through myna. Codex's picker had its
-// GPT models direct only: the ones myna serves on those accounts
+// #1603 (SwimmingLiu): two Codex accounts on in owl, Codex on CC
+// Switch's custom relay and not through owl. Codex's picker had its
+// GPT models direct only: the ones owl serves on those accounts
 // (codex/…) were left out as "Codex's own sign-in, one more hop". They
 // are not Codex's sign-in while it is on a relay, and with several
-// accounts myna routes over them; they are offered via myna, beside
+// accounts owl routes over them; they are offered via owl, beside
 // the direct ones. Listing them writes nothing. With Codex on its own
-// ChatGPT sign-in and that one account alone in myna, they still add
+// ChatGPT sign-in and that one account alone in owl, they still add
 // only a hop and stay out.
-func TestCodexAccountsOfferedViaMyna(t *testing.T) {
+func TestCodexAccountsOfferedViaOwl(t *testing.T) {
 	claims := func(m map[string]any) string {
 		b, _ := json.Marshal(m)
 		return "h." + base64.RawURLEncoding.EncodeToString(b) + ".s"
@@ -40,13 +40,13 @@ func TestCodexAccountsOfferedViaMyna(t *testing.T) {
 		os.MkdirAll(filepath.Dir(provider.Path()), 0o755)
 		os.WriteFile(filepath.Join(filepath.Dir(provider.Path()), "logins.json"), b, 0o600)
 	}
-	via := func(a *Agent) (direct, myna []Option) {
+	via := func(a *Agent) (direct, owl []Option) {
 		for _, o := range a.Fields[0].Options(nil) {
 			switch {
 			case o.Value == "gpt-5.5" && o.Direct != "":
 				direct = append(direct, o)
-			case strings.HasPrefix(o.Value, "codex/") && o.Direct == "" && strings.HasSuffix(o.Note, "via myna"):
-				myna = append(myna, o)
+			case strings.HasPrefix(o.Value, "codex/") && o.Direct == "" && strings.HasSuffix(o.Note, "via owl"):
+				owl = append(owl, o)
 			}
 		}
 		return
@@ -57,12 +57,12 @@ func TestCodexAccountsOfferedViaMyna(t *testing.T) {
 		os.WriteFile(filepath.Join(home, ".codex", "models_cache.json"), cache, 0o644)
 		logins(true)
 		before := read()
-		direct, myna := via(codex(home))
+		direct, owl := via(codex(home))
 		if len(direct) == 0 {
 			t.Error("the relay's own gpt-5.5 isn't offered direct")
 		}
-		if !hasValue(myna, "codex/gpt-5.5") {
-			t.Errorf("no codex/gpt-5.5 via myna: %+v", myna)
+		if !hasValue(owl, "codex/gpt-5.5") {
+			t.Errorf("no codex/gpt-5.5 via owl: %+v", owl)
 		}
 		if read() != before {
 			t.Errorf("listing the models wrote config.toml:\n%s", read())
@@ -73,8 +73,8 @@ func TestCodexAccountsOfferedViaMyna(t *testing.T) {
 		home, _ := codexHome(t, string(me), ccSwitchCodex)
 		os.WriteFile(filepath.Join(home, ".codex", "models_cache.json"), cache, 0o644)
 		logins(false)
-		if _, myna := via(codex(home)); !hasValue(myna, "codex/gpt-5.5") {
-			t.Errorf("the account in myna isn't the relay Codex is on: %+v", myna)
+		if _, owl := via(codex(home)); !hasValue(owl, "codex/gpt-5.5") {
+			t.Errorf("the account in owl isn't the relay Codex is on: %+v", owl)
 		}
 	})
 
@@ -82,8 +82,8 @@ func TestCodexAccountsOfferedViaMyna(t *testing.T) {
 		home, _ := codexHome(t, string(me), "model = \"gpt-5.5\"\n")
 		os.WriteFile(filepath.Join(home, ".codex", "models_cache.json"), cache, 0o644)
 		logins(false)
-		if _, myna := via(codex(home)); len(myna) != 0 {
-			t.Errorf("Codex's own sign-in, again via myna: %+v", myna)
+		if _, owl := via(codex(home)); len(owl) != 0 {
+			t.Errorf("Codex's own sign-in, again via owl: %+v", owl)
 		}
 	})
 }

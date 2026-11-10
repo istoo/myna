@@ -60,7 +60,7 @@ func TestOlder(t *testing.T) {
 	}
 }
 
-// Refresh writes over the folders an older myna wrote, and no other.
+// Refresh writes over the folders an older owl wrote, and no other.
 func TestRefreshWritesOnlyWrittenFolders(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)

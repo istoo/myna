@@ -14,7 +14,7 @@ const assets = path.resolve(__dirname, "../assets");
 const HOME = "/Users/aimer";
 const agent = (id, name) => ({ id, name, icon: "", skills: `${HOME}/.${id}/skills`, mcp: `${HOME}/.${id}/mcp.json` });
 const base = () => ({
-  dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
+  dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
   agents: [agent("codex", "Codex"), agent("pi", "Pi"), agent("dsh", "DeepSeek Harness")],
   instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [],
   skills: [{ name: "grilling", description: "Grill a plan", kind: "folder", agents: ["codex"], source: `${HOME}/skills/grilling` }],
@@ -68,13 +68,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await t.test(lang + " " + tab, async () => {
           const w = words[lang];
           const ctx = await browser.newContext({ viewport: { width: 980, height: 800 } });
-          await ctx.addInitScript((tab) => { try { localStorage.setItem("myna.libTab", tab); } catch {} }, tab);
+          await ctx.addInitScript((tab) => { try { localStorage.setItem("owl.libTab", tab); } catch {} }, tab);
           const page = await ctx.newPage();
           page.setDefaultTimeout(5000);
           page.setDefaultNavigationTimeout(60000);
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", server(lang));
-          await page.goto("http://myna.test/");
+          await page.goto("http://owl.test/");
           await navTo(page, "library");
           const chip = (id) => page.locator(`#view-library .lib-row .lib-ag[data-agent="${id}"]`);
           await chip("dsh").waitFor();

@@ -9,7 +9,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/istoo/myna/internal/appdir"
+	"github.com/istoo/owl/internal/appdir"
 )
 
 // WorkBuddy (Tencent's desktop agent) keeps its sessions much as Claude

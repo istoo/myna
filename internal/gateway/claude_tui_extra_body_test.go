@@ -9,9 +9,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/claudetui"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/claudetui"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // tuiScriptHarness is a script harness whose runs are the interactive
@@ -21,7 +21,7 @@ func tuiScriptHarness(t *testing.T, script string) *resumeHarness {
 	h := newScriptHarness(t, "ok", script)
 	claudeTUIRuns = true
 	t.Cleanup(func() { claudeTUIRuns = false })
-	helper := filepath.Join(t.TempDir(), "myna")
+	helper := filepath.Join(t.TempDir(), "owl")
 	testenv.Program(t, helper, `#!/bin/sh
 [ "$1" = "`+claudetui.Command+`" ] || exit 9
 shift; claude=$1; shift

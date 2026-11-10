@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // slowEye is eyeUp with the describing model's answer held: until gate is
@@ -103,7 +103,7 @@ func TestVisionWaitIsntTheDescribersTime(t *testing.T) {
 }
 
 // The limit still ends a describer that takes too long once asked, and the
-// usage log says myna stopped waiting, not that the agent canceled.
+// usage log says owl stopped waiting, not that the agent canceled.
 func TestVisionLimitEndsASlowDescriber(t *testing.T) {
 	visionLimits(t, 200*time.Millisecond, 10*time.Second)
 	s, _ := slowEyed(t, time.Second)
@@ -120,7 +120,7 @@ func TestVisionLimitEndsASlowDescriber(t *testing.T) {
 	if vision == nil {
 		t.Fatal("no vision request in the usage log")
 	}
-	if vision.Status != 499 || !strings.Contains(vision.Error, "myna stopped waiting") || strings.Contains(vision.Error, "agent canceled") {
+	if vision.Status != 499 || !strings.Contains(vision.Error, "owl stopped waiting") || strings.Contains(vision.Error, "agent canceled") {
 		t.Fatalf("vision usage: %d %q", vision.Status, vision.Error)
 	}
 }

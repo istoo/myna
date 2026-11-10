@@ -22,7 +22,7 @@ function systemPath(dir) {
 }
 
 function install(t, { termux = true, arch = "aarch64", override = false, prefixOnly = false, missing = false, corrupt = false, desktop = false, github = false, args = [], env: extra = {}, tamper = "", libs = desktop, cli = !desktop, distro = "ID=ubuntu\nID_LIKE=debian\n", sessions = [], login = "", tty = false, uid = 1000, sudo = true, pmFails = false } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), "myna-install-"));
+  const dir = mkdtempSync(join(tmpdir(), "owl-install-"));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   const tools = join(dir, "tools");
   const home = join(dir, "home");
@@ -32,15 +32,15 @@ function install(t, { termux = true, arch = "aarch64", override = false, prefixO
   const bin = override ? join(dir, "custom bin") : termux ? join(prefix, "bin") : join(home, ".local/bin");
   mkdirSync(tools, { recursive: true });
   mkdirSync(bin, { recursive: true });
-  writeFileSync(join(bin, "myna"), "old installation");
+  writeFileSync(join(bin, "owl"), "old installation");
   const payload = "test binary\n";
   const cpu = arch === "aarch64" ? "arm64" : "amd64";
-  const file = termux ? `myna-cli-android-${cpu}` : desktop ? `myna-linux-${cpu}` : `myna-cli-linux-${cpu}`;
+  const file = termux ? `owl-cli-android-${cpu}` : desktop ? `owl-linux-${cpu}` : `owl-cli-linux-${cpu}`;
   const assets = {};
   // A Linux asset is present even when Android's is missing: never use it.
-  for (const name of new Set([file, `myna-cli-linux-${cpu}`, `myna-linux-${cpu}`])) {
+  for (const name of new Set([file, `owl-cli-linux-${cpu}`, `owl-linux-${cpu}`])) {
     if (missing && name === file) continue;
-    assets[name] = { url: github ? `https://github.com/istoo/myna/releases/download/vtest/${name}` : `https://download.invalid/${name}`, sha256: corrupt ? "0".repeat(64) : createHash("sha256").update(payload).digest("hex") };
+    assets[name] = { url: github ? `https://github.com/istoo/owl/releases/download/vtest/${name}` : `https://download.invalid/${name}`, sha256: corrupt ? "0".repeat(64) : createHash("sha256").update(payload).digest("hex") };
   }
   const requests = join(dir, "requests");
   writeFileSync(join(tools, "uname"), `#!/bin/sh\ncase "$1" in -m) echo '${arch}';; -s) echo Linux;; esac\n`, { mode: 0o755 });
@@ -108,8 +108,8 @@ else fs.writeFileSync(args[args.indexOf("-o") + 1], tamper && url.startsWith(tam
     HOME: home,
     PREFIX: termux ? prefix : "",
     TERMUX_VERSION: termux && !prefixOnly ? "test" : "",
-    MYNA_BIN_DIR: override ? bin : "",
-    MYNA_CLI: cli ? "1" : "",
+    OWL_BIN_DIR: override ? bin : "",
+    OWL_CLI: cli ? "1" : "",
     // a headless shell unless a test gives it a desktop
     DISPLAY: "",
     WAYLAND_DISPLAY: "",
@@ -119,10 +119,10 @@ else fs.writeFileSync(args[args.indexOf("-o") + 1], tamper && url.startsWith(tam
     XDG_SESSION_TYPE: "",
     XDG_DATA_DIRS: dataDirs,
     INSTALL_LOGIN: login,
-    MYNA_OS_RELEASE: join(dir, "os-release"),
+    OWL_OS_RELEASE: join(dir, "os-release"),
     // no terminal unless a test gives it one: the run never reaches a real
     // sudo or package manager
-    MYNA_TTY: tty ? join(dir, "tty") : join(dir, "no-tty"),
+    OWL_TTY: tty ? join(dir, "tty") : join(dir, "no-tty"),
     INSTALL_PM_LOG: pmLog,
     INSTALL_PM_FAILS: pmFails ? "1" : "",
     PATH: tools + ":" + (sudo ? process.env.PATH : systemPath(dir)),
@@ -133,8 +133,8 @@ else fs.writeFileSync(args[args.indexOf("-o") + 1], tamper && url.startsWith(tam
     INSTALL_PAYLOAD: payload,
     INSTALL_ARGS: join(dir, "args"),
     INSTALL_TAMPER: tamper,
-    MYNA_PROXY: "",
-    MYNA_MIRROR: "",
+    OWL_PROXY: "",
+    OWL_MIRROR: "",
     ...extra,
   };
   if (tty) writeFileSync(join(dir, "tty"), "");
@@ -152,33 +152,33 @@ else fs.writeFileSync(args[args.indexOf("-o") + 1], tamper && url.startsWith(tam
 test("Termux downloads Android arm64 into PREFIX/bin even with WebKit installed", (t) => {
   const r = install(t, { desktop: true });
   assert.equal(r.status, 0, r.stderr);
-  assert.equal(readFileSync(join(r.bin, "myna"), "utf8"), r.payload);
+  assert.equal(readFileSync(join(r.bin, "owl"), "utf8"), r.payload);
   // NTFS keeps no execute bit, so Windows reports none
-  if (process.platform !== "win32") assert.ok(statSync(join(r.bin, "myna")).mode & 0o111);
-  assert.match(r.requests, /myna-cli-android-arm64/);
-  assert.doesNotMatch(r.requests, /myna-linux-|icon-256/);
-  assert.equal(existsSync(join(r.share, "applications/myna.desktop")), false);
-  assert.match(r.stdout, /run it: myna web/);
+  if (process.platform !== "win32") assert.ok(statSync(join(r.bin, "owl")).mode & 0o111);
+  assert.match(r.requests, /owl-cli-android-arm64/);
+  assert.doesNotMatch(r.requests, /owl-linux-|icon-256/);
+  assert.equal(existsSync(join(r.share, "applications/owl.desktop")), false);
+  assert.match(r.stdout, /run it: owl web/);
   assert.doesNotMatch(r.stdout, /install WebKit/);
 });
 
 test("Termux prefix detection and amd64 target", (t) => {
   const r = install(t, { prefixOnly: true, arch: "x86_64" });
   assert.equal(r.status, 0, r.stderr);
-  assert.match(r.requests, /myna-cli-android-amd64/);
+  assert.match(r.requests, /owl-cli-android-amd64/);
 });
 
 test("Termux respects a custom bin directory containing spaces", (t) => {
   const r = install(t, { override: true });
   assert.equal(r.status, 0, r.stderr);
-  assert.equal(readFileSync(join(r.bin, "myna"), "utf8"), r.payload);
+  assert.equal(readFileSync(join(r.bin, "owl"), "utf8"), r.payload);
 });
 
 test("missing Android release never falls back to Linux", (t) => {
   const r = install(t, { missing: true });
   assert.notEqual(r.status, 0);
-  assert.match(r.stderr, /no myna-cli-android-arm64.*build in Termux/);
-  assert.equal(readFileSync(join(r.bin, "myna"), "utf8"), "old installation");
+  assert.match(r.stderr, /no owl-cli-android-arm64.*build in Termux/);
+  assert.equal(readFileSync(join(r.bin, "owl"), "utf8"), "old installation");
   assert.equal(r.requests.trim().split("\n").length, 1);
 });
 
@@ -186,17 +186,17 @@ test("a checksum mismatch leaves the existing installation intact", (t) => {
   const r = install(t, { corrupt: true });
   assert.notEqual(r.status, 0);
   assert.match(r.stderr, /does not match its checksum/);
-  assert.equal(readFileSync(join(r.bin, "myna"), "utf8"), "old installation");
+  assert.equal(readFileSync(join(r.bin, "owl"), "utf8"), "old installation");
 });
 
 test("ordinary Linux still selects its CLI or desktop build", (t) => {
   for (const desktop of [false, true]) {
     const r = install(t, { termux: false, desktop });
     assert.equal(r.status, 0, r.stderr);
-    assert.match(r.requests, desktop ? /myna-linux-arm64/ : /myna-cli-linux-arm64/);
-    assert.equal(existsSync(join(r.share, "applications/myna.desktop")), desktop);
-    // the dock binds the window (app_id/WM_CLASS "myna") to the entry (#2626)
-    if (desktop) assert.match(readFileSync(join(r.share, "applications/myna.desktop"), "utf8"), /^StartupWMClass=myna$/m);
+    assert.match(r.requests, desktop ? /owl-linux-arm64/ : /owl-cli-linux-arm64/);
+    assert.equal(existsSync(join(r.share, "applications/owl.desktop")), desktop);
+    // the dock binds the window (app_id/WM_CLASS "owl") to the entry (#2626)
+    if (desktop) assert.match(readFileSync(join(r.share, "applications/owl.desktop"), "utf8"), /^StartupWMClass=owl$/m);
   }
 });
 
@@ -206,14 +206,14 @@ test("no proxy and no mirror unless given", (t) => {
   const r = install(t, { termux: false, github: true });
   assert.equal(r.status, 0, r.stderr);
   for (const a of r.calls) assert.ok(!a.includes("--proxy"), JSON.stringify(a));
-  assert.match(r.requests, /^https:\/\/github\.com\/istoo\/myna\//m);
+  assert.match(r.requests, /^https:\/\/github\.com\/istoo\/owl\//m);
 });
 
-test("--proxy takes every download through it, as does MYNA_PROXY", (t) => {
+test("--proxy takes every download through it, as does OWL_PROXY", (t) => {
   for (const [opts, want] of [
     [{ args: ["--proxy", "socks5h://127.0.0.1:1080"] }, "socks5h://127.0.0.1:1080"],
     [{ args: ["--proxy=http://127.0.0.1:7890"] }, "http://127.0.0.1:7890"],
-    [{ env: { MYNA_PROXY: "http://10.0.0.1:3128" } }, "http://10.0.0.1:3128"],
+    [{ env: { OWL_PROXY: "http://10.0.0.1:3128" } }, "http://10.0.0.1:3128"],
   ]) {
     const r = install(t, { termux: false, desktop: true, github: true, ...opts });
     assert.equal(r.status, 0, r.stderr);
@@ -230,52 +230,52 @@ test("--mirror fetches the file through the mirror, the feed and its checksum fr
   const r = install(t, { termux: false, github: true, args: ["--mirror", "https://gh.mirror.example"] });
   assert.equal(r.status, 0, r.stderr);
   const [feed, file] = r.requests.trim().split("\n");
-  assert.equal(feed, "https://github.com/istoo/myna/releases/latest/download/latest.json");
-  assert.equal(file, "https://gh.mirror.example/https://github.com/istoo/myna/releases/download/vtest/myna-cli-linux-arm64");
-  assert.equal(readFileSync(join(r.bin, "myna"), "utf8"), r.payload);
+  assert.equal(feed, "https://github.com/istoo/owl/releases/latest/download/latest.json");
+  assert.equal(file, "https://gh.mirror.example/https://github.com/istoo/owl/releases/download/vtest/owl-cli-linux-arm64");
+  assert.equal(readFileSync(join(r.bin, "owl"), "utf8"), r.payload);
   assert.match(r.stdout, /through https:\/\/gh\.mirror\.example\//);
 
-  const env = install(t, { termux: false, github: true, env: { MYNA_MIRROR: "https://gh.mirror.example/" } });
+  const env = install(t, { termux: false, github: true, env: { OWL_MIRROR: "https://gh.mirror.example/" } });
   assert.equal(env.status, 0, env.stderr);
   assert.match(env.requests, /^https:\/\/gh\.mirror\.example\/https:\/\/github\.com\//m);
 });
 
-test("a file the mirror changed is refused and the installed myna kept", (t) => {
+test("a file the mirror changed is refused and the installed owl kept", (t) => {
   const r = install(t, { termux: false, github: true, args: ["--mirror", "https://gh.mirror.example/"], tamper: "https://gh.mirror.example/" });
   assert.notEqual(r.status, 0);
-  assert.match(r.stderr, /from https:\/\/gh\.mirror\.example\/ does not match its checksum from https:\/\/github\.com\/istoo\/myna; not installed/);
-  assert.equal(readFileSync(join(r.bin, "myna"), "utf8"), "old installation");
+  assert.match(r.stderr, /from https:\/\/gh\.mirror\.example\/ does not match its checksum from https:\/\/github\.com\/istoo\/owl; not installed/);
+  assert.equal(readFileSync(join(r.bin, "owl"), "utf8"), "old installation");
   const bad = install(t, { termux: false, args: ["--mirror", "gh.mirror.example"] });
   assert.notEqual(bad.status, 0);
   assert.match(bad.stderr, /--mirror is an http\(s\) address/);
 });
 
-// pota on Discord: the script installed myna and had no way to take it
+// pota on Discord: the script installed owl and had no way to take it
 // off. --uninstall takes off what it put there and keeps the user's
-// settings; --purge has myna disconnect the agents and delete them first.
+// settings; --purge has owl disconnect the agents and delete them first.
 function installedDesktop(t, opts = {}) {
   const r = install(t, { termux: false, desktop: true, ...opts });
   assert.equal(r.status, 0, r.stderr);
-  const exe = join(r.bin, "myna");
-  // myna itself, as far as the uninstall asks it anything
+  const exe = join(r.bin, "owl");
+  // owl itself, as far as the uninstall asks it anything
   writeFileSync(exe, `#!/bin/sh
-echo "$*" >> "$HOME/myna-calls"
-[ "$1 $2" = "daemon uninstall" ] && rm -f "$XDG_CONFIG_HOME/systemd/user/myna.service"
-[ "$1 $2" = "uninstall --yes" ] && { [ -z "$MYNA_FAIL" ] || exit 1; rm -rf "$XDG_CONFIG_HOME/myna" "$XDG_DATA_HOME/applications/myna.desktop"; }
+echo "$*" >> "$HOME/owl-calls"
+[ "$1 $2" = "daemon uninstall" ] && rm -f "$XDG_CONFIG_HOME/systemd/user/owl.service"
+[ "$1 $2" = "uninstall --yes" ] && { [ -z "$OWL_FAIL" ] || exit 1; rm -rf "$XDG_CONFIG_HOME/owl" "$XDG_DATA_HOME/applications/owl.desktop"; }
 exit 0
 `, { mode: 0o755 });
-  const settings = join(r.config, "myna", "settings.json");
-  mkdirSync(join(r.config, "myna"), { recursive: true });
+  const settings = join(r.config, "owl", "settings.json");
+  mkdirSync(join(r.config, "owl"), { recursive: true });
   writeFileSync(settings, "{}");
-  const calls = () => (existsSync(join(r.home, "myna-calls")) ? readFileSync(join(r.home, "myna-calls"), "utf8") : "");
-  return { ...r, exe, settings, calls, entry: join(r.share, "applications/myna.desktop"), icon: join(r.share, "icons/hicolor/256x256/apps/myna.png"), mime: join(r.config, "mimeapps.list") };
+  const calls = () => (existsSync(join(r.home, "owl-calls")) ? readFileSync(join(r.home, "owl-calls"), "utf8") : "");
+  return { ...r, exe, settings, calls, entry: join(r.share, "applications/owl.desktop"), icon: join(r.share, "icons/hicolor/256x256/apps/owl.png"), mime: join(r.config, "mimeapps.list") };
 }
 
-test("--uninstall takes off the command, menu entry, icon and myna:// default, and keeps the settings", (t) => {
+test("--uninstall takes off the command, menu entry, icon and owl:// default, and keeps the settings", (t) => {
   const r = installedDesktop(t);
   for (const p of [r.exe, r.entry, r.icon]) assert.ok(existsSync(p), p);
   writeFileSync(r.mime, readFileSync(r.mime, "utf8") + "text/html=firefox.desktop\n");
-  assert.match(readFileSync(r.mime, "utf8"), /^x-scheme-handler\/myna=myna\.desktop$/m);
+  assert.match(readFileSync(r.mime, "utf8"), /^x-scheme-handler\/owl=owl\.desktop$/m);
   const u = r.run(["--uninstall"]);
   assert.equal(u.status, 0, u.stderr);
   for (const p of [r.exe, r.entry, r.icon]) assert.equal(existsSync(p), false, p);
@@ -286,19 +286,19 @@ test("--uninstall takes off the command, menu entry, icon and myna:// default, a
   assert.equal(bu.status, 0, bu.stderr);
   assert.equal(existsSync(bare.mime), false);
   assert.ok(existsSync(r.settings), "the settings stay");
-  assert.equal(r.calls(), "", "myna isn't asked to uninstall");
+  assert.equal(r.calls(), "", "owl isn't asked to uninstall");
   assert.equal(u.calls.length, 0, "nothing is downloaded");
   assert.match(u.stdout, /kept your settings.*--purge/);
   // again: nothing there, nothing wrong
   const again = r.run(["--uninstall"]);
   assert.equal(again.status, 0, again.stderr);
-  assert.match(again.stdout, /no myna installed by this script/);
+  assert.match(again.stdout, /no owl installed by this script/);
 });
 
-test("--uninstall takes the service and login entry that start this myna, never another's", (t) => {
+test("--uninstall takes the service and login entry that start this owl, never another's", (t) => {
   const r = installedDesktop(t);
-  const unit = join(r.config, "systemd/user/myna.service");
-  const login = join(r.config, "autostart/myna.desktop");
+  const unit = join(r.config, "systemd/user/owl.service");
+  const login = join(r.config, "autostart/owl.desktop");
   mkdirSync(join(r.config, "systemd/user"), { recursive: true });
   mkdirSync(join(r.config, "autostart"), { recursive: true });
   writeFileSync(unit, `[Service]\nExecStart="${r.exe}" serve\n`);
@@ -309,15 +309,15 @@ test("--uninstall takes the service and login entry that start this myna, never 
   assert.equal(existsSync(login), false);
   assert.match(r.calls(), /^daemon uninstall$/m);
 
-  // another myna's (one still there) are left alone
+  // another owl's (one still there) are left alone
   const o = installedDesktop(t);
-  const other = join(o.home, "elsewhere/myna");
+  const other = join(o.home, "elsewhere/owl");
   mkdirSync(join(o.home, "elsewhere"), { recursive: true });
   writeFileSync(other, "", { mode: 0o755 });
   mkdirSync(join(o.config, "systemd/user"), { recursive: true });
   mkdirSync(join(o.config, "autostart"), { recursive: true });
-  const ounit = join(o.config, "systemd/user/myna.service");
-  const ologin = join(o.config, "autostart/myna.desktop");
+  const ounit = join(o.config, "systemd/user/owl.service");
+  const ologin = join(o.config, "autostart/owl.desktop");
   writeFileSync(ounit, `[Service]\nExecStart="${other}" serve\n`);
   writeFileSync(ologin, `[Desktop Entry]\nExec="${other}" --autostart\n`);
   writeFileSync(o.entry, `[Desktop Entry]\nExec=${other} %u\n`);
@@ -327,39 +327,39 @@ test("--uninstall takes the service and login entry that start this myna, never 
   assert.equal(existsSync(o.exe), false);
 });
 
-test("--purge has myna uninstall itself first, then takes off the install", (t) => {
+test("--purge has owl uninstall itself first, then takes off the install", (t) => {
   const r = installedDesktop(t);
   const u = r.run(["--purge"]);
   assert.equal(u.status, 0, u.stderr);
   assert.match(r.calls(), /^uninstall --yes$/m);
   for (const p of [r.exe, r.entry, r.icon, r.settings]) assert.equal(existsSync(p), false, p);
-  // myna took the menu entry itself; its icon and myna:// default go too
+  // owl took the menu entry itself; its icon and owl:// default go too
   assert.equal(existsSync(r.mime), false);
   assert.doesNotMatch(u.stdout, /kept your settings/);
 
-  // myna failing to: the command stays, to run it again
-  const f = installedDesktop(t, { env: { MYNA_FAIL: "1" } });
+  // owl failing to: the command stays, to run it again
+  const f = installedDesktop(t, { env: { OWL_FAIL: "1" } });
   const fu = f.run(["--uninstall", "--purge"]);
   assert.notEqual(fu.status, 0);
-  assert.match(fu.stderr, /myna uninstall didn't finish/);
+  assert.match(fu.stderr, /owl uninstall didn't finish/);
   for (const p of [f.exe, f.entry, f.settings]) assert.ok(existsSync(p), p);
 
-  // no myna to ask: refused, the settings kept
+  // no owl to ask: refused, the settings kept
   const n = installedDesktop(t);
   rmSync(n.exe);
   const nu = n.run(["--purge"]);
   assert.notEqual(nu.status, 0);
-  assert.match(nu.stderr, /no myna at .* --uninstall alone/);
+  assert.match(nu.stderr, /no owl at .* --uninstall alone/);
   assert.ok(existsSync(n.settings));
 });
 
-test("--uninstall in Termux takes off PREFIX/bin/myna", (t) => {
+test("--uninstall in Termux takes off PREFIX/bin/owl", (t) => {
   const r = install(t, {});
   assert.equal(r.status, 0, r.stderr);
   const u = r.run(["--uninstall"]);
   assert.equal(u.status, 0, u.stderr);
-  assert.equal(existsSync(join(r.bin, "myna")), false);
-  assert.match(u.stdout, /removed .*com\.termux\/files\/usr\/bin\/myna/);
+  assert.equal(existsSync(join(r.bin, "owl")), false);
+  assert.match(u.stdout, /removed .*com\.termux\/files\/usr\/bin\/owl/);
 });
 
 // shuhai on Discord: on a Linux desktop the script installed the terminal
@@ -370,9 +370,9 @@ test("--uninstall in Termux takes off PREFIX/bin/myna", (t) => {
 function linux(t, opts) {
   const r = install(t, { termux: false, cli: false, ...opts });
   assert.equal(r.status, 0, r.stderr);
-  const gui = /myna-linux-arm64/.test(r.requests);
-  assert.notEqual(gui, /myna-cli-linux-arm64/.test(r.requests), r.requests);
-  assert.equal(existsSync(join(r.share, "applications/myna.desktop")), gui);
+  const gui = /owl-linux-arm64/.test(r.requests);
+  assert.notEqual(gui, /owl-cli-linux-arm64/.test(r.requests), r.requests);
+  assert.equal(existsSync(join(r.share, "applications/owl.desktop")), gui);
   return { ...r, gui };
 }
 const last = (r, n) => r.stdout.trimEnd().split("\n").slice(-n).join("\n");
@@ -432,13 +432,13 @@ test("--gui installs the desktop app before its libraries, and says what install
   assert.ok(r.gui);
   assert.match(last(r, 2), /aren't installed; it opens once they are/);
   assert.match(last(r, 2), /sudo apt install libwebkit2gtk-4\.1-0/);
-  // the flag wins over MYNA_CLI=1
+  // the flag wins over OWL_CLI=1
   const over = linux(t, { libs: true, cli: true, args: ["--gui"] });
   assert.ok(over.gui);
   assert.doesNotMatch(over.stdout, /aren't installed/);
 });
 
-test("--tui and MYNA_CLI=1 install the terminal build on a desktop with WebKitGTK", (t) => {
+test("--tui and OWL_CLI=1 install the terminal build on a desktop with WebKitGTK", (t) => {
   for (const opts of [{ args: ["--tui"] }, { cli: true }]) {
     const r = linux(t, { libs: true, env: { DISPLAY: ":0" }, ...opts });
     assert.equal(r.gui, false, JSON.stringify(opts));
@@ -505,7 +505,7 @@ test("a stale apt list is read again and the install tried once more", (t) => {
   assert.equal(r.pm, "sudo apt-get install -y libwebkit2gtk-4.1-0\nsudo apt-get update\nsudo apt-get install -y libwebkit2gtk-4.1-0\n");
 });
 
-test("--gui installs WebKitGTK at a terminal too; --tui, MYNA_CLI=1 and a headless computer never do", (t) => {
+test("--gui installs WebKitGTK at a terminal too; --tui, OWL_CLI=1 and a headless computer never do", (t) => {
   const g = linux(t, { libs: false, tty: true, args: ["--gui"] });
   assert.ok(g.gui);
   assert.equal(g.pm, "sudo apt-get install -y libwebkit2gtk-4.1-0\n");

@@ -96,10 +96,10 @@ func ClaudeSpelled(ref string) string {
 	return ref
 }
 
-// ClaudeRead is a model read back from Claude Code's settings as myna
+// ClaudeRead is a model read back from Claude Code's settings as owl
 // serves it: a dashed spelling ClaudeSpelled wrote taken back to the
 // served id, anything else as it is. A model of a provider switched off
-// since is taken back too, so myna still knows it for its own and moves
+// since is taken back too, so owl still knows it for its own and moves
 // the agent off it (Reseat).
 func ClaudeRead(ref string) string {
 	if real, ok := ClaudeUndashed(ref); ok {

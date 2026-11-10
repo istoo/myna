@@ -19,10 +19,10 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/testenv"
-	"github.com/istoo/myna/internal/wslrun"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/testenv"
+	"github.com/istoo/owl/internal/wslrun"
 )
 
 // autoModeAsk is Claude Code's auto mode classifier's first stage as it
@@ -304,7 +304,7 @@ func TestAutoModeReviewOnlyForClaude(t *testing.T) {
 
 // TestAutoModeReviewedRoutes: the models whose requests can carry auto
 // mode's review to Anthropic, the rule Claude Code's wiring turns the
-// review off by while none of them is behind myna (1EFLOPS on X): the
+// review off by while none of them is behind owl (1EFLOPS on X): the
 // Claude subscription, a Claude model under any vendor's spelling of it,
 // and Anthropic's own API. Codex, DeepSeek's Anthropic API and an
 // OpenAI-compatible relay's GPT are not.
@@ -586,13 +586,13 @@ func TestClaudeBridgeSafeguardResults(t *testing.T) {
 				d, _ := json.Marshal(map[string]any{"type": "stream_event", "event": map[string]any{"type": "message_delta", "delta": delta}})
 				lines := []string{
 					`{"type":"stream_event","event":{"type":"message_start","message":{"id":"msg_client","model":"claude-sonnet-5"}}}`,
-					`{"type":"stream_event","event":{"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"toolu_client","name":"mcp__myna__Bash"}}}`,
+					`{"type":"stream_event","event":{"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"toolu_client","name":"mcp__owl__Bash"}}}`,
 					string(d),
 					`{"type":"stream_event","event":{"type":"message_stop"}}`,
 				}
 				if whole {
 					message := map[string]any{"id": "msg_whole", "model": "claude-sonnet-5", "stop_reason": "tool_use",
-						"content": []any{map[string]any{"type": "tool_use", "id": "toolu_client", "name": "mcp__myna__Bash", "input": map[string]any{}}}}
+						"content": []any{map[string]any{"type": "tool_use", "id": "toolu_client", "name": "mcp__owl__Bash", "input": map[string]any{}}}}
 					if verdict != "null" {
 						message["safeguard_results"] = json.RawMessage(verdict)
 					}
@@ -870,7 +870,7 @@ func askedEffort(proto provider.Protocol, body []byte) any {
 }
 
 // classifierProvider saves an OpenAI-compatible relay the user added by
-// its address, serving gpt6.1-sol, a model whose levels myna doesn't
+// its address, serving gpt6.1-sol, a model whose levels owl doesn't
 // know, on proto (CyberCaius on Discord: a new-api relay).
 func classifierProvider(t *testing.T, proto provider.Protocol, f *fake) {
 	t.Helper()
@@ -904,7 +904,7 @@ func askClassifier(t *testing.T, s *Server, body string) (int, string) {
 }
 
 // Auto mode's classifier waits 60 seconds for its verdict (Claude Code
-// 2.1.310, per attempt). A reasoning model whose levels myna doesn't
+// 2.1.310, per attempt). A reasoning model whose levels owl doesn't
 // know, asked with no effort, reasoned at its vendor's default over the
 // whole policy and transcript, past those 60 seconds, and Claude Code
 // closed the request (CyberCaius on Discord: every classifier request
@@ -928,7 +928,7 @@ func TestAutoModeClassifierReasonsLeastOnAnUnknownModel(t *testing.T) {
 	}
 }
 
-// The effort myna adds is its own ask, not the client's: an upstream
+// The effort owl adds is its own ask, not the client's: an upstream
 // that takes no none is asked at low, one that takes no reasoning effort
 // at all is asked without it, as it was before, and each is remembered,
 // so the next classifier ask goes once.
@@ -990,7 +990,7 @@ func TestAutoModeClassifierEffortRefusedGoesWithout(t *testing.T) {
 // CyberCaius on Discord: after a switch in /model, the first auto mode
 // classifier request went to the model before it. Claude Code names its
 // sonnet tier for the classifier, and that tier followed the old main
-// model until myna moved it. The classifier goes to the model the tier
+// model until owl moved it. The classifier goes to the model the tier
 // follows now (ClassifierStandIn); a turn of the conversation naming the
 // same model, another session still on it, goes as asked.
 func TestAutoModeClassifierFollowsTheSwitchedModel(t *testing.T) {

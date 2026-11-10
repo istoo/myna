@@ -14,24 +14,24 @@ import (
 	"time"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/proc"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/proc"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
-// accountsCmd: `myna accounts [agent] [--json]`, `myna accounts add <agent>`,
-// `myna accounts switch|forget <agent> <email>`, `myna accounts switch <claude|codex> next`,
-// `myna accounts project <gemini|antigravity> <email> <project>`,
-// `myna accounts alias <agent> <email> [<name>|--clear]`
-// `myna accounts switch-only <codex|claude> [on|off]`
-// — the subscriptions myna remembers, how much of each one's allowance is
+// accountsCmd: `owl accounts [agent] [--json]`, `owl accounts add <agent>`,
+// `owl accounts switch|forget <agent> <email>`, `owl accounts switch <claude|codex> next`,
+// `owl accounts project <gemini|antigravity> <email> <project>`,
+// `owl accounts alias <agent> <email> [<name>|--clear]`
+// `owl accounts switch-only <codex|claude> [on|off]`
+// — the subscriptions owl remembers, how much of each one's allowance is
 // used, and switching the agent between them.
 func accountsCmd(args []string) error {
 	if len(args) > 1 && args[1] == "discovery" {
 		return accountsDiscoveryCmd(args[2:])
 	}
-	const usage = "usage: myna accounts [claude|codex|grok|copilot|gemini|antigravity|zed|factory|mimo|<plugin>] [--json] | myna accounts add <claude|codex|gemini|antigravity|zed|factory|mimo|<plugin>> | myna accounts add copilot [--host <name>.ghe.com] | myna accounts import <codex|claude|antigravity|factory> <file>... [--yes] | myna accounts refresh [--json] | myna accounts checkin [--json] | myna accounts switch|forget <claude|codex|gemini|antigravity|zed|factory|mimo|<plugin>> <email> | myna accounts switch <claude|codex> next | myna accounts switch|forget copilot <login>[@<name>.ghe.com] [--host <name>.ghe.com] | myna accounts project <gemini|antigravity> <email> <gcp-project-id> | myna accounts alias <agent|<plugin>> <email> [<name>|--clear] | myna accounts switch-only <codex|claude> [on|off]"
+	const usage = "usage: owl accounts [claude|codex|grok|copilot|gemini|antigravity|zed|factory|mimo|<plugin>] [--json] | owl accounts add <claude|codex|gemini|antigravity|zed|factory|mimo|<plugin>> | owl accounts add copilot [--host <name>.ghe.com] | owl accounts import <codex|claude|antigravity|factory> <file>... [--yes] | owl accounts refresh [--json] | owl accounts checkin [--json] | owl accounts switch|forget <claude|codex|gemini|antigravity|zed|factory|mimo|<plugin>> <email> | owl accounts switch <claude|codex> next | owl accounts switch|forget copilot <login>[@<name>.ghe.com] [--host <name>.ghe.com] | owl accounts project <gemini|antigravity> <email> <gcp-project-id> | owl accounts alias <agent|<plugin>> <email> [<name>|--clear] | owl accounts switch-only <codex|claude> [on|off]"
 	agentID := func(s string) (string, error) {
 		switch strings.ToLower(s) {
 		case "claude", "cc":
@@ -76,7 +76,7 @@ func accountsCmd(args []string) error {
 		return nil
 	}
 	if len(args) > 1 && args[1] == "alias" {
-		// a name of the user's own for an account (#1515): myna's,
+		// a name of the user's own for an account (#1515): owl's,
 		// never written to the vendor's or plugin's sign-in
 		if len(args) < 4 {
 			return fmt.Errorf("%s", usage)
@@ -98,9 +98,9 @@ func accountsCmd(args []string) error {
 			if a := provider.AccountNameOf(id, user); a != "" {
 				fmt.Println(a)
 			} else if s := provider.SeatNameOf(id, user); s != "" {
-				fmt.Println(s, muted.Render("· the key plan this account stands in for; name it: myna accounts alias "+args[2]+" "+args[3]+" <name>"))
+				fmt.Println(s, muted.Render("· the key plan this account stands in for; name it: owl accounts alias "+args[2]+" "+args[3]+" <name>"))
 			} else {
-				fmt.Println(muted.Render(user + " has no name of its own · name it: myna accounts alias " + args[2] + " " + args[3] + " <name>"))
+				fmt.Println(muted.Render(user + " has no name of its own · name it: owl accounts alias " + args[2] + " " + args[3] + " <name>"))
 			}
 			return nil
 		}
@@ -137,7 +137,7 @@ func accountsCmd(args []string) error {
 			case len(args) == 4 && strings.HasPrefix(args[3], "--host="):
 				host = strings.TrimPrefix(args[3], "--host=")
 			case len(args) != 3:
-				return fmt.Errorf("usage: myna accounts add copilot [--host <name>.ghe.com]")
+				return fmt.Errorf("usage: owl accounts add copilot [--host <name>.ghe.com]")
 			}
 			h, err := provider.CopilotHost(host)
 			if err != nil {
@@ -216,7 +216,7 @@ func accountsCmd(args []string) error {
 			return err
 		}
 		if _, plug := provider.PluginOf(id); plug || id == "gemini" || id == "antigravity" || id == "copilot" {
-			fmt.Println(green.Render("✓"), "myna now uses", args[3], "for", id)
+			fmt.Println(green.Render("✓"), "owl now uses", args[3], "for", id)
 			return nil
 		}
 		if id == "codex" && provider.CodexNoAccount != nil && provider.CodexNoAccount() {
@@ -260,7 +260,7 @@ func accountsCmd(args []string) error {
 		return nil
 	}
 	if len(ls) == 0 {
-		fmt.Println(muted.Render("no accounts yet ·"), "add one: myna accounts add <claude|codex|gemini|antigravity>")
+		fmt.Println(muted.Render("no accounts yet ·"), "add one: owl accounts add <claude|codex|gemini|antigravity>")
 		return nil
 	}
 	// an account named by the user, or for the key plan it stands in
@@ -306,11 +306,11 @@ func accountsCmd(args []string) error {
 		line += quotaReadingCell(r.AsOf, r.ReadAt, r.Windows)
 		fmt.Println(line)
 	}
-	fmt.Println(faint.Render("  ● signed in · ○ takes over when it runs out · add one: myna accounts add <agent> · switch: myna accounts switch <agent> <email>"))
+	fmt.Println(faint.Render("  ● signed in · ○ takes over when it runs out · add one: owl accounts add <agent> · switch: owl accounts switch <agent> <email>"))
 	return nil
 }
 
-// accountRow is one account and its allowance, as `myna accounts` shows it.
+// accountRow is one account and its allowance, as `owl accounts` shows it.
 type accountRow struct {
 	Agent   string      `json:"agent"`
 	User    string      `json:"user"`
@@ -336,7 +336,7 @@ type accountRow struct {
 type quotaSpan = provider.QuotaSpan
 
 // accountRows asks each agent's accounts for their allowance at once; what
-// was asked less than a minute ago comes from myna's cache.
+// was asked less than a minute ago comes from owl's cache.
 func accountRows(ls []provider.Login, now time.Time) []accountRow {
 	// the user asking, read even when allowances are read only when asked
 	ctx, cancel := context.WithTimeout(provider.Asked(context.Background()), 15*time.Second)
@@ -394,7 +394,7 @@ func accountRows(ls []provider.Login, now time.Time) []accountRow {
 func quotaCell(w quotaSpan, now time.Time) string {
 	name := strings.NewReplacer(" hours", "h", " hour", "h", " days", "d", " day", "d", " · ", " ").Replace(w.Name)
 	if w.Unlimited {
-		// no cap is not 0% of one: a remote myna's gateway key held to
+		// no cap is not 0% of one: a remote owl's gateway key held to
 		// no limit (#1547) read "Limit 0%"
 		return name + " unlimited"
 	}
@@ -468,7 +468,7 @@ func addAccount(agentID string) error {
 		// a server or container: the sign-in runs Claude Code, which it
 		// has none of; downloading it is offered, and asked (Jorben).
 		// Not on Windows, where one in WSL may be the one signed in with.
-		fmt.Println(amber.Render("!"), "Claude Code isn't installed here: myna signs in to Claude, and answers its requests, through it")
+		fmt.Println(amber.Render("!"), "Claude Code isn't installed here: owl signs in to Claude, and answers its requests, through it")
 		if err := installClaudeCode(false); err != nil {
 			return err
 		}
@@ -513,7 +513,7 @@ func addAccount(agentID string) error {
 		case st.CallbackBlocked != "":
 			fmt.Println(amber.Render("!"), fmt.Sprintf("Another program has port %d, where the sign-in comes back, so the page the browser ends on won't finish it. Paste its whole address here and press Enter:", st.CallbackPort))
 		default:
-			fmt.Println("If the page the browser ends on won't load (myna on a server or in Docker), paste its whole address here and press Enter:")
+			fmt.Println("If the page the browser ends on won't load (owl on a server or in Docker), paste its whole address here and press Enter:")
 		}
 		id := st.ID
 		go func() {
@@ -542,9 +542,9 @@ func addAccount(agentID string) error {
 		} else if st.Using {
 			fmt.Println(green.Render("✓"), agentID, "is signed in as", st.User)
 		} else if strings.HasPrefix(agentID, "copilot") {
-			fmt.Println(green.Render("✓"), "added", st.User, muted.Render("· with the other Copilot accounts in myna's window"))
+			fmt.Println(green.Render("✓"), "added", st.User, muted.Render("· with the other Copilot accounts in owl's window"))
 		} else {
-			fmt.Println(green.Render("✓"), "added", st.User, muted.Render("· use it: myna accounts switch "+agentID+" "+st.User))
+			fmt.Println(green.Render("✓"), "added", st.User, muted.Render("· use it: owl accounts switch "+agentID+" "+st.User))
 		}
 		return nil
 	case "failed":
@@ -553,10 +553,10 @@ func addAccount(agentID string) error {
 	return fmt.Errorf("sign-in canceled")
 }
 
-// importUsage is how `myna accounts import` is run.
-const importUsage = "usage: myna accounts import <codex|claude|antigravity|factory> <file>... [--yes]"
+// importUsage is how `owl accounts import` is run.
+const importUsage = "usage: owl accounts import <codex|claude|antigravity|factory> <file>... [--yes]"
 
-// importAccounts: `myna accounts import <agent> <file>... [--yes]` brings
+// importAccounts: `owl accounts import <agent> <file>... [--yes]` brings
 // in accounts from other tools' files, as the window's "Import accounts from
 // a file…" does (#1453): Codex's auth.json, codexbar's config.json, and
 // Cockpit Tools', CLIProxyAPI's and Sub2API's exports for ChatGPT; Claude
@@ -589,7 +589,7 @@ func importAccounts(args []string) error {
 	case "antigravity", "ag":
 		id = "antigravity"
 	case "factory", "droid":
-		return fmt.Errorf("Factory runs on its plugin now: add the key with myna accounts add factory")
+		return fmt.Errorf("Factory runs on its plugin now: add the key with owl accounts add factory")
 	default:
 		return fmt.Errorf("%q: accounts can be imported for codex, claude, antigravity and factory\n%s", rest[0], importUsage)
 	}
@@ -615,8 +615,8 @@ func importAccounts(args []string) error {
 	switch id {
 	case "codex":
 		say = []string{"Each account's sign-in is refreshed with ChatGPT before it is added, as signing in does.",
-			"That spends the file's sign-in: the tool it came from (Codex CLI on another computer, codexbar, Cockpit Tools, CLIProxyAPI) is signed out of that account and has to sign in again. From then on the account is myna's.",
-			"The files are only read, never changed. An account myna holds already is left as it is."}
+			"That spends the file's sign-in: the tool it came from (Codex CLI on another computer, codexbar, Cockpit Tools, CLIProxyAPI) is signed out of that account and has to sign in again. From then on the account is owl's.",
+			"The files are only read, never changed. An account owl holds already is left as it is."}
 	case "claude":
 		say = []string{provider.ClaudeRisk,
 			"Each account is kept as the file has it. Claude Code renews its sign-in the first time it uses it, and the file's copy then stops working: the tool it came from has to sign in again.",
@@ -669,10 +669,10 @@ func importAccounts(args []string) error {
 			fmt.Println(green.Render("✓"), "added", who+plan)
 		case "updated":
 			took++
-			fmt.Println(green.Render("✓"), who, muted.Render("· in myna already, now with this sign-in"))
+			fmt.Println(green.Render("✓"), who, muted.Render("· in owl already, now with this sign-in"))
 		case "exists":
 			took++
-			why := "in myna already with this sign-in, left as it is"
+			why := "in owl already with this sign-in, left as it is"
 			if r.Error != "" {
 				why = r.Error
 			}
@@ -684,7 +684,7 @@ func importAccounts(args []string) error {
 	if took == 0 {
 		return fmt.Errorf("nothing imported")
 	}
-	fmt.Println(faint.Render("  see them: myna accounts " + id))
+	fmt.Println(faint.Render("  see them: owl accounts " + id))
 	return nil
 }
 
@@ -699,14 +699,14 @@ var appLink = agent.OpenAppLink
 func openURLInBrowser(url string) {
 	// the link is printed beside it, to open by hand when this fails (#2043)
 	if err := proc.OpenBrowser(url); err != nil {
-		fmt.Fprintln(os.Stderr, "myna couldn't open the browser:", err)
+		fmt.Fprintln(os.Stderr, "owl couldn't open the browser:", err)
 	}
 }
 
-// refreshAccounts: `myna accounts refresh` renews the sign-in of every
+// refreshAccounts: `owl accounts refresh` renews the sign-in of every
 // saved ChatGPT account, and every saved Claude account, on or off (Claude
 // Code's /usage run in its own directory), the agent isn't signed in to
-// now — what the gateway does every eight days, for a myna that isn't
+// now — what the gateway does every eight days, for a owl that isn't
 // left running (cron, launchd). A sign-in the vendor refuses is marked as
 // needing a new one.
 func refreshAccounts(asJSON bool) error {
@@ -750,7 +750,7 @@ func refreshAccounts(asJSON bool) error {
 	return nil
 }
 
-// checkinWorkBuddy: `myna accounts checkin` — WorkBuddy's daily check-in
+// checkinWorkBuddy: `owl accounts checkin` — WorkBuddy's daily check-in
 // (签到) for each WorkBuddy (China) account not in yet today, and Trae CN's
 // (每日签到) for each Trae CN account, and MiniMax Code's for each MiniMax
 // Code account, and Qoder's daily credits for each Qoder account, and each
@@ -792,7 +792,7 @@ func checkinWorkBuddy(asJSON bool) error {
 		// later (#3326)
 		later := ""
 		if r.Again {
-			later = " · myna asks again later"
+			later = " · owl asks again later"
 			if r.Outcome == provider.CheckinDone {
 				fmt.Println(muted.Render("·"), r.User, muted.Render("says already checked in · its day may not have turned"+later))
 				continue
@@ -863,7 +863,7 @@ func checkinWhy(msg string) string {
 }
 
 // accountNamed is the saved account of agent that user names: its name as
-// myna lists it ("a@b.com · Team"), the email alone when only one of the
+// owl lists it ("a@b.com · Team"), the email alone when only one of the
 // agent's accounts has it, or the name the user gave it (alias), when that
 // is one account's and no other's email (provider.AccountByName).
 func accountNamed(agent, user string) (string, error) {
@@ -906,19 +906,19 @@ func accountNamed(agent, user string) (string, error) {
 	case len(same) > 1:
 		return "", fmt.Errorf("%s has %d accounts of %s: %q — name one in full", agent, len(same), user, same)
 	case len(names) == 0:
-		return "", fmt.Errorf("no saved %s accounts · add one: myna accounts add %s", agent, agent)
+		return "", fmt.Errorf("no saved %s accounts · add one: owl accounts add %s", agent, agent)
 	}
 	return "", fmt.Errorf("no saved %s account %q · its accounts: %q", agent, user, names)
 }
 
-// switchOnlyCmd is `myna accounts switch-only <codex|claude> [on|off]`:
-// myna only switches the agent's own sign-in to the next account with
+// switchOnlyCmd is `owl accounts switch-only <codex|claude> [on|off]`:
+// owl only switches the agent's own sign-in to the next account with
 // room. Codex's requests are then never sent through the gateway for
 // account failover (#1907); Claude's accounts serve no request through the
 // gateway (provider.KeptToAgent, myduso on Discord). With no on or off it
 // says which it is.
 func switchOnlyCmd(args []string) error {
-	const usage = "usage: myna accounts switch-only <codex|claude> [on|off]"
+	const usage = "usage: owl accounts switch-only <codex|claude> [on|off]"
 	if len(args) < 1 || len(args) > 2 {
 		return fmt.Errorf("%s", usage)
 	}
@@ -930,13 +930,13 @@ func switchOnlyCmd(args []string) error {
 		on := provider.SwitchOnly(id)
 		switch {
 		case id == "codex" && on:
-			fmt.Println("on · myna only switches Codex's sign-in; its requests go straight to OpenAI")
+			fmt.Println("on · owl only switches Codex's sign-in; its requests go straight to OpenAI")
 		case id == "codex":
-			fmt.Println("off · with more of its accounts on, Codex's requests go through myna to fail over between them")
+			fmt.Println("off · with more of its accounts on, Codex's requests go through owl to fail over between them")
 		case on:
-			fmt.Println("on · myna only switches Claude Code's sign-in; it serves no requests on the Claude accounts")
+			fmt.Println("on · owl only switches Claude Code's sign-in; it serves no requests on the Claude accounts")
 		default:
-			fmt.Println("off · myna serves requests on the Claude accounts that are on")
+			fmt.Println("off · owl serves requests on the Claude accounts that are on")
 		}
 		return nil
 	}
@@ -955,13 +955,13 @@ func switchOnlyCmd(args []string) error {
 	agent.SyncCatalog()
 	switch {
 	case id == "codex" && on:
-		fmt.Println(green.Render("✓"), "myna only switches Codex's sign-in to an account with room; its requests go straight to OpenAI. A Codex app or session already open stays on its account until it is opened again.")
+		fmt.Println(green.Render("✓"), "owl only switches Codex's sign-in to an account with room; its requests go straight to OpenAI. A Codex app or session already open stays on its account until it is opened again.")
 	case id == "codex":
-		fmt.Println(green.Render("✓"), "with more of its accounts on, Codex's requests go through myna to fail over between them again")
+		fmt.Println(green.Render("✓"), "with more of its accounts on, Codex's requests go through owl to fail over between them again")
 	case on:
-		fmt.Println(green.Render("✓"), "myna only switches Claude Code's sign-in to an account with room; it serves no requests on the Claude accounts. A Claude Code session already open stays on its account until it is started again.")
+		fmt.Println(green.Render("✓"), "owl only switches Claude Code's sign-in to an account with room; it serves no requests on the Claude accounts. A Claude Code session already open stays on its account until it is started again.")
 	default:
-		fmt.Println(green.Render("✓"), "myna serves requests on the Claude accounts that are on again")
+		fmt.Println(green.Render("✓"), "owl serves requests on the Claude accounts that are on again")
 	}
 	return nil
 }

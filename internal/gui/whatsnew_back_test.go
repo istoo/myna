@@ -9,15 +9,15 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/update"
+	"github.com/istoo/owl/internal/update"
 )
 
 // Settings' What's new offers, besides the notes since the last update,
 // this version and the 10, 20, 50 or 100 before it (Linka on Discord). The
 // site is asked for that many alone, once per language and longest range:
 // a shorter range, or the same again, is cut from what was had. A failed
-// ask is said, with the shorter range had before; a range myna doesn't
-// offer is the default. The site's list is myna-releases' shape, with
+// ask is said, with the shorter range had before; a range owl doesn't
+// offer is the default. The site's list is owl-releases' shape, with
 // 0.1.1407 never released and each note's Install section.
 func TestWhatsNewBackRanges(t *testing.T) {
 	home := t.TempDir()
@@ -30,7 +30,7 @@ func TestWhatsNewBackRanges(t *testing.T) {
 		s := strconv.Itoa(v)
 		list = append(list, update.Note{
 			Version: "0.1." + s,
-			Notes:   "## Bug Fixes\n\n- fix " + s + "\n\n## Install\n\n- macOS: [myna-0.1." + s + "-mac-arm64.dmg](https://github.com/istoo/myna/releases/download/v0.1." + s + "/myna-0.1." + s + "-mac-arm64.dmg)",
+			Notes:   "## Bug Fixes\n\n- fix " + s + "\n\n## Install\n\n- macOS: [owl-0.1." + s + "-mac-arm64.dmg](https://github.com/istoo/owl/releases/download/v0.1." + s + "/owl-0.1." + s + "-mac-arm64.dmg)",
 		})
 	}
 	var mu sync.Mutex
@@ -57,8 +57,8 @@ func TestWhatsNewBackRanges(t *testing.T) {
 		json.NewEncoder(w).Encode(map[string]any{"releases": out})
 	}))
 	defer srv.Close()
-	t.Setenv("MYNA_NOTES_FEED", srv.URL)
-	t.Setenv("MYNA_UPDATE_FEED", "http://127.0.0.1:1/")
+	t.Setenv("OWL_NOTES_FEED", srv.URL)
+	t.Setenv("OWL_UPDATE_FEED", "http://127.0.0.1:1/")
 	oldV, oldNews, oldUp := Version, news, updates
 	t.Cleanup(func() { Version, news, updates = oldV, oldNews, oldUp })
 	Version = "0.1.1410"
@@ -128,7 +128,7 @@ func TestWhatsNewBackRanges(t *testing.T) {
 			t.Fatalf("%d after 100 asked %q, got %v", n, got, versions(j))
 		}
 	}
-	// a range myna doesn't offer: the default, the site not asked for it
+	// a range owl doesn't offer: the default, the site not asked for it
 	for _, q := range []string{"&last=7", "&last=x", "&last=1000"} {
 		if j, _ = ask(q); !slices.Equal(versions(j), []string{"0.1.1410", "0.1.1409"}) {
 			t.Fatalf("%s: %v", q, versions(j))

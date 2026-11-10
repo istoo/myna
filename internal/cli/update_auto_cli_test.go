@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 func TestUpdateAutoKeepsCorruptSettings(t *testing.T) {
@@ -71,7 +71,7 @@ func TestUpdateAutoWithBOMSettings(t *testing.T) {
 	}
 }
 
-// myna update auto turns the app's own update checks off and on and sets
+// owl update auto turns the app's own update checks off and on and sets
 // how often they run, from the presets only (#472).
 func TestUpdateAutoCmd(t *testing.T) {
 	groupsHome(t)

@@ -6,7 +6,7 @@ import "strings"
 //
 // MiniMax Code takes a SubAgent's model only as "<provider>/<model>" with
 // one slash in the whole (/^[^/\s]+\/[^/\s]+$/, #1387), and its provider
-// for myna is "custom_provider:myna", so a model under it can't hold a
+// for owl is "custom_provider:owl", so a model under it can't hold a
 // slash: "bb-codex/gpt-6.1-sol" is written there as "bb-codex~gpt-6.1-sol",
 // and the gateway takes that back to the catalog id (Unflat). A tilde is in
 // no id a provider was seen to serve but OpenRouter's "~anthropic/…"

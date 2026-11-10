@@ -77,7 +77,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     });
     const feed = {};
     await page.route("**/*", serve(feed));
-    await page.goto("http://myna.test/?view=routing");
+    await page.goto("http://owl.test/?view=routing");
     await page.locator(".rt-hub").waitFor();
     await page.waitForTimeout(800);
     const was = await page.evaluate(() => window.reads);

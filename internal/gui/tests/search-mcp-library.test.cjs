@@ -1,10 +1,10 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// lutra_fs on Discord: Settings › Models › Web search shows myna's search
+// lutra_fs on Discord: Settings › Models › Web search shows owl's search
 // as an "MCP server", but Library › MCP servers didn't have it, so there
 // was nowhere to give it to an agent but copying its address. The Library
-// now has it as Myna Web Search, myna's own server beside Myna Image
-// and Myna Browser, given only to the agents picked for it, and the
-// Settings row says the way there as the Library is: Give agents Myna
+// now has it as Owl Web Search, owl's own server beside Owl Image
+// and Owl Browser, given only to the agents picked for it, and the
+// Settings row says the way there as the Library is: Give agents Owl
 // Web Search… opens its sheet in the Library, which says where a search
 // goes; with the Library off, Turn on the Library switches it on; gateway
 // mode, which has no Library, offers neither. Every language, Chromium and
@@ -24,7 +24,7 @@ const LANGS = ["en", "zh", "zh-TW", "ja", "de"];
 const tr = (lang, s) => (lang === "en" ? s : I18N[lang]?.[s] ?? s);
 const HOME = "/Users/tester";
 const HINT = "Pick the agents that may search with it: each search goes where Settings → Models → Web search sends it, and costs what that charges.";
-const ABOUT = "Search the web with the search set in Myna (Settings → Models → Web search), and read a page by its URL.";
+const ABOUT = "Search the web with the search set in Owl (Settings → Models → Web search), and read a page by its URL.";
 
 function fixture(lang, { libOn, have = false, gateway = false }) {
   const st = { libOn };
@@ -32,7 +32,7 @@ function fixture(lang, { libOn, have = false, gateway = false }) {
   const builtins = () => [{ id: "library", name: "Library", sub: "Instructions, MCP servers and skills for every agent", on: st.libOn, chosen: st.libOn, source: "preset", state: st.libOn ? "active" : "off", inUse: 0 }];
   const settings = () => ({
     theme: "light", lang, tray: "panel", currency: "usd", textSize: 100, redactWords: [],
-    version: "0.1.400", dir: "~/.config/myna", gateway: "http://127.0.0.1:3999", port: 3999,
+    version: "0.1.400", dir: "~/.config/owl", gateway: "http://127.0.0.1:3999", port: 3999,
     proxyNow: "none", proxySource: "none", vision: "", imageGen: "", lanURLs: [],
     visionModels: [], imageGenModels: [], workbuddyCheckins: [],
     searcher: "", searchChoices: [],
@@ -43,10 +43,10 @@ function fixture(lang, { libOn, have = false, gateway = false }) {
     ...(gateway ? { web: true, gatewayMode: "on", gatewayOn: true } : {}),
   });
   const lib = () => ({
-    dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
+    dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
     agents: [{ id: "pi", name: "Pi", icon: "generic", mcp: `${HOME}/.pi/mcp.json`, skills: `${HOME}/.pi/skills` }],
     instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [], skills: [], problems: [],
-    servers: have ? [{ name: "myna-web-search", transport: "stdio", command: "/Applications/myna.app/Contents/MacOS/myna", args: ["mcp", "search"], agents: ["pi"] }] : [],
+    servers: have ? [{ name: "owl-web-search", transport: "stdio", command: "/Applications/owl.app/Contents/MacOS/owl", args: ["mcp", "search"], agents: ["pi"] }] : [],
   });
   const route = async (route) => {
     const req = route.request(), url = new URL(req.url());
@@ -66,8 +66,8 @@ function fixture(lang, { libOn, have = false, gateway = false }) {
     if (url.pathname === "/api/library") return json(lib());
     if (url.pathname === "/api/library/market/servers") {
       return json({ items: [
-        { id: "myna-image", name: "myna-image", title: "Myna Image", publisher: "Myna", description: "Generate and edit images with the image model set in Myna.", transport: "stdio", runs: "myna", featured: true, optIn: true, have: "" },
-        { id: "myna-web-search", name: "myna-web-search", title: "Myna Web Search", publisher: "Myna", description: ABOUT, transport: "stdio", runs: "myna", featured: true, optIn: true, have: have ? "myna-web-search" : "" },
+        { id: "owl-image", name: "owl-image", title: "Owl Image", publisher: "Owl", description: "Generate and edit images with the image model set in Owl.", transport: "stdio", runs: "owl", featured: true, optIn: true, have: "" },
+        { id: "owl-web-search", name: "owl-web-search", title: "Owl Web Search", publisher: "Owl", description: ABOUT, transport: "stdio", runs: "owl", featured: true, optIn: true, have: have ? "owl-web-search" : "" },
       ] });
     }
     if (url.pathname === "/api/library/market/skills") return json({ items: [] });
@@ -110,7 +110,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => page.errors.push(e.message));
       await page.route("**/*", f.route);
       await watchSettingsReads(page);
-      await page.goto("http://myna.test/?view=settings&tab=models");
+      await page.goto("http://owl.test/?view=settings&tab=models");
       await settingsDrawn(page);
       await row(page).waitFor();
       return { page, posts: f.posts };
@@ -118,10 +118,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     for (const lang of LANGS) {
       const w = (s) => tr(lang, s);
       for (const width of [1100, 420]) {
-        await t.test(`${lang} at ${width}px: Give agents Myna Web Search… opens its sheet in the Library`, async () => {
+        await t.test(`${lang} at ${width}px: Give agents Owl Web Search… opens its sheet in the Library`, async () => {
           const { page } = await open(lang, width, { libOn: true });
           const go = row(page).locator(".who button.search-mcp-lib");
-          assert.equal((await go.textContent()).trim(), w("Give agents Myna Web Search…"));
+          assert.equal((await go.textContent()).trim(), w("Give agents Owl Web Search…"));
           // the address and its copy button stay as they were
           assert.equal(await row(page).locator(".val button").count(), 1);
           assert.equal(await wide(page), 0);
@@ -130,7 +130,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const sheet = page.locator("#modal .mk-sheet");
           await sheet.waitFor();
           assert.equal(await page.locator("#view-library").isVisible(), true);
-          assert.equal((await sheet.locator(".mk-name.big").textContent()).trim(), "Myna Web Search");
+          assert.equal((await sheet.locator(".mk-name.big").textContent()).trim(), "Owl Web Search");
           assert.equal((await sheet.locator(".mk-about").textContent()).trim(), w(ABOUT));
           assert.equal((await sheet.locator(".mk-hint").first().textContent()).trim(), w(HINT));
           // opt in: no agent is ticked until it is picked
@@ -146,7 +146,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           assert.equal((await go.textContent()).trim(), w("Turn on the Library"));
           assert.equal(await wide(page), 0);
           await go.click();
-          await page.waitForFunction((s) => document.querySelector("#searchMcpRow button.search-mcp-lib")?.textContent.trim() === s, w("Give agents Myna Web Search…"));
+          await page.waitForFunction((s) => document.querySelector("#searchMcpRow button.search-mcp-lib")?.textContent.trim() === s, w("Give agents Owl Web Search…"));
           assert.deepEqual(posts, [{ id: "library", on: true }]);
           assert.deepEqual(page.errors, []);
           await page.context().close();
@@ -155,7 +155,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await t.test(`${lang}: one already in the library opens MCP servers with nothing over it`, async () => {
         const { page } = await open(lang, 1100, { libOn: true, have: true });
         await row(page).locator("button.search-mcp-lib").click();
-        await page.locator('#view-library .mk[data-market="mcp"] .mk-card[data-id="myna-web-search"]').waitFor();
+        await page.locator('#view-library .mk[data-market="mcp"] .mk-card[data-id="owl-web-search"]').waitFor();
         assert.equal(await page.locator("#modal .mk-sheet").count(), 0);
         assert.deepEqual(page.errors, []);
         await page.context().close();

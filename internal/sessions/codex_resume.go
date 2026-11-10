@@ -11,13 +11,13 @@ import (
 // Codex 0.166 resumes a thread only on the provider it was started on:
 // the provider its row in the state database names, else its rollout's
 // session_meta. On any other, `codex resume <id>` stops at "This chat uses
-// custom, but your current provider is myna. Switch to custom to
+// custom, but your current provider is owl. Switch to custom to
 // continue." (modelProviderMismatch, codex-rs app-server
 // config_manager.rs load_for_resume), and nothing lets a resume go on
 // another provider: the check compares the provider the thread was saved
 // with against the one config.toml (with -c) selects. So a session started
 // through CC Switch's "custom" couldn't be opened from Sessions once Codex
-// was on myna (mrten_95615 on Discord). Codex 0.165 and before resumed it
+// was on owl (mrten_95615 on Discord). Codex 0.165 and before resumed it
 // on its own provider without asking.
 
 // codexBuiltinProviders are the providers Codex knows without a table of
@@ -64,7 +64,7 @@ func codexProviderKnown(home, p string) bool {
 // `codex resume -c model_provider=<its provider> <id>` while config.toml
 // still has that provider, so it goes on where it was made; when the
 // provider is gone the thread is moved to the one Codex is on
-// (MoveCodexProvider, its files kept in myna's trash first) and resumed
+// (MoveCodexProvider, its files kept in owl's trash first) and resumed
 // there, the only way Codex resumes it at all. Any other session, and a
 // Codex one in a WSL distro, is its Resume as listed.
 func ResumeNow(s Session) string {

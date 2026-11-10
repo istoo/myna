@@ -6,12 +6,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
-// myna model spec (Dani Ariyanto on Discord): a model nothing knows is
+// owl model spec (Dani Ariyanto on Discord): a model nothing knows is
 // shown unknown on each part, takes a whole spec in one command, shows it
-// as the user's, is listed by myna model specs, and --reset puts it back.
+// as the user's, is listed by owl model specs, and --reset puts it back.
 // A bad number, level, vision answer or flag is refused with the usage
 // and writes nothing; --help anywhere prints the usage and writes nothing.
 func TestModelSpecCmd(t *testing.T) {

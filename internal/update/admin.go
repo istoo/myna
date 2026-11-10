@@ -8,7 +8,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/proc"
 )
 
 // ErrCanceled is the administrator's password prompt dismissed.
@@ -18,7 +18,7 @@ var ErrCanceled = errors.New("the update was canceled")
 // one, or it couldn't be shown. What was to run as one didn't run.
 var ErrNoAdmin = errors.New("no administrator prompt")
 
-// NeedsAdmin reports whether err is myna not being allowed to change the
+// NeedsAdmin reports whether err is owl not being allowed to change the
 // folder it lives in, which the administrator's password gets past.
 func NeedsAdmin(err error) bool {
 	return errors.Is(err, fs.ErrPermission) || errors.Is(err, syscall.EXDEV)
@@ -56,7 +56,7 @@ var run = func(name string, args ...string) ([]byte, error) {
 }
 
 // asAdmin runs a shell script as root, after the system's password prompt.
-func asAdmin(script string) error { return AsAdmin("myna is updating itself.", script) }
+func asAdmin(script string) error { return AsAdmin("owl is updating itself.", script) }
 
 // AsAdmin runs a shell script as root, after the system's password prompt,
 // which says why (on a Mac). ErrCanceled is the prompt dismissed.

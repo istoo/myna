@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/probelog"
+	"github.com/istoo/owl/internal/probelog"
 )
 
 // ledgerSpy is an Observer that only counts the rows Append hands it.
@@ -19,8 +19,8 @@ func (*ledgerSpy) Bodies() Bodies       { var b Bodies; return b }
 func (*ledgerSpy) Begin(Request) Watch  { return nil }
 func (s *ledgerSpy) Ledger(r Record)    { s.rows = append(s.rows, r) }
 
-// A request myna sends a provider on its own (the editor's Test, Detect
-// APIs, a model list) is a row of the request log, marked as myna's own
+// A request owl sends a provider on its own (the editor's Test, Detect
+// APIs, a model list) is a row of the request log, marked as owl's own
 // with what it was for, and counts in nothing: no total, source, group,
 // summary, Load, LastSeen, shared day or observer (neiko, gys619).
 func TestProbeRowsListedNotCounted(t *testing.T) {
@@ -47,7 +47,7 @@ func TestProbeRowsListedNotCounted(t *testing.T) {
 		t.Fatalf("probe rows %+v", page.Rows)
 	}
 	test := probes[1] // newest first
-	if probes[0].Kind != probelog.KindList || test.Kind != probelog.KindTest || test.Agent != "myna" || test.Provider != "relay" ||
+	if probes[0].Kind != probelog.KindList || test.Kind != probelog.KindTest || test.Agent != "owl" || test.Provider != "relay" ||
 		test.ProviderAccount != "me" || test.Model != "gpt-9" || test.Status != 401 || test.Endpoint != "/v1/chat/completions" {
 		t.Fatalf("probe rows %+v", probes)
 	}
@@ -59,7 +59,7 @@ func TestProbeRowsListedNotCounted(t *testing.T) {
 	}
 	for dim, shares := range page.By {
 		for _, s := range shares {
-			if s.ID == "relay" || s.ID == "myna" || s.ID == "gpt-9" {
+			if s.ID == "relay" || s.ID == "owl" || s.ID == "gpt-9" {
 				t.Fatalf("%s counts a probe: %+v", dim, shares)
 			}
 		}
@@ -70,8 +70,8 @@ func TestProbeRowsListedNotCounted(t *testing.T) {
 	if rs := Load(time.Time{}); len(rs) != 1 {
 		t.Fatalf("Load %+v", rs)
 	}
-	if !LastSeen("myna").IsZero() {
-		t.Fatal("a probe is a request from agent myna")
+	if !LastSeen("owl").IsZero() {
+		t.Fatal("a probe is a request from agent owl")
 	}
 	n := 0
 	for _, calls := range OwnDays(now.Add(-time.Hour)) {
@@ -90,7 +90,7 @@ func TestProbeRowsListedNotCounted(t *testing.T) {
 }
 
 // ferock on Discord: Usage > Requests filled with "Model list" rows, 0
-// tokens and 200, one every 10 minutes for a Remote myna, that no agent
+// tokens and 200, one every 10 minutes for a Remote owl, that no agent
 // sent. A model list that was answered is no row, neither written nor
 // read back from a log that has it from before; one that failed is still
 // listed (it is why models are missing), and so is every Test.
@@ -108,7 +108,7 @@ func TestAnsweredModelListIsNoRow(t *testing.T) {
 	probelog.Sink(probelog.Row{Time: now.Add(5 * time.Second), Kind: probelog.KindTest, Provider: "remote", Host: "10.0.0.2:3425",
 		Endpoint: "/v1/chat/completions", Model: "m", Status: 200, Millis: 900})
 	// a log written before: its answered lists are left out as it is read
-	Append(Record{Time: now.Add(6 * time.Second), Agent: "myna", Provider: "remote", Host: "10.0.0.2:3425",
+	Append(Record{Time: now.Add(6 * time.Second), Agent: "owl", Provider: "remote", Host: "10.0.0.2:3425",
 		Endpoint: "GET /v1/models", Kind: probelog.KindList, Status: 200, Millis: 700, Source: SourceProbe})
 
 	b, err := os.ReadFile(Path())

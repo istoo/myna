@@ -5,10 +5,10 @@ import (
 	"os"
 	"testing"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
-// myna update channel stable|every saves Settings' Update channel
+// owl update channel stable|every saves Settings' Update channel
 // (ssharpcc on X); with nothing after it, it only says which; anything
 // else is refused and nothing is saved.
 func TestUpdateChannelCmd(t *testing.T) {

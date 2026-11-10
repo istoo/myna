@@ -8,9 +8,9 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/steady"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/steady"
 )
 
 // The last-known state (#1519, fatkun). state() reads every agent's config
@@ -57,7 +57,7 @@ func keptSum(kept []byte) [32]byte {
 }
 
 // stateFile is the last-known state, with the version that wrote it: an
-// older myna's is not drawn by a newer page.
+// older owl's is not drawn by a newer page.
 type stateFile struct {
 	Version string    `json:"version"`
 	State   stateJSON `json:"state"`
@@ -66,7 +66,7 @@ type stateFile struct {
 func lastStatePath() string { return filepath.Join(appdir.Cache(), "agents-state.json") }
 
 // keepState remembers s as the last-known state. The file is written only
-// when what is kept changed, and as myna's own cache: nothing a request
+// when what is kept changed, and as owl's own cache: nothing a request
 // reads is built from it, so its write doesn't drop what filememo holds
 // (edit.WriteAtomic's would: every poll of the Agents page rebuilt each
 // agent's model list and picker, and every provider's catalog, anew).
@@ -83,7 +83,7 @@ func keptFile(s stateJSON) stateFile {
 	s.Settings = settings.Settings{}
 	// and what is told once: a notice, a file recovered after a crash
 	s.Notice, s.Connected, s.Recovered = "", nil, nil
-	// and the myna serving the gateway now, which the next start asks
+	// and the owl serving the gateway now, which the next start asks
 	s.GatewayOther = nil
 	return stateFile{Version: Version, State: s}
 }

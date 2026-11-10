@@ -4,7 +4,7 @@
 // passes on, and the tray panel's Usage tab still shows the allowances.
 package usage
 
-import "github.com/istoo/myna/internal/pluginrt"
+import "github.com/istoo/owl/internal/pluginrt"
 
 func init() {
 	pluginrt.Register(pluginrt.Manifest{

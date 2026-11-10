@@ -3,7 +3,7 @@ package provider
 import (
 	"net/url"
 
-	"github.com/istoo/myna/internal/netproxy"
+	"github.com/istoo/owl/internal/netproxy"
 )
 
 func init() { netproxy.HTTP1 = codexBackend }

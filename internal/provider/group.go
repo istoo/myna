@@ -6,7 +6,7 @@ package provider
 // subscription whose allowance renews soonest first across providers, one
 // resting after a failure last — rather than over one provider's.
 //
-// The user makes groups, in the Routing view. myna also finds some on
+// The user makes groups, in the Routing view. owl also finds some on
 // its own: a model more than one provider serves under the same name is a
 // group of those, derived each time and never stored until the user
 // changes one. Models of different names are only ever grouped by the
@@ -31,8 +31,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // GroupPrefix starts a group's id in the catalog: "group/<id>".
@@ -270,10 +270,10 @@ type Group struct {
 	// of a provider it names, a provider it names none of on every
 	// account it has. Empty, every account of every member serves.
 	Accounts []string `json:"accounts,omitempty"`
-	// Auto is set on a group myna found: one model served by several
+	// Auto is set on a group owl found: one model served by several
 	// providers. It is derived, never stored.
 	Auto bool `json:"auto,omitempty"`
-	// Spelled is how a vendor spells the model of a group myna found
+	// Spelled is how a vendor spells the model of a group owl found
 	// (auto-…), which agents are given it by: auto/<Spelled> (Ref). It is
 	// derived from the members each time the groups are read, never stored.
 	Spelled string `json:"-"`
@@ -390,7 +390,7 @@ func (m Member) Below(depth int) Member {
 // maxNest is how deep groups in groups may go.
 const maxNest = 8
 
-// Groups lists the user's groups, then those myna found, hidden ones
+// Groups lists the user's groups, then those owl found, hidden ones
 // too (marked so), in the order the user put them in (SetGroupOrder) where
 // they did: the Routing page, the gateway's model list, the CLI and the
 // TUI all list them so.
@@ -410,7 +410,7 @@ func groupsIn(entries []Entry) []Group {
 // sharedGroups is Groups for a caller that only reads them: no copy, so
 // nothing it is given may be changed. PublicRef, asked for every model a
 // page lists, copied every group and its rules each time (115 MB of a live
-// myna's 2.6 GB in a minute and a half).
+// owl's 2.6 GB in a minute and a half).
 func sharedGroups() []Group {
 	return heldFrom("groups", providerEntries(), buildGroupsIn)
 }
@@ -454,7 +454,7 @@ func buildGroupsIn(entries []Entry) []Group {
 	f := heldOf("file", load)
 	var out []Group
 	hidden := map[string]bool{}
-	var have map[string]bool // the providers myna has, switched off or not
+	var have map[string]bool // the providers owl has, switched off or not
 	for _, g := range f.Groups {
 		if g.Hidden {
 			hidden[g.ID] = true
@@ -491,8 +491,8 @@ func buildGroupsIn(entries []Entry) []Group {
 }
 
 // withoutRemoved is a found group the user changed (an "auto-…" id kept
-// in providers.json) without the members of providers myna no longer
-// has (have): a provider removed leaves the group as it leaves one myna
+// in providers.json) without the members of providers owl no longer
+// has (have): a provider removed leaves the group as it leaves one owl
 // finds, where they had stayed for the user to take out by hand (Discord).
 // It is how the group is read, not stored, so a provider back under its
 // id (an account shown again) is back in it. A member the user picked a
@@ -560,12 +560,12 @@ func (g Group) own() Group {
 	return g
 }
 
-// AutoGroupsOn reports whether myna finds groups on its own: a model
+// AutoGroupsOn reports whether owl finds groups on its own: a model
 // more than one provider serves is a group of them (autoGroups). It is on
 // until the user turns it off.
 func AutoGroupsOn() bool { return !load().NoAutoGroups }
 
-// SetAutoGroups turns the groups myna finds on its own on or off, all of
+// SetAutoGroups turns the groups owl finds on its own on or off, all of
 // them at once (蓝猫 on Discord: they could only be removed one by one).
 // Off, none is listed or served; the groups the user made or changed, one
 // found included, stay, and so do the records of those removed, so that
@@ -609,7 +609,7 @@ func SetAutoGroups(on bool) error {
 	return store(f)
 }
 
-// AutoGroupID is the id of the group myna finds for a model, however a
+// AutoGroupID is the id of the group owl finds for a model, however a
 // vendor spells it: "auto-claude-opus-5-5" for claude-opus-5.5.
 func AutoGroupID(model string) string { return "auto-" + Slug(sameModel(model)) }
 
@@ -618,7 +618,7 @@ var groupDots = regexp.MustCompile(`\.{2,}`)
 // GroupSlug derives a group's own id from a name as Slug does, the dots
 // kept: "GPT 6.1 Sol" → "gpt-6.1-sol", so an agent sending group/<id> sends
 // the model's name as harnesses that price or tune by it read it (#968). A
-// run of dots is one, and none starts or ends it. The ids myna finds
+// run of dots is one, and none starts or ends it. The ids owl finds
 // (auto-…) stay Slug's, so no id saved before changes.
 func GroupSlug(name string) string {
 	s := strings.Join(strings.FieldsFunc(strings.ToLower(name), func(r rune) bool {
@@ -627,18 +627,18 @@ func GroupSlug(name string) string {
 	return strings.Trim(groupDots.ReplaceAllString(s, "."), "-.")
 }
 
-// AutoGroupOf is the id of the group myna finds for a provider's model:
+// AutoGroupOf is the id of the group owl finds for a provider's model:
 // AutoGroupID of the model the user said it is the same as (settings'
 // ModelSameAs), else of its own id.
 func AutoGroupOf(pid, model string) string {
 	return "auto-" + Slug(mergeKey(pid, model, settings.Load().ModelSameAs))
 }
 
-// MergeName is the name the groups myna finds merge a model by, when
+// MergeName is the name the groups owl finds merge a model by, when
 // the user said nothing of it: its id as vendors agree on it (sameModel).
 func MergeName(model string) string { return sameModel(model) }
 
-// mergeKey is what the groups myna finds merge pid's model by: the
+// mergeKey is what the groups owl finds merge pid's model by: the
 // model the user said it is the same as (same, by "<provider>/<model>"),
 // spelt as vendors agree on it, else its own id so spelt.
 func mergeKey(pid, model string, same map[string]string) string {
@@ -648,7 +648,7 @@ func mergeKey(pid, model string, same map[string]string) string {
 	return sameModel(model)
 }
 
-// AutoStandIn is the model a request for a group myna found goes to while
+// AutoStandIn is the model a request for a group owl found goes to while
 // such groups are off (SetAutoGroups), or once the providers the user keeps
 // out of them (SetAutoGroupSkip) took it away: its model, from the first
 // provider that serves it, one not kept out first, as "provider/model". An
@@ -690,7 +690,7 @@ func AutoStandIn(id string) (string, bool) {
 	return first, first != ""
 }
 
-// foundGroups are the groups myna finds (autoGroups) among entries and
+// foundGroups are the groups owl finds (autoGroups) among entries and
 // the models of the providers switched off: one switched off for a while
 // stays in the group, a member the gateway skips (membersIn), rather than
 // taking a group of two away with every agent, rule and group set to it.
@@ -707,11 +707,11 @@ func unskipped(entries []Entry, skip []string) []Entry {
 	return slices.DeleteFunc(slices.Clone(entries), func(e Entry) bool { return slices.Contains(skip, e.Provider.ID) })
 }
 
-// AutoGroupSkip are the providers the user keeps out of the groups myna
+// AutoGroupSkip are the providers the user keeps out of the groups owl
 // finds (SetAutoGroupSkip).
 func AutoGroupSkip() []string { return slices.Clone(load().AutoGroupSkip) }
 
-// SetAutoGroupSkip keeps the providers ids names out of the groups myna
+// SetAutoGroupSkip keeps the providers ids names out of the groups owl
 // finds, and every other back in: none of their models is in a found
 // group, so a model one other provider serves is no group of them. The
 // groups the user made or changed, a found one included, keep them: they
@@ -1087,7 +1087,7 @@ func ResolveRoute(id string) (Provider, string, bool) {
 // text-only member doesn't take images (#756) — offering the reasoning
 // levels the members have in common, as before, but for those fixed at
 // an effort of their own, which take whatever the agent asks, and those
-// whose levels nothing myna reads knows (levelsUnknown), which are
+// whose levels nothing owl reads knows (levelsUnknown), which are
 // sent it as asked, those that think with no levels to pick from,
 // which are sent it as asked up to high (the gateway's fitFor), and those
 // known not to think, which are sent no reasoning ask (Quiet). With
@@ -1123,7 +1123,7 @@ func entriesBy(entries []Entry) entryOf {
 // says the same: a group of Kimi Code's models keeps always_thinking and
 // dynamically_loaded_tools in Kimi Code (jiabubu on Discord: one Kimi
 // model put in a group to list it first lost both). One member without it,
-// or one myna has no entry for, and the group has none: Kimi Code would
+// or one owl has no entry for, and the group has none: Kimi Code would
 // send a member that can't the request shaped for one that can
 func groupSharedKimi(e *Entry, ms []Member, entries []Entry, find entryOf) {
 	for i, m := range ms {
@@ -1215,7 +1215,7 @@ func buildGroupEntries(entries []Entry) []Entry {
 			// smallestWindow says it for a group following its smallest
 			// (Osal on Discord: an Ultra group of a ChatGPT account's
 			// GPT-6 Astra, set to its 872K on the codex provider, was
-			// handed to Codex as myna's default 272K, ~258K at 95%)
+			// handed to Codex as owl's default 272K, ~258K at 95%)
 			if ctx > e.Context {
 				e.Context, e.WindowSet = ctx, typed
 			} else if ctx > 0 && ctx == e.Context {
@@ -1246,7 +1246,7 @@ func buildGroupEntries(entries []Entry) []Entry {
 				}
 				continue
 			} else if unknown {
-				// nothing myna reads says which levels it takes, or that
+				// nothing owl reads says which levels it takes, or that
 				// it takes none: the gateway sends it the effort asked as
 				// it is (fitEffort), so it doesn't take the others' away —
 				// a Token Plan's deepseek-v4-pro-202606 beside a TokenHub
@@ -1325,7 +1325,7 @@ func buildGroupEntries(entries []Entry) []Entry {
 // provider for its model or all of its models. A group told its
 // smallest member's window is then told one the user typed (#2224: a
 // group following its smallest member, a 500K the user set on it, was
-// handed to Claude Desktop and Codex as myna's default 272K, which a
+// handed to Claude Desktop and Codex as owl's default 272K, which a
 // group set to 500K itself wasn't). A tie counts as typed: the window is
 // the user's either way.
 func smallestWindow(entries []Entry, ms []Member) (n int, typed bool) {
@@ -1361,7 +1361,7 @@ func smallestWindowBy(entries []Entry, find entryOf, ms []Member) (n int, typed 
 	return n, typed
 }
 
-// levelsUnknown reports whether nothing myna reads says which reasoning
+// levelsUnknown reports whether nothing owl reads says which reasoning
 // levels the model of x takes, or that it takes none: it has none in the
 // catalog, no account's list gives it, its vendor and its maker don't list
 // it, and models.dev lists no model of its id at all.
@@ -1378,7 +1378,7 @@ func levelsUnknown(x Entry) bool {
 	return !catalog.Knows(x.Model)
 }
 
-// Quiet reports whether the model is known not to think: myna has a
+// Quiet reports whether the model is known not to think: owl has a
 // word on it — its vendor's or its maker's list, or its provider's own
 // account list — and that word says no reasoning. A model nothing speaks
 // for isn't quiet: the gateway sends it the effort the agent asked for,
@@ -1387,12 +1387,12 @@ func levelsUnknown(x Entry) bool {
 // effort to. A group's member that is quiet is sent no reasoning ask,
 // which some vendors turn away with a 400 on a model that can't think,
 // but for one the user fixed at an effort (Group's member syntax, #189):
-// the gateway leaves that alone, the user's word over myna's.
+// the gateway leaves that alone, the user's word over owl's.
 func (e Entry) Quiet() bool {
 	return e.Reasonless || !e.Reasoning && len(e.Efforts) == 0 && !levelsUnknown(e)
 }
 
-// SaveGroup adds or replaces a group of the user's. Changing one myna
+// SaveGroup adds or replaces a group of the user's. Changing one owl
 // found makes it the user's.
 func SaveGroup(g Group) error {
 	g = g.own() // cleaned below in place: the caller's lists stay as they were
@@ -1502,7 +1502,7 @@ func SaveGroup(g Group) error {
 	if !slices.Contains(Affinities, g.Affinity) {
 		g.Affinity = ""
 	}
-	if g.Pick = strings.TrimPrefix(strings.TrimSpace(g.Pick), "myna/"); g.Pick != "" {
+	if g.Pick = strings.TrimPrefix(strings.TrimSpace(g.Pick), "owl/"); g.Pick != "" {
 		g.Pick = cleanMember(entries, g.Pick)
 	}
 	if !slices.Contains(g.Members, g.Pick) {
@@ -1519,7 +1519,7 @@ func SaveGroup(g Group) error {
 	if g.Levels, err = CleanLevels(g.Levels); err != nil {
 		return err
 	}
-	g.Classifier = strings.TrimPrefix(strings.TrimSpace(g.Classifier), "myna/")
+	g.Classifier = strings.TrimPrefix(strings.TrimSpace(g.Classifier), "owl/")
 	g.Effort = strings.ToLower(strings.TrimSpace(g.Effort))
 	intents := slices.ContainsFunc(g.Rules, func(r Rule) bool { return r.Intent != "" })
 	switch {
@@ -1536,13 +1536,13 @@ func SaveGroup(g Group) error {
 	}
 	if gid, ok := strings.CutPrefix(g.Classifier, GroupPrefix); ok {
 		if c, ok := groupOf(groupsIn(providerEntries()), gid); !ok {
-			return fmt.Errorf("myna has no group %q to classify with", gid)
+			return fmt.Errorf("owl has no group %q to classify with", gid)
 		} else if c.Disabled {
 			return fmt.Errorf("%s is switched off: switch it on to classify with it", c.Name)
 		}
 	} else if g.Classifier != "" {
 		if _, _, ok := Resolve(g.Classifier); !ok {
-			return fmt.Errorf("myna knows no model %q to classify with", g.Classifier)
+			return fmt.Errorf("owl knows no model %q to classify with", g.Classifier)
 		}
 	}
 	g.Auto, g.Hidden = false, false
@@ -1565,7 +1565,7 @@ func SaveGroup(g Group) error {
 // fingerprint — trimmed, each once, in the order given. One the group
 // held already and its provider has no more (an account signed out, a key
 // rotated) is kept as it was, matching nothing, so the group stays held
-// rather than let off to every account; a new one must be one myna has.
+// rather than let off to every account; a new one must be one owl has.
 func cleanGroupAccounts(in, was []string) ([]string, error) {
 	var out []string
 	for _, a := range in {
@@ -1597,7 +1597,7 @@ func cleanGroupAccounts(in, was []string) ([]string, error) {
 	return out, nil
 }
 
-// groupsInGroup checks the groups a group has in it: each one myna has,
+// groupsInGroup checks the groups a group has in it: each one owl has,
 // and none that has the group in it, however deep — the group would be
 // in itself, and a request to it would go round for ever.
 func groupsInGroup(g Group, all []Group) error {
@@ -1611,7 +1611,7 @@ func groupsInGroup(g Group, all []Group) error {
 		}
 		sub, ok := groupOf(all, gid)
 		if !ok {
-			return fmt.Errorf("myna has no group %q to put in %s", gid, g.Name)
+			return fmt.Errorf("owl has no group %q to put in %s", gid, g.Name)
 		}
 		if way := wayTo(all, sub, g.ID, nil); way != nil {
 			return fmt.Errorf("%s can't be in %s: %s is in it already (%s), so %s would be in itself",
@@ -1705,7 +1705,7 @@ func memberGroupsIn(entries []Entry) map[string][]string {
 	return out
 }
 
-// DeleteGroup removes a group of the user's; one myna found is hidden,
+// DeleteGroup removes a group of the user's; one owl found is hidden,
 // to come back with ShowGroup. A group another has in it, or classifies
 // with, stays until it is taken out of that one.
 func DeleteGroup(id string) error {
@@ -1793,7 +1793,7 @@ func DeleteGroups(ids []string) error {
 }
 
 // SwitchGroup switches a group of the user's on or off (Group.Disabled).
-// A group myna found is the catalog's, so it is removed rather than
+// A group owl found is the catalog's, so it is removed rather than
 // switched off; and one that classifies for another stays on, or that
 // group's rules would have no one to ask.
 func SwitchGroup(id string, on bool) error {
@@ -1804,9 +1804,9 @@ func SwitchGroup(id string, on bool) error {
 	i := slices.IndexFunc(f.Groups, func(g Group) bool { return g.ID == id && !g.Hidden })
 	if i < 0 {
 		if g, ok := groupOf(groupsIn(providerEntries()), id); ok && g.Auto {
-			return fmt.Errorf("%s was found by myna: remove it, or change it to make it yours, to switch it off", g.Name)
+			return fmt.Errorf("%s was found by owl: remove it, or change it to make it yours, to switch it off", g.Name)
 		}
-		return fmt.Errorf("myna has no group %q", id)
+		return fmt.Errorf("owl has no group %q", id)
 	}
 	if f.Groups[i].Disabled == !on {
 		return nil
@@ -1833,7 +1833,7 @@ func PickGroup(id, pick string) error {
 	}
 	i := slices.IndexFunc(f.Groups, func(g Group) bool { return g.ID == id && !g.Hidden })
 	if i < 0 {
-		return fmt.Errorf("myna has no group %q", id)
+		return fmt.Errorf("owl has no group %q", id)
 	}
 	g := &f.Groups[i]
 	if g.Routing != Manual {
@@ -1866,7 +1866,7 @@ func DisabledGroup(id string) (Group, bool) {
 }
 
 // RemovedGroups are the found groups the user removed, whether or not
-// myna finds them now: each is a record in providers.json ({"id", "hidden":
+// owl finds them now: each is a record in providers.json ({"id", "hidden":
 // true}) that keeps it removed when two providers serve its model again.
 func RemovedGroups() []string {
 	var out []string
@@ -1878,7 +1878,7 @@ func RemovedGroups() []string {
 	return out
 }
 
-// ShowGroup brings back a group myna found that the user had removed.
+// ShowGroup brings back a group owl found that the user had removed.
 func ShowGroup(id string) error {
 	f, err := read()
 	if err != nil {
@@ -1889,7 +1889,7 @@ func ShowGroup(id string) error {
 }
 
 // RenameGroup gives a group another id, the one agents pick it by
-// (group/<id>). A group myna found becomes the user's under the new id,
+// (group/<id>). A group owl found becomes the user's under the new id,
 // the found one kept removed so it doesn't come back beside it. The
 // groups that have it in them, and their rules, name it by the new id.
 func RenameGroup(from, to string) error {

@@ -1,15 +1,15 @@
-// Package uninstall takes myna off this computer: `myna uninstall` and
-// Settings › Uninstall myna.
+// Package uninstall takes owl off this computer: `owl uninstall` and
+// Settings › Uninstall owl.
 //
-// Jevik_AI on X deleted myna's folders by hand, and Codex's config.toml
+// Jevik_AI on X deleted owl's folders by hand, and Codex's config.toml
 // kept openai_base_url on 127.0.0.1:3425: every Codex turn failed with a
-// 502, with nothing left that knew why. Deleting myna's files never puts
+// 502, with nothing left that knew why. Deleting owl's files never puts
 // an agent back, so uninstalling does that first, the way each agent's
-// Disconnect does (what myna changed goes back, what the user changed
-// by hand since stays theirs), then removes what myna registered with
+// Disconnect does (what owl changed goes back, what the user changed
+// by hand since stays theirs), then removes what owl registered with
 // the system, then its own files.
 //
-// What it leaves: the myna executable itself (a running program can't
+// What it leaves: the owl executable itself (a running program can't
 // delete itself everywhere, and the user put it there), and the Library's
 // folder while it holds skills or servers the user's agents use.
 package uninstall
@@ -26,17 +26,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/autostart"
-	"github.com/istoo/myna/internal/claudecode"
-	"github.com/istoo/myna/internal/daemon"
-	"github.com/istoo/myna/internal/library"
-	"github.com/istoo/myna/internal/pii"
-	"github.com/istoo/myna/internal/proc"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/shortcut"
-	"github.com/istoo/myna/internal/update"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/autostart"
+	"github.com/istoo/owl/internal/claudecode"
+	"github.com/istoo/owl/internal/daemon"
+	"github.com/istoo/owl/internal/library"
+	"github.com/istoo/owl/internal/pii"
+	"github.com/istoo/owl/internal/proc"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/shortcut"
+	"github.com/istoo/owl/internal/update"
 )
 
 // Done is one thing uninstalling did, or couldn't.
@@ -55,7 +55,7 @@ type Report struct {
 	// CodexApp: a Codex app still on the config it read before, which
 	// the user quits and opens
 	CodexApp bool `json:"codexApp,omitempty"`
-	// Exe is the myna executable, left where it is
+	// Exe is the owl executable, left where it is
 	Exe string `json:"exe"`
 }
 
@@ -97,7 +97,7 @@ var (
 // before it restarts the Codex app's app-server.
 var codexAppWait = 30 * time.Second
 
-// Connected are the agents myna is in now, which Run disconnects.
+// Connected are the agents owl is in now, which Run disconnects.
 func Connected() []*agent.Agent {
 	var out []*agent.Agent
 	for _, a := range agents() {
@@ -108,7 +108,7 @@ func Connected() []*agent.Agent {
 	return out
 }
 
-// Agents disconnects every agent myna is in: the first half of
+// Agents disconnects every agent owl is in: the first half of
 // uninstalling, which the app does while it still runs.
 func Agents(ctx context.Context, r *Report) {
 	// failover first: it is a provider in Codex's config too
@@ -125,7 +125,7 @@ func Agents(ctx context.Context, r *Report) {
 		r.Agents = append(r.Agents, d)
 		codex = codex || a.ID == "codex"
 	}
-	// the threads Codex ran on myna's models open without myna
+	// the threads Codex ran on owl's models open without owl
 	portRollouts(10 * time.Second)
 	if codex {
 		// the Codex app read the old config as its app-server started
@@ -150,7 +150,7 @@ func disconnect(a *agent.Agent) error {
 	return err
 }
 
-// System removes what myna registered with the system: its background
+// System removes what owl registered with the system: its background
 // service, opening at login, its Start menu shortcut and links.
 func System(r *Report) {
 	exe, _ := executable()
@@ -161,7 +161,7 @@ func System(r *Report) {
 		{"background service", removeService},
 		{"open at login", autostartOff},
 		{"Start menu shortcut", func() error { return removeShortcut(exe) }},
-		{"myna:// links", func() error { return removeScheme(exe) }},
+		{"owl:// links", func() error { return removeScheme(exe) }},
 		{"privacy model's helper", endPII},
 	} {
 		d := Done{What: s.what}
@@ -172,7 +172,7 @@ func System(r *Report) {
 	}
 }
 
-// Folders are myna's own folders Data removes, and the Library's folder
+// Folders are owl's own folders Data removes, and the Library's folder
 // when it keeps that.
 func Folders() (remove []string, keep string) {
 	home, _ := os.UserHomeDir()
@@ -223,8 +223,8 @@ func libraryInUse() bool {
 	return false
 }
 
-// Data removes myna's own files: settings, providers, sign-ins kept by
-// myna, usage, caches. With the Library in use, everything in myna's
+// Data removes owl's own files: settings, providers, sign-ins kept by
+// owl, usage, caches. With the Library in use, everything in owl's
 // folder but it goes.
 func Data(r *Report) {
 	remove, keep := Folders()
@@ -242,7 +242,7 @@ func Data(r *Report) {
 		r.Data = append(r.Data, d)
 	}
 	if keep != "" {
-		r.Kept = append(r.Kept, Done{What: keep, Err: "skills and servers your agents use from myna's Library"})
+		r.Kept = append(r.Kept, Done{What: keep, Err: "skills and servers your agents use from owl's Library"})
 	}
 }
 
@@ -269,12 +269,12 @@ func removeAllBut(dir, keep string) error {
 	return errors.Join(errs...)
 }
 
-// Run uninstalls myna: agents, then the system, then its files. The
+// Run uninstalls owl: agents, then the system, then its files. The
 // app runs Data itself once it has quit (WebView2 holds its folder open
 // while it runs), so it calls Agents and System only.
 func Run(ctx context.Context) *Report {
 	r := &Report{}
-	// the service first: one still serving would put myna back
+	// the service first: one still serving would put owl back
 	System(r)
 	Agents(ctx, r)
 	Data(r)
@@ -283,7 +283,7 @@ func Run(ctx context.Context) *Report {
 }
 
 // AfterExit waits for process pid to end, for up to wait, then removes
-// myna's files: what the app starts as it quits.
+// owl's files: what the app starts as it quits.
 func AfterExit(pid int, wait time.Duration) *Report {
 	until := time.Now().Add(wait)
 	for update.Alive(pid) && time.Now().Before(until) {
@@ -302,8 +302,8 @@ var startAfter = func(cmd *exec.Cmd) error {
 	return proc.StartReaped(cmd)
 }
 
-// DataAfterExit starts `myna uninstall --data-after <this pid>`, which
-// removes myna's files once this process, the app, has quit: the app's
+// DataAfterExit starts `owl uninstall --data-after <this pid>`, which
+// removes owl's files once this process, the app, has quit: the app's
 // half of Run after Agents and System.
 func DataAfterExit() error {
 	exe, err := executable()
@@ -313,8 +313,8 @@ func DataAfterExit() error {
 	return startAfter(proc.Command(exe, "uninstall", "--data-after", strconv.Itoa(os.Getpid())))
 }
 
-// removable says whether p can be one of myna's folders: never one
-// that holds more than myna's, as the home, a root or a relative path
+// removable says whether p can be one of owl's folders: never one
+// that holds more than owl's, as the home, a root or a relative path
 // would, from a variable set to one.
 func removable(p, home string) bool {
 	return p != "" && filepath.IsAbs(p) && filepath.Dir(p) != p && (home == "" || !within(home, p))

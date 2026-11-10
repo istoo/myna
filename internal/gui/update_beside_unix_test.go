@@ -15,10 +15,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/owl/internal/gateway"
 )
 
-// gaubeebangeel on X: an agent myna serves runs `myna update` at 4am.
+// gaubeebangeel on X: an agent owl serves runs `owl update` at 4am.
 // It put the new version in, and the app ran on as the old one until it
 // was quit and reopened, which cut the agent off; to keep it going the
 // agent needed a provider of its own. Now the command asks the app
@@ -34,9 +34,9 @@ func TestUpdateInATerminalRestartsTheAppWithoutCuttingIt(t *testing.T) {
 	gw := handoverSandbox(t, up.URL)
 	addr := gw.Addr()
 
-	// the binary as this myna started from it, which the terminal's
-	// myna update then replaces
-	exe := filepath.Join(t.TempDir(), "myna")
+	// the binary as this owl started from it, which the terminal's
+	// owl update then replaces
+	exe := filepath.Join(t.TempDir(), "owl")
 	if err := os.WriteFile(exe, []byte("v0.1.1"), 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -89,7 +89,7 @@ func TestUpdateInATerminalRestartsTheAppWithoutCuttingIt(t *testing.T) {
 		t.Fatalf("the stream's first chunk: %q %v", line, err)
 	}
 
-	// myna update in a terminal: the binary replaced, then the ask
+	// owl update in a terminal: the binary replaced, then the ask
 	if err := os.WriteFile(exe, []byte("v0.1.2 is longer"), 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -101,10 +101,10 @@ func TestUpdateInATerminalRestartsTheAppWithoutCuttingIt(t *testing.T) {
 	json.NewDecoder(r.Body).Decode(&reply)
 	r.Body.Close()
 	if r.StatusCode != http.StatusOK || reply.State != "restarting" || !reply.Handover {
-		t.Fatalf("myna update's ask: %d %+v", r.StatusCode, reply)
+		t.Fatalf("owl update's ask: %d %+v", r.StatusCode, reply)
 	}
 
-	eventually2(t, 30*time.Second, "the new myna never served the gateway", func() bool {
+	eventually2(t, 30*time.Second, "the new owl never served the gateway", func() bool {
 		c := child.Load()
 		return c != nil && servedByPid(addr) == c.Process.Pid
 	})
@@ -134,10 +134,10 @@ func TestUpdateInATerminalRestartsTheAppWithoutCuttingIt(t *testing.T) {
 	}
 }
 
-// A myna that isn't the copy myna update replaced stays as it is, and
+// A owl that isn't the copy owl update replaced stays as it is, and
 // says so.
 func TestUpdateOfAnotherCopyLeavesTheAppBe(t *testing.T) {
-	exe := filepath.Join(t.TempDir(), "myna")
+	exe := filepath.Join(t.TempDir(), "owl")
 	if err := os.WriteFile(exe, []byte("v0.1.1"), 0o755); err != nil {
 		t.Fatal(err)
 	}

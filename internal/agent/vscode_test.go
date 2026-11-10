@@ -6,14 +6,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/usage"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/jsonc"
 )
 
-// VS Code's chat: switched on, myna's group joins the user's in
+// VS Code's chat: switched on, owl's group joins the user's in
 // chatLanguageModels.json, its token in each model's Authorization header
 // and no apiKey (VS Code reads that from its secret storage only), and a new
 // chat starts on the model picked; switched off, both files are as they were
@@ -47,7 +47,7 @@ func TestVSCode(t *testing.T) {
 	if err := a.Connect(); err != nil {
 		t.Fatal(err)
 	}
-	if f.Get() != "myna/relay/glm-4.6" || !a.Wired() || a.Check() != "" {
+	if f.Get() != "owl/relay/glm-4.6" || !a.Wired() || a.Check() != "" {
 		t.Fatalf("connected: %q %v %q", f.Get(), a.Wired(), a.Check())
 	}
 	if v, _ := edit.GetJSON(a.Path, vscodeDefault); v != "relay/glm-4.6" {
@@ -69,10 +69,10 @@ func TestVSCode(t *testing.T) {
 	}
 	g, _ := edit.GetJSONItem(lm, vscodeGroup)
 	for k, want := range map[string]string{
-		"vendor": "customendpoint", "name": "myna", "apiType": "chat-completions",
+		"vendor": "customendpoint", "name": "owl", "apiType": "chat-completions",
 		"models.0.id": "relay/glm-4.6", "models.0.url": gatewayV1() + "/chat/completions",
 		"models.0.toolCalling": "true", "models.0.contextWindow": "204800",
-		"models.0.requestHeaders.Authorization": "Bearer myna",
+		"models.0.requestHeaders.Authorization": "Bearer owl",
 	} {
 		if got := gjson.Get(g, k).String(); got != want {
 			t.Errorf("%s = %q, want %q", k, got, want)
@@ -104,14 +104,14 @@ func TestVSCode(t *testing.T) {
 	}
 	writeFile(t, lm, b)
 
-	// one of VS Code's own picked: myna's models stay in its list
+	// one of VS Code's own picked: owl's models stay in its list
 	if err := a.Apply("model", "auto"); err != nil {
 		t.Fatal(err)
 	}
 	if f.Get() != "auto" || !a.Wired() {
 		t.Fatalf("own: %q %v", f.Get(), a.Wired())
 	}
-	if err := a.Apply("model", "myna/relay/other"); err != nil {
+	if err := a.Apply("model", "owl/relay/other"); err != nil {
 		t.Fatal(err)
 	}
 	// switched off: back to auto, the last of the user's own, group gone
@@ -146,7 +146,7 @@ func TestVSCodeRoundTrip(t *testing.T) {
 		t.Fatalf("not as it was:\n%s\n%s", readFile(a.Path), readFile(lm))
 	}
 
-	// no files at all: made, and emptied of myna again
+	// no files at all: made, and emptied of owl again
 	home = syncHome(t)
 	dir = filepath.Join(home, "fresh", "User")
 	a = vscodeAt(dir)
@@ -154,7 +154,7 @@ func TestVSCodeRoundTrip(t *testing.T) {
 	if err := a.Connect(); err != nil {
 		t.Fatal(err)
 	}
-	if a.Field("model").Get() != "myna/relay/glm-4.6" || a.Check() != "" {
+	if a.Field("model").Get() != "owl/relay/glm-4.6" || a.Check() != "" {
 		t.Fatalf("fresh: %q\n%s", a.Field("model").Get(), readFile(lm))
 	}
 	if err := a.Disconnect(); err != nil {
@@ -166,10 +166,10 @@ func TestVSCodeRoundTrip(t *testing.T) {
 }
 
 // a window on one of VS Code's own profiles reads that profile's
-// chatLanguageModels.json and settings.json, not the default's: myna's
+// chatLanguageModels.json and settings.json, not the default's: owl's
 // group and default model go in each profile's too, a profile that uses the
 // default's is left alone, and switched off every file is as it was
-// (TJHHHH on Discord: the Agents window listed myna, the side Chat didn't)
+// (TJHHHH on Discord: the Agents window listed owl, the side Chat didn't)
 func TestVSCodeProfiles(t *testing.T) {
 	home := syncHome(t)
 	dir := filepath.Join(home, "vscode", "User")
@@ -213,7 +213,7 @@ func TestVSCodeProfiles(t *testing.T) {
 		t.Fatal(err)
 	}
 	if _, ok := edit.GetJSONItem(filepath.Join(dir, "profiles", "new1", "chatLanguageModels.json"), vscodeGroup); !ok {
-		t.Fatal("new profile not given myna's group")
+		t.Fatal("new profile not given owl's group")
 	}
 
 	if err := a.Disconnect(); err != nil {
@@ -223,7 +223,7 @@ func TestVSCodeProfiles(t *testing.T) {
 		t.Fatalf("work profile not as it was:\n%s\n%s", readFile(filepath.Join(work, "settings.json")), readFile(wlm))
 	}
 	if _, ok := edit.GetJSONItem(filepath.Join(dir, "profiles", "new1", "chatLanguageModels.json"), vscodeGroup); ok {
-		t.Fatal("new profile kept myna's group")
+		t.Fatal("new profile kept owl's group")
 	}
 }
 
@@ -281,7 +281,7 @@ func TestVSCodeInsiders(t *testing.T) {
 		t.Fatal(err)
 	}
 	g, ok := edit.GetJSONItem(filepath.Join(ins.Dir, "chatLanguageModels.json"), vscodeGroup)
-	if !ok || gjson.Get(g, "models.0.requestHeaders.Authorization").String() != "Bearer myna-vscode-insiders" || !ins.Wired() || ins.Check() != "" {
+	if !ok || gjson.Get(g, "models.0.requestHeaders.Authorization").String() != "Bearer owl-vscode-insiders" || !ins.Wired() || ins.Check() != "" {
 		t.Fatalf("connected: %s %v %q", g, ins.Wired(), ins.Check())
 	}
 	if readFile(st.Path) != `{"chat.defaultModel": "gpt-5"}`+"\n" || isFile(filepath.Join(st.Dir, "chatLanguageModels.json")) || st.Wired() {
@@ -298,7 +298,7 @@ func TestVSCodeInsiders(t *testing.T) {
 		t.Fatal(err)
 	}
 	if _, ok := edit.GetJSONItem(filepath.Join(ins.Dir, "chatLanguageModels.json"), vscodeGroup); ok || ins.Wired() {
-		t.Fatal("disconnected, myna's group kept")
+		t.Fatal("disconnected, owl's group kept")
 	}
 }
 
@@ -330,7 +330,7 @@ func TestVSCodium(t *testing.T) {
 		t.Fatal(err)
 	}
 	g, ok := edit.GetJSONItem(filepath.Join(c.Dir, "chatLanguageModels.json"), vscodeGroup)
-	if !ok || gjson.Get(g, "models.0.requestHeaders.Authorization").String() != "Bearer myna-vscodium" || !c.Wired() || c.Check() != "" {
+	if !ok || gjson.Get(g, "models.0.requestHeaders.Authorization").String() != "Bearer owl-vscodium" || !c.Wired() || c.Check() != "" {
 		t.Fatalf("connected: %s %v %q", g, c.Wired(), c.Check())
 	}
 	if isFile(filepath.Join(vs.Dir, "chatLanguageModels.json")) || readFile(vs.Path) != `{"chat.defaultModel":"gpt-5"}`+"\n" || vs.Wired() {
@@ -343,7 +343,7 @@ func TestVSCodium(t *testing.T) {
 		t.Fatal(err)
 	}
 	if _, ok := edit.GetJSONItem(filepath.Join(c.Dir, "chatLanguageModels.json"), vscodeGroup); ok || c.Wired() {
-		t.Fatal("disconnected, myna's group kept")
+		t.Fatal("disconnected, owl's group kept")
 	}
 }
 
@@ -412,7 +412,7 @@ func TestVSCodiumCopilotChatOpenAICompatible(t *testing.T) {
 		t.Fatalf("no customoai group:\n%s", readFile(lm))
 	}
 	m := gjson.Get(g, `models.#(id=="relay/m")`)
-	if m.Get("url").String() != vscodeURL() || m.Get("requestHeaders.x-api-key").String() != "myna-vscodium" ||
+	if m.Get("url").String() != vscodeURL() || m.Get("requestHeaders.x-api-key").String() != "owl-vscodium" ||
 		m.Get("requestHeaders.Authorization").Exists() || m.Get("contextWindow").Exists() || gjson.Get(g, "apiKey").Exists() ||
 		m.Get("maxInputTokens").Int() <= 0 || m.Get("maxOutputTokens").Int() <= 0 || !m.Get("toolCalling").Bool() {
 		t.Fatalf("model: %s", m.Raw)
@@ -436,7 +436,7 @@ func TestVSCodiumCopilotChatOpenAICompatible(t *testing.T) {
 		t.Fatalf("token: %q", got)
 	}
 
-	// the Custom Endpoint group an older myna wrote: Sync, as at myna's
+	// the Custom Endpoint group an older owl wrote: Sync, as at owl's
 	// start, writes it for customoai
 	if err := edit.DelJSONItem(lm, vscodeGroupOf(vscodeOAI)); err != nil {
 		t.Fatal(err)
@@ -469,7 +469,7 @@ func TestVSCodiumCopilotChatOpenAICompatible(t *testing.T) {
 		t.Fatalf("customoai group kept:\n%s", readFile(lm))
 	}
 	g, ok = edit.GetJSONItem(lm, vscodeGroup)
-	if !ok || gjson.Get(g, "models.0.requestHeaders.Authorization").String() != "Bearer myna-vscodium" || c.Check() != "" {
+	if !ok || gjson.Get(g, "models.0.requestHeaders.Authorization").String() != "Bearer owl-vscodium" || c.Check() != "" {
 		t.Fatalf("custom endpoint: %s %q", g, c.Check())
 	}
 
@@ -514,9 +514,9 @@ func TestVSCodeChatInstalledWithoutExtensionsJSON(t *testing.T) {
 }
 
 // the reasoning effort picked for a model in Copilot Chat's model picker,
-// which VS Code writes into myna's group as
+// which VS Code writes into owl's group as
 // settings["<model id>"].reasoningEffort, stays through a Sync with nothing
-// changed, a Sync after the catalog changed and a model picked in myna
+// changed, a Sync after the catalog changed and a model picked in owl
 // (chim3744 on Discord: max went out as low, the first level, after each)
 func TestVSCodeKeepsThePickedEffort(t *testing.T) {
 	home := syncHome(t)
@@ -528,7 +528,7 @@ func TestVSCodeKeepsThePickedEffort(t *testing.T) {
 	}
 	lm := filepath.Join(dir, "chatLanguageModels.json")
 	// what VS Code 1.142 writes on a pick (setModelConfiguration), with a
-	// model myna no longer lists picked before
+	// model owl no longer lists picked before
 	g, ok := edit.GetJSONItem(lm, vscodeGroup)
 	if !ok {
 		t.Fatalf("no group:\n%s", readFile(lm))
@@ -575,10 +575,10 @@ func TestVSCodeKeepsThePickedEffort(t *testing.T) {
 		t.Fatalf("not synced: %s", g)
 	}
 
-	if err := a.Apply("model", "myna/relay/other"); err != nil {
+	if err := a.Apply("model", "owl/relay/other"); err != nil {
 		t.Fatal(err)
 	}
-	kept("a model picked in myna")
+	kept("a model picked in owl")
 
 	// a model gone from the catalog still leaves the list
 	if err := provider.Save(provider.Provider{ID: "relay", Name: "Relay", Key: "k", Chat: "http://127.0.0.1:1/v1", Models: []string{"glm-4.6"}}); err != nil {

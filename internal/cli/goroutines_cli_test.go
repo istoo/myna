@@ -11,10 +11,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/owl/internal/gateway"
 )
 
-// --help and its other forms print myna goroutines' usage, ask nothing
+// --help and its other forms print owl goroutines' usage, ask nothing
 // and write nothing; a flag it doesn't take, "-", or a second file are
 // refused the same way, before the gateway is asked.
 func TestGoroutinesHelpAndBadArgsWriteNothing(t *testing.T) {
@@ -22,17 +22,17 @@ func TestGoroutinesHelpAndBadArgsWriteNothing(t *testing.T) {
 	asked := false
 	gw := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { asked = true }))
 	defer gw.Close()
-	t.Setenv("MYNA_ADDR", strings.TrimPrefix(gw.URL, "http://"))
+	t.Setenv("OWL_ADDR", strings.TrimPrefix(gw.URL, "http://"))
 	before := tree(t, root)
 	for _, args := range [][]string{{"goroutines", "--help"}, {"goroutines", "-h"}, {"goroutines", "help"}, {"goroutines", "out.txt", "--help"}} {
 		out, err := runOut(t, args...)
-		if err != nil || !strings.Contains(out, "usage: myna goroutines [<file>]") {
-			t.Errorf("myna %s: %v %q", strings.Join(args, " "), err, out)
+		if err != nil || !strings.Contains(out, "usage: owl goroutines [<file>]") {
+			t.Errorf("owl %s: %v %q", strings.Join(args, " "), err, out)
 		}
 	}
 	for _, args := range [][]string{{"goroutines", "--out", "x"}, {"goroutines", "-o"}, {"goroutines", "-"}, {"goroutines", "a.txt", "b.txt"}, {"goroutines", " "}} {
 		if _, err := runOut(t, args...); err == nil || !strings.Contains(err.Error(), "nothing was written") {
-			t.Errorf("myna %s: %v", strings.Join(args, " "), err)
+			t.Errorf("owl %s: %v", strings.Join(args, " "), err)
 		}
 	}
 	if asked {
@@ -43,14 +43,14 @@ func TestGoroutinesHelpAndBadArgsWriteNothing(t *testing.T) {
 	}
 }
 
-// Against a running gateway (its Handler, on loopback), myna goroutines
+// Against a running gateway (its Handler, on loopback), owl goroutines
 // writes the dump into the working folder, prints its path and which
 // process it is of, and never writes over a file there.
 func TestGoroutinesWritesTheRunningGatewaysDump(t *testing.T) {
 	_, dir := heapDir(t)
 	gw := httptest.NewServer(gateway.New().Handler())
 	defer gw.Close()
-	t.Setenv("MYNA_ADDR", strings.TrimPrefix(gw.URL, "http://"))
+	t.Setenv("OWL_ADDR", strings.TrimPrefix(gw.URL, "http://"))
 
 	out, err := runOut(t, "goroutines", "stuck.txt")
 	if err != nil {
@@ -82,24 +82,24 @@ func TestGoroutinesWritesTheRunningGatewaysDump(t *testing.T) {
 		t.Fatal("the first dump changed")
 	}
 
-	// no name: myna-goroutines-<date>-<time>.txt here
+	// no name: owl-goroutines-<date>-<time>.txt here
 	if _, err := runOut(t, "goroutines"); err != nil {
 		t.Fatal(err)
 	}
-	if m, _ := filepath.Glob(filepath.Join(dir, "myna-goroutines-*.txt")); len(m) != 1 {
+	if m, _ := filepath.Glob(filepath.Join(dir, "owl-goroutines-*.txt")); len(m) != 1 {
 		t.Fatalf("no default file: %v", m)
 	}
 }
 
-// A myna older than this one answers 404: myna goroutines says to
-// update it and writes nothing. With no myna answering, it says so.
+// A owl older than this one answers 404: owl goroutines says to
+// update it and writes nothing. With no owl answering, it says so.
 func TestGoroutinesWithAnOlderOrNoGateway(t *testing.T) {
 	_, dir := heapDir(t)
 	old := httptest.NewServer(http.NotFoundHandler())
 	defer old.Close()
-	t.Setenv("MYNA_ADDR", strings.TrimPrefix(old.URL, "http://"))
+	t.Setenv("OWL_ADDR", strings.TrimPrefix(old.URL, "http://"))
 	if _, err := runOut(t, "goroutines", "x.txt"); err == nil || !strings.Contains(err.Error(), "older than this one") {
-		t.Fatalf("an older myna: %v", err)
+		t.Fatalf("an older owl: %v", err)
 	}
 
 	// a port kept by the test that hangs up on every call: one freed
@@ -118,9 +118,9 @@ func TestGoroutinesWithAnOlderOrNoGateway(t *testing.T) {
 			c.Close()
 		}
 	}()
-	t.Setenv("MYNA_ADDR", ln.Addr().String())
-	if _, err := runOut(t, "goroutines", "x.txt"); err == nil || !strings.Contains(err.Error(), "is myna running") {
-		t.Fatalf("no myna: %v", err)
+	t.Setenv("OWL_ADDR", ln.Addr().String())
+	if _, err := runOut(t, "goroutines", "x.txt"); err == nil || !strings.Contains(err.Error(), "is owl running") {
+		t.Fatalf("no owl: %v", err)
 	}
 	if ents, _ := os.ReadDir(dir); len(ents) != 0 {
 		t.Fatalf("written: %v", ents)

@@ -8,16 +8,16 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/codexcat"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/codexcat"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // The Codex app's picker shows only the models of Codex's list that a
 // flag of OpenAI's names, for Codex on its built-in provider, unless Codex
 // reads its list from a file (model_catalog_json): beside the ChatGPT
-// sign-in it showed GPT alone, myna's models in the list it was handed
+// sign-in it showed GPT alone, owl's models in the list it was handed
 // all the same (laddieyao on Discord). The CLI shows the whole list. So
-// where the Codex app is installed, myna writes the list it hands Codex
+// where the Codex app is installed, owl writes the list it hands Codex
 // into a file for Codex to read (agent.CodexDesktopList), and Codex asks
 // for no list then: the backend's part of it is asked for here, with
 // Codex's sign-in, and kept.
@@ -58,17 +58,17 @@ var codexDesk struct {
 // CodexDesktopCatalog is the list a Codex beside its ChatGPT sign-in is
 // handed (/backend-api/codex/models), as a file Codex reads with
 // model_catalog_json: the backend's entries as it sent them, narrowed and
-// set as the codex provider has them, myna's after them. ok is false
+// set as the codex provider has them, owl's after them. ok is false
 // while the backend's list is not known: none asked for yet, or none it
 // gave. That is unknown, never an empty list, and the file as it was
 // stands. The backend is asked again in the background when its list is
 // old, CodexDesktopChanged told when it changed.
 //
 // A sign-in the backend calls revoked, with no list of its from before,
-// is handed Codex's last list of its own and myna's models, as
+// is handed Codex's last list of its own and owl's models, as
 // codexModels answers Codex then (#4308): the backend has said all it
 // will for that sign-in, and without it the app's picker had none of
-// myna's models until the user signed in again.
+// owl's models until the user signed in again.
 //
 // The list is the list of the account Codex is signed in to, and a Pro
 // account lists models a Plus one doesn't. Once Codex is on another

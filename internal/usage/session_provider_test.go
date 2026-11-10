@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/sessions"
 )
 
 func TestCodexSessionAttributionRequiresRecordedIdentity(t *testing.T) {
@@ -204,13 +204,13 @@ func TestLocalSessionAccountsDoNotEstablishProviders(t *testing.T) {
 		call sessions.Call
 		want string
 	}{
-		{"Codex on myna's account", sessions.Call{Agent: "codex", Upstream: "openai", AccountID: "a-mine", UserID: "u-mine"}, "mine@example.com"},
+		{"Codex on owl's account", sessions.Call{Agent: "codex", Upstream: "openai", AccountID: "a-mine", UserID: "u-mine"}, "mine@example.com"},
 		{"Codex on another account", sessions.Call{Agent: "codex", Upstream: "openai", AccountID: "a-other"}, ""},
 		{"Codex with no account recorded", sessions.Call{Agent: "codex", Upstream: "openai"}, ""},
-		{"myna's account through a relay", sessions.Call{Agent: "codex", Upstream: "relay", AccountID: "a-mine", UserID: "u-mine"}, "mine@example.com"},
-		{"Claude Desktop on myna's account", sessions.Call{Agent: "claude-desktop", Session: "mine"}, "claude@example.com"},
+		{"owl's account through a relay", sessions.Call{Agent: "codex", Upstream: "relay", AccountID: "a-mine", UserID: "u-mine"}, "mine@example.com"},
+		{"Claude Desktop on owl's account", sessions.Call{Agent: "claude-desktop", Session: "mine"}, "claude@example.com"},
 		{"Claude Desktop in another organization", sessions.Call{Agent: "claude-desktop", Session: "other"}, "team@example.com"},
-		{"Claude-3p on myna's account's ids", sessions.Call{Agent: "claude-desktop", Session: "third-3p"}, "claude@example.com"},
+		{"Claude-3p on owl's account's ids", sessions.Call{Agent: "claude-desktop", Session: "third-3p"}, "claude@example.com"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			if got := r.resolve(tc.call); got != tc.want {
@@ -293,7 +293,7 @@ func TestOpenCodeSessionCallIsWhatItAskedFor(t *testing.T) {
 }
 
 // A Claude Code call outside every desktop root costs nothing to place:
-// a started myna's first Requests read asks this of every call twice,
+// a started owl's first Requests read asks this of every call twice,
 // and the path arithmetic it skipped was a fifth of what that read
 // allocated.
 func TestDesktopIdentityOfCLICallAllocatesNothing(t *testing.T) {

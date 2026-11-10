@@ -16,13 +16,13 @@ import (
 )
 
 // Plugins on GitHub that nobody listed: a repository its author tagged
-// with the myna-plugin topic. The market shows them apart from the
+// with the owl-plugin topic. The market shows them apart from the
 // community's, as not reviewed by anyone: installed from npm when its
 // author published it there from the repository, else from the repository
 // itself (github:owner/repo).
 
 // Topic is the GitHub topic that puts a repository on the Plugins page.
-const Topic = "myna-plugin"
+const Topic = "owl-plugin"
 
 // Tagged is a repository tagged with Topic.
 type Tagged struct {
@@ -46,7 +46,7 @@ type Tagged struct {
 	Package string `json:"package,omitempty"`
 	Version string `json:"version,omitempty"`
 	Kind    string `json:"kind,omitempty"` // "middleware", "agent", "page" or "hooks" when that is all it is
-	// its package.json's myna.icon, as an installed plugin gives its
+	// its package.json's owl.icon, as an installed plugin gives its
 	// provider one: an https URL or a data:image URI, as it is written
 	Icon string `json:"icon,omitempty"`
 }
@@ -147,7 +147,7 @@ func (e *TaggedMissing) Unwrap() error { return e.Why }
 // are left out, as is one whose package.json doesn't parse, which bun
 // couldn't install either. A repository whose package.json didn't come in
 // time is as the list had it last, and the list is asked again in
-// taggedRetry. MYNA_PLUGIN_MARKET=off keeps to none.
+// taggedRetry. OWL_PLUGIN_MARKET=off keeps to none.
 //
 // The error says the list isn't GitHub's whole answer, and why: the search
 // failed (the list is what GitHub said before, empty when it never
@@ -161,10 +161,10 @@ func TaggedRepos(ctx context.Context) ([]Tagged, error) {
 	if taggedL != nil && time.Since(taggedAt) < taggedTTL {
 		return taggedL, taggedWhy
 	}
-	if os.Getenv("MYNA_PLUGIN_MARKET") == "off" {
+	if os.Getenv("OWL_PLUGIN_MARKET") == "off" {
 		return []Tagged{}, nil
 	}
-	// a myna started again within the ten minutes: what GitHub said then,
+	// a owl started again within the ten minutes: what GitHub said then,
 	// without the wait of asking (a package.json read for each)
 	if taggedL == nil {
 		if fi, err := os.Stat(taggedCache()); err == nil && time.Since(fi.ModTime()) < taggedTTL {
@@ -189,7 +189,7 @@ func TaggedRepos(ctx context.Context) ([]Tagged, error) {
 		if b, err := json.Marshal(l); err == nil {
 			_ = os.MkdirAll(filepath.Dir(taggedCache()), 0o755)
 			_ = os.WriteFile(taggedCache(), b, 0o644)
-			// a myna started again meanwhile asks again too
+			// a owl started again meanwhile asks again too
 			_ = os.Chtimes(taggedCache(), taggedAt, taggedAt)
 		}
 		return l, taggedWhy
@@ -422,7 +422,7 @@ func readTagged(pc context.Context, t Tagged, branch string) (Tagged, bool, bool
 		Main    string          `json:"main"`
 		Exports json.RawMessage `json:"exports"`
 		License any             `json:"license"`
-		Myna    struct {
+		Owl    struct {
 			Middleware string `json:"middleware"`
 			Agent      string `json:"agent"`
 			Hooks      string `json:"hooks"`
@@ -444,21 +444,21 @@ func readTagged(pc context.Context, t Tagged, branch string) (Tagged, bool, bool
 			t.License = t.PkgLicense
 		}
 	}
-	// a picture, as host.js's iconOf takes one: myna checks and
+	// a picture, as host.js's iconOf takes one: owl checks and
 	// keeps it before the page shows it (the GUI's /api/plugins/github)
-	t.Icon = ownIcon(pj.Myna.Icon)
+	t.Icon = ownIcon(pj.Owl.Icon)
 	if pj.Main == "" && len(pj.Exports) == 0 {
 		switch {
-		case strings.TrimSpace(pj.Myna.Middleware) != "":
+		case strings.TrimSpace(pj.Owl.Middleware) != "":
 			t.Kind = "middleware"
-		case strings.TrimSpace(pj.Myna.Agent) != "":
+		case strings.TrimSpace(pj.Owl.Agent) != "":
 			t.Kind = "agent"
-		case strings.TrimSpace(pj.Myna.Page.File) != "":
+		case strings.TrimSpace(pj.Owl.Page.File) != "":
 			t.Kind = "page"
-		// gateway hooks alone (myna.hooks) need no entry of their
+		// gateway hooks alone (owl.hooks) need no entry of their
 		// own, as the host loads them: the hooks file is the one to
 		// find (#3821)
-		case strings.TrimSpace(pj.Myna.Hooks) != "":
+		case strings.TrimSpace(pj.Owl.Hooks) != "":
 			t.Kind = "hooks"
 		}
 	}
@@ -490,13 +490,13 @@ func readTagged(pc context.Context, t Tagged, branch string) (Tagged, bool, bool
 	// that is only a command (bin), an MCP server, has none and
 	// would never load (#1327)
 	if IsGit(t.Spec) || !npmNames {
-		entry := pj.Myna.Middleware
+		entry := pj.Owl.Middleware
 		if t.Kind == "agent" {
-			entry = pj.Myna.Agent
+			entry = pj.Owl.Agent
 		} else if t.Kind == "page" {
-			entry = pj.Myna.Page.File
+			entry = pj.Owl.Page.File
 		} else if t.Kind == "hooks" {
-			entry = pj.Myna.Hooks
+			entry = pj.Owl.Hooks
 		} else if t.Kind != "middleware" {
 			entry = pkgEntry(pj.Exports, pj.Main)
 			if !IsGit(t.Spec) {

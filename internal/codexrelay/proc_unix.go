@@ -13,8 +13,8 @@ func alive(pid int) bool {
 	return err == nil || err == syscall.EPERM
 }
 
-// detach keeps the relay out of myna's process group, so it outlives
-// myna.
+// detach keeps the relay out of owl's process group, so it outlives
+// owl.
 func detach(cmd *exec.Cmd) {
 	if cmd.SysProcAttr == nil {
 		cmd.SysProcAttr = &syscall.SysProcAttr{}

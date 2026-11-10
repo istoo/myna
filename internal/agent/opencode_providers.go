@@ -4,29 +4,29 @@ import (
 	"encoding/json"
 	"slices"
 
-	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/owl/internal/edit"
 )
 
 // OpenCode 2 keeps a provider under providers, in words of its own, and
 // still reads OpenCode 1's provider: a provider named under both is the one
 // under providers, whole, and the other only a line in its log
-// (packages/core/src/config/normalize.ts, mergeMaps, at v2.1.4). myna
+// (packages/core/src/config/normalize.ts, mergeMaps, at v2.1.4). owl
 // writes its provider under provider, which both read. OpenChamber writes a
 // provider its form saves under providers and takes it out of provider
 // (packages/web/server/lib/opencode/config-v2.js, writeSectionEntry), so
-// once it had saved myna's, myna's next sync put myna's back under
+// once it had saved owl's, owl's next sync put owl's back under
 // provider while OpenCode 2 went on reading OpenChamber's copy: a model
 // added since was missing from OpenCode 2 and OpenChamber (#3883). Where
-// the file keeps myna's provider under providers, myna writes it there
+// the file keeps owl's provider under providers, owl writes it there
 // too, in OpenCode 2's words; a file without one doesn't get one.
-const openCodeNativeKey = "providers." + mynaID
+const openCodeNativeKey = "providers." + owlID
 
-// openCodeNative is myna's provider block for an OpenCode config, in
-// OpenCode 1's words (mynaProviderJSONAt's "opencode" shape), as OpenCode
+// openCodeNative is owl's provider block for an OpenCode config, in
+// OpenCode 1's words (owlProviderJSONAt's "opencode" shape), as OpenCode
 // 2 reads it from provider (packages/core/src/v1/config/migrate.ts,
 // migrateStandardProvider and migrateModel; checked against what 2.1.4's
 // opencode debug config makes of it): npm is package "aisdk:<npm>",
-// options (myna's baseURL and apiKey) are settings, a model's modalities
+// options (owl's baseURL and apiKey) are settings, a model's modalities
 // are capabilities beside tools (true, OpenCode's default), and its
 // variants a list of {id, settings, body} (openCodeNativeVariant).
 // reasoning, which OpenCode 2 doesn't read, goes.
@@ -39,7 +39,7 @@ func openCodeNative(block any) any {
 	if o, ok := b["options"]; ok {
 		out["settings"] = o
 	}
-	// in the order myna lists them (#4575): OpenCode lists a provider's
+	// in the order owl lists them (#4575): OpenCode lists a provider's
 	// models in the file's key order
 	ms := orderedJSON{}
 	in, _ := b["models"].(orderedJSON)
@@ -99,11 +99,11 @@ func openCodeNativeVariant(id string, opts any) orderedJSON {
 	return out
 }
 
-// openCodeNativeKept is openCodeKept for myna's provider under providers:
-// myna's models are its own, written whole, and what else the block holds
+// openCodeNativeKept is openCodeKept for owl's provider under providers:
+// owl's models are its own, written whole, and what else the block holds
 // stays (theirsKept), as does a variant the user put on one of them, where
-// it is or after myna's. A variant that says what myna's of its name
-// says is myna's (openCodeOwnVariant): one the model has no longer goes.
+// it is or after owl's. A variant that says what owl's of its name
+// says is owl's (openCodeOwnVariant): one the model has no longer goes.
 func openCodeNativeKept(path string, block func() any) func() any {
 	return theirsKept(path, openCodeNativeKey, func() any {
 		v := openCodeNative(block())
@@ -155,7 +155,7 @@ func openCodeNativeKept(path string, block func() any) func() any {
 }
 
 // openCodeOwnVariant is the id of a variant under providers, and whether
-// it is myna's: it says what myna's of that name says (openCodeVariant)
+// it is owl's: it says what owl's of that name says (openCodeVariant)
 // and nothing else, its options split as OpenCode 2 splits them or all in
 // settings, as OpenChamber writes a variant it carries over from provider
 // (config-v2.js, toModelVariants).
@@ -189,21 +189,21 @@ func openCodeOwnVariant(raw json.RawMessage) (string, bool) {
 	return id, err == nil && id != "" && sameJSON(string(b), openCodeVariant(id))
 }
 
-// syncOpenCodeNative brings myna's provider under providers in the
-// OpenCode config at path up to block, myna's provider in OpenCode 1's
+// syncOpenCodeNative brings owl's provider under providers in the
+// OpenCode config at path up to block, owl's provider in OpenCode 1's
 // words, where the file keeps it there.
 func syncOpenCodeNative(path string, block func() any) error {
 	return syncJSONInOrder(path, openCodeNativeKey, openCodeNativeKept(path, block))
 }
 
-// openCodeWiringOff is wiringOff for myna's provider in the OpenCode
+// openCodeWiringOff is wiringOff for owl's provider in the OpenCode
 // config at path: under provider, and under providers where the file keeps
 // it there, which OpenCode 2 reads instead.
 func openCodeWiringOff(name, path, v1, key string) string {
 	under := func(prefix string) func(string) (string, bool) {
 		return func(k string) (string, bool) { return edit.GetJSON(path, prefix+k) }
 	}
-	if off := wiringOff(name, path, under("provider."+mynaID+".options."), "baseURL", v1, "apiKey", key); off != "" {
+	if off := wiringOff(name, path, under("provider."+owlID+".options."), "baseURL", v1, "apiKey", key); off != "" {
 		return off
 	}
 	if _, ok := edit.GetJSON(path, openCodeNativeKey); !ok {

@@ -12,8 +12,8 @@ import (
 // login, and again when it stops with a failure.
 type launchd struct{}
 
-// Label is the launch agent's; the tray's at login is com.istoo.myna.
-const Label = "com.istoo.myna.serve"
+// Label is the launch agent's; the tray's at login is com.istoo.owl.
+const Label = "com.istoo.owl.serve"
 
 func home() string {
 	h, _ := os.UserHomeDir()
@@ -24,7 +24,7 @@ func (launchd) file() string {
 	return filepath.Join(home(), "Library", "LaunchAgents", Label+".plist")
 }
 
-func logFile() string { return filepath.Join(home(), "Library", "Logs", "myna", "serve.log") }
+func logFile() string { return filepath.Join(home(), "Library", "Logs", "owl", "serve.log") }
 
 func (launchd) logs() string { return "tail -f " + strconv.Quote(logFile()) }
 
@@ -37,7 +37,7 @@ func plist(exe string, args, env []string) string {
 	var b strings.Builder
 	b.WriteString(`<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<!-- Written by myna daemon install; myna daemon uninstall removes it. -->
+<!-- Written by owl daemon install; owl daemon uninstall removes it. -->
 <plist version="1.0">
 <dict>
 	<key>Label</key>` + s(Label) + `
@@ -71,7 +71,7 @@ func (l launchd) install(exe string, args, env []string) error {
 		return err
 	}
 	// launchd opens StandardOutPath itself, with the user's umask (0644);
-	// made here first, it writes into myna's own 0600 file, whose lines
+	// made here first, it writes into owl's own 0600 file, whose lines
 	// applog scrubbed nothing of (#4133)
 	if f, err := os.OpenFile(logFile(), os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o600); err == nil {
 		f.Close()

@@ -8,15 +8,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/owl/internal/gateway"
 )
 
 // liby233 on Discord: deepseek-acp (dsh in an editor over ACP, CodeG)
 // reads $DSH_HOME/settings.yaml and nothing else, and loads the pi-ai plugin
-// only when that file names llm-pi-ai; with myna's route in the profiles
-// alone an editor listed DeepSeek's own models. A pick puts myna's route
+// only when that file names llm-pi-ai; with owl's route in the profiles
+// alone an editor listed DeepSeek's own models. A pick puts owl's route
 // there too, beside the user's own routes and sections, and never a start
-// of myna's (dsh 0.1 kept the user's pick there); Disconnect takes the
+// of owl's (dsh 0.1 kept the user's pick there); Disconnect takes the
 // route out and leaves the rest.
 func TestDshACPSettingsGetTheRoute(t *testing.T) {
 	home, dir, web := dshRouteHome(t)
@@ -25,32 +25,32 @@ func TestDshACPSettingsGetTheRoute(t *testing.T) {
 	read := func() string { b, _ := os.ReadFile(settings); return string(b) }
 	a := dsh(home)
 
-	if err := a.Pick("model", "myna/deepseek/pro"); err != nil {
+	if err := a.Pick("model", "owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	s := read()
-	for _, want := range []string{"llm-pi-ai:\n  providers:\n    myna:\n", "displayName: Myna", "apiKeyEnv: " + dshKeyRef, "api: openai-completions", "baseURL: " + gatewayV1(), "- id: deepseek/pro"} {
+	for _, want := range []string{"llm-pi-ai:\n  providers:\n    owl:\n", "displayName: Owl", "apiKeyEnv: " + dshKeyRef, "api: openai-completions", "baseURL: " + gatewayV1(), "- id: deepseek/pro"} {
 		if !strings.Contains(s, want) {
 			t.Fatalf("settings.yaml lacks %q:\n%s", want, s)
 		}
 	}
 	if strings.Contains(s, "agent-default-model") {
-		t.Fatalf("a start of myna's in settings.yaml:\n%s", s)
+		t.Fatalf("a start of owl's in settings.yaml:\n%s", s)
 	}
 	if st, _ := os.Stat(settings); runtime.GOOS != "windows" && st.Mode().Perm() != 0o600 {
 		t.Fatalf("settings.yaml made %v", st.Mode().Perm())
 	}
 
 	// the user's own: a route of theirs, a section of another plugin's, the
-	// protocol they picked for myna's route in dsh's Models page
-	own := "# mine\nllm-deepseek:\n  thinking: enabled\nllm-pi-ai:\n  providers:\n    mine:\n      displayName: Mine\n      apiKeyEnv: MINE_API_KEY\n      api: openai-completions\n      baseURL: https://mine.example/v1\n      models:\n        - id: m1\n    myna:\n      api: openai-responses\n"
+	// protocol they picked for owl's route in dsh's Models page
+	own := "# mine\nllm-deepseek:\n  thinking: enabled\nllm-pi-ai:\n  providers:\n    mine:\n      displayName: Mine\n      apiKeyEnv: MINE_API_KEY\n      api: openai-completions\n      baseURL: https://mine.example/v1\n      models:\n        - id: m1\n    owl:\n      api: openai-responses\n"
 	os.Remove(settings)
 	os.WriteFile(settings, []byte(own), 0o644)
 	if err := a.Sync(); err != nil {
 		t.Fatal(err)
 	}
 	s = read()
-	for _, want := range []string{"# mine\n", "llm-deepseek:\n  thinking: enabled\n", "    mine:\n", "baseURL: https://mine.example/v1", "    myna:\n", "api: openai-responses", "- id: deepseek/flash"} {
+	for _, want := range []string{"# mine\n", "llm-deepseek:\n  thinking: enabled\n", "    mine:\n", "baseURL: https://mine.example/v1", "    owl:\n", "api: openai-responses", "- id: deepseek/flash"} {
 		if !strings.Contains(s, want) {
 			t.Fatalf("after the sync settings.yaml lacks %q:\n%s", want, s)
 		}
@@ -63,8 +63,8 @@ func TestDshACPSettingsGetTheRoute(t *testing.T) {
 		t.Fatal(err)
 	}
 	s = read()
-	if strings.Contains(s, "myna") || strings.Contains(s, dshKeyRef) {
-		t.Fatalf("myna's route stayed:\n%s", s)
+	if strings.Contains(s, "owl") || strings.Contains(s, dshKeyRef) {
+		t.Fatalf("owl's route stayed:\n%s", s)
 	}
 	for _, want := range []string{"# mine\n", "llm-deepseek:\n  thinking: enabled\n", "    mine:\n", "baseURL: https://mine.example/v1"} {
 		if !strings.Contains(s, want) {
@@ -72,8 +72,8 @@ func TestDshACPSettingsGetTheRoute(t *testing.T) {
 		}
 	}
 
-	// only myna's there: the section goes with it
-	if err := a.Pick("model", "myna/deepseek/pro"); err != nil {
+	// only owl's there: the section goes with it
+	if err := a.Pick("model", "owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	os.WriteFile(settings, []byte("llm-deepseek:\n  thinking: enabled\n"), 0o644)
@@ -90,9 +90,9 @@ func TestDshACPSettingsGetTheRoute(t *testing.T) {
 
 // dsh 0.2 eats settings.yaml at each start: it renames it to
 // settings.yaml.imported, over the one before, and imports it into the
-// profile. The round myna does while it serves writes the route there
-// again, and an import of the user's own from before myna's first is
-// kept aside rather than lost under myna's.
+// profile. The round owl does while it serves writes the route there
+// again, and an import of the user's own from before owl's first is
+// kept aside rather than lost under owl's.
 func TestDshACPSettingsWrittenAgain(t *testing.T) {
 	_, dir, web := dshRouteHome(t)
 	t.Setenv("DSH_HOME", dir)
@@ -101,7 +101,7 @@ func TestDshACPSettingsWrittenAgain(t *testing.T) {
 	imported := settings + ".imported"
 	mine := "llm-deepseek:\n  thinking: enabled\nagent-default-model:\n  model: deepseek-v4-pro\n"
 	os.WriteFile(imported, []byte(mine), 0o644)
-	if err := dsh(filepath.Dir(dir)).Field("model").Set("myna/deepseek/pro"); err != nil {
+	if err := dsh(filepath.Dir(dir)).Field("model").Set("owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	if b, _ := os.ReadFile(imported + ".kept"); string(b) != mine {
@@ -112,23 +112,23 @@ func TestDshACPSettingsWrittenAgain(t *testing.T) {
 	if trouble := dshWiredOnce(); trouble != "" {
 		t.Fatal(trouble)
 	}
-	if b, _ := os.ReadFile(settings); !strings.Contains(string(b), "    myna:\n") {
+	if b, _ := os.ReadFile(settings); !strings.Contains(string(b), "    owl:\n") {
 		t.Fatalf("the round didn't write settings.yaml again:\n%s", b)
 	}
-	// myna's own import isn't kept over the user's
+	// owl's own import isn't kept over the user's
 	os.Rename(settings, imported)
 	os.Remove(imported + ".kept")
 	if trouble := dshWiredOnce(); trouble != "" {
 		t.Fatal(trouble)
 	}
 	if _, err := os.Stat(imported + ".kept"); err == nil {
-		t.Fatal("myna's own import was kept")
+		t.Fatal("owl's own import was kept")
 	}
 }
 
 // deepseek-acp and dsh refuse a key store any other user can read ("run
 // chmod 600"), and dsh won't start then: one there already at 0644, the
-// user's or an older myna's, is made owner-only when myna puts its key
+// user's or an older owl's, is made owner-only when owl puts its key
 // in, and when the key was there already.
 func TestDshStoreMadeOwnerOnly(t *testing.T) {
 	if runtime.GOOS == "windows" {
@@ -139,7 +139,7 @@ func TestDshStoreMadeOwnerOnly(t *testing.T) {
 	creds := filepath.Join(dir, ".credentials.yaml")
 	os.WriteFile(creds, []byte("version: 1\nrefs:\n  DEEPSEEK_API_KEY: sk-mine\n"), 0o644)
 	a := dsh(home)
-	if err := a.Field("model").Set("myna/deepseek/pro"); err != nil {
+	if err := a.Field("model").Set("owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	if st, _ := os.Stat(creds); st.Mode().Perm() != 0o600 {
@@ -158,7 +158,7 @@ func TestDshStoreMadeOwnerOnly(t *testing.T) {
 }
 
 // In a WSL distro a file written through \\wsl.localhost is 0644 whatever
-// mode myna asks for (tried on xiaomi-gpu), so the key store is chmodded
+// mode owl asks for (tried on xiaomi-gpu), so the key store is chmodded
 // from inside the distro, at the path the distro has it; settings.yaml
 // gets the route at the gateway as the distro reaches it.
 func TestWSLDshStoreOwnerOnly(t *testing.T) {
@@ -179,7 +179,7 @@ func TestWSLDshStoreOwnerOnly(t *testing.T) {
 	d := distro{Name: "Ubuntu", Root: root, Home: "/home/me", Has: map[string]bool{"bin:dsh": true},
 		Gateway: "172.20.0.1", Running: true}
 	a := wslAgent(wslKindOf("dsh"), d)
-	if err := a.Field("model").Set("myna/relay/glm-4.6"); err != nil {
+	if err := a.Field("model").Set("owl/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	want := "-d Ubuntu -e chmod go-rwx /home/me/.dsh/.credentials.yaml"

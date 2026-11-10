@@ -3,21 +3,21 @@ package gui
 import (
 	"time"
 
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/settings"
 )
 
-// Quitting myna ends the gateway, and every agent connected to it fails
-// until myna is opened again, with nothing to say why: Codex retried
+// Quitting owl ends the gateway, and every agent connected to it fails
+// until owl is opened again, with nothing to say why: Codex retried
 // "unexpected status 502 Bad Gateway: Unknown error" five times and gave
-// up, and its user found myna's line in ~/.codex/config.toml only after
+// up, and its user found owl's line in ~/.codex/config.toml only after
 // a long search (Aisiverto on X). So a Quit the user chooses (the tray's
 // menu, the panel's Quit, Command-Q on the Mac) while agents are connected
 // opens the window on a question first, naming them (quitask.js): Quit,
 // Disconnect and quit (each one's own settings put back, as its row's
 // Disconnect does), or Cancel, with "Don't ask again" (zhujiu on Discord),
 // which Settings › General › Ask before quitting turns back on
-// (settings.QuitNoAsk). A quit myna makes itself (a restart to
+// (settings.QuitNoAsk). A quit owl makes itself (a restart to
 // update, Uninstall) and the system's own (logging out, shutting down,
 // the Dock's Quit) don't ask.
 
@@ -29,7 +29,7 @@ type quitAgentJSON struct {
 }
 
 // quitAgents lists the agents connected to the gateway this process
-// serves: none when another myna serves it, which goes on serving them.
+// serves: none when another owl serves it, which goes on serving them.
 // A var so tests can say.
 var quitAgents = func() []quitAgentJSON {
 	if served.Load() == nil {
@@ -38,7 +38,7 @@ var quitAgents = func() []quitAgentJSON {
 	return wiredAgents(agent.Detected())
 }
 
-// wiredAgents is the agents of as with myna in their config.
+// wiredAgents is the agents of as with owl in their config.
 func wiredAgents(as []*agent.Agent) []quitAgentJSON {
 	out := []quitAgentJSON{}
 	for _, a := range as {
@@ -50,7 +50,7 @@ func wiredAgents(as []*agent.Agent) []quitAgentJSON {
 }
 
 // quitAsker is a host that asks before a quit the user chose (the app's);
-// a browser's page (myna web) quits at once.
+// a browser's page (owl web) quits at once.
 type quitAsker interface {
 	// AskQuit quits, or first asks in the window when agents are connected
 	AskQuit()

@@ -3,7 +3,7 @@ package gateway
 import (
 	"context"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // claudeFastBeta is the beta Claude's fast mode (speed "fast") is asked

@@ -7,8 +7,8 @@ import (
 	"testing"
 )
 
-// `myna qwen a/m` writes its provider entries and the gateway's key,
-// `myna qwen default` takes myna back out and restores the model the
+// `owl qwen a/m` writes its provider entries and the gateway's key,
+// `owl qwen default` takes owl back out and restores the model the
 // user had, their own provider entry and settings kept.
 func TestAgentQwenDefault(t *testing.T) {
 	groupsHome(t)
@@ -46,7 +46,7 @@ func TestAgentQwenDefault(t *testing.T) {
 		t.Fatal(err)
 	}
 	s := read()
-	for _, want := range []string{`"id": "a/m"`, `"name": "m · A"`, `"MYNA_QWEN_API_KEY"`, `"selectedType": "openai"`, `"baseUrl": "https://idealab.example.com/v1"`, `"outputLanguage": "zh-CN"`} {
+	for _, want := range []string{`"id": "a/m"`, `"name": "m · A"`, `"OWL_QWEN_API_KEY"`, `"selectedType": "openai"`, `"baseUrl": "https://idealab.example.com/v1"`, `"outputLanguage": "zh-CN"`} {
 		if !strings.Contains(s, want) {
 			t.Fatalf("not wired (%s missing):\n%s", want, s)
 		}

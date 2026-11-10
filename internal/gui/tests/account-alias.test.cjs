@@ -95,7 +95,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], posts = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, posts));
-        await page.goto("http://myna.test/?view=providers");
+        await page.goto("http://owl.test/?view=providers");
         await page.locator(".row.provider", { hasText: "ZCode" }).first().click();
         const row = (id) => page.locator(`.editor .accts .acc[data-account-id="${id}"]`);
         await row(TEAM).locator(".acct-who").waitFor();
@@ -176,7 +176,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           await page.goto(url);
           return page;
         };
-        const page = await open("http://myna.test/?view=usage");
+        const page = await open("http://owl.test/?view=usage");
         await page.locator(".subscription-account .quota-alias").first().waitFor();
         const accts = await page.evaluate(() => [...document.querySelectorAll(".subscription-account")].map((a) => ({
           alias: a.querySelector(".quota-alias")?.textContent, aliasTitle: a.querySelector(".quota-alias")?.title,
@@ -190,7 +190,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.deepEqual(await stripes(page, ".subscription-account, .subscription-account *"), [], "no border stripes");
 
         // the tray panel: the name before the address
-        const panel = await open("http://myna.test/?mode=panel");
+        const panel = await open("http://owl.test/?mode=panel");
         await panel.evaluate(() => setPanelTab("usage"));
         await panel.locator("#panelQuota .pq-user").first().waitFor();
         // one in sight, the other behind Show 1 more account

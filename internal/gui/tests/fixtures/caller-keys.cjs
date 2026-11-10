@@ -10,9 +10,9 @@ const sum = (rows) => ({
 
 function fixture(lang, theme, events, options = {}) {
   let keys = [
-    { id: "laptop", name: "Laptop", masked: "sk-myna-key-…111111" },
-    { id: "server", name: "Server", masked: "sk-myna-key-…222222" },
-    { id: "work", name: "Work", masked: "sk-myna-key-…333333" },
+    { id: "laptop", name: "Laptop", masked: "sk-owl-key-…111111" },
+    { id: "server", name: "Server", masked: "sk-owl-key-…222222" },
+    { id: "work", name: "Work", masked: "sk-owl-key-…333333" },
   ];
   // options.keys is the test's own list: [] for the empty Gateway keys
   if (options.keys) keys = options.keys;
@@ -28,9 +28,9 @@ function fixture(lang, theme, events, options = {}) {
   const lanURLs = options.lanURLs || ["http://192.168.1.10:3999", "http://10.0.0.10:3999"];
   // options.lanPublic are those of them at an internet address
   const lanPublic = () => lan && options.lanPublic ? { lanPublic: options.lanPublic } : {};
-  // options.publicURL is MYNA_PUBLIC_URL's, offered while shared (#1551)
+  // options.publicURL is OWL_PUBLIC_URL's, offered while shared (#1551)
   const publicURL = () => lan && options.publicURL ? { publicURL: options.publicURL } : {};
-  // options.container: myna runs in a container, and lanURLs are its
+  // options.container: owl runs in a container, and lanURLs are its
   // own; options.containerHost is where other containers on the host
   // reach the gateway (the host's Docker bridge address)
   const container = () => ({ ...(lan && options.container ? { container: true } : {}),
@@ -67,8 +67,8 @@ function fixture(lang, theme, events, options = {}) {
     const json = (data) => route.fulfill({ json: data });
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = ${JSON.stringify({ lang, theme, web: !!options.web,
       // with options.publicURL or options.bootGateway, where this process's
-      // gateway listens, as myna's boot.js says it, and while shared the
-      // addresses other machines use, MYNA_PUBLIC_URL with them
+      // gateway listens, as owl's boot.js says it, and while shared the
+      // addresses other machines use, OWL_PUBLIC_URL with them
       ...(options.publicURL || options.bootGateway ? { sideGateway: { url: "http://127.0.0.1:3999", running: true, boot: true,
         ...(lan ? { lan, lanURLs } : {}), ...container(), ...publicURL() } } : {}) })};` });
     if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
@@ -86,12 +86,12 @@ function fixture(lang, theme, events, options = {}) {
       let key = keys.find((k) => k.id === lanKeyID);
       if (lan && (!key || body.newKey)) {
         if (!key) {
-          key = { id: "lan-key-" + (++serial), name: "Myna", lan: true };
+          key = { id: "lan-key-" + (++serial), name: "Owl", lan: true };
           lanKeyID = key.id;
           keys.push(key);
         }
         lanSecret = "fixture-lan-" + (++rotations);
-        key.masked = "sk-myna-key-…" + lanSecret.slice(-6);
+        key.masked = "sk-owl-key-…" + lanSecret.slice(-6);
       }
       return json(lanState());
     }
@@ -136,7 +136,7 @@ function fixture(lang, theme, events, options = {}) {
         const id = "new-key-" + (++serial);
         secret = body.secret?.trim() || "fixture-created-" + serial;
         secrets.set(id, secret);
-        keys.push({ id, name: body.name, masked: body.secret ? "…" + secret.slice(-4) : "sk-myna-key-…created" });
+        keys.push({ id, name: body.name, masked: body.secret ? "…" + secret.slice(-4) : "sk-owl-key-…created" });
       }
       if (action === "rename-key") k.name = body.name;
       if (action === "rotate-key") {
@@ -145,7 +145,7 @@ function fixture(lang, theme, events, options = {}) {
         secret = body.secret?.trim() || "fixture-rotated-" + (++rotations);
         secrets.set(k.id, secret);
         if (k.id === lanKeyID) lanSecret = secret;
-        k.masked = body.secret ? "…" + secret.slice(-4) : "sk-myna-key-…" + secret.slice(-6);
+        k.masked = body.secret ? "…" + secret.slice(-4) : "sk-owl-key-…" + secret.slice(-6);
       }
       if (action === "remove-key") keys = keys.filter((v) => v !== k);
       if (action === "on-key" || action === "off-key") k.off = action === "off-key";
@@ -193,7 +193,7 @@ function fixture(lang, theme, events, options = {}) {
       return json({ keys, secret });
     }
     if (url.pathname === "/api/copy") { events.push({ action: "clipboard", body: req.postDataJSON() }); return json({}); }
-    if (url.pathname === "/api/usage") return json({ ...sum(rows), ...groups(), agents: [], models: [], series: [], bucket: "day", path: "~/.config/myna/usage.jsonl" });
+    if (url.pathname === "/api/usage") return json({ ...sum(rows), ...groups(), agents: [], models: [], series: [], bucket: "day", path: "~/.config/owl/usage.jsonl" });
     if (url.pathname === "/api/usage/requests") { events.push({ action: "ledger", query: url.search }); return json(ledger(url.searchParams)); }
     if (url.pathname === "/api/usage/requests/export") { events.push({ action: "export", query: url.search }); return json({ path: "~/Downloads/keys.csv", rows: ledger(url.searchParams).total }); }
     if (url.pathname === "/api/usage/quotas") return json([]);

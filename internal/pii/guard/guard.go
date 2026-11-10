@@ -14,7 +14,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/istoo/myna/internal/pii/guard/coreml"
+	"github.com/istoo/owl/internal/pii/guard/coreml"
 )
 
 // labels are the model's BIO tags, by output index (its labels.json).
@@ -250,7 +250,7 @@ func (m *Model) Find(text string) []Span {
 // carried is the first panic in the goroutines a read starts, panicked
 // again by rethrow on the goroutine that waited for them, where Find's
 // caller can recover it: a panic left on a goroutine of its own ends the
-// whole process (#4553 ended myna on Windows).
+// whole process (#4553 ended owl on Windows).
 type carried struct{ p atomic.Pointer[any] }
 
 // catch is deferred by each goroutine.

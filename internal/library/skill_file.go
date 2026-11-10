@@ -1,7 +1,7 @@
 package library
 
 // A skill's files read and edited in the page (refeccd on Discord: skills
-// handed over to myna from ~/.agents/skills could no longer be edited
+// handed over to owl from ~/.agents/skills could no longer be edited
 // there, where the user used to). What is saved goes into the library's
 // folder of the skill, so every agent linked to it reads it at once, and
 // the sync that follows makes each agent's copy again. A copy edited in an
@@ -21,7 +21,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/owl/internal/edit"
 )
 
 const (
@@ -99,7 +99,7 @@ func SaveSkillFile(name, file, text, was string) (*Result, error) {
 }
 
 // skillFilePath is the file at rel in the skill's folder root: a place in
-// it, not a link, and none of the folders myna leaves aside.
+// it, not a link, and none of the folders owl leaves aside.
 func skillFilePath(root, rel string) (string, error) {
 	rel = filepath.FromSlash(rel)
 	if rel == "" || !filepath.IsLocal(rel) {
@@ -116,7 +116,7 @@ func skillFilePath(root, rel string) (string, error) {
 		return "", err
 	}
 	if !fi.Mode().IsRegular() {
-		return "", fmt.Errorf("%s is not a file myna opens: it is a link or a folder", filepath.ToSlash(rel))
+		return "", fmt.Errorf("%s is not a file owl opens: it is a link or a folder", filepath.ToSlash(rel))
 	}
 	// a folder in it that is a link leads out of the skill
 	if dir, err := filepath.EvalSymlinks(filepath.Dir(p)); err != nil {

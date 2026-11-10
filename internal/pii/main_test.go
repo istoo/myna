@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // The tests run in a home of their own; the test binary started again
@@ -110,7 +110,7 @@ func fakeServe(mode string) {
 	for {
 		n, err := u32()
 		if err != nil {
-			os.Exit(0) // stdin ended: myna let it go
+			os.Exit(0) // stdin ended: owl let it go
 		}
 		texts := make([]string, n)
 		for i := range texts {

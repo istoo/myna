@@ -5,8 +5,8 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // The Requests page's Gateway key filter lists the keys in the order the

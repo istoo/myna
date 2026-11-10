@@ -50,9 +50,9 @@ export function openPalette() {
         }) });
       }
     }
-    for (const v of myna.pages()) {
+    for (const v of owl.pages()) {
       if (seen.has(v)) continue;
-      const part = myna.page(v);
+      const part = owl.page(v);
       if (!part?.title) continue;
       seen.add(v);
       out.push({ name: t(part.title), kind: "Plugin page", run: () => show(v) });

@@ -84,7 +84,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const ed = page.locator(".editor.new");
 
         for (const { name } of presets) {
-          await page.goto("http://myna.test/?view=providers");
+          await page.goto("http://owl.test/?view=providers");
           await page.locator("#addProvider").click();
           await sheet.locator(".tile .n", { hasText: new RegExp("^" + name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "$") }).click();
           await ed.locator(".ehead b", { hasText: name }).waitFor();
@@ -101,7 +101,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
         // editing a saved OpenRouter shows the same
         const saved = page.locator(".editor");
-        await page.goto("http://myna.test/?view=providers");
+        await page.goto("http://owl.test/?view=providers");
         await page.locator('#providers .row[data-id="openrouter"]').click();
         await saved.locator(".ehead b", { hasText: "OpenRouter" }).waitFor();
         const got = await decideField(saved);

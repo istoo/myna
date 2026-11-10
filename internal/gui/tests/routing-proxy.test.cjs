@@ -56,8 +56,8 @@ function serve(lang) {
 }
 
 const want = {
-  en: { story: "the proxy myna goes through didn't take the connection, so the request never reached the vendor and goes on to the next", rest: "so it doesn't rest", tag: "502 · proxy not reachable" },
-  zh: { story: "myna 使用的代理未接受连接，请求未到达厂商，已转给下一个", rest: "不休息", tag: "502 · 代理连不上" },
+  en: { story: "the proxy owl goes through didn't take the connection, so the request never reached the vendor and goes on to the next", rest: "so it doesn't rest", tag: "502 · proxy not reachable" },
+  zh: { story: "owl 使用的代理未接受连接，请求未到达厂商，已转给下一个", rest: "不休息", tag: "502 · 代理连不上" },
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -78,7 +78,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         }
         await browser.close();
       });
-      await page.goto("http://myna.test/?view=routing");
+      await page.goto("http://owl.test/?view=routing");
       await page.locator(".rt-days .rt-day").nth(1).click();
       await page.locator(".rt-req").nth(routes.length - 1).waitFor();
 
