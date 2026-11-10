@@ -52,7 +52,7 @@
 curl -fsSL https://github.com/istoo/owl/releases/latest/download/install.sh | sh
 ```
 
-<sub>在桌面上，脚本安装桌面应用。Linux 上没有 WebKitGTK 4.1 时，脚本先用包管理器装上（sudo 会问密码）；没有桌面、或者没有终端可以询问时，安装终端版，并告诉你要补哪个包。`--gui` 或 `--tui` 可以指定。防火墙后面用 `--proxy` 或 `--mirror`。也可以用 `go install github.com/istoo/owl@latest`，或者 [Docker 镜像](https://github.com/istoo/owl/blob/main/docs/docker)。每个构建都会自己更新，更新说明只来自这个仓库。卸载时用同一条命令加 `sh -s -- --uninstall`；`~/.config/owl` 里的设置会保留，除非加上 `--purge`——那会断开你的 agent 并一起删掉。</sub>
+<sub>在桌面上，脚本安装桌面应用。Linux 上没有 WebKitGTK 4.1 时，脚本先用包管理器装上（sudo 会问密码）；没有桌面、或者没有终端可以询问时，安装终端版，并告诉你要补哪个包。`--gui` 或 `--tui` 可以指定。防火墙后面用 `--proxy` 或 `--mirror`。名字带 `owl-cli-*` 的是终端版——它们是可执行文件，不是文本文件：`chmod +x` 之后在终端运行，或者用上面的脚本把 `owl` 放进 PATH。图形界面是 `owl-darwin-*.zip`。也可以用 `go install github.com/istoo/owl@latest`，或者 [Docker 镜像](https://github.com/istoo/owl/blob/main/site/public/docs/zh/docker.html)。每个构建都会自己更新，更新说明只来自这个仓库。卸载时用同一条命令加 `sh -s -- --uninstall`；`~/.config/owl` 里的设置会保留，除非加上 `--purge`——那会断开你的 agent 并一起删掉。</sub>
 
 ## 快速上手
 
@@ -119,7 +119,7 @@ agent 会把读到的东西放进提示词：一个 `.env`、一份配置、一�
 
 > **预设包括** Anthropic · OpenAI · Google Gemini · Google Vertex AI · Amazon Bedrock（runtime 与 Mantle）· DeepSeek · Kimi · 智谱 GLM · MiniMax · StepFun · LongCat · Qwen · 百度千帆 · 腾讯云 · 华为云 MaaS · 火山引擎方舟 · Mistral · Groq · Nous Portal · xAI · OpenRouter · Together · Fireworks · SiliconFlow · NVIDIA NIM · ModelScope · Ollama · LM Studio……以及任何 OpenAI 或 Anthropic 兼容的 URL。
 
-**导入** 可以从 CC Switch、Claude Code、Codex 和 Alma 带入供应商。**[Add to owl](https://github.com/istoo/owl/blob/main/docs/import)** 链接让供应商官网一键把配置交给 owl。每个 key、每个账号都可以走自己的代理。
+**导入** 可以从 CC Switch、Claude Code、Codex 和 Alma 带入供应商。**[Add to owl](https://github.com/istoo/owl/blob/main/site/public/docs/zh/import.html)** 链接让供应商官网一键把配置交给 owl。每个 key、每个账号都可以走自己的代理。
 
 你已经登录的 agent 是一个**订阅**，后面有一串模型，于是 owl 可以把它当成供应商给所有其他 agent 用。同一个订阅可以加多个账号，owl 会在它们之间故障转移。
 
@@ -147,7 +147,7 @@ agent 会把读到的东西放进提示词：一个 `.env`、一份配置、一�
 | **`usage`** | 先用用得最少的成员 |
 | **`pace`** | 用每小时剩余额度最多的账号，直到它重置 |
 
-只要供应商的提示词缓存还值得保留，一段对话就**留在回答它的那个账号上**。分组里可以再放分组。**[意图路由](https://github.com/istoo/owl/blob/main/docs/intent)** 让你选一个小模型读每一轮的新请求，测试交给强模型，简单问题交给便宜的模型。Routing 页会实时显示每一次决定。
+只要供应商的提示词缓存还值得保留，一段对话就**留在回答它的那个账号上**。分组里可以再放分组。**[意图路由](https://github.com/istoo/owl/blob/main/site/public/docs/zh/intent.html)** 让你选一个小模型读每一轮的新请求，测试交给强模型，简单问题交给便宜的模型。Routing 页会实时显示每一次决定。
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="site/public/img/routing-dark.png">
@@ -162,7 +162,7 @@ owl plugin add pi-antigravity         # pi 包，同样的装法
 owl plugin login google-plugin        # 它自己的登录流程，在 owl 里
 ```
 
-插件跑在 [Bun](https://bun.sh) 上，第一次需要时自动下载。插件负责登录、列出模型、发出请求；agent 像用其他供应商一样用这些模型。去 **[magpie-community/plugins](https://github.com/magpie-community/plugins)** 找，或者[自己写一个](https://github.com/istoo/owl/blob/main/docs/plugins)。
+插件跑在 [Bun](https://bun.sh) 上，第一次需要时自动下载。插件负责登录、列出模型、发出请求；agent 像用其他供应商一样用这些模型。去 **[magpie-community/plugins](https://github.com/magpie-community/plugins)** 找，或者[自己写一个](https://github.com/istoo/owl/blob/main/site/public/docs/zh/plugins.html)。
 
 插件也可以是**网关中间件**：看得见每个 agent 发出去和收回来的一切的 JavaScript。`onRequest` 可以改写请求或拦下它，`onEvent` 看得见每个流式事件，`onResponse` 看到完整回复。抛错或者跑太久的钩子不会影响请求，请求按原样发出。
 
@@ -210,8 +210,8 @@ owl plugin options model-map '{"mapping": {"fast": "deepseek/deepseek-chat"}}'
 | **上下文** | 每个请求的上下文窗口有多满、多少来自缓存、是什么占满的 |
 | **账单** | 按账号和按上游 key 统计，并可导出 OTLP 到你自己的可观测性平台 |
 | **局域网** | 打开 **在局域网共享**，给每个客户端一个命名的网关 key，各自有每天、每周或每月的 token 和花费上限 |
-| **[远程 owl](https://github.com/istoo/owl/blob/main/docs/remote)** | 笔记本用你台式机上 owl 的供应商、账号和分组，同时仍然接自己的 agent |
-| **[Docker](https://github.com/istoo/owl/blob/main/docs/docker)** | 在服务器或 NAS 上跑 `ghcr.io/istoo/owl`，从网页界面管理 |
+| **[远程 owl](https://github.com/istoo/owl/blob/main/site/public/docs/zh/remote.html)** | 笔记本用你台式机上 owl 的供应商、账号和分组，同时仍然接自己的 agent |
+| **[Docker](https://github.com/istoo/owl/blob/main/site/public/docs/zh/docker.html)** | 在服务器或 NAS 上跑 `ghcr.io/istoo/owl`，从网页界面管理 |
 | **同步** | 备份到文件，或者通过 WebDAV（坚果云、Nextcloud……）、S3，或 GitHub 上的加密仓库在机器之间同步 |
 
 - **资料库**：指令、MCP 服务器、技能和子 agent 只写一次；owl 按各 agent 的格式写进它的文件，并且只删除自己写进去的东西。
