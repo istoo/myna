@@ -23,6 +23,19 @@
       （下一版撤）。`magpie-community/plugins` 全仓库零处 myna 引用，无需改。
       验证：19 个资产（8 myna + 8 owl + install/latest/notes）；`latest.json` 16 条；下载 `myna-darwin-arm64.zip` 检查为
       `myna.app/` 且 `Info.plist` 是 owl；Release 与 Docker 两个 workflow 全绿；Latest 指向 2910。
+- [x] 彻底撤掉 myna（2026-11-10，用户定：代码与 GitHub 一起删）：
+      代码里删掉 `/v1/myna/*` 改写、插件环境 `MYNA_*` 镜像、`~/.config/myna`/`~/.cache/myna` 迁移、
+      旧 LaunchAgent/autostart/widget 清理、会话与 provider id 的 `myna` 识别、provider id 保留名、
+      release 的 `myna-*` 资产别名；相关 fixture 改名（GitHub/npm 外部快照保留原文）。
+      保留上游 magpie 契约（`magpie` 插件键、`@magpie-community`、`X-Magpie-*`、`~/.config/magpie` 迁移）。
+      GitHub：仓库描述改 Owl；删掉 2910 的 8 个 `myna-*` 资产并重传去掉它们的 `latest.json`；
+      `notes.json` 与发布说明里的旧名行删掉；v0.1.2896–2909 共 14 个 release 删除（tag 保留）。
+      验证：`go build ./...`、`go vet`、`gofmt -l` 干净；`go test ./internal/{appdir,sessions,autostart,omarchy,provider}` 3076 绿、
+      gateway 路由 331 绿、plugin 除本机既有红 `TestHostToldTheGatewayAddress` 外全绿（CI 上该包绿）；
+      线上 2910 只剩 11 个 owl 资产，`latest.json`/`notes.json` 各 0 处 myna。
+      CI 红另记 [#17](https://github.com/istoo/owl/issues/17)（`TestKeepOffWaitsForTheSetting`，macOS，本地 5/5 通过）。
+- [x] 社区只保留 GitHub（2026-11-10）：站点社区卡片、文档页头与页脚、应用 About 行都去掉 Discord；
+      README 重写为 owl 版本（命令、端点与事实沿用，文档链接改指真实存在的 `site/public/docs/*.html`）。
 - [ ] **下一版发布前**：撤掉网关的 `/v1/myna/*` 改写与插件环境的 `MYNA_*` 镜像（用户 11-10 定：按计划撤），
       并在发布说明里写明；社区插件仓库经查零处引用，撤掉不影响它们。Mac 上从旧版升级的 `myna.app` 目录不重命名（签名/LaunchServices 风险）。
 - [x] routing-sky-under（CI 3 条）：两处——第三只请求的点在飞行途中被读到（900ms 固定等待），改为等所有点位置连续 5 帧不变；
