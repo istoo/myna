@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -83,4 +84,30 @@ export default { id: "addr-probe", server: async () => ({}) }
 	if got := told(); got != "127.0.0.1:4999" {
 		t.Errorf("under OWL_ADDR=0.0.0.0:4999 the plugin was told OWL_ADDR=%s", got)
 	}
+}
+
+// A plugin written before the rename reads MYNA_ADDR: it is handed the
+// OWL_ADDR owl starts it with, under the old name too.
+func TestPluginEnvKeepsTheOldName(t *testing.T) {
+	t.Setenv("OWL_ADDR", "127.0.0.1:3591")
+	t.Setenv("OWL_BUN", "/usr/bin/bun")
+	os.Unsetenv("MYNA_ADDR")
+	e := env()
+	got := map[string]string{}
+	for _, kv := range e {
+		if k, v, ok := strings.Cut(kv, "="); ok {
+			got[k] = v
+		}
+	}
+	if got["MYNA_ADDR"] != "127.0.0.1:3591" || got["MYNA_BUN"] != "/usr/bin/bun" {
+		t.Fatalf("a plugin reading the old names has %q and %q", got["MYNA_ADDR"], got["MYNA_BUN"])
+	}
+	// one the user set is theirs
+	t.Setenv("MYNA_ADDR", "127.0.0.1:4000")
+	for _, kv := range env() {
+		if kv == "MYNA_ADDR=127.0.0.1:4000" {
+			return
+		}
+	}
+	t.Fatal("MYNA_ADDR the user set was replaced")
 }

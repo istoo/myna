@@ -1013,7 +1013,31 @@ func command(ctx context.Context, name string, args ...string) *exec.Cmd {
 }
 
 // env is the plugins' environment: owl's, with its proxy.
-func env() []string { return netproxy.Env(os.Environ()) }
+// env is the environment a plugin's programs are started with. A plugin
+// written before the rename reads MYNA_ADDR and the other MYNA_* names:
+// each OWL_* variable is handed to it under that name too, for the release
+// while the community's plugins move over. A MYNA_* the user set stands.
+func env() []string {
+	e := netproxy.Env(os.Environ())
+	seen := make(map[string]bool, len(e))
+	for _, kv := range e {
+		if k, _, ok := strings.Cut(kv, "="); ok {
+			seen[k] = true
+		}
+	}
+	out := e[:len(e):len(e)]
+	for _, kv := range e {
+		k, v, ok := strings.Cut(kv, "=")
+		if !ok || !strings.HasPrefix(k, "OWL_") {
+			continue
+		}
+		if old := "MYNA_" + strings.TrimPrefix(k, "OWL_"); !seen[old] {
+			out = append(out, old+"="+v)
+			seen[old] = true
+		}
+	}
+	return out
+}
 
 // Version is the version of the package spec installed (or checked out
 // at its path), "" when there is none.
