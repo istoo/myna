@@ -247,4 +247,9 @@
       routing-bodies + call-headers 40/40。注意：旧选择器在本地 1.65 上不复现那 9 条（CI 上是重载下的重绘竞态），
       所以 `.rt-days .rt-day` 的依据是 CI 日志里 nth(1) 解析到隐藏的分组按钮，而不是本地红绿。
 - [x] allow-ips、lan-docker 的"Add/开关移动了页面"：同样是滚轮惯性未停就取基准，加 `wheelRest` 后 1.65 上 30/30。
-- [ ] 应用侧待修（#14）：codex-predictions 选完模型视图回跳 ≈300px；model-load 390 宽点击跳 229px；usage 视图横向溢出 4px。
+- [x] usage 视图横向溢出 4px：源头是趋势卡的指标页签（`.led-bar .segs` 383px vs 卡片 358px），
+      按编辑器里同款规则改为换行；1.65 上 usage 五个文件 93/100（回退该规则 89/100），usage-heatmap 26/26 且 macOS 26/26。`d5ea0a139`
+- [ ] 应用侧待修（#14）：codex-predictions 选完模型视图回跳（420 宽确定性 5/5；根因是"点击保持期间的滚轮惯性滚动被保留却未记为读者位置"）；
+      model-load 390 宽点击跳 229px。应用滚动记账逻辑暂不改（牵动整套 GUI 滚动，风险高）。
+- [ ] view-open-wheel（webkit 约 20 条）：320 个子测试，Linux 上单条 180–234 秒，父测试 15 分钟超时后余下子测试瞬时失败；
+      测的是"听不到滚轮"时的记账（waitsBack），属应用侧。
