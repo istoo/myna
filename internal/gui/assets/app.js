@@ -1298,7 +1298,7 @@ const CONNECT_COST = {
   // Desktop's third-party mode runs in a userData of its own (Claude-3p),
   // so the signed-in profile's chats and projects aren't shown there; owl
   // leaves them alone (xgddm88 on X: 之前的工程和会话记录全没了)
-  "claude-desktop": "Chats and projects from your Anthropic sign-in stay in Desktop's own profile, not shown on owl; nothing is deleted, and turning this off brings them back.",
+  "claude-desktop": ["Chats and projects from your Anthropic sign-in stay in Desktop's own profile, not shown on owl; nothing is deleted, and turning this off brings them back.", "To go on with them on owl, open Settings → Import in Desktop: it can copy in your Claude.ai chats and projects and this computer's earlier sessions, and leaves the originals as they are."],
 };
 // what an agent not yet connected says turning it on does to what the user
 // sees in it, before they turn it on
@@ -2263,7 +2263,7 @@ function connectPanel(a, { fields, fieldBtn }) {
   if (a.native) for (const [key, detail] of Object.entries(a.native.fields || {})) {
     if (detail.detail) { const f = a.fields.find((x) => x.key === key); kv(t(f?.label || key), line(t(detail.detail))); }
   }
-  if (CONNECT_COST[kindOf(a)]) kv(t("Once connected"), line(t(CONNECT_COST[kindOf(a)])));
+  if (CONNECT_COST[kindOf(a)]) kv(t("Once connected"), line([].concat(CONNECT_COST[kindOf(a)]).map((s) => t(s)).join(" ")));
   // its own settings, the rows Settings had (agentPrefRows), here where
   // the agent is; shown once they are read, so none opens on a default
   const own = agentPrefsOf(a);

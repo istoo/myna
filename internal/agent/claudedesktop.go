@@ -136,7 +136,7 @@ func claudeDesktop(home string) *Agent {
 		},
 		Notice: func() string {
 			if desktopWiredAny(ps) {
-				return noticeClaudedesktop1.String() + " " + noticeClaudedesktop3.String()
+				return noticeClaudedesktop1.String() + " " + noticeClaudedesktop3.String() + " " + noticeClaudedesktop5.String()
 			}
 			return noticeClaudedesktop2.String() + " " + noticeClaudedesktop4.String()
 		},
@@ -1094,4 +1094,12 @@ var (
 	// (xgddm88 on X: 之前的工程和会话记录全没了).
 	noticeClaudedesktop3 = newNotice("Chats and projects from your Anthropic sign-in stay in Desktop's own profile, not shown on owl; nothing is deleted, and turning this off brings them back.")
 	noticeClaudedesktop4 = newNotice("Your chats and projects from before are back there.")
+	// and how to go on with them on owl (Jacky_yyyyyyyy on X): Desktop's
+	// own importer, which owl's profile turns on (desktopSeedImport).
+	// With claudeAiImport.enabled, 2.7032 and 4.16336 offer it in 3p mode
+	// under Settings → Import: Claude.ai's chats and projects (a sign-in
+	// to Claude.ai there, or its data export zip) and the Code and Cowork
+	// sessions of the signed-in profile, copied in under new ids, the
+	// originals left alone.
+	noticeClaudedesktop5 = newNotice("To go on with them on owl, open Settings → Import in Desktop: it can copy in your Claude.ai chats and projects and this computer's earlier sessions, and leaves the originals as they are.")
 )

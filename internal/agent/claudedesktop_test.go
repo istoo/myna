@@ -1270,6 +1270,14 @@ func TestClaudeDesktopKeepsTheSignedInHistory(t *testing.T) {
 	if n := a.Notice(); !strings.Contains(n, noticeClaudedesktop3.String()) {
 		t.Errorf("on, the notice doesn't say the signed-in history stays: %q", n)
 	}
+	// and how to go on with it on owl: Desktop's own importer, which the
+	// profile turns on (Jacky_yyyyyyyy on X)
+	if n := a.Notice(); !strings.Contains(n, noticeClaudedesktop5.String()) {
+		t.Errorf("on, the notice doesn't say how to go on with the history on owl: %q", n)
+	}
+	if got := desktopJSON(t, p.prof)["claudeAiImport"]; !reflect.DeepEqual(got, map[string]any{"enabled": true, "bannerBehavior": "detect"}) {
+		t.Errorf("on, Desktop's import isn't turned on for the notice to point at: %v", got)
+	}
 	if err := f.Set(""); err != nil {
 		t.Fatal(err)
 	}
