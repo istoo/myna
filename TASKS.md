@@ -15,7 +15,7 @@
 - [x] 仓库改名：`gh repo rename owl`（istoo/myna → istoo/owl，旧地址重定向），本地 origin 同步。
 - [x] 验证：`go build ./...`、`go vet ./...`、`go test ./internal/{appdir,autostart,omarchy,update}`（203）、
       `go test ./internal/gui -run 'Icon|Flap|Logo|Manifest|Tray'`（62）、`go test ./internal/provider -run 'Logo|Signin|Brand'`（5）、
-      GUI 冒烟 7 文件 56/56（chromium）、`make icons`。PR #15。
+      GUI 冒烟 7 文件 56/56（chromium）、`make icons`。PR #15 已合并（squash `4c331d207`），main 的 Test/GUI/Docker 全绿。
 - [x] 真实迁移验证（沙箱 HOME）：放 `~/.config/myna/{providers.json,settings.json}` 后运行编译出的 owl，
       日志 `appdir: brought owl's files over from …/.config/myna`，两个文件都出现在 `~/.config/owl`。
 - [ ] 未验证：Mac 上 Dock 磁贴的 flap 动画（新图形）在真机上的观感。
