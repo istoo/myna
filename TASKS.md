@@ -18,6 +18,11 @@
       GUI 冒烟 7 文件 56/56（chromium）、`make icons`。PR #15 已合并（squash `4c331d207`），main 的 Test/GUI/Docker 全绿。
 - [x] 真实迁移验证（沙箱 HOME）：放 `~/.config/myna/{providers.json,settings.json}` 后运行编译出的 owl，
       日志 `appdir: brought owl's files over from …/.config/myna`，两个文件都出现在 `~/.config/owl`。
+- [x] 兼容与发布 `v0.1.2910`：release 同时上传 `myna-*` 资产（Mac 的 zip 内部是 `myna.app`、二进制与签名同一份），
+      `latest.json` 列两套名字；网关把 `/v1/myna/*` 改写到 `/v1/owl/*`，插件子进程把 `OWL_*` 以 `MYNA_*` 再给一份
+      （下一版撤）。`magpie-community/plugins` 全仓库零处 myna 引用，无需改。
+      验证：19 个资产（8 myna + 8 owl + install/latest/notes）；`latest.json` 16 条；下载 `myna-darwin-arm64.zip` 检查为
+      `myna.app/` 且 `Info.plist` 是 owl；Release 与 Docker 两个 workflow 全绿；Latest 指向 2910。
 - [ ] 未验证：Mac 上 Dock 磁贴的 flap 动画（新图形）在真机上的观感。
 - 记录原则：`LESSONS.md`、`tasks/lessons.md` 与本文件的历史叙述保持原样（它们是历史事实），新内容用新名。
 
