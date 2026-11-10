@@ -4513,17 +4513,22 @@ function routingPage(part) {
 
   const flying = new Map(); // packet → { id: the row it is at, agent }
 
-  // A owl, drawn to fly: facing right, the dot it carries at the tip
-  // of its beak where the flight puts it; its wings beat from the shoulder.
-  const FLIER = '<g class="rt-lift"><g transform="scale(1.2) translate(-6.5 3.2)">'
-    + '<path class="wing far" d="M-14.5 -3.4C-16.5 -9.5 -14.2 -15 -8.6 -18.6C-9.4 -12.6 -9.6 -7.4 -9.2 -3.2Z"/>'
-    + '<path class="tail" d="M-31.5 3.1L-18.6 -1.8L-17.4 1.2L-30.8 4.6Z"/>'
-    + '<ellipse class="body" cx="-12.2" cy="-1.4" rx="7.6" ry="3.9"/>'
-    + '<ellipse class="belly" cx="-12.8" cy="0.4" rx="4.3" ry="1.6"/>'
-    + '<circle class="body" cx="-4.9" cy="-3.7" r="3.1"/>'
-    + '<path class="body" d="M-2.3 -4.8L1.4 -3.3L-2.3 -2.2Z"/>'
-    + '<g class="wing near"><path d="M-15.6 -3.2C-17.8 -10.2 -15.2 -16.4 -8.4 -20.4C-9.3 -13.6 -9.4 -7.8 -8.8 -2.8Z"/>'
-    + '<path class="bar" d="M-14.6 -5.6C-15.4 -10.4 -13.8 -14.4 -10.4 -17.2"/></g>'
+  // A owl, drawn to fly: facing right, round and big-eyed with its ear
+  // tufts up, the dot it carries at the tip of its beak where the flight
+  // puts it; its wings beat from the shoulder. The same owl as the app's
+  // icon (build/icon/owl.svg), in profile so it can face where it flies.
+  const FLIER = '<g class="rt-lift"><g transform="scale(1.2) translate(3 2.6)">'
+    + '<path class="wing far" d="M-18.0 -2.4C-22.2 -3.6 -24.2 -7.6 -23.2 -11.6C-19.6 -9.4 -17.8 -6.2 -17.2 -2.6Z"/>'
+    + '<ellipse class="body" cx="-10.5" cy="-1.0" rx="9.0" ry="9.2"/>'
+    + '<path class="body" d="M-17.2 -7.6L-18.4 -12.8L-13.0 -9.4Z"/>'
+    + '<path class="body" d="M-3.8 -7.6L-2.6 -12.8L-8.0 -9.4Z"/>'
+    + '<circle class="belly" cx="-14.2" cy="-3.4" r="3.0"/>'
+    + '<circle class="belly" cx="-6.8" cy="-3.4" r="3.0"/>'
+    + '<circle class="body" cx="-13.6" cy="-3.4" r="1.25"/>'
+    + '<circle class="body" cx="-6.2" cy="-3.4" r="1.25"/>'
+    + '<path class="belly" d="M-12.2 -0.4L-8.8 -0.4L-10.5 2.6Z"/>'
+    + '<g class="wing near"><path d="M-3.0 -2.4C1.2 -3.6 3.2 -7.6 2.2 -11.6C-1.4 -9.4 -3.2 -6.2 -3.8 -2.6Z"/>'
+    + '<path class="bar" d="M-2.6 -5.4C-1.0 -7.0 1.0 -8.6 2.0 -9.6"/></g>'
     + "</g></g>";
 
   function bird(kind) {
