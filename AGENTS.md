@@ -17,10 +17,12 @@ Before reviewing a community PR, read [contributors](docs/contributors.md):
 what stops a review for possible harm, what is closed unreviewed, and the
 authors whose PRs are closed on sight.
 
-## Lessons
+## Lessons and how a change is run
 
 Before changing code, read [LESSONS.md](LESSONS.md): what recent merged
-work got wrong and the rule that would have caught it.
+work got wrong and the rule that would have caught it. Write the check a
+change must pass before the first edit, and keep a retry to the unit that
+failed: [how a change is run](docs/agent-workflow.md).
 
 ## Built-in subscriptions that a plugin serves
 

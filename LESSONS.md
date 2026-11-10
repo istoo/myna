@@ -90,6 +90,25 @@ its client's timeout on CI (7ac20247a). Two lessons were seen a third day
 and moved into the code standards: myna's default never overrides a
 value the user set, and a checkout belongs to the session that made it.
 
+## What an accepted result teaches
+
+A lesson below says what went wrong. The other half of the same edge is
+what a change that was accepted changed about how the next one is cut:
+a confirmed approach becomes a constraint, not a story. Record it in
+three lines, where the next change in that area will read it:
+
+```
+ACCEPTED  d5b1cff32, the awake flake fixed at its cause
+DERIVED   a window that counts a timer's looks covers the timer's grid, not just its interval
+LANDS IN  code-standards.md, "A timing test leaves room on both sides"
+```
+
+`ACCEPTED` names the commit, not a person. `DERIVED` is one sentence a
+later reader can apply without opening the diff. `LANDS IN` is a file and
+a section, so the constraint is found where the work is cut — the code
+standards, a subsystem page, or the brief for the next change. A result
+with no derivable constraint is not recorded here; most are like that.
+
 ## Reading the report
 
 **Reproduce the reporter's exact case, on the surface they use, before you
