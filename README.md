@@ -55,6 +55,13 @@ curl -fsSL https://github.com/istoo/owl/releases/latest/download/install.sh | sh
 
 <sub>On a desktop the script installs the app. On Linux without WebKitGTK 4.1 it installs that first with your package manager (sudo asks for your password); with no desktop, or no terminal to ask at, it installs the terminal build and says which package to add. `--gui` or `--tui` chooses. Behind a firewall, use `--proxy` or `--mirror`. The files named `owl-cli-*` are terminal builds — executables, not documents: `chmod +x` one and run it, or let the script above put `owl` on your PATH. The app is `owl-darwin-*.zip`. Or `go install github.com/istoo/owl@latest`, or the [Docker image](https://github.com/istoo/owl/blob/main/site/public/docs/docker.html). Every build updates itself and its release notes come from this repository. To remove it, run the same command with `sh -s -- --uninstall`; your settings in `~/.config/owl` stay unless you add `--purge`, which disconnects your agents and deletes them too.</sub>
 
+**First open on macOS.** The app is signed ad hoc, not notarised. A copy a
+browser downloaded carries the quarantine flag, and macOS refuses it until
+you allow it: **Open Anyway** in **System Settings → Privacy & Security**,
+or `/usr/bin/xattr -dr com.apple.quarantine /Applications/owl.app`. A copy installed
+by the script above is downloaded with `curl`, has no quarantine flag, and
+opens at once.
+
 ## Quick start
 
 1. **Add a provider.** Open owl and go to **Providers → Add provider**. Pick a preset and paste a key, or sign in with a subscription.

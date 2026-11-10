@@ -54,6 +54,11 @@ curl -fsSL https://github.com/istoo/owl/releases/latest/download/install.sh | sh
 
 <sub>在桌面上，脚本安装桌面应用。Linux 上没有 WebKitGTK 4.1 时，脚本先用包管理器装上（sudo 会问密码）；没有桌面、或者没有终端可以询问时，安装终端版，并告诉你要补哪个包。`--gui` 或 `--tui` 可以指定。防火墙后面用 `--proxy` 或 `--mirror`。名字带 `owl-cli-*` 的是终端版——它们是可执行文件，不是文本文件：`chmod +x` 之后在终端运行，或者用上面的脚本把 `owl` 放进 PATH。图形界面是 `owl-darwin-*.zip`。也可以用 `go install github.com/istoo/owl@latest`，或者 [Docker 镜像](https://github.com/istoo/owl/blob/main/site/public/docs/zh/docker.html)。每个构建都会自己更新，更新说明只来自这个仓库。卸载时用同一条命令加 `sh -s -- --uninstall`；`~/.config/owl` 里的设置会保留，除非加上 `--purge`——那会断开你的 agent 并一起删掉。</sub>
 
+**macOS 首次打开。** 应用是 ad-hoc 签名，没有公证。浏览器下载的副本带着隔离标记，
+在你允许之前 macOS 会拒绝打开：到 **系统设置 → 隐私与安全性** 点 **仍要打开**，
+或者运行 `/usr/bin/xattr -dr com.apple.quarantine /Applications/owl.app`。用上面的脚本安装的副本
+是用 `curl` 下载的，没有隔离标记，可以直接打开。
+
 ## 快速上手
 
 1. **添加供应商。** 打开 owl，进入 **供应商 → 添加供应商**。选一个预设、粘贴 key，或者用订阅登录。

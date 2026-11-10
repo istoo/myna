@@ -2804,8 +2804,13 @@ owl update --mirror https://mirror.example/
 No mirror is used unless you give one, and the SHA-256 every download is
 checked against still comes from github.com/istoo/owl, never from the mirror.
 
-Mac releases are signed and notarised; the Windows and Linux builds are not
-signed yet (Windows SmartScreen may ask before the first run). Every build
+Mac releases are signed ad hoc (there is no Developer ID here), so macOS
+asks once before the first open: a copy a browser downloaded carries the
+quarantine flag and needs **Open Anyway** in System Settings › Privacy &
+Security, or `/usr/bin/xattr -dr com.apple.quarantine /Applications/owl.app`. A copy
+installed by `install.sh` (curl) has no quarantine flag and nothing to
+allow. The Windows and Linux builds are not signed yet (Windows SmartScreen
+may ask before the first run). Every build
 keeps itself current: the app
 downloads a new version in the background and installs it when you restart
 (*Restart to Update* in the menu) or quit; `owl update` does the same from

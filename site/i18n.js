@@ -113,7 +113,7 @@ const zh = {
   "det.usage": "按 Agent 统计用量",
   "det.usage.p": "经过网关的每个 Agent、每个模型的 token、缓存命中和费用。",
   "det.update": "自动更新",
-  "det.update.p": "新版本在后台悄悄下载，重启时安装。Mac 版经过签名和公证。",
+  "det.update.p": "新版本在后台悄悄下载，重启时安装。Mac 版是 ad-hoc 签名，首次打开时 macOS 会询问一次。",
 
   "cli.eyebrow": "终端",
   "cli.h2": "还有 TUI 和 CLI。",
@@ -266,7 +266,7 @@ const ja = {
   "det.usage": "エージェントごとの使用量",
   "det.usage.p": "ゲートウェイを通ったエージェントとモデルごとのトークン数、キャッシュヒット、コスト。",
   "det.update": "自動アップデート",
-  "det.update.p": "新しいバージョンは裏で静かにダウンロードされ、再起動時にインストールされます。Mac 版は署名・公証済み。",
+  "det.update.p": "新しいバージョンは裏で静かにダウンロードされ、再起動時にインストールされます。Mac 版は ad-hoc 署名なので、初回起動時に macOS が一度確認します。",
 
   "cli.eyebrow": "ターミナル",
   "cli.h2": "TUI と CLI も。",
@@ -419,7 +419,7 @@ const de = {
   "det.usage": "Nutzung je Agent",
   "det.usage.p": "Tokens, Cache-Treffer und Kosten für jeden Agenten und jedes Modell, die über den Zugangspunkt liefen.",
   "det.update": "Aktualisiert sich selbst",
-  "det.update.p": "Neue Versionen werden still im Hintergrund geladen und beim Neustart installiert. Auf dem Mac signiert und notarisiert.",
+  "det.update.p": "Neue Versionen werden still im Hintergrund geladen und beim Neustart installiert. Auf dem Mac ad-hoc signiert, deshalb fragt macOS beim ersten Öffnen einmal.",
 
   "cli.eyebrow": "Terminal",
   "cli.h2": "Auch als TUI und CLI.",
