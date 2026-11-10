@@ -4,7 +4,7 @@
 export function aboutRows(ctx) {
   // el, $, t and the window's other helpers are its own declarations,
   // reached as globals; the values app.js keeps in let or const come here
-  const { about, s, keep, web, setTab, UPDATE_EVERY, DISCORD_SVG, GITHUB_SVG, gatewayMode } = ctx;
+  const { about, s, keep, web, setTab, UPDATE_EVERY, GITHUB_SVG, gatewayMode } = ctx;
   const row = (name, sub, value, ...tools) => {
     const r = el("div", "row pref");
     const who = el("div", "who");
@@ -95,18 +95,13 @@ export function aboutRows(ctx) {
   const lic = el("button", "text", t("View"));
   lic.onclick = showNotices;
   row(t("Open-source licenses"), t("the notices of the code and data owl is built with"), "", lic);
-  const join = el("button", "discord");
-  join.innerHTML = DISCORD_SVG;
-  join.append(el("span", "", t("Join Discord")));
-  join.title = "discord.gg/vGSnD3ZKQF";
-  join.onclick = () => api("open", { url: "https://discord.gg/vGSnD3ZKQF" }).catch(() => {});
-  // issues and the code are on GitHub, for those who'd rather not use Discord
+  // issues and the code are on GitHub
   const repo = el("button", "github");
   repo.innerHTML = GITHUB_SVG;
   repo.append(el("span", "", "GitHub"));
   repo.title = "github.com/istoo/owl";
   repo.onclick = () => api("open", { url: "https://github.com/istoo/owl" }).catch(() => {});
-  row(t("Community"), t("questions, ideas and feedback, on Discord or GitHub"), "", join, repo);
+  row(t("Community"), t("questions, ideas and feedback, on GitHub"), "", repo);
   // owl uninstall, from the app (Jevik_AI on X deleted owl's folders
   // by hand and Codex kept pointing at a gateway that was gone). Never in a
   // browser: owl web would be taken off the computer serving the page.

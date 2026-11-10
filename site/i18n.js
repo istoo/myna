@@ -131,7 +131,7 @@ const zh = {
   "cli.c.tui": "# 在终端里用完整的应用",
 
   "comm.h": "加入 owl 社区",
-  "comm.p": "提问、分享你的配置、告诉我们下一步做什么——都在 Discord。",
+  "comm.p": "提问、分享你的配置、告诉我们下一步做什么——都在 GitHub。",
 
   "fin.h2": "每个 Agent，每个模型。",
   "fin.sub": "免费、开源、原生。支持 macOS、Windows 和 Linux。",
@@ -284,7 +284,7 @@ const ja = {
   "cli.c.tui": "# アプリ全体をターミナルで",
 
   "comm.h": "owl コミュニティに参加",
-  "comm.p": "質問、設定の共有、次に作ってほしいもの——Discord でどうぞ。",
+  "comm.p": "質問、設定の共有、次に作ってほしいもの——GitHub でどうぞ。",
 
   "fin.h2": "すべてのエージェント。すべてのモデル。",
   "fin.sub": "無料、オープンソース、ネイティブ。macOS、Windows、Linux に対応。",
@@ -437,7 +437,7 @@ const de = {
   "cli.c.tui": "# die ganze App im Terminal",
 
   "comm.h": "Werden Sie Teil der owl-Community",
-  "comm.p": "Fragen stellen, Ihr Setup zeigen, uns sagen, was wir als Nächstes bauen sollen – auf Discord.",
+  "comm.p": "Fragen stellen, Ihr Setup zeigen, uns sagen, was wir als Nächstes bauen sollen – auf GitHub.",
 
   "fin.h2": "Jeder Agent. Jedes Modell.",
   "fin.sub": "Kostenlos, Open Source, nativ. Für macOS, Windows und Linux.",
