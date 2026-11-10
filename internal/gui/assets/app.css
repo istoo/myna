@@ -1385,6 +1385,10 @@ body.masked :hover > .acct-eye, body.masked .pq-card:hover .acct-eye, body.maske
 .led-trend { padding: 10px 14px 10px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; }
 .led-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; margin-bottom: 8px; }
 .led-bar .grow { flex: 1; }
+/* a narrow window's tabs wrap rather than push the view into a sideways
+   scroll (Japanese and German at 420px, issue #13): the editor's choices do
+   the same in its sheet */
+.led-bar .segs { max-width: 100%; flex-wrap: wrap; }
 .led-by { font-size: 11.5px; color: var(--muted); }
 /* "Split by" and its choices wrap together, under the metrics when narrow */
 .led-split { display: flex; align-items: center; gap: 8px; }
