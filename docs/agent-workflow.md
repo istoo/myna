@@ -11,7 +11,7 @@ A unit of work starts with the check it must pass, written as a command
 and the output that makes it green:
 
 ```
-GREEN  go test ./internal/gateway -run TestRoutingWindow exits 0
+GREEN  go test ./internal/gateway -run '^TestReadOnlyKeyEveryRoute$' exits 0
 GREEN  gofmt -l is empty
 GREEN  the diff touches only internal/gateway/routing.go
 ```
