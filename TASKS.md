@@ -338,3 +338,5 @@
 - [x] d0aa4ad89 的 Test 全绿（Copilot 池模型）
 - [x] 2026-11-11 05:5x：backport c4da9a97d + 47e30d0e9（弹窗打开时标题栏仍可拖窗口）
 - [x] 9a4b36bce 的 Test 全绿（Windows 卸载残留）
+- [x] 2026-11-11 06:2x：backport 6bac8f8a5（手机底部 tab bar + More）
+- [x] d897811f2 的 Test 与 GUI 全绿（弹窗拖动）
