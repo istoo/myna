@@ -61,6 +61,9 @@ func TokenFor(agent string) string { return Token + "-" + agent }
 // agentOf is the agent a request came from: the one its token names
 // (TokenFor), else the one its User-Agent does.
 func agentOf(r *http.Request) string {
+	if id := pathAgent(r); id != "" {
+		return id
+	}
 	if id, ok := strings.CutPrefix(callerKey(r), Token+"-"); ok && id != "" {
 		return usage.AgentOf(id)
 	}
@@ -115,6 +118,9 @@ func codexForClaudeCode(h http.Header) bool {
 // came with the plain gateway token, not one owl gave an agent, and
 // its User-Agent names no agent.
 func startedByAgent(r *http.Request, agent string) bool {
+	if pathAgent(r) != "" {
+		return false
+	}
 	if _, ok := strings.CutPrefix(callerKey(r), Token+"-"); ok {
 		return false
 	}

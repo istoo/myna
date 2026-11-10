@@ -425,6 +425,8 @@ func lanGuard(next http.Handler) http.Handler {
 			return
 		}
 		r = takePagePort(r)
+		// an agent named in the path (AgentPath) is told by it
+		r = takeAgentPath(r)
 		// a WSL distro's agent, at the address Windows has on its network
 		// (wsl.go), is one of this computer's
 		if fromWSL(r) {
