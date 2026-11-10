@@ -66,9 +66,11 @@ jobs:
       # (NODE_PATH).
       #
       # The two browsers are a few hundred MB a shard, and the version is
-      # fixed, so they are kept between runs: a hit installs nothing from the
-      # network, run 42809799587's shard 4 died at this step's 20-minute
-      # timeout. A miss installs as before, --with-deps included.
+      # fixed, so they are kept between runs: a hit downloads nothing, run
+      # 42809799587's shard 4 died at this step's 20-minute timeout. The
+      # system libraries are installed every run, cached browsers or not:
+      # with the hit skipping them, run 42860876261's WebKit tests all went
+      # red on a runner image without libevent-2.1.so.7.
       - name: Playwright browsers cache
         id: pwcache
         uses: actions/cache@v4
@@ -81,11 +83,8 @@ jobs:
           mkdir -p "$RUNNER_TEMP/pw" && cd "$RUNNER_TEMP/pw"
           npm init -y >/dev/null
           npm i --no-audit --no-fund "playwright@$PLAYWRIGHT_VERSION"
-          if [ "${{ steps.pwcache.outputs.cache-hit }}" = "true" ]; then
-            npx playwright install chromium webkit
-          else
-            npx playwright install --with-deps chromium webkit
-          fi
+          npx playwright install chromium webkit
+          npx playwright install-deps chromium webkit
           echo "NODE_PATH=$RUNNER_TEMP/pw/node_modules" >> "$GITHUB_ENV"
 
       # The smoke set is what every GUI change passes through: translations
