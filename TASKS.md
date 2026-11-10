@@ -16,7 +16,9 @@
 - [x] 验证：`go build ./...`、`go vet ./...`、`go test ./internal/{appdir,autostart,omarchy,update}`（203）、
       `go test ./internal/gui -run 'Icon|Flap|Logo|Manifest|Tray'`（62）、`go test ./internal/provider -run 'Logo|Signin|Brand'`（5）、
       GUI 冒烟 7 文件 56/56（chromium）、`make icons`。PR #15。
-- [ ] 未验证：真实安装的 myna → owl 首次启动迁移；Mac 上 Dock 磁贴的 flap 动画。
+- [x] 真实迁移验证（沙箱 HOME）：放 `~/.config/myna/{providers.json,settings.json}` 后运行编译出的 owl，
+      日志 `appdir: brought owl's files over from …/.config/myna`，两个文件都出现在 `~/.config/owl`。
+- [ ] 未验证：Mac 上 Dock 磁贴的 flap 动画（新图形）在真机上的观感。
 - 记录原则：`LESSONS.md`、`tasks/lessons.md` 与本文件的历史叙述保持原样（它们是历史事实），新内容用新名。
 
 - [x] 0. 创建 istoo/myna 仓库，设置 origin/upstream
