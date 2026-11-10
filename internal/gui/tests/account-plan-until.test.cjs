@@ -81,6 +81,9 @@ for (const [engine, browserType] of [["chromium", chromium], ["webkit", webkit]]
       assert.ok(m.inside, `${at}: the date stays inside its row`);
       // on a phone the plan has a line of its own under the address
       assert.ok(m.line <= (web ? 84 : 24), `${at}: the first line is one line (${m.line}px)`);
+      // the sheet's width settles as its rows draw: wait for that, not a
+      // half-drawn row on a loaded runner (issue #13)
+      await page.waitForFunction(() => { const b = document.querySelector(".modal .ebody"); return b && b.scrollWidth - b.clientWidth <= 0; }, null, { timeout: 1000 }).catch(() => {});
       const wide = await page.evaluate(() => { const b = document.querySelector(".modal .ebody"); return b.scrollWidth - b.clientWidth; });
       assert.ok(wide <= 0, `${at}: the sheet doesn't scroll sideways (${wide}px)`);
       await context.close();

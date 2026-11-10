@@ -116,7 +116,10 @@ for (const [engine, browserType] of [["chromium", chromium], ["webkit", webkit]]
       assert.deepEqual(unruled, [], `${at}: every row is ruled off`);
 
       // the sheet doesn't scroll sideways, and in the app, whose scroll bar
-      // myna draws, its edges match (a phone's bar takes no room)
+      // myna draws, its edges match (a phone's bar takes no room). Its width
+      // settles as the rows draw, so the measure waits for that rather than
+      // reading a half-drawn row on a loaded runner (issue #13)
+      await page.waitForFunction(() => { const b = document.querySelector(".modal .ebody"); return b && b.scrollWidth - b.clientWidth <= 0; }, null, { timeout: 1000 }).catch(() => {});
       const m = await page.evaluate(() => {
         const body = document.querySelector(".modal .ebody"), b = body.getBoundingClientRect(), cs = getComputedStyle(body);
         return { wide: body.scrollWidth - body.clientWidth, left: parseFloat(cs.paddingLeft), right: b.right - body.getBoundingClientRect().left - body.clientWidth - parseFloat(cs.borderLeftWidth) + parseFloat(cs.paddingRight), bar: body.offsetWidth - body.clientWidth };
