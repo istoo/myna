@@ -261,4 +261,9 @@
       新增 `fixtures/press.cjs`：先 focus，等控件位置连续 3 帧不变，再 click。容器 1.65 webkit 12/12、macOS chromium 12/12、macOS webkit 12/12。`414e1ad3a`
       应用侧未改：给 `.ebody` 加 `scrollbar-gutter: stable` 或 `overflow-y: scroll` 都只能让首帧宽 10px 或 20px（重排仍发生），
       是 WebKitGTK 的网格首帧计算问题，不是本次测试错。桌面版（body.linux，`.ebody` 已是 `overflow-y: scroll`）是否也丢第一下点击未验证。
+- [x] user-select（10 条，en/zh/ja/de × 420/1100）：`-webkit-user-select` 在 WebKitGTK 2.52 上算作 `auto`、标准属性才是规则（WebKit 16 相反），
+      取"非 auto 的那个"后 8 条转绿；剩下的 420 ja 是拖选起点取了滚轮惯性未停的位置（选到上一行的 "disconnect/reset before headers"），
+      改为 `wheelRest` 等停稳。容器 webkit 8/8、macOS chromium 8/8、macOS webkit 8/8。`97878c1d9`
+- [ ] view-open-wheel 本地镜像与 CI 结论相反：CI 全量里 chromium 360s、webkit 366s 全绿；本地 webkit 的 `unheard` 子测试单条 57–250s 并有 5 条红
+      （CI 上同样 160 条只要 6 分钟）。属镜像环境差异，测试未改；不再用本地红绿判断这个文件。
 - [ ] 已知限制：CI 的字体集与本地镜像不同，德语 560 宽的 9px/6px 溢出本地复现不了；已在镜像里跑 `playwright install-deps` 试图对齐。
