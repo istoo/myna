@@ -340,3 +340,5 @@
 - [x] 9a4b36bce 的 Test 全绿（Windows 卸载残留）
 - [x] 2026-11-11 06:2x：backport 6bac8f8a5（手机底部 tab bar + More）
 - [x] d897811f2 的 Test 与 GUI 全绿（弹窗拖动）
+- [x] 2026-11-11 07:0x：backport 2545bce6e（更新后菜单栏图标位置保留）
+- [x] b4c6aff83 的 Test 与 GUI 全绿（手机 tab bar）
