@@ -56,6 +56,11 @@ func want(st State, now time.Time) bool {
 	return st.Busy || (!st.Last.IsZero() && now.Sub(st.Last) < Grace)
 }
 
+// othersEvery is how often a loop with Keep turned off looks for a write
+// another process made. A var, so a test can keep the beat from landing
+// inside the window it counts looks in.
+var othersEvery = filememo.OthersEvery
+
 // Keep holds sleep off as far as level says while state says the agents are
 // at work, until ctx ends. A level changed while held is taken anew.
 func Keep(ctx context.Context, level func() Level, state func() State) {
@@ -104,7 +109,7 @@ func Keep(ctx context.Context, level func() Level, state func() State) {
 		// seconds (#3185: these looks woke an idle owl)
 		every, changed := tick, (<-chan struct{})(nil)
 		if l == Off {
-			every, changed = filememo.OthersEvery(), written
+			every, changed = othersEvery(), written
 		}
 		select {
 		case <-ctx.Done():

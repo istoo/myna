@@ -151,9 +151,12 @@ func TestKeepDisplay(t *testing.T) {
 // Turned off, Keep looks at the setting again when it is written, not each
 // few seconds (#3185), and turning it on is still taken at once.
 func TestKeepOffWaitsForTheSetting(t *testing.T) {
-	oldHold, oldTick := hold, tick
-	defer func() { hold, tick = oldHold, oldTick }()
+	oldHold, oldTick, oldEvery := hold, tick, othersEvery
+	defer func() { hold, tick, othersEvery = oldHold, oldTick, oldEvery }()
 	tick = time.Millisecond
+	// the beat lands on the clock's 5s grid, which a 50ms window can cross;
+	// an hour keeps it out of the window being counted
+	othersEvery = func() time.Duration { return time.Hour }
 	var held atomic.Int32
 	hold = func(bool) (func(), error) { held.Add(1); return func() { held.Add(-1) }, nil }
 	var looks atomic.Int32
