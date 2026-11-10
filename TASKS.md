@@ -330,3 +330,5 @@
 - [x] 2026-11-11 02:2x：38f43bdf1 的 test(macos) 红：TestTOMLBigFileParsesInLinearTime 比值 24.6>24（负载擦边）；TestSearchQueueKeepsCodexAlive/cancel 挂 19m 致整包 30m 超时 → 测试清理已修（99a5924ba）
 - [ ] TOML 比值阈值 24 在慢 runner 上擦边，未改；若再红需换成更稳的度量或放宽
 - [x] 2026-11-11 02:4x：56da6020c 的 test(macos) 红：TestSpotlightStaleAsksEveryAppAgain 5s 等状态不够 → 上限改 30s
+- [x] 2026-11-11 04:2x：backport 388ca9ad4（Claude Desktop 导入提示）→ 本地提交
+- [x] d4ccee0d4 的 Test 全绿（effort 修复）
