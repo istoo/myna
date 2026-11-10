@@ -22705,7 +22705,9 @@ function sideBars() {
       bar.style.top = box.offsetTop + "px";
       bar.style.height = ch + "px";
       const h = Math.max(24, Math.round(ch * ch / sh));
-      const y = Math.round((ch - h) * box.scrollTop / (sh - ch));
+      // the foot is laid from its end (app.css): scrollTop 0 there
+      const from = getComputedStyle(box).flexDirection === "column-reverse" ? sh - ch : 0;
+      const y = Math.round((ch - h) * (box.scrollTop + from) / (sh - ch));
       thumb.style.height = h + "px";
       thumb.style.transform = `translateY(${y}px)`;
     };
@@ -22811,7 +22813,9 @@ function navSubs() {
   let box = document.querySelector(".nav-sub:not(.leaving)");
   const want = side && at && items.length > 1;
   // another page's list folds away as this one's opens, both at once
-  if (box && (!want || box.dataset.view !== view || box.previousElementSibling !== at)) { navSubLeave(box); box = null; }
+  // Settings' list is over its button, which stays put (jen_celeus on X)
+  const above = at?.id === "prefs";
+  if (box && (!want || box.dataset.view !== view || (above ? box.nextElementSibling : box.previousElementSibling) !== at)) { navSubLeave(box); box = null; }
   if (want) {
     const fresh = !box;
     if (fresh) {
@@ -22827,7 +22831,7 @@ function navSubs() {
         e.preventDefault();
         all[(to + all.length) % all.length].focus();
       };
-      at.after(box);
+      if (above) at.before(box); else at.after(box);
     }
     box.setAttribute("aria-label", (at.querySelector("span[data-t]") || at.querySelector("span"))?.textContent || "");
     for (const s of box.querySelectorAll(".nav-s")) s.remove();
@@ -22871,6 +22875,9 @@ function navSubs() {
     if (fresh && !navSubs.quiet) navSubEnter(box);
   }
   renderCrumb(items);
+  // the foot takes more room while Settings' list is open in it (app.css);
+  // a class rather than :has(), which Safari before 15.4 can't parse
+  $(".side-foot")?.classList.toggle("has-sub", !!(box && above));
 }
 // the sidebar's lists open and fold the way iOS's do: a spring that
 // starts quick and settles slowly, the rows coming in one after another
@@ -22981,8 +22988,12 @@ function navSubEnter(box) {
   box.classList.add("moving");
   box.animate([{ height: "0px", marginTop: "0px", marginBottom: "0px", opacity: 0 }, to], { duration: 460, easing: NAV_EASE })
     .finished.then(() => box.classList.remove("moving"), () => {});
-  [...box.querySelectorAll(".nav-s")].forEach((s, i) => s.animate(
-    [{ opacity: 0, transform: "translateY(-6px)" }, { opacity: 1, transform: "none" }],
+  // Settings' rises from its button, the nearest row first
+  const up = !!box.closest(".side-foot");
+  const rows = [...box.querySelectorAll(".nav-s")];
+  if (up) rows.reverse();
+  rows.forEach((s, i) => s.animate(
+    [{ opacity: 0, transform: `translateY(${up ? 6 : -6}px)` }, { opacity: 1, transform: "none" }],
     { duration: 380, delay: 60 + i * 28, easing: NAV_EASE, fill: "backwards" }));
   box.querySelector(".nav-hl").animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, delay: 120, fill: "backwards" });
 }
