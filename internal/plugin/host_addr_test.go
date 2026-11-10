@@ -20,9 +20,15 @@ func TestHostToldTheGatewayAddress(t *testing.T) {
 	sandbox(t)
 	t.Setenv("OWL_ADDR", "")
 	os.Unsetenv("OWL_ADDR")
-	was := proxyLookNone
-	proxyLookNone = 0
-	t.Cleanup(func() { proxyLookNone = was })
+	// this machine may have a system proxy, which makes the host look for
+	// the proxy's move only every 15s; the port's move is what is measured
+	// here, so neither wait applies
+	for _, k := range []string{"HTTPS_PROXY", "HTTP_PROXY", "ALL_PROXY", "https_proxy", "http_proxy", "all_proxy"} {
+		t.Setenv(k, "")
+	}
+	wasNone, wasEvery := proxyLookNone, proxyLookEvery
+	proxyLookNone, proxyLookEvery = 0, 0
+	t.Cleanup(func() { proxyLookNone, proxyLookEvery = wasNone, wasEvery })
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 
