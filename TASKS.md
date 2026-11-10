@@ -25,6 +25,9 @@
       `myna.app/` 且 `Info.plist` 是 owl；Release 与 Docker 两个 workflow 全绿；Latest 指向 2910。
 - [ ] **下一版发布前**：撤掉网关的 `/v1/myna/*` 改写与插件环境的 `MYNA_*` 镜像（用户 11-10 定：按计划撤），
       并在发布说明里写明；社区插件仓库经查零处引用，撤掉不影响它们。Mac 上从旧版升级的 `myna.app` 目录不重命名（签名/LaunchServices 风险）。
+- [x] routing-sky-under（CI 3 条）：两处——第三只请求的点在飞行途中被读到（900ms 固定等待），改为等所有点位置连续 5 帧不变；
+      另一处是几何：点半径 4.5、560px 中日文下点边距卡片 3.98px，边沿相交 0.52px，比 0.5 容差多 0.02，判定改为 1px（两像素贴边即相接）。
+      容器 webkit 20/20（原 18/20）、macOS chromium 20/20、macOS webkit 20/20。`c5ddec61b`
 - [ ] 未验证：Mac 上 Dock 磁贴的 flap 动画（新图形）在真机上的观感。
 - 记录原则：`LESSONS.md`、`tasks/lessons.md` 与本文件的历史叙述保持原样（它们是历史事实），新内容用新名。
 
