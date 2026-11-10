@@ -332,3 +332,5 @@
 - [x] 2026-11-11 02:4x：56da6020c 的 test(macos) 红：TestSpotlightStaleAsksEveryAppAgain 5s 等状态不够 → 上限改 30s
 - [x] 2026-11-11 04:2x：backport 388ca9ad4（Claude Desktop 导入提示）→ 本地提交
 - [x] d4ccee0d4 的 Test 全绿（effort 修复）
+- [x] 2026-11-11 04:5x：backport b9a1b4aa1（Copilot 多账号模型并集与按账号路由）
+- [x] 83cfb6b02 的 Test 与 GUI 全绿（Desktop 导入提示）
