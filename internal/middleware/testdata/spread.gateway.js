@@ -1,6 +1,6 @@
-// spread.gateway.js: the example on github.com/istoo/myna/docs/plugins#gateway-points.
+// spread.gateway.js: the example on github.com/istoo/owl/docs/plugins#gateway-points.
 // Routing "spread/fewest-tokens" tries the accounts or keys that used the
-// fewest tokens lately first, resting ones last; onUsage says in myna's
+// fewest tokens lately first, resting ones last; onUsage says in owl's
 // log which requests were slow.
 
 export const strategies = {

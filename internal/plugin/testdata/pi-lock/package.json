@@ -1,5 +1,5 @@
 {
-  "name": "myna-plugins",
+  "name": "owl-plugins",
   "private": true,
   "dependencies": {
     "@earendil-works/pi-coding-agent": "1.2.0"

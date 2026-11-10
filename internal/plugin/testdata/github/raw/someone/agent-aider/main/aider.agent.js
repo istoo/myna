@@ -1,7 +1,7 @@
 // Aider (aider.chat) keeps its settings in ~/.aider.conf.yml and reaches
 // any OpenAI-compatible endpoint through litellm's openai/ prefix, so
-// myna's model goes in as openai/<provider>/<model>, beside myna's
-// address and the key myna keeps for Aider.
+// owl's model goes in as openai/<provider>/<model>, beside owl's
+// address and the key owl keeps for Aider.
 export const agent = {
   id: "aider",
   name: "Aider",
@@ -17,7 +17,7 @@ export function connect({ gateway }) {
   return {
     "openai-api-base": gateway.v1,
     "openai-api-key": gateway.key,
-    // myna's model ids aren't in litellm's list, so aider would warn on each
+    // owl's model ids aren't in litellm's list, so aider would warn on each
     "show-model-warnings": false,
   }
 }

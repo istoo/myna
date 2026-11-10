@@ -1,6 +1,6 @@
 // A plugin giving its providers their own icons and its key a title and a
-// hint: the auth hook's icon (myna's own field), else package.json's
-// myna.icon (and so maxConcurrency and maxAccounts); an "api" method's label and placeholder.
+// hint: the auth hook's icon (owl's own field), else package.json's
+// owl.icon (and so maxConcurrency and maxAccounts); an "api" method's label and placeholder.
 const svg = "data:image/svg+xml;base64," + btoa('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="#fd0"/></svg>')
 
 export const Lemon = async () => ({

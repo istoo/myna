@@ -1,7 +1,7 @@
 html, body { background: transparent; }
-body { margin: 0; padding: 10px 12px; font: 13px/1.5 var(--myna-font, system-ui); color: var(--myna-fg); }
+body { margin: 0; padding: 10px 12px; font: 13px/1.5 var(--owl-font, system-ui); color: var(--owl-fg); }
 p { margin: 0 0 4px; }
-.muted { color: var(--myna-muted); }
-textarea { box-sizing: border-box; width: 100%; min-height: 56px; font: inherit; color: inherit; background: var(--myna-card); border: 1px solid var(--myna-line); border-radius: 6px; padding: 6px 8px; resize: vertical; }
-button { font: inherit; color: var(--myna-accent); background: none; border: 0; padding: 0; cursor: pointer; }
+.muted { color: var(--owl-muted); }
+textarea { box-sizing: border-box; width: 100%; min-height: 56px; font: inherit; color: inherit; background: var(--owl-card); border: 1px solid var(--owl-line); border-radius: 6px; padding: 6px 8px; resize: vertical; }
+button { font: inherit; color: var(--owl-accent); background: none; border: 0; padding: 0; cursor: pointer; }
 ol { margin: 0; padding-left: 18px; }
