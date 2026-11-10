@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A model the user picks for one of Claude Desktop's tiers is, for the
@@ -20,7 +20,7 @@ import (
 // behaves_as feeds Desktop's own effort profile only). A list there
 // replaces the gateway's /v1/models in Desktop's menu, and while none of
 // its names is a bare tier word Desktop doesn't read /v1/models at all
-// (adminListObviatesDiscovery), so the list myna writes is the whole of
+// (adminListObviatesDiscovery), so the list owl writes is the whole of
 // what /v1/models gives Desktop, in its order, by its ids, each with what
 // Desktop would have read off the row: its display_name as labelOverride,
 // supports1m for a window of 1M and up (and prefer1m for a model listed by
@@ -57,9 +57,9 @@ func DesktopBehavesAs() (as map[string]string, ok bool) {
 	return as, true
 }
 
-// DesktopInferenceModels is the inferenceModels list myna gives Claude
+// DesktopInferenceModels is the inferenceModels list owl gives Claude
 // Desktop's profile: nil while no model it lists is picked for a tier,
-// when Desktop finds myna's models on its own (/v1/models). ok is false
+// when Desktop finds owl's models on its own (/v1/models). ok is false
 // when the picks can't be read: whatever is written stays.
 func DesktopInferenceModels() (list []map[string]any, ok bool) {
 	picked, ok := desktopTiersKnown()
@@ -78,7 +78,7 @@ func DesktopInferenceModels() (list []map[string]any, ok bool) {
 		// whose names aren't bare tier words (adminListObviatesDiscovery
 		// in its app.asar, 4.4212), and names an entry by its
 		// labelOverride, else its catalog's name, else the discovered
-		// row's, else the id itself (pzn, ngn): every mythos-myna-<n>
+		// row's, else the id itself (pzn, ngn): every mythos-owl-<n>
 		// read as that id (chengming0v0 on Discord). Each entry is
 		// labelled as /v1/models labels its row, a catalog-named Claude
 		// model too, whose provider the skipped description said

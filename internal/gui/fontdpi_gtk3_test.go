@@ -28,7 +28,7 @@ func TestFontDPIUnset(t *testing.T) {
 	}
 	here, _ := filepath.Abs(".")
 	bin := filepath.Join(t.TempDir(), "probe")
-	args := append([]string{"testdata/fontdpi_probe.c", "-DMYNA_FONT_DPI", "-I" + here, "-o", bin}, strings.Fields(string(flags))...)
+	args := append([]string{"testdata/fontdpi_probe.c", "-DOWL_FONT_DPI", "-I" + here, "-o", bin}, strings.Fields(string(flags))...)
 	if out, err := exec.Command("cc", args...).CombinedOutput(); err != nil {
 		t.Fatalf("build probe: %v\n%s", err, out)
 	}

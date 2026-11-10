@@ -29,29 +29,29 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/awake"
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/codexrelay"
-	"github.com/istoo/myna/internal/filememo"
-	"github.com/istoo/myna/internal/gwbudget"
-	"github.com/istoo/myna/internal/gwmw"
-	"github.com/istoo/myna/internal/gwtool"
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/pluginrt"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/redact"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/awake"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/codexrelay"
+	"github.com/istoo/owl/internal/filememo"
+	"github.com/istoo/owl/internal/gwbudget"
+	"github.com/istoo/owl/internal/gwmw"
+	"github.com/istoo/owl/internal/gwtool"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/pluginrt"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/redact"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // DefaultAddr is where the gateway listens unless Settings' port or
-// MYNA_ADDR says otherwise.
+// OWL_ADDR says otherwise.
 const DefaultAddr = "127.0.0.1:3425"
 
 // Token is the bearer token agents are told to use. The gateway only
 // listens on loopback and accepts anything, but agents insist on one.
-const Token = "myna"
+const Token = "owl"
 
 // TokenFor is the token an agent that says nothing of itself in its
 // User-Agent is told to use, so the gateway still knows it: Alma's requests
@@ -76,7 +76,7 @@ func agentOf(r *http.Request) string {
 		// cursor-agent talks to Cursor's backend alone, never to a
 		// gateway: a Cursor User-Agent here is Cursor Private Inference's
 		// ("Cursor-CLI/…") sent with a key other than its own, the one
-		// typed in its Open configuration or a model's settings ("myna"),
+		// typed in its Open configuration or a model's settings ("owl"),
 		// and it is shown its models as with its key (mamba on Discord)
 		return "cursor-local"
 	}
@@ -110,9 +110,9 @@ func codexForClaudeCode(h http.Header) bool {
 	return false
 }
 
-// startedByAgent says whether a request is from no agent myna knows but
+// startedByAgent says whether a request is from no agent owl knows but
 // from something an agent started with its environment (a hook's script): it
-// came with the plain gateway token, not one myna gave an agent, and
+// came with the plain gateway token, not one owl gave an agent, and
 // its User-Agent names no agent.
 func startedByAgent(r *http.Request, agent string) bool {
 	if _, ok := strings.CutPrefix(callerKey(r), Token+"-"); ok {
@@ -122,7 +122,7 @@ func startedByAgent(r *http.Request, agent string) bool {
 }
 
 // StandIn is the model an agent is set to use in place of one it named that
-// myna doesn't serve it: Claude Code asks for claude-haiku-… by name for
+// owl doesn't serve it: Claude Code asks for claude-haiku-… by name for
 // its small tasks, whatever its haiku tier is set to, and that goes to the
 // tier's model rather than to some provider that happens to list the name.
 // "" leaves the model as asked. Set by main.
@@ -146,7 +146,7 @@ func withWires(r *http.Request) *http.Request {
 }
 
 // wiresOf is the names in force for ctx: the ones withWires read, or the
-// ones in force now for a request myna made for itself and never carried
+// ones in force now for a request owl made for itself and never carried
 // them on.
 func wiresOf(ctx context.Context) map[string]string {
 	if load, ok := ctx.Value(wiresKey{}).(func() map[string]string); ok {
@@ -160,12 +160,12 @@ func wiresOf(ctx context.Context) map[string]string {
 const (
 	movedClassifier = "classifier"  // Claude Code's auto mode classifier: the model /model moved its tier to
 	movedClaudeTier = "claude-tier" // Claude Code's full id of a Claude model: the model set for its tier
-	movedStandIn    = "stand-in"    // a model myna doesn't serve: the one the agent's config names
+	movedStandIn    = "stand-in"    // a model owl doesn't serve: the one the agent's config names
 	movedCodexTurn  = "codex-turn"  // Codex's memory or auto-review call: its last turn's model
 	movedPrivacy    = "privacy"     // a request masking would change: Settings › Privacy's model for it
 )
 
-// standIn is StandIn's model for one myna shows no entry for: not a
+// standIn is StandIn's model for one owl shows no entry for: not a
 // catalog id or model, nor a ready provider's "provider/model".
 func standIn(agent, asked string) string {
 	if StandIn == nil || !unserved(asked) {
@@ -181,29 +181,29 @@ func standIn(agent, asked string) string {
 // claudeFamily is a full id of one of the model families Claude Code has a
 // tier for, as Claude Code or a wrapper of it names one: claude-sonnet-4-6,
 // claude-fable-5-1, claude-haiku-4-5-20251001, claude-3-5-sonnet-20241022,
-// whatever the version, matched by family so a release myna has never
+// whatever the version, matched by family so a release owl has never
 // heard of is one too. A provider's "a/claude-…" is not one.
 var claudeFamily = regexp.MustCompile(`^claude-(?:[0-9][0-9.-]*-)?(?:opus|sonnet|haiku|fable)(?:[-.@:]|$)`)
 
 // claudeTierStandIn is the model Claude Code is set to use for the tier of
-// a full Claude id it names (StandIn), even one myna serves: Claude Code
+// a full Claude id it names (StandIn), even one owl serves: Claude Code
 // asks for claude-haiku-… by name for its small tasks, and a wrapper (T3
 // Code, KevinXC on Discord) asks for every model by its full id, so
-// claude-sonnet-5 went to the Claude account myna serves it on, spent,
+// claude-sonnet-5 went to the Claude account owl serves it on, spent,
 // while claude-sonnet-4-6, which no provider of the user's listed, went to
 // the sonnet tier. Every id of a family now goes to its tier, as Claude
 // Code's own aliases do. A routing group of the user's own named by the id
-// still has it; one myna found (auto-…) was never picked for it. "" when
+// still has it; one owl found (auto-…) was never picked for it. "" when
 // the id is no such one, the agent isn't Claude Code, or Claude Code isn't
-// routed through myna (StandIn says nothing).
+// routed through owl (StandIn says nothing).
 //
-// A client myna doesn't know as an agent (Python-urllib, an Anthropic SDK)
-// naming such an id that myna doesn't serve is taken for one Claude Code
+// A client owl doesn't know as an agent (Python-urllib, an Anthropic SDK)
+// naming such an id that owl doesn't serve is taken for one Claude Code
 // started: a hook, statusline or plugin script inherits Claude Code's
 // ANTHROPIC_BASE_URL and token, and asks for claude-sonnet-4-6 by name,
 // which went nowhere, a 404 (tbxark on X). It gets Claude Code's tier too.
 // An id the user does serve (a Claude account, an Anthropic key) goes
-// where it is served, and an agent myna knows keeps its own models.
+// where it is served, and an agent owl knows keeps its own models.
 func claudeTierStandIn(r *http.Request, agent, asked string) string {
 	if StandIn == nil || !claudeFamily.MatchString(strings.ToLower(strings.TrimSuffix(asked, "[1m]"))) {
 		return ""
@@ -224,7 +224,7 @@ func claudeTierStandIn(r *http.Request, agent, asked string) string {
 	return m
 }
 
-// unserved: myna shows no entry for the model — not a catalog id or
+// unserved: owl shows no entry for the model — not a catalog id or
 // model, nor the "provider/model" of a provider that is on (a routing
 // group's id is taken as served). A switched-off provider's is unserved: a
 // session that started before it was switched off still asks for the model
@@ -265,24 +265,24 @@ func namesInCatalog() map[string]bool {
 }
 
 // switchedOff says a request for model went nowhere because p, which
-// serves it, is switched off in myna (provider.Provider.Off), or kept to
+// serves it, is switched off in owl (provider.Provider.Off), or kept to
 // Claude Code's own sign-in (provider.Provider.KeptToAgent).
 func switchedOff(p provider.Provider, model string) string {
 	if p.KeptToAgent() {
-		return fmt.Sprintf("%s's accounts are kept to Claude Code's own sign-in in Myna, so %q is not served; untick \"Only switch Claude Code's sign-in\" under its accounts in Myna's Providers to use it", p.Name, model)
+		return fmt.Sprintf("%s's accounts are kept to Claude Code's own sign-in in Owl, so %q is not served; untick \"Only switch Claude Code's sign-in\" under its accounts in Owl's Providers to use it", p.Name, model)
 	}
-	return fmt.Sprintf("%s is switched off in Myna, so %q is not served; switch it on again in Myna's Providers to use it", p.Name, model)
+	return fmt.Sprintf("%s is switched off in Owl, so %q is not served; switch it on again in Owl's Providers to use it", p.Name, model)
 }
 
 // Version is set by main.
 var Version = "dev"
 
-// Addr is the listen address: MYNA_ADDR, else Settings' port on
+// Addr is the listen address: OWL_ADDR, else Settings' port on
 // loopback (settings.GatewayAddr).
 func Addr() string { return settings.GatewayAddr() }
 
-// SavedURL is URL by Settings alone, MYNA_ADDR left aside: where the
-// installed myna, whose settings these are, is reached.
+// SavedURL is URL by Settings alone, OWL_ADDR left aside: where the
+// installed owl, whose settings these are, is reached.
 func SavedURL() string { return "http://" + settings.SavedAddr() }
 
 // URL is the base URL agents use, e.g. http://127.0.0.1:3425: a gateway
@@ -296,12 +296,12 @@ func URL() string {
 }
 
 // Window says this process shows the routing of the gateway it serves:
-// the app's window (a tray's too, when opened) or myna web's page, and
-// not myna serve, which has none. Set by the gui.
+// the app's window (a tray's too, when opened) or owl web's page, and
+// not owl serve, which has none. Set by the gui.
 var Window bool
 
 // Serves says how this process was started (app, tray, web, serve or tui):
-// the Routing page of another myna on this computer, which shows this
+// the Routing page of another owl on this computer, which shows this
 // one's routing, names it (#2606). Set by the cli.
 var Serves = "app"
 
@@ -311,29 +311,29 @@ func Running() bool {
 	return running
 }
 
-// Serving asks the address what answers there: whether a myna gateway
-// does, and whether the myna serving it has a window its routing can be
+// Serving asks the address what answers there: whether a owl gateway
+// does, and whether the owl serving it has a window its routing can be
 // watched in (#110).
 func Serving() (running, window bool) {
 	s := ServedBy()
 	return s.Running, s.Window
 }
 
-// Served is what the myna answering at the gateway's address says of
+// Served is what the owl answering at the gateway's address says of
 // itself.
 type Served struct {
-	Running bool   // a myna gateway answers
+	Running bool   // a owl gateway answers
 	Window  bool   // its routing can be watched in its window (#110)
 	Version string // its version; "" from one that doesn't say
 	Pid     int    // its process id; 0 from one that doesn't say
 	Serves  string // how it was started: app, tray, web, serve or tui; "" from one that doesn't say
 }
 
-// ServedBy asks the address which myna answers there. Another myna can
-// keep the port after this one is updated (a myna serve left running, a
+// ServedBy asks the address which owl answers there. Another owl can
+// keep the port after this one is updated (a owl serve left running, a
 // second copy, one that didn't quit), and every agent's request is then
 // still that one's to send: in #506 a Factory 403 came worded as v0.1.550
-// and earlier word it to two people whose myna said v0.1.630, so none of
+// and earlier word it to two people whose owl said v0.1.630, so none of
 // the fixes since reached their requests. Its version tells it apart.
 func ServedBy() Served {
 	c := &http.Client{Timeout: 700 * time.Millisecond}
@@ -350,20 +350,20 @@ func ServedBy() Served {
 		Pid     int    `json:"pid"`
 		Serves  string `json:"serves"`
 	}
-	if decodeJSON(b, &info) != nil || info.Name != "myna" {
-		return Served{Running: bytes.Contains(b, []byte(`"myna"`)), Window: bytes.Contains(b, []byte(`"window":true`))}
+	if decodeJSON(b, &info) != nil || info.Name != "owl" {
+		return Served{Running: bytes.Contains(b, []byte(`"owl"`)), Window: bytes.Contains(b, []byte(`"window":true`))}
 	}
 	return Served{Running: true, Window: info.Window, Version: info.Version, Pid: info.Pid, Serves: info.Serves}
 }
 
-// ServedBusy is what the myna serving the gateway has in flight, as its
-// /v1/myna/concurrency tells it: agent requests (those waiting for a
+// ServedBusy is what the owl serving the gateway has in flight, as its
+// /v1/owl/concurrency tells it: agent requests (those waiting for a
 // slot among them) and Claude Code turns waiting on their caller's tools.
-// ok is false when it doesn't say (a myna from before 3b6ca0557, a
+// ok is false when it doesn't say (a owl from before 3b6ca0557, a
 // refusal, no answer in time): unknown, which is never idle.
 func ServedBusy() (n int, ok bool) {
 	c := &http.Client{Timeout: 700 * time.Millisecond}
-	res, err := c.Get(URL() + "/v1/myna/concurrency")
+	res, err := c.Get(URL() + "/v1/owl/concurrency")
 	if err != nil {
 		return 0, false
 	}
@@ -393,7 +393,7 @@ func ServedBusy() (n int, ok bool) {
 
 // Taken reports whether anything accepts connections at the gateway's
 // address, whether or not it answers ServedBy's question in time: a
-// myna busy starting, or slow on a small server, still holds the port.
+// owl busy starting, or slow on a small server, still holds the port.
 func Taken() bool {
 	c, err := net.DialTimeout("tcp", strings.TrimPrefix(URL(), "http://"), 500*time.Millisecond)
 	if err != nil {
@@ -413,11 +413,11 @@ type Call struct {
 	Route int64     `json:"route,omitempty"`
 	Time  time.Time `json:"time"`
 	Agent string    `json:"agent"`         // who called, from the client's User-Agent
-	Via   string    `json:"via,omitempty"` // the computer a remote myna's request came from (AgentHeader)
+	Via   string    `json:"via,omitempty"` // the computer a remote owl's request came from (AgentHeader)
 	// Kind: what the agent made the call for, when it isn't its turn —
 	// a Codex subagent's (callKind) — "" for a turn
 	Kind string `json:"kind,omitempty"`
-	// For: the request a call of myna's own (a web search) was made for
+	// For: the request a call of owl's own (a web search) was made for
 	For *CallFor `json:"for,omitempty"`
 	// Masked: what masking swapped in it, nil for nothing
 	Masked   *Masked           `json:"masked,omitempty"`
@@ -485,7 +485,7 @@ type Server struct {
 	subscription    *subscriptionBridge
 	// imageStore is the image MCP server's jobs and images (image_mcp.go)
 	imageStore imageMCPStore
-	// browser is the Myna Browser extensions connected (browser.go)
+	// browser is the Owl Browser extensions connected (browser.go)
 	browser      browserRelay
 	debug        bool
 	trace        trace // what routing did with each request, for the Gateway view
@@ -513,10 +513,10 @@ type Server struct {
 	// front is Front's handler, built once
 	frontOnce sync.Once
 	front     http.Handler
-	// handedOff: another myna serves the port now, and this one's end
+	// handedOff: another owl serves the port now, and this one's end
 	// waits for its requests in flight to finish (handover.go)
 	handedOff atomic.Bool
-	// notAccepting: this one let its listener go, for the myna serving
+	// notAccepting: this one let its listener go, for the owl serving
 	// the port after it to take every connection (stopAccepting); its
 	// Serve ending then waits for the drain
 	notAccepting atomic.Bool
@@ -567,7 +567,7 @@ type Server struct {
 func New() *Server {
 	redact.SetKeyPath(filepath.Join(settings.Dir(), "redact.key"))
 	// a kept socket's turns are logged as a call is (codex_socket_keep.go)
-	codexSocketDebug.Store(os.Getenv("MYNA_DEBUG") != "")
+	codexSocketDebug.Store(os.Getenv("OWL_DEBUG") != "")
 	s := &Server{
 		// a request counted against a MaxRPM waits for room in its minute
 		// first (rpm.go); the ChatGPT backend is spoken to over HTTP/1.1
@@ -575,7 +575,7 @@ func New() *Server {
 		client:       &http.Client{Transport: rpmTransport{upstreamTransport()}},
 		unfit:        make(map[string]bool),
 		subscription: newSubscriptionBridge(),
-		debug:        os.Getenv("MYNA_DEBUG") != "",
+		debug:        os.Getenv("OWL_DEBUG") != "",
 		sightFile:    sightsPath(),
 	}
 	s.loadSights()
@@ -716,14 +716,14 @@ func keepRecent(ring []Call, c Call) []Call {
 	return append(ring, c)
 }
 
-// WhileServing is work only the myna serving the gateway does, begun
-// once it is bound and ended with it: one of the mynas running, never
+// WhileServing is work only the owl serving the gateway does, begun
+// once it is bound and ended with it: one of the owls running, never
 // two at once.
 var WhileServing []func(context.Context)
 
 // ListenAndServe runs the gateway until ctx ends, and returns once the
 // requests in flight then have finished: within 2s, or, handing over, as
-// long as a stream takes. A bind error means another myna is already
+// long as a stream takes. A bind error means another owl is already
 // serving, which is fine for the caller to ignore.
 func (s *Server) ListenAndServe(ctx context.Context) error {
 	migrateLANKeyBestEffort()
@@ -734,7 +734,7 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 	s.lnMu.Lock()
 	s.tls = cfg
 	s.lnMu.Unlock()
-	// the Codex relay a myna quitting left at the port (codexrelay)
+	// the Codex relay a owl quitting left at the port (codexrelay)
 	// lets go of it, finishing the turns it streams
 	if !Handover && !Inherited() {
 		codexrelay.Leave()
@@ -746,17 +746,17 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 	s.lnMu.Lock()
 	s.ln = ln
 	s.lnMu.Unlock()
-	// the keys out of credit a myna before this one rested go on
+	// the keys out of credit a owl before this one rested go on
 	// resting, and climb on from their rung (rest_store.go)
 	loadRests()
-	// a socket handed over (handover.go): the myna that had it stops
+	// a socket handed over (handover.go): the owl that had it stops
 	// accepting once told this one serves on it
 	if ack := takeAck(); ack != nil {
 		go ack()
 	}
 	// the observers plugins registered (usage.Observer) run while this
 	// process serves, and plugins turned on or off elsewhere (the window,
-	// `myna plugin builtin`) come and go here too
+	// `owl plugin builtin`) come and go here too
 	stopObservers := usage.ServeObservers()
 	defer stopObservers()
 	// and the user's own routing groups are served while plugins/groups is
@@ -768,7 +768,7 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 		}
 	})
 	defer stopGroups()
-	// and myna's own tools (its web search) are offered and answered
+	// and owl's own tools (its web search) are offered and answered
 	// while the plugin serving each is on (gwtool)
 	stopTools := gwtool.Gate()
 	defer stopTools()
@@ -798,13 +798,13 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 	// and the MCP hub's servers that the Library no longer gives are ended
 	go keepHubPruned(freshCtx)
 	srv := &http.Server{Handler: s.closesWhenHandedOff(s.Front()), ReadHeaderTimeout: 30 * time.Second, IdleTimeout: 5 * time.Minute, ConnState: s.unread.note, ConnContext: peerUserContext}
-	// the myna serving the gateway, and only it, keeps the saved accounts
+	// the owl serving the gateway, and only it, keeps the saved accounts
 	// signed in, so two never refresh one sign-in at once
 	go provider.KeepLoginsAlive(ctx)
 	// and signs Codex and Claude Code in to their next account when the
 	// one they are on is spent
 	go provider.KeepOnAnAccountWithRoom(ctx)
-	// and has the Codex app read its provider again as myna becomes it
+	// and has the Codex app read its provider again as owl becomes it
 	// for a used-up ChatGPT account, and after (its Send greys otherwise)
 	go provider.KeepCodexAppOnItsProvider(ctx, s.CodexBusy)
 	// and, when settings say to, starts its accounts' next windows as the last reset
@@ -826,7 +826,7 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 	go provider.KeepRetiringMoved(ctx)
 	// and fetches the partner list every hour, asked for or not
 	go provider.KeepPartnersFresh(ctx)
-	go provider.KeepPluginsListed(ctx) // models a plugin's vendor drops or adds, while myna runs
+	go provider.KeepPluginsListed(ctx) // models a plugin's vendor drops or adds, while owl runs
 	// and renews the plugins' sign-ins as they come due, used or not (#5080)
 	go provider.KeepPluginsSignedIn(ctx)
 	// and those a signed-in account's vendor adds (a ChatGPT plan's new GPT)
@@ -866,7 +866,7 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 		c, cancel := context.WithTimeout(context.Background(), s.drainFor())
 		defer cancel()
 		if s.handingOver() {
-			// another myna takes every connection from here: this one
+			// another owl takes every connection from here: this one
 			// stops taking them, and each one it took, new or kept alive,
 			// has its next request read before Shutdown, which closes one
 			// it reads after it began unanswered (#3568, #3451)
@@ -892,7 +892,7 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 		}
 		s.subscription.abortAll()
 		provider.FlushServed() // what answered last, kept for the next start and the CLI
-		flushSticks()          // who answered which conversation, for the next start or the myna handed over to
+		flushSticks()          // who answered which conversation, for the next start or the owl handed over to
 		// the MCP servers the hub started end with the gateway
 		StopHub()
 	}()
@@ -941,7 +941,7 @@ func (s *Server) routes() *routeMux {
 	// Claude Desktop's third-party gateway looks for one here before it
 	// takes the address
 	mux.HandleFunc("GET /api/hello", func(w http.ResponseWriter, r *http.Request) {
-		writeJSON(w, 200, map[string]any{"name": "myna", "version": Version})
+		writeJSON(w, 200, map[string]any{"name": "owl", "version": Version})
 	})
 	// the Ollama API's model routes, for a client that takes a custom
 	// endpoint only as an Ollama server (ollama.go)
@@ -952,22 +952,22 @@ func (s *Server) routes() *routeMux {
 	// (Zed's Ollama provider; ollama_chat.go)
 	mux.HandleFunc("POST /api/chat", s.ollamaChat(false))
 	mux.HandleFunc("POST /api/generate", s.ollamaChat(true))
-	mux.HandleFunc("GET /v1/myna/quotas", s.quotas)
-	mux.HandleFunc("GET /v1/myna/usage", s.usageSummary)
-	mux.HandleFunc("GET /v1/myna/usage/requests", s.usageRequests)
-	mux.HandleFunc("POST /v1/myna/usage/requests", s.usageIngest)
-	mux.HandleFunc("GET /v1/myna/quotas/history", s.quotasHistory)
+	mux.HandleFunc("GET /v1/owl/quotas", s.quotas)
+	mux.HandleFunc("GET /v1/owl/usage", s.usageSummary)
+	mux.HandleFunc("GET /v1/owl/usage/requests", s.usageRequests)
+	mux.HandleFunc("POST /v1/owl/usage/requests", s.usageIngest)
+	mux.HandleFunc("GET /v1/owl/quotas/history", s.quotasHistory)
 	mux.HandleFunc("GET "+provider.RemoteCardsPath, s.quotaCards)
 	mux.HandleFunc("POST "+provider.RemoteRefreshPath, s.quotaCardsRefresh)
 	mux.HandleFunc("POST "+provider.RemoteCodexResetPath, s.codexReset)
-	mux.HandleFunc("GET /v1/myna/route", s.sessionRoute)
+	mux.HandleFunc("GET /v1/owl/route", s.sessionRoute)
 	mux.HandleFunc("GET "+StatuslinePath, s.statusline)
 	mux.HandleFunc("POST "+StatuslinePath, s.statusline)
-	mux.HandleFunc("GET /v1/myna/trace", s.gatewayTrace)
+	mux.HandleFunc("GET /v1/owl/trace", s.gatewayTrace)
 	mux.HandleFunc("GET "+routeSnapshotPath, s.routeSnapshot)
 	mux.HandleFunc("GET "+routeEventsPath, s.routeEvents)
-	mux.HandleFunc("GET /v1/myna/concurrency", s.concurrency)
-	mux.HandleFunc("GET /v1/myna/limit", s.keyLimit)
+	mux.HandleFunc("GET /v1/owl/concurrency", s.concurrency)
+	mux.HandleFunc("GET /v1/owl/limit", s.keyLimit)
 	mux.HandleFunc("GET "+OwnMCPPath, s.ownMCPList)
 	// short-lived keys, issued by a key let issue them or from loopback
 	// (issue_keys.go)
@@ -979,21 +979,21 @@ func (s *Server) routes() *routeMux {
 	mux.HandleFunc("POST "+OIDCKeysPath, s.oidcIssueKey)
 	mux.HandleFunc("GET "+KeyPagePath, s.keyPage)
 	mux.HandleFunc("GET "+keyPageData, s.keyInfo)
-	// the Claude Code processes the Claude subscription runs, for myna
+	// the Claude Code processes the Claude subscription runs, for owl
 	// claude-code runs (loopback only)
 	mux.HandleFunc("GET "+ClaudeRunsPath, s.claudeRuns)
-	// a heap profile of this process, for myna heap (loopback only)
+	// a heap profile of this process, for owl heap (loopback only)
 	mux.HandleFunc("GET "+HeapPath, s.heapProfile)
-	// a CPU profile of this process over some seconds, for myna cpu
+	// a CPU profile of this process over some seconds, for owl cpu
 	// (loopback only)
 	mux.HandleFunc("GET "+CPUPath, s.cpuProfile)
-	// every goroutine's stack and wait, for myna goroutines (loopback
+	// every goroutine's stack and wait, for owl goroutines (loopback
 	// only)
 	mux.HandleFunc("GET "+GoroutinesPath, s.goroutineDump)
-	// a restart into the version myna update put in (loopback only)
+	// a restart into the version owl update put in (loopback only)
 	mux.HandleFunc("POST "+RestartPath, s.restartToUpdate)
-	mux.HandleFunc("GET /v1/myna/omarchy", s.omarchyTheme)
-	mux.HandleFunc("OPTIONS /v1/myna/omarchy", s.omarchyTheme)
+	mux.HandleFunc("GET /v1/owl/omarchy", s.omarchyTheme)
+	mux.HandleFunc("OPTIONS /v1/owl/omarchy", s.omarchyTheme)
 	mux.HandleFunc("POST /v1/chat/completions", s.handle(provider.Chat))
 	mux.HandleFunc("POST /chat/completions", s.handle(provider.Chat))
 	mux.HandleFunc("POST /v1/responses", s.handle(provider.Responses))
@@ -1051,7 +1051,7 @@ func (s *Server) routes() *routeMux {
 	mux.HandleFunc("GET /v1beta/models", s.geminiModels)
 	mux.HandleFunc("POST /v1beta/models/{call...}", s.gemini)
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		writeError(w, provider.Chat, http.StatusNotFound, "myna serves /v1/chat/completions, /v1/responses, /v1/messages, /v1/systemone, /v1/images/generations, /v1/images/edits, /v1/videos, /v1/embeddings, /v1/rerank, /v1/audio/transcriptions, /v1/audio/translations, /v1/audio/speech and /v1beta/models/*")
+		writeError(w, provider.Chat, http.StatusNotFound, "owl serves /v1/chat/completions, /v1/responses, /v1/messages, /v1/systemone, /v1/images/generations, /v1/images/edits, /v1/videos, /v1/embeddings, /v1/rerank, /v1/audio/transcriptions, /v1/audio/translations, /v1/audio/speech and /v1beta/models/*")
 	})
 	return mux
 }
@@ -1064,7 +1064,7 @@ func (s *Server) responsesOverHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if strings.EqualFold(r.Header.Get("Upgrade"), "websocket") {
-		writeError(w, provider.Responses, http.StatusUpgradeRequired, "myna relays Responses over HTTP only: send POST /v1/responses (streamed as SSE); Responses over a WebSocket is not served")
+		writeError(w, provider.Responses, http.StatusUpgradeRequired, "owl relays Responses over HTTP only: send POST /v1/responses (streamed as SSE); Responses over a WebSocket is not served")
 		return
 	}
 	w.Header().Set("Allow", "POST")
@@ -1072,16 +1072,16 @@ func (s *Server) responsesOverHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // catalogSize is how many models the catalog has, as info says, kept by
-// provider.StampNow: every myna on this computer asks another which
+// provider.StampNow: every owl on this computer asks another which
 // it is (ServedBy, a window's every 15s, each look at its state while it
 // doesn't serve), and each question built the whole catalog to count it,
 // 5.4 GB of a day's 36 GB of allocations.
 var catalogSize stamped[struct{}, int]
 
 func (s *Server) info(w http.ResponseWriter, r *http.Request) {
-	out := map[string]any{"name": "myna", "version": Version, "models": catalogSize.get(struct{}{}, func() int { return len(provider.Catalog()) }), "window": Window,
-		"apis": []string{"/v1/chat/completions", "/v1/responses", "/v1/messages", "/v1/systemone", "/v1beta/models/{model}:generateContent", "/v1/images/generations", "/v1/images/edits", "/v1/videos", NativePath + "{provider}/{path}", "/v1/embeddings", "/v1/rerank", "/v1/audio/transcriptions", "/v1/audio/translations", "/v1/audio/speech", "/v1/myna/quotas", "/v1/myna/quotas/history", "/v1/myna/usage", "/v1/myna/usage/requests", "/v1/myna/route", StatuslinePath, "/v1/myna/trace", OwnMCPPath, SearchMCPPath, VisionMCPPath, ImageMCPPath, BrowserMCPPath, ToolsMCPPath, HubMCPAll, HubMCPPath + "{agent}"}}
-	// which process serves, for another myna on this computer to name it
+	out := map[string]any{"name": "owl", "version": Version, "models": catalogSize.get(struct{}{}, func() int { return len(provider.Catalog()) }), "window": Window,
+		"apis": []string{"/v1/chat/completions", "/v1/responses", "/v1/messages", "/v1/systemone", "/v1beta/models/{model}:generateContent", "/v1/images/generations", "/v1/images/edits", "/v1/videos", NativePath + "{provider}/{path}", "/v1/embeddings", "/v1/rerank", "/v1/audio/transcriptions", "/v1/audio/translations", "/v1/audio/speech", "/v1/owl/quotas", "/v1/owl/quotas/history", "/v1/owl/usage", "/v1/owl/usage/requests", "/v1/owl/route", StatuslinePath, "/v1/owl/trace", OwnMCPPath, SearchMCPPath, VisionMCPPath, ImageMCPPath, BrowserMCPPath, ToolsMCPPath, HubMCPAll, HubMCPPath + "{agent}"}}
+	// which process serves, for another owl on this computer to name it
 	// on its Routing page (#2606); not told to another machine
 	if local(r) {
 		out["pid"], out["serves"] = os.Getpid(), Serves
@@ -1089,25 +1089,25 @@ func (s *Server) info(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, 200, out)
 }
 
-// quotas is what is left of every subscription, plan and key myna has,
-// for an agent choosing where to send its work (myna quota --json is the
+// quotas is what is left of every subscription, plan and key owl has,
+// for an agent choosing where to send its work (owl quota --json is the
 // same). It names the accounts and their balances, so it answers this
 // machine, and another only with an enabled gateway key, which lanGuard
-// asks of it while the gateway is shared or MYNA_ADDR puts it on the
+// asks of it while the gateway is shared or OWL_ADDR puts it on the
 // network. A key held to a budget, models or accounts is someone else's
 // to use and is told none of it (refuseHeld), as are quotasHistory,
 // quotaCards, quotaCardsRefresh and concurrency; one its owner lets be
 // told its quotas is told those of what it may use (scopeQuotas, #2216).
 func (s *Server) quotas(w http.ResponseWriter, r *http.Request) {
 	if !local(r) && !sharedWith(r) {
-		writeError(w, provider.Chat, http.StatusForbidden, "myna's quotas are told to another machine only when myna is shared on the local network (Settings → Network and sharing → Share on local network) and the request carries its API key (Authorization: Bearer <key> or x-api-key: <key>)")
+		writeError(w, provider.Chat, http.StatusForbidden, "owl's quotas are told to another machine only when owl is shared on the local network (Settings → Network and sharing → Share on local network) and the request carries its API key (Authorization: Bearer <key> or x-api-key: <key>)")
 		return
 	}
 	scope, ok := scopeQuotas(w, r)
 	if !ok {
 		return
 	}
-	// ?kept=1: what was last read, no vendor asked (myna statusline,
+	// ?kept=1: what was last read, no vendor asked (owl statusline,
 	// run on every message, #1997)
 	if r.URL.Query().Get("kept") == "1" {
 		writeJSON(w, 200, map[string]any{"object": "list", "data": scope.quotas(provider.KeptQuotaReport(time.Now()))})
@@ -1119,12 +1119,12 @@ func (s *Server) quotas(w http.ResponseWriter, r *http.Request) {
 }
 
 // quotasHistory is what was left of each account's windows over time, as
-// this myna (and the computers sharing usage with it) read them (#651):
+// this owl (and the computers sharing usage with it) read them (#651):
 // ?days= back (45 at most), ?provider= and ?user= to pick an account.
-// /v1/myna/quotas stays the snapshot.
+// /v1/owl/quotas stays the snapshot.
 func (s *Server) quotasHistory(w http.ResponseWriter, r *http.Request) {
 	if !local(r) && !sharedWith(r) {
-		writeError(w, provider.Chat, http.StatusForbidden, "myna's quotas are told to another machine only when myna is shared on the local network (Settings → Network and sharing → Share on local network) and the request carries its API key (Authorization: Bearer <key> or x-api-key: <key>)")
+		writeError(w, provider.Chat, http.StatusForbidden, "owl's quotas are told to another machine only when owl is shared on the local network (Settings → Network and sharing → Share on local network) and the request carries its API key (Authorization: Bearer <key> or x-api-key: <key>)")
 		return
 	}
 	scope, ok := scopeQuotas(w, r)
@@ -1135,12 +1135,12 @@ func (s *Server) quotasHistory(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, 200, map[string]any{"object": "list", "data": scope.histories(provider.QuotaHistories(provider.QuotaHistorySince(q.Get("days"), time.Now()), q.Get("provider"), q.Get("user")))})
 }
 
-// quotaCards is the Usage page's cards as this myna last read them, for
-// another myna that has this one as its provider (remote-myna) to
+// quotaCards is the Usage page's cards as this owl last read them, for
+// another owl that has this one as its provider (remote-owl) to
 // show: its own cache, however old, and no vendor asked for it.
 func (s *Server) quotaCards(w http.ResponseWriter, r *http.Request) {
 	if !local(r) && !sharedWith(r) {
-		writeError(w, provider.Chat, http.StatusForbidden, "myna's quotas are told to another machine only when myna is shared on the local network (Settings → Network and sharing → Share on local network) and the request carries its API key (Authorization: Bearer <key> or x-api-key: <key>)")
+		writeError(w, provider.Chat, http.StatusForbidden, "owl's quotas are told to another machine only when owl is shared on the local network (Settings → Network and sharing → Share on local network) and the request carries its API key (Authorization: Bearer <key> or x-api-key: <key>)")
 		return
 	}
 	scope, ok := scopeQuotas(w, r)
@@ -1150,7 +1150,7 @@ func (s *Server) quotaCards(w http.ResponseWriter, r *http.Request) {
 	writeCards(w, r, scope)
 }
 
-// remoteRefreshes is when another myna last had each card read again
+// remoteRefreshes is when another owl last had each card read again
 // here: one refreshed by hand is read at most once in remoteRefreshGap,
 // however often it is asked, so the vendor sees no more than this
 // computer's own refresh button would make it.
@@ -1161,12 +1161,12 @@ var remoteRefreshes = struct {
 
 const remoteRefreshGap = 30 * time.Second
 
-// quotaCardsRefresh is a card's refresh pressed on another myna: the
+// quotaCardsRefresh is a card's refresh pressed on another owl: the
 // card (?provider=, &user=) is read again here, or every card when none
 // is named, then the cards are answered as quotaCards answers them.
 func (s *Server) quotaCardsRefresh(w http.ResponseWriter, r *http.Request) {
 	if !local(r) && !sharedWith(r) {
-		writeError(w, provider.Chat, http.StatusForbidden, "myna's quotas are told to another machine only when myna is shared on the local network (Settings → Network and sharing → Share on local network) and the request carries its API key (Authorization: Bearer <key> or x-api-key: <key>)")
+		writeError(w, provider.Chat, http.StatusForbidden, "owl's quotas are told to another machine only when owl is shared on the local network (Settings → Network and sharing → Share on local network) and the request carries its API key (Authorization: Bearer <key> or x-api-key: <key>)")
 		return
 	}
 	scope, ok := scopeQuotas(w, r)
@@ -1174,8 +1174,8 @@ func (s *Server) quotaCardsRefresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	id, user := r.URL.Query().Get("provider"), r.URL.Query().Get("user")
-	if strings.Contains(id, "/") || provider.IsRemoteCard(id) { // a card this myna has from another: not passed on
-		writeError(w, provider.Chat, http.StatusBadRequest, "this myna reads only its own cards again")
+	if strings.Contains(id, "/") || provider.IsRemoteCard(id) { // a card this owl has from another: not passed on
+		writeError(w, provider.Chat, http.StatusBadRequest, "this owl reads only its own cards again")
 		return
 	}
 	// a key told only some cards (#2216) has only those read again: a
@@ -1219,7 +1219,7 @@ var codexResetsAsked = struct {
 
 // codexReset spends one of a Codex account's rate-limit resets, as the
 // Usage page's "Use a reset" does (provider.SpendCodexReset, the same
-// code), asked by another myna's card or an app holding a gateway key
+// code), asked by another owl's card or an app holding a gateway key
 // (#3850, prgrmrwy). A reset can't be undone, so beyond what
 // quotaCardsRefresh asks it takes a gateway key, from this computer too,
 // never one that is read-only (readOnlyGuard refuses that before here)
@@ -1230,18 +1230,18 @@ var codexResetsAsked = struct {
 // can't see; ?credit= picks one of its resets.each.
 func (s *Server) codexReset(w http.ResponseWriter, r *http.Request) {
 	if !local(r) && !sharedWith(r) {
-		writeError(w, provider.Chat, http.StatusForbidden, "myna's quotas are told to another machine only when myna is shared on the local network (Settings → Network and sharing → Share on local network) and the request carries its API key (Authorization: Bearer <key> or x-api-key: <key>)")
+		writeError(w, provider.Chat, http.StatusForbidden, "owl's quotas are told to another machine only when owl is shared on the local network (Settings → Network and sharing → Share on local network) and the request carries its API key (Authorization: Bearer <key> or x-api-key: <key>)")
 		return
 	}
 	who := access.Caller(r.Context())
 	if who.KeyID == "" || who.ReadOnly {
-		writeError(w, provider.Chat, http.StatusUnauthorized, "using a Codex reset can't be undone, so it takes an enabled myna gateway key with full access (Gateway → Gateway keys), sent as Authorization: Bearer <key> or x-api-key, from this computer too; or use it on this computer's Usage page")
+		writeError(w, provider.Chat, http.StatusUnauthorized, "using a Codex reset can't be undone, so it takes an enabled owl gateway key with full access (Gateway → Gateway keys), sent as Authorization: Bearer <key> or x-api-key, from this computer too; or use it on this computer's Usage page")
 		return
 	}
 	// a key held to a budget, models or accounts is someone else's to
 	// use: told some cards (#2216) or none, it spends no reset of the
 	// owner's
-	if refuseHeld(w, r, "this gateway key is held to a budget, models or accounts, so it uses none of this myna's Codex resets: use a key with full access") {
+	if refuseHeld(w, r, "this gateway key is held to a budget, models or accounts, so it uses none of this owl's Codex resets: use a key with full access") {
 		return
 	}
 	q := r.URL.Query()
@@ -1300,7 +1300,7 @@ func modelObject(e provider.Entry) map[string]any {
 		"owned_by": e.Provider.ID, "display_name": e.PlainName(), "reasoning": e.Thinks(), "supported_reasoning_levels": levels,
 		"reasoning_levels": flat}
 	// the window, as the names clients read it by: a group's context
-	// (myna group set … context=) included
+	// (owl group set … context=) included
 	if e.Context > 0 {
 		m["context_window"], m["context_length"], m["max_input_tokens"] = e.Context, e.Context, e.Context
 	}
@@ -1309,7 +1309,7 @@ func modelObject(e provider.Entry) map[string]any {
 	if out := e.PublishedOutput(); out > 0 {
 		m["max_output_tokens"] = out
 	}
-	// for another myna that has this one as its provider (remote-myna):
+	// for another owl that has this one as its provider (remote-owl):
 	// the APIs a request for the model goes on as it is, so it sends each
 	// one on an API of these rather than having it translated twice, and
 	// whether it takes images
@@ -1338,7 +1338,7 @@ func modelObject(e provider.Entry) map[string]any {
 // offer a model their tools. Without either, a client that matches what a
 // model can do by its id (psikent on Discord: an SSH client) found none
 // for a routing group, whose id is the user's own name, and wouldn't hand
-// it a tool. Every chat model myna lists takes tools — the gateway reads
+// it a tool. Every chat model owl lists takes tools — the gateway reads
 // one written as text back as a call (textcalls.go) — so a group, all of
 // whose members do, says so as well. The decision models and Claude
 // Desktop's and Claude Science's lists, shaped for their own readers, are
@@ -1412,7 +1412,7 @@ func cursorLocalModel(m map[string]any, e provider.Entry) {
 	m["capabilities"] = c
 }
 
-// drawerObjects are the image models myna draws with, as another myna
+// drawerObjects are the image models owl draws with, as another owl
 // asks for them in its list (provider.DrawersHeader): "kind": "image",
 // which an agent's list never has, so it takes none for a model to chat
 // with. A gateway key held to some models is told of those alone, as its
@@ -1442,8 +1442,8 @@ func drawerObjects(r *http.Request) []map[string]any {
 	return out
 }
 
-// videomakerObjects are the video models myna makes videos with, as
-// another myna asks for them (provider.VideomakersHeader): "kind": "video".
+// videomakerObjects are the video models owl makes videos with, as
+// another owl asks for them (provider.VideomakersHeader): "kind": "video".
 // A gateway key held to some models or accounts is told of those alone,
 // as its chat list is (#2579).
 func videomakerObjects(r *http.Request) []map[string]any {
@@ -1472,7 +1472,7 @@ func catalogFor(r *http.Request) []provider.Entry {
 	return keyAllowed(r, shown)
 }
 
-// listKinds is which of myna's models a /v1/models call lists: its chat
+// listKinds is which of owl's models a /v1/models call lists: its chat
 // models alone, unless it names the kinds it wants in ?kind= (chat, image,
 // video, comma separated; all for the three). Image and video models are
 // listed only when asked for, each marked "kind" (drawerObjects,
@@ -1522,16 +1522,16 @@ func (s *Server) models(w http.ResponseWriter, r *http.Request) {
 			data = scienceModels(shown)
 		} else {
 			labels := provider.Labels(shown)
-			// for another myna: how it searches the web for each model
-			myna := r.Header.Get(provider.DrawersHeader) != ""
-			searches := myna && canSearch()
-			// for another myna, what each model costs here, so its usage
+			// for another owl: how it searches the web for each model
+			owl := r.Header.Get(provider.DrawersHeader) != ""
+			searches := owl && canSearch()
+			// for another owl, what each model costs here, so its usage
 			// there is counted at the same price: told only to this computer
-			// and to one this myna is shared with by a gateway key, as the
+			// and to one this owl is shared with by a gateway key, as the
 			// prices are the user's own settings
 			//
 			// and to any client, OpenRouter's pricing for each model it knows
-			// a price of (cleary5779 on Discord: an agent built on myna
+			// a price of (cleary5779 on Discord: an agent built on owl
 			// shows what a call costs), told to the same callers: the price is
 			// what the Usage page counts the model at, the user's own included.
 			// The settings, groups and providers are read once for the list
@@ -1543,17 +1543,17 @@ func (s *Server) models(w http.ResponseWriter, r *http.Request) {
 				priceOf = provider.EntryPricer(settings.Load(), provider.GroupFinder())
 			}
 			// the tiers Codex here is offered on each model (#1234), for every
-			// client: another myna offers them to its own Codex, and Cindy
+			// client: another owl offers them to its own Codex, and Cindy
 			// shows its Fast switch on a model whose tiers hold priority
 			// (#1914). A model with none says nothing
 			tiers := codexTiers(shown)
 			// each model by its bare id as well, after the provider/model ids,
 			// when the user asked for it (settings.BareModelIDs): a client
 			// moved from another proxy asks for gpt-5.6-sol (love1sbug on X).
-			// Never for another myna, whose provider would list each twice.
+			// Never for another owl, whose provider would list each twice.
 			// Each row is the entry the bare id reaches, its label that one's.
 			rows, ids := slices.Clip(shown), map[int]string{}
-			if !myna && provider.BareModelIDs() {
+			if !owl && provider.BareModelIDs() {
 				labels = slices.Clip(labels)
 				for _, b := range provider.BareEntries(shown) {
 					ids[len(rows)] = b.ID
@@ -1567,7 +1567,7 @@ func (s *Server) models(w http.ResponseWriter, r *http.Request) {
 				if id, ok := ids[i]; ok {
 					m["id"] = id
 				}
-				if myna {
+				if owl {
 					if how := webSearchOf(e, searches); how != "" {
 						m["web_search"] = how
 					}
@@ -1583,7 +1583,7 @@ func (s *Server) models(w http.ResponseWriter, r *http.Request) {
 						}
 					}
 				}
-				// for another myna: its name as the agents' lists here call
+				// for another owl: its name as the agents' lists here call
 				// it, with its provider's after it unless the user wants it
 				// plain, so two providers' models of one name are told apart
 				// there as they are here
@@ -1604,7 +1604,7 @@ func (s *Server) models(w http.ResponseWriter, r *http.Request) {
 	if r.Header.Get(provider.DecidersHeader) != "" {
 		// the decision models its own pickers offer: of a provider with
 		// picks (OpenRouter's twenty-odd), the picked ones, so another
-		// myna lists what its Gateway page shows (GokoShiki on Discord)
+		// owl lists what its Gateway page shows (GokoShiki on Discord)
 		deciders := keyAllowed(r, provider.OfferedDeciders(nil))
 		for i := range deciders {
 			deciders[i].Name = cmp.Or(deciders[i].Name, deciders[i].Model)
@@ -1665,12 +1665,12 @@ func (s *Server) model(w http.ResponseWriter, r *http.Request) {
 	writeError(w, provider.Chat, 404, "unknown model "+id)
 }
 
-// unprefixed is the model myna serves by an id Claude Desktop was given
-// for it (claudeLooking): anthropic/myna-<number>, mythos-myna-<number>,
-// myna-<number>.anthropic.<Claude model>, or, as it listed them
-// before, "anthropic/" put in front of myna's id — or by its flat
+// unprefixed is the model owl serves by an id Claude Desktop was given
+// for it (claudeLooking): anthropic/owl-<number>, mythos-owl-<number>,
+// owl-<number>.anthropic.<Claude model>, or, as it listed them
+// before, "anthropic/" put in front of owl's id — or by its flat
 // spelling (unflat) or its Claude version dashed (provider.ClaudeUndashed).
-// An id that is myna's as it stands (a provider named
+// An id that is owl's as it stands (a provider named
 // anthropic) is left alone.
 func unprefixed(id string) string {
 	if real, ok := aliased(id); ok {
@@ -1696,7 +1696,7 @@ func unprefixed(id string) string {
 }
 
 // askedAt splits a model asked for at an effort of its own,
-// "<model>:<level>" (before a [1m] mark) — a Claude Code tier myna set one
+// "<model>:<level>" (before a [1m] mark) — a Claude Code tier owl set one
 // on (#536) — into the model and the level, "" for none. As a routing
 // group's member is read (#189), only a level's name after the last colon is
 // one, and a model a provider has by the whole id ("x:high") is taken whole.
@@ -1947,17 +1947,17 @@ func (s *Server) handle(from provider.Protocol) http.HandlerFunc {
 			return
 		}
 		noteAsked(r.Context(), model)
-		// a Claude Code Message Thread myna keeps no history for: sent
+		// a Claude Code Message Thread owl keeps no history for: sent
 		// again whole, without it (message_threads.go, #2480)
 		if from == provider.Anthropic && namesThread(body) {
 			refuseThread(w)
 			return
 		}
-		// a thread Codex started on myna, on one of Codex's own models
-		// myna serves nothing for: on Codex's own sign-in, as the
-		// ChatGPT backend's route sends it (codexOwnOffMyna)
+		// a thread Codex started on owl, on one of Codex's own models
+		// owl serves nothing for: on Codex's own sign-in, as the
+		// ChatGPT backend's route sends it (codexOwnOffOwl)
 		if from == provider.Responses {
-			if r2, why := codexOwnOffMyna(r, body, model); r2 != nil {
+			if r2, why := codexOwnOffOwl(r, body, model); r2 != nil {
 				s.codexBackend(w, r2)
 				return
 			} else if why != "" {
@@ -1965,7 +1965,7 @@ func (s *Server) handle(from provider.Protocol) http.HandlerFunc {
 				return
 			}
 		}
-		// Codex with myna as its provider: spawn_agent names every
+		// Codex with owl as its provider: spawn_agent names every
 		// model a subagent may be put on, not only Codex's first five
 		// (Gearclickist on Discord)
 		if from == provider.Responses && (fromCodex(r.Header) || agentOf(r) == "codex") {
@@ -1995,7 +1995,7 @@ func (s *Server) handle(from provider.Protocol) http.HandlerFunc {
 			}
 			provider.SawClient(provider.ClientClaudeCode, seen)
 		}
-		// Codex with myna as its provider asks for a thread's title
+		// Codex with owl as its provider asks for a thread's title
 		// here (#743)
 		if from == provider.Responses {
 			if to := codexTitlesTo(r.Header, body, true, nil); to != "" {
@@ -2016,8 +2016,8 @@ func (s *Server) handle(from provider.Protocol) http.HandlerFunc {
 			}
 			// Codex compacts remotely, a compaction_trigger here, on a
 			// provider table named "OpenAI" (CC Switch's relay tables,
-			// which myna points here, #1301): the summary is myna's to
-			// make, as on CodexPath, and myna's summaries go back as text;
+			// which owl points here, #1301): the summary is owl's to
+			// make, as on CodexPath, and owl's summaries go back as text;
 			// a provider set to compact natively is asked Codex's own (#1099)
 			if bytes.Contains(body, []byte(`"compaction`)) {
 				var compact bool
@@ -2137,7 +2137,7 @@ func replyBufSize(contentLength int64) int {
 // serve routes one parsed-enough request to its provider.
 func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Protocol, body []byte) {
 	start := time.Now()
-	// a client's "off" is myna's none, for every route and check below
+	// a client's "off" is owl's none, for every route and check below
 	// that reads the body's effort (plugins#334)
 	body = offAsNone(from, body)
 	// a HEIC photo goes as JPEG (or PNG), which every vendor takes, on
@@ -2189,11 +2189,11 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 	holdBody(r.Context(), plain)
 	capture := &captureResponseWriter{ResponseWriter: w}
 	if wholeBodies {
-		capture.whole = &spool{limit: wholeBodyLimit, pattern: "myna-whole-*"}
+		capture.whole = &spool{limit: wholeBodyLimit, pattern: "owl-whole-*"}
 	}
 	w = capture
 	// the agent it is recorded as, the one on the computer it was passed
-	// on from for a remote myna's request; agent the one that sent it,
+	// on from for a remote owl's request; agent the one that sent it,
 	// which what is done with it goes by
 	who, agent := callerOf(r), agentOf(r)
 	metadata := requestSessionMetadata(r.Header, body)
@@ -2316,7 +2316,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 			return id
 		}
 		if id, ok := provider.AutoStandIn(m); ok {
-			// a group myna found, while the user has those off: its
+			// a group owl found, while the user has those off: its
 			// model from one provider, rather than refused
 			return id
 		}
@@ -2330,7 +2330,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 	} else if m := claudeTierStandIn(r, agent, asked); m != "" {
 		// Claude Code (or a wrapper, T3 Code) naming one of Anthropic's
 		// models by its full id: the model it is set to use for that tier,
-		// whether or not myna serves the id too
+		// whether or not owl serves the id too
 		asked = grouped(at(m))
 		move(m, movedClaudeTier)
 	} else if g := grouped(asked); g != asked {
@@ -2395,7 +2395,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 		msg := unknownModel(call.Model, "")
 		if g, ok := provider.DisabledGroup(asked); ok {
 			call.Error = "group switched off"
-			msg = fmt.Sprintf("the routing group %s is switched off in Myna, so %q is not served; switch it on again on Myna's Routing page to use it", g.Name, call.Model)
+			msg = fmt.Sprintf("the routing group %s is switched off in Owl, so %q is not served; switch it on again on Owl's Routing page to use it", g.Name, call.Model)
 		} else if g, _, ok := provider.FindGroup(asked); ok && g.Decides() {
 			// a group of decision models answers System One, not this
 			call.Status, call.Error = 400, "a decision group"
@@ -2466,7 +2466,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 	// group it wasn't given (groupAllowed)
 	keyWho, keyHeld := keyHolds(r)
 	_, accHeld := accountHolds(r)
-	chose, _ := r.Context().Value(mynaChoseKey{}).(bool)
+	chose, _ := r.Context().Value(owlChoseKey{}).(bool)
 	if keyHeld && (isGroup && !groupAllowed(keyWho, g, ms) || !isGroup && !modelAllowed(keyWho, p, model)) {
 		call.Status, call.Error = 403, "model not allowed for the gateway key"
 		writeError(w, from, 403, keyModelError(keyWho, call.Model))
@@ -2570,7 +2570,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 	// as a model's check does.
 	var ask classifier
 	if r.Header.Get("User-Agent") != RouterAgent && !desktopCheck {
-		// a wait myna knows of, before a route is begun (unrouted.go),
+		// a wait owl knows of, before a route is begun (unrouted.go),
 		// one for every group the request goes through
 		ask = s.askWaited(r.Context())
 	}
@@ -2611,7 +2611,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 	// agents are told: while one describes images they are told every
 	// model takes them, and send the images on to be described
 	//
-	// One that turned an image away since myna started is text-only
+	// One that turned an image away since owl started is text-only
 	// whatever its list or models.dev says, with a model to describe the
 	// image: the model picked is given the description, not left to fail
 	// over to the same model at another provider that sees (xyenon)
@@ -2752,7 +2752,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 		who := keyWho
 		var members map[string]bool
 		if chose {
-			// myna's own call for the key — a web search, a picture
+			// owl's own call for the key — a web search, a picture
 			// described, a Codex title: of the models the user picked, so
 			// the models don't hold it, but the spend lands on an account,
 			// and the accounts hold it too
@@ -2802,7 +2802,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 		} else {
 			msg, back = cappedError(call.Model, held, time.Now())
 			if strictHeld != nil {
-				msg += ". The conversation stays strictly on that account (Stays: Strict), so myna doesn't move it to another"
+				msg += ". The conversation stays strictly on that account (Stays: Strict), so owl doesn't move it to another"
 			}
 			record = cappedRecord(held)
 		}
@@ -2924,7 +2924,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 	}
 	if isGroup && seenGroup == nil {
 		// without a model to describe it, a new image goes only to the
-		// members that see it (#756) — to members myna knows nothing
+		// members that see it (#756) — to members owl knows nothing
 		// of when none is known to see, as a model of its own would be
 		// sent it. With one, the members keep their order, a text-only
 		// one given it described.
@@ -3055,7 +3055,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 		kept = k
 	}
 	var sentMs int64 // ms from the request to its answering try going to the vendor
-	// of it, myna's own, the tries that failed first and the wait for a
+	// of it, owl's own, the tries that failed first and the wait for a
 	// slot (usage.Record.Own, Retried, Queued: #1532)
 	var ownMs, retriedMs, queuedMs int64
 	var firstBegan time.Time // when the first try began
@@ -3105,7 +3105,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 	// mid-call (plugins#38), asked again where it stood (cutReasks, #2873)
 	cuts := 0
 	// ended is when the last try's reply ended: the request's ms end there,
-	// not after what myna writes down of it once it has (#1939: sticks
+	// not after what owl writes down of it once it has (#1939: sticks
 	// and the provider's last answer, saved to disk, took seconds on a busy
 	// disk, and the reply's speed counted them as its own)
 	var ended time.Time
@@ -3379,7 +3379,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 			}
 		}
 		if fixed == "" && ruled == "" && effort == "" && agentPick != "" && c.p.Thinks(c.model) {
-			// the effort picked in myna for an agent whose config can't
+			// the effort picked in owl for an agent whose config can't
 			// carry one (Cursor Private Inference, #1003), in place of the
 			// level it sent, on a model that reasons; a member fixed at
 			// one, a suffix and the turn's pick are more particular
@@ -3520,7 +3520,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 			// told to ask then rather than at once
 			msg := fmt.Sprintf("%s (out of its allowance: not asked again before %s)", rested.said, heldClock(back, time.Now()))
 			held, heldBack, call.Status, call.Error = true, back, rested.Status, c.p.Name+": "+msg
-			// the answer names who held it, as one asked would: a myna
+			// the answer names who held it, as one asked would: a owl
 			// using this one rests that model of it alone (remoteModelRest)
 			noteMember(hw, r, c.p, c.model)
 			writeError(hw, from, call.Status, msg)
@@ -3553,7 +3553,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 			// when the request last went out to the vendor, its body
 			// written: what came after is the vendor's (Record.Sent).
 			// Before it, from when it began to go out, is connecting and
-			// sending the body, and before that myna's (#1532); and each
+			// sending the body, and before that owl's (#1532); and each
 			// step of its way out, for the Routing page to say whose time
 			// a slow turn was (TryNet)
 			ctx = httptrace.WithClientTrace(ctx, nt.hooks(&asking, &asked, &wrote))
@@ -4626,7 +4626,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, from provider.Pro
 		}
 		if !hw.passing && hw.code() == http.StatusTooManyRequests && hw.header.Get("Retry-After") == "" {
 			// the vendor said nothing of when: the agent is told when
-			// myna asks again, the first of those it rested back
+			// owl asks again, the first of those it rested back
 			if heldBack.IsZero() {
 				heldBack, _ = soonestBack(cands[:i+1])
 			}
@@ -4887,7 +4887,7 @@ func (s *Server) attempt(w http.ResponseWriter, r *http.Request, from provider.P
 		// translation and a plugin's fetch alike
 		body = chatCallIDs(body)
 	}
-	// a response the request named that myna doesn't hold goes only to
+	// a response the request named that owl doesn't hold goes only to
 	// a provider it is relayed to as written (prev_response.go): Claude's
 	// and the ChatGPT backend's accounts drop it, as a translation does
 	noteAnswered(r, "")
@@ -4932,7 +4932,7 @@ func (s *Server) attempt(w http.ResponseWriter, r *http.Request, from provider.P
 	if relay && from != provider.Anthropic && p.OnMessages(model) && slices.Contains(s.usable(p, model), provider.Anthropic) {
 		relay = false
 	}
-	// a web search offered is done by the provider, or by myna for it,
+	// a web search offered is done by the provider, or by owl for it,
 	// which a relayed request can't. The request is translated on the
 	// client's own API all the same, not on Chat: Codex offers web_search
 	// on every turn, and on a provider serving Responses each went out as
@@ -4965,7 +4965,7 @@ func (s *Server) attempt(w http.ResponseWriter, r *http.Request, from provider.P
 	// (upstreamPath). A client that asked for one JSON body is translated,
 	// which reads that SSE and writes the JSON. Relaying it would hand the
 	// client the data: lines under a 200. Vertex AI answers generateContent
-	// whole, and a translation would drop what the client asked that myna
+	// whole, and a translation would drop what the client asked that owl
 	// doesn't read (its safetySettings, topK, schema, thinkingBudget 0)
 	if relay && from == provider.Gemini && !streamOf(body) && !p.IsVertex() {
 		relay = false
@@ -4983,7 +4983,7 @@ func (s *Server) attempt(w http.ResponseWriter, r *http.Request, from provider.P
 	// must be set to false for non-streaming calls". One asked for whole is
 	// asked streamed on Chat and given back whole, its thinking as the
 	// model would have done it (ZekeXiao on X: a group's classifier on the
-	// Qwen Token Plan, which myna asks for one body)
+	// Qwen Token Plan, which owl asks for one body)
 	if relay && from == provider.Chat && !streamOf(body) && dashScope(p) {
 		relay, ownAPI = false, true
 	}
@@ -5002,7 +5002,7 @@ func (s *Server) attempt(w http.ResponseWriter, r *http.Request, from provider.P
 		// custom tool (#3392), and Copilot's answer says no more than the
 		// status — "422 Unprocessable Entity: Unprocessable Entity"
 		// (#2951, #4374: six requests of one turn, all refused) — so
-		// nothing tells myna what to learn from. They go as functions
+		// nothing tells owl what to learn from. They go as functions
 		// from the first ask.
 		if p.Account != nil && p.Account.Agent == "copilot" && grokModel(model) {
 			return true
@@ -5017,7 +5017,7 @@ func (s *Server) attempt(w http.ResponseWriter, r *http.Request, from provider.P
 	}
 	if relay {
 		call.To = from
-		// a web search myna ran for the model, replayed to a provider
+		// a web search owl ran for the model, replayed to a provider
 		// that runs none: left out, as a translation leaves it, since the
 		// provider's own chat form answers it with nothing (withoutSearchCalls).
 		// A relay Codex's turns go to as sent, and a native compaction,
@@ -5283,7 +5283,7 @@ func (s *Server) forwardOnce(ctx context.Context, p provider.Provider, to provid
 	// the conversation ${sessionId} and ${threadId} stand for in the
 	// user's own fields and headers for the provider (conversation.go);
 	// its Subagent is the request's Claude Code subagent, for
-	// ${subagentId} in an extra body value (istoo/myna#2937)
+	// ${subagentId} in an extra body value (istoo/owl#2937)
 	conv := provider.Conversation{Session: cmp.Or(sessionOf(in), conversationID(in, body)), Subagent: subOf(in)}
 	if p.AsksThread() {
 		conv.Thread = threadOf(in, body)
@@ -5341,7 +5341,7 @@ func (s *Server) forwardOnce(ctx context.Context, p provider.Provider, to provid
 	defer provider.LetGo(req)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json, text/event-stream")
-	// myna's, or the agent's own where the provider is set to pass it
+	// owl's, or the agent's own where the provider is set to pass it
 	// on (#1851); a signed-in account's signing, a client the vendor
 	// serves (OpenCode's, Cline's, Kilo's) and the user's own header put
 	// theirs on after
@@ -5356,7 +5356,7 @@ func (s *Server) forwardOnce(ctx context.Context, p provider.Provider, to provid
 		if p.Account == nil && fromClaudeCode(in) {
 			// a relay that serves only Claude Code (#179: "only accessible
 			// via the official Claude CLI") knows it by its own headers,
-			// which go on as it sent them; its key to myna never does
+			// which go on as it sent them; its key to owl never does
 			for k, vs := range in {
 				if claudeCodeHeader(k) {
 					req.Header[k] = slices.Clone(vs)
@@ -5374,7 +5374,7 @@ func (s *Server) forwardOnce(ctx context.Context, p provider.Provider, to provid
 		// allows Codex official clients") knows it by its User-Agent,
 		// originator and x-codex- headers, which go on as Codex sent them,
 		// as they do when Codex talks to the relay itself; its key to
-		// myna never does. A test asked as Codex asks with them
+		// owl never does. A test asked as Codex asks with them
 		// (provider.TestAs)
 		seen := http.Header{}
 		lite := liteKept(p, to, true, modelOf(body))
@@ -5425,7 +5425,7 @@ func (s *Server) forwardOnce(ctx context.Context, p provider.Provider, to provid
 		// it works in
 		provider.OpenCodeClient(req.Header, openCodeSeed(in, body), openCodeDir(factsOf(to, body).dir))
 		if v := in.Get("x-opencode-project"); v != "" {
-			// OpenCode's own, asking through myna
+			// OpenCode's own, asking through owl
 			req.Header.Set("x-opencode-project", v)
 		}
 	}
@@ -5467,7 +5467,7 @@ func (s *Server) forwardOnce(ctx context.Context, p provider.Provider, to provid
 			req.Header.Set(provider.FallbackHeader, "1")
 		}
 	}
-	if p.IsRemoteMyna() {
+	if p.IsRemoteOwl() {
 		passOnCaller(ctx, req)
 		markSearching(ctx, req)
 	}
@@ -5584,8 +5584,8 @@ func claudeCodeHeader(k string) bool {
 // vscode_agent_host, which Codex sends as both: those are Codex's turns
 // too, though they are counted under VS Code (agent.vscodeAgentHostUA).
 // Without it one of Codex's own models asked there was answered 404
-// "myna knows no model" rather than going on Codex's sign-in
-// (codexOwnOffMyna; justruman on Discord).
+// "owl knows no model" rather than going on Codex's sign-in
+// (codexOwnOffOwl; justruman on Discord).
 func fromCodex(in http.Header) bool {
 	return codexNamed(in) || hostedCodex(in)
 }
@@ -5657,7 +5657,7 @@ func (s *Server) passthrough(w http.ResponseWriter, r *http.Request, p provider.
 	upstream := provider.UpstreamNameIn(wiresOf(r.Context()), p.ID, model)
 	body = rewriteModel(body, upstream)
 	if proto == provider.Responses {
-		// Claude's blocks myna gave a Responses client go back to Claude
+		// Claude's blocks owl gave a Responses client go back to Claude
 		// alone; to this API the item is its summary, as before
 		body = withoutClaudeSeals(body)
 	}
@@ -5706,7 +5706,7 @@ func (s *Server) passthrough(w http.ResponseWriter, r *http.Request, p provider.
 			body = withReasoningText(body)
 		} else {
 			if strings.HasSuffix(p.Host(), "openai.com") || p.IsAzure() || !s.fits(p.ID, bareReasoningRefused(model), proto) {
-				// reasoning myna gave Codex, an id with nothing sealed in
+				// reasoning owl gave Codex, an id with nothing sealed in
 				// it, which they'd look up and not find (#1008), nor does an
 				// upstream that has turned it away before (#1044)
 				body = withoutBareReasoning(body)
@@ -5817,7 +5817,7 @@ func (s *Server) passthrough(w http.ResponseWriter, r *http.Request, p provider.
 		// #4910)
 		toolSeen = clientToolUseIDs(body)
 		body = saltedCallIDsBack(body)
-		// Claude Code's advisor, named by myna's id (advisor.go)
+		// Claude Code's advisor, named by owl's id (advisor.go)
 		body = advisorTools(body, p, upstream, wiresOf(r.Context()))
 		if p.IsBedrock() {
 			// Claude Code's metadata.user_id, a JSON string these days, is
@@ -6383,9 +6383,9 @@ func (s *Server) passthrough(w http.ResponseWriter, r *http.Request, p provider.
 		spaces = &nsTidy{named: named, back: renamed, sse: sse}
 	}
 	// a reasoning item another vendor wrote with its text in it, in a reply
-	// relayed as it came, made into one myna could have (#2855): the
+	// relayed as it came, made into one owl could have (#2855): the
 	// client stores what it is handed and replays it where OpenAI's rules
-	// hold, on myna or off it
+	// hold, on owl or off it
 	var made *reasoningTidy
 	if proto == provider.Responses {
 		made = &reasoningTidy{sse: sse}
@@ -6504,7 +6504,7 @@ func (s *Server) passthrough(w http.ResponseWriter, r *http.Request, p provider.
 		pending = pending[:0]
 		atLine = true
 	}
-	// apart is what goes before an event myna appends: a blank line,
+	// apart is what goes before an event owl appends: a blank line,
 	// after the line still pending if the upstream's last write stopped
 	// inside one
 	apart := func() []byte {
@@ -7007,10 +7007,10 @@ func (s *Server) forwardTranslated(ctx context.Context, p provider.Provider, to 
 		}
 		// the tier the client asked for goes to a provider the user added
 		// by its address as it was asked (Request.Tier), and to another
-		// myna, which offered it and serves it as its own Codex would be
+		// owl, which offered it and serves it as its own Codex would be
 		// (#1234), and to a provider plugin, on its Chat or Responses, when
 		// it is one the plugin says the model is served at (#2514)
-		own := p.Preset == "" && p.Account == nil || p.IsRemoteMyna()
+		own := p.Preset == "" && p.Account == nil || p.IsRemoteOwl()
 		if p.IsPlugin() {
 			// fast mode in Claude's words (speed "fast", a fast pick from
 			// an agent on its API) is the priority tier, or ultrafast for
@@ -7029,9 +7029,9 @@ func (s *Server) forwardTranslated(ctx context.Context, p provider.Provider, to 
 				r.Tier, req = tier, &r
 			}
 		}
-		if p.IsRemoteMyna() && req.Tier == "" && req.Fast && (to == provider.Chat || to == provider.Responses) {
+		if p.IsRemoteOwl() && req.Tier == "" && req.Fast && (to == provider.Chat || to == provider.Responses) {
 			// fast mode in Claude's words (a fast pick from an agent on
-			// its API, littlekk88 on Discord) is the tier another myna
+			// its API, littlekk88 on Discord) is the tier another owl
 			// offers it at: priority, or ultrafast for a pick sent
 			// Ultrafast where it offers that. Its Chat or Responses reads
 			// service_tier alone
@@ -7111,8 +7111,8 @@ func (s *Server) forwardTranslated(ctx context.Context, p provider.Provider, to 
 			// been tried with it
 			body = withoutLoneToolChoice(body)
 		}
-		if to == provider.Chat && req.WebSearch && p.IsRemoteMyna() {
-			// the other myna searches for it (search_remote.go)
+		if to == provider.Chat && req.WebSearch && p.IsRemoteOwl() {
+			// the other owl searches for it (search_remote.go)
 			body = withFields(body, map[string]any{"web_search_options": map[string]any{}})
 		}
 		if !s.fits(p.ID, historyToolsRefused, to) {
@@ -7128,12 +7128,12 @@ func (s *Server) forwardTranslated(ctx context.Context, p provider.Provider, to 
 		if to == provider.CodeAssist && p.Account != nil {
 			// the envelope is named in there, where the id it carries is
 			// known: on Antigravity that is the variant the effort picked,
-			// not the model myna knows
+			// not the model owl knows
 			body = codeAssistBody(p, req, model, wires)
 		} else if wire != model {
 			// the vendor's own name for the model goes in the model field
 			// and nowhere else: everything above shaped the request from
-			// the model myna knows, which is what those decisions are
+			// the model owl knows, which is what those decisions are
 			// about
 			body = rewriteModel(body, wire)
 		}
@@ -7236,7 +7236,7 @@ func (s *Server) forwardTranslated(ctx context.Context, p provider.Provider, to 
 		if req.endsWithAssistant() && refusesPrefill(res.StatusCode, b) {
 			// the model takes no prefill (#1447), remembered for it alone.
 			// A conversation the client ended with the assistant's message
-			// is asked again with a user turn after it; myna's own
+			// is asked again with a user turn after it; owl's own
 			// continuation of a cut reply isn't (streamTranslated)
 			s.markUnfit(p.ID, prefillRefused(model), to)
 			if req.LastIsTurn && !req.Resume {
@@ -7327,7 +7327,7 @@ func (s *Server) forwardTranslated(ctx context.Context, p provider.Provider, to 
 		}
 		if req.OwnEffort {
 			if refused, value := ownEffortRefused(res.StatusCode, b, req.Effort); refused {
-				// the effort myna added for auto mode's classifier
+				// the effort owl added for auto mode's classifier
 				// (fitAutoModeClassifier) turned away: none, by a model
 				// that reasons, is asked again at low; any other refusal,
 				// the field's, without it, as before. Remembered either way
@@ -7392,7 +7392,7 @@ func (s *Server) forwardTranslated(ctx context.Context, p provider.Provider, to 
 			r.Tier, req = "", &r
 			continue
 		}
-		// myna's own key is what a refusal is about only when it says so:
+		// owl's own key is what a refusal is about only when it says so:
 		// another 400 is not asked again for it
 		ownKeyKept := ownKey != "" && req.CacheKey == ownKey && !refusesField(res.StatusCode, b, cacheKeyField)
 		if req.CacheKey != "" && !ownKeyKept && badRequest(res.StatusCode) && !wrongEndpoint(res.StatusCode, b) && !provider.CopilotRefusal(b) {
@@ -7530,7 +7530,7 @@ func ownCacheKey(p provider.Provider) bool {
 // of: the session the client names (sessionOf), else its first user
 // message, which every later turn repeats, hashed into a UUID's shape, so
 // it is the same for every turn and names nothing of the client, the
-// user or myna.
+// user or owl.
 func cacheKeyOf(in http.Header, req *Request) string {
 	h := sha256.New()
 	if v := sessionOf(in); v != "" {
@@ -7559,7 +7559,7 @@ func refusesField(status int, body []byte, field string) bool {
 }
 
 // hourMarksRefused is an upstream that turned away the hour-long cache
-// marks myna adds (Request.hourMarks), as remembered in unfit.
+// marks owl adds (Request.hourMarks), as remembered in unfit.
 const hourMarksRefused = "cache_control.ttl"
 
 // hourMarksRefusal is a 400 over a cache mark's ttl: a relay that knows no
@@ -7904,12 +7904,12 @@ func (s *Server) translate(w http.ResponseWriter, r *http.Request, p provider.Pr
 	}
 	if request.WebSearch {
 		// an API on which the provider searches by itself comes first;
-		// without one, its model is given myna's search. A searcher
+		// without one, its model is given owl's search. A searcher
 		// asked for another model goes there too: on its first API
 		// (DeepSeek's Chat) it had no search tool and answered from
 		// nothing (#669)
 		for _, t := range s.usable(p, model) {
-			if searchesFor(p, t, model, request) && !mynaSearches(r.Context(), p) {
+			if searchesFor(p, t, model, request) && !owlSearches(r.Context(), p) {
 				if from == provider.Responses && (to == provider.Responses) != (t == provider.Responses) {
 					request, err = parseRequest(from, body, false, t == provider.Responses)
 					if err != nil {
@@ -7942,7 +7942,7 @@ func (s *Server) translate(w http.ResponseWriter, r *http.Request, p provider.Pr
 		zen = &zenReply{z: zenFreeTools(request)}
 	}
 	if request.WebSearch {
-		if !searching(r.Context()) && canSearchFor(p) && (!searchesFor(p, to, model, request) || mynaSearches(r.Context(), p)) {
+		if !searching(r.Context()) && canSearchFor(p) && (!searchesFor(p, to, model, request) || owlSearches(r.Context(), p)) {
 			ask := antigravityRound(w, p, s.askTranslated(p, to, model, r.Header, w.Header()))
 			if zen != nil {
 				ask = zenRound(zen.z, ask)
@@ -8057,7 +8057,7 @@ func (s *Server) translate(w http.ResponseWriter, r *http.Request, p provider.Pr
 			}
 		}
 		// a request the vendor refused in its stream is answered as
-		// refused, with its code (myna-releases#18); anything else is
+		// refused, with its code (owl-releases#18); anything else is
 		// the vendor failing, with the status its words would have come
 		// with: a minute limit in a 200 stream is a 429, not a 502
 		return writeVendorError(w, from, cmp.Or(col.errStatus, streamStatus(said)), p.Name+": "+said, col.errSaid), said
@@ -8350,20 +8350,20 @@ var keepaliveGap = time.Second
 var keepaliveEvery, keepaliveLongest = 15 * time.Second, 5 * time.Minute
 
 // translatedQuietLongest is how long a translated reply's upstream may
-// say nothing at all, its stream open, while myna keeps the client
+// say nothing at all, its stream open, while owl keeps the client
 // alive every keepaliveEvery (keepThroughSilence). A reply that comes in
 // one burst at its end (claude-opus-5-5 at effort max, a relay that
 // buffers) is silent for its whole generation, which runs past 10
-// minutes, longer than the 10 minutes myna gives a vendor for its
+// minutes, longer than the 10 minutes owl gives a vendor for its
 // headers (upstreamHeaderWait); a dead connection ends sooner by itself
 // (HTTP2Health, TCP keepalive). Past it the client's own idle timeout
 // ends the wait: Claude Code's, 300s after its last ping counted.
 var translatedQuietLongest = 30 * time.Minute
 
 // pingEvery is the least time between two of Anthropic's ping events
-// myna sends one client; a keepalive due sooner is a comment. Claude
+// owl sends one client; a keepalive due sooner is a comment. Claude
 // Code (2.1.311) starts its 300s stream watchdog again on a ping only
-// for 30 in a row (Gcr): pings a second apart, as myna sent them
+// for 30 in a row (Gcr): pings a second apart, as owl sent them
 // while an upstream sent its own keepalives, spend those in 30s, and the
 // watchdog ends the reply 300s later. One a minute lasts
 // translatedQuietLongest,
@@ -8677,7 +8677,7 @@ const SessionHeader = "X-Magpie-Session"
 // user (an email, a login) or its id in the routing trace, percent-encoded
 // when it isn't ASCII (pinnedName): only it is tried, and when it can't take the request the caller is told why rather
 // than another account answering — a probe of one account needs that one.
-// It goes no further than myna.
+// It goes no further than owl.
 const AccountHeader = "X-Magpie-Account"
 
 // sessionOf is the session a request names, "" when it names none.
@@ -8713,7 +8713,7 @@ func subOf(in http.Header) string {
 	return sub
 }
 
-// nativeSessionOf keeps the client session even when myna's header overrides it.
+// nativeSessionOf keeps the client session even when owl's header overrides it.
 func nativeSessionOf(in http.Header) string {
 	for _, h := range sessionHeaders {
 		if v := strings.TrimSpace(in.Get(h)); v != "" {
@@ -8786,7 +8786,7 @@ func conversationID(in http.Header, body []byte) string {
 		}
 		w.Flush()
 	}
-	return "myna-" + hex.EncodeToString(h.Sum(nil)[:12])
+	return "owl-" + hex.EncodeToString(h.Sum(nil)[:12])
 }
 
 // writeOpening writes msg, one message of an opening of several
@@ -8982,7 +8982,7 @@ func userOpens(msg []byte) (theirs, result bool) {
 func offSpelled(e string) bool { return strings.EqualFold(strings.TrimSpace(e), "off") }
 
 // offAsNone is a Chat or Responses body asking reasoning "off"
-// (reasoning_effort, or reasoning.effort) asking for myna's own off
+// (reasoning_effort, or reasoning.effort) asking for owl's own off
 // level, none, instead: what every check and route reads the effort by,
 // and what fitEffort fits to the model's own off level, or its least
 // where it has none, as "none" asked is. A body with no such field goes
@@ -9094,7 +9094,7 @@ func forcesTool(choice string) bool {
 // schema; and a vendor that holds the forced tool to strict mode instead
 // answers `tools.N.custom: For 'object' type, 'additionalProperties' must
 // be explicitly set to false` (#668), which Anthropic says only of a
-// strict tool, and myna sends none.
+// strict tool, and owl sends none.
 var toolChoiceRefused = regexp.MustCompile(`(?i)tool_choice\W+type\W+tool\W+and\W+any\W+are not supported|tools\.\d+\.custom\W+for\W+object\W+type\W+additionalProperties\W+must be explicitly set to false`)
 
 // unforced is req with its forced tool_choice left to the model: a named
@@ -9387,7 +9387,7 @@ func streamError(w http.ResponseWriter, proto provider.Protocol, model string, s
 		// reads as the model at capacity and stops on (codex-rs codex-api
 		// sse/responses_error.rs). A busy status told once Codex has the
 		// stream's headers went as server_error, which Codex retries as a
-		// dropped stream: five more turns, each asked again by myna,
+		// dropped stream: five more turns, each asked again by owl,
 		// "reconnecting 5/5" and the last error alone (wjh66 on Discord)
 		ev.Code = "server_is_overloaded"
 	}
@@ -9450,7 +9450,7 @@ var busyWords = regexp.MustCompile(`(?i)concurrency limit|too many (pending|conc
 
 // spentWords say an account is out of what it pays for, which no retry
 // clears: Pi's own deny-list keeps such a text from being asked again, and
-// myna doesn't tell it otherwise.
+// owl doesn't tell it otherwise.
 var spentWords = regexp.MustCompile(`(?i)quota|insufficient|balance|credit|billing|budget|usage.?limit|余额|额度|欠费|套餐|用量`)
 
 // saysBusy is msg, a request error's text (400, 409, 422), with "you can
@@ -9480,7 +9480,7 @@ func writeError(w http.ResponseWriter, proto provider.Protocol, status int, msg 
 // shape, as writeError does, keeping the code and param the vendor named
 // (an OpenAI-shaped error's strings) for a client of OpenAI's shape: the
 // ChatGPT backend's invalid_access_program on access_programs.cyber
-// (myna-releases#18) reaches the agent as the backend said it.
+// (owl-releases#18) reaches the agent as the backend said it.
 func writeVendorError(w http.ResponseWriter, proto provider.Protocol, status int, msg string, body []byte) int {
 	var code, param any
 	if e := gjson.GetBytes(body, "error"); e.IsObject() {
@@ -9617,13 +9617,13 @@ func tooLong(status int, msg string) bool {
 var paceWords = regexp.MustCompile(`(?i)rate.?limit|per (minute|hour|day)|\bTP[MD]\b|please wait|try again later|throttl|速率|频繁|频率|限流|并发|每(秒|分钟|小时|天|日)|稍后(再试|重试)`)
 
 // splitSent tells what of sent, the ms from the request (start) to its
-// answering try's body written, was myna's own work, the tries that
+// answering try's body written, was owl's own work, the tries that
 // failed first with their pauses (from the first try's start to this
 // one's), and this try's wait for a slot (queued). asked is when the
 // request that went out began to (GetConn, UnixNano; 0 when unknown):
 // after it is connecting and sending the body, which is neither. #1532:
 // OpenCode Go held a try ~100 s before its 503, and the detail called the
-// whole of it myna's.
+// whole of it owl's.
 func splitSent(sent int64, start, firstBegan, began time.Time, asked, queued int64) (own, retried, waited int64) {
 	retried = min(max(began.Sub(firstBegan).Milliseconds(), 0), sent)
 	waited = min(max(queued, 0), sent-retried)

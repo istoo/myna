@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A group whose members are a pattern (#766) sends a request to a model the
@@ -50,7 +50,7 @@ func TestPatternGroupRoutes(t *testing.T) {
 }
 
 // A group whose patterns match nothing served now is named as such, not
-// answered with every model myna has.
+// answered with every model owl has.
 func TestEmptyPatternGroupSaysSo(t *testing.T) {
 	fresh(t)
 	if err := provider.SaveGroup(provider.Group{ID: "none", Name: "None", Match: []string{"nobody/*"}}); err != nil {

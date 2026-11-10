@@ -8,9 +8,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/sessions"
 )
 
 // GatewaySessionWindow returns gateway sessions and their daily usage for a

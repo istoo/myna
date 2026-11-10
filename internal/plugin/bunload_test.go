@@ -29,14 +29,14 @@ func (e exitedWith) Error() string { return fmt.Sprintf("exit status %#x", uint3
 // INSTRUCTION, SIGILL) says which and what to do; any other exit is
 // given back as it was.
 func TestWontLoadSaysWindowsOrCPU(t *testing.T) {
-	bun := `C:\myna\cache\bun\1.4.2\myna-bun.exe`
+	bun := `C:\owl\cache\bun\1.4.2\owl-bun.exe`
 	for _, c := range []struct {
 		err  error
 		why  string
 		says []string
 	}{
-		{exitedWith(0xc0000139), "windows", []string{"Windows 10 version 1809", "Windows Server 2019", "0xc0000139", "MYNA_BUN", bun}},
-		{exitedWith(0xc000001d), "cpu", []string{"processor", "SSE4.2", "MYNA_BUN", bun}},
+		{exitedWith(0xc0000139), "windows", []string{"Windows 10 version 1809", "Windows Server 2019", "0xc0000139", "OWL_BUN", bun}},
+		{exitedWith(0xc000001d), "cpu", []string{"processor", "SSE4.2", "OWL_BUN", bun}},
 	} {
 		wrapped := errors.Join(errors.New("starting"), c.err)
 		ue := wontLoad(bun, wrapped)

@@ -6,7 +6,7 @@ import (
 	"log"
 	"unsafe"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 	"github.com/wailsapp/wails/v3/pkg/application"
 	"golang.org/x/sys/windows"
 )
@@ -21,11 +21,11 @@ func webView2Check(app *application.App) bool {
 	if !webView2Missing(app.Env.Info().PlatformInfo) {
 		return true
 	}
-	log.Printf("myna: no Microsoft Edge WebView2 Runtime, which myna's windows need; install it from %s, or use myna web / myna tui", webView2Page)
+	log.Printf("owl: no Microsoft Edge WebView2 Runtime, which owl's windows need; install it from %s, or use owl web / owl tui", webView2Page)
 	title, body := webView2Notice(trayLang(settings.Load().Lang, systemLang))
 	if webView2Box(title, body) == idYes {
 		if err := windows.ShellExecute(0, windows.StringToUTF16Ptr("open"), windows.StringToUTF16Ptr(webView2Page), nil, nil, windows.SW_SHOWNORMAL); err != nil {
-			log.Println("myna: opening the WebView2 page:", err)
+			log.Println("owl: opening the WebView2 page:", err)
 		}
 	}
 	return false

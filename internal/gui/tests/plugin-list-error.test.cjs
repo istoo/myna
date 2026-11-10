@@ -1,6 +1,6 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // A plugin's account whose model list failed has only the plugin's
-// defaults (Cursor's Auto alone, gnayiab on X running myna in WSL): its
+// defaults (Cursor's Auto alone, gnayiab on X running owl in WSL): its
 // editor says why under the models, in the user's language, with no left
 // border; an account whose list came in says nothing.
 const assert = require("node:assert/strict");
@@ -10,7 +10,7 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
-const said = "Cursor isn't signed in; sign in from myna's Providers page or run `cursor-agent login`";
+const said = "Cursor isn't signed in; sign in from owl's Providers page or run `cursor-agent login`";
 const cursor = (listError) => ({
   id: "cursor", name: "Cursor", icon: "cursor", chat: "http://127.0.0.1/plugin/cursor/v1", responses: "", anthropic: "", catalog: "",
   models: [{ id: "auto", name: "Auto", on: true }], agents: [], fallback: [], headers: {}, chosen: [],
@@ -56,7 +56,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       });
 
       await page.route("**/*", server(lang, said));
-      await page.goto("http://myna.test/?view=providers");
+      await page.goto("http://owl.test/?view=providers");
       await page.locator(".row.provider", { hasText: "Cursor" }).click();
       const hint = page.locator(".editor .list-error");
       await hint.waitFor();
@@ -76,7 +76,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     page.setDefaultNavigationTimeout(60000);
     t.after(() => browser.close());
     await page.route("**/*", server("en", ""));
-    await page.goto("http://myna.test/?view=providers");
+    await page.goto("http://owl.test/?view=providers");
     await page.locator(".row.provider", { hasText: "Cursor" }).click();
     await page.locator(".editor").waitFor();
     await page.waitForTimeout(200);

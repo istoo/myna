@@ -12,8 +12,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // seedKeptPlan saves provider alpha (model m1, answering from up; its
@@ -39,13 +39,13 @@ func seedKeptPlan(t *testing.T, up string) {
 	provider.ForgetPlanQuotas()
 }
 
-// Claude Code on another computer than the gateway (steven_4422: myna in
+// Claude Code on another computer than the gateway (steven_4422: owl in
 // Docker, Claude Code on the Linux host) runs curl for its status line.
 // The line is the CLI's own, the model of the session sent in the body
 // first, and another machine is told it only with a gateway key.
 func TestStatuslineEndpoint(t *testing.T) {
 	fresh(t)
-	t.Setenv("MYNA_ADDR", "")
+	t.Setenv("OWL_ADDR", "")
 	up := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		io.WriteString(w, `{"id":"ok","model":"m1","choices":[{"message":{"role":"assistant","content":"hi"}}]}`)

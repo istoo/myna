@@ -13,7 +13,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // codexShellTools are Codex's exec_command and write_stdin as it offers
@@ -558,7 +558,7 @@ func TestGrokCallsGiveCodexIntegers(t *testing.T) {
 }
 
 // A relay with only Chat for grok-4.6 is translated for: Codex reads the
-// same integers in the Responses reply myna writes.
+// same integers in the Responses reply owl writes.
 func TestGrokCallsGiveCodexIntegersTranslated(t *testing.T) {
 	for _, c := range integralCases(t) {
 		for cut, pieces := range someCuts(c.args) {

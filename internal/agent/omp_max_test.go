@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A routing group with max ticked offers max in omp (whqtian on Discord:

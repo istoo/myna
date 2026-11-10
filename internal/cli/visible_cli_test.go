@@ -5,9 +5,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // The visibility is kept under the agent's id lowered, because VisibleTo
@@ -106,7 +106,7 @@ func TestVisibleAllTakesOnlyPickedOut(t *testing.T) {
 	}
 }
 
-// myna models and myna visible take a WSL agent by its id, in the
+// owl models and owl visible take a WSL agent by its id, in the
 // distro's own case or any other: before, both lowered what was typed and
 // then matched it exactly against ids that keep the distro's case (#271).
 func TestWSLAgentByIDInModelsAndVisible(t *testing.T) {

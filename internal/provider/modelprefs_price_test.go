@@ -3,12 +3,12 @@ package provider
 import (
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // A model's price is set from the provider editor's Names, prices & levels, with
-// its Save, as `myna model price` sets it (ITea312 on #819: only the
+// its Save, as `owl model price` sets it (ITea312 on #819: only the
 // price rate was in the window); OwnPrice gives it its list price back.
 // The agents aren't told: a price isn't what they pick a model by.
 func TestSetModelPrefsPrice(t *testing.T) {

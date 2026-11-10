@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-// The Codex app's app-server is restarted only when it runs on myna's
+// The Codex app's app-server is restarted only when it runs on owl's
 // Codex home: its HOME and CODEX_HOME are read from what ps -E prints
 // (macOS) or /proc/<pid>/environ (Linux).
 func TestParsePSEnv(t *testing.T) {
@@ -49,14 +49,14 @@ func TestParseEnviron(t *testing.T) {
 // from ps, so the child is this test binary, as the Codex app's codex is
 // its own.
 func TestEnvOfHelper(t *testing.T) {
-	if os.Getenv("MYNA_ENV_HELPER") != "1" {
+	if os.Getenv("OWL_ENV_HELPER") != "1" {
 		return
 	}
 	os.Stdout.WriteString("running\n")
 	time.Sleep(30 * time.Second)
 }
 
-// EnvOf reads a running child's own environment, not myna's.
+// EnvOf reads a running child's own environment, not owl's.
 func TestEnvOfChild(t *testing.T) {
 	if runtime.GOOS != "darwin" && runtime.GOOS != "linux" {
 		t.Skip("EnvOf answers ErrNoEnv here")
@@ -65,7 +65,7 @@ func TestEnvOfChild(t *testing.T) {
 	cmd := CommandContext(ctx, os.Args[0], "-test.run=^TestEnvOfHelper$")
 	// TMPDIR is this test's: given no testenv.Marker, the helper makes a
 	// test home of its own there, which it never removes once killed
-	cmd.Env = []string{"MYNA_ENV_HELPER=1", "HOME=/sand box/h", "CODEX_HOME=/sand box/h/.codex", "TMPDIR=" + t.TempDir()}
+	cmd.Env = []string{"OWL_ENV_HELPER=1", "HOME=/sand box/h", "CODEX_HOME=/sand box/h/.codex", "TMPDIR=" + t.TempDir()}
 	out, _ := cmd.StdoutPipe()
 	if err := cmd.Start(); err != nil {
 		t.Fatal(err)
@@ -92,7 +92,7 @@ func TestEnvOfChild(t *testing.T) {
 // is shown as a fatal error), SIGTERM elsewhere.
 func TestEndExitsClean(t *testing.T) {
 	cmd := CommandContext(context.Background(), os.Args[0], "-test.run=^TestEnvOfHelper$")
-	cmd.Env = append(os.Environ(), "MYNA_ENV_HELPER=1")
+	cmd.Env = append(os.Environ(), "OWL_ENV_HELPER=1")
 	out, _ := cmd.StdoutPipe()
 	if err := cmd.Start(); err != nil {
 		t.Fatal(err)

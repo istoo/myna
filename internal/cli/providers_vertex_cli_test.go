@@ -10,7 +10,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // vertexNotAsked points Vertex AI, Google's token endpoint and IAM
@@ -37,7 +37,7 @@ func lineWith(out, s string) string {
 	return ""
 }
 
-// myna provider add google-vertex takes the project, location, credentials
+// owl provider add google-vertex takes the project, location, credentials
 // file and service account as pairs, set changes them (an empty one goes
 // back to the default), and none of them is taken by a provider that isn't
 // Vertex AI. A key is never taken: the error says what signs it instead.
@@ -48,7 +48,7 @@ func TestProviderAddVertexPairs(t *testing.T) {
 	for _, args := range [][]string{{"provider", "add", "google-vertex"}, {"provider", "add", "google-vertex", "location=us"}} {
 		err := providerCmd(args)
 		if err == nil || !strings.Contains(err.Error(), "needs the id of your Google Cloud project") ||
-			!strings.Contains(err.Error(), "myna provider add google-vertex project=") {
+			!strings.Contains(err.Error(), "owl provider add google-vertex project=") {
 			t.Fatalf("%v: %v", args[2:], err)
 		}
 	}
@@ -149,7 +149,7 @@ func TestProviderAddVertexPairs(t *testing.T) {
 	}
 	out, err = printed(t, func() error { return providerCmd([]string{"provider", "key", "google-vertex", "AIzaSy-test"}) })
 	if err == nil || !strings.Contains(err.Error(), "Google credentials") ||
-		!strings.Contains(err.Error(), "myna provider set google-vertex credentials=") {
+		!strings.Contains(err.Error(), "owl provider set google-vertex credentials=") {
 		t.Fatalf("provider key: %v", err)
 	}
 	if strings.Contains(out, "✓") || mustFind(t, "google-vertex").Key != "" {
@@ -157,10 +157,10 @@ func TestProviderAddVertexPairs(t *testing.T) {
 	}
 }
 
-// myna providers and myna provider <id> say a Vertex AI provider is
+// owl providers and owl provider <id> say a Vertex AI provider is
 // signed with Google credentials, as which service account, and which
 // project and location it asks, never that it has no key or needs none;
-// switched off still says so. myna presets says it is added with its
+// switched off still says so. owl presets says it is added with its
 // project.
 func TestProvidersShowVertexCredentials(t *testing.T) {
 	groupsHome(t)
@@ -169,7 +169,7 @@ func TestProvidersShowVertexCredentials(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if row := lineWith(out, "google-vertex"); !strings.Contains(row, "myna provider add google-vertex project=") || strings.Contains(row, "<key>") {
+	if row := lineWith(out, "google-vertex"); !strings.Contains(row, "owl provider add google-vertex project=") || strings.Contains(row, "<key>") {
 		t.Fatalf("presets: %q", row)
 	}
 	key := filepath.Join(t.TempDir(), "vertex-sa.json")
@@ -225,17 +225,17 @@ func TestProvidersShowVertexCredentials(t *testing.T) {
 		t.Fatal(err)
 	}
 	out, _ = printed(t, providers)
-	if row := lineWith(out, "google-vertex"); !strings.Contains(row, "switched off") || strings.Contains(row, "Google credentials") || !strings.Contains(row, "myna provider on google-vertex") {
+	if row := lineWith(out, "google-vertex"); !strings.Contains(row, "switched off") || strings.Contains(row, "Google credentials") || !strings.Contains(row, "owl provider on google-vertex") {
 		t.Errorf("list, off: %q", row)
 	}
-	if row := lineWith(out, "vertex-sa"); strings.Contains(row, "myna provider on") {
+	if row := lineWith(out, "vertex-sa"); strings.Contains(row, "owl provider on") {
 		t.Errorf("list, on, says how to turn it on: %q", row)
 	}
 }
 
 // A Vertex AI provider with no project an address can be made of
-// (providers.json edited by hand) asks nothing: myna providers says it
-// needs a project, as the app's row does, and myna provider <id> says
+// (providers.json edited by hand) asks nothing: owl providers says it
+// needs a project, as the app's row does, and owl provider <id> says
 // how to give it one, never to give it a key, which it takes none of.
 func TestProvidersShowVertexWithoutProject(t *testing.T) {
 	groupsHome(t)
@@ -261,16 +261,16 @@ func TestProvidersShowVertexWithoutProject(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if row := lineWith(out, "project "); !strings.Contains(row, want) || !strings.Contains(row, "myna provider set "+id+" project=") {
+		if row := lineWith(out, "project "); !strings.Contains(row, want) || !strings.Contains(row, "owl provider set "+id+" project=") {
 			t.Errorf("show, %s: project %q in\n%s", id, row, out)
 		}
-		if strings.Contains(out, "provider key") || strings.Contains(out, "not set  myna provider key") {
+		if strings.Contains(out, "provider key") || strings.Contains(out, "not set  owl provider key") {
 			t.Errorf("show, %s, asks for a key:\n%s", id, out)
 		}
 	}
 }
 
-// myna provider test asks Vertex AI with a token minted from the
+// owl provider test asks Vertex AI with a token minted from the
 // provider's Google credentials, with no key asked for on the way: the
 // smallest generateContent, at its project, to the first of its models.
 func TestProviderTestVertex(t *testing.T) {

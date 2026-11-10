@@ -1,8 +1,8 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// visamzh on X: the app's window and myna web open together. One restarted
+// visamzh on X: the app's window and owl web open together. One restarted
 // to update; the other's page ran on as the old one, its Update pill still
-// offering the version already in. A browser's page (myna web, the app's
-// page) now reloads once another version of myna answers in its place:
+// offering the version already in. A browser's page (owl web, the app's
+// page) now reloads once another version of owl answers in its place:
 // when it is clicked back into, and, left on screen, within a minute. The
 // app's own window doesn't, its process making a new one. Every language,
 // both engines, wide and narrow; no backend, the API is faked.
@@ -21,14 +21,14 @@ function settingsPayload(lang) {
     dock: false, dockWindow: false, proxy: "", redact: false, redactPersonal: false, redactWords: [],
     codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", workbuddyCheckin: false, noStats: false,
     trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "",
-    version: "0.1.400", dir: "~/.config/myna", gateway: "http://127.0.0.1:3425",
+    version: "0.1.400", dir: "~/.config/owl", gateway: "http://127.0.0.1:3425",
     proxyNow: "none", proxySource: "none", login: false,
     visionModels: [], imageGenModels: [], workbuddyCheckins: [], lanURLs: [],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
   };
 }
 
-// ctl.version is the myna answering: 0.1.400 with 0.1.401 downloaded,
+// ctl.version is the owl answering: 0.1.400 with 0.1.401 downloaded,
 // until the other side's update has it restart as 0.1.401
 function server(lang, web, ctl) {
   return async (route) => {
@@ -65,21 +65,21 @@ async function open(browser, width, lang, web, ctl, clock) {
   page.on("pageerror", (e) => { if (!/^ResizeObserver loop completed with undelivered notifications/.test(e.message)) errors.push(e.message); });
   if (clock) await page.clock.install();
   await page.route("**/*", server(lang, web, ctl));
-  await page.goto("http://myna.test/?view=settings");
+  await page.goto("http://owl.test/?view=settings");
   await pill(page).waitFor({ state: "visible" });
   await page.evaluate(() => { window.oldPage = true; });
   return { page, errors };
 }
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
-  test(engine + ": a page whose myna restarted into another's update reloads", async (t) => {
+  test(engine + ": a page whose owl restarted into another's update reloads", async (t) => {
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     t.after(() => browser.close());
     for (const width of [1100, 420]) for (const lang of langs) {
       await t.test(`${lang} at ${width}: clicked back into`, async () => {
         const ctl = { version: "0.1.400", pages: 0, log: [] };
         const { page, errors } = await open(browser, width, lang, true, ctl);
-        // the app's window put 0.1.401 in, and myna web restarted into it
+        // the app's window put 0.1.401 in, and owl web restarted into it
         ctl.version = "0.1.401";
         await page.evaluate(() => window.dispatchEvent(new Event("focus")));
         await page.waitForFunction(() => !window.oldPage && document.readyState === "complete");

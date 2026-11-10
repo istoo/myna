@@ -14,7 +14,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 func TestLegacyPicksServeWhatWasPicked(t *testing.T) {
@@ -34,7 +34,7 @@ func TestLegacyPicksServeWhatWasPicked(t *testing.T) {
 	}
 	// the state of a provider saved before PickedFrom: one old pick, no
 	// PickedFrom, the list fetched since
-	dir := filepath.Join(home, ".config", "myna")
+	dir := filepath.Join(home, ".config", "owl")
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -102,7 +102,7 @@ func TestLegacyPicksOfEveryModelGetPickedFromAtSave(t *testing.T) {
 	if err := catalog.SaveLive("relay", chat, ms); err != nil {
 		t.Fatal(err)
 	}
-	dir := filepath.Join(home, ".config", "myna")
+	dir := filepath.Join(home, ".config", "owl")
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		t.Fatal(err)
 	}

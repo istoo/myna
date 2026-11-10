@@ -7,16 +7,16 @@ import (
 	"log"
 	"strings"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 	"github.com/wailsapp/wails/v3/pkg/application"
 )
 
 // errPanelKeyFailed is a refusal that isn't another app's hold: a key
 // this keyboard has no code for, or no display to bind on.
-var errPanelKeyFailed = errors.New("myna couldn't take this shortcut")
+var errPanelKeyFailed = errors.New("owl couldn't take this shortcut")
 
 // startPanelKey binds the saved shortcut once the app has started, and
-// has Settings bind each one recorded after. A myna this one took over
+// has Settings bind each one recorded after. A owl this one took over
 // from (before, its pid) may hold it until it has quit: refused, it is
 // tried again then.
 func (h *host) startPanelKey(before int) {
@@ -70,7 +70,7 @@ func (h *host) bindPanelKey(s string) error {
 	return nil
 }
 
-// dropPanelKey lets the shortcut go, for a Mac's myna leaving the menu
+// dropPanelKey lets the shortcut go, for a Mac's owl leaving the menu
 // bar to the version it handed over to.
 func (h *host) dropPanelKey() {
 	h.keyMu.Lock()

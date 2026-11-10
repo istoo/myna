@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // WorkBuddy's security policy turning away an agent's system prompt (Claude

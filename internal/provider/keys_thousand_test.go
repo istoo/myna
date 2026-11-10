@@ -10,11 +10,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/agentenv"
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/agentenv"
+	"github.com/istoo/owl/internal/catalog"
 )
 
-// @NetRozee on X: a custom endpoint given a thousand keys froze myna.
+// @NetRozee on X: a custom endpoint given a thousand keys froze owl.
 // What a page or a request asks of a provider's keys is counted here, not
 // timed: each is asked once for all of them, never once a key.
 

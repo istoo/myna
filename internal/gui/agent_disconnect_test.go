@@ -8,10 +8,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// The Agents page's Disconnect: an agent myna is in says so (wired), and
+// The Agents page's Disconnect: an agent owl is in says so (wired), and
 // disconnecting it puts back the model the user had and answers with the
 // agent no longer wired.
 func TestAgentDisconnectAPI(t *testing.T) {
@@ -53,10 +53,10 @@ func TestAgentDisconnectAPI(t *testing.T) {
 		return agentJSON{}
 	}
 	if codex(call("/api/state", "")).Wired {
-		t.Fatal("wired before myna set anything")
+		t.Fatal("wired before owl set anything")
 	}
 	if !codex(call("/api/set", `{"agent":"codex","field":"model","value":"relay/m1"}`)).Wired {
-		t.Fatal("not wired on a myna model")
+		t.Fatal("not wired on a owl model")
 	}
 	a := codex(call("/api/agents/disconnect/codex", "{}"))
 	if a.Wired || a.Fields[0].Value != "gpt-5.4" {

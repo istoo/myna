@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/netproxy"
+	"github.com/istoo/owl/internal/netproxy"
 )
 
 // proxyCheckRig: a trace page at a name that resolves nowhere

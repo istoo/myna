@@ -1,5 +1,5 @@
-# People who asked not to be named in myna's release notes or on the
-# contributors page (github.com/istoo/myna/docs/contributors). One name or GitHub
+# People who asked not to be named in owl's release notes or on the
+# contributors page (github.com/istoo/owl/docs/contributors). One name or GitHub
 # login a line, as it is credited; case doesn't matter. Lines after # are
 # comments.
 #

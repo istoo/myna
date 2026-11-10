@@ -11,9 +11,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/sessions"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/sessions"
+	"github.com/istoo/owl/internal/settings"
 )
 
 func TestAutomaticTitleGroupsAPI(t *testing.T) {

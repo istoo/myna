@@ -6,7 +6,7 @@
 // and so does a hook's (the same gap). Its click opens no editor; it asks
 // first in the page (no window.confirm), naming the one it takes ("Remove
 // the MCP server exa-2?") and what goes with it: the agents it is taken
-// out of (none for one turned off), the projects myna placed it in, its
+// out of (none for one turned off), the projects owl placed it in, its
 // sign-in, and that the agents' own servers stay. Cancel posts nothing;
 // Remove posts servers/remove (hooks/remove) with its name, the row goes,
 // the others stay. Chromium and WebKit, 1100px and 420px, in en, zh,
@@ -30,7 +30,7 @@ const HOOK_AGENTS = [
   { id: "codex", file: `${HOME}/.codex/hooks.json`, events: ["PreToolUse", "PostToolUse", "Stop"] },
 ];
 const lib = (st) => ({
-  dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
+  dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
   agents: [agent("claude", "Claude Code"), agent("codex", "Codex")],
   instructions: { agents: [] }, servers: st.servers, skills: [], foundServers: [], foundSkills: [], problems: [],
   projects: [{ path: `${HOME}/work/app`, name: "app", servers: { exa: ["claude"] } }],
@@ -70,7 +70,7 @@ function server(lang, state, posts) {
     if (url.pathname === "/api/groups") return json({ groups: [] });
     if (url.pathname === "/api/providers") return json({ providers: [], gateway: { running: true } });
     if (url.pathname.startsWith("/api/")) return json({});
-    if (url.host !== "myna.test") return route.fulfill({ status: 404, body: "" });
+    if (url.host !== "owl.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -121,14 +121,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const ctx = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: "reduce" });
         // the tab the page opens on: MCP servers, then Hooks after a reload (at
         // 1100px the tabs are in the side bar)
-        await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", sessionStorage.getItem("tab") || "mcp"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("owl.libTab", sessionStorage.getItem("tab") || "mcp"); } catch {} });
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         page.on("dialog", (d) => { errors.push("a browser dialog: " + d.message()); d.dismiss(); });
         await page.route("**/*", server(lang, state, posts));
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         await navTo(page, "library");
         const v = page.locator("#view-library");
         const sheet = page.locator("#modal .lib-editor");
@@ -165,8 +165,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal((await sheet.locator(".ehead b").textContent()).trim(), w("Remove the MCP server {name}?", { name: "exa" }));
         assert.deepEqual(await lines(), [
           w("It is taken out of the library and out of {agents}.", { agents: "Claude Code, Codex" }),
-          w("It is taken out of the {n} projects myna placed it in too.", { n: 1 }),
-          w("myna's sign-in to it is forgotten too."),
+          w("It is taken out of the {n} projects owl placed it in too.", { n: 1 }),
+          w("owl's sign-in to it is forgotten too."),
           w("Servers your agents have that aren't in the library stay as they are."),
         ]);
         await sheet.locator(".bar button", { hasText: w("Cancel") }).click();

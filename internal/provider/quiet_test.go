@@ -5,10 +5,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
-// Quiet is the model myna has a word on that says no reasoning: its
+// Quiet is the model owl has a word on that says no reasoning: its
 // vendor's or its maker's list, or its provider's own account list. A model
 // nothing speaks for isn't quiet — the gateway sends it the effort the
 // agent asked for, as #597 leaves it — and neither is one that thinks.
@@ -19,7 +19,7 @@ func TestEntryQuiet(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	cache := t.TempDir()
 	t.Setenv("XDG_CACHE_HOME", cache)
-	os.MkdirAll(filepath.Join(cache, "myna"), 0o755)
+	os.MkdirAll(filepath.Join(cache, "owl"), 0o755)
 	if err := os.WriteFile(catalog.CachePath(), []byte(`{
 	  "xiaomi": {"models": {
 	    "mimo-v2.6-flash": {"id":"mimo-v2.6-flash","reasoning":true,"reasoning_options":[{"type":"toggle"}]}}},
@@ -66,7 +66,7 @@ func TestEntryQuiet(t *testing.T) {
 	// a relay's list says nothing of reasoning: #597's unknown, sent the
 	// effort as the agent asked, rather than treated as one that can't
 	// think — "plain" here is a model of another vendor's catalog, and
-	// nothing myna reads speaks for the relay's
+	// nothing owl reads speaks for the relay's
 	quiet("relay/plain", false)
 	quiet("relay/mystery", false)
 	// mimo-v2.6-flash thinks with a switch alone (Xiaomi's own list), so

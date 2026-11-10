@@ -3,11 +3,11 @@ package davsync
 import (
 	"testing"
 
-	"github.com/istoo/myna/internal/backup"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/backup"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// #1821: an upload with keys from a myna that knows no access key (one
+// #1821: an upload with keys from a owl that knows no access key (one
 // before v0.1.1142, or one it was never given on) has the provider's key
 // and no AccessKey ID or Secret. The server's are kept while the key is
 // the same, so the next computer to sync doesn't lose them; a keyless

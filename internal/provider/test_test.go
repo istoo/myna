@@ -12,7 +12,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 // Each endpoint is tried with a key made for it, and the Anthropic one

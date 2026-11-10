@@ -15,10 +15,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/usage"
 )
 
 func TestMixedDecisionGateway(t *testing.T) {
@@ -129,7 +129,7 @@ func (u *jevUp) turns() []map[string]any {
 	return out
 }
 
-// Myna's own /v1/systemone sends the call to the Jev provider named by
+// Owl's own /v1/systemone sends the call to the Jev provider named by
 // the model prefix, with that prefix taken off the model. /systemone is
 // not served.
 func TestSystemOneRoutesByPrefix(t *testing.T) {
@@ -190,7 +190,7 @@ func TestSystemOneRoutesByPrefix(t *testing.T) {
 	call := func(path, body string) *httptest.ResponseRecorder {
 		rec := httptest.NewRecorder()
 		req := httptest.NewRequest("POST", path, strings.NewReader(body))
-		req.Header.Set("Authorization", "Bearer myna")
+		req.Header.Set("Authorization", "Bearer owl")
 		req.Header.Set(SessionHeader, "decision-session")
 		s.Handler().ServeHTTP(rec, req)
 		return rec
@@ -341,15 +341,15 @@ func TestJevPicksTheIntent(t *testing.T) {
 	if r.Rule.N != 0 || r.Rule.Classified.Intent != "" || r.Rule.Classified.Error != "" {
 		t.Fatalf("unsure: %+v", r.Rule.Classified)
 	}
-	// Jev's call is myna's own; it holds no conversation itself
+	// Jev's call is owl's own; it holds no conversation itself
 	if code, out := postAs(t, s, "s3", `{"model":"ts/jev-latest","messages":[{"role":"user","content":"hi"}]}`); code != 400 || !strings.Contains(out, "only decides") {
 		t.Fatalf("chat to Jev: %d %s", code, out)
 	}
-	// its record is the routing classifier's, myna's own (#1839)
+	// its record is the routing classifier's, owl's own (#1839)
 	n := 0
 	for _, r := range usage.Load(time.Time{}) {
 		if r.Provider == "ts" {
-			if r.Kind != "routing" || !r.ByMyna() {
+			if r.Kind != "routing" || !r.ByOwl() {
 				t.Fatalf("Jev's record: %+v", r)
 			}
 			n++

@@ -7,7 +7,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A group made of patterns only whose provider stops listing the models

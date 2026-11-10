@@ -12,18 +12,18 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/backup"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/backup"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 	"github.com/klauspost/compress/zstd"
 )
 
-// "not a myna backup" was all a sync said whatever the server sent where
+// "not a owl backup" was all a sync said whatever the server sent where
 // the backup should be (JasonLeeForOnly on Discord, over several versions),
-// and nothing in myna could get past it. Each case below is a server
+// and nothing in owl could get past it. Each case below is a server
 // behaving as a real one does: one that compresses though asked not to, a
 // web page in front of WebDAV, a file left empty or cut short, another
-// app's file at the path. What myna can read it reads; the rest is said
+// app's file at the path. What owl can read it reads; the rest is said
 // as what it is, and a file that is really there and not a backup can be
 // replaced from this computer, the server's copy kept first.
 
@@ -126,7 +126,7 @@ func TestReadCompressedBackup(t *testing.T) {
 	}
 }
 
-// Brotli, which myna can't unpack, is said as itself.
+// Brotli, which owl can't unpack, is said as itself.
 func TestReadBrotliSaid(t *testing.T) {
 	s, _, _, _ := syncedServer(t)
 	s.get = func(w http.ResponseWriter, r *http.Request) bool {
@@ -162,7 +162,7 @@ func TestServerAnswerSaid(t *testing.T) {
 	}{
 		// a Nextcloud's address given without /remote.php/dav: its web
 		// app sends the read to its sign-in page
-		"nextcloud login": {answer{to: "/login?redirect_url=/dav/myna", ctype: "text/html; charset=UTF-8", body: page("Nextcloud", `<form method="post" name="login">`)},
+		"nextcloud login": {answer{to: "/login?redirect_url=/dav/owl", ctype: "text/html; charset=UTF-8", body: page("Nextcloud", `<form method="post" name="login">`)},
 			[]string{"web page", `"Nextcloud"`, "redirect to 127.0.0.1", "/login", "WebDAV address"}, "page", false},
 		// Cloudflare Access in front of a tunnel
 		"cloudflare access": {answer{to: "/cdn-cgi/access/login/dav.example.com?kid=abc", ctype: "text/html", body: page("Sign in ・ Cloudflare Access", "")},
@@ -173,8 +173,8 @@ func TestServerAnswerSaid(t *testing.T) {
 			[]string{`"AList"`, "WebDAV address"}, "page", false},
 		// rclone serve webdav (and a Synology's web station) list a
 		// folder as a page
-		"directory listing": {answer{status: 200, ctype: "text/html; charset=utf-8", body: []byte("<html><head><title>Directory listing of /myna/myna.myna-backup/</title></head><body><a href=\"../\">../</a></body></html>")},
-			[]string{"Directory listing of /myna/myna.myna-backup/"}, "page", false},
+		"directory listing": {answer{status: 200, ctype: "text/html; charset=utf-8", body: []byte("<html><head><title>Directory listing of /owl/owl.owl-backup/</title></head><body><a href=\"../\">../</a></body></html>")},
+			[]string{"Directory listing of /owl/owl.owl-backup/"}, "page", false},
 		// a captive portal's page with no <html> to begin with
 		"captive portal": {answer{status: 200, ctype: "text/html", body: []byte("<head><title>Hotel WiFi – Sign in</title></head><body><h1>Welcome</h1></body>")},
 			[]string{"Hotel WiFi – Sign in"}, "page", false},
@@ -183,12 +183,12 @@ func TestServerAnswerSaid(t *testing.T) {
 			[]string{"XML document", "<d:error>"}, "xml", false},
 		// a write that never landed left an empty file
 		"empty": {answer{status: 200, ctype: "application/octet-stream", body: []byte{}},
-			[]string{"is empty (0 bytes)", "myna webdav upload"}, "empty", true},
+			[]string{"is empty (0 bytes)", "owl webdav upload"}, "empty", true},
 		// another app's file at the same path
 		"other app": {answer{status: 200, ctype: "application/octet-stream", body: []byte(`{"format":"cc-switch-backup","version":3,"data":"..."}`)},
 			[]string{`"cc-switch-backup" file`, "another app", "upload"}, "format", true},
 		"json": {answer{status: 200, ctype: "application/json", body: []byte(`[1,2,3]`)},
-			[]string{"JSON file that isn't a myna backup (7 bytes)"}, "json", true},
+			[]string{"JSON file that isn't a owl backup (7 bytes)"}, "json", true},
 		"zip": {answer{status: 200, ctype: "application/octet-stream", body: append([]byte("PK\x03\x04"), make([]byte, 40)...)},
 			[]string{"application/zip (44 bytes)"}, "other", true},
 	}
@@ -341,7 +341,7 @@ func TestUploadKeepsABackup(t *testing.T) {
 func TestS3ReadCompressedObject(t *testing.T) {
 	f, srv := newFakeS3(t)
 	cfg := f.config(srv)
-	const key = "team x+y/myna/myna.myna-backup"
+	const key = "team x+y/owl/owl.owl-backup"
 	a := newComputer(t)
 	a.use(t)
 	provider.Save(provider.Provider{ID: "deepseek", Name: "DeepSeek", Chat: "https://api.deepseek.com/v1", Key: "k1"})

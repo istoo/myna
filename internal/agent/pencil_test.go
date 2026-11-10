@@ -10,8 +10,8 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // pencilUser is ~/.pencil/models.json as Pencil writes a custom provider
@@ -99,7 +99,7 @@ func pencilFormat(t *testing.T, raw []byte) pencilProvider {
 }
 
 // Pencil (pen.dev) reads custom providers from ~/.pencil/models.json in
-// Pi's format. myna adds itself as the provider "myna", every model on
+// Pi's format. owl adds itself as the provider "owl", every model on
 // openai-completions at the gateway, and keeps the user's own providers,
 // keys and keys of Pencil's; off, it takes only its own out.
 func TestPencilModels(t *testing.T) {
@@ -135,10 +135,10 @@ func TestPencilModels(t *testing.T) {
 	if f.Get() != "" {
 		t.Fatalf("get: %q", f.Get())
 	}
-	if err := f.Set(mynaID); err != nil {
+	if err := f.Set(owlID); err != nil {
 		t.Fatal(err)
 	}
-	if f.Get() != mynaID {
+	if f.Get() != owlID {
 		t.Fatalf("get: %q", f.Get())
 	}
 
@@ -157,9 +157,9 @@ func TestPencilModels(t *testing.T) {
 		t.Errorf("Pencil's own key changed: %s", file["somethingOfPencils"])
 	}
 
-	p := pencilFormat(t, provs[mynaID])
+	p := pencilFormat(t, provs[owlID])
 	if p.API != "openai-completions" || p.BaseURL != gatewayV1() || p.APIKey != gateway.TokenFor("pencil") {
-		t.Errorf("provider: %s", provs[mynaID])
+		t.Errorf("provider: %s", provs[owlID])
 	}
 	ids := []string{}
 	for _, m := range p.Models {
@@ -177,7 +177,7 @@ func TestPencilModels(t *testing.T) {
 	}
 	json.Unmarshal([]byte(readFile(path)), &file)
 	json.Unmarshal(file["providers"], &provs)
-	pencilFormat(t, provs[mynaID])
+	pencilFormat(t, provs[owlID])
 	if _, ok := provs["XXXXX"]; !ok {
 		t.Fatal("the user's provider is gone after a sync")
 	}
@@ -191,7 +191,7 @@ func TestPencilModels(t *testing.T) {
 	file, provs = nil, nil
 	json.Unmarshal([]byte(readFile(path)), &file)
 	json.Unmarshal(file["providers"], &provs)
-	if _, ok := provs[mynaID]; ok || !sameJSON(string(provs["XXXXX"]), json.RawMessage(userProvs["XXXXX"])) {
+	if _, ok := provs[owlID]; ok || !sameJSON(string(provs["XXXXX"]), json.RawMessage(userProvs["XXXXX"])) {
 		t.Errorf("after off: %s", readFile(path))
 	}
 	// off, a sync leaves it off

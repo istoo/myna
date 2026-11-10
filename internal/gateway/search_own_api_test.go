@@ -10,7 +10,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A request that offers web search, at a provider that doesn't search by
@@ -51,7 +51,7 @@ func TestSearchOfferedStaysOnTheClientsAPI(t *testing.T) {
 }
 
 // Codex's web_search at a provider serving Responses that doesn't search:
-// the model, asked on Responses, is given myna's web_search function,
+// the model, asked on Responses, is given owl's web_search function,
 // the search is done by a provider that can, and Codex gets the answer
 // (#997).
 func TestCodexSearchAnsweredOnResponses(t *testing.T) {

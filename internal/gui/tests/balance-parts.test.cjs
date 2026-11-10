@@ -82,7 +82,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
       // the Usage page: a line an amount, the user's labels, Balance only
       // where there is none
-      const page = await open("usage", "http://myna.test/?view=usage", { width: 900, height: 700 });
+      const page = await open("usage", "http://owl.test/?view=usage", { width: 900, height: 700 });
       const relay = page.locator(".subscription-card", { hasText: "My Relay" });
       await relay.locator(".bal-part").first().waitFor();
       assert.deepEqual(await relay.locator(".bal-part > span").allTextContents(), [w.balance, "Today", "Used", "Week"]);
@@ -123,7 +123,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.equal(over, 0, "nothing runs out of a card");
 
       // the menu bar panel's Balances
-      const panel = await open("panel", "http://myna.test/?mode=panel", { width: 440, height: 640 });
+      const panel = await open("panel", "http://owl.test/?mode=panel", { width: 440, height: 640 });
       await panel.locator('#ptabs [data-ptab="usage"]').click();
       const card = panel.locator(".pq-card.bal", { hasText: "My Relay" });
       await card.locator(".pq-amt").waitFor();

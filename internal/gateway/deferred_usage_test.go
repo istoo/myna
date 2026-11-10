@@ -9,14 +9,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // The Cursor plugin's step that collected an earlier step's late usage
-// event (istoo/myna#1053) tells it apart, as magpie_deferred: the
+// event (istoo/owl#1053) tells it apart, as magpie_deferred: the
 // step's prompt_tokens stay its own, which a client reads as how full its
 // context is (pi read 366940 = 181270 + 185670 of a 300k window, where
-// 185670 was used), and myna bills both.
+// 185670 was used), and owl bills both.
 const deferredJSON = `{"id":"c","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":185670,"completion_tokens":2240,"total_tokens":187910,"prompt_tokens_details":{"cached_tokens":181266,"cache_write_tokens":4400},"magpie_deferred":{"prompt_tokens":181270,"completion_tokens":1913,"cached_tokens":177533,"cache_write_tokens":3735}}}`
 
 var deferredStream = "data: " + deferredJSON + "\n\ndata: [DONE]\n\n"
@@ -98,7 +98,7 @@ func TestNoDeferredUsageAsBefore(t *testing.T) {
 const realDeferredChunk = `{"id":"chatcmpl-71dd4976e7f654f774cd7619","object":"chat.completion.chunk","created":1791866687,"model":"composer-2.5","choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"usage":{"prompt_tokens":1371,"completion_tokens":48,"total_tokens":1419,"prompt_tokens_details":{"cached_tokens":1328,"cache_write_tokens":0},"magpie_deferred":{"prompt_tokens":2619,"completion_tokens":106,"cached_tokens":2533,"cache_write_tokens":0}}}`
 
 // Claude Code on Cursor: the chat reply is translated, and Claude Code is
-// told the step's own prompt, while myna bills the earlier steps' too
+// told the step's own prompt, while owl bills the earlier steps' too
 func TestTranslatedReplyTellsOwnUsageBillsDeferred(t *testing.T) {
 	d := &chatDecoder{}
 	var c collector
@@ -151,10 +151,10 @@ func TestDeferredUsageThroughTheGateway(t *testing.T) {
 				io.WriteString(w, `{}`)
 			}))
 			defer collector.Close()
-			t.Setenv("MYNA_OTEL_ENABLED", "true")
-			t.Setenv("MYNA_OTEL_ENDPOINT", collector.URL)
-			t.Setenv("MYNA_OTEL_HEADERS", "")
-			t.Setenv("MYNA_OTEL_METRICS", "false")
+			t.Setenv("OWL_OTEL_ENABLED", "true")
+			t.Setenv("OWL_OTEL_ENDPOINT", collector.URL)
+			t.Setenv("OWL_OTEL_HEADERS", "")
+			t.Setenv("OWL_OTEL_METRICS", "false")
 			fastOTel(t)
 			stop := startOTel()
 			t.Cleanup(stop)

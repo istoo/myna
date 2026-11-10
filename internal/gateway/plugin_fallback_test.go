@@ -7,7 +7,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A plugin is told when another candidate follows its try

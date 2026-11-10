@@ -61,7 +61,7 @@ async function open(t, engine, lang, width, start) {
   const saved = [];
   await page.route("**/*", serve(lang, saved, start));
   await watchSettingsReads(page);
-  await page.goto("http://myna.test/?view=settings&tab=models");
+  await page.goto("http://owl.test/?view=settings&tab=models");
   await settingsDrawn(page); // rows found are the ones that stay (#1659)
   const row = page.locator("#replyList #replyModelRow");
   await row.waitFor();

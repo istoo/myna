@@ -15,8 +15,8 @@ import (
 // A plugin's fetch is told the folder the agent works in, as the agent says
 // it in its request, and whether it is a git repository, so a plugin that
 // tells its vendor the user's environment says the agent's and not
-// myna's own (magpie-community/plugins#86: ZCode's Start Plan said
-// myna's ~/.config/myna as the working directory, and the model went
+// owl's own (magpie-community/plugins#86: ZCode's Start Plan said
+// owl's ~/.config/owl as the working directory, and the model went
 // looking there). The headers reach the plugin and never the vendor; a
 // request that says no folder has neither.
 func TestPluginToldWhereTheAgentWorks(t *testing.T) {

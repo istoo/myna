@@ -9,8 +9,8 @@
 package gateway
 
 import (
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/pluginrt"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/pluginrt"
 )
 
 // Settings are the page's settings, at their defaults.

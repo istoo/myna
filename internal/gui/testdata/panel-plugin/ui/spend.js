@@ -1,8 +1,8 @@
 // A panel at the end of the Usage page: today's three most used models,
 // from the usage:summary read its package declares.
 (async () => {
-  await myna.ready;
-  const s = await myna.read("usage:summary", { period: "today" });
+  await owl.ready;
+  const s = await owl.read("usage:summary", { period: "today" });
   const top = document.getElementById("top");
   for (const m of s.models.slice(0, 3)) {
     const li = document.createElement("li");

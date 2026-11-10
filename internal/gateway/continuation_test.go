@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // cutChat is a Chat upstream that severs the reply mid-stream on the calls

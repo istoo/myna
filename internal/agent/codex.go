@@ -23,33 +23,33 @@ import (
 
 	"github.com/pelletier/go-toml/v2"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/codexcat"
-	"github.com/istoo/myna/internal/codexrelay"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/filememo"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/lastgood"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/sessions"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/codexcat"
+	"github.com/istoo/owl/internal/codexrelay"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/filememo"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/lastgood"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/sessions"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // Codex talks the OpenAI Responses API. Signed in to ChatGPT, it is
-// routed through myna with `openai_base_url` alone: Codex keeps its
+// routed through owl with `openai_base_url` alone: Codex keeps its
 // built-in OpenAI provider and sign-in, so its own models, its threads
 // (listed per provider) and the Codex app's model picker stay as they are,
-// and myna's gateway passes its own models through to OpenAI while it
-// answers the rest — the model list included, so myna's models join
+// and owl's gateway passes its own models through to OpenAI while it
+// answers the rest — the model list included, so owl's models join
 // OpenAI's in /model. Not signed in, the built-in provider can't run, and
-// myna is a provider of its own: a [model_providers.myna] table,
-// `model_provider = "myna"`, and a model catalog file for /model. So it
+// owl is a provider of its own: a [model_providers.owl] table,
+// `model_provider = "owl"`, and a model catalog file for /model. So it
 // is too for Codex signed in with an API key, often one a relay issued:
 // Codex then never asks for the model list (its models manager skips the
 // fetch for an API key), so its picker was the models it was built with
-// and the one set, myna's others missing, and the built-in ones went to
+// and the one set, owl's others missing, and the built-in ones went to
 // OpenAI with that key (#322). So it is too for a ChatGPT account the
 // Codex app holds, out of its allowance with no credits to go on with
 // (provider.CodexUsedUp), which it won't send anything for, whoever serves
@@ -59,31 +59,31 @@ import (
 // with it till the reset; for api, with room, it keeps its account
 // (requires_openai_auth, openaiAuth). A window at 100% alone
 // is not that: credits carry the account on, the app keeps sending, and
-// Codex stays signed in beside myna's models. The base URL is set then
+// Codex stays signed in beside owl's models. The base URL is set then
 // too: a thread started on the built-in provider is opened on it again, and
-// a myna model picked in it would otherwise go to the ChatGPT backend.
+// a owl model picked in it would otherwise go to the ChatGPT backend.
 //
-// The [model_providers.myna] table stays once written. A thread keeps the
-// provider it was started on, and one started on myna can't be opened
-// again without the table ("Model provider `myna` not found"), whichever
+// The [model_providers.owl] table stays once written. A thread keeps the
+// provider it was started on, and one started on owl can't be opened
+// again without the table ("Model provider `owl` not found"), whichever
 // way Codex is routed now. Codex looks model_provider up in the tables as
 // it loads config.toml (codex-rs config: "Model provider `{id}` not
-// found"), so `model_provider = "myna"` without the table keeps it from
-// loading its config at all, a new thread too: myna never writes the one
+// found"), so `model_provider = "owl"` without the table keeps it from
+// loading its config at all, a new thread too: owl never writes the one
 // without the other, takes model_provider out whenever it steps out as the
 // provider (disconnected, unwired, joined beside the sign-in), and Sync
 // writes the table back when something else took it.
 
-// codexStandIn is the model Codex is set to use, when myna is its
-// provider, for a model it names that myna doesn't serve. Codex asks for
+// codexStandIn is the model Codex is set to use, when owl is its
+// provider, for a model it names that owl doesn't serve. Codex asks for
 // some by a name of OpenAI's whatever its provider: auto-review of an
 // approval goes out as "codex-auto-review" (the guardian's reviewer model,
-// "independent of current login"), which myna answered 404 "myna knows
+// "independent of current login"), which owl answered 404 "owl knows
 // no model", and Codex reported the review as failed. Codex itself reviews
-// with the turn's model when its catalog lacks the reviewer; so does myna.
+// with the turn's model when its catalog lacks the reviewer; so does owl.
 // Signed in, Codex's own names go on to OpenAI (codexUpstream) instead.
 func codexStandIn(path string) string {
-	if p, _ := edit.GetTOMLTop(path, "model_provider"); p != mynaID {
+	if p, _ := edit.GetTOMLTop(path, "model_provider"); p != owlID {
 		return ""
 	}
 	m, _ := edit.GetTOMLTop(path, "model")
@@ -92,23 +92,23 @@ func codexStandIn(path string) string {
 
 func codex(home string) *Agent { return codexIn(here(home)) }
 
-// The two notices myna's multi-agent V1 setting (#141) can carry: Codex's
-// own features.multi_agent_v2 is on in the config myna routes and takes the
-// V1 over, or myna couldn't read that config to tell. myna writes nothing
+// The two notices owl's multi-agent V1 setting (#141) can carry: Codex's
+// own features.multi_agent_v2 is on in the config owl routes and takes the
+// V1 over, or owl couldn't read that config to tell. owl writes nothing
 // here — the setting is the user's own to turn off.
 var (
-	codexV1ConflictNotice  = newNotice("Codex's own multi_agent_v2 is on in the config myna routes, which takes over the multi-agent V1 myna's models ask for; turn it off in Codex's config to run subagents on myna's models.")
-	codexV1ReadErrorNotice = newNotice("Codex's multi-agent V1 is on, but myna couldn't read Codex's config to check its own multi_agent_v2.")
+	codexV1ConflictNotice  = newNotice("Codex's own multi_agent_v2 is on in the config owl routes, which takes over the multi-agent V1 owl's models ask for; turn it off in Codex's config to run subagents on owl's models.")
+	codexV1ReadErrorNotice = newNotice("Codex's multi-agent V1 is on, but owl couldn't read Codex's config to check its own multi_agent_v2.")
 )
 
 // multiAgentV2OnIn reads one [features] table for Codex's own multi_agent_v2,
 // read-only: the bare multi_agent_v2 boolean, or enabled in the
 // [features.multi_agent_v2] table, spelled as a table, an inline object or a
-// dotted key. set reports whether myna recognizes the key as on or off. A
+// dotted key. set reports whether owl recognizes the key as on or off. A
 // table whose enabled is left out, or any other value (a string "true"), is
-// not recognized, so myna reads it as nothing and warns on nothing — Codex
+// not recognized, so owl reads it as nothing and warns on nothing — Codex
 // itself rejects such a config at load (multi_agent_v2 is a bool or a table
-// there), so this is myna's read of an invalid file, not Codex's default.
+// there), so this is owl's read of an invalid file, not Codex's default.
 func multiAgentV2OnIn(features map[string]any) (on, set bool) {
 	switch v := features["multi_agent_v2"].(type) {
 	case bool:
@@ -127,13 +127,13 @@ func multiAgentV2OnIn(features map[string]any) (on, set bool) {
 // in the profile the config selects. Codex 0.133.0 applied that overlay itself
 // (core/config/mod.rs: Features::from_sources with base = [features] and
 // profile = [profiles.<name>.features], the profile applied on top), and
-// myna's own Check already reads profiles.<profile> the same way; that legacy
+// owl's own Check already reads profiles.<profile> the same way; that legacy
 // shape is what this mirrors. From 0.134 Codex dropped in-file profiles: an
 // in-file `profile` key is an error and `--profile` selects a separate
 // {profile}.config.toml layer, so this is not a claim about which profile a
-// modern Codex is running under — only about the same in-file shape myna's
+// modern Codex is running under — only about the same in-file shape owl's
 // Check reads. The whole file is decoded (codexTopOf, as codexEnableEfforts
-// reads it). A config myna can't read is an error, never taken for off; no
+// reads it). A config owl can't read is an error, never taken for off; no
 // config file has no key, nothing Codex turns V2 on with.
 func codexMultiAgentV2On(path string) (bool, error) {
 	doc, err := codexTopOf(path)
@@ -143,7 +143,7 @@ func codexMultiAgentV2On(path string) (bool, error) {
 	top, _ := doc.Features.(map[string]any)
 	on, _ := multiAgentV2OnIn(top)
 	// the legacy in-file profile's features override the top level's, as Codex
-	// 0.133.0 applied them (base then profile) and as myna's Check reads
+	// 0.133.0 applied them (base then profile) and as owl's Check reads
 	// profiles.<profile>: take the profile's value when it sets one, else keep
 	// the top level's. Only the profile the config names counts.
 	if profile, _ := doc.Profile.(string); profile != "" {
@@ -157,7 +157,7 @@ func codexMultiAgentV2On(path string) (bool, error) {
 	return on, nil
 }
 
-// codexTop is the tables of Codex's config myna's looks decode the file
+// codexTop is the tables of Codex's config owl's looks decode the file
 // for. A config trusting every project Codex was opened in holds thousands
 // of [projects."…"] tables (the owner's 10,932, in 1.5 MB), and decoding
 // those again for each look was 3 MB a look, over 20 MB a catalog sync.
@@ -190,9 +190,9 @@ func codexTopOf(path string) (*codexTop, error) {
 // codexSubAgentsV1Warning is the notice for the config Codex is routed
 // through (path, routed): settings.CodexAgentsV1 is on and Codex's own
 // multi_agent_v2 is explicitly on there, so Codex's V2 wins over the V1
-// myna's own models ask for and a subagent on one can't read its task.
-// "" when the setting is off, Codex isn't routed through myna here, or its
-// own multi_agent_v2 is off; a config myna can't read is told, not taken
+// owl's own models ask for and a subagent on one can't read its task.
+// "" when the setting is off, Codex isn't routed through owl here, or its
+// own multi_agent_v2 is off; a config owl can't read is told, not taken
 // for off.
 func codexSubAgentsV1Warning(path string, routed bool) string {
 	if !codexcat.V1() || !routed {
@@ -225,7 +225,7 @@ func CodexSubAgentsV1Warning() string {
 // only once it restarts; a var so tests can say.
 var codexRunning = func() bool { return Running(`(^|/)codex( |$)`) }
 
-// codexEffortsAll are the levels Codex takes for a model myna's catalog
+// codexEffortsAll are the levels Codex takes for a model owl's catalog
 // doesn't describe: its ReasoningEffort enum, none through xhigh. The
 // Codex app's picker knows more (codexAppEfforts), but those are its
 // [desktop] setting's, not model_reasoning_effort's.
@@ -246,7 +246,7 @@ func codexEfforts(ms []catalog.Model, model string) []Option {
 	return append([]Option{d}, static(e...)...)
 }
 
-// catalogParses is whether b is a model list myna writes for Codex, the
+// catalogParses is whether b is a model list owl writes for Codex, the
 // shape Keep reads of the file there.
 func catalogParses(b []byte) bool {
 	var v struct {
@@ -255,11 +255,11 @@ func catalogParses(b []byte) bool {
 	return json.Unmarshal(b, &v) == nil
 }
 
-// writeOwnList writes the model list myna keeps for Codex at path. A file
+// writeOwnList writes the model list owl keeps for Codex at path. A file
 // there that doesn't parse is copied aside first: Keep (#1450) holds
 // nothing of a file it can't read, so writing the new list over one would
 // end the keys the user added by hand with no copy (#2263's rule for
-// myna's state files, which this file had missed). An error stops the
+// owl's state files, which this file had missed). An error stops the
 // write.
 func writeOwnList(path string, b []byte) error {
 	if err := lastgood.KeepUnparsed(path, catalogParses); err != nil {
@@ -271,13 +271,13 @@ func writeOwnList(path string, b []byte) error {
 func codexIn(at place) *Agent {
 	dir := at.codexHome()
 	path := filepath.Join(dir, "config.toml")
-	catalogPath := filepath.Join(dir, "myna-models.json")
+	catalogPath := filepath.Join(dir, "owl-models.json")
 	get := func(k string) string { v, _ := edit.GetTOMLTop(path, k); return v }
 	// this machine's Codex reaches the gateway at the address its config
-	// gives, when that is myna's on another host: the Codex app on
+	// gives, when that is owl's on another host: the Codex app on
 	// Windows with its agent in WSL reads Windows' config.toml from WSL,
 	// where 127.0.0.1 is the distro's own, so the user points it at
-	// Windows as WSL sees it, or a forward of theirs (#816); myna keeps
+	// Windows as WSL sees it, or a forward of theirs (#816); owl keeps
 	// that address, checks against it and writes it again
 	if at.spell == nil && at.base == nil {
 		at.base = func() string { return codexKeptGateway(path) }
@@ -289,7 +289,7 @@ func codexIn(at place) *Agent {
 	if at.spell == nil && runtime.GOOS == "windows" {
 		catalogRef = filepath.Base(catalogPath)
 	}
-	// ownCatalog: the config names myna's catalog, by any spelling
+	// ownCatalog: the config names owl's catalog, by any spelling
 	ownCatalog := func(c string) bool {
 		if c == "" {
 			return false
@@ -299,29 +299,29 @@ func codexIn(at place) *Agent {
 		}
 		return at.spell == nil && !filepath.IsAbs(c) && filepath.Clean(filepath.Join(dir, c)) == filepath.Clean(catalogPath)
 	}
-	// ownList is myna's model list for Codex as written to catalogPath:
-	// what the user added by hand to the list there (a key myna doesn't
-	// write, supports_reasoning_summaries on a model myna gave none) is
+	// ownList is owl's model list for Codex as written to catalogPath:
+	// what the user added by hand to the list there (a key owl doesn't
+	// write, supports_reasoning_summaries on a model owl gave none) is
 	// kept, not written over by the next model switch or sync (#1450).
 	// Each model's default effort is the one this config starts new
 	// sessions at, or the model's nearest (codexcat.ModelDefault), which
 	// Codex takes on a switch to it. The models Codex used are among the
 	// first 100, which is all the Codex app reads (codexcat.Fit).
 	list := func() []byte {
-		return codexcat.CatalogUsed(mynaModels("codex"), get("model_reasoning_effort"), usage.CodexUsed())
+		return codexcat.CatalogUsed(owlModels("codex"), get("model_reasoning_effort"), usage.CodexUsed())
 	}
 	ownList := func() []byte {
 		cur, _ := edit.Read(catalogPath)
 		return codexcat.Keep(cur, list())
 	}
-	// listGone: myna's list is known not to be there; one that can't be
+	// listGone: owl's list is known not to be there; one that can't be
 	// looked at is not taken for gone
 	listGone := func() bool {
 		_, err := os.Stat(catalogPath)
 		return errors.Is(err, fs.ErrNotExist)
 	}
 	// unnameGoneList takes model_catalog_json out of the config where it
-	// names myna's list and the list is gone, so Codex can load its
+	// names owl's list and the list is gone, so Codex can load its
 	// config again
 	unnameGoneList := func() error {
 		if !ownCatalog(get("model_catalog_json")) || !listGone() {
@@ -342,16 +342,16 @@ func codexIn(at place) *Agent {
 		_, err := os.Stat(c)
 		return errors.Is(err, fs.ErrNotExist)
 	}
-	// dropList takes the list away as myna steps out as Codex's
+	// dropList takes the list away as owl steps out as Codex's
 	// provider; one holding what the user added stays, which the config
-	// no longer names, for ownList to keep when myna is back
+	// no longer names, for ownList to keep when owl is back
 	//
 	// The config never names it once it is gone: Codex reads the file as
 	// it loads its config, and with it missing loads none at all ("No such
 	// file or directory (os error 2)"), the CLI and the ChatGPT app both
-	// (zwaydot on X: Codex didn't open after myna's Disconnect). The
-	// key was taken out only while model_provider was still myna's, and
-	// the file went whatever the provider: one moved off myna by the app,
+	// (zwaydot on X: Codex didn't open after owl's Disconnect). The
+	// key was taken out only while model_provider was still owl's, and
+	// the file went whatever the provider: one moved off owl by the app,
 	// another tool or a hand edit left the key naming a removed file.
 	dropList := func() {
 		defer unnameGoneList()
@@ -370,33 +370,33 @@ func codexIn(at place) *Agent {
 			os.Remove(catalogPath)
 		}
 	}
-	asProvider := func() bool { return get("model_provider") == mynaID }
+	asProvider := func() bool { return get("model_provider") == owlID }
 	viaBase := func() bool {
 		u := get("openai_base_url")
 		return isCodexGatewayOn(u, at.host()) || strings.TrimSuffix(u, "/") == at.codexURL()
 	}
 	routed := func() bool { return asProvider() || viaBase() }
 	// joined: connected by Join, on a model of Codex's own (its last pick)
-	// with myna's beside it, by the base URL
+	// with owl's beside it, by the base URL
 	joined := func() bool { return viaBase() && stashShared()[at.key("codex.joined")] == "1" }
-	// beside: set on one of myna's models beside the ChatGPT sign-in, by
+	// beside: set on one of owl's models beside the ChatGPT sign-in, by
 	// the base URL, Codex's own models in its list too: one of them written
 	// in by Codex (its /model, or a Codex app still running on its old
-	// pick) leaves it connected, its config still on myna's gateway
+	// pick) leaves it connected, its config still on owl's gateway
 	// (#940: it read as not connected), the change told as drift. One
-	// picked on the Agents page still takes myna out (set).
+	// picked on the Agents page still takes owl out (set).
 	beside := func() bool { return viaBase() && stashShared()[at.key("codex.beside")] == "1" }
 	// chatGPT is whether Codex is signed in to ChatGPT. With account
 	// discovery off (#1535) auth.json stays unread, and Codex is taken to be
-	// as myna last wired it, beside a ChatGPT sign-in or not, so turning
+	// as owl last wired it, beside a ChatGPT sign-in or not, so turning
 	// discovery off never rewires Codex by itself.
 	//
 	// A Codex that reaches the gateway from another machine (a WSL distro
-	// under NAT, or MYNA_ADDR pinned beyond loopback) is wired as one
+	// under NAT, or OWL_ADDR pinned beyond loopback) is wired as one
 	// with no ChatGPT sign-in: beside its sign-in it would send the gateway
 	// its ChatGPT token, and from there the gateway takes a named key
-	// alone, so every request was a 401 (#2145, lazydao). With myna as
-	// its provider it sends the key myna gives it (gwKey); its own models
+	// alone, so every request was a 401 (#2145, lazydao). With owl as
+	// its provider it sends the key owl gives it (gwKey); its own models
 	// still go straight to OpenAI on its sign-in.
 	chatGPT := func() bool {
 		if onAnotherMachine(at.gw()) {
@@ -406,8 +406,8 @@ func codexIn(at place) *Agent {
 			return joined() || beside()
 		}
 		// a read that says nothing (auth.json caught while Codex rewrites
-		// it) leaves Codex as myna last wired it: beside its sign-in, or
-		// myna its provider while the Codex app holds the account
+		// it) leaves Codex as owl last wired it: beside its sign-in, or
+		// owl its provider while the Codex app holds the account
 		// (codex.out), which Sync puts back once it has room
 		signedIn, known := codexChatGPTKnown(dir)
 		if !known {
@@ -415,25 +415,25 @@ func codexIn(at place) *Agent {
 		}
 		return signedIn
 	}
-	// myna is in Codex's config: on one of myna's models, or joined;
-	// or, routed, on the model of the group myna set it to as Codex
+	// owl is in Codex's config: on one of owl's models, or joined;
+	// or, routed, on the model of the group owl set it to as Codex
 	// spells it (gpt-6.1-sol for group/auto-gpt-6-1-sol, #750), which the
 	// gateway takes as that group
 	wired := func() bool {
 		m := get("model")
-		return isMyna(m) || joined() || beside() || routed() && setAsGroup(cmp.Or(at.id, "codex"), "model", m)
+		return isOwl(m) || joined() || beside() || routed() && setAsGroup(cmp.Or(at.id, "codex"), "model", m)
 	}
-	// deskList is the list myna hands Codex beside its ChatGPT sign-in,
+	// deskList is the list owl hands Codex beside its ChatGPT sign-in,
 	// written to a file of its own (deskPath) and named by
 	// model_catalog_json, where the Codex app is installed: the app's
 	// picker shows only the models of Codex's list a flag of OpenAI's
-	// names while Codex is on its built-in provider, myna's never among
+	// names while Codex is on its built-in provider, owl's never among
 	// them, unless Codex reads its list from a file (laddieyao on
-	// Discord: GPT alone in the app, myna's in the CLI). It is not
-	// myna's catalog as a provider (catalogPath, ownCatalog): Codex is
+	// Discord: GPT alone in the app, owl's in the CLI). It is not
+	// owl's catalog as a provider (catalogPath, ownCatalog): Codex is
 	// on its built-in provider, with its own models from the ChatGPT
 	// backend's list as the backend sent them (CodexDesktopList).
-	deskPath := filepath.Join(dir, "myna-desktop-models.json")
+	deskPath := filepath.Join(dir, "owl-desktop-models.json")
 	deskRef := at.native(deskPath)
 	if at.spell == nil && runtime.GOOS == "windows" {
 		deskRef = filepath.Base(deskPath)
@@ -451,12 +451,12 @@ func codexIn(at place) *Agent {
 		_, err := os.Stat(deskPath)
 		return errors.Is(err, fs.ErrNotExist)
 	}
-	// deskWanted: myna is connected beside the ChatGPT sign-in (joined,
-	// or on one of myna's models), not as Codex's provider, on this
+	// deskWanted: owl is connected beside the ChatGPT sign-in (joined,
+	// or on one of owl's models), not as Codex's provider, on this
 	// machine's Codex, and the Codex app reads this config. The CLI alone
 	// keeps asking the gateway for the list, which follows every change at
 	// once; a Codex here for account failover alone has no models of
-	// myna's to show.
+	// owl's to show.
 	deskWanted := func() bool {
 		if at.spell != nil || asProvider() || !viaBase() || !(joined() || beside()) || !chatGPT() {
 			return false
@@ -517,14 +517,14 @@ func codexIn(at place) *Agent {
 	models := func() []catalog.Model {
 		switch {
 		case asProvider():
-			return mynaModels("codex")
+			return owlModels("codex")
 		case viaBase():
-			return append(catalog.Codex(), mynaModels("codex")...)
+			return append(catalog.Codex(), owlModels("codex")...)
 		}
 		return catalog.Codex()
 	}
 	// relist hands Codex its models again after the effort new sessions
-	// start at changed, which their default efforts follow: myna's
+	// start at changed, which their default efforts follow: owl's
 	// catalog written again, or the list the gateway hands Codex beside
 	// its sign-in marked stale (its tag carries the effort)
 	relist := func() error {
@@ -548,10 +548,10 @@ func codexIn(at place) *Agent {
 	// left unset stays unset — Codex then takes the model's own default,
 	// which is what Default on the effort control asked for (lgtm: Default
 	// turned into medium on its own). Routed, the Codex app offers
-	// myna's models' efforts too (#310).
+	// owl's models' efforts too (#310).
 	settle := func() error {
 		if routed() {
-			if err := codexEnableEfforts(path, mynaModels("codex")); err != nil {
+			if err := codexEnableEfforts(path, owlModels("codex")); err != nil {
 				return err
 			}
 		}
@@ -562,24 +562,24 @@ func codexIn(at place) *Agent {
 			if err := edit.SetTOMLTop(path, edit.KV{Path: "model_reasoning_effort", Value: to}); err != nil {
 				return err
 			}
-			// myna's own change, which Disconnect undoes while it stands
+			// owl's own change, which Disconnect undoes while it stands
 			stash(map[string]string{at.key("codex.effort_set"): to})
 			if err := relist(); err != nil {
 				return err
 			}
 		}
-		// the Codex app's list as myna is wired now, or taken out
+		// the Codex app's list as owl is wired now, or taken out
 		if err := deskList(); err != nil {
 			return err
 		}
 		return dropSubEffort()
 	}
-	// myna as a provider Codex can name; its threads started on myna do
+	// owl as a provider Codex can name; its threads started on owl do
 	// Codex's background compaction, as Settings has it (#2490): written
-	// where Codex is routed through myna, taken back where it isn't
+	// where Codex is routed through owl, taken back where it isn't
 	asyncCompaction := func(routed bool) error {
 		// a compact limit tune wrote here before goes to Long
-		// conversations, the one window myna keeps (7eleven)
+		// conversations, the one window owl keeps (7eleven)
 		if at.id == "" && at.spell == nil {
 			tuneMigrateCodex(at.home)
 		}
@@ -589,9 +589,9 @@ func codexIn(at place) *Agent {
 	}
 	// keptBearerToken is the table's bearer token when it is one the
 	// gateway takes: a caller key of the gateway's own the user put in
-	// myna's token's place goes through myna all the same, so theirs
+	// owl's token's place goes through owl all the same, so theirs
 	// stays, as a sync keeps one (keyHolds); only a value the gateway would
-	// refuse is wired over (#2545). The sharing key myna made is myna's
+	// refuse is wired over (#2545). The sharing key owl made is owl's
 	// own, however much Authenticate takes it, so it never counts as theirs
 	// (Default): sharing going off brings gateway.Token back
 	keptBearerToken := func(table string) string {
@@ -603,32 +603,32 @@ func codexIn(at place) *Agent {
 		}
 		return tok
 	}
-	// openaiAuth: whether myna's provider table says
+	// openaiAuth: whether owl's provider table says
 	// requires_openai_auth, and whether that is known. Without it Codex's
 	// app-server answers account/read and getAuthStatus with no account and
-	// no token for a provider that is myna, and the Codex app (ChatGPT.app
+	// no token for a provider that is owl, and the Codex app (ChatGPT.app
 	// 26.1021) switches to an identity of no account: its ChatGPT mode's
 	// chats and projects ("Work") are gone, as are Chrome control and cloud
-	// tasks, while myna's models still answer (Qyburn3 on X). With it the
-	// app keeps the account, and Codex still sends myna's key
-	// (experimental_bearer_token) to myna, no ChatGPT-Account-ID, its
+	// tasks, while owl's models still answer (Qyburn3 on X). With it the
+	// app keeps the account, and Codex still sends owl's key
+	// (experimental_bearer_token) to owl, no ChatGPT-Account-ID, its
 	// tools the same (image_gen kept): tried with ChatGPT.app 26.1021 and
 	// its codex 0.164.0-alpha.11 against a capturing server.
 	//
 	// Only for a ChatGPT sign-in with room. One the Codex app holds (used
 	// up, codexUsedUp) would have the app read its rate limit again and
-	// grey Send for myna's models too, which is what codex.out exists to
+	// grey Send for owl's models too, which is what codex.out exists to
 	// get past (#540, c54478904). An API key alone has no account to keep,
 	// and Codex drops its image tool for a provider requiring OpenAI auth
 	// (uses_openai_actor_authorization); no sign-in at all would have the
 	// app ask for one. A sign-in read that says nothing leaves the table
 	// as it is.
 	//
-	// requires_openai_auth = false is never myna's (it writes true or
-	// nothing): the user wrote it, to have the Codex app on myna with no
+	// requires_openai_auth = false is never owl's (it writes true or
+	// nothing): the user wrote it, to have the Codex app on owl with no
 	// ChatGPT account of its own (蛋仔 on Discord), and it stays.
 	ownNoAuth := func() bool {
-		t, _ := edit.GetTOMLTable(path, "model_providers."+mynaID)
+		t, _ := edit.GetTOMLTable(path, "model_providers."+owlID)
 		return t["requires_openai_auth"] == "false"
 	}
 	openaiAuth := func() (want, known bool) {
@@ -643,23 +643,23 @@ func codexIn(at place) *Agent {
 	}
 	putProvider := func() error {
 		kvs := []edit.KV{
-			{Path: "name", Value: "myna"},
+			{Path: "name", Value: "owl"},
 			{Path: "base_url", Value: at.v1()},
 			{Path: "wire_api", Value: "responses"},
-			{Path: "experimental_bearer_token", Value: keptBearerToken("model_providers." + mynaID)},
+			{Path: "experimental_bearer_token", Value: keptBearerToken("model_providers." + owlID)},
 			// Codex offers its built-in image tool (image_gen.imagegen) and
 			// the other OpenAI-provider tools only to a provider it reads as
 			// the OpenAI actor: one that does not require OpenAI auth but
 			// carries x-openai-actor-authorization. Without this header the
-			// model is never given the tool, so a Codex on myna can't draw
+			// model is never given the tool, so a Codex on owl can't draw
 			// (the request that names model/draws never happens at all).
 			// uses_openai_actor_authorization() is exactly this check.
 			// An Inline table: a config that holds the headers as their own
-			// [model_providers.myna.http_headers] table, or as dotted keys,
+			// [model_providers.owl.http_headers] table, or as dotted keys,
 			// gets the header set there, the user's others kept; written
 			// inline beside that table it defined http_headers twice and
 			// every model switch failed (wztlink1013 on Discord).
-			{Path: "http_headers", Value: edit.Inline{{Path: "x-openai-actor-authorization", Value: "myna"}}},
+			{Path: "http_headers", Value: edit.Inline{{Path: "x-openai-actor-authorization", Value: "owl"}}},
 		}
 		// the table's capabilities, the user's or the background
 		// compaction's, aren't lost as it is written again
@@ -672,59 +672,59 @@ func codexIn(at place) *Agent {
 		} else if ownNoAuth() {
 			kvs = append(kvs, edit.KV{Path: "requires_openai_auth", Value: false})
 		}
-		if err := edit.SetTOMLTable(path, "model_providers."+mynaID, kvs...); err != nil {
+		if err := edit.SetTOMLTable(path, "model_providers."+owlID, kvs...); err != nil {
 			return err
 		}
-		if t, _ := edit.GetTOMLTable(path, "model_providers."+mynaID); !want && known && t["requires_openai_auth"] != "" {
-			if err := edit.DelTOMLKey(path, "model_providers."+mynaID, "requires_openai_auth"); err != nil {
+		if t, _ := edit.GetTOMLTable(path, "model_providers."+owlID); !want && known && t["requires_openai_auth"] != "" {
+			if err := edit.DelTOMLKey(path, "model_providers."+owlID, "requires_openai_auth"); err != nil {
 				return err
 			}
 		}
 		return asyncCompaction(true)
 	}
-	// authStale: the myna table says requires_openai_auth otherwise
+	// authStale: the owl table says requires_openai_auth otherwise
 	// than openaiAuth wants, for Sync to write it again
 	authStale := func() bool {
 		want, known := openaiAuth()
 		if !known {
 			return false
 		}
-		t, err := edit.GetTOMLTable(path, "model_providers."+mynaID)
+		t, err := edit.GetTOMLTable(path, "model_providers."+owlID)
 		if err != nil || t == nil {
 			return false
 		}
 		return (t["requires_openai_auth"] == "true") != want
 	}
 	hasProvider := func() bool {
-		t, err := edit.GetTOMLTable(path, "model_providers."+mynaID)
+		t, err := edit.GetTOMLTable(path, "model_providers."+owlID)
 		return err == nil && t != nil
 	}
-	// noProvider: the config was read and has no such table; one myna
+	// noProvider: the config was read and has no such table; one owl
 	// can't read is told by Check as it is, and written to by nothing
 	noProvider := func() bool {
-		t, err := edit.GetTOMLTable(path, "model_providers."+mynaID)
+		t, err := edit.GetTOMLTable(path, "model_providers."+owlID)
 		return err == nil && t == nil
 	}
-	// namesMyna: the config has Codex on myna as its provider, at its
-	// top or in a profile. Codex then reads [model_providers.myna] as it
+	// namesOwl: the config has Codex on owl as its provider, at its
+	// top or in a profile. Codex then reads [model_providers.owl] as it
 	// loads the config, before any thread: without the table it loads no
-	// config at all ("Model provider `myna` not found"), the app and the
+	// config at all ("Model provider `owl` not found"), the app and the
 	// CLI both, whatever the model.
-	namesMyna := func() bool {
+	namesOwl := func() bool {
 		if asProvider() {
 			return true
 		}
 		names, _ := edit.TOMLTables(path)
 		for _, n := range names {
 			if strings.HasPrefix(n, "profiles.") {
-				if t, _ := edit.GetTOMLTable(path, n); t["model_provider"] == mynaID {
+				if t, _ := edit.GetTOMLTable(path, n); t["model_provider"] == owlID {
 					return true
 				}
 			}
 		}
 		return false
 	}
-	// dropProvider takes myna out as the provider Codex is on; the table
+	// dropProvider takes owl out as the provider Codex is on; the table
 	// stays for the threads started on it
 	dropProvider := func() error {
 		if !asProvider() {
@@ -741,76 +741,76 @@ func codexIn(at place) *Agent {
 		dropList()
 		return nil
 	}
-	// bringBack moves the threads started while myna was Codex's
-	// provider (model_provider "myna") onto the provider Codex is on now,
-	// once it is off myna: Codex lists only the threads of its current
+	// bringBack moves the threads started while owl was Codex's
+	// provider (model_provider "owl") onto the provider Codex is on now,
+	// once it is off owl: Codex lists only the threads of its current
 	// provider (app-server thread/list, the TUI's resume picker), so after
-	// a Disconnect, a hand edit, or myna stepping back beside the
-	// ChatGPT sign-in, every thread started on myna was gone from Codex
-	// (kaizaoji on X). Only myna's own threads move, never those of a
+	// a Disconnect, a hand edit, or owl stepping back beside the
+	// ChatGPT sign-in, every thread started on owl was gone from Codex
+	// (kaizaoji on X). Only owl's own threads move, never those of a
 	// provider of the user's (CC Switch's, #887); none while a profile
-	// still names myna, whose threads they are; and a copy of each is
-	// kept in myna's trash (MoveCodexProvider). A thread Codex wrote to
+	// still names owl, whose threads they are; and a copy of each is
+	// kept in owl's trash (MoveCodexProvider). A thread Codex wrote to
 	// in the last minute, or one a Codex has open, waits for the next
 	// Sync. This machine's Codex only: a distro's state database isn't
-	// myna's to open.
+	// owl's to open.
 	bringBack := func() {
-		if at.spell != nil || namesMyna() {
+		if at.spell != nil || namesOwl() {
 			return
 		}
 		to := sessions.CodexProviderIn(dir)
-		if to == mynaID {
+		if to == owlID {
 			return
 		}
-		// in place first (bringOver's, and those started on myna that
+		// in place first (bringOver's, and those started on owl that
 		// Codex hasn't packed): no copy of each in the trash; an id of
 		// another length pads the line, or rewrites that one file
-		inPlace, err := sessions.RelabelCodexThreads(dir, mynaID, to)
+		inPlace, err := sessions.RelabelCodexThreads(dir, owlID, to)
 		if len(inPlace) > 0 {
-			log.Printf("codex: %d thread(s) on myna moved back to %s, where Codex lists them", len(inPlace), to)
+			log.Printf("codex: %d thread(s) on owl moved back to %s, where Codex lists them", len(inPlace), to)
 		}
 		if err != nil {
-			log.Println("codex: moving myna's threads back:", err)
+			log.Println("codex: moving owl's threads back:", err)
 		}
-		moved, err := sessions.MoveCodexThreads(dir, mynaID, to)
+		moved, err := sessions.MoveCodexThreads(dir, owlID, to)
 		if len(moved) > 0 {
-			log.Printf("codex: %d thread(s) started on myna moved to %s, where Codex lists them", len(moved), to)
+			log.Printf("codex: %d thread(s) started on owl moved to %s, where Codex lists them", len(moved), to)
 		}
 		if err != nil {
-			log.Println("codex: moving myna's threads:", err)
+			log.Println("codex: moving owl's threads:", err)
 		}
 	}
-	// bringOver is bringBack the other way: while myna is Codex's
+	// bringOver is bringBack the other way: while owl is Codex's
 	// provider, the threads Codex started on OpenAI before are listed
 	// where Codex is now. Codex's resume picker and the app's thread list
-	// show the threads of the provider Codex is on alone, so with myna
-	// its provider (no ChatGPT sign-in, an API key, myna API, an account
+	// show the threads of the provider Codex is on alone, so with owl
+	// its provider (no ChatGPT sign-in, an API key, owl API, an account
 	// out of its allowance) `codex resume` said "No sessions yet" over a
 	// history that was all there (notnico64 on Discord). They move in
 	// place (RelabelCodexThreads): those Codex has packed, a week after
 	// their last turn, stay on OpenAI, as a rewrite of every one would
 	// copy the whole history. bringBack moves them back as Codex leaves
-	// myna. Only OpenAI's, and only when Codex was on OpenAI before
-	// myna: threads of a provider of the user's (CC Switch's) stay, and
+	// owl. Only OpenAI's, and only when Codex was on OpenAI before
+	// owl: threads of a provider of the user's (CC Switch's) stay, and
 	// so do OpenAI's when Codex was on another provider, whose threads
 	// bringBack would hand them to. None while a profile is chosen, whose
 	// provider is the one Codex lists, and none from a distro's Codex.
 	bringOver := func() {
-		if at.spell != nil || !asProvider() || sessions.CodexProviderIn(dir) != mynaID {
+		if at.spell != nil || !asProvider() || sessions.CodexProviderIn(dir) != owlID {
 			return
 		}
 		if p := stashShared()[at.key("codex.provider")]; p != "" && p != "openai" {
 			return
 		}
-		moved, err := sessions.RelabelCodexThreads(dir, "openai", mynaID)
+		moved, err := sessions.RelabelCodexThreads(dir, "openai", owlID)
 		if len(moved) > 0 {
-			log.Printf("codex: %d thread(s) started on OpenAI moved to myna, where Codex lists them now", len(moved))
+			log.Printf("codex: %d thread(s) started on OpenAI moved to owl, where Codex lists them now", len(moved))
 		}
 		if err != nil {
-			log.Println("codex: moving OpenAI's threads to myna:", err)
+			log.Println("codex: moving OpenAI's threads to owl:", err)
 		}
 	}
-	// mirrorsTaken are the mirrors takeMirrors pointed at myna (#1796)
+	// mirrorsTaken are the mirrors takeMirrors pointed at owl (#1796)
 	mirrorsTaken := func() []string {
 		var ids []string
 		json.Unmarshal([]byte(stashShared()[at.key("codex.mirrors")]), &ids)
@@ -818,10 +818,10 @@ func codexIn(at place) *Agent {
 	}
 	// isCCSwitchMirror reports whether a model_providers table is CC Switch's
 	// official OpenAI mirror: name = "OpenAI", requires_openai_auth = true, and no
-	// base_url (or myna's codexURL while failing over, or while
+	// base_url (or owl's codexURL while failing over, or while
 	// takeMirrors has it).
 	isCCSwitchMirror := func(p string) bool {
-		if p == "" || p == "openai" || p == mynaID {
+		if p == "" || p == "openai" || p == owlID {
 			return false
 		}
 		t, err := edit.GetTOMLTable(path, "model_providers."+p)
@@ -848,12 +848,12 @@ func codexIn(at place) *Agent {
 	// each one's base URL by its id: CC Switch's, and any other a Codex
 	// thread was started on. A thread keeps the provider it was started
 	// on, and CC Switch moves every third-party thread onto its "custom"
-	// one, so one reopened there still went to the relay, a myna model
+	// one, so one reopened there still went to the relay, a owl model
 	// picked in it too, which the relay didn't know. A table of the user's
 	// own, or one a newer CC Switch names after its card, did the same:
 	// an old thread sent "apikeyfan/gpt-6.1-sol" straight to the relay
 	// ("not supported by any configured account") while a new one worked.
-	// While a myna model is on, those tables go through myna as well;
+	// While a owl model is on, those tables go through owl as well;
 	// a table a profile names is the user's to pick, and stays as it is,
 	// and so does one no thread was started on.
 	ccSwitchTables := func() map[string]string {
@@ -864,7 +864,7 @@ func codexIn(at place) *Agent {
 		read := false
 		for _, n := range names {
 			id, ok := strings.CutPrefix(n, "model_providers.")
-			if !ok || id == mynaID || codexBuiltinProvider[id] || named[id] || isCCSwitchMirror(id) {
+			if !ok || id == owlID || codexBuiltinProvider[id] || named[id] || isCCSwitchMirror(id) {
 				continue
 			}
 			t, _ := edit.GetTOMLTable(path, n)
@@ -886,13 +886,13 @@ func codexIn(at place) *Agent {
 		return out
 	}
 	// putThreadTables writes a table for each provider a Codex thread was
-	// started on that config.toml has none of, pointed at myna. The
+	// started on that config.toml has none of, pointed at owl. The
 	// Codex app resumes a thread on its own provider, and without that
 	// table it loads no config for it: "Model provider `custom` not found",
 	// a thread started through CC Switch reopened after CC Switch rewrote
 	// config.toml without its table (#1372). Codex's built-in providers
-	// need none, and myna's own is putProvider's. A table written so
-	// stays, as myna's own does, for the threads that name it.
+	// need none, and owl's own is putProvider's. A table written so
+	// stays, as owl's own does, for the threads that name it.
 	putThreadTables := func() error {
 		// the providers config.toml has, however spelled (a table, inline,
 		// dotted keys); one that doesn't parse is left alone
@@ -905,7 +905,7 @@ func codexIn(at place) *Agent {
 			return nil
 		}
 		for _, id := range sessions.CodexThreadProviders(dir) {
-			if _, ok := providers[id]; ok || id == mynaID || codexBuiltinProvider[id] {
+			if _, ok := providers[id]; ok || id == owlID || codexBuiltinProvider[id] {
 				continue
 			}
 			if err := edit.SetTOMLTable(path, "model_providers."+id,
@@ -921,14 +921,14 @@ func codexIn(at place) *Agent {
 	}
 	// takeMirrors points CC Switch's OpenAI mirrors (the official OpenAI on
 	// the ChatGPT sign-in, under an id of its own and with no base_url) at
-	// myna's ChatGPT backend while Codex's built-in provider goes there
+	// owl's ChatGPT backend while Codex's built-in provider goes there
 	// by openai_base_url, which a table of another id doesn't follow. A
 	// thread started on one ("custom") and reopened went straight to
-	// ChatGPT, which refused the myna model picked in it ("The
+	// ChatGPT, which refused the owl model picked in it ("The
 	// 'group/intent-auto' model is not supported when using Codex with a
-	// ChatGPT account"), and myna never saw the request (#1796). Through
-	// myna it is answered as the built-in provider's threads are: a
-	// myna model by myna, Codex's own on the ChatGPT accounts. A table
+	// ChatGPT account"), and owl never saw the request (#1796). Through
+	// owl it is answered as the built-in provider's threads are: a
+	// owl model by owl, Codex's own on the ChatGPT accounts. A table
 	// a profile names stays as it is.
 	takeMirrors := func() error {
 		if !viaBase() {
@@ -978,8 +978,8 @@ func codexIn(at place) *Agent {
 		forget(at.key("codex.mirrors"))
 		return nil
 	}
-	// takeTables points CC Switch's tables at myna, each one's own base
-	// URL kept in the stash for giveTables (a table already on myna's
+	// takeTables points CC Switch's tables at owl, each one's own base
+	// URL kept in the stash for giveTables (a table already on owl's
 	// keeps the one kept for it), and writes the tables threads name that
 	// are gone (putThreadTables), and takes CC Switch's OpenAI mirrors
 	// (takeMirrors)
@@ -1009,7 +1009,7 @@ func codexIn(at place) *Agent {
 		return nil
 	}
 	// giveTables puts the base URLs back, on the tables still pointed at
-	// myna; one changed since is left as it is now
+	// owl; one changed since is left as it is now
 	giveTables := func() error {
 		if err := giveMirrors(); err != nil {
 			return err
@@ -1028,11 +1028,11 @@ func codexIn(at place) *Agent {
 		forget(at.key("codex.tables"))
 		return nil
 	}
-	// api: the user wants myna as Codex's provider even while Codex is
+	// api: the user wants owl as Codex's provider even while Codex is
 	// signed in to ChatGPT
 	api := func() bool { return stashShared()[at.key("codex.login")] == "api" }
 	// out reports whether the Codex app holds the ChatGPT account Codex is
-	// signed in to (codexUsedUp), for myna to become Codex's provider
+	// signed in to (codexUsedUp), for owl to become Codex's provider
 	// while it does (#540): never with the sign-in kept on ChatGPT
 	// (chatgpt), where the user would rather the Codex app wait for the
 	// account than leave its ChatGPT state
@@ -1057,7 +1057,7 @@ func codexIn(at place) *Agent {
 		return nil
 	}
 	// the model spawned subagents start on, when not the parent's; one of
-	// myna's goes when myna steps out, as Codex could no longer find it
+	// owl's goes when owl steps out, as Codex could no longer find it
 	subagent := func() (string, error) {
 		agents, err := edit.GetTOMLTable(path, "agents")
 		return agents["default_subagent_model"], err
@@ -1065,7 +1065,7 @@ func codexIn(at place) *Agent {
 	// the model Codex writes its memories with (Yc on Discord): [memories]
 	// extract_model summarises a thread, consolidation_model folds them in
 	// (codex-rs/config/src/types.rs). Unset, Codex takes gpt-5.6-luna and
-	// gpt-5.6-terra, whatever its model; myna sets both to one pick.
+	// gpt-5.6-terra, whatever its model; owl sets both to one pick.
 	memories := func() (string, error) {
 		m, err := edit.GetTOMLTable(path, "memories")
 		return cmp.Or(m["consolidation_model"], m["extract_model"]), err
@@ -1078,11 +1078,11 @@ func codexIn(at place) *Agent {
 		}
 		return nil
 	}
-	// one of myna's goes too: Codex could no longer find it
+	// one of owl's goes too: Codex could no longer find it
 	dropSubagent := func() error {
 		if m, err := memories(); err != nil {
 			return err
-		} else if isMyna(m) {
+		} else if isOwl(m) {
 			if err := dropMemories(); err != nil {
 				return err
 			}
@@ -1091,7 +1091,7 @@ func codexIn(at place) *Agent {
 		if err != nil {
 			return err
 		}
-		if !isMyna(model) {
+		if !isOwl(model) {
 			return nil
 		}
 		return edit.DelTOMLKey(path, "agents", "default_subagent_model")
@@ -1121,11 +1121,11 @@ func codexIn(at place) *Agent {
 		}
 		return nil
 	}
-	// the user disconnected Codex and hasn't connected it since: myna
+	// the user disconnected Codex and hasn't connected it since: owl
 	// writes nothing of its own back (paynezhuang on Discord: the base URL
 	// was back after every update)
 	disconnected := func() bool { return stashShared()[at.key("codex"+disconnectedKey)] == "1" }
-	// Codex on one of its own models goes through myna too while more of
+	// Codex on one of its own models goes through owl too while more of
 	// its ChatGPT accounts are on there, so one out of its allowance hands
 	// the turn to the next; with none, or once the user disconnected Codex,
 	// it goes straight to OpenAI again
@@ -1145,9 +1145,9 @@ func codexIn(at place) *Agent {
 		// pointed at the Codex path: the gateway takes a named key there,
 		// so the turn failover handed it came back a 401 (#2145)
 		on := !disconnected() && codexFailover() && !onAnotherMachine(at.gw())
-		// failover is myna's own idea, not the user's: never handed
+		// failover is owl's own idea, not the user's: never handed
 		// Codex's requests while a proxy they'd go through doesn't pass
-		// them on to myna, which would have every turn fail with 502
+		// them on to owl, which would have every turn fail with 502
 		// (codex_proxy.go); one written before goes again
 		if on && at.spell == nil && !codexProxyOK(path, at.gw()) {
 			on = false
@@ -1171,9 +1171,9 @@ func codexIn(at place) *Agent {
 		}
 		// the base URL failover wrote is marked (codex.failover), and only
 		// that one goes again: one the user wrote in config.toml by hand,
-		// to have Codex's own models go through myna, stays (#856: it was
-		// gone again each time myna started). One already there while
-		// failover is on is taken as failover's, as a myna from before
+		// to have Codex's own models go through owl, stays (#856: it was
+		// gone again each time owl started). One already there while
+		// failover is on is taken as failover's, as a owl from before
 		// the mark wrote it.
 		owned := stashShared()[at.key("codex.failover")] == "1"
 		switch {
@@ -1189,11 +1189,11 @@ func codexIn(at place) *Agent {
 		}
 		return nil
 	}
-	// failingOver: Codex reaches myna for account failover alone, by the
+	// failingOver: Codex reaches owl for account failover alone, by the
 	// base URL failover wrote (codex.failover) or by CC Switch's OpenAI
-	// mirror pointed at myna for it (codex.mirror_failover), with nothing
-	// of myna's connected. It read as not connected while every request
-	// went through myna, myna's models in its list (#1385).
+	// mirror pointed at owl for it (codex.mirror_failover), with nothing
+	// of owl's connected. It read as not connected while every request
+	// went through owl, owl's models in its list (#1385).
 	failingOver := func() bool {
 		if wired() || asProvider() {
 			return false
@@ -1205,23 +1205,23 @@ func codexIn(at place) *Agent {
 		}
 		return viaBase() && s[at.key("codex.failover")] == "1"
 	}
-	modelOptions := func(withMyna bool) []Option {
+	modelOptions := func(withOwl bool) []Option {
 		var own []Option
 		// each of Codex's own says which way it goes, as Claude Code's do:
-		// to its provider directly, or through myna while routed by the
-		// base URL or with myna its provider (EZN7L2C3, #834: Codex 下拉
-		// 选项中没有 via myna)
+		// to its provider directly, or through owl while routed by the
+		// base URL or with owl its provider (EZN7L2C3, #834: Codex 下拉
+		// 选项中没有 via owl)
 		p := get("model_provider")
 		to, through := "OpenAI", routed()
-		if p != "" && p != mynaID && p != "openai" {
+		if p != "" && p != owlID && p != "openai" {
 			// a provider of the user's own, or CC Switch's, pointed at
-			// myna or not
+			// owl or not
 			t, _ := edit.GetTOMLTable(path, "model_providers."+p)
 			to, through = p, t["base_url"] == at.codexURL() || t["base_url"] == at.v1()
 		}
-		// beside its sign-in on one of myna's models, not joined, one of
-		// its own picked here takes myna out (set, #940) unless failover
-		// puts the base URL back: it said via myna, and the pick went
+		// beside its sign-in on one of owl's models, not joined, one of
+		// its own picked here takes owl out (set, #940) unless failover
+		// puts the base URL back: it said via owl, and the pick went
 		// straight to OpenAI with nothing asked (NancyTom18 on X)
 		ownThrough := through
 		if through && (p == "" || p == "openai") && beside() && !asProvider() && !api() &&
@@ -1238,19 +1238,19 @@ func codexIn(at place) *Agent {
 			}
 			return own
 		}
-		if p != "" && p != mynaID && !isCCSwitchMirror(p) {
+		if p != "" && p != owlID && !isCCSwitchMirror(p) {
 			own = say(group(p, options(catalog.Codex(), "")))
 		} else {
-			own = codexInMyna(say(group("OpenAI", options(ownCodex(), ""))))
-			// with myna Codex's provider (myna API, or a myna model
+			own = codexInOwl(say(group("OpenAI", options(ownCodex(), ""))))
+			// with owl Codex's provider (owl API, or a owl model
 			// picked with no ChatGPT sign-in beside it), Codex's own models
-			// are reached through myna on a ChatGPT account there: picked
-			// so, set so (#701). One myna doesn't serve is picked off
-			// myna, straight to OpenAI, and says so: it said via myna,
-			// and picking it took Codex off myna at once (#1269)
+			// are reached through owl on a ChatGPT account there: picked
+			// so, set so (#701). One owl doesn't serve is picked off
+			// owl, straight to OpenAI, and says so: it said via owl,
+			// and picking it took Codex off owl at once (#1269)
 			if api() || asProvider() {
 				for i, o := range own {
-					if id := codexOwnViaMyna(o.Value); id != "" {
+					if id := codexOwnViaOwl(o.Value); id != "" {
 						own[i].Label, own[i].Value, own[i].Ref = o.Value, id, id
 					} else if !api() {
 						own[i].Via, own[i].Direct = false, "OpenAI"
@@ -1258,24 +1258,24 @@ func codexIn(at place) *Agent {
 				}
 			}
 		}
-		if !withMyna {
+		if !withOwl {
 			return own
 		}
-		// the models myna serves on the Codex accounts in it (codex/…)
+		// the models owl serves on the Codex accounts in it (codex/…)
 		// are left out while they would only add a hop: Codex on its own
-		// ChatGPT sign-in, that one account alone in myna. On a relay or
+		// ChatGPT sign-in, that one account alone in owl. On a relay or
 		// a key they are not Codex's sign-in, and over several accounts
-		// myna routes; offered via myna then, beside the direct ones
+		// owl routes; offered via owl then, beside the direct ones
 		// (#1603: Codex on CC Switch's custom relay, two accounts, GPT
-		// models direct only). Routed, Codex's own say via myna already.
+		// models direct only). Routed, Codex's own say via owl already.
 		onSignIn := (p == "" || p == "openai" || isCCSwitchMirror(p)) && chatGPT()
 		if !through && (!onSignIn || codexFailover()) {
 			return withVia(own, "codex", "")
 		}
-		return append(own, codexViaMynaFor(own)...)
+		return append(own, codexViaOwlFor(own)...)
 	}
-	// unroute takes myna out as the way Codex reaches its models and puts
-	// back what the stash kept from before myna was wired in (its
+	// unroute takes owl out as the way Codex reaches its models and puts
+	// back what the stash kept from before owl was wired in (its
 	// provider, catalog and effort); it answers the model Codex was on
 	// then, for Unwire to go back to
 	unroute := func() (string, error) {
@@ -1296,11 +1296,11 @@ func codexIn(at place) *Agent {
 			return "", err
 		}
 		was := unstash(at.key("codex.model"))
-		// what was there before myna is put back only where myna's
+		// what was there before owl is put back only where owl's
 		// change still stands: a key the user set by hand since keeps
 		// theirs (yhwangl on X)
 		var back []edit.KV
-		if p := unstash(at.key("codex.provider")); p != "" && p != mynaID && get("model_provider") == "" {
+		if p := unstash(at.key("codex.provider")); p != "" && p != owlID && get("model_provider") == "" {
 			back = append(back, edit.KV{Path: "model_provider", Value: p})
 		}
 		// the catalog of the user's own put back while its file is there:
@@ -1308,7 +1308,7 @@ func codexIn(at place) *Agent {
 		if c := unstash(at.key("codex.catalog")); c != "" && !ownCatalog(c) && !deskCatalog(c) && !theirListGone(c) && (get("model_catalog_json") == "" || deskCatalog(get("model_catalog_json"))) {
 			back = append(back, edit.KV{Path: "model_catalog_json", Value: c})
 		}
-		// the effort, where it is still one myna set: picked on the
+		// the effort, where it is still one owl set: picked on the
 		// Agents page, or moved to one its model has. One taken out
 		// reads the same however it was, and comes back.
 		id := at.id
@@ -1349,10 +1349,10 @@ func codexIn(at place) *Agent {
 			}
 			// Codex as installed: OpenAI, its own catalog, its default
 			// model. A provider of the user's at the top stays (#4347):
-			// a reset takes myna's keys out, not theirs, and Codex
+			// a reset takes owl's keys out, not theirs, and Codex
 			// goes on resuming the threads it saved with theirs
 			keys := []string{"model", "model_catalog_json"}
-			if p := get("model_provider"); p == "" || p == "openai" || p == mynaID {
+			if p := get("model_provider"); p == "" || p == "openai" || p == owlID {
 				keys = append(keys, "model_provider")
 			}
 			if err := edit.DelTOMLTop(path, keys...); err != nil {
@@ -1362,18 +1362,18 @@ func codexIn(at place) *Agent {
 			forget(at.key("codex.model"), at.key("codex.effort"), at.key("codex.effort_set"), at.key("codex.provider"), at.key("codex.catalog"), at.key("codex.out"), at.key("codex.joined"), at.key("codex.beside"))
 			return deskList()
 		}
-		// myna API: myna stays Codex's provider whichever model is the
-		// default, so one of Codex's own goes as myna serves it, on the
-		// ChatGPT account there; taking myna out for it took myna's
+		// owl API: owl stays Codex's provider whichever model is the
+		// default, so one of Codex's own goes as owl serves it, on the
+		// ChatGPT account there; taking owl out for it took owl's
 		// models out of Codex's picker with it (#701)
-		if api() && !isMyna(v) {
-			id := codexOwnViaMyna(v)
+		if api() && !isOwl(v) {
+			id := codexOwnViaOwl(v)
 			if id == "" {
-				return fmt.Errorf("Codex's sign-in is myna API, and myna serves no %s: switch Codex's ChatGPT subscription on in myna, or set Codex's sign-in to ChatGPT", v)
+				return fmt.Errorf("Codex's sign-in is owl API, and owl serves no %s: switch Codex's ChatGPT subscription on in owl, or set Codex's sign-in to ChatGPT", v)
 			}
 			v = id
 		}
-		if isMyna(v) {
+		if isOwl(v) {
 			if err := dropMirrorFailover(); err != nil {
 				return err
 			}
@@ -1382,17 +1382,17 @@ func codexIn(at place) *Agent {
 					at.key("codex.provider"): get("model_provider"), at.key("codex.catalog"): get("model_catalog_json")})
 			}
 			// a ChatGPT account the Codex app holds (out of allowance and
-			// of credits) keeps it from sending at all, a myna model's
-			// request too; as a provider of Codex's own, myna is past
+			// of credits) keeps it from sending at all, a owl model's
+			// request too; as a provider of Codex's own, owl is past
 			// that. Wired so for that alone, it is marked (codex.out), for
 			// Sync to put it back beside the sign-in once the account has
 			// room again.
 			// Beside the sign-in only from a provider at the top that is
-			// myna's to take down: its own, none, or CC Switch's mirror
+			// owl's to take down: its own, none, or CC Switch's mirror
 			// of OpenAI, as Join has it. A provider of the user's (CC
 			// Switch's custom, an older takeover's) is not taken down
 			// silently (#4347): every thread saved with it stopped
-			// resuming (modelProviderMismatch). The takeover names myna
+			// resuming (modelProviderMismatch). The takeover names owl
 			// and keeps the user's spelling in the stash, for Unwire to
 			// put back.
 			p := get("model_provider")
@@ -1403,12 +1403,12 @@ func codexIn(at place) *Agent {
 				if err := dropProvider(); err != nil {
 					return err
 				}
-				// for the threads started while myna was the provider
+				// for the threads started while owl was the provider
 				if err := putProvider(); err != nil {
 					return err
 				}
 				// the base URL is the built-in provider's, and a catalog
-				// file would stand in for the list myna hands out
+				// file would stand in for the list owl hands out
 				if err := edit.DelTOMLTop(path, "model_provider", "model_catalog_json"); err != nil {
 					return err
 				}
@@ -1425,14 +1425,14 @@ func codexIn(at place) *Agent {
 				return settle()
 			}
 			// codex.out is for an account the takeover stands in for: a
-			// provider of the user's taken over is myna's doing, not
+			// provider of the user's taken over is owl's doing, not
 			// the account's, so Sync never steps Codex out of it
 			if chatgpt && ours {
 				stash(map[string]string{at.key("codex.out"): "1"})
 			} else {
 				forget(at.key("codex.out"))
 			}
-			// myna is its provider now, not beside the sign-in
+			// owl is its provider now, not beside the sign-in
 			forget(at.key("codex.beside"))
 			if err := putProvider(); err != nil {
 				return err
@@ -1441,12 +1441,12 @@ func codexIn(at place) *Agent {
 				return err
 			}
 			// a thread started on Codex's built-in provider stays on it when
-			// opened again, and its model can be switched to one of myna's
+			// opened again, and its model can be switched to one of owl's
 			// there (the Codex app's, ChatGPT Desktop's picker): the base
-			// URL sends that one to myna too, not to the ChatGPT backend,
+			// URL sends that one to owl too, not to the ChatGPT backend,
 			// which refuses it (#259). A base URL of the user's own stays.
 			kv := []edit.KV{
-				{Path: "model_provider", Value: mynaID},
+				{Path: "model_provider", Value: owlID},
 				{Path: "model_catalog_json", Value: catalogRef},
 				{Path: "model", Value: v},
 			}
@@ -1463,13 +1463,13 @@ func codexIn(at place) *Agent {
 			bringOver()
 			return settle()
 		}
-		// joined, a model of Codex's own is picked beside myna's, as in
+		// joined, a model of Codex's own is picked beside owl's, as in
 		// Codex's /model: it stays connected
 		if joined() && !api() && chatGPT() {
-			// myna made its provider for a used-up account (codex.out)
+			// owl made its provider for a used-up account (codex.out)
 			// and that no longer holds (kept on ChatGPT, or room again):
 			// back on the sign-in as Join leaves it. Only the model set
-			// left myna the provider of one of Codex's own for good
+			// left owl the provider of one of Codex's own for good
 			// (eddie.zhan on Discord, Always ChatGPT from the takeover)
 			if asProvider() && stashShared()[at.key("codex.out")] == "1" && !out() {
 				forget(at.key("codex.out"), at.key("codex.out_own"), at.key("codex.out_stand"))
@@ -1504,7 +1504,7 @@ func codexIn(at place) *Agent {
 	a := atomic(&Agent{
 		ID: "codex", Name: "Codex", Icon: "codex-color", Bin: "codex", Dir: dir, Path: path,
 		UA: []string{"codex", "acp-extension-codex"}, // The ACP adapter's default client name becomes Codex's originator.
-		// Codex as it was before myna: its default puts it back as
+		// Codex as it was before owl: its default puts it back as
 		// installed, OpenAI and its default model, where this brings back
 		// the provider and model the user had
 		Unwire: func() error {
@@ -1516,13 +1516,13 @@ func codexIn(at place) *Agent {
 			if err := dropSubagent(); err != nil {
 				return err
 			}
-			// the model left alone where myna had none to take over; a
+			// the model left alone where owl had none to take over; a
 			// model of Codex's own picked while joined stays, its last pick
 			switch {
-			case now != "" && !isMyna(now):
-			case was != "" && !isMyna(was):
+			case now != "" && !isOwl(now):
+			case was != "" && !isOwl(was):
 				err = edit.SetTOMLTop(path, edit.KV{Path: "model", Value: was})
-			case isMyna(get("model")):
+			case isOwl(get("model")):
 				err = edit.DelTOMLTop(path, "model")
 			}
 			if err != nil {
@@ -1530,7 +1530,7 @@ func codexIn(at place) *Agent {
 			}
 			dropList()
 			forget(at.key("codex.model"), at.key("codex.effort"), at.key("codex.effort_set"), at.key("codex.provider"), at.key("codex.catalog"))
-			// its threads go on without myna: the compactions myna made
+			// its threads go on without owl: the compactions owl made
 			// in them written as Codex's own (a distro's Codex locks its
 			// files where this machine's locks can't reach)
 			if at.spell == nil {
@@ -1540,12 +1540,12 @@ func codexIn(at place) *Agent {
 			bringBack()
 			return settle()
 		},
-		// signed in with ChatGPT, Codex reaches myna by the base URL with
+		// signed in with ChatGPT, Codex reaches owl by the base URL with
 		// its own models still there: connected so, it stays on the model it
 		// was on, the one last picked in its /model (the owner: 让 Codex 记住
-		// 上次的选择), and myna's models join its list
+		// 上次的选择), and owl's models join its list
 		Join: func() (bool, error) {
-			if api() || !chatGPT() || out() || isMyna(get("model")) {
+			if api() || !chatGPT() || out() || isOwl(get("model")) {
 				return false, nil
 			}
 			if p := get("model_provider"); p != "" && p != "openai" && !isCCSwitchMirror(p) {
@@ -1562,7 +1562,7 @@ func codexIn(at place) *Agent {
 			if err := dropProvider(); err != nil {
 				return false, err
 			}
-			// for the threads started on one of myna's models
+			// for the threads started on one of owl's models
 			if err := putProvider(); err != nil {
 				return false, err
 			}
@@ -1582,7 +1582,7 @@ func codexIn(at place) *Agent {
 			return true, settle()
 		},
 		// joined as the GUI and drift tell it: Codex's own models in its
-		// list beside myna's. With myna its provider (myna API, or a
+		// list beside owl's. With owl its provider (owl API, or a
 		// ChatGPT account the Codex app holds) they are not, though the
 		// mark stays for Sync to put it back beside the sign-in: the
 		// Agents row said "its own models stay in /model" while the Codex
@@ -1602,22 +1602,22 @@ func codexIn(at place) *Agent {
 			}
 			return errors.Join(dropMirrorFailover(), dropBase())
 		},
-		OwnVia: codexOwnViaMyna,
+		OwnVia: codexOwnViaOwl,
 		SideModel: func() string {
-			if m := get("model"); viaBase() && !asProvider() && isMyna(m) {
+			if m := get("model"); viaBase() && !asProvider() && isOwl(m) {
 				return m
 			}
 			return ""
 		},
 		Sync: func() error {
 			// after the sync, which may have put Codex back beside its
-			// sign-in or made myna its provider, and whatever it failed at
+			// sign-in or made owl its provider, and whatever it failed at
 			defer bringOver()
 			defer bringBack()
-			// model_catalog_json naming myna's list with the list gone,
-			// as an older myna's Disconnect could leave it (zwaydot on
+			// model_catalog_json naming owl's list with the list gone,
+			// as an older owl's Disconnect could leave it (zwaydot on
 			// X): Codex loads no config at all then. Connected or not, the
-			// list is written again while myna is the provider, else the
+			// list is written again while owl is the provider, else the
 			// key goes, at the next start, with no reconnect.
 			if ownCatalog(get("model_catalog_json")) && listGone() {
 				if asProvider() {
@@ -1628,8 +1628,8 @@ func codexIn(at place) *Agent {
 					return err
 				}
 			}
-			// the Codex app's list, written again as myna is wired now
-			// (the backend's list or myna's models changed), or taken out
+			// the Codex app's list, written again as owl is wired now
+			// (the backend's list or owl's models changed), or taken out
 			// where it is no longer wanted: a hand edit, another tool
 			if err := deskList(); err != nil {
 				return err
@@ -1637,18 +1637,18 @@ func codexIn(at place) *Agent {
 			if err := asyncCompaction(routed()); err != nil {
 				return err
 			}
-			// model_provider = "myna" left with its table gone (taken by
+			// model_provider = "owl" left with its table gone (taken by
 			// another tool, or a hand edit), which keeps Codex from loading
-			// its config at all, connected to myna or not (Tystem on
+			// its config at all, connected to owl or not (Tystem on
 			// Discord): the table is written back, as it stays once written
-			if namesMyna() && noProvider() {
+			if namesOwl() && noProvider() {
 				if err := putProvider(); err != nil {
 					return err
 				}
 			}
 			// the sign-in came or went, or the account ran out or has
 			// room again: requires_openai_auth follows (openaiAuth), on a
-			// table an older myna wrote too
+			// table an older owl wrote too
 			if authStale() {
 				if err := putProvider(); err != nil {
 					return err
@@ -1657,65 +1657,65 @@ func codexIn(at place) *Agent {
 			if err := failover(); err != nil {
 				return err
 			}
-			// myna API on one of Codex's own models, as an older myna
+			// owl API on one of Codex's own models, as an older owl
 			// left it unwired: wired again, as picking it does now (#701);
 			// not one the user disconnected, which this left the same
-			if m := get("model"); api() && !disconnected() && !isMyna(m) && !asProvider() && codexOwnViaMyna(m) != "" {
+			if m := get("model"); api() && !disconnected() && !isOwl(m) && !asProvider() && codexOwnViaOwl(m) != "" {
 				return set(m)
 			}
-			// on a myna model by the base URL alone with no ChatGPT
-			// sign-in, as an older myna left a Codex signed in with an
-			// API key: its picker never had myna's models (#322)
-			if m := get("model"); isMyna(m) && viaBase() && get("model_provider") == "" && !chatGPT() {
+			// on a owl model by the base URL alone with no ChatGPT
+			// sign-in, as an older owl left a Codex signed in with an
+			// API key: its picker never had owl's models (#322)
+			if m := get("model"); isOwl(m) && viaBase() && get("model_provider") == "" && !chatGPT() {
 				return set(m)
 			}
 			// the ChatGPT account ran out on one of Codex's own models,
 			// joined beside the sign-in (MasterYi on Discord: the Codex
-			// app greyed Send, a myna model's turn too), as in #540
-			// below: myna becomes Codex's provider on that model as
-			// myna serves it, the one picked kept (codex.out_own) to go
-			// back to once the account has room. One myna serves on no
-			// account of its own is left as it is, and so is one myna
+			// app greyed Send, a owl model's turn too), as in #540
+			// below: owl becomes Codex's provider on that model as
+			// owl serves it, the one picked kept (codex.out_own) to go
+			// back to once the account has room. One owl serves on no
+			// account of its own is left as it is, and so is one owl
 			// could serve on that same account alone, with no fallback
 			// and no other account (provider.CodexServesWhileOut): every
 			// turn would be refused there too, and the takeover only hid
 			// the account and its reset and restarted the app twice
 			// (xiaoq6285 on Discord, one Plus account)
-			if m := get("model"); !isMyna(m) && !api() && chatGPT() && joined() && out() && provider.CodexServesWhileOut(m) {
-				if id := codexOwnViaMyna(m); id != "" {
+			if m := get("model"); !isOwl(m) && !api() && chatGPT() && joined() && out() && provider.CodexServesWhileOut(m) {
+				if id := codexOwnViaOwl(m); id != "" {
 					stash(map[string]string{at.key("codex.out_own"): m})
 					return set(id)
 				}
 			}
-			// myna can't serve the model picked on that account, but the
+			// owl can't serve the model picked on that account, but the
 			// Codex app greys Send for every model while the account is
 			// out (shamen, chenhan, xiaoq6285 on Discord): with a model of
-			// myna's on no account of the held one, myna becomes
+			// owl's on no account of the held one, owl becomes
 			// Codex's provider on that one so the user can send at all.
 			// This reverses f37742e14, which left Codex on its sign-in to
 			// keep the account's menu: a grey Send for every model costs
 			// more. Once per held/unheld transition: on the stand-in the
-			// model is myna's, so the branch is not met again; the
+			// model is owl's, so the branch is not met again; the
 			// stand-in is kept (codex.out_stand) for the way back below.
-			if m := get("model"); !isMyna(m) && !api() && chatGPT() && joined() && out() && !provider.CodexServesWhileOut(m) {
+			if m := get("model"); !isOwl(m) && !api() && chatGPT() && joined() && out() && !provider.CodexServesWhileOut(m) {
 				if id := codexOtherModel(); id != "" {
 					stash(map[string]string{at.key("codex.out_own"): m, at.key("codex.out_stand"): id})
 					return set(id)
 				}
 			}
 			// put back before #540's way back, which would take
-			// codex/<model> for a myna model picked beside the sign-in
+			// codex/<model> for a owl model picked beside the sign-in
 			if own := stashShared()[at.key("codex.out_own")]; own != "" {
 				m := get("model")
 				switch {
 				case stashShared()[at.key("codex.out")] != "1" || !asProvider() ||
 					codexOwnOf(m) != own && m != stashShared()[at.key("codex.out_stand")]:
-					// moved since (another model picked, myna API, a
+					// moved since (another model picked, owl API, a
 					// disconnect): that stands
 					forget(at.key("codex.out_own"), at.key("codex.out_stand"))
 				case !out():
 					// back beside the sign-in on the one picked, as Join
-					// leaves it: Codex's own sign-in, myna's models joined
+					// leaves it: Codex's own sign-in, owl's models joined
 					forget(at.key("codex.out_own"), at.key("codex.out"), at.key("codex.out_stand"))
 					if err := edit.DelTOMLTop(path, "model_provider", "model_catalog_json"); err != nil {
 						return err
@@ -1731,13 +1731,13 @@ func codexIn(at place) *Agent {
 				}
 			}
 			// the ChatGPT account ran out (of its allowance and its
-			// credits) after a myna model was picked beside its sign-in:
-			// the Codex app then sends nothing, a myna model's turn
-			// included, in a new thread or an old one (#540), so myna
+			// credits) after a owl model was picked beside its sign-in:
+			// the Codex app then sends nothing, a owl model's turn
+			// included, in a new thread or an old one (#540), so owl
 			// becomes Codex's provider as set does for an account already
 			// out; and once the account has room again (or Codex is on
-			// one with room), Codex's own models join myna's again
-			if m := get("model"); isMyna(m) && !api() && chatGPT() {
+			// one with room), Codex's own models join owl's again
+			if m := get("model"); isOwl(m) && !api() && chatGPT() {
 				switch {
 				case viaBase() && !asProvider() && out():
 					return set(m)
@@ -1745,14 +1745,14 @@ func codexIn(at place) *Agent {
 					return set(m)
 				}
 			}
-			// a table taken away before (by an older myna) comes back
-			// while myna is wired, for the threads that name it
+			// a table taken away before (by an older owl) comes back
+			// while owl is wired, for the threads that name it
 			if wired() && viaBase() && !hasProvider() {
 				if err := putProvider(); err != nil {
 					return err
 				}
 			}
-			// CC Switch's tables, left from before myna took them over
+			// CC Switch's tables, left from before owl took them over
 			if wired() && routed() {
 				if err := takeTables(); err != nil {
 					return err
@@ -1760,8 +1760,8 @@ func codexIn(at place) *Agent {
 			}
 			switch {
 			case asProvider() && ownCatalog(get("model_catalog_json")):
-				// set up by a myna from before #259: the threads started
-				// on Codex's built-in provider reach myna too
+				// set up by a owl from before #259: the threads started
+				// on Codex's built-in provider reach owl too
 				if get("openai_base_url") == "" {
 					if err := edit.SetTOMLTop(path, edit.KV{Path: "openai_base_url", Value: at.codexURL()}); err != nil {
 						return err
@@ -1775,7 +1775,7 @@ func codexIn(at place) *Agent {
 				}
 			case failingOver():
 				// the list the gateway hands a Codex there for failover
-				// alone: its own models, without myna's (#1385)
+				// alone: its own models, without owl's (#1385)
 				return codexStaleCache(filepath.Join(dir, "models_cache.json"), provider.CodexOwnListTag())
 			case viaBase():
 				if err := codexStaleCache(filepath.Join(dir, "models_cache.json"), provider.CodexListTag()); err != nil {
@@ -1786,27 +1786,27 @@ func codexIn(at place) *Agent {
 			}
 			// a model that now has levels it had none of before (models.dev
 			// synced, a vendor's list fetched) keeps an effort it takes
-			if isMyna(get("model")) {
+			if isOwl(get("model")) {
 				return settle()
 			}
 			// on a model of Codex's own (the app's last pick), the app's
-			// picker still lists myna's: the efforts they take now are
+			// picker still lists owl's: the efforts they take now are
 			// offered there too. A group that came to take max kept only
 			// high in the app, with no control, while the config was on
 			// Codex's own model (#2127)
 			if routed() {
-				return codexEnableEfforts(path, mynaModels("codex"))
+				return codexEnableEfforts(path, owlModels("codex"))
 			}
 			return nil
 		},
 		Check: func() string {
-			if namesMyna() && noProvider() {
-				return "Codex's config names myna as its model_provider but has no [model_providers.myna], so Codex can't load its config (\"Model provider `myna` not found\"): myna writes it back when it next syncs, or connect Codex again"
+			if namesOwl() && noProvider() {
+				return "Codex's config names owl as its model_provider but has no [model_providers.owl], so Codex can't load its config (\"Model provider `owl` not found\"): owl writes it back when it next syncs, or connect Codex again"
 			}
 			if !wired() {
 				return ""
 			}
-			// a profile's settings win over the top level's, myna's included
+			// a profile's settings win over the top level's, owl's included
 			if p := get("profile"); p != "" {
 				t, err := edit.GetTOMLTable(path, "profiles."+p)
 				if err != nil {
@@ -1814,35 +1814,35 @@ func codexIn(at place) *Agent {
 				}
 				for _, k := range []string{"model", "model_provider", "openai_base_url", "model_catalog_json"} {
 					if v, ok := t[k]; ok && v != get(k) {
-						return "Codex's profile " + p + " sets its own " + k + " (" + v + "), which Codex takes over myna's"
+						return "Codex's profile " + p + " sets its own " + k + " (" + v + "), which Codex takes over owl's"
 					}
 				}
 			}
 			switch {
 			case asProvider():
-				t, err := edit.GetTOMLTable(path, "model_providers."+mynaID)
+				t, err := edit.GetTOMLTable(path, "model_providers."+owlID)
 				if err != nil {
 					return err.Error()
 				}
 				if t["base_url"] != at.v1() || !keyHolds(t["experimental_bearer_token"], at.gwKey()) || t["wire_api"] != "responses" {
-					return "Codex's [model_providers.myna] no longer points at myna's gateway (" + at.v1() + ")"
+					return "Codex's [model_providers.owl] no longer points at owl's gateway (" + at.v1() + ")"
 				}
 				if c := get("model_catalog_json"); !ownCatalog(c) {
-					return "Codex's model_catalog_json is no longer myna's list"
+					return "Codex's model_catalog_json is no longer owl's list"
 				}
 				if _, err := os.Stat(catalogPath); err != nil {
-					return "myna's model list for Codex (" + catalogPath + ") is gone"
+					return "owl's model list for Codex (" + catalogPath + ") is gone"
 				}
 			case viaBase():
 				if u := get("openai_base_url"); strings.TrimSuffix(u, "/") != at.codexURL() {
-					return "Codex's openai_base_url is " + u + ", not myna's gateway at " + at.codexURL()
+					return "Codex's openai_base_url is " + u + ", not owl's gateway at " + at.codexURL()
 				}
 			default:
-				return "Codex's config no longer sends its model through myna (no openai_base_url or model_provider of myna's), so Codex asks OpenAI for a model OpenAI doesn't have"
+				return "Codex's config no longer sends its model through owl (no openai_base_url or model_provider of owl's), so Codex asks OpenAI for a model OpenAI doesn't have"
 			}
 			for id, u := range ccSwitchTables() {
 				if u != at.v1() {
-					return "Codex's [model_providers." + id + "] sends to " + u + ", not myna's gateway: a Codex thread started on it goes there when reopened, a myna model picked in it too"
+					return "Codex's [model_providers." + id + "] sends to " + u + ", not owl's gateway: a Codex thread started on it goes there when reopened, a owl model picked in it too"
 				}
 			}
 			return ""
@@ -1858,8 +1858,8 @@ func codexIn(at place) *Agent {
 		// daemon_auto_start, on by default on every OS), so closing every
 		// codex session keeps the old list: a new one shows Codex's own
 		// models until that daemon is restarted, while the desktop app's
-		// own app-server, restarted with the app, has myna's (TJHHHH,
-		// luci). With no codex session on it myna restarts it itself
+		// own app-server, restarted with the app, has owl's (TJHHHH,
+		// luci). With no codex session on it owl restarts it itself
 		// (codexDaemonNotice); with one, the user says when.
 		Notice: func() string {
 			var out []string
@@ -1889,7 +1889,7 @@ func codexIn(at place) *Agent {
 				// takes is on the Default option (Takes), not the value, so
 				// picking Default doesn't read back as medium (lgtm)
 				Get: func() string { return get("model_reasoning_effort") },
-				// set, myna's models start at it too when Codex is switched
+				// set, owl's models start at it too when Codex is switched
 				// to one, or at their nearest (relist, codexcat.ModelDefault):
 				// it fell back to the middle of the road (Creat.wu on Discord)
 				Set: func(v string) error {
@@ -1910,9 +1910,9 @@ func codexIn(at place) *Agent {
 			},
 			{
 				// Codex lists only the first five models in the spawn_agent
-				// tool it gives the model, its own ahead of myna's (the
+				// tool it gives the model, its own ahead of owl's (the
 				// gateway names the rest there, spawnAgentModels), and a
-				// subagent is put on one of myna's here without the lead
+				// subagent is put on one of owl's here without the lead
 				// naming it. It is only the model a
 				// spawn that names none starts on: unset, the lead's own,
 				// but a lead naming another in spawn_agent gets that one
@@ -1924,8 +1924,8 @@ func codexIn(at place) *Agent {
 					if v == "" {
 						return edit.DelTOMLKey(path, "agents", "default_subagent_model")
 					}
-					if isMyna(v) && !routed() {
-						return fmt.Errorf("pick a model through myna for Codex first; its subagents can then have one of their own")
+					if isOwl(v) && !routed() {
+						return fmt.Errorf("pick a model through owl for Codex first; its subagents can then have one of their own")
 					}
 					if err := edit.SetTOMLKey(path, "agents", "default_subagent_model", v); err != nil {
 						return err
@@ -1935,10 +1935,10 @@ func codexIn(at place) *Agent {
 				Options: func(map[string]string) []Option { return modelOptions(routed()) },
 			},
 			{
-				// the model myna puts every subagent on, whatever the
+				// the model owl puts every subagent on, whatever the
 				// lead asked for in spawn_agent (willz on Discord): kept in
-				// myna's settings, not Codex's config, since the gateway
-				// rewrites the subagent's request. Every model myna serves
+				// owl's settings, not Codex's config, since the gateway
+				// rewrites the subagent's request. Every model owl serves
 				// is offered (#1633: a lead on a chat provider, its
 				// subagents wanted there too); a subagent whose task a
 				// ChatGPT-backed lead sealed stays on the model asked for
@@ -1971,13 +1971,13 @@ func codexIn(at place) *Agent {
 					var out, groups []Option
 					for _, e := range provider.CodexSubagentModels() {
 						if e.Group != "" {
-							groups = append(groups, Option{Value: e.ID, Label: e.Name, Note: "routing group · via myna",
+							groups = append(groups, Option{Value: e.ID, Label: e.Name, Note: "routing group · via owl",
 								Icon: e.Provider.Icon, Icons: e.Icons, Group: RoutingGroups, Ref: e.ID})
 							continue
 						}
-						note := e.Provider.Name + " · via myna"
+						note := e.Provider.Name + " · via owl"
 						if a := e.Provider.Account; a != nil && a.User != "" {
-							note = a.User + " · via myna"
+							note = a.User + " · via owl"
 						}
 						out = append(out, Option{Value: e.ID, Label: e.Name, Note: note, Icon: e.Provider.Icon,
 							Group: e.Provider.Name, Ref: e.ID, Context: e.Context})
@@ -2016,8 +2016,8 @@ func codexIn(at place) *Agent {
 					if v == "" {
 						return dropMemories()
 					}
-					if isMyna(v) && !routed() {
-						return fmt.Errorf("pick a model through myna for Codex first; its memories can then be written with one of myna's")
+					if isOwl(v) && !routed() {
+						return fmt.Errorf("pick a model through owl for Codex first; its memories can then be written with one of owl's")
 					}
 					for _, k := range []string{"extract_model", "consolidation_model"} {
 						if err := edit.SetTOMLKey(path, "memories", k, v); err != nil {
@@ -2029,10 +2029,10 @@ func codexIn(at place) *Agent {
 				Options: func(map[string]string) []Option { return modelOptions(routed()) },
 			},
 			{
-				// how Codex takes myna's models: beside its ChatGPT
-				// sign-in (openai_base_url), myna its provider only while
+				// how Codex takes owl's models: beside its ChatGPT
+				// sign-in (openai_base_url), owl its provider only while
 				// the Codex app holds the account (""); beside it always,
-				// held or not (chatgpt); or with myna as its provider,
+				// held or not (chatgpt); or with owl as its provider,
 				// the Codex app keeping its ChatGPT account while it has
 				// room (requires_openai_auth, openaiAuth): Codex's
 				// getAuthStatus has no token for a provider without it, and
@@ -2050,22 +2050,22 @@ func codexIn(at place) *Agent {
 					switch {
 					case v != "api" && codexOwnOf(m) != "":
 						// back beside the sign-in, Codex's own model goes to
-						// OpenAI itself again, not by a hop through myna
+						// OpenAI itself again, not by a hop through owl
 						return set(codexOwnOf(m))
-					case isMyna(m):
+					case isOwl(m):
 						return set(m)
-					case v == "api" && codexOwnViaMyna(m) != "":
-						// myna API on one of Codex's own models: wired as
-						// for myna's, so its models are in Codex's picker
+					case v == "api" && codexOwnViaOwl(m) != "":
+						// owl API on one of Codex's own models: wired as
+						// for owl's, so its models are in Codex's picker
 						return set(m)
 					}
 					return nil
 				},
 				Options: func(map[string]string) []Option {
 					return []Option{
-						{Value: "", Label: "ChatGPT", Note: "myna's models join Codex's own; Codex stays signed in to ChatGPT, and while the Codex app blocks its account (out of allowance, no credits left) myna is Codex's provider, so the app still sends"},
-						{Value: "chatgpt", Label: "Always ChatGPT", Note: "as ChatGPT, and kept so while the Codex app blocks its account: myna never becomes Codex's provider. The Codex app may then send nothing till the account has room; Codex CLI goes on through myna"},
-						{Value: "api", Label: "myna API", Note: "myna is Codex's provider, with myna's models only; the Codex app keeps its ChatGPT account (its chats, projects and Chrome control) while the account has room"},
+						{Value: "", Label: "ChatGPT", Note: "owl's models join Codex's own; Codex stays signed in to ChatGPT, and while the Codex app blocks its account (out of allowance, no credits left) owl is Codex's provider, so the app still sends"},
+						{Value: "chatgpt", Label: "Always ChatGPT", Note: "as ChatGPT, and kept so while the Codex app blocks its account: owl never becomes Codex's provider. The Codex app may then send nothing till the account has room; Codex CLI goes on through owl"},
+						{Value: "api", Label: "owl API", Note: "owl is Codex's provider, with owl's models only; the Codex app keeps its ChatGPT account (its chats, projects and Chrome control) while the account has room"},
 					}
 				},
 			},
@@ -2112,7 +2112,7 @@ var (
 	codexAppEffortsOn = []string{"low", "medium", "high", "xhigh", "ultra", "persistent"}
 )
 
-// codexEnableEfforts adds the efforts myna's models take to the Codex
+// codexEnableEfforts adds the efforts owl's models take to the Codex
 // app's [desktop] enabled-reasoning-efforts in config.toml: its model
 // picker offers a model's efforts only when they are there, so a model's
 // "max" or "minimal" was never offered (#310). The user's entries stay,
@@ -2173,7 +2173,7 @@ func codexEnableEfforts(path string, ms []catalog.Model) error {
 }
 
 // ownCodex is Codex's own models, narrowed to the ones ticked on its ChatGPT
-// subscription in myna when any are — the subscription switched off, its
+// subscription in owl when any are — the subscription switched off, its
 // picks narrow nothing, as it serves no agent anything.
 func ownCodex() []catalog.Model {
 	ms := catalog.Codex()
@@ -2193,14 +2193,14 @@ func ownCodex() []catalog.Model {
 	return out
 }
 
-// codexInMyna marks Served those of Codex's own models that myna's list
+// codexInOwl marks Served those of Codex's own models that owl's list
 // shows Codex on a ChatGPT account of the user's (codex/gpt-5.5): its
-// pickers leave out myna's codex/… as only a hop (codexViaMynaFor), so these
+// pickers leave out owl's codex/… as only a hop (codexViaOwlFor), so these
 // are how they are offered, and the agent's own models switched off
 // (provider.OwnModelsHidden) never takes them out. It did once a routing
 // group gave the picker a catalog entry, and Codex's picker was the group
 // alone (shiqi_40904 on Discord).
-func codexInMyna(own []Option) []Option {
+func codexInOwl(own []Option) []Option {
 	on := map[string]bool{}
 	for _, m := range servedOnCodex.get("", codexServedModels) {
 		on[m] = true
@@ -2211,13 +2211,13 @@ func codexInMyna(own []Option) []Option {
 	return own
 }
 
-// servedOnCodex is codexServedModels kept as myna's lists are
+// servedOnCodex is codexServedModels kept as owl's lists are
 // (stampedLists): Codex's options, built per field of its Drift on every
 // drift poll, built Codex's whole catalog each time for these few names
 // (0.2 GB of the 2.6 GB a real config allocated over 20 polls).
 var servedOnCodex stampedLists[string]
 
-// codexServedModels is the models myna's list shows Codex on a ChatGPT
+// codexServedModels is the models owl's list shows Codex on a ChatGPT
 // account of the user's.
 func codexServedModels() []string {
 	shown, _ := provider.CatalogFor("codex")
@@ -2230,13 +2230,13 @@ func codexServedModels() []string {
 	return out
 }
 
-// codexViaMynaFor is viaMynaFor("codex") keeping the models myna
+// codexViaOwlFor is viaOwlFor("codex") keeping the models owl
 // serves on a ChatGPT account that own, Codex's own list, leaves out: one
 // Codex hides from its picker (gpt-6.1-terra) but the user ticked on the
 // subscription was offered nowhere (ysm119 on Discord), as the hop is all
 // that reaches it. Those come first, in own's group: a "Codex" section
 // of their own beside it read as a second kind of model (ysm119).
-func codexViaMynaFor(own []Option) []Option {
+func codexViaOwlFor(own []Option) []Option {
 	in := map[string]bool{}
 	for _, o := range own {
 		in[o.Value] = true
@@ -2245,7 +2245,7 @@ func codexViaMynaFor(own []Option) []Option {
 		}
 	}
 	var hidden, out []Option
-	for _, o := range viaMynaShared("codex", "") {
+	for _, o := range viaOwlShared("codex", "") {
 		if !strings.HasPrefix(o.Value, "codex/") {
 			out = append(out, o)
 		} else if !in[codexOwnOf(o.Value)] {
@@ -2258,11 +2258,11 @@ func codexViaMynaFor(own []Option) []Option {
 	return append(hidden, out...)
 }
 
-// codexOwnViaMyna is the catalog id myna serves one of Codex's own
+// codexOwnViaOwl is the catalog id owl serves one of Codex's own
 // models by on a ChatGPT account of the user's ("codex/gpt-5.5"), those
 // shown to Codex first; "" when none serves it.
-func codexOwnViaMyna(model string) string {
-	if model == "" || isMyna(model) {
+func codexOwnViaOwl(model string) string {
+	if model == "" || isOwl(model) {
 		return ""
 	}
 	shown, _ := provider.CatalogFor("codex")
@@ -2276,15 +2276,15 @@ func codexOwnViaMyna(model string) string {
 	return ""
 }
 
-// codexOtherModel is a model of myna's that no ChatGPT account serves
-// (a provider's or a key's own), the one myna takes Codex over on while
-// the account is out and cannot serve what was picked. "" when myna has
+// codexOtherModel is a model of owl's that no ChatGPT account serves
+// (a provider's or a key's own), the one owl takes Codex over on while
+// the account is out and cannot serve what was picked. "" when owl has
 // none.
 func codexOtherModel() string {
 	shown, _ := provider.CatalogFor("codex")
 	for _, es := range [][]provider.Entry{shown, provider.Catalog()} {
 		for _, e := range es {
-			if a := e.Provider.Account; e.Group == "" && e.ID != "" && isMyna(e.ID) && !provider.IsGroupRef(e.ID) && (a == nil || a.Agent != "codex") {
+			if a := e.Provider.Account; e.Group == "" && e.ID != "" && isOwl(e.ID) && !provider.IsGroupRef(e.ID) && (a == nil || a.Agent != "codex") {
 				return e.ID
 			}
 		}
@@ -2293,9 +2293,9 @@ func codexOtherModel() string {
 }
 
 // codexOwnOf is the model of Codex's own a catalog id serves on a ChatGPT
-// account (codexOwnViaMyna's way back); "" for any other.
+// account (codexOwnViaOwl's way back); "" for any other.
 func codexOwnOf(id string) string {
-	if !isMyna(id) || provider.IsGroupRef(id) {
+	if !isOwl(id) || provider.IsGroupRef(id) {
 		return ""
 	}
 	p, model, ok := provider.Resolve(id)
@@ -2306,16 +2306,16 @@ func codexOwnOf(id string) string {
 }
 
 // codexGatewayURL is where Codex's built-in OpenAI provider is pointed to
-// reach myna.
+// reach owl.
 func codexGatewayURL() string { return gateway.URL() + gateway.CodexPath }
 
 // codexKeptGateway is the gateway's URL for this machine's Codex: the
-// address its config names when that is myna's gateway on a host other
+// address its config names when that is owl's gateway on a host other
 // than this one's loopback (openai_base_url at the Codex path, or
-// [model_providers.myna]'s base_url with myna's key, that one first
-// while myna is Codex's provider), else gateway.URL(). It is http or
+// [model_providers.owl]'s base_url with owl's key, that one first
+// while owl is Codex's provider), else gateway.URL(). It is http or
 // https, on any port or the scheme's own, and may have a path before
-// myna's: a company's reverse proxy at https://ai.corp.example/myna,
+// owl's: a company's reverse proxy at https://ai.corp.example/owl,
 // or one on this machine at http://127.0.0.1:8788/<route> (#1985).
 func codexKeptGateway(path string) string {
 	kept := func(u, suffix string) string {
@@ -2330,18 +2330,18 @@ func codexKeptGateway(path string) string {
 	}
 	base, _ := edit.GetTOMLTop(path, "openai_base_url")
 	var table string
-	if t, _ := edit.GetTOMLTable(path, "model_providers."+mynaID); ourKey(t["experimental_bearer_token"]) {
+	if t, _ := edit.GetTOMLTable(path, "model_providers."+owlID); ourKey(t["experimental_bearer_token"]) {
 		table = kept(t["base_url"], "/v1")
 	}
-	// the one Codex is on first: myna's table when it is the provider
-	if p, _ := edit.GetTOMLTop(path, "model_provider"); p == mynaID && table != "" {
+	// the one Codex is on first: owl's table when it is the provider
+	if p, _ := edit.GetTOMLTop(path, "model_provider"); p == owlID && table != "" {
 		return table
 	}
 	return cmp.Or(kept(base, gateway.CodexPath), table, gateway.URL())
 }
 
-// codexMoveGateway points Codex's config at to where it names myna's
-// gateway at from: openai_base_url and [model_providers.myna]'s
+// codexMoveGateway points Codex's config at to where it names owl's
+// gateway at from: openai_base_url and [model_providers.owl]'s
 // base_url, each only when it is at from; anything else is the user's.
 func codexMoveGateway(path, from, to string) error {
 	from, to = strings.TrimSuffix(from, "/"), strings.TrimSuffix(to, "/")
@@ -2350,19 +2350,19 @@ func codexMoveGateway(path, from, to string) error {
 			return err
 		}
 	}
-	if t, _ := edit.GetTOMLTable(path, "model_providers."+mynaID); ourKey(t["experimental_bearer_token"]) && strings.HasPrefix(t["base_url"], from+"/") {
-		return edit.SetTOMLKey(path, "model_providers."+mynaID, "base_url", to+strings.TrimPrefix(t["base_url"], from))
+	if t, _ := edit.GetTOMLTable(path, "model_providers."+owlID); ourKey(t["experimental_bearer_token"]) && strings.HasPrefix(t["base_url"], from+"/") {
+		return edit.SetTOMLKey(path, "model_providers."+owlID, "base_url", to+strings.TrimPrefix(t["base_url"], from))
 	}
 	return nil
 }
 
-// isCodexGatewayOn reports whether an openai_base_url is myna's gateway
+// isCodexGatewayOn reports whether an openai_base_url is owl's gateway
 // reached at host, on whichever port it listened on then.
 func isCodexGatewayOn(u, host string) bool {
 	return strings.HasPrefix(u, "http://"+host+":") && strings.HasSuffix(strings.TrimSuffix(u, "/"), gateway.CodexPath)
 }
 
-// codexStaleCache ages Codex's cached model list if it isn't the one myna
+// codexStaleCache ages Codex's cached model list if it isn't the one owl
 // would hand out now (its ETag carries the list's tag), so the next Codex to
 // start asks the gateway again rather than showing the old one until the
 // cache ages on its own; the rest of the cache stays as Codex wrote it.
@@ -2407,10 +2407,10 @@ var codexUsedUp = func() bool {
 }
 
 // codexFailover reports whether Codex is signed in to a ChatGPT account
-// with more of its accounts on in myna, behind it, and the user hasn't
-// asked myna to only switch its sign-in (provider.SwitchOnly).
+// with more of its accounts on in owl, behind it, and the user hasn't
+// asked owl to only switch its sign-in (provider.SwitchOnly).
 func codexFailover() bool {
-	// the user had myna only switch Codex's own sign-in (#1907)
+	// the user had owl only switch Codex's own sign-in (#1907)
 	if provider.SwitchOnly("codex") {
 		return false
 	}
@@ -2423,10 +2423,10 @@ func codexFailover() bool {
 }
 
 // EndCodexFailover takes account failover out of this machine's Codex
-// as the myna serving its gateway quits (EndFailover): Codex goes
+// as the owl serving its gateway quits (EndFailover): Codex goes
 // straight to OpenAI again rather than retrying a gateway that's gone.
 // The app-server codex sessions share read the old base URL as it started
-// and keeps it, and KeepCodexDaemonCurrent ends with myna, so it is
+// and keeps it, and KeepCodexDaemonCurrent ends with owl, so it is
 // restarted here, when no session is on it (thisisvainxx on X: back on
 // its own config, Codex took "several restarts"). ended says it took
 // failover out: a thread open in the Codex app still sends to the
@@ -2448,7 +2448,7 @@ func EndCodexFailover() (ended bool, err error) {
 }
 
 // RelayOpenCodex leaves a relay at the gateway's address for the Codex
-// processes running as myna quits (codexrelay.Start), when the address
+// processes running as owl quits (codexrelay.Start), when the address
 // is this computer's own and Codex is running at all.
 func RelayOpenCodex() error {
 	u, err := url.Parse(gateway.URL())
@@ -2481,11 +2481,11 @@ var (
 var CodexDesktopList func() (b []byte, ok bool)
 
 // CodexOwnOnly reports whether the Codex that asks the gateway for its
-// model list there (/backend-api/codex/models) reaches myna for account
+// model list there (/backend-api/codex/models) reaches owl for account
 // failover alone (FailingOver), to be handed only its own models (#1385).
 // That is this machine's Codex; a request doesn't say whether it came from
-// a Codex in a WSL distro instead, so one there connected to myna (what
-// myna set on it, or its joined/beside mark in the stash) keeps myna's
+// a Codex in a WSL distro instead, so one there connected to owl (what
+// owl set on it, or its joined/beside mark in the stash) keeps owl's
 // models in the list. No distro is probed for it.
 func CodexOwnOnly() bool {
 	home, err := os.UserHomeDir()
@@ -2510,7 +2510,7 @@ func CodexOwnOnly() bool {
 }
 
 // CodexSideModel is the model this machine's Codex is set to when it is
-// one of myna's, picked beside its ChatGPT sign-in (SideModel), for the
+// one of owl's, picked beside its ChatGPT sign-in (SideModel), for the
 // gateway to answer the Codex app's side turns on (gateway.CodexSideModel).
 func CodexSideModel() string {
 	home, err := os.UserHomeDir()
@@ -2551,20 +2551,20 @@ func codexChatGPT(dir string) bool {
 // known is false for an auth.json caught while Codex rewrites it in place
 // (empty, cut off) or a keychain read that failed, which is no answer
 // (provider.CodexSignInKnown). Wiring goes by known alone: taking such a
-// read for "no ChatGPT sign-in" made myna Codex's provider, and the
-// Codex app showed "myna" for its account and myna's catalog for its
+// read for "no ChatGPT sign-in" made owl Codex's provider, and the
+// Codex app showed "owl" for its account and owl's catalog for its
 // models, on and off (lucy on Discord, v0.1.1394).
 func codexChatGPTKnown(dir string) (signedIn, known bool) {
 	if settings.AccountDiscoveryOff() {
 		return false, true
 	}
 	// forced_login_method = "api" in Codex's own config (another tool or
-	// guide writes it; myna never does): Codex won't use a ChatGPT
+	// guide writes it; owl never does): Codex won't use a ChatGPT
 	// sign-in then. The TUI logs it out on start and the app server reads
 	// no account (openai/codex login/src/auth/manager.rs
 	// enforce_login_restrictions, load_auth), so wired beside it the
 	// Codex app asked for a sign-in and offered an API key alone (Tiger on
-	// Discord: "重启 codex 之后登不回去了"). Counted as no sign-in, myna
+	// Discord: "重启 codex 之后登不回去了"). Counted as no sign-in, owl
 	// is the provider and Codex needs none. The line is the user's own and
 	// stays: taking it out is how they sign in to ChatGPT again.
 	if v, ok := edit.GetTOMLTop(filepath.Join(dir, "config.toml"), "forced_login_method"); ok && strings.EqualFold(strings.TrimSpace(v), "api") {
@@ -2590,8 +2590,8 @@ func codexChatGPTKnown(dir string) (signedIn, known bool) {
 	}
 	// a sign-in OpenAI refused to refresh for good (revoked, or failed for
 	// good, #4308): Codex keeps its auth.json, but beside it every turn
-	// fails at Codex's workspace routing discovery, myna's models too.
-	// None to myna, as forced api above, until it is signed in again
+	// fails at Codex's workspace routing discovery, owl's models too.
+	// None to owl, as forced api above, until it is signed in again
 	// (another refresh token). A record that can't be read says nothing.
 	if gone, known := provider.CodexSignInGone(dir, b); !known || gone {
 		return false, known

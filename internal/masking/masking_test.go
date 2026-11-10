@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/pii"
-	"github.com/istoo/myna/internal/redact"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/pii"
+	"github.com/istoo/owl/internal/redact"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // Masking asks the model the user picked; with none picked, AstrLink
@@ -253,7 +253,7 @@ func (p partly) Find(ctx context.Context, texts []string) ([][]redact.Found, err
 	return out, &pii.Partial{Missing: missing, Of: len(texts), Err: ctx.Err()}
 }
 
-// xRayySummers on X (myna 0.1.1877, Linux, AstrLink Guard turned on):
+// xRayySummers on X (owl 0.1.1877, Linux, AstrLink Guard turned on):
 // in a burst of requests with text the model hadn't read, one waited
 // 290s, and each that stopped waiting was "masking failed, so nothing
 // was sent". Turned on by the user, the model is waited for strictWait
@@ -360,7 +360,7 @@ func (panics) Find(context.Context, []string) ([][]redact.Found, error) {
 }
 
 // A model that panics is the request's error, not a panic on find's own
-// goroutine, which ended myna on Windows (#4553).
+// goroutine, which ended owl on Windows (#4553).
 func TestModelPanicIsTheRequestsError(t *testing.T) {
 	_, err := find(context.Background(), panics{fake{installed: true}}, []string{"hello \xff"})
 	if err == nil || !strings.Contains(err.Error(), "failed reading this request") {

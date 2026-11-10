@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // generate_image and generate_video take the model to use (XYenon on
@@ -22,10 +22,10 @@ import (
 // on every route to it.
 
 // MediaModelMethod is the image MCP server's JSON-RPC method, not a tool,
-// that the stdio Myna Image server asks which model a call's model
+// that the stdio Owl Image server asks which model a call's model
 // argument stands for: {"tool": …, "model": …} → {"model": provider/model},
 // or an error naming those it may be.
-const MediaModelMethod = "myna/media_model"
+const MediaModelMethod = "owl/media_model"
 
 // mediaEnumMost is the most models a tool's schema lists as its model's
 // enum; more are described instead, and named in full by the error an
@@ -65,7 +65,7 @@ func mediaModels(video bool) (all []string, def string) {
 	return all, def
 }
 
-// ImageModel is a model myna draws with, as an agent's own list of
+// ImageModel is a model owl draws with, as an agent's own list of
 // image models names it (Pi's, internal/agent/pi_extension.go).
 type ImageModel struct {
 	ID     string // provider/model, what /v1/images takes as model
@@ -137,16 +137,16 @@ func mediaModelProp(video bool, shown []string, def string) map[string]any {
 	d := "The " + what + " model to use, as provider/model."
 	switch {
 	case def == "":
-		d += " Leave it out: none is set up in Myna."
+		d += " Leave it out: none is set up in Owl."
 	case video:
-		d += " Leave it out to use the video model set up in Myna (now " + def + ")."
+		d += " Leave it out to use the video model set up in Owl (now " + def + ")."
 	default:
-		d += " Leave it out to use the one set in Myna (Settings → Images → Image generation; now " + def + ")."
+		d += " Leave it out to use the one set in Owl (Settings → Images → Image generation; now " + def + ")."
 	}
 	prop := map[string]any{"type": "string"}
 	switch n := len(shown); {
 	case n > mediaEnumMost:
-		d += fmt.Sprintf(" One of the %d %s models set up in Myna, such as %s; an unknown one is refused with the full list.", n, what, strings.Join(shown[:3], ", "))
+		d += fmt.Sprintf(" One of the %d %s models set up in Owl, such as %s; an unknown one is refused with the full list.", n, what, strings.Join(shown[:3], ", "))
 	case n > 0:
 		prop["enum"] = slices.Clone(shown)
 	case def != "":
@@ -159,7 +159,7 @@ func mediaModelProp(video bool, shown []string, def string) map[string]any {
 // pickMediaModel is the model asked stands for: one of all, by its whole
 // id or by a bare id only one of them has; a ChatGPT account's other GPT
 // Image names as its one (ListedDrawer); or a newer model of a family a
-// subscription serves before myna lists it (drawsFamily,
+// subscription serves before owl lists it (drawsFamily,
 // grokVideoFamily), as the APIs take it. Else an error that names those
 // shown.
 func pickMediaModel(tool, asked string, video bool, all, shown []string, def string) (string, error) {
@@ -197,7 +197,7 @@ func pickMediaModel(tool, asked string, video bool, all, shown []string, def str
 		what, a = "video", "a video"
 	}
 	if def == "" {
-		return "", fmt.Errorf("%s: no %s model is set up in Myna", tool, what)
+		return "", fmt.Errorf("%s: no %s model is set up in Owl", tool, what)
 	}
 	if len(shown) == 0 {
 		return "", fmt.Errorf("%s: %q isn't %s model that can be used here; leave model out to use the default", tool, asked, a)

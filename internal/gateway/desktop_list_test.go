@@ -7,15 +7,15 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // moer2831 on Discord: a model picked for one of Claude Desktop's tiers ran
 // in its Code tab on Claude Code's generic prompt, not the one of the
 // Claude model of that tier ("直接蠢了一个度"). Desktop 4.29 hands Claude Code
 // behavesAs only from a profile's inferenceModels, so while a tier is
-// picked myna lists Desktop's models there: every row /v1/models gives
+// picked owl lists Desktop's models there: every row /v1/models gives
 // Desktop, by its id and in its order, a pick tagged with its tier and
 // run as that tier's newest Claude model, a Claude model as itself.
 // Nothing picked, no list: Desktop finds the models on its own, as before.
@@ -153,7 +153,7 @@ func TestDesktopInferenceModels(t *testing.T) {
 }
 
 // chengming0v0 on Discord (v0.1.2806, Claude Desktop): once a tier was
-// picked, the models of an API-key provider read "mythos-myna-0167851852"
+// picked, the models of an API-key provider read "mythos-owl-0167851852"
 // and the like in Desktop's menu. A profile's inferenceModels whose names
 // aren't bare tier words makes Desktop skip /v1/models
 // (adminListObviatesDiscovery, 4.4212), so an entry with no labelOverride

@@ -4,7 +4,7 @@ package provider
 // on days 4 and 7): MiniMax Code is served only by its community plugin,
 // @magpie-community/opencode-minimax-auth (provider "minimax-code", the
 // China site, and "minimax-code-global", the international one; no
-// built-in, no mover). While the setting is on, whichever myna runs the
+// built-in, no mover). While the setting is on, whichever owl runs the
 // gateway presses it for each of the plugin's accounts once a Beijing day,
 // as MiniMax Code's web page does: it asks the check-in's panel on the
 // account's site (agent.minimax.cn, agent.minimax.io), and claims while
@@ -37,8 +37,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // MiniMaxCodeID is the MiniMax Code plugin's provider (the China site),

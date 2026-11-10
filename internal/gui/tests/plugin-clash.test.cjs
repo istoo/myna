@@ -2,8 +2,8 @@
 // Two installed plugins that sign in to one provider (neiko on Discord: a
 // third-party plugin and their own folder plugin both name it). Both rows
 // stay, each says which one serves the provider, and the other one offers
-// "Use for …", which tells myna to run the provider on it. Neither row
-// reads "Signs in to nothing myna can use". Chromium and WebKit, every
+// "Use for …", which tells owl to run the provider on it. Neither row
+// reads "Signs in to nothing owl can use". Chromium and WebKit, every
 // language, wide and narrow; the API is faked here.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -45,7 +45,7 @@ function server(lang, asked) {
     }
     if (url.pathname.startsWith("/api/plugins/")) { asked.push([url.pathname, body()]); return json({}); }
     if (url.pathname.startsWith("/api/")) return json({});
-    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "myna.test") { asked.push(["fetched", url.href]); return route.fulfill({ status: 404, body: "" }); }
+    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "owl.test") { asked.push(["fetched", url.href]); return route.fulfill({ status: 404, body: "" }); }
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -54,11 +54,11 @@ function server(lang, asked) {
 
 // what each row says, in each language
 const L = {
-  en: { installed: "Installed", nothing: "Signs in to nothing myna can use", served: "Acme is served by {other}, which signs in to it too", serves: "{other} signs in to Acme too; this one serves it", use: "Use for Acme", done: "Acme now runs on my-acme" },
-  zh: { installed: "已安装", nothing: "没有 myna 能用的登录", served: "Acme 由同样登录它的 {other} 提供", serves: "{other} 也能登录 Acme，现由这个插件提供", use: "用于 Acme", done: "Acme 现在由 my-acme 提供" },
-  "zh-TW": { installed: "已安裝", nothing: "沒有 myna 能用的登入", served: "Acme 由同樣登入它的 {other} 提供", serves: "{other} 也能登入 Acme，現由這個外掛提供", use: "用於 Acme", done: "Acme 現在由 my-acme 提供" },
-  ja: { installed: "インストール済み", nothing: "myna で使えるサインインはありません", served: "Acme は、同じくサインインする {other} が提供しています", serves: "{other} も Acme にサインインします。このプラグインが提供中です", use: "Acme に使う", done: "Acme は my-acme で動くようになりました" },
-  de: { installed: "Installiert", nothing: "Meldet bei nichts an, das myna nutzen kann", served: "Acme wird von {other} bereitgestellt, die sich ebenfalls dort anmeldet", serves: "{other} meldet sich auch bei Acme an; diese Erweiterung stellt es bereit", use: "Für Acme nutzen", done: "Acme läuft jetzt über my-acme" },
+  en: { installed: "Installed", nothing: "Signs in to nothing owl can use", served: "Acme is served by {other}, which signs in to it too", serves: "{other} signs in to Acme too; this one serves it", use: "Use for Acme", done: "Acme now runs on my-acme" },
+  zh: { installed: "已安装", nothing: "没有 owl 能用的登录", served: "Acme 由同样登录它的 {other} 提供", serves: "{other} 也能登录 Acme，现由这个插件提供", use: "用于 Acme", done: "Acme 现在由 my-acme 提供" },
+  "zh-TW": { installed: "已安裝", nothing: "沒有 owl 能用的登入", served: "Acme 由同樣登入它的 {other} 提供", serves: "{other} 也能登入 Acme，現由這個外掛提供", use: "用於 Acme", done: "Acme 現在由 my-acme 提供" },
+  ja: { installed: "インストール済み", nothing: "owl で使えるサインインはありません", served: "Acme は、同じくサインインする {other} が提供しています", serves: "{other} も Acme にサインインします。このプラグインが提供中です", use: "Acme に使う", done: "Acme は my-acme で動くようになりました" },
+  de: { installed: "Installiert", nothing: "Meldet bei nichts an, das owl nutzen kann", served: "Acme wird von {other} bereitgestellt, die sich ebenfalls dort anmeldet", serves: "{other} meldet sich auch bei Acme an; diese Erweiterung stellt es bereit", use: "Für Acme nutzen", done: "Acme läuft jetzt über my-acme" },
 };
 const say = (s, other) => s.replace("{other}", other);
 
@@ -84,7 +84,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const errors = [];
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", server(lang, asked));
-          await page.goto("http://myna.test/?view=plugins");
+          await page.goto("http://owl.test/?view=plugins");
           const view = page.locator("#view-plugins");
           await view.waitFor({ state: "visible" });
           await view.page().locator(":is(.lib-tabs .opt, .nav-s):visible", { hasText: w.installed }).click();
@@ -104,7 +104,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           assert.ok(over <= 0, `the page scrolls sideways by ${over}px`);
           await shot(view, `plugin-clash-${engine}-${lang}-${width}`);
 
-          // Use for Acme on the user's own one: myna is told to run it there
+          // Use for Acme on the user's own one: owl is told to run it there
           const use = mine.locator("button", { hasText: w.use });
           assert.equal(await use.count(), 1);
           assert.ok((await use.getAttribute("title")).includes("opencode-acme-auth"), "its title names the one it takes over from");
@@ -156,7 +156,7 @@ function twice(lang) {
     if (url.pathname === "/api/plugins/market") return json({ listings, state });
     if (url.pathname === "/api/plugins/search") return json({ hits: [] });
     if (url.pathname.startsWith("/api/")) return json({});
-    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "myna.test") return route.fulfill({ status: 404, body: "" });
+    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "owl.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -185,7 +185,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const errors = [];
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", twice(lang));
-          await page.goto("http://myna.test/?view=plugins");
+          await page.goto("http://owl.test/?view=plugins");
           const view = page.locator("#view-plugins");
           await view.waitFor({ state: "visible" });
           await view.page().locator(":is(.lib-tabs .opt, .nav-s):visible", { hasText: L[lang].installed }).click();

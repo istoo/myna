@@ -4,7 +4,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/proc"
 )
 
 // refreshPath takes up the PATH an installer just wrote to the registry,

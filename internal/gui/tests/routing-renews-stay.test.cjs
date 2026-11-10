@@ -78,7 +78,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             const errors = [];
             page.on("pageerror", (e) => errors.push(e.message));
             await page.route("**/*", serve(lang));
-            await page.goto("http://myna.test/?view=routing");
+            await page.goto("http://owl.test/?view=routing");
             await rowText(page, "wb-3@example.com").waitFor();
             for (const [i, want] of renews[lang].entries()) {
               const who = `wb-${i + 1}@example.com`;

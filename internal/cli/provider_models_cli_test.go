@@ -7,11 +7,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// myna provider models <id> +m adds a model to those exposed and -m takes
+// owl provider models <id> +m adds a model to those exposed and -m takes
 // one out, keeping the rest; the whole-list form still replaces the list,
 // and says it did and how many there were before (MOMO on Discord: 35
 // exposed became 8 with nothing said).
@@ -105,10 +105,10 @@ func TestProviderModelsAddsRemovesAndSaysWhatItReplaced(t *testing.T) {
 	}
 }
 
-// myna models and myna provider <id> name the models a provider's list
+// owl models and owl provider <id> name the models a provider's list
 // has that it doesn't expose, and why, so a group naming one ("no member
 // ready (not served)") can be put right (MOMO on Discord: 35 exposed of 37,
-// opencode-go/deepseek-flash not in myna models).
+// opencode-go/deepseek-flash not in owl models).
 func TestModelsSayWhatIsNotExposed(t *testing.T) {
 	groupsHome(t)
 	catalog.Changed = nil
@@ -132,7 +132,7 @@ func TestModelsSayWhatIsNotExposed(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if !strings.Contains(out, "deepseek-flash") || !strings.Contains(out, "not picked") || !strings.Contains(out, "myna provider models og +<model>") {
+		if !strings.Contains(out, "deepseek-flash") || !strings.Contains(out, "not picked") || !strings.Contains(out, "owl provider models og +<model>") {
 			t.Errorf("%s said %q; want deepseek-flash named as not picked, and how to expose it", name, out)
 		}
 	}
@@ -146,7 +146,7 @@ func TestModelsSayWhatIsNotExposed(t *testing.T) {
 }
 
 // A group's member its provider lists but doesn't expose says so, and how
-// to expose it, in myna groups and myna group show <id>.
+// to expose it, in owl groups and owl group show <id>.
 func TestGroupMemberNotExposedSaysHow(t *testing.T) {
 	groupsHome(t)
 	catalog.Changed = nil
@@ -172,13 +172,13 @@ func TestGroupMemberNotExposedSaysHow(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if !strings.Contains(out, "not exposed · myna provider models og +deepseek-flash") {
+		if !strings.Contains(out, "not exposed · owl provider models og +deepseek-flash") {
 			t.Errorf("%s said %q; want how to expose og/deepseek-flash", name, out)
 		}
 	}
 }
 
-// myna provider models <id> best serves the newest of each family the
+// owl provider models <id> best serves the newest of each family the
 // vendor lists (Best in family, Steven on Discord); all gives the whole
 // list back, and a pick or none clears it.
 func TestProviderModelsBest(t *testing.T) {

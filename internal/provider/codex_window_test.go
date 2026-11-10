@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 // netube on Discord: a Codex Plus account's gpt-5.5 said 922K, models.dev's

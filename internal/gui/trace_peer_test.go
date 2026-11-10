@@ -9,11 +9,11 @@ import (
 	"testing"
 )
 
-// A myna here that does not serve the gateway shows the routing of the one
-// that does (#2606), and names it: the console reads the serving myna's
+// A owl here that does not serve the gateway shows the routing of the one
+// that does (#2606), and names it: the console reads the serving owl's
 // trace over loopback and plays it as its own, and its state carries how that
-// myna was started and its pid.
-func TestConsoleShowsTheServingMynasRouting(t *testing.T) {
+// owl was started and its pid.
+func TestConsoleShowsTheServingOwlsRouting(t *testing.T) {
 	h := t.TempDir()
 	t.Setenv("HOME", h)
 	t.Setenv("USERPROFILE", h)
@@ -24,13 +24,13 @@ func TestConsoleShowsTheServingMynasRouting(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Setenv("MYNA_ADDR", ln.Addr().String())
+	t.Setenv("OWL_ADDR", ln.Addr().String())
 	other := &http.Server{Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		switch r.URL.Path {
 		case "/":
-			w.Write([]byte(`{"name":"myna","version":"0.1.1257","models":3,"window":true,"serves":"serve","pid":4321,"apis":[]}`))
-		case "/v1/myna/trace":
+			w.Write([]byte(`{"name":"owl","version":"0.1.1257","models":3,"window":true,"serves":"serve","pid":4321,"apis":[]}`))
+		case "/v1/owl/trace":
 			w.Write([]byte(`{"object":"trace","seq":7,"pid":4321,"serves":"serve","routes":[{"id":1,"model":"ollama/gemma4:e4b","provider":"ollama","status":200}]}`))
 		default:
 			http.NotFound(w, r)
@@ -62,12 +62,12 @@ func TestConsoleShowsTheServingMynasRouting(t *testing.T) {
 		t.Fatal(err)
 	}
 	if !got.Mine || len(got.Routes) != 1 || got.Routes[0].Model != "ollama/gemma4:e4b" || got.Routes[0].Status != 200 {
-		t.Fatalf("the serving myna's routing was not shown: mine %v routes %+v", got.Mine, got.Routes)
+		t.Fatalf("the serving owl's routing was not shown: mine %v routes %+v", got.Mine, got.Routes)
 	}
-	// the trace names the myna it came from, so the page's name for it
-	// changes with the trace when another myna takes the gateway over
+	// the trace names the owl it came from, so the page's name for it
+	// changes with the trace when another owl takes the gateway over
 	if got.By == nil || got.By.Pid != 4321 || got.By.Serves != "serve" {
-		t.Errorf("the trace doesn't name the myna it came from: %+v", got.By)
+		t.Errorf("the trace doesn't name the owl it came from: %+v", got.By)
 	}
 
 	// the state names it, for the page's heading to say which one is routing
@@ -79,7 +79,7 @@ func TestConsoleShowsTheServingMynasRouting(t *testing.T) {
 
 // One that doesn't tell its trace (older than the endpoint, or a refusal) is
 // unknown, not empty: the page keeps the notice it had, and never plays
-// another myna's routing as its own.
+// another owl's routing as its own.
 func TestConsoleKeepsTheNoticeFromAnOlderGateway(t *testing.T) {
 	h := t.TempDir()
 	t.Setenv("HOME", h)
@@ -91,11 +91,11 @@ func TestConsoleKeepsTheNoticeFromAnOlderGateway(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Setenv("MYNA_ADDR", ln.Addr().String())
+	t.Setenv("OWL_ADDR", ln.Addr().String())
 	other := &http.Server{Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		if r.URL.Path == "/" {
-			w.Write([]byte(`{"name":"myna","version":"0.1.550","models":3,"window":true,"apis":[]}`))
+			w.Write([]byte(`{"name":"owl","version":"0.1.550","models":3,"window":true,"apis":[]}`))
 			return
 		}
 		http.NotFound(w, r)

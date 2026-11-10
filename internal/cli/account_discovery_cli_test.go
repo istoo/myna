@@ -6,10 +6,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
-// discoveryOut runs `myna accounts discovery` with args and returns what
+// discoveryOut runs `owl accounts discovery` with args and returns what
 // it printed.
 func discoveryOut(t *testing.T, args ...string) string {
 	t.Helper()
@@ -32,11 +32,11 @@ func discoveryOut(t *testing.T, args ...string) string {
 	return out
 }
 
-// `myna accounts discovery off` saves the opt-out (#1535), `on` takes it
+// `owl accounts discovery off` saves the opt-out (#1535), `on` takes it
 // back, and with no argument it says which is in effect; it leaves every
 // other setting as it was.
 func TestAccountsDiscoveryCmd(t *testing.T) {
-	t.Setenv("MYNA_NO_ACCOUNTS", "")
+	t.Setenv("OWL_NO_ACCOUNTS", "")
 	if err := settings.Save(settings.Settings{Currency: "cny"}); err != nil {
 		t.Fatal(err)
 	}
@@ -53,8 +53,8 @@ func TestAccountsDiscoveryCmd(t *testing.T) {
 	if settings.Load().NoAccountDiscovery {
 		t.Error("on left it off")
 	}
-	t.Setenv("MYNA_NO_ACCOUNTS", "1")
-	if out := discoveryOut(t); !strings.Contains(out, "MYNA_NO_ACCOUNTS") {
+	t.Setenv("OWL_NO_ACCOUNTS", "1")
+	if out := discoveryOut(t); !strings.Contains(out, "OWL_NO_ACCOUNTS") {
 		t.Errorf("under the variable: %q", out)
 	}
 	if err := run([]string{"accounts", "discovery", "maybe"}); err == nil {

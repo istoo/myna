@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/proc"
 )
 
 // cursorLocalEnvD is the environment.d file systemd's user session reads
@@ -20,7 +20,7 @@ func cursorLocalEnvD() string {
 		home, _ := os.UserHomeDir()
 		cfg = filepath.Join(home, ".config")
 	}
-	return filepath.Join(cfg, "environment.d", "myna-cursor-local.conf")
+	return filepath.Join(cfg, "environment.d", "owl-cursor-local.conf")
 }
 
 // setUserEnv writes the variables to environment.d, for the sessions from

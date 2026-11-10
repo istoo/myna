@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // Packing1 on Discord: a Google AI Pro account's model list names Argon,

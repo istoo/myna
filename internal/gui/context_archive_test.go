@@ -11,15 +11,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/gwmw"
-	"github.com/istoo/myna/internal/masking"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/gwmw"
+	"github.com/istoo/owl/internal/masking"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // wangbinyq on Discord: clicking a block of the context window card said
-// its text was gone, as myna keeps only the last 10 requests' bodies in
+// its text was gone, as owl keeps only the last 10 requests' bodies in
 // memory, with the request archive on. The archive's copy is read instead,
 // the reply beside it, masked as the copy in memory is; a request the
 // archive has no copy of says why.

@@ -74,7 +74,7 @@ for (const engine of engines) for (const lang of langs) for (const width of widt
       await browser.close();
     });
     // another view first, the request already under way
-    await page.goto("http://myna.test/?view=agents");
+    await page.goto("http://owl.test/?view=agents");
     await page.waitForTimeout(800);
     await navTo(page, "routing");
     await page.waitForFunction(() => document.querySelector(".rt-sky .pkt.held"), null, { timeout: 6000 });

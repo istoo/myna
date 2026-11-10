@@ -12,8 +12,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // A heap profile of a gateway at work (~1,000 requests in 10 minutes)
@@ -35,7 +35,7 @@ func TestRequestsParseUnchangedSettingsOnce(t *testing.T) {
 	if err := provider.Save(provider.Provider{ID: "relay", Name: "Relay", Key: "k", Chat: up.URL + "/v1", Models: []string{"m1"}}); err != nil {
 		t.Fatal(err)
 	}
-	// a long-used myna's settings: answers about many models
+	// a long-used owl's settings: answers about many models
 	images := map[string]bool{}
 	for i := range 200 {
 		images[fmt.Sprintf("p%d/model-%d", i%30, i)] = i%2 == 0

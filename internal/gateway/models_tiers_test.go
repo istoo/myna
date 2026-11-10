@@ -5,13 +5,13 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // The model list every client reads names the tiers Codex here is offered
-// on each model, not only the one another myna asks for: Cindy shows its
+// on each model, not only the one another owl asks for: Cindy shows its
 // Fast switch on a model whose service_tiers hold priority, and its link
-// asks /v1/models with no myna header (tsuixl, #1914). A model offered
+// asks /v1/models with no owl header (tsuixl, #1914). A model offered
 // no tier says nothing.
 func TestModelsListTiersForEveryClient(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())

@@ -1,14 +1,14 @@
 package davsync
 
 // Shared usage (#542): with Config.Usage on, each computer puts its calls on
-// the server beside the backup, at myna/usage/<id>-<day>.myna-usage, one
+// the server beside the backup, at owl/usage/<id>-<day>.owl-usage, one
 // file a day, sealed with the passphrase, and brings the other computers'
 // down for the Usage page. Beside its days, a computer puts what it read
-// of its accounts' windows over time (#651), at myna/usage/<id>.myna-quotas,
+// of its accounts' windows over time (#651), at owl/usage/<id>.owl-quotas,
 // sealed alike, and merges the others' into its own (provider.MergeQuotaHistory)
 // for the quota cards' curves. A computer writes and deletes its own files
 // alone, so none is ever written over by another; nothing of them is in the
-// backup, nor in what is hashed to tell whether it changed. A myna
+// backup, nor in what is hashed to tell whether it changed. A owl
 // before them never looks in the folder.
 
 import (
@@ -26,16 +26,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/backup"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/backup"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/usage"
 )
 
-// usageFolder is the folder the days go in, in myna's.
+// usageFolder is the folder the days go in, in owl's.
 const (
 	usageFolder = "usage"
-	usageExt    = ".myna-usage"
-	quotasExt   = ".myna-quotas"
+	usageExt    = ".owl-usage"
+	quotasExt   = ".owl-quotas"
 )
 
 // usageEvery is how often a sync shares usage; a sync asked for (SyncNow)
@@ -382,7 +382,7 @@ func (d *dav) write(ctx context.Context, name string, data []byte) error {
 			}
 			return nil
 		case try == 0 && (res.StatusCode == http.StatusNotFound || res.StatusCode == http.StatusConflict || res.StatusCode == http.StatusForbidden):
-			// the folder isn't there yet: myna's, then usage in it
+			// the folder isn't there yet: owl's, then usage in it
 			if err := d.mkcol(ctx); err != nil {
 				return err
 			}

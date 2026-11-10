@@ -15,8 +15,8 @@ const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
 const iso = (ms) => new Date(ms).toISOString();
-// the reporter's model: a remote myna used as a provider
-const model = "remote-myna/claude/claude-opus-5-5";
+// the reporter's model: a remote owl used as a provider
+const model = "remote-owl/claude/claude-opus-5-5";
 const promptOf = (window) => ({
   window, tokens: 186000, counted: false, turns: 1,
   parts: [
@@ -26,9 +26,9 @@ const promptOf = (window) => ({
 });
 function req(agent, live, window) {
   const prompt = promptOf(window);
-  const seat = { id: "acc@me", provider: "remote-myna", name: "Remote", who: "me@example.com", kind: "account", model, known: true };
+  const seat = { id: "acc@me", provider: "remote-owl", name: "Remote", who: "me@example.com", kind: "account", model, known: true };
   const r = {
-    id: 101, seq: 1010, time: iso(Date.now() - 5000), agent, session: "s-1", model, provider: "remote-myna",
+    id: 101, seq: 1010, time: iso(Date.now() - 5000), agent, session: "s-1", model, provider: "remote-owl",
     order: [seat], tries: [{ id: seat.id, model, start: iso(Date.now() - 5000), done: !live, status: live ? 0 : 200, ms: 3000 }],
     done: !live, status: live ? 0 : 200, ms: 3000, tokens: 900, usage: live ? [] : [{ in: 12000, out: 900 }], prompt,
   };
@@ -131,13 +131,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const context = await browser.newContext({ viewport: { width: widths[0], height: 900 } });
           t.after(() => context.close());
           const page = await context.newPage();
-          await page.addInitScript(() => { try { localStorage.setItem("myna.ctxShut", "0"); } catch {} });
+          await page.addInitScript(() => { try { localStorage.setItem("owl.ctxShut", "0"); } catch {} });
           page.setDefaultTimeout(5000);
           page.setDefaultNavigationTimeout(60000);
           const errors = [];
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", serve(lang, req(agent, live, window)));
-          await page.goto("http://myna.test/?view=routing");
+          await page.goto("http://owl.test/?view=routing");
           await page.locator(".rt-ctx .ctx-head .ctx-route").waitFor();
           for (const shut of [false, true]) {
             if (shut) {

@@ -14,7 +14,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/redact"
+	"github.com/istoo/owl/internal/redact"
 )
 
 // waitFor waits for ok, up to 10s.
@@ -159,7 +159,7 @@ func TestQueuedRequestReadsWhatTheOneAheadLearned(t *testing.T) {
 	}
 }
 
-// restart is myna started again: nothing in memory, pf-serve not running.
+// restart is owl started again: nothing in memory, pf-serve not running.
 func restart(t *testing.T) {
 	t.Helper()
 	Stop()

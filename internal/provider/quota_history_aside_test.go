@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // Aside is routing: using the window up doesn't stop the account, which is

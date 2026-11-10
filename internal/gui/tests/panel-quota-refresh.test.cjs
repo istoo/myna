@@ -9,7 +9,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
-const assets = process.env.MYNA_QUOTA_ASSETS || path.resolve(__dirname, "../assets");
+const assets = process.env.OWL_QUOTA_ASSETS || path.resolve(__dirname, "../assets");
 const iso = n => new Date(n).toISOString();
 const words = {
   en: { reset: "Resets", label: "Refresh this card" },
@@ -74,7 +74,7 @@ async function open(t, engine, lang, width = 440) {
   const errors = [], data = { quotas: fixtures(), gets: 0, posts: [], behavior: "fresh" };
   page.on("pageerror", e => errors.push(e.message));
   await page.route("**/*", serve(lang, data));
-  await page.goto("http://myna.test/?mode=panel");
+  await page.goto("http://owl.test/?mode=panel");
   await page.locator('#ptabs [data-ptab="usage"]').click();
   await page.locator('.pq-card[data-card="claude|a@example.com"]').waitFor();
   await page.evaluate(() => quotasLoading);

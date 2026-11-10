@@ -6,12 +6,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/gwtool"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/gwtool"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
-// ownMCPNames asks the gateway for myna's own MCP servers, as the chat
+// ownMCPNames asks the gateway for owl's own MCP servers, as the chat
 // page plugin does, and gives each one's name and path.
 func ownMCPNames(t *testing.T, s *Server) map[string]string {
 	t.Helper()
@@ -42,7 +42,7 @@ func toolsAre(t *testing.T, n int) {
 	t.Cleanup(func() { toolsOn = was })
 }
 
-// With nothing set up, none of myna's own servers is listed, and the
+// With nothing set up, none of owl's own servers is listed, and the
 // list is empty, not null.
 func TestOwnMCPNoneWhenNothingIsOn(t *testing.T) {
 	fresh(t)
@@ -58,11 +58,11 @@ func TestOwnMCPNoneWhenNothingIsOn(t *testing.T) {
 func TestOwnMCPListsVisionWhileOn(t *testing.T) {
 	s, _ := eyed(t)
 	toolsAre(t, 0)
-	if got := ownMCPNames(t, s); got["myna-vision"] != VisionMCPPath {
+	if got := ownMCPNames(t, s); got["owl-vision"] != VisionMCPPath {
 		t.Fatalf("vision on: %v", got)
 	}
 	noVision(t)
-	if got := ownMCPNames(t, s); got["myna-vision"] != "" {
+	if got := ownMCPNames(t, s); got["owl-vision"] != "" {
 		t.Fatalf("vision off: %v", got)
 	}
 }
@@ -94,14 +94,14 @@ func TestOwnMCPListsSearchWhileOn(t *testing.T) {
 		t.Fatal(err)
 	}
 	s := New()
-	if got := ownMCPNames(t, s); got["myna-web-search"] != SearchMCPPath {
+	if got := ownMCPNames(t, s); got["owl-web-search"] != SearchMCPPath {
 		t.Fatalf("search on: %v", got)
 	}
 	stop := gwtool.Gate() // plugins/search off: nothing serves web_search
 	defer stop()
 	searchOn() // TestMain's
 	defer func() { searchOn = gwtool.Serve(gwtool.WebSearch) }()
-	if got := ownMCPNames(t, s); got["myna-web-search"] != "" {
+	if got := ownMCPNames(t, s); got["owl-web-search"] != "" {
 		t.Fatalf("plugins/search off: %v", got)
 	}
 }
@@ -112,46 +112,46 @@ func TestOwnMCPListsPluginToolsWhileOn(t *testing.T) {
 	fresh(t)
 	s := New()
 	toolsAre(t, 2)
-	if got := ownMCPNames(t, s); got["myna-tools"] != ToolsMCPPath {
+	if got := ownMCPNames(t, s); got["owl-tools"] != ToolsMCPPath {
 		t.Fatalf("tools on: %v", got)
 	}
 	toolsAre(t, 0)
-	if got := ownMCPNames(t, s); got["myna-tools"] != "" {
+	if got := ownMCPNames(t, s); got["owl-tools"] != "" {
 		t.Fatalf("no plugin gives a tool: %v", got)
 	}
 	toolsAre(t, 2)
 	stop := gwtool.Gate() // plugins/tools off
 	defer stop()
-	if got := ownMCPNames(t, s); got["myna-tools"] != "" {
+	if got := ownMCPNames(t, s); got["owl-tools"] != "" {
 		t.Fatalf("plugins/tools off: %v", got)
 	}
 	defer gwtool.Serve(gwtool.PluginTools)()
-	if got := ownMCPNames(t, s); got["myna-tools"] != ToolsMCPPath {
+	if got := ownMCPNames(t, s); got["owl-tools"] != ToolsMCPPath {
 		t.Fatalf("plugins/tools on: %v", got)
 	}
 }
 
-// Each of myna's own servers the Library's Discover lists says why it
+// Each of owl's own servers the Library's Discover lists says why it
 // can't answer yet exactly while ownMCP leaves it out, and tells nothing
 // set up from turned off in Settings (matrix0487 on Discord: all three in
 // Discover, never a dead tool).
 func TestOwnUnreadyWhileNotListed(t *testing.T) {
 	fresh(t)
 	toolsAre(t, 0)
-	for _, n := range []string{"myna-web-search", "myna-vision", imageServerName} {
+	for _, n := range []string{"owl-web-search", "owl-vision", imageServerName} {
 		if why := OwnUnready(n); !strings.Contains(why, "yet") {
 			t.Errorf("%s with nothing set up: %q", n, why)
 		}
 	}
-	if why := OwnUnready("myna-browser"); why != "" {
-		t.Errorf("myna-browser: %q", why)
+	if why := OwnUnready("owl-browser"); why != "" {
+		t.Errorf("owl-browser: %q", why)
 	}
 	s, _ := eyed(t)
-	if got := ownMCPNames(t, s); got["myna-vision"] == "" || OwnUnready("myna-vision") != "" {
-		t.Fatalf("a model sees: listed %v, unready %q", got, OwnUnready("myna-vision"))
+	if got := ownMCPNames(t, s); got["owl-vision"] == "" || OwnUnready("owl-vision") != "" {
+		t.Fatalf("a model sees: listed %v, unready %q", got, OwnUnready("owl-vision"))
 	}
 	noVision(t)
-	if why := OwnUnready("myna-vision"); !strings.Contains(why, "off in Settings") {
+	if why := OwnUnready("owl-vision"); !strings.Contains(why, "off in Settings") {
 		t.Fatalf("vision off: %q", why)
 	}
 	st := settings.Load()
@@ -166,7 +166,7 @@ func TestOwnUnreadyWhileNotListed(t *testing.T) {
 	defer stop()
 	searchOn()
 	defer func() { searchOn = gwtool.Serve(gwtool.WebSearch) }()
-	if why := OwnUnready("myna-web-search"); !strings.Contains(why, "Plugins") {
+	if why := OwnUnready("owl-web-search"); !strings.Contains(why, "Plugins") {
 		t.Fatalf("plugins/search off: %q", why)
 	}
 }

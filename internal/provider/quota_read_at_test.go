@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // A Claude account's allowance is what Claude Code last told: shown again

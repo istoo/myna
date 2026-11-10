@@ -5,14 +5,14 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/gateway"
 )
 
 func TestAsideStageWritesSelectionObjectAndConfirmsPending(t *testing.T) {
 	settings, _ := asideHome(t)
 	a := mustFindAside(t)
-	if err := a.Native.Stage("model", "myna/relay/glm-4.6"); err != nil {
+	if err := a.Native.Stage("model", "owl/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	var saved struct {
@@ -21,7 +21,7 @@ func TestAsideStageWritesSelectionObjectAndConfirmsPending(t *testing.T) {
 	if err := json.Unmarshal([]byte(readFile(settings)), &saved); err != nil {
 		t.Fatal(err)
 	}
-	if asideSelection(saved.Default) != "myna/relay/glm-4.6" {
+	if asideSelection(saved.Default) != "owl/relay/glm-4.6" {
 		t.Fatalf("stage wrote an unusable selection: %s", saved.Default)
 	}
 	a = mustFindAside(t)
@@ -39,13 +39,13 @@ func TestAsideStageWritesSelectionObjectAndConfirmsPending(t *testing.T) {
 	}
 }
 
-func TestAsideStageNativeThenMynaRestoresNativeChoice(t *testing.T) {
+func TestAsideStageNativeThenOwlRestoresNativeChoice(t *testing.T) {
 	asideHome(t)
 	a := mustFindAside(t)
 	if err := a.Native.Stage("model", "native/other"); err != nil {
 		t.Fatal(err)
 	}
-	if err := a.Native.Stage("model", "myna/relay/glm-4.6"); err != nil {
+	if err := a.Native.Stage("model", "owl/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	if err := a.Disconnect(); err != nil {
@@ -72,7 +72,7 @@ func TestAsideStatePassesNeverReadRuntime(t *testing.T) {
 }
 
 func TestAsideRewireWithoutDaemonOnlyMovesProvider(t *testing.T) {
-	t.Setenv("MYNA_ADDR", "")
+	t.Setenv("OWL_ADDR", "")
 	settings, models := asideHome(t)
 	a := mustFindAside(t)
 	if err := a.Connect(); err != nil {
@@ -92,7 +92,7 @@ func TestAsideRewireWithoutDaemonOnlyMovesProvider(t *testing.T) {
 	if len(moved) != 1 || moved[0] != "Aside" {
 		t.Fatalf("moved %v", moved)
 	}
-	if url, _ := edit.GetJSON(models, "providers.myna.baseUrl"); url != gateway.URL()+"/v1" {
+	if url, _ := edit.GetJSON(models, "providers.owl.baseUrl"); url != gateway.URL()+"/v1" {
 		t.Fatalf("provider stayed at %s", url)
 	}
 	if readFile(settings) != before {

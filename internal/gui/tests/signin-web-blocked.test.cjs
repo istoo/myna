@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// myna web on a server or in Docker (treeMan on Discord): a sign-in's page
+// owl web on a server or in Docker (treeMan on Discord): a sign-in's page
 // is opened in the viewer's browser as a new tab once the sign-in has
 // started, after the click, and a browser may block it. The window said
 // the page was open while nothing opened. Now a blocked tab is said to be
@@ -85,7 +85,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
               return w;
             };
           });
-          await page.goto("http://myna.test/?view=providers");
+          await page.goto("http://owl.test/?view=providers");
           await page.locator("#addProvider").click();
           const sheet = page.locator("#addSheet");
           await sheet.locator('.tile[data-pick="FakeCo"]').click();

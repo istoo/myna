@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/owl/internal/gateway"
 )
 
 // tlsFlags takes --tls-cert <file> and --tls-key <file> (or =<file>) out
-// of args, sets them for the gateway over MYNA_TLS_CERT and
-// MYNA_TLS_KEY, and checks the pair: one without the other, or files
+// of args, sets them for the gateway over OWL_TLS_CERT and
+// OWL_TLS_KEY, and checks the pair: one without the other, or files
 // that don't load, refuse to start rather than serve plain HTTP the user
 // didn't ask for. rest is the other arguments.
 func tlsFlags(args []string) (rest []string, err error) {

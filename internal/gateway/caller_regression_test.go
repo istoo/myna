@@ -14,10 +14,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/usage"
 )
 
 func TestLoopbackRemainsPermissive(t *testing.T) {
@@ -28,7 +28,7 @@ func TestLoopbackRemainsPermissive(t *testing.T) {
 		if err := settings.Save(settings.Settings{LAN: shared}); err != nil {
 			t.Fatal(err)
 		}
-		for _, token := range []string{"", "anything", Token, TokenFor("alma"), "sk-myna-stale", secrets[0]} {
+		for _, token := range []string{"", "anything", Token, TokenFor("alma"), "sk-owl-stale", secrets[0]} {
 			for _, addr := range []string{"127.0.0.1:5000", "[::1]:5000"} {
 				r := httptest.NewRequest("GET", "/v1/models", nil)
 				r.RemoteAddr = addr
@@ -43,18 +43,18 @@ func TestLoopbackRemainsPermissive(t *testing.T) {
 	}
 }
 
-// A gateway MYNA_ADDR puts on the network without sharing it (the Docker
+// A gateway OWL_ADDR puts on the network without sharing it (the Docker
 // image) takes another machine's request only with an enabled gateway key,
 // however the key is sent; before, it took any token from anyone.
 func TestNetworkGatewayNeedsAKey(t *testing.T) {
 	fresh(t)
-	t.Setenv("MYNA_ADDR", "0.0.0.0:3425")
+	t.Setenv("OWL_ADDR", "0.0.0.0:3425")
 	if _, err := access.Update("add-key", access.Change{Name: "Unused"}); err != nil {
 		t.Fatal(err)
 	}
 	keys, _ := access.List()
 	secret, _ := access.Update("copy-key", access.Change{Key: keys[0].ID})
-	for _, token := range []string{"", "anything", "myna", "sk-myna-stale", secret} {
+	for _, token := range []string{"", "anything", "owl", "sk-owl-stale", secret} {
 		for _, header := range []string{"Authorization", "x-api-key", "query"} {
 			r := httptest.NewRequest("GET", "/v1/models", nil)
 			r.RemoteAddr = "192.168.1.9:5000"
@@ -76,8 +76,8 @@ func TestNetworkGatewayNeedsAKey(t *testing.T) {
 
 func TestMigrationFailureDoesNotStopGateway(t *testing.T) {
 	fresh(t)
-	t.Setenv("MYNA_ADDR", "127.0.0.1:0")
-	if err := settings.Save(settings.Settings{LAN: true, LANKey: "sk-myna-old"}); err != nil {
+	t.Setenv("OWL_ADDR", "127.0.0.1:0")
+	if err := settings.Save(settings.Settings{LAN: true, LANKey: "sk-owl-old"}); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.Chmod(settings.Path(), 0o400); err != nil {
@@ -126,7 +126,7 @@ func TestMigrationFailureDoesNotStopGateway(t *testing.T) {
 func TestLegacyCallerWithReadOnlyConfiguration(t *testing.T) {
 	fresh(t)
 	up := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Header.Get("Authorization") != "Bearer upstream" || r.URL.Query().Get("key") == "sk-myna-readonly" {
+		if r.Header.Get("Authorization") != "Bearer upstream" || r.URL.Query().Get("key") == "sk-owl-readonly" {
 			t.Error("legacy caller credential leaked upstream")
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -136,7 +136,7 @@ func TestLegacyCallerWithReadOnlyConfiguration(t *testing.T) {
 	if err := provider.Save(provider.Provider{ID: "plan", Name: "Plan", Key: "upstream", Chat: up.URL + "/v1", Models: []string{"m1"}}); err != nil {
 		t.Fatal(err)
 	}
-	s := settings.Settings{LAN: true, LANKey: "sk-myna-readonly"}
+	s := settings.Settings{LAN: true, LANKey: "sk-owl-readonly"}
 	if err := settings.Save(s); err != nil {
 		t.Fatal(err)
 	}
@@ -184,7 +184,7 @@ func TestLegacyCallerWithReadOnlyConfiguration(t *testing.T) {
 		t.Fatal("fallback attribution missing", recs)
 	}
 	for _, rec := range recs {
-		if rec.CallerKeyID != recs[0].CallerKeyID || rec.CallerKeyName != "Myna" || rec.ProviderKeyID != provider.KeyID("upstream") {
+		if rec.CallerKeyID != recs[0].CallerKeyID || rec.CallerKeyName != "Owl" || rec.ProviderKeyID != provider.KeyID("upstream") {
 			t.Fatal("fallback attribution changed", rec)
 		}
 	}

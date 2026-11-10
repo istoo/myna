@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 func histCard(user string, used5h float64, reset5h time.Time, usedWeek float64, resetWeek time.Time) SubscriptionQuota {

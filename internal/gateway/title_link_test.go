@@ -16,9 +16,9 @@ import (
 
 	"github.com/klauspost/compress/zstd"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/sessions"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/sessions"
+	"github.com/istoo/owl/internal/settings"
 )
 
 func titleTestKey(t testing.TB) {
@@ -391,7 +391,7 @@ func BenchmarkTitleLinkRequest(b *testing.B) {
 }
 
 // Real gateway requests, not pre-filled parentSession fields: both native
-// Codex and Myna's title wrapper retain enough evidence for the GUI.
+// Codex and Owl's title wrapper retain enough evidence for the GUI.
 func TestTitleLinkGatewayTransports(t *testing.T) {
 	for _, tc := range []struct {
 		name           string

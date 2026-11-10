@@ -10,14 +10,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/agentenv"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/agentenv"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/testenv"
 )
 
-// myna quota --json tells when each key last answered through the gateway
+// owl quota --json tells when each key last answered through the gateway
 // — a process of its own, which wrote it down — and marks the latest last,
-// as GET /v1/myna/quotas does (#570).
+// as GET /v1/owl/quotas does (#570).
 func TestQuotaJSONLastServedAt(t *testing.T) {
 	groupsHome(t)
 	for _, k := range agentenv.Vars {

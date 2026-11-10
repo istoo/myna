@@ -43,7 +43,7 @@ func TestReadNpx(t *testing.T) {
 }
 
 // An agent is given an npx server as node running the package's program
-// from myna's install of it, with the server's arguments after: no npx
+// from owl's install of it, with the server's arguments after: no npx
 // left between the agent and the server, which held a node and two
 // cmd.exe a server on Windows (#3885). Before the install is done the
 // agent has npx, as the library does; the install is asked for once.

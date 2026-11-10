@@ -12,8 +12,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // rewindClaude stands in for Claude Code: it logs its arguments and each

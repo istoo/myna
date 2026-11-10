@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // wingetOn makes rtk upgraded as on Windows, with a fake winget whose
@@ -144,7 +144,7 @@ func TestRTKWingetList(t *testing.T) {
 		t.Fatalf("winget ran %q; want twice", l)
 	}
 
-	// winget has no rtk-ai.rtk: myna can't tell, as before
+	// winget has no rtk-ai.rtk: owl can't tell, as before
 	ran = wingetOn(t, h, wingetUnlisted, 20, none)
 	if c := rtkUpgrader(bin); c != nil {
 		t.Fatalf("unlisted: upgrader %q; want none", c)

@@ -9,10 +9,10 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/istoo/myna/internal/pluginrt"
+	"github.com/istoo/owl/internal/pluginrt"
 )
 
-// builtinCmd: `myna plugin builtin [on|off <id>]` — myna's built-in
+// builtinCmd: `owl plugin builtin [on|off <id>]` — owl's built-in
 // plugins (internal/pluginrt, plugins/), as Plugins › Built-in shows them.
 // One in use is refused off, as the window refuses it.
 func builtinCmd(rest []string) error {
@@ -58,7 +58,7 @@ func builtinCmd(rest []string) error {
 	return nil
 }
 
-// dumpPlugins: `myna plugin dump` — what plugins.yml comes to after its
+// dumpPlugins: `owl plugin dump` — what plugins.yml comes to after its
 // layers: each built-in plugin, on or off and why, its config and the
 // layer each value is from, and how it runs in this process.
 func dumpPlugins(asJSON bool) error {

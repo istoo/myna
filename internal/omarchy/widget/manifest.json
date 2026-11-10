@@ -1,20 +1,20 @@
 {
   "schemaVersion": 1,
-  "id": "usemyna.myna",
-  "name": "myna",
+  "id": "useowl.owl",
+  "name": "owl",
   "version": "1.0.0",
-  "author": "myna",
+  "author": "owl",
   "license": "MIT",
-  "description": "myna's icon in the bar: a click drops down its panel, a right click opens its window.",
+  "description": "owl's icon in the bar: a click drops down its panel, a right click opens its window.",
   "kinds": ["bar-widget"],
   "entryPoints": {
     "barWidget": "Widget.qml"
   },
   "barWidget": {
-    "displayName": "myna",
-    "description": "Pick every agent's model from the bar: a click drops down myna's panel, a right click opens its window.",
+    "displayName": "owl",
+    "description": "Pick every agent's model from the bar: a click drops down owl's panel, a right click opens its window.",
     "category": "AI",
-    "aliases": ["myna"],
+    "aliases": ["owl"],
     "allowMultiple": false,
     "defaultSection": "right"
   }

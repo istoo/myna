@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // 墨雨藏锋 / mycf_711 (#3950): SuperMagic's accounts are prepaid wallets of

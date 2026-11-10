@@ -17,7 +17,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/proc"
 )
 
 // Carry is another agent a session can be carried on in, and the shell

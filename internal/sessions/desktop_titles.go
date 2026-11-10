@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/filememo"
+	"github.com/istoo/owl/internal/filememo"
 )
 
 // desktopTitle is what a Desktop session record (local_<id>.json) says of

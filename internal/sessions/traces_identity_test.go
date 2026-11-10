@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 func TestTraceSessionHeaderReadinessWithoutHistoryReplay(t *testing.T) {

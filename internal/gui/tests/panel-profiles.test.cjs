@@ -11,7 +11,7 @@
 // page's focus ring over its own; field and button stay in sight, and the
 // button then reads Save; a click on it saves as Enter does (it did nothing:
 // the field lost focus to it and went). Escape closes the field and gives the
-// button back. With myna slow to answer (reading every agent again took it
+// button back. With owl slow to answer (reading every agent again took it
 // seconds) and no profiles yet, the chip saved is there at once, dimmed till
 // the answer, under the tabs' line and not scrolled up behind them (the
 // click held the button, which the chip came in above); ×, clicked twice,
@@ -86,7 +86,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.setDefaultNavigationTimeout(60000);
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", server(lang, saved, opts));
-      await page.goto("http://myna.test/?mode=panel");
+      await page.goto("http://owl.test/?mode=panel");
       await page.locator("#profiles .chip, #profiles .hint").first().waitFor({ state: "attached" });
       assert.equal(await page.locator('[data-ptab="profiles"]').count(), 0, "no Profiles tab");
       await page.locator("#profBtn").click();
@@ -188,7 +188,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.waitForFunction(() => !document.querySelector(".profiles.open"));
       });
 
-      await t.test(lang + ": a slow myna, from none", async () => {
+      await t.test(lang + ": a slow owl, from none", async () => {
         const saved = [];
         const page = await open(lang, saved, { count: 0, delay: 1500, refuse: "refused" });
         const button = page.locator("#save"), field = page.locator(".profiles > .chip-input");
@@ -203,7 +203,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await field.pressSequentially("hi");
         await button.click();
         await page.waitForTimeout(200);
-        assert.equal(await chip("hi").count(), 1, "the chip saved is there before myna answers");
+        assert.equal(await chip("hi").count(), 1, "the chip saved is there before owl answers");
         assert(await chip("hi").evaluate((c) => c.classList.contains("pending")), "and dimmed till it does");
         assert.equal(await field.count(), 0, "the field closes at once");
         assert.equal((await button.textContent()).trim(), add);
@@ -220,7 +220,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await chip("hi").locator(".x").nth(1).click();
         await chip("hi").locator(".x.arm").click();
         await page.waitForTimeout(200);
-        assert.equal(await chip("hi").count(), 0, "the chip deleted goes before myna answers");
+        assert.equal(await chip("hi").count(), 0, "the chip deleted goes before owl answers");
         await page.locator("#profiles .hint").waitFor({ state: "attached" });
         await page.waitForFunction(() => /hi/.test(document.querySelector("#status").textContent) && !document.querySelector("#status").classList.contains("ok"));
         assert.equal(await chip("hi").count(), 0);

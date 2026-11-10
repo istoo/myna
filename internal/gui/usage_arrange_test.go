@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // The tray panel's Allowances tab leaves out the subscriptions set hidden
@@ -130,11 +130,11 @@ func TestUsageArrangeCardsHidden(t *testing.T) {
 	want(nil)
 }
 
-// A client myna doesn't know is counted as one of its agents from the
+// A client owl doesn't know is counted as one of its agents from the
 // Usage page's Agents list (#1958, NorethSea), saved on its own and kept
 // through a save of the Settings page; As "" counts it on its own again.
-// An agent myna knows isn't counted as another, nor anything as
-// myna, nor as a client that isn't an agent.
+// An agent owl knows isn't counted as another, nor anything as
+// owl, nor as a client that isn't an agent.
 func TestUsageArrangeCountClient(t *testing.T) {
 	h := t.TempDir()
 	t.Setenv("HOME", h)
@@ -163,8 +163,8 @@ func TestUsageArrangeCountClient(t *testing.T) {
 	want(map[string]string{"hermes-codex-thread-bridge": "codex"})
 	for _, bad := range []string{
 		`{"count":{"client":"claude-code","as":"codex"}}`,
-		`{"count":{"client":"myna-router","as":"codex"}}`,
-		`{"count":{"client":"my-bridge","as":"myna"}}`,
+		`{"count":{"client":"owl-router","as":"codex"}}`,
+		`{"count":{"client":"my-bridge","as":"owl"}}`,
 		`{"count":{"client":"my-bridge","as":"Python-urllib"}}`,
 		`{"count":{"client":"","as":"codex"}}`,
 	} {

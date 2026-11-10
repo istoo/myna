@@ -12,7 +12,7 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // namesBackend stands in for the ChatGPT backend's check of tool names:

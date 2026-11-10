@@ -5,14 +5,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // claudeOpusThenSonnet is #1050's Claude Code before the switch: on
-// myna's Opus 5.5, its sonnet tier and its subagents given Sonnet 5.5,
-// both 1M models, as myna's record (applied.json) had them. It answers
+// owl's Opus 5.5, its sonnet tier and its subagents given Sonnet 5.5,
+// both 1M models, as owl's record (applied.json) had them. It answers
 // the settings.json.
 func claudeOpusThenSonnet(t *testing.T, a *Agent, home string) string {
 	t.Helper()
@@ -37,7 +37,7 @@ func claudeOpusThenSonnet(t *testing.T, a *Agent, home string) string {
 }
 
 // sonnetFollowsAsBefore moves the main model onto Sonnet 5.5 in Claude
-// Code's /model, and leaves what myna's Follow writes as a myna before
+// Code's /model, and leaves what owl's Follow writes as a owl before
 // #1050's fix left it: the tier and the subagents on the new main model
 // following it, not marked as the user's own.
 func sonnetFollowsAsBefore(t *testing.T, a *Agent, path string) {
@@ -55,13 +55,13 @@ func sonnetFollowsAsBefore(t *testing.T, a *Agent, path string) {
 	forget(at.key("claude.tier_own.sonnet"), at.key("claude.tier_own.subagent"))
 }
 
-// The main model moved onto the Sonnet 5.5 myna had given the sonnet tier
-// and the subagents, in Claude Code's own /model (whose list myna writes,
-// each "· via myna"): the two now follow the main model, read as empty,
-// and run on the model myna set them to. That isn't "changed outside
-// myna" (#1050, cjyrainbow: Claude Code · WSL Ubuntu 已在 myna 之外换掉
-// claude/claude-sonnet-5-5[1m] while everything still went through myna).
-// The main model taken off myna still is.
+// The main model moved onto the Sonnet 5.5 owl had given the sonnet tier
+// and the subagents, in Claude Code's own /model (whose list owl writes,
+// each "· via owl"): the two now follow the main model, read as empty,
+// and run on the model owl set them to. That isn't "changed outside
+// owl" (#1050, cjyrainbow: Claude Code · WSL Ubuntu 已在 owl 之外换掉
+// claude/claude-sonnet-5-5[1m] while everything still went through owl).
+// The main model taken off owl still is.
 func TestClaudeFollowerOnTheMainModelIsNoDrift(t *testing.T) {
 	home, _ := codexHome(t, "", "")
 	a := claude(home)
@@ -73,15 +73,15 @@ func TestClaudeFollowerOnTheMainModelIsNoDrift(t *testing.T) {
 		t.Fatalf("not #1050's state: %v\n%s", v, readFile(path))
 	}
 	if d := a.Drift(); d != nil {
-		t.Fatalf("drift on a tier following myna's model: %+v", *d)
+		t.Fatalf("drift on a tier following owl's model: %+v", *d)
 	}
 
-	// the main model on Anthropic's own: changed outside myna
+	// the main model on Anthropic's own: changed outside owl
 	if err := edit.SetJSON(path, edit.KV{Path: "env.ANTHROPIC_BASE_URL", Value: "https://api.anthropic.com"}, edit.KV{Path: "model", Value: "claude-sonnet-5-5"}); err != nil {
 		t.Fatal(err)
 	}
 	if d := a.Drift(); d == nil || d.Kind != "replaced" && d.Kind != "unwired" {
-		t.Fatalf("the main model off myna isn't said: %+v", d)
+		t.Fatalf("the main model off owl isn't said: %+v", d)
 	}
 }
 
@@ -91,7 +91,7 @@ func TestWSLClaudeFollowerOnTheMainModelIsNoDrift(t *testing.T) {
 	root, home := claudeDistroHome(t, `{"model": "opus"}`)
 	d := distro{Name: "Ubuntu", Root: root, Home: "/home/me", Has: map[string]bool{"dir:.claude": true},
 		Gateway: "172.20.0.1", Mirrored: true, Running: true}
-	// what myna sees there is kept for when the distro stops
+	// what owl sees there is kept for when the distro stops
 	seen := d
 	wsl.Lock()
 	if wsl.seen == nil {
@@ -107,7 +107,7 @@ func TestWSLClaudeFollowerOnTheMainModelIsNoDrift(t *testing.T) {
 		t.Fatalf("not #1050's state: %v\n%s", v, readFile(path))
 	}
 	if dr := a.Drift(); dr != nil {
-		t.Fatalf("drift on a tier following myna's model: %+v", *dr)
+		t.Fatalf("drift on a tier following owl's model: %+v", *dr)
 	}
 	d.Running = false
 	stopped := wslAgent(wslKindOf("claude"), d)
@@ -115,18 +115,18 @@ func TestWSLClaudeFollowerOnTheMainModelIsNoDrift(t *testing.T) {
 		t.Fatalf("stopped: not what was last seen: %v", v)
 	}
 	if dr := stopped.Drift(); dr != nil {
-		t.Fatalf("stopped: drift on a tier following myna's model: %+v", *dr)
+		t.Fatalf("stopped: drift on a tier following owl's model: %+v", *dr)
 	}
 	noOwnClaude(t)
 }
 
 // A model given to a tier or the subagents stays theirs when the main model
-// moves onto it and on again, picked in myna or in Claude Code's /model:
+// moves onto it and on again, picked in owl or in Claude Code's /model:
 // #1050's sonnet tier and subagents, given Sonnet 5.5, went to Opus 5.5
 // with the main model's way back from Sonnet 5.5, the pick lost without a
 // word. "Same as model" picked for them afterwards has them follow again.
 func TestClaudeOwnTierStaysThroughTheMainModel(t *testing.T) {
-	for _, via := range []string{"myna", "/model"} {
+	for _, via := range []string{"owl", "/model"} {
 		t.Run(via, func(t *testing.T) {
 			home, _ := codexHome(t, "", "")
 			a := claude(home)
@@ -134,7 +134,7 @@ func TestClaudeOwnTierStaysThroughTheMainModel(t *testing.T) {
 			env := func(k string) string { v, _ := edit.GetJSON(path, "env."+k); return v }
 			main := func(m string) {
 				t.Helper()
-				if via == "myna" {
+				if via == "owl" {
 					if err := a.Apply("model", m); err != nil {
 						t.Fatal(err)
 					}
@@ -179,7 +179,7 @@ func TestClaudeOwnTierStaysThroughTheMainModel(t *testing.T) {
 }
 
 // Every tier given a model of its own keeps it when the main model moves
-// onto that model and on again, picked in myna or in Claude Code's
+// onto that model and on again, picked in owl or in Claude Code's
 // /model, whatever the tier would follow there (#2257, luokinging): a
 // fable tier given GPT-6.1 Sol, with the main model moved from K2.8
 // Preview onto GPT-6.1 Sol, read as "Same as main model", since fable
@@ -189,7 +189,7 @@ func TestClaudeOwnTierStaysThroughTheMainModel(t *testing.T) {
 func TestClaudeOwnTierOnTheNewMainModelStays(t *testing.T) {
 	for _, own := range []string{"oa/gpt-6.1-sol", "anth/claude-opus-5-5"} {
 		for _, tier := range claudeTiers {
-			for _, via := range []string{"myna", "/model"} {
+			for _, via := range []string{"owl", "/model"} {
 				t.Run(own+"/"+tier+"/"+via, func(t *testing.T) {
 					home, _ := codexHome(t, "", "")
 					a := claude(home)
@@ -205,7 +205,7 @@ func TestClaudeOwnTierOnTheNewMainModelStays(t *testing.T) {
 					bare := func(s string) string { return strings.TrimSuffix(s, "[1m]") }
 					main := func(m string) {
 						t.Helper()
-						if via == "myna" {
+						if via == "owl" {
 							if err := a.Apply("model", m); err != nil {
 								t.Fatal(err)
 							}

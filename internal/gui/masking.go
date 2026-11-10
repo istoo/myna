@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/istoo/myna/internal/gwmw"
-	"github.com/istoo/myna/internal/masking"
-	"github.com/istoo/myna/internal/maskrec"
+	"github.com/istoo/owl/internal/gwmw"
+	"github.com/istoo/owl/internal/masking"
+	"github.com/istoo/owl/internal/maskrec"
 )
 
 // previewMax is how much text the preview masks.
@@ -63,10 +63,10 @@ func shownRecord(r maskrec.Record, t gwmw.Teller) maskedRecord {
 //     commas; blocked=1 keeps the requests held back);
 //   - GET /api/masking/record?key= one record;
 //   - GET /api/masking/value?p= what a placeholder stood for, while this
-//     myna's masker remembers it (404 after a restart: it is never on
+//     owl's masker remembers it (404 after a restart: it is never on
 //     disk);
 //   - GET /api/masking/sent?key= the body a record's request went to its
-//     vendor with, masked, while this myna keeps it (the latest
+//     vendor with, masked, while this owl keeps it (the latest
 //     maskrec keeps; 404 after a restart);
 //   - POST /api/masking/values {ps} what each placeholder stood for, of
 //     those the masker still remembers, for the page to show the request

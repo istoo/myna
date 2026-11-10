@@ -12,10 +12,10 @@ window.askResetSheet = function (q) {
   ed.append(el("p", "lib-confirm", t(q.resets.count === 1
     ? "{who} has 1 reset. Using it starts its windows again at once, as if none of them had been used. It can't be undone."
     : "{who} has {n} resets. Using one starts its windows again at once, as if none of them had been used. It can't be undone.", { who, n: q.resets.count })));
-  // a remote myna's card (office/codex, #3850): that myna spends it,
+  // a remote owl's card (office/codex, #3850): that owl spends it,
   // on the account signed in there
   const remote = q.provider !== "codex" && q.from;
-  if (remote) ed.append(el("p", "lib-confirm reset-remote", t("The myna on {computer}, where this account is signed in, uses it.", { computer: q.from })));
+  if (remote) ed.append(el("p", "lib-confirm reset-remote", t("The owl on {computer}, where this account is signed in, uses it.", { computer: q.from })));
   // which of them is used: the one that runs out first unless the user
   // picks another of those listed one by one (01huadalang on Discord),
   // and the dialog names the one it spends
@@ -107,15 +107,15 @@ window.askResetSheet = function (q) {
   go.focus();
 };
 
-// remoteResetError says why a remote myna used no reset (remote_quotas.go)
+// remoteResetError says why a remote owl used no reset (remote_quotas.go)
 function remoteResetError(err) {
-  if (/^this key is read-only on the remote myna/.test(err)) return t("This key is read-only on that computer's myna — give this provider a key with full access to use a reset from here");
+  if (/^this key is read-only on the remote owl/.test(err)) return t("This key is read-only on that computer's owl — give this provider a key with full access to use a reset from here");
   if (/didn't say in time whether the reset was used/.test(err)) return t("That computer didn't say in time whether the reset was used — it may have been. Refresh the card before asking again");
-  if (/^remote myna doesn't share its quotas/.test(err)) return t("That computer's myna can't use a reset from here yet — update myna there");
-  if (/^remote myna holds this key/.test(err)) return t("That computer's myna holds this key to a budget, models or accounts, so it uses none of its resets — give this provider a key with full access");
-  if (/^remote myna isn't shared/.test(err)) return t("That computer's myna isn't shared — turn on Settings → Network and sharing → Share on local network there");
-  if (/^remote myna didn't take this key/.test(err)) return t("That computer's myna didn't take this key — use one of its gateway keys in this provider");
-  if (/^couldn't reach the remote myna/.test(err)) return t("Couldn't reach that computer's myna — check that it is running and its address");
+  if (/^remote owl doesn't share its quotas/.test(err)) return t("That computer's owl can't use a reset from here yet — update owl there");
+  if (/^remote owl holds this key/.test(err)) return t("That computer's owl holds this key to a budget, models or accounts, so it uses none of its resets — give this provider a key with full access");
+  if (/^remote owl isn't shared/.test(err)) return t("That computer's owl isn't shared — turn on Settings → Network and sharing → Share on local network there");
+  if (/^remote owl didn't take this key/.test(err)) return t("That computer's owl didn't take this key — use one of its gateway keys in this provider");
+  if (/^couldn't reach the remote owl/.test(err)) return t("Couldn't reach that computer's owl — check that it is running and its address");
   return err;
 }
 

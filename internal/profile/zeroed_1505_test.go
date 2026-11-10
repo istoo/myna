@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/appdir"
+	"github.com/istoo/owl/internal/appdir"
 )
 
 // profiles.json zeroed by a crash (#1505) is its last good generation.

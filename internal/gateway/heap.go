@@ -1,9 +1,9 @@
 package gateway
 
-// GET /v1/myna/heap: a Go heap profile of the process serving the
-// gateway, for a report of myna holding too much memory. A macOS
+// GET /v1/owl/heap: a Go heap profile of the process serving the
+// gateway, for a report of owl holding too much memory. A macOS
 // `sample` of the app names none of Go's frames, so this is the one way
-// to see what the Go side holds; `myna heap` asks for it and writes the
+// to see what the Go side holds; `owl heap` asks for it and writes the
 // file the user sends.
 
 import (
@@ -17,11 +17,11 @@ import (
 	"runtime/pprof"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // HeapPath is where the gateway answers a heap profile.
-const HeapPath = "/v1/myna/heap"
+const HeapPath = "/v1/owl/heap"
 
 // HeapStatsHeader carries HeapStats, as JSON, beside the profile.
 const HeapStatsHeader = "X-Magpie-Heap-Stats"
@@ -35,7 +35,7 @@ type HeapStats struct {
 	PID          int    `json:"pid"`
 	Program      string `json:"program"`
 	Version      string `json:"version"`
-	Window       bool   `json:"window"` // the app's window or myna web serves the gateway
+	Window       bool   `json:"window"` // the app's window or owl web serves the gateway
 	Uptime       string `json:"uptime"`
 	HeapAlloc    uint64 `json:"heapAlloc"`
 	HeapInuse    uint64 `json:"heapInuse"`
@@ -94,7 +94,7 @@ func (s *Server) heapProfile(w http.ResponseWriter, r *http.Request) {
 	})
 	h := w.Header()
 	h.Set("Content-Type", "application/octet-stream")
-	h.Set("Content-Disposition", `attachment; filename="myna-heap.pb.gz"`)
+	h.Set("Content-Disposition", `attachment; filename="owl-heap.pb.gz"`)
 	h.Set("Cache-Control", "no-store")
 	h.Set(HeapStatsHeader, string(stats))
 	w.Write(buf.Bytes())
@@ -109,7 +109,7 @@ func (s *Server) heapProfile(w http.ResponseWriter, r *http.Request) {
 // and corsGuard turn most of these away first; this holds where Handler
 // is served without them too.
 func heapRefused(r *http.Request) string {
-	return profileRefused(r, "heap profile", "myna heap")
+	return profileRefused(r, "heap profile", "owl heap")
 }
 
 // profileRefused is heapRefused for any profile of this process (cpuRefused
@@ -117,11 +117,11 @@ func heapRefused(r *http.Request) string {
 func profileRefused(r *http.Request, what, cmd string) string {
 	switch {
 	case !local(r):
-		return "myna hands its " + what + " only to a program on this computer, over loopback: run " + cmd + " there"
+		return "owl hands its " + what + " only to a program on this computer, over loopback: run " + cmd + " there"
 	case fromBrowser(r):
-		return "myna doesn't hand its " + what + " to a web page: run " + cmd + " in a terminal"
+		return "owl doesn't hand its " + what + " to a web page: run " + cmd + " in a terminal"
 	case !loopbackHost(r.Host):
-		return "myna hands its " + what + " only to a call to localhost or a loopback address, not " + r.Host + ": run " + cmd
+		return "owl hands its " + what + " only to a call to localhost or a loopback address, not " + r.Host + ": run " + cmd
 	}
 	return ""
 }

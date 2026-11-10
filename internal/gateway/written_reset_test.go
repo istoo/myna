@@ -12,9 +12,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // WorkBuddy's two refusals, as Natsumeretsu quoted them (#1669), and
@@ -300,7 +300,7 @@ func TestRateLimitBelievesItsReset(t *testing.T) {
 func TestPluginWrittenResetRests(t *testing.T) {
 	bun := testenv.Bun(t)
 	fresh(t)
-	t.Setenv("MYNA_BUN", bun)
+	t.Setenv("OWL_BUN", bun)
 	t.Cleanup(plugin.Settle)
 	old := allowances
 	allowances = func(string) map[string]provider.Allowance { return nil }

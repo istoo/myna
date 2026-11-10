@@ -10,7 +10,7 @@ import (
 // a turn names a thread, {"type":"create"} on its first and
 // {"type":"continue","previous_message_id":…} after, and a continue
 // carries only what came after that message, leaving the earlier
-// history, the system prompt and the tools to the server. myna keeps
+// history, the system prompt and the tools to the server. owl keeps
 // no thread: it routes each request on its own, often to an upstream
 // that never saw the first, and a continue it passed on reached the
 // model as the latest turn alone, which answered as if the conversation

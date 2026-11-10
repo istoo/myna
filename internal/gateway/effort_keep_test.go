@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A group whose effort is auto keeps a conversation's reasoning from one
@@ -48,11 +48,11 @@ func TestAutoEffortKeepsTheCache(t *testing.T) {
 }
 
 // Where an effort change goes as a configuration_update (Responses on a
-// GPT-6 model through a ChatGPT account, MYNA_EFFORT_UPDATES=on), the
+// GPT-6 model through a ChatGPT account, OWL_EFFORT_UPDATES=on), the
 // easier pick isn't held back: the update carries it and the top-level
 // effort, and the cache with it, stays the thread's first.
 func TestAutoEffortGoesAsUpdate(t *testing.T) {
-	t.Setenv("MYNA_EFFORT_UPDATES", "on")
+	t.Setenv("OWL_EFFORT_UPDATES", "on")
 	f := &fake{t: t, ctype: "none", reply: effortReply}
 	effortCodexAccount(t, f)
 	j := &jevUp{choice: noIntent, sure: 0.9}

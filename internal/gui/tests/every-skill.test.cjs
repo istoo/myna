@@ -17,7 +17,7 @@ const HOME = "/Users/emo";
 const agent = (id, name, skills = true) => ({ id, name, icon: "", skills: skills ? `${HOME}/.${id}/skills` : "" });
 const sk = (name, agents) => ({ name, description: name, kind: "folder", agents });
 const lib = (skills) => ({
-  dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
+  dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
   agents: [agent("claude", "Claude Code"), agent("codex", "Codex"), agent("pi", "Pi"), agent("goose", "Goose", false)],
   instructions: { agents: [] }, servers: [], skills, foundServers: [], projects: [], foundSkills: [],
 });
@@ -72,14 +72,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     });
     const open = async (lang, posts) => {
       const ctx = await browser.newContext({ viewport: { width: 860, height: 700 } });
-      await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "skills"); } catch {} });
+      await ctx.addInitScript(() => { try { localStorage.setItem("owl.libTab", "skills"); } catch {} });
       const page = await ctx.newPage();
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(60000);
       page.on("pageerror", (e) => errors.push(e.message));
       page.on("dialog", (d) => { errors.push("a browser dialog: " + d.message()); d.dismiss(); });
       await page.route("**/*", server(lang, posts));
-      await page.goto("http://myna.test/");
+      await page.goto("http://owl.test/");
       await navTo(page, "library");
       await page.locator("#view-library .lib-body:not(.lib-skel) .lib-row").first().waitFor();
       return page;

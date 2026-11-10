@@ -13,15 +13,15 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/provider"
 	"github.com/tidwall/gjson"
 )
 
 // A Responses client may send only a turn's new input and name the
 // response it follows (previous_response_id), as OpenAI's own API lets it
 // (kevinzhow on X: every request carried the whole conversation, images
-// and all). myna keeps each response it gave such a client, its input
+// and all). owl keeps each response it gave such a client, its input
 // and its output, under the response's id, and a request that names one
 // is given the conversation whole before anything else reads it: a
 // translation, a hook, the masking. A provider that keeps responses itself
@@ -120,7 +120,7 @@ func (s *prevStore) drop(e *list.Element) {
 }
 
 // prevScope is whose responses a request may name: its gateway key, the
-// computer a remote myna passed it on from, and for a request with no
+// computer a remote owl passed it on from, and for a request with no
 // key from another computer, that computer's address.
 func prevScope(r *http.Request) string {
 	keyID := access.Caller(r.Context()).KeyID
@@ -186,7 +186,7 @@ func prevAskOf(ctx context.Context) *prevAsk {
 	return a
 }
 
-// prevLost is the id a request named that myna doesn't hold, which a
+// prevLost is the id a request named that owl doesn't hold, which a
 // try that doesn't relay it to a provider as written can't honour.
 func prevLost(r *http.Request) string {
 	if a := prevAskOf(r.Context()); a != nil && a.id != "" && !a.known {
@@ -210,7 +210,7 @@ func noteAnswered(r *http.Request, route string) {
 	}
 }
 
-// previousResponse gives a Responses request that names a response myna
+// previousResponse gives a Responses request that names a response owl
 // holds the conversation whole, and keeps the reply for the next turn.
 // Its done is deferred by the caller.
 func previousResponse(w http.ResponseWriter, r *http.Request, from provider.Protocol, body []byte) (http.ResponseWriter, *http.Request, []byte, func()) {
@@ -237,7 +237,7 @@ func previousResponse(w http.ResponseWriter, r *http.Request, from provider.Prot
 	}
 	input, fresh := prevInput(q["input"])
 	if fresh == nil {
-		// an input myna can't read as items: left as it came
+		// an input owl can't read as items: left as it came
 		return w, r, body, nothing
 	}
 	if ask.known {
@@ -275,7 +275,7 @@ func previousResponse(w http.ResponseWriter, r *http.Request, from provider.Prot
 		r = r.WithContext(context.WithValue(r.Context(), prevAskKey{}, ask))
 	}
 	sink := &conversationWriter{captureResponseWriter: &captureResponseWriter{
-		ResponseWriter: w, full: &spool{limit: prevReplyMax, pattern: "myna-prevresp-*"},
+		ResponseWriter: w, full: &spool{limit: prevReplyMax, pattern: "owl-prevresp-*"},
 	}}
 	return sink, r, body, func() {
 		defer sink.full.discard()
@@ -378,12 +378,12 @@ func prevReply(ctype string, reply []byte) (id string, output []json.RawMessage,
 	return r.ID, r.Output, true
 }
 
-// prevDelta is body, a Responses request myna gave its conversation
+// prevDelta is body, a Responses request owl gave its conversation
 // whole, with the new input alone after the id p keeps the previous
 // response under, when p is the provider and key that answered it and
 // keeps what it is sent. The tries' changes to the input are kept: the
 // new items are the body's own last ones, and only when the body still
-// has as many items as myna gave it.
+// has as many items as owl gave it.
 func prevDelta(r *http.Request, p provider.Provider, body []byte) ([]byte, bool) {
 	a := prevAskOf(r.Context())
 	if a == nil || !a.known || a.upstreamID == "" || a.route != prevRoute(p) || !prevKeptBy(p) {

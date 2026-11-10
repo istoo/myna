@@ -106,7 +106,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("dialog", (d) => { errors.push("a browser dialog: " + d.message()); d.dismiss(); });
       const calls = [];
       await page.route("**/*", serve(lang, calls));
-      await page.goto("http://myna.test/?view=providers");
+      await page.goto("http://owl.test/?view=providers");
       await page.locator("#nav").getByRole("button", { name: w.nav, exact: true }).click();
       const view = page.locator("#view-sessions");
       const row = (id) => view.locator(`.row.sm-sess[data-id="${id}"]`);

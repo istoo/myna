@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/filememo"
+	"github.com/istoo/owl/internal/filememo"
 )
 
 func gatewayFixture(t *testing.T, source string) string {
@@ -31,7 +31,7 @@ func gatewayFixture(t *testing.T, source string) string {
 }
 
 // TestHasGatewayLooksOnceASecond: every request asks HasGateway, so it
-// reads the plugins at most once a second (#3725), and at once after myna
+// reads the plugins at most once a second (#3725), and at once after owl
 // wrote a file of its own.
 func TestHasGatewayLooksOnceASecond(t *testing.T) {
 	sandbox(t)
@@ -48,7 +48,7 @@ func TestHasGatewayLooksOnceASecond(t *testing.T) {
 	}
 	filememo.Forget()
 	if HasGateway() {
-		t.Fatal("myna's own write wasn't looked at")
+		t.Fatal("owl's own write wasn't looked at")
 	}
 	if err := os.WriteFile(pkg, []byte(`{"magpie":{"hooks":"./request.js"}}`), 0o644); err != nil {
 		t.Fatal(err)
@@ -460,7 +460,7 @@ func TestGatewayHookInvalidOrUndefinedResult(t *testing.T) {
 }
 
 // Bun loads TypeScript itself: a direct *.hooks.ts file and a package
-// whose myna.hooks names a .ts entry both run without a build step.
+// whose owl.hooks names a .ts entry both run without a build step.
 func TestGatewayHookTypeScript(t *testing.T) {
 	sandbox(t)
 	direct := filepath.Join(t.TempDir(), "recall.hooks.ts")
@@ -504,8 +504,8 @@ func gatewayRequest(ctx context.Context, body []byte, info GatewayContext) []byt
 	return run.Body
 }
 
-// A JS gateway middleware (*.gateway.js, myna.gateway) and a request hook
-// (*.hooks.js, myna.hooks) never claim the same entry: a hook importing
+// A JS gateway middleware (*.gateway.js, owl.gateway) and a request hook
+// (*.hooks.js, owl.hooks) never claim the same entry: a hook importing
 // node:fs loaded as middleware too would show "didn't load" for a plugin
 // that works.
 func TestGatewayHookNamesApartFromMiddleware(t *testing.T) {
@@ -531,10 +531,10 @@ func TestGatewayHookNamesApartFromMiddleware(t *testing.T) {
 			t.Fatal(err)
 		}
 		if got := Gateway(dir) != ""; got != hook {
-			t.Errorf("myna.%s: hook %v, want %v", key, got, hook)
+			t.Errorf("owl.%s: hook %v, want %v", key, got, hook)
 		}
 		if f, _ := Middleware(dir); hook && f != "" {
-			t.Errorf("myna.%s is loaded as middleware too", key)
+			t.Errorf("owl.%s is loaded as middleware too", key)
 		}
 	}
 }

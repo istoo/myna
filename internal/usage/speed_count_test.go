@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/owl/internal/sessions"
 )
 
 // A group's speed says how many replies it is of, and a group none of whose

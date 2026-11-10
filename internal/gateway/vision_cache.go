@@ -1,6 +1,6 @@
 package gateway
 
-// Completed image descriptions are kept next to the rest of myna's
+// Completed image descriptions are kept next to the rest of owl's
 // settings, so restarting or updating the gateway doesn't describe every
 // image in an ongoing conversation again. Only inline images are saved:
 // their cache key comes from their bytes. A URL is left to the in-memory
@@ -19,10 +19,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/filelock"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/steady"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/filelock"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/steady"
 )
 
 const (

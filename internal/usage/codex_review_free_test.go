@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 // silverzhou on Discord: OpenAI made Codex's Auto-review free for users

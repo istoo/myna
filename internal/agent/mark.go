@@ -4,37 +4,37 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/gateway"
 )
 
-// MarkWritten has every TOML, YAML and dotenv line myna writes that
+// MarkWritten has every TOML, YAML and dotenv line owl writes that
 // points an agent at it carry a comment saying so and how to undo it
 // (lineNote). A Codex left with openai_base_url on a gateway that no
-// longer ran, after myna's folders were deleted by hand, failed every
-// turn with nothing in its config naming myna (Jevik_AI on X). Set by
+// longer ran, after owl's folders were deleted by hand, failed every
+// turn with nothing in its config naming owl (Jevik_AI on X). Set by
 // main; tests of an agent's exact bytes run without it.
 func MarkWritten() { edit.Mark = lineNote }
 
-const undo = "Disconnect in myna or `myna uninstall` undoes it"
+const undo = "Disconnect in owl or `owl uninstall` undoes it"
 
 // lineNote is the note a config line gets, "" for one that isn't
-// myna's: a URL on the gateway's port, and Codex's own keys that name
-// myna.
+// owl's: a URL on the gateway's port, and Codex's own keys that name
+// owl.
 func lineNote(table, key, value string) string {
 	switch {
-	case table == "" && key == "model_provider" && value == mynaID:
-		return "Codex on myna's local gateway; " + undo + ", or delete this line and the model line"
-	case table == "" && key == "model_catalog_json" && strings.Contains(value, "myna"):
-		return "myna's model list for Codex; " + undo + ", or delete this line"
+	case table == "" && key == "model_provider" && value == owlID:
+		return "Codex on owl's local gateway; " + undo + ", or delete this line and the model line"
+	case table == "" && key == "model_catalog_json" && strings.Contains(value, "owl"):
+		return "owl's model list for Codex; " + undo + ", or delete this line"
 	case !onGateway(value):
 		return ""
-	case table == "model_providers."+mynaID:
-		return "for Codex threads started on myna; unused while model_provider doesn't name myna"
+	case table == "model_providers."+owlID:
+		return "for Codex threads started on owl; unused while model_provider doesn't name owl"
 	case table == "":
-		return "points at myna's local gateway; " + undo + ", or delete this line"
+		return "points at owl's local gateway; " + undo + ", or delete this line"
 	}
-	return "points at myna's local gateway; " + undo + ", or remove this entry and pick another model"
+	return "points at owl's local gateway; " + undo + ", or remove this entry and pick another model"
 }
 
 // onGateway says whether v is a URL on the gateway's port: on loopback, or

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 	"github.com/tidwall/gjson"
 )
 
@@ -94,7 +94,7 @@ func TestExtraBodyResponsesRelayed(t *testing.T) {
 
 // Claude Code's subagents share the conversation's session header, so
 // ${sessionId} alone puts every subagent's turns on one prompt_cache_key
-// (istoo/myna#2937), more than a relay keeps warm. ${subagentId} is
+// (istoo/owl#2937), more than a relay keeps warm. ${subagentId} is
 // the request's x-claude-code-agent-id, which the conversation's own
 // turns never send: the lead's key stays one shard, each subagent's
 // turns another.
@@ -126,7 +126,7 @@ func TestExtraBodySubagentId(t *testing.T) {
 	}
 }
 
-// Without a session header, ${sessionId} is the id myna derives from the
+// Without a session header, ${sessionId} is the id owl derives from the
 // conversation's first user message: never the literal, the same on every
 // turn of one conversation, different for another.
 func TestExtraBodyChatDerivedSession(t *testing.T) {
@@ -148,12 +148,12 @@ func TestExtraBodyChatDerivedSession(t *testing.T) {
 	one := ask(`[{"role":"user","content":"first"}]`)
 	again := ask(`[{"role":"user","content":"first"},{"role":"assistant","content":"OK"},{"role":"user","content":"next"}]`)
 	other := ask(`[{"role":"user","content":"another"}]`)
-	if !strings.HasPrefix(one, "myna-") || one != again || one == other {
+	if !strings.HasPrefix(one, "owl-") || one != again || one == other {
 		t.Errorf("derived ids: %q %q %q", one, again, other)
 	}
 }
 
-// A request myna translates gets the fields too, on top of the
+// A request owl translates gets the fields too, on top of the
 // translated body: Messages to a Chat provider, Chat to a Responses one.
 func TestExtraBodyTranslated(t *testing.T) {
 	t.Run("messages to chat", func(t *testing.T) {

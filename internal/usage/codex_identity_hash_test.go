@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/owl/internal/sessions"
 )
 
 // A request state's key changes with any thread's identity, and only with

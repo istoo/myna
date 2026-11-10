@@ -21,9 +21,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/proc"
-	"github.com/istoo/myna/internal/source"
-	"github.com/istoo/myna/internal/steady"
+	"github.com/istoo/owl/internal/proc"
+	"github.com/istoo/owl/internal/source"
+	"github.com/istoo/owl/internal/steady"
 )
 
 // rtk's version is kept up to date the way it was installed: Homebrew's
@@ -279,7 +279,7 @@ func latestRTK() (string, error) {
 		CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse },
 	}
 	req, _ := http.NewRequest("HEAD", rtkReleases, nil)
-	req.Header.Set("User-Agent", "myna")
+	req.Header.Set("User-Agent", "owl")
 	if resp, err := source.Do(c, req); err == nil {
 		resp.Body.Close()
 		if _, tag, ok := strings.Cut(resp.Header.Get("Location"), "/releases/tag/"); ok {
@@ -289,7 +289,7 @@ func latestRTK() (string, error) {
 		}
 	}
 	req, _ = http.NewRequest("GET", rtkReleasesAPI, nil)
-	req.Header.Set("User-Agent", "myna")
+	req.Header.Set("User-Agent", "owl")
 	req.Header.Set("Accept", "application/vnd.github+json")
 	resp, _, err := doGitHub(req, func(r *http.Request) (*http.Response, error) { return source.Do(c, r) })
 	if err != nil {
@@ -332,7 +332,7 @@ func newer(a, b string) bool {
 }
 
 // rtkUpgrader is how the rtk at bin is brought up to date, by where it was
-// installed; nil when myna can't tell.
+// installed; nil when owl can't tell.
 func rtkUpgrader(bin string) []string {
 	real, err := filepath.EvalSymlinks(bin)
 	if err != nil {
@@ -379,10 +379,10 @@ func rtkUpgrader(bin string) []string {
 		return wingetUp
 	// a standalone rtk.exe somewhere else on Windows, put there by hand
 	// from rtk's own Windows release (%USERPROFILE%\.local\bin, #2006): no
-	// package manager installed it, so myna replaces it itself. winget's
+	// package manager installed it, so owl replaces it itself. winget's
 	// and cargo's folders were taken above, and an rtk winget's records or
 	// winget list say is winget's went to winget; when winget couldn't say
-	// (it timed out), myna still can't tell rather than take it over.
+	// (it timed out), owl still can't tell rather than take it over.
 	// rtk's Windows release has no arm64 build, so on one it can't either
 	case rtkOnWindows && rtkArch == "amd64" &&
 		strings.EqualFold(filepath.Base(bin), "rtk.exe") &&
@@ -423,8 +423,8 @@ func inCargoBin(dir string) bool {
 }
 
 // cargoFor is the cargo that upgrades the rtk in cargo's folder dir: the one
-// on myna's PATH, by name, else the one rustup put in that same folder
-// beside rtk, by its path. A myna started before Rust was installed, or
+// on owl's PATH, by name, else the one rustup put in that same folder
+// beside rtk, by its path. A owl started before Rust was installed, or
 // with a PATH without cargo's folder (rustup adds it for terminals opened
 // after), found no cargo by name, and the rtk cargo installed had no
 // upgrade at all: its Upgrade button did nothing (新v学员, 10-27). "" when
@@ -454,7 +454,7 @@ func isCargo(c []string) bool {
 
 // rtkNoUpgrade is why the rtk at bin has no upgrade, for the page to say
 // when a newer release is out (RTKView.NoUpgrade): "cargo" when cargo
-// installed it but myna finds no cargo to run, "" otherwise.
+// installed it but owl finds no cargo to run, "" otherwise.
 func rtkNoUpgrade(bin string) string {
 	if inCargoBin(filepath.Dir(bin)) && cargoFor(filepath.Dir(bin)) == "" {
 		return "cargo"
@@ -463,7 +463,7 @@ func rtkNoUpgrade(bin string) string {
 }
 
 // rtkWindowsRelease is the upgrader rtkUpgrader gives a Windows rtk no
-// package manager installed (#2006): myna replaces it with rtk.exe out of
+// package manager installed (#2006): owl replaces it with rtk.exe out of
 // rtk's own Windows release. The action names only the binary to replace:
 // the release is RTKLatest's when the upgrade runs, since naming it here
 // would have ReadRTK (a page draw) wait on RTKLatest's lock while it asks
@@ -474,11 +474,11 @@ const rtkWindowsRelease = "rtk-windows-release"
 // tests can point it at a fake release.
 var rtkDownloadBase = "https://github.com/rtk-ai/rtk/releases/download"
 
-// rtkDownloadMax is the largest file myna reads from a release: rtk's
+// rtkDownloadMax is the largest file owl reads from a release: rtk's
 // Windows zip is a few MB.
 const rtkDownloadMax = 200 << 20
 
-// rtkArch is the architecture rtk's Windows release is chosen for: myna's
+// rtkArch is the architecture rtk's Windows release is chosen for: owl's
 // own, which Windows on arm64 runs emulated when it is amd64. A var so a
 // test runs the amd64 branch on any machine.
 var rtkArch = runtime.GOARCH
@@ -519,7 +519,7 @@ func rtkFetch(url string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("User-Agent", "myna")
+	req.Header.Set("User-Agent", "owl")
 	c := &http.Client{Timeout: 5 * time.Minute}
 	resp, err := source.DoOfficial(c, req)
 	if err != nil {
@@ -740,18 +740,18 @@ func UpgradeRTK() (*RTKView, error) {
 	c := upgraderOf(bin)
 	if c == nil {
 		if rtkNoUpgrade(bin) == "cargo" {
-			return nil, fmt.Errorf("the rtk at %s was installed with cargo, but myna can't find cargo — install Rust from https://rustup.rs, or run %s in a terminal", bin, rtkCargoCmd)
+			return nil, fmt.Errorf("the rtk at %s was installed with cargo, but owl can't find cargo — install Rust from https://rustup.rs, or run %s in a terminal", bin, rtkCargoCmd)
 		}
-		return nil, fmt.Errorf("myna can't tell how the rtk at %s was installed — update it the way you installed it", bin)
+		return nil, fmt.Errorf("owl can't tell how the rtk at %s was installed — update it the way you installed it", bin)
 	}
 	before := rtkVersion()
 	none := false
 	if c[0] == rtkWindowsRelease {
-		// no package manager and no installer to run: myna downloads
+		// no package manager and no installer to run: owl downloads
 		// rtk's own Windows release and replaces the binary itself (#2006)
 		version := RTKLatest()
 		if version == "" {
-			return nil, fmt.Errorf("myna can't tell which RTK release to install for %s — check the network and try again", bin)
+			return nil, fmt.Errorf("owl can't tell which RTK release to install for %s — check the network and try again", bin)
 		}
 		if err := installRTKWindowsRelease(version, bin); err != nil {
 			return nil, err
@@ -810,11 +810,11 @@ func UpgradeRTK() (*RTKView, error) {
 // Windows does let a running rtk.exe be renamed: when cargo is refused, the
 // rtk.exe is moved aside, a copy of it put in its place for the agents to
 // run meanwhile, and cargo run again, which builds nothing again (its build
-// is kept in a folder of myna's, CARGO_TARGET_DIR, removed after) and only
+// is kept in a folder of owl's, CARGO_TARGET_DIR, removed after) and only
 // installs over the copy.
 func runCargoRTK(c []string, bin string, timeout time.Duration) error {
 	var env []string
-	if dir, err := os.MkdirTemp("", "myna-rtk-cargo-"); err == nil {
+	if dir, err := os.MkdirTemp("", "owl-rtk-cargo-"); err == nil {
 		defer os.RemoveAll(dir)
 		env = append(env, "CARGO_TARGET_DIR="+dir)
 	}

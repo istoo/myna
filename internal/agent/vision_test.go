@@ -4,9 +4,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // visionOff has no model describe images to one that can't see them, so an
@@ -39,7 +39,7 @@ func TestDescribedModelTakesImages(t *testing.T) {
 		t.Fatal(err)
 	}
 	plain := func() catalog.Model {
-		for _, m := range mynaModels("dsh") {
+		for _, m := range owlModels("dsh") {
 			if m.ID == "v/plain" {
 				return m
 			}

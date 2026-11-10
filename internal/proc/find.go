@@ -10,9 +10,9 @@ import (
 // FindTool is the command-line tool name as a terminal would run it: on
 // PATH, else in one of the folders a user's tools are installed in
 // (UserBinDirs), else, on Windows, on the PATH the registry has now, which
-// a myna started before the tool was installed doesn't have (#839: the
+// a owl started before the tool was installed doesn't have (#839: the
 // Claude sign-in said Claude Code wasn't installed, its installer having
-// put claude.exe in ~/.local/bin after myna started). A version
+// put claude.exe in ~/.local/bin after owl started). A version
 // manager's wrapper script found there is given as the program it runs
 // (Unwrap). "" when none. Where it is on PATH is kept while those folders
 // are unchanged (LookPath); Unwrap keeps its own answer by the script's
@@ -32,7 +32,7 @@ func FindTool(name string) string {
 
 // sandboxVar is testenv.Marker, which proc can't import: the home a test
 // binary's testenv.Isolate made.
-const sandboxVar = "MYNA_TEST_SANDBOX"
+const sandboxVar = "OWL_TEST_SANDBOX"
 
 // Isolated reports whether this is a test binary testenv isolated, where
 // nothing of the machine's own (its folders, its registry) is read.

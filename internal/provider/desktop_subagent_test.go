@@ -4,10 +4,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
-// desktopSubagentHome is a fresh home for myna's files.
+// desktopSubagentHome is a fresh home for owl's files.
 func desktopSubagentHome(t *testing.T) {
 	t.Helper()
 	isolate(t)
@@ -59,14 +59,14 @@ func TestDesktopSubagentModelRenamed(t *testing.T) {
 	}
 }
 
-// Only a model or group myna serves by that exact id is served: another
+// Only a model or group owl serves by that exact id is served: another
 // model name under a provider that is on is not.
 func TestDesktopSubagentUnserved(t *testing.T) {
 	desktopSubagentHome(t)
 	if err := SaveGroup(Group{ID: "workers", Name: "Workers", Members: []string{"fake/m1"}}); err != nil {
 		t.Fatal(err)
 	}
-	for id, want := range map[string]string{"fake/m1": "", "group/workers": "", "fake/missing": "myna doesn't serve it now", "missing/m": "myna doesn't serve it now"} {
+	for id, want := range map[string]string{"fake/m1": "", "group/workers": "", "fake/missing": "owl doesn't serve it now", "missing/m": "owl doesn't serve it now"} {
 		if got := DesktopSubagentUnserved(id); got != want {
 			t.Errorf("%s: %q, want %q", id, got, want)
 		}

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // grokRelaySearchStream is a reply as grok2api_python (xLmiler's Grok
@@ -14,9 +14,9 @@ import (
 // <think> tags led by a Windows line end ("\r\n<think>{results}</think>\r\n"
 // in process_model_response), then Grok's answer token by token, with no
 // finish_reason before [DONE].
-const grokRelaySearchStream = `data: {"id": "chatcmpl-6c1f0e3a-1b7e-4a51-9a51-0c6e8f1f2d11", "created": 1761700000, "model": "grok-3-search", "object": "chat.completion.chunk", "choices": [{"index": 0, "delta": {"content": "\r\n<think>\r\n<details><summary>\u8d44\u6599[0]: myna</summary>\r\nA local LLM gateway\r\n\n[Link](https://github.com/istoo/myna)\r\n</details></think>\r\n"}}]}
+const grokRelaySearchStream = `data: {"id": "chatcmpl-6c1f0e3a-1b7e-4a51-9a51-0c6e8f1f2d11", "created": 1761700000, "model": "grok-3-search", "object": "chat.completion.chunk", "choices": [{"index": 0, "delta": {"content": "\r\n<think>\r\n<details><summary>\u8d44\u6599[0]: owl</summary>\r\nA local LLM gateway\r\n\n[Link](https://github.com/istoo/owl)\r\n</details></think>\r\n"}}]}
 
-data: {"id": "chatcmpl-1f0b2c4d-8e9a-4b3c-a2d1-5e6f7a8b9c0d", "created": 1761700000, "model": "grok-3-search", "object": "chat.completion.chunk", "choices": [{"index": 0, "delta": {"content": "Myna"}}]}
+data: {"id": "chatcmpl-1f0b2c4d-8e9a-4b3c-a2d1-5e6f7a8b9c0d", "created": 1761700000, "model": "grok-3-search", "object": "chat.completion.chunk", "choices": [{"index": 0, "delta": {"content": "Owl"}}]}
 
 data: {"id": "chatcmpl-2a3b4c5d-6e7f-4a8b-9c0d-1e2f3a4b5c6d", "created": 1761700000, "model": "grok-3-search", "object": "chat.completion.chunk", "choices": [{"index": 0, "delta": {"content": " is a gateway."}}]}
 
@@ -32,9 +32,9 @@ func TestGrokRelayThinkAfterLineEnd(t *testing.T) {
 	for _, c := range []struct {
 		name, path, body string
 	}{
-		{"messages", "/v1/messages", `{"model":"grokr/grok-3-search","stream":true,"max_tokens":100,"messages":[{"role":"user","content":"myna?"}]}`},
-		{"responses", "/v1/responses", `{"model":"grokr/grok-3-search","stream":true,"input":[{"role":"user","content":"myna?"}]}`},
-		{"messages whole", "/v1/messages", `{"model":"grokr/grok-3-search","max_tokens":100,"messages":[{"role":"user","content":"myna?"}]}`},
+		{"messages", "/v1/messages", `{"model":"grokr/grok-3-search","stream":true,"max_tokens":100,"messages":[{"role":"user","content":"owl?"}]}`},
+		{"responses", "/v1/responses", `{"model":"grokr/grok-3-search","stream":true,"input":[{"role":"user","content":"owl?"}]}`},
+		{"messages whole", "/v1/messages", `{"model":"grokr/grok-3-search","max_tokens":100,"messages":[{"role":"user","content":"owl?"}]}`},
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			t.Setenv("XDG_CONFIG_HOME", t.TempDir())
@@ -49,11 +49,11 @@ func TestGrokRelayThinkAfterLineEnd(t *testing.T) {
 				t.Fatalf("code %d: %s", code, out)
 			}
 			think, text := grokRelayParts(t, out)
-			if !strings.Contains(think, "资料[0]: myna") || !strings.Contains(think, "[Link](https://github.com/istoo/myna)") {
+			if !strings.Contains(think, "资料[0]: owl") || !strings.Contains(think, "[Link](https://github.com/istoo/owl)") {
 				t.Errorf("thinking %q, want the search results", think)
 			}
-			if text != "Myna is a gateway." {
-				t.Errorf("answer %q, want %q", text, "Myna is a gateway.")
+			if text != "Owl is a gateway." {
+				t.Errorf("answer %q, want %q", text, "Owl is a gateway.")
 			}
 		})
 	}

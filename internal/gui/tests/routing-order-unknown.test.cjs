@@ -4,7 +4,7 @@
 // (planLevel): an account whose allowance isn't known doesn't go after
 // another member's known one. The Routing page said it did (bitssly on
 // X: "opencode：剩余额度未知，排在已知的之后。" under an In order group),
-// as if myna had moved the member the user put there. Now an In order
+// as if owl had moved the member the user put there. Now an In order
 // group's first says In order, and the unknown-allowance line is said
 // only of an account weighed against a known one of its own member, as
 // a Smart group still says it of each; a group By weight says the
@@ -75,7 +75,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // WebKit reports a layout loop it recovers from as a page error
         page.on("pageerror", (error) => { if (!/ResizeObserver loop/.test(error.message)) errors.push(error.message); });
         await page.route("**/*", serve(lang));
-        await page.goto("http://myna.test/?view=routing");
+        await page.goto("http://owl.test/?view=routing");
         const say = (key, vars = {}) => page.evaluate(([lang, key, vars]) => {
           const s = (lang !== "en" && I18N[lang]?.[key]) || key;
           return s.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? `{${k}}`);

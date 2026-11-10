@@ -8,10 +8,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // plugged has plugins.json list a plugin that gives one search API, as the
@@ -79,7 +79,7 @@ func TestPluginSearchAPI(t *testing.T) {
 		t.Fatal(err)
 	}
 	if !canSearch() {
-		t.Fatal("a plugin's search API alone doesn't let myna search")
+		t.Fatal("a plugin's search API alone doesn't let owl search")
 	}
 
 	s := New()

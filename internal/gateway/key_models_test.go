@@ -9,14 +9,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A gateway key held to some models (#882) sees only those in the model
 // lists, is refused any other before a provider is asked — by a bare
 // name, through a group with one it may not use or as a fallback — while
-// another key and myna's own calls for it go on.
+// another key and owl's own calls for it go on.
 func TestGatewayKeyModelsHoldAKey(t *testing.T) {
 	fresh(t)
 	plan := &fake{t: t, ctype: "application/json", reply: `{"id":"from-plan","choices":[]}`}
@@ -108,14 +108,14 @@ func TestGatewayKeyModelsHoldAKey(t *testing.T) {
 	if w := chat(secrets[1], "spare/m2"); w.Code != 200 || !strings.Contains(w.Body.String(), "from-spare") {
 		t.Fatal("a free key was held", w.Code, w.Body.String())
 	}
-	// myna's own call for the key (a search, a picture described) goes on
+	// owl's own call for the key (a search, a picture described) goes on
 	r := httptest.NewRequest("POST", "/v1/chat/completions", strings.NewReader(`{"model":"spare/m2","messages":[{"role":"user","content":"hi"}]}`))
-	r = r.WithContext(mynaChose(r.Context()))
+	r = r.WithContext(owlChose(r.Context()))
 	r.Header.Set("Authorization", "Bearer "+secrets[0])
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, r)
 	if rec.Code != 200 {
-		t.Fatal("myna's own call was held", rec.Code, rec.Body.String())
+		t.Fatal("owl's own call was held", rec.Code, rec.Body.String())
 	}
 	// plan out of quota: its fallback is a model the key may not use
 	plan.code, plan.reply = 429, `{"error":{"message":"slow down"}}`
@@ -344,7 +344,7 @@ func TestGatewayKeyModelsHoldCountTokensAndSystemOne(t *testing.T) {
 	}
 }
 
-// Another myna added as a provider with a gateway key held to some
+// Another owl added as a provider with a gateway key held to some
 // models asks this one for its image and video models too
 // (provider.DrawersHeader, VideomakersHeader). It is told of those the
 // key may use alone, as it is of chat models; a key free of models, and
@@ -460,7 +460,7 @@ func TestGatewayKeyAccountsHoldTheImageAndVideoLists(t *testing.T) {
 // two groups, and Clef and Jev listed nowhere) has the group's own
 // decision model asked for every turn, whatever the key's models: Jev
 // picks the turn's rule. Asking Jev itself, at /v1/systemone or in
-// another myna's list of decision models, is a model of its own, which
+// another owl's list of decision models, is a model of its own, which
 // the key reaches only once it names it, as the key editor now lets it.
 func TestGatewayKeyHeldToAGroupKeepsItsDecider(t *testing.T) {
 	s, _, _, j := jevved(t, "", provider.Rule{Use: "b/big", Intent: "debugging"})
@@ -518,7 +518,7 @@ func TestGatewayKeyHeldToAGroupKeepsItsDecider(t *testing.T) {
 // user's own is the key's only when it names it, on every route: the
 // model lists, chat completions, Anthropic's messages and count_tokens.
 // A bare name that is both such a group and the key's model is the model.
-// A group myna found, one model two providers serve, is the key's when
+// A group owl found, one model two providers serve, is the key's when
 // it may use both, as before; a key naming the group is given it.
 func TestGatewayKeyGivenAModelIsNotGivenItsGroup(t *testing.T) {
 	fresh(t)
@@ -613,7 +613,7 @@ func TestGatewayKeyGivenAModelIsNotGivenItsGroup(t *testing.T) {
 			t.Fatalf("count_tokens %s: %d %s", model, w.Code, w.Body.String())
 		}
 	}
-	// a group myna found: one model of both providers
+	// a group owl found: one model of both providers
 	if ids := listed(secrets[1]); !slices.ContainsFunc(ids, func(id string) bool { return strings.HasPrefix(id, "auto/") }) || slices.Contains(ids, "group/only-38") || slices.Contains(ids, "group/gemini-3-8") {
 		t.Fatalf("a key given both providers' gemini-3.8 lists %v", ids)
 	}

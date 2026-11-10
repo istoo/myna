@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 func TestRegisterScheme(t *testing.T) {
@@ -25,7 +25,7 @@ func TestRegisterScheme(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Setenv("FLATPAK_ID", "")
 			if tc.flatpak {
-				t.Setenv("FLATPAK_ID", "ai.usemyna.Myna")
+				t.Setenv("FLATPAK_ID", "ai.useowl.Owl")
 			}
 			root := t.TempDir()
 			data := filepath.Join(root, "data")
@@ -35,15 +35,15 @@ func TestRegisterScheme(t *testing.T) {
 				t.Fatal(err)
 			}
 			calls := filepath.Join(root, "calls")
-			t.Setenv("MYNA_SCHEME_TEST_CALLS", calls)
+			t.Setenv("OWL_SCHEME_TEST_CALLS", calls)
 			t.Setenv("PATH", bin)
 			for _, name := range []string{"update-desktop-database", "xdg-mime"} {
-				script := "#!/bin/sh\nprintf '%s\\n' '" + name + "' \"$@\" >> \"$MYNA_SCHEME_TEST_CALLS\"\n"
+				script := "#!/bin/sh\nprintf '%s\\n' '" + name + "' \"$@\" >> \"$OWL_SCHEME_TEST_CALLS\"\n"
 				testenv.Program(t, filepath.Join(bin, name), script)
 			}
 			dir := filepath.Join(data, "applications")
-			path := filepath.Join(dir, "myna.desktop")
-			const old = "[Desktop Entry]\nExec=/usr/bin/myna %u\nMimeType=x-scheme-handler/myna;\n"
+			path := filepath.Join(dir, "owl.desktop")
+			const old = "[Desktop Entry]\nExec=/usr/bin/owl %u\nMimeType=x-scheme-handler/owl;\n"
 			if tc.existing {
 				if err := os.MkdirAll(dir, 0o755); err != nil {
 					t.Fatal(err)
@@ -76,7 +76,7 @@ func TestRegisterScheme(t *testing.T) {
 				t.Fatal(err)
 			}
 			got, err := os.ReadFile(path)
-			if err != nil || !strings.Contains(string(got), "Exec="+exe+" %u\n") || !strings.Contains(string(got), "MimeType=x-scheme-handler/myna;\n") {
+			if err != nil || !strings.Contains(string(got), "Exec="+exe+" %u\n") || !strings.Contains(string(got), "MimeType=x-scheme-handler/owl;\n") {
 				t.Fatalf("desktop entry: %q, %v", got, err)
 			}
 			checkDesktopBinding(t, data, string(got))
@@ -84,7 +84,7 @@ func TestRegisterScheme(t *testing.T) {
 			if err := registerScheme(); err != nil {
 				t.Fatal(err)
 			}
-			want := "update-desktop-database\n" + dir + "\nxdg-mime\ndefault\nmyna.desktop\nx-scheme-handler/myna\n"
+			want := "update-desktop-database\n" + dir + "\nxdg-mime\ndefault\nowl.desktop\nx-scheme-handler/owl\n"
 			if got, err := os.ReadFile(calls); err != nil || string(got) != want {
 				t.Fatalf("registration calls: %q, want %q (%v)", got, want, err)
 			}
@@ -96,10 +96,10 @@ func TestRegisterScheme(t *testing.T) {
 // is installed, so neither the dock nor the app grid draws a gear (#2626).
 func checkDesktopBinding(t *testing.T, data, entry string) {
 	t.Helper()
-	if !strings.Contains(entry, "\nStartupWMClass="+programName+"\n") || !strings.Contains(entry, "\nIcon=myna\n") {
+	if !strings.Contains(entry, "\nStartupWMClass="+programName+"\n") || !strings.Contains(entry, "\nIcon=owl\n") {
 		t.Fatalf("desktop entry doesn't bind the window %q and its icon: %q", programName, entry)
 	}
-	icon, err := os.ReadFile(filepath.Join(data, "icons", "hicolor", "256x256", "apps", "myna.png"))
+	icon, err := os.ReadFile(filepath.Join(data, "icons", "hicolor", "256x256", "apps", "owl.png"))
 	if err != nil || !bytes.Equal(icon, desktopIcon) {
 		t.Fatalf("icon not installed: %d bytes, %v", len(icon), err)
 	}
@@ -108,7 +108,7 @@ func checkDesktopBinding(t *testing.T, data, entry string) {
 	}
 }
 
-// An entry an older myna (or install.sh) wrote for this executable has no
+// An entry an older owl (or install.sh) wrote for this executable has no
 // StartupWMClass; it is written again, once, and the icon put beside it.
 func TestRegisterSchemeBindsAnOlderEntry(t *testing.T) {
 	t.Setenv("FLATPAK_ID", "")
@@ -120,19 +120,19 @@ func TestRegisterSchemeBindsAnOlderEntry(t *testing.T) {
 		t.Fatal(err)
 	}
 	calls := filepath.Join(root, "calls")
-	t.Setenv("MYNA_SCHEME_TEST_CALLS", calls)
+	t.Setenv("OWL_SCHEME_TEST_CALLS", calls)
 	t.Setenv("PATH", bin)
 	for _, name := range []string{"update-desktop-database", "xdg-mime"} {
-		testenv.Program(t, filepath.Join(bin, name), "#!/bin/sh\nprintf '%s\\n' '"+name+"' >> \"$MYNA_SCHEME_TEST_CALLS\"\n")
+		testenv.Program(t, filepath.Join(bin, name), "#!/bin/sh\nprintf '%s\\n' '"+name+"' >> \"$OWL_SCHEME_TEST_CALLS\"\n")
 	}
 	exe, err := os.Executable()
 	if err != nil {
 		t.Fatal(err)
 	}
 	dir := filepath.Join(data, "applications")
-	path := filepath.Join(dir, "myna.desktop")
-	older := "[Desktop Entry]\nType=Application\nName=myna\nComment=Every agent's model. One place.\nExec=" + exe +
-		" %u\nIcon=myna\nCategories=Development;Utility;\nMimeType=x-scheme-handler/myna;\nTerminal=false\n"
+	path := filepath.Join(dir, "owl.desktop")
+	older := "[Desktop Entry]\nType=Application\nName=owl\nComment=Every agent's model. One place.\nExec=" + exe +
+		" %u\nIcon=owl\nCategories=Development;Utility;\nMimeType=x-scheme-handler/owl;\nTerminal=false\n"
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -169,7 +169,7 @@ func TestKeepWebData(t *testing.T) {
 		moved         bool
 	}{
 		{"webkit data under the executable's name", true, false, true},
-		{"myna's folder there already", true, true, false},
+		{"owl's folder there already", true, true, false},
 		{"a folder that isn't WebKit's", false, false, false},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
@@ -186,7 +186,7 @@ func TestKeepWebData(t *testing.T) {
 			if err := os.WriteFile(filepath.Join(from, sub, "file__0.localstorage"), []byte("favourites"), 0o644); err != nil {
 				t.Fatal(err)
 			}
-			if tc.there { // even empty, it is myna's, which a rename would replace
+			if tc.there { // even empty, it is owl's, which a rename would replace
 				if err := os.MkdirAll(to, 0o755); err != nil {
 					t.Fatal(err)
 				}

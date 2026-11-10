@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/backup"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/backup"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // A server whose file a relay cut short used to stop every sync after: the
@@ -21,7 +21,7 @@ import (
 // never get wrong are pinned here: a fresh computer that never synced, an
 // out-of-date computer whose copy isn't the one that broke, and a server
 // that answers with a page instead of a backup at all.
-const backupFile = "/dav/myna/myna.myna-backup"
+const backupFile = "/dav/owl/owl.owl-backup"
 
 func cut(fake *fakeDAV, file string, keep int) {
 	fake.mu.Lock()

@@ -11,9 +11,9 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // openBotUser is openbot-custom-providers-v1.json as OpenBot saves it
@@ -42,7 +42,7 @@ const openBotUser = `{
 `
 
 // openBotEntryDoc is a providers entry with OpenBot's fields alone
-// (entrySchema), so a field of myna's own fails to decode.
+// (entrySchema), so a field of owl's own fails to decode.
 type openBotEntryDoc struct {
 	ID      *string `json:"id"`
 	Name    *string `json:"name"`
@@ -60,12 +60,12 @@ type openBotEntryDoc struct {
 // composed provider/model id must be, or OpenBot drops the whole list.
 var openBotAgentModel = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._:/\[\],=-]*$`)
 
-// openBotRead is the file's myna entry, checked as OpenBot reads one
+// openBotRead is the file's owl entry, checked as OpenBot reads one
 // (fileSchema, then isCustomProviderSummary, which fails closed on the
 // whole list): version 1, the required fields there and nothing else, at
 // most 64 models with ids and names it takes and windows in its range;
 // and the user's entries, as written.
-func openBotRead(t *testing.T, path string) (myna openBotEntryDoc, others []json.RawMessage) {
+func openBotRead(t *testing.T, path string) (owl openBotEntryDoc, others []json.RawMessage) {
 	t.Helper()
 	b, err := os.ReadFile(path)
 	if err != nil {
@@ -89,29 +89,29 @@ func openBotRead(t *testing.T, path string) (myna openBotEntryDoc, others []json
 		if e.ID == nil || e.Name == nil || e.BaseURL == nil || e.Models == nil {
 			t.Fatalf("entry without a required field: %s", raw)
 		}
-		if *e.ID != mynaID {
+		if *e.ID != owlID {
 			others = append(others, raw)
 			continue
 		}
 		if found {
-			t.Fatalf("two entries of myna's: %s", b)
+			t.Fatalf("two entries of owl's: %s", b)
 		}
-		found, myna = true, e
+		found, owl = true, e
 	}
 	if !found {
-		t.Fatalf("no entry of myna's: %s", b)
+		t.Fatalf("no entry of owl's: %s", b)
 	}
-	if len(*myna.Name) > 80 {
-		t.Errorf("name %q", *myna.Name)
+	if len(*owl.Name) > 80 {
+		t.Errorf("name %q", *owl.Name)
 	}
-	if n := len(*myna.Models); n > 64 {
+	if n := len(*owl.Models); n > 64 {
 		t.Errorf("%d models, OpenBot takes 64", n)
 	}
-	for _, m := range *myna.Models {
+	for _, m := range *owl.Models {
 		if m.ID == nil || m.Name == nil {
 			t.Fatalf("model without id or name: %s", b)
 		}
-		if id := mynaID + "/" + *m.ID; len(*m.ID) > 128 || len(id) > 160 || !openBotAgentModel.MatchString(id) {
+		if id := owlID + "/" + *m.ID; len(*m.ID) > 128 || len(id) > 160 || !openBotAgentModel.MatchString(id) {
 			t.Errorf("model id %q OpenBot refuses", *m.ID)
 		}
 		if len([]rune(*m.Name)) > 160 {
@@ -121,12 +121,12 @@ func openBotRead(t *testing.T, path string) (myna openBotEntryDoc, others []json
 			t.Errorf("%s: window %d", *m.ID, *w)
 		}
 	}
-	return myna, others
+	return owl, others
 }
 
 // OpenBot (nightly-labs/openbot) lists the user's own endpoints in its
 // model picker, from openbot-custom-providers-v1.json in its userData
-// folder. myna adds itself as the endpoint "myna" on the gateway's
+// folder. owl adds itself as the endpoint "owl" on the gateway's
 // Chat Completions, keyless, keeps the user's entries as they were and the
 // name, harness and key they give its entry, writes nothing when nothing
 // changed, and off takes only its own entry out.
@@ -156,10 +156,10 @@ func TestOpenBotProvider(t *testing.T) {
 	if f.Get() != "" {
 		t.Fatalf("get: %q", f.Get())
 	}
-	if err := f.Set(mynaID); err != nil {
+	if err := f.Set(owlID); err != nil {
 		t.Fatal(err)
 	}
-	if f.Get() != mynaID {
+	if f.Get() != owlID {
 		t.Fatalf("get after set: %q", f.Get())
 	}
 	// the restart it needs, said while it runs
@@ -176,14 +176,14 @@ func TestOpenBotProvider(t *testing.T) {
 
 	gw := gateway.URL()
 	e, others := openBotRead(t, path)
-	if *e.BaseURL != gw+"/v1" || *e.Name != "myna" || e.Secret != nil || e.Harness != nil {
+	if *e.BaseURL != gw+"/v1" || *e.Name != "owl" || e.Secret != nil || e.Harness != nil {
 		t.Errorf("entry: base %q name %q secret %v harness %v", *e.BaseURL, *e.Name, e.Secret, e.Harness)
 	}
 	var got, want []string
 	for _, m := range *e.Models {
 		got = append(got, *m.ID)
 	}
-	for _, m := range mynaModels("openbot") {
+	for _, m := range owlModels("openbot") {
 		want = append(want, m.ID)
 	}
 	if len(want) < 2 || !slices.Equal(got, want) {
@@ -203,7 +203,7 @@ func TestOpenBotProvider(t *testing.T) {
 	if err := a.Sync(); err != nil {
 		t.Fatal(err)
 	}
-	if err := f.Set(mynaID); err != nil {
+	if err := f.Set(owlID); err != nil {
 		t.Fatal(err)
 	}
 	if b2, _ := os.ReadFile(path); !bytes.Equal(b, b2) {
@@ -218,8 +218,8 @@ func TestOpenBotProvider(t *testing.T) {
 	var doc map[string]any
 	json.Unmarshal(b, &doc)
 	for _, x := range doc["providers"].([]any) {
-		if m := x.(map[string]any); m["id"] == mynaID {
-			m["name"], m["secret"], m["harness"] = "My myna", "c2VhbGVk", "pi"
+		if m := x.(map[string]any); m["id"] == owlID {
+			m["name"], m["secret"], m["harness"] = "My owl", "c2VhbGVk", "pi"
 			m["models"] = m["models"].([]any)[:1]
 		}
 	}
@@ -229,14 +229,14 @@ func TestOpenBotProvider(t *testing.T) {
 		t.Fatal(err)
 	}
 	e, _ = openBotRead(t, path)
-	if *e.Name != "My myna" || e.Secret == nil || *e.Secret != "c2VhbGVk" || e.Harness == nil || *e.Harness != "pi" {
+	if *e.Name != "My owl" || e.Secret == nil || *e.Secret != "c2VhbGVk" || e.Harness == nil || *e.Harness != "pi" {
 		t.Errorf("the user's name, key and harness not kept: %+v", e)
 	}
 	if len(*e.Models) != len(want) {
 		t.Errorf("models after sync: %d, want %d", len(*e.Models), len(want))
 	}
 
-	// off: only myna's entry goes, the file stays
+	// off: only owl's entry goes, the file stays
 	if err := f.Set(""); err != nil {
 		t.Fatal(err)
 	}
@@ -261,12 +261,12 @@ func TestOpenBotProvider(t *testing.T) {
 	}
 }
 
-// OpenBot not run yet: myna makes the file with the version 1 OpenBot
+// OpenBot not run yet: owl makes the file with the version 1 OpenBot
 // needs, and off takes the file away again.
 func TestOpenBotMakesItsFile(t *testing.T) {
 	home := syncHome(t)
 	a := openBot(home, filepath.Join(home, ".config"))
-	if err := a.Field("provider").Set(mynaID); err != nil {
+	if err := a.Field("provider").Set(owlID); err != nil {
 		t.Fatal(err)
 	}
 	_, others := openBotRead(t, a.Path)
@@ -283,12 +283,12 @@ func TestOpenBotMakesItsFile(t *testing.T) {
 		t.Fatal(err)
 	}
 	if _, err := os.Stat(a.Path); !os.IsNotExist(err) {
-		t.Errorf("myna's own file left behind: %v", err)
+		t.Errorf("owl's own file left behind: %v", err)
 	}
 }
 
 // A file OpenBot can't read leaves it with no endpoints and every save
-// refused, so it may be a newer OpenBot's: myna leaves it as it is.
+// refused, so it may be a newer OpenBot's: owl leaves it as it is.
 func TestOpenBotLeavesAlone(t *testing.T) {
 	home := syncHome(t)
 	a := openBot(home, filepath.Join(home, ".config"))
@@ -303,7 +303,7 @@ func TestOpenBotLeavesAlone(t *testing.T) {
 		`{"version": 1,`,
 	} {
 		os.WriteFile(a.Path, []byte(s), 0o600)
-		if err := a.Field("provider").Set(mynaID); err == nil {
+		if err := a.Field("provider").Set(owlID); err == nil {
 			t.Errorf("%s: set", s)
 		}
 		if b, _ := os.ReadFile(a.Path); string(b) != s {
@@ -313,8 +313,8 @@ func TestOpenBotLeavesAlone(t *testing.T) {
 }
 
 // OpenBot drops every model of an endpoint when one would not do: more than
-// 64, an id it won't compose as myna/<id>, a window out of its range. So
-// myna writes the first 64 it takes, and a window only inside the range.
+// 64, an id it won't compose as owl/<id>, a window out of its range. So
+// owl writes the first 64 it takes, and a window only inside the range.
 func TestOpenBotModelsItTakes(t *testing.T) {
 	syncHome(t)
 	ms := []string{"has space", "ünï"}
@@ -324,7 +324,7 @@ func TestOpenBotModelsItTakes(t *testing.T) {
 	if err := provider.Save(provider.Provider{ID: "many", Name: "Many", Chat: "https://api.example/v1", Key: "k", Models: ms}); err != nil {
 		t.Fatal(err)
 	}
-	all := mynaModels("openbot")
+	all := owlModels("openbot")
 	if len(all) <= openBotMaxModels || !slices.ContainsFunc(all, func(m catalog.Model) bool { return m.ID == "has space" || m.ID == "many/has space" }) {
 		t.Fatalf("fixture: %d models", len(all))
 	}
@@ -333,7 +333,7 @@ func TestOpenBotModelsItTakes(t *testing.T) {
 		t.Errorf("%d models", len(e.Models))
 	}
 	for _, m := range e.Models {
-		if !openBotAgentModel.MatchString(mynaID + "/" + m.ID) {
+		if !openBotAgentModel.MatchString(owlID + "/" + m.ID) {
 			t.Errorf("model %q OpenBot refuses", m.ID)
 		}
 		if m.ContextWindow != 0 && (m.ContextWindow < 1024 || m.ContextWindow > 100_000_000) {

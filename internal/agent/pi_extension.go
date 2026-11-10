@@ -11,9 +11,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // Pi's codemode calls classifier and image models (models.classify,
@@ -21,23 +21,23 @@ import (
 // "Use image models"), wangbinyq on Discord. Pi's models.json defines chat
 // models only: its model definitions have no type, and a custom provider's
 // classifier or image models come from an extension alone
-// (docs/custom-provider.md, "Register mixed-operation models"). So myna
-// writes one, extensions/myna.ts in Pi's agent folder, which Pi loads by
-// itself. It lists myna's decision models as provider myna-systemone,
-// on Pi's own System One client against myna's /v1/systemone, and its
-// image models as myna-images, drawn by /v1/images/generations. It is
-// there while models.json has providers.myna, and gone with it.
+// (docs/custom-provider.md, "Register mixed-operation models"). So owl
+// writes one, extensions/owl.ts in Pi's agent folder, which Pi loads by
+// itself. It lists owl's decision models as provider owl-systemone,
+// on Pi's own System One client against owl's /v1/systemone, and its
+// image models as owl-images, drawn by /v1/images/generations. It is
+// there while models.json has providers.owl, and gone with it.
 
 //go:embed pi_extension.ts
 var piExtensionSource string
 
-// piExtensionMark opens the file myna writes. A file at that path
+// piExtensionMark opens the file owl writes. A file at that path
 // without it is the user's own, and is never written over or removed.
-const piExtensionMark = "// myna: written by myna"
+const piExtensionMark = "// owl: written by owl"
 
-// piExtensionPath is myna's extension in Pi's agent folder dir.
+// piExtensionPath is owl's extension in Pi's agent folder dir.
 func piExtensionPath(dir string) string {
-	return filepath.Join(dir, "extensions", "myna.ts")
+	return filepath.Join(dir, "extensions", "owl.ts")
 }
 
 // piExtensionModel is a model as the extension registers it.
@@ -48,7 +48,7 @@ type piExtensionModel struct {
 }
 
 // piExtensionFor is the extension's source for a gateway at baseURL (its
-// /v1) and key; "" when myna has no decision or image model to list.
+// /v1) and key; "" when owl has no decision or image model to list.
 func piExtensionFor(baseURL, key string) string {
 	ds := provider.OfferedDeciders(nil)
 	for i := range ds {
@@ -74,12 +74,12 @@ func piExtensionFor(baseURL, key string) string {
 		"baseUrl": baseURL, "apiKey": key,
 		"classifiers": classifiers, "images": images,
 	})
-	return strings.Replace(piExtensionSource, "__MYNA__", string(data), 1)
+	return strings.Replace(piExtensionSource, "__OWL__", string(data), 1)
 }
 
-// piExtensionSynced brings myna's extension in Pi's agent folder dir
-// to what models.json says: written while it has providers.myna and
-// myna has models to list, else gone. A file there myna didn't write
+// piExtensionSynced brings owl's extension in Pi's agent folder dir
+// to what models.json says: written while it has providers.owl and
+// owl has models to list, else gone. A file there owl didn't write
 // is left as it is.
 func piExtensionSynced(dir, modelsPath, baseURL, key string) error {
 	path := piExtensionPath(dir)
@@ -93,7 +93,7 @@ func piExtensionSynced(dir, modelsPath, baseURL, key string) error {
 		return nil // the user's own
 	}
 	want := ""
-	if _, on := edit.GetJSON(modelsPath, "providers."+mynaID); on {
+	if _, on := edit.GetJSON(modelsPath, "providers."+owlID); on {
 		want = piExtensionFor(baseURL, key)
 	}
 	if want == "" {

@@ -13,7 +13,7 @@ package proc
 
 // responsibility_spawnattrs_setdisclaim (libSystem, macOS 10.14 on) has
 // the child answer for itself to TCC; looked up, as it has no header.
-static int myna_spawn_own(const char *path, char *const argv[], char *const envp[], const char *dir, int out, pid_t *pid) {
+static int owl_spawn_own(const char *path, char *const argv[], char *const envp[], const char *dir, int out, pid_t *pid) {
 	posix_spawnattr_t attr;
 	posix_spawn_file_actions_t fa;
 	int err = posix_spawnattr_init(&attr);
@@ -25,7 +25,7 @@ static int myna_spawn_own(const char *path, char *const argv[], char *const envp
 	sigfillset(&all);
 	posix_spawnattr_setsigmask(&attr, &none);
 	posix_spawnattr_setsigdefault(&attr, &all);
-	// only stdin, stdout and stderr are passed on, none of myna's own
+	// only stdin, stdout and stderr are passed on, none of owl's own
 	posix_spawnattr_setflags(&attr, POSIX_SPAWN_CLOEXEC_DEFAULT | POSIX_SPAWN_SETSIGMASK | POSIX_SPAWN_SETSIGDEF);
 	int (*disclaim)(posix_spawnattr_t *, int) = (int (*)(posix_spawnattr_t *, int))dlsym(RTLD_DEFAULT, "responsibility_spawnattrs_setdisclaim");
 	if (disclaim != NULL) disclaim(&attr, 1);
@@ -39,7 +39,7 @@ static int myna_spawn_own(const char *path, char *const argv[], char *const envp
 	return err;
 }
 
-static int myna_responsible(pid_t pid) {
+static int owl_responsible(pid_t pid) {
 	pid_t (*f)(pid_t) = (pid_t (*)(pid_t))dlsym(RTLD_DEFAULT, "responsibility_get_pid_responsible_for_pid");
 	if (f == NULL) return 0;
 	pid_t r = f(pid);
@@ -95,7 +95,7 @@ func spawnOwn(cmd *exec.Cmd, out *os.File) (int, error) {
 		defer C.free(unsafe.Pointer(dir))
 	}
 	var pid C.pid_t
-	if e := C.myna_spawn_own(path, argv, envp, dir, C.int(out.Fd()), &pid); e != 0 {
+	if e := C.owl_spawn_own(path, argv, envp, dir, C.int(out.Fd()), &pid); e != 0 {
 		return 0, &os.PathError{Op: "posix_spawn", Path: cmd.Path, Err: syscall.Errno(e)}
 	}
 	return int(pid), nil
@@ -166,4 +166,4 @@ func combinedOutputOwn(ctx context.Context, cmd *exec.Cmd) ([]byte, error) {
 
 // Responsible is the process macOS holds responsible for pid, the one its
 // privacy prompts name; 0 when that can't be told.
-func Responsible(pid int) int { return int(C.myna_responsible(C.pid_t(pid))) }
+func Responsible(pid int) int { return int(C.owl_responsible(C.pid_t(pid))) }

@@ -15,7 +15,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MYNA_ROUTING_ASSETS || path.join(__dirname, "../assets"));
+const assets = path.resolve(process.env.OWL_ROUTING_ASSETS || path.join(__dirname, "../assets"));
 const models = [
   { id: "a/sol", name: "sol", providerName: "A", icon: "generic" },
   { id: "b/flash", name: "flash", providerName: "B", icon: "generic" },
@@ -86,7 +86,7 @@ async function open(t, engine, { lang, theme = "light", web = true, width = 1100
   const errors = [], posts = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", serve(lang, theme, web, posts));
-  await page.goto("http://myna.test/?view=routing");
+  await page.goto("http://owl.test/?view=routing");
   await page.locator(".rt-group", { hasText: "Auto" }).waitFor();
   return { page, errors, posts };
 }

@@ -1,20 +1,20 @@
 package gateway
 
-// GET or POST /v1/myna/statusline: the text `myna statusline` prints
+// GET or POST /v1/owl/statusline: the text `owl statusline` prints
 // for Claude Code's status line, for a Claude Code on another computer
-// than the gateway (steven_4422 on Discord runs myna in Docker and
+// than the gateway (steven_4422 on Discord runs owl in Docker and
 // Claude Code on the Linux host: the container can't write the host's
 // settings.json, and a command naming a binary inside it runs nowhere
 // else). The host needs only curl:
 //
-//	curl -fsS -m 1 -H 'Authorization: Bearer <key>' --data-binary @- http://<host>:3425/v1/myna/statusline || true
+//	curl -fsS -m 1 -H 'Authorization: Bearer <key>' --data-binary @- http://<host>:3425/v1/owl/statusline || true
 //
 // Claude Code puts its JSON on the command's stdin, and curl sends it as
 // the body, whose session_id picks the "→ model" part (?session= does as
 // well, for a GET). ?only=claude,a@example.com keeps those accounts, as
-// `myna statusline claude a@example.com` does. The line is made by
+// `owl statusline claude a@example.com` does. The line is made by
 // provider.StatuslineText, the CLI's own, from the same kept windows
-// (/v1/myna/quotas?kept=1: no vendor asked) and the session's route.
+// (/v1/owl/quotas?kept=1: no vendor asked) and the session's route.
 //
 // It answers like the quotas and the route it is made of: this computer,
 // and another only with an enabled gateway key (lanGuard asks for it), a
@@ -30,16 +30,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // StatuslinePath is where the status line is told.
-const StatuslinePath = "/v1/myna/statusline"
+const StatuslinePath = "/v1/owl/statusline"
 
 func (s *Server) statusline(w http.ResponseWriter, r *http.Request) {
 	if !local(r) && !sharedWith(r) {
-		writeError(w, provider.Chat, http.StatusForbidden, "myna's status line is told to another machine only when myna is shared on the local network (Settings → Network and sharing → Share on local network) and the request carries its API key (Authorization: Bearer <key> or x-api-key: <key>)")
+		writeError(w, provider.Chat, http.StatusForbidden, "owl's status line is told to another machine only when owl is shared on the local network (Settings → Network and sharing → Share on local network) and the request carries its API key (Authorization: Bearer <key> or x-api-key: <key>)")
 		return
 	}
 	scope, ok := scopeQuotas(w, r)
@@ -63,7 +63,7 @@ func (s *Server) statusline(w http.ResponseWriter, r *http.Request) {
 	}
 	model := ""
 	who := access.Caller(r.Context())
-	// a read-only key is refused /v1/myna/route (another key's routes), so
+	// a read-only key is refused /v1/owl/route (another key's routes), so
 	// it is told no model here either
 	if session != "" && !who.ReadOnly {
 		only := ""

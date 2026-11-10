@@ -11,8 +11,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/agentenv"
-	"github.com/istoo/myna/internal/library"
+	"github.com/istoo/owl/internal/agentenv"
+	"github.com/istoo/owl/internal/library"
 )
 
 // folderOnly is the app's windows as far as an export needs them.
@@ -20,7 +20,7 @@ type folderOnly struct{ Windows }
 
 func (folderOnly) OpenFolder(string) error { return nil }
 
-// sandboxHome gives the test a machine of its own: no agents, no myna files.
+// sandboxHome gives the test a machine of its own: no agents, no owl files.
 func sandboxHome(t *testing.T) string {
 	t.Helper()
 	h := t.TempDir()

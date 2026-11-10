@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// What is loading has myna's bird on it (the owner, 10-26): skeletons
+// What is loading has owl's bird on it (the owner, 10-26): skeletons
 // still up after a moment, as on a slow page, get the bird, which hops from
 // bar to bar, each bar dipping under it, and flies off once they are gone.
 // A quick load never sees it, and with reduced motion no bird comes. Once
@@ -37,7 +37,7 @@ function server(market, prefs = {}, posted = []) {
     if (url.pathname === "/api/plugins") return json(state);
     if (url.pathname === "/api/plugins/listings") { await market(); return json({ listings }); }
     if (url.pathname.startsWith("/api/")) return json({});
-    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "myna.test") return route.fulfill({ status: 404, body: "" });
+    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "owl.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -74,7 +74,7 @@ async function open(browser, reduced, market, prefs, posted, view = "plugins") {
     requestAnimationFrame(step);
   });
   await page.route("**/*", server(market, prefs, posted));
-  await page.goto("http://myna.test/?view=" + view);
+  await page.goto("http://owl.test/?view=" + view);
   return { page, errors };
 }
 

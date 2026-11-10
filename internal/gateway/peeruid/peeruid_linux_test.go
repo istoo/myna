@@ -15,7 +15,7 @@ import (
 
 // The child mode of TestSameRefusesAnotherUser: dial, stay open, leave.
 func TestMain(m *testing.M) {
-	if addr := os.Getenv("MYNA_PEERUID_DIAL"); addr != "" {
+	if addr := os.Getenv("OWL_PEERUID_DIAL"); addr != "" {
 		c, err := net.Dial("tcp", addr)
 		if err != nil {
 			os.Exit(1)
@@ -71,7 +71,7 @@ func TestSameRefusesAnotherUser(t *testing.T) {
 	}
 	defer ln.Close()
 	cmd := exec.Command(os.Args[0], "-test.run=^$")
-	cmd.Env = append(os.Environ(), "MYNA_PEERUID_DIAL="+ln.Addr().String())
+	cmd.Env = append(os.Environ(), "OWL_PEERUID_DIAL="+ln.Addr().String())
 	cmd.SysProcAttr = &syscall.SysProcAttr{Credential: &syscall.Credential{Uid: 65534, Gid: 65534}}
 	if err := cmd.Start(); err != nil {
 		t.Skipf("can't start a process as another user: %v", err)

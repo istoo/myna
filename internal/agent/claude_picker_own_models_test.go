@@ -5,15 +5,15 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // raclen (#4548): the "Show {agent}'s own models" switch left Claude Code's
-// own rows in /model untouched: it filters myna's pickers alone
-// (agent.Picks, #1642), and nothing myna writes for Claude Code looked at
-// it. Claude Code's /model is fed by myna all the same — modelPicker's
-// rows are myna's (writePicker) — and Claude Code drops its built-in
+// own rows in /model untouched: it filters owl's pickers alone
+// (agent.Picks, #1642), and nothing owl writes for Claude Code looked at
+// it. Claude Code's /model is fed by owl all the same — modelPicker's
+// rows are owl's (writePicker) — and Claude Code drops its built-in
 // lineup rows when a modelPicker says replaceBuiltInOptions, so writePicker
 // sets that while the switch is off, and takes it back out when on. The
 // Default row stays either way: Claude Code keeps it as its own fallback,

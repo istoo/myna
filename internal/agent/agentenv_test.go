@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/agentenv"
+	"github.com/istoo/owl/internal/agentenv"
 )
 
 // readsEnv matches the two ways these packages name a variable they read to
@@ -20,21 +20,21 @@ var readsEnv = regexp.MustCompile(`(?:Getenv|LookupEnv|getenv)\("([A-Z][A-Z_0-9]
 // notAnAgent are the variables the same sources read that are not an agent's
 // folder, so no sandbox clears them through agentenv.Vars.
 var notAnAgent = map[string]string{
-	"APPDATA":             "Windows' own folder, which a sandbox sets to one of its own rather than clears",
-	"LOCALAPPDATA":        "the same",
-	"PATH":                "the process' own",
-	"USER":                "the process' own",
-	"XDG_CONFIG_HOME":     "myna's own folder's, which appdir decides",
-	"XDG_DATA_HOME":       "the same",
-	"XDG_DATA_DIRS":       "the system's own data folders, where a .deb puts Lody's desktop entry; a test that reaches agent.OpenLody sets it to its own",
-	"XDG_CACHE_HOME":      "Go's build cache's too, which a sandbox keeps shared; Air's ACP OpenCode under it is found by path in a test's own home (#2423)",
-	"MYNA_ADDR":           "myna's own",
-	"MYNA_DEBUG":          "myna's own debug flag",
-	"MYNA_PUBLIC_URL":     "myna's own public URL",
-	"MYNA_TRUST_PROXY":    "myna's own: a proxy here signs its clients in (#1022)",
-	"MYNA_EFFORT_UPDATES": "myna's own switch for effort updates (#617)",
-	"MYNA_SITE_ORIGIN":    "a site origin myna's Omarchy theme answers, to try the site locally",
-	"MYNA_PARTNERS":       "where myna's own partner list is read from (a URL, or off), not a folder",
+	"APPDATA":            "Windows' own folder, which a sandbox sets to one of its own rather than clears",
+	"LOCALAPPDATA":       "the same",
+	"PATH":               "the process' own",
+	"USER":               "the process' own",
+	"XDG_CONFIG_HOME":    "owl's own folder's, which appdir decides",
+	"XDG_DATA_HOME":      "the same",
+	"XDG_DATA_DIRS":      "the system's own data folders, where a .deb puts Lody's desktop entry; a test that reaches agent.OpenLody sets it to its own",
+	"XDG_CACHE_HOME":     "Go's build cache's too, which a sandbox keeps shared; Air's ACP OpenCode under it is found by path in a test's own home (#2423)",
+	"OWL_ADDR":           "owl's own",
+	"OWL_DEBUG":          "owl's own debug flag",
+	"OWL_PUBLIC_URL":     "owl's own public URL",
+	"OWL_TRUST_PROXY":    "owl's own: a proxy here signs its clients in (#1022)",
+	"OWL_EFFORT_UPDATES": "owl's own switch for effort updates (#617)",
+	"OWL_SITE_ORIGIN":    "a site origin owl's Omarchy theme answers, to try the site locally",
+	"OWL_PARTNERS":       "where owl's own partner list is read from (a URL, or off), not a folder",
 	"CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "Claude Code's behaviour flag, not an agent's folder",
 	"GIT_SSH":             "the user's own SSH program for git, which a skill fetched with their git keeps",
 	"GIT_SSH_COMMAND":     "the same, as a command",
@@ -50,8 +50,8 @@ var notAnAgent = map[string]string{
 //
 // The five packages are this one, sessions, provider, library and gateway,
 // with appdir's codex.go, where CODEX_HOME is read for all of them:
-// every agent's folder variable myna reads is read in one of them, and the
-// rest of the repository reads only myna's own variables, the process' and
+// every agent's folder variable owl reads is read in one of them, and the
+// rest of the repository reads only owl's own variables, the process' and
 // the desktop's. Their sources are read as files rather than imported, since a
 // test in sessions or provider cannot import this package, which imports
 // them; what the walk looks at is what they say, not what they do.

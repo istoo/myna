@@ -4,7 +4,7 @@
 // session's title, when and how many. Temporary folders, the disk's root and
 // apps' hidden folders wait folded under Other folders at the end. Boxes and
 // the Delete bar come with Select; a folder's Delete all is in its ⋯ menu and
-// asks in myna's own dialog. In every language, Chromium and WebKit, wide
+// asks in owl's own dialog. In every language, Chromium and WebKit, wide
 // and narrow; no backend, the API is faked here.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -39,7 +39,7 @@ function serve(lang, calls) {
     if (url.pathname === "/api/providers") return json({ providers: [], presets: [], excluded: [], gateway: { running: true, window: true } });
     if (url.pathname === "/api/sessions/manage") {
       return json({ agents: [{ agent: "claude", count: sessions.length, deletable: true, name: "Claude Code", icon: "claude" }],
-        agent: "claude", home: "/home/me", sessions, terminal: false, trash: [], trashDir: "~/.local/share/myna/trash/sessions" });
+        agent: "claude", home: "/home/me", sessions, terminal: false, trash: [], trashDir: "~/.local/share/owl/trash/sessions" });
     }
     if (url.pathname === "/api/sessions/delete") {
       const body = req.postDataJSON();
@@ -76,7 +76,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("dialog", (d) => { errors.push("a browser dialog: " + d.message()); d.dismiss(); });
         const calls = [];
         await page.route("**/*", serve(lang, calls));
-        await page.goto("http://myna.test/?view=providers");
+        await page.goto("http://owl.test/?view=providers");
         await page.evaluate(() => show("sessions"));
         const view = page.locator("#view-sessions");
         const tr = (k, vars) => page.evaluate(([k, vars]) => t(k, vars), [k, vars]);

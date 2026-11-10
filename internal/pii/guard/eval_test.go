@@ -11,11 +11,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/appdir"
+	"github.com/istoo/owl/internal/appdir"
 )
 
 // What the local model finds, measured against text whose entities a person
-// marked by hand. The set is myna's own (2026-11-09), not the publisher's
+// marked by hand. The set is owl's own (2026-11-09), not the publisher's
 // benchmark: it says what a request's own words are likely to get, in
 // Chinese and English, the two languages AstrLink Guard is for.
 type evalEntity struct {
@@ -50,12 +50,12 @@ func loadEval(t *testing.T) []evalCase {
 // a card, an address, a name, a secret — and text with nothing to mask, for
 // what the model calls PII in it.
 
-// evalDir is the model's folder: MYNA_PII_DIR when it is set, else the
-// newest revision in myna's cache. "" when there is none, and the eval
+// evalDir is the model's folder: OWL_PII_DIR when it is set, else the
+// newest revision in owl's cache. "" when there is none, and the eval
 // tests skip: CI has no model, and a test never reaches the network.
 func evalDir(t *testing.T) string {
 	t.Helper()
-	if d := os.Getenv("MYNA_PII_DIR"); d != "" {
+	if d := os.Getenv("OWL_PII_DIR"); d != "" {
 		return d
 	}
 	root := filepath.Join(appdir.Cache(), "astrlink-guard")
@@ -67,7 +67,7 @@ func evalDir(t *testing.T) string {
 		}
 	}
 	if len(with) == 0 {
-		t.Skip("no AstrLink Guard model here (MYNA_PII_DIR, or myna's cache)")
+		t.Skip("no AstrLink Guard model here (OWL_PII_DIR, or owl's cache)")
 	}
 	sort.Strings(with)
 	return with[len(with)-1]

@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // Disabled models (#1867, provider/disabled.go): a model the user turned
@@ -19,19 +19,19 @@ import (
 
 // disabledError is what a request for a disabled model is told.
 func disabledError(id, pat string) string {
-	return fmt.Sprintf("model %s is disabled in myna (it matches %q in Settings › Models › Disabled models); enable it there or with `myna model enable %s`. Only requests through myna are refused", id, pat, pat)
+	return fmt.Sprintf("model %s is disabled in owl (it matches %q in Settings › Models › Disabled models); enable it there or with `owl model enable %s`. Only requests through owl are refused", id, pat, pat)
 }
 
 // unknownDisabledError is what every request is told while settings.json
 // can't be read and no list of disabled models was read before it.
 func unknownDisabledError(id string) string {
-	return fmt.Sprintf("model %s is disabled in myna for now: settings.json can't be read, so myna doesn't know which models are disabled; fix or restore settings.json", id)
+	return fmt.Sprintf("model %s is disabled in owl for now: settings.json can't be read, so owl doesn't know which models are disabled; fix or restore settings.json", id)
 }
 
 // groupDisabledError is what a request for a group whose every model is
 // disabled is told.
 func groupDisabledError(id string, g provider.Group, off []string) string {
-	return fmt.Sprintf("model %s is disabled in myna: every model of the routing group %s is (%s); enable one in Settings › Models › Disabled models or with `myna model enable`. Only requests through myna are refused", id, g.Name, strings.Join(off, ", "))
+	return fmt.Sprintf("model %s is disabled in owl: every model of the routing group %s is (%s); enable one in Settings › Models › Disabled models or with `owl model enable`. Only requests through owl are refused", id, g.Name, strings.Join(off, ", "))
 }
 
 // modelOff is the refusal for p's model, resolved, as id names it to the
@@ -77,7 +77,7 @@ func idOff(id string) (string, bool) {
 	}
 	// a bare id that resolves to nothing because the catalog left it out:
 	// one of the providers' models the user disabled ("embed-1" with
-	// lib/embed-1 disabled), refused as itself, not as a model myna
+	// lib/embed-1 disabled), refused as itself, not as a model owl
 	// doesn't know
 	if pat, off := provider.BareDisabled(id); off {
 		return disabledError(id, pat), true

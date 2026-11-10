@@ -13,12 +13,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/agentenv"
-	"github.com/istoo/myna/internal/library"
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/profile"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/agentenv"
+	"github.com/istoo/owl/internal/library"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/profile"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 func TestRestoreKeepsCorruptSettings(t *testing.T) {
@@ -47,7 +47,7 @@ func TestRestoreKeepsCorruptSettings(t *testing.T) {
 	}
 }
 
-// home gives the test a machine of its own: no agents, no myna files.
+// home gives the test a machine of its own: no agents, no owl files.
 func home(t *testing.T) {
 	t.Helper()
 	h := t.TempDir()
@@ -378,7 +378,7 @@ func TestLibrary(t *testing.T) {
 }
 
 func TestNotABackup(t *testing.T) {
-	for _, data := range []string{"", "{}", `{"format":"myna-backup","version":9,"kdf":"x"}`} {
+	for _, data := range []string{"", "{}", `{"format":"owl-backup","version":9,"kdf":"x"}`} {
 		if _, err := Open([]byte(data), "pw"); err == nil || errors.Is(err, ErrPassphrase) {
 			t.Fatalf("%q: %v", data, err)
 		}
@@ -490,7 +490,7 @@ func TestRestorePluginsAndSignIn(t *testing.T) {
 		t.Fatalf("result: %+v, want claude to sign in to, the plugin added, the failure said, acme to key", r)
 	}
 
-	// a backup from a myna before plugins installs nothing
+	// a backup from a owl before plugins installs nothing
 	asked = nil
 	got.Plugins = nil
 	if _, err := Restore(got, All); err != nil || asked != nil {

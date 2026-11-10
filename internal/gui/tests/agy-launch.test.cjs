@@ -1,10 +1,10 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Antigravity CLI (agy) takes myna's gateway only from its environment, so
+// Antigravity CLI (agy) takes owl's gateway only from its environment, so
 // its row on the Agents page has a square that copies the command starting
-// it on myna, once it is connected (right before the model picker beside
+// it on owl, once it is connected (right before the model picker beside
 // its switch, agy picking no model once started): the command in its tooltip, one click copying it (posted to /api/copy) and saying so, with the
 // page left where it was; none on an agent without one; in the tray panel's
-// opened row too; the words in Chinese. Once myna has given the user's
+// opened row too; the words in Chinese. Once owl has given the user's
 // shells a function agy (typed), the square and the opened row say plain
 // agy starts it in a new terminal, and the command is for one open now.
 // No backend: the API is faked here.
@@ -15,11 +15,11 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
-const LAUNCH = "GEMINI_API_KEY=myna-agy GOOGLE_GEMINI_BASE_URL=http://127.0.0.1:3425 agy --model 'myna/deepseek/pro'";
-const models = [{ value: "myna/deepseek/pro", label: "myna/deepseek/pro", ref: "deepseek/pro" }, { value: "model-b", label: "model-b" }];
+const LAUNCH = "GEMINI_API_KEY=owl-agy GOOGLE_GEMINI_BASE_URL=http://127.0.0.1:3425 agy --model 'owl/deepseek/pro'";
+const models = [{ value: "owl/deepseek/pro", label: "owl/deepseek/pro", ref: "deepseek/pro" }, { value: "model-b", label: "model-b" }];
 const agent = (id, name, launch) => ({
-  id, name, path: "/test/" + id, launch, wired: true, // on a myna model (#726: a connected one is in view)
-  fields: [{ key: "model", label: "model", value: "myna/deepseek/pro", options: models }],
+  id, name, path: "/test/" + id, launch, wired: true, // on a owl model (#726: a connected one is in view)
+  fields: [{ key: "model", label: "model", value: "owl/deepseek/pro", options: models }],
 });
 let typed = false;
 const state = {
@@ -72,12 +72,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
     await t.test("the window: a square that copies it", async () => {
       const copies = [];
-      const page = await open("http://myna.test/", "en", copies);
+      const page = await open("http://owl.test/", "en", copies);
       const b = page.locator(`${row("agy")} .field.launch`);
       assert.equal(await b.count(), 1);
       assert.equal(await page.locator(`${row("claude")} .field.launch`).count(), 0, "only an agent with a launch command has one");
       const title = await b.getAttribute("title");
-      assert.match(title, /Antigravity CLI takes myna only from its environment/);
+      assert.match(title, /Antigravity CLI takes owl only from its environment/);
       assert(title.includes(LAUNCH), title);
       // on the row, right before the model it starts on, so the pickers
       // and the switches line up down the list
@@ -96,14 +96,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await b.click();
       await page.waitForTimeout(300);
       assert.deepEqual(copies, [LAUNCH]);
-      assert.match(await page.locator("#status").textContent(), /Copied — run it to start Antigravity CLI on myna/);
+      assert.match(await page.locator("#status").textContent(), /Copied — run it to start Antigravity CLI on owl/);
       assert.equal(await view.evaluate((v) => v.scrollTop), top, "the click moved the page");
       assert.equal(await page.locator(`${row("agy")} .picker, .menu.open`).count(), 0, "no picker opens");
     });
 
     await t.test("the tray panel: in the opened row", async () => {
       const copies = [];
-      const page = await open("http://myna.test/?mode=panel", "en", copies, { width: 440, height: 560 });
+      const page = await open("http://owl.test/?mode=panel", "en", copies, { width: 440, height: 560 });
       await page.locator(`${row("agy")} .ag-sum`).click();
       await page.waitForTimeout(700);
       const b = page.locator(`${row("agy")} .ag-open .field.launch`);
@@ -116,23 +116,23 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
     await t.test("in Chinese", async () => {
       const copies = [];
-      const page = await open("http://myna.test/", "zh", copies);
+      const page = await open("http://owl.test/", "zh", copies);
       const b = page.locator(`${row("agy")} .field.launch`);
-      assert.match(await b.getAttribute("title"), /Antigravity CLI 只能从环境变量接入 myna · 点击复制启动它的命令：/);
+      assert.match(await b.getAttribute("title"), /Antigravity CLI 只能从环境变量接入 owl · 点击复制启动它的命令：/);
       await b.click();
       await page.waitForTimeout(300);
-      assert.match(await page.locator("#status").textContent(), /已复制，运行它即可让 Antigravity CLI 走 myna/);
+      assert.match(await page.locator("#status").textContent(), /已复制，运行它即可让 Antigravity CLI 走 owl/);
     });
 
     await t.test("typed in a new terminal", async () => {
       typed = true;
       try {
         for (const [lang, square, start, now] of [
-          ["en", /^Type agy in a new terminal to start Antigravity CLI on myna · click to copy the command for a terminal open now:\n/, "Start it with", "In a terminal open now"],
-          ["zh", /^在新终端输入 agy 即可让 Antigravity CLI 走 myna · 点击复制在已打开终端中用的命令：\n/, "启动命令", "已打开的终端"],
+          ["en", /^Type agy in a new terminal to start Antigravity CLI on owl · click to copy the command for a terminal open now:\n/, "Start it with", "In a terminal open now"],
+          ["zh", /^在新终端输入 agy 即可让 Antigravity CLI 走 owl · 点击复制在已打开终端中用的命令：\n/, "启动命令", "已打开的终端"],
         ]) {
           const copies = [];
-          const page = await open("http://myna.test/", lang, copies);
+          const page = await open("http://owl.test/", lang, copies);
           const b = page.locator(`${row("agy")} .field.launch`);
           const title = await b.getAttribute("title");
           assert.match(title, square);

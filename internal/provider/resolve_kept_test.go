@@ -11,7 +11,7 @@ import (
 // first request built while nothing moved: the window's drift poll asked
 // for each every 15s, and each built every provider's whole list again,
 // or copied the whole catalog to find one group (1.3 GB of a live
-// myna's 33 GB in 53 minutes). A provider saved since is seen at once.
+// owl's 33 GB in 53 minutes). A provider saved since is seen at once.
 func TestResolveKeptAcrossRequests(t *testing.T) {
 	isolate(t)
 	home := t.TempDir()

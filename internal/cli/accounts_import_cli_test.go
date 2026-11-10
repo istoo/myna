@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // importJWT is an unsigned JWT carrying claims, as ChatGPT's tokens are read.
@@ -20,7 +20,7 @@ func importJWT(claims map[string]any) string {
 	return "e30." + base64.RawURLEncoding.EncodeToString(b) + ".sig"
 }
 
-// myna accounts import (#1453, wlj521: several auth.json files, the way
+// owl accounts import (#1453, wlj521: several auth.json files, the way
 // Cockpit Tools takes them): it says first that the tool a file came from
 // is signed out, imports nothing until that is agreed to, takes several
 // files at once, names a file that held no account, and only reads them.
@@ -96,7 +96,7 @@ func TestAccountsImport(t *testing.T) {
 	if err != nil {
 		t.Fatalf("%v\n%s", err, out)
 	}
-	for _, want := range []string{"added a@example.com", "added b@example.com", bad + ":", "see them: myna accounts codex"} {
+	for _, want := range []string{"added a@example.com", "added b@example.com", bad + ":", "see them: owl accounts codex"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("no %q in:\n%s", want, out)
 		}

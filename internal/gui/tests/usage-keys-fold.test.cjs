@@ -94,8 +94,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang));
-      await page.addInitScript(() => { try { if (!sessionStorage.getItem("set")) { localStorage.clear(); localStorage.setItem("myna.quotaRange", "off"); sessionStorage.setItem("set", "1"); } } catch {} });
-      await page.goto("http://myna.test/?view=usage");
+      await page.addInitScript(() => { try { if (!sessionStorage.getItem("set")) { localStorage.clear(); localStorage.setItem("owl.quotaRange", "off"); sessionStorage.setItem("set", "1"); } } catch {} });
+      await page.goto("http://owl.test/?view=usage");
       await page.waitForSelector("#subscriptionUsage > [data-key=openrouter] .subscription-account .user", { state: "attached" });
 
       let got = await cards(page);

@@ -5,13 +5,13 @@
 // It serves the user's own groups on the gateway's router strategy point
 // (P3 of docs/subsystems/plugin-runtime.md): Apply holds
 // provider.ServeGroups, and off, the gateway neither lists nor routes them.
-// The groups myna finds (one model several providers serve) are the
+// The groups owl finds (one model several providers serve) are the
 // core's, on or off.
 package groups
 
 import (
-	"github.com/istoo/myna/internal/pluginrt"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/pluginrt"
+	"github.com/istoo/owl/internal/provider"
 )
 
 func init() {

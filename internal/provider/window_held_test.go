@@ -78,9 +78,9 @@ func TestHeldWindowsOnlyByWhatStopsTheAccount(t *testing.T) {
 			t.Errorf("%s: 5 hours held by %q, want held %v", c.why, got, c.held)
 		}
 	}
-	// another myna's card is as it sent it, a failed reading as it was
+	// another owl's card is as it sent it, a failed reading as it was
 	q := SubscriptionQuota{Provider: "codex", From: "studio", Windows: []QuotaWindow{five, {Name: "7 days", Used: 100}}}
 	if got := WithHeldWindows([]SubscriptionQuota{q}, now)[0].Windows[0].HeldBy; got != "" {
-		t.Errorf("another myna's card held by %q", got)
+		t.Errorf("another owl's card held by %q", got)
 	}
 }

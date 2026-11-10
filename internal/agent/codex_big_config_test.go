@@ -29,7 +29,7 @@ func TestCodexSyncDecodesTheConfigOnce(t *testing.T) {
 	// file read again to compare.
 	old := time.Now().Add(-time.Hour)
 	cfg := filepath.Join(home, ".codex", "config.toml")
-	for _, f := range []string{cfg, filepath.Join(home, ".codex", "myna-models.json")} {
+	for _, f := range []string{cfg, filepath.Join(home, ".codex", "owl-models.json")} {
 		if err := os.Chtimes(f, old, old); err != nil {
 			t.Fatal(err)
 		}

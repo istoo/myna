@@ -8,7 +8,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // dbydd on Discord: an in-order group whose first members are relays

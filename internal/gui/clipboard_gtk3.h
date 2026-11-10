@@ -23,17 +23,17 @@
 #include <time.h>
 #include <unistd.h>
 
-// myna_clipboard_set puts text on PRIMARY and then CLIPBOARD. It runs on
+// owl_clipboard_set puts text on PRIMARY and then CLIPBOARD. It runs on
 // GTK's main thread.
-static void myna_clipboard_set(const char *text) {
+static void owl_clipboard_set(const char *text) {
 	gtk_clipboard_set_text(gtk_clipboard_get(GDK_SELECTION_PRIMARY), text, -1);
 	gtk_clipboard_set_text(gtk_clipboard_get(GDK_SELECTION_CLIPBOARD), text, -1);
 }
 
-// myna_clipboard_wayland gives GDK's Wayland display and seat, for
-// myna_clipboard_read, or returns 0 when GDK isn't on Wayland. It runs on
+// owl_clipboard_wayland gives GDK's Wayland display and seat, for
+// owl_clipboard_read, or returns 0 when GDK isn't on Wayland. It runs on
 // GTK's main thread.
-static int myna_clipboard_wayland(void **display, void **seat) {
+static int owl_clipboard_wayland(void **display, void **seat) {
 #ifdef GDK_WINDOWING_WAYLAND
 	GdkDisplay *d = gdk_display_get_default();
 	if (d && GDK_IS_WAYLAND_DISPLAY(d)) {
@@ -47,28 +47,28 @@ static int myna_clipboard_wayland(void **display, void **seat) {
 }
 
 #ifdef GDK_WINDOWING_WAYLAND
-#define MYNA_PROBE_OFFERS 16
+#define OWL_PROBE_OFFERS 16
 
 typedef struct {
 	struct wl_data_device_manager *manager;
 	uint32_t version;
-	struct wl_data_offer *offers[MYNA_PROBE_OFFERS];
-	int text[MYNA_PROBE_OFFERS]; // 1 utf-8, 2 UTF8_STRING, 3 text/plain
+	struct wl_data_offer *offers[OWL_PROBE_OFFERS];
+	int text[OWL_PROBE_OFFERS]; // 1 utf-8, 2 UTF8_STRING, 3 text/plain
 	int n;
 	struct wl_data_offer *selection;
 	int got_selection;
-} myna_probe;
+} owl_probe;
 
-static int myna_probe_index(myna_probe *p, struct wl_data_offer *o) {
+static int owl_probe_index(owl_probe *p, struct wl_data_offer *o) {
 	for (int i = 0; i < p->n; i++)
 		if (p->offers[i] == o)
 			return i;
 	return -1;
 }
 
-static void myna_offer_offer(void *data, struct wl_data_offer *o, const char *mime) {
-	myna_probe *p = data;
-	int i = myna_probe_index(p, o), k = 0;
+static void owl_offer_offer(void *data, struct wl_data_offer *o, const char *mime) {
+	owl_probe *p = data;
+	int i = owl_probe_index(p, o), k = 0;
 	if (i < 0)
 		return;
 	if (strcmp(mime, "text/plain;charset=utf-8") == 0)
@@ -80,59 +80,59 @@ static void myna_offer_offer(void *data, struct wl_data_offer *o, const char *mi
 	if (k && (!p->text[i] || k < p->text[i]))
 		p->text[i] = k;
 }
-static void myna_offer_actions(void *data, struct wl_data_offer *o, uint32_t a) {}
-static const struct wl_data_offer_listener myna_offer_listener = {
-	myna_offer_offer, myna_offer_actions, myna_offer_actions,
+static void owl_offer_actions(void *data, struct wl_data_offer *o, uint32_t a) {}
+static const struct wl_data_offer_listener owl_offer_listener = {
+	owl_offer_offer, owl_offer_actions, owl_offer_actions,
 };
 
-static void myna_device_offer(void *data, struct wl_data_device *d, struct wl_data_offer *o) {
-	myna_probe *p = data;
-	if (p->n == MYNA_PROBE_OFFERS) {
+static void owl_device_offer(void *data, struct wl_data_device *d, struct wl_data_offer *o) {
+	owl_probe *p = data;
+	if (p->n == OWL_PROBE_OFFERS) {
 		wl_data_offer_destroy(o);
 		return;
 	}
 	p->offers[p->n] = o;
 	p->text[p->n] = 0;
 	p->n++;
-	wl_data_offer_add_listener(o, &myna_offer_listener, p);
+	wl_data_offer_add_listener(o, &owl_offer_listener, p);
 }
-static void myna_device_enter(void *data, struct wl_data_device *d, uint32_t serial, struct wl_surface *s, wl_fixed_t x, wl_fixed_t y, struct wl_data_offer *o) {}
-static void myna_device_leave(void *data, struct wl_data_device *d) {}
-static void myna_device_motion(void *data, struct wl_data_device *d, uint32_t t, wl_fixed_t x, wl_fixed_t y) {}
-static void myna_device_drop(void *data, struct wl_data_device *d) {}
-static void myna_device_selection(void *data, struct wl_data_device *d, struct wl_data_offer *o) {
-	myna_probe *p = data;
+static void owl_device_enter(void *data, struct wl_data_device *d, uint32_t serial, struct wl_surface *s, wl_fixed_t x, wl_fixed_t y, struct wl_data_offer *o) {}
+static void owl_device_leave(void *data, struct wl_data_device *d) {}
+static void owl_device_motion(void *data, struct wl_data_device *d, uint32_t t, wl_fixed_t x, wl_fixed_t y) {}
+static void owl_device_drop(void *data, struct wl_data_device *d) {}
+static void owl_device_selection(void *data, struct wl_data_device *d, struct wl_data_offer *o) {
+	owl_probe *p = data;
 	p->selection = o;
 	p->got_selection = 1;
 }
-static const struct wl_data_device_listener myna_device_listener = {
-	myna_device_offer, myna_device_enter, myna_device_leave,
-	myna_device_motion, myna_device_drop, myna_device_selection,
+static const struct wl_data_device_listener owl_device_listener = {
+	owl_device_offer, owl_device_enter, owl_device_leave,
+	owl_device_motion, owl_device_drop, owl_device_selection,
 };
 
-static void myna_registry_global(void *data, struct wl_registry *r, uint32_t name, const char *iface, uint32_t version) {
-	myna_probe *p = data;
+static void owl_registry_global(void *data, struct wl_registry *r, uint32_t name, const char *iface, uint32_t version) {
+	owl_probe *p = data;
 	if (!p->manager && strcmp(iface, "wl_data_device_manager") == 0) {
 		p->version = version < 3 ? version : 3;
 		p->manager = wl_registry_bind(r, name, &wl_data_device_manager_interface, p->version);
 	}
 }
-static void myna_registry_remove(void *data, struct wl_registry *r, uint32_t name) {}
-static const struct wl_registry_listener myna_registry_listener = {
-	myna_registry_global, myna_registry_remove,
+static void owl_registry_remove(void *data, struct wl_registry *r, uint32_t name) {}
+static const struct wl_registry_listener owl_registry_listener = {
+	owl_registry_global, owl_registry_remove,
 };
 
-static long myna_ms_since(struct timespec *t0) {
+static long owl_ms_since(struct timespec *t0) {
 	struct timespec t;
 	clock_gettime(CLOCK_MONOTONIC, &t);
 	return (t.tv_sec - t0->tv_sec) * 1000 + (t.tv_nsec - t0->tv_nsec) / 1000000;
 }
 #endif
 
-// myna_clipboard_read reads the clipboard the way another program
+// owl_clipboard_read reads the clipboard the way another program
 // pasting would: from the compositor, through a data device of its own on
 // its own event queue. It runs off GTK's main thread, which has to be free
-// to answer when myna holds the clipboard itself. It returns 1 with the
+// to answer when owl holds the clipboard itself. It returns 1 with the
 // text in *out (free it), 0 when the clipboard holds something else or
 // nothing could be read from it, and -1 when it can't tell: no Wayland,
 // or the compositor sent no selection (it sends one only to the focused
@@ -146,14 +146,14 @@ static long myna_ms_since(struct timespec *t0) {
 // id, the next object the compositor creates is then out of sequence, and
 // the display connection fails with EINVAL: GTK prints "Error reading
 // events from display: Invalid argument" and the app exits.
-static int myna_clipboard_read(void *display, void *seat, int timeout_ms, char **out, size_t *len) {
+static int owl_clipboard_read(void *display, void *seat, int timeout_ms, char **out, size_t *len) {
 	*out = NULL;
 	*len = 0;
 #ifdef GDK_WINDOWING_WAYLAND
 	struct wl_display *d = display;
 	struct wl_event_queue *q = wl_display_create_queue(d);
 	struct wl_display *w = wl_proxy_create_wrapper(d);
-	myna_probe p;
+	owl_probe p;
 	memset(&p, 0, sizeof p);
 	struct wl_registry *reg;
 	struct wl_data_device *dev = NULL;
@@ -165,7 +165,7 @@ static int myna_clipboard_read(void *display, void *seat, int timeout_ms, char *
 
 	wl_proxy_set_queue((struct wl_proxy *)w, q);
 	reg = wl_display_get_registry(w);
-	wl_registry_add_listener(reg, &myna_registry_listener, &p);
+	wl_registry_add_listener(reg, &owl_registry_listener, &p);
 	if (wl_display_roundtrip_queue(d, q) < 0 || !p.manager)
 		goto done;
 	if (p.version < WL_DATA_DEVICE_RELEASE_SINCE_VERSION) {
@@ -173,13 +173,13 @@ static int myna_clipboard_read(void *display, void *seat, int timeout_ms, char *
 		goto done;
 	}
 	dev = wl_data_device_manager_get_data_device(p.manager, seat);
-	wl_data_device_add_listener(dev, &myna_device_listener, &p);
+	wl_data_device_add_listener(dev, &owl_device_listener, &p);
 	if (wl_display_roundtrip_queue(d, q) < 0)
 		goto done;
 	if (!p.got_selection)
 		goto done;
 	ret = 0;
-	i = p.selection ? myna_probe_index(&p, p.selection) : -1;
+	i = p.selection ? owl_probe_index(&p, p.selection) : -1;
 	if (i < 0 || !p.text[i])
 		goto done;
 	mime = p.text[i] == 1 ? "text/plain;charset=utf-8" : p.text[i] == 2 ? "UTF8_STRING" : "text/plain";
@@ -194,7 +194,7 @@ static int myna_clipboard_read(void *display, void *seat, int timeout_ms, char *
 	buf = malloc(cap);
 	clock_gettime(CLOCK_MONOTONIC, &t0);
 	while (buf) {
-		long left = timeout_ms - myna_ms_since(&t0);
+		long left = timeout_ms - owl_ms_since(&t0);
 		struct pollfd pfd = {fds[0], POLLIN, 0};
 		if (left <= 0)
 			break;

@@ -4,7 +4,7 @@ package update
 
 import _ "embed"
 
-// The launcher myna.com is made of (com.go), built for windows/amd64 by
+// The launcher owl.com is made of (com.go), built for windows/amd64 by
 // `make release-windows` before the app; not kept in git.
 //
 //go:embed launcher-amd64.com

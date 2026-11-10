@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // The web pages that may call the gateway (#1051) are saved as origins,

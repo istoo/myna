@@ -10,12 +10,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// Another computer on the network draws with the myna shared there
+// Another computer on the network draws with the owl shared there
 // (#545): a plain client with the gateway's key, at its images API, and a
-// myna that has it as a Remote myna, whose image models it lists and
+// owl that has it as a Remote owl, whose image models it lists and
 // draws with there. Neither gets an image only this computer can open.
 func TestLANDraws(t *testing.T) {
 	_, e := easeled(t)
@@ -47,10 +47,10 @@ func TestLANDraws(t *testing.T) {
 
 	// a plain client: no key, turned away; with it, the image's bytes, by
 	// the model named or the one the Settings draw with
-	if code, _, body := ask("/v1/images/generations", "", `{"prompt":"a myna"}`); code != 401 {
+	if code, _, body := ask("/v1/images/generations", "", `{"prompt":"a owl"}`); code != 401 {
 		t.Errorf("no key: %d %s", code, body)
 	}
-	for _, body := range []string{`{"model":"art/gpt-image-1","prompt":"a myna"}`, `{"prompt":"a myna"}`} {
+	for _, body := range []string{`{"model":"art/gpt-image-1","prompt":"a owl"}`, `{"prompt":"a owl"}`} {
 		code, a, raw := ask("/v1/images/generations", secrets[0], body)
 		if code != 200 || len(a.Data) != 1 || a.Data[0].B64 != want || strings.Contains(raw, "127.0.0.1") || strings.Contains(raw, "localhost") {
 			t.Errorf("%s: %d %s", body, code, raw)
@@ -60,8 +60,8 @@ func TestLANDraws(t *testing.T) {
 		t.Errorf("edit: %d %s", code, raw)
 	}
 
-	// a myna with it as a Remote myna, signed with the key
-	id, err := provider.Add(provider.Provider{ID: "office", Name: "Office", Key: secrets[0], Preset: provider.RemoteMynaPreset, Chat: strings.TrimPrefix(host.URL, "http://")})
+	// a owl with it as a Remote owl, signed with the key
+	id, err := provider.Add(provider.Provider{ID: "office", Name: "Office", Key: secrets[0], Preset: provider.RemoteOwlPreset, Chat: strings.TrimPrefix(host.URL, "http://")})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -74,25 +74,25 @@ func TestLANDraws(t *testing.T) {
 		draws = append(draws, m.ID)
 	}
 	if !slices.Contains(draws, "art/gpt-image-1") {
-		t.Fatalf("the shared myna's image models aren't listed here: %v", draws)
+		t.Fatalf("the shared owl's image models aren't listed here: %v", draws)
 	}
 	before := len(e.got("/v1/images/generations"))
-	code, body := post(t, "/v1/images/generations", `{"model":"office/art/gpt-image-1","prompt":"a myna"}`)
+	code, body := post(t, "/v1/images/generations", `{"model":"office/art/gpt-image-1","prompt":"a owl"}`)
 	var a imagesAnswer
 	json.Unmarshal([]byte(body), &a)
 	if code != 200 || len(a.Data) != 1 || a.Data[0].B64 != want || a.Model != "office/art/gpt-image-1" {
-		t.Errorf("through the remote myna: %d %s", code, body)
+		t.Errorf("through the remote owl: %d %s", code, body)
 	}
 	if n := len(e.got("/v1/images/generations")); n != before+1 {
 		t.Errorf("the vendor was asked %d times", n-before)
 	}
 }
 
-// A myna with another as its Remote myna makes videos with the video
+// A owl with another as its Remote owl makes videos with the video
 // models shared there (#545): they are listed as such, not as image models,
-// and the video is started, asked after and fetched at the other myna's
-// videos API, under an id of this myna's.
-func TestRemoteMynaVideos(t *testing.T) {
+// and the video is started, asked after and fetched at the other owl's
+// videos API, under an id of this owl's.
+func TestRemoteOwlVideos(t *testing.T) {
 	grokSignedIn(t)
 	g := newGrokMedia(t)
 	_, secrets := newCaller(t, "Laptop")
@@ -102,7 +102,7 @@ func TestRemoteMynaVideos(t *testing.T) {
 		h.ServeHTTP(w, r)
 	}))
 	t.Cleanup(host.Close)
-	id, err := provider.Add(provider.Provider{ID: "office", Name: "Office", Key: secrets[0], Preset: provider.RemoteMynaPreset, Chat: strings.TrimPrefix(host.URL, "http://")})
+	id, err := provider.Add(provider.Provider{ID: "office", Name: "Office", Key: secrets[0], Preset: provider.RemoteOwlPreset, Chat: strings.TrimPrefix(host.URL, "http://")})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -118,14 +118,14 @@ func TestRemoteMynaVideos(t *testing.T) {
 		draws = append(draws, m.ID)
 	}
 	if !slices.Contains(films, "grok/grok-imagine-video") {
-		t.Fatalf("the shared myna's video models aren't listed here: %v", films)
+		t.Fatalf("the shared owl's video models aren't listed here: %v", films)
 	}
 	if slices.ContainsFunc(draws, func(id string) bool { return strings.Contains(id, "video") }) || !slices.Contains(draws, "grok/grok-imagine-image") {
 		t.Errorf("image models here: %v", draws)
 	}
 
 	s := New()
-	code, obj, raw, _ := request(t, s, "POST", "/v1/videos", "application/json", `{"model":"office/grok/grok-imagine-video","prompt":"a myna takes off","seconds":6,"size":"1280x720"}`)
+	code, obj, raw, _ := request(t, s, "POST", "/v1/videos", "application/json", `{"model":"office/grok/grok-imagine-video","prompt":"a owl takes off","seconds":6,"size":"1280x720"}`)
 	vid, _ := obj["id"].(string)
 	if code != 200 || !strings.HasPrefix(vid, "video_office.") || obj["model"] != "office/grok/grok-imagine-video" {
 		t.Fatalf("start: %d %s", code, raw)

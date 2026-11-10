@@ -9,7 +9,7 @@ import (
 
 // miniMaxDesktopPlist is MiniMax Code Desktop 3.1.10's Info.plist (MiniMax
 // Code-3.1.10-arm64-mac.zip from filecdn.minimax.chat, the China build) cut
-// to the keys myna reads, in their order and indentation. The
+// to the keys owl reads, in their order and indentation. The
 // international build (file.cdn.minimax.io) is the same bundle name with
 // the id com.minimax.agent (app-identity.js).
 const miniMaxDesktopPlist = `<?xml version="1.0" encoding="UTF-8"?>
@@ -30,13 +30,13 @@ const miniMaxDesktopPlist = `<?xml version="1.0" encoding="UTF-8"?>
 </plist>
 `
 
-// 教父 on Discord (MiniMax Code 3.1.10, myna v0.1.2629 and v0.1.2679):
-// MiniMax Code turned on in myna with a model picked, and the desktop app
+// 教父 on Discord (MiniMax Code 3.1.10, owl v0.1.2629 and v0.1.2679):
+// MiniMax Code turned on in owl with a model picked, and the desktop app
 // went on with the user's own MiniMax-M3.1-Flash; Sessions showed nothing.
 // Desktop's window keeps the model last picked in it and shows that, not
 // config.yaml's defaultModel, while that model is still listed. So with the
-// desktop app installed, either build, myna's notice says to restart it
-// and pick a myna model once in its menu, and its version is shown.
+// desktop app installed, either build, owl's notice says to restart it
+// and pick a owl model once in its menu, and its version is shown.
 // Without it the mcode advice stays as it was.
 func TestMiniMaxDesktopSaysPickInTheApp(t *testing.T) {
 	home, _ := miniMaxHome(t)

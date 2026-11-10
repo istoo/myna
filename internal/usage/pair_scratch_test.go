@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/owl/internal/sessions"
 )
 
 // The matcher keeps its maps and slices from one call for the next

@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // #1946 (XcodeFish): a group of two groups, coding-fast and

@@ -7,8 +7,8 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // A file where an agent keeps its folder (~/.dsh, another tool's) is not

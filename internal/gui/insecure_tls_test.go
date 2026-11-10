@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // #2383: the editor's Certificate tick is saved on a provider of the

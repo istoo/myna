@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // pickVision saves the Image recognition model the user picked.
@@ -21,8 +21,8 @@ func pickVision(t *testing.T, v string) {
 	}
 }
 
-// An Image recognition model the user picked that myna can't find any
-// more (its provider removed) is not replaced in silence by the one myna
+// An Image recognition model the user picked that owl can't find any
+// more (its provider removed) is not replaced in silence by the one owl
 // picks: the description's row in Routing names it, on every route an
 // agent sends an image by and for a group's member, and a request turned
 // away for want of any describer says it is missing.
@@ -118,7 +118,7 @@ func TestMissingImageRecognitionModelIsSaid(t *testing.T) {
 	}
 }
 
-// Image generation's pick is the same: one myna can't find is named, and
+// Image generation's pick is the same: one owl can't find is named, and
 // a request that names no model, with nothing else to draw with, says so.
 func TestMissingImageGenerationModelIsSaid(t *testing.T) {
 	s, _ := eyed(t)
@@ -130,7 +130,7 @@ func TestMissingImageGenerationModelIsSaid(t *testing.T) {
 	if got := DrawerMissing(); got != "gone/gpt-image-2" {
 		t.Fatalf("DrawerMissing = %q", got)
 	}
-	code, _, raw := postImages(t, s, "/v1/images/generations", "application/json", `{"prompt":"a myna"}`)
+	code, _, raw := postImages(t, s, "/v1/images/generations", "application/json", `{"prompt":"a owl"}`)
 	if code != 400 || !strings.Contains(raw, "gone/gpt-image-2") || !strings.Contains(raw, "Image generation") {
 		t.Fatalf("no drawer: %d %s, want 400 naming the missing gone/gpt-image-2", code, raw)
 	}

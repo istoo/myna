@@ -37,7 +37,7 @@ func serveRegistry(t *testing.T, down *bool) {
 		w.Write([]byte(testRegistry))
 	}))
 	t.Cleanup(srv.Close)
-	t.Setenv("MYNA_PLUGIN_MARKET", srv.URL)
+	t.Setenv("OWL_PLUGIN_MARKET", srv.URL)
 	forgetMarket := func() { marketMu.Lock(); marketList, marketErr = nil, nil; marketMu.Unlock() }
 	forgetMarket()
 	t.Cleanup(forgetMarket)
@@ -52,7 +52,7 @@ func serveRegistry(t *testing.T, down *bool) {
 }
 
 // A community plugin's short or shown name, case aside, is its package
-// (Atlas on Discord: `myna plugin add WorkBuddy` said it "isn't an npm
+// (Atlas on Discord: `owl plugin add WorkBuddy` said it "isn't an npm
 // package name", and a bare workbuddy would have installed npm's unscoped
 // workbuddy). npm's own package names, scoped ones, paths and git specs
 // are kept as written; npm: asks for npm's package of a name a community
@@ -110,7 +110,7 @@ func TestResolveRefusesWhatItCantName(t *testing.T) {
 }
 
 // The list unread is unknown, not empty: a name it would have to rule out
-// isn't sent to npm on a guess, while one a copy myna has names is still
+// isn't sent to npm on a guess, while one a copy owl has names is still
 // its package, and npm: is still npm's.
 func TestResolveListUnread(t *testing.T) {
 	down := true

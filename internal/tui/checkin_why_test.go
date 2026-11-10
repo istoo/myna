@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // plugins#304: an inactive or ineligible check-in says the plugin's (or
@@ -28,7 +28,7 @@ func TestCheckinSaysWhyNoneWasOffered(t *testing.T) {
 	}
 	a := r
 	a.Again = true
-	if w := checkinWords(a); !strings.HasSuffix(w, "myna asks again later · "+why) {
+	if w := checkinWords(a); !strings.HasSuffix(w, "owl asks again later · "+why) {
 		t.Errorf("again: %q", w)
 	}
 	r.Msg = ""

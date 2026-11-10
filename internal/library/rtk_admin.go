@@ -2,9 +2,9 @@ package library
 
 // RTK installed for every user of a Windows computer (winget --scope
 // machine, under C:\Program Files\WinGet) is one only an administrator can
-// upgrade, and myna runs as the user (新v学员 on Discord: "RTK and
-// other actions that need elevation all fail"). myna isn't run as
-// administrator for it: an elevated myna would write the agents' files
+// upgrade, and owl runs as the user (新v学员 on Discord: "RTK and
+// other actions that need elevation all fail"). owl isn't run as
+// administrator for it: an elevated owl would write the agents' files
 // as the administrator, and couldn't start with Windows without asking each
 // time. Instead the one winget command that needs it goes through Windows'
 // administrator prompt (update.RunElevated), as an agent's npm update in
@@ -19,8 +19,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/update"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/update"
 )
 
 // wingetNeedsAdmin is winget saying the command needs an administrator

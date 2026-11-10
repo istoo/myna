@@ -15,7 +15,7 @@ import (
 
 	"net/url"
 
-	"github.com/istoo/myna/internal/appdir"
+	"github.com/istoo/owl/internal/appdir"
 )
 
 // Cursor's CLI (cursor-agent) keeps a chat in a folder of its own under its
@@ -179,7 +179,7 @@ func cursorParentOf(f file) string {
 // in -shm when they are; both would change the folder and make the chat
 // look written to a moment ago. A store with no log to replay is opened
 // immutable, which touches nothing; one with a log is read from a copy of
-// the two files, in a folder of myna's own that close removes; a large
+// the two files, in a folder of owl's own that close removes; a large
 // store's copy is shared while it is unchanged (cursor_snapshot.go).
 func openCursorStore(path string) (db *sql.DB, closeDB func(), err error) {
 	return OpenUntouched(path)

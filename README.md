@@ -1,8 +1,8 @@
 <div align="center">
 
-<a href="https://github.com/istoo/myna"><img src="site/public/img/icon-256.png" width="112" alt="myna"></a>
+<a href="https://github.com/istoo/owl"><img src="site/public/img/icon-256.png" width="112" alt="owl"></a>
 
-# myna
+# owl
 
 ### Every agent's model. One place.
 
@@ -10,33 +10,33 @@
 Switch any of them from the menu bar. One local gateway serves them all,<br>
 and when a quota runs out, it quietly moves on to your next account.
 
-> **myna is a secondary development of [yetone/magpie](https://github.com/yetone/magpie).**
+> **owl is a secondary development of [yetone/magpie](https://github.com/yetone/magpie).**
 > It is a derived distribution: the plugin ecosystem and contracts (`magpie` plugin key,
 > `@magpie-community/*`, `X-Magpie-*` headers) are kept, while branding, the update feed and
 > network dependencies are maintained independently. The original project's copyright and
 > MIT license are retained.
 
-[![Release](https://img.shields.io/github/v/release/istoo/myna?label=release&color=111111)](https://github.com/istoo/myna/releases/latest) [![Stars](https://img.shields.io/github/stars/istoo/myna?style=flat&color=111111)](https://github.com/istoo/myna/stargazers) [![Discord](https://img.shields.io/badge/Discord-join-5865F2?logo=discord&logoColor=white)](https://discord.gg/vGSnD3ZKQF) [![License](https://img.shields.io/badge/license-MIT-111111)](LICENSE)<br>
+[![Release](https://img.shields.io/github/v/release/istoo/owl?label=release&color=111111)](https://github.com/istoo/owl/releases/latest) [![Stars](https://img.shields.io/github/stars/istoo/owl?style=flat&color=111111)](https://github.com/istoo/owl/stargazers) [![Discord](https://img.shields.io/badge/Discord-join-5865F2?logo=discord&logoColor=white)](https://discord.gg/vGSnD3ZKQF) [![License](https://img.shields.io/badge/license-MIT-111111)](LICENSE)<br>
 ![macOS](https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=white) ![Windows](https://img.shields.io/badge/Windows-0078D4?logo=windows&logoColor=white) ![Linux](https://img.shields.io/badge/Linux-FCC624?logo=linux&logoColor=black) ![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white) ![Termux](https://img.shields.io/badge/Termux-000000?logo=android&logoColor=white)
 
-**[Download](https://github.com/istoo/myna/releases/latest)** &nbsp;·&nbsp; **[Docs](https://github.com/istoo/myna/blob/main/docs/start)** &nbsp;·&nbsp; **[Reference](docs/reference.md)** &nbsp;·&nbsp; **[Plugins](https://github.com/magpie-community/plugins)** &nbsp;·&nbsp; **[Discord](https://discord.gg/vGSnD3ZKQF)** &nbsp;·&nbsp; **English** · [简体中文](README.zh-CN.md)
+**[Download](https://github.com/istoo/owl/releases/latest)** &nbsp;·&nbsp; **[Docs](https://github.com/istoo/owl/blob/main/docs/start)** &nbsp;·&nbsp; **[Reference](docs/reference.md)** &nbsp;·&nbsp; **[Plugins](https://github.com/magpie-community/plugins)** &nbsp;·&nbsp; **[Discord](https://discord.gg/vGSnD3ZKQF)** &nbsp;·&nbsp; **English** · [简体中文](README.zh-CN.md)
 
 <br>
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="site/public/img/agents-dark.png">
-  <img src="site/public/img/agents-light.png" width="900" alt="myna's Agents page: Claude Code on Kimi K3, Codex on DeepSeek V4 Pro, Gemini CLI on GLM-5.3, each picked from one list">
+  <img src="site/public/img/agents-light.png" width="900" alt="owl's Agents page: Claude Code on Kimi K3, Codex on DeepSeek V4 Pro, Gemini CLI on GLM-5.3, each picked from one list">
 </picture>
 
 </div>
 
 <br>
 
-## Is myna for you?
+## Is owl for you?
 
-Each agent keeps its model in its own file, in its own format, with its own keys and base URLs. A subscription you pay for works in one agent and nowhere else. myna puts all of that behind one app and one local gateway:
+Each agent keeps its model in its own file, in its own format, with its own keys and base URLs. A subscription you pay for works in one agent and nowhere else. owl puts all of that behind one app and one local gateway:
 
-- **Pick any model for any agent** from one list. myna edits the one key that matters in the agent's own config.
+- **Pick any model for any agent** from one list. owl edits the one key that matters in the agent's own config.
 - **Use one provider everywhere**: an API key, a local model, or the Claude, ChatGPT, Copilot, Gemini or Grok plan you're signed in to.
 - **Keep going when a quota runs out**: a provider's next account takes over, and a routing group moves on to another model or provider, so the agent never sees the error. With one account and no group there is nothing to move to, and the error reaches the agent.
 - **Keep your secrets off the vendor's servers**: once you turn masking on in **Settings → Privacy** (it's off by default), keys, passwords and emails in a prompt are masked on your computer before the request leaves it, and put back in the reply.
@@ -47,34 +47,34 @@ Runs on macOS, Windows and Linux (menu bar app, window, TUI, web UI and CLI), in
 
 ## Quick start
 
-**1 · Install.** Download the app from **[github.com/istoo/myna](https://github.com/istoo/myna)**, or run:
+**1 · Install.** Download the app from **[github.com/istoo/owl](https://github.com/istoo/owl)**, or run:
 
 ```sh
-curl -fsSL https://github.com/istoo/myna/releases/latest/download/install.sh | sh
+curl -fsSL https://github.com/istoo/owl/releases/latest/download/install.sh | sh
 ```
 
-<sub>Mac builds are signed and notarised, and every build updates itself. On Linux the script installs the desktop app, and on a desktop without WebKitGTK 4.1 installs it first with your package manager (sudo asks for your password); with no desktop, or no terminal to ask at, it installs the terminal build and says which package to add. `--gui` or `--tui` chooses. Behind a firewall, use `--proxy` or `--mirror`. Or `go install github.com/istoo/myna@latest`, or the [Docker image](https://github.com/istoo/myna/blob/main/docs/docker). Remove what the script installed with `curl -fsSL https://github.com/istoo/myna/releases/latest/download/install.sh | sh -s -- --uninstall`; your settings in `~/.config/myna` stay unless you add `--purge`, which disconnects your agents and deletes them too.</sub>
+<sub>Mac builds are signed and notarised, and every build updates itself. On Linux the script installs the desktop app, and on a desktop without WebKitGTK 4.1 installs it first with your package manager (sudo asks for your password); with no desktop, or no terminal to ask at, it installs the terminal build and says which package to add. `--gui` or `--tui` chooses. Behind a firewall, use `--proxy` or `--mirror`. Or `go install github.com/istoo/owl@latest`, or the [Docker image](https://github.com/istoo/owl/blob/main/docs/docker). Remove what the script installed with `curl -fsSL https://github.com/istoo/owl/releases/latest/download/install.sh | sh -s -- --uninstall`; your settings in `~/.config/owl` stay unless you add `--purge`, which disconnects your agents and deletes them too.</sub>
 
-**2 · Add a provider.** Open myna and go to **Providers → Add provider**. Pick a preset and paste a key, or sign in with a subscription.
+**2 · Add a provider.** Open owl and go to **Providers → Add provider**. Pick a preset and paste a key, or sign in with a subscription.
 
 **3 · Pick a model** for each agent on the **Agents** page. Start a new session and it's on the new model.
 
 Or do it all from the terminal:
 
 ```sh
-myna provider add deepseek sk-…              # a preset needs only the key
-myna claude deepseek/deepseek-v4-pro          # Claude Code on DeepSeek
-myna codex moonshot/kimi-k2.5                 # Codex on Kimi
-myna group add "Opus anywhere" models=claude/claude-opus-5-5,copilot/claude-opus-5.5 routing=smart
-myna claude group/opus-anywhere               # fails over between subscriptions
-myna save work && myna use work             # profiles
-myna quota                                    # what's left on every plan
-myna settings set theme dark                  # every Settings switch, from the terminal
-myna tool generate_image "a myna, watercolour" -o hero.png   # myna's image, vision and search tools, called directly
-myna tui                                      # the whole thing, in a terminal
+owl provider add deepseek sk-…              # a preset needs only the key
+owl claude deepseek/deepseek-v4-pro          # Claude Code on DeepSeek
+owl codex moonshot/kimi-k2.5                 # Codex on Kimi
+owl group add "Opus anywhere" models=claude/claude-opus-5-5,copilot/claude-opus-5.5 routing=smart
+owl claude group/opus-anywhere               # fails over between subscriptions
+owl save work && owl use work             # profiles
+owl quota                                    # what's left on every plan
+owl settings set theme dark                  # every Settings switch, from the terminal
+owl tool generate_image "a owl, watercolour" -o hero.png   # owl's image, vision and search tools, called directly
+owl tui                                      # the whole thing, in a terminal
 ```
 
-myna finds the subscriptions your agents are signed in to by reading their sign-ins (Claude Code's and Codex's files, the Keychain). To keep it from reading them, turn off Settings → Privacy → *Subscription accounts*, or run `myna accounts discovery off` (`on` turns it back on). `MYNA_NO_ACCOUNTS=1` turns it off for one run without changing the saved setting. API-key providers work either way.
+owl finds the subscriptions your agents are signed in to by reading their sign-ins (Claude Code's and Codex's files, the Keychain). To keep it from reading them, turn off Settings → Privacy → *Subscription accounts*, or run `owl accounts discovery off` (`on` turns it back on). `OWL_NO_ACCOUNTS=1` turns it off for one run without changing the saved setting. API-key providers work either way.
 
 ## Supported agents
 
@@ -86,12 +86,12 @@ Claude Code · Claude Desktop · Claude Science · Codex · Gemini CLI · Antigr
 </td></tr>
 </table>
 
-myna shows only the agents installed on your machine; setup notes for some of them are in the [reference](docs/reference.md#notes-on-some-agents). Anything else that takes a base URL can use the gateway too:
+owl shows only the agents installed on your machine; setup notes for some of them are in the [reference](docs/reference.md#notes-on-some-agents). Anything else that takes a base URL can use the gateway too:
 
 ```sh
-export OPENAI_BASE_URL=http://127.0.0.1:3425/v1     OPENAI_API_KEY=myna
-export ANTHROPIC_BASE_URL=http://127.0.0.1:3425     ANTHROPIC_API_KEY=myna
-export GOOGLE_GEMINI_BASE_URL=http://127.0.0.1:3425 GEMINI_API_KEY=myna
+export OPENAI_BASE_URL=http://127.0.0.1:3425/v1     OPENAI_API_KEY=owl
+export ANTHROPIC_BASE_URL=http://127.0.0.1:3425     ANTHROPIC_API_KEY=owl
+export GOOGLE_GEMINI_BASE_URL=http://127.0.0.1:3425 GEMINI_API_KEY=owl
 ```
 
 ## How it fits together
@@ -100,7 +100,7 @@ The gateway at `127.0.0.1:3425` speaks OpenAI Chat, OpenAI Responses, Anthropic 
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="site/public/img/architecture-dark.svg">
-  <img src="site/public/img/architecture.svg" alt="How myna fits together: your agents send requests to the myna gateway at 127.0.0.1:3425, which routes them through routing groups and plugins to your API keys, subscriptions and local models.">
+  <img src="site/public/img/architecture.svg" alt="How owl fits together: your agents send requests to the owl gateway at 127.0.0.1:3425, which routes them through routing groups and plugins to your API keys, subscriptions and local models.">
 </picture>
 
 
@@ -129,11 +129,11 @@ Click a value and a searchable list opens: every model of every provider you add
 
 ### Privacy masking
 
-Agents put what they read into the prompt: an `.env`, a config file, a log with a token in it. With masking on, myna swaps those values for placeholders on your computer before a request leaves it, and swaps them back in the reply. Your agent and your files keep the real values; the vendor never sees them.
+Agents put what they read into the prompt: an `.env`, a config file, a log with a token in it. With masking on, owl swaps those values for placeholders on your computer before a request leaves it, and swaps them back in the reply. Your agent and your files keep the real values; the vendor never sees them.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="site/public/img/masking-dark.png">
-  <img src="site/public/img/masking-light.png" width="900" alt="Insights › Masking: 5,812 values kept from vendors in 7 days, flowing from Claude Code and Codex through myna to OpenAI, Kimi and DeepSeek, and each request's masked values">
+  <img src="site/public/img/masking-light.png" width="900" alt="Insights › Masking: 5,812 values kept from vendors in 7 days, flowing from Claude Code and Codex through owl to OpenAI, Kimi and DeepSeek, and each request's masked values">
 </picture>
 
 | | |
@@ -153,7 +153,7 @@ Pick a preset, paste a key. Model lists come from the vendor, with names and rea
 
 > **Presets include** Anthropic · OpenAI · Google Gemini · Google Vertex AI · Amazon Bedrock (runtime and Mantle) · DeepSeek · Kimi · Zhipu GLM · MiniMax · StepFun · LongCat · Qwen · Baidu Qianfan · Tencent Cloud · Huawei Cloud MaaS · Volcengine Ark · Mistral · Groq · Nous Portal · xAI · OpenRouter · Together · Fireworks · SiliconFlow · NVIDIA NIM · ModelScope · Ollama · LM Studio … and any OpenAI- or Anthropic-compatible URL.
 
-**Import** brings in the providers from CC Switch, Claude Code, Codex and Alma. **[Add to myna](https://github.com/istoo/myna/blob/main/docs/import)** links let a provider's website hand its config to myna in one click. Each key and each account can go through a proxy of its own.
+**Import** brings in the providers from CC Switch, Claude Code, Codex and Alma. **[Add to owl](https://github.com/istoo/owl/blob/main/docs/import)** links let a provider's website hand its config to owl in one click. Each key and each account can go through a proxy of its own.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="site/public/img/add-dark.png">
@@ -162,7 +162,7 @@ Pick a preset, paste a key. Model lists come from the vendor, with names and rea
 
 ### Subscriptions
 
-An agent you're signed in to is a subscription with models behind it, so myna offers it as a provider to every other agent. Add several accounts per subscription and myna fails over between them.
+An agent you're signed in to is a subscription with models behind it, so owl offers it as a provider to every other agent. Add several accounts per subscription and owl fails over between them.
 
 - **Claude**: drives the real local `claude` binary and bridges your agent's tools over MCP
 - **Codex / ChatGPT**: your ChatGPT plan's models, in every other agent
@@ -183,11 +183,11 @@ A **routing group** is several models an agent picks as one, such as `group/dail
 | **`usage`** | Use the least-used member first |
 | **`pace`** | Use the account with the most of its week left per hour until it resets |
 
-A conversation **stays with the account that answered it** while the vendor's prompt cache is worth keeping. Groups can contain groups. **[Intent routing](https://github.com/istoo/myna/blob/main/docs/intent)** has a small model of your choice read each new turn, so tests go to the strong model and quick questions to the cheap one. The Routing view shows every decision live.
+A conversation **stays with the account that answered it** while the vendor's prompt cache is worth keeping. Groups can contain groups. **[Intent routing](https://github.com/istoo/owl/blob/main/docs/intent)** has a small model of your choice read each new turn, so tests go to the strong model and quick questions to the cheap one. The Routing view shows every decision live.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="site/public/img/routing-dark.png">
-  <img width="760" src="site/public/img/routing-light.png" alt="The Routing view: four agents through myna to seven providers, live">
+  <img width="760" src="site/public/img/routing-light.png" alt="The Routing view: four agents through owl to seven providers, live">
 </picture>
 
 <table>
@@ -210,17 +210,17 @@ A conversation **stays with the account that answered it** while the vendor's pr
 ### Plugins
 
 ```sh
-myna plugin add opencode-gemini-auth   # an OpenCode plugin from npm
-myna plugin add pi-antigravity         # a pi package, the same way
-myna plugin login google-plugin        # its own sign-in flow, in myna
+owl plugin add opencode-gemini-auth   # an OpenCode plugin from npm
+owl plugin add pi-antigravity         # a pi package, the same way
+owl plugin login google-plugin        # its own sign-in flow, in owl
 ```
 
-Plugins run on [Bun](https://bun.sh), downloaded the first time one needs it. A plugin signs in, lists its models and makes each request; agents use those models like any other provider's. Browse **[magpie-community/plugins](https://github.com/magpie-community/plugins)**, or [write your own](https://github.com/istoo/myna/blob/main/docs/plugins).
+Plugins run on [Bun](https://bun.sh), downloaded the first time one needs it. A plugin signs in, lists its models and makes each request; agents use those models like any other provider's. Browse **[magpie-community/plugins](https://github.com/magpie-community/plugins)**, or [write your own](https://github.com/istoo/owl/blob/main/docs/plugins).
 
 A plugin can also be **gateway middleware**: JavaScript that sees what every agent sends and gets back. `onRequest` can rewrite a request or turn it away, `onEvent` sees each streamed event, `onResponse` the whole reply. A hook that throws or runs too long leaves the request as it was.
 
 ```js
-// alias.middleware.js — myna plugin add ./alias.middleware.js
+// alias.middleware.js — owl plugin add ./alias.middleware.js
 export function onRequest(body, ctx) {
   if (body.model === "fast") return { ...body, model: "deepseek/deepseek-chat" };
 }
@@ -240,11 +240,11 @@ export function onRequest(body, ctx) {
 | `think-tags` | Take `<think>…</think>` out of replies, or put `reasoning_content` into them |
 
 ```sh
-myna plugin add @magpie-community/middleware-model-map
-myna plugin options model-map '{"mapping": {"fast": "deepseek/deepseek-chat"}}'
+owl plugin add @magpie-community/middleware-model-map
+owl plugin options model-map '{"mapping": {"fast": "deepseek/deepseek-chat"}}'
 ```
 
-Find them under Plugins › Discover › Gateway middleware. See [Gateway middleware](https://github.com/istoo/myna/blob/main/docs/plugins#middleware).
+Find them under Plugins › Discover › Gateway middleware. See [Gateway middleware](https://github.com/istoo/owl/blob/main/docs/plugins#middleware).
 
 </details>
 
@@ -258,7 +258,7 @@ Find them under Plugins › Discover › Gateway middleware. See [Gateway middle
 | | |
 | :-- | :-- |
 | **Tokens and cost** | Tokens, cache reads and writes, reasoning and calls, with cost at list price in dollars or yuan; set your own price for any model |
-| **Quota** | Balances and quota windows for every key, plan and account (`myna quota`), and a reminder before a window renews with much of it unused |
+| **Quota** | Balances and quota windows for every key, plan and account (`owl quota`), and a reminder before a window renews with much of it unused |
 | **Sessions** | Every agent conversation with its cost and title, reopened in your terminal with one click |
 | **Context** | How full each request's context window is, how much came from the cache, and what fills it |
 | **Bills** | By account and by upstream key, and OTLP export to your own observability stack |
@@ -268,14 +268,14 @@ Find them under Plugins › Discover › Gateway middleware. See [Gateway middle
 | | |
 | :-- | :-- |
 | **Local network** | Turn on *Share on local network* and give each client a named gateway key with its own daily, weekly or monthly token and cost limit |
-| **[Remote myna](https://github.com/istoo/myna/blob/main/docs/remote)** | A laptop uses the providers, accounts and groups of the myna on your desktop, and still wires its own agents |
-| **[Docker](https://github.com/istoo/myna/blob/main/docs/docker)** | Run `ghcr.io/istoo/myna` on a server or a NAS and manage it from the web UI |
+| **[Remote owl](https://github.com/istoo/owl/blob/main/docs/remote)** | A laptop uses the providers, accounts and groups of the owl on your desktop, and still wires its own agents |
+| **[Docker](https://github.com/istoo/owl/blob/main/docs/docker)** | Run `ghcr.io/istoo/owl` on a server or a NAS and manage it from the web UI |
 | **Sync** | Back up to a file, or sync machines over WebDAV (Nutstore, Nextcloud…), S3, or an encrypted GitHub repository backup |
 
 ### Also
 
-- **Library**: write instructions, MCP servers, skills and subagents once; myna writes them into each agent's files in its format, and removes only what it wrote.
-- **Web search for any model**: a model that can't search gets myna's search: a provider that can, or search APIs (Tavily, Brave, Exa, Firecrawl, You.com, DeepSeek, Doubao Search on Volcengine, Yuanbao Search on Tencent Cloud, SearXNG), asked in the order you drag them into, each one able to be switched off without losing its key. An API can hold several keys: searches take turns over them (or use them in order with `pick=order`), a key refused lately is asked last, and Tavily keys show what each has used of its limit, in Settings and in `myna search`. Any agent can mount the same search as an MCP server, with a `web_search` tool and a `web_fetch` tool that reads a page by its URL.
+- **Library**: write instructions, MCP servers, skills and subagents once; owl writes them into each agent's files in its format, and removes only what it wrote.
+- **Web search for any model**: a model that can't search gets owl's search: a provider that can, or search APIs (Tavily, Brave, Exa, Firecrawl, You.com, DeepSeek, Doubao Search on Volcengine, Yuanbao Search on Tencent Cloud, SearXNG), asked in the order you drag them into, each one able to be switched off without losing its key. An API can hold several keys: searches take turns over them (or use them in order with `pick=order`), a key refused lately is asked last, and Tavily keys show what each has used of its limit, in Settings and in `owl search`. Any agent can mount the same search as an MCP server, with a `web_search` tool and a `web_fetch` tool that reads a page by its URL.
 - **Images and video**: an image tool for any agent over MCP, with the model you choose, and videos with a Grok subscription or a MiniMax API key (MiniMax H3).
 - **Agents kept current**: the Agents page shows each CLI's version, updates it the way it was installed, and gives the commands for the ones you don't have.
 - **WSL**: on Windows, agents inside WSL distros are wired too, and their sessions counted.
@@ -285,17 +285,17 @@ Find them under Plugins › Discover › Gateway middleware. See [Gateway middle
 
 | | |
 | :-- | :-- |
-| **[Get started](https://github.com/istoo/myna/blob/main/docs/start)** | The guided tour |
+| **[Get started](https://github.com/istoo/owl/blob/main/docs/start)** | The guided tour |
 | **[Reference](docs/reference.md)** | Every agent, provider option, gateway endpoint, CLI command and file |
-| **[Plugins](https://github.com/istoo/myna/blob/main/docs/plugins)** | Use plugins and write your own |
-| **[Intent routing](https://github.com/istoo/myna/blob/main/docs/intent)** | Route each turn by what it asks for |
-| **[Import links](https://github.com/istoo/myna/blob/main/docs/import)** | "Add to myna" buttons for provider websites |
-| **[Remote myna](https://github.com/istoo/myna/blob/main/docs/remote)** | Use one myna's providers and groups from your other computers |
-| **[Docker](https://github.com/istoo/myna/blob/main/docs/docker)** | Run myna on a server or a NAS |
+| **[Plugins](https://github.com/istoo/owl/blob/main/docs/plugins)** | Use plugins and write your own |
+| **[Intent routing](https://github.com/istoo/owl/blob/main/docs/intent)** | Route each turn by what it asks for |
+| **[Import links](https://github.com/istoo/owl/blob/main/docs/import)** | "Add to owl" buttons for provider websites |
+| **[Remote owl](https://github.com/istoo/owl/blob/main/docs/remote)** | Use one owl's providers and groups from your other computers |
+| **[Docker](https://github.com/istoo/owl/blob/main/docs/docker)** | Run owl on a server or a NAS |
 
 ## Privacy
 
-Your prompts, replies, keys and accounts go only to the providers you use, and with [privacy masking](#privacy-masking) on, the secrets in them don't go even there. This build of Myna reports nothing to upstream: no usage event, no partner list, no icon proxy. Its updates, release notes and the pictures it shows come from, or go to, no service but your own GitHub repository.
+Your prompts, replies, keys and accounts go only to the providers you use, and with [privacy masking](#privacy-masking) on, the secrets in them don't go even there. This build of Owl reports nothing to upstream: no usage event, no partner list, no icon proxy. Its updates, release notes and the pictures it shows come from, or go to, no service but your own GitHub repository.
 
 ## Community
 
@@ -303,12 +303,12 @@ Questions, ideas, or a model that won't show up? Tell us on **[Discord](https://
 
 **This repository doesn't take pull requests.** Only maintainers can open them. If you'd like a fix or a feature, describe it on Discord and we'll build it.
 
-If myna saved you from editing one more config file, **a ⭐ helps others find it.**
+If owl saved you from editing one more config file, **a ⭐ helps others find it.**
 
-<a href="https://star-history.com/#istoo/myna&Date">
+<a href="https://star-history.com/#istoo/owl&Date">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=istoo/myna&type=Date&theme=dark">
-    <img src="https://api.star-history.com/svg?repos=istoo/myna&type=Date" width="600" alt="Star history">
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=istoo/owl&type=Date&theme=dark">
+    <img src="https://api.star-history.com/svg?repos=istoo/owl&type=Date" width="600" alt="Star history">
   </picture>
 </a>
 
@@ -316,4 +316,4 @@ If myna saved you from editing one more config file, **a ⭐ helps others find i
 
 [MIT](LICENSE)
 
-myna is not affiliated with [Apache Myna](https://myna.apache.org) or the [Apache Software Foundation](https://apache.org).
+owl is not affiliated with [Apache Owl](https://owl.apache.org) or the [Apache Software Foundation](https://apache.org).

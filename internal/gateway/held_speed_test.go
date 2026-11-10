@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // John on Discord, again after v0.1.1119: Kimi Code (api.kimi.ai, Chat,

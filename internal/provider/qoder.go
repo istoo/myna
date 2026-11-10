@@ -17,8 +17,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/qoder"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/qoder"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // qoderMu keeps a Qoder account's saved pairs still while the move reads

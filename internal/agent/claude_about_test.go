@@ -7,11 +7,11 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// claudeAboutSetup is #1227's settings.json before myna: every tier on the
+// claudeAboutSetup is #1227's settings.json before owl: every tier on the
 // user's own model, each named for it, two with a description and
 // capabilities of their own.
 const claudeAboutSetup = `{"model":"opus","env":{
@@ -56,11 +56,11 @@ func claudeAboutLeft(path string) map[string]string {
 	return out
 }
 
-// Routed through myna, the names, descriptions and capabilities the user
+// Routed through owl, the names, descriptions and capabilities the user
 // wrote for their own tier models no longer name the model each tier runs
 // (#1227: every tier on deepseek-flash, shown as grok-4.5): they go while
-// myna's models are there, and come back with the user's models when
-// myna steps out, by its default or by Disconnect.
+// owl's models are there, and come back with the user's models when
+// owl steps out, by its default or by Disconnect.
 func TestClaudeTierNamesGoWithTheirModel(t *testing.T) {
 	for _, out := range []string{"default", "disconnect"} {
 		t.Run(out, func(t *testing.T) {
@@ -71,12 +71,12 @@ func TestClaudeTierNamesGoWithTheirModel(t *testing.T) {
 				t.Fatal(err)
 			}
 			// the user's own fable model goes too, and on a model that is
-			// no Fable myna leaves the tier unset (#2090)
+			// no Fable owl leaves the tier unset (#2090)
 			if v, has := edit.GetJSON(path, "env.ANTHROPIC_DEFAULT_FABLE_MODEL"); has {
 				t.Fatalf("fable left on %q:\n%s", v, readFile(path))
 			}
 			if left := claudeAboutLeft(path); len(left) > 0 {
-				t.Fatalf("the user's own models' names left on myna's: %v", left)
+				t.Fatalf("the user's own models' names left on owl's: %v", left)
 			}
 			if out == "default" {
 				if err := a.Apply("model", ""); err != nil {
@@ -93,10 +93,10 @@ func TestClaudeTierNamesGoWithTheirModel(t *testing.T) {
 	}
 }
 
-// Claude Code routed by an older myna, which left the names of the
-// models before it in place (#1227 as reported): myna's next look takes
+// Claude Code routed by an older owl, which left the names of the
+// models before it in place (#1227 as reported): owl's next look takes
 // them out and keeps them to give back.
-func TestClaudeTierNamesLeftByAnOlderMyna(t *testing.T) {
+func TestClaudeTierNamesLeftByAnOlderOwl(t *testing.T) {
 	home, path, _ := claudeAboutHome(t, `{"model":"opus"}`)
 	a := claude(home)
 	if err := a.Apply("model", "opencode-go/deepseek-flash"); err != nil {
@@ -111,13 +111,13 @@ func TestClaudeTierNamesLeftByAnOlderMyna(t *testing.T) {
 	if err := edit.SetJSON(path, kvs...); err != nil {
 		t.Fatal(err)
 	}
-	// as an older myna left it: nothing kept of having looked
+	// as an older owl left it: nothing kept of having looked
 	forget("claude.tier_about")
 	if err := a.Sync(); err != nil {
 		t.Fatal(err)
 	}
 	if left := claudeAboutLeft(path); len(left) > 0 {
-		t.Fatalf("the names before myna are left: %v", left)
+		t.Fatalf("the names before owl are left: %v", left)
 	}
 	if err := a.Apply("model", ""); err != nil {
 		t.Fatal(err)
@@ -127,10 +127,10 @@ func TestClaudeTierNamesLeftByAnOlderMyna(t *testing.T) {
 	}
 }
 
-// A name the user writes for myna's model is theirs: it stays while the
-// tier is on that model, whatever else myna writes, and goes when the
+// A name the user writes for owl's model is theirs: it stays while the
+// tier is on that model, whatever else owl writes, and goes when the
 // tier moves to another.
-func TestClaudeOwnTierNameOnMyna(t *testing.T) {
+func TestClaudeOwnTierNameOnOwl(t *testing.T) {
 	home, path, _ := claudeAboutHome(t, `{"model":"opus"}`)
 	a := claude(home)
 	if err := a.Apply("model", "opencode-go/deepseek-flash"); err != nil {
@@ -156,7 +156,7 @@ func TestClaudeOwnTierNameOnMyna(t *testing.T) {
 	}
 	want := map[string]string{"ANTHROPIC_DEFAULT_OPUS_MODEL_NAME": "DeepSeek Pro", "ANTHROPIC_DEFAULT_SONNET_MODEL_NAME": "DeepSeek Flash"}
 	if got := claudeAboutLeft(path); !reflect.DeepEqual(got, want) {
-		t.Fatalf("the user's names for myna's models: %v\n%s", got, readFile(path))
+		t.Fatalf("the user's names for owl's models: %v\n%s", got, readFile(path))
 	}
 	// the main model moves: sonnet, following it, moves too; opus stays
 	if err := a.Apply("model", "opencode-go/deepseek-pro"); err != nil {

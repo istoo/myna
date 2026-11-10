@@ -15,7 +15,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // revokedReply is the 401 a request signed with a revoked credential is

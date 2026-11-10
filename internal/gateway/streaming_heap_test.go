@@ -11,7 +11,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // streamingHold is a ResponseWriter that passes a reply on as it comes.

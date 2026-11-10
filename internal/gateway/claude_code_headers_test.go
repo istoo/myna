@@ -7,12 +7,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A relay that serves only Claude Code (#179: packy's "only accessible via
 // the official Claude CLI") gets Claude Code's own headers and body as it
-// sent them, the provider's key in place of myna's
+// sent them, the provider's key in place of owl's
 func TestClaudeCodeHeadersReachAnthropicRelay(t *testing.T) {
 	f := &fake{t: t, ctype: "application/json", reply: `{"id":"msg","type":"message","content":[]}`}
 	up := setup(t, provider.Anthropic, f)
@@ -69,21 +69,21 @@ func TestClaudeCodeHeadersReachAnthropicRelay(t *testing.T) {
 		}
 	}
 
-	// a provider with no key of its own still never sees myna's
+	// a provider with no key of its own still never sees owl's
 	p, _ := provider.Find("fake")
 	p.Key = ""
 	provider.Save(*p)
 	send("/v1/messages", claude)
 	if a, k := f.head.Get("Authorization"), f.head.Get("X-Api-Key"); a != "" || k != "" {
-		t.Errorf("myna's key leaked: %q %q", a, k)
+		t.Errorf("owl's key leaked: %q %q", a, k)
 	}
 	if f.head.Get("X-App") != "cli" {
 		t.Errorf("x-app: %v", f.head)
 	}
 
-	// another agent's request goes as myna's
+	// another agent's request goes as owl's
 	send("/v1/messages?beta=true", http.Header{"User-Agent": {"opencode/1.0"}, "X-App": {"other"}, "X-Stainless-Lang": {"js"}})
-	if ua := f.head.Get("User-Agent"); !strings.HasPrefix(ua, "myna/") || f.head.Get("X-App") != "" || f.head.Get("X-Stainless-Lang") != "" || query != "" {
+	if ua := f.head.Get("User-Agent"); !strings.HasPrefix(ua, "owl/") || f.head.Get("X-App") != "" || f.head.Get("X-Stainless-Lang") != "" || query != "" {
 		t.Errorf("other agent: %q %v %q", ua, f.head, query)
 	}
 }

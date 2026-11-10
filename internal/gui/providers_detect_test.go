@@ -10,8 +10,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // The editor's Detect asks which APIs answer at the URL typed, with the

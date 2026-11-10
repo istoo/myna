@@ -14,7 +14,7 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // parseMemoBody is a Claude Code conversation in a folder, long enough to

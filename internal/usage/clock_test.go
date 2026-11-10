@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/owl/internal/sessions"
 )
 
 // holdClock stops Clock at at for the test and gives at back, for the test

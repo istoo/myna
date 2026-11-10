@@ -31,7 +31,7 @@ for(const [engine,browserType] of Object.entries({chromium,webkit}))for(const la
    const file=path.join(assets,u.pathname==='/'?'index.html':u.pathname);
    try{return route.fulfill({body:await fs.readFile(file),contentType:{'.html':'text/html','.js':'text/javascript','.css':'text/css','.svg':'image/svg+xml'}[path.extname(file)]});}catch{return route.fulfill({status:404,body:''});}
   });
-  await page.goto('http://myna.test/?view=providers');
+  await page.goto('http://owl.test/?view=providers');
   await page.locator('#addProvider').click();
   await page.locator('#addSheet .tile[data-pick="PublicFixture"]').click();
   const choice=page.getByRole('button',{name:'Enable fixed access',exact:true});

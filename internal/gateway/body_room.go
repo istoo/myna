@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/proc"
 )
 
 // bodyRoom bounds the decoded request bytes the gateway serves at once.
@@ -57,7 +57,7 @@ var bodyRoomWait = 100 * time.Second
 // bodyRoomFloor is the least room, however small the machine.
 const bodyRoomFloor = 64 << 20
 
-// bodyRoomSize is a thirty-second of what myna's processes may use
+// bodyRoomSize is a thirty-second of what owl's processes may use
 // (memLimit on Linux, the computer's memory elsewhere), bodyRoomFloor at
 // least: a 44 MiB Responses turn sent on as Chat peaked at ~700 MiB of Go
 // heap on its way, garbage not yet collected included, and a plugin's host
@@ -82,7 +82,7 @@ type bodyFull struct {
 }
 
 func (e *bodyFull) Error() string {
-	return fmt.Sprintf("myna is serving %d MiB of request bodies at once, as much as it holds (%d MiB, %s), "+
+	return fmt.Sprintf("owl is serving %d MiB of request bodies at once, as much as it holds (%d MiB, %s), "+
 		"and none of them ended within %s to make room for this %d MiB one; the provider was not asked",
 		e.held>>20, e.room>>20, e.why, e.waited, e.n>>20)
 }

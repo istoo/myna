@@ -3,11 +3,11 @@ package provider
 import (
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 // The ChatGPT account running out of its allowance, or getting it back, is
-// told to the agents' sync (#540), which makes myna Codex's provider while
+// told to the agents' sync (#540), which makes owl Codex's provider while
 // the account is out; the same state again is not.
 func TestNoteCodexUsedUp(t *testing.T) {
 	told := 0

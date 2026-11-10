@@ -1,8 +1,8 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// JetBrains Air's row picks the model of the Myna agent myna adds to
+// JetBrains Air's row picks the model of the Owl agent owl adds to
 // Air, and nothing else. jumy_18634 on Discord picked one there and found
 // Air's own Codex still on its own model. Air's IDE plugin runs the codex
-// and claude on this computer, so its Codex and Claude Agent are on myna
+// and claude on this computer, so its Codex and Claude Agent are on owl
 // exactly while Codex and Claude Code are connected here; the Air app's run
 // on its own sign-in and never are. Each row, opened, says which, in every
 // language, wide and narrow. No backend: faked here.
@@ -17,7 +17,7 @@ const assets = path.resolve(__dirname, "../assets");
 const { I18N } = strings();
 const say = (lang, k) => (lang === "en" ? k : I18N[lang][k]);
 
-const model = (v) => [{ key: "model", label: "model", value: v, options: [{ value: v, ref: "qoder/qoder-fast", label: "qoder-fast", icon: "myna" }] }];
+const model = (v) => [{ key: "model", label: "model", value: v, options: [{ value: v, ref: "qoder/qoder-fast", label: "qoder-fast", icon: "owl" }] }];
 function fixture(lang) {
   const settings = { lang, theme: "light" };
   const state = () => ({
@@ -55,7 +55,7 @@ const text = async (loc) => (await loc.allTextContents()).map((s) => s.trim());
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   for (const lang of Object.keys(DETAILS)) {
     for (const width of [1100, 640]) {
-      test(`${engine} ${lang} ${width}px: Air's rows say whether Air's own Codex and Claude Agent go through myna`, async (t) => {
+      test(`${engine} ${lang} ${width}px: Air's rows say whether Air's own Codex and Claude Agent go through owl`, async (t) => {
         const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
         const page = await browser.newPage({ viewport: { width, height: 900 } });
         page.setDefaultTimeout(5000);
@@ -64,7 +64,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", fixture(lang).serve);
         t.after(() => browser.close());
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
 
         // the IDE plugin's: Codex connected here, Claude Code not
         const ide = row("air-ide");
@@ -74,11 +74,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await lines.first().waitFor();
         const all = await text(lines);
         for (const k of [
-          "In Air's agent menu, pick Myna: the model here is Myna's, and myna's models are in its model menu.",
+          "In Air's agent menu, pick Owl: the model here is Owl's, and owl's models are in its model menu.",
           "Air's own Codex and Claude Agent don't take the model here: they run the Codex and Claude Code on this computer, with those agents' own settings.",
-          "Codex is connected here, so Air's Codex lists myna's models too: pick one in its model menu, in a new Codex task.",
+          "Codex is connected here, so Air's Codex lists owl's models too: pick one in its model menu, in a new Codex task.",
         ]) assert.ok(all.includes(say(lang, k)), `${JSON.stringify(say(lang, k))} not in ${JSON.stringify(all)}`);
-        assert.deepEqual(await text(page.locator(`${ide} .ag-exp .ag-air-own`)), [say(lang, "Claude Code isn't connected here, so Air's Claude Agent doesn't go through myna.")]);
+        assert.deepEqual(await text(page.locator(`${ide} .ag-exp .ag-air-own`)), [say(lang, "Claude Code isn't connected here, so Air's Claude Agent doesn't go through owl.")]);
         const fits = async (loc) => {
           const box = await loc.first().boundingBox();
           assert.ok(box.width <= width && box.height > 0, JSON.stringify(box));
@@ -86,12 +86,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         };
         await fits(page.locator(`${ide} .ag-exp .ag-air-own`));
 
-        // the app's: never through myna, whatever is connected here
+        // the app's: never through owl, whatever is connected here
         const app = row("air");
         await page.locator(`${app} .ag-link`, { hasText: DETAILS[lang] }).click();
         const own = page.locator(`${app} .ag-exp .ag-air-own`);
         await own.first().waitFor();
-        assert.deepEqual(await text(own), [say(lang, "Air's own agents (Codex, Claude Agent…) run on Air's own sign-in and settings, not through myna: only Myna in its agent menu takes myna's models.")]);
+        assert.deepEqual(await text(own), [say(lang, "Air's own agents (Codex, Claude Agent…) run on Air's own sign-in and settings, not through owl: only Owl in its agent menu takes owl's models.")]);
         await fits(own);
         assert.deepEqual(errors, []);
       });

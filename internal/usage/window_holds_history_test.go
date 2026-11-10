@@ -2,7 +2,7 @@ package usage
 
 import (
 	"encoding/json"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 	"testing"
 	"time"
 )

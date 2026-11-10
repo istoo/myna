@@ -12,19 +12,19 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // One event a day, under the same id, with nothing but the id, the version
-// and the system, and what myna is used with by built-in ids; none once
+// and the system, and what owl is used with by built-in ids; none once
 // the user turns it off.
 func TestSend(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
 	t.Setenv("DO_NOT_TRACK", "")
-	t.Setenv("MYNA_NO_STATS", "")
+	t.Setenv("OWL_NO_STATS", "")
 	usage = func() Usage {
 		return Usage{Agents: []string{"claude", "codex"}, Providers: []string{"deepseek", "custom"}, Models: []string{"deepseek/deepseek-v4"}, Groups: 2}
 	}
@@ -42,7 +42,7 @@ func TestSend(t *testing.T) {
 		got = append(got, b.Batch)
 	}))
 	defer srv.Close()
-	t.Setenv("MYNA_STATS_HOST", srv.URL)
+	t.Setenv("OWL_STATS_HOST", srv.URL)
 	day := time.Date(2026, 9, 28, 9, 0, 0, 0, time.UTC)
 	for _, at := range []time.Time{day, day.Add(3 * time.Hour), day.Add(24 * time.Hour)} {
 		if err := Send(context.Background(), "0.1.300", "app", at); err != nil {
@@ -57,13 +57,13 @@ func TestSend(t *testing.T) {
 	}
 	a := got[0][0]
 	p := a["properties"].(map[string]any)
-	if a["event"] != "myna active" || p["version"] != "0.1.300" || p["kind"] != "app" || p["agents"] != 2.0 || p["providers"] != 2.0 || p["models"] != 1.0 || p["groups"] != 2.0 || len(p) != 10 {
+	if a["event"] != "owl active" || p["version"] != "0.1.300" || p["kind"] != "app" || p["agents"] != 2.0 || p["providers"] != 2.0 || p["models"] != 1.0 || p["groups"] != 2.0 || len(p) != 10 {
 		t.Fatalf("active: %v", a)
 	}
 	var uses []string
 	for _, e := range got[0][1:] {
 		p := e["properties"].(map[string]any)
-		if e["event"] != "myna uses" || e["distinct_id"] != a["distinct_id"] || p["$process_person_profile"] != false || len(p) != 4 {
+		if e["event"] != "owl uses" || e["distinct_id"] != a["distinct_id"] || p["$process_person_profile"] != false || len(p) != 4 {
 			t.Fatalf("use: %v", e)
 		}
 		uses = append(uses, p["kind"].(string)+" "+p["id"].(string))
@@ -81,7 +81,7 @@ func TestSend(t *testing.T) {
 
 	settings.Save(settings.Settings{NoStats: true})
 	Send(context.Background(), "0.1.300", "app", day.Add(72*time.Hour))
-	t.Setenv("MYNA_NO_STATS", "1")
+	t.Setenv("OWL_NO_STATS", "1")
 	settings.Save(settings.Settings{})
 	Send(context.Background(), "0.1.300", "app", day.Add(96*time.Hour))
 	if len(got) != 3 {
@@ -89,7 +89,7 @@ func TestSend(t *testing.T) {
 	}
 }
 
-// A provider is named by what myna built in, never by what the user
+// A provider is named by what owl built in, never by what the user
 // typed: a preset's id, a subscription's agent, a known plugin's id;
 // anything else is "custom" or "plugin".
 func TestProviderLabel(t *testing.T) {
@@ -162,19 +162,19 @@ func TestModelLabelKeepsTheUsersOwnModelIDs(t *testing.T) {
 }
 
 // The partners' counts of the days ended go with the day's event, each as
-// one "myna partner" at its own day, and are sent once; with what myna
+// one "owl partner" at its own day, and are sent once; with what owl
 // is used with turned off they don't go.
 func TestSendPartnerCounts(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(home, ".cache"))
 	t.Setenv("DO_NOT_TRACK", "")
-	t.Setenv("MYNA_NO_STATS", "")
+	t.Setenv("OWL_NO_STATS", "")
 	usage = func() Usage { return Usage{} }
 	defer func() { usage = readUsage }()
 	counts := `{"days":{"2026-09-27":{"acme":{"shown":12,"opened":2}},"2026-09-28":{"acme":{"shown":3}}}}`
 	write := func() {
-		f := filepath.Join(home, ".cache", "myna", "partner-counts.json")
+		f := filepath.Join(home, ".cache", "owl", "partner-counts.json")
 		if err := os.MkdirAll(filepath.Dir(f), 0o755); err != nil {
 			t.Fatal(err)
 		}
@@ -192,12 +192,12 @@ func TestSendPartnerCounts(t *testing.T) {
 		got = append(got, b.Batch)
 	}))
 	defer srv.Close()
-	t.Setenv("MYNA_STATS_HOST", srv.URL)
+	t.Setenv("OWL_STATS_HOST", srv.URL)
 	day := time.Date(2026, 9, 28, 9, 0, 0, 0, time.UTC)
 	partners := func(batch []map[string]any) []string {
 		var out []string
 		for _, e := range batch {
-			if e["event"] != "myna partner" {
+			if e["event"] != "owl partner" {
 				continue
 			}
 			p := e["properties"].(map[string]any)

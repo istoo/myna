@@ -5,19 +5,19 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/gateway"
 )
 
 // Codex in a WSL distro under NAT connected while the gateway wasn't shared
 // was written gateway.Token, which the gateway turns away from beyond
 // loopback; turning sharing on afterwards left it there, and every request
-// was 401 "not an enabled myna gateway key" (tried on Windows with
-// myna-desktop). Rekey, run as sharing changes, gives it the sharing key,
+// was 401 "not an enabled owl gateway key" (tried on Windows with
+// owl-desktop). Rekey, run as sharing changes, gives it the sharing key,
 // and gateway.Token again once sharing is off.
 func TestRekeyGivesWSLAgentTheSharingKey(t *testing.T) {
-	t.Setenv("MYNA_ADDR", "")
+	t.Setenv("OWL_ADDR", "")
 	home, _ := codexHome(t, "", "model = \"gpt-5.5\"\n")
 	probe := "home:/" + filepath.Base(home) + "\ndir:.codex\nroute:default via 172.23.80.1 dev eth0 proto kernel\nnet:nat\n"
 	fakeWSL(t, "Ubuntu\r\n", "Ubuntu\r\n", map[string]string{"Ubuntu": probe},
@@ -36,7 +36,7 @@ func TestRekeyGivesWSLAgentTheSharingKey(t *testing.T) {
 	cfg := filepath.Join(home, ".codex", "config.toml")
 	token := func() string {
 		t.Helper()
-		tb, err := edit.GetTOMLTable(cfg, "model_providers."+mynaID)
+		tb, err := edit.GetTOMLTable(cfg, "model_providers."+owlID)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -92,7 +92,7 @@ func TestRekeyGivesWSLAgentTheSharingKey(t *testing.T) {
 // Rekey leaves an agent on this machine's loopback as it is: its key
 // doesn't follow sharing.
 func TestRekeyLeavesLoopback(t *testing.T) {
-	t.Setenv("MYNA_ADDR", "")
+	t.Setenv("OWL_ADDR", "")
 	_, read := codexHome(t, "", "model = \"gpt-5.5\"\n")
 	var as []*Agent
 	for _, a := range All() {
@@ -109,7 +109,7 @@ func TestRekeyLeavesLoopback(t *testing.T) {
 	if moved, err := Rekey(as); err != nil || len(moved) != 0 {
 		t.Fatalf("moved %v, %v", moved, err)
 	}
-	if cfg := read(); strings.Contains(cfg, "myna") {
+	if cfg := read(); strings.Contains(cfg, "owl") {
 		t.Fatalf("written:\n%s", cfg)
 	}
 }

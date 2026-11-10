@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/owl/internal/sessions"
 )
 
 // A session is exported as Markdown (#1276): in the app to Downloads, never
@@ -47,7 +47,7 @@ func TestSessionExportMarkdown(t *testing.T) {
 			}
 		}
 	}
-	for _, want := range []string{"myna-session-claude-0a1b2c3d-111.md", "myna-session-claude-0a1b2c3d-111-2.md"} {
+	for _, want := range []string{"owl-session-claude-0a1b2c3d-111.md", "owl-session-claude-0a1b2c3d-111-2.md"} {
 		w := httptest.NewRecorder()
 		mux.ServeHTTP(w, httptest.NewRequest("POST", "/api/sessions/export"+q, strings.NewReader("{}")))
 		var out struct{ Path string }
@@ -64,7 +64,7 @@ func TestSessionExportMarkdown(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	mux.ServeHTTP(w, httptest.NewRequest("GET", "/api/sessions/markdown"+q, nil))
-	if w.Code != 200 || !strings.Contains(w.Header().Get("Content-Disposition"), `filename="myna-session-claude-0a1b2c3d-111.md"`) {
+	if w.Code != 200 || !strings.Contains(w.Header().Get("Content-Disposition"), `filename="owl-session-claude-0a1b2c3d-111.md"`) {
 		t.Fatalf("download: %d %v", w.Code, w.Header())
 	}
 	check(w.Body.String())

@@ -121,7 +121,7 @@ func TestMarkdownCodexAndPi(t *testing.T) {
 	}
 }
 
-// An agent whose conversation myna can't read has nothing to export.
+// An agent whose conversation owl can't read has nothing to export.
 func TestMarkdownUnsupported(t *testing.T) {
 	var b bytes.Buffer
 	if err := WriteMarkdown(&b, Session{Agent: "opencode", ID: "x", Path: "/x"}, "OpenCode"); err != ErrNoTranscript {

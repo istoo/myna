@@ -5,9 +5,9 @@ package cli
 import (
 	"log"
 
-	"github.com/istoo/myna/internal/applog"
-	"github.com/istoo/myna/internal/gui"
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/applog"
+	"github.com/istoo/owl/internal/gui"
+	"github.com/istoo/owl/internal/proc"
 )
 
 const hasGUI = true

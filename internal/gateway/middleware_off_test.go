@@ -11,12 +11,12 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/gwmw"
-	"github.com/istoo/myna/internal/masking"
-	"github.com/istoo/myna/internal/middleware"
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/gwmw"
+	"github.com/istoo/owl/internal/masking"
+	"github.com/istoo/owl/internal/middleware"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // echoing is a vendor that keeps what it was sent and says the last

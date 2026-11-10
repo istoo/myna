@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 	"github.com/tidwall/gjson"
 )
 
@@ -333,7 +333,7 @@ func (o *ollamaWriter) WriteHeader(code int) {
 	}
 	o.status = code
 	o.sse = strings.HasPrefix(o.header.Get("Content-Type"), "text/event-stream")
-	// what says why it waits or failed (Retry-After, myna's own marks)
+	// what says why it waits or failed (Retry-After, owl's own marks)
 	// reaches the client as it would on /v1
 	for k, vs := range o.header {
 		if k == "Retry-After" || strings.HasPrefix(k, "X-") {

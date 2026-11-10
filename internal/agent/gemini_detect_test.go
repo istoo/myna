@@ -6,7 +6,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // TestGeminiNotAntigravity: a ~/.gemini holding only what Antigravity keeps

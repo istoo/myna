@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/istoo/myna/internal/backup"
-	"github.com/istoo/myna/internal/profile"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/backup"
+	"github.com/istoo/owl/internal/profile"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // hereAgents sets the agents whose picks stay on this computer, as the

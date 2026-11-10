@@ -1,6 +1,6 @@
-// Package notices holds the third-party notices every myna binary
+// Package notices holds the third-party notices every owl binary
 // carries: THIRD_PARTY_NOTICES at the repository's root, which package main
-// embeds and hands over before anything runs. `myna licenses` prints it,
+// embeds and hands over before anything runs. `owl licenses` prints it,
 // and Settings › About shows it.
 package notices
 

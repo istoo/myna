@@ -48,7 +48,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/istoo/myna/internal/appdir"
+	"github.com/istoo/owl/internal/appdir"
 )
 
 // VertexPreset is the preset's id.

@@ -8,9 +8,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 const summaryCacheSessions = 1024
@@ -39,7 +39,7 @@ var summaries struct {
 func indexedSummary(p Period, now time.Time) Summary { return topSummary(p, now, -1) }
 
 // ReadAhead parses the log into its index and works out today's summary in
-// this computer's zone, for myna to run as it starts: the first reader,
+// this computer's zone, for owl to run as it starts: the first reader,
 // the tray panel's line of today's calls, finds both done. Parsing the log
 // cold took 0.33 s at 2 MB and 0.77 s at 40 MB on one core, and the
 // panel's numbers waited for it on the first open after a start

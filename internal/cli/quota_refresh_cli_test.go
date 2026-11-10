@@ -12,12 +12,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/agentenv"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/agentenv"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/testenv"
 )
 
-// myna quota refresh <provider> reads that card again, as its refresh
+// owl quota refresh <provider> reads that card again, as its refresh
 // button on the Usage page does, and shows it alone: the other providers'
 // vendors aren't asked, and a second run within 30 seconds asks nobody and
 // shows what was read (#2104).

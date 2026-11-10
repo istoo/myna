@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // noNamespaces answers as a vendor's Responses API that knows no
@@ -36,13 +36,13 @@ func noNamespaces(got *[]string, refuse bool) http.HandlerFunc {
 }
 
 // hasImageTool reports whether a request offers Codex's image tool, in its
-// namespace or flat as myna translates it.
+// namespace or flat as owl translates it.
 func hasImageTool(body string) bool {
 	return strings.Contains(body, `"type":"namespace"`) || strings.Contains(body, `"image_gen__imagegen"`)
 }
 
-// Codex on a myna model offers its image tool, as #870 has it, in the
-// namespace image_gen (testdata: what Codex 0.160.0 sends, myna's
+// Codex on a owl model offers its image tool, as #870 has it, in the
+// namespace image_gen (testdata: what Codex 0.160.0 sends, owl's
 // provider table and catalog). A vendor that knows no namespaces turned
 // every chat away with a bare 400 (#949, AnyRouter's "bad response status
 // code 400" to "只回复 OK"). It is asked again without the tool, and not
@@ -52,7 +52,7 @@ func TestImageToolLeftOutWhereRefused(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// Codex's own web_search has myna translate the request and search
+	// Codex's own web_search has owl translate the request and search
 	// for the vendor, which then gets the tool flat; without it the body
 	// passes through with the namespace
 	for name, search := range map[string]string{

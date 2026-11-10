@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // Claude Desktop shows a gateway model of 1M tokens or more twice, its

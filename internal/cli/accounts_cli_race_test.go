@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/agentenv"
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/agentenv"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A provider no longer known to LoginUsage has no quota, but its remembered

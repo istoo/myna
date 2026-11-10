@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // An account whose sign-in the vendor refuses while the move reads the
@@ -20,7 +20,7 @@ import (
 func TestMoveRefusedWhileListing(t *testing.T) {
 	bun := testenv.Bun(t)
 	claudeHome(t)
-	t.Setenv("MYNA_BUN", bun)
+	t.Setenv("OWL_BUN", bun)
 	t.Cleanup(plugin.Settle)
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 	defer cancel()
@@ -63,7 +63,7 @@ func TestMoveRefusedWhileListing(t *testing.T) {
 func TestMoveExpiredInWords(t *testing.T) {
 	bun := testenv.Bun(t)
 	claudeHome(t)
-	t.Setenv("MYNA_BUN", bun)
+	t.Setenv("OWL_BUN", bun)
 	t.Cleanup(plugin.Settle)
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 	defer cancel()
@@ -96,10 +96,10 @@ func TestMoveExpiredInWords(t *testing.T) {
 	}
 }
 
-// A move's lock left by a myna killed mid-move (a hung move stopped by
+// A move's lock left by a owl killed mid-move (a hung move stopped by
 // hand) holds nothing: the next move takes it, where it used to be
-// refused as "another myna is moving" for a quarter of an hour.
-func TestMoveLockOfDeadMyna(t *testing.T) {
+// refused as "another owl is moving" for a quarter of an hour.
+func TestMoveLockOfDeadOwl(t *testing.T) {
 	claudeHome(t)
 	gone := exec.Command("true")
 	if err := gone.Run(); err != nil {
@@ -114,9 +114,9 @@ func TestMoveLockOfDeadMyna(t *testing.T) {
 	}
 	unlock, err := lockMoves()
 	if err != nil {
-		t.Fatalf("a dead myna's lock: %v", err)
+		t.Fatalf("a dead owl's lock: %v", err)
 	}
-	// one held by a myna still running stays held
+	// one held by a owl still running stays held
 	if _, err := lockMoves(); err == nil {
 		t.Fatal("a live lock was taken")
 	}

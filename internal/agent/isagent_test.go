@@ -3,10 +3,10 @@ package agent
 import (
 	"testing"
 
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/usage"
 )
 
-// The gateway takes a client that is no agent myna knows, with the plain
+// The gateway takes a client that is no agent owl knows, with the plain
 // token, for a script Claude Code started (tbxark on X); every agent's own
 // User-Agent must still read as an agent, and a script's must not.
 func TestIsAgentByUserAgent(t *testing.T) {

@@ -15,14 +15,14 @@ import (
 
 // The menu bar's image: the bird, then a cell for each card side by side,
 // drawn at twice the points for a Retina screen, in the bar's text colour
-// light or dark. MYNA_TRAY_PREVIEW=<dir> writes each as a PNG to look at.
+// light or dark. OWL_TRAY_PREVIEW=<dir> writes each as a PNG to look at.
 func TestTrayImage(t *testing.T) {
 	bird, err := os.ReadFile("tray.png")
 	if err != nil {
 		t.Fatal(err)
 	}
 	cells, _, _ := trayUsageView(trayCards(), time.Now(), false, false)
-	out := os.Getenv("MYNA_TRAY_PREVIEW")
+	out := os.Getenv("OWL_TRAY_PREVIEW")
 	widths := map[bool][]int{}
 	for _, dark := range []bool{false, true} {
 		for n := 0; n <= 3; n++ {
@@ -282,7 +282,7 @@ func TestTrayImageClickWithoutBird(t *testing.T) {
 }
 
 // The digits weigh what the menu bar's other figures do (qingnianxiaozhe on
-// X: beside Surge's and iStat Menus' figures myna's read too bold, and a
+// X: beside Surge's and iStat Menus' figures owl's read too bold, and a
 // lone figure too small and too heavy): two stacked rows in the small
 // system font, regular or at most medium, never semibold or bold; a lone
 // row in the menu bar's own font, its size and regular weight. Both have

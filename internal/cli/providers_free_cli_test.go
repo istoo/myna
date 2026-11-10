@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-// myna provider set free=yes counts every model of a provider free for
+// owl provider set free=yes counts every model of a provider free for
 // Free first (jiabubu on Discord: ModelScope's free daily quota), show
 // says so, free=no takes it back, and any other value is refused and
 // leaves the saved one alone.

@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/istoo/myna/internal/lastgood"
+	"github.com/istoo/owl/internal/lastgood"
 )
 
 // LoadChecked tells settings that aren't there (no error) from settings

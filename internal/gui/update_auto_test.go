@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // The feed is asked by itself as often as Settings says, every six hours

@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // isMemoryKind: a call Codex makes to write or consolidate its memories,
@@ -23,7 +23,7 @@ func codexTurnKey(r *http.Request, who string) string {
 }
 
 // rememberCodexTurn keeps the model a turn of Codex's own conversation
-// was asked on, one myna serves, for its memory calls.
+// was asked on, one owl serves, for its memory calls.
 func (s *Server) rememberCodexTurn(r *http.Request, who, agent, kind, asked string) {
 	if agent != "codex" || kind != "" {
 		return
@@ -46,23 +46,23 @@ func isReviewCall(kind, asked string) bool {
 // follow too).
 func freeOnChatGPT(model, plan string) bool { return provider.ChatGPTReviewFree(model, plan) }
 
-// codexMemoryStandIn is the model a Codex memory call goes to when myna
+// codexMemoryStandIn is the model a Codex memory call goes to when owl
 // knows none by the name it came with (#742): Codex writes and
 // consolidates its memories on models of its own (memories.extract_model
 // and consolidation_model, gpt-5.6-luna and gpt-5.6-terra by default) by
-// their bare names, whatever it is set to, so with myna as its provider
+// their bare names, whatever it is set to, so with owl as its provider
 // every one was turned away as an unknown model before it was routed. It
 // goes to the model that Codex's own turns go to — the last one it had
 // answered here, else the last in the ledger (a week back) from the same
 // agent with the same key — so it is routed, and in the views, as the
 // memory call it is. Its auto-review (isReviewCall) goes there too when
-// Codex's config names no model myna serves (StandIn): Codex reviews on
+// Codex's config names no model owl serves (StandIn): Codex reviews on
 // the conversation's model when it has no reviewer, and a Codex whose
-// config myna doesn't read as its own — on myna through another
+// config owl doesn't read as its own — on owl through another
 // provider table or a profile, under a CODEX_HOME of its own, or on
-// another computer — was answered 404 "myna knows no model
+// another computer — was answered 404 "owl knows no model
 // \"codex-auto-review\"" (Adam on Discord). "" for any other call, a model
-// myna serves, or a Codex that has had no turn answered here.
+// owl serves, or a Codex that has had no turn answered here.
 //
 // Codex starts its memories with each turn of a conversation, so a memory
 // call can come before the turn it was started with, the first after the
@@ -75,15 +75,15 @@ func (s *Server) codexMemoryStandIn(r *http.Request, who, agent, kind, asked str
 	}
 	if _, _, ok := provider.Resolve(asked); ok {
 		// A memory call on one of Codex's own bare defaults that a
-		// provider of myna's happens to serve under the same name:
+		// provider of owl's happens to serve under the same name:
 		// the name is Codex's own, not a pick of that provider's model,
 		// and the account it resolves to may refuse the model outright
 		// (400, three tries, the memory lost, #4765). With Codex's
 		// config naming no model for its memories, the call follows the
 		// conversation's, as it does on the ChatGPT backend's path
 		// (codexFollowTo). "" keeps it where the name resolves: any
-		// other call, the config's own pick, a call whose config myna
-		// can't read, or no conversation of myna's to follow.
+		// other call, the config's own pick, a call whose config owl
+		// can't read, or no conversation of owl's to follow.
 		if !isMemoryKind(kind) || CodexSideSet == nil || CodexSideSet("memories") {
 			return ""
 		}

@@ -9,12 +9,12 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
-// The allow list (lc on Discord, myna in Docker on a public host): the
-// addresses other computers may reach myna from at all, as IPs and CIDR
+// The allow list (lc on Discord, owl in Docker on a public host): the
+// addresses other computers may reach owl from at all, as IPs and CIDR
 // ranges. A request from any other address is refused 403 before its key
 // is looked at, so a gateway key that leaks is of no use from elsewhere.
 // No list lets every address in, as before. This computer (loopback, and
@@ -22,17 +22,17 @@ import (
 //
 // The address judged is the connection's own (r.RemoteAddr). A forwarding
 // header (X-Forwarded-For and the rest) is never taken for it: anyone can
-// write one, and myna keeps no list of proxies to believe. A proxy or
-// tunnel on this computer reaches myna from loopback, so what it passes
+// write one, and owl keeps no list of proxies to believe. A proxy or
+// tunnel on this computer reaches owl from loopback, so what it passes
 // on is let in here, and still needs a gateway key (proxied); limit who
 // reaches such a proxy at the proxy.
 
 // AllowIPsEnv names the environment variable that sets the list, in place
-// of Settings' (for Docker and `myna web`).
-const AllowIPsEnv = "MYNA_ALLOW_IPS"
+// of Settings' (for Docker and `owl web`).
+const AllowIPsEnv = "OWL_ALLOW_IPS"
 
 // AllowIPs is the allow list in force, as written, and whether
-// MYNA_ALLOW_IPS set it. Empty: no list, every address let in.
+// OWL_ALLOW_IPS set it. Empty: no list, every address let in.
 func AllowIPs() (list []string, fromEnv bool) {
 	list, fromEnv, _ = allowList()
 	return list, fromEnv
@@ -41,7 +41,7 @@ func AllowIPs() (list []string, fromEnv bool) {
 // lastAllow is the Settings list as last read whole. settings.json that
 // can't be read, or doesn't parse with no last good generation, holds a
 // list nobody knows: it is never taken for "no list" (every address let
-// in). The one read last stays in force, and with none read since myna
+// in). The one read last stays in force, and with none read since owl
 // started, only this computer is let in.
 var lastAllow struct {
 	sync.Mutex
@@ -78,9 +78,9 @@ var warnedAllow sync.Map
 
 // allowPrefixes is the list in force, read; on says one is set, or that
 // settings.json holds one nobody knows (unknown), which lets in only this
-// computer. An entry that doesn't read (a mistyped MYNA_ALLOW_IPS) lets
+// computer. An entry that doesn't read (a mistyped OWL_ALLOW_IPS) lets
 // nothing in and is logged once: the list stays on, so a typo never opens
-// myna to every address.
+// owl to every address.
 func allowPrefixes() (ps []netip.Prefix, on, unknown bool) {
 	list, _, unknown := allowList()
 	if unknown {
@@ -118,7 +118,7 @@ func peerAddr(r *http.Request) (netip.Addr, bool) {
 
 // ownAddr: a is one of this computer's own addresses, which a connection
 // comes from only when it was made here (an agent calling the address
-// MYNA_ADDR names, which isn't loopback).
+// OWL_ADDR names, which isn't loopback).
 var ownAddr = func(a netip.Addr) bool {
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
@@ -134,7 +134,7 @@ var ownAddr = func(a netip.Addr) bool {
 	return false
 }
 
-// allowedIn is whether a request from a may reach myna under the allow
+// allowedIn is whether a request from a may reach owl under the allow
 // list ps (on: there is one): there is none, a is this computer's, or a
 // is in it.
 func allowedIn(ps []netip.Prefix, on bool, a netip.Addr) bool {
@@ -173,7 +173,7 @@ func KeepsOut(list []string, r *http.Request) (string, bool) {
 	return a.String(), !allowedListFrom(list, a)
 }
 
-// allowed: r may reach myna under the allow list; when it may not, it
+// allowed: r may reach owl under the allow list; when it may not, it
 // names r's address and says why.
 func allowed(r *http.Request) (addr, why string, ok bool) {
 	ps, on, unknown := allowPrefixes()
@@ -194,13 +194,13 @@ func allowed(r *http.Request) (addr, why string, ok bool) {
 // list, or (unknown) settings.json, which holds the list, can't be read.
 func notAllowed(addr string, unknown bool) string {
 	if unknown {
-		return "myna couldn't read its settings.json in " + settings.Dir() + ", which holds its allow list, so it answers only this computer until it can, and this request came from " + addr + ": repair that file, or set the list in " + AllowIPsEnv
+		return "owl couldn't read its settings.json in " + settings.Dir() + ", which holds its allow list, so it answers only this computer until it can, and this request came from " + addr + ": repair that file, or set the list in " + AllowIPsEnv
 	}
-	return "myna answers only the addresses on its allow list (" + AllowIPsEnv + ", or Settings → Network and sharing → Allowed addresses), and this request came from " + addr + ": add it there to let it in"
+	return "owl answers only the addresses on its allow list (" + AllowIPsEnv + ", or Settings → Network and sharing → Allowed addresses), and this request came from " + addr + ": add it there to let it in"
 }
 
 // AllowGuard refuses a request from an address the allow list leaves out,
-// 403, before anything else looks at it: the page `myna web` serves.
+// 403, before anything else looks at it: the page `owl web` serves.
 func AllowGuard(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if addr, why, ok := allowed(r); !ok {

@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 func claudeAuthFixture(t *testing.T, lapse string) (Provider, savedLogin) {
@@ -102,7 +102,7 @@ func TestClaudeRefusalHoldsForItsCredentialOnly(t *testing.T) {
 }
 
 // Claude Code empties a sign-in Anthropic refused to refresh: the copy
-// myna kept of it is the refused one, never put back for Claude Code.
+// owl kept of it is the refused one, never put back for Claude Code.
 func TestClaudeEmptiedSignInIsNotPutBack(t *testing.T) {
 	p, side := claudeAuthFixture(t, "")
 	dir, err := sideToken(t, p, side.User)

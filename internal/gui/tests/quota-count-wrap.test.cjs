@@ -48,7 +48,7 @@ for (const [name, engine] of [["webkit", webkit], ["chromium", chromium]]) {
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         await page.route("**/*", serve("zh", [...wb, trae.after]));
-        await page.goto("http://myna.test/?view=usage");
+        await page.goto("http://owl.test/?view=usage");
         await page.locator(".subscription-card .quota-n").nth(2).waitFor();
         await page.waitForTimeout(300);
         const counts = await page.evaluate(() => [...document.querySelectorAll(".quota-n")].map((n) => ({

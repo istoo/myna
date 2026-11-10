@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // The settings status must not display credentials; requests still need them.

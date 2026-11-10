@@ -3,7 +3,7 @@ package agent
 // JetBrains Air, JetBrains' agentic development environment, runs its own
 // agents (Claude Agent, Codex, Gemini CLI, Junie) on the accounts signed in
 // under Settings | Account | AI Providers: a sign-in or an API key, with no
-// base URL of its own to point at myna (AIR-4541 asks for one). What it
+// base URL of its own to point at owl (AIR-4541 asks for one). What it
 // does take is any agent that speaks the Agent Client Protocol, listed in
 // acp.json in its config folder — ~/Library/Application Support/JetBrains/Air
 // on macOS, $XDG_CONFIG_HOME/JetBrains/Air on Linux, %APPDATA%\JetBrains\Air
@@ -12,22 +12,22 @@ package agent
 //	{"agent_servers": {"<name in Air's agent menu>": {"command": …, "args": […], "env": {…}}}}
 //
 // and the models such an agent reports at session/new are its model menu
-// in Air. So myna adds an agent of its own there, "Myna": OpenCode's ACP
-// server (opencode acp), handed with OPENCODE_CONFIG a config file myna
-// keeps beside acp.json that has myna's provider, its models, the one
+// in Air. So owl adds an agent of its own there, "Owl": OpenCode's ACP
+// server (opencode acp), handed with OPENCODE_CONFIG a config file owl
+// keeps beside acp.json that has owl's provider, its models, the one
 // picked as the model a task starts on, and enabled_providers narrowed to
-// myna, so Air's menu lists myna's models and routing groups and nothing
+// owl, so Air's menu lists owl's models and routing groups and nothing
 // of OpenCode's own. OpenCode merges that file over the user's own config
 // and leaves the rest of it (their plugins, agents, MCP servers) as it is.
 // Air's own agents, and the accounts they run on, aren't touched.
 //
 // Checked with OpenCode 2.0.20's opencode acp under a sandbox HOME, as Air
-// starts it: session/new's model option lists myna's models alone, the
+// starts it: session/new's model option lists owl's models alone, the
 // one set here current. Not with Air itself. One gap is OpenCode's: when a
 // provider's key is in the environment it is started with (OPENAI_API_KEY,
 // DEEPSEEK_API_KEY, … set, not empty), 2.0.20's ACP server lists that
 // provider and none of its config's — this file's, the global one or a
-// project's alike — so myna's models don't show; an emptied key, or one
+// project's alike — so owl's models don't show; an emptied key, or one
 // kept in OpenCode's auth.json, doesn't do it.
 
 import (
@@ -40,14 +40,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/proc"
 )
 
-// airAgent is the name myna's agent has in acp.json, and so in Air's
+// airAgent is the name owl's agent has in acp.json, and so in Air's
 // agent menu.
-const airAgent = "Myna"
+const airAgent = "Owl"
 
 // airDir is where Air keeps its settings and acp.json.
 func airDir(home, cfg string) string {
@@ -162,10 +162,10 @@ func air(home, cfg string) *Agent {
 // CODEX_HOME or ~/.codex and no model_provider or CODEX_HOME of its own
 // (CodexAppServerProcessKt, CodexCliUtils), its model menu Codex's
 // model/list and its default config/read's model; its Claude Agent runs
-// claude with only Air's hooks in --settings. So both are on myna while
+// claude with only Air's hooks in --settings. So both are on owl while
 // Codex and Claude Code are connected here, and the model picked on Air's
-// row is the Myna agent's alone (jumy_18634 on Discord), which the row
-// says (airSaid in app.js). myna adds the same Myna agent as the
+// row is the Owl agent's alone (jumy_18634 on Discord), which the row
+// says (airSaid in app.js). owl adds the same Owl agent as the
 // app's, with its OpenCode config beside acp.json.
 func airIDE(home, cfg string) *Agent {
 	dir := filepath.Join(home, ".jetbrains")
@@ -175,14 +175,14 @@ func airIDE(home, cfg string) *Agent {
 		Aliases: []string{"air-plugin", "air-in-ides", "jetbrains-acp"},
 		Dir:     dir,
 		// ~/.jetbrains is there for AI Assistant's agents too: an IDE of
-		// 2026.2 or later, or myna's agent already in acp.json, says Air
+		// 2026.2 or later, or owl's agent already in acp.json, says Air
 		// can be
 		detect: func() bool {
 			if jetBrainsIDESince(home, cfg, 2026, 2) {
 				return true
 			}
 			v, _ := edit.GetJSON(path, "agent_servers."+airAgent+".env.OPENCODE_CONFIG")
-			return v == filepath.Join(dir, "myna-opencode.json")
+			return v == filepath.Join(dir, "owl-opencode.json")
 		},
 	}, path, noticeAirIDE)
 }
@@ -229,22 +229,22 @@ func jetBrainsIDESince(home, cfg string, year, minor int) bool {
 var jetBrainsVersioned = regexp.MustCompile(`^[A-Za-z]+(\d{4})\.(\d+)$`)
 
 // airAt is an Air agent on the acp.json at path: a, with its id, name,
-// icon and detection, gets the Myna entry there and its OpenCode config
+// icon and detection, gets the Owl entry there and its OpenCode config
 // beside it; done is the notice once it is there.
 func airAt(home string, a *Agent, path string, done notice) *Agent {
 	dir := filepath.Dir(path)
-	// the OpenCode config myna's agent runs on, myna's own file
-	ocPath := filepath.Join(dir, "myna-opencode.json")
+	// the OpenCode config owl's agent runs on, owl's own file
+	ocPath := filepath.Join(dir, "owl-opencode.json")
 	entry := "agent_servers." + airAgent
 	id := a.ID
-	provider := openCodeKept(ocPath, func() any { return mynaProviderJSONFor("opencode", id) })
-	// ours: acp.json's Myna is the agent myna added, on its file
+	provider := openCodeKept(ocPath, func() any { return owlProviderJSONFor("opencode", id) })
+	// ours: acp.json's Owl is the agent owl added, on its file
 	ours := func() bool {
 		v, _ := edit.GetJSON(path, entry+".env.OPENCODE_CONFIG")
 		return v == ocPath
 	}
-	// model is the one a task starts on, read from myna's own file: with
-	// Myna gone from acp.json it still reads, for Check to say so and a
+	// model is the one a task starts on, read from owl's own file: with
+	// Owl gone from acp.json it still reads, for Check to say so and a
 	// set again to put the entry back
 	model := func() string { v, _ := edit.GetJSON(ocPath, "model"); return v }
 	a.Path = path
@@ -258,18 +258,18 @@ func airAt(home string, a *Agent, path string, done notice) *Agent {
 		return done.String()
 	}
 	a.Check = func() string {
-		if !usesMyna(model()) {
+		if !usesOwl(model()) {
 			return ""
 		}
 		if !ours() {
-			return "Air's Myna agent (" + filepath.Base(path) + ") is gone, so Air no longer reaches myna"
+			return "Air's Owl agent (" + filepath.Base(path) + ") is gone, so Air no longer reaches owl"
 		}
-		return wiringOff("Air", ocPath, func(k string) (string, bool) { return edit.GetJSON(ocPath, "provider."+mynaID+".options."+k) },
+		return wiringOff("Air", ocPath, func(k string) (string, bool) { return edit.GetJSON(ocPath, "provider."+owlID+".options."+k) },
 			"baseURL", gatewayV1(), "apiKey", hereKey())
 	}
 	a.ListOnly = true
 	a.Sync = func() error {
-		return syncJSONInOrder(ocPath, "provider."+mynaID, provider)
+		return syncJSONInOrder(ocPath, "provider."+owlID, provider)
 	}
 	a.Fields = []Field{{
 		Key: "model", Label: "model",
@@ -284,15 +284,15 @@ func airAt(home string, a *Agent, path string, done notice) *Agent {
 				}
 				return nil
 			}
-			ref, ok := strings.CutPrefix(v, mynaID+"/")
-			if !ok || !isMyna(ref) {
-				return fmt.Errorf("Air takes only myna's models here (its own agents are picked in Air): %s isn't one", v)
+			ref, ok := strings.CutPrefix(v, owlID+"/")
+			if !ok || !isOwl(ref) {
+				return fmt.Errorf("Air takes only owl's models here (its own agents are picked in Air): %s isn't one", v)
 			}
 			// each key new to the file goes in at its top: last first,
 			// so a new file reads $schema, model, …, provider
 			if err := edit.SetJSON(ocPath,
-				edit.KV{Path: "provider." + mynaID, Value: provider()},
-				edit.KV{Path: "enabled_providers", Value: []string{mynaID}},
+				edit.KV{Path: "provider." + owlID, Value: provider()},
+				edit.KV{Path: "enabled_providers", Value: []string{owlID}},
 				// titles and summaries too, as the user's own small
 				// model may be a provider left out here
 				edit.KV{Path: "small_model", Value: v},
@@ -309,14 +309,14 @@ func airAt(home string, a *Agent, path string, done notice) *Agent {
 				"env": map[string]string{"OPENCODE_CONFIG": ocPath},
 			}})
 		},
-		Options: func(map[string]string) []Option { return viaMyna(id, mynaID+"/") },
+		Options: func(map[string]string) []Option { return viaOwl(id, owlID+"/") },
 	}}
 	return atomic(a, path, ocPath)
 }
 
 // what air says after a change (notice.go)
 var (
-	noticeAir1   = newNotice("Air runs myna's models through OpenCode's ACP server, and OpenCode isn't installed here: install OpenCode (npm i -g opencode-ai), then pick Myna in a new Air task.")
-	noticeAir2   = newNotice("In Air, start a new task and pick Myna in its agent menu: myna's models and routing groups are in its model menu.")
-	noticeAirIDE = newNotice("In your JetBrains IDE (2026.3, or 2026.2 with the Air plugin), pick Myna in Air's agent menu — restart the IDE if it isn't listed yet: myna's models and routing groups are in its model menu.")
+	noticeAir1   = newNotice("Air runs owl's models through OpenCode's ACP server, and OpenCode isn't installed here: install OpenCode (npm i -g opencode-ai), then pick Owl in a new Air task.")
+	noticeAir2   = newNotice("In Air, start a new task and pick Owl in its agent menu: owl's models and routing groups are in its model menu.")
+	noticeAirIDE = newNotice("In your JetBrains IDE (2026.3, or 2026.2 with the Air plugin), pick Owl in Air's agent menu — restart the IDE if it isn't listed yet: owl's models and routing groups are in its model menu.")
 )

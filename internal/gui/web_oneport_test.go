@@ -8,12 +8,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/settings"
 )
 
-// onePortHome is a fresh myna home for one test: settings and keys of
+// onePortHome is a fresh owl home for one test: settings and keys of
 // its own.
 func onePortHome(t *testing.T) {
 	t.Helper()
@@ -22,12 +22,12 @@ func onePortHome(t *testing.T) {
 	t.Setenv("USERPROFILE", home)
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
-	t.Setenv("MYNA_ADDR", "")
-	t.Setenv("MYNA_PUBLIC_URL", "")
-	t.Setenv("MYNA_TRUST_PROXY", "")
+	t.Setenv("OWL_ADDR", "")
+	t.Setenv("OWL_PUBLIC_URL", "")
+	t.Setenv("OWL_TRUST_PROXY", "")
 }
 
-// onePortKey shares myna and makes an enabled gateway key.
+// onePortKey shares owl and makes an enabled gateway key.
 func onePortKey(t *testing.T) string {
 	t.Helper()
 	s := settings.Load()
@@ -60,7 +60,7 @@ func onePortCall(t *testing.T, h http.Handler, method, target, peer, host, cooki
 		r.Header.Set(hdr[i], hdr[i+1])
 	}
 	if cookie != "" {
-		r.AddCookie(&http.Cookie{Name: "myna_web_3430", Value: cookie})
+		r.AddCookie(&http.Cookie{Name: "owl_web_3430", Value: cookie})
 	}
 	w := httptest.NewRecorder()
 	h.ServeHTTP(w, r)
@@ -69,8 +69,8 @@ func onePortCall(t *testing.T, h http.Handler, method, target, peer, host, cooki
 
 var chromeMarks = []string{"User-Agent", "Mozilla/5.0 (Macintosh) Chrome/140", "Sec-Fetch-Site", "same-origin", "Sec-Fetch-Mode", "cors"}
 
-// onePortCases checks what `myna web`'s port answers, the gateway being
-// reached through gw (this process's, or another myna's): its client
+// onePortCases checks what `owl web`'s port answers, the gateway being
+// reached through gw (this process's, or another owl's): its client
 // routes as the gateway's own port would, and the page's API never without
 // the page's key, whatever route, Origin or Host a request takes.
 func onePortCases(t *testing.T, h http.Handler, reached *bool) {
@@ -92,7 +92,7 @@ func onePortCases(t *testing.T, h http.Handler, reached *bool) {
 	api("from a foreign Origin", "POST", "/api/settings", lo, here, "Origin", "https://evil.example")
 	api("under a rebound Host", "GET", "/api/settings", lo, evil, chromeMarks...)
 	api("under a rebound Host, a POST", "POST", "/api/settings", lo, evil, append([]string{"Origin", "http://" + evil}, chromeMarks...)...)
-	api("through a proxy", "GET", "/api/settings", lo, "myna.example.com", "X-Forwarded-For", "203.0.113.9")
+	api("through a proxy", "GET", "/api/settings", lo, "owl.example.com", "X-Forwarded-For", "203.0.113.9")
 	api("from another machine", "GET", "/api/settings", "10.0.0.5:50001", here)
 	// nor by a path that names a client route on its way to the API
 	api("by /v1/../api", "GET", "/v1/../api/settings", lo, here)
@@ -111,7 +111,7 @@ func onePortCases(t *testing.T, h http.Handler, reached *bool) {
 	// A raw TCP forward to the page's port (frp's tcp, ssh -R, socat), or
 	// a proxy that adds no forwarding header, arrives from loopback with
 	// nothing an agent here wouldn't send: no client route there is
-	// answered as local, so with myna not shared none is answered at all
+	// answered as local, so with owl not shared none is answered at all
 	// (reported privately by Coffemon). Browser marks change nothing.
 	forwarded(t, gw, 403, lo)
 
@@ -137,10 +137,10 @@ func onePortCases(t *testing.T, h http.Handler, reached *bool) {
 	gw("under a rebound Host, a POST", 401, "POST", "/v1/chat/completions", lo, evil, "", append([]string{"Origin", "http://" + evil}, chromeMarks...)...)
 	// the page's own cookie is no gateway key either
 	gw("under a rebound Host with the page's cookie", 401, "GET", "/v1/models", lo, evil, onePortWebKey, chromeMarks...)
-	gw("through a proxy without a key", 401, "GET", "/v1/models", lo, "myna.example.com", "", "X-Forwarded-For", "203.0.113.9")
-	gw("through a proxy with the page's cookie", 401, "GET", "/v1/models", lo, "myna.example.com", onePortWebKey, "X-Forwarded-For", "203.0.113.9")
+	gw("through a proxy without a key", 401, "GET", "/v1/models", lo, "owl.example.com", "", "X-Forwarded-For", "203.0.113.9")
+	gw("through a proxy with the page's cookie", 401, "GET", "/v1/models", lo, "owl.example.com", onePortWebKey, "X-Forwarded-For", "203.0.113.9")
 	gw("from another machine without a key", 401, "GET", "/v1/models", "10.0.0.5:50001", here, "")
-	gw("through a proxy with a gateway key", 200, "GET", "/v1/models", lo, "myna.example.com", "", "X-Forwarded-For", "203.0.113.9", "Authorization", "Bearer "+key)
+	gw("through a proxy with a gateway key", 200, "GET", "/v1/models", lo, "owl.example.com", "", "X-Forwarded-For", "203.0.113.9", "Authorization", "Bearer "+key)
 	gw("from another machine with a gateway key", 200, "GET", "/v1/models", "10.0.0.5:50001", here, "", "Authorization", "Bearer "+key)
 
 	// not shared: another machine, or a proxy, isn't answered at all
@@ -149,7 +149,7 @@ func onePortCases(t *testing.T, h http.Handler, reached *bool) {
 	if err := settings.Save(s); err != nil {
 		t.Fatal(err)
 	}
-	gw("through a proxy, not shared", 403, "GET", "/v1/models", lo, "myna.example.com", "", "X-Forwarded-For", "203.0.113.9", "Authorization", "Bearer "+key)
+	gw("through a proxy, not shared", 403, "GET", "/v1/models", lo, "owl.example.com", "", "X-Forwarded-For", "203.0.113.9", "Authorization", "Bearer "+key)
 	gw("from another machine, not shared", 403, "GET", "/v1/models", "10.0.0.5:50001", here, "", "Authorization", "Bearer "+key)
 }
 
@@ -160,7 +160,7 @@ func onePortCases(t *testing.T, h http.Handler, reached *bool) {
 // routes.
 func forwarded(t *testing.T, gw func(string, int, string, string, string, string, string, ...string), want int, peer string) {
 	t.Helper()
-	for _, host := range []string{"127.0.0.1:3430", "127.0.0.1", "localhost:3430", "myna.example.com"} {
+	for _, host := range []string{"127.0.0.1:3430", "127.0.0.1", "localhost:3430", "owl.example.com"} {
 		gw("forwarded to "+host+": chat completions", want, "POST", "/v1/chat/completions", peer, host, "")
 		gw("forwarded to "+host+": chat completions without /v1", want, "POST", "/chat/completions", peer, host, "")
 		gw("forwarded to "+host+": responses", want, "POST", "/v1/responses", peer, host, "")
@@ -168,7 +168,7 @@ func forwarded(t *testing.T, gw func(string, int, string, string, string, string
 		gw("forwarded to "+host+": models", want, "GET", "/v1/models", peer, host, "")
 		gw("forwarded to "+host+": Gemini", want, "GET", "/v1beta/models", peer, host, "")
 		gw("forwarded to "+host+": an MCP server", want, "POST", "/mcp/github", peer, host, "")
-		gw("forwarded to "+host+": myna's web search MCP", want, "POST", "/mcp/myna/web-search", peer, host, "")
+		gw("forwarded to "+host+": owl's web search MCP", want, "POST", "/mcp/owl/web-search", peer, host, "")
 		gw("forwarded to "+host+": the Codex backend", want, "POST", gateway.CodexPath+"/responses", peer, host, "")
 	}
 	gw("forwarded, a browser's marks", want, "POST", "/v1/chat/completions", peer, "127.0.0.1:3430", "", chromeMarks...)
@@ -186,7 +186,7 @@ func onePortPage(reached *bool) http.Handler {
 }
 
 // zgcwkj on Discord: one reverse-proxy location for the page and the
-// agents. `myna web`'s port hands the gateway's client routes to the
+// agents. `owl web`'s port hands the gateway's client routes to the
 // gateway this process serves, through the gateway's own guards.
 func TestWebOnePortServedHere(t *testing.T) {
 	onePortHome(t)
@@ -197,7 +197,7 @@ func TestWebOnePortServedHere(t *testing.T) {
 	onePortCases(t, onePortPage(&reached), &reached)
 }
 
-// With another myna serving the gateway (the service, the app), the page
+// With another owl serving the gateway (the service, the app), the page
 // passes the client routes on to it, and they are judged there as they
 // came: Host, Origin and a proxy's forwarding headers kept, and one from
 // another machine marked as such.
@@ -206,7 +206,7 @@ func TestWebOnePortServedElsewhere(t *testing.T) {
 	other := httptest.NewServer(gateway.New().Front())
 	t.Cleanup(other.Close)
 	u, _ := url.Parse(other.URL)
-	t.Setenv("MYNA_ADDR", u.Host)
+	t.Setenv("OWL_ADDR", u.Host)
 	prev := served.Swap(nil)
 	t.Cleanup(func() { served.Store(prev) })
 	var reached bool
@@ -226,7 +226,7 @@ func TestWebAssetsAreNoClientPath(t *testing.T) {
 
 // An agent here keeps the gateway's own port, key-free from loopback as
 // before; only the page's port judges every client route as from another
-// machine, and MYNA_TRUST_PROXY (a proxy that signs its clients in)
+// machine, and OWL_TRUST_PROXY (a proxy that signs its clients in)
 // doesn't make the page's port local again.
 func TestWebOnePortAgentsHereUseTheGatewayPort(t *testing.T) {
 	onePortHome(t)
@@ -242,13 +242,13 @@ func TestWebOnePortAgentsHereUseTheGatewayPort(t *testing.T) {
 	if w.Code != 403 || !strings.Contains(w.Body.String(), "page port") || !strings.Contains(w.Body.String(), gateway.URL()) {
 		t.Fatalf("an agent here on the page's port, not shared: %d: %s", w.Code, w.Body.String())
 	}
-	t.Setenv("MYNA_TRUST_PROXY", "1")
+	t.Setenv("OWL_TRUST_PROXY", "1")
 	if w := onePortCall(t, page, "POST", "/v1/chat/completions", "127.0.0.1:50001", "127.0.0.1:3430", ""); w.Code != 403 {
-		t.Fatalf("with MYNA_TRUST_PROXY, the page's port: %d: %s", w.Code, w.Body.String())
+		t.Fatalf("with OWL_TRUST_PROXY, the page's port: %d: %s", w.Code, w.Body.String())
 	}
 	key := onePortKey(t)
-	if w := onePortCall(t, page, "POST", "/mcp/myna/web-search", "127.0.0.1:50001", "127.0.0.1", ""); w.Code != 401 && w.Code != 429 {
-		t.Fatalf("with MYNA_TRUST_PROXY, shared, the page's port's MCP without a key: %d: %s", w.Code, w.Body.String())
+	if w := onePortCall(t, page, "POST", "/mcp/owl/web-search", "127.0.0.1:50001", "127.0.0.1", ""); w.Code != 401 && w.Code != 429 {
+		t.Fatalf("with OWL_TRUST_PROXY, shared, the page's port's MCP without a key: %d: %s", w.Code, w.Body.String())
 	}
 	if w := onePortCall(t, page, "GET", "/v1/models", "127.0.0.1:50001", "127.0.0.1", "", "Authorization", "Bearer "+key); w.Code != 200 {
 		t.Fatalf("the page's port with a gateway key: %d: %s", w.Code, w.Body.String())

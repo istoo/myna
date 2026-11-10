@@ -10,7 +10,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // deepSeekCustomRefusal is DeepSeek's Responses API turning Codex's exec
@@ -63,7 +63,7 @@ func (u *customUpstream) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // A Responses API that takes no custom tool (DeepSeek's, #2656) turned
-// every Codex turn offering exec away, and myna gave the 400 back. The
+// every Codex turn offering exec away, and owl gave the 400 back. The
 // turn is now translated on the same API: exec offered as a function
 // taking its input, the call back to Codex as the custom_tool_call it
 // runs, exec's name kept. The next turn goes translated at once, and an
@@ -204,7 +204,7 @@ func TestCustomToolRefusalWordings(t *testing.T) {
 		`{"error":{"message":"Invalid tool type: 'custom'"}}`,
 		`{"error":{"message":"custom tools are not supported"}}`,
 		// xAI 422s the type with Rust's own wording (#3392, kongkongklng),
-		// in an error body and bare, as myna reads it off a reply's words
+		// in an error body and bare, as owl reads it off a reply's words
 		`{"error":{"message":"xAI: Failed to deserialize the JSON body into the target type: tools[6].type: unknown variant ` + "`custom`" + `, expected one of ` + "`function`" + `, ` + "`web_search`" + `","type":"invalid_request_error"}}`,
 		`Failed to deserialize the JSON body into the target type: tools[6].type: unknown variant ` + "`custom`" + `, expected one of ` + "`function`" + `, ` + "`shell`" + `, ` + "`tool_search`" + ``,
 	}

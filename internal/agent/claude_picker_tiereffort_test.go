@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // iTanX (#1616): Codex's Sol as the main model (Opus, Sonnet), Astra on

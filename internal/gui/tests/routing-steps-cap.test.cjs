@@ -55,7 +55,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     page.on("pageerror", (e) => { if (!/ResizeObserver loop/.test(e.message)) errors.push(e.message); }); // WebKit reports a layout loop it recovers from as a page error
     await page.route("**/*", serve);
     t.after(() => browser.close());
-    await page.goto("http://myna.test/?view=routing");
+    await page.goto("http://owl.test/?view=routing");
     const rows = page.locator(".rt-req");
     await rows.nth(routes.length - 1).waitFor();
     const steps = page.locator(".rt-steps");

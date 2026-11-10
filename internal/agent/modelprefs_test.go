@@ -7,12 +7,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A model the user names, or keeps some reasoning levels of, is named so
-// and offered only those in the lists myna wrote into the agents' files,
+// and offered only those in the lists owl wrote into the agents' files,
 // rewritten as soon as it is changed; a reset gives the model's own back.
 func TestModelNameAndLevelsReachAgentFiles(t *testing.T) {
 	home := syncHome(t)
@@ -23,13 +23,13 @@ func TestModelNameAndLevelsReachAgentFiles(t *testing.T) {
 		t.Fatal(err)
 	}
 	piModels := filepath.Join(home, ".pi", "agent", "models.json")
-	writeFile(t, piModels, `{"providers":{"myna":{"name":"myna","models":[]}}}`)
-	// Pi runs a model of myna's: connected, so its list follows
-	writeFile(t, filepath.Join(home, ".pi", "agent", "settings.json"), `{"defaultProvider":"myna","defaultModel":"relay/glm-4.6"}`)
-	setUpInMyna("pi")
+	writeFile(t, piModels, `{"providers":{"owl":{"name":"owl","models":[]}}}`)
+	// Pi runs a model of owl's: connected, so its list follows
+	writeFile(t, filepath.Join(home, ".pi", "agent", "settings.json"), `{"defaultProvider":"owl","defaultModel":"relay/glm-4.6"}`)
+	setUpInOwl("pi")
 	codexDir := filepath.Join(home, ".codex")
-	codexCat := filepath.Join(codexDir, "myna-models.json")
-	writeFile(t, filepath.Join(codexDir, "config.toml"), "model = \"relay/glm-4.6\"\nmodel_provider = \"myna\"\nmodel_catalog_json = '"+codexCat+"'\n")
+	codexCat := filepath.Join(codexDir, "owl-models.json")
+	writeFile(t, filepath.Join(codexDir, "config.toml"), "model = \"relay/glm-4.6\"\nmodel_provider = \"owl\"\nmodel_catalog_json = '"+codexCat+"'\n")
 	writeFile(t, codexCat, `{"models":[]}`)
 	catalog.Changed = SyncCatalog
 	t.Cleanup(func() { catalog.Changed = nil })
@@ -48,7 +48,7 @@ func TestModelNameAndLevelsReachAgentFiles(t *testing.T) {
 	if err := json.Unmarshal([]byte(readFile(piModels)), &pi); err != nil {
 		t.Fatal(err)
 	}
-	ms := pi.Providers["myna"].Models
+	ms := pi.Providers["owl"].Models
 	// a custom name still carries its provider, the same as GLM-4.6's own
 	// name would, so a picker full of renamed models can still be told
 	// apart by vendor

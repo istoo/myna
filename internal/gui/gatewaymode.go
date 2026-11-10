@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"sync/atomic"
 
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/settings"
 )
 
-// Gateway mode (Player on Discord): `myna web` on a server that is only
+// Gateway mode (Player on Discord): `owl web` on a server that is only
 // the gateway for other machines' agents shows what such a gateway needs —
 // Providers, Gateway, Routing, Usage, Sessions, Plugins and Settings — and leaves out
 // what is this machine's agents' (Agents, Library, the settings
@@ -19,20 +19,20 @@ import (
 // windows show everything whatever it says.
 //
 // Settings' choice (settings.GatewayMode, "on" or "off") wins; with none,
-// `myna web --gateway` turns it on, and so does a myna web with no
+// `owl web --gateway` turns it on, and so does a owl web with no
 // agent on its machine (a container, a NAS). Settings › General turns it
 // off again, which brings the pages back.
 
-// WebGateway is `myna web --gateway`'s.
+// WebGateway is `owl web --gateway`'s.
 var WebGateway atomic.Bool
 
-// webPage is set once the page is served by `myna web`: settingsState,
+// webPage is set once the page is served by `owl web`: settingsState,
 // which has no Windows, tells the page its gateway mode by it.
 var webPage atomic.Bool
 
 // gatewayMode says whether the page is in gateway mode, and why: "on" or
-// "off" (Settings' choice), "flag" (myna web --gateway), "no-agents", or
-// "" (the app's windows, or myna web on a machine with agents).
+// "off" (Settings' choice), "flag" (owl web --gateway), "no-agents", or
+// "" (the app's windows, or owl web on a machine with agents).
 func gatewayMode(web bool) (bool, string) {
 	if !web {
 		return false, ""
@@ -54,7 +54,7 @@ func gatewayMode(web bool) (bool, string) {
 var agentsHere = func() bool { return len(agent.Detected()) > 0 }
 
 // gatewayModeRoutes: POST /api/settings/gateway-mode {"mode": "on" | "off"
-// | ""} sets Settings' choice, "" leaving it to myna again.
+// | ""} sets Settings' choice, "" leaving it to owl again.
 func gatewayModeRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/settings/gateway-mode", func(rw http.ResponseWriter, r *http.Request) {
 		var in struct {

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 
-	"github.com/istoo/myna/internal/claudeseal"
+	"github.com/istoo/owl/internal/claudeseal"
 	"github.com/tidwall/gjson"
 )
 
@@ -25,7 +25,7 @@ func claudeThinking(text, signature string) string {
 	return claudeseal.Seal(b)
 }
 
-// claudePart is the reasoning a block myna sealed stands for: Claude's
+// claudePart is the reasoning a block owl sealed stands for: Claude's
 // thinking, signed, or its redacted_thinking whole; summary (the item's
 // own reasoning, as it is without one) when the block can't be read.
 func claudePart(block json.RawMessage, summary Part) Part {
@@ -50,7 +50,7 @@ func claudePart(block json.RawMessage, summary Part) Part {
 // withoutClaudeSeals is a Responses request body with no Claude block in
 // its reasoning items, for a Responses API: OpenAI would refuse the
 // envelope as invalid_encrypted_content, and Claude's thinking is no other
-// vendor's to read. An item keeps its summary, as it was before myna
+// vendor's to read. An item keeps its summary, as it was before owl
 // carried the block; one with none (a block signed with no text, or
 // redacted) goes. Every other item, and a body with none, goes byte for
 // byte.

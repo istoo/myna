@@ -6,11 +6,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // Reasoning state that goes from a client to an upstream of the same API
-// through myna's translation (a non-streaming request to a stream-only
+// through owl's translation (a non-streaming request to a stream-only
 // account, web search on the client's own API, a plugin, failover) comes
 // back as the vendor wrote it (#1445, XYenon). The fixtures are the
 // vendors' documented shapes.

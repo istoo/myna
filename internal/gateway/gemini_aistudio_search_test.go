@@ -8,7 +8,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 	"github.com/tidwall/gjson"
 )
 
@@ -215,7 +215,7 @@ func TestGeminiKeySearchesScope(t *testing.T) {
 
 // An AI Studio key that searches by googleSearch is a searcher like a
 // Google sign-in (cocoasoda on Discord: 代搜索供应商 had no Gemini): Settings
-// lists it, its own models first (Own), and myna picks it by itself to
+// lists it, its own models first (Own), and owl picks it by itself to
 // search for another provider's model, which can't, on the user's key.
 func TestAIStudioKeySearchesForOthers(t *testing.T) {
 	s, calls := aiStudio(t, nil)

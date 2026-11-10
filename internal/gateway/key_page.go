@@ -4,14 +4,14 @@ import (
 	_ "embed"
 	"net/http"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/budget"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/budget"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // KeyPagePath is the page a gateway key's holder opens in a browser at the
-// address they reach the gateway at (zytszone on X: myna shared with a
+// address they reach the gateway at (zytszone on X: owl shared with a
 // whole department, whose people can't be given the admin's app). It asks
 // for their key and shows, from keyInfo, that key's own name, limits,
 // usage and models, and the setup to paste into Claude Code, Codex or an
@@ -20,13 +20,13 @@ import (
 const KeyPagePath = "/me"
 
 // keyPageData is the key page's own route.
-const keyPageData = "/v1/myna/me"
+const keyPageData = "/v1/owl/me"
 
 //go:embed keypage.html
 var keyPageHTML []byte
 
 // keyPageOpen: r asks for the key page itself, which lanGuard serves to
-// another machine without a key while myna is shared: it is the same
+// another machine without a key while owl is shared: it is the same
 // bytes for everyone and has no data in it. Its data (keyInfo) needs the
 // key as every other route does.
 func keyPageOpen(r *http.Request) bool {
@@ -55,7 +55,7 @@ var keyPageUsage = []usage.Period{usage.Today, usage.Week, usage.Month}
 // over today, 7 and 30 days and the models it called most, and the models
 // it may use. Nothing in it is another key's, an account's, a provider's
 // key or the admin's: no account names, no other key, no secret (the
-// holder typed theirs). No key, a wrong one, one turned off and myna's
+// holder typed theirs). No key, a wrong one, one turned off and owl's
 // own token (which is no gateway key) are answered 401 alike.
 func (s *Server) keyInfo(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "no-store")

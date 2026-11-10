@@ -15,7 +15,7 @@ const assets = path.resolve(__dirname, "../assets");
 const HOME = "/Users/emo";
 const agent = (id, name) => ({ id, name, icon: "", skills: `${HOME}/.${id}/skills`, mcp: `${HOME}/.${id}/mcp.json` });
 const lib = () => ({
-  dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
+  dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
   agents: [agent("codex", "Codex"), agent("claude", "Claude Code")],
   instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [], skills: [], servers: [],
 });
@@ -55,13 +55,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         for (const tab of ["rtk", "mcp", "instructions"]) {
           await t.test(`${lang} ${width} ${tab}`, async () => {
             const ctx = await browser.newContext({ viewport: { width, height: 800 } });
-            await ctx.addInitScript((tab) => { try { localStorage.setItem("myna.libTab", tab); } catch {} }, tab);
+            await ctx.addInitScript((tab) => { try { localStorage.setItem("owl.libTab", tab); } catch {} }, tab);
             const page = await ctx.newPage();
             page.setDefaultTimeout(5000);
             page.setDefaultNavigationTimeout(60000);
             page.on("pageerror", (e) => errors.push(e.message));
             await page.route("**/*", server(lang));
-            await page.goto("http://myna.test/");
+            await page.goto("http://owl.test/");
             await navTo(page, "library");
             const v = page.locator("#view-library");
             await v.locator(".lib-body > p.lib-intro").waitFor();

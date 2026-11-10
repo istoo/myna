@@ -3,12 +3,12 @@ package provider
 import (
 	"testing"
 
-	"github.com/istoo/myna/internal/update"
+	"github.com/istoo/owl/internal/update"
 )
 
 // Kiro's plugin before 0.1.24 answered a too-long conversation that Kiro
 // said in its event stream with a 502, and a reply Kiro stopped for a
-// full window as a finished one, so myna never read either as an
+// full window as a finished one, so owl never read either as an
 // overflow (TestKiroPluginOverflowGoesToAMemberWithRoom in the gateway).
 // The mover keeps every moved user on a version that says it.
 func TestKiroMoverHasTheTooLongFix(t *testing.T) {

@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/owl/internal/sessions"
 )
 
 // A stats read again behind that finds the same stats keeps their gen, so

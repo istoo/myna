@@ -6,11 +6,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // znuaibot's case (#1989): OpenCode is shown only the one model picked for
-// it, and that model's provider is switched off. myna has models, but
+// it, and that model's provider is switched off. owl has models, but
 // none is left in OpenCode's lists: Connect says so, with a code the GUI
 // says it by in the reader's language, not that OpenCode can't be
 // connected.

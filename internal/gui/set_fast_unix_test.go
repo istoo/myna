@@ -13,9 +13,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // Picking Claude Code's model answers at once, although /api/set answers
@@ -163,7 +163,7 @@ func TestSetAnswersWhileDevinAndProvidersHang(t *testing.T) {
 	}
 
 	// what is written is what it was: the last pick, Anthropic's own
-	// model, off myna's gateway
+	// model, off owl's gateway
 	if m, _ := edit.GetJSON(settingsPath, "model"); m != "claude-sonnet-5-5" {
 		t.Errorf("settings.json model %q", m)
 	}

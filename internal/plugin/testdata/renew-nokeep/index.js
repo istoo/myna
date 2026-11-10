@@ -1,4 +1,4 @@
-// A plugin that renews its sign-ins through myna (auth.refresh) but
+// A plugin that renews its sign-ins through owl (auth.refresh) but
 // says keepAlive: false: an account nothing uses is left to lapse. Each
 // renewal is written to $RENEW_LOG as "stay:" and the refresh token.
 import fs from "node:fs"

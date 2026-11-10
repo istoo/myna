@@ -8,7 +8,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // relayOfChatGPT is a Responses provider in front of the ChatGPT backend,
@@ -46,8 +46,8 @@ func relayOn(t *testing.T, id string) *relayOfChatGPT {
 	return f
 }
 
-// codexSubTurn is a request Codex, signed in to ChatGPT, sends myna for one
-// of myna's models, with the web_search Codex offers on every turn.
+// codexSubTurn is a request Codex, signed in to ChatGPT, sends owl for one
+// of owl's models, with the web_search Codex offers on every turn.
 func codexSubTurn(s *Server, model, session, parent, input string) *httptest.ResponseRecorder {
 	rec := httptest.NewRecorder()
 	body := `{"model":"` + model + `","stream":true,"tools":[{"type":"web_search","external_web_access":true}],"input":[` + input + `]}`
@@ -87,7 +87,7 @@ func TestSealedTaskGoesBackToTheRelayThatSealedIt(t *testing.T) {
 
 // A subagent on another provider than the one that sealed its task is
 // still turned away before anyone is asked, and told which one sealed it,
-// not to use a Myna-served model it already uses.
+// not to use a Owl-served model it already uses.
 func TestSealedTaskRefusedByAnotherRelay(t *testing.T) {
 	fresh(t)
 	s2a := relayOn(t, "s2a")
@@ -97,13 +97,13 @@ func TestSealedTaskRefusedByAnotherRelay(t *testing.T) {
 		t.Fatalf("lead: %d %s", rec.Code, rec.Body.String())
 	}
 	rec := codexSubTurn(s, "s2a/gpt-6-astra", "worker-1", "lead-1", sealedHandoff)
-	if rec.Code != 400 || !strings.Contains(rec.Body.String(), "(s2b)") || strings.Contains(rec.Body.String(), "Myna-served") || strings.Contains(rec.Body.String(), "gAAAAA") {
+	if rec.Code != 400 || !strings.Contains(rec.Body.String(), "(s2b)") || strings.Contains(rec.Body.String(), "Owl-served") || strings.Contains(rec.Body.String(), "gAAAAA") {
 		t.Fatalf("subagent: %d %s", rec.Code, rec.Body.String())
 	}
 	if n := len(s2a.requests()); n != 0 || len(other.requests()) != 1 {
 		t.Fatalf("s2a asked %d times, s2b %d", n, len(other.requests()))
 	}
-	// nor does a subagent whose lead myna never answered go to a relay
+	// nor does a subagent whose lead owl never answered go to a relay
 	rec = codexSubTurn(s, "s2a/gpt-6-astra", "worker-2", "lead-elsewhere", sealedHandoff)
 	if rec.Code != 400 || !strings.Contains(rec.Body.String(), "s2a/gpt-6-astra is neither") || len(s2a.requests()) != 0 {
 		t.Fatalf("unknown lead: %d %s, s2a asked %d times", rec.Code, rec.Body.String(), len(s2a.requests()))
@@ -142,7 +142,7 @@ func TestSealedReplyGoesBackToTheProviderThatAnsweredTheLead(t *testing.T) {
 }
 
 // The reply still goes nowhere that didn't answer the lead: a lead moved to
-// another provider, or one myna never answered, is turned away before
+// another provider, or one owl never answered, is turned away before
 // anyone is asked; and a subagent on another provider than the ChatGPT
 // account that answered its lead is told to use the lead's model, as before.
 func TestSealedReplyRefusedWhereTheLeadWasNotAnswered(t *testing.T) {

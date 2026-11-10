@@ -35,11 +35,11 @@ import (
 
 	"github.com/MoeForge/moejs"
 
-	"github.com/istoo/myna/internal/beat"
-	"github.com/istoo/myna/internal/filememo"
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/routes"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/beat"
+	"github.com/istoo/owl/internal/filememo"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/routes"
+	"github.com/istoo/owl/internal/usage"
 )
 
 var (
@@ -412,8 +412,8 @@ func (o *observer) Serve() (stop func()) {
 	go func() {
 		defer wg.Done()
 		// a plugin turned on here is seen once saved (Written); every
-		// OthersEvery only catches one the CLI or a second myna turned on
-		// (#3185: a 1s tick woke an idle myna every second)
+		// OthersEvery only catches one the CLI or a second owl turned on
+		// (#3185: a 1s tick woke an idle owl every second)
 		for {
 			select {
 			case <-done:

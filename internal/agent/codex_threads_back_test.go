@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/owl/internal/edit"
 )
 
 // codexThreadOn writes a thread of Codex's on the provider p, its rollout
@@ -52,17 +52,17 @@ func codexRowOn(t *testing.T, dir, id string) string {
 	return p
 }
 
-// kaizaoji on X: after using myna with Codex and disconnecting it, Codex
+// kaizaoji on X: after using owl with Codex and disconnecting it, Codex
 // said a project's earlier context didn't exist. Codex lists only the
 // threads of the provider it is on (app-server thread/list, the resume
 // picker), and with no ChatGPT sign-in (or an API key, or an account out
-// of its allowance) myna is Codex's provider, so every thread started
-// then names "myna" and was gone once Codex was back on OpenAI. They
+// of its allowance) owl is Codex's provider, so every thread started
+// then names "owl" and was gone once Codex was back on OpenAI. They
 // come back to the provider Codex is on: at the Disconnect, and at a sync
 // after the provider was taken off by hand. A thread of a provider of the
 // user's own (CC Switch's "custom") stays where it is, and none moves
-// while Codex is on myna, at its top or in a profile.
-func TestCodexThreadsComeBackOffMyna(t *testing.T) {
+// while Codex is on owl, at its top or in a profile.
+func TestCodexThreadsComeBackOffOwl(t *testing.T) {
 	const (
 		mine   = "019a0000-0000-7000-8000-0000000000a1"
 		theirs = "019a0000-0000-7000-8000-0000000000a2"
@@ -85,18 +85,18 @@ func TestCodexThreadsComeBackOffMyna(t *testing.T) {
 		if err := cx.Fields[0].Set("fake/m1"); err != nil {
 			t.Fatal(err)
 		}
-		if p, _ := edit.GetTOMLTop(filepath.Join(dir, "config.toml"), "model_provider"); p != "myna" {
-			t.Fatalf("provider %q, want myna as Codex's provider with no sign-in", p)
+		if p, _ := edit.GetTOMLTop(filepath.Join(dir, "config.toml"), "model_provider"); p != "owl" {
+			t.Fatalf("provider %q, want owl as Codex's provider with no sign-in", p)
 		}
-		minePath := codexThreadOn(t, dir, mine, "myna")
+		minePath := codexThreadOn(t, dir, mine, "owl")
 		codexThreadOn(t, dir, theirs, "custom")
 		codexThreadOn(t, dir, before, "openai")
-		// connected, myna's threads are where Codex lists them
+		// connected, owl's threads are where Codex lists them
 		if err := cx.Sync(); err != nil {
 			t.Fatal(err)
 		}
-		if p := codexRowOn(t, dir, mine); p != "myna" {
-			t.Fatalf("moved off myna while Codex is on it: %q", p)
+		if p := codexRowOn(t, dir, mine); p != "owl" {
+			t.Fatalf("moved off owl while Codex is on it: %q", p)
 		}
 		if err := cx.Unwire(); err != nil {
 			t.Fatal(err)
@@ -111,20 +111,20 @@ func TestCodexThreadsComeBackOffMyna(t *testing.T) {
 		}
 	})
 	t.Run("by hand", func(t *testing.T) {
-		// myna taken out of config.toml by hand, its table left for its
-		// threads, and a profile of the user's on myna
-		table := "\n[model_providers.myna]\nname = \"myna\"\nbase_url = \"http://127.0.0.1:3425/v1\"\nwire_api = \"responses\"\n"
-		profile := "\n[profiles.mg]\nmodel_provider = \"myna\"\n"
+		// owl taken out of config.toml by hand, its table left for its
+		// threads, and a profile of the user's on owl
+		table := "\n[model_providers.owl]\nname = \"owl\"\nbase_url = \"http://127.0.0.1:3425/v1\"\nwire_api = \"responses\"\n"
+		profile := "\n[profiles.mg]\nmodel_provider = \"owl\"\n"
 		home, _ := codexHome(t, "", "model = \"gpt-5.4\"\n"+table+profile)
 		dir := filepath.Join(home, ".codex")
 		path := filepath.Join(dir, "config.toml")
-		codexThreadOn(t, dir, mine, "myna")
+		codexThreadOn(t, dir, mine, "owl")
 		codexThreadOn(t, dir, theirs, "custom")
 		cx := codex(home)
 		cx.Sync()
 		// its threads are where `codex -p mg` lists them
-		if p := codexRowOn(t, dir, mine); p != "myna" {
-			t.Fatalf("moved while a profile is on myna: %q", p)
+		if p := codexRowOn(t, dir, mine); p != "owl" {
+			t.Fatalf("moved while a profile is on owl: %q", p)
 		}
 		os.WriteFile(path, []byte("model = \"gpt-5.4\"\n"+table), 0o644)
 		cx.Sync()
@@ -133,8 +133,8 @@ func TestCodexThreadsComeBackOffMyna(t *testing.T) {
 				t.Errorf("thread %s on %q, want %q", id, p, want)
 			}
 		}
-		// CC Switch's provider set by hand: a thread left on myna goes there
-		codexThreadOn(t, dir, before, "myna")
+		// CC Switch's provider set by hand: a thread left on owl goes there
+		codexThreadOn(t, dir, before, "owl")
 		os.WriteFile(path, []byte("model = \"gpt-5.4\"\nmodel_provider = \"custom\"\n"+table+"\n[model_providers.custom]\nname = \"custom\"\nbase_url = \"https://relay.example/v1\"\n"), 0o644)
 		cx.Sync()
 		for id, want := range map[string]string{mine: "openai", theirs: "custom", before: "custom"} {

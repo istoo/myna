@@ -11,21 +11,21 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/testenv"
 )
 
-// Signing in to an account removed from myna shows it again before the
+// Signing in to an account removed from owl shows it again before the
 // sign-in reads as done, so the window, seeing it done, finds the account
 // listed rather than saying it can't list it (TestClaudeTeamSeatBesidePersonal
 // found it missing on macOS in #1046's CI). Each way a sign-in finishes is
-// checked: myna's own callback (Codex), an agent's login command run by
-// myna (Claude) and a plugin's.
+// checked: owl's own callback (Codex), an agent's login command run by
+// owl (Claude) and a plugin's.
 func TestSignInDoneOnceTheAccountIsBack(t *testing.T) {
 	for _, c := range []struct {
 		agent string
-		// setUp signs in to agent, which is then removed from myna
+		// setUp signs in to agent, which is then removed from owl
 		setUp func(t *testing.T)
 		// signIn starts the sign-in again, and finish does what the
 		// browser, or the code its page shows, does then
@@ -64,7 +64,7 @@ func TestSignInDoneOnceTheAccountIsBack(t *testing.T) {
 		setUp: func(t *testing.T) {
 			bun := testenv.Bun(t)
 			claudeHome(t)
-			t.Setenv("MYNA_BUN", bun)
+			t.Setenv("OWL_BUN", bun)
 			t.Cleanup(plugin.Settle)
 			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 			defer cancel()

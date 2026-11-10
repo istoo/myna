@@ -23,7 +23,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // restProbeSteps is how long after a rest begins its key is first asked

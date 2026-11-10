@@ -9,10 +9,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/claudetui"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/claudetui"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // printMode sets the user's ClaudePrintMode (the interactive mode turned
@@ -36,7 +36,7 @@ func printMode(t *testing.T, print bool) {
 func TestClaudeTUIOnRefusesPrint(t *testing.T) {
 	h, started := tuiHelperHarness(t, "")
 	// an image known by its URL the interactive mode can't download (this
-	// computer's, which myna never fetches): -p's Claude Code sends the
+	// computer's, which owl never fetches): -p's Claude Code sends the
 	// URL as it is
 	body := `{"model":"claude-sonnet-5","max_tokens":100,"messages":[{"role":"user","content":[{"type":"image","source":{"type":"url","url":"http://127.0.0.1:1/a.png"}},{"type":"text","text":"what is it?"}]}]}`
 	ask := func() (int, string) {
@@ -85,7 +85,7 @@ func TestAskClaudeTUIOn(t *testing.T) {
 	claudeTUIRuns = true
 	t.Cleanup(func() { claudeTUIRuns = false })
 	env := filepath.Join(t.TempDir(), "env")
-	helper := filepath.Join(t.TempDir(), "myna")
+	helper := filepath.Join(t.TempDir(), "owl")
 	testenv.Program(t, helper, `#!/bin/sh
 [ "$1" = "`+claudetui.Command+`" ] || exit 9
 echo "trust=$`+claudetui.TrustEnv+`" >> '`+env+`'

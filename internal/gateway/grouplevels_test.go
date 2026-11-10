@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A group that names its own levels (#295) lists them on /v1/models, and a

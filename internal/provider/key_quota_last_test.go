@@ -8,7 +8,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/istoo/myna/internal/agentenv"
+	"github.com/istoo/owl/internal/agentenv"
 )
 
 // A Command Code key's plan and balance, read once, still show when

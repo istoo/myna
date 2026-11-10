@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/pii/guard/coreml"
+	"github.com/istoo/owl/internal/pii/guard/coreml"
 )
 
 // half rounds as numpy's astype(float16) does, which made the sha256 in
@@ -48,7 +48,7 @@ func TestCoreMLWeights(t *testing.T) {
 // On a Mac, CoreML labels a long window as bert.go does, but for a token
 // in a hundred, and finds the same spans, their scores within .2 (each is
 // up to .13 from the publisher's float32 model, on either side). Load
-// compiles the program into MYNA_GUARD_DIR/coreml the first time.
+// compiles the program into OWL_GUARD_DIR/coreml the first time.
 func TestCoreMLMatchesGo(t *testing.T) {
 	d := dir(t)
 	if !coreml.Available {

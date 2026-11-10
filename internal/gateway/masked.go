@@ -9,8 +9,8 @@ import (
 	"unicode/utf8"
 	"unsafe"
 
-	"github.com/istoo/myna/internal/gwmw"
-	"github.com/istoo/myna/internal/maskrec"
+	"github.com/istoo/owl/internal/gwmw"
+	"github.com/istoo/owl/internal/maskrec"
 )
 
 // Masked is what masking swapped in a request, for the Routing page and
@@ -29,7 +29,7 @@ type Masked struct {
 
 // OnMasked is told of each request's record as masking makes it, for the
 // notification that a value was masked (Must2333 on X); set by the app,
-// nil (myna serve, the CLI) for none. It is on the request's way, so it
+// nil (owl serve, the CLI) for none. It is on the request's way, so it
 // only takes the record: which of its values are new is asked later
 // (maskrec.Fresh). The record holds no value and no text around one.
 var OnMasked func(maskrec.Record)

@@ -34,17 +34,17 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/usage"
 )
 
 const fallbackCooldown = time.Minute
 
 // groupBudget is how long a group's serial walk may wait on members that
 // are slow to start, in all: below the 600s a client gives up at, so the
-// error comes from myna and names the budget, and no member is blamed
+// error comes from owl and names the budget, and no member is blamed
 // for the client hanging up first (#5113). A var for tests.
 var groupBudget = 540 * time.Second
 
@@ -115,7 +115,7 @@ type capHold struct {
 	spend *spendHold
 }
 
-// spendHold is how a key is held at its spend cap: the cap, what myna
+// spendHold is how a key is held at its spend cap: the cap, what owl
 // counted spent in its period, and the period (its start for one in all).
 type spendHold struct {
 	usd, spent float64
@@ -154,7 +154,7 @@ func (c candidate) label() string {
 }
 
 // restKey is what a candidate rests by: an account by its user, whether
-// or not the agent is signed in to it — myna can sign Codex in to the
+// or not the agent is signed in to it — owl can sign Codex in to the
 // next account when the one it is on is out, and the one out stays out.
 func (c candidate) restKey() string {
 	if a := c.p.Account; a != nil && a.User != "" {
@@ -204,17 +204,17 @@ func (c candidate) who() string {
 	return c.restKey()
 }
 
-// remoteUpstream is, for a remote myna's model, the provider there that
+// remoteUpstream is, for a remote owl's model, the provider there that
 // serves it, its id's first part (anthropic of anthropic/claude-…), or a
 // group of the remote's, its whole id; "" for any other provider's model,
-// and for a remote's model named without one. The remote myna is one
+// and for a remote's model named without one. The remote owl is one
 // key here, but each of its providers is a vendor of its own, with its
 // own cache and its own seals (fremontdango on Discord: a group of one
 // model from two of the remote's providers kept a conversation on the
 // second when the first was resting, as one account, where the same
 // group on the remote moved it as gone).
 func remoteUpstream(p provider.Provider, model string) string {
-	if !p.IsRemoteMyna() {
+	if !p.IsRemoteOwl() {
 		return ""
 	}
 	if strings.HasPrefix(model, provider.GroupPrefix) {
@@ -228,7 +228,7 @@ func remoteUpstream(p provider.Provider, model string) string {
 }
 
 // vendor is who as the vendor a conversation is with knows it: the key or
-// account, and behind a remote myna the provider there (remoteUpstream).
+// account, and behind a remote owl the provider there (remoteUpstream).
 // What a vendor keeps of a conversation — its cache, the reasoning and
 // compactions it sealed — goes by it; what the user limits on the key
 // here — its lanes, requests a minute — still goes by who.
@@ -240,7 +240,7 @@ func (c candidate) vendor() string {
 }
 
 // sameVendor says whether c is with the vendor that who, asked for model,
-// was: the same key or account, and behind a remote myna the same
+// was: the same key or account, and behind a remote owl the same
 // provider there. With no model known (an answer the usage log has) it
 // is the key or account alone.
 func (c candidate) sameVendor(who, model string) bool {
@@ -452,7 +452,7 @@ func perKeyEvery(p provider.Provider, model string, from provider.Protocol) (out
 		out, unlisted = unlisted, nil // no key lists it: try them all the same
 	}
 	if len(out) == 0 {
-		// no key's plan has it as myna knows the plans: a model the
+		// no key's plan has it as owl knows the plans: a model the
 		// vendor added since, tried on them all the same. Else a key
 		// whose plan lacks it is never asked, not even after the others
 		// refused it: its endpoint has no such model either
@@ -968,7 +968,7 @@ func cappedError(model string, ws []Weighed, now time.Time) (string, time.Time) 
 		if soonest.IsZero() {
 			again = "once its cap is raised"
 		}
-		return fmt.Sprintf("spend cap reached: every key that serves %q has spent the spend cap set on it in myna — %s. myna uses it again %s; %s", model, strings.Join(held, "; "), again, spendAdvice), soonest
+		return fmt.Sprintf("spend cap reached: every key that serves %q has spent the spend cap set on it in owl — %s. owl uses it again %s; %s", model, strings.Join(held, "; "), again, spendAdvice), soonest
 	}
 	capped, noCredits := heldBy(ws)
 	if slices.ContainsFunc(ws, func(w Weighed) bool { return w.SpendCap > 0 }) {
@@ -983,15 +983,15 @@ func cappedError(model string, ws []Weighed, now time.Time) (string, time.Time) 
 		return msg + "; and " + strings.Join(spends, "; ") + " (to use it, " + spendAdvice + ")", soonest
 	}
 	if unread(ws) {
-		return fmt.Sprintf("usage cap reached: every account that serves %q is held at the usage cap set on it in myna, or held as its usage can't be told right now — %s. myna reads it again at the next request and uses it once it is under its cap; %s, or turn off Check usage near the cap (Providers → the provider's accounts, or myna provider pool <id> --careful off)", model, strings.Join(held, "; "), heldAdvice(capped, noCredits)), soonest
+		return fmt.Sprintf("usage cap reached: every account that serves %q is held at the usage cap set on it in owl, or held as its usage can't be told right now — %s. owl reads it again at the next request and uses it once it is under its cap; %s, or turn off Check usage near the cap (Providers → the provider's accounts, or owl provider pool <id> --careful off)", model, strings.Join(held, "; "), heldAdvice(capped, noCredits)), soonest
 	}
 	switch {
 	case !noCredits:
-		return fmt.Sprintf("usage cap reached: every account that serves %q is held at the usage cap set on it in myna — %s. myna uses it again once that window renews; %s", model, strings.Join(held, "; "), heldAdvice(capped, noCredits)), soonest
+		return fmt.Sprintf("usage cap reached: every account that serves %q is held at the usage cap set on it in owl — %s. owl uses it again once that window renews; %s", model, strings.Join(held, "; "), heldAdvice(capped, noCredits)), soonest
 	case !capped:
-		return fmt.Sprintf("usage limit reached: every account that serves %q has used up its allowance and is set in myna not to spend its credits — %s. myna uses it again once that window renews; %s", model, strings.Join(held, "; "), heldAdvice(capped, noCredits)), soonest
+		return fmt.Sprintf("usage limit reached: every account that serves %q has used up its allowance and is set in owl not to spend its credits — %s. owl uses it again once that window renews; %s", model, strings.Join(held, "; "), heldAdvice(capped, noCredits)), soonest
 	}
-	return fmt.Sprintf("usage limit reached: every account that serves %q is held by myna — %s. myna uses it again once that window renews; %s", model, strings.Join(held, "; "), heldAdvice(capped, noCredits)), soonest
+	return fmt.Sprintf("usage limit reached: every account that serves %q is held by owl — %s. owl uses it again once that window renews; %s", model, strings.Join(held, "; "), heldAdvice(capped, noCredits)), soonest
 }
 
 // checkpointCappedError is cappedError for a request whose native
@@ -1001,7 +1001,7 @@ func cappedError(model string, ws []Weighed, now time.Time) (string, time.Time) 
 func checkpointCappedError(model string, cp checkpointWriter, ws []Weighed, now time.Time) (string, time.Time) {
 	held, soonest := heldReasons(ws, now)
 	capped, noCredits := heldBy(ws)
-	return fmt.Sprintf("usage limit reached on the one account this conversation can go to — %s. The conversation was compacted natively by %s, and only that key or account can read the compaction it sealed, so myna doesn't send it to another account that serves %q, which would refuse it; the routing mode and how conversations stay don't change that. myna uses it again once that window renews; %s, or start a new conversation", strings.Join(held, "; "), cp.Who, model, heldAdvice(capped, noCredits)), soonest
+	return fmt.Sprintf("usage limit reached on the one account this conversation can go to — %s. The conversation was compacted natively by %s, and only that key or account can read the compaction it sealed, so owl doesn't send it to another account that serves %q, which would refuse it; the routing mode and how conversations stay don't change that. owl uses it again once that window renews; %s, or start a new conversation", strings.Join(held, "; "), cp.Who, model, heldAdvice(capped, noCredits)), soonest
 }
 
 // heldReasons is what holds each account of ws held at a share, and the
@@ -1015,7 +1015,7 @@ func heldReasons(ws []Weighed, now time.Time) ([]string, time.Time) {
 		}
 		s := fmt.Sprintf("%s (%s) is at %.0f%% of a usage window, past its %d%% cap", w.Name, w.Who, w.Used, w.Capped)
 		if w.SpendCap > 0 {
-			s = fmt.Sprintf("%s (%s) has spent %s of the %s spend cap set on it %s, as myna's usage prices its calls", w.Name, w.Who, usd(w.Spent), usd(w.SpendCap), spendPeriod(w.SpendPeriod, w.SpendSince, now))
+			s = fmt.Sprintf("%s (%s) has spent %s of the %s spend cap set on it %s, as owl's usage prices its calls", w.Name, w.Who, usd(w.Spent), usd(w.SpendCap), spendPeriod(w.SpendPeriod, w.SpendSince, now))
 		}
 		if w.NoCredits {
 			s = fmt.Sprintf("%s (%s) has used up a usage window and is set not to spend its credits", w.Name, w.Who)
@@ -1035,7 +1035,7 @@ func heldReasons(ws []Weighed, now time.Time) ([]string, time.Time) {
 }
 
 // spendAdvice is how to go on past a key's spend cap.
-const spendAdvice = "raise or lift the key's spend cap in myna (Providers → the key's spend cap, or myna provider spend-cap), or add a fallback"
+const spendAdvice = "raise or lift the key's spend cap in owl (Providers → the key's spend cap, or owl provider spend-cap), or add a fallback"
 
 // spendOnly says whether every one of ws held is held at a key's spend
 // cap.
@@ -1076,11 +1076,11 @@ func spendPeriod(period string, since *time.Time, now time.Time) string {
 func heldAdvice(capped, noCredits bool) string {
 	switch {
 	case !noCredits:
-		return "raise or lift the cap in myna (Providers → the account's cap, or myna provider account-cap)"
+		return "raise or lift the cap in owl (Providers → the account's cap, or owl provider account-cap)"
 	case !capped:
-		return "to go on now, if an account holds credits, let it spend them (Usage → the account's Use credits, or myna quota credits <account> on)"
+		return "to go on now, if an account holds credits, let it spend them (Usage → the account's Use credits, or owl quota credits <account> on)"
 	}
-	return "to go on now, raise or lift a cap (Providers → the account's cap, or myna provider account-cap) or, if an account holds credits, let it spend them (Usage → the account's Use credits, or myna quota credits <account> on)"
+	return "to go on now, raise or lift a cap (Providers → the account's cap, or owl provider account-cap) or, if an account holds credits, let it spend them (Usage → the account's Use credits, or owl quota credits <account> on)"
 }
 
 // heldBy says what holds the accounts of ws held at a share: a usage cap
@@ -1197,7 +1197,7 @@ func barredError(model string, ws []Weighed) string {
 			names = append(names, w.Name)
 		}
 	}
-	return fmt.Sprintf("model %q is set not to be served by any account or key of %s: each one's own list of models leaves it out. Add it to an account's models in myna (Providers → the account's Models), or pick another model", model, strings.Join(names, ", "))
+	return fmt.Sprintf("model %q is set not to be served by any account or key of %s: each one's own list of models leaves it out. Add it to an account's models in owl (Providers → the account's Models), or pick another model", model, strings.Join(names, ", "))
 }
 
 // asideOf is how the trace tells the keys made for another protocol than
@@ -1333,14 +1333,14 @@ func restingOf(c candidate) (Rest, bool) {
 // allowance or its credit — refused with a 429 or a 402 for it, the
 // vendor's words kept — the rest of the first, and when the first of them
 // is asked again: asked before then, each would be refused the same
-// (#1772). A key whose rest myna guessed the length of, the vendor and
+// (#1772). A key whose rest owl guessed the length of, the vendor and
 // the user naming no time, is asked again all the same after its first
 // refusal, and a minute on after the next (Rest.asksAt): zoecats on Discord, a local aggregator said "quota
 // exhausted" for the moment it switched upstreams, and every request,
 // the agent's retry first, was answered from its 15-minute rest. A
 // subscription account isn't held so: its resets may be spent for it
 // (autoReset), and its windows are read again as it is planned. Nor is a
-// model of another computer's myna (Rest.there): that myna holds its
+// model of another computer's owl (Rest.there): that owl holds its
 // own rests, and the user may have changed what it serves since
 // (zaidu259434 on X: a group there moved off a spent vendor, and its
 // refusal was still given here until the time it named).
@@ -1409,7 +1409,7 @@ func spentAfter(cs []candidate) bool {
 // resting after the vendor said it is out of quota or credit (the
 // account's, or its model's own pool), or with a window that counts the
 // model used up. back is when the first of them is, zero when none says.
-// A model myna picks for a call of its own (AutoVision, autoSearcher)
+// A model owl picks for a call of its own (AutoVision, autoSearcher)
 // is one routing would still try: a turn's own model goes to the one
 // candidate it has all the same, but the describer or searcher picked in
 // its place can be another (#1801). Unknown allowance, or a rest for a
@@ -1588,7 +1588,7 @@ func modelRetired(status int, body []byte) bool {
 // as it answered glm-5-free and kimi-k2.5-free on 2026-10-10 once they
 // left its free list: {"type":"error","error":{"type":"ModelError",
 // "message":"Model glm-5-free is not supported"}}. Read in the vendor's
-// body, or in the message myna put it into ("OpenCode Zen Free: Model
+// body, or in the message owl put it into ("OpenCode Zen Free: Model
 // glm-5-free is not supported"). Not its "is not supported for format
 // anthropic", a model served on another API (wrongEndpoint), and not its
 // AuthError "Invalid API key." for a key it doesn't take.
@@ -1638,7 +1638,7 @@ var shapeWords = regexp.MustCompile(`(?i)failed to deserialize|unknown (item |co
 // once, as for shapeWords, and Command Code doesn't rest. Its overflow
 // that says so names the model's context length before the trace id, and
 // isn't one. The message may come after a provider's name ("Command Code:
-// "), as myna tells it on.
+// "), as owl tells it on.
 var unsaidWords = regexp.MustCompile(`(?i)(^|"|\\"|: )invalid request error trace_id: [0-9a-f]{16,}(\\?"|\s*$)`)
 
 // shapeRefused says a request failed over its shape alone: the next
@@ -2209,7 +2209,7 @@ type holdWriter struct {
 	// reasoning keeps the agent from its idle timeout with SSE comments
 	// meanwhile (#751)
 	alive *keptAlive
-	// notes are the headers myna says of the try (noteMember), set
+	// notes are the headers owl says of the try (noteMember), set
 	// under mu: all keepAlive sends of the try's before it has its status,
 	// as until then the try is still writing header, with no lock
 	notes http.Header
@@ -2306,7 +2306,7 @@ func newHoldWriter(w http.ResponseWriter, hold bool) *holdWriter {
 
 func (h *holdWriter) Header() http.Header { return h.header }
 
-// note sets a header myna says of the try, which keepAlive may send
+// note sets a header owl says of the try, which keepAlive may send
 // from watch's goroutine before the try has its status.
 func (h *holdWriter) note(k, v string) {
 	h.mu.Lock()
@@ -2359,7 +2359,7 @@ func (h *holdWriter) pass() {
 	}
 	dst := h.w.Header()
 	for k, v := range h.header {
-		if k != resetsHeader && k != refusedHeader && k != zdrHeader && k != answeredThereHeader && k != keyLimitThereHeader { // myna's own notes, for restAfter and settle
+		if k != resetsHeader && k != refusedHeader && k != zdrHeader && k != answeredThereHeader && k != keyLimitThereHeader { // owl's own notes, for restAfter and settle
 			dst[k] = v
 		}
 	}
@@ -2787,7 +2787,7 @@ func (h *holdWriter) scan() {
 // kept alive (keepAlive): the stream's 200, then a comment every
 // keepHeldEvery. A refusal after it still goes to another account, whose
 // stream follows the comments in the same response. It was holdLongest,
-// 15s, and a proxy between the agent and myna that hangs up on a
+// 15s, and a proxy between the agent and owl that hangs up on a
 // request with nothing back for about 10s ended every turn whose vendor
 // took longer to its first event: Codex on Windows sends its requests for
 // 127.0.0.1 through the system proxy a Clash-style app sets, "127.*" in
@@ -2858,7 +2858,7 @@ func (a *keptAlive) tooQuiet(d time.Duration) bool {
 // after it, its stream going on in the same response (pass).
 func (h *holdWriter) keepAlive() {
 	if h.ctx != nil && keepsNothingAlive(h.ctx) {
-		// myna's own ask: nothing waits on it, and its status must still
+		// owl's own ask: nothing waits on it, and its status must still
 		// be the vendor's when it answers (noKeepAliveKey)
 		return
 	}
@@ -2880,7 +2880,7 @@ func (h *holdWriter) keepAlive() {
 		}
 		// the try's header is whole once it has its status (WriteHeader,
 		// under mu); before, the vendor's are still being copied into it
-		// from the try's goroutine, and only myna's notes are read
+		// from the try's goroutine, and only owl's notes are read
 		src := h.header
 		if h.status == 0 {
 			src = h.notes
@@ -3272,7 +3272,7 @@ func (h *holdWriter) watch() func() {
 // vendor says nothing, every keepaliveEvery for up to keepaliveLongest
 // since it last did: a vendor that sent its 200 and response.created, then
 // nothing while it reasoned, had the stream held with none of it sent,
-// and Cloudflare in front of a remote myna ended the request at 125s
+// and Cloudflare in front of a remote owl ended the request at 125s
 // (524) with the agent sent nothing at all; one quiet mid-reply was reset
 // by it as well (#947). Held, the agent is sent the stream's headers and
 // comments only (keepAlive), none of the try, which another account may
@@ -3399,7 +3399,7 @@ var filterReasons = map[string]string{
 	"content_policy_violation": "content_filter",
 	// Factory's usage policy check, a 403 whose code droid 0.245.0 tells
 	// apart from an account's 403 the same way (the Factory plugin keeps
-	// the code on the error it hands myna): handed on as its 403, the
+	// the code on the error it hands owl): handed on as its 403, the
 	// agent took it for a failed sign-in (sweanng on Discord, ZCode:
 	// "Provider authentication failed", reason=auth_failed status=403)
 	"content_policy_rejected": "content_policy_rejected",

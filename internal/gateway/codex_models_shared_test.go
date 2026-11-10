@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // forgetCodexLists starts the test with no backend list kept, and ends it
@@ -48,9 +48,9 @@ func codexListAsk(h http.Handler) (int, map[string]bool) {
 }
 
 // Twenty Codex app-servers asking for the model list at once, with a
-// ChatGPT backend slower than myna waits for it (#3734): the backend is
+// ChatGPT backend slower than owl waits for it (#3734): the backend is
 // asked once for all of them, and its list, though it came after they
-// were answered, is what the next ones get, at once, with myna's
+// were answered, is what the next ones get, at once, with owl's
 // models. Before, each asked on its own and gave up at codexModelsWait,
 // so a slow backend's list never came through.
 func TestCodexModelListSharedWhenSlow(t *testing.T) {
@@ -93,7 +93,7 @@ func TestCodexModelListSharedWhenSlow(t *testing.T) {
 	}
 	wg.Wait()
 	if bad.Load() != 0 {
-		t.Fatalf("%d of 20 answers without myna's models or Codex's last list", bad.Load())
+		t.Fatalf("%d of 20 answers without owl's models or Codex's last list", bad.Load())
 	}
 	if n := asks.Load(); n != 1 {
 		t.Fatalf("the backend was asked %d times for 20 lists at once, want 1", n)
@@ -106,12 +106,12 @@ func TestCodexModelListSharedWhenSlow(t *testing.T) {
 		_, has := codexListAsk(h)
 		if has["gpt-live"] {
 			if !has["fake/m1"] || has["gpt-cached"] {
-				t.Fatalf("the backend's list without myna's models, or beside the cached one: %v", has)
+				t.Fatalf("the backend's list without owl's models, or beside the cached one: %v", has)
 			}
 			break
 		}
 		if time.Now().After(deadline) {
-			t.Fatal("the backend's list, answered after myna stopped waiting, never reached a caller")
+			t.Fatal("the backend's list, answered after owl stopped waiting, never reached a caller")
 		}
 		time.Sleep(20 * time.Millisecond)
 	}
@@ -204,14 +204,14 @@ func TestCodexModelListRefusedSignInPassed(t *testing.T) {
 	}
 }
 
-// A backend that always answers after myna stops waiting still gets its
+// A backend that always answers after owl stops waiting still gets its
 // list to Codex: the ask goes on, and the next caller has it. Before,
 // every ask was given up at codexModelsWait, so such a backend's list,
 // and the version and tools its entries say, never came through (#3734).
 func TestCodexModelListBackendAlwaysSlow(t *testing.T) {
 	setup(t, provider.Chat, &fake{t: t})
 	chatgpt(t, func(w http.ResponseWriter, r *http.Request) {
-		// three times what myna waits, well inside codexListFetch
+		// three times what owl waits, well inside codexListFetch
 		select {
 		case <-time.After(600 * time.Millisecond):
 		case <-r.Context().Done():
@@ -228,7 +228,7 @@ func TestCodexModelListBackendAlwaysSlow(t *testing.T) {
 			return
 		}
 		if time.Now().After(deadline) {
-			t.Fatal("a backend slower than myna waits never got its list through")
+			t.Fatal("a backend slower than owl waits never got its list through")
 		}
 		time.Sleep(50 * time.Millisecond)
 	}

@@ -1,7 +1,7 @@
 package gateway
 
 // The request archive on this computer (CyberCaius on Discord): while sync
-// has no S3 bucket for it, a call is kept in myna's own folder, at
+// has no S3 bucket for it, a call is kept in owl's own folder, at
 // request-archive/<date>/<id>.json, the same file the bucket would get. It
 // has a switch of its own, settings' RequestArchiveLocal, which sync never
 // carries to another computer, so request bodies are written to a disk only
@@ -21,7 +21,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // ErrNotArchived is a name the archive on this computer has nothing at.
@@ -54,8 +54,8 @@ var (
 	localArchives = map[string]*DiskArchive{}
 )
 
-// LocalArchive is the archive in myna's folder: request-archive under
-// ~/.config/myna, or a portable myna's data folder.
+// LocalArchive is the archive in owl's folder: request-archive under
+// ~/.config/owl, or a portable owl's data folder.
 func LocalArchive() *DiskArchive {
 	dir := filepath.Join(settings.Dir(), "request-archive")
 	localMu.Lock()

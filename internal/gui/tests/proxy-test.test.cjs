@@ -105,7 +105,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             page.on("pageerror", (e) => errors.push(e.message));
             await page.route("**/*", server(lang, st));
             await watchSettingsReads(page);
-            await page.goto("http://myna.test/?view=settings&tab=network");
+            await page.goto("http://owl.test/?view=settings&tab=network");
             // the network tab is drawn again by load()'s read of the settings:
             // the row is pressed and held once that is in (#4469)
             await settingsDrawn(page);
@@ -144,7 +144,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           page.setDefaultNavigationTimeout(60000);
           await page.route("**/*", server(lang, st));
           await watchSettingsReads(page);
-          await page.goto("http://myna.test/?view=settings&tab=network");
+          await page.goto("http://owl.test/?view=settings&tab=network");
           await settingsDrawn(page);
           await page.locator("#proxySegs button.proxy-test").click();
           await page.locator("#proxyCheck").waitFor({ state: "visible" });

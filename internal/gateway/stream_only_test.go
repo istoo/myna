@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A backend that only streams (WorkBuddy: "Non-stream chat request is

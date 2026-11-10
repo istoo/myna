@@ -13,96 +13,96 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
-// A remote myna's quotas (莫 on Discord): a computer whose providers are
-// another's myna (remote-myna) has the accounts signed in there, not
-// here, so its Usage page, menu bar and myna quota had nothing to show.
-// They now show the other myna's cards as it last read them, each named
-// with that myna ("Codex · office") and its provider id put after the
+// A remote owl's quotas (莫 on Discord): a computer whose providers are
+// another's owl (remote-owl) has the accounts signed in there, not
+// here, so its Usage page, menu bar and owl quota had nothing to show.
+// They now show the other owl's cards as it last read them, each named
+// with that owl ("Codex · office") and its provider id put after the
 // remote's ("office/codex"), so they never meet this computer's own.
 //
-// Only the myna holding the sign-ins asks the vendors. It answers
+// Only the owl holding the sign-ins asks the vendors. It answers
 // RemoteCardsPath from what it has kept (CachedCards: its page's cards and
 // what was read behind the requests since, cards_kept.go) and asks nobody;
 // a card's refresh here asks it to read that card again
 // (RemoteRefreshPath), which is the one time a vendor is asked for us.
 
 // RemoteCardsPath is the gateway's answer of its kept cards.
-const RemoteCardsPath = "/v1/myna/quotas/cards"
+const RemoteCardsPath = "/v1/owl/quotas/cards"
 
 // RemoteRefreshPath has the gateway read a card (?provider=, &user=)
 // again, or every card when no provider is named, then answer as
 // RemoteCardsPath.
-const RemoteRefreshPath = "/v1/myna/quotas/refresh"
+const RemoteRefreshPath = "/v1/owl/quotas/refresh"
 
 // RemoteCodexResetPath has the gateway spend one of its Codex account's
 // rate-limit resets (?user=, the account always named; &credit=, one of
 // its resets.each, else the one that runs out first), as its Usage page's
-// "Use a reset" does (#3850, prgrmrwy): a reset shown on another myna's
+// "Use a reset" does (#3850, prgrmrwy): a reset shown on another owl's
 // card, or in an app reading the cards, can be used from there too. It
 // can't be undone, so the gateway takes it only with a gateway key of full
 // access, never from a page or app it lets in without one.
-const RemoteCodexResetPath = "/v1/myna/quotas/codex-reset"
+const RemoteCodexResetPath = "/v1/owl/quotas/codex-reset"
 
-// RemoteResetWait is how long a remote myna is waited for to spend a
+// RemoteResetWait is how long a remote owl is waited for to spend a
 // reset: its use (20s at most) and its wait for routing to know (10s).
 const RemoteResetWait = 35 * time.Second
 
-// remoteCardsFor is how long another myna's cards are kept here before
+// remoteCardsFor is how long another owl's cards are kept here before
 // they are asked for again: reading its cache costs it nothing from the
 // vendors, but the menu bar and alerts ask often.
 const remoteCardsFor = 30 * time.Second
 
-// errRemoteNothingRead is a remote myna that has read no card since it
+// errRemoteNothingRead is a remote owl that has read no card since it
 // started: it is asked to only when a card is refreshed here.
-const errRemoteNothingRead = "nothing read on that myna yet; refresh to have it read"
+const errRemoteNothingRead = "nothing read on that owl yet; refresh to have it read"
 
-// errRemoteNoShare is a remote myna too old to answer RemoteCardsPath.
-const errRemoteNoShare = "remote myna doesn't share its quotas; update myna on that computer"
+// errRemoteNoShare is a remote owl too old to answer RemoteCardsPath.
+const errRemoteNoShare = "remote owl doesn't share its quotas; update owl on that computer"
 
-// errRemoteNotShared is a remote myna that answers models but not its
-// quotas (403): it isn't shared on its local network, as an older myna's
-// gateway that MYNA_ADDR opened (Docker's) wasn't until it was (Fim980 on
+// errRemoteNotShared is a remote owl that answers models but not its
+// quotas (403): it isn't shared on its local network, as an older owl's
+// gateway that OWL_ADDR opened (Docker's) wasn't until it was (Fim980 on
 // X: the card said only "Allowance unavailable"). A newer one asks a key of
 // every other machine and, given one, answers the quotas too.
-const errRemoteNotShared = "remote myna isn't shared; turn on Share on local network on that computer"
+const errRemoteNotShared = "remote owl isn't shared; turn on Share on local network on that computer"
 
-// errRemoteKey is a remote myna that didn't take this provider's key (401).
-const errRemoteKey = "remote myna didn't take this key; use one of its enabled gateway keys"
+// errRemoteKey is a remote owl that didn't take this provider's key (401).
+const errRemoteKey = "remote owl didn't take this key; use one of its enabled gateway keys"
 
 // KeyReadOnlyCode is the error code a gateway answers a read-only key
 // with on a route that uses or changes anything.
 const KeyReadOnlyCode = "gateway_key_read_only"
 
-// errRemoteReadOnly is a remote myna whose key here is read-only: it
+// errRemoteReadOnly is a remote owl whose key here is read-only: it
 // shows the cards, and spends nothing.
-const errRemoteReadOnly = "this key is read-only on the remote myna; give the provider a key with full access to use a reset from here"
+const errRemoteReadOnly = "this key is read-only on the remote owl; give the provider a key with full access to use a reset from here"
 
 // KeyHeldCode is the error code a gateway answers a key held to a budget,
 // models or accounts with, where its own accounts would be told (#1981):
 // the key is someone else's to use, and is told its own limit alone.
 const KeyHeldCode = "gateway_key_held"
 
-// errKeyHeld is a remote myna that holds this provider's key to a
+// errKeyHeld is a remote owl that holds this provider's key to a
 // budget, models or accounts: it tells the key's own card (remoteKeyCards)
 // and none of its accounts', so none is shown, not even one kept from
 // before the key was held.
-var errKeyHeld = errors.New("remote myna holds this key to a budget, models or accounts")
+var errKeyHeld = errors.New("remote owl holds this key to a budget, models or accounts")
 
-// errRemoteUnreachable starts the error of a remote myna that couldn't
+// errRemoteUnreachable starts the error of a remote owl that couldn't
 // be reached at all.
-const errRemoteUnreachable = "couldn't reach the remote myna"
+const errRemoteUnreachable = "couldn't reach the remote owl"
 
-// CachedCards is the Usage page's cards as this myna last read them,
-// each with its kind, for another myna to show: no vendor is asked,
-// whatever their age, and another myna's cards shown here aren't
+// CachedCards is the Usage page's cards as this owl last read them,
+// each with its kind, for another owl to show: no vendor is asked,
+// whatever their age, and another owl's cards shown here aren't
 // passed on.
 //
 // The cards are the page's with what was read of the same accounts and
-// keys behind it since (cards_kept.go): a myna serving only other
-// mynas has nobody on its page (#1313).
+// keys behind it since (cards_kept.go): a owl serving only other
+// owls has nobody on its page (#1313).
 func CachedCards(now time.Time) []SubscriptionQuota {
 	c := &subscriptionUsageCache
 	c.Lock()
@@ -146,7 +146,7 @@ func CachedCards(now time.Time) []SubscriptionQuota {
 }
 
 // ReadAllCards has every card read again, the page's Refresh asked by
-// another myna whose card of this one's said nothing was read yet.
+// another owl whose card of this one's said nothing was read yet.
 func ReadAllCards(ctx context.Context) {
 	AskUsage()
 	ForgetBalances()
@@ -173,7 +173,7 @@ func remoteCardsID(p Provider) string {
 	return p.ID + "\x00" + keyID(p.Key)
 }
 
-// ForgetRemoteCardsForTest drops the remote mynas' cards kept here, for
+// ForgetRemoteCardsForTest drops the remote owls' cards kept here, for
 // a test run again (-count) to ask its own fake remote afresh.
 func ForgetRemoteCardsForTest() {
 	c := &remoteCardCache
@@ -195,20 +195,20 @@ func ForgetKeptCardsForTest() {
 	c.Unlock()
 }
 
-// remoteMynas are the remote mynas this myna uses.
-func remoteMynas() []Provider {
+// remoteOwls are the remote owls this owl uses.
+func remoteOwls() []Provider {
 	var out []Provider
 	for _, p := range All() {
-		if p.IsRemoteMyna() && !p.Hidden && !p.Off && p.Key != "" && p.Anthropic != "" {
+		if p.IsRemoteOwl() && !p.Hidden && !p.Off && p.Key != "" && p.Anthropic != "" {
 			out = append(out, p)
 		}
 	}
 	return out
 }
 
-// RemoteCards is every remote myna's cards, named for this computer.
+// RemoteCards is every remote owl's cards, named for this computer.
 func RemoteCards(ctx context.Context) []SubscriptionQuota {
-	ps := remoteMynas()
+	ps := remoteOwls()
 	got := make([][]SubscriptionQuota, len(ps))
 	var wg sync.WaitGroup
 	for i, p := range ps {
@@ -248,7 +248,7 @@ func remoteCards(ctx context.Context, p Provider, fresh bool) []SubscriptionQuot
 		if msg == "" {
 			msg = errRemoteNothingRead
 		}
-		return []SubscriptionQuota{{Provider: p.ID, Name: name, Icon: "myna", Kind: "subscription", From: name, Windows: []QuotaWindow{}, Error: msg}}
+		return []SubscriptionQuota{{Provider: p.ID, Name: name, Icon: "owl", Kind: "subscription", From: name, Windows: []QuotaWindow{}, Error: msg}}
 	}
 	out := make([]SubscriptionQuota, 0, len(r.cards))
 	for _, q := range r.cards {
@@ -259,7 +259,7 @@ func remoteCards(ctx context.Context, p Provider, fresh bool) []SubscriptionQuot
 		q.Name += " · " + name
 		q.From = name
 		// what is pressed on a card acts on this computer's accounts:
-		// a check-in is the other myna's to do. A Codex reset is
+		// a check-in is the other owl's to do. A Codex reset is
 		// spent there when pressed here (UseRemoteCodexReset, #3850);
 		// a GLM team's (byWindow) is spent on the vendor's page
 		if q.Provider != p.ID+"/codex" || q.Resets != nil && q.Resets.ByWindow {
@@ -281,11 +281,11 @@ func remoteName(p Provider) string {
 	return p.ID
 }
 
-// remoteOf is the remote myna a card's provider id names, and the id of
+// remoteOf is the remote owl a card's provider id names, and the id of
 // the card there ("" for the card that stands for the remote itself).
 func remoteOf(id string) (Provider, string, bool) {
 	rid, card, _ := strings.Cut(id, "/")
-	for _, p := range remoteMynas() {
+	for _, p := range remoteOwls() {
 		if p.ID == rid {
 			return p, card, true
 		}
@@ -293,14 +293,14 @@ func remoteOf(id string) (Provider, string, bool) {
 	return Provider{}, "", false
 }
 
-// IsRemoteCard is whether id is a card this myna has from a remote
-// myna, or the card standing for the remote itself.
+// IsRemoteCard is whether id is a card this owl has from a remote
+// owl, or the card standing for the remote itself.
 func IsRemoteCard(id string) bool {
 	_, _, ok := remoteOf(id)
 	return ok
 }
 
-// refreshRemote has the remote myna read its card again (every card,
+// refreshRemote has the remote owl read its card again (every card,
 // for the remote's own), then keeps what it now has.
 func refreshRemote(ctx context.Context, p Provider, card, user string) {
 	// a key's limit card is read again with that key (or every key's)
@@ -355,11 +355,11 @@ func keepRemoteCards(id string, asked time.Time, cards []SubscriptionQuota, err 
 	return r
 }
 
-// RemoteQuotaHistories is every remote myna's quota history since days
-// ago, as its own GET /v1/myna/quotas/history has it (read from its
+// RemoteQuotaHistories is every remote owl's quota history since days
+// ago, as its own GET /v1/owl/quotas/history has it (read from its
 // disk, no vendor asked), the providers named as RemoteCards names them.
 func RemoteQuotaHistories(ctx context.Context, days string) []QuotaHistory {
-	ps := remoteMynas()
+	ps := remoteOwls()
 	got := make([][]QuotaHistory, len(ps))
 	var wg sync.WaitGroup
 	for i, p := range ps {
@@ -367,7 +367,7 @@ func RemoteQuotaHistories(ctx context.Context, days string) []QuotaHistory {
 		go func() {
 			defer wg.Done()
 			var hs []QuotaHistory
-			if err := remoteJSON(ctx, p, http.MethodGet, "/v1/myna/quotas/history?days="+url.QueryEscape(days), &hs); err != nil {
+			if err := remoteJSON(ctx, p, http.MethodGet, "/v1/owl/quotas/history?days="+url.QueryEscape(days), &hs); err != nil {
 				return
 			}
 			for j := range hs {
@@ -388,7 +388,7 @@ func askRemote(ctx context.Context, p Provider, method, path string) ([]Subscrip
 	return cards, nil
 }
 
-// signRemote puts on req, a request of myna's own to the remote myna
+// signRemote puts on req, a request of owl's own to the remote owl
 // p (its cards, a refresh, its quota history, a key's limit), key and p's
 // Headers, as its model list and its API requests carry them (Yirasumi on
 // Discord: the Usage page's read of the remote went without the headers a
@@ -405,7 +405,7 @@ func (p Provider) signRemote(req *http.Request, key string) {
 }
 
 // remoteKey writes key as x-api-key, in place of the header in any case:
-// to a remote myna that header is myna's key, which a gateway reads
+// to a remote owl that header is owl's key, which a gateway reads
 // beside Authorization, so a user's header (a proxy's Authorization) never
 // leaves the request without it, and a key's limit is read with that key.
 func remoteKey(h http.Header, key string) {
@@ -485,11 +485,11 @@ func remoteBody(ctx context.Context, p Provider, method, path string, wait time.
 	return b, nil
 }
 
-// errRemoteResetUnknown is a reset asked of a remote myna that didn't
+// errRemoteResetUnknown is a reset asked of a remote owl that didn't
 // answer in time: it may have been spent there, so it isn't asked again.
 const errRemoteResetUnknown = "%s didn't say in time whether the reset was used; it may have been. Refresh the card to see before asking again"
 
-// UseRemoteCodexReset has the remote myna whose card id is (its Codex
+// UseRemoteCodexReset has the remote owl whose card id is (its Codex
 // card, "office/codex") spend one of user's resets there, as its own
 // Usage page would (#3850, prgrmrwy: the card here said "1 reset", and
 // using it took a walk to the other computer). credit is one of the
@@ -500,7 +500,7 @@ const errRemoteResetUnknown = "%s didn't say in time whether the reset was used;
 func UseRemoteCodexReset(ctx context.Context, id, user, credit string) (ResetOutcome, error) {
 	p, card, ok := remoteOf(id)
 	if !ok || card != "codex" {
-		return ResetOutcome{}, fmt.Errorf("%s is no remote myna's Codex card", id)
+		return ResetOutcome{}, fmt.Errorf("%s is no remote owl's Codex card", id)
 	}
 	if user == "" {
 		return ResetOutcome{}, errors.New("name the Codex account whose reset is used")

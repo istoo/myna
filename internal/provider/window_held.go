@@ -14,7 +14,7 @@ import "time"
 // used up read 75% of 5 hours left in all, #4791). It isn't so the other
 // way: a week with 22% left behind five hours used up still has that 22%
 // once the five hours start again. A ChatGPT account that goes on on its
-// credits isn't held. Another myna's cards are as it sent them; qs and
+// credits isn't held. Another owl's cards are as it sent them; qs and
 // its windows, which the caches share, are left as they were.
 func WithHeldWindows(qs []SubscriptionQuota, now time.Time) []SubscriptionQuota {
 	out := make([]SubscriptionQuota, len(qs))

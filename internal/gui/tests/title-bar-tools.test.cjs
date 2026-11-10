@@ -16,13 +16,13 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MYNA_GUI_ASSETS || path.join(__dirname, "../assets"));
+const assets = path.resolve(process.env.OWL_GUI_ASSETS || path.join(__dirname, "../assets"));
 const HOME = "/Users/tester";
 const agent = (id, name, icon) => ({ id, name, icon, skills: `${HOME}/.${id}/skills`, mcp: `${HOME}/.${id}/mcp.json` });
 
 function serve(lang) {
   const view = {
-    dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
+    dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
     agents: [agent("claude", "Claude Code", "claudecode-color")],
     instructions: { agents: [], sets: [] },
     servers: [{ name: "filesystem", transport: "stdio", command: "npx", args: ["-y", "fs"], agents: ["claude"] }],
@@ -75,8 +75,8 @@ function bar(head) {
 }
 
 const pages = [
-  ...["instructions", "mcp", "skills", "hooks", "subagents", "rtk"].map((tab) => ({ name: "library " + tab, url: "?view=library", head: "#view-library .lib-head", init: ["myna.libTab", tab] })),
-  ...["builtin", "discover", "installed"].map((tab) => ({ name: "plugins " + tab, url: "?view=plugins", head: "#view-plugins .pm-head", init: ["myna.pluginTab", tab] })),
+  ...["instructions", "mcp", "skills", "hooks", "subagents", "rtk"].map((tab) => ({ name: "library " + tab, url: "?view=library", head: "#view-library .lib-head", init: ["owl.libTab", tab] })),
+  ...["builtin", "discover", "installed"].map((tab) => ({ name: "plugins " + tab, url: "?view=plugins", head: "#view-plugins .pm-head", init: ["owl.pluginTab", tab] })),
   { name: "settings", url: "?view=settings", head: "#view-settings .set-head" },
 ];
 
@@ -96,17 +96,17 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           // WebKit reports a read its navigation cancelled as a page error:
           // "Fetch API cannot load … due to access control checks" (#1350,
           // #1307), not this test's. Its message starts partway through the
-          // sentence ("/myna.test/api/agents/cli due to access control
+          // sentence ("/owl.test/api/agents/cli due to access control
           // checks."), so the filter reads the stack, which has it whole.
           if (engine === "webkit" && /Fetch API cannot load .* due to access control checks/.test(e.stack)) return;
           errors.push(`${width}px ${on}: ${e.stack}`);
         });
         await page.route("**/*", serve(lang));
-        await page.addInitScript(() => { localStorage.setItem("myna.navLayout", "side"); });
+        await page.addInitScript(() => { localStorage.setItem("owl.navLayout", "side"); });
         for (const p of pages) {
           on = p.name;
           if (p.init) await page.evaluate(([k, v]) => localStorage.setItem(k, v), p.init).catch(() => {});
-          await page.goto("http://myna.test/" + p.url);
+          await page.goto("http://owl.test/" + p.url);
           if (p.init) { await page.evaluate(([k, v]) => localStorage.setItem(k, v), p.init); await page.reload(); }
           await page.locator(p.head).waitFor();
           await page.locator("#crumb b").waitFor();

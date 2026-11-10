@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/owl/internal/plugin"
 )
 
 // A reset shared by unrelated vendors is not evidence of a shared account.
@@ -104,7 +104,7 @@ func TestPlanLeftOutOfACopy(t *testing.T) {
 	}
 }
 
-// myna quota, its --json and the gateway show a pool's own windows in
+// owl quota, its --json and the gateway show a pool's own windows in
 // place of the models' drawing on it (the shapes TestAntigravityQuotaPools
 // records): one span per pool window, the pool in its name.
 func TestQuotaReportPoolsAntigravity(t *testing.T) {

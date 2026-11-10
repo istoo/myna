@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // #1606 (Ti800): a subscription's quota kept for the long task in one

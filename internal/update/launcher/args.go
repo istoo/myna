@@ -8,7 +8,7 @@ import (
 )
 
 // magic ends the file; the app's name is just before it, after a NUL.
-const magic = "\x00myna-com-target"
+const magic = "\x00owl-com-target"
 
 // tail is how much of the file's end is read for the name: a file name
 // of 255 UTF-16 units is at most 765 bytes of UTF-8.
@@ -52,7 +52,7 @@ func argsOf(line string) string {
 }
 
 // opensWindow is whether args are a command the app answers with its
-// window (cli.run): none, app, gui, tray, panel, -Embedding or a myna://
+// window (cli.run): none, app, gui, tray, panel, -Embedding or a owl://
 // link.
 func opensWindow(args []string) bool {
 	if len(args) == 0 {
@@ -62,5 +62,5 @@ func opensWindow(args []string) bool {
 	case "app", "gui", "tray", "panel", "-Embedding":
 		return true
 	}
-	return strings.HasPrefix(strings.ToLower(args[0]), "myna:")
+	return strings.HasPrefix(strings.ToLower(args[0]), "owl:")
 }

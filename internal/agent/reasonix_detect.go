@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/proc"
 )
 
 func reasonixDetected(home string) bool {

@@ -8,8 +8,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A plugin whose models are all on Gemini's API (XYenon's Google AI Studio
@@ -51,7 +51,7 @@ func TestGooglePluginTakesEmbeddingsAndSpeech(t *testing.T) {
 	if code != 200 || !strings.Contains(raw, `"embedding":[0.1,-0.2]`) {
 		t.Fatalf("embeddings: %d %s", code, raw)
 	}
-	code, _, audio := postSpeech(t, s, "/v1/audio/speech", `{"model":"`+pid+`/gemini-2.5-flash-preview-tts","input":"Hello from the myna.","voice":"Kore"}`)
+	code, _, audio := postSpeech(t, s, "/v1/audio/speech", `{"model":"`+pid+`/gemini-2.5-flash-preview-tts","input":"Hello from the owl.","voice":"Kore"}`)
 	if code != 200 || string(audio) != "RIFF-fake-wav" {
 		t.Fatalf("speech: %d %s", code, audio)
 	}

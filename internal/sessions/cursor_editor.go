@@ -45,16 +45,16 @@ func openCursorEditorDB(path string) *sql.DB {
 
 // openCursorEditorStore opens the editor's state.vscdb to read it. While
 // Cursor runs, its own processes share the store as readers of its -wal
-// through its -shm, and myna reads it as one more, in place: a copy of a
+// through its -shm, and owl reads it as one more, in place: a copy of a
 // store of several GB was written to the temp folder each time Cursor had
 // written since the last, ~10.6 GB every few minutes on Windows, where no
-// clone makes a copy free (Echo-Huang0010, #1988). Nothing myna shows is
+// clone makes a copy free (Echo-Huang0010, #1988). Nothing owl shows is
 // read from the store's file times, so a reader's mark in -shm moves no
 // chat; each chat carries its own (lastUpdatedAt). With no -shm beside a
 // live -wal there is no Cursor running to share it with, and it is opened
 // as a chat's store is (openCursorStore).
 func openCursorEditorStore(path string) (*sql.DB, func(), error) {
-	// copies an older myna left, which no copy made here would sweep
+	// copies an older owl left, which no copy made here would sweep
 	cursorSnaps.sweep.Do(sweepCursorSnaps)
 	wal, werr := os.Stat(path + "-wal")
 	_, serr := os.Stat(path + "-shm")

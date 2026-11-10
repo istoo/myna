@@ -37,7 +37,7 @@ function fixture(lang) {
   const state = () => ({
     agents: [{
       id: "zcode", name: "ZCode", path: "~/.zcode/v2/config.json", icon: "zcode", wired: true, menu: true,
-      fields: [{ key: "provider", label: "provider", value: "myna", options: [{ value: "myna", label: "myna", icon: "myna", note: "every myna model in ZCode's picker" }] }],
+      fields: [{ key: "provider", label: "provider", value: "owl", options: [{ value: "owl", label: "owl", icon: "owl", note: "every owl model in ZCode's picker" }] }],
       models: count(),
     }],
     profiles: [], settings: { lang, theme: "light" },
@@ -84,7 +84,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", fixture(lang).serve);
-        await page.goto("http://myna.test/" + (where === "panel" ? "?mode=panel" : ""));
+        await page.goto("http://owl.test/" + (where === "panel" ? "?mode=panel" : ""));
         await page.locator(row).waitFor();
         const tr = (s, v) => page.evaluate(([s, v]) => t(s, v), [s, v]);
         // the button, and in the panel the row's words beside it

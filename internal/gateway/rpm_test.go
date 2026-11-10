@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // minuteVendor answers chat completions, Messages and count_tokens, noting
@@ -404,7 +404,7 @@ func TestMaxRPMAgentGoneWhileWaiting(t *testing.T) {
 	}
 }
 
-// What myna sends on its own counts too: a retry after the vendor's 503
+// What owl sends on its own counts too: a retry after the vendor's 503
 // is a request of the minute, and so is a count_tokens that reaches the
 // vendor. With 3 a minute, one request tried twice and one count leave no
 // room, so the next chat waits for the minute.

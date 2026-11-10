@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A plugin's model that says it gives video (Veo, on XYenon's Google AI
@@ -37,7 +37,7 @@ func TestPluginMakesVideos(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 		switch {
 		case r.Method == "POST" && r.URL.Path == "/v1/videos":
-			if !strings.Contains(string(b), `"model":"veo-3.1-generate-preview"`) || !strings.Contains(string(b), `"prompt":"a myna"`) {
+			if !strings.Contains(string(b), `"model":"veo-3.1-generate-preview"`) || !strings.Contains(string(b), `"prompt":"a owl"`) {
 				w.WriteHeader(400)
 				io.WriteString(w, `{"error":{"message":"sent `+strings.ReplaceAll(string(b), `"`, `'`)+`"}}`)
 				return
@@ -83,7 +83,7 @@ func TestPluginMakesVideos(t *testing.T) {
 		}
 	}
 	h := New().Handler()
-	code, obj, raw := asKey(t, h, secrets[0], "POST", "/v1/videos", `{"model":"`+pid+`/veo-3.1-generate-preview","prompt":"a myna"}`)
+	code, obj, raw := asKey(t, h, secrets[0], "POST", "/v1/videos", `{"model":"`+pid+`/veo-3.1-generate-preview","prompt":"a owl"}`)
 	id, _ := obj["id"].(string)
 	if code != 200 || id == "" {
 		t.Fatalf("start: %d %s", code, raw)
@@ -113,7 +113,7 @@ func TestPluginMakesVideos(t *testing.T) {
 	if code, _, raw = asKey(t, h, secrets[2], "GET", "/v1/videos/"+id, ""); code != 403 {
 		t.Fatalf("a key held to other models asked after it: %d %s", code, raw)
 	}
-	if code, _, raw = asKey(t, h, secrets[2], "POST", "/v1/videos", `{"model":"`+pid+`/veo-3.1-generate-preview","prompt":"a myna"}`); code != 403 {
+	if code, _, raw = asKey(t, h, secrets[2], "POST", "/v1/videos", `{"model":"`+pid+`/veo-3.1-generate-preview","prompt":"a owl"}`); code != 403 {
 		t.Fatalf("a key held to other models started one: %d %s", code, raw)
 	}
 	if rows := usageRows(t, "generate_content", 1); len(rows) != 1 || rows[0].Provider != pid || rows[0].Model != "veo-3.1-generate-preview" || rows[0].Status != 200 {

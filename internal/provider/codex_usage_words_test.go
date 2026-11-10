@@ -67,8 +67,8 @@ func TestCodexUsageSaysWhy(t *testing.T) {
 		// Cloudflare's own 52x has no status text in Go
 		{"522", 522, cloudflareChallengePage[:40], "ChatGPT answered the usage read with HTTP 522", true},
 		// the real answer, cut off
-		{"cut short", 200, realCodexUsage[:300], "ChatGPT's usage reply isn't one myna reads: unexpected end of JSON input", false},
-		{"not an object", 200, `[]`, "ChatGPT's usage reply isn't one myna reads: json: cannot unmarshal array", false},
+		{"cut short", 200, realCodexUsage[:300], "ChatGPT's usage reply isn't one owl reads: unexpected end of JSON input", false},
+		{"not an object", 200, `[]`, "ChatGPT's usage reply isn't one owl reads: json: cannot unmarshal array", false},
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			codexUsageServing(t, c.code, c.body)

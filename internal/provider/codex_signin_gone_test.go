@@ -42,9 +42,9 @@ func TestCodexRefreshGoneRule(t *testing.T) {
 	}
 }
 
-// Codex's own sign-in, revoked (jjt on Discord, #4308): myna's usage read
+// Codex's own sign-in, revoked (jjt on Discord, #4308): owl's usage read
 // is turned away 401 token_revoked, its refresh is refused for good, and
-// the sign-in is gone to myna (CodexSignInGone), kept across a restart.
+// the sign-in is gone to owl (CodexSignInGone), kept across a restart.
 // A refresh that fails otherwise marks nothing, nor does a refusal of a
 // token Codex has replaced meanwhile. A sign-in made again is not gone,
 // with no step of the user's. A record that can't be read says nothing.
@@ -81,7 +81,7 @@ func TestCodexSignInGoneWhenRefusedForGood(t *testing.T) {
 			w.Write([]byte(`upstream connect error`))
 		case "rotated":
 			// Codex refreshed first: its new tokens are in auth.json by
-			// the time myna's spent one is refused
+			// the time owl's spent one is refused
 			writeFile(t, filepath.Join(home, ".codex", "auth.json"), map[string]any{
 				"auth_mode": "chatgpt",
 				"tokens": map[string]any{

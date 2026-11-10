@@ -13,14 +13,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/filememo"
-	"github.com/istoo/myna/internal/lastgood"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/steady"
+	"github.com/istoo/owl/internal/filememo"
+	"github.com/istoo/owl/internal/lastgood"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/steady"
 )
 
 // Tool is a tool a plugin gives: OpenCode's tool hook ({tool: {name:
-// tool({description, args, execute})}}), which myna offers every agent
+// tool({description, args, execute})}}), which owl offers every agent
 // through its plugin tools MCP server (internal/gateway/tools_mcp.go).
 type Tool struct {
 	Name        string `json:"name"`

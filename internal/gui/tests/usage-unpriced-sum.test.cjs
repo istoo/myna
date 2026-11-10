@@ -15,7 +15,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MYNA_ASSETS || path.resolve(__dirname, "../assets"));
+const assets = path.resolve(process.env.OWL_ASSETS || path.resolve(__dirname, "../assets"));
 const today = new Date().toISOString().slice(0, 10);
 const at = (min) => new Date(Date.now() - min * 60e3).toISOString();
 
@@ -111,8 +111,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, some));
-        await page.addInitScript((tab) => { localStorage.setItem("myna.usageTab", tab); localStorage.setItem("myna.sessRange", "all"); }, tab);
-        await page.goto("http://myna.test/?view=usage");
+        await page.addInitScript((tab) => { localStorage.setItem("owl.usageTab", tab); localStorage.setItem("owl.sessRange", "all"); }, tab);
+        await page.goto("http://owl.test/?view=usage");
         await page.waitForFunction(() => document.querySelector("#usageCost span:not(.skeleton)"));
         return page;
       };

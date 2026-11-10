@@ -10,7 +10,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // Google Vertex AI's editor asks for a project, a location, a credentials

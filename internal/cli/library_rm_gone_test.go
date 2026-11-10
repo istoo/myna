@@ -7,10 +7,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/library"
+	"github.com/istoo/owl/internal/library"
 )
 
-// myna library skill rm --gone (スライム on Discord): an update says the
+// owl library skill rm --gone (スライム on Discord): an update says the
 // skills its source no longer has apart from failures, and rm --gone takes
 // every one of them out, asked first; with nobody at a terminal, only with
 // --yes. A skill still in its source stays.

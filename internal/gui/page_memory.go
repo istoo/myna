@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // A Sessions or Usage page's poll reads every session file's listing and

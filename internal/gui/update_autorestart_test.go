@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/update"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/update"
 )
 
 // #2096: with Settings' AutoRestart on, a downloaded update is restarted

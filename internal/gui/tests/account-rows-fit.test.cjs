@@ -73,7 +73,7 @@ for (const engine of engines) {
         page.on("pageerror", (e) => errors.push(e.message));
         const reads = { n: 0 };
         await page.route("**/*", serve(lang, reads));
-        await page.goto("http://myna.test/?view=providers");
+        await page.goto("http://owl.test/?view=providers");
         await page.locator(".row.provider", { hasText: "Claude" }).first().click();
         await page.waitForFunction(() => document.querySelectorAll(".editor .acc.with-aq .aq-w").length === 10);
         await frames(page);

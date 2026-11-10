@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Write latest.json and notes.json for a Myna release.
+"""Write latest.json and notes.json for a Owl release.
 
 The app reads them as release assets of the newest release:
 
-    https://github.com/istoo/myna/releases/latest/download/latest.json
-    https://github.com/istoo/myna/releases/latest/download/notes.json
+    https://github.com/istoo/owl/releases/latest/download/latest.json
+    https://github.com/istoo/owl/releases/latest/download/notes.json
 
 latest.json describes the release: its version, notes, page, and every
 asset with its size and SHA-256. notes.json keeps every release's notes

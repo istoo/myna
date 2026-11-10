@@ -12,12 +12,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/proc"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/proc"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/usage"
 	"github.com/pelletier/go-toml/v2"
 )
 
@@ -35,7 +35,7 @@ func TestReasonixRegistered(t *testing.T) {
 func TestReasonixCredentialFileTakesPrecedence(t *testing.T) {
 	a, _ := reasonixFixture(t, reasonixNativeConfig)
 	t.Setenv(reasonixKey, "unused-shell-credential")
-	if err := a.Field("model").Set("myna/a/pro"); err != nil {
+	if err := a.Field("model").Set("owl/a/pro"); err != nil {
 		t.Fatal(err)
 	}
 	if got := a.Check(); got != "" {
@@ -45,7 +45,7 @@ func TestReasonixCredentialFileTakesPrecedence(t *testing.T) {
 
 func TestReasonixDuplicatePrivateCredentialIsAConflict(t *testing.T) {
 	a, env := reasonixFixture(t, reasonixNativeConfig)
-	if err := a.Field("model").Set("myna/a/pro"); err != nil {
+	if err := a.Field("model").Set("owl/a/pro"); err != nil {
 		t.Fatal(err)
 	}
 	before, _ := os.ReadFile(a.Path)
@@ -89,7 +89,7 @@ func TestReasonixRestoresAbsentAndEmptyDefault(t *testing.T) {
 	for _, root := range []string{"", "default_model = \"\"\n"} {
 		t.Run(root, func(t *testing.T) {
 			a, _ := reasonixFixture(t, root+"[desktop]\nprovider_access = []\n")
-			if err := a.Field("model").Set("myna/a/pro"); err != nil {
+			if err := a.Field("model").Set("owl/a/pro"); err != nil {
 				t.Fatal(err)
 			}
 			if err := a.Field("model").Set(""); err != nil {
@@ -110,7 +110,7 @@ func TestReasonixRejectsCorruptRestoreRecord(t *testing.T) {
 	for _, record := range []string{"", "null", "{}", "{\"version\":999}", "{\"version\":1}", "{\"version\":1,\"default_model\":null}"} {
 		t.Run(record, func(t *testing.T) {
 			a, env := reasonixFixture(t, reasonixNativeConfig)
-			if err := a.Field("model").Set("myna/a/pro"); err != nil {
+			if err := a.Field("model").Set("owl/a/pro"); err != nil {
 				t.Fatal(err)
 			}
 			files, _ := filepath.Glob(filepath.Join(filepath.Dir(provider.Path()), "reasonix-*.json"))
@@ -134,12 +134,12 @@ func TestReasonixRejectsCorruptRestoreRecord(t *testing.T) {
 
 func TestReasonixRestoreKeepsLaterUserEdits(t *testing.T) {
 	a, env := reasonixFixture(t, reasonixNativeConfig)
-	if err := a.Field("model").Set("myna/a/pro"); err != nil {
+	if err := a.Field("model").Set("owl/a/pro"); err != nil {
 		t.Fatal(err)
 	}
 	edit.SetTOMLTop(a.Path, edit.KV{Path: "default_model", Value: "native/other"})
 	edit.SetTOMLKey(a.Path, "ui", "theme", "light")
-	edit.SetTOMLKey(a.Path, "desktop", "provider_access", edit.Raw("[\"native\", \"myna\", \"later\"]"))
+	edit.SetTOMLKey(a.Path, "desktop", "provider_access", edit.Raw("[\"native\", \"owl\", \"later\"]"))
 	edit.SetEnvFile(env, edit.KV{Path: "LATER_API_KEY", Value: "later-secret"})
 	if err := a.Field("model").Set(""); err != nil {
 		t.Fatal(err)
@@ -332,16 +332,16 @@ func TestReasonixGatewayAndRestore(t *testing.T) {
 	for _, o := range f.Options(a.Values()) {
 		opts = append(opts, o.Value)
 	}
-	for _, want := range []string{"native/other", "myna/a/pro", "myna/group/code"} {
+	for _, want := range []string{"native/other", "owl/a/pro", "owl/group/code"} {
 		if !slices.Contains(opts, want) {
 			t.Fatalf("missing option %s: %v", want, opts)
 		}
 	}
-	if err := f.Set("myna/group/code"); err != nil {
+	if err := f.Set("owl/group/code"); err != nil {
 		t.Fatal(err)
 	}
 	cfg := reasonixDecode(t, a.Path)
-	if cfg["default_model"] != "myna/group/code" {
+	if cfg["default_model"] != "owl/group/code" {
 		t.Fatalf("default: %v", cfg)
 	}
 	providers := cfg["providers"].([]any)
@@ -349,7 +349,7 @@ func TestReasonixGatewayAndRestore(t *testing.T) {
 		t.Fatalf("native provider changed: %v", providers)
 	}
 	p := providers[1].(map[string]any)
-	if p["name"] != "myna" || p["kind"] != "openai" || p["base_url"] != gatewayV1() || p["default"] != "group/code" {
+	if p["name"] != "owl" || p["kind"] != "openai" || p["base_url"] != gatewayV1() || p["default"] != "group/code" {
 		t.Fatalf("wiring: %v", p)
 	}
 	key, _ := p["api_key_env"].(string)
@@ -365,7 +365,7 @@ func TestReasonixGatewayAndRestore(t *testing.T) {
 	if a.Check() != "" {
 		t.Fatal(a.Check())
 	}
-	if err := f.Set("myna/a/flash"); err != nil {
+	if err := f.Set("owl/a/flash"); err != nil {
 		t.Fatal(err)
 	}
 	if err := f.Set(""); err != nil {
@@ -388,7 +388,7 @@ func TestReasonixGatewayAndRestore(t *testing.T) {
 
 func TestReasonixEffortAndSync(t *testing.T) {
 	a, env := reasonixFixture(t, reasonixNativeConfig)
-	if err := a.Field("model").Set("myna/a/pro"); err != nil {
+	if err := a.Field("model").Set("owl/a/pro"); err != nil {
 		t.Fatal(err)
 	}
 	effort := a.Field("effort")
@@ -422,14 +422,14 @@ func TestReasonixEffortAndSync(t *testing.T) {
 	}
 	cfg := reasonixDecode(t, a.Path)
 	p := cfg["providers"].([]any)[1].(map[string]any)
-	if !slices.Contains(p["models"].([]any), any("b/new")) || cfg["default_model"] != "myna/a/pro" {
+	if !slices.Contains(p["models"].([]any), any("b/new")) || cfg["default_model"] != "owl/a/pro" {
 		t.Fatalf("new catalog: %v", p)
 	}
 	overrides := p["model_overrides"].(map[string]any)
 	if !slices.Contains(overrides["a/pro"].(map[string]any)["supported_efforts"].([]any), any("xhigh")) {
 		t.Fatal("Studio lost extended effort levels")
 	}
-	if err := a.Field("model").Set("myna/a/flash"); err != nil {
+	if err := a.Field("model").Set("owl/a/flash"); err != nil {
 		t.Fatal(err)
 	}
 	if effort.Get() != "" {
@@ -439,14 +439,14 @@ func TestReasonixEffortAndSync(t *testing.T) {
 
 func TestReasonixConflictsAndReadErrorsLeaveFiles(t *testing.T) {
 	for _, extra := range []string{
-		"\n[[providers]]\nname = \"myna\"\nmodels = [\"mine\"]\n",
+		"\n[[providers]]\nname = \"owl\"\nmodels = [\"mine\"]\n",
 		"\n[[providers]]\nname = \"broken\"\nmodels = [\n",
 	} {
 		t.Run(extra, func(t *testing.T) {
 			a, env := reasonixFixture(t, reasonixNativeConfig+extra)
 			before, _ := os.ReadFile(a.Path)
 			beforeEnv, _ := os.ReadFile(env)
-			if err := a.Field("model").Set("myna/a/pro"); err == nil {
+			if err := a.Field("model").Set("owl/a/pro"); err == nil {
 				t.Fatal("accepted conflicting or malformed config")
 			}
 			after, _ := os.ReadFile(a.Path)
@@ -460,7 +460,7 @@ func TestReasonixConflictsAndReadErrorsLeaveFiles(t *testing.T) {
 	os.Remove(env)
 	os.Mkdir(env, 0o700)
 	before, _ := os.ReadFile(a.Path)
-	if err := a.Field("model").Set("myna/a/pro"); err == nil {
+	if err := a.Field("model").Set("owl/a/pro"); err == nil {
 		t.Fatal("accepted unreadable credential file")
 	}
 	after, _ := os.ReadFile(a.Path)
@@ -486,14 +486,14 @@ func TestReasonixSyncDoesNotCreateConfiguration(t *testing.T) {
 	if _, err := os.Stat(a.Path); !os.IsNotExist(err) {
 		t.Fatal("reset created a config")
 	}
-	if err := a.Field("model").Set("myna/a/pro"); err != nil {
+	if err := a.Field("model").Set("owl/a/pro"); err != nil {
 		t.Fatal(err)
 	}
 	if err := a.Field("model").Set(""); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := os.Stat(a.Path); !os.IsNotExist(err) {
-		t.Fatal("reset kept a config made by myna")
+		t.Fatal("reset kept a config made by owl")
 	}
 }
 
@@ -508,7 +508,7 @@ func TestReasonixBuiltinDefaultCanBeReselected(t *testing.T) {
 	t.Run("return", func(t *testing.T) {
 		a, env := reasonixFixture(t, original)
 		f := a.Field("model")
-		if err := f.Set("myna/a/pro"); err != nil {
+		if err := f.Set("owl/a/pro"); err != nil {
 			t.Fatal(err)
 		}
 		if !slices.ContainsFunc(f.Options(a.Values()), func(o Option) bool { return o.Value == "deepseek-flash" }) {
@@ -518,7 +518,7 @@ func TestReasonixBuiltinDefaultCanBeReselected(t *testing.T) {
 			t.Fatal(err)
 		}
 		cfg, err := readReasonix(a.Path)
-		if err != nil || cfg.DefaultModel == nil || *cfg.DefaultModel != "deepseek-flash" || cfg.myna().Name != "" {
+		if err != nil || cfg.DefaultModel == nil || *cfg.DefaultModel != "deepseek-flash" || cfg.owl().Name != "" {
 			t.Fatalf("native default was not restored: %+v %v", cfg, err)
 		}
 		if _, exists := edit.GetEnvFile(env, reasonixKey); exists {
@@ -530,13 +530,13 @@ func TestReasonixBuiltinDefaultCanBeReselected(t *testing.T) {
 func TestReasonixRestoreRemovesAccessAddedLater(t *testing.T) {
 	a, _ := reasonixFixture(t, strings.Replace(reasonixNativeConfig, "provider_access = [\"native\"]\n", "", 1))
 	f := a.Field("model")
-	if err := f.Set("myna/a/pro"); err != nil {
+	if err := f.Set("owl/a/pro"); err != nil {
 		t.Fatal(err)
 	}
 	if err := edit.SetTOMLKey(a.Path, "desktop", "provider_access", edit.Raw("[\"native\", \"later\"]")); err != nil {
 		t.Fatal(err)
 	}
-	if err := f.Set("myna/a/flash"); err != nil {
+	if err := f.Set("owl/a/flash"); err != nil {
 		t.Fatal(err)
 	}
 	if err := f.Set(""); err != nil {
@@ -544,13 +544,13 @@ func TestReasonixRestoreRemovesAccessAddedLater(t *testing.T) {
 	}
 	cfg, err := readReasonix(a.Path)
 	if err != nil || !reflect.DeepEqual(cfg.Desktop.Access, []string{"native", "later"}) {
-		t.Fatalf("restore kept access that myna added after initial setup: %v %v", cfg.Desktop.Access, err)
+		t.Fatalf("restore kept access that owl added after initial setup: %v %v", cfg.Desktop.Access, err)
 	}
 }
 
 func TestReasonixConcurrentEditsAndSync(t *testing.T) {
 	a, _ := reasonixFixture(t, reasonixNativeConfig)
-	if err := a.Field("model").Set("myna/a/pro"); err != nil {
+	if err := a.Field("model").Set("owl/a/pro"); err != nil {
 		t.Fatal(err)
 	}
 	b, err := Find("reasonix") // API calls and catalog sync construct separate agents.
@@ -565,7 +565,7 @@ func TestReasonixConcurrentEditsAndSync(t *testing.T) {
 			defer workers.Done()
 			target := []*Agent{a, b}[i%2]
 			for j := range 4 {
-				if err := target.Field("model").Set([]string{"myna/a/pro", "myna/a/flash"}[(i+j)%2]); err != nil {
+				if err := target.Field("model").Set([]string{"owl/a/pro", "owl/a/flash"}[(i+j)%2]); err != nil {
 					errors <- err
 				}
 				if err := target.Sync(); err != nil {
@@ -581,7 +581,7 @@ func TestReasonixConcurrentEditsAndSync(t *testing.T) {
 		break
 	}
 	cfg, err := readReasonix(a.Path)
-	if err != nil || cfg.DefaultModel == nil || *cfg.DefaultModel != "myna/"+cfg.myna().Default {
+	if err != nil || cfg.DefaultModel == nil || *cfg.DefaultModel != "owl/"+cfg.owl().Default {
 		t.Fatalf("concurrent edits split the selected model and provider: %+v %v", cfg, err)
 	}
 	if drift := a.Check(); drift != "" {

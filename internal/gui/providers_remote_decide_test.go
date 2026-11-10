@@ -5,16 +5,16 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // The editor receives an authoritative list, even empty, so a Jev Router
 // chat model on a remote isn't guessed to be a System One model.
-func TestRemoteMynaDecisionPicker(t *testing.T) {
+func TestRemoteOwlDecisionPicker(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
-	if err := provider.Save(provider.Provider{ID: "office", Preset: provider.RemoteMynaPreset, Chat: "http://127.0.0.1:1", Key: "remote-key"}); err != nil {
+	if err := provider.Save(provider.Provider{ID: "office", Preset: provider.RemoteOwlPreset, Chat: "http://127.0.0.1:1", Key: "remote-key"}); err != nil {
 		t.Fatal(err)
 	}
 	p, _ := provider.Find("office")

@@ -43,7 +43,7 @@ func TestWebGuard(t *testing.T) {
 }
 
 func TestWebKey(t *testing.T) {
-	t.Setenv("MYNA_WEB_KEY", "")
+	t.Setenv("OWL_WEB_KEY", "")
 	a, fixed, err := webKey()
 	if err != nil || fixed || len(a) != 32 {
 		t.Fatalf("a run's own key: %q %v %v", a, fixed, err)
@@ -51,17 +51,17 @@ func TestWebKey(t *testing.T) {
 	if b, _, _ := webKey(); b == a {
 		t.Fatal("two runs got one key")
 	}
-	t.Setenv("MYNA_WEB_KEY", "short")
+	t.Setenv("OWL_WEB_KEY", "short")
 	if _, _, err := webKey(); err == nil {
-		t.Fatal("a short MYNA_WEB_KEY was taken")
+		t.Fatal("a short OWL_WEB_KEY was taken")
 	}
-	t.Setenv("MYNA_WEB_KEY", "0123456789abcdef x;y")
+	t.Setenv("OWL_WEB_KEY", "0123456789abcdef x;y")
 	if _, _, err := webKey(); err == nil {
-		t.Fatal("a MYNA_WEB_KEY a cookie can't hold was taken")
+		t.Fatal("a OWL_WEB_KEY a cookie can't hold was taken")
 	}
-	t.Setenv("MYNA_WEB_KEY", "0123456789abcdef-kept")
+	t.Setenv("OWL_WEB_KEY", "0123456789abcdef-kept")
 	if k, fixed, err := webKey(); err != nil || !fixed || k != "0123456789abcdef-kept" {
-		t.Fatalf("MYNA_WEB_KEY: %q %v %v", k, fixed, err)
+		t.Fatalf("OWL_WEB_KEY: %q %v %v", k, fixed, err)
 	}
 
 	// a fixed key's cookie outlives the browser
@@ -97,12 +97,12 @@ func TestWebGuardBookmark(t *testing.T) {
 
 	// the link's cookie, and the form's below, are Chrome's high priority
 	link := do(httptest.NewRequest("GET", "/?view=usage&k="+key, nil))
-	if sc := link.Header().Get("Set-Cookie"); link.Code != http.StatusSeeOther || !strings.HasSuffix(sc, "; Priority=High") || !strings.HasPrefix(sc, "myna_web_3430="+key+";") {
+	if sc := link.Header().Get("Set-Cookie"); link.Code != http.StatusSeeOther || !strings.HasSuffix(sc, "; Priority=High") || !strings.HasPrefix(sc, "owl_web_3430="+key+";") {
 		t.Fatalf("link: %d %q", link.Code, sc)
 	}
 
 	// the reporter's case: the stale value first, the right one after
-	if c := do(page("myna_web_3430=0123456789abcdef-old; myna_web_3430=" + key)).Code; c != http.StatusTeapot {
+	if c := do(page("owl_web_3430=0123456789abcdef-old; owl_web_3430=" + key)).Code; c != http.StatusTeapot {
 		t.Fatalf("stale cookie first: %d", c)
 	}
 
@@ -113,7 +113,7 @@ func TestWebGuardBookmark(t *testing.T) {
 		t.Fatalf("no cookie: %d %s", rec.Code, body)
 	}
 	// a cookie with another key: says so
-	if body := do(page("myna_web_3430=0123456789abcdef-old")).Body.String(); !strings.Contains(body, "holds a key that isn") {
+	if body := do(page("owl_web_3430=0123456789abcdef-old")).Body.String(); !strings.Contains(body, "holds a key that isn") {
 		t.Fatalf("other key: %s", body)
 	}
 	// the page's own fetches get a plain 401 with the reason

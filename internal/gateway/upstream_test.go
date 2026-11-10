@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // orAnswers is an aggregator that answers as OpenRouter does (seen

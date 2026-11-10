@@ -62,7 +62,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, theme));
-        await page.goto("http://myna.test/?view=providers");
+        await page.goto("http://owl.test/?view=providers");
         const notice = page.locator("#movable .deprecation");
         await notice.waitFor();
         await page.locator("#providers .row.provider").first().waitFor();

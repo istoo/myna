@@ -3,7 +3,7 @@ package gateway
 import (
 	"net/http"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // desktopSubagentPick is what is done with the model of a Claude Desktop
@@ -33,7 +33,7 @@ func desktopSubagentPick(r *http.Request, agent, named, resolved string, body []
 	}
 	pick := &SubagentPick{Asked: named, To: to}
 	if _, off := idOff(to); off {
-		pick.Kept = "it is disabled in myna"
+		pick.Kept = "it is disabled in owl"
 		return pick
 	}
 	if why := provider.DesktopSubagentUnserved(to); why != "" {

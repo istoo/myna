@@ -7,8 +7,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/istoo/myna/internal/fonts"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/fonts"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // onFonts updates existing webviews even while the other one has focus.
@@ -23,10 +23,10 @@ func fontSettingsJS(s settings.Settings) string {
 	return "window.receiveFonts?.(" + string(b) + ");"
 }
 
-// The fonts installed on the computer myna runs on, for its windows and
+// The fonts installed on the computer owl runs on, for its windows and
 // for a browser tab (which keeps the families it draws itself, fonts.js).
 // A browser tab is also offered common families: it may be on another
-// computer, and a nogui build (Docker, myna-cli) reads no fonts at all,
+// computer, and a nogui build (Docker, owl-cli) reads no fonts at all,
 // where its rows were left out and only Text size flashed by (Norcleeh).
 // A failed refresh leaves the last successful collection intact.
 func fontRoutes(mux *http.ServeMux, web, off bool, discover func() ([]fonts.Family, error)) {
@@ -34,7 +34,7 @@ func fontRoutes(mux *http.ServeMux, web, off bool, discover func() ([]fonts.Fami
 	var cached []fonts.Family
 	mux.HandleFunc("GET /api/fonts", func(rw http.ResponseWriter, r *http.Request) {
 		if off && !web {
-			http.Error(rw, "installed fonts can't be read by this myna", http.StatusNotFound)
+			http.Error(rw, "installed fonts can't be read by this owl", http.StatusNotFound)
 			return
 		}
 		mu.Lock()

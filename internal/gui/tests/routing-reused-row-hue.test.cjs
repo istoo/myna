@@ -16,7 +16,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MYNA_ROUTING_ASSETS || path.join(__dirname, "../assets"));
+const assets = path.resolve(process.env.OWL_ROUTING_ASSETS || path.join(__dirname, "../assets"));
 const M = "glm-5.1";
 const order = [
   { id: "solo#s1", provider: "solo", name: "Solo", who: "solo-1", kind: "key", model: M },
@@ -83,7 +83,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           };
         });
         const row = (who) => page.locator(".rt-accts li", { has: page.locator(".who", { hasText: new RegExp(`^${who}$`) }) });
-        await page.goto("http://myna.test/?view=routing");
+        await page.goto("http://owl.test/?view=routing");
         await row("solo-1").waitFor();
         await page.waitForFunction(() => document.querySelector(".rt-accts li.now"));
         const codex = await hue("Codex");

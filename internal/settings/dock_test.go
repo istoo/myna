@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/lastgood"
+	"github.com/istoo/owl/internal/lastgood"
 )
 
 // Show in Dock's Hide (DockNever) is this computer's own, as Dock and

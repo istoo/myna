@@ -10,8 +10,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // openRouterUp stands in for openrouter.ai, in process: /api/v1/systemone

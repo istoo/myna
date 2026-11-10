@@ -11,9 +11,9 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/istoo/myna/internal/davsync"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/davsync"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // archiveStore is the bucket a call is read back from: sync's S3 one, or
@@ -87,11 +87,11 @@ func openArchive(r *http.Request) (io.ReadCloser, int64, string, error) {
 	}
 	b, ok := archiveBucket()
 	if !ok {
-		return nil, 0, "", errors.New("Not in the archive on this computer: it is saved just after the call, the oldest are removed past the archive's size, or the save failed (myna's log says why)")
+		return nil, 0, "", errors.New("Not in the archive on this computer: it is saved just after the call, the oldest are removed past the archive's size, or the save failed (owl's log says why)")
 	}
 	body, size, err := b.Open(r.Context(), name)
 	if errors.Is(err, davsync.ErrNoObject) {
-		return nil, 0, "", errors.New("Not in the archive yet: it is uploaded just after the call, or the upload failed (myna's log says why)")
+		return nil, 0, "", errors.New("Not in the archive yet: it is uploaded just after the call, or the upload failed (owl's log says why)")
 	}
 	if err != nil {
 		return nil, 0, "", err
@@ -154,7 +154,7 @@ func archiveRoutes(mux *http.ServeMux) {
 		writeJSON(rw, archivePreview{ID: a.ID, Call: &a.Call, Request: preview(a.Request), Response: preview(a.Response), Bytes: int64(len(data))})
 	})
 	// the archive's file, whole and as the bucket has it, to the browser
-	// that asks: myna web's
+	// that asks: owl web's
 	mux.HandleFunc("GET /api/archive/file", func(rw http.ResponseWriter, r *http.Request) {
 		body, size, name, err := openArchive(r)
 		if err != nil {
@@ -163,7 +163,7 @@ func archiveRoutes(mux *http.ServeMux) {
 		}
 		defer body.Close()
 		rw.Header().Set("Content-Type", "application/json")
-		rw.Header().Set("Content-Disposition", `attachment; filename="myna-request-`+name+`.json"`)
+		rw.Header().Set("Content-Disposition", `attachment; filename="owl-request-`+name+`.json"`)
 		if size >= 0 {
 			rw.Header().Set("Content-Length", fmt.Sprint(size))
 		}
@@ -177,7 +177,7 @@ func archiveRoutes(mux *http.ServeMux) {
 			return
 		}
 		defer body.Close()
-		path, err := saveDownload(downloads(), "myna-request-"+name, ".json", body)
+		path, err := saveDownload(downloads(), "owl-request-"+name, ".json", body)
 		if err != nil {
 			fail(rw, err)
 			return

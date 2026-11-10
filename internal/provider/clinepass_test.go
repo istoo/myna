@@ -7,7 +7,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 func TestPlanModels(t *testing.T) {

@@ -43,13 +43,13 @@ type Watch interface {
 type Request struct {
 	Header http.Header
 	// Agent the agent that sent it, Session its native session when it
-	// names one, else myna's
+	// names one, else owl's
 	Agent, Session string
 	// Kind its call kind ("web_search", "vision", …), "auxiliary" for
 	// Claude's tool-less small helper calls, "" for an agent's own turn
 	Kind string
 	// Plain is a loopback request with no gateway key, not passed on from
-	// another myna: one the agent's own transcript can hold
+	// another owl: one the agent's own transcript can hold
 	Plain bool
 }
 
@@ -158,4 +158,4 @@ func observeLedger(r Record) {
 }
 
 // BodyCut ends a body the gateway captured only the start of.
-const BodyCut = "\n… (cut here by myna)"
+const BodyCut = "\n… (cut here by owl)"

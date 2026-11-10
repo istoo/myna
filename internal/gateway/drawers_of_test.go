@@ -3,8 +3,8 @@ package gateway
 import (
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // The image models a Google sign-in can draw with come from the model list

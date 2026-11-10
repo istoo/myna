@@ -9,7 +9,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // qianfan plays the plan's own endpoints: chat completions and Responses

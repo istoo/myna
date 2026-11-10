@@ -13,7 +13,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = process.env.MYNA_GUI_ASSETS || path.resolve(__dirname, "../assets");
+const assets = process.env.OWL_GUI_ASSETS || path.resolve(__dirname, "../assets");
 const INSTALLS = [
   { id: "opencode", name: "OpenCode", icon: "opencode", commands: [{ via: "npm", command: "npm install -g opencode-ai" }] },
   { id: "crush", name: "Crush", icon: "crush", commands: [{ via: "brew", command: "brew install crush" }] },
@@ -71,7 +71,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, ctl));
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         const inst = page.locator("#agentsInstall");
         const head = inst.locator(".ag-install-head");
         const count = (n) => said(page, lang, "Install another agent ({n})", { n });
@@ -94,7 +94,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert(word, "More in Plugins has no " + lang);
         assert.equal(await more.locator("b").textContent(), word);
         assert.equal(await more.locator(".ag-install-pnames").textContent(), AGENTS.join(await said(page, lang, ", ")));
-        const tip = await said(page, lang, "Agents myna has no setup of its own for: install a plugin for one in the Plugins tab, and it is listed here");
+        const tip = await said(page, lang, "Agents owl has no setup of its own for: install a plugin for one in the Plugins tab, and it is listed here");
         assert(tip, "the tip has no " + lang);
         assert.equal(await more.getAttribute("title"), tip);
         // on one line, its words inside it
@@ -131,7 +131,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         p2.setDefaultNavigationTimeout(60000);
         p2.on("pageerror", (e) => errors.push(e.message));
         await p2.route("**/*", server(lang, ctl));
-        await p2.goto("http://myna.test/");
+        await p2.goto("http://owl.test/");
         await p2.locator("#agentsInstall .ag-install-plugins").waitFor();
         assert.equal(await p2.locator("#agentsInstall .ag-install-head").count(), 0, "a header over no commands");
         assert.equal(await p2.locator("#agentsInstall .ag-install-row").count(), 1);
@@ -145,7 +145,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         p3.setDefaultNavigationTimeout(60000);
         p3.on("pageerror", (e) => errors.push(e.message));
         await p3.route("**/*", server(lang, ctl));
-        await p3.goto("http://myna.test/");
+        await p3.goto("http://owl.test/");
         await p3.waitForFunction((want) => document.querySelector("#agentsInstall .ag-install-head")?.textContent === want, await said(p3, lang, "Install another agent ({n})", { n: 2 }));
         await p3.locator("#agentsInstall .ag-install-head").click();
         assert.equal(await p3.locator("#agentsInstall .ag-install-row").count(), 2);

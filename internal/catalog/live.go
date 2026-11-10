@@ -16,12 +16,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/filememo"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/filememo"
 )
 
 // A vendor's own /models endpoint is the truth about what it serves today;
-// models.dev lags and keeps legacy names around. myna asks the vendor when
+// models.dev lags and keeps legacy names around. owl asks the vendor when
 // it has a key, remembers the answer next to the models.dev cache, and lets
 // the catalog fill in display names and reasoning levels.
 
@@ -95,7 +95,7 @@ func LiveByID(provider, model string) []Model {
 
 // LiveByIDShared is LiveByID without the copy, for a caller that only
 // reads it: asked for a model's APIs, price or tiers for every model a
-// page lists, the copies were 32 MB of a live myna's 2.6 GB in a minute
+// page lists, the copies were 32 MB of a live owl's 2.6 GB in a minute
 // and a half.
 func LiveByIDShared(provider, model string) []Model {
 	f, err := readLive(provider)
@@ -225,7 +225,7 @@ func SaveLiveSides(provider, base string, models []Model, sides map[string][]Mod
 	return nil
 }
 
-// Changed, when set, is told that the models myna offers may be others
+// Changed, when set, is told that the models owl offers may be others
 // now: a provider added, edited or removed, a vendor's list fetched anew.
 // The agent package sets it, to bring the model lists agents keep in files
 // of their own up to date.
@@ -541,7 +541,7 @@ func fetchPage(ctx context.Context, url, key string, anthropic bool, headers map
 			return nil, nil, err
 		}
 		req.Header.Set("Accept", "application/json")
-		req.Header.Set("User-Agent", "myna")
+		req.Header.Set("User-Agent", "owl")
 		if key != "" {
 			req.Header.Set("Authorization", "Bearer "+key)
 			req.Header.Set("x-api-key", key)
@@ -633,7 +633,7 @@ func fetchPage(ctx context.Context, url, key string, anthropic bool, headers map
 		if id == "" {
 			continue
 		}
-		// Another myna's list is already what its user exposed. Keep
+		// Another owl's list is already what its user exposed. Keep
 		// its retrieval models too; a vendor's general list still leaves
 		// out models agents can't chat with.
 		decision := r.Kind == "decision"
@@ -643,7 +643,7 @@ func fetchPage(ctx context.Context, url, key string, anthropic bool, headers map
 			// "output_modalities": ["video"]}
 			ins, outs = Kinds(r.Modalities.InputModalities), Kinds(r.Modalities.OutputModalities)
 		}
-		// a model the list says makes videos: another myna's kind, or,
+		// a model the list says makes videos: another owl's kind, or,
 		// where the list marks no kind, Ark's domain "VideoGeneration" or
 		// an output of video without text (doubao-seedance-*, wan2-1-*),
 		// which is no model to chat with (axelburks on Discord: Ark's
@@ -689,7 +689,7 @@ func fetchPage(ctx context.Context, url, key string, anthropic bool, headers map
 			m.Output = int(n)
 		}
 		m.Efforts = levelsOf(r.Levels)
-		if r.WebSearch == "native" || r.WebSearch == "myna" {
+		if r.WebSearch == "native" || r.WebSearch == "owl" {
 			m.WebSearch = r.WebSearch
 		}
 		if input != nil {
@@ -757,7 +757,7 @@ type liveModel struct {
 	// the context window, where the list tells it (OpenRouter, Command
 	// Code); any, as a vendor's odd value mustn't lose the whole list
 	ContextLength any `json:"context_length"`
-	// what another myna's list tells of each model: the APIs its own
+	// what another owl's list tells of each model: the APIs its own
 	// provider serves it on, where a request goes on as it is rather
 	// than translated (native_endpoints), its longest reply and its
 	// reasoning levels. any, as a vendor's odd value mustn't lose the
@@ -765,19 +765,19 @@ type liveModel struct {
 	Native []string `json:"native_endpoints"`
 	Output any      `json:"max_output_tokens"`
 	Levels any      `json:"supported_reasoning_levels"`
-	// another myna's name for the model with its provider there after
+	// another owl's name for the model with its provider there after
 	// it, and "image", "video" or "decision" for its other models
 	Label string `json:"magpie_label"`
 	Kind  string `json:"kind"`
-	// how another myna searches the web for the model: "native" or
-	// "myna" (Model.WebSearch)
+	// how another owl searches the web for the model: "native" or
+	// "owl" (Model.WebSearch)
 	WebSearch string `json:"web_search"`
-	// the service tiers another myna offers its Codex on the model
+	// the service tiers another owl offers its Codex on the model
 	// (Fast's "priority"), as Codex's catalog writes them ({"id":…}) or
 	// as plain ids: kept as Model.Tiers (#1234). any, as an odd value
 	// mustn't lose the whole list
 	Tiers any `json:"service_tiers"`
-	// what another myna counts a call to the model at, asked for with
+	// what another owl counts a call to the model at, asked for with
 	// its X-Magpie-Prices header: the price its user set, else its list
 	// price. Raw, as an odd value mustn't lose the whole list
 	Price json.RawMessage `json:"magpie_price"`
@@ -878,7 +878,7 @@ func tiersOf(v any) []string {
 }
 
 // levelsOf are the efforts of a list's supported_reasoning_levels, as
-// myna and Codex write them ([{"effort":"high"}]) or as plain names.
+// owl and Codex write them ([{"effort":"high"}]) or as plain names.
 func levelsOf(v any) []string {
 	xs, _ := v.([]any)
 	var out []string
@@ -895,7 +895,7 @@ func levelsOf(v any) []string {
 }
 
 // EndpointAPIs names the APIs of a model list's supported_endpoints —
-// "chat", "responses", "anthropic" — leaving out any myna doesn't speak
+// "chat", "responses", "anthropic" — leaving out any owl doesn't speak
 // (Copilot's websocket one); nil when it names none of them.
 func EndpointAPIs(endpoints []string) []string {
 	var out []string
@@ -992,7 +992,7 @@ func Decorate(live []Model, known []Model) []Model {
 	return out
 }
 
-// sane reports whether a price another myna sent is one a vendor could
+// sane reports whether a price another owl sent is one a vendor could
 // charge: no part below zero or out of range, and tiers of a size.
 func (p Price) sane() bool {
 	ok := func(vs ...float64) bool {

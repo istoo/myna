@@ -3,8 +3,8 @@ package otlp
 import (
 	"testing"
 
-	"github.com/istoo/myna/internal/testenv"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/testenv"
+	"github.com/istoo/owl/internal/usage"
 )
 
 func TestMain(m *testing.M) { testenv.Main(m) }

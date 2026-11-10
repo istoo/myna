@@ -1,9 +1,9 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // Kiro Crew (Vincent on Discord) runs on a harness, an agent connected to
-// myna. Connecting it with none connected, or with its harness set in
+// owl. Connecting it with none connected, or with its harness set in
 // its config.local.json, is refused, and the refusal reads in the
 // window's language; connected, the notice that new sessions take the new
-// harness does too, and so does the one that myna connected the harness
+// harness does too, and so does the one that owl connected the harness
 // Crew is set to along with it (wuping9525: Claude Code, not connected). In every language, in Chromium and WebKit, at a wide
 // and a narrow window. No backend: the API is faked.
 const assert = require("node:assert/strict");
@@ -13,16 +13,16 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
-const NO_HARNESS = "Kiro Crew runs on a harness: connect Codex, Claude Code, OpenCode, Pi or Goose to myna first, then connect Kiro Crew";
-const PINNED = "Kiro Crew's config.local.json sets its harness, and that wins over config.json: myna leaves it alone. Change agent.acp_backend there, or take it out, then connect again";
+const NO_HARNESS = "Kiro Crew runs on a harness: connect Codex, Claude Code, OpenCode, Pi or Goose to owl first, then connect Kiro Crew";
+const PINNED = "Kiro Crew's config.local.json sets its harness, and that wins over config.json: owl leaves it alone. Change agent.acp_backend there, or take it out, then connect again";
 const NEW_SESSIONS = "Kiro Crew takes the new harness for new sessions; sessions already open keep theirs.";
-const JOINED = "Kiro Crew runs on {harness}, so myna connected {harness} too; turning Kiro Crew off disconnects it again.";
+const JOINED = "Kiro Crew runs on {harness}, so owl connected {harness} too; turning Kiro Crew off disconnects it again.";
 const CONNECTED = NEW_SESSIONS + " " + JOINED.replaceAll("{harness}", "Claude Code");
-const NOTE = "its harness, an agent connected to myna, runs on myna's models";
+const NOTE = "its harness, an agent connected to owl, runs on owl's models";
 const crew = (on) => ({
   id: "kirocrew", name: "Kiro Crew", icon: "generic", path: "/test/kiro/crew/config.json", wired: on,
   fields: [
-    { key: "provider", label: "provider", value: on ? "myna" : "", options: [{ value: "myna", label: "myna", icon: "myna", note: NOTE }] },
+    { key: "provider", label: "provider", value: on ? "owl" : "", options: [{ value: "owl", label: "owl", icon: "owl", note: NOTE }] },
     { key: "harness", label: "harness", value: on ? "codex" : "", quiet: true, options: [{ value: "codex", label: "Codex", icon: "codex-color" }] },
   ],
 });
@@ -39,7 +39,7 @@ function server(lang, answers) {
       const a = answers.shift();
       if (a) return route.fulfill({ status: 400, json: { error: a } });
       on = true;
-      return route.fulfill({ json: { ...st(), connected: { how: "myna" }, notice: CONNECTED } });
+      return route.fulfill({ json: { ...st(), connected: { how: "owl" }, notice: CONNECTED } });
     }
     if (url.pathname === "/api/usage/quotas") return route.fulfill({ json: [] });
     if (url.pathname === "/api/groups") return route.fulfill({ json: { groups: [] } });
@@ -69,7 +69,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           page.setDefaultNavigationTimeout(60000);
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", server(lang, [NO_HARNESS, PINNED]));
-          await page.goto("http://myna.test/?view=agents");
+          await page.goto("http://owl.test/?view=agents");
           const sw = page.locator('.row.agent[data-id="kirocrew"] .ag-conn');
           await sw.waitFor();
           // each word is said in this language, not English
@@ -89,7 +89,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const said = (await page.locator("#status").textContent()).trim();
           const want = await page.evaluate((n) => tNotice(n), CONNECTED);
           assert.ok(said.endsWith(want), said);
-          if (lang !== "en") assert.ok(!said.includes("sessions already open") && !said.includes("myna connected"), said);
+          if (lang !== "en") assert.ok(!said.includes("sessions already open") && !said.includes("owl connected"), said);
           assert.ok(said.includes("Claude Code") && !said.includes("{harness}"), said);
           const fits = await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
           assert.ok(fits, "the page runs past the window");

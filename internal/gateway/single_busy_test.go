@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // busyUpstream answers each request with the next of its replies, the
@@ -207,7 +207,7 @@ func TestSingleProviderPassesALongLimitThrough(t *testing.T) {
 				}
 				s.trace.mu.Unlock()
 				if waiting {
-					t.Fatalf("myna waits to ask again: %+v", lastRoute(s).Tries)
+					t.Fatalf("owl waits to ask again: %+v", lastRoute(s).Tries)
 				}
 			}
 			if g.code != c.r.code || u.asked() != 1 {
@@ -220,7 +220,7 @@ func TestSingleProviderPassesALongLimitThrough(t *testing.T) {
 	}
 }
 
-// An agent gone while myna waits out its one provider's rate limit ends
+// An agent gone while owl waits out its one provider's rate limit ends
 // the request there: the route is over as canceled, its try says the agent
 // left in the pause, and the vendor is asked nothing more.
 func TestSingleProviderAgentGoneInTheWait(t *testing.T) {
@@ -245,7 +245,7 @@ func TestSingleProviderAgentGoneInTheWait(t *testing.T) {
 		}
 	}()
 	if !inPause(s, 1, 30*time.Second) {
-		t.Fatalf("myna never paused to ask again: %+v", lastRoute(s).Tries)
+		t.Fatalf("owl never paused to ask again: %+v", lastRoute(s).Tries)
 	}
 	cancel()
 	<-ended
@@ -270,7 +270,7 @@ func TestSingleProviderAgentGoneInTheWait(t *testing.T) {
 	}
 }
 
-// The Patience the user set on the provider (myna provider set a
+// The Patience the user set on the provider (owl provider set a
 // patience=…) stands over singlePatience either way: off hands the agent a
 // rate limit the default would wait out, a shorter one hands it one the
 // default would wait for, and a longer one waits out one the default
@@ -337,7 +337,7 @@ func TestSingleProviderOwnPatienceWins(t *testing.T) {
 					}
 					s.trace.mu.Unlock()
 					if waiting {
-						t.Fatalf("myna waits to ask again past the user's patience: %+v", lastRoute(s).Tries)
+						t.Fatalf("owl waits to ask again past the user's patience: %+v", lastRoute(s).Tries)
 					}
 				}
 			}

@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 func gatewayHome(t *testing.T) {

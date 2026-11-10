@@ -22,21 +22,21 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/claudeseal"
-	"github.com/istoo/myna/internal/codexcat"
-	"github.com/istoo/myna/internal/codexsummary"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/claudeseal"
+	"github.com/istoo/owl/internal/codexcat"
+	"github.com/istoo/owl/internal/codexsummary"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/usage"
 )
 
-// CodexPath is where Codex's built-in OpenAI provider reaches myna, as its
+// CodexPath is where Codex's built-in OpenAI provider reaches owl, as its
 // `openai_base_url`. Codex keeps its own sign-in and sends what it would send
 // the ChatGPT backend: a request for one of its own models goes on there as
-// it came, one for a myna model (a catalog id, provider/model) is served
-// like any other, and the model list is OpenAI's with myna's added. Ending
+// it came, one for a owl model (a catalog id, provider/model) is served
+// like any other, and the model list is OpenAI's with owl's added. Ending
 // in /backend-api/codex keeps Codex treating it as that backend.
 const CodexPath = "/backend-api/codex"
 
@@ -45,9 +45,9 @@ const CodexPath = "/backend-api/codex"
 // point it elsewhere.
 var codexAPIBase = "https://api.openai.com/v1"
 
-// mynaCompaction marks a compaction item myna made: its summary, which
-// only myna reads back (codexsummary).
-const mynaCompaction = codexsummary.Mark
+// owlCompaction marks a compaction item owl made: its summary, which
+// only owl reads back (codexsummary).
+const owlCompaction = codexsummary.Mark
 
 var nativeSealedAgentPayload = regexp.MustCompile(`^gAAAAA[A-Za-z0-9_-]+={0,2}$`)
 
@@ -73,14 +73,14 @@ func (s *Server) codexBackend(w http.ResponseWriter, r *http.Request) {
 		if strings.TrimPrefix(r.URL.Path, CodexPath) == "/responses" && s.serveResponsesSocket(w, r) {
 			return
 		}
-		http.Error(w, "myna serves a WebSocket on "+CodexPath+"/responses alone", http.StatusUpgradeRequired)
+		http.Error(w, "owl serves a WebSocket on "+CodexPath+"/responses alone", http.StatusUpgradeRequired)
 		return
 	}
 	// the pool's accounts and their model lists say they are this Codex, or
 	// newer: the backend serves a model only to a client that knows it
 	provider.SawCodexClient(r.Header)
 	rest := strings.TrimPrefix(r.URL.Path, CodexPath)
-	// a turn of Codex's own is read to codexBodyLimit, one for a myna
+	// a turn of Codex's own is read to codexBodyLimit, one for a owl
 	// model held to the limit of every other route once it is named
 	body, ok := s.readRequestBody(w, r, provider.Responses, s.codexLimitOf())
 	if !ok {
@@ -92,9 +92,9 @@ func (s *Server) codexBackend(w http.ResponseWriter, r *http.Request) {
 		s.codexModels(w, r)
 		return
 	case r.Method == http.MethodPost && rest == AlphaSearchPath:
-		// web.run on a myna model is searched where the model is
+		// web.run on a owl model is searched where the model is
 		// served, never relayed on Codex's own sign-in; one of Codex's
-		// own models goes through myna's accounts when its turns do
+		// own models goes through owl's accounts when its turns do
 		// (codexAccounts), else on as it came
 		model := modelOf(body)
 		if !strings.Contains(model, "/") {
@@ -115,7 +115,7 @@ func (s *Server) codexBackend(w http.ResponseWriter, r *http.Request) {
 		}
 		// the route that shows it while it is held before routing names
 		// it, as handle's and gemini's do (Jason on Discord: a held Codex
-		// turn showed as no model, "myna · 0 on")
+		// turn showed as no model, "owl · 0 on")
 		noteAsked(r.Context(), model)
 		// a turn of the conversation's own: the model its side calls may
 		// follow (codexFollowTo)
@@ -149,12 +149,12 @@ func (s *Server) codexBackend(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			// a subagent on one of Codex's own models, put on the model
-			// set for Codex's subagents, a ChatGPT account's in myna;
+			// set for Codex's subagents, a ChatGPT account's in owl;
 			// the request on the model asked for when it can't be, the
 			// trace saying why (codexUpstreamOn, serve). With none set,
 			// it stays on the model it was named (codexFollowTo). A
 			// memory call with nothing set for it goes on the model its
-			// conversation is on when that is one of myna's, not on
+			// conversation is on when that is one of owl's, not on
 			// the ChatGPT sign-in (codexFollowTo). Set to the lead's model,
 			// a subagent asking for any model goes on the lead's, one of
 			// Codex's own through its sign-in too (codexSubagentPick)
@@ -173,7 +173,7 @@ func (s *Server) codexBackend(w http.ResponseWriter, r *http.Request) {
 			body = spawnAgentModels(r, body, model, true)
 		}
 		// one of Codex's own models the user disabled (#1867) is refused
-		// here, never relayed to the ChatGPT backend; a myna model is
+		// here, never relayed to the ChatGPT backend; a owl model is
 		// refused by serve
 		if !strings.Contains(model, "/") {
 			if msg, off := codexNativeOff(model); off {
@@ -186,11 +186,11 @@ func (s *Server) codexBackend(w http.ResponseWriter, r *http.Request) {
 		if strings.Contains(model, "/") {
 			if most := s.bodyLimitOf(); int64(len(body)) > most {
 				writeError(w, provider.Responses, http.StatusRequestEntityTooLarge, overLimit(most).Error()+
-					"; this limit is for a myna model, and one of Codex's own models takes up to "+sizeWord(s.codexLimitOf()))
+					"; this limit is for a owl model, and one of Codex's own models takes up to "+sizeWord(s.codexLimitOf()))
 				return
 			}
 			if rest == "/responses/compact" {
-				writeError(w, provider.Responses, 400, "/responses/compact is not supported for Myna models; use a compaction_trigger on /responses")
+				writeError(w, provider.Responses, 400, "/responses/compact is not supported for Owl models; use a compaction_trigger on /responses")
 				return
 			}
 			if kind == "guardian" || isMemoryKind(kind) {
@@ -218,7 +218,7 @@ func (s *Server) codexBackend(w http.ResponseWriter, r *http.Request) {
 			// goes, as it does from a turn: with its text in it, the
 			// backend refuses the whole compaction over "input[n].content:
 			// array too long", and Codex shows it as the turn's error
-			// (jue on Discord). A summary myna made goes as its text.
+			// (jue on Discord). A summary owl made goes as its text.
 			body, _ = codexInput(body, false)
 			// a key held to some accounts (#905) may not spend the sign-in
 			// compaction still relays on: refused as its turns are (#967),
@@ -226,8 +226,8 @@ func (s *Server) codexBackend(w http.ResponseWriter, r *http.Request) {
 			// can't be shown to be the key's, switched off or gone
 			on := compactOn(r, model)
 			// a seal only its writer reads (#1099, #2271): a compact
-			// carrying one myna recorded the writer of is judged here —
-			// the writer on in myna answers it signed as the writer, a
+			// carrying one owl recorded the writer of is judged here —
+			// the writer on in owl answers it signed as the writer, a
 			// gone writer is refused with the reason — not relayed to be
 			// refused there (#2727)
 			writer, gone, _ := sealedCompact(r, model, body)
@@ -259,10 +259,10 @@ func (s *Server) codexBackend(w http.ResponseWriter, r *http.Request) {
 			id, ok = codexSealedFor(r, model, body)
 		}
 		if ok {
-			// through myna's accounts, Codex's compaction is the codex
-			// provider's to decide as a myna model's is: sealed natively
+			// through owl's accounts, Codex's compaction is the codex
+			// provider's to decide as a owl model's is: sealed natively
 			// only with its native compaction on, as only the account that
-			// sealed it can read it; off, myna's summary, which any of
+			// sealed it can read it; off, owl's summary, which any of
 			// them reads (#2582, #2642: one of Codex's own models compacted
 			// natively whatever the setting, and the conversation was held
 			// to that account)
@@ -276,7 +276,7 @@ func (s *Server) codexBackend(w http.ResponseWriter, r *http.Request) {
 		}
 		// a turn on Codex's own sign-in that masking would change goes
 		// to the model the user set for that, as written, as one through
-		// myna's accounts does in serve (maskRouteFor)
+		// owl's accounts does in serve (maskRouteFor)
 		if to := codexMaskRoute(r, rest, body); to != "" {
 			body, compact := codexInputAs(withModel(body, to), true, s.nativeCompactionFor(to))
 			if compact {
@@ -289,7 +289,7 @@ func (s *Server) codexBackend(w http.ResponseWriter, r *http.Request) {
 		body, _ = codexInput(body, false)
 		if r.Header.Get(AccountHeader) != "" {
 			// relayed as it came, it would go to Codex's own sign-in only
-			writeError(w, provider.Responses, 400, AccountHeader+" names one of myna's Codex accounts, and Codex isn't signed in to ChatGPT here with any on in myna")
+			writeError(w, provider.Responses, 400, AccountHeader+" names one of owl's Codex accounts, and Codex isn't signed in to ChatGPT here with any on in owl")
 			return
 		}
 	}
@@ -299,7 +299,7 @@ func (s *Server) codexBackend(w http.ResponseWriter, r *http.Request) {
 		w, recorded = recordConversation(w, r, provider.Responses, body)
 		defer recorded()
 		// and the tool loop it may be stuck in spends that sign-in's
-		// allowance as it would a myna model's
+		// allowance as it would a owl model's
 		if s.stoppedToolLoop(w, r, provider.Responses, body) {
 			return
 		}
@@ -312,22 +312,22 @@ func (s *Server) codexBackend(w http.ResponseWriter, r *http.Request) {
 
 // sealedTaskError is what a subagent is told whose task its lead sealed
 // when nothing model names can read it. lead is the provider that
-// answered the lead, "" when myna didn't (the lead was one of Codex's
+// answered the lead, "" when owl didn't (the lead was one of Codex's
 // own models) or has no record of it in the last sealerKeep. A task
 // already sealed opens only where it was sealed, so the way on with it
 // is said too (#1367). earlier is a provider that answered the lead's
 // earlier turns but can't have sealed the task (canSeal): the lead moved
-// on to Codex's own model, whose turns myna keeps no record of, and the
+// on to Codex's own model, whose turns owl keeps no record of, and the
 // task was sealed there (plugins#70). Each says what is sealed: the task
 // itself, which fork_turns="none" doesn't change (#1855).
 func sealedTaskError(model, lead, earlier string) string {
 	if earlier != "" {
-		return fmt.Sprintf("This subagent's task was sealed by the ChatGPT backend, which answered the agent that sent it on one of Codex's own models (a subagent of this thread put there, or the lead after a switch), and only a ChatGPT account can open it. %s can't. %s answered the lead's earlier turns, but it neither seals a task nor opens one. "+sealedTaskItself+" Set Codex's subagent model on myna's Agents page to a model of a ChatGPT account added in myna, or to one that isn't served by the ChatGPT backend, so subagents get tasks they can read. To go on with this task, have it spawned again from an agent that isn't on Codex's own models."+sealedWayOut(), model, earlier)
+		return fmt.Sprintf("This subagent's task was sealed by the ChatGPT backend, which answered the agent that sent it on one of Codex's own models (a subagent of this thread put there, or the lead after a switch), and only a ChatGPT account can open it. %s can't. %s answered the lead's earlier turns, but it neither seals a task nor opens one. "+sealedTaskItself+" Set Codex's subagent model on owl's Agents page to a model of a ChatGPT account added in owl, or to one that isn't served by the ChatGPT backend, so subagents get tasks they can read. To go on with this task, have it spawned again from an agent that isn't on Codex's own models."+sealedWayOut(), model, earlier)
 	}
 	if lead != "" {
 		return fmt.Sprintf("This subagent's task was sealed by the server that answered its lead (%s), and only that server can open it; %s can't. "+sealedTaskItself+" Give the subagent the lead's model, or a lead model that isn't served by the ChatGPT backend, so its subagents get a task they can read. To go on with this task, use a model on %s for the lead and the subagent, or have the lead spawn the subagent again."+sealedWayOut(), lead, model, lead)
 	}
-	return fmt.Sprintf("This subagent's task was sealed by the ChatGPT backend that answered its lead, and only that backend can open it: a ChatGPT account, or the Responses API provider that answered the lead. %s is neither: myna has no record of it answering the lead in the last 30 days. "+sealedTaskItself+" Give the subagent the lead's model, or a lead model that isn't served by the ChatGPT backend, so its subagents get a task they can read. To go on with this task, use the lead's model, or have the lead spawn the subagent again."+sealedWayOut(), model)
+	return fmt.Sprintf("This subagent's task was sealed by the ChatGPT backend that answered its lead, and only that backend can open it: a ChatGPT account, or the Responses API provider that answered the lead. %s is neither: owl has no record of it answering the lead in the last 30 days. "+sealedTaskItself+" Give the subagent the lead's model, or a lead model that isn't served by the ChatGPT backend, so its subagents get a task they can read. To go on with this task, use the lead's model, or have the lead spawn the subagent again."+sealedWayOut(), model)
 }
 
 // sealedWayOut is the way to subagents on any model from a lead on
@@ -338,9 +338,9 @@ func sealedTaskError(model, lead, earlier string) string {
 // before it was on, or held there by Codex's own features.multi_agent_v2.
 func sealedWayOut() string {
 	if settings.Load().CodexAgentsV1 {
-		return ` "Codex subagents on any model" is on in Codex's settings on myna's Agents page, but this thread runs Codex's multi-agent V2, whose tasks are sealed: it began before the setting was turned on, or Codex's own features.multi_agent_v2 is on in its config. Start a new thread, with features.multi_agent_v2 off.`
+		return ` "Codex subagents on any model" is on in Codex's settings on owl's Agents page, but this thread runs Codex's multi-agent V2, whose tasks are sealed: it began before the setting was turned on, or Codex's own features.multi_agent_v2 is on in its config. Start a new thread, with features.multi_agent_v2 off.`
 	}
-	return ` For subagents on any model while the lead is on a ChatGPT model, turn on "Codex subagents on any model" in Codex's settings on myna's Agents page and start a new thread: the lead then hands its subagents their tasks as text.`
+	return ` For subagents on any model while the lead is on a ChatGPT model, turn on "Codex subagents on any model" in Codex's settings on owl's Agents page and start a new thread: the lead then hands its subagents their tasks as text.`
 }
 
 // sealedTaskItself says what a sealed task is (#1855): spawn_agent's
@@ -354,7 +354,7 @@ const sealedTaskItself = `What is sealed is the task itself: the message the age
 // canSeal says whether the provider id names could have sealed a
 // subagent's task, as sealedReader has who can open one: a ChatGPT
 // account, or a provider of no sign-in serving the Responses API (a relay
-// of the ChatGPT backend, #1109). One myna can't find is taken as one
+// of the ChatGPT backend, #1109). One owl can't find is taken as one
 // that could.
 func canSeal(id string) bool {
 	p, err := provider.Find(id)
@@ -415,7 +415,7 @@ func (s *Server) sealedReaders(cands []candidate, pl planned, sealers []string) 
 }
 
 // leadProvider is the provider that answered a subagent's lead, the
-// thread parent names, in any scope myna routed it in: "" when it
+// thread parent names, in any scope owl routed it in: "" when it
 // answered none of the lead's turns, or so long ago it no longer counts.
 // Given a lead's own conversation, it is the provider that answered the
 // lead.
@@ -482,7 +482,7 @@ func loggedAnswers(convs ...string) []loggedAnswer {
 		// the provider that answered, not one a deleted provider's
 		// calls were merged into on the Usage page (Renames.Own)
 		r.Provider = renamed.Own(r.Provider, r.Time)
-		if r.Provider == "" || r.Provider == "myna" || r.IsRejected() || r.IsReported() || r.Status <= 0 || r.Status >= 400 || r.Computer != "" || isTitleKind(r.Kind) {
+		if r.Provider == "" || r.Provider == "owl" || r.IsRejected() || r.IsReported() || r.Status <= 0 || r.Status >= 400 || r.Computer != "" || isTitleKind(r.Kind) {
 			return
 		}
 		// ponytail: host " as " is provider.Where. A relay that starts
@@ -645,7 +645,7 @@ func withoutSealedMessages(body []byte) ([]byte, bool) {
 		if from == "" {
 			from = "another agent"
 		}
-		note := "[myna: this message from " + from + " was sealed by the ChatGPT backend, which answered that agent on one of Codex's own models, and only it can open it; this model can't, so it was left out. An agent's final result still reaches the agent that spawned it as text.]"
+		note := "[owl: this message from " + from + " was sealed by the ChatGPT backend, which answered that agent on one of Codex's own models, and only it can open it; this model can't, so it was left out. An agent's final result still reaches the agent that spawned it as text.]"
 		for j, p := range parts {
 			if c, _ := p["encrypted_content"].(string); p["type"] == "encrypted_content" && nativeSealedAgentPayload.MatchString(c) {
 				parts[j] = map[string]any{"type": "input_text", "text": note}
@@ -681,8 +681,8 @@ func withoutSealedMessages(body []byte) ([]byte, bool) {
 // the ChatGPT backend that sealed it), so it spends that sign-in with
 // nothing of the key asked — and the gate fails closed: a held key may
 // compact only where the sign-in can be shown to be one of the key's
-// accounts (AllowsAccount), so a Codex switched off in myna, or
-// signed in to ChatGPT nowhere myna can resolve, is refused as an
+// accounts (AllowsAccount), so a Codex switched off in owl, or
+// signed in to ChatGPT nowhere owl can resolve, is refused as an
 // account the key may not use is, the relay reaching the sign-in all
 // the same. Codex signed in with its own API key (auth.json's
 // auth_mode) spends no account the key's list governs, and is the one
@@ -711,20 +711,20 @@ func compactSigninHeld(r *http.Request, model string, on *provider.Provider) (ac
 // request is bound to that account — so the message says the two ways
 // out, not the accounts alone.
 func compactHeldError(who access.Identity, model string) string {
-	return fmt.Sprintf("Native compaction for %s goes through the account Codex is signed in to, which the gateway key %q may not use; it may use %s. Native compaction has no other route: add the signed-in account to the key in myna's Gateway page, or use one of myna's models, whose compaction goes through a compaction_trigger on /responses and the key's accounts.",
+	return fmt.Sprintf("Native compaction for %s goes through the account Codex is signed in to, which the gateway key %q may not use; it may use %s. Native compaction has no other route: add the signed-in account to the key in owl's Gateway page, or use one of owl's models, whose compaction goes through a compaction_trigger on /responses and the key's accounts.",
 		model, who.KeyName, keyAccountNames(who))
 }
 
 // sealedCompactHeldError is compactHeldError for a compact sealed by
 // writer, another of Codex's accounts, which only it can read (#2727).
 func sealedCompactHeldError(who access.Identity, model string, writer *provider.Provider) string {
-	return fmt.Sprintf("This conversation's native compaction for %s was sealed by %s, and only that account can read it; the gateway key %q may not use it; it may use %s. Add %s to the key in myna's Gateway page, or start a new conversation.",
+	return fmt.Sprintf("This conversation's native compaction for %s was sealed by %s, and only that account can read it; the gateway key %q may not use it; it may use %s. Add %s to the key in owl's Gateway page, or start a new conversation.",
 		model, writer.Account.User, who.KeyName, keyAccountNames(who), writer.Account.User)
 }
 
 // compactOn is the account a native compaction of one of Codex's own
 // models goes to in place of the ChatGPT sign-in it would relay on: one of
-// Codex's other accounts on in myna while the sign-in is paused there
+// Codex's other accounts on in owl while the sign-in is paused there
 // (#263, the user's own account kept for Codex's remote control, Computer
 // Use and the like, another doing the work). Its turns already go to the
 // others (codexAccounts, routing passing the paused one over); relayed as
@@ -761,7 +761,7 @@ func compactOn(r *http.Request, model string) *provider.Provider {
 
 // codexAccounts is what a request for one of Codex's own models is served
 // as when Codex is signed in to ChatGPT and more of its accounts are on in
-// myna: the codex subscription's model (codex/<model>), which goes to the
+// owl: the codex subscription's model (codex/<model>), which goes to the
 // account Codex is signed in to and, when that one is out of its allowance
 // or rate limited, on to the next — as it can't when relayed as it came.
 // A gateway key held to some models or accounts (#882, #905) is served
@@ -798,12 +798,12 @@ func codexAccounts(r *http.Request, model string) (string, bool) {
 		return id, true
 	}
 	// Codex's sign-in known to be out (of its allowance, no credits): a
-	// Codex started before myna took its turns over (codex.out) still
+	// Codex started before owl took its turns over (codex.out) still
 	// sends them to its built-in provider, and relayed as they came each
 	// one met the same refusal until Codex was restarted, which then sent
-	// them to myna as codex/<model> (unsplashz on Discord). Served as
+	// them to owl as codex/<model> (unsplashz on Discord). Served as
 	// that restarted Codex's are, they go where routing sends them, with
-	// no restart. A request signed by an account myna doesn't have (a
+	// no restart. A request signed by an account owl doesn't have (a
 	// Codex in WSL) goes as it came
 	if ok && p.Account != nil && p.Account.Agent == "codex" && codexHeldKnown() {
 		if acct := h.Get("chatgpt-account-id"); acct == "" || acct == provider.CodexSignedInAccount() {
@@ -816,9 +816,9 @@ func codexAccounts(r *http.Request, model string) (string, bool) {
 	return id, true
 }
 
-// codexSealedFor is codexAccounts for a request myna would relay as it
+// codexSealedFor is codexAccounts for a request owl would relay as it
 // came to Codex's own sign-in, the one account on, that carries a native
-// compaction myna recorded the writer of: it goes through routing,
+// compaction owl recorded the writer of: it goes through routing,
 // which sends it only to that writer or answers why not
 // (checkpointReaders, checkpointError). Relayed, it reached the sign-in
 // whoever sealed it, and was refused there (#2642: the account that
@@ -837,18 +837,18 @@ func codexSealedFor(r *http.Request, model string, body []byte) (string, bool) {
 	return id, true
 }
 
-// sealedCompact judges a legacy compact whose input carries a seal myna
-// recorded the writer of (#2727): the writer on in myna answers it,
+// sealedCompact judges a legacy compact whose input carries a seal owl
+// recorded the writer of (#2727): the writer on in owl answers it,
 // signed as the writer — a seal only its writer reads (#1099, #2271), and
 // relayed as it came the compact reaches the sign-in, which another
 // account's seal refuses, its reason unread. A writer gone (signed out,
 // lapsed, paused, switched off, kept from the model) is refused here with
 // the same words the same request on /responses gets (checkpointError,
 // #2642). The sign-in's pause (compactOn) changes the signature, not the
-// judgment. judged is false for what goes as it came: a seal a myna
+// judgment. judged is false for what goes as it came: a seal a owl
 // key's candidate wrote, a request signing with its own
 // chatgpt-account-id (a Codex on WSL or another CODEX_HOME — codexServed's
-// caution), a provider or sign-in state myna cannot read, and the
+// caution), a provider or sign-in state owl cannot read, and the
 // sign-in's own seal while the sign-in can still be asked (the backend
 // takes its own).
 func sealedCompact(r *http.Request, model string, body []byte) (writer *provider.Provider, gone string, judged bool) {
@@ -953,8 +953,8 @@ func (s *Server) codexUpstreamOn(w http.ResponseWriter, r *http.Request, rest st
 	// row written below sums this call's tries in its own context (#4456)
 	r = r.WithContext(context.WithValue(r.Context(), upBytesKey{}, &upBytes{}))
 	w0, body0 := w, body // as they came, for the fallbacks (codexFallBack)
-	// Claude's blocks myna gave Codex (claudeseal) are Claude's alone:
-	// to OpenAI each item is its summary, as before myna carried them
+	// Claude's blocks owl gave Codex (claudeseal) are Claude's alone:
+	// to OpenAI each item is its summary, as before owl carried them
 	body = withoutClaudeSeals(body)
 	base := provider.CodexBase
 	if apiKey(r.Header) && rest != "/models" {
@@ -963,7 +963,7 @@ func (s *Server) codexUpstreamOn(w http.ResponseWriter, r *http.Request, rest st
 	var maskedHits maskHits
 	// the ChatGPT sign-in the user set to go unmasked, and its fallbacks
 	// (codexFallBack masks for its own route), gets the turn as written
-	// (isee1_1 on Discord); Codex's own API key is no account of myna's
+	// (isee1_1 on Discord); Codex's own API key is no account of owl's
 	sentWhole := base == provider.CodexBase && codexRouteUnmasked(on)
 	if r.Method == http.MethodPost && !sentWhole {
 		var unmask func()
@@ -1015,7 +1015,7 @@ func (s *Server) codexUpstreamOn(w http.ResponseWriter, r *http.Request, rest st
 	// the one it can go to: Codex's own sign-in, or its key
 	var tr *Route
 	// where the try now going spent its time (TryNet): the request goes
-	// out through myna's own client, as a routed try's does, so the
+	// out through owl's own client, as a routed try's does, so the
 	// Routing page says whose time a slow turn was here too
 	nt := &netTrace{}
 	first := firstToken{start: start} // the reply's first tokens (#196), counted as ms are
@@ -1074,7 +1074,7 @@ func (s *Server) codexUpstreamOn(w http.ResponseWriter, r *http.Request, rest st
 			}
 			prompt := promptRead() // outside the trace's lock, which reading it takes
 			s.trace.update(tr, func(t *Route) {
-				// what masking took: myna's own time isn't split here
+				// what masking took: owl's own time isn't split here
 				t.Masking = maskingMs(r.Context(), 0)
 				// the last try: the turn asked again for an overload has one each
 				try := &t.Tries[len(t.Tries)-1]
@@ -1177,7 +1177,7 @@ func (s *Server) codexUpstreamOn(w http.ResponseWriter, r *http.Request, rest st
 	// the client that did, and the bytes it was passed
 	var readErr, writeErr error
 	var passed int64
-	relayedAcct := "" // myna's ChatGPT account the turn went out on, if any
+	relayedAcct := "" // owl's ChatGPT account the turn went out on, if any
 	if rest == "/responses" && base != codexAPIBase {
 		// the account goes on its credits, its week used up: a reset it
 		// spends by itself when the week runs out goes first
@@ -1233,7 +1233,7 @@ func (s *Server) codexUpstreamOn(w http.ResponseWriter, r *http.Request, rest st
 			// left to the transport, the reply comes back plain for the usage in it
 			req.Header.Del("Accept-Encoding")
 			// a turn to ChatGPT goes zstd-compressed again, as Codex sent it
-			// before myna read it (ylorn on X); an API key's goes plain
+			// before owl read it (ylorn on X); an API key's goes plain
 			sent = provider.CodexCompressed(req, body)
 			// counted for the request's ledger row, as forwardOnce's are (#4456)
 			sentUp(r.Context(), sent, len(body))
@@ -1260,7 +1260,7 @@ func (s *Server) codexUpstreamOn(w http.ResponseWriter, r *http.Request, rest st
 				return
 			}
 			if on != nil {
-				// one of myna's accounts: a revoked sign-in shows on its
+				// one of owl's accounts: a revoked sign-in shows on its
 				// row, to sign in again (#1793)
 				noteSignIn(ctx, on.Account, req, res)
 			}
@@ -1347,7 +1347,7 @@ func (s *Server) codexUpstreamOn(w http.ResponseWriter, r *http.Request, rest st
 			if acct, ok := codexRelayedAccount(base, r.Header, on); ok {
 				// the windows the reply tells of the account it went out on
 				// are kept as its usage, and a full one has it read again at
-				// once, as a turn served through myna's accounts has: with
+				// once, as a turn served through owl's accounts has: with
 				// Codex's sign-in the only account, every turn comes this way,
 				// and the Codex app was moved off a used-up account only at
 				// the next look, minutes on, Send greyed until it was
@@ -1391,7 +1391,7 @@ func (s *Server) codexUpstreamOn(w http.ResponseWriter, r *http.Request, rest st
 			if overload && codexAccountOut(res.StatusCode, msg) && s.codexFallsBack(modelOf(body), body) {
 				// the account out of its allowance (its credits and resets
 				// looked at above): the fallbacks answer, as they do for a
-				// turn through myna's accounts, rather than Codex handed
+				// turn through owl's accounts, rather than Codex handed
 				// the refusal (adorable_piglet on Discord)
 				said := provider.APIError(msg, res.Status)
 				handOut(res.StatusCode, said, msg)
@@ -1545,7 +1545,7 @@ func (s *Server) codexUpstreamOn(w http.ResponseWriter, r *http.Request, rest st
 		errType = provider.ErrorType(refusal)
 		if relayedAcct != "" && failure(res.StatusCode, refusal) == failQuota {
 			// the account it went out on refused the turn as out of its
-			// allowance: read again now, so myna takes the turns over
+			// allowance: read again now, so owl takes the turns over
 			// (codex.out) and the Codex app is told without a restart
 			codexMayBeUsedUp(relayedAcct)
 		}
@@ -1624,7 +1624,7 @@ func codexRouteUnmasked(on *provider.Provider) bool {
 // codexAccountOut says the ChatGPT backend turned away a turn on Codex's
 // own sign-in for the account, not the request: out of its allowance
 // (usage_limit_reached, a plan without Codex), of its credits, or rate
-// limited — what a turn through myna's accounts goes on past to the
+// limited — what a turn through owl's accounts goes on past to the
 // next. A 401 is never one: Codex renews its own sign-in on it.
 func codexAccountOut(status int, body []byte) bool {
 	if status == http.StatusUnauthorized {
@@ -1641,7 +1641,7 @@ func codexAccountOut(status int, body []byte) bool {
 }
 
 // codexFallsBack says Codex's turn on one of its own models has fallbacks
-// to go on to (codexFallBack): the Codex subscription's, set in myna, at
+// to go on to (codexFallBack): the Codex subscription's, set in owl, at
 // least one of them found. A turn compacting natively is the backend's to
 // answer, and goes nowhere else.
 func (s *Server) codexFallsBack(model string, body []byte) bool {
@@ -1658,7 +1658,7 @@ func (s *Server) codexFallsBack(model string, body []byte) bool {
 // codexFallBack serves Codex's turn on its own sign-in, which the backend
 // was too busy for however often it was asked again, from the Codex
 // subscription's fallbacks, as serve goes on to them for a turn through
-// myna's accounts; the account itself is not asked again (handedOnOf).
+// owl's accounts; the account itself is not asked again (handedOnOf).
 // kept is what Codex was sent while it waited: the stream's headers, once
 // it had them, which the fallback's reply follows.
 func (s *Server) codexFallBack(w http.ResponseWriter, r *http.Request, body []byte, kept *keptAlive) {
@@ -1722,10 +1722,10 @@ func codexServed(base string, h http.Header, on *provider.Provider) (id, account
 	return p.ID, p.Account.User
 }
 
-// codexRelayedAccount is the ChatGPT account of myna's that a relay
+// codexRelayedAccount is the ChatGPT account of owl's that a relay
 // through codexUpstreamOn went out on: the one it was signed with (on),
 // or Codex's own sign-in when the request names it; false for a call to
-// OpenAI's API, or one signed by an account myna doesn't have.
+// OpenAI's API, or one signed by an account owl doesn't have.
 func codexRelayedAccount(base string, h http.Header, on *provider.Provider) (provider.Provider, bool) {
 	if base != provider.CodexBase || apiKey(h) {
 		return provider.Provider{}, false
@@ -1733,7 +1733,7 @@ func codexRelayedAccount(base string, h http.Header, on *provider.Provider) (pro
 	if on != nil && on.Account != nil && on.Account.User != "" {
 		return *on, true
 	}
-	// the token went out as Codex sent it: it is the sign-in myna reads
+	// the token went out as Codex sent it: it is the sign-in owl reads
 	// only when it names the same ChatGPT account. A Codex in WSL, or
 	// under another CODEX_HOME, signs with its own, which isn't named here
 	if acct := h.Get("chatgpt-account-id"); acct != "" && acct != provider.CodexSignedInAccount() {
@@ -1819,7 +1819,7 @@ func codexKeyRefused(msg []byte) string {
 	}
 	return "OpenAI refused the API key Codex is signed in with (" + said + "). " +
 		"This is one of Codex's own models, which goes to OpenAI with Codex's own sign-in: " +
-		"pick one of myna's models in Codex (provider/model, or set it in myna's Agents view), " +
+		"pick one of owl's models in Codex (provider/model, or set it in owl's Agents view), " +
 		"or sign Codex in with ChatGPT, or with an OpenAI API key"
 }
 
@@ -1842,22 +1842,22 @@ func droppedUnanswered(ctx context.Context, err error) bool {
 // lists (#322) — and what to do about it.
 func codexUnreached(model string, err error) string {
 	return "OpenAI can't be reached (" + err.Error() + "). " + model + " is one of Codex's own models, " +
-		"which goes to OpenAI with Codex's own sign-in: pick one of myna's models in Codex " +
-		"(provider/model, or set it in myna's Agents view), or let Codex reach OpenAI"
+		"which goes to OpenAI with Codex's own sign-in: pick one of owl's models in Codex " +
+		"(provider/model, or set it in owl's Agents view), or let Codex reach OpenAI"
 }
 
 // codexFailedEmpty says why a model of Codex's own failed when OpenAI gave
 // an error status and nothing else: where it went, and what to do — a
-// Codex left on its own model while myna's Agents view picked another
+// Codex left on its own model while owl's Agents view picked another
 // for it sends the turn to OpenAI, not to that one (#409).
 func codexFailedEmpty(model, status string) string {
 	return "OpenAI answered " + status + " and said nothing more. " + model + " is one of Codex's own models, " +
-		"which goes to OpenAI with Codex's own sign-in, not to a provider in myna: pick one of myna's models in Codex " +
-		"(provider/model, or set it in myna's Agents view), or try again later"
+		"which goes to OpenAI with Codex's own sign-in, not to a provider in owl: pick one of owl's models in Codex " +
+		"(provider/model, or set it in owl's Agents view), or try again later"
 }
 
 // codexWho names who a request relayed to OpenAI went to: Codex's own
-// sign-in, its API key, or one of myna's ChatGPT accounts (on).
+// sign-in, its API key, or one of owl's ChatGPT accounts (on).
 func codexWho(base string, on *provider.Provider) string {
 	switch {
 	case on != nil && on.Account != nil && on.Account.User != "":
@@ -1895,8 +1895,8 @@ func codexSaidNothing(rest, model, who string, res *http.Response, msg []byte) (
 		}
 	}
 	return who + " answered " + what + " for " + model + " " + res.Status + said +
-		". " + model + " is one of Codex's own models, which goes to OpenAI, not to a provider in myna; try again later, " +
-		"or pick one of myna's models in Codex (provider/model, or set it in myna's Agents view)", true
+		". " + model + " is one of Codex's own models, which goes to OpenAI, not to a provider in owl; try again later, " +
+		"or pick one of owl's models in Codex (provider/model, or set it in owl's Agents view)", true
 }
 
 // codexStreamCut says when a relayed stream was cut mid-reply: an SSE reply
@@ -2016,7 +2016,7 @@ func codexHeader(k string) bool {
 // makes on a hidden thread of its own goes without x-openai-subagent: its
 // x-codex-turn-metadata names the thread's source instead — "thread_title"
 // for the title of a new chat (#314), "guardian_review". A web search
-// myna runs for a model that can't search is "web_search". DSH marks its
+// owl runs for a model that can't search is "web_search". DSH marks its
 // compaction with x-deepseek-harness-compact: "compact" too.
 func callKind(h http.Header) string {
 	v := strings.TrimSpace(h.Get("x-openai-subagent"))
@@ -2080,10 +2080,10 @@ func copyHeaders(dst, src http.Header) {
 
 // codexModelsWait is how long the ChatGPT backend is given for its model
 // list. Codex gives the whole request 5 s (MODELS_REFRESH_TIMEOUT in its
-// models endpoint) and then keeps the list it was built with, myna's
+// models endpoint) and then keeps the list it was built with, owl's
 // models nowhere in it; a backend slow to answer, or not reachable at all
 // on a network that drops chatgpt.com's packets rather than refusing
-// them, held myna's answer past that (#539). A var so tests can say.
+// them, held owl's answer past that (#539). A var so tests can say.
 var codexModelsWait = 3 * time.Second
 
 // codexListFor is how long the backend's list is handed out again without
@@ -2099,7 +2099,7 @@ const codexListFetch = 30 * time.Second
 // app-servers asked it at once, each on its own and each given up at
 // codexModelsWait, so a backend slower than that never got a list through
 // and Codex fell back to its own metadata, without tool_search for
-// myna's groups, and inlined every Apps tool: ~500K tokens a turn
+// owl's groups, and inlined every Apps tool: ~500K tokens a turn
 // (#3734, 1,906 timeouts in a day).
 var codexLists = struct {
 	sync.Mutex
@@ -2223,18 +2223,18 @@ func (s *Server) askCodexList(rctx context.Context, h http.Header, query string,
 }
 
 // codexModels is the ChatGPT backend's model list for this sign-in, with
-// myna's models after it. Should the backend not answer, or not in
+// owl's models after it. Should the backend not answer, or not in
 // time, Codex's last list of its own stands in.
 func (s *Server) codexModels(w http.ResponseWriter, r *http.Request) {
 	var own []any
 	body, etag, deny, denyBody := s.codexBackendList(r)
 	// A sign-in the backend calls revoked (401 token_revoked, "Encountered
 	// invalidated oauth token", provider.SignInRevoked) is answered as a
-	// backend that didn't answer: Codex's last list of its own, myna's
+	// backend that didn't answer: Codex's last list of its own, owl's
 	// models after it. Passed through, Codex tried one refresh, which
 	// fails for good for such a sign-in (openai/codex login/src/auth/
 	// manager.rs: refresh_token_expired, _reused, _invalidated), and kept
-	// its bundled list, so myna's models were gone from the picker until
+	// its bundled list, so owl's models were gone from the picker until
 	// the user signed in again (jjt on Discord, #4308). Nothing is kept of
 	// it: the next ask goes to the backend again, so a sign-in made again
 	// has its list at once, and Codex still learns of the dead sign-in on
@@ -2270,19 +2270,19 @@ func (s *Server) codexModels(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	all := codexMerged(own, cached)
-	// the list is the backend's and myna's, and so is its ETag
+	// the list is the backend's and owl's, and so is its ETag
 	w.Header().Set("ETag", codexcat.WithTag(etag, codexListTag()))
 	writeJSON(w, 200, map[string]any{"models": all})
 }
 
-// codexMerged is the list myna hands a Codex beside its ChatGPT sign-in:
+// codexMerged is the list owl hands a Codex beside its ChatGPT sign-in:
 // own, the backend's entries (cached when they are Codex's last list, not
 // the backend's answer), as the user narrowed and set them on the codex
-// provider, with myna's models after them. The entries are written into.
+// provider, with owl's models after them. The entries are written into.
 func codexMerged(own []any, cached bool) []any {
 	defer provider.Hold()()
 	// the windows the user set on the codex provider, as /v1/models says
-	// them (#674); a cached entry, which keeps what myna handed Codex
+	// them (#674); a cached entry, which keeps what owl handed Codex
 	// last, takes the account's own list's back when none is set
 	window := provider.CodexNativeWindow(cached)
 	for _, m := range own {
@@ -2295,8 +2295,8 @@ func codexMerged(own []any, cached bool) []any {
 	}
 	// The backend lists every model the ChatGPT account can reach. When the
 	// user picked among them on the codex provider, keep the list to those:
-	// their pick governs Codex's own models, not just myna's added ones.
-	// A hidden one stays: it is never in a picker, myna's included
+	// their pick governs Codex's own models, not just owl's added ones.
+	// A hidden one stays: it is never in a picker, owl's included
 	// (parseCodexModels), and Codex uses it for jobs of its own. One of them
 	// is codex-auto-review. Without it in the list, Codex's auto-review runs
 	// on the conversation's own model at low effort
@@ -2359,8 +2359,8 @@ func codexMerged(own []any, cached bool) []any {
 			codexcat.AutoReview(o, autoReview)
 		}
 	}
-	// a Codex here for account failover alone, not connected to myna,
-	// keeps to its own models (#1385: 62 of myna's were in its list)
+	// a Codex here for account failover alone, not connected to owl,
+	// keeps to its own models (#1385: 62 of owl's were in its list)
 	var ms []catalog.Model
 	if !codexOwnOnly() {
 		ms = provider.CodexListed()
@@ -2386,7 +2386,7 @@ func codexMerged(own []any, cached bool) []any {
 }
 
 // modelsEtag is the X-Models-Etag of a backend reply as Codex should read
-// it: with myna's models in it, as the list's own ETag has them, so a
+// it: with owl's models in it, as the list's own ETag has them, so a
 // change to either has Codex ask for the list again.
 func modelsEtag(h http.Header) {
 	if v := h.Get("X-Models-Etag"); v != "" {
@@ -2395,9 +2395,9 @@ func modelsEtag(h http.Header) {
 }
 
 // CodexOwnOnly reports whether the Codex asking for its model list at
-// CodexPath reaches myna for account failover alone, not connected to
+// CodexPath reaches owl for account failover alone, not connected to
 // it (agent.CodexOwnOnly): it is then handed only its own models (#1385).
-// Set by main; nil, every Codex gets myna's models too.
+// Set by main; nil, every Codex gets owl's models too.
 var CodexOwnOnly func() bool
 
 func codexOwnOnly() bool { return CodexOwnOnly != nil && CodexOwnOnly() }
@@ -2415,18 +2415,18 @@ func codexListTag() string {
 	return tag
 }
 
-// codexInput restores summaries myna made. For a myna model, it also
+// codexInput restores summaries owl made. For a owl model, it also
 // replaces Codex's compaction trigger with a request to summarise the input.
 // OpenAI's own models keep the trigger for their backend to handle.
-func codexInput(body []byte, mynaModel bool) (_ []byte, compact bool) {
-	return codexInputAs(body, mynaModel, false)
+func codexInput(body []byte, owlModel bool) (_ []byte, compact bool) {
+	return codexInputAs(body, owlModel, false)
 }
 
-// codexInputAs is codexInput, the trigger kept for a myna model too
+// codexInputAs is codexInput, the trigger kept for a owl model too
 // when native says its provider compacts natively (NativeCompaction,
-// #1099): the summaries myna made before are still restored.
-func codexInputAs(body []byte, mynaModel, native bool) (_ []byte, compact bool) {
-	if !anyInputItem(body, func(it []byte) bool { return codexInputItemChanges(it, mynaModel, native) }) {
+// #1099): the summaries owl made before are still restored.
+func codexInputAs(body []byte, owlModel, native bool) (_ []byte, compact bool) {
+	if !anyInputItem(body, func(it []byte) bool { return codexInputItemChanges(it, owlModel, native) }) {
 		return body, false
 	}
 	var q map[string]json.RawMessage
@@ -2453,7 +2453,7 @@ func codexInputAs(body []byte, mynaModel, native bool) (_ []byte, compact bool) 
 				out = append(out, msg)
 			}
 		case "compaction_trigger":
-			if !mynaModel || native {
+			if !owlModel || native {
 				out = append(out, it)
 				continue
 			}
@@ -2462,7 +2462,7 @@ func codexInputAs(body []byte, mynaModel, native bool) (_ []byte, compact bool) 
 		case "reasoning":
 			// OpenAI accepts no reasoning content parts in replayed input.
 			// Drop the item so its encrypted_content cannot fail there too.
-			if !mynaModel {
+			if !owlModel {
 				if content, present := it["content"]; present && content != nil {
 					parts, ok := content.([]any)
 					if !ok || len(parts) > 0 {
@@ -2473,9 +2473,9 @@ func codexInputAs(body []byte, mynaModel, native bool) (_ []byte, compact bool) 
 				// Nor reasoning with nothing sealed in it — another vendor's,
 				// only an id (rs_…): OpenAI, which keeps nothing (store is
 				// false), looks the id up and answers 404 "Item … not found".
-				// Nor Claude's block myna carried in one (claudeseal),
+				// Nor Claude's block owl carried in one (claudeseal),
 				// which OpenAI would refuse as invalid_encrypted_content:
-				// before myna carried it, the item had nothing sealed
+				// before owl carried it, the item had nothing sealed
 				if enc, _ := it["encrypted_content"].(string); enc == "" || claudeseal.Is(enc) {
 					changed = true
 					continue
@@ -2530,16 +2530,16 @@ func codexInputAs(body []byte, mynaModel, native bool) (_ []byte, compact bool) 
 // codexInputItemChanges reports whether codexInputAs would put another in
 // the place of it, an input item, or leave it out: read as the rewrite
 // reads it (a map[string]any), without decoding the conversation.
-func codexInputItemChanges(it []byte, mynaModel, native bool) bool {
+func codexInputItemChanges(it []byte, owlModel, native bool) bool {
 	typ, _ := stringBytes(memberOrNil(it, "type"))
 	switch {
 	case string(typ) == "compaction" || string(typ) == "compaction_summary":
 		enc, _ := stringBytes(memberOrNil(it, "encrypted_content"))
-		return hasPrefix(enc, mynaCompaction)
+		return hasPrefix(enc, owlCompaction)
 	case string(typ) == "compaction_trigger":
-		return mynaModel && !native
+		return owlModel && !native
 	case string(typ) == "reasoning":
-		if mynaModel {
+		if owlModel {
 			return false
 		}
 		if c := memberOrNil(it, "content"); c != nil && string(c) != "null" {
@@ -2562,14 +2562,14 @@ func codexInputItemChanges(it []byte, mynaModel, native bool) bool {
 // in client_metadata's x-codex-turn-metadata too.
 const turnMetadataHeader = "X-Codex-Turn-Metadata"
 
-// localCompactionTurn is Codex's turn metadata for a compaction myna
+// localCompactionTurn is Codex's turn metadata for a compaction owl
 // summarises itself, as Codex says it of the summary it asks a provider
 // for: compaction.implementation "responses", not the remote
 // "responses_compaction_v2" Codex named when it sent a compaction_trigger
 // (Codex 0.162.1 under a provider named "OpenAI" and under another, both
-// captured). The trigger is gone from what myna sends, so the request
+// captured). The trigger is gone from what owl sends, so the request
 // said remote compaction and carried none, a shape Codex itself never
-// sends. A relay that only takes Codex's own requests refused myna's
+// sends. A relay that only takes Codex's own requests refused owl's
 // compaction with "invalid codex request" (#2352, #1171). Everything
 // else stays byte for byte; false when there's nothing to change.
 func localCompactionTurn(meta string) (string, bool) {
@@ -2603,7 +2603,7 @@ func localCompactionTurn(meta string) (string, bool) {
 // the only places Codex names either (codex-rs core/src/session/turn.rs,
 // maybe_run_previous_model_inline_compact). When it fails Codex asks the
 // turn's own model instead, but only under its provider named "OpenAI"
-// (compact_model_fallback.rs); under myna's, the provider Codex has
+// (compact_model_fallback.rs); under owl's, the provider Codex has
 // while its sign-in is used up (codex.out), the failure is the turn's,
 // and every turn of the thread asks the old model again.
 func previousModelCompaction(r *http.Request, body []byte) bool {
@@ -2668,7 +2668,7 @@ func refusesInput(status int, b []byte) bool {
 
 // withoutBareReasoning is a Responses request without the reasoning items
 // that have nothing sealed in them, where store isn't true: an id and a
-// summary only, as myna gives Codex in a translated reply (rs_ and
+// summary only, as owl gives Codex in a translated reply (rs_ and
 // newID). OpenAI's API and Azure OpenAI's look such an item up among the
 // items they stored, and with store false they stored none, so the whole
 // request goes back 400 "Item with id 'rs_…' not found" (#1008); its
@@ -2885,7 +2885,7 @@ func refusesCitationOffsets(status int, b []byte) bool {
 // withoutOffsetlessCitations is a Responses request without the
 // output_text annotations that lack the offsets OpenAI's schema wants on
 // every one, as another vendor's Responses reply wrote them (Volcengine
-// Ark's url_citation, #4921): Codex stored the reply myna relayed, and
+// Ark's url_citation, #4921): Codex stored the reply owl relayed, and
 // where that schema holds — the ChatGPT backend, OpenAI's API, a relay in
 // front of them — the replay was refused whole, every turn of the thread
 // with it. Such an annotation goes; the text, and a citation with its
@@ -2978,7 +2978,7 @@ func itemCitesWithoutOffsets(it []byte) bool {
 }
 
 // openaiItemPrefix is the id prefix OpenAI takes for each kind of call item
-// a vendor's reply may have handed Codex with another: myna, or the
+// a vendor's reply may have handed Codex with another: owl, or the
 // vendor, gave a tool search's and a custom tool's call a function_call's
 // id (fc_…), and Codex hands the item back on every later turn. OpenAI's
 // own models and the ChatGPT backend turn the whole request away ("Invalid
@@ -3240,7 +3240,7 @@ var keepsSeal = map[string]bool{`"reasoning"`: true, `"compaction"`: true, `"com
 // output.encrypted_content in its include,
 // and the sealed output (encrypted_content) on a message or call that an
 // OpenAI model wrote earlier in the conversation; and, for a summary ask
-// of myna's own (compaction, codexCompact), with its developer messages
+// of owl's own (compaction, codexCompact), with its developer messages
 // as the system ones they are (developerItemsAsSystem) — Codex's own turns
 // keep the role, which a relay may be checking them by (#350, #1758).
 // A relay that checks it is Codex's turned the lot away ("invalid codex
@@ -3335,19 +3335,19 @@ func forVendor(p provider.Provider, body []byte, compaction bool) []byte {
 
 // keepsAccessPrograms says a Responses request to p goes with its top-level
 // access_programs, the Cyber program a request asks the model under
-// (OpenAI's Daybreak, myna-releases#18): to the ChatGPT backend, to
-// OpenAI's API, to another myna (whose own upstream decides), and to a
+// (OpenAI's Daybreak, owl-releases#18): to the ChatGPT backend, to
+// OpenAI's API, to another owl (whose own upstream decides), and to a
 // relay that takes Codex's requests as Codex sent them (CodexAsSent). Codex
 // itself sends the field to nobody else: only with a ChatGPT sign-in, or an
 // API key on its provider named "openai" (codex-rs cyber_access_program.rs,
-// for_auth and for_provider), which is how it comes to myna. OpenCode Go
+// for_auth and for_provider), which is how it comes to owl. OpenCode Go
 // answers it, for DeepSeek and GLM, with a 503 "Endpoint is unavailable"
 // that says nothing of the field (#3172), and no other vendor has a program
 // to read in it.
 func keepsAccessPrograms(p provider.Provider, in http.Header) bool {
 	return p.Account != nil && p.Account.Agent == "codex" ||
 		strings.HasSuffix(p.Host(), "openai.com") ||
-		p.IsRemoteMyna() ||
+		p.IsRemoteOwl() ||
 		p.CodexAsSent && p.Account == nil && fromCodex(in)
 }
 
@@ -3446,9 +3446,9 @@ func developerItemsAsSystem(body []byte) []byte {
 
 func userMessage(text string) map[string]any { return codexsummary.UserMessage(text) }
 
-// codexCompact compacts a conversation held by a myna model: the model
+// codexCompact compacts a conversation held by a owl model: the model
 // summarises it, and the summary goes back to Codex as the compaction item
-// the backend would have made, marked as myna's so myna reads it back
+// the backend would have made, marked as owl's so owl reads it back
 // in later requests.
 //
 // A provider that answers the summary 404 — a relay that serves the
@@ -3456,7 +3456,7 @@ func userMessage(text string) map[string]any { return codexsummary.UserMessage(t
 // failed" (#866) — or 405 or 501 (lacksEndpoint), or 400 for an item of it it doesn't have (#1008) is
 // asked once more with the conversation as plain text, none of its items'
 // ids or sealed reasoning in it; when that fails too the summary is
-// myna's own, the conversation's user messages and last reply,
+// owl's own, the conversation's user messages and last reply,
 // so the compaction still completes and Codex goes on. So is one the
 // ChatGPT backend answers 502 "response protection is unavailable" (vs on
 // Discord): the same long history failed so on every account and model,
@@ -3469,18 +3469,18 @@ func userMessage(text string) map[string]any { return codexsummary.UserMessage(t
 // ends incomplete, is a failure the next account or member answers, as
 // one that fails before it begins, and is never taken for the summary.
 // When none is left and the last one's stream broke off, the summary is
-// myna's own (#3526): Codex, told a 502, asked the same huge summary
+// owl's own (#3526): Codex, told a 502, asked the same huge summary
 // over until the guard held it, and the conversation could neither compact
 // nor go on. One that ended incomplete is still told so. One conversation's
 // compaction that keeps failing stops being asked for a while
 // (compactFails, #2274).
 func (s *Server) codexCompact(w http.ResponseWriter, r *http.Request, body []byte) {
 	key, model := compactKey(body), modelOf(body)
-	// Codex's compaction on the model a thread is leaving, under myna's
+	// Codex's compaction on the model a thread is leaving, under owl's
 	// provider: one that fails is compacted locally, as Codex would have
 	// the turn's own model do it (previousModelCompaction), never the
 	// turn's failure. On CodexPath Codex's provider is its own "OpenAI",
-	// which asks the turn's model itself, a summary where myna's local
+	// which asks the turn's model itself, a summary where owl's local
 	// one is only what was asked and the last reply
 	prev := !strings.HasPrefix(r.URL.Path, CodexPath+"/") && previousModelCompaction(r, body)
 	if msg, held := s.compactFails.held(key, model); held && !prev {
@@ -3550,7 +3550,7 @@ func (s *Server) codexCompact(w http.ResponseWriter, r *http.Request, body []byt
 		// the guard held it and the conversation could neither compact nor
 		// go on (#3526). A translated reply that stopped short comes as a
 		// 502 saying so (summaryEndedShort), the same cut. The summary is
-		// myna's own, as when no model can be asked at all; the summary
+		// owl's own, as when no model can be asked at all; the summary
 		// as text isn't tried, the cut was in what the model wrote, not in
 		// what it was asked
 		who, _ := compactFailure(body, rec)
@@ -3609,7 +3609,7 @@ func (s *Server) codexCompact(w http.ResponseWriter, r *http.Request, body []byt
 		// tools offered, a history tool declared as a stub that it calls
 		// anyway — the history's calls are what it follows. Asked again
 		// with the conversation as text, there's no exchange of calls to
-		// go on with; when it still writes no summary, myna compacts
+		// go on with; when it still writes no summary, owl compacts
 		// without a model, so Codex goes on rather than failing over and
 		// over
 		who, _ := compactFailure(body, rec)
@@ -3649,7 +3649,7 @@ func (s *Server) codexCompact(w http.ResponseWriter, r *http.Request, body []byt
 	s.compactFails.done(key)
 	id := res.ID
 	if id == "" {
-		id = fmt.Sprintf("resp_myna_%d", time.Now().UnixNano())
+		id = fmt.Sprintf("resp_owl_%d", time.Now().UnixNano())
 	}
 	item := map[string]any{"type": "compaction", "id": "cmp_" + strings.TrimPrefix(id, "resp_"),
 		"encrypted_content": codexsummary.Encrypted(sum.String())}
@@ -3860,7 +3860,7 @@ func localSummary(body []byte, why string) string {
 		n += len(asked[from])
 	}
 	var b strings.Builder
-	b.WriteString("myna compacted this conversation without a model (" + why + "), so this is no summary: it is what the user asked")
+	b.WriteString("owl compacted this conversation without a model (" + why + "), so this is no summary: it is what the user asked")
 	if from > 0 {
 		fmt.Fprintf(&b, " (the latest %d of %d messages)", len(asked)-from, len(asked))
 	}

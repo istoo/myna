@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // Grok Build reads a Messages thinking block as ContentBlock::Thinking
@@ -67,11 +67,11 @@ func thinkingBlocks(t *testing.T, body string) []map[string]any {
 	return blocks
 }
 
-// TestMessagesThinkingIsSigned: every thinking block myna gives a
+// TestMessagesThinkingIsSigned: every thinking block owl gives a
 // Messages client says a signature, a string, whether the reply was
 // relayed from a vendor's Messages endpoint that wrote none (MiniMax's) or
 // translated from Chat's reasoning_content, streamed or whole. The
-// thinking itself is unchanged, and what myna adds is empty, never a
+// thinking itself is unchanged, and what owl adds is empty, never a
 // made-up signature.
 func TestMessagesThinkingIsSigned(t *testing.T) {
 	for _, tt := range []struct {
@@ -105,7 +105,7 @@ func TestMessagesThinkingIsSigned(t *testing.T) {
 				t.Fatalf("thinking block has no signature string, as Grok Build turns away: %v\n%s", blocks[0], body)
 			}
 			if sig != "" {
-				t.Errorf("signature = %q, want the empty one myna adds", sig)
+				t.Errorf("signature = %q, want the empty one owl adds", sig)
 			}
 			if _, ok := blocks[0]["thinking"].(string); !ok {
 				t.Errorf("thinking block has no thinking string: %v", blocks[0])

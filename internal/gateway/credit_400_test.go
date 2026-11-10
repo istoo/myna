@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // superMagicBroke is SuperMagic's answer to an account whose points ran
@@ -29,7 +29,7 @@ func superMagicBrokeBody() string {
 func TestCreditRefusalIsRetryableAtAnyStatus(t *testing.T) {
 	for _, body := range []string{
 		superMagicBrokeBody(),
-		"超级麦吉: " + superMagicBroke, // as myna tells it on
+		"超级麦吉: " + superMagicBroke, // as owl tells it on
 	} {
 		for _, status := range []int{400, 409, 422} {
 			if f := failure(status, []byte(body)); f != failCredit {

@@ -12,9 +12,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/claudetui"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/claudetui"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // guardClaude stands in for an interactive Claude Code whose tap puts the
@@ -43,7 +43,7 @@ func guardClaude(t *testing.T) string {
 echo "args $*" >> ` + log + `
 cb=$(cat "$(printf '%s\n' "$@" | grep -o '"claude-mcp-helper","[^"]*"' | head -1 | sed 's/.*","//; s/"$//')")
 me=$$
-sent() { echo "sent $(cat "$MYNA_CLAUDE_GUARD" 2>/dev/null)" >> ` + log + `; }
+sent() { echo "sent $(cat "$OWL_CLAUDE_GUARD" 2>/dev/null)" >> ` + log + `; }
 start() { echo '{"type":"stream_event","event":{"type":"message_start","message":{"id":"m'$1'","model":"claude-sonnet-5","usage":{"input_tokens":1}}}}'; }
 stop() {
   echo '{"type":"stream_event","event":{"type":"message_delta","delta":{"stop_reason":"'$1'"},"usage":{"output_tokens":3}}}'
@@ -56,7 +56,7 @@ while read -r line; do
     continue;;
   esac
   printf 'told %s\n' "$line" >> ` + log + `
-  if [ -n "$MYNA_CLAUDE_GUARD" ] && [ -z "$FAKE_NO_TAP" ]; then : > "$MYNA_CLAUDE_GUARD.live"; fi
+  if [ -n "$OWL_CLAUDE_GUARD" ] && [ -z "$FAKE_NO_TAP" ]; then : > "$OWL_CLAUDE_GUARD.live"; fi
   case "$line" in *CALL3*) ;; *)
     sent; start 0
     echo '{"type":"stream_event","event":{"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"pid '$me'"}}}'
@@ -66,7 +66,7 @@ while read -r line; do
   esac
   for k in 1 2 3; do
     sent; start $k
-    echo '{"type":"stream_event","event":{"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"toolu_G'$me'_'$k'","name":"mcp__myna__read"}}}'
+    echo '{"type":"stream_event","event":{"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"toolu_G'$me'_'$k'","name":"mcp__owl__read"}}}'
     echo '{"type":"stream_event","event":{"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"{}"}}}'
     echo '{"type":"stream_event","event":{"type":"content_block_stop","index":0}}'
     stop tool_use
@@ -83,7 +83,7 @@ done
 	t.Setenv("PATH", dir+string(os.PathListSeparator)+os.Getenv("PATH"))
 	claudeTUIRuns = true
 	t.Cleanup(func() { claudeTUIRuns = false })
-	helper := filepath.Join(t.TempDir(), "myna")
+	helper := filepath.Join(t.TempDir(), "owl")
 	testenv.Program(t, helper, `#!/bin/sh
 [ "$1" = "`+claudetui.Command+`" ] || exit 9
 shift; claude=$1; shift
@@ -126,7 +126,7 @@ func guardTurn(t *testing.T, s *Server, conv, guards string) (id, text string) {
 	}
 	last := res.Content[len(res.Content)-1]
 	if last.Type == "tool_use" {
-		// the run's call reaches myna after its reply is told
+		// the run's call reaches owl after its reply is told
 		eventually(t, "the run's call "+last.ID, func() bool {
 			s.subscription.mu.Lock()
 			defer s.subscription.mu.Unlock()
@@ -143,7 +143,7 @@ func guardServer(t *testing.T) *Server {
 	srv := httptest.NewServer(s.Handler())
 	t.Cleanup(srv.Close)
 	t.Cleanup(s.subscription.abortAll) // before srv.Close: a run's MCP call holds a request open
-	t.Setenv("MYNA_ADDR", srv.Listener.Addr().String())
+	t.Setenv("OWL_ADDR", srv.Listener.Addr().String())
 	return s
 }
 
@@ -203,7 +203,7 @@ func TestClaudeTUIToolLoopCarriesEachBatchsSafeguards(t *testing.T) {
 // A run without the tap (a Claude Code that doesn't load it) can't be
 // given a batch's safeguards: one whose rules changed is let go, and the
 // log says why, where it said "process expired" alone and the run's end
-// read "myna ended it" (vibbow, #4804).
+// read "owl ended it" (vibbow, #4804).
 func TestClaudeTUIToolResultsLogWhyTheRunEnded(t *testing.T) {
 	log := guardClaude(t)
 	t.Setenv("FAKE_NO_TAP", "1")

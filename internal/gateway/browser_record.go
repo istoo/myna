@@ -15,7 +15,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/access"
+	"github.com/istoo/owl/internal/access"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/basicfont"

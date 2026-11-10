@@ -9,7 +9,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 	"github.com/tidwall/gjson"
 )
 
@@ -65,7 +65,7 @@ func (u *programsUpstream) last(t *testing.T) (string, []byte) {
 // Responses upstream, and OpenCode Go answered it for DeepSeek and GLM
 // with 503 "Endpoint is unavailable". Codex itself sends the field only to
 // OpenAI (a ChatGPT sign-in, or an API key on its "openai" provider), so it
-// now reaches the ChatGPT backend, OpenAI's API, another myna and a relay
+// now reaches the ChatGPT backend, OpenAI's API, another owl and a relay
 // set to take Codex's requests as sent, as it came, and no one else, on
 // every path to a Responses upstream: relayed, and built from Chat.
 func TestAccessProgramsGoToOpenAIAlone(t *testing.T) {
@@ -97,8 +97,8 @@ func TestAccessProgramsGoToOpenAIAlone(t *testing.T) {
 		Responses: "https://asis.test/v1", Models: []string{"gpt-5.5"}}, "responses")
 	save(provider.Provider{ID: "oai", Name: "OpenAI", Key: "sk-k",
 		Responses: "https://api.openai.com/v1", Models: []string{"gpt-5.5"}}, "responses")
-	save(provider.Provider{ID: "other-myna", Name: "Another myna", Key: "k", Preset: provider.RemoteMynaPreset,
-		Responses: "http://remote-myna.test/v1", Models: []string{"codex/gpt-5.5"}}, "responses")
+	save(provider.Provider{ID: "other-owl", Name: "Another owl", Key: "k", Preset: provider.RemoteOwlPreset,
+		Responses: "http://remote-owl.test/v1", Models: []string{"codex/gpt-5.5"}}, "responses")
 	save(provider.Provider{ID: "chatonly", Name: "Chat only", Key: "k",
 		Chat: "https://chat.test/v1", Models: []string{"deepseek-chat"}}, "chat")
 	save(provider.Provider{ID: "msgonly", Name: "Messages only", Key: "k",
@@ -137,7 +137,7 @@ func TestAccessProgramsGoToOpenAIAlone(t *testing.T) {
 		{"openai, null", "/v1/responses", resp("oai/gpt-5.5", "null"), codex, "null"},
 		{"openai, chat built as responses", "/v1/chat/completions", chat("oai/gpt-5.5"), nil, programs},
 		{"relay as sent, from codex", "/v1/responses", resp("asis/gpt-5.5", programs), codex, programs},
-		{"another myna", "/v1/responses", resp("other-myna/codex/gpt-5.5", programs), codex, programs},
+		{"another owl", "/v1/responses", resp("other-owl/codex/gpt-5.5", programs), codex, programs},
 		// no other API has the field
 		{"chat upstream", "/v1/responses", resp("chatonly/deepseek-chat", programs), codex, ""},
 		{"messages upstream", "/v1/responses", resp("msgonly/glm-5.3", programs), codex, ""},

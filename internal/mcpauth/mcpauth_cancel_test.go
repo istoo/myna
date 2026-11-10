@@ -10,9 +10,9 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/istoo/myna/internal/mcpauth"
-	"github.com/istoo/myna/internal/mcpauth/mcpauthtest"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/mcpauth"
+	"github.com/istoo/owl/internal/mcpauth/mcpauthtest"
+	"github.com/istoo/owl/internal/settings"
 )
 
 type heldTokenResponse struct {

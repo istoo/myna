@@ -22,7 +22,7 @@ const iso = (s = 0) => new Date(Date.now() - s * 1e3).toISOString();
 // Pi on a Z.ai team account, OpenCode on Kimi Code's one key: neither in the group
 const zai = { id: "zcode@lin@x.test", provider: "zcode", name: "ZCode", kind: "account", who: "lin@x.test", plan: "Team Pro", model: "GLM-5.3-Flash", routing: "" };
 const kimi = { id: "kimi-code-cn", provider: "kimi-code-cn", name: "Kimi Code (China)", kind: "provider", model: "k3.1-pro", routing: "" };
-// DeepSeek Harness on the group myna found for deepseek-v4.1-flash, in order
+// DeepSeek Harness on the group owl found for deepseek-v4.1-flash, in order
 const ark = { id: "volcengine", provider: "volcengine", name: "Volcengine Ark", kind: "provider", model: "deepseek-v4.1-flash", routing: "" };
 const ent = { id: "dfm@hoob@gmail.com", provider: "dfm", name: "DF Model", kind: "account", who: "hoob@gmail.com", plan: "Enterprise", model: "dfmodel", routing: "", known: true, used: 0 };
 const qwen = { id: "qwen-cn", provider: "qwen-cn", name: "Qwen (China)", kind: "provider", model: "vanchin/deepseek-v4.1-flash", routing: "" };
@@ -91,7 +91,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const s = (lang !== "en" && I18N[lang]?.[key]) || key;
           return s.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? `{${k}}`);
         }, [lang, key, vars]);
-        await page.goto("http://myna.test/?view=routing");
+        await page.goto("http://owl.test/?view=routing");
         await page.locator(".rt-accts > li[title]").nth(2).waitFor();
 
         // DeepSeek Harness alone: its group's three, no heading
@@ -118,7 +118,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal(await heads.nth(0).locator("i").textContent(), await say("In order"));
         // a provider with one key routes nothing: its heading says no way
         assert.equal(await heads.nth(2).locator("i").textContent(), "");
-        // each heading has a wire from myna, and lights while its own answers
+        // each heading has a wire from owl, and lights while its own answers
         assert.equal(await page.locator(".rt-wires path[d]").count(), 3 + 3 + 5);
         // each lights as its request answers: wait for all three, not a frame
         await page.waitForFunction(() => [...document.querySelectorAll(".rt-accts > li.rt-sub")].every((li) => li.classList.contains("on")), null, { timeout: 15000 });

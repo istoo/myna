@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // 喜欢一个人 on Discord called the model through a routing group of several

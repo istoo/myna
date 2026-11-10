@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/backup"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/backup"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // #1776 (tsuixl, Aliyun OSS, which answers a conditional PUT 400
@@ -24,7 +24,7 @@ func TestS3BlindWriteGoneOverIsMergedAgain(t *testing.T) {
 	f.noCond = true
 	cfg := f.config(srv)
 	ctx := context.Background()
-	const key = "team x+y/myna/myna.myna-backup"
+	const key = "team x+y/owl/owl.owl-backup"
 	sync := func(t *testing.T) {
 		t.Helper()
 		if err := Now(ctx); err != nil {

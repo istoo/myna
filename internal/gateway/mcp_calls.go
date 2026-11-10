@@ -8,25 +8,25 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/usage"
 )
 
-// An agent's call to a tool of one of myna's own MCP servers is a row of
+// An agent's call to a tool of one of owl's own MCP servers is a row of
 // the request log (usage.SourceMCP), apart from the model requests (ferock
 // on Discord): which tool, when, the provider and model it used, how long
 // it took and whether it worked. serveMCP writes one for every tools/call
 // the gateway's servers answer (image, vision, web search, plugin tools,
-// the hub), and the Myna Image server an agent runs reports its own
+// the hub), and the Owl Image server an agent runs reports its own
 // (MCPCalledMethod), as its calls never pass here. A call's arguments are
 // never kept: the row has the tool's name and, when it failed, what it
 // said, clipped as a vendor's error is (keepMsg).
 
-// MCPCalledMethod is the JSON-RPC method the Myna Image server an agent
+// MCPCalledMethod is the JSON-RPC method the Owl Image server an agent
 // runs tells the gateway's image MCP server of a tool call it answered:
 // MCPCalled, as params. It is answered with an empty result.
-const MCPCalledMethod = "myna/toolCalled"
+const MCPCalledMethod = "owl/toolCalled"
 
-// MCPCalled is one tool call the Myna Image server answered.
+// MCPCalled is one tool call the Owl Image server answered.
 type MCPCalled struct {
 	Tool string `json:"tool"`
 	// Millis is how long the call took, to its answer
@@ -38,7 +38,7 @@ type MCPCalled struct {
 }
 
 // imageServerName is what the request log names both image servers by.
-const imageServerName = "myna-image"
+const imageServerName = "owl-image"
 
 // mcpUseKey holds a tool call's *mcpUse in its request's context.
 type mcpUseKey struct{}
@@ -175,7 +175,7 @@ func mcpFailure(result any, rpcErr map[string]any) string {
 	return "failed"
 }
 
-// imageMCPCalled writes the row of a call the Myna Image server an
+// imageMCPCalled writes the row of a call the Owl Image server an
 // agent runs answered (MCPCalledMethod).
 func imageMCPCalled(r *http.Request, raw json.RawMessage) (any, map[string]any) {
 	var c MCPCalled
@@ -185,7 +185,7 @@ func imageMCPCalled(r *http.Request, raw json.RawMessage) (any, map[string]any) 
 	switch c.Tool {
 	case GenerateImageTool, GenerateVideoTool, GenerationResultTool:
 	default:
-		return nil, map[string]any{"code": -32602, "message": "no tool " + c.Tool + " is Myna Image's"}
+		return nil, map[string]any{"code": -32602, "message": "no tool " + c.Tool + " is Owl Image's"}
 	}
 	took := time.Duration(max(c.Millis, 0)) * time.Millisecond
 	prov, model, _ := strings.Cut(c.Model, "/")

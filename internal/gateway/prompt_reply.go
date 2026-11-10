@@ -10,8 +10,8 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/redact"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/redact"
 )
 
 // PromptReply is a request's reply, piece by piece: the answer's text, its

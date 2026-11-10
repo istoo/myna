@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// myna provider account-cap caps a subscription account at a share of
+// owl provider account-cap caps a subscription account at a share of
 // each usage window (70, 70%), off lifts it; a share out of 1–99, an
 // account the subscription hasn't, or a provider with keys is an error.
 func TestAccountCapCmd(t *testing.T) {

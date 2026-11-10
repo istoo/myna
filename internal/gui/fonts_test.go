@@ -10,9 +10,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/fonts"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/fonts"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 func TestFontDiscoveryCacheAndFailure(t *testing.T) {
@@ -67,7 +67,7 @@ func TestFontDiscoveryCacheAndFailure(t *testing.T) {
 	}
 }
 
-// Norcleeh: a nogui myna's browser tab had no font rows. A tab is offered
+// Norcleeh: a nogui owl's browser tab had no font rows. A tab is offered
 // the server's families and the common ones, whatever the server can read.
 func TestBrowserTabFontsWithoutInstalledFonts(t *testing.T) {
 	read := func(off bool, discover func() ([]fonts.Family, error)) []fonts.Family {
@@ -94,7 +94,7 @@ func TestBrowserTabFontsWithoutInstalledFonts(t *testing.T) {
 	}
 	nogui := read(true, func() ([]fonts.Family, error) { t.Fatal("fonts read where they can't be"); return nil, nil })
 	if len(nogui) != len(commonFamilies) {
-		t.Fatalf("a nogui myna's tab got %v", names(nogui))
+		t.Fatalf("a nogui owl's tab got %v", names(nogui))
 	}
 	for _, f := range nogui {
 		if len(f.Styles) != 2 || f.Styles[0].Family != f.Name || fonts.Validate(&f.Styles[0]) != nil || fonts.Validate(&f.Styles[1]) != nil {

@@ -2,7 +2,7 @@
 // Settings' Web search section (#419): the search APIs a model's search goes
 // to when no provider can search, in their order, and a row to add one. A
 // SearXNG picked asks for its address; Add sends the API, its key and its
-// address; Remove takes one away; a key myna refuses is said in the row,
+// address; Remove takes one away; a key owl refuses is said in the row,
 // what was typed kept. A saved key is shown in its row and hidden again, or
 // copied, as a provider's is (OnurBen on Discord). Every API takes a base URL
 // of the user's own (#1580), on a line under the key: empty is the vendor's,
@@ -86,7 +86,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const posted = [];
       await page.route("**/*", serve(lang, posted));
       await watchSettingsReads(page);
-      await page.goto("http://myna.test/?view=settings&tab=models");
+      await page.goto("http://owl.test/?view=settings&tab=models");
       await settingsDrawn(page); // rows found are the ones that stay (#1659)
       const list = page.locator("#searchList");
       const head = list.locator(".row.search-add");
@@ -97,7 +97,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         try { await head.scrollIntoViewIfNeeded({ timeout: 1000 }); break; } catch (e) { if (i >= 4) throw e; }
       }
       // the clicks below are at the row's buttons' places, so the whole row
-      // is brought on screen, by the wheel: myna puts back a scroll the
+      // is brought on screen, by the wheel: owl puts back a scroll the
       // reader didn't make, and a row only partly shown is left where it is
       // by scrollIntoViewIfNeeded; Settings' own landing can still put the
       // view back, so the row is on screen twice, a second apart

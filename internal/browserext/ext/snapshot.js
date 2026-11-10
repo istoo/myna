@@ -46,7 +46,7 @@ const CLICKABLE = `(() => {
 async function clickables(tabId) {
   const ids = new Set();
   try {
-    const r = await send(tabId, "Runtime.evaluate", { expression: CLICKABLE, objectGroup: "myna-snap" });
+    const r = await send(tabId, "Runtime.evaluate", { expression: CLICKABLE, objectGroup: "owl-snap" });
     if (!r.result || !r.result.objectId) return ids;
     const props = await send(tabId, "Runtime.getProperties", { objectId: r.result.objectId, ownProperties: true });
     await Promise.all(props.result.filter((p) => /^\d+$/.test(p.name) && p.value && p.value.objectId).map(async (p) => {
@@ -56,7 +56,7 @@ async function clickables(tabId) {
       } catch {}
     }));
   } catch {} finally {
-    send(tabId, "Runtime.releaseObjectGroup", { objectGroup: "myna-snap" }).catch(() => {});
+    send(tabId, "Runtime.releaseObjectGroup", { objectGroup: "owl-snap" }).catch(() => {});
   }
   return ids;
 }
@@ -233,7 +233,7 @@ export async function take(t, opts = {}) {
   const inFrame = (at, depth) => {
     const f = inner.get(at);
     if (!f) {
-      lines.push("  ".repeat(depth) + "- (a frame this browser doesn't let Myna Browser read: use a screenshot, or open its address in a tab)");
+      lines.push("  ".repeat(depth) + "- (a frame this browser doesn't let Owl Browser read: use a screenshot, or open its address in a tab)");
       return;
     }
     const was = [sid, frame];
@@ -285,7 +285,7 @@ export async function find(t, ref) {
   const r = t.refs.get(ref);
   if (!r) throw fault("STALE_REF", `ref ${ref} isn't in the latest snapshot of this tab: take a snapshot and use a ref from it`);
   try {
-    const o = await send(t.tabId, "DOM.resolveNode", { backendNodeId: r.backend, objectGroup: "myna-act" }, r.sid);
+    const o = await send(t.tabId, "DOM.resolveNode", { backendNodeId: r.backend, objectGroup: "owl-act" }, r.sid);
     const c = await send(t.tabId, "Runtime.callFunctionOn", { objectId: o.object.objectId, functionDeclaration: "function(){return this.isConnected}", returnByValue: true }, r.sid);
     if (c.result.value) return { ...r, ref, objectId: o.object.objectId };
   } catch {}
@@ -294,7 +294,7 @@ export async function find(t, ref) {
   const same = [...t.refs].filter(([, v]) => v.role === r.role && v.name === r.name);
   if (same.length === 1) {
     const [nref, v] = same[0];
-    const o = await send(t.tabId, "DOM.resolveNode", { backendNodeId: v.backend, objectGroup: "myna-act" }, v.sid);
+    const o = await send(t.tabId, "DOM.resolveNode", { backendNodeId: v.backend, objectGroup: "owl-act" }, v.sid);
     return { ...v, ref: nref, objectId: o.object.objectId };
   }
   if (same.length > 1) throw fault("AMBIGUOUS", `${ref} (${r.role} "${r.name}") was redrawn and ${same.length} elements now match it: take a snapshot and pick one`);

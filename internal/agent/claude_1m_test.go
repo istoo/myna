@@ -4,12 +4,12 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// TestClaude1MMarked: every name myna hands Claude Code for a model of a
+// TestClaude1MMarked: every name owl hands Claude Code for a model of a
 // 1M window carries [1m], however it was set: Claude Code 2.1.284 and before
 // take "claude/claude-opus-5-5" unmarked for 200K, whatever
 // CLAUDE_CODE_MAX_CONTEXT_TOKENS says, and compact it again and again

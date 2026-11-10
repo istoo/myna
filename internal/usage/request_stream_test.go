@@ -7,7 +7,7 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/owl/internal/sessions"
 )
 
 // The Requests page reads a packed local chunk one chunk at a time instead of

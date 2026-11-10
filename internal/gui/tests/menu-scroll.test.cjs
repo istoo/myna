@@ -43,7 +43,7 @@ async function serve(route) {
   if (url.pathname === "/api/usage/quotas" || url.pathname === "/api/usage/quotas/history" || url.pathname === "/api/agents/install" || url.pathname === "/api/plugins/agents") return json([]);
   if (url.pathname === "/api/whatsnew" || url.pathname === "/api/model-speeds" || url.pathname === "/api/model-loads") return json({});
   if (url.pathname === "/api/upstream") return json({ vendors: [], providers: {} });
-  // the sidebar's plugin pages, and plugin panels in myna's pages: none
+  // the sidebar's plugin pages, and plugin panels in owl's pages: none
   if (url.pathname === "/api/plugin-pages" || url.pathname === "/api/plugin-panels") return json([]);
   // the sidebar's gateway line, when no page has read the providers
   if (url.pathname === "/api/providers") return json({ providers: [], gateway: { url: "http://127.0.0.1:3425", running: true } });
@@ -95,7 +95,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     const errors = [];
     page.on("pageerror", e => errors.push(e.message));
     await page.route("**/*", serve);
-    await page.addInitScript(() => localStorage.setItem("myna.usageTab", "sessions"));
+    await page.addInitScript(() => localStorage.setItem("owl.usageTab", "sessions"));
     await context.tracing.start({ screenshots: true, snapshots: true });
     t.after(async () => {
       try {
@@ -107,9 +107,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       } finally { await browser.close(); }
     });
     async function reset() {
-      await page.goto("http://myna.test/?view=usage");
+      await page.goto("http://owl.test/?view=usage");
       await page.locator("#sessFolder:not([hidden])").waitFor();
-      assert.equal(await page.title(), "myna");
+      assert.equal(await page.title(), "owl");
       assert.equal(await page.locator("#sessList .sess-item").count(), 40);
       // Always-visible scrollbars make track/thumb input independent of OS preferences.
       await page.addStyleTag({ content: `

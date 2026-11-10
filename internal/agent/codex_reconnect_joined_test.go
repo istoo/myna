@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // nancyCodex is NancyTom18's Codex (on X): signed in with ChatGPT, its own
@@ -26,7 +26,7 @@ func nancyCodex(t *testing.T) (*Agent, func() string) {
 }
 
 // ownPath is how the model picker tags each of Codex's own models: "via"
-// (through myna) or "direct".
+// (through owl) or "direct".
 func ownPath(t *testing.T, cx *Agent) map[string]string {
 	t.Helper()
 	out := map[string]string{}
@@ -52,9 +52,9 @@ func ownPath(t *testing.T, cx *Agent) map[string]string {
 // Connected by the switch, on a routing group, disconnected and restored,
 // then switched on again: Codex comes back as the switch first connected
 // it, joined, so one of its own models picked on the Agents page stays
-// through myna, as the picker says. Put back on the group alone, it was
+// through owl, as the picker says. Put back on the group alone, it was
 // beside its sign-in and not joined: the OpenAI model picked took Codex
-// off myna and every row said direct (NancyTom18's first screenshot).
+// off owl and every row said direct (NancyTom18's first screenshot).
 func TestCodexReconnectStaysJoined(t *testing.T) {
 	cx, read := nancyCodex(t)
 	if c, err := cx.ConnectHow(); err != nil || c.How != "joined" {
@@ -87,7 +87,7 @@ func TestCodexReconnectStaysJoined(t *testing.T) {
 		t.Fatal(err)
 	}
 	if cfg := read(); !strings.Contains(cfg, "openai_base_url") || !strings.Contains(cfg, `model = "gpt-5.6-luna"`) || !cx.Wired() {
-		t.Fatalf("an own model picked took Codex off myna, wired %v:\n%s", cx.Wired(), cfg)
+		t.Fatalf("an own model picked took Codex off owl, wired %v:\n%s", cx.Wired(), cfg)
 	}
 	for m, p := range ownPath(t, cx) {
 		if p != "via" {
@@ -96,10 +96,10 @@ func TestCodexReconnectStaysJoined(t *testing.T) {
 	}
 }
 
-// Beside its sign-in on a routing group and not joined (a myna model
+// Beside its sign-in on a routing group and not joined (a owl model
 // picked while Codex wasn't connected, or a Codex connected again by an
-// older myna), one of its own picked here takes myna out: each says
-// direct, so the picker asks before it does. It said via myna, and the
+// older owl), one of its own picked here takes owl out: each says
+// direct, so the picker asks before it does. It said via owl, and the
 // pick went straight to OpenAI (NancyTom18's second screenshot).
 func TestCodexBesideOwnModelsSayDirect(t *testing.T) {
 	cx, read := nancyCodex(t)
@@ -119,6 +119,6 @@ func TestCodexBesideOwnModelsSayDirect(t *testing.T) {
 		t.Fatal(err)
 	}
 	if cfg := read(); strings.Contains(cfg, "openai_base_url") || cx.Wired() {
-		t.Fatalf("picked one of its own, still on myna:\n%s", cfg)
+		t.Fatalf("picked one of its own, still on owl:\n%s", cfg)
 	}
 }

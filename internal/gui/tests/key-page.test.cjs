@@ -5,7 +5,7 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 const { fixture } = require("./fixtures/caller-keys.cjs");
 
-// zytszone on X: myna shared with a whole department, whose people can't
+// zytszone on X: owl shared with a whole department, whose people can't
 // be given the admin's app. Each opens the gateway's /me with their own
 // gateway key and sees that key's limits, usage and models, and the setup
 // for Claude Code, Codex and an OpenAI-compatible client with the address
@@ -15,7 +15,7 @@ const { fixture } = require("./fixtures/caller-keys.cjs");
 // key sent as Authorization, never in the address.
 const html = fs.readFileSync(path.resolve(__dirname, "../../gateway/keypage.html"), "utf8");
 const CSP = "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; img-src data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'";
-const KEY = "sk-myna-alice-0123456789";
+const KEY = "sk-owl-alice-0123456789";
 const BASE = "http://gw.test:3999";
 const ME = {
   name: "Alice", readOnly: false, version: "dev",
@@ -42,7 +42,7 @@ async function open(engine, lang, me = ME) {
   await page.route("**/*", (route) => {
     const req = route.request(), url = new URL(req.url());
     if (url.pathname === "/me") return route.fulfill({ contentType: "text/html; charset=utf-8", headers: { "Content-Security-Policy": CSP }, body: html });
-    if (url.pathname === "/v1/myna/me") {
+    if (url.pathname === "/v1/owl/me") {
       if (url.searchParams.has("key")) return route.fulfill({ status: 400, json: {} });
       if (req.headers().authorization !== "Bearer " + KEY) return route.fulfill({ status: 401, json: { error: { message: "no" } } });
       return route.fulfill({ json: me });
@@ -66,7 +66,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       t.after(() => browser.close());
       assert.equal(await page.locator("#signin h1").textContent(), TITLE[lang]);
       // a wrong key is told so, in the page's language, and shows nothing
-      await signIn(page, "sk-myna-wrong");
+      await signIn(page, "sk-owl-wrong");
       await page.locator("#err").waitFor();
       const err = await page.locator("#err").textContent();
       assert.ok(err.length > 10, err);
@@ -96,7 +96,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.click('#tabs [data-tab="codex"]');
       await page.click('#models [data-id="plan/m1"]');
       s = await snippet(page);
-      assert.match(s, /^model = "plan\/m1"\nmodel_provider = "myna"\n/);
+      assert.match(s, /^model = "plan\/m1"\nmodel_provider = "owl"\n/);
       assert.match(s, /base_url = "http:\/\/gw\.test:3999\/v1"/);
       assert.match(s, /wire_api = "responses"/);
       assert.match(s, new RegExp(`experimental_bearer_token = "${KEY}"`));
@@ -114,7 +114,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.locator("#info").waitFor();
       await page.click("#forget");
       await page.locator("#signin").waitFor();
-      assert.equal(await page.evaluate(() => sessionStorage.getItem("myna-key")), null);
+      assert.equal(await page.evaluate(() => sessionStorage.getItem("owl-key")), null);
       await page.reload();
       await page.locator("#signin").waitFor();
       assert.equal(await page.locator("#info").isHidden(), true);
@@ -146,7 +146,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", fixture(lang, "light", [], { lan: true, web: true }));
-      await page.goto("http://myna.test/?view=gateway");
+      await page.goto("http://owl.test/?view=gateway");
       const line = page.locator("#gatewayKeys .gw-key-page");
       await line.waitFor();
       assert.equal(await line.locator("code").textContent(), "http://192.168.1.10:3999/me");
@@ -159,7 +159,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     });
   }
 
-  test(`${engine}: MYNA_PUBLIC_URL is the address given, and no keys gives none`, async (t) => {
+  test(`${engine}: OWL_PUBLIC_URL is the address given, and no keys gives none`, async (t) => {
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     t.after(() => browser.close());
     const ctx = await browser.newContext({ viewport: { width: 1000, height: 800 }, reducedMotion: "reduce" });
@@ -167,12 +167,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     page.setDefaultTimeout(6000);
     page.setDefaultNavigationTimeout(60000);
     await page.route("**/*", fixture("en", "light", [], { lan: true, web: true, publicURL: "https://ai.corp.example" }));
-    await page.goto("http://myna.test/?view=gateway");
+    await page.goto("http://owl.test/?view=gateway");
     await page.locator("#gatewayKeys .gw-key-page").waitFor();
     assert.equal(await page.locator("#gatewayKeys .gw-key-page code").textContent(), "https://ai.corp.example/me");
     page = await ctx.newPage();
     await page.route("**/*", fixture("en", "light", [], { lan: true, web: true, keys: [] }));
-    await page.goto("http://myna.test/?view=gateway");
+    await page.goto("http://owl.test/?view=gateway");
     await page.locator("#gatewayKeys .none").waitFor();
     assert.equal(await page.locator("#gatewayKeys .gw-key-page").count(), 0);
   });

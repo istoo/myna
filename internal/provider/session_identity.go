@@ -9,8 +9,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/istoo/myna/internal/filememo"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/filememo"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // SessionIdentity is an account's public identity, without its credentials.

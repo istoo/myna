@@ -8,12 +8,12 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A turn refused with usage_limit_reached on the account Codex is signed
 // in to has that account read again at once (provider.CodexMayBeUsedUp),
-// for myna to become Codex's provider before the next five-minute look:
+// for owl to become Codex's provider before the next five-minute look:
 // the Codex app greys its Send on the account meanwhile (MasterYi on
 // Discord).
 func TestCodexUsedUpReplyAsksAtOnce(t *testing.T) {
@@ -39,10 +39,10 @@ func TestCodexUsedUpReplyAsksAtOnce(t *testing.T) {
 
 // The same refusal with Codex's sign-in the only account: the turn is
 // relayed to ChatGPT as Codex sent it, and still has the account read
-// again at once. Only the next look, minutes on, made myna Codex's
+// again at once. Only the next look, minutes on, made owl Codex's
 // provider before, and the Codex app kept Send greyed until it was
 // restarted (unsplashz on Discord). A request signed by a ChatGPT account
-// myna doesn't have (a Codex in WSL) asks nothing.
+// owl doesn't have (a Codex in WSL) asks nothing.
 func TestCodexUsedUpRelayedAsksAtOnce(t *testing.T) {
 	codexSignedIn(t)
 	var tried, models []string
@@ -78,7 +78,7 @@ func TestCodexUsedUpRelayedAsksAtOnce(t *testing.T) {
 }
 
 // A relayed turn that answers with the account's window heard full keeps
-// it as the sign-in's usage, as a turn through myna's accounts does
+// it as the sign-in's usage, as a turn through owl's accounts does
 // (#1295), which reads the account again at once (NoteCodexLimits).
 func TestCodexRelayedWindowsHeard(t *testing.T) {
 	codexSignedIn(t)
@@ -121,11 +121,11 @@ func TestCodexRelayedWindowsHeard(t *testing.T) {
 }
 
 // Codex's sign-in, the one account, known to be out: a Codex started
-// before myna became its provider (codex.out) still sends its own
-// model's turns to its built-in provider. They go through myna's
+// before owl became its provider (codex.out) still sends its own
+// model's turns to its built-in provider. They go through owl's
 // accounts as codex/<model>, as a restarted Codex's do, rather than
 // relayed to the same refusal until a restart (unsplashz on Discord).
-// Not known out, or signed by an account myna doesn't have, they go
+// Not known out, or signed by an account owl doesn't have, they go
 // as they came.
 func TestCodexHeldSignInServedWithoutRestart(t *testing.T) {
 	codexSignedIn(t)

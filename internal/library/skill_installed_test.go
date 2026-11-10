@@ -117,7 +117,7 @@ func TestInstalledDependenciesAreNoChange(t *testing.T) {
 	}
 }
 
-// A skill fetched before myna kept Own has only Hash, of the files
+// A skill fetched before owl kept Own has only Hash, of the files
 // fetched with their lock file: installed folders and bytecode are no
 // change, and nor is the lock file left as it came. One the install
 // wrote again can't be told from an edit until the skill is updated.

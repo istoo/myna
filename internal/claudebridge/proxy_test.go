@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // ownIPv4 is an IPv4 address of one of this computer's interfaces that
@@ -34,7 +34,7 @@ func ownIPv4() string {
 	return ""
 }
 
-// #2440 (ump45nose): an agent hands the helper the *_PROXY myna gave it
+// #2440 (ump45nose): an agent hands the helper the *_PROXY owl gave it
 // for its vendor (the system's proxy, by default), and a gateway on a LAN
 // or Tailscale address isn't in that NO_PROXY. The helper's callback went
 // to the proxy, which reset it, and the tool call never reached the run.
@@ -87,7 +87,7 @@ func TestCallbackGoesPastTheAgentsProxy(t *testing.T) {
 	p := "http://" + proxy.Addr().String()
 	cmd := exec.CommandContext(t.Context(), os.Args[0])
 	cmd.Env = append(os.Environ(), helperEnv+"=1",
-		"MYNA_MCP_CALLBACK="+cb.URL+"/_myna/claude-mcp/tok", "MYNA_MCP_TOOLS="+tools,
+		"OWL_MCP_CALLBACK="+cb.URL+"/_owl/claude-mcp/tok", "OWL_MCP_TOOLS="+tools,
 		"HTTPS_PROXY="+p, "https_proxy="+p, "HTTP_PROXY="+p, "http_proxy="+p,
 		"ALL_PROXY="+p, "all_proxy="+p, "NO_PROXY=localhost,127.0.0.1,::1", "no_proxy=localhost,127.0.0.1,::1")
 	in, _ := cmd.StdinPipe()
@@ -113,7 +113,7 @@ func TestCallbackGoesPastTheAgentsProxy(t *testing.T) {
 		t.Fatal("no answer from the helper")
 	}
 	if !strings.Contains(got, "file body") {
-		t.Fatalf("the call didn't reach myna: %s", got)
+		t.Fatalf("the call didn't reach owl: %s", got)
 	}
 	select {
 	case <-proxied:

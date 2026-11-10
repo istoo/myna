@@ -8,10 +8,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 func TestGrok(t *testing.T) {
@@ -45,33 +45,33 @@ func TestGrok(t *testing.T) {
 		t.Fatalf("get: %q", f.Get())
 	}
 
-	if err := f.Set("myna/deepseek/pro"); err != nil {
+	if err := f.Set("owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	raw := read()
-	m := table(`model."myna/deepseek/pro"`)
-	if m["model"] != "deepseek/pro" || m["api_key"] != "myna" || !strings.HasSuffix(m["base_url"], "/v1") ||
-		m["api_backend"] != "chat_completions" || table(`model."myna/deepseek/flash"`) == nil {
+	m := table(`model."owl/deepseek/pro"`)
+	if m["model"] != "deepseek/pro" || m["api_key"] != "owl" || !strings.HasSuffix(m["base_url"], "/v1") ||
+		m["api_backend"] != "chat_completions" || table(`model."owl/deepseek/flash"`) == nil {
 		t.Fatalf("tables:\n%s", raw)
 	}
 	// a campaign of xAI's would set the default over it
 	if table("features")["campaigns"] != "false" {
 		t.Fatalf("campaigns:\n%s", raw)
 	}
-	if f.Get() != "myna/deepseek/pro" || !strings.Contains(raw, "# mine") || !strings.Contains(raw, "[model.my-own]") ||
+	if f.Get() != "owl/deepseek/pro" || !strings.Contains(raw, "# mine") || !strings.Contains(raw, "[model.my-own]") ||
 		table("ui")["theme"] != "dark" {
 		t.Fatalf("config:\n%s", raw)
 	}
 
 	// picked again, and synced: the tables are replaced, never repeated
-	if err := f.Set("myna/deepseek/flash"); err != nil {
+	if err := f.Set("owl/deepseek/flash"); err != nil {
 		t.Fatal(err)
 	}
 	if err := a.Sync(); err != nil {
 		t.Fatal(err)
 	}
 	raw = read()
-	if n := strings.Count(raw, `[model."myna/deepseek/pro"]`); n != 1 {
+	if n := strings.Count(raw, `[model."owl/deepseek/pro"]`); n != 1 {
 		t.Fatalf("%d tables:\n%s", n, raw)
 	}
 
@@ -80,25 +80,25 @@ func TestGrok(t *testing.T) {
 	if err := a.Sync(); err != nil {
 		t.Fatal(err)
 	}
-	if strings.Contains(read(), `"myna/deepseek/pro"]`) {
+	if strings.Contains(read(), `"owl/deepseek/pro"]`) {
 		t.Fatalf("stale:\n%s", read())
 	}
 
-	// its own model: myna steps out, the user's own model stays
+	// its own model: owl steps out, the user's own model stays
 	if err := f.Set("grok-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	raw = read()
-	if f.Get() != "grok-4.6" || strings.Contains(raw, "myna") || !strings.Contains(raw, "[model.my-own]") {
+	if f.Get() != "grok-4.6" || strings.Contains(raw, "owl") || !strings.Contains(raw, "[model.my-own]") {
 		t.Fatalf("own:\n%s", raw)
 	}
-	// nothing through myna: sync leaves the file alone
+	// nothing through owl: sync leaves the file alone
 	if err := a.Sync(); err != nil || read() != raw {
 		t.Fatalf("sync touched it:\n%s", read())
 	}
 
 	e := a.Field("effort")
-	f.Set("myna/deepseek/flash")
+	f.Set("owl/deepseek/flash")
 	if err := e.Set("high"); err != nil || e.Get() != "high" {
 		t.Fatalf("effort: %v %q", err, e.Get())
 	}
@@ -106,18 +106,18 @@ func TestGrok(t *testing.T) {
 		t.Fatal(err)
 	}
 	raw = read()
-	if f.Get() != "" || strings.Contains(raw, "myna") || strings.Contains(raw, "campaigns") || e.Get() != "high" {
+	if f.Get() != "" || strings.Contains(raw, "owl") || strings.Contains(raw, "campaigns") || e.Get() != "high" {
 		t.Fatalf("reset:\n%s", raw)
 	}
 }
 
 func TestGrokReadErrorStopsChanges(t *testing.T) {
-	const wired = "[model.\"myna/keep\"]\nmodel = \"keep\"\n\n"
+	const wired = "[model.\"owl/keep\"]\nmodel = \"keep\"\n\n"
 	for _, tc := range []struct {
 		name, input string
 	}{
 		{"models", wired + "[models]\ndefault = [\n"},
-		{"features", "[models]\ndefault = \"myna/keep\"\n\n" + wired + "[features]\ncampaigns = [\n"},
+		{"features", "[models]\ndefault = \"owl/keep\"\n\n" + wired + "[features]\ncampaigns = [\n"},
 	} {
 		for _, action := range []string{"set", "clear", "sync"} {
 			t.Run(tc.name+"/"+action, func(t *testing.T) {
@@ -154,8 +154,8 @@ func TestGrokReadErrorStopsChanges(t *testing.T) {
 
 func TestGrokSyncRequiresOrdinaryModelTable(t *testing.T) {
 	for _, body := range []string{
-		"note = '''\n[model.\"myna/fake\"]\n'''\n",
-		"[[model.\"myna/array\"]]\nmodel = \"array\"\n",
+		"note = '''\n[model.\"owl/fake\"]\n'''\n",
+		"[[model.\"owl/array\"]]\nmodel = \"array\"\n",
 	} {
 		t.Run(body, func(t *testing.T) {
 			home := t.TempDir()
@@ -173,7 +173,7 @@ func TestGrokSyncRequiresOrdinaryModelTable(t *testing.T) {
 				t.Fatal(err)
 			}
 			if string(got) != input {
-				t.Fatalf("synced a config without a myna model table:\n%s", got)
+				t.Fatalf("synced a config without a owl model table:\n%s", got)
 			}
 		})
 	}
@@ -183,7 +183,7 @@ func TestGrokCheckReportsTOMLParseErrors(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("GROK_HOME", home)
 	path := filepath.Join(home, "config.toml")
-	input := "[models]\ndefault = \"myna/fake\"\n\n[model.\"myna/fake\"]\ninvalid = [\n"
+	input := "[models]\ndefault = \"owl/fake\"\n\n[model.\"owl/fake\"]\ninvalid = [\n"
 	if err := os.WriteFile(path, []byte(input), 0o600); err != nil {
 		t.Fatal(err)
 	}
@@ -193,7 +193,7 @@ func TestGrokCheckReportsTOMLParseErrors(t *testing.T) {
 	}
 }
 
-// The models myna serves on the account Grok Build is signed in to are
+// The models owl serves on the account Grok Build is signed in to are
 // Grok's own a second time, beside its own: they fold into one row of the
 // picker (Fate on Discord: grokbuild 在登录态下会加载重复的模型), the
 // other providers' rows left as they are.
@@ -212,7 +212,7 @@ func TestGrokFoldsItsOwnAccount(t *testing.T) {
 	os.MkdirAll(filepath.Join(home, "grok"), 0o755)
 	os.WriteFile(filepath.Join(home, "grok", "auth.json"), []byte(`{"x":{"key":"k","email":"me@x.ai"}}`), 0o600)
 	// the Grok plugin serves the account, taken from Grok Build's own
-	spec := "@myna-community/opencode-grok-auth"
+	spec := "@owl-community/opencode-grok-auth"
 	write := func(name string, v any) {
 		t.Helper()
 		b, _ := json.Marshal(v)
@@ -236,29 +236,29 @@ func TestGrokFoldsItsOwnAccount(t *testing.T) {
 	for _, o := range a.Field("model").Options(a.Values()) {
 		if o.Same {
 			same = append(same, o.Value)
-		} else if strings.HasPrefix(o.Value, "myna/") {
+		} else if strings.HasPrefix(o.Value, "owl/") {
 			others = append(others, o.Value)
 		}
 	}
 	if len(same) == 0 {
-		t.Fatalf("nothing folded; myna's rows: %v", others)
+		t.Fatalf("nothing folded; owl's rows: %v", others)
 	}
 	for _, v := range same {
-		if !strings.HasPrefix(v, "myna/grok/") {
+		if !strings.HasPrefix(v, "owl/grok/") {
 			t.Errorf("folded %s, not on the Grok account", v)
 		}
 	}
 	for _, v := range others {
-		if strings.HasPrefix(v, "myna/grok/") {
+		if strings.HasPrefix(v, "owl/grok/") {
 			t.Errorf("%s on the Grok account not folded", v)
 		}
 	}
-	if !slices.Contains(others, "myna/deepseek/pro") {
+	if !slices.Contains(others, "owl/deepseek/pro") {
 		t.Errorf("DeepSeek's row: %v", others)
 	}
 }
 
-// Each of myna's models is asked on the API its provider serves it on
+// Each of owl's models is asked on the API its provider serves it on
 // natively (uk.jent on Discord): a model served on OpenAI's Responses API
 // on "responses", one on Anthropic's Messages API on "messages", and the
 // rest on Chat Completions, Grok Build's default. All three go to the
@@ -281,12 +281,12 @@ func TestGrokAsksEachModelNatively(t *testing.T) {
 		}
 	}
 	path := filepath.Join(home, "grok", "config.toml")
-	if err := grok(home).Field("model").Set("myna/deepseek/pro"); err != nil {
+	if err := grok(home).Field("model").Set("owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	raw, _ := os.ReadFile(path)
 	for id, want := range map[string]string{"deepseek/pro": "chat_completions", "resp/gpt-6-sol": "responses", "anth/claude-sonnet-5": "messages"} {
-		m, err := edit.GetTOMLTable(path, `model."myna/`+id+`"`)
+		m, err := edit.GetTOMLTable(path, `model."owl/`+id+`"`)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -313,7 +313,7 @@ func grokSandbox(t *testing.T) (string, string) {
 	return home, filepath.Join(home, "grok", "config.toml")
 }
 
-// grokWindows is the context_window of myna's tables for pro and flash.
+// grokWindows is the context_window of owl's tables for pro and flash.
 func grokWindows(t *testing.T, path string) (int, int) {
 	t.Helper()
 	got, err := grokWindowsIn(path)
@@ -323,33 +323,33 @@ func grokWindows(t *testing.T, path string) (int, int) {
 	return got["deepseek/pro"], got["deepseek/flash"]
 }
 
-// A context_window the user set by hand in one of myna's tables stays
+// A context_window the user set by hand in one of owl's tables stays
 // through a sync and a new pick (uk.jent on Discord: dozens of models told
 // 1M, set to 300K one by one, and written over on the next sync), while
-// the tables they didn't touch follow myna's catalog.
+// the tables they didn't touch follow owl's catalog.
 func TestGrokKeepsAWindowSetByHand(t *testing.T) {
 	home, path := grokSandbox(t)
 	a := grok(home)
-	if err := a.Field("model").Set("myna/deepseek/pro"); err != nil {
+	if err := a.Field("model").Set("owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	if pro, flash := grokWindows(t, path); pro != 1000000 || flash != 200000 {
-		t.Fatalf("myna's windows: pro %d, flash %d", pro, flash)
+		t.Fatalf("owl's windows: pro %d, flash %d", pro, flash)
 	}
-	if err := edit.SetTOMLKey(path, `model."myna/deepseek/pro"`, "context_window", 300000); err != nil {
+	if err := edit.SetTOMLKey(path, `model."owl/deepseek/pro"`, "context_window", 300000); err != nil {
 		t.Fatal(err)
 	}
 	if err := a.Sync(); err != nil {
 		t.Fatal(err)
 	}
-	if err := a.Field("model").Set("myna/deepseek/flash"); err != nil {
+	if err := a.Field("model").Set("owl/deepseek/flash"); err != nil {
 		t.Fatal(err)
 	}
 	if pro, flash := grokWindows(t, path); pro != 300000 || flash != 200000 {
 		raw, _ := os.ReadFile(path)
 		t.Fatalf("after a sync: pro %d (set by hand to 300000), flash %d\n%s", pro, flash, raw)
 	}
-	// the provider's window changed in myna: the one set by hand stays,
+	// the provider's window changed in owl: the one set by hand stays,
 	// the other follows
 	provider.Save(provider.Provider{ID: "deepseek", Name: "DeepSeek", Chat: "http://127.0.0.1:1/v1", Key: "k", Models: []string{"pro", "flash"},
 		Contexts: map[string]int{"pro": 1000000, "flash": 128000}})
@@ -359,11 +359,11 @@ func TestGrokKeepsAWindowSetByHand(t *testing.T) {
 	if pro, flash := grokWindows(t, path); pro != 300000 || flash != 128000 {
 		t.Fatalf("after a window changed: pro %d, flash %d", pro, flash)
 	}
-	// taken out and put back, myna's tables start from its own again
+	// taken out and put back, owl's tables start from its own again
 	if err := a.Field("model").Set(""); err != nil {
 		t.Fatal(err)
 	}
-	if err := a.Field("model").Set("myna/deepseek/pro"); err != nil {
+	if err := a.Field("model").Set("owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	if pro, _ := grokWindows(t, path); pro != 1000000 {
@@ -371,15 +371,15 @@ func TestGrokKeepsAWindowSetByHand(t *testing.T) {
 	}
 }
 
-// A config an older myna wrote, with no record of what it gave: a window
+// A config an older owl wrote, with no record of what it gave: a window
 // other than the model's whole one is the user's and stays; the whole one,
-// which that myna wrote, follows Long conversations.
+// which that owl wrote, follows Long conversations.
 func TestGrokKeepsAWindowSetBeforeTheRecord(t *testing.T) {
 	home, path := grokSandbox(t)
 	os.MkdirAll(filepath.Dir(path), 0o755)
-	old := "[models]\ndefault = \"myna/deepseek/pro\"\n\n" +
-		"[model.\"myna/deepseek/pro\"]\nmodel = \"deepseek/pro\"\nbase_url = \"http://127.0.0.1:3425/v1\"\napi_key = \"myna\"\ncontext_window = 300000\n\n" +
-		"[model.\"myna/deepseek/flash\"]\nmodel = \"deepseek/flash\"\nbase_url = \"http://127.0.0.1:3425/v1\"\napi_key = \"myna\"\ncontext_window = 200000\n"
+	old := "[models]\ndefault = \"owl/deepseek/pro\"\n\n" +
+		"[model.\"owl/deepseek/pro\"]\nmodel = \"deepseek/pro\"\nbase_url = \"http://127.0.0.1:3425/v1\"\napi_key = \"owl\"\ncontext_window = 300000\n\n" +
+		"[model.\"owl/deepseek/flash\"]\nmodel = \"deepseek/flash\"\nbase_url = \"http://127.0.0.1:3425/v1\"\napi_key = \"owl\"\ncontext_window = 200000\n"
 	if err := os.WriteFile(path, []byte(old), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -404,7 +404,7 @@ func TestGrokKeepsAWindowSetBeforeTheRecord(t *testing.T) {
 func TestGrokWindowFollowsLongConversations(t *testing.T) {
 	home, path := grokSandbox(t)
 	a := grok(home)
-	if err := a.Field("model").Set("myna/deepseek/pro"); err != nil {
+	if err := a.Field("model").Set("owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	set := func(f func(*settings.Settings)) {

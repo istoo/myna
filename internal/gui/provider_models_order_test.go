@@ -6,9 +6,9 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // Picks the vendor's list doesn't know are shown first, the last one

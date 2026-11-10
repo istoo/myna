@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/budget"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/budget"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // postEncoded sends body to the running gateway at path with the given
@@ -142,7 +142,7 @@ func TestEncodedBodyInflatedPastLimit(t *testing.T) {
 	}
 }
 
-// A body in an encoding myna can't read is refused 415, saying which,
+// A body in an encoding owl can't read is refused 415, saying which,
 // rather than read as broken JSON.
 func TestUnknownBodyEncodingRefused(t *testing.T) {
 	for _, path := range []string{"/v1/responses", "/v1/chat/completions", "/v1/messages", "/v1beta/models/fake/m1:generateContent", CodexPath + "/responses"} {

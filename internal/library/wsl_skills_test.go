@@ -10,21 +10,21 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/agent"
+	"github.com/istoo/owl/internal/agent"
 )
 
 // The copies each agent in WSL got of its own before (cutemmuu on X) are
 // links to the distro's one copy after the next sync: one edited in an
 // agent, its edit the newest, goes to the library and every agent first;
 // one whose edit lost is kept with the backups; a skill folder of the
-// user's own beside them, and one they put where myna's copy goes, are
+// user's own beside them, and one they put where owl's copy goes, are
 // never touched.
 func TestWSLOldCopiesBecomeLinks(t *testing.T) {
 	h := wslSandbox(t)
 	src := filepath.Join(home(), "src", "skills")
 	skill(t, filepath.Join(src, "pdf"), "pdf", "Read PDFs")
 	skill(t, filepath.Join(src, "csv"), "csv", "Read CSVs")
-	// what myna gave them before: a marked copy in each
+	// what owl gave them before: a marked copy in each
 	for _, id := range []string{wslCodex, wslClaude, wslPi} {
 		ok(t)(SetSkillHow(id, HowCopy))
 	}
@@ -43,9 +43,9 @@ func TestWSLOldCopiesBecomeLinks(t *testing.T) {
 	time.Sleep(20 * time.Millisecond)
 	write(t, filepath.Join(src, "csv/SKILL.md"), "---\nname: csv\ndescription: Edited by hand\n---\n")
 	// the user's own skill beside them, and a folder of theirs where
-	// myna's copy of pdf would go
+	// owl's copy of pdf would go
 	write(t, filepath.Join(cl, "mine/SKILL.md"), "---\nname: mine\ndescription: Mine\n---\n")
-	store := filepath.Join(h, ".local/share/myna/skills")
+	store := filepath.Join(h, ".local/share/owl/skills")
 	write(t, filepath.Join(store, "csv/SKILL.md"), "the user's own csv")
 
 	// the update: no way of their own set any more, as a user who never
@@ -58,9 +58,9 @@ func TestWSLOldCopiesBecomeLinks(t *testing.T) {
 		}
 		problems = append(problems, res.Problems...)
 	}
-	// the user's csv in myna's place is said, for each agent given csv
+	// the user's csv in owl's place is said, for each agent given csv
 	for _, p := range problems {
-		if p.What != "skill:csv" || !strings.Contains(p.Error, "in the way of myna's copy of csv") {
+		if p.What != "skill:csv" || !strings.Contains(p.Error, "in the way of owl's copy of csv") {
 			t.Errorf("problem: %+v", p)
 		}
 	}
@@ -86,7 +86,7 @@ func TestWSLOldCopiesBecomeLinks(t *testing.T) {
 	// csv's place in the store is the user's: nothing is put there, and
 	// the agents keep what they had of it
 	if s := read(t, filepath.Join(store, "csv/SKILL.md")); s != "the user's own csv" {
-		t.Errorf("the user's folder in myna's place was written over: %q", s)
+		t.Errorf("the user's folder in owl's place was written over: %q", s)
 	}
 	for _, d := range []string{cx, cl, pi} {
 		if p := filepath.Join(d, "csv"); isLink(t, p) || !ours(p, "csv") {
@@ -129,7 +129,7 @@ func TestWSLStoreSweepKeepsEdits(t *testing.T) {
 	src := filepath.Join(home(), "src", "skills")
 	skill(t, filepath.Join(src, "pdf"), "pdf", "Read PDFs")
 	ok(t)(InstallSkills(src, []string{"pdf"}, []string{wslCodex}))
-	store := filepath.Join(h, ".local/share/myna/skills/pdf")
+	store := filepath.Join(h, ".local/share/owl/skills/pdf")
 	// edited in the distro's copy and unticked in one change: the edit is
 	// taken first, then the copy goes
 	time.Sleep(20 * time.Millisecond)
@@ -143,16 +143,16 @@ func TestWSLStoreSweepKeepsEdits(t *testing.T) {
 	}
 }
 
-// On a real WSL (MYNA_WSL_TEST_DISTRO, on Windows): the agents of a
+// On a real WSL (OWL_WSL_TEST_DISTRO, on Windows): the agents of a
 // distro whose home is a folder of the test's own in /tmp there get links
-// the distro makes and follows, which myna reads back through wsl.exe
+// the distro makes and follows, which owl reads back through wsl.exe
 // (Windows can't), so a sync with nothing new changes nothing; an edit
 // made in the distro's copy reaches the library; a way of copies takes
 // the link away for a copy and back; unticked, the links and the copy go.
 func TestWSLSkillsLinkedLive(t *testing.T) {
-	name := os.Getenv("MYNA_WSL_TEST_DISTRO")
+	name := os.Getenv("OWL_WSL_TEST_DISTRO")
 	if name == "" || runtime.GOOS != "windows" {
-		t.Skip("MYNA_WSL_TEST_DISTRO not set")
+		t.Skip("OWL_WSL_TEST_DISTRO not set")
 	}
 	t.Setenv("PATH", filepath.Join(os.Getenv("SystemRoot"), "System32")+string(os.PathListSeparator)+os.Getenv("PATH"))
 	sh := func(script string, args ...string) string {
@@ -165,7 +165,7 @@ func TestWSLSkillsLinkedLive(t *testing.T) {
 		}
 		return strings.TrimSpace(string(out))
 	}
-	base := "/tmp/myna-wsl-skills-" + strconv.FormatInt(time.Now().UnixNano(), 36)
+	base := "/tmp/owl-wsl-skills-" + strconv.FormatInt(time.Now().UnixNano(), 36)
 	sh(`mkdir -p -- "$1/.codex" "$1/.claude" && printf 'model = "m"\n' > "$1/.codex/config.toml" && printf '{}\n' > "$1/.claude/settings.json"`, base)
 	t.Cleanup(func() { sh(`rm -rf -- "$1"`, base) })
 	sandbox(t)
@@ -184,14 +184,14 @@ func TestWSLSkillsLinkedLive(t *testing.T) {
 	skill(t, filepath.Join(src, "pdf"), "pdf", "Read PDFs")
 	ok(t)(InstallSkills(src, []string{"pdf"}, []string{"claude", codex, claude}))
 	for _, d := range []string{"/.codex/skills/pdf", "/.claude/skills/pdf"} {
-		if got := sh(`readlink -- "$1"`, base+d); got != base+"/.local/share/myna/skills/pdf" {
+		if got := sh(`readlink -- "$1"`, base+d); got != base+"/.local/share/owl/skills/pdf" {
 			t.Fatalf("%s leads to %q", d, got)
 		}
 		if got := sh(`cat -- "$1/SKILL.md"`, base+d); !strings.Contains(got, "Read PDFs") {
 			t.Fatalf("the distro reads through %s: %q", d, got)
 		}
 		if p := filepath.Join(h, filepath.FromSlash(d)); !ours(p, "pdf") || !linked(p) {
-			t.Fatalf("%s isn't myna's link, as Windows reads it", p)
+			t.Fatalf("%s isn't owl's link, as Windows reads it", p)
 		}
 	}
 	if res := ok(t)(Sync()); len(res.Changed) != 0 {
@@ -213,17 +213,17 @@ func TestWSLSkillsLinkedLive(t *testing.T) {
 
 	// copies for Codex: its link goes for a copy, and back
 	ok(t)(SetSkillHow(codex, HowCopy))
-	if got := sh(`[ -L "$1" ] && echo link || { [ -f "$1/.myna-library" ] && echo copy; }`, base+"/.codex/skills/pdf"); got != "copy" {
+	if got := sh(`[ -L "$1" ] && echo link || { [ -f "$1/.owl-library" ] && echo copy; }`, base+"/.codex/skills/pdf"); got != "copy" {
 		t.Fatalf("Codex given copies has %q", got)
 	}
 	ok(t)(SetSkillHow(codex, ""))
-	if got := sh(`readlink -- "$1"`, base+"/.codex/skills/pdf"); got != base+"/.local/share/myna/skills/pdf" {
+	if got := sh(`readlink -- "$1"`, base+"/.codex/skills/pdf"); got != base+"/.local/share/owl/skills/pdf" {
 		t.Fatalf("Codex's copy made a link again leads to %q", got)
 	}
 
 	ok(t)(SkillAgents("pdf", []string{"claude"}))
 	if got := sh(`for p in "$@"; do { [ -e "$p" ] || [ -L "$p" ]; } && echo "$p"; done; true`,
-		base+"/.codex/skills/pdf", base+"/.claude/skills/pdf", base+"/.local/share/myna/skills/pdf"); got != "" {
+		base+"/.codex/skills/pdf", base+"/.claude/skills/pdf", base+"/.local/share/owl/skills/pdf"); got != "" {
 		t.Errorf("still there once unticked: %s", got)
 	}
 }

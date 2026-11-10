@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/proc"
 )
 
 // systemLinkHandler asks xdg-mime which desktop entry opens scheme's

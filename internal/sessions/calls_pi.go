@@ -29,14 +29,14 @@ import (
 // usage, on the model and provider in use. A call that failed is written
 // with no usage, and is none.
 //
-// A call made through myna's own entry (provider "myna", which
+// A call made through owl's own entry (provider "owl", which
 // internal/agent's pi.go and omp.go write, "dial" before the rename) is the
 // gateway's to count: it logged the call itself, with the provider and
 // account that answered. Cindy's Pi names it otherwise: Cindy gives a
 // custom provider it imports the link's id and eight hex digits of a new
 // UUID (its import parser: `${id.slice(0,24)}-${randomUUID().slice(0,8)}`),
-// so myna's link, id "myna" (internal/agent's cindy.go), is
-// "myna-beedee1a" there, and a call through it was counted twice: by the
+// so owl's link, id "owl" (internal/agent's cindy.go), is
+// "owl-beedee1a" there, and a call through it was counted twice: by the
 // gateway, and again here as Cindy's own (jealousy03888 on Discord, ZCode's
 // GLM-5.3 in Cindy listed once as a gateway request and once as a local
 // session).
@@ -54,21 +54,30 @@ func piCallFiles() []file {
 	return append(out, wslFiles("pi", "raft", "omp")...)
 }
 
-// piGateway is whether a provider is myna's own entry, in agent's files.
+// piGateway is whether a provider is owl's own entry, in agent's files.
 func piGateway(agent, provider string) bool {
-	if provider == "myna" || provider == "dial" {
+	// "owl", and the names this fork used before it: a user's older
+	// sessions are under one of those
+	if provider == "owl" || provider == "myna" || provider == "magpie" || provider == "dial" {
 		return true
 	}
 	return agent == "cindy" && cindyGatewayProvider(provider)
 }
 
 // cindyGatewayProvider is whether a provider id is the one Cindy gives
-// myna's import link: "myna-" and eight lowercase hex digits. A
-// provider the user adds in Cindy by hand under the name Myna is
-// "myna", or "myna-2" beside another (its slug), never this shape.
+// owl's import link: "owl-" and eight lowercase hex digits. A
+// provider the user adds in Cindy by hand under the name Owl is
+// "owl", or "owl-2" beside another (its slug), never this shape.
 func cindyGatewayProvider(id string) bool {
-	rest, ok := strings.CutPrefix(id, "myna-")
-	if !ok || len(rest) != 8 {
+	// the prefix owl writes, and the one this fork wrote as myna
+	rest := id
+	for _, pre := range []string{"owl-", "myna-"} {
+		if r, ok := strings.CutPrefix(id, pre); ok {
+			rest = r
+			break
+		}
+	}
+	if len(rest) != 8 {
 		return false
 	}
 	for _, r := range rest {

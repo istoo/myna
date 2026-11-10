@@ -22,8 +22,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/proc"
 )
 
 // shim is a version manager's shim an agent's CLI was found as.
@@ -88,7 +88,7 @@ func miseShim(bin string) *shim {
 		return nil
 	}
 	// mise-shim.exe runs the mise on PATH; the installers' own folders
-	// after it, for a myna whose PATH lacks it
+	// after it, for a owl whose PATH lacks it
 	home, _ := os.UserHomeDir()
 	mgr := lookTool("mise", filepath.Join(home, ".local", "bin", exe("mise")),
 		filepath.Join(appdir.Getenv("LOCALAPPDATA"), "mise", "bin", exe("mise")))

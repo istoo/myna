@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // routeEnded reports s's newest route and whether it and every try of it

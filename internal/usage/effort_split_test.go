@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/owl/internal/sessions"
 )
 
 // Codex's effort before the last days is kept in effort-v1.json: a start

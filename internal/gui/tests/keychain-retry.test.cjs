@@ -1,6 +1,6 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // #2367 (Dony2050): Codex keeps its sign-in in the macOS keychain, and the
-// keychain didn't give it to myna (the prompt denied, or answered too
+// keychain didn't give it to owl (the prompt denied, or answered too
 // late). The Providers page's line that says so has Try again, which posts
 // provider/keychain-retry once; the line goes when the read gets it, and a
 // line with no keychain to ask has no Try again. In English and Chinese,
@@ -12,7 +12,7 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
-const why = "1 account is saved in myna, and they are only offered beside the account Codex is signed in to. Codex keeps its sign-in in the macOS keychain (cli_auth_credentials_store = \"auto\" in /Users/me/.codex/config.toml), and macOS's keychain prompt was denied or cancelled. Allow myna when macOS asks for the keychain (\"Always Allow\" lets /usr/bin/security read that item from then on, so macOS stops asking each time Codex changes it), or set cli_auth_credentials_store = \"file\" there and sign in again (codex login).";
+const why = "1 account is saved in owl, and they are only offered beside the account Codex is signed in to. Codex keeps its sign-in in the macOS keychain (cli_auth_credentials_store = \"auto\" in /Users/me/.codex/config.toml), and macOS's keychain prompt was denied or cancelled. Allow owl when macOS asks for the keychain (\"Always Allow\" lets /usr/bin/security read that item from then on, so macOS stops asking each time Codex changes it), or set cli_auth_credentials_store = \"file\" there and sign in again (codex login).";
 
 function serve(lang, posts, retry) {
   let read = false;
@@ -64,7 +64,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, posts, retry));
-      await page.goto("http://myna.test/?view=providers");
+      await page.goto("http://owl.test/?view=providers");
       const line = page.locator("#excluded .excluded", { hasText: w.line });
       await line.waitFor();
       return { page, errors, line };

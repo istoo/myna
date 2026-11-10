@@ -20,7 +20,7 @@ func authFile(t *testing.T) map[string]map[string]any {
 	return all
 }
 
-// A host stopped (myna quitting, a plugin updated) while it renews a
+// A host stopped (owl quitting, a plugin updated) while it renews a
 // sign-in lets the renewal end and its new token be saved: the vendor
 // has spent the old refresh token, so a host killed 2 seconds in left
 // the account signed out.
@@ -99,7 +99,7 @@ func TestTwoHostsKeepEachOthersSignIns(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	h2, _, err := startOn(ctx, os.Getenv("MYNA_BUN"))
+	h2, _, err := startOn(ctx, os.Getenv("OWL_BUN"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -204,7 +204,7 @@ func TestTakenAccountNotSignedBackInByALateListing(t *testing.T) {
 }
 
 // A listing in flight saves its rotation only over the sign-in it read: one
-// renewed or replaced meanwhile (myna's own renewal, another host, a move)
+// renewed or replaced meanwhile (owl's own renewal, another host, a move)
 // stands, and the spent token it was based on isn't written over it (#4).
 func TestLateRotationKeepsTheReplacedSignIn(t *testing.T) {
 	sandbox(t)

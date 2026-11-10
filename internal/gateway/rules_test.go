@@ -11,8 +11,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // ruleUp is a Chat vendor that answers as its key, streaming when asked,
@@ -192,7 +192,7 @@ func TestRuleTokensFloorFromUsage(t *testing.T) {
 	}
 }
 
-// A turn myna didn't see begin — myna restarted, the rules changed —
+// A turn owl didn't see begin — owl restarted, the rules changed —
 // isn't moved by them; the next turn is looked at.
 func TestRuleWaitsForATurnItDidNotSeeBegin(t *testing.T) {
 	s, a, b := ruled(t, provider.Rule{Use: "b/big", Tokens: 20000})
@@ -397,7 +397,7 @@ func TestRuleEveryProtocol(t *testing.T) {
 				if r.Rule == nil || (r.Rule.N == 1) == short || r.Rule.Turn != 1 {
 					t.Errorf("%s: %+v", name, r.Rule)
 				}
-				// myna streams from the vendor for any agent not speaking Chat
+				// owl streams from the vendor for any agent not speaking Chat
 				up := map[string]*ruleUp{"ka": a, "kb": b}[want]
 				if a.n()+b.n() != na+nb+1 || up.n() == 0 || tc.path == "/v1/chat/completions" && up.calls[len(up.calls)-1] != map[bool]string{true: "stream", false: "json"}[stream] {
 					t.Errorf("%s: upstream calls a %v b %v", name, a.calls, b.calls)

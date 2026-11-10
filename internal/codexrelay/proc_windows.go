@@ -23,7 +23,7 @@ func alive(pid int) bool {
 	return ev == waitTimeout
 }
 
-// detach starts the relay outside myna's console, so it outlives it.
+// detach starts the relay outside owl's console, so it outlives it.
 func detach(cmd *exec.Cmd) {
 	if cmd.SysProcAttr == nil {
 		cmd.SysProcAttr = &syscall.SysProcAttr{}

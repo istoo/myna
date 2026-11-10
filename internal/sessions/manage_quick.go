@@ -15,7 +15,7 @@ import (
 // every agent with a gateway session for its ids, Codex's too while Claude
 // Code was shown. It still reads at once what is cheap: a file it has a
 // parse of that has only grown, read on from where the parse left off. A
-// file it would read whole (none kept, an older myna's index, a file
+// file it would read whole (none kept, an older owl's index, a file
 // written over, or a Claude Code or Codex file whose kept parse can't be
 // read on after a restart) is read behind the answer, as Stats and List
 // read it, and until then its row stands on what is known now: the parse

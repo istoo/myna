@@ -8,7 +8,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/owl/internal/plugin"
 )
 
 // Restoring and syncing a keyless provider keep this machine's balance

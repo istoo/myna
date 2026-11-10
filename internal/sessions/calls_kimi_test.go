@@ -24,7 +24,7 @@ import (
 //   - wd_v14-cancel: a turn cancelled mid-request, whose last llm.request
 //     has no usage.record, 6 calls
 //   - wd_v15-early-no-agentid: 1.5 records written before agentId, 10 calls
-//   - wd_v15-myna-failed: a failed call through myna, no usage.record
+//   - wd_v15-owl-failed: a failed call through owl, no usage.record
 //   - wd_v14-no-turn, wd_v14-reopened-ses, wd_v10-migrated: no calls
 //
 // The totals for the whole files (32, 151, 6 and 10 calls) are the
@@ -135,18 +135,18 @@ func writeKimiWire(t *testing.T, home, session, agent string, lines ...string) {
 	}
 }
 
-// A call Kimi made through myna's own entry (a model table keyed
-// myna/<provider>/<model>, as the reporter's failed call's modelAlias
+// A call Kimi made through owl's own entry (a model table keyed
+// owl/<provider>/<model>, as the reporter's failed call's modelAlias
 // is) is the gateway's to count. The record is the quoted one with that
-// model: no successful call through myna was in the files shared.
-func TestKimiCodeSkipsCallsThroughMyna(t *testing.T) {
+// model: no successful call through owl was in the files shared.
+func TestKimiCodeSkipsCallsThroughOwl(t *testing.T) {
 	home := kimiHome(t)
-	viaMyna := strings.Replace(kimiRecordLine, `"kimi-code/k3"`, `"myna/mistral/zai-glm-5-3"`, 1)
-	viaMyna = strings.Replace(viaMyna, `1791696952640`, `1791696960000`, 1)
-	writeKimiWire(t, home, "session_through-myna", "main", kimiRecordLine, viaMyna, "")
+	viaOwl := strings.Replace(kimiRecordLine, `"kimi-code/k3"`, `"owl/mistral/zai-glm-5-3"`, 1)
+	viaOwl = strings.Replace(viaOwl, `1791696952640`, `1791696960000`, 1)
+	writeKimiWire(t, home, "session_through-owl", "main", kimiRecordLine, viaOwl, "")
 	var got []Call
 	for _, c := range kimiCalls() {
-		if c.Session == "session_through-myna" {
+		if c.Session == "session_through-owl" {
 			got = append(got, c)
 		}
 	}

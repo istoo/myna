@@ -12,14 +12,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/desktopdir"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/desktopdir"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // desktopSandbox is a home of its own with nothing of this machine's in
-// reach: every variable Desktop's folders (and myna's stash) follow.
+// reach: every variable Desktop's folders (and owl's stash) follow.
 func desktopSandbox(t *testing.T) (string, desktopPaths) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
@@ -115,7 +115,7 @@ func TestDesktopDirs(t *testing.T) {
 	}
 }
 
-// A fresh Claude Desktop: its folder and nothing myna writes in it yet.
+// A fresh Claude Desktop: its folder and nothing owl writes in it yet.
 func TestClaudeDesktopFresh(t *testing.T) {
 	home, p := desktopSandbox(t)
 	a := claudeDesktop(home)
@@ -132,7 +132,7 @@ func TestClaudeDesktopFresh(t *testing.T) {
 		t.Fatalf("get: %q", f.Get())
 	}
 
-	if err := f.Set("myna"); err != nil {
+	if err := f.Set("owl"); err != nil {
 		t.Fatal(err)
 	}
 	for _, c := range []string{p.config, p.config3p} {
@@ -142,7 +142,7 @@ func TestClaudeDesktopFresh(t *testing.T) {
 	}
 	want := map[string]any{
 		"inferenceProvider": "gateway", "inferenceGatewayBaseUrl": gateway.URL(),
-		"inferenceGatewayApiKey": "myna-claude-desktop", "inferenceGatewayAuthScheme": "bearer",
+		"inferenceGatewayApiKey": "owl-claude-desktop", "inferenceGatewayAuthScheme": "bearer",
 		"disableDeploymentModeChooser": true, "coworkEgressAllowedHosts": []any{"*"},
 		"claudeAiImport":    map[string]any{"enabled": true, "bannerBehavior": "detect"},
 		"toolSearchEnabled": true,
@@ -154,10 +154,10 @@ func TestClaudeDesktopFresh(t *testing.T) {
 		t.Errorf("profile mode %v", st.Mode())
 	}
 	meta := desktopJSON(t, p.meta)
-	if meta["appliedId"] != desktopProfileID || !reflect.DeepEqual(meta["entries"], []any{map[string]any{"id": desktopProfileID, "name": "myna"}}) {
+	if meta["appliedId"] != desktopProfileID || !reflect.DeepEqual(meta["entries"], []any{map[string]any{"id": desktopProfileID, "name": "owl"}}) {
 		t.Errorf("meta: %v", meta)
 	}
-	if f.Get() != "myna" || a.Check() != "" {
+	if f.Get() != "owl" || a.Check() != "" {
 		t.Fatalf("get %q, check %q", f.Get(), a.Check())
 	}
 	if n := a.Notice(); n == "" {
@@ -194,7 +194,7 @@ func TestClaudeDesktopKeepsTheUsers(t *testing.T) {
 
 	a := claudeDesktop(home)
 	f := a.Field("provider")
-	if err := f.Set("myna"); err != nil {
+	if err := f.Set("owl"); err != nil {
 		t.Fatal(err)
 	}
 	cfg := desktopJSON(t, p.config)
@@ -216,7 +216,7 @@ func TestClaudeDesktopKeepsTheUsers(t *testing.T) {
 	on := desktopTree(t, p)
 
 	// on again changes nothing
-	if err := f.Set("myna"); err != nil {
+	if err := f.Set("owl"); err != nil {
 		t.Fatal(err)
 	}
 	if again := desktopTree(t, p); !reflect.DeepEqual(again, on) {
@@ -237,7 +237,7 @@ func TestClaudeDesktopKeepsTheUsers(t *testing.T) {
 	}
 
 	// on → off → on is the first on again
-	if err := f.Set("myna"); err != nil {
+	if err := f.Set("owl"); err != nil {
 		t.Fatal(err)
 	}
 	if again := desktopTree(t, p); !reflect.DeepEqual(again, on) {
@@ -245,15 +245,15 @@ func TestClaudeDesktopKeepsTheUsers(t *testing.T) {
 	}
 }
 
-// dev_quj on X: "Claude Desktop 已不经过 myna：配置已变更" after a
-// restart, with Desktop on myna. Desktop 4.4212 drops a stored
+// dev_quj on X: "Claude Desktop 已不经过 owl：配置已变更" after a
+// restart, with Desktop on owl. Desktop 4.4212 drops a stored
 // deploymentMode itself and never reads the Claude folder's, so the check
-// follows Desktop's own rule (desktop3p): off myna only when Claude-3p
+// follows Desktop's own rule (desktop3p): off owl only when Claude-3p
 // says "1p" and the profile leaves Desktop's chooser on.
 func TestClaudeDesktopModeAsDesktopReadsIt(t *testing.T) {
 	home, p := desktopSandbox(t)
 	a := claudeDesktop(home)
-	if err := a.Field("provider").Set("myna"); err != nil {
+	if err := a.Field("provider").Set("owl"); err != nil {
 		t.Fatal(err)
 	}
 	quiet := func(why string) {
@@ -304,7 +304,7 @@ func TestClaudeDesktopModeAsDesktopReadsIt(t *testing.T) {
 	}
 }
 
-// Desktop or the user changing things after myna: Check says so, off
+// Desktop or the user changing things after owl: Check says so, off
 // leaves what they chose, and the profile the user's own settings in it.
 func TestClaudeDesktopChangedSince(t *testing.T) {
 	home, p := desktopSandbox(t)
@@ -312,7 +312,7 @@ func TestClaudeDesktopChangedSince(t *testing.T) {
 	desktopWrite(t, p.meta, `{"entries":[{"id":"mine","name":"Mine"}],"appliedId":"mine"}`)
 	a := claudeDesktop(home)
 	f := a.Field("provider")
-	if err := f.Set("myna"); err != nil {
+	if err := f.Set("owl"); err != nil {
 		t.Fatal(err)
 	}
 	// a setting made in Desktop's window stays through a second on
@@ -320,7 +320,7 @@ func TestClaudeDesktopChangedSince(t *testing.T) {
 	if c := a.Check(); c == "" {
 		t.Error("check: a profile pointing elsewhere is fine")
 	}
-	if err := f.Set("myna"); err != nil {
+	if err := f.Set("owl"); err != nil {
 		t.Fatal(err)
 	}
 	prof := desktopJSON(t, p.prof)
@@ -353,25 +353,25 @@ func TestClaudeDesktopChangedSince(t *testing.T) {
 		t.Errorf("config: %v", m)
 	}
 	if _, err := os.Stat(p.config3p); !os.IsNotExist(err) {
-		t.Error("the 3p config myna made is still there")
+		t.Error("the 3p config owl made is still there")
 	}
 	if meta := desktopJSON(t, p.meta); meta["appliedId"] != "mine" || len(meta["entries"].([]any)) != 1 {
 		t.Errorf("meta: %v", meta)
 	}
 	if _, err := os.Stat(p.prof); !os.IsNotExist(err) {
-		t.Error("myna's profile is still there")
+		t.Error("owl's profile is still there")
 	}
 }
 
 // #2035 (capiton0): settings the user made in Desktop's third-party window
-// live in myna's profile. Switching Desktop off myna and on again
+// live in owl's profile. Switching Desktop off owl and on again
 // brings them back, the gateway's address and key set anew.
 func TestClaudeDesktopOffOnKeepsTheUsersSettings(t *testing.T) {
 	home, p := desktopSandbox(t)
 	os.MkdirAll(p.dir, 0o755)
 	a := claudeDesktop(home)
 	f := a.Field("provider")
-	if err := f.Set("myna"); err != nil {
+	if err := f.Set("owl"); err != nil {
 		t.Fatal(err)
 	}
 	desktopWrite(t, p.prof, `{"inferenceProvider":"gateway","inferenceGatewayBaseUrl":"http://old:1","inferenceGatewayApiKey":"old","inferenceGatewayAuthScheme":"bearer",`+
@@ -380,36 +380,36 @@ func TestClaudeDesktopOffOnKeepsTheUsersSettings(t *testing.T) {
 		t.Fatal(err)
 	}
 	if _, err := os.Stat(p.prof); !os.IsNotExist(err) {
-		t.Fatal("myna's profile is still there after off")
+		t.Fatal("owl's profile is still there after off")
 	}
-	if err := f.Set("myna"); err != nil {
+	if err := f.Set("owl"); err != nil {
 		t.Fatal(err)
 	}
 	prof := desktopJSON(t, p.prof)
 	want := map[string]any{
 		"inferenceProvider": "gateway", "inferenceGatewayBaseUrl": gateway.URL(),
-		"inferenceGatewayApiKey": "myna-claude-desktop", "inferenceGatewayAuthScheme": "bearer",
+		"inferenceGatewayApiKey": "owl-claude-desktop", "inferenceGatewayAuthScheme": "bearer",
 		"disableDeploymentModeChooser": false, "coworkEgressAllowedHosts": []any{"corp.example"},
 		"inferenceModels": []any{"claude-opus-4-7"}, "isClaudeCodeForDesktopEnabled": true,
 	}
 	if !reflect.DeepEqual(prof, want) {
 		t.Errorf("profile after off and on:\n%v\nwant\n%v", prof, want)
 	}
-	if f.Get() != "myna" || a.Check() != "" {
+	if f.Get() != "owl" || a.Check() != "" {
 		t.Errorf("get %q, check %q", f.Get(), a.Check())
 	}
 }
 
 // #2035 (capiton0): a profile the user made in Desktop's window for
-// myna's gateway, applied when myna is switched on, starts myna's
+// owl's gateway, applied when owl is switched on, starts owl's
 // profile: their settings (as they posted them) are kept, only the
 // gateway's address, key and auth scheme set. Their own profile is left
-// as it was and applied again when myna is switched off.
+// as it was and applied again when owl is switched off.
 func TestClaudeDesktopOnKeepsTheUsersOwnGatewayProfile(t *testing.T) {
 	home, p := desktopSandbox(t)
 	const theirs = `{
   "inferenceGatewayBaseUrl": "` + "%s" + `",
-  "inferenceGatewayApiKey": "myna",
+  "inferenceGatewayApiKey": "owl",
   "sshHostAllowlist": ["*"],
   "chatTabEnabled": true,
   "chatAdvancedFileAnalysisEnabled": true,
@@ -431,16 +431,16 @@ func TestClaudeDesktopOnKeepsTheUsersOwnGatewayProfile(t *testing.T) {
 	desktopWrite(t, p.meta, `{"appliedId":"5b0d0c6e-1f2a-4c3b-9d4e-0a1b2c3d4e5f","entries":[{"id":"5b0d0c6e-1f2a-4c3b-9d4e-0a1b2c3d4e5f","name":"mine"}]}`)
 	a := claudeDesktop(home)
 	f := a.Field("provider")
-	if err := f.Set("myna"); err != nil {
+	if err := f.Set("owl"); err != nil {
 		t.Fatal(err)
 	}
 	var want map[string]any
 	json.Unmarshal([]byte(body), &want)
-	want["inferenceGatewayApiKey"] = "myna-claude-desktop"
+	want["inferenceGatewayApiKey"] = "owl-claude-desktop"
 	want["inferenceGatewayAuthScheme"] = "bearer"
 	want["claudeAiImport"] = map[string]any{"enabled": true, "bannerBehavior": "detect"}
 	if prof := desktopJSON(t, p.prof); !reflect.DeepEqual(prof, want) {
-		t.Errorf("myna's profile:\n%v\nwant\n%v", prof, want)
+		t.Errorf("owl's profile:\n%v\nwant\n%v", prof, want)
 	}
 	if b, _ := os.ReadFile(own); string(b) != body {
 		t.Errorf("their profile was changed:\n%s", b)
@@ -457,7 +457,7 @@ func TestClaudeDesktopOnKeepsTheUsersOwnGatewayProfile(t *testing.T) {
 }
 
 // A profile for somewhere else (another gateway, Bedrock) is not carried
-// into myna's: its models and settings are for that place.
+// into owl's: its models and settings are for that place.
 func TestClaudeDesktopOnLeavesOtherProfilesOut(t *testing.T) {
 	for name, prof := range map[string]string{
 		"other gateway": `{"inferenceProvider":"gateway","inferenceGatewayBaseUrl":"https://llm.example.com","inferenceModels":["corp-model"],"chatTabEnabled":true}`,
@@ -467,23 +467,23 @@ func TestClaudeDesktopOnLeavesOtherProfilesOut(t *testing.T) {
 			home, p := desktopSandbox(t)
 			desktopWrite(t, filepath.Join(p.library, "abc.json"), prof)
 			desktopWrite(t, p.meta, `{"appliedId":"abc","entries":[{"id":"abc","name":"mine"}]}`)
-			if err := claudeDesktop(home).Field("provider").Set("myna"); err != nil {
+			if err := claudeDesktop(home).Field("provider").Set("owl"); err != nil {
 				t.Fatal(err)
 			}
 			got := desktopJSON(t, p.prof)
 			if _, ok := got["chatTabEnabled"]; ok {
-				t.Errorf("myna's profile took another place's settings: %v", got)
+				t.Errorf("owl's profile took another place's settings: %v", got)
 			}
 		})
 	}
 }
 
-// A file myna can't read as Desktop writes it is left alone, and so is
+// A file owl can't read as Desktop writes it is left alone, and so is
 // everything else.
 func TestClaudeDesktopRefusesOddFiles(t *testing.T) {
 	home, p := desktopSandbox(t)
 	desktopWrite(t, p.meta, `[]`)
-	if err := claudeDesktop(home).Field("provider").Set("myna"); err == nil {
+	if err := claudeDesktop(home).Field("provider").Set("owl"); err == nil {
 		t.Fatal("a meta file that isn't an object was taken")
 	}
 	if b, _ := os.ReadFile(p.meta); string(b) != "[]" {
@@ -495,13 +495,13 @@ func TestClaudeDesktopRefusesOddFiles(t *testing.T) {
 		}
 	}
 	desktopWrite(t, p.meta, `{"entries":{}}`)
-	if err := claudeDesktop(home).Field("provider").Set("myna"); err == nil {
+	if err := claudeDesktop(home).Field("provider").Set("owl"); err == nil {
 		t.Fatal("entries that aren't a list were taken")
 	}
 }
 
 // each of Claude Code's tiers in Desktop's Code tab can have a model of its
-// own (WilianWeng): offered once Desktop is on myna, set by the catalog id
+// own (WilianWeng): offered once Desktop is on owl, set by the catalog id
 // or by the id Desktop is shown, and taken away with ""
 func TestClaudeDesktopTiers(t *testing.T) {
 	home, _ := desktopSandbox(t)
@@ -514,9 +514,9 @@ func TestClaudeDesktopTiers(t *testing.T) {
 		t.Fatal("no quiet sonnet field")
 	}
 	if len(f.Options(nil)) != 0 {
-		t.Fatal("tiers offered before Desktop is on myna")
+		t.Fatal("tiers offered before Desktop is on owl")
 	}
-	if err := a.Field("provider").Set("myna"); err != nil {
+	if err := a.Field("provider").Set("owl"); err != nil {
 		t.Fatal(err)
 	}
 	if len(f.Options(nil)) != 2 {
@@ -532,7 +532,7 @@ func TestClaudeDesktopTiers(t *testing.T) {
 		t.Fatalf("tiers: %v", gateway.DesktopTiers())
 	}
 	if err := f.Set("nope/x"); err == nil {
-		t.Fatal("a model myna doesn't serve was taken")
+		t.Fatal("a model owl doesn't serve was taken")
 	}
 	if err := f.Set(""); err != nil || f.Get() != "" {
 		t.Fatalf("unset: %v %q", err, f.Get())
@@ -542,7 +542,7 @@ func TestClaudeDesktopTiers(t *testing.T) {
 // Kilig on Discord: Claude Desktop from its setup.exe on Windows 10 LTSC
 // runs as an MSIX package, its data in
 // %LOCALAPPDATA%\Packages\Claude_<publisher>\LocalCache\Roaming\Claude and
-// nothing in %APPDATA%\Claude. It is detected, and myna's switch writes
+// nothing in %APPDATA%\Claude. It is detected, and owl's switch writes
 // the package's folders, which the packaged app up to 2.x reads. bg5eau on
 // X: 2.31226.1, packaged the same way, reads the real
 // %LOCALAPPDATA%\Claude-3p, so the switch writes the real folders too, and
@@ -574,11 +574,11 @@ func TestClaudeDesktopMSIX(t *testing.T) {
 	if want := filepath.Join(pkg, "Local", "Claude", "claude_desktop_config.json"); a.Path != want {
 		t.Errorf("path %s, want %s", a.Path, want)
 	}
-	if err := a.Field("provider").Set("myna"); err != nil {
+	if err := a.Field("provider").Set("owl"); err != nil {
 		t.Fatal(err)
 	}
-	if a.Field("provider").Get() != mynaID {
-		t.Fatal("not on myna")
+	if a.Field("provider").Get() != owlID {
+		t.Fatal("not on owl")
 	}
 	for _, q := range []desktopPaths{p, r} {
 		if !desktopWired(q) {
@@ -623,9 +623,9 @@ func TestClaudeDesktopMSIX(t *testing.T) {
 	}
 }
 
-// A packaged Desktop switched on by a myna that wrote only the
+// A packaged Desktop switched on by a owl that wrote only the
 // package's folders keeps its stash: switching on now writes the real ones
-// too, and off still leaves the package's as they were before myna.
+// too, and off still leaves the package's as they were before owl.
 func TestClaudeDesktopMSIXStashBefore(t *testing.T) {
 	home, _ := desktopSandbox(t)
 	old := desktopdir.OS
@@ -637,14 +637,14 @@ func TestClaudeDesktopMSIXStashBefore(t *testing.T) {
 	p := desktopPathsOf(filepath.Join(pkg, "Local", "Claude"), filepath.Join(pkg, "Local", "Claude-3p"))
 	desktopWrite(t, p.config3p, `{"deploymentMode":"1p"}`)
 	before := desktopTree(t, p)
-	// as the myna before wrote it: the package's set, the plain keys
+	// as the owl before wrote it: the package's set, the plain keys
 	if err := desktopOn(p); err != nil {
 		t.Fatal(err)
 	}
 	r := desktopPathsOf(filepath.Join(local, "Claude"), filepath.Join(local, "Claude-3p"))
 
 	a := claudeDesktop(home)
-	if err := a.Field("provider").Set("myna"); err != nil {
+	if err := a.Field("provider").Set("owl"); err != nil {
 		t.Fatal(err)
 	}
 	if !desktopWired(r) {
@@ -665,10 +665,10 @@ func TestClaudeDesktopMSIXStashBefore(t *testing.T) {
 
 // dumplings on Discord: Desktop 2.31226.0 from its MSIX on Windows runs in
 // the real %LOCALAPPDATA%\Claude-3p (its "Local State" there is the newest),
-// and the package's LocalCache copy, which myna wrote too, is emptied.
-// Desktop is on myna and the card doesn't say it was changed; the copy
+// and the package's LocalCache copy, which owl wrote too, is emptied.
+// Desktop is on owl and the card doesn't say it was changed; the copy
 // Desktop reads turned back to 1p still does, and Reconnect with a tier on
-// one of myna's models puts the gateway back, not only the tier.
+// one of owl's models puts the gateway back, not only the tier.
 func TestClaudeDesktopMSIXChecksTheFoldersDesktopRuns(t *testing.T) {
 	home, _ := desktopSandbox(t)
 	old := desktopdir.OS
@@ -690,7 +690,7 @@ func TestClaudeDesktopMSIXChecksTheFoldersDesktopRuns(t *testing.T) {
 		os.Chtimes(f, then, then)
 	}
 	a := claudeDesktop(home)
-	if err := a.Field("provider").Set("myna"); err != nil {
+	if err := a.Field("provider").Set("owl"); err != nil {
 		t.Fatal(err)
 	}
 	if err := a.Field("sonnet").Set("v/a"); err != nil {
@@ -737,11 +737,11 @@ func TestClaudeDesktopMSIXChecksTheFoldersDesktopRuns(t *testing.T) {
 	}
 }
 
-// Claude-3p is a userData of its own, so Desktop on myna started in the
+// Claude-3p is a userData of its own, so Desktop on owl started in the
 // system's language, not the one picked signed in with Anthropic (memory
 // and Osal on Discord: Chinese gone). The language is carried into
 // Claude-3p's config.json, nothing else of Claude's is, and off takes the
-// file myna made for it away again.
+// file owl made for it away again.
 func TestClaudeDesktopCarriesTheLanguage(t *testing.T) {
 	home, p := desktopSandbox(t)
 	own := "{\n  \"locale\": \"zh-CN\",\n  \"userThemeMode\": \"dark\"\n}\n"
@@ -749,7 +749,7 @@ func TestClaudeDesktopCarriesTheLanguage(t *testing.T) {
 	before := desktopTree(t, p)
 
 	f := claudeDesktop(home).Field("provider")
-	if err := f.Set("myna"); err != nil {
+	if err := f.Set("owl"); err != nil {
 		t.Fatal(err)
 	}
 	if m := desktopJSON(t, p.app3p); !reflect.DeepEqual(m, map[string]any{"locale": "zh-CN"}) {
@@ -767,7 +767,7 @@ func TestClaudeDesktopCarriesTheLanguage(t *testing.T) {
 }
 
 // A language already set in 3p mode (Desktop's, or the user's by hand) is
-// theirs: no write of myna's changes Claude-3p's config.json, on, again,
+// theirs: no write of owl's changes Claude-3p's config.json, on, again,
 // off and on again, and off leaves it there.
 func TestClaudeDesktopKeepsThe3pLanguage(t *testing.T) {
 	home, p := desktopSandbox(t)
@@ -776,7 +776,7 @@ func TestClaudeDesktopKeepsThe3pLanguage(t *testing.T) {
 	desktopWrite(t, p.app3p, mine)
 
 	f := claudeDesktop(home).Field("provider")
-	for i, v := range []string{"myna", "myna", "", "myna"} {
+	for i, v := range []string{"owl", "owl", "", "owl"} {
 		if err := f.Set(v); err != nil {
 			t.Fatal(err)
 		}
@@ -787,12 +787,12 @@ func TestClaudeDesktopKeepsThe3pLanguage(t *testing.T) {
 }
 
 // Wired, and Desktop has written its config.json since: the user then
-// sets the language there by hand. Applying myna again keeps every key;
-// off keeps the file, which is no longer myna's alone.
+// sets the language there by hand. Applying owl again keeps every key;
+// off keeps the file, which is no longer owl's alone.
 func TestClaudeDesktopUserEditsThenReapply(t *testing.T) {
 	home, p := desktopSandbox(t)
 	f := claudeDesktop(home).Field("provider")
-	if err := f.Set("myna"); err != nil {
+	if err := f.Set("owl"); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := os.Stat(p.app3p); err == nil {
@@ -801,7 +801,7 @@ func TestClaudeDesktopUserEditsThenReapply(t *testing.T) {
 	desktopWrite(t, p.app, `{"locale":"zh-CN"}`)
 	edited := "{\n  \"locale\": \"zh-TW\",\n  \"hasCompletedOnboarding\": true\n}\n"
 	desktopWrite(t, p.app3p, edited)
-	for _, v := range []string{"myna", "", "myna"} {
+	for _, v := range []string{"owl", "", "owl"} {
 		if err := f.Set(v); err != nil {
 			t.Fatal(err)
 		}
@@ -812,12 +812,12 @@ func TestClaudeDesktopUserEditsThenReapply(t *testing.T) {
 }
 
 // Only a language Desktop can name is carried, and a Claude-3p config.json
-// myna can't read as an object is left as it is, the takeover going on.
+// owl can't read as an object is left as it is, the takeover going on.
 func TestClaudeDesktopLanguageOddValues(t *testing.T) {
 	for _, own := range []string{`{"locale":"../../x"}`, `{"locale":7}`, `{"locale":""}`, `not json`} {
 		home, p := desktopSandbox(t)
 		desktopWrite(t, p.app, own)
-		if err := claudeDesktop(home).Field("provider").Set("myna"); err != nil {
+		if err := claudeDesktop(home).Field("provider").Set("owl"); err != nil {
 			t.Fatal(err)
 		}
 		if b, err := os.ReadFile(p.app3p); err == nil {
@@ -827,7 +827,7 @@ func TestClaudeDesktopLanguageOddValues(t *testing.T) {
 	home, p := desktopSandbox(t)
 	desktopWrite(t, p.app, `{"locale":"zh-CN"}`)
 	desktopWrite(t, p.app3p, `[1]`)
-	if err := claudeDesktop(home).Field("provider").Set("myna"); err != nil {
+	if err := claudeDesktop(home).Field("provider").Set("owl"); err != nil {
 		t.Fatal(err)
 	}
 	if b, _ := os.ReadFile(p.app3p); string(b) != `[1]` {
@@ -838,24 +838,24 @@ func TestClaudeDesktopLanguageOddValues(t *testing.T) {
 	}
 }
 
-// bigcat1800 on Discord: Desktop 4.4212 in 3p mode on myna, 13 MCP
+// bigcat1800 on Discord: Desktop 4.4212 in 3p mode on owl, 13 MCP
 // servers, and every tool's schema went whole on each request (~162K
 // tokens). Desktop starts Claude Code with experimental betas off unless
 // its toolSearchEnabled policy is on, and Claude Code then keeps tool
-// search off whatever ENABLE_TOOL_SEARCH says. myna's profile gets the
-// policy once, on a switch on and, for a Desktop already on myna, from
+// search off whatever ENABLE_TOOL_SEARCH says. owl's profile gets the
+// policy once, on a switch on and, for a Desktop already on owl, from
 // Sync; a value the user set, false too, or took away since, stays theirs.
 func TestClaudeDesktopTurnsOnToolSearch(t *testing.T) {
 	home, p := desktopSandbox(t)
 	a := claudeDesktop(home)
-	if err := a.Field("provider").Set("myna"); err != nil {
+	if err := a.Field("provider").Set("owl"); err != nil {
 		t.Fatal(err)
 	}
 	if got := desktopJSON(t, p.prof)["toolSearchEnabled"]; got != true {
 		t.Fatalf("switch on: toolSearchEnabled %v", got)
 	}
 
-	// on myna before this change: no toolSearchEnabled, no mark
+	// on owl before this change: no toolSearchEnabled, no mark
 	prof := desktopJSON(t, p.prof)
 	delete(prof, "toolSearchEnabled")
 	b, _ := json.Marshal(prof)
@@ -865,7 +865,7 @@ func TestClaudeDesktopTurnsOnToolSearch(t *testing.T) {
 		t.Fatal(err)
 	}
 	if got := desktopJSON(t, p.prof)["toolSearchEnabled"]; got != true {
-		t.Fatalf("Sync on myna: toolSearchEnabled %v", got)
+		t.Fatalf("Sync on owl: toolSearchEnabled %v", got)
 	}
 
 	// the user takes it away in Desktop's window: not written back
@@ -873,7 +873,7 @@ func TestClaudeDesktopTurnsOnToolSearch(t *testing.T) {
 	if err := a.Sync(); err != nil {
 		t.Fatal(err)
 	}
-	if err := a.Field("provider").Set("myna"); err != nil {
+	if err := a.Field("provider").Set("owl"); err != nil {
 		t.Fatal(err)
 	}
 	if _, has := desktopJSON(t, p.prof)["toolSearchEnabled"]; has {
@@ -895,7 +895,7 @@ func TestClaudeDesktopTurnsOnToolSearch(t *testing.T) {
 		t.Fatalf("check %q", a.Check())
 	}
 
-	// off myna: the profile goes, and Sync writes nothing
+	// off owl: the profile goes, and Sync writes nothing
 	if err := a.Field("provider").Set(""); err != nil {
 		t.Fatal(err)
 	}
@@ -905,15 +905,15 @@ func TestClaudeDesktopTurnsOnToolSearch(t *testing.T) {
 		t.Fatal(err)
 	}
 	if after := desktopTree(t, p); !reflect.DeepEqual(after, before) {
-		t.Fatalf("Sync off myna wrote:\n%v", after)
+		t.Fatalf("Sync off owl wrote:\n%v", after)
 	}
 }
 
-// lambdua on X: Desktop on myna runs in Claude-3p, a userData of its own,
+// lambdua on X: Desktop on owl runs in Claude-3p, a userData of its own,
 // so the Code and Cowork sessions it had signed in with Anthropic were out
 // of sight. Desktop imports them itself (Settings → Import) once its
-// claudeAiImport policy is on: myna's profile gets it, once, on a switch
-// on and, for a Desktop already on myna, from Sync at the next start.
+// claudeAiImport policy is on: owl's profile gets it, once, on a switch
+// on and, for a Desktop already on owl, from Sync at the next start.
 // A claudeAiImport the user has, or took away since, stays theirs, and
 // Desktop's own sessions are never touched.
 func TestClaudeDesktopOffersItsSessionImport(t *testing.T) {
@@ -924,20 +924,20 @@ func TestClaudeDesktopOffersItsSessionImport(t *testing.T) {
 	desktopWrite(t, session, `{"sessionId":"local_1","title":"mine"}`)
 	a := claudeDesktop(home)
 	if a.Sync == nil {
-		t.Fatal("no Sync: a Desktop already on myna never gets the import")
+		t.Fatal("no Sync: a Desktop already on owl never gets the import")
 	}
-	// not on myna: Sync writes nothing
+	// not on owl: Sync writes nothing
 	before := desktopTree(t, p)
 	if err := a.Sync(); err != nil {
 		t.Fatal(err)
 	}
 	if after := desktopTree(t, p); !reflect.DeepEqual(after, before) {
-		t.Fatalf("Sync off myna wrote:\n%v", after)
+		t.Fatalf("Sync off owl wrote:\n%v", after)
 	}
 
-	// on myna before this change: a profile with no claudeAiImport and
+	// on owl before this change: a profile with no claudeAiImport and
 	// nothing in the stash; Sync seeds it
-	if err := a.Field("provider").Set("myna"); err != nil {
+	if err := a.Field("provider").Set("owl"); err != nil {
 		t.Fatal(err)
 	}
 	if got := desktopJSON(t, p.prof)["claudeAiImport"]; !reflect.DeepEqual(got, on) {
@@ -952,7 +952,7 @@ func TestClaudeDesktopOffersItsSessionImport(t *testing.T) {
 		t.Fatal(err)
 	}
 	if got := desktopJSON(t, p.prof)["claudeAiImport"]; !reflect.DeepEqual(got, on) {
-		t.Fatalf("Sync on myna: claudeAiImport %v", got)
+		t.Fatalf("Sync on owl: claudeAiImport %v", got)
 	}
 
 	// the user turns it off in Desktop's window (the key gone): stays off
@@ -960,7 +960,7 @@ func TestClaudeDesktopOffersItsSessionImport(t *testing.T) {
 	if err := a.Sync(); err != nil {
 		t.Fatal(err)
 	}
-	if err := a.Field("provider").Set("myna"); err != nil {
+	if err := a.Field("provider").Set("owl"); err != nil {
 		t.Fatal(err)
 	}
 	if _, has := desktopJSON(t, p.prof)["claudeAiImport"]; has {
@@ -973,7 +973,7 @@ func TestClaudeDesktopOffersItsSessionImport(t *testing.T) {
 	}
 	forget(desktopImport+p.key, desktopProfile+p.key)
 	theirs := map[string]any{"enabled": false}
-	if err := a.Field("provider").Set("myna"); err != nil {
+	if err := a.Field("provider").Set("owl"); err != nil {
 		t.Fatal(err)
 	}
 	if err := edit.SetJSON(p.prof, edit.KV{Path: "claudeAiImport", Value: theirs}); err != nil {
@@ -993,7 +993,7 @@ func TestClaudeDesktopOffersItsSessionImport(t *testing.T) {
 	}
 }
 
-// aa86222 on Discord: Desktop on myna had none of the user's connectors.
+// aa86222 on Discord: Desktop on owl had none of the user's connectors.
 // 3p mode reads its MCP servers from Claude-3p's claude_desktop_config.json,
 // so the ones added signed in with Anthropic (Claude's file) were out of
 // sight. Switching on copies each one Claude-3p doesn't have; one of the
@@ -1007,7 +1007,7 @@ func TestClaudeDesktopCarriesTheMCPServers(t *testing.T) {
 
 	a := claudeDesktop(home)
 	f := a.Field("provider")
-	if err := f.Set("myna"); err != nil {
+	if err := f.Set("owl"); err != nil {
 		t.Fatal(err)
 	}
 	m := desktopJSON(t, p.config3p)
@@ -1020,7 +1020,7 @@ func TestClaudeDesktopCarriesTheMCPServers(t *testing.T) {
 	}
 	// on again and Sync: nothing doubled, nothing more written
 	once := desktopTree(t, p)
-	if err := f.Set("myna"); err != nil {
+	if err := f.Set("owl"); err != nil {
 		t.Fatal(err)
 	}
 	if err := a.Sync(); err != nil {
@@ -1045,7 +1045,7 @@ func TestClaudeDesktopMCPKeepsThe3pServers(t *testing.T) {
 	desktopWrite(t, p.config, `{"mcpServers":{"a":{"command":"a"},"b":{"command":"b-signed-in"},"c":{"command":"c"}}}`)
 	desktopWrite(t, p.config3p, `{"mcpServers":{"b":{"command":"b-3p"},"x":{"command":"x"}}}`)
 	f := claudeDesktop(home).Field("provider")
-	if err := f.Set("myna"); err != nil {
+	if err := f.Set("owl"); err != nil {
 		t.Fatal(err)
 	}
 	got := desktopJSON(t, p.config3p)["mcpServers"]
@@ -1072,13 +1072,13 @@ func TestClaudeDesktopMCPKeepsThe3pServers(t *testing.T) {
 	}
 }
 
-// A Desktop on myna from before the servers were carried gets them from
-// Sync at myna's next start, once: a server the user then takes out in
+// A Desktop on owl from before the servers were carried gets them from
+// Sync at owl's next start, once: a server the user then takes out in
 // 3p mode isn't brought back by the next Sync.
 func TestClaudeDesktopSyncCarriesTheMCPServersOnce(t *testing.T) {
 	home, p := desktopSandbox(t)
 	a := claudeDesktop(home)
-	if err := a.Field("provider").Set("myna"); err != nil {
+	if err := a.Field("provider").Set("owl"); err != nil {
 		t.Fatal(err)
 	}
 	forget(desktopMCPSeen + p.key)
@@ -1103,12 +1103,12 @@ func TestClaudeDesktopSyncCarriesTheMCPServersOnce(t *testing.T) {
 }
 
 // aa86222 on Discord: Desktop's configuration exported on one computer
-// (myna's profile, with the connectors the user added) and imported on
+// (owl's profile, with the connectors the user added) and imported on
 // another is a new configLibrary entry under an id Desktop makes, applied
-// beside myna's own and CC Switch's. It points at this myna's
-// gateway, so Desktop runs on myna: the row reads connected, and
+// beside owl's own and CC Switch's. It points at this owl's
+// gateway, so Desktop runs on owl: the row reads connected, and
 // Reconnect keeps it applied and its connectors as they are.
-func TestClaudeDesktopImportedProfileIsOnMyna(t *testing.T) {
+func TestClaudeDesktopImportedProfileIsOnOwl(t *testing.T) {
 	const imported = "3f6c2a8e-9b1d-4e57-a0c4-7d2e5f81b9a6"
 	const ccswitch = "c1d2e3f4-a5b6-4c7d-8e9f-0a1b2c3d4e5f"
 	theirs := func(key string) string {
@@ -1130,7 +1130,7 @@ func TestClaudeDesktopImportedProfileIsOnMyna(t *testing.T) {
 		home, p := desktopSandbox(t)
 		os.MkdirAll(p.dir, 0o755)
 		a := claudeDesktop(home)
-		if err := a.Field("provider").Set("myna"); err != nil {
+		if err := a.Field("provider").Set("owl"); err != nil {
 			t.Fatal(err)
 		}
 		// what Desktop wrote: CC Switch's profile and the imported one,
@@ -1140,7 +1140,7 @@ func TestClaudeDesktopImportedProfileIsOnMyna(t *testing.T) {
 		f := filepath.Join(p.library, imported+".json")
 		desktopWrite(t, f, theirs(key))
 		desktopWrite(t, p.meta, `{"appliedId":"`+imported+`","entries":[{"id":"`+ccswitch+`","name":"CC Switch"},`+
-			`{"id":"`+desktopProfileID+`","name":"myna"},{"id":"`+imported+`","name":"myna"}]}`)
+			`{"id":"`+desktopProfileID+`","name":"owl"},{"id":"`+imported+`","name":"owl"}]}`)
 		return a, p, f
 	}
 	applied := func(t *testing.T, p desktopPaths) string {
@@ -1148,7 +1148,7 @@ func TestClaudeDesktopImportedProfileIsOnMyna(t *testing.T) {
 		return id
 	}
 
-	t.Run("this myna's key", func(t *testing.T) {
+	t.Run("this owl's key", func(t *testing.T) {
 		a, p, f := setup(t, agentKey("claude-desktop"))
 		if c := a.Check(); c != "" {
 			t.Errorf("check: %s", c)
@@ -1157,7 +1157,7 @@ func TestClaudeDesktopImportedProfileIsOnMyna(t *testing.T) {
 			t.Fatal(err)
 		}
 		// Reconnect: nothing of theirs changes, theirs stays applied
-		if err := a.Field("provider").Set("myna"); err != nil {
+		if err := a.Field("provider").Set("owl"); err != nil {
 			t.Fatal(err)
 		}
 		if b, _ := os.ReadFile(f); string(b) != theirs(agentKey("claude-desktop")) {
@@ -1181,12 +1181,12 @@ func TestClaudeDesktopImportedProfileIsOnMyna(t *testing.T) {
 		}
 	})
 
-	t.Run("another myna's key", func(t *testing.T) {
+	t.Run("another owl's key", func(t *testing.T) {
 		a, p, f := setup(t, "mk-from-the-other-computer")
 		if c := a.Check(); c == "" {
 			t.Error("check: a key the gateway refuses is fine")
 		}
-		// myna's start gives it a key the gateway takes, and nothing else
+		// owl's start gives it a key the gateway takes, and nothing else
 		if err := a.Sync(); err != nil {
 			t.Fatal(err)
 		}
@@ -1205,7 +1205,7 @@ func TestClaudeDesktopImportedProfileIsOnMyna(t *testing.T) {
 
 	t.Run("reconnect fixes the key", func(t *testing.T) {
 		a, p, f := setup(t, "mk-from-the-other-computer")
-		if err := a.Field("provider").Set("myna"); err != nil {
+		if err := a.Field("provider").Set("owl"); err != nil {
 			t.Fatal(err)
 		}
 		var want map[string]any
@@ -1222,7 +1222,7 @@ func TestClaudeDesktopImportedProfileIsOnMyna(t *testing.T) {
 		a, p, _ := setup(t, agentKey("claude-desktop"))
 		edit.SetJSON(p.meta, edit.KV{Path: "appliedId", Value: ccswitch})
 		if c := a.Check(); c == "" {
-			t.Error("check: CC Switch's profile reads as myna's")
+			t.Error("check: CC Switch's profile reads as owl's")
 		}
 		if err := a.Sync(); err != nil {
 			t.Fatal(err)
@@ -1230,8 +1230,8 @@ func TestClaudeDesktopImportedProfileIsOnMyna(t *testing.T) {
 		if got := desktopJSON(t, filepath.Join(p.library, ccswitch+".json")); got["inferenceGatewayApiKey"] != "cc-switch" {
 			t.Errorf("CC Switch's profile was written: %v", got)
 		}
-		// Reconnect applies myna's own, as before
-		if err := a.Field("provider").Set("myna"); err != nil {
+		// Reconnect applies owl's own, as before
+		if err := a.Field("provider").Set("owl"); err != nil {
 			t.Fatal(err)
 		}
 		if id := applied(t, p); id != desktopProfileID {
@@ -1242,7 +1242,7 @@ func TestClaudeDesktopImportedProfileIsOnMyna(t *testing.T) {
 
 // Desktop's 3p mode runs in Claude-3p, a userData of its own, so the
 // chats, projects and Code sessions of the Anthropic sign-in (in Claude/)
-// aren't shown on myna (xgddm88 on X: 之前的工程和会话记录全没了). Turning
+// aren't shown on owl (xgddm88 on X: 之前的工程和会话记录全没了). Turning
 // Desktop on and off leaves every byte of that history as it was, and the
 // notice says before the restart that it stays and comes back.
 func TestClaudeDesktopKeepsTheSignedInHistory(t *testing.T) {
@@ -1259,7 +1259,7 @@ func TestClaudeDesktopKeepsTheSignedInHistory(t *testing.T) {
 	}
 	a := claudeDesktop(home)
 	f := a.Field("provider")
-	if err := f.Set("myna"); err != nil {
+	if err := f.Set("owl"); err != nil {
 		t.Fatal(err)
 	}
 	for f, s := range history {

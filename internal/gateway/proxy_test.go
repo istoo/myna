@@ -11,9 +11,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/netproxy"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/netproxy"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // seen records the requests a server was sent: through a proxy, the host

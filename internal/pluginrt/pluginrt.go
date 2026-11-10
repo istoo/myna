@@ -1,4 +1,4 @@
-// Package pluginrt runs myna's built-in plugins: the parts of myna not
+// Package pluginrt runs owl's built-in plugins: the parts of owl not
 // everyone needs (Lxxyx on X: "功能太多了"), each one a package under
 // plugins/ that registers a Manifest. The runtime applies the ones the user
 // has on (plugins.yml, see config.go) in the order their Requires and
@@ -26,7 +26,7 @@ import (
 // minor no newer than this one's. One that doesn't match isn't applied.
 const API = "1.0"
 
-// Core are the services myna itself provides, which a plugin may
+// Core are the services owl itself provides, which a plugin may
 // Require without another plugin providing them.
 var Core = []string{"settings", "providers", "gateway", "window"}
 
@@ -99,7 +99,7 @@ type Ctx struct {
 	provided []string
 }
 
-// OnDispose runs f when the plugin is turned off or myna stops.
+// OnDispose runs f when the plugin is turned off or owl stops.
 func (c *Ctx) OnDispose(f func()) { c.disposes = append(c.disposes, f) }
 
 // Contribute puts a part in the window while the plugin is active.

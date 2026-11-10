@@ -9,7 +9,7 @@
 // does the agent's menu; shut, the rows are back where they were. Gateway
 // mode writes no agent's files, so none of it shows, but Long conversations:
 // it sets the windows the gateway serves, which agents elsewhere read, so
-// with no Codex or Claude Code here (a gateway, myna in Docker) it stays
+// with no Codex or Claude Code here (a gateway, owl in Docker) it stays
 // in Settings › General, on the size set before (Linka on Discord). Five languages, wide
 // and narrow, Chromium and WebKit; no backend, the API is faked here.
 const assert = require("node:assert/strict");
@@ -28,7 +28,7 @@ function settingsPayload(over) {
     dock: false, dockWindow: false, proxy: "", redact: false, redactPersonal: false, redactWords: [],
     codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", workbuddyCheckin: false, noStats: false,
     trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "",
-    version: "0.1.400", dir: "~/.config/myna", gateway: "http://127.0.0.1:3425",
+    version: "0.1.400", dir: "~/.config/owl", gateway: "http://127.0.0.1:3425",
     proxyNow: "none", proxySource: "none", login: false,
     visionModels: [], imageGenModels: [], workbuddyCheckins: [], lanURLs: [], titleModels: [],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
@@ -100,7 +100,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       test(`${engine} ${lang} ${width}: an agent's own settings are in its opened row, and Settings' search finds them there`, async (t) => {
         const { page, errors } = await newPage(engine, t, width, lang);
         const w = want[lang];
-        await page.goto("http://myna.test/?view=agents");
+        await page.goto("http://owl.test/?view=agents");
         await openAgentSettings(page, "codex");
         const codexBox = '.row.agent[data-id="codex"] .ag-prefs';
         assert.deepEqual(await shownIn(page, codexBox), CODEX, `${lang} ${width}: Codex's eight`);
@@ -117,7 +117,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await noSideScroll(page, `${lang} ${width} Grok Build`);
 
         // none in Settings; its search says where they are
-        await page.goto("http://myna.test/?view=settings");
+        await page.goto("http://owl.test/?view=settings");
         await page.locator("#setQ").waitFor();
         // #setQ is in the page before Settings is drawn, and Long
         // conversations with it: wait for the drawing to take it out
@@ -151,7 +151,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     for (const width of [1100, 440]) {
       test(`${engine} ${lang} ${width}: Settings opens after Codex's row was opened and shut`, async (t) => {
         const { page, errors } = await newPage(engine, t, width, lang);
-        await page.goto("http://myna.test/?view=agents");
+        await page.goto("http://owl.test/?view=agents");
         await openAgentSettings(page, "codex");
         await page.locator('.row.agent[data-id="codex"] .ag-link').click();
         await page.locator('.row.agent[data-id="codex"] .ag-prefs').waitFor({ state: "detached" });
@@ -172,7 +172,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     test(`${engine} ${lang}: in the panel a Settings line and the agent's menu open its sheet`, async (t) => {
       const { page, errors } = await newPage(engine, t, 360, lang);
       const w = want[lang];
-      await page.goto("http://myna.test/?mode=panel&view=agents");
+      await page.goto("http://owl.test/?mode=panel&view=agents");
       // the panel shows a row's controls once it's opened
       await page.locator('.row.agent[data-id="codex"] .ag-sum').click();
       const line = page.locator('.row.agent[data-id="codex"] .agent-prefs-open');
@@ -209,11 +209,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
   test(`${engine}: gateway mode shows none of an agent's settings`, async (t) => {
     const { page, errors } = await newPage(engine, t, 1100, "en", { gateway: true });
     // it has no Agents page: asked for, the Providers page shows
-    await page.goto("http://myna.test/?view=agents");
+    await page.goto("http://owl.test/?view=agents");
     await page.locator("#view-providers").waitFor();
     assert.equal(await page.locator("#view-agents").isVisible(), false, "no Agents page");
     assert.equal(await page.locator(".ag-prefs, .agent-prefs-open").count(), 0, "no rows, no line");
-    await page.goto("http://myna.test/?view=settings");
+    await page.goto("http://owl.test/?view=settings");
     await page.locator("#setQ").fill("Codex");
     assert.equal(await page.locator(".agent-pref-link").count(), 0, "no link rows");
     assert.deepEqual(errors, []);
@@ -225,7 +225,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     test(`${engine}: ${what} keeps Long conversations in Settings`, async (t) => {
       const posts = [];
       const { page, errors } = await newPage(engine, t, 1100, "en", { ...opts, posts });
-      await page.goto("http://myna.test/?view=settings&tab=general");
+      await page.goto("http://owl.test/?view=settings&tab=general");
       const row = page.locator("#setPage-general #fullContextRow");
       await row.waitFor();
       for (const id of CODEX.filter((id) => id !== "fullContextRow")) assert.equal(await page.locator(`#view-settings #${id}`).count(), 0, `${id} not in Settings`);

@@ -6,11 +6,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // misteer_ti. on Discord: Claude Code reads a relay's claude-opus-4.6 as
-// Claude Opus 4, so myna gives it relay/claude-opus-4-6-us. The gateway
+// Claude Opus 4, so owl gives it relay/claude-opus-4-6-us. The gateway
 // takes that dashed spelling back to the model the relay serves, its
 // effort and [1m] mark kept; a model served by the dashed name itself is
 // that one, and another vendor's id is never respelled.

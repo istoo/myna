@@ -303,7 +303,7 @@ static NSStatusBarButton *mpFind(NSView *v) {
 	return nil;
 }
 
-// mpButton is myna's one status item's button, in the status bar's window.
+// mpButton is owl's one status item's button, in the status bar's window.
 static NSStatusBarButton *mpButton(void) {
 	for (NSWindow *w in NSApp.windows) {
 		NSStatusBarButton *b = mpFind(w.contentView);
@@ -402,7 +402,7 @@ static void mpTipOn(NSStatusBarButton *b, NSString *s) {
 	b.toolTip = s.length ? s : nil;
 }
 
-// mpTip puts the tooltip on myna's status item; 0 while the item isn't
+// mpTip puts the tooltip on owl's status item; 0 while the item isn't
 // up yet. Wails (v3.0.0-beta.24) leaves SetTooltip a no-op on macOS
 // ("Tooltips not supported on macOS").
 static int mpTip(const char *tip) {

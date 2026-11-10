@@ -4,16 +4,16 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// Usage is what the day's event says myna is used with, when the user
+// Usage is what the day's event says owl is used with, when the user
 // shares it: built-in ids only. A provider of the user's own is "custom",
 // and so is a model on one; a plugin no one knows is "plugin".
 type Usage struct {
-	Agents    []string // the agents connected to myna: claude, codex
+	Agents    []string // the agents connected to owl: claude, codex
 	Providers []string // the providers on: deepseek, codex (a subscription), plugin:kiro
 	Models    []string // the models the connected agents are set to: deepseek/deepseek-v4, custom, group
 	Groups    int      // routing groups shown
@@ -85,7 +85,7 @@ func agentLabel(id string) string {
 
 // modelLabel is an agent's model as stats name it: the provider's label
 // and the vendor's model id, "group" for a routing group, and the label
-// alone for a provider of the user's own; "" for one myna can't find.
+// alone for a provider of the user's own; "" for one owl can't find.
 // On a key's provider the model id is the user's to type (an Ollama
 // model they named, a fine-tune with their organisation in it), so it
 // goes only when models.dev knows it, else as "other"; a subscription's

@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/sessions"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/sessions"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // A gateway session whose agent keeps it too is one session, in the count

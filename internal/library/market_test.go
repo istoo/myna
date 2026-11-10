@@ -28,12 +28,12 @@ func TestFromRegistry(t *testing.T) {
 		"remotes": [
 			{"type": "sse", "url": "https://acme.dev/sse"},
 			{"type": "streamable-http", "url": "https://acme.dev/mcp", "headers": [
-				{"name": "X-Client", "value": "myna"},
+				{"name": "X-Client", "value": "owl"},
 				{"name": "Authorization", "value": "Bearer {token}", "isRequired": true, "isSecret": true}
 			]}
 		]}`))
 	if !ok || m.Name != "weather" || m.Title != "weather" || m.Publisher != "acme" || m.Homepage != "https://github.com/acme/weather" ||
-		m.Icon != gh("acme") || m.Transport != "http" || m.server.URL != "https://acme.dev/mcp" || m.server.Headers["X-Client"] != "myna" {
+		m.Icon != gh("acme") || m.Transport != "http" || m.server.URL != "https://acme.dev/mcp" || m.server.Headers["X-Client"] != "owl" {
 		t.Fatalf("remote: %+v %v", m, ok)
 	}
 	if len(m.Inputs) != 1 || m.Inputs[0].Key != "Authorization" || m.Inputs[0].format != "Bearer {}" || !m.Inputs[0].Secret {
@@ -68,7 +68,7 @@ func TestFromRegistry(t *testing.T) {
 		t.Fatalf("oci: %+v %v", m, ok)
 	}
 
-	// what myna can't start: a URL with a variable in it, a package over
+	// what owl can't start: a URL with a variable in it, a package over
 	// another transport, a named argument it would have to make up
 	for _, s := range []string{
 		`{"name": "a/b", "remotes": [{"type": "streamable-http", "url": "https://{tenant}.acme.dev/mcp"}]}`,
@@ -221,7 +221,7 @@ func TestSkillsShPages(t *testing.T) {
 	}
 }
 
-// myna's own skills come first, marked official, and only where a
+// owl's own skills come first, marked official, and only where a
 // search names them (ttmouse on X).
 func TestFeaturedSkills(t *testing.T) {
 	sandbox(t)
@@ -233,20 +233,20 @@ func TestFeaturedSkills(t *testing.T) {
 	t.Cleanup(func() { popular.Lock(); popular.list = nil; popular.Unlock() })
 
 	list, _ := MarketSkills("")
-	if len(list) != 3 || list[0].ID != "magpie-community/plugins/myna-setup" || list[1].ID != "magpie-community/plugins/myna-quota" || list[2].ID != "o/r/pdf" {
+	if len(list) != 3 || list[0].ID != "magpie-community/plugins/owl-setup" || list[1].ID != "magpie-community/plugins/owl-quota" || list[2].ID != "o/r/pdf" {
 		t.Fatalf("market: %+v", list)
 	}
 	for _, m := range list[:2] {
 		if !m.Official || !m.Featured || m.Description == "" || m.Icon != gh("magpie-community") || !offered(m.Icon) {
-			t.Fatalf("myna's own: %+v", m)
+			t.Fatalf("owl's own: %+v", m)
 		}
 	}
-	if list, _ := MarketSkills("quota"); len(list) == 0 || list[0].SkillID != "myna-quota" || slices.ContainsFunc(list, func(m MarketSkill) bool { return m.SkillID == "myna-setup" }) {
+	if list, _ := MarketSkills("quota"); len(list) == 0 || list[0].SkillID != "owl-quota" || slices.ContainsFunc(list, func(m MarketSkill) bool { return m.SkillID == "owl-setup" }) {
 		t.Fatalf("quota: %+v", list)
 	}
-	// Leyuu_5 on X: an agent sets myna up; found by what a user searches
+	// Leyuu_5 on X: an agent sets owl up; found by what a user searches
 	for _, q := range []string{"setup", "routing", "gateway key"} {
-		if list, _ := MarketSkills(q); len(list) == 0 || list[0].SkillID != "myna-setup" {
+		if list, _ := MarketSkills(q); len(list) == 0 || list[0].SkillID != "owl-setup" {
 			t.Fatalf("%s: %+v", q, list)
 		}
 	}
@@ -302,7 +302,7 @@ func TestInstallFromRegistry(t *testing.T) {
 	if s.Name != "acme" || s.URL != "https://acme.dev/mcp" || s.Headers["Authorization"] != "Bearer k-123" || !slices.Equal(s.Agents, []string{"claude"}) {
 		t.Fatalf("server: %+v", s)
 	}
-	// its icon stays with it, and stays one myna will fetch, once the
+	// its icon stays with it, and stays one owl will fetch, once the
 	// market has forgotten it
 	seenServers.Lock()
 	clear(seenServers.m)
@@ -319,33 +319,33 @@ func TestInstallFromRegistry(t *testing.T) {
 	}
 }
 
-func TestMynaImageIsOptIn(t *testing.T) {
+func TestOwlImageIsOptIn(t *testing.T) {
 	sandbox(t)
-	ok(t)(InstallServer("myna-image", nil, nil))
+	ok(t)(InstallServer("owl-image", nil, nil))
 	list, err := MarketServers("")
 	if err != nil {
 		t.Fatal(err)
 	}
-	i := slices.IndexFunc(list, func(m MarketServer) bool { return m.ID == "myna-image" })
-	if i < 0 || !list[i].OptIn || list[i].Have != "myna-image" {
+	i := slices.IndexFunc(list, func(m MarketServer) bool { return m.ID == "owl-image" })
+	if i < 0 || !list[i].OptIn || list[i].Have != "owl-image" {
 		t.Fatalf("market: %+v", list)
 	}
 	l, err := load()
 	if err != nil {
 		t.Fatal(err)
 	}
-	s := l.server("myna-image")
+	s := l.server("owl-image")
 	if s == nil || len(s.Agents) != 0 || !filepath.IsAbs(s.Command) || strings.Join(s.Args, " ") != "mcp image" {
 		t.Fatalf("added as %+v", s)
 	}
 }
 
-// Myna Image's card doesn't say videos need a Grok subscription: the
-// gateway also makes them with Seedance, another myna and a provider whose
+// Owl Image's card doesn't say videos need a Grok subscription: the
+// gateway also makes them with Seedance, another owl and a provider whose
 // model list marks video models (#1399).
-func TestMynaImageSaysVideoModels(t *testing.T) {
+func TestOwlImageSaysVideoModels(t *testing.T) {
 	d := selfServer().Description
-	if strings.Contains(d, "Grok subscription") || !strings.Contains(d, "video model set up in Myna") {
+	if strings.Contains(d, "Grok subscription") || !strings.Contains(d, "video model set up in Owl") {
 		t.Fatalf("description %q", d)
 	}
 }
@@ -371,9 +371,9 @@ func TestMarketSkillHadByName(t *testing.T) {
 	}
 }
 
-// Myna Browser is myna's own too, `myna mcp browser`, given only to
+// Owl Browser is owl's own too, `owl mcp browser`, given only to
 // the agents picked for it: it acts as the user wherever they're signed in.
-func TestMynaBrowserIsOptIn(t *testing.T) {
+func TestOwlBrowserIsOptIn(t *testing.T) {
 	sandbox(t)
 	ok(t)(InstallServer(browserServerName, nil, nil))
 	list, err := MarketServers("")
@@ -397,11 +397,11 @@ func TestMynaBrowserIsOptIn(t *testing.T) {
 	}
 }
 
-// Myna Web Search is myna's own too, `myna mcp search` (lutra_fs on
+// Owl Web Search is owl's own too, `owl mcp search` (lutra_fs on
 // Discord: Settings named the search MCP, the Library didn't have it),
 // given only to the agents picked for it: a search costs what the search
 // set in Settings charges.
-func TestMynaWebSearchIsOptIn(t *testing.T) {
+func TestOwlWebSearchIsOptIn(t *testing.T) {
 	sandbox(t)
 	ok(t)(InstallServer(searchServerName, nil, nil))
 	list, err := MarketServers("")
@@ -409,7 +409,7 @@ func TestMynaWebSearchIsOptIn(t *testing.T) {
 		t.Fatal(err)
 	}
 	i := slices.IndexFunc(list, func(m MarketServer) bool { return m.ID == searchServerName })
-	if i < 0 || !list[i].OptIn || list[i].Have != searchServerName || list[i].Title != "Myna Web Search" {
+	if i < 0 || !list[i].OptIn || list[i].Have != searchServerName || list[i].Title != "Owl Web Search" {
 		t.Fatalf("market: %+v", list)
 	}
 	l, err := load()
@@ -423,18 +423,18 @@ func TestMynaWebSearchIsOptIn(t *testing.T) {
 	if v, ok := valueOf((&mcpFile{Format: fmtCodex}).encode(s), "tool_timeout_sec"); !ok || v != 120 {
 		t.Fatalf("Codex's entry: tool_timeout_sec = %v %v", v, ok)
 	}
-	// written by hand with another myna binary, it is the same server
-	other := Server{Name: "web", Transport: "stdio", Command: "/opt/other/myna", Args: []string{"mcp", "search"}}
+	// written by hand with another owl binary, it is the same server
+	other := Server{Name: "web", Transport: "stdio", Command: "/opt/other/owl", Args: []string{"mcp", "search"}}
 	if serverKey(&other) != serverKey(s) {
 		t.Fatalf("keys %q and %q", serverKey(&other), serverKey(s))
 	}
 }
 
-// Myna Image Recognition is in Discover beside Myna Image and Myna
+// Owl Image Recognition is in Discover beside Owl Image and Owl
 // Web Search, added for no agent until the user picks them, with time to
 // look (matrix0487 on Discord); any binary's `mcp vision` is the same
 // server.
-func TestMynaImageRecognitionIsOptIn(t *testing.T) {
+func TestOwlImageRecognitionIsOptIn(t *testing.T) {
 	sandbox(t)
 	list, err := MarketServers("")
 	if err != nil {
@@ -451,7 +451,7 @@ func TestMynaImageRecognitionIsOptIn(t *testing.T) {
 		t.Fatal(err)
 	}
 	i := slices.IndexFunc(list, func(m MarketServer) bool { return m.ID == visionServerName })
-	if i < 0 || list[i].Have != visionServerName || list[i].Title != "Myna Image Recognition" {
+	if i < 0 || list[i].Have != visionServerName || list[i].Title != "Owl Image Recognition" {
 		t.Fatalf("market: %+v", list)
 	}
 	l, err := load()
@@ -465,7 +465,7 @@ func TestMynaImageRecognitionIsOptIn(t *testing.T) {
 	if v, ok := valueOf((&mcpFile{Format: fmtCodex}).encode(s), "tool_timeout_sec"); !ok || v != 120 {
 		t.Fatalf("Codex's entry: tool_timeout_sec = %v %v", v, ok)
 	}
-	other := Server{Name: "eyes", Transport: "stdio", Command: "/opt/other/myna", Args: []string{"mcp", "vision"}}
+	other := Server{Name: "eyes", Transport: "stdio", Command: "/opt/other/owl", Args: []string{"mcp", "vision"}}
 	if serverKey(&other) != serverKey(s) {
 		t.Fatalf("keys %q and %q", serverKey(&other), serverKey(s))
 	}

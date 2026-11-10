@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // Claude refusing after it has only thought, as Opus did Claude Code
@@ -139,7 +139,7 @@ func TestThinkingHeldLonger(t *testing.T) {
 // a group (itspig, plugins #540): deepseek-v4.1-flash reasoned for ~5s,
 // then ended finish_reason content_filter with 0 tokens counted, all under
 // a 200. The plugin takes the filter's "Sorry, I can't respond to this
-// question." out, so this is what reaches myna: reasoning, then
+// question." out, so this is what reaches owl: reasoning, then
 // content_filter with nothing said. Its reasoning went through as it came,
 // so the next member was never asked and DeepSeek Harness failed "The
 // model refused to complete the request"; held, the next member answers.

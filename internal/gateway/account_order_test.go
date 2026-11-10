@@ -4,8 +4,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 func TestArrangedKeysAreGatewayCandidates(t *testing.T) {

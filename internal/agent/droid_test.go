@@ -7,12 +7,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // droidUser is a settings.json as droid leaves it for someone with a BYOK
-// model of their own on a Factory model, and settings myna has nothing
+// model of their own on a Factory model, and settings owl has nothing
 // to do with.
 const droidUser = `{
   "customModels": [
@@ -86,20 +86,20 @@ func TestDroid(t *testing.T) {
 		t.Fatalf("model: %q", got)
 	}
 	// the picker: the user's own BYOK model by the id droid knows it by,
-	// the Factory model they're on, then myna's catalog
+	// the Factory model they're on, then owl's catalog
 	opts := a.Field("model").Options(a.Values())
 	if opts[0].Value != "claude-opus-4-7" || opts[1].Value != "custom:Kimi-K2-[Groq]-0" || opts[1].Label != "Kimi K2 [Groq]" || opts[1].Group != "Droid" {
 		t.Fatalf("own options: %+v", opts[:2])
 	}
 	var via bool
 	for _, o := range opts {
-		via = via || o.Value == "myna/deepseek/pro"
+		via = via || o.Value == "owl/deepseek/pro"
 	}
 	if !via {
-		t.Fatalf("no myna/deepseek/pro in %+v", opts)
+		t.Fatalf("no owl/deepseek/pro in %+v", opts)
 	}
 
-	if err := a.Apply("model", "myna/deepseek/pro"); err != nil {
+	if err := a.Apply("model", "owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	ms, order, f := droidFile(t, path)
@@ -111,18 +111,18 @@ func TestDroid(t *testing.T) {
 		t.Fatalf("user's entry rewritten:\n%s", readFile(path))
 	}
 	sd := f["sessionDefaultSettings"].(map[string]any)
-	if sd["model"] != "custom:myna/deepseek/pro" || sd["autonomyLevel"] != "low" || f["diffMode"] != "unified" {
+	if sd["model"] != "custom:owl/deepseek/pro" || sd["autonomyLevel"] != "low" || f["diffMode"] != "unified" {
 		t.Fatalf("settings: %v", f)
 	}
-	if got := a.Values()["model"]; got != "myna/deepseek/pro" {
+	if got := a.Values()["model"]; got != "owl/deepseek/pro" {
 		t.Fatalf("model read back: %q", got)
 	}
 	// each on the API its provider speaks, so the gateway relays it as it is
 	for id, want := range map[string][2]string{
-		"custom:myna/deepseek/pro":         {"generic-chat-completion-api", gatewayV1()},
-		"custom:myna/deepseek/flash":       {"generic-chat-completion-api", gatewayV1()},
-		"custom:myna/resp/grok-5":          {"openai", gatewayV1()},
-		"custom:myna/anth/claude-sonnet-5": {"anthropic", gateway.URL()},
+		"custom:owl/deepseek/pro":         {"generic-chat-completion-api", gatewayV1()},
+		"custom:owl/deepseek/flash":       {"generic-chat-completion-api", gatewayV1()},
+		"custom:owl/resp/grok-5":          {"openai", gatewayV1()},
+		"custom:owl/anth/claude-sonnet-5": {"anthropic", gateway.URL()},
 	} {
 		e := ms[id]
 		if e == nil {
@@ -135,18 +135,18 @@ func TestDroid(t *testing.T) {
 		if _, ok := e["noImageSupport"]; !ok {
 			t.Errorf("%s: noImageSupport left to droid's default: %v", id, e)
 		}
-		if m := strings.TrimPrefix(id, "custom:myna/"); e["model"] != m {
+		if m := strings.TrimPrefix(id, "custom:owl/"); e["model"] != m {
 			t.Errorf("%s: model %v", id, e["model"])
 		}
 	}
-	if n := ms["custom:myna/deepseek/pro"]["displayName"]; n != "pro · DeepSeek" {
+	if n := ms["custom:owl/deepseek/pro"]["displayName"]; n != "pro · DeepSeek" {
 		t.Errorf("displayName %v", n)
 	}
 	if d := a.Check(); d != "" {
 		t.Fatalf("check: %s", d)
 	}
-	// another of myna's: the stash keeps the user's own
-	if err := a.Apply("model", "myna/resp/grok-5"); err != nil {
+	// another of owl's: the stash keeps the user's own
+	if err := a.Apply("model", "owl/resp/grok-5"); err != nil {
 		t.Fatal(err)
 	}
 	// a provider added since joins the picker on Sync
@@ -154,12 +154,12 @@ func TestDroid(t *testing.T) {
 	if err := a.Sync(); err != nil {
 		t.Fatal(err)
 	}
-	if ms, _, _ = droidFile(t, path); ms["custom:myna/later/m1"] == nil {
+	if ms, _, _ = droidFile(t, path); ms["custom:owl/later/m1"] == nil {
 		t.Fatalf("sync: %v", ms)
 	}
-	// something else rewrote myna's entry
+	// something else rewrote owl's entry
 	cur := readFile(path)
-	at := strings.Index(cur, `"custom:myna/resp/grok-5"`)
+	at := strings.Index(cur, `"custom:owl/resp/grok-5"`)
 	edited := cur[:at] + strings.Replace(cur[at:], gatewayV1(), "http://127.0.0.1:9/v1", 1)
 	os.WriteFile(path, []byte(edited), 0o644)
 	if d := a.Check(); !strings.Contains(d, "baseUrl") {
@@ -170,7 +170,7 @@ func TestDroid(t *testing.T) {
 		t.Fatalf("check after sync: %s", d)
 	}
 
-	// reset: the user's model back, myna's entries gone, the rest as it was
+	// reset: the user's model back, owl's entries gone, the rest as it was
 	if err := a.Apply("model", ""); err != nil {
 		t.Fatal(err)
 	}
@@ -180,12 +180,12 @@ func TestDroid(t *testing.T) {
 	_ = home
 }
 
-// Picking one of the user's own models while on myna's takes myna out.
+// Picking one of the user's own models while on owl's takes owl out.
 func TestDroidOwnModel(t *testing.T) {
 	_, path := droidHome(t)
 	os.WriteFile(path, []byte(droidUser), 0o644)
 	a := droid(os.Getenv("HOME"))
-	if err := a.Apply("model", "myna/anth/claude-sonnet-5"); err != nil {
+	if err := a.Apply("model", "owl/anth/claude-sonnet-5"); err != nil {
 		t.Fatal(err)
 	}
 	if err := a.Apply("model", "custom:Kimi-K2-[Groq]-0"); err != nil {
@@ -199,7 +199,7 @@ func TestDroidOwnModel(t *testing.T) {
 		t.Fatalf("model: %v", got)
 	}
 	// and a reset after that leaves the user's choice, not the stash
-	if err := a.Apply("model", "myna/deepseek/pro"); err != nil {
+	if err := a.Apply("model", "owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	a.Apply("model", "")
@@ -209,14 +209,14 @@ func TestDroidOwnModel(t *testing.T) {
 }
 
 // No settings.json at all, or one with droid's documented top-level
-// "model": myna adds only its own, and a reset leaves the file as it was.
+// "model": owl adds only its own, and a reset leaves the file as it was.
 func TestDroidFresh(t *testing.T) {
 	home, path := droidHome(t)
 	a := droid(home)
 	if a.Values()["model"] != "" {
 		t.Fatal("model without a file")
 	}
-	if err := a.Apply("model", "myna/deepseek/flash"); err != nil {
+	if err := a.Apply("model", "owl/deepseek/flash"); err != nil {
 		t.Fatal(err)
 	}
 	if _, order, _ := droidFile(t, path); len(order) != 5 {
@@ -234,11 +234,11 @@ func TestDroidFresh(t *testing.T) {
 	if a.Values()["model"] != "gpt-5.5" {
 		t.Fatalf("top-level model: %q", a.Values()["model"])
 	}
-	if err := a.Apply("model", "myna/deepseek/pro"); err != nil {
+	if err := a.Apply("model", "owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	// droid reads sessionDefaultSettings.model before the top-level one
-	if _, _, f := droidFile(t, path); f["model"] != "gpt-5.5" || f["sessionDefaultSettings"].(map[string]any)["model"] != "custom:myna/deepseek/pro" {
+	if _, _, f := droidFile(t, path); f["model"] != "gpt-5.5" || f["sessionDefaultSettings"].(map[string]any)["model"] != "custom:owl/deepseek/pro" {
 		t.Fatalf("settings: %v", f)
 	}
 	if err := a.Apply("model", ""); err != nil {
@@ -272,7 +272,7 @@ func TestDroidOverrideAndLegacy(t *testing.T) {
 	if strings.Join(got, ",") != "custom:Local-Qwen-0,custom:Local-Qwen-1" {
 		t.Fatalf("legacy options: %v", got)
 	}
-	if err := a.Apply("model", "myna/deepseek/pro"); err != nil {
+	if err := a.Apply("model", "owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	if readFile(legacy) != cfg {
@@ -315,23 +315,23 @@ func TestDroidWantsItsOwnRule(t *testing.T) {
 // A GPT or a Claude served on Chat is written on the provider droid asks
 // for, so droid doesn't warn about it at every session start (ji233 on
 // Discord: "ultrafast/gpt-6.1-sol appears to be an OpenAI model"), and an
-// entry an older myna wrote on Chat is moved on the next sync.
+// entry an older owl wrote on Chat is moved on the next sync.
 func TestDroidProviderByName(t *testing.T) {
 	_, path := droidHome(t)
 	provider.Save(provider.Provider{ID: "ultrafast", Name: "Ultrafast", Key: "k", Chat: "http://127.0.0.1:1/v1",
 		Models: []string{"gpt-6.1-sol", "o3", "claude-opus-4-7", "kimi-k2.5"}})
 	a := droid(os.Getenv("HOME"))
-	if err := a.Apply("model", "myna/ultrafast/gpt-6.1-sol"); err != nil {
+	if err := a.Apply("model", "owl/ultrafast/gpt-6.1-sol"); err != nil {
 		t.Fatal(err)
 	}
 	want := map[string][2]string{
-		"custom:myna/ultrafast/gpt-6.1-sol":     {"openai", gatewayV1()},
-		"custom:myna/ultrafast/o3":              {"openai", gatewayV1()},
-		"custom:myna/ultrafast/claude-opus-4-7": {"anthropic", gateway.URL()},
-		"custom:myna/ultrafast/kimi-k2.5":       {"generic-chat-completion-api", gatewayV1()},
-		"custom:myna/deepseek/pro":              {"generic-chat-completion-api", gatewayV1()},
-		"custom:myna/anth/claude-sonnet-5":      {"anthropic", gateway.URL()},
-		"custom:myna/resp/grok-5":               {"openai", gatewayV1()},
+		"custom:owl/ultrafast/gpt-6.1-sol":     {"openai", gatewayV1()},
+		"custom:owl/ultrafast/o3":              {"openai", gatewayV1()},
+		"custom:owl/ultrafast/claude-opus-4-7": {"anthropic", gateway.URL()},
+		"custom:owl/ultrafast/kimi-k2.5":       {"generic-chat-completion-api", gatewayV1()},
+		"custom:owl/deepseek/pro":              {"generic-chat-completion-api", gatewayV1()},
+		"custom:owl/anth/claude-sonnet-5":      {"anthropic", gateway.URL()},
+		"custom:owl/resp/grok-5":               {"openai", gatewayV1()},
 	}
 	check := func(when string) {
 		t.Helper()
@@ -347,7 +347,7 @@ func TestDroidProviderByName(t *testing.T) {
 	}
 	check("apply")
 
-	// as an older myna left it: every Chat model on
+	// as an older owl left it: every Chat model on
 	// generic-chat-completion-api, and no record of what it wrote
 	old := strings.ReplaceAll(readFile(path), `"provider": "openai"`, `"provider": "generic-chat-completion-api"`)
 	old = strings.Replace(old, `"model": "ultrafast/claude-opus-4-7",`, `"model": "ultrafast/claude-opus-4-7", "x": 1,`, 1)
@@ -356,10 +356,10 @@ func TestDroidProviderByName(t *testing.T) {
 	if err := a.Sync(); err != nil {
 		t.Fatal(err)
 	}
-	check("sync over an older myna's")
+	check("sync over an older owl's")
 }
 
-// A field of one of myna's entries the user changed stays as they set
+// A field of one of owl's entries the user changed stays as they set
 // it through a sync and a new pick; the rest follows the catalog, and the
 // baseUrl follows the provider they picked.
 func TestDroidKeepsAnEntryEditedByHand(t *testing.T) {
@@ -367,7 +367,7 @@ func TestDroidKeepsAnEntryEditedByHand(t *testing.T) {
 	provider.Save(provider.Provider{ID: "ultrafast", Name: "Ultrafast", Key: "k", Chat: "http://127.0.0.1:1/v1",
 		Models: []string{"gpt-6.1-sol", "kimi-k2.5"}})
 	a := droid(os.Getenv("HOME"))
-	if err := a.Apply("model", "myna/ultrafast/kimi-k2.5"); err != nil {
+	if err := a.Apply("model", "owl/ultrafast/kimi-k2.5"); err != nil {
 		t.Fatal(err)
 	}
 	var f map[string]any
@@ -375,13 +375,13 @@ func TestDroidKeepsAnEntryEditedByHand(t *testing.T) {
 	for _, m := range f["customModels"].([]any) {
 		e := m.(map[string]any)
 		switch e["id"] {
-		case "custom:myna/ultrafast/gpt-6.1-sol":
+		case "custom:owl/ultrafast/gpt-6.1-sol":
 			// back on Chat, by their own choice
 			e["provider"] = "generic-chat-completion-api"
 			e["maxContextLimit"] = 300000
 			e["extraArgs"] = map[string]any{"reasoning_effort": "high"}
 			e["index"] = 7
-		case "custom:myna/ultrafast/kimi-k2.5":
+		case "custom:owl/ultrafast/kimi-k2.5":
 			e["provider"] = "anthropic"
 			e["displayName"] = "Kimi (mine)"
 			delete(e, "noImageSupport")
@@ -389,21 +389,21 @@ func TestDroidKeepsAnEntryEditedByHand(t *testing.T) {
 	}
 	b, _ := json.MarshalIndent(f, "", "  ")
 	os.WriteFile(path, b, 0o644)
-	for _, step := range []func() error{a.Sync, func() error { return a.Apply("model", "myna/deepseek/pro") }} {
+	for _, step := range []func() error{a.Sync, func() error { return a.Apply("model", "owl/deepseek/pro") }} {
 		if err := step(); err != nil {
 			t.Fatal(err)
 		}
 		ms, _, _ := droidFile(t, path)
-		g := ms["custom:myna/ultrafast/gpt-6.1-sol"]
+		g := ms["custom:owl/ultrafast/gpt-6.1-sol"]
 		if g["provider"] != "generic-chat-completion-api" || g["baseUrl"] != gatewayV1() || g["maxContextLimit"] != float64(300000) ||
 			g["extraArgs"] == nil || g["index"] != nil || g["apiKey"] != gateway.Token || g["displayName"] == nil {
 			t.Errorf("gpt: %v", g)
 		}
-		k := ms["custom:myna/ultrafast/kimi-k2.5"]
+		k := ms["custom:owl/ultrafast/kimi-k2.5"]
 		if _, ok := k["noImageSupport"]; ok || k["provider"] != "anthropic" || k["baseUrl"] != gateway.URL() || k["displayName"] != "Kimi (mine)" {
 			t.Errorf("kimi: %v", k)
 		}
-		if p := ms["custom:myna/deepseek/pro"]; p["provider"] != "generic-chat-completion-api" || p["displayName"] != "pro · DeepSeek" {
+		if p := ms["custom:owl/deepseek/pro"]; p["provider"] != "generic-chat-completion-api" || p["displayName"] != "pro · DeepSeek" {
 			t.Errorf("an entry not edited: %v", p)
 		}
 	}

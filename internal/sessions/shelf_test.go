@@ -54,7 +54,7 @@ func TestShelfFullKeepsTheLarger(t *testing.T) {
 	}
 }
 
-// An idle myna holds nothing on a shelf.
+// An idle owl holds nothing on a shelf.
 func TestShelfLetsGoWhenIdle(t *testing.T) {
 	s := shelf[int]{idleFor: 20 * time.Millisecond}
 	s.give(1, nil)

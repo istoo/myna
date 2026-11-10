@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // readBytesLines is how TraceReader.Poll read a file before nextTraceLine:

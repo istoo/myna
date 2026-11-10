@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/edit"
 )
 
 // TestClaudeAliasShown (StringKe on Discord): a settings.json saying
@@ -86,7 +86,7 @@ func TestClaudeAliasShown(t *testing.T) {
 	if opts[0].Direct != "relay.example.test" {
 		t.Fatalf("a relay's model said to go to %q", opts[0].Direct)
 	}
-	// picking one in myna writes it as before
+	// picking one in owl writes it as before
 	if err := a.Field("model").Set("claude-sonnet-5-5"); err != nil {
 		t.Fatal(err)
 	}
@@ -98,7 +98,7 @@ func TestClaudeAliasShown(t *testing.T) {
 // TestClaudeDatedAlias (#496): models.dev lists an alias and its dated id
 // as two models (claude-opus-4-5, claude-opus-4-5-20251101), and the
 // picker showed both. The dated one now names its alias, for the picker to
-// show one row; through myna too, the [1m] mark and all. Two dated ids
+// show one row; through owl too, the [1m] mark and all. Two dated ids
 // of one name, or a dated one with no alias beside it, are left alone.
 func TestClaudeDatedAlias(t *testing.T) {
 	opts := claudeDated([]Option{

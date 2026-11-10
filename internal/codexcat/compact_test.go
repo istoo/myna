@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // Codex is told the threshold the user set (#876, hisiling: 272K was the
@@ -70,10 +70,10 @@ func TestCodexCatalogCompactAt(t *testing.T) {
 }
 
 // Codex shows a model's context_window (95% of it) as the conversation's
-// context, so a 1M model of a plugin's told myna's 272K threshold there
+// context, so a 1M model of a plugin's told owl's 272K threshold there
 // showed 258K (01huadalang on Discord, Command Code's 1M models). The
 // window is the model's own, and the threshold goes where Codex compacts
-// (auto_compact_token_limit), for a model myna describes and for a
+// (auto_compact_token_limit), for a model owl describes and for a
 // relay's own entry alike.
 func TestCodexWindowShownCompactApart(t *testing.T) {
 	t.Setenv("HOME", t.TempDir())
@@ -108,7 +108,7 @@ func TestCodexWindowShownCompactApart(t *testing.T) {
 			}
 		}
 	}
-	// myna's default: the plugin's 1M model shows 1M and compacts at
+	// owl's default: the plugin's 1M model shows 1M and compacts at
 	// 272K; a relay's entry is the vendor's (its null), unless the user
 	// set a threshold on it
 	check("default", map[string][2]any{
@@ -133,7 +133,7 @@ func TestCodexWindowShownCompactApart(t *testing.T) {
 	})
 }
 
-// A model whose window myna doesn't know (a relay listing none, one
+// A model whose window owl doesn't know (a relay listing none, one
 // models.dev lacks) still compacts where the user set: Codex reads an
 // entry with neither context_window nor auto_compact_token_limit as one
 // it never compacts, so it ran into the vendor's "too long" and only a

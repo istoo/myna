@@ -17,7 +17,7 @@ const assets = path.resolve(__dirname, "../assets");
 const kimi = {
   id: "kimi", name: "Kimi Code", icon: "generic", kind: "partner", sponsored: true, regionLabel: "Plan",
   notes: { en: "One subscription, one K3 quota shared by every agent", zh: "一份订阅，所有 agent 共享 K3 额度" },
-  website: "https://github.com/istoo/myna/go/kimi/site", keysUrl: "https://github.com/istoo/myna/go/kimi/keys",
+  website: "https://github.com/istoo/owl/go/kimi/site", keysUrl: "https://github.com/istoo/owl/go/kimi/keys",
   chat: "https://api.kimi.example/coding/v1", anthropic: "https://api.kimi.example/coding",
   regions: [
     { id: "cn", name: "China", chat: "https://api.kimi.example/coding/v1", anthropic: "https://api.kimi.example/coding" },
@@ -53,7 +53,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang));
-      await page.goto("http://myna.test/?view=providers");
+      await page.goto("http://owl.test/?view=providers");
       // with no provider the page opens its add sheet itself once the list
       // is in, and its add button goes away: a press before that opens it
       // instead (on a slow machine the list came first, and the press

@@ -5,7 +5,7 @@
 // the keys on hover; the head's sum counts the account once (mimi on
 // Discord: a site's keys 1-A031-Pro, 2-S009-Plus and 3-S010-Team-2 each
 // showed the account's $8.39 and its own curve). A key with the same amount
-// that myna didn't find to be that account's, and another provider's keys,
+// that owl didn't find to be that account's, and another provider's keys,
 // stay each its own row. At 440px nothing is cut or spills. English and
 // Chinese; no backend, the API is faked here.
 const assert = require("node:assert/strict");
@@ -95,8 +95,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang));
-      await page.addInitScript(() => { try { if (!sessionStorage.getItem("set")) { localStorage.clear(); localStorage.setItem("myna.quotaRange", "2d"); sessionStorage.setItem("set", "1"); } } catch {} });
-      await page.goto("http://myna.test/?view=usage");
+      await page.addInitScript(() => { try { if (!sessionStorage.getItem("set")) { localStorage.clear(); localStorage.setItem("owl.quotaRange", "2d"); sessionStorage.setItem("set", "1"); } } catch {} });
+      await page.goto("http://owl.test/?view=usage");
       await page.waitForSelector("#subscriptionUsage > [data-key=site] .subscription-account .user", { state: "attached" });
 
       const got = await cards(page);

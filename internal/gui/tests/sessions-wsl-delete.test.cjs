@@ -2,7 +2,7 @@
 // A session in a WSL distro is deleted from the Sessions page as this
 // computer's are (TJHHHH: 请问是否可以增加wsl内对于会话的删除呢): its row has
 // its box beside the WSL badge, its folder's box picks it, and the bar's
-// Delete asks in myna's own dialog and posts sessions/delete with its id;
+// Delete asks in owl's own dialog and posts sessions/delete with its id;
 // no note says WSL's can't be deleted. In English and Chinese; no backend,
 // the API is faked here.
 const assert = require("node:assert/strict");
@@ -33,7 +33,7 @@ function serve(lang, calls) {
     if (url.pathname === "/api/providers") return json({ providers: [], presets: [], excluded: [], gateway: { running: true, window: true } });
     if (url.pathname === "/api/sessions/manage") {
       return json({ agents: [{ agent: "claude", count: sessions.length, deletable: true, name: "Claude Code", icon: "claude" }],
-        agent: "claude", sessions, terminal: false, trash: [], trashDir: "C:\\Users\\me\\AppData\\Roaming\\myna\\trash\\sessions" });
+        agent: "claude", sessions, terminal: false, trash: [], trashDir: "C:\\Users\\me\\AppData\\Roaming\\owl\\trash\\sessions" });
     }
     if (url.pathname === "/api/sessions/delete") {
       const body = req.postDataJSON();
@@ -70,7 +70,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("dialog", (d) => { errors.push("a browser dialog: " + d.message()); d.dismiss(); });
       const calls = [];
       await page.route("**/*", serve(lang, calls));
-      await page.goto("http://myna.test/?view=providers");
+      await page.goto("http://owl.test/?view=providers");
       await page.locator("#nav").getByRole("button", { name: w.nav, exact: true }).click();
       const view = page.locator("#view-sessions");
       const row = view.locator('.row.sm-sess[data-id="w-1"]');

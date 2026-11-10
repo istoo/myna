@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/routes"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/routes"
 )
 
 // connor_yang on Discord: three sessions on a provider with three accounts,

@@ -11,20 +11,20 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/desktopdir"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/desktopdir"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// Claude Desktop and WorkBuddy read what myna writes for them as they
+// Claude Desktop and WorkBuddy read what owl writes for them as they
 // start (微雨南山 and stones on Discord, 10-24: a provider added showed up
 // there only after a restart). Claude Desktop asks the gateway for its
 // models once, at start. WorkBuddy 5.6's app.asar watches models.json only
 // when the file was there at start, and the watch is on the file itself,
 // so a rewrite by rename leaves it watching the old one. While such an app
-// runs on what it read before myna's last change, its Agents row offers
-// a Restart. myna never restarts one unasked: the button asks first, in
-// myna's own dialog, and only then quits the app as its own Quit does
+// runs on what it read before owl's last change, its Agents row offers
+// a Restart. owl never restarts one unasked: the button asks first, in
+// owl's own dialog, and only then quits the app as its own Quit does
 // and opens it again. The Codex app on macOS has its own Restart on its
 // stale-copy line (codex_app.go), behind the same question.
 
@@ -187,17 +187,17 @@ func bundleExecutable(b, id string) string {
 	return strings.TrimSpace(string(exe[1]))
 }
 
-// AppRun is a desktop app running on what it read before myna's last
+// AppRun is a desktop app running on what it read before owl's last
 // change to it: when it started, for the row to offer a Restart.
 type AppRun struct {
 	Since time.Time `json:"since"`
 }
 
 // AppBehind is the agent's desktop app when it runs here and started
-// before myna last changed what it reads at start; nil when it isn't
-// running, has started since, or myna doesn't restart it here. Only for
-// an agent connected to myna, or one disconnected from it in myna:
-// those are the changes myna made.
+// before owl last changed what it reads at start; nil when it isn't
+// running, has started since, or owl doesn't restart it here. Only for
+// an agent connected to owl, or one disconnected from it in owl:
+// those are the changes owl made.
 func (a *Agent) AppBehind() *AppRun {
 	r, ok := restartApps[a.ID]
 	if !ok || a.WSL != "" {
@@ -221,10 +221,10 @@ func (a *Agent) AppBehind() *AppRun {
 	return &AppRun{Since: c.since}
 }
 
-// appReads are the files the agent's desktop app reads myna's part from
+// appReads are the files the agent's desktop app reads owl's part from
 // at start, and that part. Claude Desktop: deploymentMode, the profile
-// applied and myna's profile (or the user's for myna's gateway), with the models the gateway lists it.
-// WorkBuddy: myna's models in its models.json (workbuddyPart).
+// applied and owl's profile (or the user's for owl's gateway), with the models the gateway lists it.
+// WorkBuddy: owl's models in its models.json (workbuddyPart).
 func (a *Agent) appReads() (files []string, reads func() string) {
 	switch a.ID {
 	case "claude-desktop":
@@ -253,8 +253,8 @@ func (a *Agent) appReads() (files []string, reads func() string) {
 				b.WriteString(mode + "\n" + id + "\n")
 				b.Write(prof)
 				b.WriteString("\n")
-				// a profile of the user's for myna's gateway, applied
-				// instead of myna's (desktopKeyApplied)
+				// a profile of the user's for owl's gateway, applied
+				// instead of owl's (desktopKeyApplied)
 				if f := desktopAppliedGateway(p); f != "" {
 					theirs, _ := edit.Read(f)
 					b.Write(theirs)
@@ -287,9 +287,9 @@ var restarting sync.Map
 // (tNotice): an app not on the old settings any more was quit or
 // restarted meanwhile.
 var (
-	noticeRestartNotHere    = newNotice("myna doesn't restart {agent} on this computer.")
+	noticeRestartNotHere    = newNotice("owl doesn't restart {agent} on this computer.")
 	noticeRestartCurrent    = newNotice("{agent} isn't running on the old settings any more.")
-	noticeRestartAsk        = newNotice("myna couldn't ask {agent} to quit. Quit it yourself, then open it again.")
+	noticeRestartAsk        = newNotice("owl couldn't ask {agent} to quit. Quit it yourself, then open it again.")
 	noticeRestartStillOpen  = newNotice("{agent} is still open; it may be asking something in its window. Answer it there, or quit it, then open it again.")
 	noticeRestartStillThere = newNotice("{agent} is still running. Quit it, then open it again.")
 	noticeRestartNoOpen     = newNotice("{agent} quit, but didn't open again. Open it yourself.")
@@ -298,7 +298,7 @@ var (
 func restartErr(n notice, a *Agent) error { return errors.New(n.say("agent", a.Name)) }
 
 // RestartApp quits the agent's desktop app and opens it again, so it reads
-// what myna wrote. Only the Agents row's Restart calls it, after the
+// what owl wrote. Only the Agents row's Restart calls it, after the
 // user confirmed, and only an app AppBehind lists is quit. macOS: asked to
 // quit as ⌘Q does, every process of its bundle waited for; one still open
 // then (it may be asking something) is left, never forced, and not opened

@@ -11,16 +11,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// packinggoods on Discord: a request still answering on a remote myna's
+// packinggoods on Discord: a request still answering on a remote owl's
 // claude-opus-5-5 had Routing's context window card say the model's window
 // isn't known, though its list gives it: the window was set on the route
 // only once the request was done. A request in flight is in the window of
 // the model its try went to, from the moment its prompt is read, on the
-// gateway's routes and on a Codex turn through myna's Codex backend
+// gateway's routes and on a Codex turn through owl's Codex backend
 // alike; done, it keeps it.
 func TestLivePromptHasItsWindow(t *testing.T) {
 	// held: an upstream that starts its reply and holds it until let go,
@@ -78,20 +78,20 @@ func TestLivePromptHasItsWindow(t *testing.T) {
 		return live, r.Prompt
 	}
 
-	t.Run("remote myna", func(t *testing.T) {
+	t.Run("remote owl", func(t *testing.T) {
 		fresh(t)
 		h, let := held(t, `data: {"id":"x","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"role":"assistant","content":"o"}}]}`+"\n\n")
 		up := httptest.NewServer(h)
 		t.Cleanup(up.Close)
 		t.Cleanup(let) // before the server's Close, which waits on it
-		if err := provider.Save(provider.Provider{ID: "remote-myna", Name: "Remote", Preset: provider.RemoteMynaPreset, Key: "sk-myna-x", Chat: up.URL}); err != nil {
+		if err := provider.Save(provider.Provider{ID: "remote-owl", Name: "Remote", Preset: provider.RemoteOwlPreset, Key: "sk-owl-x", Chat: up.URL}); err != nil {
 			t.Fatal(err)
 		}
-		// the other myna's /v1/models, which says the window
-		if err := catalog.SaveLive("remote-myna", up.URL+"/v1", []catalog.Model{{ID: "claude/claude-opus-5-5", Context: 1000000}}); err != nil {
+		// the other owl's /v1/models, which says the window
+		if err := catalog.SaveLive("remote-owl", up.URL+"/v1", []catalog.Model{{ID: "claude/claude-opus-5-5", Context: 1000000}}); err != nil {
 			t.Fatal(err)
 		}
-		req := httptest.NewRequest("POST", "/v1/chat/completions", strings.NewReader(`{"model":"remote-myna/claude/claude-opus-5-5","stream":true,"messages":[{"role":"user","content":"refactor the parser"}]}`))
+		req := httptest.NewRequest("POST", "/v1/chat/completions", strings.NewReader(`{"model":"remote-owl/claude/claude-opus-5-5","stream":true,"messages":[{"role":"user","content":"refactor the parser"}]}`))
 		live, done := inFlight(t, New(), req, let)
 		if live == nil || live.Window != 1000000 {
 			t.Errorf("in flight: prompt %+v, want the window 1000000", live)

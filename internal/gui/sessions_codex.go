@@ -3,7 +3,7 @@ package gui
 import (
 	"slices"
 
-	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/owl/internal/sessions"
 )
 
 func addCodexModelEffort(s *sessions.Session, byThread map[string][]sessions.ModelEffort) {

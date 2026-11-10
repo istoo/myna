@@ -11,9 +11,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // wbRestrictedBody is WorkBuddy's 403 for an account it restricted, byte
@@ -134,7 +134,7 @@ func TestPluginRestrictedAccountSkipped(t *testing.T) {
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			fresh(t)
-			t.Setenv("MYNA_BUN", bun)
+			t.Setenv("OWL_BUN", bun)
 			t.Cleanup(plugin.Settle)
 			var mu sync.Mutex
 			var tried []string

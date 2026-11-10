@@ -3,7 +3,7 @@ package gui
 import (
 	"testing"
 
-	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/owl/internal/sessions"
 )
 
 // usage.CodexModelEffort's answer is shared by every ask: a session or a

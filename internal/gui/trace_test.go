@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/owl/internal/gateway"
 )
 
 // The tray panel's Routing tab opens the window's Routing page on the

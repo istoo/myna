@@ -12,9 +12,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/library"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/library"
 )
 
 // fakes puts a fake in for everything Run asks of the system, and records
@@ -54,7 +54,7 @@ func fakes(t *testing.T, list []*agent.Agent, isWired map[string]bool, failing m
 	removeShortcut = func(string) error { did = append(did, "shortcut"); return nil }
 	removeScheme = func(string) error { did = append(did, "scheme"); return nil }
 	endPII = step("pii")
-	executable = func() (string, error) { return "/opt/myna/myna", nil }
+	executable = func() (string, error) { return "/opt/owl/owl", nil }
 	return &did
 }
 
@@ -75,9 +75,9 @@ func gone(t *testing.T, p string) bool {
 }
 
 // Uninstalling stops the service before anything else (one still serving
-// would wire agents again), disconnects only the agents myna is in,
+// would wire agents again), disconnects only the agents owl is in,
 // restarts the Codex app's app-server when Codex was one of them, and
-// removes myna's files last.
+// removes owl's files last.
 func TestRunOrder(t *testing.T) {
 	codex := &agent.Agent{ID: "codex", Name: "Codex"}
 	claude := &agent.Agent{ID: "claude", Name: "Claude Code"}
@@ -97,9 +97,9 @@ func TestRunOrder(t *testing.T) {
 		t.Fatalf("report: %+v", r)
 	}
 	if !gone(t, appdir.Config()) || !gone(t, appdir.Cache()) {
-		t.Fatal("myna's folders left")
+		t.Fatal("owl's folders left")
 	}
-	if r.Exe != "/opt/myna/myna" {
+	if r.Exe != "/opt/owl/owl" {
 		t.Fatalf("exe %q", r.Exe)
 	}
 	if len(r.Agents) != 2 || r.Agents[0].What != "Codex" || r.Agents[1].What != "Claude Code" {
@@ -141,7 +141,7 @@ func TestRunCodexAppLeft(t *testing.T) {
 }
 
 // Skills and servers the user's agents use from the Library stay; the
-// rest of myna's folder goes.
+// rest of owl's folder goes.
 func TestDataKeepsLibraryInUse(t *testing.T) {
 	fakes(t, nil, map[string]bool{}, nil)
 	skill := filepath.Join(library.Dir(), "skills", "docx", "SKILL.md")
@@ -153,7 +153,7 @@ func TestDataKeepsLibraryInUse(t *testing.T) {
 	r := &Report{}
 	Data(r)
 	if !gone(t, settings) || !gone(t, filepath.Join(appdir.Config(), "usage")) {
-		t.Fatal("myna's own files left")
+		t.Fatal("owl's own files left")
 	}
 	if gone(t, skill) {
 		t.Fatal("a skill in use removed")
@@ -200,7 +200,7 @@ func TestFoldersNeverHome(t *testing.T) {
 		root:                                false,
 		h:                                   false,
 		filepath.Join(root, "Users"):        false,
-		filepath.Join(h, ".config", "myna"): true,
+		filepath.Join(h, ".config", "owl"):  true,
 		filepath.Join(root, "Users", "me2"): true,
 	} {
 		if removable(p, h) != ok {
@@ -209,7 +209,7 @@ func TestFoldersNeverHome(t *testing.T) {
 	}
 }
 
-// What the app starts as it quits removes myna's files once the app is
+// What the app starts as it quits removes owl's files once the app is
 // gone.
 func TestAfterExit(t *testing.T) {
 	fakes(t, nil, map[string]bool{}, nil)

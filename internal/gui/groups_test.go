@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // The Routing view's save with another id than the group had (from)
@@ -92,7 +92,7 @@ func TestGroupsFoundSwitch(t *testing.T) {
 	}
 }
 
-// groups/skip keeps providers out of the groups myna finds
+// groups/skip keeps providers out of the groups owl finds
 // (chenxiang0010 on Discord): the state names them, and lists every
 // provider that can be, one kept out that is gone too.
 func TestGroupsSkip(t *testing.T) {

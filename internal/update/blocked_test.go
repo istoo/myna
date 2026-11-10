@@ -16,7 +16,7 @@ import (
 func relaunchFiles(t *testing.T) (exe, old string) {
 	t.Helper()
 	dir := t.TempDir()
-	exe, old = filepath.Join(dir, "myna.exe"), filepath.Join(dir, "myna.exe.old")
+	exe, old = filepath.Join(dir, "owl.exe"), filepath.Join(dir, "owl.exe.old")
 	os.WriteFile(exe, []byte("new version"), 0o755)
 	os.WriteFile(old, []byte("running version"), 0o755)
 	return exe, old
@@ -115,7 +115,7 @@ func TestRelaunchReportedStays(t *testing.T) {
 	}
 }
 
-// What the started myna writes is what the one starting it waits for.
+// What the started owl writes is what the one starting it waits for.
 func TestReportStarted(t *testing.T) {
 	p := filepath.Join(t.TempDir(), "started")
 	t.Setenv(startedEnv, p)

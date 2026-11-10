@@ -109,7 +109,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           await browser.close();
         });
 
-        await page.goto("http://myna.test/?view=gateway");
+        await page.goto("http://owl.test/?view=gateway");
         const rows = page.locator("#activity .call-item");
         await rows.first().waitFor();
         // what is clicked is brought into view by the wheel, as the reader

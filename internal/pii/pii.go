@@ -10,7 +10,7 @@
 //
 // Privacy Filter is OpenAI's (Apache-2.0), 1.6 GB as the q8 GGUF
 // LocalAI made of it, run by pf-serve (native/privacy-filter), a program
-// built from privacy-filter.cpp on ggml. Neither ships with myna: both
+// built from privacy-filter.cpp on ggml. Neither ships with owl: both
 // are downloaded when the user turns the model on, each checked against
 // the sha256 pinned here, and the setting (settings.RedactModel) is saved
 // only once both are. pf-serve is started on the first request that needs
@@ -22,7 +22,7 @@
 // it. One that dies is started again; one that dies on the GPU, doesn't
 // load there in gpuLoadTimeout, or hangs there twice in a row, is started
 // on the CPU until the GPU is tried again (gpuRetryAfter), with no restart
-// of myna. One that keeps failing holds requests back at once, not
+// of owl. One that keeps failing holds requests back at once, not
 // after a load each, until it is tried again (retryAfter).
 package pii
 
@@ -34,9 +34,9 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/pii/guard"
-	"github.com/istoo/myna/internal/redact"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/pii/guard"
+	"github.com/istoo/owl/internal/redact"
 )
 
 // The model, at a revision of LocalAI's repo, so the file is always the
@@ -54,7 +54,7 @@ var (
 var (
 	serveTag  = "pf-v3"
 	oldTags   = []string{"pf-v2", "pf-v1"}
-	serveBase = "https://github.com/istoo/myna/releases/download/"
+	serveBase = "https://github.com/istoo/owl/releases/download/"
 	serveSHA  = map[string]string{
 		"darwin-amd64":  "5d9277d6852b7e3dcc30d102f43c21bf54a5c3199e0f9f998d965ec7a30ea6d7",
 		"darwin-arm64":  "b45951751bb26633a5ca3827fbf3718f10dfd5c313da6b4f6ba786755353cb4b",
@@ -70,7 +70,7 @@ func Supported() bool { return serveSHA[target()] != "" }
 // Size is how much turning the model on downloads.
 func Size() int64 { return modelSize }
 
-// dir is where the model and pf-serve are kept: myna's cache, since
+// dir is where the model and pf-serve are kept: owl's cache, since
 // either can be downloaded again, and never the settings' folder, which a
 // sync carries to the user's other computers.
 var dir = func() string { return filepath.Join(appdir.Cache(), "privacy-filter") }
@@ -86,7 +86,7 @@ func serveDir() string { return tagDir(serveTag) }
 func tagDir(tag string) string { return filepath.Join(dir(), tag+"-"+target()) }
 
 // tagDirs are where tag's pf-serve may be on disk: tagDir, and under
-// Rosetta also the Intel one's, which myna fetched there before it
+// Rosetta also the Intel one's, which owl fetched there before it
 // fetched Apple silicon's (target).
 func tagDirs(tag string) []string {
 	ds := []string{tagDir(tag)}
@@ -130,7 +130,7 @@ func Installed() bool {
 }
 
 // ErrNotInstalled is what a request gets when the model is on in the
-// settings and isn't on disk (myna's cache was cleared).
+// settings and isn't on disk (owl's cache was cleared).
 var ErrNotInstalled = errors.New("the local masking model isn't downloaded; download it again in Settings → Privacy, or turn it off")
 
 // Status is what Settings → Privacy shows of the model.
@@ -150,7 +150,7 @@ type Status struct {
 	Device  string `json:"device,omitempty"`
 	// Via is the runtime AstrLink Guard runs on, "CoreML" on a Mac where
 	// it does (Device then the one its plan puts most of the model on, or
-	// ""); "" for myna's own Go code on the CPU
+	// ""); "" for owl's own Go code on the CPU
 	Via      string `json:"via,omitempty"`
 	GPU      bool   `json:"gpu,omitempty"`
 	LoadMS   int    `json:"loadMs,omitempty"`

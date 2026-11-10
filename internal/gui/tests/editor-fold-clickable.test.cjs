@@ -12,7 +12,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MYNA_GUI_ASSETS || path.resolve(__dirname, "../assets"));
+const assets = path.resolve(process.env.OWL_GUI_ASSETS || path.resolve(__dirname, "../assets"));
 const codex = {
   id: "codex", name: "Codex", icon: "codex-color", chat: "", responses: "https://chatgpt.com/backend-api/codex", anthropic: "", catalog: "",
   models: [{ id: "gpt-6", name: "GPT-6", on: true }], agents: [], fallback: [], headers: {}, keyList: [],
@@ -65,7 +65,7 @@ for (const [engine, browserType] of [["chromium", chromium], ["webkit", webkit]]
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, theme));
-      await page.goto("http://myna.test/?view=providers");
+      await page.goto("http://owl.test/?view=providers");
       await page.locator(".row.provider", { hasText: name }).first().click();
       const sum = page.locator(sel);
       await sum.waitFor();

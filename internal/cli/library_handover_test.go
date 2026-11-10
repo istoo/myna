@@ -5,10 +5,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/library"
+	"github.com/istoo/owl/internal/library"
 )
 
-// myna library skill hand-over / hand-back (tnt1223): a skill kept in
+// owl library skill hand-over / hand-back (tnt1223): a skill kept in
 // ~/.agents/skills moves into the library's folder and back again; --all
 // takes the library's skills kept there, and nothing else.
 func TestLibrarySkillHandOver(t *testing.T) {

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // plugins#304: an inactive or ineligible check-in says the plugin's (or
@@ -29,7 +29,7 @@ func TestCheckinSaysWhyNoneWasOffered(t *testing.T) {
 	for _, want := range []string{
 		"Qoder arno no check-in event now · " + why,
 		"Trae CN lei not eligible for the check-in · this device has checked in today",
-		"Qoder bo no check-in event now · " + why + " · myna asks again later",
+		"Qoder bo no check-in event now · " + why + " · owl asks again later",
 	} {
 		if !strings.Contains(out, want) {
 			t.Errorf("missing %q in\n%s", want, out)

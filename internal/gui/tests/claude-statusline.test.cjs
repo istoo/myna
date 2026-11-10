@@ -4,7 +4,7 @@
 // click turns on (posting statusline on) and off again, lit while on, its
 // title saying what it shows and the change said in the status, in every
 // language. A row whose settings.json has a status line of the user's own
-// gets no options from myna and shows no square. Chromium and WebKit,
+// gets no options from owl and shows no square. Chromium and WebKit,
 // the window and the narrow tray panel.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -13,7 +13,7 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
-const NOTE = "the 5h and 7d use of the accounts myna serves, under Claude Code's prompt";
+const NOTE = "the 5h and 7d use of the accounts owl serves, under Claude Code's prompt";
 const claude = (id, value, offered) => ({
   id, name: "Claude Code " + id, icon: "claudecode-color", path: "/test/" + id, wired: true,
   fields: [
@@ -75,9 +75,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           page.setDefaultNavigationTimeout(60000);
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", serve(lang, sets));
-          await page.goto("http://myna.test/" + (mode ? "?mode=" + mode : ""));
+          await page.goto("http://owl.test/" + (mode ? "?mode=" + mode : ""));
           await page.locator(row("mine")).waitFor();
-          // one row open at a time: the user's first, then myna's
+          // one row open at a time: the user's first, then owl's
           for (const id of ["theirs", "mine"]) {
             await page.locator(`${row(id)} ${mode ? ".ag-sum" : ".ag-link"}`).click();
             await page.waitForTimeout(mode ? 700 : 200);

@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/plugin"
 )
 
 // A built-in moved onto its plugin offers the reasoning levels it did for

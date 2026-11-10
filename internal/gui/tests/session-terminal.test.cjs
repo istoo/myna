@@ -15,7 +15,7 @@ const terminalApps = [
 function serve(lang, posts, terminalDefault = "com.apple.Terminal") {
   let settings = {
     theme: "light", lang, tray: "panel", sessionTerminal: "", terminalApps,
-    terminalDefault, version: "test", dir: "/tmp/myna",
+    terminalDefault, version: "test", dir: "/tmp/owl",
     gateway: "http://127.0.0.1:3425", visionModels: [], imageGenModels: [],
     fx: { rate: 7.2, stale: false },
   };
@@ -83,7 +83,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await browser.close();
       });
 
-      await page.goto("http://myna.test/");
+      await page.goto("http://owl.test/");
       await page.locator("#prefs").click();
       const row = page.locator("#sessionTerminalRow");
       await row.waitFor({ state: "visible" });
@@ -150,7 +150,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await context.addInitScript(() => Object.defineProperty(navigator, "platform", { get: () => "MacIntel" }));
       const page = await context.newPage();
       await page.route("**/*", serve(lang, [], "com.apple.TextEdit"));
-      await page.goto("http://myna.test/");
+      await page.goto("http://owl.test/");
       await page.locator("#prefs").click();
       await page.locator("#sessionTerminalRow").waitFor({ state: "visible" });
       await reach(page);

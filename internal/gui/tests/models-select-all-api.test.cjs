@@ -83,7 +83,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         const posts = [];
         await page.route("**/*", serve(lang, posts));
-        await page.goto("http://myna.test/?view=providers");
+        await page.goto("http://owl.test/?view=providers");
 
         const editor = page.locator("#modal:not([hidden]) .editor");
         const open = async (name) => {
@@ -148,7 +148,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const over = await page.evaluate(() => [document.documentElement.scrollWidth - innerWidth, ...[...document.querySelectorAll("#modal .editor *")].filter((e) => getComputedStyle(e).borderLeftWidth !== getComputedStyle(e).borderRightWidth && parseFloat(getComputedStyle(e).borderLeftWidth) > 1).map((e) => e.className)]);
         assert.deepEqual(over, [0], "overflow or stripe");
         // the fake save answers nothing, so the page is opened again
-        await page.goto("http://myna.test/?view=providers");
+        await page.goto("http://owl.test/?view=providers");
 
         // a Claude pick made before stays picked (dimmed), and is saved again
         await open("Command Code picked");

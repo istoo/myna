@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/sessions"
 )
 
 func codexDetailsAPILine(t *testing.T, at time.Time, typ string, payload any) string {

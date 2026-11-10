@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // claudeCaching has the fake Claude Code of claudeMadeFirst answer on both

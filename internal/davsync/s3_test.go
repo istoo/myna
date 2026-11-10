@@ -17,8 +17,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/backup"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/backup"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // fakeS3 is an S3 server with one bucket and one access key, keeping
@@ -181,7 +181,7 @@ func TestS3Put(t *testing.T) {
 	if _, err := s.put(ctx, []byte("one"), ""); err != nil {
 		t.Fatal(err)
 	}
-	if got := string(f.objects["team x+y/myna/myna.myna-backup"]); got != "one" {
+	if got := string(f.objects["team x+y/owl/owl.owl-backup"]); got != "one" {
 		t.Fatalf("stored %q", got)
 	}
 	if _, err := s.put(ctx, []byte("another first"), ""); !errors.Is(err, errChanged) {
@@ -198,7 +198,7 @@ func TestS3Put(t *testing.T) {
 	if _, err := s.put(ctx, []byte("three"), etag); !errors.Is(err, errChanged) {
 		t.Fatalf("a write over a version since changed: %v", err)
 	}
-	if got := string(f.objects["team x+y/myna/myna.myna-backup"]); got != "two" {
+	if got := string(f.objects["team x+y/owl/owl.owl-backup"]); got != "two" {
 		t.Fatalf("stored %q", got)
 	}
 	want := []string{"GET", "PUT none:*", "PUT none:*", "GET", "PUT " + etag, "PUT " + etag}
@@ -244,7 +244,7 @@ func TestS3NoConditions(t *testing.T) {
 	_, v, _ := s.get(ctx, version{})
 	etag := v.ETag
 	f.mu.Lock()
-	f.store("team x+y/myna/myna.myna-backup", []byte("theirs"))
+	f.store("team x+y/owl/owl.owl-backup", []byte("theirs"))
 	f.mu.Unlock()
 	if _, err := s.put(ctx, []byte("two"), etag); !errors.Is(err, errChanged) {
 		t.Fatalf("a write over another computer's: %v", err)
@@ -254,7 +254,7 @@ func TestS3NoConditions(t *testing.T) {
 	if _, err := s.put(ctx, []byte("two"), etag); err != nil {
 		t.Fatal(err)
 	}
-	if got := string(f.objects["team x+y/myna/myna.myna-backup"]); got != "two" {
+	if got := string(f.objects["team x+y/owl/owl.owl-backup"]); got != "two" {
 		t.Fatalf("stored %q", got)
 	}
 	want := []string{"PUT none:*", "HEAD", "PUT", "HEAD", "GET", "HEAD", "GET", "HEAD", "PUT"}
@@ -279,12 +279,12 @@ func TestS3Address(t *testing.T) {
 		cfg         Config
 		url, region string
 	}{
-		{Config{URL: "s3://bkt/a b/"}, "https://bkt.s3.us-east-1.amazonaws.com/a%20b/myna/myna.myna-backup", "us-east-1"},
-		{Config{URL: "s3://bkt", Region: "eu-west-2"}, "https://bkt.s3.eu-west-2.amazonaws.com/myna/myna.myna-backup", "eu-west-2"},
-		{Config{URL: "s3://bkt/p", Endpoint: "0123abc.r2.cloudflarestorage.com"}, "https://bkt.0123abc.r2.cloudflarestorage.com/p/myna/myna.myna-backup", "auto"},
-		{Config{URL: "s3://bkt/p", Endpoint: "https://s3.example.com/", PathStyle: true}, "https://s3.example.com/bkt/p/myna/myna.myna-backup", "us-east-1"},
-		{Config{URL: "s3://bkt", Endpoint: "http://192.168.1.5:9000"}, "http://192.168.1.5:9000/bkt/myna/myna.myna-backup", "us-east-1"},
-		{Config{URL: "s3://my.bkt", Endpoint: "https://s3.example.com"}, "https://s3.example.com/my.bkt/myna/myna.myna-backup", "us-east-1"},
+		{Config{URL: "s3://bkt/a b/"}, "https://bkt.s3.us-east-1.amazonaws.com/a%20b/owl/owl.owl-backup", "us-east-1"},
+		{Config{URL: "s3://bkt", Region: "eu-west-2"}, "https://bkt.s3.eu-west-2.amazonaws.com/owl/owl.owl-backup", "eu-west-2"},
+		{Config{URL: "s3://bkt/p", Endpoint: "0123abc.r2.cloudflarestorage.com"}, "https://bkt.0123abc.r2.cloudflarestorage.com/p/owl/owl.owl-backup", "auto"},
+		{Config{URL: "s3://bkt/p", Endpoint: "https://s3.example.com/", PathStyle: true}, "https://s3.example.com/bkt/p/owl/owl.owl-backup", "us-east-1"},
+		{Config{URL: "s3://bkt", Endpoint: "http://192.168.1.5:9000"}, "http://192.168.1.5:9000/bkt/owl/owl.owl-backup", "us-east-1"},
+		{Config{URL: "s3://my.bkt", Endpoint: "https://s3.example.com"}, "https://s3.example.com/my.bkt/owl/owl.owl-backup", "us-east-1"},
 	} {
 		s, err := newS3(c.cfg)
 		if err != nil {
@@ -312,7 +312,7 @@ func TestS3Sync(t *testing.T) {
 			f.noCond = noCond
 			ctx := context.Background()
 			cfg := f.config(srv)
-			const key = "team x+y/myna/myna.myna-backup"
+			const key = "team x+y/owl/owl.owl-backup"
 
 			a, b := newComputer(t), newComputer(t)
 			a.use(t)
@@ -504,19 +504,19 @@ func TestConfigureKeepsTheOtherKind(t *testing.T) {
 	}
 }
 
-// A real S3 server, when one is given: MYNA_S3_TEST=endpoint,bucket,key
+// A real S3 server, when one is given: OWL_S3_TEST=endpoint,bucket,key
 // id,secret[,region] (a MinIO: docker run -p 9000:9000 minio/minio server
 // /data, and a bucket made there). The same writes as TestS3Put, then a sync.
 func TestS3Live(t *testing.T) {
-	spec := os.Getenv("MYNA_S3_TEST")
+	spec := os.Getenv("OWL_S3_TEST")
 	if spec == "" {
-		t.Skip("MYNA_S3_TEST is not set")
+		t.Skip("OWL_S3_TEST is not set")
 	}
 	p := strings.Split(spec, ",")
 	if len(p) < 4 {
-		t.Fatal("MYNA_S3_TEST=endpoint,bucket,key id,secret[,region]")
+		t.Fatal("OWL_S3_TEST=endpoint,bucket,key id,secret[,region]")
 	}
-	cfg := Config{URL: fmt.Sprintf("s3://%s/myna-test-%d x+y", p[1], time.Now().UnixNano()), Endpoint: p[0], User: p[2], Password: p[3], Passphrase: "correct horse", PathStyle: true, Keys: true}
+	cfg := Config{URL: fmt.Sprintf("s3://%s/owl-test-%d x+y", p[1], time.Now().UnixNano()), Endpoint: p[0], User: p[2], Password: p[3], Passphrase: "correct horse", PathStyle: true, Keys: true}
 	if len(p) > 4 {
 		cfg.Region = p[4]
 	}
@@ -627,7 +627,7 @@ func TestS3ConditionsOutsideTheSignature(t *testing.T) {
 	if !get || !put {
 		t.Fatalf("the conditions didn't reach the server: %q", f.log)
 	}
-	remote, err := backup.Open(f.objects["team x+y/myna/myna.myna-backup"], "correct horse")
+	remote, err := backup.Open(f.objects["team x+y/owl/owl.owl-backup"], "correct horse")
 	if err != nil || len(remote.Providers) != 2 {
 		t.Fatalf("in the bucket: %v %+v", err, remote.Providers)
 	}

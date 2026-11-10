@@ -22,7 +22,7 @@ func TestShellProfiles(t *testing.T) {
 	t.Setenv("ZDOTDIR", zdot)
 	oldExe, oldShells := cliExe, cliShells
 	t.Cleanup(func() { cliExe, cliShells = oldExe, oldShells })
-	cliExe = func() (string, error) { return "/Applications/myna.app/Contents/MacOS/myna", nil }
+	cliExe = func() (string, error) { return "/Applications/owl.app/Contents/MacOS/owl", nil }
 	cliShells = func() []cliShell {
 		return []cliShell{{Name: "zsh", Default: true}, {Name: "bash"}, {Name: "fish"}, {Name: "nu"}}
 	}
@@ -56,7 +56,7 @@ func TestShellProfiles(t *testing.T) {
 		t.Fatalf("with fish's folder: %v", in)
 	}
 
-	// ZDOTDIR outside the home: not myna's to write
+	// ZDOTDIR outside the home: not owl's to write
 	t.Setenv("ZDOTDIR", t.TempDir())
 	in, _ = ShellFunction("agy", fnBody)
 	if len(in) != 2 {

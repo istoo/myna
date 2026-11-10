@@ -39,8 +39,8 @@ func GitSaid(text string) string {
 // an empty one say, is passed over as git passes it over, so an empty
 // /tmp/.git doesn't make every folder under /tmp a repository (#3675).
 // "" when dir isn't a folder here (an agent on another computer, through
-// a shared myna) or a .git on the way can't be read (another user's,
-// through a shared myna): unknown, never "no".
+// a shared owl) or a .git on the way can't be read (another user's,
+// through a shared owl): unknown, never "no".
 func GitOnDisk(dir string) string {
 	if !filepath.IsAbs(dir) {
 		return ""

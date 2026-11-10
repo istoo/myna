@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // gateway-key add --read-only and gateway-key access (Steven on Discord: a

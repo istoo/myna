@@ -15,9 +15,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // twoProviders: "plan" (the one agents pick) falls back to "spare".
@@ -366,7 +366,7 @@ func TestSubscriptionAccountsTakeOver(t *testing.T) {
 
 // Two Claude Max accounts ticked (#177): the one Claude Code is signed in to
 // is out of quota, and the request goes to the saved spare, streamed or not.
-// With myna wired into Claude Code, `claude auth status` tells of myna's
+// With owl wired into Claude Code, `claude auth status` tells of owl's
 // token and no email: the account is still named from ~/.claude.json, so it
 // is the saved me@example.com, not a "Claude Max" served beside it.
 func TestClaudeAccountsTakeOver(t *testing.T) {

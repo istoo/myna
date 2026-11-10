@@ -5,14 +5,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/gateway"
 )
 
 // Codex stays on the local gateway even when its advertised URL changes.
 func TestCodexPublicURL(t *testing.T) {
 	home, read := codexHome(t, `{"tokens":{"access_token":"x","id_token":"x.e30.x"}}`, "model = \"gpt-5.5\"\n")
-	t.Setenv("MYNA_PUBLIC_URL", "https://myna.example.com/myna///")
+	t.Setenv("OWL_PUBLIC_URL", "https://owl.example.com/owl///")
 	cx := codex(home)
 	if err := cx.Fields[0].Set("fake/m1"); err != nil {
 		t.Fatal(err)
@@ -21,7 +21,7 @@ func TestCodexPublicURL(t *testing.T) {
 		!strings.Contains(cfg, `base_url = "`+gateway.URL()+`/v1"`) {
 		t.Fatalf("local URL not written:\n%s", cfg)
 	}
-	t.Setenv("MYNA_PUBLIC_URL", "")
+	t.Setenv("OWL_PUBLIC_URL", "")
 	if got := codex(home).Check(); got != "" {
 		t.Fatalf("wiring changed after removing public URL: %s", got)
 	}
@@ -34,10 +34,10 @@ func TestCodexPublicURL(t *testing.T) {
 }
 
 // Gemini keeps its local wiring and restores the original URL across changes
-// to the advertised URL, including a second application of myna.
+// to the advertised URL, including a second application of owl.
 func TestGeminiPublicURL(t *testing.T) {
 	home, _ := codexHome(t, "", "")
-	t.Setenv("MYNA_PUBLIC_URL", "https://myna.example.com/")
+	t.Setenv("OWL_PUBLIC_URL", "https://owl.example.com/")
 	path := filepath.Join(home, ".gemini", ".env")
 	if err := edit.SetEnvFile(path, edit.KV{Path: "GOOGLE_GEMINI_BASE_URL", Value: "https://gemini.example.com"}); err != nil {
 		t.Fatal(err)
@@ -50,7 +50,7 @@ func TestGeminiPublicURL(t *testing.T) {
 		t.Fatalf("base URL: %q", got)
 	}
 	for _, public := range []string{"https://another.example.com", ""} {
-		t.Setenv("MYNA_PUBLIC_URL", public)
+		t.Setenv("OWL_PUBLIC_URL", public)
 		if got := gemini(home).Check(); got != "" {
 			t.Fatalf("wiring changed with public URL %q: %s", public, got)
 		}

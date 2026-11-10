@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // The credits a ChatGPT account holds besides its windows are its balance

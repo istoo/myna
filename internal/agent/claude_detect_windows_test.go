@@ -5,13 +5,13 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/proc"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/proc"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // claudeBinHome is a Windows home with no Claude Code folder, no
-// CLAUDE_CONFIG_DIR and a PATH of myna's own that has no claude on it:
-// a myna started before Claude Code was installed, or restarted by a
+// CLAUDE_CONFIG_DIR and a PATH of owl's own that has no claude on it:
+// a owl started before Claude Code was installed, or restarted by a
 // self-update with the PATH it had then.
 func claudeBinHome(t *testing.T) string {
 	t.Helper()
@@ -28,11 +28,11 @@ func claudeBinHome(t *testing.T) string {
 	return home
 }
 
-// #1482 (edussss, Windows 11, myna v0.1.1175): Claude Code wasn't listed
-// on the Agents page. Detected asked myna's own PATH only, which on
-// Windows is the one myna started with: Claude Code's installer (irm
+// #1482 (edussss, Windows 11, owl v0.1.1175): Claude Code wasn't listed
+// on the Agents page. Detected asked owl's own PATH only, which on
+// Windows is the one owl started with: Claude Code's installer (irm
 // https://claude.ai/install.ps1 | iex) puts claude.exe in ~\.local\bin and
-// adds that to the user's PATH in the registry, which a running myna
+// adds that to the user's PATH in the registry, which a running owl
 // never sees, and npm's global folder is the same. The sign-in already
 // found it there through proc.FindTool (#839); now the Agents page does
 // too, with the CLI's path.
@@ -56,7 +56,7 @@ func TestClaudeFoundWhereWindowsInstallsPutIt(t *testing.T) {
 			}
 		})
 	}
-	// installed after myna started, in a folder the registry's PATH has
+	// installed after owl started, in a folder the registry's PATH has
 	// now (winget's Links, scoop's shims, an nvm-windows Node): a test's
 	// registry folder lies under its sandbox (proc.SystemDirs)
 	t.Run("the registry's PATH now", func(t *testing.T) {

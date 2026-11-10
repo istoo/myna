@@ -12,11 +12,11 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
-// fakeDeepSeek answers as DeepSeek's APIs do when myna's searcher asks
+// fakeDeepSeek answers as DeepSeek's APIs do when owl's searcher asks
 // them to search: Chat has no search tool, and deepseek-flash writes its
 // own tool-call markup as text; Responses runs web_search (found nothing
 // while blind is set); Anthropic runs web_search_20250305 and answers
@@ -219,7 +219,7 @@ func TestSearcherAskedWhereItSearches(t *testing.T) {
 }
 
 // A relay said to search is for Settings to name: when Automatic's searcher
-// finds nothing, the fallback goes on to another provider myna picks by
+// finds nothing, the fallback goes on to another provider owl picks by
 // itself, never to the relay and its quota (#359).
 func TestSearchFallbackSkipsARelaySaidToSearch(t *testing.T) {
 	searchSandbox(t)
@@ -353,13 +353,13 @@ func TestSearcherFindingNothingGivesWay(t *testing.T) {
 		t.Fatalf("the model was told %q", r)
 	}
 
-	// another searcher, next in myna's order, answers before the APIs
+	// another searcher, next in owl's order, answers before the APIs
 	apis.asked = nil
 	ds2 := newFakeDeepSeek(t)
 	searchesOn(t, provider.Responses, ds2.URL)
 	save(t, provider.Provider{ID: "ds2", Name: "DeepSeek 2", Key: "k", Responses: ds2.URL + "/v1", Models: []string{"deepseek-flash"}})
 	if p, _, _ := searcher(); p.ID != "ds" {
-		t.Fatalf("myna's searcher is %s", p.ID)
+		t.Fatalf("owl's searcher is %s", p.ID)
 	}
 	blocks = searchAsClaudeCode(t)
 	if len(apis.asked) != 0 || len(ds2.searches()) != 1 {

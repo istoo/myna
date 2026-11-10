@@ -14,7 +14,7 @@ import (
 const testSetupToken = "sk-ant-oat01-setuptoken-abcdefghijklmnopqrstuvwxyz0123456789"
 
 // sfss5362 on X: "支持 CLAUDE_CODE_OAUTH_TOKEN 吗". A token `claude
-// setup-token` printed is added as an account of myna's own: kept in
+// setup-token` printed is added as an account of owl's own: kept in
 // logins.json, named without an email, given to Claude Code for its own
 // config directory only, and Claude Code's own sign-in left as it was.
 func TestClaudeSetupTokenAccount(t *testing.T) {

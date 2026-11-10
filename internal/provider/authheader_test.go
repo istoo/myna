@@ -8,7 +8,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 // What Aloha's service answered on Discord when sent both key headers.

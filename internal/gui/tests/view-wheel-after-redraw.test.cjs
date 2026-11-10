@@ -19,9 +19,9 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = process.env.MYNA_AFTER_REDRAW_ASSETS || path.resolve(__dirname, "../assets");
+const assets = process.env.OWL_AFTER_REDRAW_ASSETS || path.resolve(__dirname, "../assets");
 const LANGS = ["en", "zh", "zh-TW", "ja", "de"];
-const model = (id) => ({ key: "model", label: "model", value: id, options: [{ value: id, label: id, ref: "relay/" + id, note: "Relay · via myna" }] });
+const model = (id) => ({ key: "model", label: "model", value: id, options: [{ value: id, label: id, ref: "relay/" + id, note: "Relay · via owl" }] });
 const AGENTS = Array.from({ length: 14 }, (_, i) => ({
   id: "a" + i, name: "Agent " + i, path: "/t/a" + i + ".json", icon: "generic", wired: true,
   fields: [model("m" + i), { key: "effort", label: "effort", value: "high", options: [{ value: "high", label: "High" }] }],
@@ -87,7 +87,7 @@ const CASES = {
   // each tab in turn, clicked and wheeled at once
   async usage(p) {
     const view = p.locator("#view-usage");
-    await p.goto("http://myna.test/?view=usage");
+    await p.goto("http://owl.test/?view=usage");
     await p.locator("#usageTab .opt").nth(3).waitFor();
     await tall(view);
     await rested(p, view);
@@ -104,7 +104,7 @@ const CASES = {
   // an agent's row opened, then closed, wheeled at once after each
   async agents(p) {
     const view = p.locator("#view-agents");
-    await p.goto("http://myna.test/?view=agents");
+    await p.goto("http://owl.test/?view=agents");
     await p.locator('#agents .row.agent[data-id="a1"] .ag-link').waitFor();
     await tall(view);
     await rested(p, view);
@@ -122,7 +122,7 @@ const CASES = {
   // Settings' tabs stay at the top as the page scrolls under them (narrow)
   async settings(p) {
     const view = p.locator("#view-settings");
-    await p.goto("http://myna.test/?view=settings");
+    await p.goto("http://owl.test/?view=settings");
     await p.locator("#setTab-network").waitFor();
     await tall(view);
     await rested(p, view);

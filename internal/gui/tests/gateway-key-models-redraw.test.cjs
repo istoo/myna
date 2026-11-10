@@ -24,7 +24,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await new Promise((r) => setTimeout(r, 500));
         await route.fallback();
       });
-      await page.goto("http://myna.test/?view=gateway");
+      await page.goto("http://owl.test/?view=gateway");
       const badge = page.locator('#gatewayKeys .acc[data-key="work"] .key-models');
       await badge.waitFor();
       const menu = page.locator(".proto-menu");

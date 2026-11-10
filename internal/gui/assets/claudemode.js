@@ -33,7 +33,7 @@ function ccTip(anchor, tui) {
   };
   tip.append(
     mode(tui, t("Interactive mode (TUI)"),
-      t("myna opens Claude Code as a person does, in a terminal of its own that you don't see, types each request in and reads the reply from its transcript."),
+      t("owl opens Claude Code as a person does, in a terminal of its own that you don't see, types each request in and reads the reply from its transcript."),
       t("Your plan counts these requests as Claude Code's own use, at about half of the 5-hour allowance that -p uses for the same work.")),
     mode(!tui, "claude -p",
       t("Claude Code's print mode, the one scripts and the Agent SDK use: a request in, its reply out."),
@@ -71,7 +71,7 @@ window.claudeModeDraw = function (box, m) {
   });
   pick.classList.add("cc-pick");
   pick.classList.toggle("tui", m.tui);
-  // myna web shows the gateway's, which only its own Settings change
+  // owl web shows the gateway's, which only its own Settings change
   for (const b of pick.querySelectorAll(".opt")) b.disabled = gatewayMode;
   // Chromium has no onfocusin property: the events are listened for
   pick.onmouseenter = () => ccTip(pick, on);

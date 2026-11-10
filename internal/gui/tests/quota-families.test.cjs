@@ -19,7 +19,7 @@ const { chromium, webkit } = require("playwright");
 const assets = path.resolve(__dirname, "../assets");
 const at = (h) => new Date(Date.now() + h * 36e5).toISOString();
 const win = (name, family, used, h) => ({ name, family, used, ...(h ? { resetsAt: at(h) } : {}) });
-// as myna reports an Antigravity account: a window a model, by id
+// as owl reports an Antigravity account: a window a model, by id
 const ag = (user, [opus, sonnet, flash, proHigh, proLow, f37High, f37Low, f37Med, oss]) => ({
   provider: "antigravity", name: "Antigravity", icon: "antigravity-color", user, plan: "Google AI Pro",
   windows: [
@@ -98,7 +98,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const fill = (loc) => loc.evaluateAll((es) => es.map((e) => Math.round(parseFloat(e.style.width))));
 
       // the Usage page: an account's families, Gemini and Claude first
-      const page = await open("usage", "http://myna.test/?view=usage", { width: 900, height: 700 });
+      const page = await open("usage", "http://owl.test/?view=usage", { width: 900, height: 700 });
       const card = page.locator(".subscription-card", { hasText: "Antigravity" });
       await card.locator(".quota-windows").first().waitFor();
       const boxes = card.locator(".quota-windows");
@@ -143,7 +143,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.deepEqual(border, [], "no left-border accent");
 
       // the menu bar panel: three rings an account, the families
-      const panel = await open("panel", "http://myna.test/?mode=panel", { width: 440, height: 640 });
+      const panel = await open("panel", "http://owl.test/?mode=panel", { width: 440, height: 640 });
       await panel.locator('#ptabs [data-ptab="usage"]').click();
       // its second account is behind the button, as several accounts are
       await panel.locator(".pq-group", { hasText: "Antigravity" }).locator(".pq-more").click();
@@ -157,7 +157,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert(ring.includes("Claude Opus 4.6 (Thinking)") && ring.includes("Claude Sonnet 4.6"), "the ring's tooltip lists its models: " + ring);
 
       // the provider's accounts: Gemini and Claude on each row
-      const prov = await open("accounts", "http://myna.test/?view=providers", { width: 900, height: 700 });
+      const prov = await open("accounts", "http://owl.test/?view=providers", { width: 900, height: 700 });
       await prov.locator(".row.provider", { hasText: "Antigravity" }).click();
       await prov.locator(".accts .acc .aq-w").first().waitFor();
       for (const user of ["ada@example.com", "bob@example.com"]) {

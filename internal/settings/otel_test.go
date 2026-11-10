@@ -75,28 +75,28 @@ func TestOTelSettingsPreservesReadOnlyPermissions(t *testing.T) {
 
 func TestOTelSettingsAndOverrides(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(t.TempDir(), "config"))
-	for _, k := range []string{"MYNA_OTEL_ENABLED", "MYNA_OTEL_ENDPOINT", "MYNA_OTEL_HEADERS", "MYNA_OTEL_METRICS", "MYNA_OTEL_BODIES", "MYNA_OTEL_BODIES_WHOLE", "MYNA_OTEL_SESSIONS"} {
+	for _, k := range []string{"OWL_OTEL_ENABLED", "OWL_OTEL_ENDPOINT", "OWL_OTEL_HEADERS", "OWL_OTEL_METRICS", "OWL_OTEL_BODIES", "OWL_OTEL_BODIES_WHOLE", "OWL_OTEL_SESSIONS"} {
 		t.Setenv(k, "")
 	}
 	// Empty overrides are explicit; a malformed enabled value fails closed.
 	if _, err := OTelExport(); err == nil {
 		t.Fatal("empty enabled override accepted")
 	}
-	t.Setenv("MYNA_OTEL_ENABLED", "false")
-	t.Setenv("MYNA_OTEL_METRICS", "false")
-	t.Setenv("MYNA_OTEL_BODIES", "false")
-	t.Setenv("MYNA_OTEL_BODIES_WHOLE", "false")
-	t.Setenv("MYNA_OTEL_SESSIONS", "false")
-	t.Setenv("MYNA_OTEL_ENDPOINT", "http://localhost:4318")
+	t.Setenv("OWL_OTEL_ENABLED", "false")
+	t.Setenv("OWL_OTEL_METRICS", "false")
+	t.Setenv("OWL_OTEL_BODIES", "false")
+	t.Setenv("OWL_OTEL_BODIES_WHOLE", "false")
+	t.Setenv("OWL_OTEL_SESSIONS", "false")
+	t.Setenv("OWL_OTEL_ENDPOINT", "http://localhost:4318")
 	if o, err := OTelExport(); err != nil || o.Enabled {
 		t.Fatalf("endpoint enabled export: %+v %v", o, err)
 	}
-	t.Setenv("MYNA_OTEL_ENABLED", "true")
-	t.Setenv("MYNA_OTEL_METRICS", "true")
-	t.Setenv("MYNA_OTEL_BODIES", "true")
-	t.Setenv("MYNA_OTEL_BODIES_WHOLE", "true")
-	t.Setenv("MYNA_OTEL_SESSIONS", "true")
-	t.Setenv("MYNA_OTEL_HEADERS", "Authorization=Basic%20YWJjZA==,X-Tag=a%2Cb%2Bc")
+	t.Setenv("OWL_OTEL_ENABLED", "true")
+	t.Setenv("OWL_OTEL_METRICS", "true")
+	t.Setenv("OWL_OTEL_BODIES", "true")
+	t.Setenv("OWL_OTEL_BODIES_WHOLE", "true")
+	t.Setenv("OWL_OTEL_SESSIONS", "true")
+	t.Setenv("OWL_OTEL_HEADERS", "Authorization=Basic%20YWJjZA==,X-Tag=a%2Cb%2Bc")
 	o, err := OTelExport()
 	if err != nil || !o.Enabled || !o.Metrics || !o.Bodies || !o.BodiesWhole || !o.Sessions || o.Headers["Authorization"] != "Basic YWJjZA==" || o.Headers["X-Tag"] != "a,b+c" {
 		t.Fatalf("%+v %v", o, err)

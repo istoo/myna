@@ -8,11 +8,11 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/update"
+	"github.com/istoo/owl/internal/update"
 )
 
-// The AUR's myna-bin installs /usr/bin/myna, and with pkexec there
-// myna put its own download over the package's file on a restart, so
+// The AUR's owl-bin installs /usr/bin/owl, and with pkexec there
+// owl put its own download over the package's file on a restart, so
 // pacman's database named one version and the disk had another, and the
 // next yay upgrade wrote over it again (shuhai on Discord). A binary a
 // package manager installed now says a version is out and the command
@@ -23,12 +23,12 @@ func TestUpdatePackagedLeavesItToTheManager(t *testing.T) {
 		if r.URL.Path == "/asset" {
 			t.Errorf("a packaged binary downloaded the release")
 		}
-		json.NewEncoder(w).Encode(update.Release{Version: "0.1.11", URL: "https://github.com/istoo/myna/releases/tag/v0.1.11", Assets: map[string]update.Asset{
+		json.NewEncoder(w).Encode(update.Release{Version: "0.1.11", URL: "https://github.com/istoo/owl/releases/tag/v0.1.11", Assets: map[string]update.Asset{
 			update.BinaryAsset(): {URL: "http://" + r.Host + "/asset"},
 		}})
 	}))
 	defer srv.Close()
-	t.Setenv("MYNA_UPDATE_FEED", srv.URL)
+	t.Setenv("OWL_UPDATE_FEED", srv.URL)
 	old := Version
 	Version = "0.1.10"
 	defer func() { Version = old }()
@@ -37,11 +37,11 @@ func TestUpdatePackagedLeavesItToTheManager(t *testing.T) {
 	canElevate = func() bool { return true }
 
 	dir := t.TempDir() // writable: ownership alone decides
-	exe := filepath.Join(dir, "myna")
-	if err := os.WriteFile(exe, []byte("myna"), 0o755); err != nil {
+	exe := filepath.Join(dir, "owl")
+	if err := os.WriteFile(exe, []byte("owl"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	packagedBy = func(string) *update.Packaged { return &update.Packaged{Manager: "pacman", Package: "myna-bin"} }
+	packagedBy = func(string) *update.Packaged { return &update.Packaged{Manager: "pacman", Package: "owl-bin"} }
 	u := &updater{}
 	u.placeExe(exe)
 	if u.exe != "" {
@@ -49,13 +49,13 @@ func TestUpdatePackagedLeavesItToTheManager(t *testing.T) {
 	}
 	u.check()
 	j := u.json()
-	if j.State != "available" || j.Stuck != "package" || j.Packaged == nil || j.Packaged.Manager != "pacman" || j.Packaged.Package != "myna-bin" || j.Packaged.Command != "yay -S myna-bin" || j.Latest != "0.1.11" {
+	if j.State != "available" || j.Stuck != "package" || j.Packaged == nil || j.Packaged.Manager != "pacman" || j.Packaged.Package != "owl-bin" || j.Packaged.Command != "yay -S owl-bin" || j.Latest != "0.1.11" {
 		t.Fatalf("%+v %+v", j, j.Packaged)
 	}
 	if u.install(true) {
 		t.Fatal("install put something in")
 	}
-	if b, _ := os.ReadFile(exe); string(b) != "myna" {
+	if b, _ := os.ReadFile(exe); string(b) != "owl" {
 		t.Fatalf("the package's file was changed: %q", b)
 	}
 

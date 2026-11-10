@@ -21,7 +21,7 @@ const servers = [
   { name: "spaced", transport: "stdio", command: "C:\\Program Files\\nodejs\\node.exe", args: ["say \"hi\"", ""], agents: ["claude"] },
 ];
 const fixture = (servers) => ({
-  dir: `${HOME}\\.myna\\library`, backups: `${HOME}\\.myna\\backups`, home: HOME,
+  dir: `${HOME}\\.owl\\library`, backups: `${HOME}\\.owl\\backups`, home: HOME,
   agents: [{ id: "claude", name: "Claude Code", icon: "claudecode-color", skills: `${HOME}\\.claude\\skills`, mcp: `${HOME}\\.claude.json` }],
   instructions: { agents: [], sets: [] }, foundServers: [], foundSkills: [], skills: [], projects: [], servers,
 });
@@ -81,15 +81,15 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const ctx = await browser.newContext({ viewport: { width: 980, height: 500 } });
         await ctx.addInitScript((p) => {
           Object.defineProperty(Navigator.prototype, "platform", { get: () => p });
-          try { localStorage.setItem("myna.libTab", "mcp"); } catch {}
+          try { localStorage.setItem("owl.libTab", "mcp"); } catch {}
         }, platform);
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         const saves = [];
-        await page.route("http://myna.test/**", server(saves));
-        await page.goto("http://myna.test/");
+        await page.route("http://owl.test/**", server(saves));
+        await page.goto("http://owl.test/");
         await navTo(page, "library");
         await page.locator("#view-library .lib-body:not(.lib-skel) .lib-row").first().waitFor();
         const lines = await page.locator("#view-library .lib-row .sub.mono").evaluateAll((els) => els.map((e) => [e.textContent, e.title]));

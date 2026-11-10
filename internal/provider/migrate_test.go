@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // fakeMover moves a made-up built-in, "fakeco", whose accounts keep a
@@ -86,7 +86,7 @@ func fakeSaved(t *testing.T) map[string]savedLogin {
 func TestMoveToPlugin(t *testing.T) {
 	bun := testenv.Bun(t)
 	claudeHome(t)
-	t.Setenv("MYNA_BUN", bun)
+	t.Setenv("OWL_BUN", bun)
 	t.Cleanup(plugin.Settle)
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 	defer cancel()
@@ -210,13 +210,13 @@ func TestMoveToPlugin(t *testing.T) {
 
 }
 
-// A move cut short (myna quit mid-way) is put back before it is tried
-// again, and a failed one waits before myna tries it by itself again:
+// A move cut short (owl quit mid-way) is put back before it is tried
+// again, and a failed one waits before owl tries it by itself again:
 // hours while the built-in serves its accounts, minutes once it is retired.
 func TestMoveCutShort(t *testing.T) {
 	bun := testenv.Bun(t)
 	claudeHome(t)
-	t.Setenv("MYNA_BUN", bun)
+	t.Setenv("OWL_BUN", bun)
 	t.Cleanup(plugin.Settle)
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 	defer cancel()
@@ -290,7 +290,7 @@ func TestMoveCutShort(t *testing.T) {
 	if errs := MoveRetiring(ctx); errs["fakeco"] != nil || !Moved("fakeco") {
 		t.Fatalf("a retired built-in after retiredRetry: %v", errs)
 	}
-	// a myna that stopped between the record and logins.json: tidied
+	// a owl that stopped between the record and logins.json: tidied
 	loginsMu.Lock()
 	_ = writeLogins(append(readLogins(), fakeLogin("late@fake", "r-l", false, true)))
 	loginsMu.Unlock()
@@ -317,7 +317,7 @@ func mustPlugin(t *testing.T) plugin.Provider {
 func TestPutBackKeepsNewer(t *testing.T) {
 	bun := testenv.Bun(t)
 	claudeHome(t)
-	t.Setenv("MYNA_BUN", bun)
+	t.Setenv("OWL_BUN", bun)
 	t.Cleanup(plugin.Settle)
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 	defer cancel()
@@ -416,7 +416,7 @@ func TestRemovedPluginIsNoMoveCandidate(t *testing.T) {
 }
 
 // A moved built-in's plugin is updated to the version its move needs, as
-// the built-in came up to date with myna; one whose plugin the user
+// the built-in came up to date with owl; one whose plugin the user
 // removed isn't installed again.
 func TestKeepMovedCurrent(t *testing.T) {
 	claudeHome(t)

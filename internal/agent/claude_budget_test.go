@@ -12,34 +12,34 @@ import (
 // largest to that window.
 func TestClaudePlan(t *testing.T) {
 	models := []claudeBudget{
-		{id: "mythos-myna-1", window: 500000, compact: 272000},
-		{id: "mythos-myna-2", window: 131000, compact: 272000},
-		{id: "anthropic/myna-3[1m]", window: 1000000, long: true, compact: 272000},
-		{id: "anthropic/myna-4", compact: -1},
-		{id: "myna/v/gpt-6.1-sol", window: 400000, compact: -1},
+		{id: "mythos-owl-1", window: 500000, compact: 272000},
+		{id: "mythos-owl-2", window: 131000, compact: 272000},
+		{id: "anthropic/owl-3[1m]", window: 1000000, long: true, compact: 272000},
+		{id: "anthropic/owl-4", compact: -1},
+		{id: "owl/v/gpt-6.1-sol", window: 400000, compact: -1},
 	}
 	top, entries := claudePlan(models, 272000, nil)
-	want := map[string]int{"mythos-myna-2": 131000, "anthropic/myna-4": 1000000, "myna/v/gpt-6.1-sol": 400000}
+	want := map[string]int{"mythos-owl-2": 131000, "anthropic/owl-4": 1000000, "owl/v/gpt-6.1-sol": 400000}
 	if top != 1000000 || !reflect.DeepEqual(entries, want) {
-		t.Fatalf("myna's default: %d %v", top, entries)
+		t.Fatalf("owl's default: %d %v", top, entries)
 	}
 	// no top-level window: every model runs at the largest, the [1m] one's 1M
 	top, entries = claudePlan(models, 0, nil)
-	want = map[string]int{"mythos-myna-1": 272000, "mythos-myna-2": 131000, "anthropic/myna-3": 272000, "myna/v/gpt-6.1-sol": 400000}
+	want = map[string]int{"mythos-owl-1": 272000, "mythos-owl-2": 131000, "anthropic/owl-3": 272000, "owl/v/gpt-6.1-sol": 400000}
 	if top != 1000000 || !reflect.DeepEqual(entries, want) {
 		t.Fatalf("no default: %d %v", top, entries)
 	}
 	// the user's own entries are theirs; "auto" on the 131K one holds the
 	// largest to its window
-	top, entries = claudePlan(models, 0, map[string]string{"mythos-myna-2": "auto", "myna/v/gpt-6.1-sol": "100000"})
-	want = map[string]int{"anthropic/myna-3": 272000}
+	top, entries = claudePlan(models, 0, map[string]string{"mythos-owl-2": "auto", "owl/v/gpt-6.1-sol": "100000"})
+	want = map[string]int{"anthropic/owl-3": 272000}
 	if top != 131000 || !reflect.DeepEqual(entries, want) {
 		t.Fatalf("the user's own: %d %v", top, entries)
 	}
 	// one within the model's window is kept as it is, and doesn't hold
 	// the largest
-	top, entries = claudePlan(models, 0, map[string]string{"mythos-myna-2": "50000"})
-	want = map[string]int{"mythos-myna-1": 272000, "anthropic/myna-3": 272000, "myna/v/gpt-6.1-sol": 400000}
+	top, entries = claudePlan(models, 0, map[string]string{"mythos-owl-2": "50000"})
+	want = map[string]int{"mythos-owl-1": 272000, "anthropic/owl-3": 272000, "owl/v/gpt-6.1-sol": 400000}
 	if top != 1000000 || !reflect.DeepEqual(entries, want) {
 		t.Fatalf("the user's 50000: %d %v", top, entries)
 	}
@@ -68,7 +68,7 @@ func TestClaudePlan(t *testing.T) {
 	if top != 1000000 || !reflect.DeepEqual(entries, map[string]int{"b": 1000000, "c": 400000}) {
 		t.Fatalf("behavesAs: %d %v", top, entries)
 	}
-	// an id myna's editor can't put in a key path gets no entry
+	// an id owl's editor can't put in a key path gets no entry
 	if _, entries = claudePlan([]claudeBudget{{id: "a", window: 400000}, {id: "b*", window: 100000}}, 0, nil); len(entries) != 0 {
 		t.Fatalf("b*: %v", entries)
 	}
@@ -77,7 +77,7 @@ func TestClaudePlan(t *testing.T) {
 // TestBudgetPath: a dot in a model's id is part of its key, as Claude Code
 // reads it, and the "[1m]" mark is not.
 func TestBudgetPath(t *testing.T) {
-	if p := budgetPath("myna/v/gpt-6.1-sol[1m]"); p != `modelSettings.myna/v/gpt-6\.1-sol.autoCompactWindow` {
+	if p := budgetPath("owl/v/gpt-6.1-sol[1m]"); p != `modelSettings.owl/v/gpt-6\.1-sol.autoCompactWindow` {
 		t.Fatal(p)
 	}
 	if got := budgetsRead(`{"a.b":{"autoCompactWindow":5},"c":{"autoCompactWindow":"auto"},"d":{"effortLevel":"high"}}`); !reflect.DeepEqual(got, map[string]string{"a.b": "5", "c": "auto"}) {

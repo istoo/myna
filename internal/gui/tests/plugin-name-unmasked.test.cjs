@@ -32,7 +32,7 @@ function serve(lang, signed) {
     if (url.pathname === "/api/settings") return json(settings);
     if (url.pathname === "/api/providers") return json(providers());
     if (url.pathname === "/api/plugin-signin/prompt") return json({ prompt: null, inputs: {} });
-    // what myna answered before lileo0668: the plugin's name as its user
+    // what owl answered before lileo0668: the plugin's name as its user
     if (url.pathname === "/api/plugin-signin") { signed.on = true; return json({ agent: "opencode-zen-free", state: "done", user: ZEN }); }
     if (url.pathname === "/api/groups") return json({ groups: [], models: [] });
     if (url.pathname === "/api/plugins") return json({ plugins: plugins() });
@@ -50,14 +50,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       t.after(() => browser.close());
       for (const width of [900, 360]) {
         const context = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: "reduce" });
-        await context.addInitScript(() => { try { localStorage.setItem("myna.maskEmails", "1"); } catch {} });
+        await context.addInitScript(() => { try { localStorage.setItem("owl.maskEmails", "1"); } catch {} });
         const page = await context.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, { on: false }));
-        await page.goto("http://myna.test/?view=providers");
+        await page.goto("http://owl.test/?view=providers");
 
         // the blur is on: an account's name is hidden
         await page.waitForFunction((a) => document.querySelector(".pii") && !document.body.innerText.includes(a), ACCOUNT);

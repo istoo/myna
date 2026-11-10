@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Gateway mode (Player on Discord): myna web on a server that is only
+// Gateway mode (Player on Discord): owl web on a server that is only
 // the gateway for other computers' agents. boot.js says so and the page
 // opens on Providers with no Agents or Library tab, an address
 // kept for one of them opening Providers; Settings leaves out what is
@@ -7,8 +7,8 @@
 // the Codex and Claude Code settings live on the Agents page, which is
 // gone) and the desktop's alerts, and General has the switch — Automatic, On, Off —
 // saying why it is on. Off brings the tabs and the rows back at once, the
-// Agents page opening again; Automatic takes them away again. myna web
-// not in gateway mode keeps every tab, and the switch is myna web's
+// Agents page opening again; Automatic takes them away again. owl web
+// not in gateway mode keeps every tab, and the switch is owl web's
 // alone. No click scrolls the page, no native <select>, no left border.
 // English and Chinese; no backend, the API is faked here.
 const assert = require("node:assert/strict");
@@ -26,7 +26,7 @@ function settingsPayload(over) {
     dock: false, dockWindow: false, proxy: "", redact: false, redactPersonal: false, redactWords: [],
     codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", workbuddyCheckin: false, noStats: false,
     trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "",
-    version: "0.1.400", dir: "/config/home/.config/myna", gateway: "http://127.0.0.1:3425",
+    version: "0.1.400", dir: "/config/home/.config/owl", gateway: "http://127.0.0.1:3425",
     proxyNow: "none", proxySource: "none", login: false,
     visionModels: [], imageGenModels: [], workbuddyCheckins: [], lanURLs: [],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
@@ -34,7 +34,7 @@ function settingsPayload(over) {
   };
 }
 
-// agents says whether myna found agents here: Automatic is on without
+// agents says whether owl found agents here: Automatic is on without
 // notice is the warning on Codex's subagents row, when the answer
 // carries one
 function server(lang, posts, { web = true, gateway = true, agents = false, notice } = {}) {
@@ -128,7 +128,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [], posts = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", server(lang, posts));
-      await page.goto("http://myna.test/");
+      await page.goto("http://owl.test/");
       await page.waitForSelector("#nav button.on");
       assert.deepEqual(await tabs(page), KEPT, `${where}: the tabs`);
       assert.deepEqual(await viewShown(page), ["view-providers"], `${where}: opens on Providers`);
@@ -136,7 +136,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
       // an address kept for a page left out opens Providers
       for (const v of HIDDEN) {
-        await page.goto(`http://myna.test/?view=${v}`);
+        await page.goto(`http://owl.test/?view=${v}`);
         await page.waitForSelector("#nav button.on");
         assert.deepEqual(await viewShown(page), ["view-providers"], `${where}: ?view=${v}`);
       }
@@ -175,8 +175,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await context.close();
     }
 
-    // myna web with agents here, and the app's window: every tab; the
-    // switch is myna web's alone
+    // owl web with agents here, and the app's window: every tab; the
+    // switch is owl web's alone
     for (const [web, name] of [[true, "web with agents"], [false, "window"]]) {
       for (const lang of ["en", "zh"]) {
         const where = `${engine} ${lang} ${name}`;
@@ -187,7 +187,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, [], { web, gateway: false, agents: true }));
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         await page.waitForSelector("#nav button.on");
         assert.deepEqual(await tabs(page), ["agents", "sessions", "library", "providers", "routing", "gateway", "usage", "masking", "plugins"], where);
         assert.deepEqual(await viewShown(page), ["view-agents"], where);
@@ -205,14 +205,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 // Codex's settings (its opened row on the Agents page) carry the subagents
 // row's the warning element
 // #codexAgentsV1Warn: with `notice` in the settings answer it shows the text
-// (translated), without one it stays hidden. myna writes nothing here — the
+// (translated), without one it stays hidden. owl writes nothing here — the
 // user turns Codex's own multi_agent_v2 off themselves (#141, #1028 review).
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   test(`${engine}: the codex subagents warning row`, async (t) => {
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     t.after(() => browser.close());
     // not an i18n key, so t() hands it back as it is in every language
-    const notice = "Codex's own multi_agent_v2 is on in the config myna routes (#141 probe)";
+    const notice = "Codex's own multi_agent_v2 is on in the config owl routes (#141 probe)";
     for (const [withNotice, what] of [[true, "with notice"], [false, "without notice"]]) {
       const where = `${engine} ${what}`;
       const context = await browser.newContext({ viewport: { width: 1100, height: 560 }, reducedMotion: "reduce" });
@@ -225,7 +225,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // are shown and the warning row is rendered here
       await page.route("**/*", server("en", posts, { web: false, gateway: false, agents: true, notice: withNotice ? notice : undefined }));
       await watchSettingsReads(page);
-      await page.goto("http://myna.test/?view=agents");
+      await page.goto("http://owl.test/?view=agents");
       await openAgentSettings(page);
       await page.locator("#codexAgentsV1Segs .opt").first().waitFor();
       const warn = page.locator("#codexAgentsV1Warn");
@@ -265,7 +265,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
   test(`${engine}: the codex subagents warning in every language, narrow`, async (t) => {
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     t.after(() => browser.close());
-    const warning = "Codex's own multi_agent_v2 is on in the config myna routes, which takes over the multi-agent V1 myna's models ask for; turn it off in Codex's config to run subagents on myna's models.";
+    const warning = "Codex's own multi_agent_v2 is on in the config owl routes, which takes over the multi-agent V1 owl's models ask for; turn it off in Codex's config to run subagents on owl's models.";
     const restart = "Codex builds its model list at start-up — restart the Codex app, open codex sessions and the app-server they share (codex app-server daemon restart) to see this.";
     for (const lang of ["en", "zh", "zh-TW", "ja", "de"]) {
       const context = await browser.newContext({ viewport: { width: 420, height: 720 }, reducedMotion: "reduce" });
@@ -276,7 +276,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", server(lang, [], { web: false, gateway: false, agents: true, notice: warning + " " + restart }));
       await watchSettingsReads(page);
-      await page.goto("http://myna.test/?view=agents");
+      await page.goto("http://owl.test/?view=agents");
       await openAgentSettings(page);
       await page.locator("#codexAgentsV1Segs .opt").first().waitFor();
       const warn = page.locator("#codexAgentsV1Warn");

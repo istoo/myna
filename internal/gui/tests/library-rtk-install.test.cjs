@@ -17,7 +17,7 @@ const assets = path.resolve(__dirname, "../assets");
 const HOME = "/Users/aimer";
 const agent = (id, name) => ({ id, name, icon: "", skills: `${HOME}/.${id}/skills`, mcp: `${HOME}/.${id}/mcp.json` });
 const lib = () => ({
-  dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
+  dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
   agents: [agent("claude", "Claude Code")],
   instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [], skills: [], servers: [],
 });
@@ -70,13 +70,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         let release;
         const st = { calls: 0, done: false, hold: new Promise((r) => { release = r; }) };
         const ctx = await browser.newContext({ viewport: { width, height: 800 } });
-        await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "rtk"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("owl.libTab", "rtk"); } catch {} });
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, st));
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         await navTo(page, "library");
         const v = page.locator("#view-library");
         const cmd = v.locator(".lib-rtk-cmd");

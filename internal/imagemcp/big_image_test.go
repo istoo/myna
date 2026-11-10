@@ -17,8 +17,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // fourK is a real 3840x2160 PNG of about the size #1576's relay sent

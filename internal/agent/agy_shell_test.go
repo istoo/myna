@@ -8,14 +8,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/update"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/update"
 )
 
-// Typing agy just works (bestony on Discord): picking one of myna's
+// Typing agy just works (bestony on Discord): picking one of owl's
 // models for agy gives the user's shells a function agy that starts it
-// through myna, the next start puts it back for a user wired before,
+// through owl, the next start puts it back for a user wired before,
 // and stepping out takes it out, the user's own lines as they were.
 func TestAgyShell(t *testing.T) {
 	home := t.TempDir()
@@ -39,7 +39,7 @@ func TestAgyShell(t *testing.T) {
 	if env, m := AgyStart(); env != nil || m != "" {
 		t.Fatalf("AgyStart before: %v %q", env, m)
 	}
-	if err := a.Apply("model", "myna/deepseek/pro"); err != nil {
+	if err := a.Apply("model", "owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	in := update.ShellFunctionIn("agy")
@@ -48,18 +48,18 @@ func TestAgyShell(t *testing.T) {
 	}
 	for _, p := range in {
 		b, _ := os.ReadFile(p)
-		if s := string(b); !strings.HasPrefix(s, mine+"\n# >>> myna agy >>>\nfunction agy {\n") || !strings.Contains(s, ` agy run "$@"; else command agy "$@"; fi`) || !strings.HasSuffix(s, "}\n# <<< myna agy <<<\n") {
+		if s := string(b); !strings.HasPrefix(s, mine+"\n# >>> owl agy >>>\nfunction agy {\n") || !strings.Contains(s, ` agy run "$@"; else command agy "$@"; fi`) || !strings.HasSuffix(s, "}\n# <<< owl agy <<<\n") {
 			t.Fatalf("%s:\n%s", p, s)
 		}
 	}
 	if a.Typed() != "agy" {
 		t.Fatalf("typed: %q", a.Typed())
 	}
-	if n := a.Notice(); !strings.HasPrefix(n, "Type agy in a new terminal: myna added it to ~/") || !strings.HasSuffix(n, "(in a terminal open now: "+a.Launch()+").") {
+	if n := a.Notice(); !strings.HasPrefix(n, "Type agy in a new terminal: owl added it to ~/") || !strings.HasSuffix(n, "(in a terminal open now: "+a.Launch()+").") {
 		t.Fatalf("notice: %q", n)
 	}
 	env, m := AgyStart()
-	if m != "myna/deepseek/pro" || strings.Join(env, " ") != "GEMINI_API_KEY="+gateway.TokenFor("agy")+" GOOGLE_GEMINI_BASE_URL="+gateway.URL() {
+	if m != "owl/deepseek/pro" || strings.Join(env, " ") != "GEMINI_API_KEY="+gateway.TokenFor("agy")+" GOOGLE_GEMINI_BASE_URL="+gateway.URL() {
 		t.Fatalf("AgyStart: %v %q", env, m)
 	}
 
@@ -89,21 +89,21 @@ func TestAgyShell(t *testing.T) {
 	if a.Typed() != "" {
 		t.Fatal("typed after stepping out")
 	}
-	// and a start off myna doesn't give it again
+	// and a start off owl doesn't give it again
 	a.Sync()
 	if got := update.ShellFunctionIn("agy"); len(got) != 0 {
-		t.Fatalf("Sync off myna: %v", got)
+		t.Fatalf("Sync off owl: %v", got)
 	}
 }
 
-// The function in each shell runs this myna's `agy run`, the agy on
-// PATH when myna is gone, its path quoted for that shell.
+// The function in each shell runs this owl's `agy run`, the agy on
+// PATH when owl is gone, its path quoted for that shell.
 func TestAgyFunction(t *testing.T) {
-	prog := "/Users/o'neil/myna"
+	prog := "/Users/o'neil/owl"
 	for kind, want := range map[string]string{
-		"posix":      `if [ -x '/Users/o'\''neil/myna' ]; then '/Users/o'\''neil/myna' agy run "$@"; else command agy "$@"; fi`,
-		"fish":       `'/Users/o\'neil/myna' agy run $argv`,
-		"powershell": `foreach ($l in @(& '/Users/o''neil/myna' agy env))`,
+		"posix":      `if [ -x '/Users/o'\''neil/owl' ]; then '/Users/o'\''neil/owl' agy run "$@"; else command agy "$@"; fi`,
+		"fish":       `'/Users/o\'neil/owl' agy run $argv`,
+		"powershell": `foreach ($l in @(& '/Users/o''neil/owl' agy env))`,
 	} {
 		if got := agyFunction(kind, prog); !strings.Contains(got, want) {
 			t.Errorf("%s:\n%s\nwant it to have %s", kind, got, want)

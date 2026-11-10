@@ -7,7 +7,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/istoo/myna/internal/appdir"
+	"github.com/istoo/owl/internal/appdir"
 )
 
 func codexConfigPath() string {
@@ -44,8 +44,8 @@ func readCodexConfig(path string) ([]AppImport, error) {
 			name = id
 		}
 		it := AppImport{Ref: id, From: "config.toml"}
-		if id == "myna" {
-			it.Provider, it.Skip = Provider{Name: name}, "it points at myna itself"
+		if id == "owl" {
+			it.Provider, it.Skip = Provider{Name: name}, "it points at owl itself"
 			out = append(out, it)
 			continue
 		}
@@ -112,7 +112,7 @@ func codexImportModels(configPath, catalogPath string) []string {
 	} else if !filepath.IsAbs(catalogPath) {
 		catalogPath = filepath.Join(filepath.Dir(configPath), catalogPath)
 	}
-	if filepath.Clean(catalogPath) == filepath.Join(appdir.CodexHomeIn(home), "myna-models.json") {
+	if filepath.Clean(catalogPath) == filepath.Join(appdir.CodexHomeIn(home), "owl-models.json") {
 		return nil
 	}
 	b, err := os.ReadFile(catalogPath)

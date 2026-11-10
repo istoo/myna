@@ -10,11 +10,11 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/owl/internal/gateway"
 )
 
-// healthcheck: myna healthcheck — exits 0 when a myna gateway answers
-// at its address (MYNA_ADDR, else the port in Settings' Gateway address on 127.0.0.1,
+// healthcheck: owl healthcheck — exits 0 when a owl gateway answers
+// at its address (OWL_ADDR, else the port in Settings' Gateway address on 127.0.0.1,
 // 3425 unless set), for a container's
 // HEALTHCHECK, which has no curl to ask it with.
 func healthcheck() error {
@@ -25,8 +25,8 @@ func healthcheck() error {
 	}
 	defer res.Body.Close()
 	b, _ := io.ReadAll(io.LimitReader(res.Body, 4096))
-	if res.StatusCode != http.StatusOK || !bytes.Contains(b, []byte(`"myna"`)) {
-		return fmt.Errorf("%s answers %s, not as a myna gateway", gateway.URL(), res.Status)
+	if res.StatusCode != http.StatusOK || !bytes.Contains(b, []byte(`"owl"`)) {
+		return fmt.Errorf("%s answers %s, not as a owl gateway", gateway.URL(), res.Status)
 	}
 	return nil
 }

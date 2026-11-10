@@ -4,34 +4,34 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// myna model spec: a model's context window, reply limit, vision and
+// owl model spec: a model's context window, reply limit, vision and
 // reasoning levels at once, over what the vendor's list and models.dev say
 // (Dani Ariyanto on Discord: a custom provider's models had none known).
 
 const specUsage = `usage:
-  myna model spec <provider/model>             its context window, max output, vision and reasoning levels,
+  owl model spec <provider/model>             its context window, max output, vision and reasoning levels,
                                                  and whether each is yours or the vendor's list's / models.dev's
-  myna model spec <provider/model> [--context <n>] [--output <n>] [--vision on|off] [--reasoning <levels>]
+  owl model spec <provider/model> [--context <n>] [--output <n>] [--vision on|off] [--reasoning <levels>]
                                                  say any of them: --context 200000 or 1m, --output 128k,
                                                  --reasoning low-high (a range), low,medium,high (a list) or off
                                                  (send it no reasoning field); auto as any value takes yours off
                                                  that one and goes back to the vendor's list and models.dev
-  myna model spec '<provider>/*' --context <n> --output <n>
+  owl model spec '<provider>/*' --context <n> --output <n>
                                                  a window and max output for every model of that provider that
                                                  has none of its own; vision and reasoning are set per model
-  myna model spec <provider/model> --reset     take every value you set off this model
-  myna model specs                             the models you gave a spec
+  owl model spec <provider/model> --reset     take every value you set off this model
+  owl model specs                             the models you gave a spec
 
-  What you set wins over the vendor's list and models.dev everywhere myna reads them: the app's
+  What you set wins over the vendor's list and models.dev everywhere owl reads them: the app's
   badges, the gateway's model list and routing, max_tokens, image handling, and the model lists
-  myna writes into the agents. A model you set nothing on is as it was. A catalog refresh keeps them.
+  owl writes into the agents. A model you set nothing on is as it was. A catalog refresh keeps them.
   Reasoning levels narrowed from the model's own only narrow what agents are offered; the vendor is
   still asked at any level it has. Levels given a model with none known are what it is asked at.
 
-  e.g. myna model spec kenari/glm-5:free --context 128k --output 16k --vision off --reasoning low-high`
+  e.g. owl model spec kenari/glm-5:free --context 128k --output 16k --vision off --reasoning low-high`
 
 func modelSpec(args []string) error {
 	if len(args) == 0 {
@@ -51,7 +51,7 @@ func modelSpec(args []string) error {
 			return err
 		}
 		if len(gone) == 0 {
-			return fmt.Errorf("%s has no spec of yours to reset — myna model spec %s says what it has now", ref, typedRef(ref))
+			return fmt.Errorf("%s has no spec of yours to reset — owl model spec %s says what it has now", ref, typedRef(ref))
 		}
 		fmt.Println(green.Render("✓"), ref, muted.Render("has no "+strings.Join(gone, ", ")+" of yours · it goes by the vendor's list and models.dev"))
 		return nil
@@ -128,7 +128,7 @@ func specTokens(what, v string) (int, error) {
 	return n, nil
 }
 
-// showSpec prints a model's spec as myna goes by it, and where each part
+// showSpec prints a model's spec as owl goes by it, and where each part
 // came from.
 func showSpec(ref string) error {
 	p, model, err := modelRef(ref)
@@ -179,7 +179,7 @@ func showSpec(ref string) error {
 func modelSpecs() error {
 	rows := provider.ModelSpecs()
 	if len(rows) == 0 {
-		fmt.Println(muted.Render("no model has a spec of yours yet · myna model spec <provider/model> --context <n> …"))
+		fmt.Println(muted.Render("no model has a spec of yours yet · owl model spec <provider/model> --context <n> …"))
 		return nil
 	}
 	w := 0

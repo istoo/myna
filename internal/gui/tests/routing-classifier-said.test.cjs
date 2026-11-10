@@ -79,7 +79,7 @@ async function open(t, engine, lang, width, said) {
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", serve(lang, routeOf(said)));
-  await page.goto("http://myna.test/?view=routing");
+  await page.goto("http://owl.test/?view=routing");
   await page.locator(".rt-group").first().waitFor();
   return { page, errors };
 }

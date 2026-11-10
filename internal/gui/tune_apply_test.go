@@ -5,10 +5,10 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/codexcat"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/codexcat"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/sessions"
 )
 
 // hoobnn on Discord (11-01): under Usage › Context, over 7 or 30 days,
@@ -20,7 +20,7 @@ import (
 // and the card still read 430K, now held as that model's own. "Now" is
 // where Long conversations has Codex's other models; a model with its
 // own threshold is named apart. With no other model in the range, the
-// card is held before the click as well, Long conversations at myna's
+// card is held before the click as well, Long conversations at owl's
 // default or not, since Use couldn't move it.
 func TestTuneCodexUseLandsInEveryRange(t *testing.T) {
 	sandboxHome(t)
@@ -48,7 +48,7 @@ func TestTuneCodexUseLandsInEveryRange(t *testing.T) {
 		}
 		return st.Agents[0].Advice[0]
 	}
-	// where Codex's model list, as myna gives it, has Codex compact
+	// where Codex's model list, as owl gives it, has Codex compact
 	landed := func() map[string]int {
 		t.Helper()
 		var out struct {
@@ -70,7 +70,7 @@ func TestTuneCodexUseLandsInEveryRange(t *testing.T) {
 	}
 
 	// one model, with a threshold of its own, and Long conversations at
-	// myna's default: Use couldn't move it, so there is none
+	// owl's default: Use couldn't move it, so there is none
 	if a := advice("own/gpt-own-1m"); a.Own == nil || a.Own.Model != "own/gpt-own-1m" || a.Own.Value != 430000 || a.Compact.Current != 430000 {
 		t.Errorf("only the model with its own 430K: own %+v, now %d; want it named, now 430000", a.Own, a.Compact.Current)
 	}
@@ -97,7 +97,7 @@ func TestTuneCodexUseLandsInEveryRange(t *testing.T) {
 	for _, ms := range [][]string{{"cpa/gpt-cpa-1m"}, {"cpa/gpt-cpa-1m", "own/gpt-own-1m"}} {
 		a := advice(ms...)
 		if a.Compact.Current != best || a.Own != nil || !a.Setting.Ours || a.Setting.Value != strconv.Itoa(best) {
-			t.Errorf("%v after Use %d: now %d, own %+v, setting %+v; want now %d, put in by myna", ms, best, a.Compact.Current, a.Own, a.Setting, best)
+			t.Errorf("%v after Use %d: now %d, own %+v, setting %+v; want now %d, put in by owl", ms, best, a.Compact.Current, a.Own, a.Setting, best)
 		}
 	}
 	at := landed()

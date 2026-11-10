@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A group's member the user unchecked in its provider's model list is

@@ -2,15 +2,15 @@ package catalog
 
 import "testing"
 
-// A models_cache.json Codex wrote from a list handed through myna has
-// myna's models in it; they are not Codex's own.
-func TestCodexCacheLeavesMynaOut(t *testing.T) {
-	b := []byte(`{"etag":"W/\"abc+myna-0a06185a4db4\"","models":[
+// A models_cache.json Codex wrote from a list handed through owl has
+// owl's models in it; they are not Codex's own.
+func TestCodexCacheLeavesOwlOut(t *testing.T) {
+	b := []byte(`{"etag":"W/\"abc+owl-0a06185a4db4\"","models":[
 		{"slug":"gpt-5.5","display_name":"GPT-5.5","visibility":"list","priority":1},
-		{"slug":"group/semantic","display_name":"semantic","description":"semantic via myna","visibility":"list","priority":2},
+		{"slug":"group/semantic","display_name":"semantic","description":"semantic via owl","visibility":"list","priority":2},
 		{"slug":"group/auto-glm-5-3-flash","display_name":"GLM-5.3-Flash","visibility":"list","priority":3},
 		{"slug":"codex/gpt-5.4","display_name":"GPT-5.4","visibility":"list","priority":4},
-		{"slug":"deepseek/deepseek-v4","display_name":"DeepSeek V4","description":"DeepSeek V4 via myna","visibility":"list","priority":5}]}`)
+		{"slug":"deepseek/deepseek-v4","display_name":"DeepSeek V4","description":"DeepSeek V4 via owl","visibility":"list","priority":5}]}`)
 	ms, err := parseCodex(b)
 	if err != nil {
 		t.Fatal(err)

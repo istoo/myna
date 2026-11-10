@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 	"github.com/tidwall/gjson"
 )
 
@@ -98,8 +98,8 @@ func TestUndeclaredHistoryToolRefusedThenStubbed(t *testing.T) {
 			if c := gjson.GetBytes(last, "tool_choice"); c.Exists() {
 				t.Fatalf("tool_choice %s set where the client offered tools", c.Raw)
 			}
-			if strings.Contains(strings.ToLower(string(last)), "myna") {
-				t.Fatalf("the stub names myna: %s", last)
+			if strings.Contains(strings.ToLower(string(last)), "owl") {
+				t.Fatalf("the stub names owl: %s", last)
 			}
 			asked = nil
 			if code, out := postChatTo(h, piDeferred); code != 200 || len(asked) != 1 {

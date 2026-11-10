@@ -1,8 +1,8 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// DeepSeek Harness's own DeepSeek models, beside myna's in its model
-// picker, can be left out (MizuIro-H, #1642). They aren't myna's catalog,
+// DeepSeek Harness's own DeepSeek models, beside owl's in its model
+// picker, can be left out (MizuIro-H, #1642). They aren't owl's catalog,
 // so its model list has a switch of their own at the top: off, the picker
-// offers myna's alone, at once on closing the list and in the state read
+// offers owl's alone, at once on closing the list and in the state read
 // after; on again, they are back. The one the agent is set to stays (the
 // server's agent.Picks). An agent with no models of its own has no switch,
 // and the order view hides it. In English, Chinese, German and Japanese, at a
@@ -19,20 +19,20 @@ const own = ["deepseek-flash", "deepseek-v4-pro", "deepseek-v4-flash"].map((v) =
   value: v, label: v.replace("deepseek", "DeepSeek").replace("-v4", "-V4").replace("-flash", "-Flash").replace("-pro", "-Pro"),
   icon: "deepseek-color", group: "DeepSeek Harness", direct: "DeepSeek",
 }));
-const myna = ["pro", "flash"].map((m) => ({ value: "myna/deepseek/" + m, label: "deepseek-" + m, ref: "deepseek/" + m, note: "DeepSeek · via myna", group: "DeepSeek", icon: "deepseek-color" }));
-const list = myna.map((o, i) => ({ id: o.ref, name: o.label, group: "DeepSeek", icon: "deepseek-color", inUse: i === 0 }));
+const owl = ["pro", "flash"].map((m) => ({ value: "owl/deepseek/" + m, label: "deepseek-" + m, ref: "deepseek/" + m, note: "DeepSeek · via owl", group: "DeepSeek", icon: "deepseek-color" }));
+const list = owl.map((o, i) => ({ id: o.ref, name: o.label, group: "DeepSeek", icon: "deepseek-color", inUse: i === 0 }));
 
 function fixture(lang) {
   let ownHidden = false, late = 0;
   const posts = [];
   const count = { shown: list.length, listed: list.length };
-  const options = () => [...(ownHidden ? [] : own), ...myna];
+  const options = () => [...(ownHidden ? [] : own), ...owl];
   const state = () => ({
     agents: [
       { id: "dsh", name: "DeepSeek Harness", icon: "deepseek-color", path: "/fixture/dsh", wired: true, models: count,
-        fields: [{ key: "model", label: "model", value: "myna/deepseek/pro", options: options() }] },
+        fields: [{ key: "model", label: "model", value: "owl/deepseek/pro", options: options() }] },
       { id: "codex", name: "Codex", icon: "codex-color", path: "/fixture/codex", wired: true, models: count,
-        fields: [{ key: "model", label: "model", value: "myna/deepseek/pro", options: myna }] },
+        fields: [{ key: "model", label: "model", value: "owl/deepseek/pro", options: owl }] },
     ],
     profiles: [], settings: { lang, theme: "light" },
   });
@@ -101,7 +101,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           }
           await browser.close();
         });
-        await page.goto("http://myna.test/?view=agents");
+        await page.goto("http://owl.test/?view=agents");
         await page.locator(row("dsh")).waitFor();
         const pop = page.locator(".am-pop:not(.leaving)");
         const open = async (id) => {
@@ -128,7 +128,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         };
         const settle = () => page.waitForTimeout(250);
 
-        // before: dsh's own beside myna's
+        // before: dsh's own beside owl's
         assert.match(await picked(), /DeepSeek-V4-Pro/);
 
         await open("dsh");
@@ -143,7 +143,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert(pb.x >= 0 && pb.x + pb.width <= width, JSON.stringify(pb));
         assert.equal(await box.evaluate((e) => e.querySelector("span").scrollWidth <= e.querySelector("span").clientWidth), true, "its words cut short");
 
-        // the order view is myna's models alone: no switch there
+        // the order view is owl's models alone: no switch there
         await pop.locator(".am-seg button", { hasText: w.order }).click();
         assert(await box.isHidden());
         await pop.locator(".am-seg button", { hasText: w.all }).click();
@@ -157,7 +157,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await close();
         let rows = await picked();
         assert.doesNotMatch(rows, /DeepSeek-V4-Pro|DeepSeek-Flash/, "dsh's own still offered");
-        assert.match(rows, /deepseek-flash/, "myna's are offered");
+        assert.match(rows, /deepseek-flash/, "owl's are offered");
         // and so in the state read again
         await page.waitForTimeout(1800);
         rows = await picked();

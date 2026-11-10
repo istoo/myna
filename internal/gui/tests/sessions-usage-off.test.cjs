@@ -37,7 +37,7 @@ function serve(lang, off) {
     }
     if (url.pathname === "/api/sessions/overview") return json({ count: 2, median: 5000, p90: 5000, days: [1], top: { tokens: [], cost: [], active: [] } });
     if (url.pathname === "/api/sessions/manage") {
-      return json({ agents: [{ agent: "codex", count: list.length, deletable: true, name: "Codex", icon: "openai" }], agent: "codex", sessions: list.map((s) => ({ ...s, size: 4096, messages: 6, files: 1, deletable: true })), terminal: true, trash: [], trashDir: "~/myna/trash/sessions" });
+      return json({ agents: [{ agent: "codex", count: list.length, deletable: true, name: "Codex", icon: "openai" }], agent: "codex", sessions: list.map((s) => ({ ...s, size: 4096, messages: 6, files: 1, deletable: true })), terminal: true, trash: [], trashDir: "~/owl/trash/sessions" });
     }
     if (url.pathname === "/api/groups") return json({ groups: [] });
     if (url.pathname === "/api/usage/quotas") return json([]);
@@ -84,8 +84,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, ["sessions"]));
-        await page.addInitScript(() => { localStorage.setItem("myna.usageTab", "sessions"); localStorage.setItem("myna.sessRange", "all"); });
-        await page.goto("http://myna.test/?view=usage");
+        await page.addInitScript(() => { localStorage.setItem("owl.usageTab", "sessions"); localStorage.setItem("owl.sessRange", "all"); });
+        await page.goto("http://owl.test/?view=usage");
 
         const list = page.locator("#sessList");
         const row = list.locator(".row.sess", { hasText: "你好" });
@@ -123,8 +123,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(60000);
       await page.route("**/*", serve(lang, []));
-      await page.addInitScript(() => { localStorage.setItem("myna.usageTab", "sessions"); localStorage.setItem("myna.sessRange", "all"); });
-      await page.goto("http://myna.test/?view=usage");
+      await page.addInitScript(() => { localStorage.setItem("owl.usageTab", "sessions"); localStorage.setItem("owl.sessRange", "all"); });
+      await page.goto("http://owl.test/?view=usage");
       const row = page.locator("#sessList .row.sess", { hasText: "你好" });
       await row.waitFor();
       assert.equal(await row.getAttribute("role"), "link");

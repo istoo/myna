@@ -13,15 +13,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/update"
+	"github.com/istoo/owl/internal/update"
 )
 
-// The version last run is kept in myna's folder, and the notes since are
+// The version last run is kept in owl's folder, and the notes since are
 // shown once after an upgrade: not on a fresh install, nor offline.
 func TestWhatsNewAfterUpgrade(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("XDG_CONFIG_HOME", home)
-	dir := filepath.Join(home, "myna")
+	dir := filepath.Join(home, "owl")
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(map[string]any{"releases": []update.Note{
 			{Version: "0.1.604", Notes: "- four (#464)\n\n### Install\n\nlinks"},
@@ -30,8 +30,8 @@ func TestWhatsNewAfterUpgrade(t *testing.T) {
 		}})
 	}))
 	defer srv.Close()
-	t.Setenv("MYNA_NOTES_FEED", srv.URL)
-	t.Setenv("MYNA_UPDATE_FEED", "http://127.0.0.1:1/")
+	t.Setenv("OWL_NOTES_FEED", srv.URL)
+	t.Setenv("OWL_UPDATE_FEED", "http://127.0.0.1:1/")
 	old := Version
 	defer func() { Version = old }()
 	last := func() string {
@@ -96,12 +96,12 @@ func TestUpdateNotesWithoutInstall(t *testing.T) {
 	}
 }
 
-// A myna from before the version was kept, already in use, shows its own
+// A owl from before the version was kept, already in use, shows its own
 // version's notes; the site without the list yet leaves the update feed's.
 func TestWhatsNewFromBefore(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("XDG_CONFIG_HOME", home)
-	dir := filepath.Join(home, "myna")
+	dir := filepath.Join(home, "owl")
 	os.MkdirAll(dir, 0o755)
 	os.WriteFile(filepath.Join(dir, "settings.json"), []byte("{}"), 0o644)
 	os.Chtimes(filepath.Join(dir, "settings.json"), started.Add(-time.Hour), started.Add(-time.Hour))
@@ -109,8 +109,8 @@ func TestWhatsNewFromBefore(t *testing.T) {
 		json.NewEncoder(w).Encode(update.Release{Version: "0.1.604", Notes: "## Bug Fixes\n\n- four"})
 	}))
 	defer feed.Close()
-	t.Setenv("MYNA_UPDATE_FEED", feed.URL)
-	t.Setenv("MYNA_NOTES_FEED", feed.URL+"/404")
+	t.Setenv("OWL_UPDATE_FEED", feed.URL)
+	t.Setenv("OWL_NOTES_FEED", feed.URL+"/404")
 	old := Version
 	defer func() { Version = old }()
 	Version = "0.1.604"
@@ -122,12 +122,12 @@ func TestWhatsNewFromBefore(t *testing.T) {
 }
 
 // #525: the dialog comes up by itself on the first start of an update the
-// user didn't ask for from myna; after "Restart to update" its notes wait
+// user didn't ask for from owl; after "Restart to update" its notes wait
 // in Settings, and "Don't show again today" keeps it quiet for the day.
 func TestWhatsNewQuietAfterRestartToUpdate(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("XDG_CONFIG_HOME", home)
-	dir := filepath.Join(home, "myna")
+	dir := filepath.Join(home, "owl")
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(map[string]any{"releases": []update.Note{
 			{Version: "0.1.606", Notes: "- six"},
@@ -136,8 +136,8 @@ func TestWhatsNewQuietAfterRestartToUpdate(t *testing.T) {
 		}})
 	}))
 	defer srv.Close()
-	t.Setenv("MYNA_NOTES_FEED", srv.URL)
-	t.Setenv("MYNA_UPDATE_FEED", "http://127.0.0.1:1/")
+	t.Setenv("OWL_NOTES_FEED", srv.URL)
+	t.Setenv("OWL_UPDATE_FEED", "http://127.0.0.1:1/")
 	oldV, oldToday := Version, today
 	defer func() { Version, today = oldV, oldToday }()
 	day := "2026-10-02"
@@ -159,7 +159,7 @@ func TestWhatsNewQuietAfterRestartToUpdate(t *testing.T) {
 		updates.exe, updates.self, updates.latest, updates.staged = oExe, oSelf, oLatest, oStaged
 		updates.mu.Unlock()
 	}()
-	exe := filepath.Join(t.TempDir(), "myna")
+	exe := filepath.Join(t.TempDir(), "owl")
 	os.WriteFile(exe, []byte("old"), 0o755)
 	self, _ := os.Stat(exe)
 	os.WriteFile(exe, []byte("newer"), 0o755) // in already: install has nothing to swap
@@ -251,7 +251,7 @@ func TestWhatsNewTodayRoute(t *testing.T) {
 // Settings' What's new with an update waiting lists every release after
 // the one running up to it, not the update's alone (小八 on Discord: on
 // 0.1.1398 with 0.1.1409 waiting, it showed 0.1.1409 and then 0.1.1398 and
-// older). The site's list is the shape myna-releases had that day, with
+// older). The site's list is the shape owl-releases had that day, with
 // 0.1.1407 never released and each note's Install section.
 func TestWhatsNewListsEveryReleaseUpToTheWaitingUpdate(t *testing.T) {
 	home := t.TempDir()
@@ -264,16 +264,16 @@ func TestWhatsNewListsEveryReleaseUpToTheWaitingUpdate(t *testing.T) {
 		s := strconv.Itoa(v)
 		list = append(list, update.Note{
 			Version: "0.1." + s,
-			Notes:   "## Bug Fixes\n\n- fix " + s + "\n\n## Install\n\n- macOS: [myna-0.1." + s + "-mac-arm64.dmg](https://github.com/istoo/myna/releases/download/v0.1." + s + "/myna-0.1." + s + "-mac-arm64.dmg)",
-			URL:     "https://github.com/istoo/myna/releases/tag/v0.1." + s,
+			Notes:   "## Bug Fixes\n\n- fix " + s + "\n\n## Install\n\n- macOS: [owl-0.1." + s + "-mac-arm64.dmg](https://github.com/istoo/owl/releases/download/v0.1." + s + "/owl-0.1." + s + "-mac-arm64.dmg)",
+			URL:     "https://github.com/istoo/owl/releases/tag/v0.1." + s,
 		})
 	}
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(map[string]any{"releases": list})
 	}))
 	defer srv.Close()
-	t.Setenv("MYNA_NOTES_FEED", srv.URL)
-	t.Setenv("MYNA_UPDATE_FEED", "http://127.0.0.1:1/")
+	t.Setenv("OWL_NOTES_FEED", srv.URL)
+	t.Setenv("OWL_UPDATE_FEED", "http://127.0.0.1:1/")
 	oldV, oldNews, oldUp := Version, news, updates
 	t.Cleanup(func() { Version, news, updates = oldV, oldNews, oldUp })
 	Version = "0.1.1398"

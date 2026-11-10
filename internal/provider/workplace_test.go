@@ -240,8 +240,8 @@ func TestGitOnDiskAgreesWithGit(t *testing.T) {
 }
 
 // A .git that can't be read is unknown, never "no" (nor the "yes" any
-// .git was before): myna may not be the user it belongs to, through a
-// shared myna, and can't tell an empty one from a repository it isn't
+// .git was before): owl may not be the user it belongs to, through a
+// shared owl, and can't tell an empty one from a repository it isn't
 // let into.
 func TestGitOnDiskUnreadIsUnknown(t *testing.T) {
 	if runtime.GOOS == "windows" {

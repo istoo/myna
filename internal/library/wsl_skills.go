@@ -5,12 +5,12 @@ package library
 // there that the distro follows (one os.Symlink makes through
 // \\wsl.localhost is an empty folder in the distro), so each agent in a
 // distro used to get a copy of its own of every skill. Now the distro
-// holds one copy of each skill its agents are given, myna's, in
-// ~/.local/share/myna/skills (Target.Store); each agent there gets a
+// holds one copy of each skill its agents are given, owl's, in
+// ~/.local/share/owl/skills (Target.Store); each agent there gets a
 // link to it, made in the distro by wsl.exe (agent.WSLSymlink), as an
 // agent on Windows gets one to the library's folder. An edit made in an
 // agent through its link is in that copy, which takeEdits looks at as it
-// does at any copy of myna's. An agent set to take copies (SkillHow)
+// does at any copy of owl's. An agent set to take copies (SkillHow)
 // still gets a copy of its own.
 //
 // The copy isn't put in the distro's ~/.agents/skills: every agent there
@@ -23,13 +23,13 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/istoo/myna/internal/agent"
+	"github.com/istoo/owl/internal/agent"
 )
 
-// wslStoreRel is myna's folder for skills in a distro, below its home.
-var wslStoreRel = []string{".local", "share", "myna", "skills"}
+// wslStoreRel is owl's folder for skills in a distro, below its home.
+var wslStoreRel = []string{".local", "share", "owl", "skills"}
 
-// wslStored gives t, an agent's target in a WSL distro whose home myna
+// wslStored gives t, an agent's target in a WSL distro whose home owl
 // opens at home, the distro's store of skills, unless it has no skills.
 // An agent whose skills folder is on a Windows drive (its folder a link
 // to /mnt/c/…, #4502), or a store that is, keeps copies of its own: a
@@ -46,8 +46,8 @@ func wslStored(t *Target, home string) {
 	t.Store = store
 }
 
-// inWSLStore is whether to, a path as myna opens it, is a skill by that
-// name in a distro's store: what myna's link in an agent there leads to.
+// inWSLStore is whether to, a path as owl opens it, is a skill by that
+// name in a distro's store: what owl's link in an agent there leads to.
 func inWSLStore(to, name string) bool {
 	parts := strings.FieldsFunc(filepath.ToSlash(to), func(r rune) bool { return r == '/' || r == '\\' })
 	n := len(parts)
@@ -65,7 +65,7 @@ func inWSLStore(to, name string) bool {
 // storeSkill makes the distro's copy of the skill (t.Store), or makes it
 // again when the library's has changed since; looked at once a sync step
 // for each store, and changed says this call made it. A folder there
-// that isn't myna's copy is never touched.
+// that isn't owl's copy is never touched.
 func (l *Library) storeSkill(t *Target, name string) (changed bool, err error) {
 	p := filepath.Join(t.Store, name)
 	key := strings.ToLower(p)
@@ -78,7 +78,7 @@ func (l *Library) storeSkill(t *Target, name string) (changed bool, err error) {
 			return true, copyIn(p, name)
 		}
 		if !fi.IsDir() || !ours(p, name) {
-			return false, errors.New(p + " is in the way of myna's copy of " + name + " in WSL")
+			return false, errors.New(p + " is in the way of owl's copy of " + name + " in WSL")
 		}
 		dropOld(p, name)
 		h := l.libHash(name)
@@ -131,7 +131,7 @@ func (l *Library) wslRelink(t *Target) func(id, p, name string) (bool, error) {
 }
 
 // sweepWSLStores takes out of each distro's store the copies no agent
-// there has a link to, or is given, any more. A copy edited since myna
+// there has a link to, or is given, any more. A copy edited since owl
 // made it is kept aside with the backups. A store with an agent that
 // couldn't be reached is left as it is: that agent may still link to any.
 func (l *Library) sweepWSLStores(targets []*Target, res *Result) {

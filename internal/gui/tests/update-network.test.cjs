@@ -26,15 +26,15 @@ const words = {
 // what the backend says after the tries: the cause, the file, no address
 const failed = {
   state: "error", current: "0.1.1615", latest: "0.1.1618", retry: true, network: true,
-  url: "https://github.com/istoo/myna/releases/tag/v0.1.1618",
-  error: "the download of myna.exe.new broke off (EOF)",
+  url: "https://github.com/istoo/owl/releases/tag/v0.1.1618",
+  error: "the download of owl.exe.new broke off (EOF)",
 };
 
 function server(lang, ctl) {
   return async (route) => {
     const req = route.request(), url = new URL(req.url());
     const json = (data) => route.fulfill({ json: data });
-    const settings = { theme: "light", lang, version: "0.1.1615", dir: "~/.config/myna", gateway: "http://127.0.0.1:3425", lanURLs: [], fx: { rate: 7.2 } };
+    const settings = { theme: "light", lang, version: "0.1.1615", dir: "~/.config/owl", gateway: "http://127.0.0.1:3425", lanURLs: [], fx: { rate: 7.2 } };
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:"${lang}",theme:"light",web:false};` });
     if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (url.pathname === "/api/state") return json({ agents: [], profiles: [], settings });
@@ -69,7 +69,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           page.on("pageerror", (e) => { if (!/^ResizeObserver loop completed with undelivered notifications/.test(e.message)) errors.push(e.message); });
           await page.route("**/*", server(lang, ctl));
           await watchSettingsReads(page);
-          await page.goto("http://myna.test/?view=settings");
+          await page.goto("http://owl.test/?view=settings");
           await settingsDrawn(page);
           await openPart(page, "about");
           const row = page.locator("#about .row.pref", { has: page.locator(".sub", { hasText: w.said }) });

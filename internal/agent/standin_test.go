@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/usage"
 )
 
 func TestClaudeStandIn(t *testing.T) {
@@ -50,8 +50,8 @@ func TestClaudeStandIn(t *testing.T) {
 	}
 }
 
-// Codex on myna as its provider asks for its auto-review by OpenAI's
-// name, codex-auto-review (shihao H on X: 404 myna knows no model
+// Codex on owl as its provider asks for its auto-review by OpenAI's
+// name, codex-auto-review (shihao H on X: 404 owl knows no model
 // "codex-auto-review"); it goes to the model Codex is set to. Signed in
 // (routed by openai_base_url) or not routed, nothing stands in.
 func TestCodexStandIn(t *testing.T) {
@@ -67,9 +67,9 @@ func TestCodexStandIn(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	write("model = \"deepseek/deepseek-v4\"\nmodel_provider = \"myna\"\n\n[model_providers.myna]\nname = \"myna\"\n")
+	write("model = \"deepseek/deepseek-v4\"\nmodel_provider = \"owl\"\n\n[model_providers.owl]\nname = \"owl\"\n")
 	if got := StandIn("codex", "codex-auto-review"); got != "deepseek/deepseek-v4" {
-		t.Errorf("myna as provider: %q", got)
+		t.Errorf("owl as provider: %q", got)
 	}
 	// the gateway knows the request as Codex's by its User-Agent
 	for _, ua := range []string{

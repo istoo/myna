@@ -12,7 +12,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // firstMost is the most of a stream read for its first tokens: a reply

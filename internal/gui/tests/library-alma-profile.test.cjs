@@ -13,7 +13,7 @@ const { chromium, webkit } = require("playwright");
 const assets = path.resolve(__dirname, "../assets");
 const HOME = "/Users/foobra";
 const library = {
-  dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
+  dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
   agents: [{ id: "alma", name: "Alma", icon: "alma", instructions: `${HOME}/.config/alma/USER.md` }],
   instructions: {
     shared: "Be brief.",
@@ -50,11 +50,11 @@ const move = {
   de: "Eigenes in den gemeinsamen Text verschieben",
 };
 const note = {
-  en: "This file is Alma's profile of you: myna adds its part after yours and leaves your own lines in it. A USER.md in a workspace is read instead of this one.",
-  zh: "该文件是 Alma 对你的个人资料：myna 会把它的部分加在你的内容之后，你自己的内容保留在文件里。工作区中的 USER.md 会代替此文件被读取。",
-  "zh-TW": "該檔案是 Alma 對你的個人資料：myna 會把它的部分加在你的內容之後，你自己的內容保留在檔案裡。工作區中的 USER.md 會取代此檔案被讀取。",
-  ja: "このファイルは Alma にとってのあなたのプロフィールです。myna は自分の部分をあなたの内容の後に追加し、あなた自身の行はそのまま残します。ワークスペースに USER.md があると、こちらの代わりにそれが読み込まれます。",
-  de: "Diese Datei ist das Profil, das Alma von dir hat: myna fügt seinen Teil nach deinem an und lässt deine eigenen Zeilen darin. Eine USER.md in einem Workspace wird stattdessen gelesen.",
+  en: "This file is Alma's profile of you: owl adds its part after yours and leaves your own lines in it. A USER.md in a workspace is read instead of this one.",
+  zh: "该文件是 Alma 对你的个人资料：owl 会把它的部分加在你的内容之后，你自己的内容保留在文件里。工作区中的 USER.md 会代替此文件被读取。",
+  "zh-TW": "該檔案是 Alma 對你的個人資料：owl 會把它的部分加在你的內容之後，你自己的內容保留在檔案裡。工作區中的 USER.md 會取代此檔案被讀取。",
+  ja: "このファイルは Alma にとってのあなたのプロフィールです。owl は自分の部分をあなたの内容の後に追加し、あなた自身の行はそのまま残します。ワークスペースに USER.md があると、こちらの代わりにそれが読み込まれます。",
+  de: "Diese Datei ist das Profil, das Alma von dir hat: owl fügt seinen Teil nach deinem an und lässt deine eigenen Zeilen darin. Eine USER.md in einem Workspace wird stattdessen gelesen.",
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -69,13 +69,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     for (const lang of Object.keys(note)) {
       await t.test(lang, async () => {
         const ctx = await browser.newContext({ viewport: { width: 980, height: 860 }, reducedMotion: "reduce" });
-        await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "instructions"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("owl.libTab", "instructions"); } catch {} });
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang));
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         await page.locator('button[data-view="library"]').click();
         const row = page.locator(`${view} .lib-row`, { hasText: "Alma" });
         await row.first().click();

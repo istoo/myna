@@ -3,15 +3,15 @@ package provider
 // Codex's background app-server. Codex CLI (0.156 on) can keep one running
 // for its sessions to attach to — `codex app-server --managed-daemon`,
 // started by the CLI and left running — and it reads the ChatGPT sign-in
-// once, when it starts. So when myna switches the account Codex is signed
+// once, when it starts. So when owl switches the account Codex is signed
 // in to, a Codex session opened after that still runs on the account before
-// until the daemon is restarted. myna doesn't restart it on its own:
+// until the daemon is restarted. owl doesn't restart it on its own:
 // that ends the sessions running on it. It says so instead, and restarts it
 // when asked (RestartCodexDaemon).
 //
 // The daemon is told apart by --managed-daemon: the app-servers other apps
 // run for themselves (the ChatGPT app's own codex, an editor's) are started
-// without it, and they are none of myna's business.
+// without it, and they are none of owl's business.
 
 import (
 	"bytes"
@@ -28,7 +28,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/proc"
 )
 
 // CodexDaemonRestart is the command that restarts Codex's app-server, for
@@ -60,7 +60,7 @@ var processCodexHome = func(pid int) (home string, ok bool) {
 	return "", true
 }
 
-// codexHome is the Codex home myna signs Codex in through.
+// codexHome is the Codex home owl signs Codex in through.
 func codexHome() string { return filepath.Dir(codexAuthPath()) }
 
 // isManagedDaemon reports whether a command line is Codex's managed
@@ -166,9 +166,9 @@ const codexDaemonRecheck = 5 * time.Second
 // another, the app-server left running on the one before.
 func noteCodexSwitch(from, to string) { noteCodexSwitchBy(from, to, false) }
 
-// noteCodexSwitchBy is noteCodexSwitch, byMyna saying myna made the
+// noteCodexSwitchBy is noteCodexSwitch, byOwl saying owl made the
 // switch by itself (switchLoginBy).
-func noteCodexSwitchBy(from, to string, byMyna bool) {
+func noteCodexSwitchBy(from, to string, byOwl bool) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	// the Codex app's app-servers are found and restarted on
@@ -176,7 +176,7 @@ func noteCodexSwitchBy(from, to string, byMyna bool) {
 	// A switch by hand off an account known held is one off a used-up
 	// account, as SwitchWhenSpent's is: a turn left open on it when quota
 	// ran out mid-turn is restarted past once quiet (xiaoq6285 on Discord)
-	codexAppSwitched(codexHeldKnown(from), byMyna)
+	codexAppSwitched(codexHeldKnown(from), byOwl)
 	ps, err := listProcesses(ctx)
 	known := err == nil
 	codexDaemonMu.Lock()
@@ -352,7 +352,7 @@ func linuxCodexApp(exe string) bool {
 
 // RestartCodexDaemon has Codex restart its app-server, which reads the
 // sign-in again: `codex app-server daemon restart`, run with the codex CLI
-// myna finds and the Codex home it signs Codex in through. Codex 0.162's
+// owl finds and the Codex home it signs Codex in through. Codex 0.162's
 // sessions attached to it reconnect to the new one, a turn running is let
 // finish first (for up to a minute); an older Codex's are ended.
 func RestartCodexDaemon(ctx context.Context) error {
@@ -372,7 +372,7 @@ func restartCodexDaemon(ctx context.Context, home string) error {
 	}
 	// run as its own responsible process: the daemon it leaves running
 	// works in the folder of every codex attached to it, and macOS would
-	// otherwise ask for ~/Desktop and the like in myna's name
+	// otherwise ask for ~/Desktop and the like in owl's name
 	// (reformed9448 on Discord)
 	if out, err := proc.CombinedOutputOwn(ctx, cmd); err != nil {
 		if msg := lastLine(out); msg != "" {
@@ -384,12 +384,12 @@ func restartCodexDaemon(ctx context.Context, home string) error {
 }
 
 // codexDaemonCommand is `codex app-server daemon <verb>`, with CODEX_HOME
-// set to the home myna switches, and nothing to read on stdin (Codex
+// set to the home owl switches, and nothing to read on stdin (Codex
 // waits on a stdin left open).
 func codexDaemonCommand(ctx context.Context, home, verb string) (*exec.Cmd, error) {
 	exe := codexExecutable()
 	if exe == "" {
-		return nil, errors.New("the codex CLI isn't installed, or myna can't find it")
+		return nil, errors.New("the codex CLI isn't installed, or owl can't find it")
 	}
 	cmd := proc.CommandContext(ctx, exe, "app-server", "daemon", verb)
 	env := slices.DeleteFunc(codexDaemonEnv(os.Environ()), func(kv string) bool { return strings.HasPrefix(kv, "CODEX_HOME=") })
@@ -412,17 +412,17 @@ var (
 // codexDaemonEnv is env with the PATH and proxy variables a terminal opened
 // now has, from the login shell: the daemon outlives the restart and
 // serves every codex started after it, so it runs as one started from a
-// terminal would. myna opened from the desktop has neither: on Linux,
-// with the proxy set in .zshrc, the daemon myna restarted after a
+// terminal would. owl opened from the desktop has neither: on Linux,
+// with the proxy set in .zshrc, the daemon owl restarted after a
 // ChatGPT sign-in reached chatgpt.com directly, and every codex after it
 // stopped at "account/read failed: workspace routing discovery timed out"
 // until the daemon was restarted from a terminal (guotianci6 on X, Codex
 // 0.164). The proxy variables are taken as a set: when the login shell
-// names any, myna's own are dropped, so a NO_PROXY only myna has
+// names any, owl's own are dropped, so a NO_PROXY only owl has
 // doesn't ride along; when it names none, env's stay.
 func codexDaemonEnv(env []string) []string {
 	if runtime.GOOS == "windows" {
-		return env // a terminal's environment is the registry's, as myna's is
+		return env // a terminal's environment is the registry's, as owl's is
 	}
 	var login []string
 	for _, k := range daemonProxyVars {
@@ -447,12 +447,12 @@ func codexDaemonEnv(env []string) []string {
 
 // The daemon also builds Codex's model list once, as it starts, from
 // config.toml and the catalog it names (codex-rs app-server's models
-// manager): a codex session started after myna wires Codex in, or takes
+// manager): a codex session started after owl wires Codex in, or takes
 // it out, attaches to the daemon left running and shows the list from
-// before — Codex's own models, or myna's — until it restarts (luci on
+// before — Codex's own models, or owl's — until it restarts (luci on
 // Discord, Codex 0.162). It runs per CODEX_HOME, not per terminal, and
 // has no idle exit. Restarting it with no codex session attached ends
-// nothing, so myna does that itself (KeepCodexDaemonCurrent); with one
+// nothing, so owl does that itself (KeepCodexDaemonCurrent); with one
 // attached, the Agents page offers it.
 
 // A CodexDaemonCheck is what KeepCodexDaemonCurrent found and did.
@@ -461,10 +461,10 @@ type CodexDaemonCheck struct {
 	Behind bool
 	// Since is when that daemon started
 	Since time.Time
-	// Attached is how many codex sessions may be on it, which myna
+	// Attached is how many codex sessions may be on it, which owl
 	// doesn't restart it under
 	Attached int
-	// Restarted: myna restarted it, and new sessions get the new list
+	// Restarted: owl restarted it, and new sessions get the new list
 	Restarted bool
 	Err       error
 }
@@ -473,7 +473,7 @@ type CodexDaemonCheck struct {
 var codexRestarting sync.Mutex
 
 // KeepCodexDaemonCurrent restarts the managed app-server of the Codex home
-// home when it started before changed (when myna last changed what Codex
+// home when it started before changed (when owl last changed what Codex
 // reads at start) and no codex session is attached to it. One that can't
 // be found or timed, or a restart already under way, is left as it is.
 func KeepCodexDaemonCurrent(ctx context.Context, home string, changed time.Time) CodexDaemonCheck {
@@ -510,7 +510,7 @@ func KeepCodexDaemonCurrent(ctx context.Context, home string, changed time.Time)
 // changed: only a daemon one names can be found behind (daemonStarted), so
 // with none the processes aren't listed at all. Listing them is a
 // PowerShell run on Windows, which every look did every codexDaemonEvery
-// for as long as myna ran (#2341).
+// for as long as owl ran (#2341).
 func pidFileBehind(home string, changed time.Time) bool {
 	for _, pid := range daemonPIDs(home) {
 		if since, ok := daemonStarted(home, pid); ok && since.Before(changed.Add(-time.Second)) {
@@ -599,12 +599,12 @@ func splitExe(args string) (exe, rest string) {
 	return exe, rest
 }
 
-// CodexHome is the Codex home myna wires and signs Codex in through.
+// CodexHome is the Codex home owl wires and signs Codex in through.
 func CodexHome() string { return codexHome() }
 
 // CodexPIDs lists the Codex processes running now that may hold a thread
-// sending to myna's gateway: the Codex app's app-server, the managed
-// daemon, the CLI's sessions, an editor's codex. A relay myna leaves at
+// sending to owl's gateway: the Codex app's app-server, the managed
+// daemon, the CLI's sessions, an editor's codex. A relay owl leaves at
 // quit for them ends once they all have (codexrelay).
 func CodexPIDs(ctx context.Context) []int {
 	ps, err := listProcesses(ctx)

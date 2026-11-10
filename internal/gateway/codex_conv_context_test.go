@@ -10,8 +10,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // Two Codex conversations on one model id at once, a long one and a new

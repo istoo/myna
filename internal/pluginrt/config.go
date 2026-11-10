@@ -15,10 +15,10 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/beat"
-	"github.com/istoo/myna/internal/filelock"
-	"github.com/istoo/myna/internal/filememo"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/beat"
+	"github.com/istoo/owl/internal/filelock"
+	"github.com/istoo/owl/internal/filememo"
 )
 
 // plugins.yml says which built-in plugins are on, and each one's config:
@@ -33,13 +33,13 @@ import (
 // the built-in default (every plugin on, its Manifest.Defaults), the
 // preset (Essentials leaves the plugins not Essential off), then the
 // user's own rows. A plugin in use (Manifest.InUse) is on whatever they
-// say. `myna plugin dump` shows the result and where each value came
+// say. `owl plugin dump` shows the result and where each value came
 // from.
 //
 // Every install starts with All (Settle): a new user sees everything
-// myna can do, and turns off what they don't want ("所有的内置插件默认
+// owl can do, and turns off what they don't want ("所有的内置插件默认
 // 都应该是开启的", the owner, 10-17). Essentials is only ever the user's
-// own pick, `myna plugin preset essentials`.
+// own pick, `owl plugin preset essentials`.
 
 // Presets a plugins.yml can name.
 const (
@@ -70,11 +70,11 @@ type Row struct {
 	Config  map[string]any `yaml:"config,omitempty"`
 }
 
-// Path is plugins.yml, in myna's folder.
+// Path is plugins.yml, in owl's folder.
 func Path() string { return filepath.Join(appdir.Config(), "plugins.yml") }
 
 var (
-	inProcess sync.Mutex // filelock.Mutex holds other mynas off; this, this one's goroutines
+	inProcess sync.Mutex // filelock.Mutex holds other owls off; this, this one's goroutines
 	fileLock  = filelock.Mutex{Path: func() string { return Path() + ".lock" }}
 )
 
@@ -282,8 +282,8 @@ func update(change func(*File)) error {
 	return write(f)
 }
 
-const header = "# myna's built-in plugins: which are on, and each one's config.\n" +
-	"# `myna plugin dump` shows what they come to, and where each value is from.\n"
+const header = "# owl's built-in plugins: which are on, and each one's config.\n" +
+	"# `owl plugin dump` shows what they come to, and where each value is from.\n"
 
 // write puts f in plugins.yml whole or not at all, the file it replaces
 // kept as plugins.yml.bak. Called with the locks held.
@@ -357,7 +357,7 @@ func Refresh() ([]Composed, error) {
 // KeepFresh refreshes the process's runtime (Refresh) as it starts and
 // whenever plugins.yml, or one of also (a file an InUse reads), changes,
 // until ctx ends. The process serving the gateway runs it: the window or
-// `myna plugin builtin` in another process may turn a plugin on or off,
+// `owl plugin builtin` in another process may turn a plugin on or off,
 // and what a plugin registers with the gateway (an observer) follows
 // without a restart.
 func KeepFresh(ctx context.Context, every func() time.Duration, also ...string) {

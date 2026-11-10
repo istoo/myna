@@ -9,7 +9,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 // fakeMLXServe answers as MLX-Serve (github.com/ddalcu/mlx-serve) does:

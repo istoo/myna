@@ -13,7 +13,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // What careful means, as the thread pins no figures: an account within

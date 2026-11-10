@@ -55,7 +55,7 @@ const words = {
 };
 const keys = [
   "Turn on routing groups", "Routing groups are on",
-  "Routing groups are off in Plugins › Built-in: the groups myna finds, one model several providers serve, still route, but your own can't be made or changed here.",
+  "Routing groups are off in Plugins › Built-in: the groups owl finds, one model several providers serve, still route, but your own can't be made or changed here.",
 ];
 
 async function open(engine, width, t, name) {
@@ -82,7 +82,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], posts = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, false, posts));
-        await page.goto("http://myna.test/?view=routing");
+        await page.goto("http://owl.test/?view=routing");
 
         const note = page.locator(".rt-gsec .rt-goff");
         await note.waitFor();
@@ -110,7 +110,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, true, []));
-      await page.goto("http://myna.test/?view=routing");
+      await page.goto("http://owl.test/?view=routing");
       await page.locator(".rt-group", { hasText: "Mine" }).waitFor({ state: "visible" });
       assert.equal(await page.locator(".rt-goff").isVisible(), false);
       assert(await page.locator("#rtNewGroup").isVisible());
@@ -121,7 +121,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
   test(`${engine}: the note's strings are in every language`, async (t) => {
     const page = await open(engine, 900, t, `${engine}-routing-groups-off-i18n.png`);
     await page.route("**/*", serve("en", false, []));
-    await page.goto("http://myna.test/?view=routing");
+    await page.goto("http://owl.test/?view=routing");
     await page.locator(".rt-goff").waitFor();
     const missing = await page.evaluate((ks) => ["zh", "zh-TW", "ja", "de"].flatMap((l) => ks.filter((k) => !I18N[l]?.[k]).map((k) => `${l}: ${k}`)), keys);
     assert.deepEqual(missing, []);

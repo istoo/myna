@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/provider"
 )
 
 func TestRecentCallBodiesOnDemand(t *testing.T) {

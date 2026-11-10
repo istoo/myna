@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 func TestAnthropicImageSourceFields(t *testing.T) {

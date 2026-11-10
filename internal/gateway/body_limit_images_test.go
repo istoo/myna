@@ -15,14 +15,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/proc"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/proc"
+	"github.com/istoo/owl/internal/provider"
 	"github.com/klauspost/compress/zstd"
 )
 
 // NeoPengZhile's Codex session had read many images; Codex sends the
 // whole conversation each turn, screenshots inline, zstd-compressed, and
-// past 128 MB decoded myna answered 413 on all five retries (#1422).
+// past 128 MB decoded owl answered 413 on all five retries (#1422).
 // Such a turn is read now: a zstd body of inline images decoding to
 // 136 MB, on Codex's backend path, with the gateway's own limit.
 func TestImageHeavyCodexTurnIsRead(t *testing.T) {
@@ -59,7 +59,7 @@ func TestImageHeavyCodexTurnIsRead(t *testing.T) {
 	}
 }
 
-// One past the limit is still refused, and the 413 says it is myna's
+// One past the limit is still refused, and the 413 says it is owl's
 // own limit, that the provider wasn't asked, and to compact (#1422): the
 // reporter saw only "request body exceeds gateway limit" and couldn't
 // tell whose it was.
@@ -81,7 +81,7 @@ func TestOverLimitSaysWhoseAndWhatToDo(t *testing.T) {
 		t.Fatalf("status %d, want 413", w.Code)
 	}
 	got := w.Body.String()
-	for _, want := range []string{"myna's gateway limit of 1 KB", "the provider was not asked", "/compact", "not the model's context"} {
+	for _, want := range []string{"owl's gateway limit of 1 KB", "the provider was not asked", "/compact", "not the model's context"} {
 		if !strings.Contains(got, want) {
 			t.Errorf("413 body %s doesn't say %q", got, want)
 		}
@@ -133,14 +133,14 @@ func TestCodexBodyLimitFromMemory(t *testing.T) {
 }
 
 // dallascao on Discord: Codex generating images and revising them again
-// and again, until myna answered 413 "over myna's gateway limit of
+// and again, until owl answered 413 "over owl's gateway limit of
 // 512 MB (decoded)" on /backend-api/codex/responses, while Codex signed
 // in to OpenAI went on. Codex keeps each generated image in the
 // conversation as a function_call_output's input_image, and over HTTP
 // sends it whole every turn. On a 16 GB machine such a turn of a little
 // over 512 MB, on one of Codex's own models, now reaches the ChatGPT
-// backend whole; the same turn for a myna model is still refused, as a
-// myna model's turn is translated at several times its size, and the
+// backend whole; the same turn for a owl model is still refused, as a
+// owl model's turn is translated at several times its size, and the
 // 413 says Codex's own models take more.
 func TestCodexGeneratedImagesPastOldLimit(t *testing.T) {
 	if testing.Short() {
@@ -192,12 +192,12 @@ func TestCodexGeneratedImagesPastOldLimit(t *testing.T) {
 	t.Logf("a %d MB turn went on in %s", len(body)>>20, time.Since(start))
 
 	got.Store(0)
-	copy(body[len(`{"model":"`):], "x/gpt-5") // a myna model, as long as gpt-5.5
+	copy(body[len(`{"model":"`):], "x/gpt-5") // a owl model, as long as gpt-5.5
 	rec = post()
 	if rec.Code != 413 || got.Load() != 0 {
-		t.Fatalf("a myna model's %d MB turn: %d, backend got %d", len(body)>>20, rec.Code, got.Load())
+		t.Fatalf("a owl model's %d MB turn: %d, backend got %d", len(body)>>20, rec.Code, got.Load())
 	}
-	for _, want := range []string{"myna's gateway limit of 512 MB", "the provider was not asked", "one of Codex's own models takes up to 1024 MB", "/compact"} {
+	for _, want := range []string{"owl's gateway limit of 512 MB", "the provider was not asked", "one of Codex's own models takes up to 1024 MB", "/compact"} {
 		if !strings.Contains(rec.Body.String(), want) {
 			t.Errorf("413 %s doesn't say %q", rec.Body.String(), want)
 		}

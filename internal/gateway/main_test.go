@@ -7,21 +7,21 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/agentenv"
-	"github.com/istoo/myna/internal/budget"
-	"github.com/istoo/myna/internal/gwbudget"
-	"github.com/istoo/myna/internal/gwmw"
-	"github.com/istoo/myna/internal/gwtool"
-	"github.com/istoo/myna/internal/masking"
-	"github.com/istoo/myna/internal/middleware"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/routes"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/agentenv"
+	"github.com/istoo/owl/internal/budget"
+	"github.com/istoo/owl/internal/gwbudget"
+	"github.com/istoo/owl/internal/gwmw"
+	"github.com/istoo/owl/internal/gwtool"
+	"github.com/istoo/owl/internal/masking"
+	"github.com/istoo/owl/internal/middleware"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/routes"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // standInsEnv names the folder of a test binary's stand-in CLIs, for a
 // test binary it starts again.
-const standInsEnv = "MYNA_GATEWAY_TEST_STAND_INS"
+const standInsEnv = "OWL_GATEWAY_TEST_STAND_INS"
 
 func TestMain(m *testing.M) {
 	serveRotation()
@@ -29,7 +29,7 @@ func TestMain(m *testing.M) {
 	serveMiddleware()
 	searchOn = gwtool.Serve(gwtool.WebSearch)
 	limitsOn = gwbudget.Limit(budget.Limiter{})
-	// the test binary is no myna: it runs no claude-tui-helper
+	// the test binary is no owl: it runs no claude-tui-helper
 	claudeTUIRuns = false
 	code, err := isolatedTests(m)
 	if err != nil {
@@ -43,7 +43,7 @@ func TestMain(m *testing.M) {
 // alone does not isolate the macOS Keychain, and account caches eventually
 // expire: discovery must keep finding only the test's sign-ins and CLIs.
 func isolatedTests(m *testing.M) (int, error) {
-	home, err := os.MkdirTemp("", "myna-gateway-test-")
+	home, err := os.MkdirTemp("", "owl-gateway-test-")
 	if err != nil {
 		return 1, err
 	}
@@ -191,7 +191,7 @@ func withoutGroups(t *testing.T) {
 }
 
 // searchOn is plugins/search on: the gateway's tests offer and answer
-// myna's web search, as a user with it on has.
+// owl's web search, as a user with it on has.
 var searchOn func()
 
 // limitsOn is plugins/budget on: the gateway's tests hold gateway keys to
@@ -206,7 +206,7 @@ func withoutLimits(t *testing.T) {
 }
 
 // withoutSearch is plugins/search off for t, in a process serving the
-// gateway (gwtool.Gate): myna's web search is neither offered nor
+// gateway (gwtool.Gate): owl's web search is neither offered nor
 // answered.
 func withoutSearch(t *testing.T) {
 	searchOn()

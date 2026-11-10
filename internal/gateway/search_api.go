@@ -16,14 +16,14 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/budget"
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/budget"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/usage"
 )
 
-// When no provider can search, myna's web_search tool is answered by a
+// When no provider can search, owl's web_search tool is answered by a
 // search API the user gave a key to (#419): what it found goes to the
 // model as it came, each page's title, address and what it says, with no
 // model asked to read it first.
@@ -40,7 +40,7 @@ type foundPage struct {
 	Age              string // how old the search said it is, "" when it didn't
 }
 
-// canSearch is whether myna can answer its web_search tool: plugins/search
+// canSearch is whether owl can answer its web_search tool: plugins/search
 // is on (searchServed), and a provider searches for it, or a search API
 // does.
 func canSearch() bool {
@@ -57,7 +57,7 @@ func canSearch() bool {
 // server tool asked of any model here is answered.
 func CanSearch() bool { return canSearch() }
 
-// Searcher names the provider and model myna searches with for a model
+// Searcher names the provider and model owl searches with for a model
 // that can't, "" when none can.
 func Searcher() string {
 	if p, m, ok := searcher(); ok {
@@ -79,7 +79,7 @@ func searcherName(p provider.Provider, model string) string {
 	return p.Name + " · " + model
 }
 
-// AutoSearcher names the provider and model myna picks to search with
+// AutoSearcher names the provider and model owl picks to search with
 // when Settings names none, "" when none can.
 func AutoSearcher() string {
 	if p, m, ok := autoSearcher(); ok {
@@ -183,13 +183,13 @@ func logSearchAPI(ctx context.Context, a provider.SearchAPI, query string, start
 	logSearch(ctx, rec, query, start, found, err)
 }
 
-// logSearch writes rec, a search myna ran with a search API or a plan's
+// logSearch writes rec, a search owl ran with a search API or a plan's
 // own search service, as the request log's row of it: the agent it was
 // for, how long it took and how it ended (200, the API's refusal, the
 // error, "found nothing"). The query is never kept, nor said in the
 // error: the row may go to another computer the usage syncs with.
 func logSearch(ctx context.Context, rec usage.Record, query string, start time.Time, found int, err error) {
-	rec.Time, rec.Agent, rec.Kind, rec.Source = start, "myna", "web_search", usage.SourceSearch
+	rec.Time, rec.Agent, rec.Kind, rec.Source = start, "owl", "web_search", usage.SourceSearch
 	rec.Millis = time.Since(start).Milliseconds()
 	if f := searchFor(ctx); f != nil && f.Agent != "" {
 		rec.Agent = f.Agent
@@ -319,7 +319,7 @@ func (s *Server) askSearchAPI(ctx context.Context, a provider.SearchAPI, query s
 			getAt(provider.YouFreeSearch, url.Values{"query": {query}, "count": {fmt.Sprint(searchHits)}})
 		}
 	default:
-		return nil, fmt.Errorf("myna can't ask %q", a.Vendor)
+		return nil, fmt.Errorf("owl can't ask %q", a.Vendor)
 	}
 	if err != nil {
 		return nil, err
@@ -327,8 +327,8 @@ func (s *Server) askSearchAPI(ctx context.Context, a provider.SearchAPI, query s
 	r.Header.Set("Accept", "application/json")
 	r.Header.Set("User-Agent", SearchAgent)
 	if a.Vendor == "you" {
-		// the tag You.com asked for, to tell myna's searches apart (#1626)
-		r.Header.Set("User-Agent", SearchAgent+" youdotcom-integration/yetone-myna")
+		// the tag You.com asked for, to tell owl's searches apart (#1626)
+		r.Header.Set("User-Agent", SearchAgent+" youdotcom-integration/yetone-owl")
 	}
 	if a.Key != "" {
 		switch a.Vendor {
@@ -391,7 +391,7 @@ func (s *Server) askSearchAPI(ctx context.Context, a provider.SearchAPI, query s
 			}
 		}
 		// an API that says the key back in its error doesn't get it into
-		// myna's logs or the model's turn
+		// owl's logs or the model's turn
 		if a.Key != "" {
 			msg = strings.ReplaceAll(msg, a.Key, provider.MaskSearchKey(a.Key))
 		}

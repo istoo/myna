@@ -6,12 +6,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // Some replicas of GLM's flash models stitch the fragments of a streamed
 // tool call's arguments with CR: each JSON \r escape in the text is a CR
-// they put at a token boundary (istoo/myna#4256), and the client reads
+// they put at a token boundary (istoo/owl#4256), and the client reads
 // one broken line a CR. An argument's text says a line ending as the pair
 // \r\n, which stays; a \n or a \t stands for itself; a \\r is a backslash
 // and an r, no CR at all. Every other \r escape goes, with the little
@@ -19,7 +19,7 @@ import (
 // cure's cost. The cure runs only on the routes the defect was seen on:
 // another model's reply goes as it came, healthy or not.
 
-// glmFlash is whether id, the model as myna or its upstream names it,
+// glmFlash is whether id, the model as owl or its upstream names it,
 // is one of those flash models, under whatever vendor prefix a relay or
 // router gives it.
 func glmFlash(id string) bool {
@@ -30,7 +30,7 @@ func glmFlash(id string) bool {
 }
 
 // glmServed is whether a request for model on p goes to one of those
-// models, by myna's id for it or the name it is sent upstream under.
+// models, by owl's id for it or the name it is sent upstream under.
 func glmServed(wires map[string]string, p provider.Provider, model string) bool {
 	return glmFlash(model) || glmFlash(provider.UpstreamNameIn(wires, p.ID, model))
 }

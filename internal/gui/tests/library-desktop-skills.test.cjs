@@ -14,7 +14,7 @@ const { navTo } = require("./reader.cjs");
 const assets = path.resolve(__dirname, "../assets");
 const HOME = "/Users/aimer";
 const lib = (desktopSkills) => ({
-  dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
+  dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
   agents: [
     { id: "codex", name: "Codex", icon: "", skills: `${HOME}/.codex/skills` },
     { id: "claude-desktop", name: "Claude Desktop", icon: "claude-color", mcp: `${HOME}/Library/Application Support/Claude/claude_desktop_config.json`,
@@ -60,13 +60,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       for (const has of [true, false]) {
         await t.test(`${lang} ${has ? "with" : "without"} a skills-plugin`, async () => {
           const ctx = await browser.newContext({ viewport: { width: 980, height: 800 } });
-          await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "skills"); } catch {} });
+          await ctx.addInitScript(() => { try { localStorage.setItem("owl.libTab", "skills"); } catch {} });
           const page = await ctx.newPage();
           page.setDefaultTimeout(5000);
           page.setDefaultNavigationTimeout(60000);
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", server(lang, has));
-          await page.goto("http://myna.test/");
+          await page.goto("http://owl.test/");
           await navTo(page, "library");
           await page.locator('#view-library .lib-row .lib-ag[data-agent="codex"]').first().waitFor();
           const asides = await page.locator("#view-library p.lib-aside").allTextContents();

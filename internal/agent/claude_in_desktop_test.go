@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/desktopdir"
+	"github.com/istoo/owl/internal/desktopdir"
 )
 
 // cybercaius (Discord, Windows): Claude Code and Desktop uninstalled, only

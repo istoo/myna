@@ -1,7 +1,7 @@
 package library
 
 // A plugin that gives tools (OpenCode's tool hook, served at the gateway's
-// /mcp/myna/tools) is a server in the Library of its own (chenxiang0010
+// /mcp/owl/tools) is a server in the Library of its own (chenxiang0010
 // on Discord: Search1API's tools in the MCP hub). Once the plugin host has
 // noted the plugin's tools (plugin-tools.json), the library adds a server
 // named by the plugin's short name (search1api), at the gateway's
@@ -35,8 +35,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/plugin"
 )
 
 // pluginToolsOf and runPluginToolOf are the gateway's, a test's fakes in

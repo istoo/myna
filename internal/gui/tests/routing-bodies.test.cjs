@@ -58,7 +58,7 @@ function serve(lang, archiveOn = false) {
     if (url.pathname === "/api/usage/requests") return json({ period: url.searchParams.get("period"), rows: [], offset: 0, total: 0, calls: 0, errors: 0, input: 600, output: 80, cache_read: 0, cache_write: 0, reasoning: 0, cost: 0, unpriced: 2, agents: [{ id: "codex", name: "Codex", icon: "codex-color" }] });
     if (url.pathname === "/api/usage/requests/content") return json({ found: false, why: "read" });
     if (url.pathname === "/api/usage/quotas") return json([]);
-    if (url.pathname === "/api/usage") return json({ calls: 2, errors: 0, input: 600, output: 80, cache_read: 0, cache_write: 0, reasoning: 0, unpriced: 2, cost: 0, bucket: "day", series: [], agents: [], models: [], path: "~/.config/myna/usage.jsonl" });
+    if (url.pathname === "/api/usage") return json({ calls: 2, errors: 0, input: 600, output: 80, cache_read: 0, cache_write: 0, reasoning: 0, unpriced: 2, cost: 0, bucket: "day", series: [], agents: [], models: [], path: "~/.config/owl/usage.jsonl" });
     if (url.pathname === "/api/sessions") return json({ sessions: [], dirs: [] });
     if (url.pathname === "/api/sessions/stats") return json({ from: "", to: "", days: [], agents: {} });
     if (url.pathname.startsWith("/api/")) return json({});
@@ -121,7 +121,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.mouse.click(x, y);
       };
       const pick = (i) => tap(page.locator(".rt-req").nth(i));
-      await page.goto("http://myna.test/?view=routing");
+      await page.goto("http://owl.test/?view=routing");
       // the date bar's own buttons: the request-grouping controls share the
       // class (the first subtest says so), and on ubuntu's WebKit nth(1) of
       // all of them was one of those, drawn hidden (#13)
@@ -212,7 +212,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const [x, y] = await loc.evaluate((e) => { const r = e.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; });
         await page.mouse.click(x, y);
       };
-      await page.goto("http://myna.test/?view=routing");
+      await page.goto("http://owl.test/?view=routing");
       // the date bar's own buttons: the request-grouping controls share the
       // class (the first subtest says so), and on ubuntu's WebKit nth(1) of
       // all of them was one of those, drawn hidden (#13)

@@ -7,7 +7,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 // useXiaomiCatalog puts testdata/xiaomi_catalog.json in the catalog cache:
@@ -96,7 +96,7 @@ func TestXiaomiListPrice(t *testing.T) {
 		t.Error("a Xiaomi Token Plan provider counts as a Kimi Code membership")
 	}
 
-	// what `myna model price` and the Usage page read: the saved provider's
+	// what `owl model price` and the Usage page read: the saved provider's
 	p := xiaomiAt(t, "api", oldDefault)
 	if err := Save(p); err != nil {
 		t.Fatal(err)
@@ -131,7 +131,7 @@ func TestXiaomiRegionCatalogs(t *testing.T) {
 			}
 		}
 		// added at that region from a link
-		p, err := ParseImport("myna://import?preset=xiaomi&region=" + region)
+		p, err := ParseImport("owl://import?preset=xiaomi&region=" + region)
 		if err != nil {
 			t.Fatal(err)
 		}

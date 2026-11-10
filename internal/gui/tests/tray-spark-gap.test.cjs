@@ -100,7 +100,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const errors = [];
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", serve(lang, fixtures(Date.now())));
-          await page.goto("http://myna.test/?mode=panel");
+          await page.goto("http://owl.test/?mode=panel");
           await page.locator('#ptabs [data-ptab="usage"]').click();
           for (const [user, pace, ahead] of [["ahead@x.com", "−30%", true], ["behind@x.com", "+20%", false]]) {
             const box = page.locator(".pq-card", { hasText: user }).locator(".pq-spark-box");

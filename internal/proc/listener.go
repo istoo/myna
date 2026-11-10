@@ -8,8 +8,8 @@ import (
 )
 
 // The process listening on a port, and its program: how the GUI finds the
-// older myna that keeps the gateway's port and quits it, when the user
-// asks it to (leslie_luo on Discord: the page said an older myna served
+// older owl that keeps the gateway's port and quits it, when the user
+// asks it to (leslie_luo on Discord: the page said an older owl served
 // the gateway, with no way to find it and quit it).
 
 // ErrDenied is a process this user may not end: another user's, or one
@@ -33,7 +33,7 @@ func Executable(pid int) (string, error) {
 	return strings.TrimSuffix(p, " (deleted)"), nil
 }
 
-// Terminate asks process pid to end: SIGTERM on Unix, which a myna quits
+// Terminate asks process pid to end: SIGTERM on Unix, which a owl quits
 // on; on Windows it is ended at once (nothing else reaches a tray app).
 // ErrDenied when this user may not.
 func Terminate(pid int) error { return terminate(pid) }
@@ -41,11 +41,11 @@ func Terminate(pid int) error { return terminate(pid) }
 // Kill ends process pid at once. ErrDenied when this user may not.
 func Kill(pid int) error { return kill(pid) }
 
-// IsMyna says whether the program at path is a myna: myna, its
-// myna-* builds or dial, its name before; with .exe, and Windows' .old
+// IsOwl says whether the program at path is a owl: owl, its
+// owl-* builds or dial, its name before; with .exe, and Windows' .old
 // for one replaced by an update while it ran, or .old-2 when that one was
 // still held.
-func IsMyna(path string) bool {
+func IsOwl(path string) bool {
 	if path == "" {
 		return false
 	}
@@ -58,7 +58,7 @@ func IsMyna(path string) bool {
 	n = strings.TrimSuffix(n, ".old")
 	n = strings.TrimSuffix(n, ".new")
 	n = strings.TrimSuffix(n, ".exe")
-	for _, name := range []string{"myna", "dial"} {
+	for _, name := range []string{"owl", "dial"} {
 		if n == name || strings.HasPrefix(n, name+"-") || strings.HasPrefix(n, name+"_") {
 			return true
 		}
@@ -67,7 +67,7 @@ func IsMyna(path string) bool {
 }
 
 // isOldCount is the -2, -3 an update appends when exe.old is taken too: a
-// number alone is myna's own naming, so another program's is left alone.
+// number alone is owl's own naming, so another program's is left alone.
 func isOldCount(s string) bool {
 	s = strings.TrimPrefix(s, "-")
 	if s == "" {
@@ -84,8 +84,8 @@ func isOldCount(s string) bool {
 // IsForwarder says whether the program at path holds a port for a container
 // or a VM, which serves on it from inside: OrbStack's helper, Docker
 // Desktop's backend and vpnkit, docker-proxy, Podman's gvproxy, Lima's
-// (Colima's, Rancher Desktop's) host agent, WSL's relay. A myna answering
-// there runs in that container (leslie_luo on Discord: myna v0.1.552 in
+// (Colima's, Rancher Desktop's) host agent, WSL's relay. A owl answering
+// there runs in that container (leslie_luo on Discord: owl v0.1.552 in
 // OrbStack held 3425, and its helper was named as the program to quit),
 // which only the container's own tools stop.
 func IsForwarder(path string) bool {

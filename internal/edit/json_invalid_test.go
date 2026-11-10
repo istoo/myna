@@ -48,15 +48,15 @@ func TestJSONEditsPreserveInvalidFiles(t *testing.T) {
 }
 
 func TestJSONItemEditsPreserveInvalidFiles(t *testing.T) {
-	where := map[string]string{"name": "myna"}
+	where := map[string]string{"name": "owl"}
 	for _, input := range []string{
-		`[{"name":"myna"}, {"name":]`,
-		`[{"name":"myna"} {"name":"keep"}]`,
-		`[{"name":"myna"}] [{"name":"keep"}]`,
+		`[{"name":"owl"}, {"name":]`,
+		`[{"name":"owl"} {"name":"keep"}]`,
+		`[{"name":"owl"}] [{"name":"keep"}]`,
 	} {
 		for name, edit := range map[string]func(string) error{
 			"set": func(p string) error {
-				return SetJSONItem(p, where, map[string]string{"name": "myna", "model": "new"})
+				return SetJSONItem(p, where, map[string]string{"name": "owl", "model": "new"})
 			},
 			"delete": func(p string) error { return DelJSONItem(p, where) },
 		} {

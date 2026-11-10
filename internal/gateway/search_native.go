@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/budget"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/budget"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/usage"
 	"github.com/tidwall/gjson"
 )
 
@@ -105,7 +105,7 @@ const maxNativeSearchRows = 20
 func logNativeSearches(ctx context.Context, n int, at time.Time, agent, providerID, host, model string) {
 	who := access.Caller(ctx)
 	for range min(n, maxNativeSearchRows) {
-		budget.Append(usage.Record{Time: at, Agent: cmp.Or(agent, "myna"), Kind: "web_search", Source: usage.SourceSearch,
+		budget.Append(usage.Record{Time: at, Agent: cmp.Or(agent, "owl"), Kind: "web_search", Source: usage.SourceSearch,
 			Provider: providerID, Host: host, Requested: model, Model: model, Status: http.StatusOK,
 			CallerKeyID: who.KeyID, CallerKeyName: who.KeyName, CallerIssuerID: who.IssuerID()})
 	}

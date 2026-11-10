@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 func TestClaudeLoginKeychainWriteFailureKeepsLoginsFile(t *testing.T) {

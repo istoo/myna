@@ -9,7 +9,7 @@ import (
 // Factory Droid's skills (MaxMooreMy on X: "droid 也能帮忙修复下吗",
 // Sessions' Skills card said no skill was called). The four sessions in
 // testdata/droid-skills are real droid 0.231.0 sessions, run headless
-// (droid exec, on a custom model through myna's gateway) in a sandbox
+// (droid exec, on a custom model through owl's gateway) in a sandbox
 // home, byte for byte; only the folder of their working directory is
 // named shorter. In one the model reads notes.txt and calls the Skill
 // tool for greet-user; in one the user types /greet-user, and in one

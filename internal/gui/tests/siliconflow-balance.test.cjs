@@ -70,7 +70,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         });
         await page.route("**/*", serve(lang, opened));
         // app.js is large: its first load on a busy machine takes more than 5s
-        await page.goto("http://myna.test/?view=usage", { timeout: 30000 });
+        await page.goto("http://owl.test/?view=usage", { timeout: 30000 });
 
         const err = page.locator(".subscription-card", { hasText: "SiliconFlow" }).locator(".subscription-error");
         await err.waitFor();

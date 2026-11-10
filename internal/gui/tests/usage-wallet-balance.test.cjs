@@ -13,11 +13,11 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MYNA_ASSETS || path.join(__dirname, "../assets"));
+const assets = path.resolve(process.env.OWL_ASSETS || path.join(__dirname, "../assets"));
 const left = { en: "6,291 积分 left", zh: "剩余 6,291 积分", "zh-TW": "剩餘 6,291 积分", ja: "残り 6,291 积分", de: "6,291 积分 übrig" };
 
 const quotas = [
-  // as myna's API sends a wallet's window: its balance and unit, used 0
+  // as owl's API sends a wallet's window: its balance and unit, used 0
   // and no share (QuotaSpan.Balance)
   { provider: "magicrew-plugin", name: "SuperMagic", user: "wallet@example.com", windows: [
     { name: "Points", used: 0, remaining: 100, balance: 6291, unit: "积分" },
@@ -61,7 +61,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang));
-        await page.goto("http://myna.test/?view=usage");
+        await page.goto("http://owl.test/?view=usage");
         const at = `${lang} ${width}px`;
         const wallet = page.locator(".subscription-card", { hasText: "SuperMagic" });
         const fine = page.locator(".subscription-card", { hasText: "Claude" });

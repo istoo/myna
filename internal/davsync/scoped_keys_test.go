@@ -9,11 +9,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/backup"
-	"github.com/istoo/myna/internal/library"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/backup"
+	"github.com/istoo/owl/internal/library"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // A providers-only upload must not turn the remote's redacted settings and
@@ -41,7 +41,7 @@ func TestProviderKeysPreserveOtherSecretsSync(t *testing.T) {
 			remote := func() backup.Bundle {
 				t.Helper()
 				f.mu.Lock()
-				data := slices.Clone(f.objects["team x+y/myna/myna.myna-backup"])
+				data := slices.Clone(f.objects["team x+y/owl/owl.owl-backup"])
 				f.mu.Unlock()
 				got, err := backup.Open(data, cfg.Passphrase)
 				if err != nil {
@@ -238,7 +238,7 @@ func TestTakeScopedPartCredentials(t *testing.T) {
 					}
 					if part == "providers" {
 						// the whole-bundle bit follows the providers' own when
-						// this upload carried them, so a myna that reads no
+						// this upload carried them, so a owl that reads no
 						// per-part ones still keeps the server's keys when it
 						// uploads after a keyed one
 						if (from.Keys || (from.ProvidersKeys != nil && *from.ProvidersKeys)) && (merged.ProvidersKeys != nil && *merged.ProvidersKeys) && !merged.Keys {

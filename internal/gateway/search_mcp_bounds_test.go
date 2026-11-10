@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/mcpauth/mcpauthtest"
+	"github.com/istoo/owl/internal/mcpauth/mcpauthtest"
 )
 
 // A body past an MCP route's limit is refused whole (#1766, ggbdpq): a
@@ -62,7 +62,7 @@ func TestOwnMCPRejectsOversizedBody(t *testing.T) {
 	}
 }
 
-// The same holds for a signed-in MCP server myna proxies: a body cut at
+// The same holds for a signed-in MCP server owl proxies: a body cut at
 // 32 MiB went to the server, with the user's sign-in, as a shorter message.
 func TestMCPProxyRejectsOversizedBody(t *testing.T) {
 	fresh(t)

@@ -54,18 +54,18 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       const posts = [];
       await page.route("**/*", serve(lang, posts));
-      await page.goto("http://myna.test/?view=providers");
+      await page.goto("http://owl.test/?view=providers");
       const wait = async (n) => { for (let i = 0; i < 50 && posts.length === n; i++) await page.waitForTimeout(50); };
 
       // the one not signed in takes a paste, for its own id
       await page.locator(".row.provider", { hasText: "StepFun Work" }).click();
       const paste = page.locator(".editor .stepplan input[type=password]");
-      await paste.fill("myna-stepfun:{}");
+      await paste.fill("owl-stepfun:{}");
       await paste.press("Enter");
       await wait(0);
       assert.equal(posts.length, 1);
       assert.equal(posts[0].path, "/api/stepfun/stepfun-2/session");
-      assert.equal(posts[0].body.text, "myna-stepfun:{}");
+      assert.equal(posts[0].body.text, "owl-stepfun:{}");
 
       // the one signed in signs out, for its own id
       await page.locator(".editor .bar").getByRole("button", { name: words[lang].cancel, exact: true }).click();

@@ -16,8 +16,8 @@ import (
 
 	"github.com/MoeForge/moejs"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/gwmw"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/gwmw"
 )
 
 // account is what onAccount, and ctx.account after it, are told of the
@@ -88,12 +88,12 @@ func (r *Run) Account(a gwmw.Account) (skip bool, by string) {
 
 // accountRef is the account a, as middleware name is told it: a keyed hash
 // of who the account is (its kind, user and plan), the same for every
-// request and every start of myna, different for each middleware, and
+// request and every start of owl, different for each middleware, and
 // one nobody can turn back into the email without this computer's key,
 // even knowing the email to try.
 func accountRef(name string, a gwmw.Account) string {
 	mac := hmac.New(sha256.New, refKey())
-	for _, s := range []string{"myna account ref v1", name, a.Agent, strings.ToLower(a.User), strings.ToLower(a.Plan)} {
+	for _, s := range []string{"owl account ref v1", name, a.Agent, strings.ToLower(a.User), strings.ToLower(a.Plan)} {
 		mac.Write([]byte(s))
 		mac.Write([]byte{0})
 	}
@@ -106,7 +106,7 @@ var refKeys = struct {
 }{m: map[string][]byte{}}
 
 // refKey is the key refs are made with: random, made the first time and
-// kept in myna's folder (account-ref.key), so a ref is the same after a
+// kept in owl's folder (account-ref.key), so a ref is the same after a
 // restart. A key that can't be read is never written over, as every ref a
 // middleware kept would change: this process makes do with one of its own
 // and says so.

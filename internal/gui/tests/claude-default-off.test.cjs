@@ -1,9 +1,9 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Claude Code on a model of myna's, Default picked and Use default
+// Claude Code on a model of owl's, Default picked and Use default
 // confirmed (EZN7L2C3, #834 on v0.1.920): the row said Not connected with
-// 「接入」 off, yet its model read Pick a model and its list had myna's
+// 「接入」 off, yet its model read Pick a model and its list had owl's
 // models alone, Default and Claude Code's own gone. It now says Default,
-// and lists Default (the one it is on), its own models and myna's, as
+// and lists Default (the one it is on), its own models and owl's, as
 // when connected; and it goes under Not set up as the ask said. No click
 // moves the page. In English and Chinese.
 const assert = require("node:assert/strict");
@@ -16,9 +16,9 @@ const assets = path.resolve(__dirname, "../assets");
 const claude = [
   { value: "claude-sonnet-5-5", note: "Claude Sonnet 5.5", icon: "claude-color", group: "Claude Code", direct: "Anthropic" },
   { value: "claude-opus-5-5", note: "Claude Opus 5.5", icon: "claude-color", group: "Claude Code", direct: "Anthropic" },
-  { value: "deepseek/pro", label: "DeepSeek Pro", note: "DeepSeek · via myna", icon: "deepseek-color", group: "DeepSeek", ref: "deepseek/pro" },
+  { value: "deepseek/pro", label: "DeepSeek Pro", note: "DeepSeek · via owl", icon: "deepseek-color", group: "DeepSeek", ref: "deepseek/pro" },
 ];
-const codex = [{ value: "relay/m1", label: "m1", note: "Relay · via myna", ref: "relay/m1", group: "Relay" }];
+const codex = [{ value: "relay/m1", label: "m1", note: "Relay · via owl", ref: "relay/m1", group: "Relay" }];
 const fresh = () => ({
   agents: [
     { id: "claude", name: "Claude Code", icon: "claudecode-color", path: "~/.claude/settings.json", wired: true,
@@ -60,14 +60,14 @@ function server(lang, sets) {
 }
 
 const words = {
-  en: { def: "Default", shown: "default", use: "Use default", direct: "direct, not via myna", via: "via myna" },
-  zh: { def: "默认", shown: "默认", use: "使用默认", direct: "直连，不经 myna", via: "经 myna" },
+  en: { def: "Default", shown: "default", use: "Use default", direct: "direct, not via owl", via: "via owl" },
+  zh: { def: "默认", shown: "默认", use: "使用默认", direct: "直连，不经 owl", via: "经 owl" },
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   for (const lang of ["en", "zh"]) {
     const w = words[lang];
-    test(`${engine} ${lang}: Claude Code taken off myna by Default says Default, lists every choice, and goes under Not set up`, async (t) => {
+    test(`${engine} ${lang}: Claude Code taken off owl by Default says Default, lists every choice, and goes under Not set up`, async (t) => {
       const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
       const page = await (await browser.newContext({ viewport: { width: 980, height: 640 }, reducedMotion: "reduce" })).newPage();
       t.after(() => browser.close());
@@ -77,7 +77,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       const sets = [];
       await page.route("**/*", server(lang, sets));
-      await page.goto("http://myna.test/");
+      await page.goto("http://owl.test/");
       const row = page.locator('.row.agent[data-id="claude"]');
       const field = row.locator('> .field.ag-start[data-key="model"]');
       await field.waitFor();
@@ -104,7 +104,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       // the row says Default, not Pick a model
       assert.equal(await field.locator(".v").textContent(), w.shown);
 
-      // and its list has Default, the one it is on, its own and myna's
+      // and its list has Default, the one it is on, its own and owl's
       await open();
       const cur = page.locator("#pop #list li.cur");
       assert.equal(await cur.count(), 1);

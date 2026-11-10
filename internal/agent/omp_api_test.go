@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/provider"
 	"gopkg.in/yaml.v3"
 )
 
@@ -42,7 +42,7 @@ func TestOmpModelsAskedOnTheirNativeAPI(t *testing.T) {
 	if err := catalog.SaveLive("anth", "http://127.0.0.1:1", live); err != nil {
 		t.Fatal(err)
 	}
-	if err := omp(home).Field("model").Set("myna/anth/claude-sonnet-5"); err != nil {
+	if err := omp(home).Field("model").Set("owl/anth/claude-sonnet-5"); err != nil {
 		t.Fatal(err)
 	}
 	b, err := os.ReadFile(filepath.Join(home, ".omp", "agent", "models.yml"))
@@ -53,7 +53,7 @@ func TestOmpModelsAskedOnTheirNativeAPI(t *testing.T) {
 	if err := yaml.Unmarshal(b, &file); err != nil {
 		t.Fatal(err)
 	}
-	pm := file["providers"].(map[string]any)["myna"].(map[string]any)
+	pm := file["providers"].(map[string]any)["owl"].(map[string]any)
 	if pm["api"] != "openai-completions" || pm["baseUrl"] != gatewayV1() || pm["auth"] != "none" {
 		t.Fatalf("provider: %v", pm)
 	}
@@ -132,7 +132,7 @@ func TestOmpGeminiModelsAskedOnGeminisAPI(t *testing.T) {
 	if err := catalog.SaveLive("gem", "http://127.0.0.1:1/v1beta", live); err != nil {
 		t.Fatal(err)
 	}
-	if err := omp(home).Field("model").Set("myna/gem/gemini-3-flash"); err != nil {
+	if err := omp(home).Field("model").Set("owl/gem/gemini-3-flash"); err != nil {
 		t.Fatal(err)
 	}
 	b, err := os.ReadFile(filepath.Join(home, ".omp", "agent", "models.yml"))
@@ -143,7 +143,7 @@ func TestOmpGeminiModelsAskedOnGeminisAPI(t *testing.T) {
 	if err := yaml.Unmarshal(b, &file); err != nil {
 		t.Fatal(err)
 	}
-	pm := file["providers"].(map[string]any)["myna"].(map[string]any)
+	pm := file["providers"].(map[string]any)["owl"].(map[string]any)
 	if pm["api"] != "openai-completions" || pm["baseUrl"] != gatewayV1() || pm["auth"] != "none" || pm["apiKey"] != nil {
 		t.Fatalf("provider: %v", pm)
 	}

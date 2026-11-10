@@ -61,7 +61,7 @@ async function open(t, engine, lang, scene, width = 1100) {
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.route("**/*", serve(lang, scene));
-  await page.goto("http://myna.test/?view=routing");
+  await page.goto("http://owl.test/?view=routing");
   const req = page.locator(".rt-req").first();
   await req.waitFor();
   if (await req.getAttribute("aria-pressed") !== "true") await req.click();

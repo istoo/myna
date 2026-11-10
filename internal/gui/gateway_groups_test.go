@@ -5,7 +5,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // The Gateway view's routing groups say what agents are told of them, as

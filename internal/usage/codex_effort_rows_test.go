@@ -10,7 +10,7 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/owl/internal/sessions"
 )
 
 // threadRows are the rows of a whole ledger that carry a Codex thread.

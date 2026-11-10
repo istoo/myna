@@ -10,7 +10,7 @@ import (
 
 // #2685: an MCP server started by fnm's npx.cmd, by its full path, runs
 // the package it fetched, which runs `node` by name. A terminal's fnm put
-// node's folder on PATH; myna's PATH, the registry's, didn't have it,
+// node's folder on PATH; owl's PATH, the registry's, didn't have it,
 // and the server exited 1 with cmd's "'node' is not recognized as an
 // internal or external command, operable program or batch file." After
 // UserPath the child finds fnm's node, and FindTool finds a bare npx.

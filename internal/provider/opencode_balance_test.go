@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/agentenv"
+	"github.com/istoo/owl/internal/agentenv"
 )
 
 // noVendor answers no request and keeps what was asked: OpenCode tells

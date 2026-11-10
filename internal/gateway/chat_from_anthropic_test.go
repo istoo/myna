@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // pacedMessages is an Anthropic Messages upstream that says its reply's

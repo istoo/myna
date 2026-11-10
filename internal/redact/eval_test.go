@@ -13,8 +13,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/pii"
-	"github.com/istoo/myna/internal/redact"
+	"github.com/istoo/owl/internal/pii"
+	"github.com/istoo/owl/internal/redact"
 )
 
 // The masking evaluation: made-up texts of the kinds agents send (prose,
@@ -26,7 +26,7 @@ import (
 // Three ways are scored on them:
 //   - rules: the rules alone, the model off;
 //   - model: what the local model found, as it said it, before any check;
-//   - both:  the rules and the model with myna's checks on what it found,
+//   - both:  the rules and the model with owl's checks on what it found,
 //     as a user with the model on gets.
 //
 // Each local model (pii.Models) is scored on its own. What it said is
@@ -38,11 +38,11 @@ import (
 // it taken off.
 //
 // To ask the real models again, after a case is added or a new model,
-// point MYNA_EVAL_CACHE at the cache folder they were downloaded into
-// (the folder that holds myna/privacy-filter, myna/astrlink-guard);
+// point OWL_EVAL_CACHE at the cache folder they were downloaded into
+// (the folder that holds owl/privacy-filter, owl/astrlink-guard);
 // each one there is asked:
 //
-//	MYNA_EVAL_CACHE=$HOME/.cache go test -run TestMaskEval -v ./internal/redact
+//	OWL_EVAL_CACHE=$HOME/.cache go test -run TestMaskEval -v ./internal/redact
 //
 // which writes the recording again and logs the table.
 func TestMaskEval(t *testing.T) {
@@ -50,7 +50,7 @@ func TestMaskEval(t *testing.T) {
 	for _, em := range evalModels {
 		t.Run(em.id, func(t *testing.T) {
 			rec := readRecording(t, em.path)
-			if dir := os.Getenv("MYNA_EVAL_CACHE"); dir != "" {
+			if dir := os.Getenv("OWL_EVAL_CACHE"); dir != "" {
 				if r, ok := askModel(t, dir, pii.Of(em.id)); ok {
 					rec = r
 					writeRecording(t, em.path, rec)
@@ -60,8 +60,8 @@ func TestMaskEval(t *testing.T) {
 			evalModel(t, rec, em.known, pii.Of(em.id).MinScore())
 		})
 	}
-	if os.Getenv("MYNA_EVAL_CACHE") != "" && asked == 0 {
-		t.Fatal("no model is in MYNA_EVAL_CACHE")
+	if os.Getenv("OWL_EVAL_CACHE") != "" && asked == 0 {
+		t.Fatal("no model is in OWL_EVAL_CACHE")
 	}
 }
 
@@ -85,7 +85,7 @@ func evalModel(t *testing.T, rec map[string]recorded, known func(evalValue) stri
 		}
 	}
 	if len(stale) > 0 {
-		t.Fatalf("the model's recording is not of cases %v; record it again with MYNA_EVAL_CACHE (see TestMaskEval)", stale)
+		t.Fatalf("the model's recording is not of cases %v; record it again with OWL_EVAL_CACHE (see TestMaskEval)", stale)
 	}
 	kept := map[string]recorded{}
 	for id, r := range rec {
@@ -158,7 +158,7 @@ func gone(out, v string) bool {
 	return !strings.Contains(placeholders.ReplaceAllString(out, "\x00"), v)
 }
 
-// modelFound says the model put a span of a kind myna masks over some
+// modelFound says the model put a span of a kind owl masks over some
 // of v, where v is in text.
 func modelFound(text, v string, fs []redact.Found) bool {
 	for at := 0; ; {
@@ -310,7 +310,7 @@ func writeRecording(t *testing.T, recordingPath string, rec map[string]recorded)
 func askModel(t *testing.T, dir string, m pii.Model) (map[string]recorded, bool) {
 	t.Setenv("XDG_CACHE_HOME", dir)
 	if !m.Installed() {
-		t.Logf("%s isn't in %s; its recording is kept", m.ID(), filepath.Join(dir, "myna"))
+		t.Logf("%s isn't in %s; its recording is kept", m.ID(), filepath.Join(dir, "owl"))
 		return nil, false
 	}
 	defer m.Stop()

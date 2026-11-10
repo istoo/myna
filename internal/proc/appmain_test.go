@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // openCodeBundle lays out OpenCode.app as its desktop app ships on a Mac:
@@ -61,7 +61,7 @@ func ranOf(t *testing.T, ran string) string {
 
 // An opencode that is OpenCode.app's own program, reached through a link
 // or a folder of the bundle on PATH, is never run by a version probe: run,
-// it opens OpenCode's window, which myna's version check did at each
+// it opens OpenCode's window, which owl's version check did at each
 // start and after each update (saint carol on Discord). The CLI beside it
 // in the bundle is still asked.
 func TestProbeNeverOpensAnApp(t *testing.T) {

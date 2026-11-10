@@ -10,9 +10,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // Sharing gates remote access; each authorized remote call carries the same
@@ -41,7 +41,7 @@ func TestLANGuard(t *testing.T) {
 	}
 	keys, _ := access.List()
 	keyID := keys[0].ID
-	t.Setenv("MYNA_ADDR", "")
+	t.Setenv("OWL_ADDR", "")
 	if c := call("192.168.1.9:5000", "x-api-key", secret); c != http.StatusForbidden {
 		t.Fatal("unshared remote", c)
 	}
@@ -56,12 +56,12 @@ func TestLANGuard(t *testing.T) {
 	if addr := listenAddr(); addr != "0.0.0.0:"+Port() {
 		t.Fatal(addr)
 	}
-	for _, hdr := range [][]string{nil, {"Authorization", "Bearer myna"}, {"x-api-key", "wrong"}} {
+	for _, hdr := range [][]string{nil, {"Authorization", "Bearer owl"}, {"x-api-key", "wrong"}} {
 		if c := call("192.168.1.9:5000", hdr...); c != http.StatusUnauthorized {
 			t.Fatal("unauthorized remote", hdr, c)
 		}
 	}
-	if c := call("192.168.1.9:5000", "x-api-key", secret); c != 200 || id != keyID || got != "Bearer myna|myna" {
+	if c := call("192.168.1.9:5000", "x-api-key", secret); c != 200 || id != keyID || got != "Bearer owl|owl" {
 		t.Fatal(c, id, got)
 	}
 	if c := call("127.0.0.1:5000", "Authorization", "Bearer "+secret); c != 200 || id != keyID {
@@ -78,13 +78,13 @@ func TestLANGuard(t *testing.T) {
 	}
 	s.LAN = false
 	settings.Save(s)
-	// MYNA_ADDR on the network, not shared (the Docker image): another
+	// OWL_ADDR on the network, not shared (the Docker image): another
 	// machine, a container's host among them, needs an enabled key too
-	t.Setenv("MYNA_ADDR", "0.0.0.0:3499")
-	for _, hdr := range [][]string{nil, {"Authorization", "Bearer myna"}, {"x-api-key", "wrong"}} {
+	t.Setenv("OWL_ADDR", "0.0.0.0:3499")
+	for _, hdr := range [][]string{nil, {"Authorization", "Bearer owl"}, {"x-api-key", "wrong"}} {
 		for _, from := range []string{"192.168.1.9:5000", "172.17.0.1:40312", "[fd00::1]:5000"} {
 			if c := call(from, hdr...); c != http.StatusUnauthorized || id != "" {
-				t.Fatal("MYNA_ADDR on the network, not shared:", from, hdr, c)
+				t.Fatal("OWL_ADDR on the network, not shared:", from, hdr, c)
 			}
 		}
 	}
@@ -92,21 +92,21 @@ func TestLANGuard(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if c := call("172.17.0.1:40312", "Authorization", "Bearer "+secret); c != 200 || id == "" || got != "Bearer myna|" {
-		t.Fatal("MYNA_ADDR on the network, with a key:", c, id, got)
+	if c := call("172.17.0.1:40312", "Authorization", "Bearer "+secret); c != 200 || id == "" || got != "Bearer owl|" {
+		t.Fatal("OWL_ADDR on the network, with a key:", c, id, got)
 	}
 	if c := call("127.0.0.1:5000", "Authorization", "Bearer anything"); c != 200 {
-		t.Fatal("loopback, MYNA_ADDR on the network:", c)
+		t.Fatal("loopback, OWL_ADDR on the network:", c)
 	}
 }
 
 // A gateway on every interface is reached here on loopback.
 func TestURLOfWildcard(t *testing.T) {
-	t.Setenv("MYNA_ADDR", "0.0.0.0:3499")
+	t.Setenv("OWL_ADDR", "0.0.0.0:3499")
 	if u := URL(); u != "http://127.0.0.1:3499" {
 		t.Fatal(u)
 	}
-	t.Setenv("MYNA_ADDR", "")
+	t.Setenv("OWL_ADDR", "")
 	if u := URL(); u != "http://127.0.0.1:3425" {
 		t.Fatal(u)
 	}
@@ -119,7 +119,7 @@ func TestAgentOf(t *testing.T) {
 		{"Bearer " + TokenFor("alma"), "", "ai-sdk/openai/2.0.52 ai-sdk/provider-utils/3.0.12 runtime/node.js/v22", "alma"},
 		// alma-server's (Alma 0.4's @ai-sdk/openai 4.0.15 under Node 22,
 		// whose navigator.userAgent the AI SDK appends): Alma's by the key
-		// myna gives its provider, the AI SDK's without it (Lutra.x)
+		// owl gives its provider, the AI SDK's without it (Lutra.x)
 		{"Bearer " + TokenFor("alma"), "", "ai-sdk/openai/4.0.15 ai-sdk/provider-utils/5.0.10 runtime/node.js/22", "alma"},
 		{"Bearer " + Token, "", "ai-sdk/openai/4.0.15 ai-sdk/provider-utils/5.0.10 runtime/node.js/22", "ai-sdk"},
 		{"", TokenFor("alma"), "ai-sdk/anthropic/2.0.1", "alma"},
@@ -143,30 +143,30 @@ func TestAgentOf(t *testing.T) {
 	}
 }
 
-// In a container myna's own addresses are the container's (Docker's
+// In a container owl's own addresses are the container's (Docker's
 // bridge, 172.17.x), which a NAS's other devices can't reach: set,
-// MYNA_PUBLIC_URL is the address shared, and its host the one printed
+// OWL_PUBLIC_URL is the address shared, and its host the one printed
 // for the web page.
 func TestPublicURLShared(t *testing.T) {
-	t.Setenv("MYNA_ADDR", "0.0.0.0:3425")
+	t.Setenv("OWL_ADDR", "0.0.0.0:3425")
 	for _, c := range []struct{ env, want, host string }{
 		{"http://192.168.1.20:3425", "http://192.168.1.20:3425", "192.168.1.20"},
-		{"https://nas.example.com/myna/", "https://nas.example.com/myna", "nas.example.com"},
+		{"https://nas.example.com/owl/", "https://nas.example.com/owl", "nas.example.com"},
 		{"nas.local:13425", "http://nas.local:13425", "nas.local"},
 		{"http://[fd00::20]:13425", "http://[fd00::20]:13425", "fd00::20"},
 	} {
-		t.Setenv("MYNA_PUBLIC_URL", c.env)
+		t.Setenv("OWL_PUBLIC_URL", c.env)
 		if got := LANURLs(); len(got) != 1 || got[0] != c.want {
-			t.Errorf("MYNA_PUBLIC_URL=%q: %v, want %s", c.env, got, c.want)
+			t.Errorf("OWL_PUBLIC_URL=%q: %v, want %s", c.env, got, c.want)
 		}
 		if got := PublicHost(); got != c.host {
-			t.Errorf("MYNA_PUBLIC_URL=%q: host %q, want %s", c.env, got, c.host)
+			t.Errorf("OWL_PUBLIC_URL=%q: host %q, want %s", c.env, got, c.host)
 		}
 		if ContainerAddrs() {
-			t.Errorf("MYNA_PUBLIC_URL=%q still says the addresses are a container's", c.env)
+			t.Errorf("OWL_PUBLIC_URL=%q still says the addresses are a container's", c.env)
 		}
 	}
-	t.Setenv("MYNA_PUBLIC_URL", "")
+	t.Setenv("OWL_PUBLIC_URL", "")
 	if PublicHost() != "" {
 		t.Error("unset, a host:", PublicHost())
 	}
@@ -205,7 +205,7 @@ func TestInContainer(t *testing.T) {
 // offer) sees the host's interfaces, Docker's bridges among them, and its
 // addresses are the host's: they aren't said to be a container's own. A
 // container on a bridge network has its eth0 alone (jiezhengj on Discord:
-// myna in Docker on a NAS).
+// owl in Docker on a NAS).
 func TestHostNetwork(t *testing.T) {
 	for _, c := range []struct {
 		names []string
@@ -224,7 +224,7 @@ func TestHostNetwork(t *testing.T) {
 	}
 	was := ifaceNames
 	t.Cleanup(func() { ifaceNames = was })
-	t.Setenv("MYNA_PUBLIC_URL", "")
+	t.Setenv("OWL_PUBLIC_URL", "")
 	ifaceNames = func() []string { return []string{"lo", "eth0", "docker0"} }
 	if ContainerAddrs() {
 		t.Error("on the host's network, the addresses are said to be a container's")
@@ -234,13 +234,13 @@ func TestHostNetwork(t *testing.T) {
 // Another computer lists the models with the key it was given whatever
 // else its client sends beside it: an empty or placeholder Authorization
 // with the key in x-api-key, a stale token there, "bearer" in lower case
-// (悠悠哥 on Discord: a client's model list from myna shared on a NAS
-// failed, while from myna on 127.0.0.1, which takes any token, it came).
+// (悠悠哥 on Discord: a client's model list from owl shared on a NAS
+// failed, while from owl on 127.0.0.1, which takes any token, it came).
 // The request comes as it would from the network: another address, the
 // NAS's address as its Host.
 func TestLANModelsWithKeyBesideAnotherToken(t *testing.T) {
 	setup(t, provider.Chat, &fake{t: t})
-	t.Setenv("MYNA_ADDR", "")
+	t.Setenv("OWL_ADDR", "")
 	keys, secrets := newCaller(t, "PC")
 	key := secrets[0]
 	var who string
@@ -265,9 +265,9 @@ func TestLANModelsWithKeyBesideAnotherToken(t *testing.T) {
 		{"x-api-key", key, "Authorization", "Bearer "},
 		{"x-api-key", key, "Authorization", "Bearer"},
 		{"x-api-key", key, "Authorization", "Bearer undefined"},
-		{"x-api-key", key, "Authorization", "Bearer myna"},
+		{"x-api-key", key, "Authorization", "Bearer owl"},
 		{"Authorization", "bearer " + key},
-		{"Authorization", "Bearer myna", "x-goog-api-key", key},
+		{"Authorization", "Bearer owl", "x-goog-api-key", key},
 	} {
 		for _, path := range []string{"/v1/models", "/models", "/v1/models?limit=1000"} {
 			c, b := list("192.168.0.9:50123", path, hdr...)
@@ -281,7 +281,7 @@ func TestLANModelsWithKeyBesideAnotherToken(t *testing.T) {
 	}
 	// a key the gateway doesn't have is refused wherever it is sent
 	for _, hdr := range [][]string{
-		{"x-api-key", "sk-myna-wrong", "Authorization", "Bearer myna"},
+		{"x-api-key", "sk-owl-wrong", "Authorization", "Bearer owl"},
 		{"Authorization", "Bearer "},
 		{"x-api-key", key + "x"},
 	} {
@@ -296,14 +296,14 @@ func TestLANModelsWithKeyBesideAnotherToken(t *testing.T) {
 }
 
 // ZCode's custom provider asks no model list; its models are typed one a
-// line (悠悠哥 on Discord: from myna on a NAS nothing filled it, while a
-// myna on this computer writes its models into ZCode's own config).
+// line (悠悠哥 on Discord: from owl on a NAS nothing filled it, while a
+// owl on this computer writes its models into ZCode's own config).
 // /v1/models?format=text gives the ids one a line to paste there, opened
 // in a browser on another computer with the key as ?key=; without a key it
 // is refused as the list is.
 func TestLANModelsAsText(t *testing.T) {
 	setup(t, provider.Chat, &fake{t: t})
-	t.Setenv("MYNA_ADDR", "")
+	t.Setenv("OWL_ADDR", "")
 	_, secrets := newCaller(t, "PC")
 	h := lanGuard(New().Handler())
 	get := func(path string) *httptest.ResponseRecorder {
@@ -343,13 +343,13 @@ func TestLANModelsAsText(t *testing.T) {
 // One, the Responses websocket, images, retrieval, videos, Gemini, the MCP
 // sign-ins, Codex's backend and catalog, the quotas, the route and the
 // rest — refuses another machine without an enabled gateway key, when
-// MYNA_ADDR puts the gateway on the network and it isn't shared (the
+// OWL_ADDR puts the gateway on the network and it isn't shared (the
 // Docker image, whose host reaches it from Docker's bridge). Through the
 // whole server stack, lanGuard in front of Handler.
 func TestNetworkGatewayGuardsEveryRoute(t *testing.T) {
 	fresh(t)
-	t.Setenv("MYNA_ADDR", "0.0.0.0:3425")
-	t.Setenv("MYNA_TRUST_PROXY", "")
+	t.Setenv("OWL_ADDR", "0.0.0.0:3425")
+	t.Setenv("OWL_TRUST_PROXY", "")
 	if err := settings.Save(settings.Settings{LAN: false}); err != nil {
 		t.Fatal(err)
 	}
@@ -363,10 +363,10 @@ func TestNetworkGatewayGuardsEveryRoute(t *testing.T) {
 		{"GET", "/"}, {"GET", "/v1"}, {"GET", "/v1/models"}, {"GET", "/models"}, {"GET", "/v1/models/x"},
 		{"GET", "/muse-code/models"}, {"GET", "/api/hello"},
 		{"GET", "/api/version"}, {"GET", "/api/tags"}, {"POST", "/api/show"},
-		{"GET", "/v1/myna/quotas"}, {"GET", "/v1/myna/quotas/history"},
+		{"GET", "/v1/owl/quotas"}, {"GET", "/v1/owl/quotas/history"},
 		{"GET", provider.RemoteCardsPath}, {"POST", provider.RemoteRefreshPath},
 		{"POST", provider.RemoteCodexResetPath + "?user=me@example.com"},
-		{"GET", "/v1/myna/route?session=s"}, {"GET", "/v1/myna/concurrency"}, {"GET", "/v1/myna/limit"},
+		{"GET", "/v1/owl/route?session=s"}, {"GET", "/v1/owl/concurrency"}, {"GET", "/v1/owl/limit"},
 		{"POST", "/v1/chat/completions"}, {"POST", "/chat/completions"},
 		{"POST", "/v1/responses"}, {"POST", "/responses"}, {"GET", "/v1/responses"}, {"GET", "/responses"},
 		{"POST", "/v1/messages"}, {"POST", "/messages"}, {"POST", "/v1/messages/count_tokens"},
@@ -375,7 +375,7 @@ func TestNetworkGatewayGuardsEveryRoute(t *testing.T) {
 		{"POST", "/v1/embeddings"}, {"POST", "/v1/rerank"},
 		{"POST", "/v1/audio/transcriptions"}, {"POST", "/v1/audio/translations"}, {"POST", "/v1/audio/speech"},
 		{"POST", "/v1/videos"}, {"GET", "/v1/videos/v1"}, {"GET", "/v1/videos/v1/content"},
-		{"POST", "/_myna/claude-mcp/tok"}, {"POST", "/mcp/neon"},
+		{"POST", "/_owl/claude-mcp/tok"}, {"POST", "/mcp/neon"},
 		{"POST", CodexPath + "/responses"}, {"GET", CodexCatalogPath},
 		{"GET", "/v1beta/models"}, {"POST", "/v1beta/models/m:generateContent"},
 		{"GET", "/nowhere"},
@@ -398,7 +398,7 @@ func TestNetworkGatewayGuardsEveryRoute(t *testing.T) {
 	}
 	for _, rt := range routes {
 		for _, from := range []string{"172.17.0.1:40312", "192.168.1.9:5000"} {
-			for _, hdr := range [][]string{nil, {"Authorization", "Bearer myna"}, {"x-api-key", "anything"}, {"x-goog-api-key", "myna"}, {"Authorization", "Bearer " + live}} {
+			for _, hdr := range [][]string{nil, {"Authorization", "Bearer owl"}, {"x-api-key", "anything"}, {"x-goog-api-key", "owl"}, {"Authorization", "Bearer " + live}} {
 				resetAuthThrottle() // test each route's own guard, not the flood limiter that would 429 later tries
 				if c, b := call(rt[0], rt[1], from, hdr...); c != http.StatusUnauthorized || !strings.Contains(b, "gateway key") {
 					t.Errorf("%s %s from %s with %v: %d %.120s", rt[0], rt[1], from, hdr, c, b)
@@ -408,14 +408,14 @@ func TestNetworkGatewayGuardsEveryRoute(t *testing.T) {
 	}
 	// a gateway key gets past the guard; loopback still takes any token
 	_, secrets := newCaller(t, "Host")
-	settings.Save(settings.Settings{LAN: false}) // newCaller shares myna
+	settings.Save(settings.Settings{LAN: false}) // newCaller shares owl
 	if c, b := call("GET", "/v1/models", "172.17.0.1:40312", "Authorization", "Bearer "+secrets[0]); c != 200 {
 		t.Fatal("with the key:", c, b)
 	}
-	if c, b := call("GET", "/v1/myna/quotas", "172.17.0.1:40312", "x-api-key", secrets[0]); c != 200 {
+	if c, b := call("GET", "/v1/owl/quotas", "172.17.0.1:40312", "x-api-key", secrets[0]); c != 200 {
 		t.Fatal("quotas with the key:", c, b)
 	}
-	if c, b := call("GET", "/v1/models", "127.0.0.1:5000", "Authorization", "Bearer myna"); c != 200 {
+	if c, b := call("GET", "/v1/models", "127.0.0.1:5000", "Authorization", "Bearer owl"); c != 200 {
 		t.Fatal("loopback:", c, b)
 	}
 }

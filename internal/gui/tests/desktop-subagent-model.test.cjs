@@ -18,7 +18,7 @@ const fresh = (wired = true) => ({
   agents: [{
     id: "claude-desktop", name: "Claude Desktop", path: "/test/claude_desktop_config.json", icon: "claude-color", wired,
     fields: [
-      { key: "provider", label: "provider", value: wired ? "myna" : "", options: [{ value: "myna", label: "myna" }] },
+      { key: "provider", label: "provider", value: wired ? "owl" : "", options: [{ value: "owl", label: "owl" }] },
       ...["opus", "sonnet", "haiku", "fable"].map((tier) => ({ key: tier, label: tier, value: "", options: wired ? models : [] })),
       { key: "subagent_model", label: "subagent model", value: "", options: wired ? models : [] },
       { key: "subagent_effort", label: "subagent effort", value: "", options: wired ? allLevels : [] },
@@ -35,7 +35,7 @@ const seat = { id: "fake", provider: "fake", name: "Fake", who: "Test key", kind
 const routes = [
   { id: 3, seq: 3, time: at(0), agent: "claude-desktop", model: "fake/m1", provider: "fake", subagentEffort: "high", subagent: { asked: "fake/m1", to: "fake/m2" },
     order: [seat], tries: [{ id: "fake", model: "m2", start: at(0), done: true, status: 200, ms: 900 }], done: true, status: 200, ms: 900, tokens: 1200 },
-  { id: 2, seq: 2, time: at(1), agent: "claude-desktop", model: "fake/m1", provider: "fake", subagentEffort: "high", subagent: { asked: "fake/m1", to: "fake/m2", kept: "it is disabled in myna" },
+  { id: 2, seq: 2, time: at(1), agent: "claude-desktop", model: "fake/m1", provider: "fake", subagentEffort: "high", subagent: { asked: "fake/m1", to: "fake/m2", kept: "it is disabled in owl" },
     order: [{ ...seat, model: "m1" }], tries: [{ id: "fake", model: "m1", start: at(1), done: true, status: 200, ms: 900 }], done: true, status: 200, ms: 900, tokens: 1200 },
   { id: 1, seq: 1, time: at(2), agent: "claude-desktop", model: "fake/m1", provider: "fake", subagentEffort: "high",
     order: [{ ...seat, model: "m1" }], tries: [{ id: "fake", model: "m1", start: at(2), effort: "high", done: true, status: 200, ms: 900 }], done: true, status: 200, ms: 900, tokens: 1200 },
@@ -82,35 +82,35 @@ function server(lang, fixture) {
 // Expected reader-facing words, independent of the translation lookup.
 const W = {
   en: { effortDefault: "subagent effort: default\nthe effort Claude Code asks for", effortHigh: "subagent effort: high",
-    effortStory: "The subagent effort set in myna is high; the model's supported levels and a routing group's fixed member effort still apply.",
+    effortStory: "The subagent effort set in owl is high; the model's supported levels and a routing group's fixed member effort still apply.",
     unset: "subagent model: the model the lead asks for", def: "Default", set: "subagent model: M2",
     note: "each subagent on the model Claude Desktop's lead asks for",
-    moved: "Claude Desktop requested a subagent on fake/m1; myna put it on fake/m2, the model set for its subagents.",
-    kept: "Claude Desktop requested a subagent on fake/m1 and it stayed there: its subagents are set to fake/m2, but it is disabled in myna." },
+    moved: "Claude Desktop requested a subagent on fake/m1; owl put it on fake/m2, the model set for its subagents.",
+    kept: "Claude Desktop requested a subagent on fake/m1 and it stayed there: its subagents are set to fake/m2, but it is disabled in owl." },
   zh: { effortDefault: "子代理推理强度：默认\n跟随 Claude Code 请求的推理强度", effortHigh: "子代理推理强度：高",
-    effortStory: "myna 为子代理设定的推理强度是 高；仍按模型支持的等级适配，并保留路由组成员的固定强度。",
+    effortStory: "owl 为子代理设定的推理强度是 高；仍按模型支持的等级适配，并保留路由组成员的固定强度。",
     unset: "子代理模型：主代理请求的模型", def: "默认", set: "子代理模型：M2",
     note: "每个子代理都用 Claude Desktop 主代理请求的模型",
-    moved: "Claude Desktop 请求了使用 fake/m1 的子代理；myna 将其改用 fake/m2，即为它的子代理设定的模型。",
-    kept: "Claude Desktop 请求了使用 fake/m1 的子代理，并保留在该模型上：它的子代理设为 fake/m2，但该模型在 myna 中已停用。" },
+    moved: "Claude Desktop 请求了使用 fake/m1 的子代理；owl 将其改用 fake/m2，即为它的子代理设定的模型。",
+    kept: "Claude Desktop 请求了使用 fake/m1 的子代理，并保留在该模型上：它的子代理设为 fake/m2，但该模型在 owl 中已停用。" },
   "zh-TW": { effortDefault: "子代理推理強度：預設\n跟隨 Claude Code 請求的推理強度", effortHigh: "子代理推理強度：高",
-    effortStory: "myna 為子代理設定的推理強度是 高；仍按模型支援的等級適配，並保留路由群組成員的固定強度。",
+    effortStory: "owl 為子代理設定的推理強度是 高；仍按模型支援的等級適配，並保留路由群組成員的固定強度。",
     unset: "子代理模型：主代理請求的模型", def: "預設", set: "子代理模型：M2",
     note: "每個子代理都用 Claude Desktop 主代理請求的模型",
-    moved: "Claude Desktop 請求了使用 fake/m1 的子代理；myna 將其改用 fake/m2，即為它的子代理設定的模型。",
-    kept: "Claude Desktop 請求了使用 fake/m1 的子代理，並保留在該模型上：它的子代理設為 fake/m2，但該模型在 myna 中已停用。" },
+    moved: "Claude Desktop 請求了使用 fake/m1 的子代理；owl 將其改用 fake/m2，即為它的子代理設定的模型。",
+    kept: "Claude Desktop 請求了使用 fake/m1 的子代理，並保留在該模型上：它的子代理設為 fake/m2，但該模型在 owl 中已停用。" },
   ja: { effortDefault: "サブエージェントの推論レベル：デフォルト\nClaude Code が要求する推論レベル", effortHigh: "サブエージェントの推論レベル：高",
-    effortStory: "myna で設定したサブエージェントの推論レベルは 高 です。モデルが対応するレベルへの調整と、ルーティンググループのメンバーに固定されたレベルは引き続き適用されます。",
+    effortStory: "owl で設定したサブエージェントの推論レベルは 高 です。モデルが対応するレベルへの調整と、ルーティンググループのメンバーに固定されたレベルは引き続き適用されます。",
     unset: "サブエージェントのモデル：リードがリクエストしたモデル", def: "デフォルト", set: "サブエージェントのモデル：M2",
     note: "各サブエージェントは Claude Desktop のリードがリクエストしたモデルを使います",
-    moved: "Claude Desktop が fake/m1 のサブエージェントをリクエストしました。myna はサブエージェント用に設定された fake/m2 に切り替えました。",
-    kept: "Claude Desktop が fake/m1 のサブエージェントをリクエストし、そのモデルのままになりました。サブエージェントは fake/m2 に設定されていますが、このモデルは myna で無効になっています。" },
+    moved: "Claude Desktop が fake/m1 のサブエージェントをリクエストしました。owl はサブエージェント用に設定された fake/m2 に切り替えました。",
+    kept: "Claude Desktop が fake/m1 のサブエージェントをリクエストし、そのモデルのままになりました。サブエージェントは fake/m2 に設定されていますが、このモデルは owl で無効になっています。" },
   de: { effortDefault: "Reasoning-Effort der Subagenten: Standard\nder von Claude Code angeforderte Reasoning-Effort", effortHigh: "Reasoning-Effort der Subagenten: hoch",
-    effortStory: "Der in myna gesetzte Reasoning-Effort der Subagenten ist hoch; die unterstützten Stufen des Modells und die feste Stufe eines Mitglieds der Routing-Gruppe gelten weiterhin.",
+    effortStory: "Der in owl gesetzte Reasoning-Effort der Subagenten ist hoch; die unterstützten Stufen des Modells und die feste Stufe eines Mitglieds der Routing-Gruppe gelten weiterhin.",
     unset: "Modell der Subagenten: das Modell, das der Haupt-Agent anfordert", def: "Standard", set: "Modell der Subagenten: M2",
     note: "jeder Subagent auf dem Modell, das der Haupt-Agent von Claude Desktop anfordert",
-    moved: "Claude Desktop hat einen Subagent mit fake/m1 angefordert; myna hat ihn auf fake/m2 gesetzt, das für seine Subagenten festgelegte Modell.",
-    kept: "Claude Desktop hat einen Subagent mit fake/m1 angefordert, und er blieb dort: Seine Subagenten sind auf fake/m2 gesetzt, aber es ist in myna deaktiviert." },
+    moved: "Claude Desktop hat einen Subagent mit fake/m1 angefordert; owl hat ihn auf fake/m2 gesetzt, das für seine Subagenten festgelegte Modell.",
+    kept: "Claude Desktop hat einen Subagent mit fake/m1 angefordert, und er blieb dort: Seine Subagenten sind auf fake/m2 gesetzt, aber es ist in owl deaktiviert." },
 };
 
 const cd = '.row.agent[data-id="claude-desktop"]';
@@ -139,7 +139,7 @@ for (const engine of engines) {
           }
           await browser.close();
         });
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         await page.locator(cd).waitFor();
         await page.locator(`${cd} .ag-link`).click();
         await page.locator(`${cd} .ag-exp`).waitFor();
@@ -163,7 +163,7 @@ for (const engine of engines) {
         const first = await page.locator("#pop #list li").first().evaluate((e) => [e.querySelector(".v")?.textContent, e.querySelector(".n")?.textContent]);
         assert.deepEqual(first, [w.def, w.note], "translated Default first with Desktop's lead note");
         const items = await page.locator("#pop #list li").allInnerTexts();
-        for (const model of models) assert(items.some((s) => s.includes(model.label)), `${model.label} offered by myna`);
+        for (const model of models) assert(items.some((s) => s.includes(model.label)), `${model.label} offered by owl`);
         const pop = await page.locator("#pop").boundingBox();
         assert(pop && pop.x >= 0 && pop.x + pop.width <= width, JSON.stringify(pop));
         const left = await page.locator(`${cd} .field.extra[data-key="subagent_model"], #pop #list li`).evaluateAll((es) => es.flatMap((e) => [e, ...e.querySelectorAll("*")]).filter((e) => {
@@ -229,14 +229,14 @@ for (const engine of engines) {
         assert.equal(await page.evaluate(() => scrollY), y, "Default does not scroll");
 
         fixture.state = fresh(false);
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         await page.locator(cd).waitFor();
         assert.equal(await page.locator(`${cd} .field[data-key="subagent_model"]`).count(), 0, "unwired Desktop with no options or value has no square");
         assert.equal(await page.locator(`${cd} .field[data-key="subagent_effort"]`).count(), 0, "unwired Desktop has no effort square");
 
         // A narrow window covers the list with the story, so reopen it afresh.
         for (const [i, said] of [[0, w.moved], [1, w.kept], [2, w.effortStory]]) {
-          await page.goto("http://myna.test/?view=routing");
+          await page.goto("http://owl.test/?view=routing");
           await page.locator(".rt-days .rt-day").nth(1).click();
           await page.locator(".rt-req").nth(1).waitFor();
           await page.locator(".rt-req").nth(i).evaluate((e) => e.click());
@@ -246,7 +246,7 @@ for (const engine of engines) {
           assert.equal(await page.locator(".rt-steps .aside", { hasText: said }).count(), 1, "one subagent aside without a kind");
           assert.equal(await page.locator(".rt-steps .kind").count(), 0, "Desktop has no Codex purpose tag");
           assert(story.includes(w.effortStory), "the effort pick is explained even without a model replacement");
-          if (i === 1 && lang !== "en") assert(!story.includes("it is disabled in myna"), "kept reason must be translated");
+          if (i === 1 && lang !== "en") assert(!story.includes("it is disabled in owl"), "kept reason must be translated");
         }
         assert.deepEqual(errors, []);
       });

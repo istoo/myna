@@ -7,7 +7,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 // AIHubMix's /models leaves out gpt-image-2, which its key draws with; its

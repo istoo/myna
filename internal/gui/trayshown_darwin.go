@@ -78,7 +78,7 @@ static int mpTrayItemsNow(int rename) {
 			if (![t respondsToSelector:@selector(statusItem)]) continue;
 			id it = [t performSelector:@selector(statusItem)];
 			if (![it isKindOfClass:[NSStatusItem class]]) continue;
-			if (rename) ((NSStatusItem *)it).autosaveName = [NSString stringWithFormat:@"myna quitting %d", n];
+			if (rename) ((NSStatusItem *)it).autosaveName = [NSString stringWithFormat:@"owl quitting %d", n];
 			n++;
 		}
 	}
@@ -130,7 +130,7 @@ func forgetTrayHidden() int { return int(C.mpForgetHidden()) }
 // what is queued on it, the tray's Hide among them.
 func forgetTrayHiddenLater() { C.mpForgetHiddenLater() }
 
-// keepTrayPlace has the menu bar icon's place outlive this myna: run as
+// keepTrayPlace has the menu bar icon's place outlive this owl: run as
 // the app quits, before Wails removes the item, which would forget where
 // the user put it (mpKeepTrayPlaceNow). How many items it kept the place of.
 func keepTrayPlace() int { return int(C.mpTrayItems(1)) }
@@ -159,11 +159,11 @@ func mainSettled() { C.mpMainSettled() }
 
 // trayBroughtBackKey marks, in the Mac's defaults (this computer's, never
 // in a backup), that the hidden icon a handover left was brought back.
-const trayBroughtBackKey = "myna tray brought back after a handover"
+const trayBroughtBackKey = "owl tray brought back after a handover"
 
 // bringTrayBack, once per computer, brings back the menu bar icon a restart
-// to update hid: from v0.1.1354 the myna before hid its own item with
-// setVisible:NO, which AppKit keeps for the app, so every later myna
+// to update hid: from v0.1.1354 the owl before hid its own item with
+// setVisible:NO, which AppKit keeps for the app, so every later owl
 // started with no icon. A hide kept after that is the user's. Whether one
 // stays hidden, to be left alone.
 func bringTrayBack() (stillHidden bool) {

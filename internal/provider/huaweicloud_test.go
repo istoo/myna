@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 func TestHuaweiCloudTokenPlan(t *testing.T) {

@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// coolmantou on Discord: start an agent from myna's Agents list. On the
+// coolmantou on Discord: start an agent from owl's Agents list. On the
 // Mac app's window, a row whose agent has a program to run (terminal) has
 // "Open in terminal" in its menu, connected or under Not set up; it posts
 // agents/open with the agent's id and nothing else (the command is made on
@@ -13,11 +13,11 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
-const options = ["gpt-5.4", "myna/relay/m1"].map((m) => ({ value: m, label: "Label " + m, ...(m.startsWith("myna/") ? { ref: "relay/m1" } : {}) }));
+const options = ["gpt-5.4", "owl/relay/m1"].map((m) => ({ value: m, label: "Label " + m, ...(m.startsWith("owl/") ? { ref: "relay/m1" } : {}) }));
 const state = {
   agents: [
-    { id: "codex", name: "Codex", icon: "generic", path: "/fixture/codex", wired: true, terminal: true, fields: [{ key: "model", label: "model", value: "myna/relay/m1", options }] },
-    { id: "desk", name: "Desk App", icon: "generic", path: "/Applications/Desk.app", wired: true, fields: [{ key: "model", label: "model", value: "myna/relay/m1", options }] },
+    { id: "codex", name: "Codex", icon: "generic", path: "/fixture/codex", wired: true, terminal: true, fields: [{ key: "model", label: "model", value: "owl/relay/m1", options }] },
+    { id: "desk", name: "Desk App", icon: "generic", path: "/Applications/Desk.app", wired: true, fields: [{ key: "model", label: "model", value: "owl/relay/m1", options }] },
     { id: "claude", name: "Claude Code", icon: "generic", path: "/fixture/claude", terminal: true, fields: [{ key: "model", label: "model", value: "gpt-5.4", options }] },
   ],
   profiles: [],
@@ -61,7 +61,7 @@ async function open(engine, t, lang, web, query) {
   const errors = [], posts = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", server(lang, web, posts));
-  await page.goto("http://myna.test/" + query);
+  await page.goto("http://owl.test/" + query);
   return { page, errors, posts };
 }
 

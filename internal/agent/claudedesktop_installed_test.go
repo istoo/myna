@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/desktopdir"
+	"github.com/istoo/owl/internal/desktopdir"
 )
 
 // Claude Desktop installed on Windows and not yet opened has none of its

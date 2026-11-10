@@ -11,10 +11,10 @@ import (
 
 	"github.com/pelletier/go-toml/v2"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // testdata/penguin/project_config.toml is the .project_config.toml
@@ -41,7 +41,7 @@ func penguinOf(t *testing.T) *Agent {
 	return nil
 }
 
-// penguinFile is what myna's checks read of the file at path.
+// penguinFile is what owl's checks read of the file at path.
 type penguinFile struct {
 	DefaultModel map[string]string         `toml:"default_model"`
 	Providers    map[string]map[string]any `toml:"providers"`
@@ -60,8 +60,8 @@ func readPenguinFile(t *testing.T, path string) penguinFile {
 	return f
 }
 
-// PenguinHarness is wired in its Project's .project_config.toml: myna as
-// [providers.myna] (OpenAI Responses, a key naming Penguin), its models
+// PenguinHarness is wired in its Project's .project_config.toml: owl as
+// [providers.owl] (OpenAI Responses, a key naming Penguin), its models
 // as [[models]] entries of that provider, and default_model on one. The
 // user's models, command policy and the rest stay; Disconnect puts the
 // file back as Penguin wrote it.
@@ -82,7 +82,7 @@ func TestPenguin(t *testing.T) {
 	for _, o := range a.Field("model").Options(a.Values()) {
 		vals = append(vals, o.Value)
 	}
-	if !slices.Contains(vals, "custom/my-own") || !slices.Contains(vals, "myna/relay/glm-4.6") {
+	if !slices.Contains(vals, "custom/my-own") || !slices.Contains(vals, "owl/relay/glm-4.6") {
 		t.Fatalf("options %v", vals)
 	}
 
@@ -90,19 +90,19 @@ func TestPenguin(t *testing.T) {
 		t.Fatal(err)
 	}
 	f := readPenguinFile(t, path)
-	if f.DefaultModel["provider"] != "myna" || f.DefaultModel["model_id"] != "relay/glm-4.6" {
+	if f.DefaultModel["provider"] != "owl" || f.DefaultModel["model_id"] != "relay/glm-4.6" {
 		t.Fatalf("default_model %v:\n%s", f.DefaultModel, readFile(path))
 	}
-	if !strings.HasPrefix(readFile(path), `default_model = { provider = "myna", model_id = "relay/glm-4.6" }`+"\n") {
+	if !strings.HasPrefix(readFile(path), `default_model = { provider = "owl", model_id = "relay/glm-4.6" }`+"\n") {
 		t.Fatalf("not spelled as Penguin spells it:\n%s", readFile(path))
 	}
-	p := f.Providers["myna"]
-	if p["base_url"] != gateway.URL()+"/v1" || p["client_type"] != "openai-responses" || p["api_key"] != "myna-penguin" {
+	p := f.Providers["owl"]
+	if p["base_url"] != gateway.URL()+"/v1" || p["client_type"] != "openai-responses" || p["api_key"] != "owl-penguin" {
 		t.Fatalf("provider %v", p)
 	}
 	var mine, ours []map[string]any
 	for _, m := range f.Models {
-		if m["provider"] == "myna" {
+		if m["provider"] == "owl" {
 			ours = append(ours, m)
 		} else {
 			mine = append(mine, m)
@@ -131,7 +131,7 @@ func TestPenguin(t *testing.T) {
 	}
 
 	// the shared key is off, and a sync mends it
-	if err := edit.SetTOMLKey(path, "providers.myna", "api_key", gateway.Token); err != nil {
+	if err := edit.SetTOMLKey(path, "providers.owl", "api_key", gateway.Token); err != nil {
 		t.Fatal(err)
 	}
 	if a.Check() == "" {
@@ -156,8 +156,8 @@ func TestPenguin(t *testing.T) {
 	if st2, _ := os.Stat(path); !st2.ModTime().Equal(st.ModTime()) {
 		t.Fatal("a sync with nothing to change touched the file")
 	}
-	// an entry myna gave is gone: Check says so
-	if err := edit.SetTOMLArrayTables(path, "models", "provider", "myna", nil); err != nil {
+	// an entry owl gave is gone: Check says so
+	if err := edit.SetTOMLArrayTables(path, "models", "provider", "owl", nil); err != nil {
 		t.Fatal(err)
 	}
 	if a.Check() == "" {
@@ -214,7 +214,7 @@ func TestPenguinKeepsWhatPenguinWrote(t *testing.T) {
 		t.Fatal(err)
 	}
 	// as `penguin config model add custom/another` leaves it: one more
-	// entry after myna's
+	// entry after owl's
 	b := readFile(a.Path) + "\n[[models]]\nprovider = \"custom\"\nmodel_id = \"another\"\napi_key = \"k2\"\n"
 	writeFile(t, a.Path, b)
 	if err := a.Sync(); err != nil {
@@ -231,7 +231,7 @@ func TestPenguinKeepsWhatPenguinWrote(t *testing.T) {
 	for _, m := range f.Models {
 		ids = append(ids, m["provider"].(string)+"/"+m["model_id"].(string))
 	}
-	if !slices.Equal(ids, []string{"custom/my-own", "custom/another"}) || f.Providers["myna"] != nil || f.DefaultModel["model_id"] != "my-own" {
+	if !slices.Equal(ids, []string{"custom/my-own", "custom/another"}) || f.Providers["owl"] != nil || f.DefaultModel["model_id"] != "my-own" {
 		t.Fatalf("after Disconnect:\n%s", readFile(a.Path))
 	}
 	if strings.Contains(readFile(a.Path), "\n\n\n") {
@@ -314,8 +314,8 @@ func TestPenguinUpdate(t *testing.T) {
 	}
 }
 
-// Setting the model to none while on myna's goes back to the user's own
-// default if Penguin still has it, else leaves none; myna's entries,
+// Setting the model to none while on owl's goes back to the user's own
+// default if Penguin still has it, else leaves none; owl's entries,
 // provider and a vision model among them go either way.
 func TestPenguinModelNone(t *testing.T) {
 	home := syncHome(t)
@@ -323,10 +323,10 @@ func TestPenguinModelNone(t *testing.T) {
 	writeFile(t, a.Path, penguinFixture(t))
 	m := a.Field("model")
 	for _, gone := range []bool{false, true} {
-		if err := m.Set("myna/relay/glm-4.6"); err != nil {
+		if err := m.Set("owl/relay/glm-4.6"); err != nil {
 			t.Fatal(err)
 		}
-		if err := edit.SetTOMLTop(a.Path, edit.KV{Path: "vision_model", Value: edit.Raw(`{ provider = "myna", model_id = "relay/glm-4.6" }`)}); err != nil {
+		if err := edit.SetTOMLTop(a.Path, edit.KV{Path: "vision_model", Value: edit.Raw(`{ provider = "owl", model_id = "relay/glm-4.6" }`)}); err != nil {
 			t.Fatal(err)
 		}
 		if gone {
@@ -342,7 +342,7 @@ func TestPenguinModelNone(t *testing.T) {
 			want = ""
 		}
 		b := readFile(a.Path)
-		if m.Get() != want || strings.Contains(b, "myna") {
+		if m.Get() != want || strings.Contains(b, "owl") {
 			t.Fatalf("gone %v: %q:\n%s", gone, m.Get(), b)
 		}
 	}

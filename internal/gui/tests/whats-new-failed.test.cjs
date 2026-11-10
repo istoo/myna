@@ -15,7 +15,7 @@ const { chromium, webkit } = require("playwright");
 const { watchSettingsReads, settingsDrawn } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
-const PAGE = "https://github.com/istoo/myna/releases/tag/v0.1.737";
+const PAGE = "https://github.com/istoo/owl/releases/tag/v0.1.737";
 
 function settingsPayload(lang) {
   return {
@@ -23,7 +23,7 @@ function settingsPayload(lang) {
     dock: false, dockWindow: false, proxy: "", redact: false, redactPersonal: false, redactWords: [],
     codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", workbuddyCheckin: false, noStats: false,
     trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "",
-    version: "0.1.737", dir: "~/.config/myna", gateway: "http://127.0.0.1:3425",
+    version: "0.1.737", dir: "~/.config/owl", gateway: "http://127.0.0.1:3425",
     proxyNow: "none", proxySource: "none", login: false,
     visionModels: [], imageGenModels: [], workbuddyCheckins: [], lanURLs: [],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
@@ -81,7 +81,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("dialog", (d) => { errors.push("dialog: " + d.message()); d.dismiss(); });
       await page.route("**/*", serve(lang, ctl));
       await watchSettingsReads(page);
-      await page.goto("http://myna.test/?view=settings&tab=about");
+      await page.goto("http://owl.test/?view=settings&tab=about");
       await settingsDrawn(page); // rows found are the ones that stay (#1659)
       const dialog = page.locator("#modal .editor.whatsnew");
       const view = page.locator("#view-settings");
@@ -119,7 +119,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await link.click();
       for (let i = 0; i < 40 && !ctl.opened.length; i++) await page.waitForTimeout(25);
       assert.deepEqual(ctl.opened, [PAGE]);
-      assert.equal(page.url(), "http://myna.test/?view=settings&tab=about", "the page didn't navigate");
+      assert.equal(page.url(), "http://owl.test/?view=settings&tab=about", "the page didn't navigate");
       // Try again while the site still fails: the same, asked again
       await retry.click();
       for (let i = 0; i < 40 && ctl.asked < 2; i++) await page.waitForTimeout(25);

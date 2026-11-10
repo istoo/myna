@@ -17,8 +17,8 @@ async function read(what, q) {
   return res.json();
 }
 const GONE = {
-  off: "This request's text is no longer kept: myna keeps the text of the last {n} requests, in memory only, while it runs.",
-  missing: "Not in the request archive: it is saved just after the call, the oldest are removed past the archive's size, or the save failed (myna's log says why)",
+  off: "This request's text is no longer kept: owl keeps the text of the last {n} requests, in memory only, while it runs.",
+  missing: "Not in the request archive: it is saved just after the call, the oldest are removed past the archive's size, or the save failed (owl's log says why)",
   cut: "The request archive kept only the start of this request, so it can't be read",
   unread: "The request archive's copy couldn't be read or masked, so none of it is shown",
 };
@@ -52,7 +52,7 @@ function picture(src) {
   img.alt = t("Image");
   img.decoding = "async";
   img.onload = () => fig.classList.add("in");
-  img.onerror = () => fig.replaceWith(el("div", "ctx-piece-note", t("An image: myna doesn't show it here")));
+  img.onerror = () => fig.replaceWith(el("div", "ctx-piece-note", t("An image: owl doesn't show it here")));
   img.src = src;
   fig.append(img);
   fig.onclick = (e) => {
@@ -77,7 +77,7 @@ function pieceView(pc) {
   if (pc.text) head.append(copyBtn(pc.text, pc.name || t(ROLE_NAMES[pc.role] || "Text")));
   box.append(head);
   if (pc.role === "image" && pc.src) box.append(picture(pc.src));
-  else if (pc.role === "image") box.append(el("div", "ctx-piece-note", t("An image: myna doesn't show it here")));
+  else if (pc.role === "image") box.append(el("div", "ctx-piece-note", t("An image: owl doesn't show it here")));
   else if (pc.role === "sealed") box.append(el("div", "ctx-piece-note", t("Sealed by the vendor, {n} bytes: only the vendor can read it", { n: (pc.size || 0).toLocaleString(intlLang()) })));
   else {
     if (pc.size) box.append(el("div", "ctx-piece-note", t("Sealed by the vendor, {n} bytes: only the vendor can read it", { n: pc.size.toLocaleString(intlLang()) })));
@@ -145,8 +145,8 @@ export async function open(kit, route, kind, pick) {
   const items = list.items || [];
   const sum = () => fmtK(items.reduce((s, it) => s + it.tokens, 0)) + " " + t("tokens");
   const note = el("p", "ctx-view-note", list.from === "archive"
-    ? t("As myna sent it, read from the request archive, masked where masking is on.")
-    : t("As myna sent it, masked where masking is on. Kept in memory for the last {n} requests only.", { n: list.kept }));
+    ? t("As owl sent it, read from the request archive, masked where masking is on.")
+    : t("As owl sent it, masked where masking is on. Kept in memory for the last {n} requests only.", { n: list.kept }));
   // an item: its text alone; "N more" or the earlier turns: the part's list
   const at = pick && pick.tag !== "more" && pick.tag !== "turns"
     ? items.findIndex((it) => it.name === pick.name && (it.tag || "") === (pick.tag || "")) : -1;

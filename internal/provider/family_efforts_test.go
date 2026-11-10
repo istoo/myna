@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/codexcat"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/codexcat"
 )
 
 // newModelCatalog is models.dev as it listed gpt-6.1-sol the day it was

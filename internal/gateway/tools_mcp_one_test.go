@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/gwtool"
-	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/owl/internal/gwtool"
+	"github.com/istoo/owl/internal/plugin"
 )
 
 func toolsPostTo(h http.Handler, path, body string) *httptest.ResponseRecorder {
@@ -46,7 +46,7 @@ func TestToolsMCPOnePlugin(t *testing.T) {
 	if strings.Join(names, " ") != "search crawl" {
 		t.Fatalf("search1api's tools = %v (%+v)", names, m)
 	}
-	m = readMCP(t, toolsPostTo(h, at, toolsCall("search", `{"query":"myna"}`)))
+	m = readMCP(t, toolsPostTo(h, at, toolsCall("search", `{"query":"owl"}`)))
 	if m.Result.IsError || len(m.Result.Content) != 1 || m.Result.Content[0].Text != "ran search" {
 		t.Fatalf("call = %+v", m)
 	}

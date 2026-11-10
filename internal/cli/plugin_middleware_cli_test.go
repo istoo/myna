@@ -7,12 +7,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/middleware"
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/middleware"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/testenv"
 )
 
-// myna plugin says which plugins are gateway middleware and their hooks,
+// owl plugin says which plugins are gateway middleware and their hooks,
 // or why one didn't load; a middleware plugin has no provider to sign in
 // to, so the list had nothing under it.
 func TestPluginListSaysMiddleware(t *testing.T) {
@@ -20,7 +20,7 @@ func TestPluginListSaysMiddleware(t *testing.T) {
 	groupsHome(t)
 	// the Bun the other plugin tests run on, not one downloaded from
 	// GitHub (#1922)
-	t.Setenv("MYNA_BUN", bun)
+	t.Setenv("OWL_BUN", bun)
 	t.Cleanup(plugin.Settle) // what adding the plugins told ends with the test
 	dir := t.TempDir()
 	good := filepath.Join(dir, "alias.middleware.js")
@@ -56,8 +56,8 @@ func TestPluginListSaysMiddleware(t *testing.T) {
 	}
 }
 
-// myna plugin off, on and rm take a plugin's short name, as options
-// does: `myna plugin off think-tags` said there was no such plugin.
+// owl plugin off, on and rm take a plugin's short name, as options
+// does: `owl plugin off think-tags` said there was no such plugin.
 func TestPluginOnOffRmShortName(t *testing.T) {
 	groupsHome(t)
 	t.Cleanup(plugin.Settle)

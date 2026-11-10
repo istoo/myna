@@ -15,7 +15,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/agentenv"
+	"github.com/istoo/owl/internal/agentenv"
 )
 
 // The shapes below are openrouter.ai's own, as it answered on 2026-10-06.
@@ -102,7 +102,7 @@ const pagedOnceThenAgain = `{"data":[` +
 	`"last_id":"anthropic/cohere/command-a-plus"}`
 
 // oneHome gives a test a home of its own, so nothing it fetches is read
-// from or written to the machine's own myna.
+// from or written to the machine's own owl.
 func oneHome(t *testing.T) {
 	t.Helper()
 	isolate(t)

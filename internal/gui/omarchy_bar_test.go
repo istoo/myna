@@ -9,17 +9,17 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // barWin is the desktop app as a Windows; the Bar icon routes reach no
 // method of it.
 type barWin struct{ Windows }
 
-// Settings' Bar icon tells the app whether myna's icon is in Omarchy's
+// Settings' Bar icon tells the app whether owl's icon is in Omarchy's
 // bar, so the tray's own item leaves the bar's tray while the widget is
 // there and comes back once it is taken out (Alex on Discord: with Bar icon
-// on, Omarchy's bar showed two mynas).
+// on, Omarchy's bar showed two owls).
 func TestBarIconTellsTheTray(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("the stand-in omarchy commands are shell scripts")
@@ -52,6 +52,6 @@ func TestBarIconTellsTheTray(t *testing.T) {
 	}
 	post(`{"on":false}`)
 	if len(told) != 2 || told[1] {
-		t.Fatalf("Bar icon off: the tray was told %v, want [true false] (no myna left in the bar)", told)
+		t.Fatalf("Bar icon off: the tray was told %v, want [true false] (no owl left in the bar)", told)
 	}
 }

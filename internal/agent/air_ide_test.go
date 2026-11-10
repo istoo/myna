@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/owl/internal/edit"
 )
 
 // jetBrainsConfigs is where a JetBrains IDE keeps its config folders on
@@ -23,11 +23,11 @@ func jetBrainsConfigs(home string) string {
 }
 
 // Air in an IDE (the Air plugin, Settings › AI › Air) reads its custom ACP
-// agents from ~/.jetbrains/acp.json, not the Air app's folder: myna adds
-// its Myna agent there, keeps what the IDE and the user put in the file
+// agents from ~/.jetbrains/acp.json, not the Air app's folder: owl adds
+// its Owl agent there, keeps what the IDE and the user put in the file
 // (AI Assistant's agents, default_mcp_settings), and taking it off takes
 // out that entry and its OpenCode config alone.
-func TestAirIDEAddsMynaAgent(t *testing.T) {
+func TestAirIDEAddsOwlAgent(t *testing.T) {
 	home, appDir := airHome(t, "/opt/bin/opencode")
 	acp := filepath.Join(home, ".jetbrains", "acp.json")
 	// the file as AI Assistant's "Add Custom Agent" leaves it, with an
@@ -47,30 +47,30 @@ func TestAirIDEAddsMynaAgent(t *testing.T) {
 	if a.Path != acp {
 		t.Fatalf("path %s", a.Path)
 	}
-	if err := a.Apply("model", "myna/fake/m1"); err != nil {
+	if err := a.Apply("model", "owl/fake/m1"); err != nil {
 		t.Fatal(err)
 	}
-	cfg := filepath.Join(home, ".jetbrains", "myna-opencode.json")
+	cfg := filepath.Join(home, ".jetbrains", "owl-opencode.json")
 	for k, v := range map[string]string{
-		"default_mcp_settings.use_idea_mcp":      "true",
-		"agent_servers.Goose.command":            "/usr/local/bin/goose",
-		"agent_servers.Goose.use_idea_mcp":       "false",
-		"agent_servers.Myna.command":             "/opt/bin/opencode",
-		"agent_servers.Myna.args.0":              "acp",
-		"agent_servers.Myna.env.OPENCODE_CONFIG": cfg,
+		"default_mcp_settings.use_idea_mcp":     "true",
+		"agent_servers.Goose.command":           "/usr/local/bin/goose",
+		"agent_servers.Goose.use_idea_mcp":      "false",
+		"agent_servers.Owl.command":             "/opt/bin/opencode",
+		"agent_servers.Owl.args.0":              "acp",
+		"agent_servers.Owl.env.OPENCODE_CONFIG": cfg,
 	} {
 		if got, _ := edit.GetJSON(acp, k); got != v {
 			t.Fatalf("%s = %q, want %q\n%s", k, got, v, readFile(acp))
 		}
 	}
-	if v, _ := edit.GetJSON(cfg, "provider.myna.options.baseURL"); v != gatewayV1() {
+	if v, _ := edit.GetJSON(cfg, "provider.owl.options.baseURL"); v != gatewayV1() {
 		t.Fatalf("baseURL = %q\n%s", v, readFile(cfg))
 	}
-	if v := a.Field("model").Get(); v != "myna/fake/m1" {
+	if v := a.Field("model").Get(); v != "owl/fake/m1" {
 		t.Fatalf("model = %q", v)
 	}
 	if !a.Detected() {
-		t.Fatal("not detected with myna's agent in acp.json")
+		t.Fatal("not detected with owl's agent in acp.json")
 	}
 	if n := a.Notice(); !strings.Contains(n, "JetBrains IDE") {
 		t.Fatalf("notice: %q", n)
@@ -85,8 +85,8 @@ func TestAirIDEAddsMynaAgent(t *testing.T) {
 	if err := a.Apply("model", ""); err != nil {
 		t.Fatal(err)
 	}
-	if _, ok := edit.GetJSON(acp, "agent_servers.Myna"); ok {
-		t.Fatalf("Myna still in acp.json: %s", readFile(acp))
+	if _, ok := edit.GetJSON(acp, "agent_servers.Owl"); ok {
+		t.Fatalf("Owl still in acp.json: %s", readFile(acp))
 	}
 	for _, k := range []string{"agent_servers.Goose.command", "default_mcp_settings.use_custom_mcp"} {
 		if _, ok := edit.GetJSON(acp, k); !ok {
@@ -94,7 +94,7 @@ func TestAirIDEAddsMynaAgent(t *testing.T) {
 		}
 	}
 	if _, err := os.Stat(cfg); !os.IsNotExist(err) {
-		t.Fatalf("myna's OpenCode config left: %v", err)
+		t.Fatalf("owl's OpenCode config left: %v", err)
 	}
 }
 

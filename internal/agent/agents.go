@@ -14,16 +14,16 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/filememo"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/proc"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/sessions"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/filememo"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/proc"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/sessions"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // The gateway knows each agent's requests by what this package says of it.
@@ -39,7 +39,7 @@ func init() {
 	sessions.WSLHomes = wslHomes
 	sessions.WSLRunning = WSLRunning
 	sessions.WSLOff = func() bool { return !wslLooks() }
-	// an agy conversation started on myna's gateway is picked up again
+	// an agy conversation started on owl's gateway is picked up again
 	// there, with the variables and --model it was started with
 	sessions.AgyStart = func() string {
 		home, _ := homes()
@@ -47,7 +47,7 @@ func init() {
 	}
 	// a Copilot CLI signed in inside a running distro (#723)
 	provider.CopilotWSLDirs = copilotWSLDirs
-	// the Codex app's app-server is restarted when myna becomes Codex's
+	// the Codex app's app-server is restarted when owl becomes Codex's
 	// provider for its used-up ChatGPT account, and when it stops being it;
 	// and when Codex is connected or disconnected, or its route otherwise
 	// changes, so a running app sends where its config now says
@@ -59,8 +59,8 @@ func init() {
 	// reopened on Windows, where its stdout was held open
 	provider.CodexAppOpen = codexAppOpen
 	provider.CodexAppReopen = codexAppReopen
-	// and what the Codex app holds is read while Codex takes myna's
-	// models beside its sign-in, Codex switched off in myna or not
+	// and what the Codex app holds is read while Codex takes owl's
+	// models beside its sign-in, Codex switched off in owl or not
 	provider.CodexHoldMatters = func() bool {
 		home, _ := homes()
 		a := codex(home)
@@ -69,27 +69,27 @@ func init() {
 }
 
 // codexAppRoute is where Codex's config sends it, as the app-server reads
-// it at its start: the keys myna writes for that, never one the Codex
-// app writes itself (model, model_reasoning_effort); and whether myna
+// it at its start: the keys owl writes for that, never one the Codex
+// app writes itself (model, model_reasoning_effort); and whether owl
 // is Codex's provider for its used-up ChatGPT account (AppOut). Not known
 // when Codex's config can't be read.
 //
 // The model list (model_catalog_json, the file and what it holds) is not
 // in it. A change of route ends the app's app-server, and the ChatGPT app
-// takes that as a crash and relaunches. The catalog follows myna's names
+// takes that as a crash and relaunches. The catalog follows owl's names
 // and the effort new sessions start at, which the app saves on each pick,
 // so a route that hashed it ended the app every few minutes
 // (indekkusu141209 on X, #4550). A new list is read at the app's next
 // launch, and the Agents row offers a Restart for it (StaleCopies).
 func codexAppRoute() (route string, out, known bool) {
-	// asked every 3s for as long as myna runs: the config looked at once
+	// asked every 3s for as long as owl runs: the config looked at once
 	// for its keys, not once for each (#1665)
 	defer filememo.Hold()()
 	home, _ := homes()
 	a := codex(home)
 	// opened, not read: a config.toml of 1.5 MB (Codex keeps every
 	// project's trust level in it) read whole every 3s was 1.55 GB of a
-	// live myna's 33 GB in 53 minutes; the keys below come from filememo
+	// live owl's 33 GB in 53 minutes; the keys below come from filememo
 	if f, err := os.Open(a.Path); err == nil {
 		f.Close()
 	} else if !errors.Is(err, fs.ErrNotExist) {
@@ -105,9 +105,9 @@ func codexAppRoute() (route string, out, known bool) {
 		}
 		b.WriteString(k + "=" + v + "\n")
 	}
-	t, _ := edit.GetTOMLTable(a.Path, "model_providers."+mynaID)
-	b.WriteString("myna.base_url=" + t["base_url"] + "\n")
-	// and, while myna's table is Codex's provider, whether it requires
+	t, _ := edit.GetTOMLTable(a.Path, "model_providers."+owlID)
+	b.WriteString("owl.base_url=" + t["base_url"] + "\n")
+	// and, while owl's table is Codex's provider, whether it requires
 	// OpenAI auth, which decides whether the app has its ChatGPT account
 	// at all (openaiAuth in codex.go): read as the app-server starts, like
 	// the rest. The app-server reads the account of the provider Codex is
@@ -117,8 +117,8 @@ func codexAppRoute() (route string, out, known bool) {
 	// counted there, it ended the app's app-server at the limit and again
 	// at the reset, and the ChatGPT app showed an error and relaunched
 	// each time (xiaoq6285 on Discord, #4550)
-	if mp == mynaID {
-		b.WriteString("myna.requires_openai_auth=" + t["requires_openai_auth"] + "\n")
+	if mp == owlID {
+		b.WriteString("owl.requires_openai_auth=" + t["requires_openai_auth"] + "\n")
 	}
 	if out {
 		b.WriteString("out\n")
@@ -128,8 +128,8 @@ func codexAppRoute() (route string, out, known bool) {
 
 // codexNoAccount is whether the provider Codex's config.toml names takes
 // no ChatGPT account: a model_provider whose [model_providers] table
-// doesn't say requires_openai_auth = true (myna's with the user's own
-// false, or myna as the provider with no sign-in to keep). Codex then
+// doesn't say requires_openai_auth = true (owl's with the user's own
+// false, or owl as the provider with no sign-in to keep). Codex then
 // sends the table's own key and its app-server reads no account
 // (codex-rs ModelProviderInfo::account_state, resolve_provider_auth), so
 // switching the account in auth.json changes nothing a running Codex
@@ -157,10 +157,10 @@ func codexNoAccount() bool {
 	return t["requires_openai_auth"] != "true"
 }
 
-// others are clients that reach the gateway without being agents myna
+// others are clients that reach the gateway without being agents owl
 // sets up: known only by their requests, to be drawn with a logo.
 var others = []*Agent{
-	{ID: "myna", Name: "myna", Icon: "myna", UA: []string{"myna"}},
+	{ID: "owl", Name: "owl", Icon: "owl", UA: []string{"owl"}},
 	{ID: "curl", Name: "curl", Icon: "curl", UA: []string{"curl"}},
 	// PI-Desktop (vastsa/PI-Desktop) runs Pi's own library, which says
 	// "pi (…)"; given a User-Agent of its own in its provider's settings
@@ -168,7 +168,7 @@ var others = []*Agent{
 	// Pi's "pi-" would take otherwise (#1966, dgmico)
 	{ID: "pi-desktop", Name: "PI-Desktop", Icon: "pi", UA: []string{"pi-desktop"}},
 	// Kimi Code Desktop runs Kimi Code's engine on ~/.kimi-code, so it
-	// reaches myna through Kimi Code's config, under a client name of
+	// reaches owl through Kimi Code's config, under a client name of
 	// its own ("kimi-code-desktop/…", jiabubu on Discord). Its icon is the
 	// app's own, from KimiCode-1.2.1-win-x64.exe's build/icon.ico.
 	{ID: "kimi-code-desktop", Name: "Kimi Code Desktop", Icon: "kimi-code-desktop", UA: []string{"kimi-code-desktop"}},
@@ -192,7 +192,7 @@ func Clients() []*Agent {
 	return append(out, others...)
 }
 
-// All returns every agent myna knows about, detected or not: its own,
+// All returns every agent owl knows about, detected or not: its own,
 // then those plugins add.
 func All() []*Agent {
 	home, cfg := homes()
@@ -209,13 +209,13 @@ func homes() (home, cfg string) {
 	return home, cfg
 }
 
-// builtins are the agents myna has wiring of its own for.
+// builtins are the agents owl has wiring of its own for.
 func builtins(home, cfg string) []*Agent {
 	return append(onMachine(home, cfg), wslAgents()...)
 }
 
 // local is All() without the agents in WSL distros, which wsl.exe is asked
-// for: what start-up moves look in, on every command, `myna version`
+// for: what start-up moves look in, on every command, `owl version`
 // too, and the moves came before WSL agents. A wsl.exe that hangs held each
 // command 20s, its two listings' timeouts.
 func local() []*Agent {
@@ -318,22 +318,22 @@ func jsonSet(path, key string) func(string) error {
 	}
 }
 
-// usesMyna reports whether any of the values is a myna/… reference.
-func usesMyna(vals ...string) bool {
+// usesOwl reports whether any of the values is a owl/… reference.
+func usesOwl(vals ...string) bool {
 	for _, v := range vals {
-		if strings.HasPrefix(v, mynaID+"/") {
+		if strings.HasPrefix(v, owlID+"/") {
 			return true
 		}
 	}
 	return false
 }
 
-// prefixed is an agent's Spelled whose values of myna's are all
-// myna/<ref>, as its provider/model names them.
-func prefixed(v string) bool { return strings.HasPrefix(v, mynaID+"/") }
+// prefixed is an agent's Spelled whose values of owl's are all
+// owl/<ref>, as its provider/model names them.
+func prefixed(v string) bool { return strings.HasPrefix(v, owlID+"/") }
 
-// openCodeSpelled is the Spelled of an OpenCode config at path: myna's
-// provider, or one of the file's own that sends to myna's gateway (v1),
+// openCodeSpelled is the Spelled of an OpenCode config at path: owl's
+// provider, or one of the file's own that sends to owl's gateway (v1),
 // as openCodeRef names a model there.
 func openCodeSpelled(path string, v1 func() string) func(string) bool {
 	return func(v string) bool {
@@ -382,11 +382,11 @@ func pairGet(get func(string) (string, bool), pKey, mKey string) func() string {
 	}
 }
 
-// mynaEffort is the reasoning_effort of the models.<type> object obj in
-// Crush's data file when myna set it: the object names myna's provider
+// owlEffort is the reasoning_effort of the models.<type> object obj in
+// Crush's data file when owl set it: the object names owl's provider
 // and has no field but provider, model and reasoning_effort, which is all
-// myna ever writes there. An object Crush's picker saved is not myna's.
-func mynaEffort(data, obj, mynaID string) (string, bool) {
+// owl ever writes there. An object Crush's picker saved is not owl's.
+func owlEffort(data, obj, owlID string) (string, bool) {
 	raw, ok := edit.GetJSON(data, obj)
 	if !ok {
 		return "", false
@@ -407,7 +407,7 @@ func mynaEffort(data, obj, mynaID string) (string, bool) {
 			return "", false
 		}
 	}
-	if prov != mynaID || effort == "" {
+	if prov != owlID || effort == "" {
 		return "", false
 	}
 	return effort, true
@@ -458,7 +458,7 @@ func ownOptionsFrom(native func(p string) []catalog.Model, authFile string, cur 
 	for _, p := range extra {
 		set[p] = true
 	}
-	if p, _, ok := strings.Cut(cur, "/"); ok && p != mynaID {
+	if p, _, ok := strings.Cut(cur, "/"); ok && p != owlID {
 		set[p] = true
 	}
 	if b, err := readOwnAuth(authFile); err == nil {
@@ -515,7 +515,7 @@ func ownProvider(native func(p string) []catalog.Model, p string) []Option {
 	for i := range opts {
 		opts[i].GroupIcon = ic
 		// asked of the vendor on the agent's own sign-in or key: picked on
-		// a connected agent it takes the agent off myna, which the
+		// a connected agent it takes the agent off owl, which the
 		// picker says and asks first (maxleebeta: Pi's own OpenCode Go
 		// model turned 「接入」 off, with nothing said)
 		opts[i].Direct = name
@@ -525,25 +525,25 @@ func ownProvider(native func(p string) []catalog.Model, p string) []Option {
 
 // ---- agents ----------------------------------------------------------------
 
-// mynaProviderJSON is the provider block agents with JSON configs get.
-func mynaProviderJSON(shape string) any {
-	return mynaProviderJSONFor(shape, shape)
+// owlProviderJSON is the provider block agents with JSON configs get.
+func owlProviderJSON(shape string) any {
+	return owlProviderJSONFor(shape, shape)
 }
 
-// mynaProviderJSONFor is mynaProviderJSON for an agent whose catalog is
+// owlProviderJSONFor is owlProviderJSON for an agent whose catalog is
 // narrowed under a different id than its config shape (mimocode shares
-// OpenCode's shape but is seen as itself by myna visible).
-func mynaProviderJSONFor(shape, catalog string) any {
-	return mynaProviderJSONAt(shape, catalog, gateway.URL())
+// OpenCode's shape but is seen as itself by owl visible).
+func owlProviderJSONFor(shape, catalog string) any {
+	return owlProviderJSONAt(shape, catalog, gateway.URL())
 }
 
-// mynaProviderJSONAt is mynaProviderJSONFor for an agent that reaches
+// owlProviderJSONAt is owlProviderJSONFor for an agent that reaches
 // the gateway at gw: one in a WSL distro under NAT (see wsl.go).
-func mynaProviderJSONAt(shape, catalog, gw string) any {
-	models := mynaModels(catalog) // the catalog is the agent's
+func owlProviderJSONAt(shape, catalog, gw string) any {
+	models := owlModels(catalog) // the catalog is the agent's
 	switch shape {
 	case "opencode":
-		// models in the order mynaModels has them (#4575): OpenCode lists
+		// models in the order owlModels has them (#4575): OpenCode lists
 		// the models in the file's key order, and a map's keys marshal
 		// sorted — the variants under each kept theirs since #713
 		ms := orderedJSON{}
@@ -557,7 +557,7 @@ func mynaProviderJSONAt(shape, catalog, gw string) any {
 				e["modalities"] = map[string]any{"input": []string{"text", "image"}, "output": []string{"text"}}
 			}
 			// without it OpenCode doesn't know when to compact, and a
-			// group's context (myna group set … context=) never reaches
+			// group's context (owl group set … context=) never reaches
 			// it; an output of 0 is OpenCode's own default
 			if m.Context > 0 {
 				e["limit"] = map[string]any{"context": m.Context, "output": maxTokens(m)}
@@ -574,7 +574,7 @@ func mynaProviderJSONAt(shape, catalog, gw string) any {
 			}
 			ms = append(ms, jsonPair{m.ID, e})
 		}
-		return map[string]any{"npm": "@ai-sdk/openai-compatible", "name": "myna",
+		return map[string]any{"npm": "@ai-sdk/openai-compatible", "name": "owl",
 			"options": map[string]any{"baseURL": gw + "/v1", "apiKey": openCodeKeyAt(catalog, gw)}, "models": ms}
 	case "crush":
 		var ms []map[string]any
@@ -586,7 +586,7 @@ func mynaProviderJSONAt(shape, catalog, gw string) any {
 			// without it Crush caps every reply at 16384 tokens, a model
 			// that can write more of them never asked for it; an output
 			// above the window is cut to it, as it is for every other
-			// agent myna hands a limit to
+			// agent owl hands a limit to
 			tokens := maxTokens(m)
 			if tokens == 0 {
 				tokens = 16384
@@ -604,7 +604,7 @@ func mynaProviderJSONAt(shape, catalog, gw string) any {
 		if ms == nil {
 			ms = []map[string]any{}
 		}
-		return map[string]any{"type": "openai", "name": "myna", "base_url": gw + "/v1", "api_key": keyAt(gw), "models": ms}
+		return map[string]any{"type": "openai", "name": "owl", "base_url": gw + "/v1", "api_key": keyAt(gw), "models": ms}
 	case "pi":
 		var ms []map[string]any
 		for _, m := range models {
@@ -620,19 +620,19 @@ func mynaProviderJSONAt(shape, catalog, gw string) any {
 		// Without it a turn of Pi's on Chat or Messages reached the gateway
 		// with no session: its usage had none and "Record gateway
 		// conversations" kept none of it (akic404 on Discord).
-		return map[string]any{"name": "myna", "baseUrl": gw + "/v1", "api": "openai-completions", "apiKey": keyAt(gw),
+		return map[string]any{"name": "owl", "baseUrl": gw + "/v1", "api": "openai-completions", "apiKey": keyAt(gw),
 			"compat": map[string]any{"sendSessionAffinityHeaders": true}, "models": ms}
 	}
 	return nil
 }
 
-// piBlockKept is theirsKept for myna's provider in a Pi models.json at
+// piBlockKept is theirsKept for owl's provider in a Pi models.json at
 // path, where a sendSessionAffinityHeaders the file already has, the
 // user's own or pi-cache-optimizer's (#1103), stays as it is.
 func piBlockKept(path string, value func() any) func() any {
-	return theirsKept(path, "providers."+mynaID, func() any {
+	return theirsKept(path, "providers."+owlID, func() any {
 		v := value()
-		if _, set := edit.GetJSON(path, "providers."+mynaID+".compat.sendSessionAffinityHeaders"); !set {
+		if _, set := edit.GetJSON(path, "providers."+owlID+".compat.sendSessionAffinityHeaders"); !set {
 			return v
 		}
 		if m, ok := v.(map[string]any); ok {
@@ -647,16 +647,16 @@ func piBlockKept(path string, value func() any) func() any {
 	}, "models")
 }
 
-// openCodeKept is theirsKept for myna's provider in an OpenCode config at
-// path: myna's models are its own, written whole, but a variant the user
-// put on one of them stays (#2379), where it is or after myna's, and one
-// they wrote over under a name of myna's stays theirs. A variant as myna
-// writes it under its name is myna's: one the model has no longer, a
+// openCodeKept is theirsKept for owl's provider in an OpenCode config at
+// path: owl's models are its own, written whole, but a variant the user
+// put on one of them stays (#2379), where it is or after owl's, and one
+// they wrote over under a name of owl's stays theirs. A variant as owl
+// writes it under its name is owl's: one the model has no longer, a
 // level gone or a fast mode lost, goes.
 func openCodeKept(path string, value func() any) func() any {
-	return theirsKept(path, "provider."+mynaID, func() any {
+	return theirsKept(path, "provider."+owlID, func() any {
 		v := value()
-		raw, ok := edit.GetJSON(path, "provider."+mynaID+".models")
+		raw, ok := edit.GetJSON(path, "provider."+owlID+".models")
 		if !ok {
 			return v
 		}
@@ -740,14 +740,14 @@ func piAsked(agentID string, m catalog.Model) catalog.Model {
 	return m
 }
 
-// piModelJSON is one of myna's models as an entry of Pi's models.json.
+// piModelJSON is one of owl's models as an entry of Pi's models.json.
 // native selects the model's preferred gateway API (its own api and
 // baseUrl); without it the model is left on the provider's
 // openai-completions (Pencil, pencil.go).
 func piModelJSON(m catalog.Model, gw string, native bool) map[string]any {
 	// reasoning lets Pi offer its thinking levels for the model: as
 	// /v1/models says it (provider.Entry.Thinks), so one that thinks with
-	// no levels myna knows (Trae CN's kimi-k3-max, #2380) is offered
+	// no levels owl knows (Trae CN's kimi-k3-max, #2380) is offered
 	// Pi's own off to high, which the gateway fits to the model, where
 	// it had off alone
 	e := map[string]any{"id": m.ID, "name": m.Name, "reasoning": m.Reasoning || len(m.Efforts) > 0}
@@ -817,7 +817,7 @@ func piModelJSON(m catalog.Model, gw string, native bool) map[string]any {
 
 // piPromptCache is how long, in seconds, the vendor keeps a model's prompt
 // cache for each of Pi's retention tiers, at the short end of what it
-// publishes; nil where myna doesn't relay Pi's request as it is, or the
+// publishes; nil where owl doesn't relay Pi's request as it is, or the
 // vendor's lifetime isn't known. Claude on Anthropic's Messages API keeps
 // one 5 minutes, or an hour asked with a 1h cache_control (Pi's long); GPT
 // on OpenAI's Responses API keeps one in memory 5 to 10 minutes, and only
@@ -836,7 +836,7 @@ func piPromptCache(api any, id string) map[string]any {
 }
 
 // openCodeVariants are the reasoning levels OpenCode offers for a model of
-// myna's, each asking the gateway for that effort as reasoning_effort
+// owl's, each asking the gateway for that effort as reasoning_effort
 // (@ai-sdk/openai-compatible's reasoningEffort). OpenCode 1.x offers none
 // for a model the config doesn't mark as reasoning, and adds these. OpenCode
 // 2 makes low, medium and high for every model of an openai-compatible
@@ -876,7 +876,7 @@ func openCodeVariants(efforts []string, fast bool) orderedJSON {
 // openCodeFast is the name of a fast variant, alone or after a level's.
 const openCodeFast = "fast"
 
-// openCodeVariant is the variant myna writes under name: a level asked as
+// openCodeVariant is the variant owl writes under name: a level asked as
 // reasoning_effort (@ai-sdk/openai-compatible's reasoningEffort, which
 // OpenCode 2 reads too), and a fast one asks for priority processing too,
 // in the words Codex's /fast sends it: service_tier "priority". Each
@@ -906,11 +906,11 @@ func openCodeVariant(name string) map[string]any {
 	return v
 }
 
-// openCodeReasons is whether a model of myna's is marked reasoning in
+// openCodeReasons is whether a model of owl's is marked reasoning in
 // opencode.json, which OpenCode 1 shows as 支持推理 in its model tooltip
 // and takes for a model that thinks (#725: OpenCode Zen's
 // mimo-v2.6-flash-free, which thinks with no levels to pick, said 不支持推理
-// through myna where it says it reasons under OpenCode's own Zen). OpenCode
+// through owl where it says it reasons under OpenCode's own Zen). OpenCode
 // 1 also adds low, medium and high of its own to the variants of a reasoning
 // model (ProviderTransform.variants; checked with 1.18.34), so one with levels
 // is marked only when it has those three, else it would be offered levels it
@@ -992,7 +992,7 @@ func modelEffort(efforts []string, level string) string {
 // off is left out, for Pi to offer as before. Another vendor's model there
 // keeps off hidden: without none it always thinks, and ZCode's
 // GLM-5.3-Flash turned Pi's off away ("该模型始终支持思考，不可关闭", #699),
-// as a level left out is one Pi offers. A model whose levels myna doesn't
+// as a level left out is one Pi offers. A model whose levels owl doesn't
 // know gets no map: Pi's own defaults, as before.
 func piThinkingLevels(efforts []string, claudeOff bool) map[string]any {
 	if len(efforts) == 0 {
@@ -1031,19 +1031,19 @@ func openCodeLike(at place, id, name, icon, bin, dir, auth string, ua []string, 
 			break
 		}
 	}
-	block := func() any { return mynaProviderJSONAt("opencode", id, at.gw()) }
+	block := func() any { return owlProviderJSONAt("opencode", id, at.gw()) }
 	provider := openCodeKept(path, block)
 	opts := func(key string) func(map[string]string) []Option {
 		return func(cur map[string]string) []Option {
-			return withVia(ownOptions(auth, cur[key]), id, mynaID+"/")
+			return withVia(ownOptions(auth, cur[key]), id, owlID+"/")
 		}
 	}
 	get := func(k string) string { v, _ := edit.GetJSON(path, k); return v }
 	// whether a model the file names, or one OpenChamber sends to the
-	// OpenCode it runs on this config, is one of myna's: myna's
+	// OpenCode it runs on this config, is one of owl's: owl's
 	// provider has to stay
-	onMyna := func() bool {
-		return usesMyna(get("model"), get("small_model")) || id == "opencode" && at.spell == nil && openChamberOnMyna()
+	onOwl := func() bool {
+		return usesOwl(get("model"), get("small_model")) || id == "opencode" && at.spell == nil && openChamberOnOwl()
 	}
 	set := func(key string) func(string) error {
 		return func(v string) error {
@@ -1051,10 +1051,10 @@ func openCodeLike(at place, id, name, icon, bin, dir, auth string, ua []string, 
 				if err := edit.DelJSON(path, key); err != nil {
 					return err
 				}
-				if onMyna() {
+				if onOwl() {
 					return nil
 				}
-				return edit.DelJSON(path, "provider."+mynaID, openCodeNativeKey)
+				return edit.DelJSON(path, "provider."+owlID, openCodeNativeKey)
 			}
 			v, err := openCodeRefAt(at, path, id, v)
 			if err != nil {
@@ -1068,7 +1068,7 @@ func openCodeLike(at place, id, name, icon, bin, dir, auth string, ua []string, 
 		UA:  ua,
 		Bin: bin, Dir: dir, Path: path,
 		Check: func() string {
-			if !usesMyna(get("model"), get("small_model")) {
+			if !usesOwl(get("model"), get("small_model")) {
 				return ""
 			}
 			return openCodeWiringOff(name, path, at.v1(), openCodeKeyAt(id, at.gw()))
@@ -1076,12 +1076,12 @@ func openCodeLike(at place, id, name, icon, bin, dir, auth string, ua []string, 
 		ListOnly: true,
 		Sync: func() error {
 			var err error
-			// a model of myna's chosen, but its provider gone from the
+			// a model of owl's chosen, but its provider gone from the
 			// file: put it back, or the agent has nothing to send it to
-			if _, ok := edit.GetJSON(path, "provider."+mynaID); !ok && onMyna() {
-				err = edit.SetJSON(path, edit.KV{Path: "provider." + mynaID, Value: provider()})
+			if _, ok := edit.GetJSON(path, "provider."+owlID); !ok && onOwl() {
+				err = edit.SetJSON(path, edit.KV{Path: "provider." + owlID, Value: provider()})
 			} else {
-				err = syncJSONInOrder(path, "provider."+mynaID, provider)
+				err = syncJSONInOrder(path, "provider."+owlID, provider)
 			}
 			// and where the file keeps it under providers too, which
 			// OpenCode 2 reads instead, there as well (#3883)
@@ -1106,10 +1106,10 @@ func openCodeKeyAt(id, gw string) string {
 }
 
 // openCodeRef is the value that makes the OpenCode config at path (agent
-// id's, whose catalog myna's provider there lists) send model v. One of
-// myna's goes to a provider of the file's own that already sends it to
-// myna, named there rather than in a second list of the same models, else
-// to myna's provider, put in the file; any other is v as it is.
+// id's, whose catalog owl's provider there lists) send model v. One of
+// owl's goes to a provider of the file's own that already sends it to
+// owl, named there rather than in a second list of the same models, else
+// to owl's provider, put in the file; any other is v as it is.
 func openCodeRef(path, id, v string) (string, error) {
 	return openCodeRefAt(here(""), path, id, v)
 }
@@ -1117,24 +1117,24 @@ func openCodeRef(path, id, v string) (string, error) {
 // openCodeRefAt is openCodeRef for the agent at a place, which reaches the
 // gateway at its own address.
 func openCodeRefAt(at place, path, id, v string) (string, error) {
-	ref, ok := strings.CutPrefix(v, mynaID+"/")
-	if !ok || !isMyna(ref) {
+	ref, ok := strings.CutPrefix(v, owlID+"/")
+	if !ok || !isOwl(ref) {
 		return v, nil
 	}
 	if own := ownGatewayProvider(path, ref, at.v1()); own != "" {
 		return own + "/" + ref, nil
 	}
-	block := func() any { return mynaProviderJSONAt("opencode", id, at.gw()) }
-	if err := edit.SetJSON(path, edit.KV{Path: "provider." + mynaID, Value: openCodeKept(path, block)()}); err != nil {
+	block := func() any { return owlProviderJSONAt("opencode", id, at.gw()) }
+	if err := edit.SetJSON(path, edit.KV{Path: "provider." + owlID, Value: openCodeKept(path, block)()}); err != nil {
 		return v, err
 	}
 	return v, syncOpenCodeNative(path, block)
 }
 
 // ownGatewayProvider is the provider in an OpenCode config, other than
-// myna's own, whose baseURL is myna's gateway (v1, as the agent reaches
+// owl's own, whose baseURL is owl's gateway (v1, as the agent reaches
 // it) and that lists the model ref, as a layout of one provider per family
-// of myna's models has; "" when there is none. A provider under
+// of owl's models has; "" when there is none. A provider under
 // providers is read as OpenCode 2 reads it, before the same name under
 // provider (openCodeBaseURL).
 func ownGatewayProvider(path, ref, v1 string) string {
@@ -1176,14 +1176,14 @@ func ownGatewayProvider(path, ref, v1 string) string {
 	sort.Strings(names)
 	for _, name := range names {
 		p := ps[name]
-		if _, has := p.models[ref]; name != mynaID && has && sameGateway(p.base, v1) {
+		if _, has := p.models[ref]; name != owlID && has && sameGateway(p.base, v1) {
 			return name
 		}
 	}
 	return ""
 }
 
-// sameGateway reports whether a base URL is myna's gateway's (v1), its
+// sameGateway reports whether a base URL is owl's gateway's (v1), its
 // host spelled 127.0.0.1 or localhost.
 func sameGateway(base, v1 string) bool {
 	norm := func(u string) string {
@@ -1219,7 +1219,7 @@ func mimocodeIn(at place) *Agent {
 // openCodeDir is the folder OpenCode reads its user config from:
 // $OPENCODE_CONFIG_DIR when set, else $XDG_CONFIG_HOME/opencode (cfg).
 // OpenCode 2, the one OpenChamber bundles (#321), reads that folder in place
-// of the other; OpenCode 1 reads both, the variable's last, so what myna
+// of the other; OpenCode 1 reads both, the variable's last, so what owl
 // writes there wins in either.
 func openCodeDir(cfg string) string {
 	if d := strings.TrimSpace(appdir.Getenv("OPENCODE_CONFIG_DIR")); d != "" {
@@ -1248,7 +1248,7 @@ func mimocode(home, cfg string) *Agent {
 // in its own folder, $XDG_CONFIG_HOME/deveco, merging config.json,
 // deveco.json and deveco.jsonc there (packages/opencode/src/config,
 // loadGlobal); DEVECO_CONFIG_DIR adds a folder read after it, as
-// OPENCODE_CONFIG_DIR does OpenCode's, so what myna writes there wins.
+// OPENCODE_CONFIG_DIR does OpenCode's, so what owl writes there wins.
 // Its auth is xdg-basedir's data folder's, ~/.local/share/deveco. 0.2.3's
 // requests to a provider of the config's say "deveco/0.2.3 ai-sdk/…", but
 // much of the OpenCode code it keeps still sends OpenCode's own User-Agent
@@ -1281,7 +1281,7 @@ func piIn(at place) *Agent {
 
 // piDir is Pi's agent folder at a place: PI_CODING_AGENT_DIR's when set,
 // "~" in it standing for home, else ~/.pi/agent (config.js, getAgentDir).
-// A relative one is Pi's working directory's, which myna can't know, so
+// A relative one is Pi's working directory's, which owl can't know, so
 // it is not taken; nor this machine's variable for a WSL distro's Pi.
 func piDir(at place) string {
 	if at.spell == nil {
@@ -1304,60 +1304,60 @@ func homeDir(home, d string) string {
 	return filepath.Clean(d)
 }
 
-// beforeMyna is a copy of an agent's own files taken before myna first
-// writes them (file.before-myna beside each), which Disconnect puts back
+// beforeOwl is a copy of an agent's own files taken before owl first
+// writes them (file.before-owl beside each), which Disconnect puts back
 // byte for byte when what it left says the same as the copy: the same
 // JSON, in the user's own order, spacing and comments-free layout. Where
 // they differ (the user changed something while connected), what
 // Disconnect left stands. A file that wasn't there (named in the stash
 // under absent) goes again when nothing but empty objects is left in it.
-type beforeMyna struct {
+type beforeOwl struct {
 	absent string
 	files  []string
 }
 
 // take copies each file aside, or notes it absent; a file that can't be
 // read is neither, and isn't put back.
-func (b beforeMyna) take() {
+func (b beforeOwl) take() {
 	var gone []string
 	for _, f := range b.files {
 		raw, err := os.ReadFile(f)
 		switch {
 		case err == nil:
-			if edit.WriteAtomic(f+".before-myna", raw) != nil {
-				os.Remove(f + ".before-myna")
+			if edit.WriteAtomic(f+".before-owl", raw) != nil {
+				os.Remove(f + ".before-owl")
 			}
 		case errors.Is(err, fs.ErrNotExist):
-			os.Remove(f + ".before-myna")
+			os.Remove(f + ".before-owl")
 			gone = append(gone, filepath.Base(f))
 		default:
-			os.Remove(f + ".before-myna")
+			os.Remove(f + ".before-owl")
 		}
 	}
 	stash(map[string]string{b.absent: strings.Join(gone, "\n")})
 }
 
 // restore puts back what take kept, where Disconnect left the same.
-func (b beforeMyna) restore() error {
+func (b beforeOwl) restore() error {
 	gone := strings.Split(unstash(b.absent), "\n")
 	for _, f := range b.files {
 		cur, err := os.ReadFile(f)
 		if err != nil {
-			os.Remove(f + ".before-myna")
+			os.Remove(f + ".before-owl")
 			continue
 		}
 		var now any
 		if json.Unmarshal(edit.TrimBOM(cur), &now) != nil { // a BOM is the user's own (#1534)
 			continue
 		}
-		if was, err := os.ReadFile(f + ".before-myna"); err == nil {
+		if was, err := os.ReadFile(f + ".before-owl"); err == nil {
 			var then any
 			if json.Unmarshal(edit.TrimBOM(was), &then) == nil && reflect.DeepEqual(now, then) && !bytes.Equal(cur, was) {
 				if err := edit.WriteAtomic(f, was); err != nil {
 					return err
 				}
 			}
-			os.Remove(f + ".before-myna")
+			os.Remove(f + ".before-owl")
 			continue
 		}
 		if slices.Contains(gone, filepath.Base(f)) && emptyJSON(now) {
@@ -1390,7 +1390,7 @@ func piLike(at place, id, name, dir string) *Agent {
 	return piLikeKeyed(at, id, name, dir, at.gwKey)
 }
 
-// piLikeKeyed is piLike whose provider "myna" carries key's key: one
+// piLikeKeyed is piLike whose provider "owl" carries key's key: one
 // that names the agent (agentKeyAt) for an agent whose requests carry
 // nothing else of it (Prime Agent, primeagent.go).
 func piLikeKeyed(at place, id, name, dir string, key func() string) *Agent {
@@ -1403,50 +1403,50 @@ func piLikeKeyed(at place, id, name, dir string, key func() string) *Agent {
 	// the model a new session starts on, as the model field shows it
 	startup := func() string { return piStartup(path, pairGet(get, "defaultProvider", "defaultModel")()) }
 	block := piBlockKept(modelsPath, func() any {
-		b := mynaProviderJSONAt("pi", id, at.gw()).(map[string]any)
+		b := owlProviderJSONAt("pi", id, at.gw()).(map[string]any)
 		b["apiKey"] = key()
 		return b
 	})
-	// Pi's own: myna's decision and image models, for codemode
+	// Pi's own: owl's decision and image models, for codemode
 	// (pi_extension.go); a fork's extensions may not be Pi's
 	extension := func() error { return nil }
 	if id == "pi" {
 		extension = func() error { return piExtensionSynced(dir, modelsPath, at.v1(), key()) }
 	}
-	writeMyna := func() error {
-		if err := edit.SetJSON(modelsPath, edit.KV{Path: "providers." + mynaID, Value: block()}); err != nil {
+	writeOwl := func() error {
+		if err := edit.SetJSON(modelsPath, edit.KV{Path: "providers." + owlID, Value: block()}); err != nil {
 			return err
 		}
 		return extension()
 	}
-	// the user's two files as they were before myna's first write, put
+	// the user's two files as they were before owl's first write, put
 	// back byte for byte by Disconnect where it leaves them saying the same
-	before := beforeMyna{at.key(id + ".before.absent"), []string{path, modelsPath}}
+	before := beforeOwl{at.key(id + ".before.absent"), []string{path, modelsPath}}
 	// the entries of enabledModels a sync took out (scope_gone.go)
 	gone := at.key(id + ".scope.gone")
 	return &Agent{
 		ID: id, Name: name, Icon: id, Bin: id, Dir: dir, Path: path, Spelled: prefixed,
 		Restore: before.restore,
 		Check: func() string {
-			if p, _ := get("defaultProvider"); p != mynaID {
+			if p, _ := get("defaultProvider"); p != owlID {
 				return ""
 			}
-			return wiringOff(name, modelsPath, func(k string) (string, bool) { return edit.GetJSON(modelsPath, "providers."+mynaID+"."+k) },
+			return wiringOff(name, modelsPath, func(k string) (string, bool) { return edit.GetJSON(modelsPath, "providers."+owlID+"."+k) },
 				"baseUrl", at.v1(), "apiKey", key())
 		},
 		ListOnly: true,
 		Sync: func() error {
-			if err := syncJSON(modelsPath, "providers."+mynaID, block); err != nil {
+			if err := syncJSON(modelsPath, "providers."+owlID, block); err != nil {
 				return err
 			}
 			if err := extension(); err != nil {
 				return err
 			}
-			// an entry on a model myna no longer gives Pi names nothing
+			// an entry on a model owl no longer gives Pi names nothing
 			// (#2055, scope_gone.go)
 			return piScopeSynced(path, modelsPath, gone)
 		},
-		// a provider renamed takes its myna/<id>/ entries in enabledModels
+		// a provider renamed takes its owl/<id>/ entries in enabledModels
 		// with it: an entry left on the old id names nothing, and Pi would
 		// leave that model out of Ctrl+P (#1919, #1828)
 		RenameRefs: func(from, to string) (bool, error) {
@@ -1467,7 +1467,7 @@ func piLikeKeyed(at place, id, name, dir string, key func() string) *Agent {
 						if err := edit.DelJSON(path, "defaultProvider", "defaultModel"); err != nil {
 							return err
 						}
-						if err := edit.DelJSON(modelsPath, "providers."+mynaID); err != nil {
+						if err := edit.DelJSON(modelsPath, "providers."+owlID); err != nil {
 							return err
 						}
 						if err := extension(); err != nil {
@@ -1476,13 +1476,13 @@ func piLikeKeyed(at place, id, name, dir string, key func() string) *Agent {
 						forget(gone)
 						return piScopeWithout(path)
 					}
-					if ref, ok := strings.CutPrefix(v, mynaID+"/"); ok && isMyna(ref) {
-						if _, has := edit.GetJSON(modelsPath, "providers."+mynaID); !has {
-							if p, _ := get("defaultProvider"); p != mynaID {
+					if ref, ok := strings.CutPrefix(v, owlID+"/"); ok && isOwl(ref) {
+						if _, has := edit.GetJSON(modelsPath, "providers."+owlID); !has {
+							if p, _ := get("defaultProvider"); p != owlID {
 								before.take()
 							}
 						}
-						if err := writeMyna(); err != nil {
+						if err := writeOwl(); err != nil {
 							return err
 						}
 					}
@@ -1493,20 +1493,20 @@ func piLikeKeyed(at place, id, name, dir string, key func() string) *Agent {
 					return piScopeWith(path, v)
 				},
 				Options: func(cur map[string]string) []Option {
-					return withVia(ownOptionsFrom(piRegistry(id), auth, cur["model"]), id, mynaID+"/")
+					return withVia(ownOptionsFrom(piRegistry(id), auth, cur["model"]), id, owlID+"/")
 				},
 			},
 			{
 				// Pi's startup thinking level, the same list its /thinking offers;
 				// Pi clamps it to what the model supports. Only this field is
-				// written, and only when it changed: rebuilding providers.myna
+				// written, and only when it changed: rebuilding providers.owl
 				// here replaced model fields a person had edited, such as a
 				// contextWindow. Picking the model, and the catalog sync, still
 				// refresh the provider.
 				//
-				// For a model of myna's, the levels are those Pi offers for
-				// it, from the entry myna writes, and a level it doesn't
-				// offer is shown as the one Pi runs it at: myna showed max
+				// For a model of owl's, the levels are those Pi offers for
+				// it, from the entry owl writes, and a level it doesn't
+				// offer is shown as the one Pi runs it at: owl showed max
 				// for a group Pi offered off alone for, so ran without
 				// reasoning (#597).
 				Key: "effort", Label: "thinking", Closed: true,
@@ -1599,10 +1599,10 @@ func gooseIn(at place, cfg string) *Agent {
 					}
 					return removeGooseProvider(provider)
 				}
-				// a model of myna's: myna as a custom provider of
+				// a model of owl's: owl as a custom provider of
 				// Goose's, each model with its window and whether Goose
 				// can send it a thinking level (see goose.go)
-				if ref, ok := strings.CutPrefix(v, gooseProviderID+"/"); ok && isMyna(ref) {
+				if ref, ok := strings.CutPrefix(v, gooseProviderID+"/"); ok && isOwl(ref) {
 					if err := writeGooseProvider(provider, at); err != nil {
 						return err
 					}
@@ -1612,7 +1612,7 @@ func gooseIn(at place, cfg string) *Agent {
 			Options: func(cur map[string]string) []Option {
 				// only the native providers this goose is set up with (#987:
 				// every one of four was listed, OpenRouter's hundreds of
-				// models on a goose that had only myna)
+				// models on a goose that had only owl)
 				return withVia(ownOptions("", cur["model"], gooseConfigured(path, keyEnv)...), "goose", gooseProviderID+"/")
 			},
 		}, {
@@ -1687,10 +1687,10 @@ func copilot(home string) *Agent {
 	}
 	own := func() []Option {
 		// "auto" is Copilot's own choice, not a model it lists; the rest
-		// come from the list myna last fetched from Copilot.
+		// come from the list owl last fetched from Copilot.
 		out := []Option{{Value: "auto", Note: "let Copilot pick", Icon: "githubcopilot"}}
 		if live, _, ok := catalog.Live("copilot"); ok {
-			// myna's list has Auto too, offered above
+			// owl's list has Auto too, offered above
 			live = slices.DeleteFunc(slices.Clone(live), func(m catalog.Model) bool { return m.ID == "auto" })
 			out = append(out, options(live, "")...)
 		}
@@ -1710,7 +1710,7 @@ func copilot(home string) *Agent {
 		// PATH, and running it only asks for the CLI to be installed
 		// (#3269): a command of the editor's is not the CLI
 		binNot: editorLauncher,
-		// myna/<model> is a model of the provider named myna in providers.json
+		// owl/<model> is a model of the provider named owl in providers.json
 		Spelled:  prefixed,
 		ListOnly: true,
 		Check: func() string {
@@ -1726,7 +1726,7 @@ func copilot(home string) *Agent {
 			Key: "model", Label: "model",
 			Get: jsonGet(path, "model"),
 			Set: func(v string) error {
-				if ref, ok := strings.CutPrefix(v, mynaID+"/"); ok && isMyna(ref) {
+				if ref, ok := strings.CutPrefix(v, owlID+"/"); ok && isOwl(ref) {
 					if err := copilotWrite(provs, gateway.URL()+"/v1", agentKey("copilot")); err != nil {
 						return err
 					}
@@ -1740,7 +1740,7 @@ func copilot(home string) *Agent {
 				return edit.SetJSON(path, edit.KV{Path: "model", Value: v})
 			},
 			Options: func(cur map[string]string) []Option {
-				return withVia(own(), "copilot", mynaID+"/")
+				return withVia(own(), "copilot", owlID+"/")
 			},
 		}, {
 			// effortLevel, which Copilot saves beside the model and clears
@@ -1831,7 +1831,7 @@ func crush(home, cfg string) *Agent {
 	// Crush saves the models its own picker chooses to its data file, and
 	// reads that after crush.json, so a pick there wins over one in path.
 	// The picks are read as Crush merges the two files and written where
-	// Crush writes them; myna's provider stays in path, beside the
+	// Crush writes them; owl's provider stays in path, beside the
 	// library's MCP servers.
 	data := filepath.Join(home, ".local", "share", "crush", "crush.json")
 	if dir := appdir.Getenv("XDG_DATA_HOME"); dir != "" {
@@ -1858,7 +1858,7 @@ func crushIn(at place) *Agent {
 // crushAt is Crush with its config at path and its data file at data,
 // reaching the gateway as at does.
 func crushAt(at place, path, data string) *Agent {
-	provider := theirsKept(path, "providers."+mynaID, func() any { return mynaProviderJSONAt("crush", "crush", at.gw()) }, "models")
+	provider := theirsKept(path, "providers."+owlID, func() any { return owlProviderJSONAt("crush", "crush", at.gw()) }, "models")
 	get := func(k string) (string, bool) { return edit.GetJSON(path, k) }
 	set := func(kvs ...edit.KV) error { return edit.SetJSON(path, kvs...) }
 	pick := func(k string) (string, bool) {
@@ -1868,7 +1868,7 @@ func crushAt(at place, path, data string) *Agent {
 		return get(k)
 	}
 	setPick := func(kvs ...edit.KV) error {
-		// Crush keeps API keys in its data file, so one myna is first to
+		// Crush keeps API keys in its data file, so one owl is first to
 		// make is made readable by its owner only
 		if _, err := os.Lstat(data); errors.Is(err, fs.ErrNotExist) {
 			if err := os.MkdirAll(filepath.Dir(data), 0o755); err != nil {
@@ -1895,23 +1895,23 @@ func crushAt(at place, path, data string) *Agent {
 				}
 				if json.Unmarshal(edit.TrimBOM(b), &c) == nil {
 					for p := range c.Providers {
-						if p != mynaID {
+						if p != owlID {
 							extra = append(extra, p)
 						}
 					}
 				}
 			}
-			return withVia(ownOptions("", cur[key], extra...), "crush", mynaID+"/")
+			return withVia(ownOptions("", cur[key], extra...), "crush", owlID+"/")
 		}
 	}
 	// replacePick puts v in place of the whole models.<type> object in the
 	// data file. Crush's own picker saves its per-model settings there
 	// (max_tokens, think, reasoning_effort, sampling, provider_options),
 	// and Crush applies them to whatever model the object names, so they
-	// must not stay attached to the model myna picks: a max_tokens meant
+	// must not stay attached to the model owl picks: a max_tokens meant
 	// for another model can go upstream as an over-limit request. Only an
-	// effort myna set itself is kept: one on the large pick when that pick
-	// is already myna's and carries nothing Crush adds.
+	// effort owl set itself is kept: one on the large pick when that pick
+	// is already owl's and carries nothing Crush adds.
 	replacePick := func(obj string) func(string) error {
 		return func(v string) error {
 			p, m, ok := strings.Cut(v, "/")
@@ -1920,7 +1920,7 @@ func crushAt(at place, path, data string) *Agent {
 			}
 			next := map[string]any{"provider": p, "model": m}
 			if obj == "models.large" {
-				if e, ok := mynaEffort(data, obj, mynaID); ok {
+				if e, ok := owlEffort(data, obj, owlID); ok {
 					next["reasoning_effort"] = e
 				}
 			}
@@ -1936,13 +1936,13 @@ func crushAt(at place, path, data string) *Agent {
 				}
 				large := pairGet(pick, "models.large.provider", "models.large.model")()
 				small := pairGet(pick, "models.small.provider", "models.small.model")()
-				if usesMyna(large, small) {
+				if usesOwl(large, small) {
 					return nil
 				}
-				return edit.DelJSON(path, "providers."+mynaID)
+				return edit.DelJSON(path, "providers."+owlID)
 			}
-			if ref, ok := strings.CutPrefix(v, mynaID+"/"); ok && isMyna(ref) {
-				if err := set(edit.KV{Path: "providers." + mynaID, Value: provider()}); err != nil {
+			if ref, ok := strings.CutPrefix(v, owlID+"/"); ok && isOwl(ref) {
+				if err := set(edit.KV{Path: "providers." + owlID, Value: provider()}); err != nil {
 					return err
 				}
 			}
@@ -1955,15 +1955,15 @@ func crushAt(at place, path, data string) *Agent {
 		Check: func() string {
 			large, _ := pick("models.large.provider")
 			small, _ := pick("models.small.provider")
-			if large != mynaID && small != mynaID {
+			if large != owlID && small != owlID {
 				return ""
 			}
-			return wiringOff("Crush", path, func(k string) (string, bool) { return get("providers." + mynaID + "." + k) },
+			return wiringOff("Crush", path, func(k string) (string, bool) { return get("providers." + owlID + "." + k) },
 				"base_url", at.v1(), "api_key", at.gwKey())
 		},
 		ListOnly: true,
 		Sync: func() error {
-			return syncJSON(path, "providers."+mynaID, provider)
+			return syncJSON(path, "providers."+owlID, provider)
 		},
 		Fields: []Field{
 			{Key: "model", Label: "large", Get: pairGet(pick, "models.large.provider", "models.large.model"), Set: setter("models.large.provider", "models.large.model"), Options: opts("model")},
@@ -1990,7 +1990,7 @@ func crushAt(at place, path, data string) *Agent {
 
 // what goose says after a change (notice.go)
 var (
-	noticeGoose = newNotice("Goose loads its providers at start-up — quit and reopen Goose (and open goose sessions) to use myna's models.")
+	noticeGoose = newNotice("Goose loads its providers at start-up — quit and reopen Goose (and open goose sessions) to use owl's models.")
 )
 
 // readOwnAuth is os.ReadFile for an agent's own sign-ins (OpenCode's

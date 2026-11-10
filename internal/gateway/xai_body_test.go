@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // #3392's second half, as kongkongklng reported it after merging the
@@ -38,7 +38,7 @@ const xaiSecondTurn = `{"model":"fake/grok-4.7","stream":true,"store":false,"inc
 		{"type":"message","role":"assistant","id":"msg_1","content":[{"type":"output_text","text":"Hello!"}]},
 		{"type":"message","role":"user","content":[{"type":"input_text","text":"and now?"}]}]}`
 
-// atXAI points myna's fake provider at api.x.ai and its client at up,
+// atXAI points owl's fake provider at api.x.ai and its client at up,
 // as xAI's own API is gated on the host.
 func atXAI(t *testing.T, up *httptest.Server) *Server {
 	t.Helper()
@@ -257,7 +257,7 @@ func TestXAITakesANullRequiredToolSchema(t *testing.T) {
 	}
 }
 
-// The other two shapes a tool schema leaves myna in get the same null
+// The other two shapes a tool schema leaves owl in get the same null
 // out: Responses' parameters and chat's function.parameters.
 func TestXaiBodyDropsNullRequiredInEveryShape(t *testing.T) {
 	p := provider.Provider{ID: "fake", Chat: "https://api.x.ai/v1", Responses: "http://api.x.ai/v1"}

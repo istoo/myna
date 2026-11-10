@@ -20,7 +20,7 @@ function server(lang, posts, featuresOff) {
   const fixed = {
     theme: "light", lang, tray: "panel", quotaLeft: false, currency: "usd", dock: false, dockWindow: false, proxy: "",
     redact: true, redactPersonal: false, redactWords: [], codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "",
-    trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "", version: "0.1.900", dir: "~/.config/myna",
+    trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "", version: "0.1.900", dir: "~/.config/owl",
     gateway: "http://127.0.0.1:3425", proxyNow: "none", proxySource: "none", visionModels: [], imageGenModels: [], lanURLs: [],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false }, turnDoneAlert: 0, featuresOff,
   };
@@ -75,7 +75,7 @@ async function open(engine, width, lang, posts, featuresOff, t, name, where = "?
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", server(lang, posts, featuresOff));
   await watchSettingsReads(page);
-  await page.goto("http://myna.test/" + where);
+  await page.goto("http://owl.test/" + where);
   if (where.includes("settings")) await settingsDrawn(page); // rows found are the ones that stay (#1659)
   return { page, errors };
 }

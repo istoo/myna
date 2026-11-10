@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // heldHeaders holds each request for hold before its headers, as a vendor
@@ -26,7 +26,7 @@ func (h heldHeaders) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // A try says where its time went up to the reply's first byte (TryNet):
 // a new connection's DNS, connect and TLS, writing the request, and the
 // vendor's wait before its headers, which is where a vendor's slow start
-// shows and not as myna's (Discord, Magic_zero). The next request on
+// shows and not as owl's (Discord, Magic_zero). The next request on
 // the open connection spends none of the three. The route has the
 // usage record's split of the time before the request went out.
 func TestTryTellsWhereItsTimeWent(t *testing.T) {
@@ -94,7 +94,7 @@ func TestTryNetWithoutARequest(t *testing.T) {
 
 // lute on Discord: some requests on the Routing page said where their
 // time went and some didn't. A plugin sends its request itself, through
-// its host, so myna has no timing for it: its try says who sent it,
+// its host, so owl has no timing for it: its try says who sent it,
 // which the page shows in the timing's place.
 func TestPluginTrySaysWhoSentIt(t *testing.T) {
 	pid := besideFake(t, "cursor", &cursorUp{})
@@ -105,7 +105,7 @@ func TestPluginTrySaysWhoSentIt(t *testing.T) {
 }
 
 // Who sent a try: a plugin, Claude Code for a Claude subscription, and
-// myna itself, whose try has its timing, for the rest.
+// owl itself, whose try has its timing, for the rest.
 func TestSentBy(t *testing.T) {
 	for _, c := range []struct {
 		p    provider.Provider

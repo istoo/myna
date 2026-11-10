@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // stdoutOf is what f prints.
@@ -29,9 +29,9 @@ func stdoutOf(t *testing.T, f func() error) (string, error) {
 	return string(<-done), err
 }
 
-// myna quota history tells each account's windows over time as myna
+// owl quota history tells each account's windows over time as owl
 // kept them, narrowed to a provider or an account and to --days; --json is
-// what GET /v1/myna/quotas/history answers (#802).
+// what GET /v1/owl/quotas/history answers (#802).
 func TestQuotaHistoryCmd(t *testing.T) {
 	groupsHome(t)
 	now := time.Now().UTC().Truncate(time.Second)

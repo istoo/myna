@@ -7,11 +7,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// A group myna found is listed as auto/<model> (ZeroClover on X), and
+// A group owl found is listed as auto/<model> (ZeroClover on X), and
 // served by that id and by its old group/auto-<slug> alike: one group, one
 // route, one name in the usage log, whichever an agent sent.
 func TestFoundGroupServedByBothIDs(t *testing.T) {

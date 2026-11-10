@@ -10,28 +10,28 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // The route-events feed (#3387, joe21_eee on Discord, sywyyhykkk on
 // GitHub): a display on the LAN, an ESP32 screen, shows every agent's
 // requests as they are routed (started, each try, its first content,
 // fallback, done) without knowing their sessions, which
-// /v1/myna/route asks for, and without the full trace, which names
+// /v1/owl/route asks for, and without the full trace, which names
 // accounts, folders and errors and is told to this computer alone.
 //
 // GET routeSnapshotPath is the requests going now and a cursor; GET
 // routeEventsPath?after=<cursor> streams each change after it as SSE. A
 // route here is routeActivity, an allow list of fields, never a Route
 // with some taken out. They are told as the usage log is: to this
-// computer, and to another with an enabled gateway key while myna is
+// computer, and to another with an enabled gateway key while owl is
 // shared (a read-only key reads them too, readOnlyRoutes), never to a
 // key held to a budget, models or accounts, which is told no one else's
 // requests.
 const (
-	routeSnapshotPath = "/v1/myna/route-events/snapshot"
-	routeEventsPath   = "/v1/myna/route-events"
+	routeSnapshotPath = "/v1/owl/route-events/snapshot"
+	routeEventsPath   = "/v1/owl/route-events"
 	// routeEventsKeep is how many changes the feed keeps for a reader
 	// that fell behind, or reconnects with the cursor it last had
 	routeEventsKeep = 512
@@ -44,9 +44,9 @@ const (
 // again whether its key is still on (a var for the tests)
 var routeEventsRecheck = time.Second
 
-// routeEventsRefused is what another machine is told while myna isn't
+// routeEventsRefused is what another machine is told while owl isn't
 // shared with it.
-const routeEventsRefused = "myna's routing events are told to another machine only when myna is shared on the local network (Settings → Network and sharing → Share on local network) and the request carries an enabled gateway key (Authorization: Bearer <key> or x-api-key: <key>); a read-only key reads them too"
+const routeEventsRefused = "owl's routing events are told to another machine only when owl is shared on the local network (Settings → Network and sharing → Share on local network) and the request carries an enabled gateway key (Authorization: Bearer <key> or x-api-key: <key>); a read-only key reads them too"
 
 // routeActivity is what the feed tells of a request. ID is the route's,
 // never a session's, an account's or a key's; Attempt counts from 1.
@@ -221,7 +221,7 @@ func routeEventsAllowed(w http.ResponseWriter, r *http.Request) bool {
 		writeError(w, provider.Chat, http.StatusForbidden, routeEventsRefused)
 		return false
 	}
-	return !refuseHeld(w, r, "this gateway key is held to a budget, models or accounts, so it is told no one else's routing: GET /v1/myna/usage/requests tells it its own calls")
+	return !refuseHeld(w, r, "this gateway key is held to a budget, models or accounts, so it is told no one else's routing: GET /v1/owl/usage/requests tells it its own calls")
 }
 
 // activitySnapshot is the requests going now, by id, and the cursor of
@@ -252,7 +252,7 @@ func (s *Server) routeSnapshot(w http.ResponseWriter, r *http.Request) {
 // else ?after=). It ends when the client goes, when the gateway stops
 // serving (streamsEnding: Shutdown would wait its whole drain for it),
 // when the key it came with is turned off, removed or runs out, and when
-// myna stops being shared with a reader on another machine.
+// owl stops being shared with a reader on another machine.
 func (s *Server) routeEvents(w http.ResponseWriter, r *http.Request) {
 	if !routeEventsAllowed(w, r) {
 		return

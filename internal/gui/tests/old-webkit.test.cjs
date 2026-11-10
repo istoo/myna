@@ -142,7 +142,7 @@ test("compat.js is the first of the page's own scripts", async () => {
   const srcs = all.filter((s) => s !== "boot.js" && s !== "theme.js" && s !== "omarchy.js");
   assert.equal(srcs[0], "compat.js", "loaded first: " + srcs.join(", "));
   // webfonts.js is imported by app.js in a browser tab only, cfgblocked.js
-  // when myna can't write its folder, signsheets.js when a sign-in asks a
+  // when owl can't write its folder, signsheets.js when a sign-in asks a
   // value first, ruleedit.js on a masking rule's Edit, ratewindows.js when
   // a provider editor draws its rate windows, traywindows.js when the menu
   // bar shows a card, autoresetown.js when Settings draws Codex's auto-use
@@ -249,7 +249,7 @@ test("with Safari 15.0's built-ins, the panel and the window draw every page", a
       page.on("pageerror", (e) => errors.push(e.message));
       await page.addInitScript(TAKEN);
       await page.route("**/*", serve);
-      await page.goto(`http://myna.test/?mode=${mode}`);
+      await page.goto(`http://owl.test/?mode=${mode}`);
       await page.locator("#agents .row").first().waitFor();
       assert.equal(await page.evaluate(() => [1, 2, 3].findLast((x) => x < 3)), 2, "compat.js fills findLast in");
       assert.deepEqual(await page.evaluate(() => { const a = { b: [1] }, c = structuredClone(a); return [c.b[0], c !== a && c.b !== a.b]; }), [1, true]);

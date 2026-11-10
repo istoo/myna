@@ -74,7 +74,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, fixture()));
-        await page.goto("http://myna.test/?view=routing");
+        await page.goto("http://owl.test/?view=routing");
         const rows = page.locator(".rt-req");
         await rows.nth(3).waitFor();
 
@@ -88,7 +88,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal((await cost(1).getAttribute("title")).split("\n").length, 2, "a priced row says both what the price is and what the credits are");
 
         // By session: a session sums its credits, with or without a price
-        await page.evaluate(() => localStorage.setItem("myna.routingBySession", "1"));
+        await page.evaluate(() => localStorage.setItem("owl.routingBySession", "1"));
         await page.reload();
         const group = (s) => page.locator("button.rt-session").filter({ has: page.locator(`.nm[title$="${s}"]`) });
         await group("s-credits").waitFor();

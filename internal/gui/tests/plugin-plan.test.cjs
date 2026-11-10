@@ -39,7 +39,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang));
-      await page.goto("http://myna.test/");
+      await page.goto("http://owl.test/");
       await page.waitForFunction(() => typeof accountPlan === "function");
       const plans = await page.evaluate(() => [
         accountPlan({ agent: "cursor-plugin", builtin: "cursor", plan: "pro" }),

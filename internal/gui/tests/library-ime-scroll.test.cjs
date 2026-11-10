@@ -24,7 +24,7 @@ const ids = ["claude", "codex", "gemini", "opencode", "pi", "kimi", "qwen", "dro
 const named = (id) => id[0].toUpperCase() + id.slice(1);
 const lines = (n, what) => Array.from({ length: n }, (_, i) => `- ${what} ${i + 1}: keep it short`).join("\n");
 const library = () => ({
-  dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
+  dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
   agents: ids.map((id) => ({ id, name: named(id), icon: "", instructions: `${HOME}/.${id}/AGENTS.md` })),
   instructions: {
     shared: "",
@@ -99,13 +99,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     for (const lang of ["en", "zh"]) for (const width of [980, 560]) for (const field of ["set:default", "extra:cline"]) {
       await t.test(`${lang}, ${width}px wide, ${field}`, async () => {
         const ctx = await browser.newContext({ viewport: { width, height: 640 }, reducedMotion: "reduce" });
-        await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "instructions"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("owl.libTab", "instructions"); } catch {} });
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang));
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         await navTo(page, "library");
         await page.locator(`${view} .lib-set`).first().click();
         await page.locator(`${view} textarea[data-lib="set:default"]`).waitFor();

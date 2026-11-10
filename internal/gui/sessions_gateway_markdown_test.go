@@ -10,13 +10,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/sessions"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/sessions"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/usage"
 )
 
-// akic404 on Discord: a myna on a server that other mynas reach as a
-// remote myna records their agents' conversations, and the Sessions page
+// akic404 on Discord: a owl on a server that other owls reach as a
+// remote owl records their agents' conversations, and the Sessions page
 // shows them, but its download of one as Markdown was a 400: the agent ran
 // on the other machine, so there is no file of the session here, and the
 // export looked only for one. It is written from what the gateway kept, as
@@ -45,7 +45,7 @@ func TestGatewaySessionExportsMarkdown(t *testing.T) {
 	}
 	check := func(md string) {
 		t.Helper()
-		for _, want := range []string{"- **Agent:** Pi\n", "- **Recorded by:** myna's gateway\n", "## User\n\nrename foo to bar\n", "## Assistant\n\nRenamed it in a.go.\n"} {
+		for _, want := range []string{"- **Agent:** Pi\n", "- **Recorded by:** owl's gateway\n", "## User\n\nrename foo to bar\n", "## Assistant\n\nRenamed it in a.go.\n"} {
 			if !strings.Contains(md, want) {
 				t.Fatalf("no %q in\n%s", want, md)
 			}
@@ -54,7 +54,7 @@ func TestGatewaySessionExportsMarkdown(t *testing.T) {
 	q := "?agent=pi&id=" + id
 	w = httptest.NewRecorder()
 	mux.ServeHTTP(w, httptest.NewRequest("GET", "/api/sessions/markdown"+q, nil))
-	if w.Code != 200 || !strings.Contains(w.Header().Get("Content-Disposition"), `filename="myna-session-pi-019a2b3c-pi-.md"`) {
+	if w.Code != 200 || !strings.Contains(w.Header().Get("Content-Disposition"), `filename="owl-session-pi-019a2b3c-pi-.md"`) {
 		t.Fatalf("download: %d %v %s", w.Code, w.Header(), w.Body)
 	}
 	check(w.Body.String())

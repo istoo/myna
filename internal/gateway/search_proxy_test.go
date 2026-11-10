@@ -17,9 +17,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/netproxy"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/netproxy"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // connectProxy is an HTTP proxy that notes the host:port of each CONNECT
@@ -34,7 +34,7 @@ type connectProxy struct {
 func newConnectProxy(t *testing.T, dial func(addr string) (net.Conn, error)) *connectProxy {
 	t.Helper()
 	var ln net.Listener
-	for range 20 { // a free port, never one of myna's own (3425-3437)
+	for range 20 { // a free port, never one of owl's own (3425-3437)
 		l, err := net.Listen("tcp", "127.0.0.1:0")
 		if err != nil {
 			t.Fatal(err)
@@ -101,7 +101,7 @@ func (p *connectProxy) reset() {
 	p.mu.Unlock()
 }
 
-// A web search myna makes for a turn goes through the proxy its searcher
+// A web search owl makes for a turn goes through the proxy its searcher
 // follows, not the one the turn's provider is set to (#1522): Claude Code
 // on opencode-go, set to "direct", with Codex searching and the proxy on
 // Auto, had the search to chatgpt.com dialed directly, to the poisoned

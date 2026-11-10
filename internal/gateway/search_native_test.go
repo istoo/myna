@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // what the Anthropic API streams of a search its model ran by itself, as
@@ -44,7 +44,7 @@ const responsesNative = `{"id":"r1","object":"response","status":"completed","mo
 	{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Found it."}]}],
 	"usage":{"input_tokens":4000,"output_tokens":20}}`
 
-// cybercaius on Discord: with myna's search off, DeepSeek searched by
+// cybercaius on Discord: with owl's search off, DeepSeek searched by
 // itself and Usage showed nothing of it. A search a provider's model runs
 // with its provider's own tool, which its reply shows (Anthropic's
 // server_tool_use, the Responses API's web_search_call), is a Web search

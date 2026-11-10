@@ -20,7 +20,7 @@ function headersPanel(label, first, headers) {
 
 // A call's HTTP headers both ways (usrname1833 on Discord: 查看原始请求和
 // 原始响应的http头, to debug what a capture would show), as the gateway
-// read them out, secrets taken out: the client's, then each request myna
+// read them out, secrets taken out: the client's, then each request owl
 // sent upstream for it and the head of its answer. Folded under the bodies
 // on the Gateway page's recent calls and on Routing; open when open is.
 // h is /api/gateway/call's headers, or the archive's upstream ones.
@@ -58,11 +58,11 @@ function wireHeadersGrid(h, withClient) {
     );
   }
   if (h.more) grid.append(el("p", "call-wire-note", t("{n} more requests upstream, not kept", { n: h.more })));
-  if (plugin) grid.append(el("p", "call-wire-note", t("A plugin sends a request on to its vendor with headers of its own, which myna doesn't see.")));
+  if (plugin) grid.append(el("p", "call-wire-note", t("A plugin sends a request on to its vendor with headers of its own, which owl doesn't see.")));
   return grid;
 }
 
-// The archived file, whole, however large: to the browser in myna web,
+// The archived file, whole, however large: to the browser in owl web,
 // to Downloads in the app (#447).
 async function downloadArchive(name, b) {
   const [date, aid] = name.split("/");
@@ -146,17 +146,17 @@ function archivePanel(name, id, redraw) {
     archiveBodyPanel("Response Body", got.response, id + "|archive"),
   );
   box.append(grid);
-  // what myna sent upstream for it, and the heads that came back
+  // what owl sent upstream for it, and the heads that came back
   if (got.upstream?.length) box.append(wireHeadersGrid({ upstream: got.upstream, more: got.upstreamMore }, false));
   return box;
 }
 
 const PERIODS = [["today", "Today"], ["7d", "7 days"], ["30d", "30 days"], ["all", "All"]];
 
-// The reader's time zone, which myna reads the period's days, the chart's
-// hours and a picked day in: myna web may be read from another zone than
+// The reader's time zone, which owl reads the period's days, the chart's
+// hours and a picked day in: owl web may be read from another zone than
 // the computer's, whose days put a call at 9:00 in UTC+8 under 1:00 (Outvi V
-// on Discord). None, and myna reads its own.
+// on Discord). None, and owl reads its own.
 function usageZone() {
   try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch { return ""; }
 }
@@ -421,8 +421,8 @@ function costHead(c, note, title) {
   cost.append(el("span", note ? "unpriced" : "", note || t("at your model prices")));
   cost.title = title;
 }
-// a request myna sent a provider by itself to test it (SourceProbe)
-const probeWhy = () => t("myna sent this itself to test the provider (Test, Detect APIs or a model list), not for an agent. It is not counted in any total.");
+// a request owl sent a provider by itself to test it (SourceProbe)
+const probeWhy = () => t("owl sent this itself to test the provider (Test, Detect APIs or a model list), not for an agent. It is not counted in any total.");
 const unpricedCalls = (n) => t(n === 1 ? "{n} call unpriced" : "{n} calls unpriced", { n: ledNum(n) });
 const unpricedCallsWhy = (n) => n ? t(n === 1 ? "{n} call had no known price and is not counted" : "{n} calls had no known price and are not counted", { n }) : t("Estimated at effective model prices. A model's price at one provider is set in that provider's Names, prices & levels and counts over its list price");
 // renderCosts redraws whatever on the Usage page shows a cost, once the
@@ -432,9 +432,9 @@ function renderCosts() {
   if (usage) renderUsage();
   if (ledger && usageTab === "requests") renderLedger();
   if (sessions) renderSessions();
-  document.dispatchEvent(new Event("myna-costs-changed"));
+  document.dispatchEvent(new Event("owl-costs-changed"));
 }
-// sharedBalances (keyCards): the keys myna found to read one account's
+// sharedBalances (keyCards): the keys owl found to read one account's
 // balance (sharedBalance, the first one's name) as one card, the first's,
 // with the keys it stands for (sharedKeys): mimi on Discord, a site's three
 // keys each showing the account's $8.39 and its curve. Keys that read
@@ -532,7 +532,7 @@ function quotaWarm(q) {
 }
 
 function ownCalls(n) {
-  return t("{n} by myna itself", { n: fmtN(n) });
+  return t("{n} by owl itself", { n: fmtN(n) });
 }
 // quotaReadings: a line's last eight readings, newest first, each what was
 // left and when it was read (#802), a line each, ↻ where the window
@@ -565,9 +565,9 @@ new ResizeObserver(fitChartLabels).observe($("#view-usage"));
 
 // The Overview's lists — Agents, Models, Accounts, Gateway keys — each fold
 // away under their heading (#2378: 日常看账号维度较多，都要拉到最底下), and
-// stay folded across a reload (myna.usageFolded, the folded ones' names).
+// stay folded across a reload (owl.usageFolded, the folded ones' names).
 let usageFolded = new Set();
-try { usageFolded = new Set(JSON.parse(localStorage.getItem("myna.usageFolded") || "[]")); } catch {}
+try { usageFolded = new Set(JSON.parse(localStorage.getItem("owl.usageFolded") || "[]")); } catch {}
 const USAGE_FOLDS = { agents: ["usageAgents", "usageAgentsHid"], models: ["usageModels"], accounts: ["usageAccounts"], keys: ["usageKeys"] };
 const USAGE_FOLD_TITLES = {
   agents: ["Show the agents", "Fold the agents away"],
@@ -581,7 +581,7 @@ function mountUsageFolds() {
     b.onclick = () => {
       const id = b.dataset.fold;
       if (usageFolded.has(id)) usageFolded.delete(id); else usageFolded.add(id);
-      try { localStorage.setItem("myna.usageFolded", JSON.stringify([...usageFolded])); } catch {}
+      try { localStorage.setItem("owl.usageFolded", JSON.stringify([...usageFolded])); } catch {}
       showUsageFolds();
       backToReader($("#view-usage"));
     };
@@ -611,9 +611,9 @@ function usageParts(texts) {
 // tokens, read and written, can be counted in them too (#2378), as the
 // Requests tab's total always has them — the Overview's tiles, chart and
 // lists and, since #2591, the Sessions tab's alike. Kept as the reader
-// left it (myna.usageWithCache).
+// left it (owl.usageWithCache).
 let usageWithCache = false;
-try { usageWithCache = localStorage.getItem("myna.usageWithCache") === "1"; } catch {}
+try { usageWithCache = localStorage.getItem("owl.usageWithCache") === "1"; } catch {}
 const cacheOf = (x) => (x.cache_read || 0) + (x.cache_write || 0);
 const usageTokens = (x) => tokensOf(x) + (usageWithCache ? cacheOf(x) : 0);
 // the tokens tile's label: a pop-up of the two ways to count
@@ -631,7 +631,7 @@ function usageTokensPick() {
       { v: "1", name: "With cache", note: "Cache read and written counted too" },
     ], usageWithCache ? "1" : "", (v) => {
       usageWithCache = v === "1";
-      try { localStorage.setItem("myna.usageWithCache", usageWithCache ? "1" : "0"); } catch {}
+      try { localStorage.setItem("owl.usageWithCache", usageWithCache ? "1" : "0"); } catch {}
       // the tab it was picked on follows; the pick lives on the Overview's
       // and the Sessions tab's tokens tiles (#2591)
       (usageTab === "sessions" ? renderSessions : renderUsage)();
@@ -738,13 +738,13 @@ function renderUsage() {
       // (WorkBuddy's 积分): an account's, a model's, an agent's (lcyksp
       // on Discord), not only their tokens
       if (g.credited) sub.push(ledCredits(g).textContent);
-      // myna's own calls apart from the agents' (#1839): myna's row
+      // owl's own calls apart from the agents' (#1839): owl's row
       // says it is, and a model's, a key's or an account's how many of
       // its calls were
-      if (id === "usageAgents" && g.id === "myna") who.firstChild.append(ownBadge());
+      if (id === "usageAgents" && g.id === "owl") who.firstChild.append(ownBadge());
       else if (g.own?.calls) sub.push(ownCalls(g.own.calls));
       if (g.errors) sub.push(t("{n} failed", { n: g.errors }));
-      // of those, the replies myna ended stuck in a loop (#1858)
+      // of those, the replies owl ended stuck in a loop (#1858)
       if (g.loops) sub.push(t("{n} looped", { n: g.loops }));
       if (g.retried) sub.push(t("{n} answered on a retry", { n: g.retried }));
       // how long the streamed replies took to begin, and how fast they
@@ -789,7 +789,7 @@ function renderUsage() {
     b.setAttribute("aria-haspopup", "menu");
     b.setAttribute("aria-label", t("Actions for {name}", { name: g.name || g.id }));
     b.append(svg(DOTS, 14, 2.2));
-    // a client myna doesn't know can be counted as one of the agents
+    // a client owl doesn't know can be counted as one of the agents
     // it does (#1958, NorethSea): a bridge that starts Codex under a name
     // of its own; the agent counting one has it put back on its own
     const counted = Object.entries(state.settings?.clientAgents || {}).filter(([, as]) => as === g.id).map(([c]) => c);
@@ -855,7 +855,7 @@ function renderUsage() {
   clear.hidden = false;
   clear.onclick = () => clearUsage();
   // the account cards say how many of this period's requests were
-  // myna's own (ownLine), which they could only once the summary came
+  // owl's own (ownLine), which they could only once the summary came
   if (quotas && (u.accounts?.some((g) => g.own?.calls) || $("#subscriptionUsage .quota-own"))) renderQuotas();
 }
 
@@ -887,16 +887,16 @@ async function clearUsage(g) {
 }
 
 // countable is whether the Usage page's Agents list offers to count a
-// client as an agent: one myna doesn't know, not myna's own (#1839)
+// client as an agent: one owl doesn't know, not owl's own (#1839)
 // nor the calls that named no client.
 const COUNT_AS = "M3 3v3.5A3.5 3.5 0 0 0 6.5 10H13M10 7l3 3-3 3";
 function countable(id) {
-  return !!id && id !== "other" && !/^myna/i.test(id) && !(state.clients || []).some((a) => a.id === id);
+  return !!id && id !== "other" && !/^owl/i.test(id) && !(state.clients || []).some((a) => a.id === id);
 }
 // pickCountAs opens the agents a client can be counted as, under its menu
 // button.
 function pickCountAs(anchor, g) {
-  const opts = (state.clients || []).filter((a) => a.id !== "myna").map((a) => ({ v: a.id, name: a.name, literalName: true, note: "" }));
+  const opts = (state.clients || []).filter((a) => a.id !== "owl").map((a) => ({ v: a.id, name: a.name, literalName: true, note: "" }));
   openProtoMenu(anchor, opts, "", (v) => countClientAs(g.id, v), "Count this client's calls as", "", "left", false, opts.length > 8 ? "Search agents…" : "");
 }
 // countClientAs counts a client's calls as an agent's on the Usage and
@@ -959,8 +959,8 @@ async function hideUsageAgent(id, hide) {
 // the counting never hear of it, the tray panel's Allowances tab has its
 // own (Arrange), and a menu bar cell asking for a hidden card shows it
 // until the page is left. Each is kept by its tray card id and its kind
-// (cardHideKey), in myna's settings (usageCardsHidden), so every window
-// and myna web agree; one line at the section's end says how many, and
+// (cardHideKey), in owl's settings (usageCardsHidden), so every window
+// and owl web agree; one line at the section's end says how many, and
 // has them back.
 let quotaHidOpen = false; // the hidden cards listed under their line
 let usagePeek = ""; // a card a menu bar cell asked for, shown though hidden
@@ -1113,13 +1113,13 @@ const LED_PAGE = 100;
 // Remember the chart metric; start each app load split by model.
 let ledMetric = "tokens", ledSplit = "model";
 try {
-  const m = localStorage.getItem("myna.ledMetric");
+  const m = localStorage.getItem("owl.ledMetric");
   if (["tokens", "cost", "calls", "speed"].includes(m)) ledMetric = m;
 } catch {}
 // Columns or lines (molvqingtai on Discord), kept per viewer as the metric
 // is; anything but "line", or a read that fails, is columns.
 let ledLine = false;
-try { ledLine = localStorage.getItem("myna.ledChart") === "line"; } catch {}
+try { ledLine = localStorage.getItem("owl.ledChart") === "line"; } catch {}
 
 // The filters a click set for the reader rather than one they picked in a
 // filter's menu: someone in the chart's ranking or a day of its columns
@@ -1205,7 +1205,7 @@ function ledParams(extra) {
 // asked again while it is read (the refresh button, the timer) waits for
 // that read, and another page or filter cancels it. Each pick and press
 // used to send one more, and a long history's reads, all still running,
-// took the browser's few connections to myna, so the page never came.
+// took the browser's few connections to owl, so the page never came.
 // flight: { want, ctl, p }
 const ledFlights = { page: null, heat: null };
 function ledRead(kind, path, want) {
@@ -1297,7 +1297,7 @@ function ledTime(when) {
 }
 // the model the reply named: amber, as the Routing page's tag, when it is
 // another than the one sent; plain when it is that one under a dated name,
-// or the member a remote myna's routing group sent it to, said in its title
+// or the member a remote owl's routing group sent it to, said in its title
 function ledServed(r) {
   if (!r.served) return el("span", "faint", "—");
   if (r.routed && !r.swapped) {
@@ -1407,17 +1407,17 @@ function ledDetail(r, cols) {
   if (r.kind) add("Called for", window.kindName ? window.kindName(r.kind) : r.kind);
   if (r.ttft_ms) add("First token", ledTook(r.ttft_ms));
   // of it, what came before the request went to the vendor, and the
-  // vendor's wait from then to its first token. Before it, myna's own
+  // vendor's wait from then to its first token. Before it, owl's own
   // time is told apart from the tries that failed first, a wait for a
   // slot and connecting and sending the body (#1532: a vendor that held a
-  // try ~100 s before its 503 read as 104 s in myna); a record from
+  // try ~100 s before its 503 read as 104 s in owl); a record from
   // before they were kept has only the whole
   if (r.ttft_ms && r.sent_ms) {
     const split = r.own_ms != null;
-    // of myna's own, what went on masking it (Settings → Privacy)
+    // of owl's own, what went on masking it (Settings → Privacy)
     const masking = split && r.masking_ms > 0 ? Math.min(r.masking_ms, r.own_ms) : 0;
     if (masking) add("Masking", ledTook(masking));
-    add("In myna", ledTook((split ? r.own_ms : r.sent_ms) - masking));
+    add("In owl", ledTook((split ? r.own_ms : r.sent_ms) - masking));
     if (split) {
       if (r.retried_ms > 0) add("Tries that failed first", ledTook(r.retried_ms));
       if (r.queued_ms > 0) add("Waiting for a slot", ledTook(r.queued_ms));
@@ -1465,7 +1465,7 @@ function ledDetail(r, cols) {
 
 // What was said in a request — what its agent was given, and what came back —
 // is in the agent's own session file, and read from it when a row is opened
-// (the server finds the call by its session and time); myna keeps no copy.
+// (the server finds the call by its session and time); owl keeps no copy.
 // What came is kept here while the list is looked at, so a row opened again, or
 // drawn again as the list is read anew, doesn't ask again.
 const ledContent = new Map();
@@ -1491,7 +1491,7 @@ function ledLoadContent(r) {
 }
 const LED_WHY = {
   session: "No session was named with this request, so its session file can't be found",
-  agent: "myna reads the session files of Claude Code, Claude Desktop and Codex only",
+  agent: "owl reads the session files of Claude Code, Claude Desktop and Codex only",
   missing: "This request isn't in the agent's session files: they may be deleted, moved, or not written yet",
   read: "The session file couldn't be read",
 };
@@ -1509,7 +1509,7 @@ function ledContentBox(c) {
     box.append(sec);
   }
   if (c.cut) box.append(el("p", "cx-none", t("There was more than is shown here")));
-  box.append(el("p", "cx-src", t("Read from the agent's session file; myna keeps no copy")));
+  box.append(el("p", "cx-src", t("Read from the agent's session file; owl keeps no copy")));
   return box;
 }
 
@@ -1653,7 +1653,7 @@ function ledStyle(host) {
     b.onclick = () => {
       if (id === cur) return;
       ledLine = id === "line";
-      try { localStorage.setItem("myna.ledChart", id); } catch {}
+      try { localStorage.setItem("owl.ledChart", id); } catch {}
       drawLedTrend();
     };
     host.append(b);
@@ -1759,7 +1759,7 @@ function drawLedTrend() {
     }
     slide(host, key);
   };
-  pill($("#ledMetric"), "ledMetric", LED_TREND, ledMetric, (id) => { ledMetric = id; try { localStorage.setItem("myna.ledMetric", id); } catch {} drawLedTrend(); });
+  pill($("#ledMetric"), "ledMetric", LED_TREND, ledMetric, (id) => { ledMetric = id; try { localStorage.setItem("owl.ledMetric", id); } catch {} drawLedTrend(); });
   ledStyle($("#ledStyle"));
   const keyed = (l.callerKeys || []).length > 0;
   if (ledSplit === "callerKey" && !keyed) ledSplit = "model";
@@ -1804,7 +1804,7 @@ function drawLedTrend() {
 // sight; the pointer on a day says its date and what it had.
 let ledHeat = null, ledHeatWant = "", ledHeatMetric = "tokens";
 try {
-  const m = localStorage.getItem("myna.ledHeatMetric");
+  const m = localStorage.getItem("owl.ledHeatMetric");
   if (["tokens", "calls", "cost"].includes(m)) ledHeatMetric = m;
 } catch {}
 const LED_HEAT = [["tokens", "Tokens"], ["calls", "Requests"], ["cost", "Cost"]];
@@ -1862,7 +1862,7 @@ function drawLedHeat() {
     b.onclick = () => {
       if (id === ledHeatMetric) return;
       ledHeatMetric = id;
-      try { localStorage.setItem("myna.ledHeatMetric", id); } catch {}
+      try { localStorage.setItem("owl.ledHeatMetric", id); } catch {}
       drawLedHeat();
     };
     seg.append(b);
@@ -2088,7 +2088,7 @@ const ledRowSpeed = (r) => { const d = ledDecode(r); return d ? d.n / (d.w / 100
 // speed after the first token can't be under. Against Claude Code's own
 // stream it read 2–5% under for a reply of 1,400 tokens or more, 11–33% for
 // a shorter one or one asked with a tool's result, so only a reply of 1,000
-// or more is told. 0 when it tells none, and a call myna timed tells its
+// or more is told. 0 when it tells none, and a call owl timed tells its
 // own (ledDecode). Only the row's: the period's speed counts timed calls
 // and session files' floors (usage.Row.Floor), not a gateway row's below.
 // Claude Code's, Claude Desktop's and Codex's files only (usage.FloorAgents):
@@ -2329,7 +2329,7 @@ function renderLedger() {
   }
   $("#ledSum").textContent = sum.join(" · ");
   // the two sources and their total, in the same block of cells as the totals
-  // above them: what myna carried, what it only read about in the agents'
+  // above them: what owl carried, what it only read about in the agents'
   // own session files, and the two together. Each is a filter: picking one
   // lists only its requests, and the total is the way back. Its own numbers
   // are counted with the pick cleared (usage.RequestPage), so all three stay
@@ -2378,8 +2378,8 @@ function renderLedger() {
     }
     via.style.setProperty("--vias", String(n));
     tile(cells[0], "all requests", thru.calls + dir.calls + rep.calls, all, "");
-    tile(cells[1], "through myna", thru.calls, thru, "through");
-    tile(cells[2], "not through myna", dir.calls, dir, "direct");
+    tile(cells[1], "through owl", thru.calls, thru, "through");
+    tile(cells[2], "not through owl", dir.calls, dir, "direct");
     if (n === 4) tile(cells[3], "reported by apps", rep.calls, rep, "reported");
     via.hidden = false;
   } else {
@@ -2444,20 +2444,20 @@ function renderLedger() {
     }
     td(when, "when", new Date(r.t).toLocaleString(intlLang()));
     const who = el("span", "who");
-    // an agent on another computer, whose myna passed the request on
+    // an agent on another computer, whose owl passed the request on
     const name = r.agentName || r.agent;
     // one made on another computer, whose usage sync brought (#542)
     const at = r.computerName ? t("{agent} · on {computer}", { agent: name, computer: r.computerName }) : name;
     who.append(icon(r.icon || "generic"), el("span", "", [r.via ? t("{agent} · via {host}", { agent: at, host: r.via }) : at, r.callerKeyLabel || r.callerKeyName].filter(Boolean).join(" · ")));
-    // a request myna made by itself, apart from the agents' own (#1839);
+    // a request owl made by itself, apart from the agents' own (#1839);
     // one that tested the provider (the editor's Test, Detect APIs, a model
     // list) is counted nowhere, and says so (neiko on Discord)
     const probe = r.source === "probe";
-    // an agent's call to a tool of myna's MCP servers (ferock on Discord)
+    // an agent's call to a tool of owl's MCP servers (ferock on Discord)
     const mcp = r.source === "mcp";
-    // myna's ask of a search API, for a search an agent's model made (cybercaius on Discord)
+    // owl's ask of a search API, for a search an agent's model made (cybercaius on Discord)
     const search = r.source === "search";
-    if (r.agent === "myna") {
+    if (r.agent === "owl") {
       const own = ownBadge();
       if (probe) own.title = probeWhy();
       who.append(own);
@@ -2468,7 +2468,7 @@ function renderLedger() {
     // A session file names the provider it was set up to call, which is
     // where a call that went straight to a vendor went: nothing stood
     // between the agent and it. It is the file's own record and not a route
-    // myna saw, so the id the file carries is shown as it is — never
+    // owl saw, so the id the file carries is shown as it is — never
     // resolved to a provider's name, which would promote an unknown request
     // to an official provider — and the row keeps saying it is a local
     // session. A row whose file names none says only that.
@@ -2503,14 +2503,14 @@ function renderLedger() {
     if (local && (r.session_account || r.session_provider)) {
       const k = el("span", "src local", t("Local session"));
       k.title = r.session_provider
-        ? t("Read from the agent's session file, which names the provider it was set up to call. The name shown is that record, not a route myna saw.")
+        ? t("Read from the agent's session file, which names the provider it was set up to call. The name shown is that record, not a route owl saw.")
         : t("Read from the agent's session file. The account is shown only when local metadata identifies it; no service provider is inferred.");
       badges.append(k);
     }
     // a call an app reported itself (#1874): it went straight to its vendor
     if (r.source === "reported") {
       const k = el("span", "src reported", t("Reported"));
-      k.title = t("Reported by the app that made it, through POST /v1/myna/usage/requests: the call went straight to its vendor, not through myna.");
+      k.title = t("Reported by the app that made it, through POST /v1/owl/usage/requests: the call went straight to its vendor, not through owl.");
       badges.append(k);
     }
     if (probe) {
@@ -2520,13 +2520,13 @@ function renderLedger() {
     }
     if (mcp) {
       const k = el("span", "src mcp", "MCP");
-      k.title = t("{agent} called the tool {tool} of myna's MCP server {server}. Its arguments are not kept, and it is not counted in any total: the model requests it made are rows of their own.", { agent: name, tool: r.req || "—", server: r.host || "myna" });
+      k.title = t("{agent} called the tool {tool} of owl's MCP server {server}. Its arguments are not kept, and it is not counted in any total: the model requests it made are rows of their own.", { agent: name, tool: r.req || "—", server: r.host || "owl" });
       badges.append(k);
     }
     if (search) {
       // a search API's, or a plan's own search service's (r.provider)
       const k = el("span", "src search", t(r.provider ? "Web search" : "Search API"));
-      k.title = t("myna asked {api} to search the web for {agent}. The query is not kept, and it is not counted in any total.", { api: r.req || "—", agent: name });
+      k.title = t("owl asked {api} to search the web for {agent}. The query is not kept, and it is not counted in any total.", { api: r.req || "—", agent: name });
       badges.append(k);
     }
     if (badges.childElementCount) wc.append(badges);
@@ -2685,7 +2685,7 @@ function wslBadge(s) {
 }
 
 // sessModelsText: a session's models, the first two and how many more, and
-// where myna's gateway sent its calls, the most first: a routing group's
+// where owl's gateway sent its calls, the most first: a routing group's
 // member and the reasoning it was asked for
 function sessModelsText(s) {
   const via = s.via?.length ? "→ " + [s.via[0].model, s.via[0].effort].filter(Boolean).join(" · ") + (s.via.length > 1 ? " +" + (s.via.length - 1) : "") : "";
@@ -2708,7 +2708,7 @@ function sessUsageDetail(d, s, line) {
   (s.via || []).forEach((v, i) => line(i ? "" : t("Routed"), viaText(v) + " · " + t("{n} tokens", { n: fmtN(v.tokens) }) + (v.credited ? " · " + ledCredits(v).textContent : "")));
 }
 
-// one place a session's calls went through myna, in words
+// one place a session's calls went through owl, in words
 function viaText(v) {
   return `${v.provider}/${v.model}` + (v.effort ? " · " + v.effort : "") + " · " + t("{n} calls", { n: v.calls });
 }
@@ -2757,7 +2757,7 @@ function ledSaid(p, model) {
 
 const USAGE_TABS = [["usage", "Overview"], ["requests", "Requests"], ["sessions", "Sessions"], ["context", "Context"]];
 let usageTab = "usage";
-try { const k = localStorage.getItem("myna.usageTab"); if (USAGE_TABS.some(([id]) => id === k)) usageTab = k; } catch {}
+try { const k = localStorage.getItem("owl.usageTab"); if (USAGE_TABS.some(([id]) => id === k)) usageTab = k; } catch {}
 let sessAgent = "all";
 let sessQuery = "";
 // The list is drawn in pages: every session is read (so the count beside it
@@ -2787,11 +2787,11 @@ let sessMetric = "tokens";
 const SESS_TOPS = [["tokens", "Tokens"], ["cost", "Cost"], ["active", "Active"]];
 let sessTopBy = "tokens";
 try {
-  const r = localStorage.getItem("myna.sessRange");
+  const r = localStorage.getItem("owl.sessRange");
   if (SESS_RANGES.some(([id]) => id === r)) sessRange = r;
-  const m = localStorage.getItem("myna.sessMetric");
+  const m = localStorage.getItem("owl.sessMetric");
   if (SESS_METRICS.some(([id]) => id === m)) sessMetric = m;
-  const b = localStorage.getItem("myna.sessTop");
+  const b = localStorage.getItem("owl.sessTop");
   if (SESS_TOPS.some(([id]) => id === b)) sessTopBy = b;
 } catch {}
 let sessStats = null; // { from, to, days: [{ date, usage, active }], agents } for sessRange
@@ -2816,7 +2816,7 @@ function renderUsageTab() {
       if (id === usageTab) return;
       if (usageTab === "requests") ledLeave();
       usageTab = id;
-      try { localStorage.setItem("myna.usageTab", id); } catch {}
+      try { localStorage.setItem("owl.usageTab", id); } catch {}
       $("#usageCost").replaceChildren();
       // to the Overview is to the allowances (#1588)
       loadUsage(id === "usage").catch((e) => status(e.message, "err"));
@@ -3142,7 +3142,7 @@ function renderSessRange(loading) {
     b.onclick = () => {
       if (id === sessRange) return;
       sessRange = id;
-      try { localStorage.setItem("myna.sessRange", id); } catch {}
+      try { localStorage.setItem("owl.sessRange", id); } catch {}
       sessStats = null;
       loadSessions().catch((e) => status(e.message, "err"));
     };
@@ -3257,7 +3257,7 @@ function renderSessions() {
       const history = el("button", "text sess-show-history", t("All sessions"));
       history.onclick = () => {
         sessRange = "all";
-        try { localStorage.setItem("myna.sessRange", sessRange); } catch {}
+        try { localStorage.setItem("owl.sessRange", sessRange); } catch {}
         sessStats = null;
         loadSessions().catch((e) => status(e.message, "err"));
       };
@@ -3534,7 +3534,7 @@ function renderSessChart(chart, st, used, ov, acts) {
     const head = el("div", "sess-chart-head");
     const seg = sessSegs(SESS_METRICS.map(([id, name]) => [id, name, off[id]]), metric, (id) => {
       sessMetric = id;
-      try { localStorage.setItem("myna.sessMetric", id); } catch {}
+      try { localStorage.setItem("owl.sessMetric", id); } catch {}
       chart.redraw();
     });
     head.append(el("span", "label", t(shape === "week" ? "By week" : shape === "day" ? "By day" : "Activity")), seg, el("span", "grow"));
@@ -3688,7 +3688,7 @@ function renderSessTop() {
   const head = sessCardHead("Top sessions");
   const seg = sessSegs(SESS_TOPS, sessTopBy, (id) => {
     sessTopBy = id;
-    try { localStorage.setItem("myna.sessTop", id); } catch {}
+    try { localStorage.setItem("owl.sessTop", id); } catch {}
     renderSessTop();
   });
   head.append(el("span", "grow"), seg);
@@ -3708,12 +3708,12 @@ function renderSessTop() {
     const r = el("div", "row sess sess-top");
     r.append(icon(icons.get(s.agent) || "generic"));
     const who = el("div", "who");
-    // a session myna saw only through the gateway (#2285: a Pi
+    // a session owl saw only through the gateway (#2285: a Pi
     // subagent's, its file in a temp folder) has no folder and no prompt
     // unless gateway conversations are recorded: say so, not "(no prompt)"
     who.append(el("div", "name", s.title || t(s.gateway ? "(prompt not recorded)" : "(no prompt)")));
     const sub = el("div", "sub", [s.cwd ? baseName(s.cwd) : s.gateway ? t("Gateway session") : "", names[s.agent] || s.agent, s.models?.[0], ago(s.last)].filter(Boolean).join(" · "));
-    sub.title = s.cwd || (s.gateway ? t("Seen only through the gateway: the agent kept no session file myna can read. Turn on Record gateway conversations in Sessions to keep its prompts.") : "");
+    sub.title = s.cwd || (s.gateway ? t("Seen only through the gateway: the agent kept no session file owl can read. Turn on Record gateway conversations in Sessions to keep its prompts.") : "");
     who.append(sub);
     r.append(who);
     const fc = fmtCost({ cost: s.cost, unpriced: !s.priced });
@@ -3743,7 +3743,7 @@ function renderSessTop() {
 // the ways a session's shape is told, and the one shown
 const SESS_SHAPES = [["messages", "Messages"], ["minutes", "Length"], ["autonomy", "Tool calls"]];
 let sessShapeBy = "messages";
-try { const v = localStorage.getItem("myna.sessShape"); if (SESS_SHAPES.some(([id]) => id === v)) sessShapeBy = v; } catch {}
+try { const v = localStorage.getItem("owl.sessShape"); if (SESS_SHAPES.some(([id]) => id === v)) sessShapeBy = v; } catch {}
 
 // renderSessShape counts the range's sessions by how long they ran: by
 // messages, by minutes at work, or by tool calls a prompt
@@ -3756,7 +3756,7 @@ function renderSessShape() {
   const head = sessCardHead("Session shape");
   const seg = sessSegs(SESS_SHAPES, sessShapeBy, (id) => {
     sessShapeBy = id;
-    try { localStorage.setItem("myna.sessShape", id); } catch {}
+    try { localStorage.setItem("owl.sessShape", id); } catch {}
     renderSessShape();
   });
   head.append(seg, el("span", "grow"), el("span", "tz", sh ? t(sh.total === 1 ? "{n} session" : "{n} sessions", { n: fmtN(sh.total) }) : ""));
@@ -4023,7 +4023,7 @@ function sessionItem(s) {
   r.append(go);
   const open = (e) => {
     if (window.getSelection()?.toString()) return;
-    if (!featuresOff.has("sessions")) return myna.call("sessions", "reveal", s, e);
+    if (!featuresOff.has("sessions")) return owl.call("sessions", "reveal", s, e);
     // Sessions is switched off: there is no page to open it on
     sessListOpen = sessListOpen === key ? "" : key;
     // one open at a time: the one that was folds
@@ -4068,7 +4068,7 @@ function sessionDetail(s) {
 }
 
 // All sessions: the Sessions page, on the agent picked here if one is
-$("#sessAll").onclick = (e) => myna.call("sessions", "reveal", sessAgent === "all" ? {} : { agent: sessAgent }, e);
+$("#sessAll").onclick = (e) => owl.call("sessions", "reveal", sessAgent === "all" ? {} : { agent: sessAgent }, e);
 $("#sessQ").oninput = (e) => { sessQuery = e.target.value; if (sessions) renderSessions(); };
 $("#sessQ").onkeydown = (e) => { if (e.key === "Escape" && e.target.value) { e.stopPropagation(); e.target.value = ""; sessQuery = ""; if (sessions) renderSessions(); } };
 
@@ -4076,7 +4076,7 @@ $("#sessQ").onkeydown = (e) => { if (e.key === "Escape" && e.target.value) { e.s
 //
 // Three choices (palette, language, what the tray icon opens) and the facts
 // people come looking for:
-// the version, where myna keeps its files, the gateway's address.
+// the version, where owl keeps its files, the gateway's address.
 
 // The Usage page reads its numbers again while it is looked at, as often as
 // the reader says — off, or every 5 s to a minute (a request through the gateway
@@ -4086,7 +4086,7 @@ $("#sessQ").onkeydown = (e) => { if (e.key === "Escape" && e.target.value) { e.s
 const USAGE_EVERY = [[0, "Off"], [5, "5 s"], [10, "10 s"], [30, "30 s"], [60, "1 min"]];
 let usageEvery = 5; // seconds; 0 is off
 try {
-  const v = localStorage.getItem("myna.usageEvery");
+  const v = localStorage.getItem("owl.usageEvery");
   if (USAGE_EVERY.some(([n]) => String(n) === v)) usageEvery = Number(v);
 } catch {}
 let usageLast = 0, usageReadAt = 0, sessionsAt = 0, quotasAsked = 0;
@@ -4102,7 +4102,7 @@ function renderUsageEvery() {
     if (b.classList.contains("open")) return closeProtoMenu();
     openProtoMenu(b, USAGE_EVERY.map(([n, name]) => ({ v: String(n), name: t(name), note: "" })), String(usageEvery), (v) => {
       usageEvery = Number(v);
-      try { localStorage.setItem("myna.usageEvery", v); } catch {}
+      try { localStorage.setItem("owl.usageEvery", v); } catch {}
       usageLast = performance.now();
       renderUsageEvery();
     }, "Refresh every", "sess-menu");

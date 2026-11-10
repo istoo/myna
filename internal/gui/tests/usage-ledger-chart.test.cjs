@@ -104,7 +104,7 @@ function server(lang, theme, variant, asked, exported) {
     if (url.pathname === "/api/usage/requests") { asked.push(url.searchParams); return json(page(url.searchParams, variant)); }
     if (url.pathname === "/api/usage/requests/export") { exported.push(url.searchParams); return json({ rows: 1, path: "/test/requests.csv" }); }
     if (url.pathname === "/api/usage/quotas") return json([]);
-    if (url.pathname === "/api/usage") return json({ calls: 1, errors: 0, input: 1, output: 1, cache_read: 0, cache_write: 0, reasoning: 0, unpriced: 0, cost: 1, bucket: "day", series: [], agents: [], models: [], path: "~/.config/myna/usage.jsonl" });
+    if (url.pathname === "/api/usage") return json({ calls: 1, errors: 0, input: 1, output: 1, cache_read: 0, cache_write: 0, reasoning: 0, unpriced: 0, cost: 1, bucket: "day", series: [], agents: [], models: [], path: "~/.config/owl/usage.jsonl" });
     if (url.pathname === "/api/sessions") return json({ sessions: [], dirs: [] });
     if (url.pathname === "/api/sessions/stats") return json({ from: "", to: "", days: [], agents: {} });
     if (url.pathname === "/api/groups") return json({ groups: [], models: [] });
@@ -138,7 +138,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       p.setDefaultNavigationTimeout(60000);
       p.on("pageerror", (e) => errors.push(e.message));
       await p.route("**/*", server(lang, theme, variant, asked, exported));
-      await p.goto("http://myna.test/");
+      await p.goto("http://owl.test/");
       await navTo(p, "usage");
       await p.locator(":is(#usageTab .opt, .nav-s):visible").nth(1).click();
       if (variant !== "none") await p.locator("#ledRank .rk").first().waitFor();
@@ -396,7 +396,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const first = await open("en", "light");
       await first.p.locator("#ledMetric .opt").nth(1).click();
       await first.p.locator("#ledSplit .opt").nth(SPLIT.provider).click();
-      await first.p.evaluate(() => localStorage.setItem("myna.ledSplit", "provider"));
+      await first.p.evaluate(() => localStorage.setItem("owl.ledSplit", "provider"));
       const second = await open("en", "light", { ctx: first.context });
       assert.equal(await second.p.locator("#ledMetric .opt.on").textContent(), "Cost");
       assert.equal(await second.p.locator("#ledSplit .opt.on").textContent(), "Model");

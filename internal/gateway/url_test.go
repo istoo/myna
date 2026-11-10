@@ -9,14 +9,14 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 func TestPublicURL(t *testing.T) {
-	t.Setenv("MYNA_ADDR", "0.0.0.0:3499")
-	t.Setenv("MYNA_PUBLIC_URL", "")
-	if err := os.Unsetenv("MYNA_PUBLIC_URL"); err != nil {
+	t.Setenv("OWL_ADDR", "0.0.0.0:3499")
+	t.Setenv("OWL_PUBLIC_URL", "")
+	if err := os.Unsetenv("OWL_PUBLIC_URL"); err != nil {
 		t.Fatal(err)
 	}
 	if got := PublicURL(); got != "" {
@@ -24,31 +24,31 @@ func TestPublicURL(t *testing.T) {
 	}
 	for _, c := range []struct{ public, want string }{
 		{"", ""},
-		{"https://myna.example.com", "https://myna.example.com"},
-		{"https://myna.example.com/", "https://myna.example.com"},
-		{"https://myna.example.com/myna///", "https://myna.example.com/myna"},
-		{"http://myna.example.com:3425/", "http://myna.example.com:3425"},
+		{"https://owl.example.com", "https://owl.example.com"},
+		{"https://owl.example.com/", "https://owl.example.com"},
+		{"https://owl.example.com/owl///", "https://owl.example.com/owl"},
+		{"http://owl.example.com:3425/", "http://owl.example.com:3425"},
 		{"http://[::1]:3425/", "http://[::1]:3425"},
-		{"myna.example.com", "http://myna.example.com"},
+		{"owl.example.com", "http://owl.example.com"},
 		{"nas.lan:3425///", "http://nas.lan:3425"},
 		{"[fd00::20]:3425", "http://[fd00::20]:3425"},
 		{"///", ""},
-		{"ftp://myna.example.com", ""},
-		{"//myna.example.com", ""},
-		{"https:///myna", ""},
+		{"ftp://owl.example.com", ""},
+		{"//owl.example.com", ""},
+		{"https:///owl", ""},
 		{"http://", ""},
 		{"https:///", ""},
 		{"ftp://", ""},
-		{"https://myna.example.com:bad", ""},
-		{"https://myna.example.com/%zz", ""},
-		{" https://myna.example.com", "https://myna.example.com"},
-		{"\thttps://myna.example.com/myna/ ", "https://myna.example.com/myna"},
-		{"https://myna.example.com/myna?x=1", ""},
-		{"https://myna.example.com/myna#frag", ""},
-		{"https://user:pass@myna.example.com", ""},
+		{"https://owl.example.com:bad", ""},
+		{"https://owl.example.com/%zz", ""},
+		{" https://owl.example.com", "https://owl.example.com"},
+		{"\thttps://owl.example.com/owl/ ", "https://owl.example.com/owl"},
+		{"https://owl.example.com/owl?x=1", ""},
+		{"https://owl.example.com/owl#frag", ""},
+		{"https://user:pass@owl.example.com", ""},
 	} {
 		t.Run(c.public, func(t *testing.T) {
-			t.Setenv("MYNA_PUBLIC_URL", c.public)
+			t.Setenv("OWL_PUBLIC_URL", c.public)
 			if got := PublicURL(); got != c.want {
 				t.Errorf("%q, want %q", got, c.want)
 			}
@@ -95,27 +95,27 @@ func TestPublicURLWarningOnce(t *testing.T) {
 	writer := log.Writer()
 	log.SetOutput(&logs)
 	t.Cleanup(func() { log.SetOutput(writer) })
-	t.Setenv("MYNA_ADDR", "127.0.0.1:3499")
-	t.Setenv("MYNA_PUBLIC_URL", "")
+	t.Setenv("OWL_ADDR", "127.0.0.1:3499")
+	t.Setenv("OWL_PUBLIC_URL", "")
 	PublicURL()
 	if logs.Len() != 0 {
 		t.Fatalf("unset URL warned: %q", logs.String())
 	}
-	t.Setenv("MYNA_PUBLIC_URL", "nas.lan:3425")
+	t.Setenv("OWL_PUBLIC_URL", "nas.lan:3425")
 	PublicURL()
 	if logs.Len() != 0 {
 		t.Fatalf("valid URL warned: %q", logs.String())
 	}
-	t.Setenv("MYNA_PUBLIC_URL", "ftp://nas.lan")
+	t.Setenv("OWL_PUBLIC_URL", "ftp://nas.lan")
 	if got := PublicURL(); got != "" {
 		t.Fatalf("invalid URL: %q, want no public URL", got)
 	}
-	if got := strings.Count(logs.String(), "ignoring invalid MYNA_PUBLIC_URL"); got != 1 {
+	if got := strings.Count(logs.String(), "ignoring invalid OWL_PUBLIC_URL"); got != 1 {
 		t.Fatalf("first invalid URL: %q, want exactly one warning", logs.String())
 	}
 	logs.Reset()
-	for _, u := range []string{"ftp://nas.lan", "https:///myna", "https://nas.lan:bad"} {
-		t.Setenv("MYNA_PUBLIC_URL", u)
+	for _, u := range []string{"ftp://nas.lan", "https:///owl", "https://nas.lan:bad"} {
+		t.Setenv("OWL_PUBLIC_URL", u)
 		for range 3 {
 			PublicURL()
 			PublicHost()
@@ -128,7 +128,7 @@ func TestPublicURLWarningOnce(t *testing.T) {
 	}
 }
 
-// OnNetwork: MYNA_ADDR puts the gateway beyond loopback, shared or not,
+// OnNetwork: OWL_ADDR puts the gateway beyond loopback, shared or not,
 // so callers from elsewhere need a gateway key — the console says so, as
 // keyNote does.
 func TestOnNetwork(t *testing.T) {
@@ -152,7 +152,7 @@ func TestOnNetwork(t *testing.T) {
 		{"10.0.0.5:3425", false, true},
 		{"10.0.0.5:3425", true, true},
 	} {
-		t.Setenv("MYNA_ADDR", c.addr)
+		t.Setenv("OWL_ADDR", c.addr)
 		if err := settings.Save(settings.Settings{LAN: c.lan}); err != nil {
 			t.Fatal(err)
 		}

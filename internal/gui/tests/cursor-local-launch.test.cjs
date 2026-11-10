@@ -1,7 +1,7 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // Cursor Private Inference (#299) is connected as other agents are, with no
 // command to run (mamba on Discord: a launch command of its own was out of
-// keeping with the rest): its row has the switch, which asks myna to set
+// keeping with the rest): its row has the switch, which asks owl to set
 // the build's CURSOR_LOCAL_AGENT_* variables for the user, and says to open
 // it again; the command that starts it from a shell stays, as the square
 // beside it, not the row's one control. In English and Chinese. No backend:
@@ -13,16 +13,16 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
-const LAUNCH = "CURSOR_LOCAL_AGENT_BASE_URL=http://127.0.0.1:3425/v1 CURSOR_LOCAL_AGENT_API_KEY=myna-cursor-local '/Applications/Cursor.app/Contents/MacOS/Cursor'";
-const models = [{ value: "myna/deepseek/pro", label: "myna/deepseek/pro", ref: "deepseek/pro" }];
+const LAUNCH = "CURSOR_LOCAL_AGENT_BASE_URL=http://127.0.0.1:3425/v1 CURSOR_LOCAL_AGENT_API_KEY=owl-cursor-local '/Applications/Cursor.app/Contents/MacOS/Cursor'";
+const models = [{ value: "owl/deepseek/pro", label: "owl/deepseek/pro", ref: "deepseek/pro" }];
 const agent = (id, name) => ({
   id, name, path: "/test/" + id, wired: true,
-  fields: [{ key: "model", label: "model", value: "myna/deepseek/pro", options: models }],
+  fields: [{ key: "model", label: "model", value: "owl/deepseek/pro", options: models }],
 });
-const NOTICE = "Cursor Private Inference reads myna's gateway from CURSOR_LOCAL_AGENT_BASE_URL and CURSOR_LOCAL_AGENT_API_KEY, now set for your user: quit it and open it again.";
+const NOTICE = "Cursor Private Inference reads owl's gateway from CURSOR_LOCAL_AGENT_BASE_URL and CURSOR_LOCAL_AGENT_API_KEY, now set for your user: quit it and open it again.";
 const cursorLocal = (on) => ({
   id: "cursor-local", name: "Cursor Private Inference", icon: "cursor", path: "", launch: LAUNCH, wired: on,
-  fields: [{ key: "provider", label: "provider", value: on ? "myna" : "", options: [{ value: "myna", label: "myna", icon: "myna" }] }],
+  fields: [{ key: "provider", label: "provider", value: on ? "owl" : "", options: [{ value: "owl", label: "owl", icon: "owl" }] }],
 });
 const state = {
   agents: [agent("claude", "Claude Code"), agent("codex", "Codex"), agent("pi", "Pi"),
@@ -40,7 +40,7 @@ function server(lang, copies, asked = []) {
     if (url.pathname.startsWith("/api/agents/connect/")) {
       asked.push(url.pathname);
       cur = { ...cur, agents: cur.agents.map((a) => (a.id === "cursor-local" ? cursorLocal(true) : a)) };
-      return route.fulfill({ json: { ...cur, settings: { lang, theme: "light" }, connected: { how: "myna" }, notice: NOTICE } });
+      return route.fulfill({ json: { ...cur, settings: { lang, theme: "light" }, connected: { how: "owl" }, notice: NOTICE } });
     }
     if (url.pathname === "/api/copy") { copies.push(req.postDataJSON().text); return route.fulfill({ json: {} }); }
     if (url.pathname === "/api/usage/quotas") return route.fulfill({ json: [] });
@@ -63,7 +63,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       if (errors.length) console.log(errors);
       await browser.close();
     });
-    const W = { en: { conn: "Connect Cursor Private Inference to myna", said: "Cursor Private Inference is connected to myna" }, zh: { conn: "将 Cursor Private Inference 接入 myna", said: "Cursor Private Inference 已接入 myna" } };
+    const W = { en: { conn: "Connect Cursor Private Inference to owl", said: "Cursor Private Inference is connected to owl" }, zh: { conn: "将 Cursor Private Inference 接入 owl", said: "Cursor Private Inference 已接入 owl" } };
     for (const lang of ["en", "zh"]) {
       await t.test(lang + ": the switch connects it, no command to run", async () => {
         const copies = [], asked = [];
@@ -72,7 +72,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, copies, asked));
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         // not connected, it is among the others, as any agent is
         await page.locator(".agent-more").click();
         const sw = page.locator(`${row} .ag-conn`);

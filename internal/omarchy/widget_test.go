@@ -9,7 +9,7 @@ import (
 )
 
 func TestWidgetFiles(t *testing.T) {
-	exe := `/opt/my "apps"/myna`
+	exe := `/opt/my "apps"/owl`
 	files, err := widget(exe)
 	if err != nil {
 		t.Fatal(err)
@@ -26,10 +26,10 @@ func TestWidgetFiles(t *testing.T) {
 		t.Errorf("manifest: %+v", m)
 	}
 	qml := string(files["Widget.qml"])
-	if strings.Contains(qml, "__MYNA__") || !strings.Contains(qml, `myna: "/opt/my \"apps\"/myna"`) {
+	if strings.Contains(qml, "__OWL__") || !strings.Contains(qml, `owl: "/opt/my \"apps\"/owl"`) {
 		t.Errorf("the executable isn't written in, quoted:\n%s", qml)
 	}
-	for _, s := range []string{`[root.myna, "panel"]`, `[root.myna, "app"]`, "Qt.RightButton"} {
+	for _, s := range []string{`[root.owl, "panel"]`, `[root.owl, "app"]`, "Qt.RightButton"} {
 		if !strings.Contains(qml, s) {
 			t.Errorf("Widget.qml lacks %s", s)
 		}
@@ -44,25 +44,41 @@ func TestKeepWidget(t *testing.T) {
 	if WidgetOn() {
 		t.Fatal("on in an empty config")
 	}
-	if err := KeepWidget("/usr/bin/myna"); err != nil {
+	if err := KeepWidget("/usr/bin/owl"); err != nil {
 		t.Fatal(err)
 	}
 	if WidgetOn() {
 		t.Fatal("KeepWidget put it in")
 	}
-	files, _ := widget("/usr/bin/myna")
+	files, _ := widget("/usr/bin/owl")
 	os.MkdirAll(widgetDir(), 0o755)
 	for name, b := range files {
 		os.WriteFile(filepath.Join(widgetDir(), name), b, 0o644)
 	}
-	if err := KeepWidget("/usr/bin/myna"); err != nil {
+	if err := KeepWidget("/usr/bin/owl"); err != nil {
 		t.Fatalf("up to date: %v", err)
 	}
 	// moved: it is written again, then the shell is asked to load it
-	if err := KeepWidget("/opt/myna"); err == nil || !strings.Contains(err.Error(), "omarchy") {
+	if err := KeepWidget("/opt/owl"); err == nil || !strings.Contains(err.Error(), "omarchy") {
 		t.Fatalf("moved: %v", err)
 	}
-	if b, _ := os.ReadFile(filepath.Join(widgetDir(), "Widget.qml")); !strings.Contains(string(b), `"/opt/myna"`) {
+	if b, _ := os.ReadFile(filepath.Join(widgetDir(), "Widget.qml")); !strings.Contains(string(b), `"/opt/owl"`) {
 		t.Error("not rewritten")
+	}
+}
+
+// The widget this fork wrote as myna goes when the owl one is put in: two
+// of them in the bar, one opening the app this build replaced.
+func TestAddWidgetDropsMynaWidget(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	t.Setenv("PATH", t.TempDir())
+	old := filepath.Join(filepath.Dir(widgetDir()), legacyWidgetID)
+	if err := os.MkdirAll(old, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	// the shell isn't here, so the put-in fails after the old one is gone
+	_ = AddWidget("/usr/bin/owl")
+	if _, err := os.Stat(old); !os.IsNotExist(err) {
+		t.Fatalf("myna's widget is still there: %v", err)
 	}
 }

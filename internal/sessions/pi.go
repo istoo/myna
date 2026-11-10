@@ -10,7 +10,7 @@ import (
 
 	"github.com/tidwall/jsonc"
 
-	"github.com/istoo/myna/internal/appdir"
+	"github.com/istoo/owl/internal/appdir"
 )
 
 // Pi writes a file per session, <time>_<session id>.jsonl, in a folder per

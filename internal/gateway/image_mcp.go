@@ -19,18 +19,18 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
-// myna's image generation, the model Settings › Images › Image generation
+// owl's image generation, the model Settings › Images › Image generation
 // names, is also an MCP server the gateway serves itself, beside image
-// recognition's (JonahFu on X): Myna Image (internal/imagemcp) is a stdio
+// recognition's (JonahFu on X): Owl Image (internal/imagemcp) is a stdio
 // server the Library gives an agent on this computer, which a gateway in
 // Docker, or an agent on another computer, has none of. Streamable HTTP at
 // ImageMCPPath, served and guarded as VisionMCPPath is (serveMCP), with
-// Myna Image's tools and arguments (ImageToolProps, VideoToolProps)
+// Owl Image's tools and arguments (ImageToolProps, VideoToolProps)
 // but where to save: the gateway can't write into the agent's project, so
 // an image comes back in the answer, as MCP image content, and at a URL
 // the gateway keeps it at for an hour (ImageMCPFiles); a video at the
@@ -40,18 +40,18 @@ import (
 // as they hold /v1/images.
 
 // ImageMCPPath is where the image generation MCP server is served.
-const ImageMCPPath = "/mcp/myna/image"
+const ImageMCPPath = "/mcp/owl/image"
 
 // ImageMCPFiles is where the images it made are served from.
 const ImageMCPFiles = ImageMCPPath + "/files/"
 
 // Under these keys of a tool result's _meta the image server tells a
-// client that saves what it made (myna tool) what its text tells an
+// client that saves what it made (owl tool) what its text tells an
 // agent: the id to wait on with generation_result, and each file made, at
 // its URL, and whether it is in the answer itself.
 const (
-	PendingMeta = "github.com/istoo/myna/pending"
-	FilesMeta   = "github.com/istoo/myna/files"
+	PendingMeta = "github.com/istoo/owl/pending"
+	FilesMeta   = "github.com/istoo/owl/files"
 )
 
 // MadeFile is one file a tool result's FilesMeta names.
@@ -66,7 +66,7 @@ func withMeta(res map[string]any, k string, v any) map[string]any {
 	return res
 }
 
-// The tools Myna Image and the image MCP server have.
+// The tools Owl Image and the image MCP server have.
 const (
 	GenerateImageTool    = "generate_image"
 	GenerateVideoTool    = "generate_video"
@@ -107,7 +107,7 @@ func ResultToolProps() map[string]any {
 }
 
 // imageMCPWithin is how long a call waits for its image or video before it
-// answers with an id to wait on (generation_result), as Myna Image's
+// answers with an id to wait on (generation_result), as Owl Image's
 // answerWithin: agents give a tool call as little as 30 s (#575).
 var imageMCPWithin = 20 * time.Second
 
@@ -126,7 +126,7 @@ const (
 	imageMCPJobMost = 15 * time.Minute
 )
 
-const imageMCPFrom = "an http(s) URL or a data URL (data:image/png;base64,...); an absolute file path only for an agent on the computer myna runs on"
+const imageMCPFrom = "an http(s) URL or a data URL (data:image/png;base64,...); an absolute file path only for an agent on the computer owl runs on"
 
 // imageMCPTools are the server's tools as r's caller is given them: the
 // models each generate tool may be asked for are those its key may use.
@@ -140,8 +140,8 @@ func imageMCPTools(r *http.Request) []any {
 		map[string]any{
 			"name":  GenerateImageTool,
 			"title": "Generate image",
-			"description": "Generate an image from a text prompt, or edit/combine images given as reference_images, with the image model set in Myna (Settings → Images → Image generation) or the one model names. " +
-				"The image comes back in the answer and at a URL Myna keeps it at for an hour (the link opens without a header, in a browser too, until it expires); nothing is saved in your project, so save it there yourself if you need it. " +
+			"description": "Generate an image from a text prompt, or edit/combine images given as reference_images, with the image model set in Owl (Settings → Images → Image generation) or the one model names. " +
+				"The image comes back in the answer and at a URL Owl keeps it at for an hour (the link opens without a header, in a browser too, until it expires); nothing is saved in your project, so save it there yourself if you need it. " +
 				"When it is not ready within about 20 seconds, the answer is an id to wait on with " + GenerationResultTool + " instead. Write a detailed prompt: subject, style, composition, colours, any text to render exactly.",
 			"inputSchema": ro(ImageToolProps(imageMCPFrom+"s"), false),
 			"annotations": map[string]any{"readOnlyHint": false, "destructiveHint": false, "openWorldHint": true},
@@ -149,7 +149,7 @@ func imageMCPTools(r *http.Request) []any {
 		map[string]any{
 			"name":  GenerateVideoTool,
 			"title": "Generate video",
-			"description": "Generate a short video from a text prompt, optionally starting from an image to animate, with a video model set up in Myna (the one model names, else the default). It takes from ten seconds to a few minutes; " +
+			"description": "Generate a short video from a text prompt, optionally starting from an image to animate, with a video model set up in Owl (the one model names, else the default). It takes from ten seconds to a few minutes; " +
 				"the answer is the URL to download the mp4 from (with the same Authorization header this server is called with), or, when it is not ready within about 20 seconds, an id to wait on with " + GenerationResultTool + ". " +
 				"Nothing is saved in your project. Describe the subject, the motion and the camera: what moves, how, and what the shot is.",
 			"inputSchema": ro(VideoToolProps(imageMCPFrom, imageMCPFrom+"s"), true),
@@ -200,7 +200,7 @@ type imageFile struct {
 }
 
 func (s *Server) imageMCP(w http.ResponseWriter, r *http.Request) {
-	serveMCP(w, r, "myna's image generation", imageServerName, visionMCPBody, s.imageMCPCall)
+	serveMCP(w, r, "owl's image generation", imageServerName, visionMCPBody, s.imageMCPCall)
 }
 
 // imageMCPCall answers one request: its result, or its JSON-RPC error.
@@ -210,8 +210,8 @@ func (s *Server) imageMCPCall(r *http.Request, m mcpMessage) (any, map[string]an
 		return map[string]any{
 			"protocolVersion": mcpVersion(m),
 			"capabilities":    map[string]any{"tools": map[string]any{}},
-			"serverInfo":      map[string]any{"name": "myna-image", "title": "Myna Image", "version": Version},
-			"instructions":    GenerateImageTool + " draws with the image model set in myna (Settings → Images → Image generation) and " + GenerateVideoTool + " makes a short video; images come back in the answer and at a URL, videos at a URL, nothing is saved in your project.",
+			"serverInfo":      map[string]any{"name": "owl-image", "title": "Owl Image", "version": Version},
+			"instructions":    GenerateImageTool + " draws with the image model set in owl (Settings → Images → Image generation) and " + GenerateVideoTool + " makes a short video; images come back in the answer and at a URL, videos at a URL, nothing is saved in your project.",
 		}, nil
 	case "ping":
 		return map[string]any{}, nil
@@ -264,7 +264,7 @@ func imageGenOff() (map[string]any, bool) {
 	if settings.Load().ImageGen != "off" {
 		return nil, false
 	}
-	return toolResult("Image generation is off in myna: pick a model for it in Settings → Images → Image generation", true), true
+	return toolResult("Image generation is off in owl: pick a model for it in Settings → Images → Image generation", true), true
 }
 
 // imageMCPDraw starts generate_image's drawing and answers with what it
@@ -585,7 +585,7 @@ func (s *Server) imageMCPResult(r *http.Request, id string) map[string]any {
 	j := st.jobs[id]
 	st.mu.Unlock()
 	if j == nil || j.key != access.Caller(r.Context()).KeyID {
-		return toolResult(fmt.Sprintf("no image is being made as %q (myna may have been restarted, or it was made over an hour ago): generate it again", id), true)
+		return toolResult(fmt.Sprintf("no image is being made as %q (owl may have been restarted, or it was made over an hour ago): generate it again", id), true)
 	}
 	return s.imageMCPAwait(r, j)
 }
@@ -673,7 +673,7 @@ const imageTokenParam = "t"
 // file, key or expiry is no other's.
 func imageFileToken(secret []byte, name, key string, exp int64) string {
 	m := hmac.New(sha256.New, secret)
-	fmt.Fprintf(m, "myna image file\x00%s\x00%d\x00%s", name, exp, key)
+	fmt.Fprintf(m, "owl image file\x00%s\x00%d\x00%s", name, exp, key)
 	return strconv.FormatInt(exp, 10) + "." + base64.RawURLEncoding.EncodeToString(m.Sum(nil))
 }
 
@@ -733,11 +733,11 @@ func (s *Server) imageMCPFile(w http.ResponseWriter, r *http.Request) {
 			writeError(w, provider.Chat, http.StatusUnauthorized, refusedKey(""))
 			return
 		}
-		http.Error(w, "myna's images are served to another machine only when myna is shared on the local network and the request carries a gateway key (Authorization: Bearer <key>) or the link's own token", http.StatusForbidden)
+		http.Error(w, "owl's images are served to another machine only when owl is shared on the local network and the request carries a gateway key (Authorization: Bearer <key>) or the link's own token", http.StatusForbidden)
 		return
 	}
 	if o := r.Header.Get("Origin"); o != "" && !corsAllowed(o) {
-		http.Error(w, "myna's images are served to agents, not web pages", http.StatusForbidden)
+		http.Error(w, "owl's images are served to agents, not web pages", http.StatusForbidden)
 		return
 	}
 	// another key's image is as good as none: its name says nothing

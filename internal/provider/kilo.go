@@ -10,10 +10,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
-// KiloVersion is the Kilo CLI release myna says it is to the Kilo
+// KiloVersion is the Kilo CLI release owl says it is to the Kilo
 // Gateway.
 const KiloVersion = "7.8.3"
 

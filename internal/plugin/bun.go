@@ -23,13 +23,13 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/istoo/myna/internal/ghtoken"
-	"github.com/istoo/myna/internal/libc"
-	"github.com/istoo/myna/internal/netproxy"
-	"github.com/istoo/myna/internal/source"
+	"github.com/istoo/owl/internal/ghtoken"
+	"github.com/istoo/owl/internal/libc"
+	"github.com/istoo/owl/internal/netproxy"
+	"github.com/istoo/owl/internal/source"
 )
 
-// BunVersion is the Bun myna downloads to run plugins with the first
+// BunVersion is the Bun owl downloads to run plugins with the first
 // time one is needed, and the oldest it runs them on: newer releases are
 // taken as they come (see CheckBun). Update bunSums below, testenv.MinBun
 // and test.yml's bun-version when it changes.
@@ -139,7 +139,7 @@ func missingLibs(out string) string {
 	if len(libs) == 0 {
 		return ""
 	}
-	return fmt.Sprintf("this system lacks %s, which Bun needs (on Alpine: apk add libstdc++ libgcc), or set MYNA_BUN to a bun that runs here", strings.Join(libs, ", "))
+	return fmt.Sprintf("this system lacks %s, which Bun needs (on Alpine: apk add libstdc++ libgcc), or set OWL_BUN to a bun that runs here", strings.Join(libs, ", "))
 }
 
 // whyDied adds to the error of a host that died starting what the bun it
@@ -176,11 +176,11 @@ func cantStart(bun string, err error) error {
 	if fi, serr := os.Stat(bun); serr != nil || fi.IsDir() {
 		return err
 	}
-	if b := os.Getenv("MYNA_BUN"); b != "" && b == bun {
-		return fmt.Errorf("this system can't start $MYNA_BUN (%s), though it is there: it is likely a build for another C library than this system's (glibc or musl), whose loader isn't here: %w", bun, err)
+	if b := os.Getenv("OWL_BUN"); b != "" && b == bun {
+		return fmt.Errorf("this system can't start $OWL_BUN (%s), though it is there: it is likely a build for another C library than this system's (glibc or musl), whose loader isn't here: %w", bun, err)
 	}
 	target, _ := bunTarget()
-	return fmt.Errorf("this system can't start the Bun myna downloaded (%s, %s), though it is there: the build doesn't match this system's C library (glibc or musl). Set MYNA_BUN to a bun built for this system to run plugins on it: %w", target, bun, err)
+	return fmt.Errorf("this system can't start the Bun owl downloaded (%s, %s), though it is there: the build doesn't match this system's C library (glibc or musl). Set OWL_BUN to a bun built for this system to run plugins on it: %w", target, bun, err)
 }
 
 // The statuses Windows ends a program with when it can't load it.
@@ -195,7 +195,7 @@ const (
 
 // BunUnstartableError is a bun this machine can't run at all: Windows is
 // older than Bun needs, or the processor lacks an instruction Bun is
-// built for. No Bun myna can download runs here, so an install isn't
+// built for. No Bun owl can download runs here, so an install isn't
 // tried again from elsewhere and the GUI says it in the reader's language.
 type BunUnstartableError struct {
 	Bun string
@@ -206,9 +206,9 @@ type BunUnstartableError struct {
 
 func (e *BunUnstartableError) Error() string {
 	if e.Why == "windows" {
-		return fmt.Sprintf("Bun can't start on this version of Windows: it needs Windows 10 version 1809 or later, or Windows Server 2019 or later, and this one lacks a function it uses (%s exited with 0xc0000139, entry point not found). Update Windows to run plugins, or set MYNA_BUN to a bun that runs here: %v", e.Bun, e.Err)
+		return fmt.Sprintf("Bun can't start on this version of Windows: it needs Windows 10 version 1809 or later, or Windows Server 2019 or later, and this one lacks a function it uses (%s exited with 0xc0000139, entry point not found). Update Windows to run plugins, or set OWL_BUN to a bun that runs here: %v", e.Bun, e.Err)
 	}
-	return fmt.Sprintf("Bun can't start on this computer's processor: it lacks an instruction Bun uses (%s: %v). Bun's x64 build needs SSE4.2 (an Intel or AMD processor from 2008 on; in a virtual machine, a CPU type that passes it through). Run myna on such a processor to run plugins, or set MYNA_BUN to a bun that runs here", e.Bun, e.Err)
+	return fmt.Sprintf("Bun can't start on this computer's processor: it lacks an instruction Bun uses (%s: %v). Bun's x64 build needs SSE4.2 (an Intel or AMD processor from 2008 on; in a virtual machine, a CPU type that passes it through). Run owl on such a processor to run plugins, or set OWL_BUN to a bun that runs here", e.Bun, e.Err)
 }
 
 func (e *BunUnstartableError) Unwrap() error { return e.Err }
@@ -239,11 +239,11 @@ func wontLoad(bun string, err error) *BunUnstartableError {
 	return nil
 }
 
-// Bun is the bun to run plugins with: $MYNA_BUN when set, else the one
-// myna downloaded and keeps up to date, downloading it now when there
+// Bun is the bun to run plugins with: $OWL_BUN when set, else the one
+// owl downloaded and keeps up to date, downloading it now when there
 // is none yet.
 func Bun(ctx context.Context) (string, error) {
-	if b := os.Getenv("MYNA_BUN"); b != "" {
+	if b := os.Getenv("OWL_BUN"); b != "" {
 		return b, nil
 	}
 	bunMu.Lock()
@@ -261,7 +261,7 @@ func Bun(ctx context.Context) (string, error) {
 
 // HasBun is whether a Bun is at hand without a download.
 func HasBun() bool {
-	if os.Getenv("MYNA_BUN") != "" {
+	if os.Getenv("OWL_BUN") != "" {
 		return true
 	}
 	bunMu.Lock()
@@ -348,7 +348,7 @@ func getURLFrom(ctx context.Context, url string, limit int64, mirror bool) ([]by
 		return nil, err
 	}
 	// Bun's newest release is asked of GitHub's API: with the user's
-	// GitHub token, as every request myna makes to it is (#1942)
+	// GitHub token, as every request owl makes to it is (#1942)
 	res, _, err := ghtoken.Do(req, githubAPI, func(r *http.Request) (*http.Response, error) {
 		if mirror {
 			return source.Do(http.DefaultClient, r)
@@ -375,7 +375,7 @@ func getURLFrom(ctx context.Context, url string, limit int64, mirror bool) ([]by
 // bunCommand runs bun with args in dir, the environment's proxy settings
 // passed on (a SOCKS5 one bridged, as Bun can't use it: #1409), the roots
 // the system trusts added to Bun's (caEnv), and the npm registry in use
-// where bun wouldn't find it itself (registryEnv): one set in myna, the
+// where bun wouldn't find it itself (registryEnv): one set in owl, the
 // login shell's, or npm's registry in China with the 「国内镜像」 switch on
 // (its packages are npm's own, checked against the integrity npm gave).
 var bunCommand = func(ctx context.Context, bun, dir string, args ...string) *exec.Cmd {

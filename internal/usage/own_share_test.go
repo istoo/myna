@@ -8,16 +8,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// #1839: the calls myna made by itself — its routing classifier's (UA
-// myna-router/1), a web search's, System One's decision — go to the same
+// #1839: the calls owl made by itself — its routing classifier's (UA
+// owl-router/1), a web search's, System One's decision — go to the same
 // accounts and keys as the agents' and are counted in their totals, and
-// each account, key and model says how many of them were myna's own,
+// each account, key and model says how many of them were owl's own,
 // what they came to and cost. A group with none says nothing of it.
-func TestSummaryCountsMynasOwnCallsApart(t *testing.T) {
+func TestSummaryCountsOwlsOwnCallsApart(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
 	os.MkdirAll(filepath.Dir(catalog.CachePath()), 0o755)
@@ -35,14 +35,14 @@ func TestSummaryCountsMynasOwnCallsApart(t *testing.T) {
 	recs := []Record{
 		{Time: now, Agent: "codex_cli_rs/0.50", Provider: "cx", Model: "gpt-5", Host: "chatgpt.com as a@example.com", ProviderAccount: "a@example.com", Input: 1000, Output: 100, Status: 200},
 		// the classifier's two asks of the turn, on the same account
-		{Time: now, Agent: "myna-router/1", Kind: "routing", Provider: "cx", Model: "gpt-5", Host: "chatgpt.com as a@example.com", ProviderAccount: "a@example.com", Input: 300, Output: 2, Status: 200},
-		{Time: now, Agent: "myna-router/1", Kind: "routing", Provider: "cx", Model: "gpt-5", Host: "chatgpt.com as a@example.com", ProviderAccount: "a@example.com", Input: 200, Output: 1, Status: 200},
+		{Time: now, Agent: "owl-router/1", Kind: "routing", Provider: "cx", Model: "gpt-5", Host: "chatgpt.com as a@example.com", ProviderAccount: "a@example.com", Input: 300, Output: 2, Status: 200},
+		{Time: now, Agent: "owl-router/1", Kind: "routing", Provider: "cx", Model: "gpt-5", Host: "chatgpt.com as a@example.com", ProviderAccount: "a@example.com", Input: 200, Output: 1, Status: 200},
 		// a try of it handed on: its tokens, not a request
-		{Time: now, Agent: "myna-router/1", Kind: "routing", Provider: "cx", Model: "gpt-5", Host: "chatgpt.com as a@example.com", ProviderAccount: "a@example.com", Input: 10, Status: 429, HandedOn: true},
+		{Time: now, Agent: "owl-router/1", Kind: "routing", Provider: "cx", Model: "gpt-5", Host: "chatgpt.com as a@example.com", ProviderAccount: "a@example.com", Input: 10, Status: 429, HandedOn: true},
 		// another account: the agent's alone
 		{Time: now, Agent: "codex_cli_rs/0.50", Provider: "cx", Model: "gpt-5", Host: "chatgpt.com as b@example.com", ProviderAccount: "b@example.com", Input: 50, Output: 5, Status: 200},
-		// a web search myna made, on a key
-		{Time: now, Agent: "myna-search/1", Kind: "web_search", Provider: "relay", Model: "gpt-5", Host: "relay.example", ProviderKeyID: key, Input: 40, Output: 4, Status: 200},
+		// a web search owl made, on a key
+		{Time: now, Agent: "owl-search/1", Kind: "web_search", Provider: "relay", Model: "gpt-5", Host: "relay.example", ProviderKeyID: key, Input: 40, Output: 4, Status: 200},
 		{Time: now, Agent: "claude-cli/2.1", Provider: "relay", Model: "gpt-5", Host: "relay.example", ProviderKeyID: key, Input: 60, Output: 6, Status: 200},
 	}
 	s := summarize(Month, now, recs)
@@ -52,7 +52,7 @@ func TestSummaryCountsMynasOwnCallsApart(t *testing.T) {
 	}
 	a := acct["cx@a@example.com"]
 	if a.Calls != 3 || a.Input != 1510 {
-		t.Fatalf("myna's calls are still the account's: %+v", a.Totals)
+		t.Fatalf("owl's calls are still the account's: %+v", a.Totals)
 	}
 	if a.Own.Calls != 2 || a.Own.Tokens != 513 { // the try handed on: its tokens, as Totals has them
 		t.Fatalf("account a's own share: %+v", a.Own)
@@ -61,7 +61,7 @@ func TestSummaryCountsMynasOwnCallsApart(t *testing.T) {
 		t.Fatalf("own cost %v, want %v", a.Own.Cost, want)
 	}
 	if b := acct["cx@b@example.com"]; b.Own != (OwnShare{}) {
-		t.Fatalf("account b has none of myna's: %+v", b.Own)
+		t.Fatalf("account b has none of owl's: %+v", b.Own)
 	}
 	var k Group
 	for _, g := range s.ProviderKeys {
@@ -82,23 +82,23 @@ func TestSummaryCountsMynasOwnCallsApart(t *testing.T) {
 	if ownModel != 2 {
 		t.Fatalf("model: %d own calls: %+v", ownModel, s.Models)
 	}
-	// myna's calls are an agent's row of their own, as before ("myna"
+	// owl's calls are an agent's row of their own, as before ("owl"
 	// where the agents are loaded, its User-Agent's name here)
 	mine := 0
 	for _, g := range s.Agents {
-		if (Record{Agent: g.ID}).ByMyna() {
+		if (Record{Agent: g.ID}).ByOwl() {
 			mine += g.Calls
 		} else if g.Own != (OwnShare{}) {
 			t.Fatalf("an agent's row has an own share: %+v", g)
 		}
 	}
 	if mine != 3 {
-		t.Fatalf("myna's agent rows: %d calls", mine)
+		t.Fatalf("owl's agent rows: %d calls", mine)
 	}
 	// none is said as nothing at all
 	b, _ := json.Marshal(acct["cx@b@example.com"])
 	if strings.Contains(string(b), `"own"`) {
-		t.Fatalf("a group with none of myna's calls: %s", b)
+		t.Fatalf("a group with none of owl's calls: %s", b)
 	}
 	b, _ = json.Marshal(a)
 	if !strings.Contains(string(b), `"own":{"calls":2,"tokens":513`) {
@@ -106,11 +106,11 @@ func TestSummaryCountsMynasOwnCallsApart(t *testing.T) {
 	}
 }
 
-// Every request myna sends by itself is myna's own: the classifier, the
+// Every request owl sends by itself is owl's own: the classifier, the
 // search, the image description; an agent's is not.
-func TestByMyna(t *testing.T) {
-	for ua, want := range map[string]bool{"myna-router/1": true, "myna-search/1": true, "myna-vision/1": true, "myna": true, "claude-cli/2.1": false, "codex_cli_rs/0.50": false, "": false} {
-		if got := (Record{Agent: ua}).ByMyna(); got != want {
+func TestByOwl(t *testing.T) {
+	for ua, want := range map[string]bool{"owl-router/1": true, "owl-search/1": true, "owl-vision/1": true, "owl": true, "claude-cli/2.1": false, "codex_cli_rs/0.50": false, "": false} {
+		if got := (Record{Agent: ua}).ByOwl(); got != want {
 			t.Errorf("%q: %v, want %v", ua, got, want)
 		}
 	}

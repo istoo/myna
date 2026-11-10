@@ -20,14 +20,14 @@ func TestCommandOnlyPackageIsNoPlugin(t *testing.T) {
 	defer cancel()
 	abs, _ := filepath.Abs("testdata/notplugin/myna-x-search")
 	_, err := Add(ctx, abs)
-	if err == nil || !strings.Contains(err.Error(), "myna-x-search isn't an OpenCode or myna plugin") || !strings.Contains(err.Error(), "Library → MCP servers") {
+	if err == nil || !strings.Contains(err.Error(), "myna-x-search isn't an OpenCode or owl plugin") || !strings.Contains(err.Error(), "Library → MCP servers") {
 		t.Fatalf("Add = %v", err)
 	}
 	if l := Load().Plugins; len(l) != 0 {
 		t.Fatalf("listed: %+v", l)
 	}
 
-	// added by an older myna: the host says the same, plainly
+	// added by an older owl: the host says the same, plainly
 	if err := save(List{Plugins: []Entry{{Spec: abs}}}); err != nil {
 		t.Fatal(err)
 	}
@@ -36,7 +36,7 @@ func TestCommandOnlyPackageIsNoPlugin(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(ps) != 1 || !strings.Contains(ps[0].Error, "myna-x-search isn't an OpenCode or myna plugin") || !strings.Contains(ps[0].Error, "MCP servers") || strings.Contains(ps[0].Error, "    at ") {
+	if len(ps) != 1 || !strings.Contains(ps[0].Error, "myna-x-search isn't an OpenCode or owl plugin") || !strings.Contains(ps[0].Error, "MCP servers") || strings.Contains(ps[0].Error, "    at ") {
 		t.Fatalf("loaded: %+v", ps)
 	}
 }

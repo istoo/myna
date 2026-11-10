@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/budget"
-	"github.com/istoo/myna/internal/gwbudget"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/budget"
+	"github.com/istoo/owl/internal/gwbudget"
 )
 
 // The budget point with plugins/budget on and off, for a key held to a

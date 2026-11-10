@@ -12,7 +12,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 func TestLocalProviderDiscovery(t *testing.T) {
@@ -85,9 +85,9 @@ base_url = "https://relay.example/v1"
 experimental_bearer_token = "secret-codex"
 [model_providers.relay.http_headers]
 Authorization = "secret-header"
-[model_providers.myna]
+[model_providers.owl]
 base_url = "http://127.0.0.1:3448/v1"
-experimental_bearer_token = "myna"
+experimental_bearer_token = "owl"
 [model_providers.missing_key]
 base_url = "https://missing.example/v1"
 env_key = "UNSET_DISCOVERY_KEY"

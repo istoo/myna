@@ -47,7 +47,7 @@ for (const engine of engines) for (const lang of ["en", "zh"]) {
     });
     // in a browser the app opens a link with window.open (api "open")
     await page.addInitScript(() => { window.opened = []; window.open = (u) => { window.opened.push(u); return null; }; });
-    await page.goto("http://myna.test/?view=providers");
+    await page.goto("http://owl.test/?view=providers");
     await page.waitForFunction((l) => state.settings.lang === l, lang);
     await page.waitForFunction(() => providers?.providers?.length === 5);
 

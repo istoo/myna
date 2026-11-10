@@ -4,7 +4,7 @@ import (
 	"maps"
 	"testing"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // A Max output or Compact at the user set on a model the provider has

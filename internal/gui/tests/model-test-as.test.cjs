@@ -1,7 +1,7 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // 耍赖天都爱 on Discord (模型测试的时候有的必须是codex 客户端或者claude 客户端):
-// a relay that serves only Codex or Claude Code turns myna's own test
-// request away, while the agent's requests through myna are served. A
+// a relay that serves only Codex or Claude Code turns owl's own test
+// request away, while the agent's requests through owl are served. A
 // model chip's right-click offers "Test as Codex" and "Test as Claude
 // Code" where the provider says it can be asked so (testsAs), posting
 // provider/test with that model and `as`; one that can't be yet is off,
@@ -14,7 +14,7 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
-const NOT_YET = "no Claude Code request has come through myna yet: run Claude Code through myna once, then test again";
+const NOT_YET = "no Claude Code request has come through owl yet: run Claude Code through owl once, then test again";
 const base = { icon: "generic", responses: "", anthropic: "", catalog: "", agents: [], fallback: [], headers: {},
   key: { set: true, masked: "sk-…one" }, keyList: [], balanceToken: { takes: false, set: false }, proxy: "" };
 const relay = { ...base, id: "relay", name: "Relay", chat: "https://relay.example.com/v1", anthropic: "https://relay.example.com",
@@ -56,7 +56,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [], tests = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, tests));
-      await page.goto("http://myna.test/?view=providers");
+      await page.goto("http://owl.test/?view=providers");
       const tr = (k, vars = {}) => page.evaluate(([k, vars]) => t(k, vars), [k, vars]);
       if (lang !== "en") {
         const missing = await page.evaluate(([lang, keys]) => keys.filter((k) => !I18N[lang]?.[k]), [lang,
@@ -93,14 +93,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.deepEqual(tests.map((b) => ({ id: b.id, test: b.test, as: b.as })), [{ id: "relay", test: ["gpt-5.5"], as: "codex" }]);
       await chip.locator(".tdot.ok").waitFor();
 
-      // Test this model asks as myna does
+      // Test this model asks as owl does
       await rightClick(chip);
       await menu.getByRole("menuitem", { name: await tr("Test this model") }).click();
       for (let i = 0; i < 60 && tests.length < 2; i++) await page.waitForTimeout(50);
       assert.equal(tests[1].as, undefined, "a plain test names no client");
 
       // a provider that offers neither shows neither
-      await page.goto("http://myna.test/?view=providers");
+      await page.goto("http://owl.test/?view=providers");
       await page.locator(".row.provider", { hasText: "Plain" }).click();
       const other = page.locator(".editor .mchips .mchip", { hasText: "model-p" });
       await other.waitFor();

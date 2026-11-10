@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // StringKe (#4532): the name the user gave an account picks it wherever

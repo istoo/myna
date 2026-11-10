@@ -18,20 +18,20 @@ import (
 	"time"
 	"unicode/utf16"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/lastgood"
-	"github.com/istoo/myna/internal/proc"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/sessions"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/wslrun"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/lastgood"
+	"github.com/istoo/owl/internal/proc"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/sessions"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/wslrun"
 )
 
 // An agent installed in a WSL distro reads its config there, not in
-// Windows' home — so does the Codex app's WSL connection. On Windows myna
+// Windows' home — so does the Codex app's WSL connection. On Windows owl
 // lists the distros (wsl.exe -l -q), asks each running one once for its
 // $HOME and which of wslKinds' agents are there (never starting one that is
 // stopped), and edits the files through \\wsl.localhost\<distro>. Each is
@@ -43,14 +43,14 @@ import (
 // Windows as WSL sees it, which reaches the gateway only while that
 // listens beyond loopback.
 
-// place is where an agent lives: its home as myna opens it, how a path
+// place is where an agent lives: its home as owl opens it, how a path
 // there is spelt in the agent's own config, and the gateway as it reaches
 // it. here(home) is this machine's.
 type place struct {
 	home  string
 	id    string              // the agent's id when not its own: its stash keys go under it
 	spell func(string) string // a path under home as the agent names it; nil: as is
-	sys   func(string) string // a path of the agent's system (/etc/…) as myna opens it; nil: as is
+	sys   func(string) string // a path of the agent's system (/etc/…) as owl opens it; nil: as is
 	base  func() string       // the gateway's URL from the agent; nil: gateway.URL
 	// cold: a stopped distro's, whose files can't be looked at without
 	// starting it — an agent built there takes its files at their defaults
@@ -58,19 +58,19 @@ type place struct {
 	// version is the agent's CLI's there, as the probe found it; "" when
 	// not known (one on this machine is asked itself)
 	version string
-	// reach is a path under home as myna can open it (distro.open): one
+	// reach is a path under home as owl can open it (distro.open): one
 	// below a link the distro has is opened where the link leads; nil: as
 	// is. unreached keeps the first path it couldn't tell the way to.
 	reach     func(string) (string, error)
 	unreached *error
 	// chmod takes the group's and others' bits off a file under home, where
-	// myna's own mode doesn't hold (a distro's: see ownerOnly); nil: here
+	// owl's own mode doesn't hold (a distro's: see ownerOnly); nil: here
 	chmod func(string) error
 }
 
 func here(home string) place { return place{home: home} }
 
-// open is path, a path under the place's home, where myna can open it:
+// open is path, a path under the place's home, where owl can open it:
 // in a WSL distro, a folder that is a link there (~/.codex ->
 // /mnt/c/Users/me/.codex, #4502) is opened where it leads, as nothing
 // below it can be opened through \\wsl.localhost. A link the distro
@@ -89,13 +89,13 @@ func (p place) open(path string) string {
 	return o
 }
 
-// join is filepath.Join(home, elem...), opened where myna can (open).
+// join is filepath.Join(home, elem...), opened where owl can (open).
 func (p place) join(elem ...string) string {
 	return p.open(filepath.Join(append([]string{p.home}, elem...)...))
 }
 
 // getenv is this machine's variable for this machine's agent; "" for one
-// in a distro, whose variables myna can't read.
+// in a distro, whose variables owl can't read.
 func (p place) getenv(k string) string {
 	if p.spell != nil {
 		return ""
@@ -104,7 +104,7 @@ func (p place) getenv(k string) string {
 }
 
 // codexHome is Codex's folder at the place: $CODEX_HOME on this machine
-// (appdir.CodexHome), ~/.codex in a distro, whose variables myna can't
+// (appdir.CodexHome), ~/.codex in a distro, whose variables owl can't
 // read.
 func (p place) codexHome() string {
 	if p.spell != nil {
@@ -115,7 +115,7 @@ func (p place) codexHome() string {
 
 // claudeDir is Claude Code's folder at the place: $CLAUDE_CONFIG_DIR on
 // this machine (appdir.ClaudeDir), ~/.claude in a distro, whose variables
-// myna can't read.
+// owl can't read.
 func (p place) claudeDir() string {
 	if p.spell != nil {
 		return p.join(".claude")
@@ -126,7 +126,7 @@ func (p place) claudeDir() string {
 // hermesHome is Hermes Agent's folder at the place: $HERMES_HOME, else
 // %LOCALAPPDATA%\hermes on Windows and ~/.hermes elsewhere, on this machine
 // (appdir.HermesHome); ~/.hermes in a distro, which is Linux and whose
-// variables myna can't read.
+// variables owl can't read.
 func (p place) hermesHome() string {
 	if p.spell != nil {
 		return p.join(".hermes")
@@ -200,7 +200,7 @@ func (p place) key(k string) string {
 type distro struct {
 	Name    string          `json:"name"`
 	Home    string          `json:"home"`              // $HOME inside it, e.g. /home/me
-	Root    string          `json:"root"`              // where myna opens its / from, e.g. \\wsl.localhost\Ubuntu
+	Root    string          `json:"root"`              // where owl opens its / from, e.g. \\wsl.localhost\Ubuntu
 	Has     map[string]bool `json:"has"`               // "dir:.codex", "bin:pi": what the probe found
 	Probe   int             `json:"probe,omitempty"`   // the wslProbeVersion that found it
 	Gateway string          `json:"gateway,omitempty"` // the Windows host as the distro reaches it, when not at 127.0.0.1
@@ -248,12 +248,12 @@ func (d distro) live() bool {
 	return d.up()
 }
 
-// local is a path inside the distro as myna opens it.
+// local is a path inside the distro as owl opens it.
 func (d distro) local(linux string) string {
 	return d.Root + strings.ReplaceAll(linux, "/", string(filepath.Separator))
 }
 
-// native is a path myna opens as the distro spells it: one open moved
+// native is a path owl opens as the distro spells it: one open moved
 // to where a link leads is spelt through the link, as the agent knows it.
 func (d distro) native(local string) string {
 	best, spelt := "", ""
@@ -280,7 +280,7 @@ func (d distro) native(local string) string {
 	return rel
 }
 
-// open is local, a path in the distro as myna opens it, where myna can
+// open is local, a path in the distro as owl opens it, where owl can
 // open it. Through \\wsl.localhost Windows can't follow a link the
 // distro has: a path below ~/.codex, when that leads to
 // /mnt/c/Users/me/.codex, can be neither made, written, read nor listed,
@@ -304,12 +304,12 @@ func (d distro) open(local string) (string, error) {
 	}
 	to := d.Links[best]
 	if to == "" {
-		return "", fmt.Errorf("~/%s in WSL %s is a link myna couldn't follow (readlink -f there failed), so nothing is written through it; check where it points from a shell there", best, d.Name)
+		return "", fmt.Errorf("~/%s in WSL %s is a link owl couldn't follow (readlink -f there failed), so nothing is written through it; check where it points from a shell there", best, d.Name)
 	}
 	return d.where(to) + rest, nil
 }
 
-// where is linux, a path in the distro, as myna opens it: on one of
+// where is linux, a path in the distro, as owl opens it: on one of
 // Windows' drives, the drive's own path; anywhere else, through the
 // distro's root.
 func (d distro) where(linux string) string {
@@ -332,7 +332,7 @@ func (d distro) where(linux string) string {
 	return wslDrive(drives[best]) + strings.ReplaceAll(strings.TrimPrefix(linux[len(best):], "/"), "/", string(filepath.Separator))
 }
 
-// wslDrive is the root of a Windows drive ("C:") as myna opens it; a var
+// wslDrive is the root of a Windows drive ("C:") as owl opens it; a var
 // for tests.
 var wslDrive = func(drive string) string { return drive + `\` }
 
@@ -394,8 +394,8 @@ func (d distro) place(id string) place {
 }
 
 // chmod takes the group's and others' bits off local, a file in the distro
-// myna opens, from inside it: a file written through \\wsl.localhost is
-// 0644 there whatever mode myna asks for, and a key store so is refused.
+// owl opens, from inside it: a file written through \\wsl.localhost is
+// 0644 there whatever mode owl asks for, and a key store so is refused.
 func (d distro) chmod(local string) error {
 	if _, err := os.Stat(local); err != nil {
 		return nil
@@ -408,7 +408,7 @@ func (d distro) chmod(local string) error {
 	return nil
 }
 
-// wslKind is an agent myna looks for in a distro: what the probe finds
+// wslKind is an agent owl looks for in a distro: what the probe finds
 // of it, and how it lives at a place. Adding one here is all it takes.
 type wslKind struct {
 	id, name string
@@ -438,17 +438,17 @@ var wslKinds = []wslKind{
 			switch key {
 			case "model", "subagent", "memories":
 				return func(map[string]string) []Option {
-					// over several accounts myna routes, so they are
-					// offered via myna too, as on a live Codex (#1603)
+					// over several accounts owl routes, so they are
+					// offered via owl too, as on a live Codex (#1603)
 					if codexFailover() {
 						return withVia(group("OpenAI", options(ownCodex(), "")), "codex", "")
 					}
-					own := codexInMyna(group("OpenAI", options(ownCodex(), "")))
-					return append(own, codexViaMynaFor(own)...)
+					own := codexInOwl(group("OpenAI", options(ownCodex(), "")))
+					return append(own, codexViaOwlFor(own)...)
 				}
 			case "effort":
 				return func(cur map[string]string) []Option {
-					return codexEfforts(append(catalog.Codex(), mynaModels("codex")...), cur["model"])
+					return codexEfforts(append(catalog.Codex(), owlModels("codex")...), cur["model"])
 				}
 			case "subagent_effort":
 				return func(cur map[string]string) []Option {
@@ -456,7 +456,7 @@ var wslKinds = []wslKind{
 					if m == "" {
 						m = cur["model"]
 					}
-					if e := catalog.Efforts(append(catalog.Codex(), mynaModels("codex")...), m); len(e) > 0 {
+					if e := catalog.Efforts(append(catalog.Codex(), owlModels("codex")...), m); len(e) > 0 {
 						return static(e...)
 					}
 					return static(codexEffortsAll...)
@@ -471,7 +471,7 @@ var wslKinds = []wslKind{
 			if key == "model" {
 				// the providers of its auth.json are the distro's files
 				return func(cur map[string]string) []Option {
-					return withVia(ownOptions("", cur["model"]), "pi", mynaID+"/")
+					return withVia(ownOptions("", cur["model"]), "pi", owlID+"/")
 				}
 			}
 			return nil
@@ -482,7 +482,7 @@ var wslKinds = []wslKind{
 		asleep: func(key string) func(map[string]string) []Option {
 			if key == "model" {
 				return func(cur map[string]string) []Option {
-					return withVia(ownOptions("", cur["model"]), "omo", mynaID+"/")
+					return withVia(ownOptions("", cur["model"]), "omo", owlID+"/")
 				}
 			}
 			return nil
@@ -493,7 +493,7 @@ var wslKinds = []wslKind{
 		asleep: func(key string) func(map[string]string) []Option {
 			if key == "model" {
 				return func(cur map[string]string) []Option {
-					return withVia(ownOptions("", cur["model"]), "prime-agent", mynaID+"/")
+					return withVia(ownOptions("", cur["model"]), "prime-agent", owlID+"/")
 				}
 			}
 			return nil
@@ -511,13 +511,13 @@ var wslKinds = []wslKind{
 					return joinedVia(group("Claude Code", claudeOwn(cur["model"], nil, catalog.Provider("anthropic"))), claudeViaShared(false), [2]string{"\x00claude-via", "\x00asleep"})
 				}
 			case "effort", "ultracode", "statusline":
-				// their own options read only what was last seen; myna's
+				// their own options read only what was last seen; owl's
 				// status line isn't offered in a distro
 				return nil
 			case "login":
-				// its sign-in, while the model last seen is myna's
+				// its sign-in, while the model last seen is owl's
 				return func(cur map[string]string) []Option {
-					if !isMyna(cur["model"]) {
+					if !isOwl(cur["model"]) {
 						return nil
 					}
 					return claudeSignIns()
@@ -527,19 +527,19 @@ var wslKinds = []wslKind{
 			// was last seen on, as when running, not a model to pick
 			if tier, ok := strings.CutSuffix(key, "_effort"); ok {
 				return func(cur map[string]string) []Option {
-					if !isMyna(cur["model"]) {
+					if !isOwl(cur["model"]) {
 						return nil
 					}
 					return static(tierEfforts(cmp.Or(cur[tier], cur["model"]))...)
 				}
 			}
-			// a tier, the subagents or auto mode: myna's models while the
+			// a tier, the subagents or auto mode: owl's models while the
 			// model last seen is one
 			return func(cur map[string]string) []Option {
-				if !isMyna(cur["model"]) {
+				if !isOwl(cur["model"]) {
 					return nil
 				}
-				return claudeViaMyna(false)
+				return claudeViaOwl(false)
 			}
 		}},
 	// The CLIs below keep a plain file in the distro's home, written as on
@@ -561,7 +561,7 @@ var wslKinds = []wslKind{
 				return nil
 			}
 			return func(cur map[string]string) []Option {
-				return withVia(kimiOwnOptions("", cur["model"]), "kimi", mynaID+"/")
+				return withVia(kimiOwnOptions("", cur["model"]), "kimi", owlID+"/")
 			}
 		}},
 	// Qwen Code's ~/.qwen, one settings.json of the same shape as this
@@ -573,7 +573,7 @@ var wslKinds = []wslKind{
 				return nil
 			}
 			return func(cur map[string]string) []Option {
-				return withVia(qwenOwnOptions("", cur["model"]), "qwen", mynaID+"/")
+				return withVia(qwenOwnOptions("", cur["model"]), "qwen", owlID+"/")
 			}
 		}},
 	{id: "omp", name: "omp", dir: ".omp", bin: "omp", in: ompIn, version: true,
@@ -583,7 +583,7 @@ var wslKinds = []wslKind{
 				return nil
 			}
 			return func(cur map[string]string) []Option {
-				return withVia(ompOwnOptions("", cur[key]), "omp", mynaID+"/")
+				return withVia(ompOwnOptions("", cur[key]), "omp", owlID+"/")
 			}
 		}},
 	{id: "crush", name: "Crush", dir: ".config/crush", bin: "crush", in: crushIn,
@@ -603,7 +603,7 @@ var wslKinds = []wslKind{
 			}
 			// its models_cache.json and config.toml are the distro's files
 			return func(cur map[string]string) []Option {
-				opts := viaMyna("grok", mynaID+"/")
+				opts := viaOwl("grok", owlID+"/")
 				for i := range opts {
 					opts[i].Same = opts[i].own
 				}
@@ -618,17 +618,17 @@ var wslKinds = []wslKind{
 			}
 			return func(cur map[string]string) []Option {
 				var own []Option
-				if c := cur["model"]; c != "" && !usesMyna(c) {
+				if c := cur["model"]; c != "" && !usesOwl(c) {
 					own = append(own, Option{Value: c, Icon: modelIcon("", c)})
 				}
-				return withVia(group("Droid", own), "droid", mynaID+"/")
+				return withVia(group("Droid", own), "droid", owlID+"/")
 			}
 		}},
 	// no bin: fx is also the JSON viewer's name
 	{id: "fx", name: "fx", dir: ".fx", in: fxIn,
 		restart: newNotice("{agent} in WSL {distro} reads its settings at start-up — restart open fx sessions to use this.")},
 	{id: "commandcode", name: "Command Code", dir: ".commandcode", bin: "command-code", in: commandCodeIn,
-		restart: newNotice("{agent} in WSL {distro} wants its own sign-in there (cmd login) even for models through myna, and reads its settings at start-up — restart open Command Code sessions to use this.")},
+		restart: newNotice("{agent} in WSL {distro} wants its own sign-in there (cmd login) even for models through owl, and reads its settings at start-up — restart open Command Code sessions to use this.")},
 	{id: "minimax-code", name: "MiniMax Code", dir: ".minimax", bin: "mcode", in: miniMaxIn,
 		restart: newNotice("{agent} in WSL {distro} reads its settings at start-up — restart open mcode sessions to use this."),
 		asleep: func(key string) func(map[string]string) []Option {
@@ -636,7 +636,7 @@ var wslKinds = []wslKind{
 				return nil
 			}
 			return func(cur map[string]string) []Option {
-				return withVia(miniMaxOwnOptions("", cur["model"]), "minimax-code", mynaID+"/")
+				return withVia(miniMaxOwnOptions("", cur["model"]), "minimax-code", owlID+"/")
 			}
 		}},
 	// version: a dsh with no profile yet is told from one before profiles
@@ -652,14 +652,14 @@ var wslKinds = []wslKind{
 					for i := range own {
 						own[i].Direct = "DeepSeek"
 					}
-					return withVia(own, "dsh", mynaID+"/")
+					return withVia(own, "dsh", owlID+"/")
 				}
 			}
 			if key != "effort" {
 				return nil
 			}
 			return func(cur map[string]string) []Option {
-				if ref, ok := strings.CutPrefix(cur["model"], mynaID+"/"); ok {
+				if ref, ok := strings.CutPrefix(cur["model"], owlID+"/"); ok {
 					return static(dshLevels(ref)...)
 				}
 				return static(dshEfforts...)
@@ -677,7 +677,7 @@ var wslKinds = []wslKind{
 		restart: newNotice("{agent} in WSL {distro} reads its settings as a session starts — open sessions keep the model they have; new ones use this.")},
 	{id: "qoder-cn", name: "Qoder CN", dir: ".qoder-cn", bin: "qoderclicn", in: qoderCNIn,
 		restart: newNotice("{agent} in WSL {distro} reads its settings as a session starts — open sessions keep the model they have; new ones use this.")},
-	// lgtm on Discord: myna didn't find a CodeBuddy Code installed in WSL
+	// lgtm on Discord: owl didn't find a CodeBuddy Code installed in WSL
 	{id: "codebuddy", name: "CodeBuddy Code", dir: ".codebuddy", bin: "codebuddy", in: codebuddyIn,
 		restart: newNotice("{agent} in WSL {distro} reads its model when a session starts — restart open codebuddy sessions, or run /clear in them, to use this.")},
 	// Cline's CLI, and its VS Code extension in a Remote - WSL window, which
@@ -693,7 +693,7 @@ var wslKinds = []wslKind{
 			}
 			// the models of its config.toml are the distro's files
 			return func(cur map[string]string) []Option {
-				return withVia(atomcodeOwnModels("", cur["model"]), "atomcode", mynaID+"/")
+				return withVia(atomcodeOwnModels("", cur["model"]), "atomcode", owlID+"/")
 			}
 		}},
 	// Snow CLI's ~/.snow, its profiles the distro's own; a stopped
@@ -716,18 +716,18 @@ var wslKinds = []wslKind{
 					{Value: "api-key", Label: "API key", Icon: "gemini-color"},
 					{Value: "vertex", Label: "Vertex AI", Icon: "googlecloud-color", Note: "Vertex AI · $GOOGLE_CLOUD_PROJECT"},
 				}
-				if v := cur["provider"]; v == mynaID || v == "custom" {
+				if v := cur["provider"]; v == owlID || v == "custom" {
 					out = append(out, Option{Value: v})
 				}
 				return out
 			}
 		}},
 	// Antigravity CLI, by its own folder under ~/.gemini or its command
-	// (mimi001234 on Discord: myna didn't find agy in WSL); it takes the
+	// (mimi001234 on Discord: owl didn't find agy in WSL); it takes the
 	// gateway only from how it is started, so the distro's shells get the
 	// function agy (agyDistroFunction)
 	{id: "agy", name: "Antigravity CLI", dir: ".gemini/antigravity-cli", bin: "agy", in: agyIn,
-		restart: newNotice("{agent} in WSL {distro} takes myna's gateway and model only from how it is started — type agy in a new terminal there: myna put it in the shell's profile."),
+		restart: newNotice("{agent} in WSL {distro} takes owl's gateway and model only from how it is started — type agy in a new terminal there: owl put it in the shell's profile."),
 		asleep: func(key string) func(map[string]string) []Option {
 			if key != "model" {
 				return nil
@@ -735,16 +735,16 @@ var wslKinds = []wslKind{
 			// its custom models are the distro's settings.json
 			return func(cur map[string]string) []Option {
 				var own []Option
-				if c := cur["model"]; c != "" && !usesMyna(c) {
+				if c := cur["model"]; c != "" && !usesOwl(c) {
 					own = append(own, Option{Value: c, Icon: modelIcon("", c), Direct: "Google"})
 				}
-				return withVia(group("Antigravity CLI", own), "agy", mynaID+"/")
+				return withVia(group("Antigravity CLI", own), "agy", owlID+"/")
 			}
 		}},
 	// Block's goose, by its folder alone: a goose command may be pressly's
 	// database migration tool
 	{id: "goose", name: "Goose", dir: ".config/goose", in: func(at place) *Agent { return gooseIn(at, at.join(".config")) },
-		restart: newNotice("{agent} in WSL {distro} loads its providers at start-up — restart open goose sessions to use myna's models."),
+		restart: newNotice("{agent} in WSL {distro} loads its providers at start-up — restart open goose sessions to use owl's models."),
 		asleep:  wslOwnAsleep("goose", "model")},
 	// Reasonix's native CLI (1.39 on), by its command and the version it
 	// gives: the historical npm client is reasonix too, and ~/.reasonix is
@@ -767,20 +767,20 @@ var wslKinds = []wslKind{
 			switch key {
 			case "model", "planner":
 				return func(cur map[string]string) []Option {
-					out := append(ownOptions("", cur[key]), viaMynaShared("reasonix", mynaID+"/")...)
+					out := append(ownOptions("", cur[key]), viaOwlShared("reasonix", owlID+"/")...)
 					if key == "planner" {
 						out = append([]Option{{Value: "off", Label: "off", Note: "Disable the separate planner"}}, out...)
 					}
 					return out
 				}
 			case "effort":
-				// the levels of myna's model, as its provider is written them
+				// the levels of owl's model, as its provider is written them
 				return func(cur map[string]string) []Option {
-					ref, ok := strings.CutPrefix(cur["model"], mynaID+"/")
+					ref, ok := strings.CutPrefix(cur["model"], owlID+"/")
 					if !ok {
 						return nil
 					}
-					levels := reasonixCatalogAt(mynaModels("reasonix"), ref, "", "").Overrides[ref].Efforts
+					levels := reasonixCatalogAt(owlModels("reasonix"), ref, "", "").Overrides[ref].Efforts
 					if len(levels) == 0 {
 						return nil
 					}
@@ -793,14 +793,14 @@ var wslKinds = []wslKind{
 
 // wslOwnAsleep is a stopped distro's options for an agent's model fields
 // (keys) whose live ones read its files: the providers of the value last
-// seen, and myna's.
+// seen, and owl's.
 func wslOwnAsleep(id string, keys ...string) func(string) func(map[string]string) []Option {
 	return func(key string) func(map[string]string) []Option {
 		if !slices.Contains(keys, key) {
 			return nil
 		}
 		return func(cur map[string]string) []Option {
-			return withVia(ownOptions("", cur[key]), id, mynaID+"/")
+			return withVia(ownOptions("", cur[key]), id, owlID+"/")
 		}
 	}
 }
@@ -822,7 +822,7 @@ func (k wslKind) memo(key string) string {
 	return k.id + "." + key
 }
 
-// wslFound reports whether any agent myna knows is in d.
+// wslFound reports whether any agent owl knows is in d.
 func wslFound(d distro) bool {
 	for _, k := range wslKinds {
 		if k.found(d) {
@@ -832,13 +832,13 @@ func wslFound(d distro) bool {
 	return false
 }
 
-// wslKept is whether myna keeps a distro it probed: one of wslKinds is
+// wslKept is whether owl keeps a distro it probed: one of wslKinds is
 // there, or the Copilot CLI's folder, whose sign-in it reads (#723).
 func wslKept(d distro) bool { return wslFound(d) || d.Has["dir:"+wslCopilotDir] }
 
 // ListsFor is whose model lists an agent's are (provider.CatalogFor): its
 // own id's, or, for one in a WSL distro, its Windows twin's (claude for
-// claude@wsl:Ubuntu). A distro's agent is written myna's models under
+// claude@wsl:Ubuntu). A distro's agent is written owl's models under
 // that id and sends the gateway that id's key, so the models picked for
 // its row are the ones it is shown only when kept under that id too (#927).
 func (a *Agent) ListsFor() string {
@@ -866,7 +866,7 @@ func wslPi(d distro) *Agent { return wslAgent(wslKindOf("pi"), d) }
 
 // wslAgent is an agent in a distro: its own reading and writing, at the
 // distro's home, with the distro's way to the gateway. A distro that isn't
-// running is shown as myna last saw it, and nothing of it is read: any
+// running is shown as owl last saw it, and nothing of it is read: any
 // access to its files starts it. Picking a value starts it, as asked.
 func wslAgent(k wslKind, d distro) *Agent {
 	id := k.id + "@wsl:" + d.Name
@@ -1011,12 +1011,12 @@ func unreached(a *Agent, err error) *Agent {
 	return a
 }
 
-// Unreached is why myna can't open the folder of a, an agent in a WSL
+// Unreached is why owl can't open the folder of a, an agent in a WSL
 // distro: a link there the distro couldn't resolve; nil for any other.
 func (a *Agent) Unreached() error { return a.unreached }
 
 // WSLOpen is path, under the home of a, an agent in a WSL distro, where
-// myna can open it (distro.open): below a link of the distro's, where
+// owl can open it (distro.open): below a link of the distro's, where
 // the link leads. The error says a link there couldn't be resolved. Any
 // other agent's path is as it is.
 func WSLOpen(a *Agent, path string) (string, error) {
@@ -1036,8 +1036,8 @@ func WSLOpen(a *Agent, path string) (string, error) {
 	return c.open(path)
 }
 
-// asleep is a stopped distro's agent: its fields read what myna last
-// saw, their options come from myna alone, and it has no files to check,
+// asleep is a stopped distro's agent: its fields read what owl last
+// saw, their options come from owl alone, and it has no files to check,
 // sync or migrate (Path and Dir are empty); setting a field goes to the
 // files, which starts the distro.
 func asleep(live *Agent, k wslKind, d distro) *Agent {
@@ -1104,7 +1104,7 @@ func wslAgents() []*Agent {
 func wslAgentsOf(ds []distro) []*Agent {
 	var out []*Agent
 	for _, d := range ds {
-		// only the agents it has: myna writes nothing for one that isn't
+		// only the agents it has: owl writes nothing for one that isn't
 		// there, and doesn't make it, which reads its files: a stopped
 		// distro's files opened start it again (#3896)
 		for _, k := range wslKinds {
@@ -1129,7 +1129,7 @@ func wslAgentsOf(ds []distro) []*Agent {
 }
 
 // wslHomes are the distros agents (or the Copilot CLI's folder, wslKept)
-// were found in, each user's home as myna
+// were found in, each user's home as owl
 // opens it, for internal/sessions to read their sessions in; none off
 // Windows. A stopped distro's is its home as last probed.
 func wslHomes() []sessions.WSLHome {
@@ -1153,11 +1153,11 @@ func wslHomes() []sessions.WSLHome {
 }
 
 // wslCopilotDir is the Copilot CLI's folder under a distro's $HOME: not an
-// agent myna sets up, but a sign-in it uses (provider.CopilotWSLDirs),
+// agent owl sets up, but a sign-in it uses (provider.CopilotWSLDirs),
 // so a distro that has only it is kept as one agents are found in (#723).
 const wslCopilotDir = ".copilot"
 
-// copilotWSLDirs are the Copilot CLI's folders, as myna opens them (where
+// copilotWSLDirs are the Copilot CLI's folders, as owl opens them (where
 // a link leads, #4502), in the running distros it was found in, for
 // provider to read its sign-in in; none off Windows. A stopped distro is
 // left out: reading it would start it.
@@ -1180,7 +1180,7 @@ func wslHasCopilot(name string) bool {
 
 // Only running distros are probed — asking one anything starts it — once
 // each in a process, and again only after a probe that failed. Those an
-// agent of wslKinds was found in are kept in wsl.json beside myna's settings (not the
+// agent of wslKinds was found in are kept in wsl.json beside owl's settings (not the
 // stash, which profiles and backups carry), with their fields as last
 // read, so a stopped one is listed without being started.
 var wsl struct {
@@ -1214,7 +1214,7 @@ const (
 // wslOn is whether there is WSL to look in: on Windows, or in tests.
 var wslOn = runtime.GOOS == "windows"
 
-// wslLooks is whether myna looks in WSL on its own: there is WSL, and
+// wslLooks is whether owl looks in WSL on its own: there is WSL, and
 // Settings' Detect agents in WSL is on (#1264).
 func wslLooks() bool { return wslOn && !settings.Load().NoWSLAgents }
 
@@ -1273,7 +1273,7 @@ var wslRun = func(timeout time.Duration, args ...string) ([]byte, error) {
 	return cmd.Output()
 }
 
-// wslRoot is where myna opens a running distro's / from; a var for tests.
+// wslRoot is where owl opens a running distro's / from; a var for tests.
 var wslRoot = func(name string) string {
 	if _, err := os.Stat(`\\wsl.localhost\` + name + `\`); err == nil {
 		return `\\wsl.localhost\` + name
@@ -1283,7 +1283,7 @@ var wslRoot = func(name string) string {
 
 // wslHungPath, while recent, says a wsl.exe listing timed out: each
 // command a hung WSL held for its 10s timeout (20s with the running list),
-// `myna providers` for Copilot's sign-in in a distro, `myna version`
+// `owl providers` for Copilot's sign-in in a distro, `owl version`
 // for start-up's moves.
 func wslHungPath() string { return filepath.Join(filepath.Dir(provider.Path()), "wsl-hung") }
 
@@ -1319,7 +1319,7 @@ func wslDistros() []distro {
 	}
 	if time.Since(wsl.at) > wslListAge {
 		if wsl.at.IsZero() && wslHungLately() {
-			// another myna waited out a hung wsl.exe moments ago: a
+			// another owl waited out a hung wsl.exe moments ago: a
 			// command doesn't wait 10s more (this one lists again in a minute)
 			wsl.names, wsl.listed = nil, false
 		} else {
@@ -1500,7 +1500,7 @@ func wslRemember(name, key, v string) {
 	wsl.dirty = true
 }
 
-// WSLKeep has myna remember v under key for the WSL distro name, in
+// WSLKeep has owl remember v under key for the WSL distro name, in
 // wsl.json beside what its probe found, for while the distro is stopped:
 // what another package learnt of the distro's files while it ran (the
 // library's places for each agent there), which it can't read again then
@@ -1525,7 +1525,7 @@ func wslLastSeen(name, key string) string {
 
 // wslReady are the distros running now that the probe found kind in, each
 // with its mirrored networking settled, ready for a read of its files.
-// Only myna's memory of them and which run (wslRunningLocked) are
+// Only owl's memory of them and which run (wslRunningLocked) are
 // asked — nothing is probed, and a stopped distro is never opened.
 func wslReady(kind string) []distro {
 	wsl.Lock()
@@ -1545,7 +1545,7 @@ func wslReady(kind string) []distro {
 }
 
 // wslClaudeStandIn is StandIn for a Claude Code in a WSL distro routed
-// through myna: the first, of the distros running now, whose
+// through owl: the first, of the distros running now, whose
 // settings.json has a stand-in.
 func wslClaudeStandIn(model string) string {
 	for _, d := range wslReady("claude") {
@@ -1580,8 +1580,8 @@ func wslClaudeClassifier(model string) string {
 }
 
 // wslCodexStandIn is StandIn for a Codex in a WSL distro routed through
-// myna: the first, of the distros running now, whose config.toml has
-// myna as its provider, as this machine's codexStandIn reads it.
+// owl: the first, of the distros running now, whose config.toml has
+// owl as its provider, as this machine's codexStandIn reads it.
 func wslCodexStandIn() string {
 	for _, d := range wslReady("codex") {
 		path := filepath.Join(d.place("codex@wsl:"+d.Name).codexHome(), "config.toml")
@@ -1907,8 +1907,8 @@ func wslSetting(cfg, key string) (val string, ok bool) {
 // what an agent in WSL says after a change, besides its kind's restart
 // (notice.go)
 var (
-	noticeWSLNotMirrored = newNotice("WSL {distro} is in {net} networking, not mirrored, so its {agent} was pointed at Windows ({url}) rather than 127.0.0.1; myna listens there for WSL, and it answers once Windows' firewall lets WSL in. For 127.0.0.1, set networkingMode=mirrored under [wsl2] in %UserProfile%\\.wslconfig and run wsl --shutdown, then pick the model again.")
-	noticeWSLNoMode      = newNotice("myna couldn't ask WSL {distro} its networking mode (it has no wslinfo) and %UserProfile%\\.wslconfig doesn't set it to mirrored, so its {agent} was pointed at Windows ({url}) rather than 127.0.0.1; myna listens there for WSL, and it answers once Windows' firewall lets WSL in. For 127.0.0.1, set networkingMode=mirrored under [wsl2] in %UserProfile%\\.wslconfig and run wsl --shutdown, then pick the model again.")
-	noticeWSLNoRelay     = newNotice("WSL {distro} is in {net} networking with localhostForwarding=false in %UserProfile%\\.wslconfig, so 127.0.0.1 there, where its {agent} was pointed, isn't relayed to Windows, where myna listens. Remove localhostForwarding=false under [wsl2] (it is on by default) and run wsl --shutdown.")
-	noticeWSLAsleep      = newNotice("WSL {distro} isn't running: myna shows what it last saw there, and starts it only to change something.")
+	noticeWSLNotMirrored = newNotice("WSL {distro} is in {net} networking, not mirrored, so its {agent} was pointed at Windows ({url}) rather than 127.0.0.1; owl listens there for WSL, and it answers once Windows' firewall lets WSL in. For 127.0.0.1, set networkingMode=mirrored under [wsl2] in %UserProfile%\\.wslconfig and run wsl --shutdown, then pick the model again.")
+	noticeWSLNoMode      = newNotice("owl couldn't ask WSL {distro} its networking mode (it has no wslinfo) and %UserProfile%\\.wslconfig doesn't set it to mirrored, so its {agent} was pointed at Windows ({url}) rather than 127.0.0.1; owl listens there for WSL, and it answers once Windows' firewall lets WSL in. For 127.0.0.1, set networkingMode=mirrored under [wsl2] in %UserProfile%\\.wslconfig and run wsl --shutdown, then pick the model again.")
+	noticeWSLNoRelay     = newNotice("WSL {distro} is in {net} networking with localhostForwarding=false in %UserProfile%\\.wslconfig, so 127.0.0.1 there, where its {agent} was pointed, isn't relayed to Windows, where owl listens. Remove localhostForwarding=false under [wsl2] (it is on by default) and run wsl --shutdown.")
+	noticeWSLAsleep      = newNotice("WSL {distro} isn't running: owl shows what it last saw there, and starts it only to change something.")
 )

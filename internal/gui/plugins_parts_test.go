@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/owl/internal/plugin"
 )
 
 // The Plugins page is drawn in parts (#488): the plugins suggested come at
@@ -21,10 +21,10 @@ func TestPluginMarketInParts(t *testing.T) {
 	cache := t.TempDir()
 	t.Setenv("XDG_CACHE_HOME", cache)
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
-	t.Setenv("MYNA_PLUGIN_MARKET", "off")
+	t.Setenv("OWL_PLUGIN_MARKET", "off")
 	const pkg = "@magpie-community/opencode-zcode-auth"
 	// a listing the market gives no icon (yetone: 这里的 agent plugin 为什么
-	// 没有 logo): the picture its package gives (myna.icon) is kept here,
+	// 没有 logo): the picture its package gives (owl.icon) is kept here,
 	// and the page gets it as a file, never the data URI
 	const agent = "@magpie-community/middleware-word-guard"
 	png := []byte("\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR")
@@ -34,10 +34,10 @@ func TestPluginMarketInParts(t *testing.T) {
 		agent: map[string]any{"info": map[string]any{"version": "0.1.1", "icon": data}, "at": time.Now()},
 	}
 	b, _ := json.Marshal(kept)
-	if err := os.MkdirAll(filepath.Join(cache, "myna"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(cache, "owl"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(cache, "myna", "plugin-npm.json"), b, 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(cache, "owl", "plugin-npm.json"), b, 0o644); err != nil {
 		t.Fatal(err)
 	}
 	plugin.ReloadInfo()

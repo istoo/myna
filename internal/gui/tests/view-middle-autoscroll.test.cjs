@@ -95,7 +95,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         p.on("pageerror", (e) => errors.push(e.message));
         await p.route("**/*", server(lang));
         const view = p.locator("#view-agents");
-        await p.goto("http://myna.test/?view=agents");
+        await p.goto("http://owl.test/?view=agents");
         await p.locator("#view-agents .ag-lead").first().waitFor();
         const over = await settled(p, view);
         assert.ok(over > 150, `the page must overflow: ${over}`);

@@ -11,11 +11,11 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/owl/internal/sessions"
 )
 
 // The heatmap's settled days are kept on disk between runs (heat-v1.json).
-// A started myna paired the whole history for them, every gateway call
+// A started owl paired the whole history for them, every gateway call
 // with its session row, and so again every heatOldFresh: the cold start's
 // peak, ~100 MB of a ~450 MB live heap, and seconds of CPU each time
 // (#2278). They stand while what they were counted of is the same, which

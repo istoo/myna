@@ -7,11 +7,11 @@ package agent
 // table; one at the top level is not read), and takes the summary in at the
 // turn's next step. It starts one only on a provider whose
 // capabilities.remote_compaction is "v2", which Codex gives OpenAI's own and
-// Azure alone: on myna's [model_providers.myna] it never ran until that
-// was written there too. myna's gateway answers the trigger as it does
+// Azure alone: on owl's [model_providers.owl] it never ran until that
+// was written there too. owl's gateway answers the trigger as it does
 // Codex's own compaction (codexCompact, or the provider's native one).
 //
-// What myna writes is kept in the stash, so a value the user set there
+// What owl writes is kept in the stash, so a value the user set there
 // (by hand, or a value they changed since) is theirs: never written over,
 // and left when the setting is turned off.
 //
@@ -23,7 +23,7 @@ package agent
 // true every Codex reads: an older one ignores it, a newer one turns the
 // feature on at its own 65%. So the table, which the threshold needs, is
 // written only when every Codex that reads this config is known to be new
-// enough (codexReaders), and the bare key otherwise; a table myna wrote
+// enough (codexReaders), and the bare key otherwise; a table owl wrote
 // before is taken back out where it no longer is.
 
 import (
@@ -38,7 +38,7 @@ import (
 
 	"github.com/pelletier/go-toml/v2"
 
-	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/owl/internal/edit"
 )
 
 const (
@@ -59,7 +59,7 @@ type CodexReader struct {
 
 // codexReaders are the Codexes that read the config at at: the CLI on
 // PATH, the desktop app's own (its bundled codex-cli on a Mac; the Store
-// app's on Windows, whose version myna can't read; on Linux the
+// app's on Windows, whose version owl can't read; on Linux the
 // package's resources/codex, which says its version as the CLI does:
 // codex-cli 0.166.0-alpha.5.1 in chatgpt 26.1027), the editor
 // extension's, or a WSL distro's CLI. A var so tests can name them.
@@ -118,7 +118,7 @@ func bundledCodexVersion(bundle, id string) (v string, ok bool) {
 
 // codexAsyncBlocked are the readers that keep the table out: one older
 // than codexAsyncTableFrom, or of no known version. None at all is
-// unknown as well: a Codex myna can't see may read the config.
+// unknown as well: a Codex owl can't see may read the config.
 func codexAsyncBlocked(rs []CodexReader) []CodexReader {
 	if len(rs) == 0 {
 		return []CodexReader{{Kind: "cli"}}
@@ -159,7 +159,7 @@ func codexAsyncTableOK(at place) bool {
 	return len(held) == 0
 }
 
-// codexAsyncStash is what myna wrote.
+// codexAsyncStash is what owl wrote.
 type codexAsyncStash struct {
 	Enabled bool `json:"enabled,omitempty"` // enabled = true
 	Percent int  `json:"percent,omitempty"` // the threshold
@@ -168,7 +168,7 @@ type codexAsyncStash struct {
 }
 
 // codexAsyncNow is how the config has them: the async_compaction value
-// (nil, a bool, or a table) and myna's provider table, nil when absent.
+// (nil, a bool, or a table) and owl's provider table, nil when absent.
 func codexAsyncNow(path string) (feature any, provider map[string]any, err error) {
 	doc, err := codexTopOf(path)
 	if err != nil {
@@ -176,17 +176,17 @@ func codexAsyncNow(path string) (feature any, provider map[string]any, err error
 	}
 	features, _ := doc.Features.(map[string]any)
 	providers, _ := doc.ModelProviders.(map[string]any)
-	p, _ := providers[mynaID].(map[string]any)
+	p, _ := providers[owlID].(map[string]any)
 	return features["async_compaction"], p, nil
 }
 
 // codexAsyncSync puts the setting into the Codex config at path, where
-// Codex is routed through myna or not: on is the setting, percent its
+// Codex is routed through owl or not: on is the setting, percent its
 // threshold (0 leaves Codex's own). key is the stash's. tableOK: every
 // Codex reading the config takes the table (codexAsyncTableOK); without
-// it the bare key is written, and a table of myna's taken out. The
+// it the bare key is written, and a table of owl's taken out. The
 // capability is written for a feature the user turned on in the config
-// themselves too: on myna's provider it would never run without it
+// themselves too: on owl's provider it would never run without it
 // (#2493).
 func codexAsyncSync(path, key string, routed, on bool, percent int, tableOK bool) error {
 	feature, provider, err := codexAsyncNow(path)
@@ -208,7 +208,7 @@ func codexAsyncSync(path, key string, routed, on bool, percent int, tableOK bool
 		percent = 0
 	}
 
-	// the bare async_compaction = true myna wrote, where the table is
+	// the bare async_compaction = true owl wrote, where the table is
 	// to go instead or nothing is: still as written, it goes; changed, it
 	// is the user's
 	if st.Bool && (!want || useTable) {
@@ -248,7 +248,7 @@ func codexAsyncSync(path, key string, routed, on bool, percent int, tableOK bool
 			}
 			st.Enabled = true
 		case !useTable && st.Enabled:
-			// off, or a Codex here too old for the table: the table myna
+			// off, or a Codex here too old for the table: the table owl
 			// wrote goes (a table left with nothing of the user's goes
 			// whole, so an old Codex loads its config again)
 			if err := edit.DelTOMLKey(path, codexAsyncTable, "enabled"); err != nil {
@@ -293,7 +293,7 @@ func codexAsyncSync(path, key string, routed, on bool, percent int, tableOK bool
 		st.Bool = false // changed since by the user
 	}
 
-	// capabilities on myna's provider table, when there is one: one the
+	// capabilities on owl's provider table, when there is one: one the
 	// user gave it, whatever it says, stays as it is
 	if feature, _, err = codexAsyncNow(path); err != nil {
 		return err
@@ -311,12 +311,12 @@ func codexAsyncSync(path, key string, routed, on bool, percent int, tableOK bool
 		}
 		switch {
 		case want && provider["capabilities"] == nil:
-			if err := edit.SetTOMLKey(path, "model_providers."+mynaID, "capabilities", edit.Inline{{Path: "remote_compaction", Value: "v2"}}); err != nil {
+			if err := edit.SetTOMLKey(path, "model_providers."+owlID, "capabilities", edit.Inline{{Path: "remote_compaction", Value: "v2"}}); err != nil {
 				return err
 			}
 			st.Cap = true
 		case !want && st.Cap:
-			if err := edit.DelTOMLKey(path, "model_providers."+mynaID, "capabilities"); err != nil {
+			if err := edit.DelTOMLKey(path, "model_providers."+owlID, "capabilities"); err != nil {
 				return err
 			}
 			st.Cap = false
@@ -334,9 +334,9 @@ func codexAsyncSync(path, key string, routed, on bool, percent int, tableOK bool
 	return nil
 }
 
-// codexProviderCaps is the capabilities myna's provider table has, as an
+// codexProviderCaps is the capabilities owl's provider table has, as an
 // Inline to write it back with when the table is written again: one the
-// user gave it, or myna's for the background compaction, isn't lost.
+// user gave it, or owl's for the background compaction, isn't lost.
 func codexProviderCaps(path string) edit.Inline {
 	_, provider, err := codexAsyncNow(path)
 	if err != nil {
@@ -362,10 +362,10 @@ func CodexAsyncHeldHere(home string) []CodexReader {
 }
 
 // codexAsyncOwn names what the user has in Codex's config.toml that
-// comes before myna's background compaction threshold, as codexAsyncSync
+// comes before owl's background compaction threshold, as codexAsyncSync
 // leaves it: the feature as a bare key of theirs (true at Codex's own 65%,
 // or false), their table spelled inline or as dotted keys, enabled = false
-// in it, or a threshold of their own. "" when myna's threshold is what
+// in it, or a threshold of their own. "" when owl's threshold is what
 // Codex would read.
 func codexAsyncOwn(home string) string {
 	at := here(tuneHome(home))

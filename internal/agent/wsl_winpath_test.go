@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // WSL puts Windows' PATH on the distro's, so `command -v pi` there finds

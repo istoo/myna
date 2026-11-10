@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/claudelock"
-	"github.com/istoo/myna/internal/filelock"
+	"github.com/istoo/owl/internal/claudelock"
+	"github.com/istoo/owl/internal/filelock"
 )
 
 // claudeLockAccounts signs Claude Code in to b, with a saved beside it,
@@ -51,7 +51,7 @@ func savedAuth(t *testing.T, user string) string {
 // #4532: a switch while Claude Code refreshes b's sign-in under its
 // .oauth_refresh.lock waits for the refresh, and saves b as refreshed: read
 // before, b's refresh token was the one the refresh spent, and b was
-// signed out of myna on its next use.
+// signed out of owl on its next use.
 func TestClaudeSwitchWaitsForClaudeCodesRefresh(t *testing.T) {
 	for _, name := range []string{"refresh", "legacy", "config"} {
 		t.Run(name, func(t *testing.T) {
@@ -156,12 +156,12 @@ func TestClaudeSwitchStaleAndHeldLocks(t *testing.T) {
 	})
 }
 
-// #4532: a switch from one myna process waits for Claude Code another
+// #4532: a switch from one owl process waits for Claude Code another
 // runs in the account's own directory (the app reading its /usage while
-// `myna accounts switch` runs), and hands Claude Code the sign-in that
+// `owl accounts switch` runs), and hands Claude Code the sign-in that
 // run refreshed. Before, the wait was in-process only: the switch handed
 // over the refresh token the run then spent.
-func TestClaudeSwitchWaitsForAnotherMynasRun(t *testing.T) {
+func TestClaudeSwitchWaitsForAnotherOwlsRun(t *testing.T) {
 	claudeThree(t)
 	home := os.Getenv("HOME")
 	old := ClaudeHandedOver
@@ -171,7 +171,7 @@ func TestClaudeSwitchWaitsForAnotherMynasRun(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// the other myna's run, as markClaudeRun holds it there
+	// the other owl's run, as markClaudeRun holds it there
 	mark := claudeAccountDir("max@x.com") + ".run-99999-1.lock"
 	unlock, held := filelock.Lock(mark, time.Second)
 	if !held {
@@ -182,7 +182,7 @@ func TestClaudeSwitchWaitsForAnotherMynasRun(t *testing.T) {
 	select {
 	case err := <-done:
 		unlock()
-		t.Fatalf("switched while another myna ran Claude Code in the account's directory (%v)", err)
+		t.Fatalf("switched while another owl ran Claude Code in the account's directory (%v)", err)
 	case <-time.After(300 * time.Millisecond):
 	}
 	// its Claude Code refreshes the sign-in there, and ends

@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // kiroCrewUser is config.json as Kiro Crew's dashboard saves it: the
@@ -28,7 +28,7 @@ const kiroCrewUser = `{
 `
 
 // kiroCrewSandbox is a sandbox HOME with Kiro Crew's home in it, the
-// harnesses connected to myna as wired says and the adapters as found.
+// harnesses connected to owl as wired says and the adapters as found.
 func kiroCrewSandbox(t *testing.T, wired []string, found []string) (home string, a *Agent) {
 	t.Helper()
 	home = syncHome(t)
@@ -72,7 +72,7 @@ func kiroCrewKey(t *testing.T, path, key string) (any, bool) {
 	return cur, true
 }
 
-// Connecting Kiro Crew runs it on Codex, connected to myna, and its crew
+// Connecting Kiro Crew runs it on Codex, connected to owl, and its crew
 // members too; Disconnect puts back what the user had, byte for byte, and
 // every other setting stays.
 func TestKiroCrewConnect(t *testing.T) {
@@ -94,7 +94,7 @@ func TestKiroCrewConnect(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if c.How != "myna" || !a.Wired() {
+	if c.How != "owl" || !a.Wired() {
 		t.Fatalf("connect: %+v, wired %v", c, a.Wired())
 	}
 	if v, _ := kiroCrewKey(t, a.Path, kiroCrewBackend); v != "codex" {
@@ -103,7 +103,7 @@ func TestKiroCrewConnect(t *testing.T) {
 	if v, _ := kiroCrewKey(t, a.Path, kiroCrewMember); v != "codex" {
 		t.Errorf("member_acp_backend %v", v)
 	}
-	if v := a.Values(); v["provider"] != mynaID || v["harness"] != "codex" {
+	if v := a.Values(); v["provider"] != owlID || v["harness"] != "codex" {
 		t.Errorf("values %v", v)
 	}
 	if n := a.Notice(); n != noticeKiroCrew.String() {
@@ -116,7 +116,7 @@ func TestKiroCrewConnect(t *testing.T) {
 	}
 	// connecting again changes nothing
 	b1, _ := os.ReadFile(a.Path)
-	if err := a.Field("provider").Set(mynaID); err != nil {
+	if err := a.Field("provider").Set(owlID); err != nil {
 		t.Fatal(err)
 	}
 	if b2, _ := os.ReadFile(a.Path); string(b1) != string(b2) {
@@ -141,7 +141,7 @@ func TestKiroCrewConnect(t *testing.T) {
 	}
 }
 
-// With no harness connected to myna, connecting says to connect one and
+// With no harness connected to owl, connecting says to connect one and
 // writes nothing; the harness picked by itself is Codex, then Claude Code,
 // one whose adapter is here before one whose isn't, and a harness with no
 // adapter's install says how to install it.
@@ -170,8 +170,8 @@ func TestKiroCrewPicksAHarness(t *testing.T) {
 		// Pi can't run crew members: theirs stays the user's
 		{wired: []string{"pi"}, found: []string{"pi"}, want: "pi", member: "kas"},
 		{wired: []string{"codex"}, want: "codex", member: "codex",
-			notice: "Kiro Crew runs Codex through codex-acp, which myna didn't find here: install it with npm i -g @agentclientprotocol/codex-acp, then start a new session."},
-		// deepseek is no harness of myna's
+			notice: "Kiro Crew runs Codex through codex-acp, which owl didn't find here: install it with npm i -g @agentclientprotocol/codex-acp, then start a new session."},
+		// deepseek is no harness of owl's
 		{wired: []string{"dsh", "deepseek"}},
 	} {
 		_, a := kiroCrewSandbox(t, c.wired, c.found)
@@ -219,7 +219,7 @@ func TestKiroCrewPicksAHarness(t *testing.T) {
 }
 
 // The harness picked on the row is written, its crew members' with it;
-// one not connected to myna is refused. Disconnect after a pick puts
+// one not connected to owl is refused. Disconnect after a pick puts
 // back the user's, and the pick comes back on connecting again.
 func TestKiroCrewHarnessPick(t *testing.T) {
 	_, a := kiroCrewSandbox(t, []string{"codex", "claude", "pi"}, []string{"codex", "claude", "pi"})
@@ -233,13 +233,13 @@ func TestKiroCrewHarnessPick(t *testing.T) {
 	if err := a.Pick("harness", "claude"); err != nil {
 		t.Fatal(err)
 	}
-	if v := a.Values(); v["provider"] != mynaID || v["harness"] != "claude" {
+	if v := a.Values(); v["provider"] != owlID || v["harness"] != "claude" {
 		t.Fatalf("values %v", v)
 	}
 	if v, _ := kiroCrewKey(t, a.Path, kiroCrewMember); v != "claude" {
 		t.Errorf("member %v", v)
 	}
-	// Pi runs no crew members: theirs stays myna's Claude Code
+	// Pi runs no crew members: theirs stays owl's Claude Code
 	if err := a.Pick("harness", "pi"); err != nil {
 		t.Fatal(err)
 	}
@@ -267,7 +267,7 @@ func TestKiroCrewHarnessPick(t *testing.T) {
 	}
 }
 
-// A harness set in config.local.json wins over config.json, so myna
+// A harness set in config.local.json wins over config.json, so owl
 // writes none: connecting is refused and says so, nothing is written, and
 // the row's note and notice say why.
 func TestKiroCrewLocalPin(t *testing.T) {
@@ -293,8 +293,8 @@ func TestKiroCrewLocalPin(t *testing.T) {
 	if o := a.Field("provider").Options(nil); o[0].Note != kiroCrewPinnedNote {
 		t.Errorf("note %q", o[0].Note)
 	}
-	// set there after myna connected it: what Kiro Crew runs is the
-	// user's, and myna isn't said to be its provider
+	// set there after owl connected it: what Kiro Crew runs is the
+	// user's, and owl isn't said to be its provider
 	os.Remove(local)
 	if _, err := a.ConnectHow(); err != nil {
 		t.Fatal(err)
@@ -303,14 +303,14 @@ func TestKiroCrewLocalPin(t *testing.T) {
 	if a.Wired() {
 		t.Error("wired with the local pin on kas")
 	}
-	// on a harness of myna's: connected
+	// on a harness of owl's: connected
 	os.WriteFile(local, []byte(`{"agent":{"acp_backend":"codex"}}`), 0o600)
 	if !a.Wired() {
 		t.Error("not wired with the local pin on Codex")
 	}
 }
 
-// A harness no longer connected to myna leaves Kiro Crew not connected,
+// A harness no longer connected to owl leaves Kiro Crew not connected,
 // and a harness the user set in Kiro Crew since is kept by Disconnect.
 func TestKiroCrewFollowsItsHarness(t *testing.T) {
 	_, a := kiroCrewSandbox(t, []string{"codex"}, []string{"codex"})
@@ -320,7 +320,7 @@ func TestKiroCrewFollowsItsHarness(t *testing.T) {
 	}
 	kiroCrewWired = func(string) bool { return false }
 	if a.Wired() {
-		t.Error("wired with Codex off myna")
+		t.Error("wired with Codex off owl")
 	}
 	kiroCrewWired = func(id string) bool { return id == "codex" }
 	// the user moves it to kiro-cli and its members to Claude in Kiro Crew
@@ -341,7 +341,7 @@ func TestKiroCrewFollowsItsHarness(t *testing.T) {
 	}
 }
 
-// config.json not there yet (the app installed, never started): myna
+// config.json not there yet (the app installed, never started): owl
 // makes it with the one key, and takes it out again on Disconnect.
 func TestKiroCrewMakesItsFile(t *testing.T) {
 	_, a := kiroCrewSandbox(t, []string{"opencode"}, []string{"opencode"})
@@ -356,7 +356,7 @@ func TestKiroCrewMakesItsFile(t *testing.T) {
 	}
 	if _, err := os.Stat(a.Path); !os.IsNotExist(err) {
 		b, _ := os.ReadFile(a.Path)
-		t.Errorf("config.json myna made is still there: %s", b)
+		t.Errorf("config.json owl made is still there: %s", b)
 	}
 }
 
@@ -450,8 +450,8 @@ func TestKiroCrewFindsAdapters(t *testing.T) {
 	}
 }
 
-// End to end, with myna's own Codex wiring in the sandbox: Kiro Crew is
-// offered Codex only once Codex is connected to myna.
+// End to end, with owl's own Codex wiring in the sandbox: Kiro Crew is
+// offered Codex only once Codex is connected to owl.
 func TestKiroCrewOnRealCodexWiring(t *testing.T) {
 	home := syncHome(t)
 	t.Setenv("KIROCREW_HOME", "")
@@ -478,19 +478,19 @@ func TestKiroCrewOnRealCodexWiring(t *testing.T) {
 	if _, err := a.ConnectHow(); err != nil {
 		t.Fatal(err)
 	}
-	if v := a.Values(); v["provider"] != mynaID || v["harness"] != "codex" {
+	if v := a.Values(); v["provider"] != owlID || v["harness"] != "codex" {
 		t.Errorf("values %v", v)
 	}
 	if err := cx.Disconnect(); err != nil {
 		t.Fatal(err)
 	}
 	if a.Wired() {
-		t.Error("Kiro Crew still connected with Codex off myna")
+		t.Error("Kiro Crew still connected with Codex off owl")
 	}
 }
 
 // kiroCrewOnClaude is a sandbox HOME with Claude Code installed but not
-// connected to myna, nothing else, and Kiro Crew's config.json set to
+// connected to owl, nothing else, and Kiro Crew's config.json set to
 // run on Claude Code, as wuping9525's Windows had it.
 func kiroCrewOnClaude(t *testing.T) (a, cc *Agent, before []byte) {
 	t.Helper()
@@ -522,7 +522,7 @@ func kiroCrewOnClaude(t *testing.T) (a, cc *Agent, before []byte) {
 }
 
 // wuping9525: Kiro Crew set to Claude Code, Claude Code installed and not
-// connected to myna. Connecting Kiro Crew connects Claude Code too, in
+// connected to owl. Connecting Kiro Crew connects Claude Code too, in
 // the one step, and runs Crew on it; Disconnect takes both off again and
 // leaves the files as they were.
 func TestKiroCrewConnectsItsHarness(t *testing.T) {
@@ -534,10 +534,10 @@ func TestKiroCrewConnectsItsHarness(t *testing.T) {
 	if !cc.Wired() {
 		t.Fatal("Claude Code not connected along with Kiro Crew")
 	}
-	if v := a.Values(); v["provider"] != mynaID || v["harness"] != "claude" {
+	if v := a.Values(); v["provider"] != owlID || v["harness"] != "claude" {
 		t.Errorf("values %v", v)
 	}
-	if n := a.Notice(); !strings.Contains(n, "myna connected Claude Code too") {
+	if n := a.Notice(); !strings.Contains(n, "owl connected Claude Code too") {
 		t.Errorf("notice %q", n)
 	}
 	if err := a.Disconnect(); err != nil {
@@ -553,8 +553,8 @@ func TestKiroCrewConnectsItsHarness(t *testing.T) {
 		t.Errorf("config.json\n%s\nwant\n%s", b, before)
 	}
 	// as Claude Code's own Disconnect leaves it: the user's settings kept,
-	// nothing of myna's
-	if b, _ := os.ReadFile(cc.Path); !strings.Contains(string(b), `"theme": "dark"`) || strings.Contains(string(b), "ANTHROPIC") || strings.Contains(string(b), "myna") {
+	// nothing of owl's
+	if b, _ := os.ReadFile(cc.Path); !strings.Contains(string(b), `"theme": "dark"`) || strings.Contains(string(b), "ANTHROPIC") || strings.Contains(string(b), "owl") {
 		t.Errorf("Claude Code's settings.json\n%s\nwas\n%s", b, ccBefore)
 	}
 	if _, ok := stashLoad()[kiroCrewJoinedKey]; ok {
@@ -574,7 +574,7 @@ func TestKiroCrewLeavesTheUsersHarness(t *testing.T) {
 		if _, err := a.ConnectHow(); err != nil {
 			t.Fatal(err)
 		}
-		if strings.Contains(a.Notice(), "myna connected") {
+		if strings.Contains(a.Notice(), "owl connected") {
 			t.Errorf("notice %q", a.Notice())
 		}
 		if err := a.Disconnect(); err != nil {

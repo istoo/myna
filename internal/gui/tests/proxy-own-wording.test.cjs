@@ -53,7 +53,7 @@ function settingsPayload(lang, source) {
     dock: false, dockWindow: false, proxy, redact: false, redactPersonal: false, redactWords: [],
     codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", workbuddyCheckin: false, noStats: false,
     trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "",
-    version: "0.1.400", dir: "~/.config/myna", gateway: "http://127.0.0.1:3425",
+    version: "0.1.400", dir: "~/.config/owl", gateway: "http://127.0.0.1:3425",
     proxyNow, proxySource: source, login: false,
     visionModels: [], imageGenModels: [], workbuddyCheckins: [], lanURLs: [],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
@@ -95,7 +95,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
               page.on("pageerror", (e) => errors.push(e.message));
               await page.route("**/*", server(lang, source));
               await watchSettingsReads(page);
-              await page.goto("http://myna.test/?view=settings");
+              await page.goto("http://owl.test/?view=settings");
               await settingsDrawn(page);
               await openPart(page, "network");
               const sub = page.locator("#proxySub");

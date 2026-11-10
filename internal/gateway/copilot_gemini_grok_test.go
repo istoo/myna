@@ -13,8 +13,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // #4374 (RoyShen12): Codex Desktop through Copilot — the Gemini models all
@@ -116,9 +116,9 @@ func TestCopilotGeminiKeepsUnprovenUnions(t *testing.T) {
 // custom tool, which xAI behind Copilot takes none of (#3392). Copilot's
 // answer in front of Grok says no more than the status (#378's bare 400),
 // so nothing in "422 Unprocessable Entity: Unprocessable Entity" (#2951,
-// #4374: six requests in a row, all refused) tells myna what to learn,
+// #4374: six requests in a row, all refused) tells owl what to learn,
 // and every turn failed. The custom tools go as functions from the first
-// ask, as a refusal already taught myna to do for the vendors whose
+// ask, as a refusal already taught owl to do for the vendors whose
 // answer names them (#2656, #3392); a model Copilot serves on the same
 // /responses that takes them (GPT) is relayed as it came.
 func TestCopilotGrokTakesCustomToolsAsFunctions(t *testing.T) {

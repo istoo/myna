@@ -9,14 +9,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// #1907 (foobra): two ChatGPT accounts, both on in myna, for Codex
+// #1907 (foobra): two ChatGPT accounts, both on in owl, for Codex
 // Desktop and the CLI alone, not for the gateway. With more accounts on,
-// myna points Codex at the gateway to fail over between them (#1385);
+// owl points Codex at the gateway to fail over between them (#1385);
 // switch-only takes that base URL out, so Codex goes straight to OpenAI and
-// myna only switches its sign-in, and nothing puts it back while it is
+// owl only switches its sign-in, and nothing puts it back while it is
 // on. Off again, failover writes it back. A base URL the user wrote by hand
 // is theirs, and stays either way (#856).
 func TestCodexSwitchOnlyKeepsCodexOffTheGateway(t *testing.T) {

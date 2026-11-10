@@ -1,11 +1,11 @@
 package gateway
 
-// GET /v1/myna/cpu: a Go CPU profile of the process serving the gateway,
-// recorded for some seconds while the user goes on using myna, for a
-// report of myna using too much CPU (@LeiCheng42 on X: the most CPU of
+// GET /v1/owl/cpu: a Go CPU profile of the process serving the gateway,
+// recorded for some seconds while the user goes on using owl, for a
+// report of owl using too much CPU (@LeiCheng42 on X: the most CPU of
 // anything while Codex runs). A macOS `sample` or Activity Monitor names
 // none of Go's frames, so this is the one way to see where the Go side
-// spends it; `myna cpu` asks for it and writes the file the user sends.
+// spends it; `owl cpu` asks for it and writes the file the user sends.
 
 import (
 	"bytes"
@@ -20,11 +20,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // CPUPath is where the gateway answers a CPU profile.
-const CPUPath = "/v1/myna/cpu"
+const CPUPath = "/v1/owl/cpu"
 
 // CPUStatsHeader carries CPUStats, as JSON, beside the profile.
 const CPUStatsHeader = "X-Magpie-CPU-Stats"
@@ -45,7 +45,7 @@ type CPUStats struct {
 	PID        int     `json:"pid"`
 	Program    string  `json:"program"`
 	Version    string  `json:"version"`
-	Window     bool    `json:"window"` // the app's window or myna web serves the gateway
+	Window     bool    `json:"window"` // the app's window or owl web serves the gateway
 	Uptime     string  `json:"uptime"`
 	Seconds    float64 `json:"seconds"` // how long the profile recorded
 	CPUKnown   bool    `json:"cpuKnown"`
@@ -66,7 +66,7 @@ var cpuSecond = time.Second
 // cpuRefused says why r may not have the CPU profile, "" when it may: the
 // same callers as the heap profile (heapRefused).
 func cpuRefused(r *http.Request) string {
-	return profileRefused(r, "CPU profile", "myna cpu")
+	return profileRefused(r, "CPU profile", "owl cpu")
 }
 
 // cpuProfile answers CPUPath: the "cpu" profile (gzipped protobuf, as go
@@ -90,7 +90,7 @@ func (s *Server) cpuProfile(w http.ResponseWriter, r *http.Request) {
 		secs = n
 	}
 	if !cpuRecording.CompareAndSwap(false, true) {
-		writeError(w, provider.Chat, http.StatusConflict, "myna is recording a CPU profile already: wait for that one to finish, then run myna cpu again")
+		writeError(w, provider.Chat, http.StatusConflict, "owl is recording a CPU profile already: wait for that one to finish, then run owl cpu again")
 		return
 	}
 	defer cpuRecording.Store(false)
@@ -99,7 +99,7 @@ func (s *Server) cpuProfile(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	if err := pprof.StartCPUProfile(&buf); err != nil {
 		// another profiler of this process (a test's -cpuprofile)
-		writeError(w, provider.Chat, http.StatusConflict, "myna couldn't start a CPU profile: "+err.Error())
+		writeError(w, provider.Chat, http.StatusConflict, "owl couldn't start a CPU profile: "+err.Error())
 		return
 	}
 	t := time.NewTimer(time.Duration(secs) * cpuSecond)
@@ -136,7 +136,7 @@ func (s *Server) cpuProfile(w http.ResponseWriter, r *http.Request) {
 	stats, _ := json.Marshal(st)
 	h := w.Header()
 	h.Set("Content-Type", "application/octet-stream")
-	h.Set("Content-Disposition", `attachment; filename="myna-cpu.pb.gz"`)
+	h.Set("Content-Disposition", `attachment; filename="owl-cpu.pb.gz"`)
 	h.Set("Cache-Control", "no-store")
 	h.Set(CPUStatsHeader, string(stats))
 	w.Write(buf.Bytes())

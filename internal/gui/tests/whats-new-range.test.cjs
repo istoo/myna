@@ -18,7 +18,7 @@ const { watchSettingsReads, settingsDrawn } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const CURRENT = "0.1.1410";
-// myna-releases' shape: newest first, 0.1.1407 never released
+// owl-releases' shape: newest first, 0.1.1407 never released
 const ALL = [];
 for (let v = 1410; v >= 1290; v--) if (v !== 1407) ALL.push({ version: "0.1." + v, notes: `## Bug Fixes\n\n- fix ${v}` });
 const back = (n) => ALL.slice(0, n + 1);
@@ -29,7 +29,7 @@ function settingsPayload(lang) {
     dock: false, dockWindow: false, proxy: "", redact: false, redactPersonal: false, redactWords: [],
     codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", workbuddyCheckin: false, noStats: false,
     trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "",
-    version: CURRENT, dir: "~/.config/myna", gateway: "http://127.0.0.1:3425",
+    version: CURRENT, dir: "~/.config/owl", gateway: "http://127.0.0.1:3425",
     proxyNow: "none", proxySource: "none", login: false,
     visionModels: [], imageGenModels: [], workbuddyCheckins: [], lanURLs: [],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
@@ -54,7 +54,7 @@ function serve(lang, ctl) {
       if (!url.searchParams.has("all")) return json({ show: false, current: CURRENT, releases: [] });
       const last = url.searchParams.get("last") || "";
       ctl.asked.push(last);
-      const base = { show: false, current: CURRENT, url: "https://github.com/istoo/myna/releases/tag/v" + CURRENT };
+      const base = { show: false, current: CURRENT, url: "https://github.com/istoo/owl/releases/tag/v" + CURRENT };
       if (last && ctl.down) return json({ ...base, releases: [], error: "release notes: 503 Service Unavailable" });
       return json({ ...base, releases: last ? back(+last) : back(1) });
     }
@@ -89,7 +89,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("dialog", (d) => { errors.push("dialog: " + d.message()); d.dismiss(); });
       await page.route("**/*", serve(lang, ctl));
       await watchSettingsReads(page);
-      await page.goto("http://myna.test/?view=settings&tab=about");
+      await page.goto("http://owl.test/?view=settings&tab=about");
       await settingsDrawn(page);
       const dialog = page.locator("#modal .editor.whatsnew");
       const view = page.locator("#view-settings");
@@ -210,7 +210,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       if (url.pathname === "/api/whatsnew/seen") return route.fulfill({ status: 204 });
       return base(route);
     });
-    await page.goto("http://myna.test/");
+    await page.goto("http://owl.test/");
     const dialog = page.locator("#modal .editor.whatsnew");
     await dialog.waitFor();
     assert.equal(await dialog.locator(".wn-range").count(), 0);

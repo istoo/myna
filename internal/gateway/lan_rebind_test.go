@@ -15,8 +15,8 @@ import (
 // the host, and a call with an enabled gateway key go through as before.
 func TestReboundPageRefused(t *testing.T) {
 	fresh(t)
-	t.Setenv("MYNA_ADDR", "")
-	t.Setenv("MYNA_PUBLIC_URL", "")
+	t.Setenv("OWL_ADDR", "")
+	t.Setenv("OWL_PUBLIC_URL", "")
 	reached := false
 	h := lanGuard(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { reached = true }))
 	call := func(method, host string, hdr ...string) int {
@@ -57,18 +57,18 @@ func TestReboundPageRefused(t *testing.T) {
 		t.Fatal("a browser at a localhost subdomain:", c)
 	}
 	// an agent sends no browser marks, whatever name it was given
-	if c := call("POST", evil, "Authorization", "Bearer myna", "User-Agent", "claude-cli/2.1"); c != 200 || !reached {
+	if c := call("POST", evil, "Authorization", "Bearer owl", "User-Agent", "claude-cli/2.1"); c != 200 || !reached {
 		t.Fatal("an agent:", c)
 	}
-	t.Setenv("MYNA_PUBLIC_URL", "https://myna.example.net")
-	if c := call("GET", "myna.example.net", chrome...); c != 200 || !reached {
+	t.Setenv("OWL_PUBLIC_URL", "https://owl.example.net")
+	if c := call("GET", "owl.example.net", chrome...); c != 200 || !reached {
 		t.Fatal("the public URL's host:", c)
 	}
 	_, secrets := newCaller(t, "Page")
 	if c := call("GET", evil, append([]string{"Authorization", "Bearer " + secrets[0]}, chrome...)...); c != 200 || !reached {
 		t.Fatal("with an enabled gateway key:", c)
 	}
-	if c := call("GET", evil, append([]string{"Authorization", "Bearer sk-myna-wrong"}, chrome...)...); c != http.StatusForbidden || reached {
+	if c := call("GET", evil, append([]string{"Authorization", "Bearer sk-owl-wrong"}, chrome...)...); c != http.StatusForbidden || reached {
 		t.Fatal("with a wrong key:", c)
 	}
 }

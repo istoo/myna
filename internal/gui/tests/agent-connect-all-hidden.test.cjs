@@ -41,7 +41,7 @@ function fixture(lang, guide) {
     if (url.pathname === "/api/agents/connect/grok") {
       connects++;
       // the gateway's answer to Connect's AllHiddenError (api.go)
-      if (!list.some((m) => !m.hidden)) return json({ error: "None of myna's models is left in Grok Build's model list", code: "all_hidden", agent: "Grok Build" }, 400);
+      if (!list.some((m) => !m.hidden)) return json({ error: "None of owl's models is left in Grok Build's model list", code: "all_hidden", agent: "Grok Build" }, 400);
       wired = true;
       return json({ ...state(), connected: { how: "first", field: "model", value: list.find((m) => !m.hidden).id } });
     }
@@ -66,8 +66,8 @@ function fixture(lang, guide) {
 }
 
 const W = {
-  en: { pick: "None of myna's models is left in Grok Build's model list: pick one, then connect Grok Build" },
-  zh: { pick: "myna 的模型都不在 Grok Build 的模型列表里：先选一个，再接入 Grok Build" },
+  en: { pick: "None of owl's models is left in Grok Build's model list: pick one, then connect Grok Build" },
+  zh: { pick: "owl 的模型都不在 Grok Build 的模型列表里：先选一个，再接入 Grok Build" },
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -89,7 +89,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           }
           await browser.close();
         });
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         const row = page.locator('.row.agent[data-id="grok"]');
         const sw = row.locator(".ag-conn");
         const chip = page.locator('.guide-agent[data-id="grok"]');

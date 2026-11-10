@@ -10,13 +10,13 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/filememo"
-	"github.com/istoo/myna/internal/lastgood"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/filememo"
+	"github.com/istoo/owl/internal/lastgood"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// The stash remembers what an agent's config said before myna pointed it
+// The stash remembers what an agent's config said before owl pointed it
 // at the gateway, so switching back restores it instead of guessing.
 //
 // stash.json holds every agent's originals, so a change to it is read,
@@ -24,7 +24,7 @@ import (
 // two changes at once, or one cut short, never leave it half there, which
 // the next change read as no stash and wrote back over every agent's. A
 // file that doesn't parse (edited by hand, or half written by an older
-// myna) is copied aside before it is written over, so what it held can
+// owl) is copied aside before it is written over, so what it held can
 // still be got back.
 var stashMu sync.Mutex
 

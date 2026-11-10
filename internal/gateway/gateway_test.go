@@ -17,8 +17,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // fake is an upstream that records what it got and replies with a script.
@@ -70,7 +70,7 @@ func sse(lines ...string) string {
 	return b.String()
 }
 
-// setup points myna's provider file at a temp dir and adds one provider
+// setup points owl's provider file at a temp dir and adds one provider
 // speaking only the given protocol, backed by the fake. Rests are kept
 // for the process, by provider id, and every test's provider is "fake":
 // one a test rested (out of its allowance, held without asking since
@@ -662,7 +662,7 @@ func TestAnthropicPassthroughTurnsThinkingOffUnlessAsked(t *testing.T) {
 }
 
 // GLM-5.3 always thinks and refuses thinking turned off (Z.ai's 1210):
-// the request myna turned it off for is asked again with it left to the
+// the request owl turned it off for is asked again with it left to the
 // model, once
 func TestAnthropicPassthroughModelThatAlwaysThinks(t *testing.T) {
 	f := &fake{t: t, ctype: "application/json", reply: `{"id":"msg","type":"message","content":[]}`}
@@ -687,7 +687,7 @@ func TestAnthropicPassthroughModelThatAlwaysThinks(t *testing.T) {
 
 // DashScope's glm-5.3 cannot think with it off either, in its own words
 // ("The value of the enable_thinking parameter is restricted to True."):
-// the request myna turned it off for is asked again with it left to the
+// the request owl turned it off for is asked again with it left to the
 // model, once
 func TestAnthropicPassthroughDashScopeThinkingRestricted(t *testing.T) {
 	f := &fake{t: t, ctype: "application/json", reply: `{"id":"msg","type":"message","content":[]}`}
@@ -729,7 +729,7 @@ func TestAnthropicPassthroughAlwaysThinksInChinese(t *testing.T) {
 }
 
 // #1141: MiniMax and Volcengine Ark refuse thinking turned off in their
-// own words, the reporters' literal messages. The request myna turned it
+// own words, the reporters' literal messages. The request owl turned it
 // off for (Claude Desktop's model_validation probe, its health probe and
 // titles send none) is asked again with thinking left to the model, once;
 // thinking the caller asked for goes as it came, and another 400 on the
@@ -771,7 +771,7 @@ func TestAnthropicPassthroughMiniMaxArkThinkingOffRefused(t *testing.T) {
 }
 
 // #3739: Kimi Code (China)'s K3.1 models refuse thinking turned off in
-// their own words, the reporter's literal message. The request myna
+// their own words, the reporter's literal message. The request owl
 // turned it off for (ZCode sends none; it asks for a level as
 // output_config.effort) is asked again with thinking left to the model,
 // once; thinking the caller asked for goes as it came, and another 400 on
@@ -1316,7 +1316,7 @@ func TestConversationID(t *testing.T) {
 	turn2 := `{"messages":[{"role":"system","content":"s"},{"role":"user","content":"fix the bug"},{"role":"assistant","content":"done"},{"role":"user","content":"thanks"}]}`
 	other := `{"messages":[{"role":"system","content":"s"},{"role":"user","content":"write docs"}]}`
 	a, b, c := conversationID(http.Header{}, []byte(turn1)), conversationID(http.Header{}, []byte(turn2)), conversationID(http.Header{}, []byte(other))
-	if a != b || a == c || !strings.HasPrefix(a, "myna-") {
+	if a != b || a == c || !strings.HasPrefix(a, "owl-") {
 		t.Errorf("derived ids: %q %q %q", a, b, c)
 	}
 	r1 := conversationID(http.Header{}, []byte(`{"input":[{"role":"user","content":"hi"}]}`))
@@ -1329,7 +1329,7 @@ func TestConversationID(t *testing.T) {
 	g1 := conversationID(http.Header{}, []byte(`{"model":"m","contents":[{"role":"user","parts":[{"text":"fix the bug"}]}]}`))
 	g2 := conversationID(http.Header{}, []byte(`{"model":"m","systemInstruction":{"parts":[{"text":"help"}]},"contents":[{"role":"user","parts":[{"text":"fix the bug"}]},{"role":"model","parts":[{"text":"done"}]},{"role":"user","parts":[{"text":"thanks"}]}]}`))
 	gOther := conversationID(http.Header{}, []byte(`{"model":"m","contents":[{"role":"user","parts":[{"text":"write docs"}]}]}`))
-	if g1 != g2 || g1 == gOther || !strings.HasPrefix(g1, "myna-") {
+	if g1 != g2 || g1 == gOther || !strings.HasPrefix(g1, "owl-") {
 		t.Errorf("gemini derived ids: %q %q %q", g1, g2, gOther)
 	}
 	// Gemini accepts an omitted role on a user content. When history adds an

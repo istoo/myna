@@ -6,17 +6,17 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/istoo/myna/internal/agent"
+	"github.com/istoo/owl/internal/agent"
 )
 
 // helpAsked is whether args ask for help rather than for the command to
 // run: -h or --help anywhere, or help as the word after the command. It
 // is looked at before run does anything, since a command that took
-// --help for a value acted on it: `myna snow --help` set Snow's model
-// to "--help", which took myna out of it (#1457), and `myna serve
+// --help for a value acted on it: `owl snow --help` set Snow's model
+// to "--help", which took owl out of it (#1457), and `owl serve
 // --help` started a gateway.
 func helpAsked(args []string) bool {
-	// what myna is started with by others (Claude Code's MCP helper, the
+	// what owl is started with by others (Claude Code's MCP helper, the
 	// Agents page's dry run, a link, Windows' -Embedding) never carries
 	// an exact -h, --help or help
 	for _, a := range args {
@@ -27,17 +27,17 @@ func helpAsked(args []string) bool {
 	if len(args) == 0 {
 		return false
 	}
-	// `myna help <command>` is the same ask as `myna <command> --help`
+	// `owl help <command>` is the same ask as `owl <command> --help`
 	return args[0] == "help" || len(args) > 1 && args[1] == "help"
 }
 
-// tuiUsage is `myna tui --help`: the keys that work on every page. The
+// tuiUsage is `owl tui --help`: the keys that work on every page. The
 // ? panel in the terminal lists each page's own keys too.
-const tuiUsage = `usage: myna tui
+const tuiUsage = `usage: owl tui
 
-  myna in the terminal: agents, providers, routing, usage, sessions and the
+  owl in the terminal: agents, providers, routing, usage, sessions and the
   library, 1–6 between them. It serves the gateway while it is open when no
-  other myna does.
+  other owl does.
 
   ↑↓ / k j    pick an agent or a row
   ←→ / h l    pick a field or a range
@@ -51,12 +51,12 @@ const tuiUsage = `usage: myna tui
   ctrl+c      quit
 `
 
-// helpFor is what `myna <command> --help` prints: the command's own
-// usage where it has one, its lines of myna's usage otherwise, an
+// helpFor is what `owl <command> --help` prints: the command's own
+// usage where it has one, its lines of owl's usage otherwise, an
 // agent's forms and fields for an agent, and the whole usage for
 // anything else.
 func helpFor(args []string) string {
-	// `myna help <command>` asks for that command's help, not the whole
+	// `owl help <command>` asks for that command's help, not the whole
 	// usage it used to print
 	if args[0] == "help" && len(args) > 1 {
 		args = args[1:]
@@ -129,13 +129,13 @@ func helpFor(args []string) string {
 	return usage
 }
 
-// usageLines are the lines of myna's usage for `myna <cmd>`, with the
+// usageLines are the lines of owl's usage for `owl <cmd>`, with the
 // lines that carry on from them.
 func usageLines(cmd string) string {
 	var b strings.Builder
 	in := false
 	for _, l := range strings.Split(usage, "\n") {
-		if rest, ok := strings.CutPrefix(l, "  myna "); ok {
+		if rest, ok := strings.CutPrefix(l, "  owl "); ok {
 			in = rest == cmd || strings.HasPrefix(rest, cmd+" ")
 		} else if !strings.HasPrefix(l, "          ") {
 			in = false
@@ -147,24 +147,24 @@ func usageLines(cmd string) string {
 	return b.String()
 }
 
-// agentHelp is `myna <agent> --help`: the forms that set it, and its
+// agentHelp is `owl <agent> --help`: the forms that set it, and its
 // fields.
 func agentHelp(a *agent.Agent) string {
 	var b strings.Builder
 	id := a.ID
 	fmt.Fprintf(&b, "%s\n\n", a.Name)
-	fmt.Fprintf(&b, "  myna %s                  show it\n", id)
+	fmt.Fprintf(&b, "  owl %s                  show it\n", id)
 	if len(a.Fields) == 0 {
 		return b.String()
 	}
-	fmt.Fprintf(&b, "  myna %s <model>          set its model   (myna models %s lists them)\n", id, id)
-	fmt.Fprintf(&b, "  myna %s <field>          show one field\n", id)
-	fmt.Fprintf(&b, "  myna %s <field> <value>  set another field\n", id)
-	fmt.Fprintf(&b, "  myna %s default          take myna out: back on what it had before\n", id)
-	fmt.Fprintf(&b, "  myna %s <field> default  that field back to its own default\n", id)
+	fmt.Fprintf(&b, "  owl %s <model>          set its model   (owl models %s lists them)\n", id, id)
+	fmt.Fprintf(&b, "  owl %s <field>          show one field\n", id)
+	fmt.Fprintf(&b, "  owl %s <field> <value>  set another field\n", id)
+	fmt.Fprintf(&b, "  owl %s default          take owl out: back on what it had before\n", id)
+	fmt.Fprintf(&b, "  owl %s <field> default  that field back to its own default\n", id)
 	if a.ID == "agy" {
-		fmt.Fprintf(&b, "  myna %s run [args…]      start agy, on myna while its model is myna's (what your shell's agy runs)\n", id)
-		fmt.Fprintf(&b, "  myna %s env              the variables and model it is started with\n", id)
+		fmt.Fprintf(&b, "  owl %s run [args…]      start agy, on owl while its model is owl's (what your shell's agy runs)\n", id)
+		fmt.Fprintf(&b, "  owl %s env              the variables and model it is started with\n", id)
 	}
 	var keys []string
 	for _, f := range a.Fields {
@@ -183,15 +183,15 @@ func agentHelp(a *agent.Agent) string {
 		if n > 1 {
 			names = strings.Join(both[:n-1], ", ") + " and " + both[n-1]
 		}
-		fmt.Fprintf(&b, "  %s alone name the %s: myna %s %s sets its %s to %s\n", names, a.Fields[0].Label, id, both[0], a.Fields[0].Label, both[0])
-		// they are the agent's own models, not myna's: setting one takes
-		// myna out (#2000, read as a query of the tier)
-		fmt.Fprintf(&b, "  they are %s's own models, not myna's: setting one takes myna out; myna %s alone shows each\n", a.Name, id)
+		fmt.Fprintf(&b, "  %s alone name the %s: owl %s %s sets its %s to %s\n", names, a.Fields[0].Label, id, both[0], a.Fields[0].Label, both[0])
+		// they are the agent's own models, not owl's: setting one takes
+		// owl out (#2000, read as a query of the tier)
+		fmt.Fprintf(&b, "  they are %s's own models, not owl's: setting one takes owl out; owl %s alone shows each\n", a.Name, id)
 	}
 	return b.String()
 }
 
-// flagArg is an argument to `myna <agent> …` that is a flag, which no
+// flagArg is an argument to `owl <agent> …` that is a flag, which no
 // agent form takes: it is said to be one, rather than set as a model or a
 // field's value. A negative number is a value.
 func flagArg(args []string) string {

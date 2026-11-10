@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // retrieveTimeout bounds an embeddings or rerank call: a vendor answers
@@ -41,7 +41,7 @@ func (s *Server) retrieve(path, operation string) http.HandlerFunc {
 		var asked string
 		json.Unmarshal(req["model"], &asked)
 		if asked == "" {
-			writeError(w, provider.Chat, 400, "name the model: \"model\" is a myna model id, as /v1/models lists them")
+			writeError(w, provider.Chat, 400, "name the model: \"model\" is a owl model id, as /v1/models lists them")
 			return
 		}
 		s.serveRetrieval(w, r, path, operation, start, asked, &jsonRetrieval{req: req})
@@ -375,10 +375,10 @@ func (s *Server) retrieveOpen(ctx context.Context, p provider.Provider, url, cty
 	if accept != "" {
 		req.Header.Set("Accept", accept)
 	}
-	// myna's, or the agent's own where the provider passes it on (#1851)
+	// owl's, or the agent's own where the provider passes it on (#1851)
 	stampUA(ctx, p, req.Header)
-	if p.IsRemoteMyna() {
-		req.Header.Set("User-Agent", "myna/"+Version)
+	if p.IsRemoteOwl() {
+		req.Header.Set("User-Agent", "owl/"+Version)
 		passOnCaller(ctx, req)
 	}
 	if err := p.Sign(ctx, req, provider.Chat, body); err != nil {

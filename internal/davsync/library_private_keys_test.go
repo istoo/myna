@@ -5,10 +5,10 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/backup"
-	"github.com/istoo/myna/internal/library"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/backup"
+	"github.com/istoo/owl/internal/library"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // The remote never held C's token. A's keyed library upload therefore cannot
@@ -42,7 +42,7 @@ func TestKeyedLibraryUploadPreservesKeylessLocalSecrets(t *testing.T) {
 	remote := func() backup.Bundle {
 		t.Helper()
 		f.mu.Lock()
-		data := slices.Clone(f.objects["team x+y/myna/myna.myna-backup"])
+		data := slices.Clone(f.objects["team x+y/owl/owl.owl-backup"])
 		f.mu.Unlock()
 		b, err := backup.Open(data, cfg.Passphrase)
 		if err != nil {

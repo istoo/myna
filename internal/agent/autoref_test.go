@@ -5,18 +5,18 @@ import (
 	"os"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// An agent myna set to a found group by its old id, group/auto-<slug>,
+// An agent owl set to a found group by its old id, group/auto-<slug>,
 // is moved onto the group's auto/<model> on the next catalog sync, its
 // other settings kept (ZeroClover on X); one whose field the user set
-// themselves, or changed since myna set it, keeps their value.
-func TestFoundGroupRenamedOnlyWhereMynaSetIt(t *testing.T) {
+// themselves, or changed since owl set it, keeps their value.
+func TestFoundGroupRenamedOnlyWhereOwlSetIt(t *testing.T) {
 	syncHome(t)
-	// relay and spare both serve glm-4.6: myna finds the group
+	// relay and spare both serve glm-4.6: owl finds the group
 	if err := provider.Save(provider.Provider{ID: "spare", Name: "Spare", Key: "k", Chat: "http://127.0.0.1:1/v1", Models: []string{"glm-4.6"}}); err != nil {
 		t.Fatal(err)
 	}
@@ -34,19 +34,19 @@ func TestFoundGroupRenamedOnlyWhereMynaSetIt(t *testing.T) {
 	if set == "" {
 		t.Fatalf("nothing set: %v", a.Values())
 	}
-	// what an older myna wrote and recorded: the group by its old id,
+	// what an older owl wrote and recorded: the group by its old id,
 	// beside a key of the user's own
-	old := "myna/group/auto-glm-4-6"
+	old := "owl/group/auto-glm-4-6"
 	if err := edit.SetJSON(a.Path, edit.KV{Path: "model", Value: old}, edit.KV{Path: "theme", Value: "mine"}); err != nil {
 		t.Fatal(err)
 	}
 	record(a.ID, "model", old)
 
 	SyncCatalog()
-	if got := a.Values()["model"]; got != "myna/auto/glm-4.6" {
-		t.Fatalf("myna's own value became %q, want myna/auto/glm-4.6\n%s", got, readFile(a.Path))
+	if got := a.Values()["model"]; got != "owl/auto/glm-4.6" {
+		t.Fatalf("owl's own value became %q, want owl/auto/glm-4.6\n%s", got, readFile(a.Path))
 	}
-	if got := appliedOf(a.ID).Fields["model"]; got != "myna/auto/glm-4.6" {
+	if got := appliedOf(a.ID).Fields["model"]; got != "owl/auto/glm-4.6" {
 		t.Errorf("applied.json holds %q", got)
 	}
 	var doc map[string]any
@@ -58,8 +58,8 @@ func TestFoundGroupRenamedOnlyWhereMynaSetIt(t *testing.T) {
 	}
 
 	// the user's own value, the group by its old id at an effort of their
-	// choosing, where myna had set the group plain: theirs, kept
-	theirs := "myna/group/auto-glm-4-6:high"
+	// choosing, where owl had set the group plain: theirs, kept
+	theirs := "owl/group/auto-glm-4-6:high"
 	if err := edit.SetJSON(a.Path, edit.KV{Path: "model", Value: theirs}); err != nil {
 		t.Fatal(err)
 	}
@@ -68,7 +68,7 @@ func TestFoundGroupRenamedOnlyWhereMynaSetIt(t *testing.T) {
 	if got := a.Values()["model"]; got != theirs {
 		t.Fatalf("the user's %q became %q", theirs, got)
 	}
-	// and one myna never set: no record of the field at all
+	// and one owl never set: no record of the field at all
 	appliedMu.Lock()
 	m := appliedLoad()
 	delete(m, a.ID)
@@ -84,11 +84,11 @@ func TestFoundGroupRenamedOnlyWhereMynaSetIt(t *testing.T) {
 }
 
 // A found group's auto/<model> follows the spelling models.dev gives the
-// model most (XYenon on Discord), so one myna listed before as
-// auto/glm-5-3-flash is auto/glm-5.3-flash now. An agent myna set to the
+// model most (XYenon on Discord), so one owl listed before as
+// auto/glm-5-3-flash is auto/glm-5.3-flash now. An agent owl set to the
 // old spelling is moved onto the new one on the next catalog sync, as one
 // set to group/auto-<slug> is: OpenCode checks its model against the list
-// myna writes, which names the group by its new spelling only. One the
+// owl writes, which names the group by its new spelling only. One the
 // user set to it themselves keeps their value, which is still the group.
 func TestFoundGroupMovedOffAnOldSpelling(t *testing.T) {
 	syncHome(t)
@@ -111,23 +111,23 @@ func TestFoundGroupMovedOffAnOldSpelling(t *testing.T) {
 	if err := a.Apply("model", "spare/glm-5.3-flash"); err != nil {
 		t.Fatal(err)
 	}
-	// what myna wrote and recorded while the group was listed by the
+	// what owl wrote and recorded while the group was listed by the
 	// first provider's spelling
-	old := "myna/auto/glm-5-3-flash"
+	old := "owl/auto/glm-5-3-flash"
 	if err := edit.SetJSON(a.Path, edit.KV{Path: "model", Value: old}); err != nil {
 		t.Fatal(err)
 	}
 	record(a.ID, "model", old)
 	SyncCatalog()
-	if got := a.Values()["model"]; got != "myna/auto/glm-5.3-flash" {
-		t.Fatalf("myna's own value became %q, want myna/auto/glm-5.3-flash\n%s", got, readFile(a.Path))
+	if got := a.Values()["model"]; got != "owl/auto/glm-5.3-flash" {
+		t.Fatalf("owl's own value became %q, want owl/auto/glm-5.3-flash\n%s", got, readFile(a.Path))
 	}
-	if got := appliedOf(a.ID).Fields["model"]; got != "myna/auto/glm-5.3-flash" {
+	if got := appliedOf(a.ID).Fields["model"]; got != "owl/auto/glm-5.3-flash" {
 		t.Errorf("applied.json holds %q", got)
 	}
 	// set as it is listed now: left alone
 	SyncCatalog()
-	if got := a.Values()["model"]; got != "myna/auto/glm-5.3-flash" {
+	if got := a.Values()["model"]; got != "owl/auto/glm-5.3-flash" {
 		t.Errorf("the group as it is listed became %q", got)
 	}
 
@@ -145,10 +145,10 @@ func TestFoundGroupMovedOffAnOldSpelling(t *testing.T) {
 		t.Fatalf("the user's own %q became %q", old, got)
 	}
 	// and a pick of the old spelling written now is the group as listed
-	if err := a.Apply("model", "myna/auto/glm-5-3-flash"); err != nil {
+	if err := a.Apply("model", "owl/auto/glm-5-3-flash"); err != nil {
 		t.Fatal(err)
 	}
-	if got := a.Values()["model"]; got != "myna/auto/glm-5.3-flash" {
+	if got := a.Values()["model"]; got != "owl/auto/glm-5.3-flash" {
 		t.Errorf("a pick of the old spelling was written as %q", got)
 	}
 }

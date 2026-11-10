@@ -11,9 +11,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 	"github.com/tidwall/gjson"
 )
 
@@ -30,7 +30,7 @@ func pickEfforts(t *testing.T, vision, searcher string) {
 
 // The reasoning level picked for Image recognition (MOMO on Discord) is
 // what its model is asked at, fitted to the levels it has, with room to
-// think in; Default is myna's own, the least it has, as before. The
+// think in; Default is owl's own, the least it has, as before. The
 // model's own requests, from an agent, are sent as they came.
 func TestVisionEffortPicked(t *testing.T) {
 	fresh(t)

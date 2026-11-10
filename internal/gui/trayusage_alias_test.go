@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // #1515: the menu bar's tooltip names an account by the name the user gave

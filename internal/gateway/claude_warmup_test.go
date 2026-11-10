@@ -12,8 +12,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // fakeWarmClaude is a claude that writes what it was run with to log and
@@ -47,7 +47,7 @@ func TestWarmClaudeAsksClaudeCodeOnce(t *testing.T) {
 	got := string(b)
 	for _, want := range []string{"[-p]", "[--model][haiku]", "[--tools][]", "[--setting-sources][]", "[--no-session-persistence]",
 		`[--settings][{"disableDeepLinkRegistration":"disable"}]`,
-		"dir:/saved/account\n", "base:\n", "stdin:hi", "myna-claude-"} {
+		"dir:/saved/account\n", "base:\n", "stdin:hi", "owl-claude-"} {
 		if !strings.Contains(got, want) {
 			t.Errorf("run lacks %q:\n%s", want, got)
 		}

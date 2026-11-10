@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/qoder"
+	"github.com/istoo/owl/internal/qoder"
 )
 
 // roundTrip moves id's saved accounts out as the plugin keeps them and back

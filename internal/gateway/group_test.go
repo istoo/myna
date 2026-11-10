@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/routes"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/routes"
 )
 
 // keyed is a vendor that says which key each request came with, and
@@ -229,7 +229,7 @@ func TestOpenRouterFreeAccountRateLimitKeepsProviderRest(t *testing.T) {
 	}
 }
 
-// A model two providers serve is a group myna finds; a group the user
+// A model two providers serve is a group owl finds; a group the user
 // makes routes over its members in the order it names them, the next one
 // taking a request the one before can't.
 func TestRoutingGroups(t *testing.T) {
@@ -264,7 +264,7 @@ func TestRoutingGroups(t *testing.T) {
 		t.Fatalf("trace: %+v", r)
 	}
 
-	// removing one myna found hides it; showing it brings it back
+	// removing one owl found hides it; showing it brings it back
 	if err := provider.DeleteGroup("auto-m"); err != nil {
 		t.Fatal(err)
 	}

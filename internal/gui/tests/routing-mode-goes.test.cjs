@@ -82,7 +82,7 @@ async function open(engine, lang, scene, width, t) {
     window.setInterval = (f, ms, ...a) => every(typeof f === "function" && String(f).includes("renderActs") ? (...x) => { f(...x); window.__redraws++; } : f, ms, ...a);
   });
   await page.route("**/*", serve(lang, scene));
-  await page.goto("http://myna.test/?view=routing");
+  await page.goto("http://owl.test/?view=routing");
   const req = page.locator(".rt-req").first();
   await req.waitFor();
   if (await req.getAttribute("aria-pressed") !== "true") await req.click();

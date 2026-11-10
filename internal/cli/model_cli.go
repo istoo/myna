@@ -7,93 +7,93 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
-// A model's name and reasoning levels, from the terminal: myna model.
+// A model's name and reasoning levels, from the terminal: owl model.
 
 const modelUsage = `usage:
-  myna model name <provider/model>             the name the model goes by
-  myna model name <provider/model> <name>      name it so everywhere: in myna, in the gateway's
-                                               model list, and in the lists myna writes into the agents
-  myna model name <provider/model> --reset     give it back its own name
-  myna model efforts <provider/model>          the reasoning levels it offers, and those it has
-  myna model efforts <provider/model> <l>,<l>  offer only these of them, e.g. low,medium,high
-  myna model efforts <provider/model> --reset  offer every level it has again
-  myna model efforts <provider/model> off      send it no reasoning field at all
-  myna model price <provider/model>            what the model costs you, and what you said it costs
-  myna model price <provider/model> <in>,<out>,<cache read>,<cache write>
+  owl model name <provider/model>              the name the model goes by
+  owl model name <provider/model> <name>       name it so everywhere: in owl, in the gateway's
+                                               model list, and in the lists owl writes into the agents
+  owl model name <provider/model> --reset      give it back its own name
+  owl model efforts <provider/model>           the reasoning levels it offers, and those it has
+  owl model efforts <provider/model> <l>,<l>   offer only these of them, e.g. low,medium,high
+  owl model efforts <provider/model> --reset   offer every level it has again
+  owl model efforts <provider/model> off       send it no reasoning field at all
+  owl model price <provider/model>             what the model costs you, and what you said it costs
+  owl model price <provider/model> <in>,<out>,<cache read>,<cache write>
                                                say what it costs, in USD per million tokens, all four parts as
                                                0.12,1.20,0.01,0.15; 0 is a model served for nothing, which is
                                                a price, not the absence of one; a fifth part is a 1-hour cache
                                                write's (not given: a Claude model's is 2× input, any other's the 4th)
-  myna model price <provider/model> <in>,<out>,<cache read>,<cache write> --tier 272k <in>,<out>,<cr>,<cw>
+  owl model price <provider/model> <in>,<out>,<cache read>,<cache write> --tier 272k <in>,<out>,<cr>,<cw>
                                                and what a request whose input, cached tokens included, is over
                                                272K costs, the whole request; --tier may be given again
-  myna model price <provider/model> --reset    take your price off this model
-  myna model price <model> <in>,<out>,<cache read>,<cache write>
+  owl model price <provider/model> --reset     take your price off this model
+  owl model price <model> <in>,<out>,<cache read>,<cache write>
                                                what the model costs from any provider you have not priced it
                                                for, kept as '*/<model>': for usage whose provider is gone, or
                                                a model models.dev doesn't price, e.g. gemini-3-pro-preview
-  myna model prices                            the models you priced
-  myna model context <provider/model>          how long a request it takes, and what you said it takes
-  myna model context <provider/model> <n>      say how long, as 200000 or 1m; '<provider>/*' is every model
-  myna model context <provider/model> --reset  take your limit off this model
-  myna model output <provider/model>           the most a reply of it may hold, and what you said
-  myna model output <provider/model> <n>       say the most, as 128000 or 128k; '<provider>/*' is every model
-  myna model output <provider/model> --reset   take your limit off this model
-  myna model spec <provider/model>             its context window, max output, vision and reasoning levels
-  myna model spec <provider/model> [--context <n>] [--output <n>] [--vision on|off] [--reasoning <levels>]
+  owl model prices                             the models you priced
+  owl model context <provider/model>           how long a request it takes, and what you said it takes
+  owl model context <provider/model> <n>       say how long, as 200000 or 1m; '<provider>/*' is every model
+  owl model context <provider/model> --reset   take your limit off this model
+  owl model output <provider/model>            the most a reply of it may hold, and what you said
+  owl model output <provider/model> <n>        say the most, as 128000 or 128k; '<provider>/*' is every model
+  owl model output <provider/model> --reset    take your limit off this model
+  owl model spec <provider/model>              its context window, max output, vision and reasoning levels
+  owl model spec <provider/model> [--context <n>] [--output <n>] [--vision on|off] [--reasoning <levels>]
                                                say any of them at once, e.g. --reasoning low-high; auto as a
-                                               value goes back to the vendor's list (myna model spec --help)
-  myna model spec <provider/model> --reset     take every value you set off this model
-  myna model specs                             the models you gave a spec
-  myna model wire <provider/model>             the name the vendor is asked for, and the one you gave
-  myna model wire <provider/model> <name>      ask for the model by this name, for a relay that serves it
-  myna model wire '<provider>/*' <name>        ask for every model of that provider by this name; a * in
+                                               value goes back to the vendor's list (owl model spec --help)
+  owl model spec <provider/model> --reset      take every value you set off this model
+  owl model specs                              the models you gave a spec
+  owl model wire <provider/model>              the name the vendor is asked for, and the one you gave
+  owl model wire <provider/model> <name>       ask for the model by this name, for a relay that serves it
+  owl model wire '<provider>/*' <name>         ask for every model of that provider by this name; a * in
                                                it is the model, so vendor-c/* asks for model-3 as
                                                vendor-c/model-3. Quote it: a shell reads a bare * as a glob
-  myna model wire <provider/model> --reset     ask for it by the name myna knows it by again, under an
+  owl model wire <provider/model> --reset      ask for it by the name owl knows it by again, under an
                                                id of its own for a provider that has since been deleted,
                                                and says when there was no name of its own to take away
-  myna model wires                             the names your vendors are asked for models by
-  myna model id <provider/model>               the id myna lists the model by, and the provider's own
-  myna model id <provider/model> <id>          list the model by this id at that provider, e.g.
+  owl model wires                              the names your vendors are asked for models by
+  owl model id <provider/model>                the id owl lists the model by, and the provider's own
+  owl model id <provider/model> <id>           list the model by this id at that provider, e.g.
                                                relay-a/deepseek-v4.1-flash-1017 deepseek-v4.1-flash: agents,
-                                               /v1/models, routing groups, the groups myna finds, gateway keys
+                                               /v1/models, routing groups, the groups owl finds, gateway keys
                                                and Usage all use it, and relay-a is still asked for
                                                deepseek-v4.1-flash-1017. One id is one model of a provider: the
                                                latest model given an id has it, and a model of the provider's
                                                own with that id is not listed while another is. A provider of
                                                your own (a key) only
-  myna model id <provider/model> --reset       list it by the provider's own id again
-  myna model ids                               the models you list by an id of your own
-  myna model names                             the models you named or narrowed
-  myna model alias <model> <name>              count the model's usage under another model id in Usage,
+  owl model id <provider/model> --reset        list it by the provider's own id again
+  owl model ids                                the models you list by an id of your own
+  owl model names                              the models you named or narrowed
+  owl model alias <model> <name>               count the model's usage under another model id in Usage,
                                                Sessions and the usage summaries, e.g. deepseek-v4.1-flash
                                                deepseek-flash: two ids of one model are one row. Each call is
                                                still priced by the id it was made under. Requests, routing and
                                                the agents' model lists never change. Ids match as the routing
                                                groups match them: a vendor/ prefix, case, "_" or a snapshot
                                                date make no difference
-  myna model alias <model>                     the name the model's usage is counted under
-  myna model alias <model> --reset             count its usage under its own id again
-  myna model aliases                           the models whose usage you count under another id
-  myna model disable <model> [<model>...]      turn models off for every request through myna: each an id
+  owl model alias <model>                      the name the model's usage is counted under
+  owl model alias <model> --reset              count its usage under its own id again
+  owl model aliases                            the models whose usage you count under another id
+  owl model disable <model> [<model>...]       turn models off for every request through owl: each an id
                                                (provider/model or a bare model id) or a glob, * any run of
                                                characters and ? one, as '*fable*'. A disabled model leaves
                                                every list and routing group, and the gateway refuses it on
                                                every route (403). Quote a glob: a shell reads a bare *
-  myna model enable <model> [<model>...]       take them off the disabled list, as written there
-  myna model disabled                          the disabled list, and the models each one turns off now
-  myna model suffix [on|own|off]               whether the agents' lists name each model with its provider
+  owl model enable <model> [<model>...]        take them off the disabled list, as written there
+  owl model disabled                           the disabled list, and the models each one turns off now
+  owl model suffix [on|own|off]                whether the agents' lists name each model with its provider
                                                (or "routing group") after it: on, as by default, "Sol · OpenAI";
                                                own, a name you gave a model just as you wrote it, "Opus 5.5",
                                                the others as on; off, "Sol" alone — but two a list would name
                                                the same keep it
-  myna model compact [on|off|<size>]           whether Codex, Claude Code and Grok Build compact a long
+  owl model compact [on|off|<size>]            whether Codex, Claude Code and Grok Build compact a long
                                                conversation at 272K: on, as by default, for a model of a
                                                longer window (in Claude Code, a Claude model runs to its
                                                own); off, at the model's whole window, 1M for a [1m] one; a
@@ -114,10 +114,10 @@ const modelUsage = `usage:
   usage and session totals report, and nothing an agent can see, and it is saved without
   rewriting the model lists in the agents' own files.
 
-  e.g. myna model name claude/claude-opus-5-5 "Opus 5.5"
-       myna model efforts openai/gpt-6 low,medium,high
-       myna model price relay-a/gpt-5.5 0.12,0.60,0.01,0.15
-       myna model context relay-a/claude-opus-5-5 1m`
+  e.g. owl model name claude/claude-opus-5-5 "Opus 5.5"
+       owl model efforts openai/gpt-6 low,medium,high
+       owl model price relay-a/gpt-5.5 0.12,0.60,0.01,0.15
+       owl model context relay-a/claude-opus-5-5 1m`
 
 func modelCmd(args []string) error {
 	if len(args) == 0 {
@@ -189,10 +189,10 @@ func modelRef(s string) (*provider.Provider, string, error) {
 // able to name is one whose provider may be gone: the key a price is
 // stored at outlives the provider it was set for.
 func splitModelRef(s string) (string, string, error) {
-	ref := strings.TrimPrefix(strings.TrimSpace(s), "myna/")
+	ref := strings.TrimPrefix(strings.TrimSpace(s), "owl/")
 	pid, model, ok := strings.Cut(ref, "/")
 	if !ok || model == "" {
-		return "", "", fmt.Errorf("name a model as provider/model, not %q (myna models lists them)", s)
+		return "", "", fmt.Errorf("name a model as provider/model, not %q (owl models lists them)", s)
 	}
 	return pid, model, nil
 }
@@ -330,16 +330,16 @@ func modelPrice(args []string) error {
 	rest := args[1:]
 	// --reset comes before the provider is looked for, and works off the
 	// key the price is stored at: a price outlives the provider it was set
-	// for, and one whose provider is gone is still listed by `myna model
+	// for, and one whose provider is gone is still listed by `owl model
 	// prices` and still counted, so a reset that resolved the provider
 	// first could not take it away — and would take another provider's
 	// price away instead where the gone one's name has been given to one.
 	ref := args[0]
 	// a model named with no provider, or as */model, is that model from any
 	// provider: what prices a session's model whose provider is gone, or one
-	// that never went through myna
+	// that never went through owl
 	every := false
-	if r := strings.TrimPrefix(strings.TrimSpace(ref), "myna/"); r != "" && !strings.Contains(r, "/") {
+	if r := strings.TrimPrefix(strings.TrimSpace(ref), "owl/"); r != "" && !strings.Contains(r, "/") {
 		ref, every = settings.AnyProvider+r, true
 	} else {
 		every = strings.HasPrefix(r, settings.AnyProvider)
@@ -361,9 +361,9 @@ func modelPrice(args []string) error {
 			// a call to it counts at no cost until one is given: say how
 			// (#2052)
 			fmt.Println(muted.Render(id), faint.Render("· no price is known for it"))
-			fmt.Println(faint.Render("  · myna model price " + typedRef(id) +
+			fmt.Println(faint.Render("  · owl model price " + typedRef(id) +
 				" <in>,<out>,<cache read>,<cache write> sets it, in USD per 1M tokens"))
-			fmt.Println(faint.Render("  · myna model price " + typedRef(provider.AnyPriceKey(model)) +
+			fmt.Println(faint.Render("  · owl model price " + typedRef(provider.AnyPriceKey(model)) +
 				" <in>,<out>,<cache read>,<cache write> sets it from every provider"))
 			return nil
 		}
@@ -375,10 +375,10 @@ func modelPrice(args []string) error {
 		case "model":
 			fmt.Println(faint.Render("  · what you said this model costs · --reset takes that away"))
 		case "provider":
-			fmt.Println(faint.Render("  · what you said every model of this provider costs · myna model price " +
+			fmt.Println(faint.Render("  · what you said every model of this provider costs · owl model price " +
 				typedRef(p.ID+"/*") + " --reset takes that away"))
 		case "any":
-			fmt.Println(faint.Render("  · what you said this model costs from any provider · myna model price " +
+			fmt.Println(faint.Render("  · what you said this model costs from any provider · owl model price " +
 				typedRef(provider.AnyPriceKey(model)) + " --reset takes that away"))
 		case "ignored":
 			fmt.Println(faint.Render("  · a price you gave is not usable and is ignored"))
@@ -390,11 +390,11 @@ func modelPrice(args []string) error {
 			if _, same := provider.SamePriceIn(st, p.ID, model); same && !listed && !made {
 				from = "the maker's price of " + st.ModelSameAs[p.ID+"/"+model] + " on models.dev, which you said it is the same as"
 			} else if p.RemotePriced(model) {
-				from = "what the other myna counts it at"
+				from = "what the other owl counts it at"
 			} else if c := p.EndpointCatalog(); c != "" {
 				from = "what models.dev's " + c + " lists at its endpoint, else its maker's"
 			}
-			fmt.Println(faint.Render("  · " + from + " · myna model price " +
+			fmt.Println(faint.Render("  · " + from + " · owl model price " +
 				typedRef(id) + " <in>,<out>,<cache read>,<cache write> to change it"))
 		}
 		return nil
@@ -508,7 +508,7 @@ func tokenSize(n int) string {
 // own applies — its provider gone, the model no longer listed by it, or a
 // model models.dev doesn't price.
 func anyModelPrice(ref string, rest []string) error {
-	key := provider.AnyPriceKey(strings.TrimPrefix(strings.TrimPrefix(strings.TrimSpace(ref), "myna/"), settings.AnyProvider))
+	key := provider.AnyPriceKey(strings.TrimPrefix(strings.TrimPrefix(strings.TrimSpace(ref), "owl/"), settings.AnyProvider))
 	if key == settings.AnyProvider || key == settings.AnyProvider+"*" {
 		return fmt.Errorf("name one model, such as %s", typedRef("*/claude-opus-4.6"))
 	}
@@ -522,7 +522,7 @@ func anyModelPrice(ref string, rest []string) error {
 			fmt.Println(faint.Render("  · what you said this model costs from any provider · --reset takes that away"))
 			return nil
 		}
-		fmt.Println(muted.Render(key), faint.Render("· no price of yours · myna model price "+typedRef(key)+" <in>,<out>,<cache read>,<cache write>"))
+		fmt.Println(muted.Render(key), faint.Render("· no price of yours · owl model price "+typedRef(key)+" <in>,<out>,<cache read>,<cache write>"))
 		return nil
 	}
 	pr, err := parsePrice(rest)
@@ -563,7 +563,7 @@ func resetModelPrice(ref string) error {
 	wid, _, _ := strings.Cut(key, "/")
 	if strings.HasPrefix(key, settings.AnyProvider) {
 		if !dropped {
-			return fmt.Errorf("%s has no price of yours to reset — myna model prices lists the ones you set", key)
+			return fmt.Errorf("%s has no price of yours to reset — owl model prices lists the ones you set", key)
 		}
 		fmt.Println(green.Render("✓"), key,
 			muted.Render("no longer has a price of yours; it is costed at what its provider lists, or its maker's on models.dev"))
@@ -571,10 +571,10 @@ func resetModelPrice(ref string) error {
 	}
 	if !dropped {
 		if _, wide := statedPrice(s.ModelPrices, wid+"/*"); wide {
-			return fmt.Errorf("%s has no price of its own; what it costs is what you set for every model of this provider, %s/*, which myna model price %s --reset takes away",
+			return fmt.Errorf("%s has no price of its own; what it costs is what you set for every model of this provider, %s/*, which owl model price %s --reset takes away",
 				key, wid, typedRef(wid+"/*"))
 		}
-		return fmt.Errorf("%s has no price of its own to reset — myna model prices lists the ones you set", key)
+		return fmt.Errorf("%s has no price of its own to reset — owl model prices lists the ones you set", key)
 	}
 	if !there {
 		fmt.Println(green.Render("✓"), key,
@@ -640,7 +640,7 @@ func modelPrices() error {
 	prices := settings.Load().ModelPrices
 	if len(prices) == 0 {
 		fmt.Println(muted.Render("no model is priced by you yet"))
-		fmt.Println(faint.Render("myna model price <provider/model> <in>,<out>,<cache read>,<cache write>"))
+		fmt.Println(faint.Render("owl model price <provider/model> <in>,<out>,<cache read>,<cache write>"))
 		return nil
 	}
 	for _, id := range slices.Sorted(maps.Keys(prices)) {
@@ -665,11 +665,11 @@ func modelSuffix(args []string) error {
 	if len(args) == 0 {
 		switch provider.SuffixMode() {
 		case provider.SuffixOff:
-			fmt.Println("off", muted.Render("· agents' lists name a model alone, \"Sol\" · myna model suffix on|own"))
+			fmt.Println("off", muted.Render("· agents' lists name a model alone, \"Sol\" · owl model suffix on|own"))
 		case provider.SuffixOwn:
-			fmt.Println("own", muted.Render("· a name you gave a model just as you wrote it, \"Opus 5.5\"; the others \"Sol · OpenAI\" · myna model suffix on|off"))
+			fmt.Println("own", muted.Render("· a name you gave a model just as you wrote it, \"Opus 5.5\"; the others \"Sol · OpenAI\" · owl model suffix on|off"))
 		default:
-			fmt.Println("on", muted.Render("· agents' lists name a model with its provider, \"Sol · OpenAI\" · myna model suffix own|off"))
+			fmt.Println("on", muted.Render("· agents' lists name a model with its provider, \"Sol · OpenAI\" · owl model suffix own|off"))
 		}
 		return nil
 	}
@@ -681,7 +681,7 @@ func modelSuffix(args []string) error {
 	case "off", "no", "false":
 		mode = provider.SuffixOff
 	default:
-		return fmt.Errorf("myna model suffix on|own|off, not %q", args[0])
+		return fmt.Errorf("owl model suffix on|own|off, not %q", args[0])
 	}
 	if err := provider.SetSuffixMode(mode); err != nil {
 		return err
@@ -704,9 +704,9 @@ func modelSuffix(args []string) error {
 func modelCompact(args []string) error {
 	if len(args) == 0 {
 		if s := settings.Load(); s.FullContext {
-			fmt.Println("off", muted.Render("· Codex, Claude Code and Grok Build run a conversation to the model's whole window · myna model compact on"))
+			fmt.Println("off", muted.Render("· Codex, Claude Code and Grok Build run a conversation to the model's whole window · owl model compact on"))
 		} else {
-			fmt.Println("on", muted.Render(fmt.Sprintf("· Codex, Claude Code and Grok Build compact at %dK on a longer window; in Claude Code a Claude model runs to its own · myna model compact off", s.Compact()/1000)))
+			fmt.Println("on", muted.Render(fmt.Sprintf("· Codex, Claude Code and Grok Build compact at %dK on a longer window; in Claude Code a Claude model runs to its own · owl model compact off", s.Compact()/1000)))
 		}
 		return nil
 	}
@@ -718,7 +718,7 @@ func modelCompact(args []string) error {
 	default:
 		n, err := provider.ParseTokens(args[0])
 		if err != nil || n <= 0 {
-			return fmt.Errorf("myna model compact on|off|<size such as 500k>, not %q", args[0])
+			return fmt.Errorf("owl model compact on|off|<size such as 500k>, not %q", args[0])
 		}
 		if err := provider.SetCompactAt(n); err != nil {
 			return err
@@ -749,7 +749,7 @@ func modelNames() error {
 	}
 	slices.Sort(keys)
 	if len(keys) == 0 {
-		fmt.Println(muted.Render("no model is named or narrowed yet · myna model name <provider/model> <name>"))
+		fmt.Println(muted.Render("no model is named or narrowed yet · owl model name <provider/model> <name>"))
 		return nil
 	}
 	w := 0
@@ -784,7 +784,7 @@ func reasonlessLevels(m map[string]bool) map[string][]string {
 }
 
 // modelWires lists the names the user gave the vendors their models are asked
-// for, and which provider and model each is for. It is `myna model prices`
+// for, and which provider and model each is for. It is `owl model prices`
 // for the wire names: those are what a provider is asked for, and no other
 // command says what is kept for a provider as a whole, so a name given for
 // every model of one was written with no way to read it back.
@@ -796,7 +796,7 @@ func reasonlessLevels(m map[string]bool) map[string][]string {
 //
 // A name that is only whitespace is no name and is not listed, as it is
 // nowhere else a name is read: UpstreamNames leaves it out and a request
-// under it goes out by the name myna knows the model by. Listing it would
+// under it goes out by the name owl knows the model by. Listing it would
 // print a line with nothing on it for a name no vendor is asked for, which
 // is the one thing a listing read back off the file must not say.
 func modelWires() error {
@@ -810,7 +810,7 @@ func modelWires() error {
 		}
 	}
 	if len(rows) == 0 {
-		fmt.Println(muted.Render("no vendor is asked for a model by another name yet · myna model wire <provider/model> <name>"))
+		fmt.Println(muted.Render("no vendor is asked for a model by another name yet · owl model wire <provider/model> <name>"))
 		return nil
 	}
 	for _, r := range rows {
@@ -887,7 +887,7 @@ func modelUsageAliases() error {
 		}
 	}
 	if len(rows) == 0 {
-		fmt.Println(muted.Render("no model is counted under another id yet · myna model alias <model> <name>"))
+		fmt.Println(muted.Render("no model is counted under another id yet · owl model alias <model> <name>"))
 		return nil
 	}
 	for _, r := range rows {
@@ -915,7 +915,7 @@ func modelContext(args []string) error {
 			if n > 0 {
 				fmt.Println(faint.Render("  · what you said every model of this provider takes, unless that model has a window of its own"))
 			} else {
-				fmt.Println(faint.Render("  · what the vendor's list and models.dev say · myna model context " + typedRef(id) + " <tokens> to say one for all of them"))
+				fmt.Println(faint.Render("  · what the vendor's list and models.dev say · owl model context " + typedRef(id) + " <tokens> to say one for all of them"))
 			}
 			return nil
 		}
@@ -936,7 +936,7 @@ func modelContext(args []string) error {
 		case p.Contexts["*"] > 0:
 			fmt.Println(faint.Render("  · what you set for every model of this provider"))
 		default:
-			fmt.Println(faint.Render("  · what the vendor's list and models.dev say · myna model context " + typedRef(id) + " <tokens> to change it"))
+			fmt.Println(faint.Render("  · what the vendor's list and models.dev say · owl model context " + typedRef(id) + " <tokens> to change it"))
 		}
 		return nil
 	}
@@ -955,11 +955,11 @@ func modelContext(args []string) error {
 					id, p.ID+"/*", resetCommand("context", p.ID+"/*"))
 			}
 			if _, served := provider.ServedEntryOf(id); served {
-				return fmt.Errorf("%s has no window of its own to reset — myna model context %s says what it takes now", id, typedRef(id))
+				return fmt.Errorf("%s has no window of its own to reset — owl model context %s says what it takes now", id, typedRef(id))
 			}
 			return fmt.Errorf("%s has no window of its own to reset", id)
 		}
-		fmt.Println(green.Render("✓"), id, muted.Render("has no window of your own · myna model context "+typedRef(id)+" says what it takes now"))
+		fmt.Println(green.Render("✓"), id, muted.Render("has no window of your own · owl model context "+typedRef(id)+" says what it takes now"))
 		return nil
 	}
 	n, err := parseTokens(rest[0])
@@ -1003,7 +1003,7 @@ func modelOutput(args []string) error {
 					key, wid+"/*", resetCommand("output", wid+"/*"))
 			}
 			if _, served := provider.ServedEntryOf(key); served {
-				return fmt.Errorf("%s has no reply limit of its own to reset — myna model output %s says what it answers with now", key, typedRef(key))
+				return fmt.Errorf("%s has no reply limit of its own to reset — owl model output %s says what it answers with now", key, typedRef(key))
 			}
 			return fmt.Errorf("%s has no reply limit of its own to reset", key)
 		}
@@ -1014,7 +1014,7 @@ func modelOutput(args []string) error {
 		// provider's model instead of the one taken off here
 		line := "has no reply limit of your own"
 		if clearedEntryIs(key) {
-			line += " · myna model output " + typedRef(key) + " says what it answers with now"
+			line += " · owl model output " + typedRef(key) + " says what it answers with now"
 		}
 		fmt.Println(green.Render("✓"), key, muted.Render(line))
 		return nil
@@ -1034,7 +1034,7 @@ func modelOutput(args []string) error {
 			if n > 0 {
 				fmt.Println(faint.Render("  · what you said every model of this provider answers with, unless that model has a limit of its own"))
 			} else {
-				fmt.Println(faint.Render("  · what the vendor's list and models.dev say · myna model output " + typedRef(id) + " <tokens> to say one for all of them"))
+				fmt.Println(faint.Render("  · what the vendor's list and models.dev say · owl model output " + typedRef(id) + " <tokens> to say one for all of them"))
 			}
 			return nil
 		}
@@ -1061,7 +1061,7 @@ func modelOutput(args []string) error {
 		case s.ModelOutputs[p.ID+"/*"] > 0:
 			fmt.Println(faint.Render("  · what you set for every model of this provider"))
 		default:
-			fmt.Println(faint.Render("  · what the vendor's list and models.dev say · myna model output " + typedRef(id) + " <tokens> to change it"))
+			fmt.Println(faint.Render("  · what the vendor's list and models.dev say · owl model output " + typedRef(id) + " <tokens> to change it"))
 		}
 		return nil
 	}
@@ -1082,8 +1082,8 @@ func modelOutput(args []string) error {
 
 // typedRef is a provider/model spelled the way a command carrying it has to be
 // typed: a wildcard in it is quoted, as a shell reads a bare * as a glob of
-// the files in the directory the command runs in and never hands myna the
-// name. Every command myna prints is one the user is meant to paste, so
+// the files in the directory the command runs in and never hands owl the
+// name. Every command owl prints is one the user is meant to paste, so
 // every one of them goes through here.
 func typedRef(ref string) string {
 	if strings.Contains(ref, "*") {
@@ -1094,7 +1094,7 @@ func typedRef(ref string) string {
 
 // resetCommand is the command that takes a limit off, over the ref as typed.
 func resetCommand(verb, ref string) string {
-	return fmt.Sprintf("myna model %s %s --reset", verb, typedRef(ref))
+	return fmt.Sprintf("owl model %s %s --reset", verb, typedRef(ref))
 }
 
 // resetTakesOff is what the command taking a limit off would take off. The
@@ -1167,7 +1167,7 @@ func modelWire(args []string) error {
 			}
 			if dropped {
 				fmt.Println(green.Render("✓"), pid+"/"+model,
-					muted.Render("no longer has a name of its own; a provider taking that id later is asked for it by the name myna knows it by"))
+					muted.Render("no longer has a name of its own; a provider taking that id later is asked for it by the name owl knows it by"))
 				return nil
 			}
 			// no name is kept under that key, so the id is a mistyped one
@@ -1193,12 +1193,12 @@ func modelWire(args []string) error {
 		fmt.Println(bold.Render(asked), muted.Render("· what "+p.Name+" is asked for, for "+shown))
 		switch {
 		case asked == model:
-			fmt.Println(faint.Render("  · the same name myna knows it by · myna model wire " + shown + " <name> to change it"))
+			fmt.Println(faint.Render("  · the same name owl knows it by · owl model wire " + shown + " <name> to change it"))
 		case model == "*":
 			fmt.Println(faint.Render("  · " + exampleOf(p, asked)))
-			fmt.Println(faint.Render("  · --reset takes it away · myna model wire " + p.ID + "/<model> <name> gives a single model one of its own"))
+			fmt.Println(faint.Render("  · --reset takes it away · owl model wire " + p.ID + "/<model> <name> gives a single model one of its own"))
 		case own:
-			fmt.Println(faint.Render("  · myna and the agents still know it as " + model + " · --reset asks for that again"))
+			fmt.Println(faint.Render("  · owl and the agents still know it as " + model + " · --reset asks for that again"))
 		case one:
 			fmt.Println(faint.Render("  · from the name given for every model of " + p.Name + " (" + every + " " + names["*"] + ")" +
 				" · --reset on it leaves that one in force"))
@@ -1212,13 +1212,13 @@ func modelWire(args []string) error {
 	// A blank name is a removal, --reset or a name of only whitespace
 	// alike, and it is DropUpstreamName that makes it: it says whether
 	// there was a name there to take away, which with the provider's own
-	// list is what tells a model already asked for by the name myna
+	// list is what tells a model already asked for by the name owl
 	// knows it by from one the provider does not serve at all, for which
 	// no name could have been kept. A ✓ over a key holding no name would
 	// read as a name being gone that never was there, and under a
 	// provider-wide name as the model's own name being the one in force,
 	// which it is not. So the removal is asked for rather than made blind,
-	// the way `myna model price --reset` asks DropModelPrice.
+	// the way `owl model price --reset` asks DropModelPrice.
 	if strings.TrimSpace(name) == "" {
 		return resetWireName(*p, model, id, shown)
 	}
@@ -1245,7 +1245,7 @@ func modelWire(args []string) error {
 		return nil
 	}
 	fmt.Println(green.Render("✓"), shown, muted.Render("is asked for as"), bold.Render(now),
-		faint.Render("· myna and the agents still know it as "+model))
+		faint.Render("· owl and the agents still know it as "+model))
 	return nil
 }
 
@@ -1255,7 +1255,7 @@ func modelWire(args []string) error {
 //
 // A key holding no name is an error rather than a tick, as it is for a price:
 // a removal over a name that is not there has taken nothing away, and the
-// tick would say the model is asked for by the name myna knows it by — a
+// tick would say the model is asked for by the name owl knows it by — a
 // claim nothing stands behind, and one that is false wherever a name given
 // for the whole provider is in force. So there are three answers, as there
 // are for a price: the model is not one the provider serves, so none could
@@ -1272,13 +1272,13 @@ func resetWireName(p provider.Provider, model, id, shown string) error {
 		if model != "*" && !provider.ServesModel(p, model) {
 			// none was kept and none could have been: a model the
 			// provider has nothing like is never asked for by any name,
-			// so naming the one in force would claim a request myna
+			// so naming the one in force would claim a request owl
 			// does not make
-			return fmt.Errorf("%s is not a model of %s myna knows of, so there is nothing to take away and none in force: a name is only kept for a model the provider serves, and this one is asked for by no name", id, p.Name)
+			return fmt.Errorf("%s is not a model of %s owl knows of, so there is nothing to take away and none in force: a name is only kept for a model the provider serves, and this one is asked for by no name", id, p.Name)
 		}
 		every := "'" + p.ID + "/*'"
 		if provider.HasUpstreamName(p.ID + "/*") {
-			return fmt.Errorf("%s has no name of its own; what it is asked for is %s, the name given for every model of %s, which myna model wire %s --reset takes away",
+			return fmt.Errorf("%s has no name of its own; what it is asked for is %s, the name given for every model of %s, which owl model wire %s --reset takes away",
 				id, now, p.Name, every)
 		}
 		if model == "*" {
@@ -1290,7 +1290,7 @@ func resetWireName(p provider.Provider, model, id, shown string) error {
 			if kept := ownKeptSaid(&p); kept != "" {
 				return fmt.Errorf("%s has no name of its own to reset, so there was nothing to take away: %s", id, kept)
 			}
-			return fmt.Errorf("%s has no name of its own to reset, so there was nothing to take away: every model of %s is already asked for by the name myna knows it by", id, p.Name)
+			return fmt.Errorf("%s has no name of its own to reset, so there was nothing to take away: every model of %s is already asked for by the name owl knows it by", id, p.Name)
 		}
 		return fmt.Errorf("%s has no name of its own to reset, so there was nothing to take away: it is already asked for as %s", id, now)
 	}
@@ -1303,13 +1303,13 @@ func resetWireName(p provider.Provider, model, id, shown string) error {
 		// the provider's own name is gone, but a model's own beats it
 		// while it is there, so the models that keep one are still asked
 		// for by it — and saying every model of the provider is asked
-		// for by the name myna knows it by is false the moment one
+		// for by the name owl knows it by is false the moment one
 		// does, so they are named instead
 		if kept := ownKeptSaid(&p); kept != "" {
 			fmt.Println(green.Render("✓"), shown, muted.Render("has no name of its own again ·"), kept)
 			return nil
 		}
-		fmt.Println(green.Render("✓"), shown, muted.Render("· every model of "+p.Name+" is asked for by the name myna knows it by again"))
+		fmt.Println(green.Render("✓"), shown, muted.Render("· every model of "+p.Name+" is asked for by the name owl knows it by again"))
 		return nil
 	}
 	fmt.Println(green.Render("✓"), shown, muted.Render("is asked for as"), bold.Render(model), muted.Render("again"))
@@ -1327,7 +1327,7 @@ func resetWireName(p provider.Provider, model, id, shown string) error {
 // does not reach.
 //
 // A name kept for a model the provider does not serve is not one of these:
-// myna asks for no such a model, so nothing goes out under that name, and
+// owl asks for no such a model, so nothing goes out under that name, and
 // saying it did would claim a request that is not made.
 func ownKept(p *provider.Provider) []string {
 	names := p.UpstreamNames()
@@ -1345,7 +1345,7 @@ func ownKept(p *provider.Provider) []string {
 // A model is named with the name it goes out under, not with the one as it
 // is stored: a star in a model's own name is that model, as it is in one
 // given for every model of a provider (UpstreamNameIn), so it is the model
-// myna knows the model by that stands there. The whole claim of the
+// owl knows the model by that stands there. The whole claim of the
 // sentence is that this is the name in force, so a star left standing in it
 // would name an id no vendor is ever asked for.
 func ownKeptSaid(p *provider.Provider) string {
@@ -1399,7 +1399,7 @@ func exampleOf(p *provider.Provider, name string) string {
 	if !strings.Contains(name, "*") {
 		return p.Name + " is asked for every one of its models as " + name
 	}
-	const star = " · * is the model myna knows each of them by"
+	const star = " · * is the model owl knows each of them by"
 	names := p.UpstreamNames()
 	model := ""
 	for _, m := range p.Exposed() {
@@ -1417,7 +1417,7 @@ func exampleOf(p *provider.Provider, name string) string {
 // modelDisable adds models, by id or glob, to the disabled list (#1867).
 func modelDisable(args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("name the models to disable, by id or glob: myna model disable '*fable*'")
+		return fmt.Errorf("name the models to disable, by id or glob: owl model disable '*fable*'")
 	}
 	if err := provider.DisableModels(args...); err != nil {
 		return err
@@ -1427,20 +1427,20 @@ func modelDisable(args []string) error {
 			continue
 		}
 		hits := provider.DisabledHits(pat)
-		note := "· no model myna serves matches it now; one that does later is disabled too"
+		note := "· no model owl serves matches it now; one that does later is disabled too"
 		if len(hits) > 0 {
 			note = "· " + strings.Join(hits, ", ")
 		}
 		fmt.Println(green.Render("✓"), bold.Render(pat), muted.Render("is disabled "+note))
 	}
-	fmt.Println(muted.Render("  only requests through myna are refused; myna model enable <model> takes it back"))
+	fmt.Println(muted.Render("  only requests through owl are refused; owl model enable <model> takes it back"))
 	return nil
 }
 
 // modelEnable takes models off the disabled list.
 func modelEnable(args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("name the models to enable, as myna model disabled lists them")
+		return fmt.Errorf("name the models to enable, as owl model disabled lists them")
 	}
 	missing, err := provider.EnableModels(args...)
 	if err != nil {
@@ -1451,7 +1451,7 @@ func modelEnable(args []string) error {
 			continue
 		}
 		if slices.Contains(missing, pat) {
-			fmt.Println(muted.Render("· " + pat + " was not on the disabled list (myna model disabled lists it)"))
+			fmt.Println(muted.Render("· " + pat + " was not on the disabled list (owl model disabled lists it)"))
 			continue
 		}
 		fmt.Println(green.Render("✓"), bold.Render(pat), muted.Render("is enabled again"))
@@ -1463,12 +1463,12 @@ func modelEnable(args []string) error {
 func modelDisabled() error {
 	list := provider.DisabledModels()
 	if len(list) == 0 {
-		fmt.Println(muted.Render("no model is disabled · myna model disable <model> turns one off"))
+		fmt.Println(muted.Render("no model is disabled · owl model disable <model> turns one off"))
 		return nil
 	}
 	for _, pat := range list {
 		hits := provider.DisabledHits(pat)
-		note := "matches no model myna serves now"
+		note := "matches no model owl serves now"
 		if len(hits) > 0 {
 			note = strings.Join(hits, ", ")
 		}

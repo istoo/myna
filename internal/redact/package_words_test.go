@@ -67,10 +67,10 @@ func TestModelWordsArentSecrets(t *testing.T) {
 
 // A value the model took for a secret before this, remembered as known, is
 // masked again only where it is assigned to a secret's name: what a user's
-// running myna had learned goes as written in the next request, the
+// running owl had learned goes as written in the next request, the
 // model finding nothing in it.
 func TestKnownModelWordsGoAsWritten(t *testing.T) {
-	// as an older myna remembered it: masked as the model's, at its score
+	// as an older owl remembered it: masked as the model's, at its score
 	p := placeholder("SECRET", "drizzle-orm")
 	placeholder("SECRET", "reflect-metadata")
 	for _, v := range []string{"drizzle-orm", "reflect-metadata"} {

@@ -1,6 +1,6 @@
 name: Release
 
-# A v* tag builds Myna here and publishes it as a GitHub release of this
+# A v* tag builds Owl here and publishes it as a GitHub release of this
 # repository. The app's updater reads latest.json and notes.json from the
 # newest release's assets, and downloads the files those name, so nothing
 # of upstream's release pipeline is involved.
@@ -12,7 +12,7 @@ name: Release
 # The Linux desktop app links GTK 3 and WebKitGTK 4.1 through cgo, so it
 # is built natively on an Ubuntu runner, in a job of its own, and the
 # release waits for it: the installer's desktop path looks for
-# myna-linux-<arch> among the release's assets.
+# owl-linux-<arch> among the release's assets.
 
 on:
   push:
@@ -67,8 +67,8 @@ jobs:
         run: make release-linux VERSION=${{ needs.version.outputs.version }}
       - uses: actions/upload-artifact@v4
         with:
-          name: myna-linux
-          path: dist/myna-linux-*
+          name: owl-linux
+          path: dist/owl-linux-*
 
   release:
     needs: [version, linux]
@@ -88,14 +88,14 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: myna-linux
+          name: owl-linux
           path: dist
 
       - name: Build the app
         run: make app VERSION=${{ needs.version.outputs.version }}
 
       - name: Package the app
-        run: ditto -c -k --keepParent myna.app myna-darwin-arm64.zip
+        run: ditto -c -k --keepParent owl.app owl-darwin-arm64.zip
 
       - name: The install script
         run: |
@@ -111,7 +111,7 @@ jobs:
             echo "  $os/$arch"
             CGO_ENABLED=0 GOOS=$os GOARCH=$arch go build -tags nogui -trimpath \
               -ldflags="-s -w -X main.version=${{ needs.version.outputs.version }}" \
-              -o "dist/myna-cli-$os-$arch$ext" . || exit 1
+              -o "dist/owl-cli-$os-$arch$ext" . || exit 1
           done
 
       - name: Notes
@@ -134,7 +134,7 @@ jobs:
             --notes NOTES.md \
             --out dist \
             --previous prev/notes.json \
-            myna-darwin-arm64.zip dist/myna-cli-* dist/myna-linux-*
+            owl-darwin-arm64.zip dist/owl-cli-* dist/owl-linux-*
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -145,6 +145,6 @@ jobs:
         run: |
           gh release create "$TAG" \
             --repo "$GITHUB_REPOSITORY" \
-            --title "Myna $TAG" \
+            --title "Owl $TAG" \
             --notes-file NOTES.md \
-            myna-darwin-arm64.zip dist/myna-cli-* dist/myna-linux-* dist/latest.json dist/notes.json dist/install.sh
+            owl-darwin-arm64.zip dist/owl-cli-* dist/owl-linux-* dist/latest.json dist/notes.json dist/install.sh

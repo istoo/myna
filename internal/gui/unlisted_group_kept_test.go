@@ -5,7 +5,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A provider's "Only through routing groups" switched off brings its

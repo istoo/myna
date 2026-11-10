@@ -1,8 +1,8 @@
-// Package backup packs what the user set up in myna into one file, sealed
+// Package backup packs what the user set up in owl into one file, sealed
 // with a passphrase, to carry to another machine: the providers (their keys
 // too, unless left out), the pictures picked for them, the settings, the
 // profiles, every agent's model and the library (the instructions, MCP
-// servers and skills myna gives the agents). Sign-ins (subscription
+// servers and skills owl gives the agents). Sign-ins (subscription
 // accounts and the plugins') are in it only when the user asks for them
 // (WithSignIns): each is the sign-in of an agent on this machine, and
 // without them each machine signs in on its own.
@@ -29,21 +29,21 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/library"
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/profile"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/library"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/profile"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // Ext is the extension backups are saved with.
-const Ext = ".myna-backup"
+const Ext = ".owl-backup"
 
 const (
-	format     = "myna-backup"
+	format     = "owl-backup"
 	iterations = 600_000
 )
 
@@ -66,7 +66,7 @@ func isBackupJSON(data []byte) bool {
 type Bundle struct {
 	Version     int                        `json:"version"`
 	Created     time.Time                  `json:"created"`
-	App         string                     `json:"app,omitempty"` // the myna that made it
+	App         string                     `json:"app,omitempty"` // the owl that made it
 	Keys        bool                       `json:"keys"`          // whole-backup credential policy
 	Providers   []provider.Provider        `json:"providers"`
 	Icons       map[string][]byte          `json:"icons,omitempty"`  // pictures picked for providers, by file name
@@ -75,20 +75,20 @@ type Bundle struct {
 	GatewayKeys *[]access.Key              `json:"gatewayKeys,omitempty"`
 	Profiles    map[string]profile.Profile `json:"profiles,omitempty"`
 	Agents      map[string]string          `json:"agents,omitempty"`  // every agent's fields as they are now
-	Library     *library.Bundle            `json:"library,omitempty"` // nil from a myna before it, or with none
+	Library     *library.Bundle            `json:"library,omitempty"` // nil from a owl before it, or with none
 	// Searches are the web search APIs (#419), their keys with the
-	// providers'; nil from a myna before them.
+	// providers'; nil from a owl before them.
 	Searches *[]provider.SearchAPI `json:"searches,omitempty"`
 	// Order is the order the user put the providers in (#499), by id;
-	// none from a myna before it went, or when they were never arranged.
+	// none from a owl before it went, or when they were never arranged.
 	Order []string `json:"order,omitempty"`
 	// GroupOrder is the order the user put the routing groups in (#779),
-	// by id; none from a myna before it, or when never arranged.
+	// by id; none from a owl before it, or when never arranged.
 	GroupOrder []string `json:"groupOrder,omitempty"`
 	// Plugins are the OpenCode plugins and middlewares added from npm or
 	// git (provider.Carried), installed where the backup is put back:
 	// the providers they serve come with them. Their sign-ins don't, as a
-	// subscription's don't. Nil from a myna before them.
+	// subscription's don't. Nil from a owl before them.
 	Plugins *[]plugin.Entry `json:"plugins,omitempty"`
 	// Sync can carry one part's credentials without changing the others'
 	// Keys policy; these are absent from older backups and whole collects.
@@ -97,7 +97,7 @@ type Bundle struct {
 	LibraryKeys   *bool `json:"libraryKeys,omitempty"`
 	// SignIns are the subscription accounts and the plugins' sign-ins,
 	// with their credentials: only when the user asked for them
-	// (WithSignIns). Nil otherwise, and from a myna before them.
+	// (WithSignIns). Nil otherwise, and from a owl before them.
 	SignIns *provider.SignIns `json:"signIns,omitempty"`
 }
 
@@ -127,14 +127,14 @@ var ErrPassphrase = errors.New("wrong passphrase, or the file was changed")
 
 // ErrCorrupt is a file that isn't a backup at all, or one cut short: its
 // JSON, format, or key-derivation fields don't read. It is told from a
-// wrong passphrase and from a newer myna's file, so a sync can rebuild
+// wrong passphrase and from a newer owl's file, so a sync can rebuild
 // the damaged one from this computer rather than fail on it forever.
-var ErrCorrupt = errors.New("not a myna backup")
+var ErrCorrupt = errors.New("not a owl backup")
 
 // ErrNotBackup is a file that doesn't begin like a backup at all: an empty
 // one, a page a server answered with, another app's file. It reads as
 // ErrCorrupt does, but is never rebuilt over by a sync on its own.
-var ErrNotBackup = errors.New("not a myna backup")
+var ErrNotBackup = errors.New("not a owl backup")
 
 // BundleVersion is the bundle's structure: 2 carries the per-part
 // credential markers (ProvidersKeys, SettingsKeys, LibraryKeys) as their
@@ -143,7 +143,7 @@ const BundleVersion = 2
 
 // Flag is a per-part credential marker as a bundle field takes one: the
 // part's own, written when a sync merged it. Absent (nil) is a whole
-// collect's or an older myna's.
+// collect's or an older owl's.
 func Flag(keys bool) *bool { return &keys }
 
 // scopedKeys is whether a part's credentials are in the bundle: the part's
@@ -311,7 +311,7 @@ func Open(data []byte, pass string) (Bundle, error) {
 		// damaged-backup case — but so does any other non-JSON body a
 		// server answers with (a captive portal's sign-in page), and that
 		// isn't damage to rebuild over. Only a body that begins like a
-		// myna backup counts as one; anything else is what it is.
+		// owl backup counts as one; anything else is what it is.
 		if isBackupJSON(data) {
 			return Bundle{}, ErrCorrupt
 		}
@@ -321,7 +321,7 @@ func Open(data []byte, pass string) (Bundle, error) {
 		return Bundle{}, ErrNotBackup
 	}
 	if e.Version != 1 || e.KDF != "pbkdf2-sha256" {
-		return Bundle{}, errors.New("this backup was made by a newer myna; update myna to open it")
+		return Bundle{}, errors.New("this backup was made by a newer owl; update owl to open it")
 	}
 	if e.Iterations < 100_000 || e.Iterations > 10_000_000 || len(e.Nonce) != 12 || len(e.Salt) < 16 {
 		return Bundle{}, ErrCorrupt

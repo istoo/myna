@@ -9,7 +9,7 @@ import (
 )
 
 // codexDistroHome is a distro's / in a temp dir with a user whose ~/.codex
-// holds config (none when ""); myna's own HOME is another temp dir.
+// holds config (none when ""); owl's own HOME is another temp dir.
 func codexDistroHome(t *testing.T, config string) (root, home string) {
 	t.Helper()
 	syncHome(t)
@@ -22,11 +22,11 @@ func codexDistroHome(t *testing.T, config string) (root, home string) {
 	return root, home
 }
 
-// A Codex in a running distro, routed through myna, stands in for a model
-// it names that myna doesn't serve, as this machine's does and a Claude
+// A Codex in a running distro, routed through owl, stands in for a model
+// it names that owl doesn't serve, as this machine's does and a Claude
 // Code in the distro does (wslClaudeStandIn): the first distro running now
-// whose config.toml has myna as its provider. One whose config isn't
-// myna's has none.
+// whose config.toml has owl as its provider. One whose config isn't
+// owl's has none.
 func TestWSLCodexStandIn(t *testing.T) {
 	root, home := codexDistroHome(t, "")
 	cfg := filepath.Join(home, ".codex", "config.toml")
@@ -37,7 +37,7 @@ func TestWSLCodexStandIn(t *testing.T) {
 	if len(ds) != 1 || !ds[0].Running {
 		t.Fatalf("%+v", ds)
 	}
-	os.WriteFile(cfg, []byte("model_provider = \"myna\"\nmodel = \"relay/main\"\n"), 0o644)
+	os.WriteFile(cfg, []byte("model_provider = \"owl\"\nmodel = \"relay/main\"\n"), 0o644)
 	if got := wslCodexStandIn(); got != "relay/main" {
 		t.Fatalf("stand-in: %q", got)
 	}
@@ -52,15 +52,15 @@ func TestWSLCodexStandIn(t *testing.T) {
 	}
 	os.WriteFile(cfg, []byte("model = \"gpt-5.5\"\n"), 0o644)
 	if got := wslCodexStandIn(); got != "" {
-		t.Fatalf("not myna's provider: %q", got)
+		t.Fatalf("not owl's provider: %q", got)
 	}
 }
 
-// A distro that has stopped since myna saw it running is never opened for
+// A distro that has stopped since owl saw it running is never opened for
 // a stand-in, however wired its config on disk is (da5f7a811: a `wsl
 // --shutdown` is not undone by background work).
 func TestWSLCodexStandInSkipsStopped(t *testing.T) {
-	root, home := codexDistroHome(t, "model_provider = \"myna\"\nmodel = \"stopped/model\"\n")
+	root, home := codexDistroHome(t, "model_provider = \"owl\"\nmodel = \"stopped/model\"\n")
 	cfg := filepath.Join(home, ".codex", "config.toml")
 	before, err := os.Stat(cfg)
 	if err != nil {
@@ -91,7 +91,7 @@ func TestWSLCodexStandInSkipsStopped(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !after.ModTime().Equal(before.ModTime()) || readFile(cfg) != "model_provider = \"myna\"\nmodel = \"stopped/model\"\n" {
+	if !after.ModTime().Equal(before.ModTime()) || readFile(cfg) != "model_provider = \"owl\"\nmodel = \"stopped/model\"\n" {
 		t.Fatal("a stopped distro's config was touched")
 	}
 }

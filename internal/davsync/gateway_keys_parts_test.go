@@ -10,11 +10,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/backup"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/backup"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 func TestGatewayKeysSettingsHash(t *testing.T) {
@@ -143,7 +143,7 @@ func TestGatewayKeysConflict(t *testing.T) {
 				if err := Now(context.Background()); err != nil {
 					t.Fatal(err)
 				}
-				path := "/dav/myna/myna.myna-backup"
+				path := "/dav/owl/owl.owl-backup"
 				fake.mu.Lock()
 				data := append([]byte(nil), fake.files[path]...)
 				fake.mu.Unlock()
@@ -283,7 +283,7 @@ func TestGatewayKeysExcluded(t *testing.T) {
 				t.Error("a keyless theme change did not upload exactly once")
 			}
 			f.mu.Lock()
-			data := append([]byte(nil), f.objects["team x+y/myna/myna.myna-backup"]...)
+			data := append([]byte(nil), f.objects["team x+y/owl/owl.owl-backup"]...)
 			f.mu.Unlock()
 			remote, err := backup.Open(data, cfg.Passphrase)
 			if err != nil {

@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 // A model whose window is known says so, rather than Codex taking it for
@@ -25,7 +25,7 @@ func TestEntriesCarryContextWindow(t *testing.T) {
 	}
 }
 
-// The ETag handed to Codex carries a tag of myna's list: another list,
+// The ETag handed to Codex carries a tag of owl's list: another list,
 // another ETag, which Codex refetches on.
 func TestETagTag(t *testing.T) {
 	a := Tag([]catalog.Model{{ID: "p/m1"}})
@@ -34,9 +34,9 @@ func TestETagTag(t *testing.T) {
 		t.Fatalf("tags %q %q", a, b)
 	}
 	for etag, want := range map[string]string{
-		`W/"abc"`: `W/"abc+myna-` + a + `"`,
-		`"abc"`:   `"abc+myna-` + a + `"`,
-		"":        "+myna-" + a,
+		`W/"abc"`: `W/"abc+owl-` + a + `"`,
+		`"abc"`:   `"abc+owl-` + a + `"`,
+		"":        "+owl-" + a,
 	} {
 		if got := WithTag(etag, a); got != want || !Tagged(got, a) || Tagged(got, b) {
 			t.Errorf("WithTag(%q) = %q, want %q", etag, got, want)

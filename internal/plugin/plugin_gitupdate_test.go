@@ -37,7 +37,7 @@ func realBunSandbox(t *testing.T) {
 	t.Setenv("USERPROFILE", dir)
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(dir, "config"))
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(dir, "cache"))
-	t.Setenv("MYNA_BUN", bun) // never downloaded
+	t.Setenv("OWL_BUN", bun) // never downloaded
 	t.Cleanup(Settle)
 	forgetHeads()
 }
@@ -103,7 +103,7 @@ func TestGitUpdateInstallsTheBranchsCommitNow(t *testing.T) {
 // update keeps the commit the lock has.
 func TestGitUpdateSaysWhenItDidnt(t *testing.T) {
 	github, _ := gitSandbox(t)
-	t.Setenv("MYNA_FAKE_BUN_STUCK", "1")
+	t.Setenv("OWL_FAKE_BUN_STUCK", "1")
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 	repo := newGitRepo(t, filepath.Join(github, "owner", "repo.git"))

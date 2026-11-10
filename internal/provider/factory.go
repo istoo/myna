@@ -46,7 +46,7 @@ var (
 	factoryMu sync.Mutex
 )
 
-// factoryCreds is what myna keeps of a Factory account.
+// factoryCreds is what owl keeps of a Factory account.
 type factoryCreds struct {
 	Access    string `json:"accessToken"`
 	Refresh   string `json:"refreshToken"`

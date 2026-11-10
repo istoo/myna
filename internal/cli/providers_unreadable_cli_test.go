@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // printed is what fn printed, and the error it ended with.
@@ -36,8 +36,8 @@ func printed(t *testing.T, fn func() error) (string, error) {
 	return out.String(), err
 }
 
-// A providers.json that can't be read is not "no providers yet": myna
-// providers and myna models end in why, and leave the file as it is
+// A providers.json that can't be read is not "no providers yet": owl
+// providers and owl models end in why, and leave the file as it is
 // (#415's review). With no good providers.json.bak to read instead
 // (#1505), it is unknown.
 func TestProvidersCmdSaysUnreadable(t *testing.T) {

@@ -1,10 +1,10 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// A repository tagged myna-plugin that is gateway hooks alone
-// (package.json's myna.hooks and no entry of its own; MengXiangxi,
+// A repository tagged owl-plugin that is gateway hooks alone
+// (package.json's owl.hooks and no entry of its own; MengXiangxi,
 // #3821) is in "Unofficial, on GitHub" as an installed one's row has it:
 // the gateway's chip saying Request hook, never Provider, and picked out
 // under Middleware, as it runs in the gateway too. The repositories are
-// seven of /api/plugins/github's real answer of 2026-10-27, from a myna
+// seven of /api/plugins/github's real answer of 2026-10-27, from a owl
 // built at this change: two providers, three middleware and two of hooks
 // alone (past six, the section has its kinds to pick from).
 // The API is faked here and no request leaves the page. English, Chinese,
@@ -18,13 +18,13 @@ const { chromium, webkit } = require("playwright");
 const assets = path.resolve(__dirname, "../assets");
 
 const REPOS = [
-  { "spec": "myna-gemini-web", "repo": "BUKOWSKIREAL/myna-gemini-web", "url": "https://github.com/BUKOWSKIREAL/myna-gemini-web", "owner": "BUKOWSKIREAL", "ownerAvatar": "https://avatars.githubusercontent.com/u/233685554?v=4", "description": "Gemini Web provider for Myna with a local backend and experimental Argon support", "stars": 101, "license": "MIT", "pushed": "2026-10-24T05:28:43Z", "package": "myna-gemini-web", "version": "0.5.6" },
-  { "spec": "github:mu-zi-lee/myna-doubao-translate", "repo": "mu-zi-lee/myna-doubao-translate", "url": "https://github.com/mu-zi-lee/myna-doubao-translate", "owner": "mu-zi-lee", "ownerAvatar": "https://avatars.githubusercontent.com/u/75201518?v=4", "description": "Myna 豆包翻译插件：通过 Cookie 直连豆包 AI、火山及微软翻译，无需 Docker 或额外 API Key。｜Myna plugin for Doubao web translation: access Doubao AI, Volcengine and Microsoft Translator via Cookie, without Docker or an extra API key.", "stars": 9, "license": "MIT", "pushed": "2026-10-09T19:22:04Z", "package": "myna-doubao-translate", "version": "0.1.2" },
-  { "spec": "github:euanguo/myna-middleware-image-slim", "repo": "euanguo/myna-middleware-image-slim", "url": "https://github.com/euanguo/myna-middleware-image-slim", "owner": "euanguo", "ownerAvatar": "https://avatars.githubusercontent.com/u/82928935?v=4", "description": "myna gateway middleware: keep the newest images and replace older inline images with a text placeholder — agents resend every screenshot on every turn otherwise", "stars": 2, "license": "MIT", "pushed": "2026-10-10T16:41:27Z", "package": "myna-middleware-image-slim", "version": "0.2.0", "kind": "middleware" },
-  { "spec": "github:ezdemo/myna-haiku55-thinking", "repo": "ezdemo/myna-haiku55-thinking", "url": "https://github.com/ezdemo/myna-haiku55-thinking", "owner": "ezdemo", "ownerAvatar": "https://avatars.githubusercontent.com/u/41895036?v=4", "description": "Myna Haiku 5.5 thinking middleware with a verified OpenDesign compatibility workaround", "stars": 1, "license": "MIT", "pushed": "2026-10-12T15:07:50Z", "package": "myna-opendesign-compatible-fix", "version": "0.1.0", "kind": "middleware" },
-  { "spec": "github:MengXiangxi/myna-openviking", "repo": "MengXiangxi/myna-openviking", "url": "https://github.com/MengXiangxi/myna-openviking", "owner": "MengXiangxi", "ownerAvatar": "https://avatars.githubusercontent.com/u/10251566?v=4", "description": "OpenViking memory recall and opt-in capture through Myna async gateway hooks", "stars": 1, "license": "MIT", "pushed": "2026-10-27T02:43:30Z", "package": "myna-openviking", "version": "0.1.0", "kind": "hooks" },
-  { "spec": "github:sdloghub/myna-session-patcher", "repo": "sdloghub/myna-session-patcher", "url": "https://github.com/sdloghub/myna-session-patcher", "owner": "sdloghub", "ownerAvatar": "https://avatars.githubusercontent.com/u/52274876?v=4", "description": "Myna gateway middleware: opt-in outbound history filtering, optional reasoning cleanup and prompt append", "stars": 0, "pushed": "2026-10-25T07:15:36Z", "package": "myna-session-patcher", "version": "0.1.1", "kind": "middleware" },
-  { "spec": "github:IvanXxxxyyuffff/myna-system-prompt-file", "repo": "IvanXxxxyyuffff/myna-system-prompt-file", "url": "https://github.com/IvanXxxxyyuffff/myna-system-prompt-file", "owner": "IvanXxxxyyuffff", "ownerAvatar": "https://avatars.githubusercontent.com/u/128815537?v=4", "description": "Myna plugin: a system prompt (persona) loaded from a local .md / .txt file and injected into every agent request. macOS + Windows.", "stars": 0, "license": "MIT", "pushed": "2026-10-26T15:01:39Z", "package": "myna-system-prompt-file", "version": "0.3.0", "kind": "hooks" },
+  { "spec": "owl-gemini-web", "repo": "BUKOWSKIREAL/owl-gemini-web", "url": "https://github.com/BUKOWSKIREAL/owl-gemini-web", "owner": "BUKOWSKIREAL", "ownerAvatar": "https://avatars.githubusercontent.com/u/233685554?v=4", "description": "Gemini Web provider for Owl with a local backend and experimental Argon support", "stars": 101, "license": "MIT", "pushed": "2026-10-24T05:28:43Z", "package": "owl-gemini-web", "version": "0.5.6" },
+  { "spec": "github:mu-zi-lee/owl-doubao-translate", "repo": "mu-zi-lee/owl-doubao-translate", "url": "https://github.com/mu-zi-lee/owl-doubao-translate", "owner": "mu-zi-lee", "ownerAvatar": "https://avatars.githubusercontent.com/u/75201518?v=4", "description": "Owl 豆包翻译插件：通过 Cookie 直连豆包 AI、火山及微软翻译，无需 Docker 或额外 API Key。｜Owl plugin for Doubao web translation: access Doubao AI, Volcengine and Microsoft Translator via Cookie, without Docker or an extra API key.", "stars": 9, "license": "MIT", "pushed": "2026-10-09T19:22:04Z", "package": "owl-doubao-translate", "version": "0.1.2" },
+  { "spec": "github:euanguo/owl-middleware-image-slim", "repo": "euanguo/owl-middleware-image-slim", "url": "https://github.com/euanguo/owl-middleware-image-slim", "owner": "euanguo", "ownerAvatar": "https://avatars.githubusercontent.com/u/82928935?v=4", "description": "owl gateway middleware: keep the newest images and replace older inline images with a text placeholder — agents resend every screenshot on every turn otherwise", "stars": 2, "license": "MIT", "pushed": "2026-10-10T16:41:27Z", "package": "owl-middleware-image-slim", "version": "0.2.0", "kind": "middleware" },
+  { "spec": "github:ezdemo/owl-haiku55-thinking", "repo": "ezdemo/owl-haiku55-thinking", "url": "https://github.com/ezdemo/owl-haiku55-thinking", "owner": "ezdemo", "ownerAvatar": "https://avatars.githubusercontent.com/u/41895036?v=4", "description": "Owl Haiku 5.5 thinking middleware with a verified OpenDesign compatibility workaround", "stars": 1, "license": "MIT", "pushed": "2026-10-12T15:07:50Z", "package": "owl-opendesign-compatible-fix", "version": "0.1.0", "kind": "middleware" },
+  { "spec": "github:MengXiangxi/owl-openviking", "repo": "MengXiangxi/owl-openviking", "url": "https://github.com/MengXiangxi/owl-openviking", "owner": "MengXiangxi", "ownerAvatar": "https://avatars.githubusercontent.com/u/10251566?v=4", "description": "OpenViking memory recall and opt-in capture through Owl async gateway hooks", "stars": 1, "license": "MIT", "pushed": "2026-10-27T02:43:30Z", "package": "owl-openviking", "version": "0.1.0", "kind": "hooks" },
+  { "spec": "github:sdloghub/owl-session-patcher", "repo": "sdloghub/owl-session-patcher", "url": "https://github.com/sdloghub/owl-session-patcher", "owner": "sdloghub", "ownerAvatar": "https://avatars.githubusercontent.com/u/52274876?v=4", "description": "Owl gateway middleware: opt-in outbound history filtering, optional reasoning cleanup and prompt append", "stars": 0, "pushed": "2026-10-25T07:15:36Z", "package": "owl-session-patcher", "version": "0.1.1", "kind": "middleware" },
+  { "spec": "github:IvanXxxxyyuffff/myna-system-prompt-file", "repo": "IvanXxxxyyuffff/myna-system-prompt-file", "url": "https://github.com/IvanXxxxyyuffff/myna-system-prompt-file", "owner": "IvanXxxxyyuffff", "ownerAvatar": "https://avatars.githubusercontent.com/u/128815537?v=4", "description": "Owl plugin: a system prompt (persona) loaded from a local .md / .txt file and injected into every agent request. macOS + Windows.", "stars": 0, "license": "MIT", "pushed": "2026-10-26T15:01:39Z", "package": "myna-system-prompt-file", "version": "0.3.0", "kind": "hooks" },
 ];
 const name = (r) => r.repo.split("/")[1];
 
@@ -41,11 +41,11 @@ function server(lang, fetched) {
     if (url.pathname === "/api/plugins") return json({ bun: true, bunVersion: "1.4.2", plugins: [], picker: false, movable: [] });
     if (url.pathname === "/api/plugins/listings") return json({ listings: [] });
     if (url.pathname === "/api/plugins/npm") return json({ npm: {} });
-    if (url.pathname === "/api/plugins/github") return json({ repos: REPOS, topic: "myna-plugin" });
+    if (url.pathname === "/api/plugins/github") return json({ repos: REPOS, topic: "owl-plugin" });
     if (url.pathname === "/api/plugins/search") return json({ hits: [] });
     if (url.pathname === "/api/plugins/updates") return json({ waiting: [], updated: [] });
     if (url.pathname.startsWith("/api/")) return json({});
-    if (url.host !== "myna.test" || !/^\/[\w./-]*$/.test(url.pathname)) { fetched.push(url.href); return route.fulfill({ status: 404, body: "" }); }
+    if (url.host !== "owl.test" || !/^\/[\w./-]*$/.test(url.pathname)) { fetched.push(url.href); return route.fulfill({ status: 404, body: "" }); }
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -66,9 +66,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], fetched = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, fetched));
-        await page.addInitScript(() => { try { localStorage.setItem("myna.pluginTab", "discover"); } catch {} });
+        await page.addInitScript(() => { try { localStorage.setItem("owl.pluginTab", "discover"); } catch {} });
         try {
-          await page.goto("http://myna.test/?view=plugins");
+          await page.goto("http://owl.test/?view=plugins");
           const sec = page.locator("#view-plugins .pm-ghsec");
           const cards = sec.locator(".pm-card");
           await cards.first().waitFor();

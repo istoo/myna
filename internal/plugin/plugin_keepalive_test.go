@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // A sign-in nothing uses is renewed by KeepSignedIn as it comes due, as a

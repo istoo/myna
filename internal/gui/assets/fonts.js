@@ -5,7 +5,7 @@
 // families it draws (webfonts.js).
 window.desktopFonts = (() => {
   let catalogue = null, held = null;
-  const web = window.bootPrefs?.web, KEY = "myna.fonts";
+  const web = window.bootPrefs?.web, KEY = "owl.fonts";
   const own = () => { try { return JSON.parse(localStorage[KEY]); } catch { return held; } };
   function keep(key, v) {
     held = { ...own(), [key]: v };

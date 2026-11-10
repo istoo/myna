@@ -22,7 +22,7 @@ const found = [
   { name: "dev", description: "Work in progress", agents: ["claude"], link: `${HOME}/src/dev` },
 ];
 const lib = (foundSkills) => ({
-  dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
+  dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
   agents: [agent("claude", "Claude Code"), agent("codex", "Codex"), agent("gemini", "Gemini CLI"), agent("goose", "Goose")],
   instructions: { agents: [] }, servers: [], skills: [], foundServers: [], projects: [], foundSkills,
 });
@@ -52,25 +52,25 @@ function server(lang, posts) {
 
 const said = {
   en: {
-    notes: ["It is taken out of Claude Code, Codex, and its folder is moved to myna's backups.", "Gemini CLI has another skill by this name; that one stays."],
+    notes: ["It is taken out of Claude Code, Codex, and its folder is moved to owl's backups.", "Gemini CLI has another skill by this name; that one stays."],
     dev: ["It is taken out of Claude Code. The folder it was linked from stays where it is."],
-    grilling: ["It is taken out of Goose, and its folder is moved to myna's backups.", `Its entry in ${HOME}/.agents/skills/grilling goes to the backups too, so no agent reads it from there.`],
+    grilling: ["It is taken out of Goose, and its folder is moved to owl's backups.", `Its entry in ${HOME}/.agents/skills/grilling goes to the backups too, so no agent reads it from there.`],
     removed: "notes removed",
   },
   zh: {
-    notes: ["将从 Claude Code, Codex 中移除，文件夹移到 myna 的备份。", "Gemini CLI 中有另一个同名 Skill，那个保持不动。"],
+    notes: ["将从 Claude Code, Codex 中移除，文件夹移到 owl 的备份。", "Gemini CLI 中有另一个同名 Skill，那个保持不动。"],
     dev: ["将从 Claude Code 中移除。它链接到的原文件夹保持不动。"],
-    grilling: ["将从 Goose 中移除，文件夹移到 myna 的备份。", `它在 ${HOME}/.agents/skills/grilling 中的条目也会移到备份，不会再有 Agent 从那里读取。`],
+    grilling: ["将从 Goose 中移除，文件夹移到 owl 的备份。", `它在 ${HOME}/.agents/skills/grilling 中的条目也会移到备份，不会再有 Agent 从那里读取。`],
   },
   ja: {
-    notes: ["Claude Code, Codex から外され、フォルダは myna のバックアップに移されます。", "Gemini CLI には同じ名前の別のスキルがあり、そちらはそのまま残ります。"],
+    notes: ["Claude Code, Codex から外され、フォルダは owl のバックアップに移されます。", "Gemini CLI には同じ名前の別のスキルがあり、そちらはそのまま残ります。"],
     dev: ["Claude Code から外されます。リンク元のフォルダはそのまま残ります。"],
-    grilling: ["Goose から外され、フォルダは myna のバックアップに移されます。", `${HOME}/.agents/skills/grilling にあるエントリもバックアップに移され、どのエージェントもそこから読まなくなります。`],
+    grilling: ["Goose から外され、フォルダは owl のバックアップに移されます。", `${HOME}/.agents/skills/grilling にあるエントリもバックアップに移され、どのエージェントもそこから読まなくなります。`],
   },
   de: {
-    notes: ["Er wird aus Claude Code, Codex entfernt, und sein Ordner wird in die Backups von myna verschoben.", "Gemini CLI hat einen anderen Skill mit diesem Namen; dieser bleibt."],
+    notes: ["Er wird aus Claude Code, Codex entfernt, und sein Ordner wird in die Backups von owl verschoben.", "Gemini CLI hat einen anderen Skill mit diesem Namen; dieser bleibt."],
     dev: ["Er wird aus Claude Code entfernt. Der Ordner, auf den er verlinkt war, bleibt, wo er ist."],
-    grilling: ["Er wird aus Goose entfernt, und sein Ordner wird in die Backups von myna verschoben.", `Sein Eintrag in ${HOME}/.agents/skills/grilling kommt ebenfalls in die Backups, sodass kein Agent ihn mehr von dort liest.`],
+    grilling: ["Er wird aus Goose entfernt, und sein Ordner wird in die Backups von owl verschoben.", `Sein Eintrag in ${HOME}/.agents/skills/grilling kommt ebenfalls in die Backups, sodass kein Agent ihn mehr von dort liest.`],
   },
 };
 
@@ -85,13 +85,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     });
     const open = async (lang, posts, width = 980) => {
       const ctx = await browser.newContext({ viewport: { width, height: 800 } });
-      await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "skills"); } catch {} });
+      await ctx.addInitScript(() => { try { localStorage.setItem("owl.libTab", "skills"); } catch {} });
       const page = await ctx.newPage();
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(60000);
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", server(lang, posts));
-      await page.goto("http://myna.test/");
+      await page.goto("http://owl.test/");
       await navTo(page, "library");
       await page.locator("#view-library .lib-body:not(.lib-skel) .lib-row").first().waitFor();
       return page;

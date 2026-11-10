@@ -7,7 +7,7 @@ import (
 )
 
 // A look at the stash's values reads and parses stash.json once, not once
-// for each look, and still sees each change: myna's own, and one another
+// for each look, and still sees each change: owl's own, and one another
 // process wrote.
 func TestStashLooksShareOneRead(t *testing.T) {
 	stashHome(t)
@@ -25,7 +25,7 @@ func TestStashLooksShareOneRead(t *testing.T) {
 	}
 	stash(map[string]string{"b.was": "2"})
 	if got := stashShared()["b.was"]; got != "2" {
-		t.Fatalf("myna's own change not seen: %q", got)
+		t.Fatalf("owl's own change not seen: %q", got)
 	}
 	if err := os.WriteFile(stashPath(), []byte(`{"c.was": "theirs, longer"}`), 0o600); err != nil {
 		t.Fatal(err)

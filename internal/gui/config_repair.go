@@ -8,22 +8,22 @@ import (
 	"os"
 	"strings"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/update"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/update"
 )
 
-// A folder on the way to myna's own that this user can't write — most
+// A folder on the way to owl's own that this user can't write — most
 // often a ~/.config a command run under sudo once made, so it belongs to
 // root — fails every save with "permission denied" (YouWhat on Discord:
-// adding a custom provider said "mkdir ~/.config/myna: permission
-// denied"). myna's files stay where every reader looks for them; the
+// adding a custom provider said "mkdir ~/.config/owl: permission
+// denied"). owl's files stay where every reader looks for them; the
 // window offers to make that folder the user's again, with one click and
 // the system's password prompt. Only that folder changes: ~/.config gets
 // its owner back and nothing in it does, since the other apps' folders
-// there are theirs, and myna's own folder, when it is the one taken, is
+// there are theirs, and owl's own folder, when it is the one taken, is
 // taken back whole.
 
-// configBlocked is the folder that keeps myna from saving, as the window
+// configBlocked is the folder that keeps owl from saving, as the window
 // names it, or "".
 func configBlocked() string {
 	if b := appdir.Blocked(); b != "" {
@@ -51,9 +51,9 @@ var mine = appdir.Mine
 // errRepairCanceled is the password prompt dismissed.
 var errRepairCanceled = update.ErrCanceled
 
-// repairConfig makes the folder that keeps myna from saving this user's
-// again, then makes myna's folders. prompt is whether the system's
-// password prompt can be shown: not to myna web's page on another
+// repairConfig makes the folder that keeps owl from saving this user's
+// again, then makes owl's folders. prompt is whether the system's
+// password prompt can be shown: not to owl web's page on another
 // device, where no one sits at this computer's screen to answer it.
 func repairConfig(prompt bool) error {
 	if b := appdir.Blocked(); b != "" {
@@ -69,14 +69,14 @@ func repairConfig(prompt bool) error {
 		} else {
 			recurse := ""
 			if appdir.Own(b) {
-				recurse = "-R " // myna's own folder: everything in it is myna's
+				recurse = "-R " // owl's own folder: everything in it is owl's
 			}
 			q := update.ShellQuote(b)
 			script := fmt.Sprintf("chown %s%d:%d %s && chmod u+rwx %s", recurse, os.Getuid(), os.Getgid(), q, q)
 			if !prompt || !canElevate() {
 				return fmt.Errorf("%s belongs to another user, and no administrator prompt can be shown here: run `sudo %s` in a terminal", b, script)
 			}
-			if err := asAdmin("myna needs "+b+" to be yours again to save its settings.", script); err != nil {
+			if err := asAdmin("owl needs "+b+" to be yours again to save its settings.", script); err != nil {
 				return err
 			}
 		}

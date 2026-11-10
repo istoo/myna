@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-// installFixture is a download folder holding exe (myna-windows-amd64.exe,
+// installFixture is a download folder holding exe (owl-windows-amd64.exe,
 // as the site names it) and the place it installs to, each with its
 // version; what Settle asks of the system answers from them.
 type installFixture struct {
@@ -24,11 +24,11 @@ func newInstallFixture(t *testing.T) *installFixture {
 	root := t.TempDir()
 	f := &installFixture{
 		downloads: filepath.Join(root, "Downloads"),
-		to:        filepath.Join(root, "Local", "Programs", "myna", "myna.exe"),
+		to:        filepath.Join(root, "Local", "Programs", "owl", "owl.exe"),
 		profiles:  filepath.Join(root, "Roaming"),
 		versions:  map[string]uint64{},
 	}
-	f.exe = filepath.Join(f.downloads, "myna-windows-amd64.exe")
+	f.exe = filepath.Join(f.downloads, "owl-windows-amd64.exe")
 	if err := os.MkdirAll(f.downloads, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -84,7 +84,7 @@ func readString(t *testing.T, p string) string {
 }
 
 // Opened from Downloads with nothing installed, the app is copied to the
-// user's programs folder as myna.exe, that folder goes on the PATH, and
+// user's programs folder as owl.exe, that folder goes on the PATH, and
 // the installed one is what opens. The download itself stays: it is the
 // user's file.
 func TestSettleInstallsADownload(t *testing.T) {
@@ -105,17 +105,17 @@ func TestSettleInstallsADownload(t *testing.T) {
 	if len(f.placed) != 1 || !samePath(f.placed[0], filepath.Dir(f.to)) {
 		t.Fatalf("PATH given %v, want the install folder once", f.placed)
 	}
-	left, _ := filepath.Glob(filepath.Join(filepath.Dir(f.to), ".myna-install-*"))
+	left, _ := filepath.Glob(filepath.Join(filepath.Dir(f.to), ".owl-install-*"))
 	if len(left) != 0 {
 		t.Fatalf("staging files left: %v", left)
 	}
 }
 
 // A copy kept anywhere the user chose, or a portable one, runs where it
-// is and installs nothing; so does one run with MYNA_NO_INSTALL=1.
+// is and installs nothing; so does one run with OWL_NO_INSTALL=1.
 func TestSettleLeavesAChosenPlace(t *testing.T) {
 	f := newInstallFixture(t)
-	tools := filepath.Join(filepath.Dir(f.downloads), "Tools", "myna-windows-amd64.exe")
+	tools := filepath.Join(filepath.Dir(f.downloads), "Tools", "owl-windows-amd64.exe")
 	if err := os.MkdirAll(filepath.Dir(tools), 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -138,10 +138,10 @@ func TestSettleLeavesAChosenPlace(t *testing.T) {
 	}
 	t.Setenv(NoInstallEnv, "1")
 	if from, to := Settle(); from != "" || to != "" {
-		t.Fatalf("MYNA_NO_INSTALL=1 still opens %q", to)
+		t.Fatalf("OWL_NO_INSTALL=1 still opens %q", to)
 	}
 	if forwards(f.exe) {
-		t.Fatal("MYNA_NO_INSTALL=1 still counts as forwarding")
+		t.Fatal("OWL_NO_INSTALL=1 still counts as forwarding")
 	}
 }
 
@@ -173,7 +173,7 @@ func TestSettleKeepsTheInstalledVersion(t *testing.T) {
 				t.Fatalf("installed holds %q, want %q", got, c.want)
 			}
 			if len(f.placed) != 0 {
-				t.Fatalf("PATH written again for an installed myna: %v", f.placed)
+				t.Fatalf("PATH written again for an installed owl: %v", f.placed)
 			}
 			if got := readString(t, f.exe); got != "MZ new download" {
 				t.Fatalf("the download was changed: %q", got)
@@ -201,12 +201,12 @@ func TestSettleFailingRunsOn(t *testing.T) {
 	}
 }
 
-// WebView2 keeps a profile per exe name, so myna.exe would start with
+// WebView2 keeps a profile per exe name, so owl.exe would start with
 // none: the installed copy is pointed at the download's, unless it has
 // one of its own.
 func TestSettleKeepsTheWebViewProfile(t *testing.T) {
 	f := newInstallFixture(t)
-	old := filepath.Join(f.profiles, "myna-windows-amd64.exe")
+	old := filepath.Join(f.profiles, "owl-windows-amd64.exe")
 	if err := os.MkdirAll(old, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -219,7 +219,7 @@ func TestSettleKeepsTheWebViewProfile(t *testing.T) {
 	}
 
 	g := newInstallFixture(t)
-	for _, d := range []string{"myna-windows-amd64.exe", "myna.exe"} {
+	for _, d := range []string{"owl-windows-amd64.exe", "owl.exe"} {
 		if err := os.MkdirAll(filepath.Join(g.profiles, d), 0o755); err != nil {
 			t.Fatal(err)
 		}
@@ -228,15 +228,15 @@ func TestSettleKeepsTheWebViewProfile(t *testing.T) {
 		t.Fatal(err)
 	}
 	if exists(filepath.Join(filepath.Dir(g.to), "webview-profile")) {
-		t.Fatal("pointed away from myna.exe's own profile")
+		t.Fatal("pointed away from owl.exe's own profile")
 	}
 }
 
-// The installed copy clears what myna wrote beside the download: the
-// myna.com and myna.cmd that ran it, and what updates moved aside.
-// A myna.cmd of the user's own, or one myna wrote for another
+// The installed copy clears what owl wrote beside the download: the
+// owl.com and owl.cmd that ran it, and what updates moved aside.
+// A owl.cmd of the user's own, or one owl wrote for another
 // program there, stays.
-func TestSettledClearsOnlyMynasFiles(t *testing.T) {
+func TestSettledClearsOnlyOwlsFiles(t *testing.T) {
 	f := newInstallFixture(t)
 	dir := f.downloads
 	com := filepath.Join(dir, comName)
@@ -249,7 +249,7 @@ func TestSettledClearsOnlyMynasFiles(t *testing.T) {
 	if err := os.WriteFile(f.exe+".old", []byte("MZ"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	// an update an older myna downloaded beside it, never put in now
+	// an update an older owl downloaded beside it, never put in now
 	if err := os.WriteFile(f.exe+".new", []byte("MZ newer"), 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -264,25 +264,25 @@ func TestSettledClearsOnlyMynasFiles(t *testing.T) {
 		t.Fatal("the download itself was removed")
 	}
 	if os.Getenv(installedFromEnv) != "" {
-		t.Fatal("passed on to what the installed myna starts")
+		t.Fatal("passed on to what the installed owl starts")
 	}
 
-	// the user's own, and myna's for another program
-	own := []byte("@echo off\r\nrem mine\r\n\"%~dp0myna-windows-amd64.exe\" %*\r\n")
+	// the user's own, and owl's for another program
+	own := []byte("@echo off\r\nrem mine\r\n\"%~dp0owl-windows-amd64.exe\" %*\r\n")
 	if err := os.WriteFile(filepath.Join(dir, shimName), own, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	other := comText([]byte("MZ launcher"), filepath.Join(dir, "myna-windows-amd64 (1).exe"))
+	other := comText([]byte("MZ launcher"), filepath.Join(dir, "owl-windows-amd64 (1).exe"))
 	if err := os.WriteFile(com, other, 0o755); err != nil {
 		t.Fatal(err)
 	}
 	t.Setenv(installedFromEnv, f.exe)
 	Settled()
 	if b, err := os.ReadFile(filepath.Join(dir, shimName)); err != nil || !bytes.Equal(b, own) {
-		t.Fatalf("the user's myna.cmd: %q, %v", b, err)
+		t.Fatalf("the user's owl.cmd: %q, %v", b, err)
 	}
 	if b, err := os.ReadFile(com); err != nil || !bytes.Equal(b, other) {
-		t.Fatalf("another program's myna.com: %v", err)
+		t.Fatalf("another program's owl.com: %v", err)
 	}
 }
 
@@ -305,10 +305,10 @@ func TestForwardWaitsForTheInstalledOne(t *testing.T) {
 		}
 		return make(chan struct{}), func() {}, nil
 	}
-	if err := Forward(`C:\Users\u\Downloads\myna-windows-amd64.exe`, `C:\Users\u\AppData\Local\Programs\myna\myna.exe`); err != nil {
+	if err := Forward(`C:\Users\u\Downloads\owl-windows-amd64.exe`, `C:\Users\u\AppData\Local\Programs\owl\owl.exe`); err != nil {
 		t.Fatal(err)
 	}
-	if !strings.HasSuffix(gotExe, `myna.exe`) {
+	if !strings.HasSuffix(gotExe, `owl.exe`) {
 		t.Fatalf("opened %q", gotExe)
 	}
 	if strings.Join(gotArgs, " ") != strings.Join(os.Args[1:], " ") {
@@ -316,7 +316,7 @@ func TestForwardWaitsForTheInstalledOne(t *testing.T) {
 	}
 	var from, marks int
 	for _, e := range gotEnv {
-		if strings.HasPrefix(e, installedFromEnv+`=C:\Users\u\Downloads\myna-windows-amd64.exe`) {
+		if strings.HasPrefix(e, installedFromEnv+`=C:\Users\u\Downloads\owl-windows-amd64.exe`) {
 			from++
 		}
 		if strings.HasPrefix(e, startedEnv+"=") {
@@ -340,12 +340,12 @@ func TestForwardWaitsForTheInstalledOne(t *testing.T) {
 		return c, func() {}, nil
 	}
 	if err := Forward("a", "b"); err == nil {
-		t.Fatal("a myna that quit unstarted taken as opened")
+		t.Fatal("a owl that quit unstarted taken as opened")
 	}
 }
 
-// A download that opens the installed myna writes no myna.com beside
-// it: the terminal's myna is the installed one's.
+// A download that opens the installed owl writes no owl.com beside
+// it: the terminal's owl is the installed one's.
 func TestNoCompanionBesideAForwardingDownload(t *testing.T) {
 	f := newInstallFixture(t)
 	f.installed(t, "MZ installed", 0)
@@ -363,7 +363,7 @@ func TestNoCompanionBesideAForwardingDownload(t *testing.T) {
 	// nor one that runs where it is: a download folder gets one only from
 	// Add (TestNoCompanionPutBackOnTheDesktop)
 	if exists(filepath.Join(f.downloads, comName)) {
-		t.Fatalf("myna.com beside the download, forwarding: %v", forwards(f.exe))
+		t.Fatalf("owl.com beside the download, forwarding: %v", forwards(f.exe))
 	}
 }
 
@@ -374,7 +374,7 @@ func TestInFolder(t *testing.T) {
 		want bool
 	}{
 		{root, true},
-		{filepath.Join(root, "Temp1_myna.zip"), true},
+		{filepath.Join(root, "Temp1_owl.zip"), true},
 		{strings.ToUpper(filepath.Join(root, "x")), true},
 		{filepath.Dir(root), false},
 		{root + "-other", false},

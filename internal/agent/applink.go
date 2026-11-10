@@ -35,7 +35,7 @@ var linkHandler = systemLinkHandler
 // OpenAppLink hands an app's import link (Cindy's, Lody's, AionUi's) to
 // open, after checking that something here opens it. The system starts
 // the opener and never says whether it found a program, so without the
-// check a click on Add myna does nothing at all when the app never
+// check a click on Add owl does nothing at all when the app never
 // registered its scheme or was moved since (sungt, 10-29). A check that
 // can't be read is unknown, and the link is handed over anyway.
 func OpenAppLink(link string, open func(string) error) error {

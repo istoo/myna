@@ -1,6 +1,6 @@
-// Package omarchy is what myna knows of Omarchy (omarchy.org), the
+// Package omarchy is what owl knows of Omarchy (omarchy.org), the
 // Hyprland desktop: whether it runs on one, and the look its current theme
-// gives every surface, so myna's windows can take that look there and
+// gives every surface, so owl's windows can take that look there and
 // nowhere else.
 //
 // Omarchy (4.x) keeps the current theme under
@@ -24,14 +24,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/proc"
 )
 
-// Detect reports whether myna runs on Omarchy. MYNA_OMARCHY=1 says it
-// does (with MYNA_OMARCHY_THEME the theme's folder), =0 that it doesn't.
+// Detect reports whether owl runs on Omarchy. OWL_OMARCHY=1 says it
+// does (with OWL_OMARCHY_THEME the theme's folder), =0 that it doesn't.
 func Detect() bool {
-	switch os.Getenv("MYNA_OMARCHY") {
+	switch os.Getenv("OWL_OMARCHY") {
 	case "1":
 		return true
 	case "0":
@@ -54,7 +54,7 @@ func Detect() bool {
 
 // ThemeDir is the current theme's folder, or "" when there is none.
 func ThemeDir() string {
-	if d := os.Getenv("MYNA_OMARCHY_THEME"); d != "" {
+	if d := os.Getenv("OWL_OMARCHY_THEME"); d != "" {
 		return d
 	}
 	home, _ := os.UserHomeDir()
@@ -73,7 +73,7 @@ func ThemeDir() string {
 	return ""
 }
 
-// Theme is the current theme as myna draws with it.
+// Theme is the current theme as owl draws with it.
 type Theme struct {
 	Name  string            `json:"name"`  // tokyo-night
 	Mode  string            `json:"mode"`  // dark or light
@@ -199,7 +199,7 @@ func (c color) alpha(a float64) color { c.a = a; return c }
 func (c color) luminance() float64 { return 0.2126*c.r + 0.7152*c.g + 0.0722*c.b }
 
 // Vars turns the theme's palette (colors.toml) and shell tokens
-// (shell.toml) into myna's CSS custom properties, the rest given: the
+// (shell.toml) into owl's CSS custom properties, the rest given: the
 // font's family, the corners' radius and the border's width.
 func Vars(colors, shell map[string]string, font string, rounding, border int) (map[string]string, string) {
 	get := func(m map[string]string, fallback color, keys ...string) color {
@@ -416,7 +416,7 @@ func fnv(s string) uint64 {
 // fontName is the font Omarchy sets for everything, as omarchy-font-current
 // says.
 func fontName() string {
-	if f := os.Getenv("MYNA_OMARCHY_FONT"); f != "" {
+	if f := os.Getenv("OWL_OMARCHY_FONT"); f != "" {
 		return f
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)

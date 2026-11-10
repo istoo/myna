@@ -5,7 +5,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // Claude Desktop runs the Claude Code of its Code tab with
@@ -14,10 +14,10 @@ import (
 // tiers' variables from the env of its settings files ("Ignoring … this
 // session's provider routing is managed by the host", Claude Code
 // 2.1.295). Desktop's own config has no key for it either (the env it
-// builds for the Code tab, Desktop 2.31226). So the subagent model myna
+// builds for the Code tab, Desktop 2.31226). So the subagent model owl
 // writes into ~/.claude doesn't reach Desktop: its subagents run on the
 // lead's model or on a tier's, and only the tiers could be picked.
-// settings.DesktopSubagentModel is the model myna puts every subagent
+// settings.DesktopSubagentModel is the model owl puts every subagent
 // turn of Desktop's on, whatever its lead or tier asked for: the gateway
 // rewrites a subagent's request (x-claude-code-agent-id, with tools) to
 // it, read on each request, so Desktop needn't restart. Its lead's turns
@@ -36,16 +36,16 @@ func DesktopSubagentModel() string {
 }
 
 // SetDesktopSubagentModel puts Desktop's subagent turns on id, a model or
-// routing group of myna's (provider/model, group/<id>); "" leaves them
-// on the model their lead asks for. One myna doesn't serve now is kept
+// routing group of owl's (provider/model, group/<id>); "" leaves them
+// on the model their lead asks for. One owl doesn't serve now is kept
 // all the same, as Codex's subagent model is, so a backup or profile put
 // back on a computer whose providers differ still applies; the gateway
 // leaves subagents on the model asked for until it is served. A bare name
-// is refused: it names no model of myna's.
+// is refused: it names no model of owl's.
 func SetDesktopSubagentModel(id string) error {
 	id = strings.TrimSpace(id)
 	if pid, model, ok := strings.Cut(id, "/"); id != "" && (!ok || pid == "" || model == "") {
-		return fmt.Errorf("Claude Desktop's subagents can't be put on %q: pick one of myna's models (provider/model)", id)
+		return fmt.Errorf("Claude Desktop's subagents can't be put on %q: pick one of owl's models (provider/model)", id)
 	}
 	s := settings.Load()
 	if s.DesktopSubagentModel == id {
@@ -60,7 +60,7 @@ func SetDesktopSubagentModel(id string) error {
 }
 
 // DesktopSubagentUnserved says why Desktop's subagents can't be put on
-// id now, "" when myna serves that exact model or routing group.
+// id now, "" when owl serves that exact model or routing group.
 // Resolve isn't enough: it takes any model name under a provider that is
 // on, and the subagent would go to the vendor for a model it lacks.
 func DesktopSubagentUnserved(id string) string {
@@ -70,7 +70,7 @@ func DesktopSubagentUnserved(id string) string {
 			return ""
 		}
 	}
-	return "myna doesn't serve it now"
+	return "owl doesn't serve it now"
 }
 
 // DesktopSubagentEffort is the effort set for Desktop's subagent turns,

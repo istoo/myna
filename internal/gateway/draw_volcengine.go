@@ -16,7 +16,7 @@ package gateway
 //     ratio maps to at 2K;
 //   - there is no quality and no mask.
 //
-// So myna draws there as the doc says: watermark false unless the caller
+// So owl draws there as the doc says: watermark false unless the caller
 // sends its own, the images as JSON, one request per image n asks for (each
 // a group when the caller sends sequential_image_generation), and a ratio
 // sent as the doc's 2K size for it, or turned away with what to do instead
@@ -32,7 +32,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // isArk is a provider at Volcengine Ark (ark.<region>.volces.com): the
@@ -67,7 +67,7 @@ func arkSize(size string) (string, error) {
 		if s, ok := arkRatioSizes[strings.ReplaceAll(size, " ", "")]; ok {
 			return s, nil
 		}
-		return "", fmt.Errorf("Volcengine's images API takes no aspect ratio as size, and %q isn't one myna can turn into a size (it can: 1:1, 4:3, 3:4, 16:9, 9:16, 3:2, 2:3, 21:9): describe the ratio in the prompt and leave size out, or give WIDTHxHEIGHT (e.g. 2048x2048)", size)
+		return "", fmt.Errorf("Volcengine's images API takes no aspect ratio as size, and %q isn't one owl can turn into a size (it can: 1:1, 4:3, 3:4, 16:9, 9:16, 3:2, 2:3, 21:9): describe the ratio in the prompt and leave size out, or give WIDTHxHEIGHT (e.g. 2048x2048)", size)
 	}
 	return size, nil
 }
@@ -87,7 +87,7 @@ func arkBody(model string, d drawing) ([]byte, error) {
 	}
 	// the caller's own fields of Ark's first (watermark,
 	// sequential_image_generation and its options, optimize_prompt_options,
-	// tools, layer_decomposition…; axelburks on Discord), then what myna
+	// tools, layer_decomposition…; axelburks on Discord), then what owl
 	// reads of OpenAI's: a watermark is off unless the caller asks for
 	// one, and the image comes as Ark's URL when the caller asks for url
 	req := map[string]any{"watermark": false}
@@ -98,7 +98,7 @@ func arkBody(model string, d drawing) ([]byte, error) {
 		req[k] = v
 	}
 	if on, _ := req["stream"].(bool); on {
-		return nil, errors.New("Volcengine's images API streams its images in events of its own, which /v1/images/generations doesn't give: leave stream out, or ask Ark's own API through myna at /v1/myna/native/<provider>/images/generations")
+		return nil, errors.New("Volcengine's images API streams its images in events of its own, which /v1/images/generations doesn't give: leave stream out, or ask Ark's own API through owl at /v1/owl/native/<provider>/images/generations")
 	}
 	delete(req, "stream")
 	req["model"] = model

@@ -9,17 +9,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/redact"
-	"github.com/istoo/myna/internal/sessions"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/redact"
+	"github.com/istoo/owl/internal/sessions"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/usage"
 )
 
 const conversationBodyMax = 8 << 20
 
 // withGatewaySession tells the client the session its conversation is
-// recorded under. Only a session the client named is recorded: myna never
+// recorded under. Only a session the client named is recorded: owl never
 // makes one up, as text under an id nothing lists can't be read (#1355).
 func withGatewaySession(w http.ResponseWriter, r *http.Request) {
 	if id := sessionOf(r.Header); id != "" {
@@ -67,7 +67,7 @@ func recordConversation(w http.ResponseWriter, r *http.Request, proto provider.P
 	at := time.Now()
 	input := append([]byte(nil), body[:min(len(body), conversationBodyMax)]...)
 	sink := &conversationWriter{captureResponseWriter: &captureResponseWriter{
-		ResponseWriter: w, full: &spool{limit: conversationBodyMax, pattern: "myna-conversation-*"},
+		ResponseWriter: w, full: &spool{limit: conversationBodyMax, pattern: "owl-conversation-*"},
 	}}
 	return sink, func() {
 		defer sink.full.discard()

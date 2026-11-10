@@ -3,7 +3,7 @@
 // it is spent — a 0% it never reported. The card shows what the plugin did
 // say (its display text, else "No allowance reported") and no percentage,
 // and no meter is drawn from it, rather than "100% left" (or NaN%) from a
-// 0 it was never told (#3650): neither as myna's API sends such a window
+// 0 it was never told (#3650): neither as owl's API sends such a window
 // (text, used 0) nor with used left out. A window that did say used:0
 // still shows its 0%, and its meter. Chromium and WebKit, every language,
 // used and left, at a narrow width; no backend, the API is faked here.
@@ -14,7 +14,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MYNA_ASSETS || path.join(__dirname, "../assets"));
+const assets = path.resolve(process.env.OWL_ASSETS || path.join(__dirname, "../assets"));
 const langs = ["en", "zh", "zh-TW", "ja", "de"];
 const none = { en: "No allowance reported", zh: "暂无额度数据", "zh-TW": "暫無額度資料", ja: "利用枠の情報なし", de: "Kein Kontingent gemeldet" };
 
@@ -66,7 +66,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang));
-        await page.goto("http://myna.test/?view=usage");
+        await page.goto("http://owl.test/?view=usage");
         const at = `${lang} ${width}px`;
 
         const spent = page.locator(".subscription-card", { hasText: "Loomy" });

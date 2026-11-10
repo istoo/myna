@@ -4,12 +4,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 	"github.com/tidwall/gjson"
 )
 
 // zcodeAsking is jinyue806's reproduction of #2622 as they sent it to
-// myna, with tool standing in for its tools[0]. The tools are the
+// owl, with tool standing in for its tools[0]. The tools are the
 // shapes the report tried, each of which SenseNova turned away.
 const zcodeAsking = `{
     "model": "sensenova/kimi-k3",

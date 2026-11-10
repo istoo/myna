@@ -13,7 +13,7 @@
 // parsed a bounded number of times, and no box read after a wire drawn
 // in the same pass. And no wire is one cubic thousands of pixels tall: WebKit
 // dashes a cubic at a cost that grows faster than its length, and the
-// flowing wire to a fold hundreds of rows from myna took ~75 ms of each
+// flowing wire to a fold hundreds of rows from owl took ~75 ms of each
 // frame. And only the keys near sight are in the list: each update laid
 // out, read and moved all 800, longer than a frame in WebKit. The rest are
 // gaps as tall as they are, their wires still drawn to where they would
@@ -102,7 +102,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const feed = { q: [], closed: false };
       await page.route("**/*", serve(lang, feed));
       t.after(async () => { feed.closed = true; await browser.close(); });
-      await page.goto("http://myna.test/?view=routing");
+      await page.goto("http://owl.test/?view=routing");
       await page.locator("#view-routing .rt-fold").first().waitFor();
       await page.waitForTimeout(1500);
 
@@ -142,7 +142,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       });
       // a key far below the fold of the window is not in the list, and one
       // in the list not in sight is not drawn and is as tall as the keys
-      // drawn: drawn, WebKit painted all 800 again on each frame a myna
+      // drawn: drawn, WebKit painted all 800 again on each frame a owl
       // flew, ~40 frames a second
       const KEYS = "#view-routing .rt-accts > li:not(.rt-fold):not(.rt-sub):not(.rt-gap):not(.idle)";
       const rowsNow = () => page.evaluate((KEYS) => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -238,7 +238,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert(n.thrash < 400, `${name}: the stage laid out again ${n.thrash} times for a wire drawn, in 3s`);
       }
       assert(opened.boxes > 100, `the open stage was laid out (${opened.boxes} boxes read)`);
-      // a wire to a fold far from myna runs thousands of pixels, in
+      // a wire to a fold far from owl runs thousands of pixels, in
       // pieces of its curve: before, it was one cubic as tall as itself
       assert(tall.wire > 5000, `the tallest wire is ${tall.wire}px`);
       assert(tall.cubic <= 2000, `a wire is drawn with a cubic ${tall.cubic}px tall`);

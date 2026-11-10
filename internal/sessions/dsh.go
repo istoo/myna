@@ -16,7 +16,7 @@ import (
 	"sync"
 	"unicode/utf16"
 
-	"github.com/istoo/myna/internal/appdir"
+	"github.com/istoo/owl/internal/appdir"
 )
 
 // DeepSeek Harness (dsh) keeps a session in a folder of its own, under
@@ -431,7 +431,7 @@ func dshNum(b []byte, key string) int64 {
 	return n
 }
 
-// dshConvs are the conversation ids myna's gateway gives the requests a
+// dshConvs are the conversation ids owl's gateway gives the requests a
 // message starts (gateway's conversationID). dsh sends no session id on
 // its chat-completions and messages routes, so the gateway keys each such
 // request by the hash of its first user message as sent, and the Context
@@ -450,14 +450,19 @@ func dshConvs(content json.RawMessage) []string {
 		return nil
 	}
 	t := jsString(parts[0].Text)
-	out := make([]string, 0, 3)
-	for _, m := range []string{
-		`{"role":"user","content":` + t + `}`,
-		`{"role":"user","content":[{"type":"text","text":` + t + `}]}`,
-		`{"role":"user","content":[{"type":"text","text":` + t + `,"cache_control":{"type":"ephemeral"}}]}`,
-	} {
-		sum := sha256.Sum256([]byte(m))
-		out = append(out, "myna-"+hex.EncodeToString(sum[:12]))
+	// the prefix the gateway gives them now, and the one this fork used
+	// before it was owl: dsh's older sessions keep the id they were
+	// recorded under, and are still found by it
+	out := make([]string, 0, 6)
+	for _, pre := range []string{"owl-", "myna-"} {
+		for _, m := range []string{
+			`{"role":"user","content":` + t + `}`,
+			`{"role":"user","content":[{"type":"text","text":` + t + `}]}`,
+			`{"role":"user","content":[{"type":"text","text":` + t + `,"cache_control":{"type":"ephemeral"}}]}`,
+		} {
+			sum := sha256.Sum256([]byte(m))
+			out = append(out, pre+hex.EncodeToString(sum[:12]))
+		}
 	}
 	return out
 }

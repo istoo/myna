@@ -5,16 +5,16 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // Codex is told where to compact a long conversation (#876) both from the
 // gateway's /models (provider.CodexListed, which sets catalog.Model.Compact)
-// and from the list myna writes for it on disk (myna-models.json,
-// codex.go:593 -> codexcat.Catalog(mynaModels("codex"))).
+// and from the list owl writes for it on disk (owl-models.json,
+// codex.go:593 -> codexcat.Catalog(owlModels("codex"))).
 //
-// mynaModels left Compact unset, so codexcat fell back to the one for
+// owlModels left Compact unset, so codexcat fell back to the one for
 // every model: a threshold the user set on a model or on its provider
 // reached the gateway's list but not the one Codex reads from disk.
 //
@@ -27,7 +27,7 @@ func TestCodexCatalogCompactAtReachesDisk(t *testing.T) {
 	if err := provider.SetModelCompacts("relay", map[string]int{"*": 100000}); err != nil {
 		t.Fatalf("SetModelCompacts: %v", err)
 	}
-	// connect Codex to myna on a myna model, as the app does: it writes
+	// connect Codex to owl on a owl model, as the app does: it writes
 	// the catalog it reads from disk
 	cx := codex(home)
 	if err := cx.Fields[0].Set("relay/glm-4.6"); err != nil {
@@ -43,7 +43,7 @@ func TestCodexCatalogCompactAtReachesDisk(t *testing.T) {
 				Compact       int    `json:"auto_compact_token_limit"`
 			} `json:"models"`
 		}
-		raw := readFile(filepath.Join(home, ".codex", "myna-models.json"))
+		raw := readFile(filepath.Join(home, ".codex", "owl-models.json"))
 		if err := json.Unmarshal([]byte(raw), &got); err != nil {
 			t.Fatalf("%v: %s", err, raw)
 		}

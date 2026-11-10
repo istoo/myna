@@ -1,10 +1,10 @@
 {
   "name": "@magpie-community/agent-aider",
   "version": "0.1.0",
-  "description": "Aider (aider.chat) as a myna agent: pick one of myna's models for it on the Agents page",
+  "description": "Aider (aider.chat) as a owl agent: pick one of owl's models for it on the Agents page",
   "type": "module",
   "files": ["aider.agent.js", "README.md"],
-  "keywords": ["myna", "myna-agent", "aider", "llm-gateway"],
+  "keywords": ["owl", "owl-agent", "aider", "llm-gateway"],
   "license": "MIT",
   "repository": { "type": "git", "url": "git+https://github.com/magpie-community/plugins.git", "directory": "packages/aider" },
   "magpie": { "agent": "./aider.agent.js" }

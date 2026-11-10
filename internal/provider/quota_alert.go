@@ -22,7 +22,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // QuotaAlert is one thing to tell the user: a window used past the share
@@ -231,7 +231,7 @@ func BalanceNumber(s string) (float64, bool) {
 
 func quotaAlertPath() string { return filepath.Join(filepath.Dir(Path()), "usage-alerts.json") }
 
-// quotaAlertMu keeps the file to one writer in this myna.
+// quotaAlertMu keeps the file to one writer in this owl.
 var quotaAlertMu sync.Mutex
 
 func readAlertMarks(path string) map[string]alertMark {

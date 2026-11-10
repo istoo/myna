@@ -13,10 +13,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/sessions"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/sessions"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // Row is one call as the ledger lists it.
@@ -32,7 +32,7 @@ type Row struct {
 	Cost    float64 `json:"cost"`
 	Priced  bool    `json:"priced"`
 	Swapped bool    `json:"swapped,omitempty"`
-	// Routed marks a remote myna group answered by one of its members.
+	// Routed marks a remote owl group answered by one of its members.
 	Routed bool `json:"routed,omitempty"`
 	// Source is "log" for a call read from an agent's own session file,
 	// which the gateway never saw: no status, no provider, no model asked
@@ -86,7 +86,7 @@ type Filter struct {
 }
 
 // SourceGateway and SourceSession are the two sources a request row is of,
-// which Row.Source spells "" and "log": the calls myna's own gateway
+// which Row.Source spells "" and "log": the calls owl's own gateway
 // served, and the ones read from the agents' own session files, which it
 // never saw. They are the requests page's source cells, and the values its
 // via= takes.
@@ -94,18 +94,18 @@ const (
 	SourceGateway = "through"
 	SourceSession = "direct"
 	// SourceReported is the third: the calls a client reported through
-	// POST /v1/myna/usage/requests (#1874), which went straight to their
+	// POST /v1/owl/usage/requests (#1874), which went straight to their
 	// vendor. Record.Source and Row.Source spell it the same, as does via=.
 	SourceReported = "reported"
 )
 
 // SourceOf is the source a row is of, as the page's cells name them: the
-// calls myna's gateway served and the ones read from the agents' session
+// calls owl's gateway served and the ones read from the agents' session
 // files. A call the gateway turned away itself is neither — the page says
 // under its totals that local rejections are not counted — so it is "" and
 // picking either cell leaves it out, as the cells' own counts already do.
 func SourceOf(r Row) string {
-	if r.IsRejected() || r.IsProbe() { // myna's own test is neither too
+	if r.IsRejected() || r.IsProbe() { // owl's own test is neither too
 		return ""
 	}
 	switch r.Source {
@@ -271,7 +271,7 @@ func ledgerOfAt(p Period, f Filter, now time.Time, reader func(time.Time) []sess
 
 // gatewayRecords is the gateway's calls from since on, as the ledger's index
 // holds them: what Load reads, without parsing usage.jsonl again. The TUI,
-// myna usage and the CSV export read a period's ledger this way, and over
+// owl usage and the CSV export read a period's ledger this way, and over
 // a long history (Vantiboo1ean, ~750k requests) parsing the whole file took
 // seconds for each.
 func gatewayRecords(since time.Time) []Record {
@@ -304,7 +304,7 @@ func (l Ledgered) Filtered(f Filter) Ledgered {
 // A row's swapped is judged by the upstream names in force now, not by the
 // one its call went out under: the names are read from the settings here,
 // once, so a name given or changed since a call was recorded re-judges that
-// call — one recorded under the name myna knows the model by, and read
+// call — one recorded under the name owl knows the model by, and read
 // after a name was set for it, reads as a swap although the vendor answered
 // with the very model that was asked for. A record keeps the canonical id
 // and the name the vendor's own reply gave (served_model) and not the name
@@ -321,7 +321,7 @@ func (l Ledgered) Filtered(f Filter) Ledgered {
 // really sent under, and it is the better answer, but it is not this
 // function's to make: it is a field on every record the gateway writes, and
 // so a change to the file's format — a column a row written by an older
-// myna has no value for, and a decision about whether an empty one means
+// owl has no value for, and a decision about whether an empty one means
 // "no upstream name" or "unknown" — rather than a row of a report. The rows
 // here are what a reader sets beside a bill, and a name in force today is
 // the one whose reply a bill's model column is read against.

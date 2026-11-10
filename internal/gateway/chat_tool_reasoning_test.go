@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // deepseekRefuseToolTurns answers as DeepSeek's Chat API does in thinking
@@ -174,7 +174,7 @@ func selfHostedRefuseDuplicate(body []byte) (int, string) {
 
 // ArvinCharl on X (v0.1.1560): pi on a self-hosted DeepSeek through the
 // Chat path keeps the thinking the server gave in reasoning and sends it
-// back there. myna gave the tool turn reasoning_content with the same
+// back there. owl gave the tool turn reasoning_content with the same
 // text and left reasoning in, and the server refused "duplicate field
 // reasoning". The thinking goes once, in reasoning_content; a message with
 // no tool turn to mend keeps its reasoning, and a body with no tool calls

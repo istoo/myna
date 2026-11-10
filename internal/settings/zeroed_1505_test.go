@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/lastgood"
+	"github.com/istoo/owl/internal/lastgood"
 )
 
 // A settings.json a crash left at its length, every byte zero (#1505), is

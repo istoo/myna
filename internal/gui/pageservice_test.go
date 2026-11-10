@@ -17,8 +17,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // fakeService is a plugin's local service on 127.0.0.1, as the chat
@@ -126,9 +126,9 @@ func listed(t *testing.T, h http.Handler) pluginPage {
 	return pages[0]
 }
 
-// aigcfree on Discord: `myna web` on a server, opened from a Windows
+// aigcfree on Discord: `owl web` on a server, opened from a Windows
 // PC's browser, sent the chat page's frame to 127.0.0.1, the PC itself. A
-// page served to a browser is told where its service is on myna web's
+// page served to a browser is told where its service is on owl web's
 // own address, and the desktop window is told nothing and keeps going
 // to 127.0.0.1 itself.
 func TestPluginPageServiceListedToBrowserOnly(t *testing.T) {
@@ -173,7 +173,7 @@ func TestPluginPageServiceSpec(t *testing.T) {
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			servicePlugins(t, c.service, c.options)
-			t.Setenv("MYNA_ADDR", "127.0.0.1:3425")
+			t.Setenv("OWL_ADDR", "127.0.0.1:3425")
 			ps := pluginPages()
 			if len(ps) != 1 {
 				t.Fatalf("a wrong service lost the page: %+v", ps)
@@ -204,7 +204,7 @@ func TestPluginPageServiceSpec(t *testing.T) {
 	}
 }
 
-// The service through `myna web`'s whole chain, with no cookie (a
+// The service through `owl web`'s whole chain, with no cookie (a
 // sandboxed frame sends none): the page's token lets it in, a made-up one
 // doesn't; the service sees its own Host and no cookie; what comes back
 // is sandboxed, sets no cookie here, and an event stream arrives as it is
@@ -212,7 +212,7 @@ func TestPluginPageServiceSpec(t *testing.T) {
 func TestPluginPageServiceProxied(t *testing.T) {
 	f := newFakeService(t)
 	servicePlugins(t, `{"port": `+strconv.Itoa(f.port)+`}`, nil)
-	t.Setenv("MYNA_ADDR", "127.0.0.1:3425")
+	t.Setenv("OWL_ADDR", "127.0.0.1:3425")
 	page := serviceMux(true)
 	p := listed(t, page)
 	srv := httptest.NewServer(webHandler("3430", onePortWebKey, 0, page))
@@ -233,7 +233,7 @@ func TestPluginPageServiceProxied(t *testing.T) {
 		return res
 	}
 
-	res := get(base, "Cookie", "myna_web_3430=the-window", "Origin", "null")
+	res := get(base, "Cookie", "owl_web_3430=the-window", "Origin", "null")
 	body, _ := io.ReadAll(res.Body)
 	if res.StatusCode != 200 || !strings.Contains(string(body), "<title>chat</title>") {
 		t.Fatalf("the service's page: %d %s", res.StatusCode, body)
@@ -249,7 +249,7 @@ func TestPluginPageServiceProxied(t *testing.T) {
 		t.Errorf("the window's cookie reached the service: %q", seen.Get("Cookie"))
 	}
 	if res.Header.Get("Set-Cookie") != "" {
-		t.Errorf("the service set a cookie on myna web's address: %q", res.Header.Get("Set-Cookie"))
+		t.Errorf("the service set a cookie on owl web's address: %q", res.Header.Get("Set-Cookie"))
 	}
 	if csp := strings.Join(res.Header.Values("Content-Security-Policy"), ", "); !strings.Contains(csp, "sandbox allow-scripts") || strings.Contains(csp, "allow-same-origin") {
 		t.Errorf("the service's page isn't sandboxed: %q", csp)
@@ -258,7 +258,7 @@ func TestPluginPageServiceProxied(t *testing.T) {
 		t.Errorf("Referrer-Policy %q", res.Header.Get("Referrer-Policy"))
 	}
 	// the service's own 'self' named with its scheme, for WebKit's
-	// sandboxed frame (#4198); myna's sandbox still after it
+	// sandboxed frame (#4198); owl's sandbox still after it
 	root := strings.TrimPrefix(srv.URL, "http://") + strings.TrimSuffix(p.URL, "index.html") + pageServicePath
 	if v := res.Header.Values("Content-Security-Policy"); len(v) != 2 || v[1] != pageServicePolicy ||
 		v[0] != "default-src 'self' https://"+root+" http://"+root+" wss://"+root+" ws://"+root+
@@ -281,7 +281,7 @@ func TestPluginPageServiceProxied(t *testing.T) {
 		t.Errorf("a made-up token: %d, want 404", res.StatusCode)
 	}
 
-	// redirects to the service's own address stay on myna web's
+	// redirects to the service's own address stay on owl web's
 	res = get(base + "go")
 	if loc := res.Header.Get("Location"); loc != "api/x?a=1" {
 		t.Errorf("a redirect to the service's own address: Location %q, want api/x?a=1", loc)
@@ -354,7 +354,7 @@ func TestPluginPageServiceDown(t *testing.T) {
 	}()
 	_, ps, _ := net.SplitHostPort(l.Addr().String())
 	servicePlugins(t, `{"port": `+ps+`}`, nil)
-	t.Setenv("MYNA_ADDR", "127.0.0.1:3425")
+	t.Setenv("OWL_ADDR", "127.0.0.1:3425")
 	page := serviceMux(true)
 	p := listed(t, page)
 	base := strings.TrimSuffix(p.URL, "index.html") + pageServicePath

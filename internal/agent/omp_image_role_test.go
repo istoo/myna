@@ -8,13 +8,13 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// treeman_26897 on Discord: omp's Roles view had none of myna's image
+// treeman_26897 on Discord: omp's Roles view had none of owl's image
 // models under IMAGE. omp's image role takes a model of kind image alone
-// (model-roles.ts), and every model myna wrote to models.yml was a chat
+// (model-roles.ts), and every model owl wrote to models.yml was a chat
 // model. From omp 18.7.0 models.yml takes kind: image on openai-images,
 // which generate_image posts to the provider's baseUrl + /images/generations,
 // the gateway's /v1/images. Its generate_image skips a keyless provider's
-// model, so myna's entry then carries the gateway's key. omp 18.15.0 was
+// model, so owl's entry then carries the gateway's key. omp 18.15.0 was
 // run with this models.yml against a stand-in gateway: --kind image lists
 // art/gpt-image-2, and generate_image posted it to /v1/images/generations.
 func TestOmpListsImageModelsForItsImageRole(t *testing.T) {
@@ -24,7 +24,7 @@ func TestOmpListsImageModelsForItsImageRole(t *testing.T) {
 	defer func() { ompVersion = was }()
 
 	a := omp(home)
-	if err := a.Field("model").Set(mynaID + "/mixed/deepseek-v4.1-flash"); err != nil {
+	if err := a.Field("model").Set(owlID + "/mixed/deepseek-v4.1-flash"); err != nil {
 		t.Fatal(err)
 	}
 	path := filepath.Join(home, ".omp", "agent", "models.yml")
@@ -34,9 +34,9 @@ func TestOmpListsImageModelsForItsImageRole(t *testing.T) {
 	if err := yaml.Unmarshal([]byte(readFile(path)), &f); err != nil {
 		t.Fatal(err)
 	}
-	e := f.Providers[mynaID]
+	e := f.Providers[owlID]
 	// omp's generate_image skips a model of a keyless provider
-	if e.Auth != "" || e.APIKey != "myna" {
+	if e.Auth != "" || e.APIKey != "owl" {
 		t.Errorf("auth %q, apiKey %q: want the gateway's key, not auth: none", e.Auth, e.APIKey)
 	}
 	if e.BaseURL != here(home).v1() {

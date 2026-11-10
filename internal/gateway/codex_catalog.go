@@ -9,14 +9,14 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/codexcat"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/codexcat"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // CodexCatalogPath is Codex's model list in its own shape, for a Codex that
-// names myna its model_provider (base_url <gateway>/v1) on another
+// names owl its model_provider (base_url <gateway>/v1) on another
 // computer, with a gateway key (#1281): its model_catalog_url. /v1/models
 // stays OpenAI's list, which Codex can't read, and CodexPath's list is the
 // ChatGPT backend's, for a Codex signed in to ChatGPT here.
@@ -25,7 +25,7 @@ const CodexCatalogPath = "/v1/codex/models"
 // codexCatalogMost is the most of a catalog Codex reads from a
 // model_catalog_url (MAX_MODEL_CATALOG_BYTES in codex-rs's models
 // endpoint): past it the whole list fails to load and Codex's picker has
-// none of myna's models. Codex 0.166 reads it whole (models_endpoint.rs
+// none of owl's models. Codex 0.166 reads it whole (models_endpoint.rs
 // passes no response_body_limit_bytes), see codexReadsWholeCatalog.
 const codexCatalogMost = 1 << 20
 
@@ -43,8 +43,8 @@ func codexReadsWholeCatalog(v string) bool {
 	return major > 0 || minor >= 166
 }
 
-// codexCatalog answers CodexCatalogPath: the models myna shows Codex, as
-// the model_catalog_json myna writes for a Codex here describes them,
+// codexCatalog answers CodexCatalogPath: the models owl shows Codex, as
+// the model_catalog_json owl writes for a Codex here describes them,
 // kept to the models a gateway key may use (keyAllowed, as /v1/models is).
 // For a Codex before 0.166 (by its ?client_version=, codexReadsWholeCatalog)
 // entries that would take the answer past codexCatalogMost are left out,
@@ -98,7 +98,7 @@ func (s *Server) codexCatalog(w http.ResponseWriter, r *http.Request) {
 
 // codexTiers are the service tiers Codex here is offered on each of shown,
 // by id: Fast on a ChatGPT account's GPT model, the tiers of Codex's own
-// entry on a relay's. Another myna that has this one as its provider
+// entry on a relay's. Another owl that has this one as its provider
 // offers its Codex the same, and sends the tier asked on (#1234).
 func codexTiers(shown []provider.Entry) map[string][]any {
 	out := map[string][]any{}

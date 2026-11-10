@@ -7,11 +7,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/sessions"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/sessions"
+	"github.com/istoo/owl/internal/settings"
 )
 
-// #1264 (Etsuya233): with Settings' Detect agents in WSL off, myna asks
+// #1264 (Etsuya233): with Settings' Detect agents in WSL off, owl asks
 // wsl.exe nothing on its own: no distro is listed or probed, no agent of
 // one is shown, and the Sessions page lists none of a distro's sessions,
 // even one it listed while the setting was on. Turned on again, the

@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // setResetLead saves the user's lead, in minutes, in a sandbox HOME.

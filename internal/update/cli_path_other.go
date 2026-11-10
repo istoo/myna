@@ -8,12 +8,12 @@ import (
 	"path/filepath"
 	"slices"
 
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/proc"
 )
 
 // installedShells are the shells installed here that a terminal may open:
 // zsh, bash and fish, the login shell ($SHELL) marked, and that one too
-// when it is another (nu, sh), with no profile myna writes.
+// when it is another (nu, sh), with no profile owl writes.
 func installedShells() []cliShell {
 	login := os.Getenv("SHELL")
 	var out []cliShell
@@ -31,8 +31,8 @@ func installedShells() []cliShell {
 }
 
 // cliDir is the folder a link to exe goes in for a shell with PATH dirs:
-// where the myna it runs now (cmd) is, when that is another copy in a
-// folder myna can write — the link takes its place, as install.sh's
+// where the owl it runs now (cmd) is, when that is another copy in a
+// folder owl can write — the link takes its place, as install.sh's
 // ln -sf does — else the first of the folders a user's commands usually go
 // in that is on it and can be written to; "" when none is.
 func cliDir(exe string, dirs []string, cmd string) string {
@@ -64,9 +64,9 @@ func cliDir(exe string, dirs []string, cmd string) string {
 	return ""
 }
 
-// cliPlace links exe as myna in dir, over what is there.
+// cliPlace links exe as owl in dir, over what is there.
 func cliPlace(exe, dir string) error {
-	dst := filepath.Join(dir, "myna")
+	dst := filepath.Join(dir, "owl")
 	if sameFile(dst, exe) {
 		return nil
 	}
@@ -76,7 +76,7 @@ func cliPlace(exe, dir string) error {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return err
 	}
-	tmp := dst + ".myna-new"
+	tmp := dst + ".owl-new"
 	os.Remove(tmp)
 	if err := os.Symlink(exe, tmp); err != nil {
 		return err

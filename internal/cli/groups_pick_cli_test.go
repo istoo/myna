@@ -3,10 +3,10 @@ package cli
 import (
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// myna group pick / pick= route a group manually (#317): every request
+// owl group pick / pick= route a group manually (#317): every request
 // to the model picked, stored with the group, the others left aside.
 func TestGroupPick(t *testing.T) {
 	groupsHome(t)

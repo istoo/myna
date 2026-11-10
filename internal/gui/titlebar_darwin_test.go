@@ -16,7 +16,7 @@ import (
 	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/wailsapp/wails/v3/pkg/events"
 
-	"github.com/istoo/myna/internal/gui/windowshape"
+	"github.com/istoo/owl/internal/gui/windowshape"
 )
 
 // titlebarRun is what the separate process measured: the main window, one
@@ -153,7 +153,7 @@ func TestMainWindowRightToLeft(t *testing.T) {
 // and decodes what it measured into v.
 func measureWindows(t *testing.T, sdk uint32, mode string, v any, args ...string) {
 	t.Helper()
-	out, err := runAppKitSDK(t, sdk, 40*time.Second, []string{"MYNA_TEST_TITLEBAR=" + mode}, args...)
+	out, err := runAppKitSDK(t, sdk, 40*time.Second, []string{"OWL_TEST_TITLEBAR=" + mode}, args...)
 	i := bytes.LastIndex(out, []byte(titlebarMark))
 	if err != nil || i < 0 {
 		t.Fatalf("measuring the windows: %v\n%s", err, out)
@@ -167,12 +167,12 @@ func measureWindows(t *testing.T, sdk uint32, mode string, v any, args ...string
 // The process measureWindows runs: the arguments go to AppKit, as the
 // test's own flags are never parsed.
 func init() {
-	mode := os.Getenv("MYNA_TEST_TITLEBAR")
+	mode := os.Getenv("OWL_TEST_TITLEBAR")
 	if mode == "" {
 		return
 	}
 	app := application.New(application.Options{
-		Name: "myna title bar regression",
+		Name: "owl title bar regression",
 		Mac:  application.MacOptions{ActivationPolicy: application.ActivationPolicyProhibited},
 		Assets: application.AssetOptions{Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "text/html")
@@ -226,7 +226,7 @@ func init() {
 		}
 		each(func(_ int, w *application.WebviewWindow) { w.SetSize(900, 600); w.Show() })
 		measure("shown")
-		each(func(_ int, w *application.WebviewWindow) { w.SetTitle("myna, renamed"); w.SetSize(1000, 680) })
+		each(func(_ int, w *application.WebviewWindow) { w.SetTitle("owl, renamed"); w.SetSize(1000, 680) })
 		measure("a new title and size")
 		// AppKit draws a new system appearance before the run loop turns:
 		// the windows are measured at once, and again once it has

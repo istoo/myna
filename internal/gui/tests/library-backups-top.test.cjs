@@ -3,7 +3,7 @@
 // very foot, under a long list, and was hard to find. It is at the top of
 // every tab now, in the strip that stays as the page scrolls, right after
 // Library folder, with the same look; nothing is left at the foot. It
-// opens myna's backups folder, waits for the library like Library folder
+// opens owl's backups folder, waits for the library like Library folder
 // does, fits a narrow window and browser without wrapping, and has no left
 // border. In every language, in both engines. No backend: the API is faked
 // here.
@@ -19,18 +19,18 @@ const agent = (id, name, icon) => ({ id, name, icon, skills: `${HOME}/.${id}/ski
 const skills = Array.from({ length: 40 }, (_, i) => ({ name: `skill-${String(i).padStart(2, "0")}`, kind: "folder", description: `Skill number ${i}`, agents: ["claude"], source: `${HOME}/skills/skill-${i}` }));
 const servers = Array.from({ length: 30 }, (_, i) => ({ name: `server-${String(i).padStart(2, "0")}`, transport: "stdio", command: "npx", args: ["-y", `server-${i}`], agents: ["claude"] }));
 const view = {
-  dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
+  dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
   agents: [agent("claude", "Claude Code", "claudecode-color")],
   instructions: { agents: [], sets: [] }, servers, foundServers: [], projects: [], foundSkills: [], skills, problems: [],
   hooks: Array.from({ length: 30 }, (_, i) => ({ name: `hook-${String(i).padStart(2, "0")}`, event: "turn-end", command: `echo ${i}`, agents: ["claude"] })),
 };
 
 const words = {
-  en: { backups: "Backups", folder: "Library folder", note: "myna keeps a copy of every file before it writes it." },
-  zh: { backups: "备份", folder: "资源库文件夹", note: "myna 写入任何文件前都会先备份一份。" },
-  "zh-TW": { backups: "備份", folder: "資源庫資料夾", note: "myna 寫入任何檔案前都會先備份一份。" },
-  ja: { backups: "バックアップ", folder: "ライブラリフォルダ", note: "myna はファイルに書き込む前に必ずコピーを保存します。" },
-  de: { backups: "Backups", folder: "Bibliotheksordner", note: "myna sichert jede Datei, bevor es sie schreibt." },
+  en: { backups: "Backups", folder: "Library folder", note: "owl keeps a copy of every file before it writes it." },
+  zh: { backups: "备份", folder: "资源库文件夹", note: "owl 写入任何文件前都会先备份一份。" },
+  "zh-TW": { backups: "備份", folder: "資源庫資料夾", note: "owl 寫入任何檔案前都會先備份一份。" },
+  ja: { backups: "バックアップ", folder: "ライブラリフォルダ", note: "owl はファイルに書き込む前に必ずコピーを保存します。" },
+  de: { backups: "Backups", folder: "Bibliotheksordner", note: "owl sichert jede Datei, bevor es sie schreibt." },
 };
 
 function serve(lang, web, opened, held) {
@@ -65,7 +65,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         for (const tab of ["instructions", "mcp", "skills", "hooks", "rtk"]) {
           const where = `${web ? "browser" : "window"} ${width}px ${tab}`;
           const context = await browser.newContext({ viewport: { width, height: 700 }, reducedMotion: "reduce" });
-          await context.addInitScript((tb) => { try { localStorage.setItem("myna.libTab", tb); } catch {} }, tab);
+          await context.addInitScript((tb) => { try { localStorage.setItem("owl.libTab", tb); } catch {} }, tab);
           const page = await context.newPage();
           page.setDefaultTimeout(5000);
           page.setDefaultNavigationTimeout(60000);
@@ -76,7 +76,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           let release;
           const held = new Promise((r) => { release = r; });
           await page.route("**/*", serve(lang, web, opened, held));
-          await page.goto("http://myna.test/?view=library");
+          await page.goto("http://owl.test/?view=library");
           const v = page.locator("#view-library");
           const head = v.locator(".lib-head");
           const back = head.locator(".lib-backups");
@@ -104,7 +104,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             };
           });
           assert.equal(got.label, w.backups, where);
-          assert.equal(got.title, w.note + "\n~/.myna/backups", where);
+          assert.equal(got.title, w.note + "\n~/.owl/backups", where);
           assert(got.after, `${where}: Backups comes right after ${w.folder}`);
           assert(got.sameRow, `${where}: Backups sits on Library folder's line`);
           assert(got.look, `${where}: Backups looks like Library folder`);

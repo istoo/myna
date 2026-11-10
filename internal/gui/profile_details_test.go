@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/profile"
+	"github.com/istoo/owl/internal/profile"
 )
 
 // The state the page draws carries what each profile holds, by agent, for a

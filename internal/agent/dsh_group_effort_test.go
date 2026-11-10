@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // ARNO on Discord: routing group 在接入 harness 的时候，没有设置
@@ -44,7 +44,7 @@ func TestDshGroupHasItsMembersLevels(t *testing.T) {
 		t.Fatal(err)
 	}
 	a := dsh(home)
-	if err := a.Field("model").Set("myna/group/flash"); err != nil {
+	if err := a.Field("model").Set("owl/group/flash"); err != nil {
 		t.Fatal(err)
 	}
 	b, _ := os.ReadFile(web)
@@ -61,7 +61,7 @@ func TestDshGroupHasItsMembersLevels(t *testing.T) {
 		t.Fatalf("the group's entry has no reasoningEfforts:\n%s", entry)
 	}
 	var offered []string
-	for _, o := range a.Field("effort").Options(map[string]string{"model": "myna/group/flash"}) {
+	for _, o := range a.Field("effort").Options(map[string]string{"model": "owl/group/flash"}) {
 		offered = append(offered, o.Value)
 	}
 	if !reflect.DeepEqual(offered, []string{"off", "low", "high", "max"}) {

@@ -47,10 +47,10 @@ func TestFetchContextLength(t *testing.T) {
 	}
 }
 
-// Another myna's list tells each model's native APIs, over the ones it
+// Another owl's list tells each model's native APIs, over the ones it
 // serves it on, its longest reply and its reasoning levels; a vendor's odd
 // values are only left out, never the whole list.
-func TestFetchMynaFields(t *testing.T) {
+func TestFetchOwlFields(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		rw.Write([]byte(`{"object":"list","data":[
 		  {"id":"anthropic/claude-opus-4-8","native_endpoints":["/v1/messages"],"max_output_tokens":128000,"supported_reasoning_levels":[{"effort":"low"},{"effort":"high"}]},
@@ -130,10 +130,10 @@ func TestFetchAtVersionedBase(t *testing.T) {
 	}
 }
 
-// Another myna's list tells each model's price (magpie_price), tiers
+// Another owl's list tells each model's price (magpie_price), tiers
 // and all; one no vendor could charge is not taken, and a list without
 // one leaves the model unpriced.
-func TestLiveMynaPrice(t *testing.T) {
+func TestLiveOwlPrice(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, `{"data":[
 			{"id":"a/priced","magpie_price":{"input":3,"output":12,"cache_read":0.3,"cache_write":3.75,"tiers":[{"above":200000,"input":6,"output":18,"cache_read":0.6,"cache_write":7.5}]}},

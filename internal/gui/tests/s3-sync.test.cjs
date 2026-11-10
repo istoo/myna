@@ -14,7 +14,7 @@ const assets = path.resolve(__dirname, "../assets");
 
 function serve(lang, posts) {
   const settings = {
-    theme: "light", lang, tray: "panel", version: "test", dir: "/tmp/myna",
+    theme: "light", lang, tray: "panel", version: "test", dir: "/tmp/owl",
     gateway: "http://127.0.0.1:3425", visionModels: [], imageGenModels: [],
     fx: { rate: 7.2, stale: false },
   };
@@ -63,7 +63,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await browser.close();
       });
 
-      await page.goto("http://myna.test/");
+      await page.goto("http://owl.test/");
       await page.locator("#prefs").click();
       await openPart(page, "sync");
       const list = page.locator("#syncList");
@@ -138,7 +138,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.equal(await form.locator(".editor-error").textContent(), zh ? "请填写存储桶名称" : "Name the bucket");
       assert.equal(posts.length, 0);
 
-      await box(L.bucket).fill("myna-sync");
+      await box(L.bucket).fill("owl-sync");
       await box(L.prefix).fill("/team/");
       await box(L.region).fill("auto");
       await box(L.key).fill("AKIDEXAMPLE");
@@ -160,11 +160,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await toEnd(); // the save button, at the form's foot, wheeled into sight
       await save.click();
       await form.waitFor({ state: "detached" });
-      assert.deepEqual(posts, [{ url: "s3://myna-sync/team", user: "AKIDEXAMPLE", password: "s3cr3t", endpoint: "https://acct.r2.cloudflarestorage.com",
+      assert.deepEqual(posts, [{ url: "s3://owl-sync/team", user: "AKIDEXAMPLE", password: "s3cr3t", endpoint: "https://acct.r2.cloudflarestorage.com",
         region: "auto", pathStyle: true, passphrase: "correct horse", keys: true, agents: true, library: true }]);
 
       assert.equal(await first.locator(".name").textContent(), zh ? "S3 同步" : "S3 sync");
-      assert.equal(await first.locator(".sub").textContent(), (zh ? "尚未同步 · " : "Not synced yet · ") + "s3://myna-sync/team · acct.r2.cloudflarestorage.com");
+      assert.equal(await first.locator(".sub").textContent(), (zh ? "尚未同步 · " : "Not synced yet · ") + "s3://owl-sync/team · acct.r2.cloudflarestorage.com");
 
       // editing it again: S3 picked, its fields as saved, the secret kept
       const edit = first.locator(".val button").last();
@@ -176,7 +176,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await edit.click();
       await form.waitFor({ state: "visible" });
       assert.equal(await form.locator(".segs .opt.on").textContent(), zh ? "S3 · 使用中" : "S3 · on");
-      assert.equal(await box(L.bucket).inputValue(), "myna-sync");
+      assert.equal(await box(L.bucket).inputValue(), "owl-sync");
       assert.equal(await box(L.prefix).inputValue(), "team");
       assert.equal(await box(L.region).inputValue(), "auto");
       assert.equal(await box(L.key).inputValue(), "AKIDEXAMPLE");

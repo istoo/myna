@@ -4,22 +4,22 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A Codex signed in to ChatGPT that reaches the gateway from another
-// machine (a WSL distro under NAT; here MYNA_ADDR pinned beyond
+// machine (a WSL distro under NAT; here OWL_ADDR pinned beyond
 // loopback, the same address for the gateway) isn't joined beside its
 // sign-in: it would send its ChatGPT token to /backend-api/codex, and from
 // there the gateway takes a named key alone, so every request was a 401
 // (#2145, lazydao). It is connected as a Codex with no ChatGPT sign-in is:
-// myna as its provider, with the LAN sharing key. One of its own models
-// picked then goes straight to OpenAI on its sign-in, off myna.
+// owl as its provider, with the LAN sharing key. One of its own models
+// picked then goes straight to OpenAI on its sign-in, off owl.
 func TestCodexBeyondLoopbackNotJoined(t *testing.T) {
 	home, read := codexHome(t, `{"auth_mode":"chatgpt","tokens":{"access_token":"at","refresh_token":"rt","id_token":"x.e30.x","account_id":"acc"}}`, "model = \"gpt-5.1\"\n")
-	t.Setenv("MYNA_ADDR", "172.23.80.1:3425")
+	t.Setenv("OWL_ADDR", "172.23.80.1:3425")
 	if err := access.ConfigureLAN(true, false); err != nil {
 		t.Fatal(err)
 	}
@@ -37,10 +37,10 @@ func TestCodexBeyondLoopbackNotJoined(t *testing.T) {
 		t.Fatalf("joined beside the ChatGPT sign-in from beyond loopback: %+v\n%s", c, read())
 	}
 	cfg := read()
-	if p, _ := edit.GetTOMLTop(cx.Path, "model_provider"); p != mynaID {
-		t.Fatalf("model_provider %q, want myna\n%s", p, cfg)
+	if p, _ := edit.GetTOMLTop(cx.Path, "model_provider"); p != owlID {
+		t.Fatalf("model_provider %q, want owl\n%s", p, cfg)
 	}
-	if k, _ := edit.GetTOMLTable(cx.Path, "model_providers."+mynaID); k["experimental_bearer_token"] != lan {
+	if k, _ := edit.GetTOMLTable(cx.Path, "model_providers."+owlID); k["experimental_bearer_token"] != lan {
 		t.Fatalf("provider key %q, want the LAN sharing key\n%s", k["experimental_bearer_token"], cfg)
 	}
 	if !strings.Contains(cfg, "172.23.80.1:3425/v1") {
@@ -50,6 +50,6 @@ func TestCodexBeyondLoopbackNotJoined(t *testing.T) {
 		t.Fatal(err)
 	}
 	if cfg := read(); strings.Contains(cfg, "model_provider =") || strings.Contains(cfg, "openai_base_url") {
-		t.Fatalf("Codex's own model still through myna:\n%s", cfg)
+		t.Fatalf("Codex's own model still through owl:\n%s", cfg)
 	}
 }

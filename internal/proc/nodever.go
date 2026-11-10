@@ -10,7 +10,7 @@ import (
 
 // Node version managers' folders read the same on every system: the
 // version folders a manager keeps, highest first, and fnm's Windows layout
-// (fnmWin*), which myna's own PATH and FindTool use on Windows and the
+// (fnmWin*), which owl's own PATH and FindTool use on Windows and the
 // tests take on any system.
 
 // nodeVersions are the names of the version folders under root that have
@@ -76,7 +76,7 @@ func isDir(p string) bool {
 // to the default version's installation folder (fnm's symlink_dir is
 // junction::create there). A terminal set up with `fnm env` has its own
 // link to aliases\default first on PATH, so its node, npx and the npm
-// shims beside them are found; myna, started from the Start menu, has
+// shims beside them are found; owl, started from the Start menu, has
 // the registry's PATH only and had none of them. An npx.cmd run by its
 // full path started too, but the package it fetched runs `node` from
 // PATH, and the server died with cmd's "'node' is not recognized".

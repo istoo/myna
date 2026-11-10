@@ -9,8 +9,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // A key set to Responses on a provider with only a Chat URL (#1702,

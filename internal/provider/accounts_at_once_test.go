@@ -3,8 +3,8 @@ package provider
 import (
 	"testing"
 
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // How many of a provider's accounts or keys take requests at once

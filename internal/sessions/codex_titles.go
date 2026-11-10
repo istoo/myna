@@ -94,7 +94,7 @@ func codexTitlesAt(path string, ids []string) map[string]string {
 	return out
 }
 
-// CodexTitleRecipients includes chats whose requests never crossed Myna.
+// CodexTitleRecipients includes chats whose requests never crossed Owl.
 // They still count as conflicting recipients of a generated title.
 func CodexTitleRecipients(digests []string) map[string][]TitleApplication {
 	out := map[string][]TitleApplication{}

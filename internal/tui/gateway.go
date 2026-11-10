@@ -6,14 +6,14 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/owl/internal/gateway"
 )
 
 // The terminal serves the gateway while it is open, as the app does, when
-// no myna has it: in WSL with only myna tui, the agents it connected to
-// myna asked an address nothing listened at, and Claude Code said
-// ECONNREFUSED (gnayiab on X). Another myna that has it (the app, myna
-// web, myna serve) keeps it, and this one takes it up once that one is
+// no owl has it: in WSL with only owl tui, the agents it connected to
+// owl asked an address nothing listened at, and Claude Code said
+// ECONNREFUSED (gnayiab on X). Another owl that has it (the app, owl
+// web, owl serve) keeps it, and this one takes it up once that one is
 // gone.
 
 // gw is who serves the gateway, for the status line.
@@ -25,7 +25,7 @@ var gw struct {
 // gatewayWatch is how often the terminal looks for a gateway gone.
 var gatewayWatch = 15 * time.Second
 
-// serveGateway serves the gateway here until ctx ends whenever no myna
+// serveGateway serves the gateway here until ctx ends whenever no owl
 // answers at its address, and returns a wait for the one it serves to have
 // stopped.
 func serveGateway(ctx context.Context) (wait func()) {
@@ -82,7 +82,7 @@ func serveGateway(ctx context.Context) (wait func()) {
 // nothing else to say: served here, or why agents can't reach it.
 func gatewayStatus() string {
 	if gw.here.Load() {
-		return sMuted.Render("● gateway " + gateway.URL() + " · served while myna tui is open")
+		return sMuted.Render("● gateway " + gateway.URL() + " · served while owl tui is open")
 	}
 	if e := gw.err.Load(); e != nil && *e != "" {
 		return sBad.Render("✗ ") + sText.Render("gateway not running: "+*e)
@@ -92,5 +92,5 @@ func gatewayStatus() string {
 
 // gatewayGoneNote is said as the terminal quits having served the gateway.
 func gatewayGoneNote() string {
-	return "myna: the gateway stopped with myna tui; agents connected to myna reach it while myna tui, myna web or myna serve runs"
+	return "owl: the gateway stopped with owl tui; agents connected to owl reach it while owl tui, owl web or owl serve runs"
 }

@@ -11,7 +11,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // chunked hands its bytes out a piece at a time, as a socket does.
@@ -80,7 +80,7 @@ func TestRequestBodyLengthNotTrusted(t *testing.T) {
 		t.Fatalf("read %q", got)
 	}
 	if lied > sizedReadFirst+64<<10 {
-		t.Fatalf("a client that said 512 MB and sent 5 bytes made myna allocate %d bytes", lied)
+		t.Fatalf("a client that said 512 MB and sent 5 bytes made owl allocate %d bytes", lied)
 	}
 	long := strings.Repeat("y", 5000)
 	if got, err := readSized(&chunked{[]byte(long), 700}, 10); err != nil || string(got) != long {

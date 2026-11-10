@@ -13,10 +13,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/owl/internal/gateway"
 )
 
-// heapDir is a home of its own and a working folder in it, the one myna
+// heapDir is a home of its own and a working folder in it, the one owl
 // heap writes its file to.
 func heapDir(t *testing.T) (root, dir string) {
 	t.Helper()
@@ -29,7 +29,7 @@ func heapDir(t *testing.T) (root, dir string) {
 	return root, dir
 }
 
-// --help and its other forms print myna heap's usage, ask nothing and
+// --help and its other forms print owl heap's usage, ask nothing and
 // write nothing, here or under the home; a flag it doesn't take, "-", or
 // a second file are refused the same way, before the gateway is asked.
 func TestHeapHelpAndBadArgsWriteNothing(t *testing.T) {
@@ -37,17 +37,17 @@ func TestHeapHelpAndBadArgsWriteNothing(t *testing.T) {
 	asked := false
 	gw := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { asked = true }))
 	defer gw.Close()
-	t.Setenv("MYNA_ADDR", strings.TrimPrefix(gw.URL, "http://"))
+	t.Setenv("OWL_ADDR", strings.TrimPrefix(gw.URL, "http://"))
 	before := tree(t, root)
 	for _, args := range [][]string{{"heap", "--help"}, {"heap", "-h"}, {"heap", "help"}, {"heap", "out.pb.gz", "--help"}} {
 		out, err := runOut(t, args...)
-		if err != nil || !strings.Contains(out, "usage: myna heap [<file>]") {
-			t.Errorf("myna %s: %v %q", strings.Join(args, " "), err, out)
+		if err != nil || !strings.Contains(out, "usage: owl heap [<file>]") {
+			t.Errorf("owl %s: %v %q", strings.Join(args, " "), err, out)
 		}
 	}
 	for _, args := range [][]string{{"heap", "--out", "x"}, {"heap", "-o"}, {"heap", "-"}, {"heap", "a.pb.gz", "b.pb.gz"}, {"heap", " "}} {
 		if _, err := runOut(t, args...); err == nil || !strings.Contains(err.Error(), "nothing was written") {
-			t.Errorf("myna %s: %v", strings.Join(args, " "), err)
+			t.Errorf("owl %s: %v", strings.Join(args, " "), err)
 		}
 	}
 	if asked {
@@ -58,14 +58,14 @@ func TestHeapHelpAndBadArgsWriteNothing(t *testing.T) {
 	}
 }
 
-// Against a running gateway (its Handler, on loopback), myna heap
+// Against a running gateway (its Handler, on loopback), owl heap
 // writes the gzipped profile into the working folder, prints its path and
 // the memory numbers, and never writes over a file there.
 func TestHeapWritesTheRunningGatewaysProfile(t *testing.T) {
 	_, dir := heapDir(t)
 	gw := httptest.NewServer(gateway.New().Handler())
 	defer gw.Close()
-	t.Setenv("MYNA_ADDR", strings.TrimPrefix(gw.URL, "http://"))
+	t.Setenv("OWL_ADDR", strings.TrimPrefix(gw.URL, "http://"))
 
 	out, err := runOut(t, "heap", "mem.pb.gz")
 	if err != nil {
@@ -100,16 +100,16 @@ func TestHeapWritesTheRunningGatewaysProfile(t *testing.T) {
 		t.Fatal("the first profile changed")
 	}
 
-	// no name: myna-heap-<date>-<time>.pb.gz here
+	// no name: owl-heap-<date>-<time>.pb.gz here
 	if _, err := runOut(t, "heap"); err != nil {
 		t.Fatal(err)
 	}
-	if m, _ := filepath.Glob(filepath.Join(dir, "myna-heap-*.pb.gz")); len(m) != 1 {
+	if m, _ := filepath.Glob(filepath.Join(dir, "owl-heap-*.pb.gz")); len(m) != 1 {
 		t.Fatalf("no default file: %v", m)
 	}
 }
 
-// With no myna answering, myna heap says so and writes nothing.
+// With no owl answering, owl heap says so and writes nothing.
 func TestHeapWithNoGateway(t *testing.T) {
 	_, dir := heapDir(t)
 	// a port kept by the test that hangs up on every call: one freed
@@ -128,8 +128,8 @@ func TestHeapWithNoGateway(t *testing.T) {
 			c.Close()
 		}
 	}()
-	t.Setenv("MYNA_ADDR", ln.Addr().String())
-	if _, err := runOut(t, "heap", "x.pb.gz"); err == nil || !strings.Contains(err.Error(), "is myna running") {
+	t.Setenv("OWL_ADDR", ln.Addr().String())
+	if _, err := runOut(t, "heap", "x.pb.gz"); err == nil || !strings.Contains(err.Error(), "is owl running") {
 		t.Fatalf("%v", err)
 	}
 	if ents, _ := os.ReadDir(dir); len(ents) != 0 {

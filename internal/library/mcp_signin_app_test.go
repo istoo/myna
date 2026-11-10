@@ -8,14 +8,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/mcpauth"
-	"github.com/istoo/myna/internal/mcpauth/mcpauthtest"
+	"github.com/istoo/owl/internal/mcpauth"
+	"github.com/istoo/owl/internal/mcpauth/mcpauthtest"
 )
 
-// A server whose sign-in doesn't let myna register itself (GitHub's, 新v学员
+// A server whose sign-in doesn't let owl register itself (GitHub's, 新v学员
 // on Discord) is signed in to as the user's own OAuth app, given in the
 // library by Claude Code's names. Without one, the sign-in says to give
-// one. The app is myna's alone: no agent's file is given it, its secret
+// one. The app is owl's alone: no agent's file is given it, its secret
 // above all.
 func TestSignInAsTheUsersOwnApp(t *testing.T) {
 	sandbox(t)

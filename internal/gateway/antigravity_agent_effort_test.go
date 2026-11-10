@@ -13,12 +13,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // Antigravity's app lists the gateway's models by id and has no level of
 // its own to pick (MDX-Tom, #4838): with an effort picked for it in
-// myna, its requests for one of Antigravity's families of levels go out
+// owl, its requests for one of Antigravity's families of levels go out
 // as the variant at that level, told that level; with none picked they go
 // as before, and another agent's requests never take its pick.
 func TestAntigravityAgentEffort(t *testing.T) {

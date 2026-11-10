@@ -10,15 +10,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/sessions"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/sessions"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // A Claude Code session seen only through the gateway, its files on another
 // computer, was listed with no delete (lc on Discord: "只可列出？不可删除？").
-// Delete now moves what myna keeps of it, its row and its recorded text,
-// to myna's trash; Restore brings both back; a later request lists it
+// Delete now moves what owl keeps of it, its row and its recorded text,
+// to owl's trash; Restore brings both back; a later request lists it
 // again; one still going on is left; and clearing the recorded
 // conversations erases the trashed text too.
 func TestSessionsDeleteGatewaySession(t *testing.T) {

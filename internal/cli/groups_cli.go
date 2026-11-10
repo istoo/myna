@@ -9,28 +9,28 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/suggest"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/suggest"
 )
 
 // Routing groups from the terminal: what the Routing view does, through
 // the same provider.SaveGroup, DeleteGroup and ShowGroup.
 
 const groupUsage = `usage:
-  myna groups                           list routing groups: yours, then those myna found
-  myna group <id>                       show one group and its models (also: myna group show <id>)
-  myna group add <name> models=<m1>[,m2…] [routing=…] [stays=…]
+  owl groups                           list routing groups: yours, then those owl found
+  owl group <id>                       show one group and its models (also: owl group show <id>)
+  owl group add <name> models=<m1>[,m2…] [routing=…] [stays=…]
                                           make a group; agents pick it as group/<id>, the id made from the name;
                                           a name in use replaces that group
-  myna group set <id> k=v…              change one: name, models (the whole list, in order, patterns too),
+  owl group set <id> k=v…              change one: name, models (the whole list, in order, patterns too),
                                           models+=<m>[,m2…] (append), models-=<m>[,m2…] (drop), routing, stays,
                                           context (how long a request agents are told it takes: 272k; smallest
                                           is its smallest model's; empty is its largest model's), levels (the reasoning levels agents are offered:
                                           levels=none,low,medium,high,xhigh,max; empty is those every model has —
                                           a model without the one asked is sent its nearest),
-                                          family (a tag: myna visible shows agents families, not each group),
+                                          family (a tag: owl visible shows agents families, not each group),
                                           id (what agents pick it as: id=gpt-6-astra drops auto-; the groups
                                           it is in follow; an agent set to the old id needs setting again),
                                           effort=auto (the classifier picks each turn's reasoning; needs classifier=),
@@ -41,34 +41,34 @@ const groupUsage = `usage:
                                           1 to 1000; a model not named keeps its own, 1 by default; empty for all 1),
                                           listed=no (its models leave the lists agents see, offered through the
                                           group alone; listed=yes lists them too again)
-  myna group pick <id> <model>          route the group manually, every request to that one of its models
+  owl group pick <id> <model>          route the group manually, every request to that one of its models
                                           (as clicking it on the group's card in the Routing view does)
-  myna group copy <id> [name]           duplicate a group with its models, routing and rules, listed after it
-                                          (name: "<its name> copy" when left out; also: myna group duplicate)
-  myna group template [kind] [name]     a group for a common need, made of your own models in one go; without
+  owl group copy <id> [name]           duplicate a group with its models, routing and rules, listed after it
+                                          (name: "<its name> copy" when left out; also: owl group duplicate)
+  owl group template [kind] [name]     a group for a common need, made of your own models in one go; without
                                           a kind, lists them and the models each would take: smart (hard turns
                                           to the strongest model, easy ones to a cheap one, a classifier telling
                                           them apart), thrifty (a cheap model first, the strongest for high
                                           reasoning or when the cheap ones fail), steady (the strongest model of
                                           each of up to three providers, each behind the other). A name or id in
                                           use is numbered, never replaced
-  myna group rm <id>…                   remove groups (one myna found is hidden instead)
-  myna group restore <id>               bring back a group myna found that you removed
-  myna group auto [on|off]              whether myna finds groups on its own (on by default); off, none is
+  owl group rm <id>…                   remove groups (one owl found is hidden instead)
+  owl group restore <id>               bring back a group owl found that you removed
+  owl group auto [on|off]              whether owl finds groups on its own (on by default); off, none is
                                           listed or served — yours, and found ones you changed, stay — and an
                                           agent set to one is moved to its model from one provider; on brings
                                           them back
-  myna group auto skip <provider>…      keep providers out of the groups myna finds (groups you made or
+  owl group auto skip <provider>…      keep providers out of the groups owl finds (groups you made or
                                           changed keep them); skip none lets every one back in
-  myna group rule add|rm|mv <id> …      rules: which model a turn goes to first, by its length, an image,
-                                          the reasoning asked for or the agent (myna group rule help)
+  owl group rule add|rm|mv <id> …      rules: which model a turn goes to first, by its length, an image,
+                                          the reasoning asked for or the agent (owl group rule help)
 
-  myna finds a group for each model two or more providers serve (auto-<model>, never stored;
-  myna group auto off stops it);
+  owl finds a group for each model two or more providers serve (auto-<model>, never stored;
+  owl group auto off stops it);
   removing one stores {"id":…,"hidden":true} in providers.json, which is what keeps it removed:
   take that record out of the file and the group is back
 
-  models   provider/model ids as myna models lists them; a bare model id works when one provider serves it;
+  models   provider/model ids as owl models lists them; a bare model id works when one provider serves it;
            group/<id> puts another group in it, routed by its own routing and rules in its place —
            never one the group is in already (that would put it in itself), at most 8 groups deep
            provider/model:<effort> fixes the member's reasoning — none, minimal, low, medium, high, xhigh
@@ -80,14 +80,14 @@ const groupUsage = `usage:
            provider/model[:effort]:fast sends the member in its vendor's fast mode: priority processing on a
            ChatGPT account (Codex's Fast) or an OpenAI key, Cursor's -fast model, Claude's fast mode on an
            Anthropic key for Opus 4.8 and 5; a model without one is refused (codex/gpt-6.1-sol:high:fast)
-           a pattern puts in every model it matches, as myna models lists them now and later: a glob, where
+           a pattern puts in every model it matches, as owl models lists them now and later: a glob, where
            * is any run of characters, / too, over the provider/model id in any case (openrouter/*:free,
            *-free, opencode-zen/*), or re:<regexp> matching the whole id, in any case too (re:openrouter/.*:(free|beta));
            (?-i) in the regexp makes case matter (re:(?-i)openrouter/.*:FREE).
            Quote it for the shell. The group keeps the pattern, not its models: one the vendor adds joins,
            one it drops leaves. The models you name come first, in your order, then those the patterns
-           match, in the order myna models lists them; one both named and matched keeps its named place.
-           A pattern never matches a group. models-=<pattern> drops the pattern; myna group <id> shows
+           match, in the order owl models lists them; one both named and matched keeps its named place.
+           A pattern never matches a group. models-=<pattern> drops the pattern; owl group <id> shows
            how many models each matches now, and says when one matches nothing
   routing  smart   (default) of the subscriptions with quota to spare, the one renewing soonest first
            order   the first model until it can't answer, then the next
@@ -110,7 +110,7 @@ const groupUsage = `usage:
                    account that answered is still asked and its error goes to the agent
   effort   agent   (default) each request reasons as much as the agent asked, but at a member's own :<effort>
            auto    as a turn begins, the group's classifier — Jev, from a TypeSafe provider
-                   (myna provider add typesafe key=…), or any model, as Jev Router on OpenRouter,
+                   (owl provider add typesafe key=…), or any model, as Jev Router on OpenRouter,
                    asked in words — rates how hard it is, and the turn's requests
                    reason at low, medium, high or xhigh in place of the agent's level; only those
                    the agent asked to reason, never one it turned off (none). A route's effort
@@ -118,20 +118,20 @@ const groupUsage = `usage:
                    group, effort=auto of its own, is asked only when this one gave no pick:
                    the outermost pick stands
 
-  e.g. myna group add "Opus anywhere" models=claude/claude-opus-5-5,copilot/claude-opus-5.5 routing=order
-       myna group set opus-anywhere stays=session models+=openrouter/anthropic/claude-opus-5.5
-       myna group set auto-gpt-6-astra id=gpt-6-astra
-       myna group add Everything models=group/opus-anywhere,deepseek/deepseek-v4-flash routing=order
-       myna group set opus-anywhere effort=auto classifier=typesafe/jev-latest
-       myna group add Fast models=codex/gpt-5.6-luna:low,deepseek/deepseek-v4-flash,glm/glm-5.3-flash:high
-       myna group set fast models+=gcloud/gemini-3.8-flash:medium
-       myna group add my-free-pool models='openrouter/*:free,opencode-zen/*-free' routing=order
-       myna group set opus-anywhere routing=weight weight=claude/claude-opus-5-5=3
-       myna group set deepseek-anywhere routing=fast   # the provider that answered it fastest lately first
-       myna group set deepseek-anywhere routing=cheap  # the provider it costs least on now first (DeepSeek's off-peak hours)
-       myna group set free-pool routing=drain          # one account until it is used up, then the next, never back
-       myna group pick opus-anywhere copilot/claude-opus-5.5
-       myna claude group/opus-anywhere`
+  e.g. owl group add "Opus anywhere" models=claude/claude-opus-5-5,copilot/claude-opus-5.5 routing=order
+       owl group set opus-anywhere stays=session models+=openrouter/anthropic/claude-opus-5.5
+       owl group set auto-gpt-6-astra id=gpt-6-astra
+       owl group add Everything models=group/opus-anywhere,deepseek/deepseek-v4-flash routing=order
+       owl group set opus-anywhere effort=auto classifier=typesafe/jev-latest
+       owl group add Fast models=codex/gpt-5.6-luna:low,deepseek/deepseek-v4-flash,glm/glm-5.3-flash:high
+       owl group set fast models+=gcloud/gemini-3.8-flash:medium
+       owl group add my-free-pool models='openrouter/*:free,opencode-zen/*-free' routing=order
+       owl group set opus-anywhere routing=weight weight=claude/claude-opus-5-5=3
+       owl group set deepseek-anywhere routing=fast   # the provider that answered it fastest lately first
+       owl group set deepseek-anywhere routing=cheap  # the provider it costs least on now first (DeepSeek's off-peak hours)
+       owl group set free-pool routing=drain          # one account until it is used up, then the next, never back
+       owl group pick opus-anywhere copilot/claude-opus-5.5
+       owl claude group/opus-anywhere`
 
 // routingNames: each routing's value in the file, what the CLI calls it,
 // and the other spellings it takes.
@@ -176,7 +176,7 @@ func parseRouting(v string) (string, error) {
 		}
 		names = append(names, r.name)
 	}
-	return "", fmt.Errorf("routing %q is not one myna has: %s, or <plugin>/<name> for a gateway plugin's", v, strings.Join(names, ", "))
+	return "", fmt.Errorf("routing %q is not one owl has: %s, or <plugin>/<name> for a gateway plugin's", v, strings.Join(names, ", "))
 }
 
 func parseStays(v string) (string, error) {
@@ -188,7 +188,7 @@ func parseStays(v string) (string, error) {
 		}
 		names = append(names, s.name)
 	}
-	return "", fmt.Errorf("stays %q is not one myna has: %s", v, strings.Join(names, ", "))
+	return "", fmt.Errorf("stays %q is not one owl has: %s", v, strings.Join(names, ", "))
 }
 
 // routingName is what the CLI calls routing v: a plugin's, or one it
@@ -262,7 +262,7 @@ func memberResolver(keep []string) func(string) (string, error) {
 	}
 	var resolve func(string) (string, error)
 	resolve = func(in string) (string, error) {
-		id := strings.TrimPrefix(strings.TrimSpace(in), "myna/")
+		id := strings.TrimPrefix(strings.TrimSpace(in), "owl/")
 		if slices.Contains(keep, id) {
 			return id, nil
 		}
@@ -293,7 +293,7 @@ func memberResolver(keep []string) func(string) (string, error) {
 					return provider.GroupPrefix + g.ID, nil
 				}
 			}
-			return "", fmt.Errorf("myna has no group %q (myna groups lists them)", gid)
+			return "", fmt.Errorf("owl has no group %q (owl groups lists them)", gid)
 		}
 		if slices.Contains(ids, id) || slices.Contains(keep, id) {
 			return id, nil
@@ -315,11 +315,11 @@ func memberResolver(keep []string) func(string) (string, error) {
 		default:
 			return "", fmt.Errorf("%s is served by %d providers; name one: %s", id, len(hits), strings.Join(hits, ", "))
 		}
-		msg := fmt.Sprintf("myna knows no model %q", id)
+		msg := fmt.Sprintf("owl knows no model %q", id)
 		if near := suggest.Close(id, ids, 6); len(near) > 0 {
 			msg += "; did you mean " + strings.Join(near, ", ") + "?"
 		}
-		return "", fmt.Errorf("%s (myna models lists them)", msg)
+		return "", fmt.Errorf("%s (owl models lists them)", msg)
 	}
 	return resolve
 }
@@ -355,7 +355,7 @@ func applyGroupPairs(g *provider.Group, pairs []string, resolve func(string) (st
 	for _, kv := range pairs {
 		k, v, ok := strings.Cut(kv, "=")
 		if !ok {
-			return fmt.Errorf("expected key=value, got %q (myna group help)", kv)
+			return fmt.Errorf("expected key=value, got %q (owl group help)", kv)
 		}
 		var err error
 		switch strings.ToLower(strings.TrimSpace(k)) {
@@ -393,7 +393,7 @@ func applyGroupPairs(g *provider.Group, pairs []string, resolve func(string) (st
 		case "models-", "members-", "model-":
 			for _, m := range splitIDs(v, inGroup(g.Members)) {
 				if provider.IsPattern(m) {
-					m = strings.TrimPrefix(strings.TrimSpace(m), "myna/")
+					m = strings.TrimPrefix(strings.TrimSpace(m), "owl/")
 					i := slices.Index(g.Match, m)
 					if i < 0 {
 						return fmt.Errorf("%s is not one of the group's patterns (%s)", m, orNone(g.Match))
@@ -401,7 +401,7 @@ func applyGroupPairs(g *provider.Group, pairs []string, resolve func(string) (st
 					g.Match = slices.Delete(g.Match, i, i+1)
 					continue
 				}
-				m, _ = provider.MemberFast(strings.TrimPrefix(m, "myna/"))
+				m, _ = provider.MemberFast(strings.TrimPrefix(m, "owl/"))
 				i := slices.IndexFunc(g.Members, func(x string) bool { return strings.EqualFold(x, m) })
 				if i < 0 { // a bare model id, as models= takes it
 					i = slices.IndexFunc(g.Members, func(x string) bool {
@@ -468,7 +468,7 @@ func applyGroupPairs(g *provider.Group, pairs []string, resolve func(string) (st
 				err = fmt.Errorf("effort=auto (the classifier picks each turn's) or effort=agent (the agent's), not %q", v)
 			}
 		case "classifier", "classify":
-			g.Classifier = strings.TrimPrefix(strings.TrimSpace(v), "myna/")
+			g.Classifier = strings.TrimPrefix(strings.TrimSpace(v), "owl/")
 		case "fast":
 			// the members sent in their vendor's fast mode, as they are in
 			// the group
@@ -512,7 +512,7 @@ func applyGroupPairs(g *provider.Group, pairs []string, resolve func(string) (st
 			g.Pick, err = pickMember(g.Members, v)
 			g.Routing = provider.Manual
 		default:
-			return fmt.Errorf("unknown field %q (fields: name, models, models+, models-, routing, pick, stays, context, levels, family, effort, classifier, fast, weight, listed; myna group help)", k)
+			return fmt.Errorf("unknown field %q (fields: name, models, models+, models-, routing, pick, stays, context, levels, family, effort, classifier, fast, weight, listed; owl group help)", k)
 		}
 		if err != nil {
 			return err
@@ -524,7 +524,7 @@ func applyGroupPairs(g *provider.Group, pairs []string, resolve func(string) (st
 // pickMember is the group's member the user named: its id, or a bare
 // model id one member has.
 func pickMember(members []string, v string) (string, error) {
-	v = strings.TrimPrefix(strings.TrimSpace(v), "myna/")
+	v = strings.TrimPrefix(strings.TrimSpace(v), "owl/")
 	if i := slices.IndexFunc(members, func(x string) bool { return strings.EqualFold(x, v) }); i >= 0 {
 		return members[i], nil
 	}
@@ -546,7 +546,7 @@ func pickMember(members []string, v string) (string, error) {
 // findGroup looks a group up by its id, its catalog id or its name.
 func findGroup(ref string) (provider.Group, error) {
 	all := provider.Groups()
-	ref = strings.TrimPrefix(provider.CanonicalRef(strings.TrimPrefix(strings.TrimSpace(ref), "myna/")), provider.GroupPrefix)
+	ref = strings.TrimPrefix(provider.CanonicalRef(strings.TrimPrefix(strings.TrimSpace(ref), "owl/")), provider.GroupPrefix)
 	for _, match := range []func(provider.Group) bool{
 		func(g provider.Group) bool { return g.ID == ref },
 		func(g provider.Group) bool { return strings.EqualFold(g.ID, ref) },
@@ -563,7 +563,7 @@ func findGroup(ref string) (provider.Group, error) {
 		}
 	}
 	if len(ids) == 0 {
-		return provider.Group{}, fmt.Errorf("no group %q; there are none yet (myna group add <name> models=…)", ref)
+		return provider.Group{}, fmt.Errorf("no group %q; there are none yet (owl group add <name> models=…)", ref)
 	}
 	return provider.Group{}, fmt.Errorf("no group %q (groups: %s)", ref, strings.Join(ids, ", "))
 }
@@ -586,7 +586,7 @@ func newGroupID(name string) string {
 	return id
 }
 
-// groupCmd: `myna group <verb> …`
+// groupCmd: `owl group <verb> …`
 func groupCmd(args []string) error {
 	if len(args) < 2 {
 		return fmt.Errorf("%s", groupUsage)
@@ -598,7 +598,7 @@ func groupCmd(args []string) error {
 		return nil
 	case "add", "new":
 		if len(rest) == 0 || strings.Contains(rest[0], "=") {
-			return fmt.Errorf("myna group add <name> models=<m1>[,m2…] [routing=…] [stays=…]\n\n%s", groupUsage)
+			return fmt.Errorf("owl group add <name> models=<m1>[,m2…] [routing=…] [stays=…]\n\n%s", groupUsage)
 		}
 		verb := "added"
 		if slices.ContainsFunc(provider.Groups(), func(o provider.Group) bool {
@@ -614,7 +614,7 @@ func groupCmd(args []string) error {
 		return showGroup(g)
 	case "set", "edit":
 		if len(rest) < 2 {
-			return fmt.Errorf("myna group set <id> k=v…\n\n%s", groupUsage)
+			return fmt.Errorf("owl group set <id> k=v…\n\n%s", groupUsage)
 		}
 		g, err := setGroup(rest[0], rest[1:])
 		if err != nil {
@@ -628,7 +628,7 @@ func groupCmd(args []string) error {
 		return showGroup(g)
 	case "rm", "remove", "delete":
 		if len(rest) < 1 {
-			return fmt.Errorf("myna group rm <id>…")
+			return fmt.Errorf("owl group rm <id>…")
 		}
 		gs, err := removeGroups(rest)
 		if err != nil {
@@ -636,7 +636,7 @@ func groupCmd(args []string) error {
 		}
 		for _, g := range gs {
 			if g.Auto {
-				fmt.Println(green.Render("✓"), "removed", bold.Render(g.Name), muted.Render("· myna found it, so it's hidden: myna group restore "+g.ID+" brings it back"))
+				fmt.Println(green.Render("✓"), "removed", bold.Render(g.Name), muted.Render("· owl found it, so it's hidden: owl group restore "+g.ID+" brings it back"))
 			} else {
 				fmt.Println(green.Render("✓"), "removed", bold.Render(g.Name))
 			}
@@ -644,7 +644,7 @@ func groupCmd(args []string) error {
 		return nil
 	case "pick", "use":
 		if len(rest) != 2 {
-			return fmt.Errorf("myna group pick <id> <model>")
+			return fmt.Errorf("owl group pick <id> <model>")
 		}
 		g, err := setGroup(rest[0], []string{"pick=" + rest[1]})
 		if err != nil {
@@ -654,14 +654,14 @@ func groupCmd(args []string) error {
 		return showGroup(g)
 	case "copy", "duplicate", "dup", "clone":
 		if len(rest) < 1 {
-			return fmt.Errorf("myna group copy <id> [name]")
+			return fmt.Errorf("owl group copy <id> [name]")
 		}
 		src, err := findGroup(rest[0])
 		if err != nil {
 			return err
 		}
 		if src.Hidden {
-			return fmt.Errorf("%s was removed: myna group restore %s brings it back first", src.ID, src.ID)
+			return fmt.Errorf("%s was removed: owl group restore %s brings it back first", src.ID, src.ID)
 		}
 		g, err := provider.CopyGroup(src.ID, strings.Join(rest[1:], " "))
 		if err != nil {
@@ -675,7 +675,7 @@ func groupCmd(args []string) error {
 		return ruleCmd(rest)
 	case "show":
 		if len(rest) != 1 {
-			return fmt.Errorf("myna group show <id>")
+			return fmt.Errorf("owl group show <id>")
 		}
 		g, err := findGroup(rest[0])
 		if err != nil {
@@ -686,7 +686,7 @@ func groupCmd(args []string) error {
 		return autoGroupsCmd(rest)
 	case "restore", "unhide":
 		if len(rest) != 1 {
-			return fmt.Errorf("myna group restore <id>")
+			return fmt.Errorf("owl group restore <id>")
 		}
 		g, err := restoreGroup(rest[0])
 		if err != nil {
@@ -700,7 +700,7 @@ func groupCmd(args []string) error {
 		return showGroup(g)
 	}
 	if len(rest) > 0 {
-		return fmt.Errorf("myna group has no %q\n\n%s", verb, groupUsage)
+		return fmt.Errorf("owl group has no %q\n\n%s", verb, groupUsage)
 	}
 	g, err := findGroup(verb)
 	if err != nil {
@@ -716,7 +716,7 @@ func addGroup(name string, pairs []string) (provider.Group, error) {
 	}
 	if g.ID = strings.ToLower(strings.TrimSpace(g.ID)); g.ID != "" {
 		if old, err := findGroup(g.ID); err == nil && old.ID == g.ID {
-			return g, fmt.Errorf("there is a group %s already: myna group set %s k=v… changes it", g.ID, g.ID)
+			return g, fmt.Errorf("there is a group %s already: owl group set %s k=v… changes it", g.ID, g.ID)
 		}
 	} else {
 		// a group is known by its name: adding one under a name taken
@@ -733,7 +733,7 @@ func addGroup(name string, pairs []string) (provider.Group, error) {
 		g.Name = g.ID
 	}
 	if len(g.Members) == 0 && len(g.Match) == 0 {
-		return g, fmt.Errorf("a group needs a model in it: models=<provider/model>[,…] (myna models lists them), or a pattern: models='openrouter/*:free'")
+		return g, fmt.Errorf("a group needs a model in it: models=<provider/model>[,…] (owl models lists them), or a pattern: models='openrouter/*:free'")
 	}
 	if err := provider.SaveGroup(g); err != nil {
 		return g, err
@@ -747,14 +747,14 @@ func setGroup(ref string, pairs []string) (provider.Group, error) {
 		return g, err
 	}
 	if g.Hidden {
-		return g, fmt.Errorf("%s was removed: myna group restore %s brings it back first", g.ID, g.ID)
+		return g, fmt.Errorf("%s was removed: owl group restore %s brings it back first", g.ID, g.ID)
 	}
 	from := g.ID
 	if err := applyGroupPairs(&g, pairs, memberResolver(g.Members), true); err != nil {
 		return g, err
 	}
 	if len(g.Members) == 0 && len(g.Match) == 0 {
-		return g, fmt.Errorf("a group needs a model in it; myna group rm %s removes it", from)
+		return g, fmt.Errorf("a group needs a model in it; owl group rm %s removes it", from)
 	}
 	pruneRules(&g)
 	to := strings.ToLower(strings.TrimSpace(g.ID))
@@ -762,7 +762,7 @@ func setGroup(ref string, pairs []string) (provider.Group, error) {
 		return g, fmt.Errorf("a group's id must be lowercase letters, digits, dots and dashes, not %q", g.ID)
 	}
 	g.ID = from
-	if err := provider.SaveGroup(g); err != nil { // one myna found is the user's now
+	if err := provider.SaveGroup(g); err != nil { // one owl found is the user's now
 		return g, err
 	}
 	if to != from {
@@ -777,10 +777,10 @@ func setGroup(ref string, pairs []string) (provider.Group, error) {
 	return findGroup(to)
 }
 
-// removedOnly is a removed found group myna doesn't find now (its model
+// removedOnly is a removed found group owl doesn't find now (its model
 // is down to one provider): only its record is left, to keep it removed.
 func removedOnly(ref string) (string, bool) {
-	ref = strings.TrimPrefix(provider.CanonicalRef(strings.TrimPrefix(strings.TrimSpace(ref), "myna/")), provider.GroupPrefix)
+	ref = strings.TrimPrefix(provider.CanonicalRef(strings.TrimPrefix(strings.TrimSpace(ref), "owl/")), provider.GroupPrefix)
 	for _, id := range provider.RemovedGroups() {
 		if strings.EqualFold(id, ref) {
 			return id, true
@@ -803,7 +803,7 @@ func removeGroups(refs []string) ([]provider.Group, error) {
 			return nil, err
 		}
 		if g.Hidden {
-			return nil, fmt.Errorf("%s is removed already; myna group restore %s brings it back", g.ID, g.ID)
+			return nil, fmt.Errorf("%s is removed already; owl group restore %s brings it back", g.ID, g.ID)
 		}
 		gs, ids = append(gs, g), append(ids, g.ID)
 	}
@@ -814,12 +814,12 @@ func removeGroup(ref string) (provider.Group, error) {
 	g, err := findGroup(ref)
 	if err != nil {
 		if id, ok := removedOnly(ref); ok {
-			return g, fmt.Errorf("%s is removed already (and no two providers serve its model now); myna group restore %s brings it back", id, id)
+			return g, fmt.Errorf("%s is removed already (and no two providers serve its model now); owl group restore %s brings it back", id, id)
 		}
 		return g, err
 	}
 	if g.Hidden {
-		return g, fmt.Errorf("%s is removed already; myna group restore %s brings it back", g.ID, g.ID)
+		return g, fmt.Errorf("%s is removed already; owl group restore %s brings it back", g.ID, g.ID)
 	}
 	return g, provider.DeleteGroup(g.ID)
 }
@@ -849,7 +849,7 @@ func groupUses() map[string][]string {
 		if len(a.Fields) == 0 {
 			continue
 		}
-		v := strings.TrimPrefix(a.Fields[0].Get(), "myna/")
+		v := strings.TrimPrefix(a.Fields[0].Get(), "owl/")
 		// a group an agent is on carries Claude Code's [1m] mark, as a
 		// model's does, and these are the agents' own settings: the mark
 		// comes off before the id is looked up by it (GroupFinder)
@@ -906,19 +906,19 @@ func catalogByID() map[string]provider.Entry {
 	return out
 }
 
-// groups: `myna groups`
-// autoGroupsCmd says whether myna finds groups on its own, or turns
+// groups: `owl groups`
+// autoGroupsCmd says whether owl finds groups on its own, or turns
 // that on or off: off, the agents set to one are moved to its model from
 // one provider (agent.Reseat), as the Routing view's switch does.
 func autoGroupsCmd(args []string) error {
 	if len(args) == 0 {
 		if provider.AutoGroupsOn() {
-			fmt.Println("found groups are", green.Render("on"), muted.Render("· a model two or more providers serve is a group of them (auto-<model>); myna group auto off turns them off"))
+			fmt.Println("found groups are", green.Render("on"), muted.Render("· a model two or more providers serve is a group of them (auto-<model>); owl group auto off turns them off"))
 		} else {
-			fmt.Println("found groups are", amber.Render("off"), muted.Render("· only the groups you made or changed; myna group auto on brings the others back"))
+			fmt.Println("found groups are", amber.Render("off"), muted.Render("· only the groups you made or changed; owl group auto on brings the others back"))
 		}
 		if skip := provider.AutoGroupSkip(); len(skip) > 0 {
-			fmt.Println("left out:", strings.Join(skip, ", "), muted.Render("· myna group auto skip none lets them back in"))
+			fmt.Println("left out:", strings.Join(skip, ", "), muted.Render("· owl group auto skip none lets them back in"))
 		}
 		return nil
 	}
@@ -930,10 +930,10 @@ func autoGroupsCmd(args []string) error {
 	case "skip":
 		return autoGroupSkipCmd(args[1:])
 	default:
-		return fmt.Errorf("myna group auto [on|off|skip <provider>…|skip none]")
+		return fmt.Errorf("owl group auto [on|off|skip <provider>…|skip none]")
 	}
 	if len(args) > 1 {
-		return fmt.Errorf("myna group auto [on|off]")
+		return fmt.Errorf("owl group auto [on|off]")
 	}
 	moved, err := agent.Reseat(func() error { return provider.SetAutoGroups(on) })
 	if err != nil {
@@ -948,15 +948,15 @@ func autoGroupsCmd(args []string) error {
 	return nil
 }
 
-// autoGroupSkipCmd keeps the providers named out of the groups myna
+// autoGroupSkipCmd keeps the providers named out of the groups owl
 // finds, the others back in (provider.SetAutoGroupSkip; chenxiang0010 on
 // Discord); "none" lets every one back in, and no name says which are
-// out. A name myna has no provider of is refused, never kept.
+// out. A name owl has no provider of is refused, never kept.
 func autoGroupSkipCmd(args []string) error {
 	if len(args) == 0 {
 		skip := provider.AutoGroupSkip()
 		if len(skip) == 0 {
-			fmt.Println("no provider is left out of found groups", muted.Render("· myna group auto skip <provider>… leaves them out"))
+			fmt.Println("no provider is left out of found groups", muted.Render("· owl group auto skip <provider>… leaves them out"))
 		} else {
 			fmt.Println("left out of found groups:", strings.Join(skip, ", "))
 		}
@@ -971,7 +971,7 @@ func autoGroupSkipCmd(args []string) error {
 		for _, a := range args {
 			id := strings.ToLower(strings.TrimSpace(a))
 			if !have[id] {
-				return fmt.Errorf("no provider %q (myna providers lists their ids)", a)
+				return fmt.Errorf("no provider %q (owl providers lists their ids)", a)
 			}
 			ids = append(ids, id)
 		}
@@ -1000,10 +1000,10 @@ func groups() error {
 		}
 	}
 	if len(shown) == 0 {
-		fmt.Println(muted.Render("no routing groups yet ·"), "myna group add <name> models=<m1>,<m2>", muted.Render("· myna group help"))
+		fmt.Println(muted.Render("no routing groups yet ·"), "owl group add <name> models=<m1>,<m2>", muted.Render("· owl group help"))
 	}
 	if !provider.AutoGroupsOn() {
-		defer fmt.Println(" ", muted.Render("found groups are off · myna group auto on brings them back"))
+		defer fmt.Println(" ", muted.Render("found groups are off · owl group auto on brings them back"))
 	}
 	names, uses := catalogByID(), groupUses()
 	for _, e := range provider.Served() {
@@ -1083,7 +1083,7 @@ func groups() error {
 	}
 	if len(ids) > 0 {
 		fmt.Println()
-		fmt.Println(" ", muted.Render("removed: "+strings.Join(ids, ", ")+" · myna group restore <id> brings one back"))
+		fmt.Println(" ", muted.Render("removed: "+strings.Join(ids, ", ")+" · owl group restore <id> brings one back"))
 		fmt.Println(" ", muted.Render("  (each is a {\"hidden\": true} record in providers.json that keeps it removed; deleting the record brings it back)"))
 	}
 	return nil
@@ -1093,14 +1093,14 @@ func showGroup(g provider.Group) error {
 	kv := func(k, v string) { fmt.Printf("  %s %s\n", muted.Render(pad(k, 9)), v) }
 	head := bold.Render(g.Name) + muted.Render("  "+g.Ref())
 	if g.Auto {
-		head += faint.Render("  found by myna — changing it makes it yours")
+		head += faint.Render("  found by owl — changing it makes it yours")
 	}
 	if g.Hidden {
-		head += amber.Render("  removed") + muted.Render(" · myna group restore "+g.ID)
+		head += amber.Render("  removed") + muted.Render(" · owl group restore "+g.ID)
 	}
 	fmt.Println(" ", head)
 	if g.Routing == provider.Manual {
-		kv("routing", "manual"+muted.Render("  every request to "+g.Picked()+"; myna group pick "+g.ID+" <model> picks another"))
+		kv("routing", "manual"+muted.Render("  every request to "+g.Picked()+"; owl group pick "+g.ID+" <model> picks another"))
 	} else {
 		kv("routing", routingName(g.Routing))
 	}
@@ -1183,7 +1183,7 @@ func showGroup(g provider.Group) error {
 }
 
 // whyNotServed is why a group's member isn't served: most often a model its
-// provider's list has but doesn't expose, which `myna provider models
+// provider's list has but doesn't expose, which `owl provider models
 // <id> +<model>` puts right (MOMO on Discord: opencode-go/deepseek-flash).
 func whyNotServed(member string) string {
 	pid, model, ok := strings.Cut(member, "/")
@@ -1199,12 +1199,12 @@ func whyNotServed(member string) string {
 	}
 	if slices.ContainsFunc(p.Available(), func(m catalog.Model) bool { return m.ID == model }) &&
 		!slices.ContainsFunc(p.Exposed(), func(m catalog.Model) bool { return m.ID == model }) {
-		return "not served: not exposed · myna provider models " + p.ID + " +" + model
+		return "not served: not exposed · owl provider models " + p.ID + " +" + model
 	}
 	return "not served"
 }
 
-// templateCmd: myna group template [kind] [name] (provider.Templates):
+// templateCmd: owl group template [kind] [name] (provider.Templates):
 // each template and the models it would take, or one of them added.
 func templateCmd(rest []string) error {
 	if len(rest) == 0 {
@@ -1219,7 +1219,7 @@ func templateCmd(rest []string) error {
 				fmt.Println("  " + muted.Render("classifier "+tp.Group.Classifier))
 			}
 		}
-		fmt.Println(muted.Render("myna group template <kind> [name] adds one"))
+		fmt.Println(muted.Render("owl group template <kind> [name] adds one"))
 		return nil
 	}
 	kind := strings.ToLower(rest[0])

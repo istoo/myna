@@ -148,18 +148,18 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     for (const lang of ["en", "zh", "zh-TW", "ja", "de"]) for (const width of [980, 420]) for (const k of kinds) {
       await t.test(`${lang} ${width}px: ${k.name}`, async () => {
         // the window is no narrower than 560px (windowMinW); narrower, it
-        // is the browser page (myna web, a phone)
+        // is the browser page (owl web, a phone)
         const web = k.mode === "window" && width < 560;
         const viewport = k.mode === "panel" ? { width: Math.min(width, 440), height: 640 } : { width, height: 760 };
         const ctx = await browser.newContext({ viewport, reducedMotion: "reduce" });
-        if (k.tab) await ctx.addInitScript((tab) => { try { localStorage.setItem("myna.panelTab", tab); } catch {} }, k.tab);
+        if (k.tab) await ctx.addInitScript((tab) => { try { localStorage.setItem("owl.panelTab", tab); } catch {} }, k.tab);
         const page = await ctx.newPage(), errors = [];
         page.setDefaultTimeout(8000);
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         try {
           await page.route("**/*", serve(lang, web));
-          await page.goto("http://myna.test/?" + (web ? "" : `mode=${k.mode}&`) + (k.view ? `view=${k.view}` : ""));
+          await page.goto("http://owl.test/?" + (web ? "" : `mode=${k.mode}&`) + (k.view ? `view=${k.view}` : ""));
           if (k.open) await k.open(page);
           const row = page.locator(k.row).first();
           await row.waitFor();

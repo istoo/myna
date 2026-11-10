@@ -4,7 +4,7 @@ import (
 	"slices"
 	"time"
 
-	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/owl/internal/sessions"
 )
 
 // pairMemo is what pairRows found over one list of chunks, named by their

@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // fernetSealed is a payload shaped as the ChatGPT backend seals one: a
@@ -149,7 +149,7 @@ func TestSealedTaskStillGoesToTheLeadsProviderADayLater(t *testing.T) {
 }
 
 // What the log tells is still only who answered: a lead another provider
-// answered, or one myna refused and never asked anyone for, doesn't
+// answered, or one owl refused and never asked anyone for, doesn't
 // make this one able to read its seal; and the refusal says so, naming
 // the provider when it is known.
 func TestSealedTaskLogDoesNotOpenItToAnotherProvider(t *testing.T) {

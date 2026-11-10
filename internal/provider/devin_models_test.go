@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 // devinListed is a CLI list the way Devin gives it: families whose

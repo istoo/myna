@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // Bailian's decision model is added with its workspace or plan, and a
@@ -52,7 +52,7 @@ func TestProviderDecidePairs(t *testing.T) {
 	}
 }
 
-func TestRemoteMynaAddReportsModels(t *testing.T) {
+func TestRemoteOwlAddReportsModels(t *testing.T) {
 	for _, tc := range []struct{ name, list, want string }{
 		{"unreachable", "", "no models exposed yet"},
 		{"chat only", `{"data":[{"id":"lib/m1"}]}`, "1 models in the catalog"},
@@ -67,7 +67,7 @@ func TestRemoteMynaAddReportsModels(t *testing.T) {
 				up.Close()
 			}
 			out, err := stdoutOf(t, func() error {
-				return providerCmd([]string{"provider", "add", "remote-myna", "remote-key", "url=" + up.URL, "id=office"})
+				return providerCmd([]string{"provider", "add", "remote-owl", "remote-key", "url=" + up.URL, "id=office"})
 			})
 			if err != nil {
 				t.Fatal(err)

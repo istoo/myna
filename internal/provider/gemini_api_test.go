@@ -146,7 +146,7 @@ func TestAIStudioSpeaksGemini(t *testing.T) {
 	}
 }
 
-// The Gemini URL myna gives an AI Studio key is filled in once: one the
+// The Gemini URL owl gives an AI Studio key is filled in once: one the
 // user clears stays empty, on every load and save after.
 func TestAIStudioGeminiClearedStays(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())

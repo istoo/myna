@@ -9,7 +9,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // The refusals of #1447: OpenCode Go's Claude models over Anthropic
@@ -210,7 +210,7 @@ func TestTrailingAssistantRelayedToNoPrefillModel(t *testing.T) {
 	}
 }
 
-// myna's own continuation of a cut reply, to a model that takes no
+// owl's own continuation of a cut reply, to a model that takes no
 // prefill, ends with what cut it, not with the refusal of an ask the
 // client never made; the next cut on that model isn't asked to go on.
 func TestStreamCutOnNoPrefillModel(t *testing.T) {

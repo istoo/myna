@@ -1,8 +1,8 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // YouWhat on Discord: ~/.config wasn't the user's (a command run with sudo
 // had made it root's), so adding a custom provider failed with "mkdir
-// ~/.config/myna: permission denied". /api/state names the folder that
-// blocks myna (configBlocked), and the window asks once a load to Repair
+// ~/.config/owl: permission denied". /api/state names the folder that
+// blocks owl (configBlocked), and the window asks once a load to Repair
 // it, which POSTs /api/config/repair. A save refused for it (code
 // config_blocked) says so in the reader's language and asks again, over
 // the editor whose save failed; Not now goes back to that editor as it was
@@ -15,11 +15,11 @@ const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
 const KEYS = [
-  "myna can't save into {path}: it belongs to another user",
-  "myna can't save its settings",
-  "{path} belongs to another user, often after a command was run with sudo, so myna can't save providers or settings there. Repair makes it yours again; the system may ask for your password.",
+  "owl can't save into {path}: it belongs to another user",
+  "owl can't save its settings",
+  "{path} belongs to another user, often after a command was run with sudo, so owl can't save providers or settings there. Repair makes it yours again; the system may ask for your password.",
   "Repair",
-  "Repaired: myna can save again",
+  "Repaired: owl can save again",
 ];
 const LANGS = ["en", "zh", "zh-TW", "ja", "de"];
 
@@ -35,7 +35,7 @@ function server(lang, calls) {
       return json(s);
     }
     if (url.pathname === "/api/config/repair") { calls.repair++; calls.blocked = false; return route.fulfill({ status: 204 }); }
-    if (url.pathname === "/api/test-save") return json({ error: "mkdir /Users/u/.config/myna: permission denied", code: "config_blocked", blocked: "~/.config" }, 400);
+    if (url.pathname === "/api/test-save") return json({ error: "mkdir /Users/u/.config/owl: permission denied", code: "config_blocked", blocked: "~/.config" }, 400);
     if (url.pathname === "/api/usage/quotas") return json([]);
     if (url.pathname === "/api/groups") return json({ groups: [] });
     if (url.pathname === "/api/update" || url.pathname === "/api/drift") return json({});
@@ -48,11 +48,11 @@ function server(lang, calls) {
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   for (const lang of ["en", "zh"]) {
-    test(`${engine} ${lang}: a folder myna can't write is repaired in one click`, async (t) => {
+    test(`${engine} ${lang}: a folder owl can't write is repaired in one click`, async (t) => {
       const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
       t.after(async () => { await browser.close(); });
       const errors = [];
-      const open = async (calls, url = "http://myna.test/", width = 900) => {
+      const open = async (calls, url = "http://owl.test/", width = 900) => {
         const page = await (await browser.newContext({ viewport: { width, height: 700 }, reducedMotion: "reduce" })).newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
@@ -69,17 +69,17 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const dialog = page.locator("#modal:not([hidden])");
       await dialog.waitFor();
       assert.match(await dialog.textContent(), /~\/\.config/, "the dialog names the folder");
-      assert.ok((await dialog.textContent()).includes(await tr(page, "myna can't save its settings")));
+      assert.ok((await dialog.textContent()).includes(await tr(page, "owl can't save its settings")));
       await dialog.getByRole("button", { name: await tr(page, "Repair"), exact: true }).click();
       await page.waitForFunction(() => document.querySelector("#modal").hidden);
       assert.equal(calls.repair, 1, "Repair reached the API");
-      assert.equal(await page.locator("#status").textContent(), await tr(page, "Repaired: myna can save again"));
+      assert.equal(await page.locator("#status").textContent(), await tr(page, "Repaired: owl can save again"));
 
       // a save refused for it: said in the reader's language, asked over
       // the editor, and Not now goes back to that editor as it was
       const p2 = await open({ blocked: false, repair: 0 });
       await p2.waitForTimeout(300);
-      assert.ok(await p2.locator("#modal").evaluate((m) => m.hidden), "nothing asked while myna can save");
+      assert.ok(await p2.locator("#modal").evaluate((m) => m.hidden), "nothing asked while owl can save");
       const said = await p2.evaluate(async () => {
         const ed = el("div", "editor");
         const head = el("div", "ehead"); head.append(el("b", "", "Add provider"));
@@ -89,7 +89,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         try { await api("test-save", {}); } catch (e) { return e.message; }
         return "";
       });
-      assert.equal(said, (await tr(p2, "myna can't save into {path}: it belongs to another user")).replace("{path}", "~/.config"));
+      assert.equal(said, (await tr(p2, "owl can't save into {path}: it belongs to another user")).replace("{path}", "~/.config"));
       const ask = p2.locator("#modal .cfg-blocked");
       await ask.waitFor();
       await ask.getByRole("button", { name: await tr(p2, "Not now"), exact: true }).click();
@@ -97,7 +97,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.equal(await p2.locator("#modal #typed").inputValue(), "my provider", "back to the editor as it was left");
 
       // the panel stays quiet
-      const panel = await open({ blocked: true, repair: 0 }, "http://myna.test/?mode=panel", 380);
+      const panel = await open({ blocked: true, repair: 0 }, "http://owl.test/?mode=panel", 380);
       await panel.waitForTimeout(500);
       assert.ok(await panel.locator("#modal").evaluate((m) => m.hidden), "the panel stays quiet");
 

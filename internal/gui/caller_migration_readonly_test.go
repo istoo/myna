@@ -5,12 +5,12 @@ import (
 	"os"
 	"testing"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 func TestReadOnlyLANMigrationDoesNotBlockSettingsOrKeys(t *testing.T) {
 	sandboxHome(t)
-	s := settings.Settings{LAN: true, LANKey: "sk-myna-fixture-readonly"}
+	s := settings.Settings{LAN: true, LANKey: "sk-owl-fixture-readonly"}
 	if err := settings.Save(s); err != nil {
 		t.Fatal(err)
 	}

@@ -13,14 +13,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // ourFree is a provider listing ids as Our Free Model's plugin does: its
 // free pools' models, and its account channels' as "channel/model".
 func ourFree(ids ...string) []plugin.Provider {
-	p := plugin.Provider{ID: "our-free-model", Spec: "myna-our-free-model", Name: "Our Free Model",
+	p := plugin.Provider{ID: "our-free-model", Spec: "owl-our-free-model", Name: "Our Free Model",
 		NPM: "@ai-sdk/openai-compatible"}
 	for _, id := range ids {
 		p.Models = append(p.Models, plugin.Model{ID: id, Name: id, NPM: "@ai-sdk/openai-compatible"})
@@ -28,9 +28,9 @@ func ourFree(ids ...string) []plugin.Provider {
 	return []plugin.Provider{p}
 }
 
-// Our Free Model's service, started again with myna after an update,
+// Our Free Model's service, started again with owl after an update,
 // lists its free pools at once and its account channels' models only once
-// it has read them, so the list the gateway's myna read a minute after
+// it has read them, so the list the gateway's owl read a minute after
 // it started was short. The picks it didn't have were dropped for good,
 // and its user picked every model again after each update (多喝热水 on
 // Discord). They are set aside now, not served while the list leaves them
@@ -38,7 +38,7 @@ func ourFree(ids ...string) []plugin.Provider {
 // a list left a pick out, not an hour later.
 func TestPluginPicksComeBackWithTheirList(t *testing.T) {
 	claudeHome(t)
-	t.Setenv("MYNA_BUN", "")
+	t.Setenv("OWL_BUN", "")
 	write := func(name string, v any) {
 		t.Helper()
 		b, _ := json.Marshal(v)
@@ -49,7 +49,7 @@ func TestPluginPicksComeBackWithTheirList(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	write("plugins.json", map[string]any{"plugins": []map[string]any{{"spec": "myna-our-free-model"}}})
+	write("plugins.json", map[string]any{"plugins": []map[string]any{{"spec": "owl-our-free-model"}}})
 	write("plugin-auth.json", map[string]any{"our-free-model": map[string]any{"type": "api", "key": "managed"}})
 	full := ourFree("pool-a", "pool-b", "qoder/claude-x", "kiro/claude-y", "kiro/claude-z")
 	plugin.UseCached(full)
@@ -151,12 +151,12 @@ func TestPluginPicksComeBackWithTheirList(t *testing.T) {
 // forgets what was set aside.
 func TestEveryPickDelistedServesNone(t *testing.T) {
 	claudeHome(t)
-	t.Setenv("MYNA_BUN", "")
+	t.Setenv("OWL_BUN", "")
 	if err := os.MkdirAll(settings.Dir(), 0o700); err != nil {
 		t.Fatal(err)
 	}
 	for name, v := range map[string]any{
-		"plugins.json":     map[string]any{"plugins": []map[string]any{{"spec": "myna-our-free-model"}}},
+		"plugins.json":     map[string]any{"plugins": []map[string]any{{"spec": "owl-our-free-model"}}},
 		"plugin-auth.json": map[string]any{"our-free-model": map[string]any{"type": "api", "key": "managed"}},
 	} {
 		b, _ := json.Marshal(v)
@@ -267,12 +267,12 @@ func TestRelayPicksComeBackWithTheirList(t *testing.T) {
 // them.
 func TestPicksGoneForGoodServeTheList(t *testing.T) {
 	claudeHome(t)
-	t.Setenv("MYNA_BUN", "")
+	t.Setenv("OWL_BUN", "")
 	if err := os.MkdirAll(settings.Dir(), 0o700); err != nil {
 		t.Fatal(err)
 	}
 	for name, v := range map[string]any{
-		"plugins.json":     map[string]any{"plugins": []map[string]any{{"spec": "myna-our-free-model"}}},
+		"plugins.json":     map[string]any{"plugins": []map[string]any{{"spec": "owl-our-free-model"}}},
 		"plugin-auth.json": map[string]any{"our-free-model": map[string]any{"type": "api", "key": "managed"}},
 	} {
 		b, _ := json.Marshal(v)
@@ -312,7 +312,7 @@ func TestPicksGoneForGoodServeTheList(t *testing.T) {
 	if got := servedIDs(t, "our-free-model"); !slices.Equal(got, whole) {
 		t.Fatalf("served %v after pickWait, want the list %v", got, whole)
 	}
-	// set aside by a myna before this one, with no time kept
+	// set aside by a owl before this one, with no time kept
 	f, err := read()
 	if err != nil {
 		t.Fatal(err)

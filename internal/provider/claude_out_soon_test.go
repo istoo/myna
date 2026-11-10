@@ -104,7 +104,7 @@ func TestClaudeNearOutIsReadEveryMinute(t *testing.T) {
 }
 
 // Claude Code refused for its limit ("You've hit your 5-hour limit",
-// written to its session) while the reading myna has says room: the
+// written to its session) while the reading owl has says room: the
 // next look reads /usage at once, whatever its wait, and moves on.
 func TestClaudeRefusalInSessionReadsAtOnce(t *testing.T) {
 	spare, set, age := claudeOutSoon(t, "50")
@@ -129,7 +129,7 @@ func TestClaudeRefusalInSessionReadsAtOnce(t *testing.T) {
 
 // What the scan of Claude Code's sessions counts: its own rate_limit
 // message, written since the scan before, whole; not one from before
-// myna looked, a half-written line, nor the words in a tool's output.
+// owl looked, a half-written line, nor the words in a tool's output.
 func TestScanClaudeLimits(t *testing.T) {
 	claudeHome(t)
 	reset := func() {

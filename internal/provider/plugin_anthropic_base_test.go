@@ -3,7 +3,7 @@ package provider
 import (
 	"testing"
 
-	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/owl/internal/plugin"
 )
 
 // A Claude model through the Copilot plugin goes to Copilot's

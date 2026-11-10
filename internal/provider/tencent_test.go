@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 const (
@@ -132,13 +132,13 @@ func TestTencentCloud(t *testing.T) {
 			}
 		}
 	}
-	// a myna://import link: Tencent Cloud at a region, an old link by
+	// a owl://import link: Tencent Cloud at a region, an old link by
 	// its old id, and an old id at another region, each where it says
 	for _, c := range tcRegions {
 		for _, link := range []string{
-			"myna://import?preset=tencent-cloud&region=" + c.region,
-			"myna://import?preset=" + c.old,
-			"myna://import?preset=tencent-tokenhub&region=" + c.region,
+			"owl://import?preset=tencent-cloud&region=" + c.region,
+			"owl://import?preset=" + c.old,
+			"owl://import?preset=tencent-tokenhub&region=" + c.region,
 		} {
 			p, err := ParseImport(link)
 			if err != nil {
@@ -190,7 +190,7 @@ func TestTencentCloudEnterprisePlan(t *testing.T) {
 				t.Fatalf("imported from %+v at %+v", e, got)
 			}
 		}
-		p, err := ParseImport("myna://import?preset=tencent-cloud&region=" + c.region)
+		p, err := ParseImport("owl://import?preset=tencent-cloud&region=" + c.region)
 		if err != nil || p.Chat != r.Chat || p.Responses != r.Responses || p.Anthropic != r.Anthropic || p.KeysURL != c.keys {
 			t.Fatalf("link: %v %+v", err, p)
 		}
@@ -222,7 +222,7 @@ func TestTencentCloudOldPresetsKeepWorking(t *testing.T) {
 	t.Setenv("HOME", home)
 	t.Setenv("USERPROFILE", home)
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
-	// providers.json as an older myna wrote it
+	// providers.json as an older owl wrote it
 	old := `{"providers":[
 {"id":"tencent-token-plan","name":"Tencent Cloud Token Plan","icon":"tencentcloud-color","preset":"tencent-token-plan","key":"sk-tp-plan",
  "chat":"` + tcOldPlanChat + `","anthropic":"` + tcOldPlanMsgs + `","models":["glm-5.3","hy3"],"website":"` + tcPlanDocs + `","keysUrl":"` + tcPlanKeys + `"},
@@ -371,7 +371,7 @@ func TestTencentPlanMovedFromLkeap(t *testing.T) {
 		t.Fatalf("volcengine: %q", v.KeyPlan)
 	}
 	// an import link made when 企业版 China was a region of its own
-	l, err := ParseImport("myna://import?preset=tencent-cloud&region=enterprise")
+	l, err := ParseImport("owl://import?preset=tencent-cloud&region=enterprise")
 	if err != nil || l.Chat != tcPlanChat || l.Anthropic != tcPlanMsgs {
 		t.Fatalf("link to the old region: %+v %v", l, err)
 	}

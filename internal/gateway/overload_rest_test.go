@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // What celestial_eagle_99230's request log had from the ChatGPT backend on

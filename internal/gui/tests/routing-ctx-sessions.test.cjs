@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// tjhhhh on Discord: with several sessions running through myna at once,
+// tjhhhh on Discord: with several sessions running through owl at once,
 // the Routing page's context window went from one session's context to the
 // other's, and which was which couldn't be told. Each session sending now
 // has a small block of its own under the card, named as its agent named it
@@ -73,7 +73,7 @@ async function open(browser, lang, width, first) {
   page.on("pageerror", (e) => errors.push(e.message));
   const feed = { next: null };
   await page.route("**/*", serve(lang, first, feed));
-  await page.goto("http://myna.test/?view=routing");
+  await page.goto("http://owl.test/?view=routing");
   await page.locator(".rt-req").first().waitFor();
   await page.locator(".rt-ctx .ctx-card").waitFor();
   const send = async (...rs) => {

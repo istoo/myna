@@ -23,8 +23,8 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/source"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/source"
 	"gopkg.in/yaml.v3"
 )
 
@@ -232,15 +232,15 @@ func dropsLetters(n string) bool {
 
 // ---- linking into agents --------------------------------------------------
 
-// marker is left in a copy myna makes where it can't link (Windows
+// marker is left in a copy owl makes where it can't link (Windows
 // without the right to), to know the copy for its own.
-const marker = ".myna-library"
+const marker = ".owl-library"
 
-// ours reports whether the entry at p is myna's link (or copy) of the
+// ours reports whether the entry at p is owl's link (or copy) of the
 // library's skill by that name.
 func ours(p, name string) bool {
 	// a link in a WSL distro is read there (linkTarget), Windows can't;
-	// one to myna's copy in the distro is myna's (wsl_skills.go)
+	// one to owl's copy in the distro is owl's (wsl_skills.go)
 	if to, ok := linkTarget(p); ok {
 		return filepath.Clean(to) == filepath.Clean(skillDir(name)) || inWSLStore(to, name)
 	}
@@ -270,7 +270,7 @@ func link(p, name string) error {
 	return markCopy(p, "copied from "+skillDir(name)+"\n")
 }
 
-// markCopy writes myna's mark into a copy just made at p: what it says,
+// markCopy writes owl's mark into a copy just made at p: what it says,
 // then the hash of what was copied. A sync tells a copy is still the
 // library's skill by that hash and the mark's time (copyIsFresh), without
 // reading every file of every copy each time (#1031).
@@ -282,7 +282,7 @@ func markCopy(p, says string) error {
 	return os.WriteFile(filepath.Join(p, marker), []byte(says), 0o644)
 }
 
-// markedHash is the hash myna's mark at p says was copied, if it says one.
+// markedHash is the hash owl's mark at p says was copied, if it says one.
 func markedHash(p string) (string, bool) {
 	b, err := os.ReadFile(filepath.Join(p, marker))
 	if err != nil {
@@ -296,7 +296,7 @@ func markedHash(p string) (string, bool) {
 	return "", false
 }
 
-// copyIn puts a copy of the library's skill at p, marked as myna's, in
+// copyIn puts a copy of the library's skill at p, marked as owl's, in
 // place of a link: made beside it and put in the place of what is there,
 // so the agent never finds half of one.
 func copyIn(p, name string) error {
@@ -306,13 +306,13 @@ func copyIn(p, name string) error {
 	}
 	// an old copy a previous swap couldn't remove is tried again
 	dropOld(p, name)
-	next := filepath.Join(filepath.Dir(p), "."+name+".myna-next")
+	next := filepath.Join(filepath.Dir(p), "."+name+".owl-next")
 	os.RemoveAll(next)
 	if err := copyDir(realDir(lib), next); err != nil {
 		os.RemoveAll(next)
 		return err
 	}
-	if err := markCopy(next, "copied from "+lib+" by myna, and copied again when it changes\n"); err != nil {
+	if err := markCopy(next, "copied from "+lib+" by owl, and copied again when it changes\n"); err != nil {
 		os.RemoveAll(next)
 		return err
 	}
@@ -328,7 +328,7 @@ func copyIn(p, name string) error {
 	// The old copy is moved aside whole before the new one goes in, and only
 	// then removed: removing it in place can fail part-way (a file held open
 	// on Windows), which would leave the agent a copy with no SKILL.md and no
-	// marker that myna no longer knows for its own.
+	// marker that owl no longer knows for its own.
 	old := oldPath(p, name)
 	if err := os.Rename(p, old); err != nil {
 		os.RemoveAll(next)
@@ -349,7 +349,7 @@ func copyIn(p, name string) error {
 
 // oldPrefix starts the name an old copy of a skill is moved aside to while
 // the new one is put in its place.
-func oldPrefix(name string) string { return "." + name + ".myna-old" }
+func oldPrefix(name string) string { return "." + name + ".owl-old" }
 
 // oldPath is a free name beside p to move the old copy of a skill aside to.
 func oldPath(p, name string) string {
@@ -557,7 +557,7 @@ func sharedSkillsDir() string { return filepath.Join(home(), ".agents", "skills"
 func sharedHas(name string) bool { return sharedEntry(name) != "" }
 
 // sharedEntry is the user's own entry in ~/.agents/skills (not a link
-// myna made) by which the agents reading that folder find the library's
+// owl made) by which the agents reading that folder find the library's
 // skill by that name: the very folder the library's is or links to. That
 // is the entry by its name, or, for a library skill linked to a folder
 // right in the shared one under another name, that entry. "" when none.
@@ -617,7 +617,7 @@ func (l *Library) syncSkills(t *Target, res *Result, all []*Target) {
 		return s.gives(id) || slices.ContainsFunc(sharers, s.gives)
 	}
 	// an agent that reads ~/.agents/skills as well as its own folder finds
-	// a skill myna put there for another (Kimi Code) already: a link in
+	// a skill owl put there for another (Kimi Code) already: a link in
 	// its own too would be the skill twice
 	shared := realDir(sharedSkillsDir())
 	isShared := realDir(t.Skills) == shared
@@ -673,7 +673,7 @@ func (l *Library) syncSkills(t *Target, res *Result, all []*Target) {
 			}
 			continue
 		}
-		// in a WSL distro, myna's one copy there is what the agent's
+		// in a WSL distro, owl's one copy there is what the agent's
 		// link leads to (wsl_skills.go): made, or made again, first
 		if t.Store != "" && !cp {
 			if made, err := l.storeSkill(t, s.Name); err != nil {
@@ -715,7 +715,7 @@ func (l *Library) syncSkills(t *Target, res *Result, all []*Target) {
 			if ours(p, s.Name) {
 				dropOld(p, s.Name)
 			}
-			// myna's copy in an agent given links now is a link again
+			// owl's copy in an agent given links now is a link again
 			// (#896), unless no link can be made here (Windows without the
 			// right to), where the copy stays
 			if ours(p, s.Name) && !cp && !linked(p) {
@@ -731,7 +731,7 @@ func (l *Library) syncSkills(t *Target, res *Result, all []*Target) {
 				}
 			}
 			// a copy is made again once the library's skill has changed: in
-			// an agent that takes copies, and where myna couldn't link
+			// an agent that takes copies, and where owl couldn't link
 			// (Windows without the right to) and left a copy instead
 			again := cp && linked(p)
 			if ours(p, s.Name) && !linked(p) && l.libHash(s.Name) != "" {
@@ -783,7 +783,7 @@ func (l *Library) syncSkills(t *Target, res *Result, all []*Target) {
 	a.Skills = mine
 }
 
-// sweepShared takes myna's own entries out of ~/.agents/skills once no
+// sweepShared takes owl's own entries out of ~/.agents/skills once no
 // agent whose folder it is, or that still reads it for the skill, has it
 // any more: an entry put there for an agent that reads its own folder now
 // (Kimi Code, #4379) would go on reaching every reader of the folder,
@@ -862,7 +862,7 @@ type probeEntry struct {
 var probeLife = 15 * time.Minute
 
 // skillTemp starts the name of a download's folder in the temp dir.
-const skillTemp = "myna-skill-"
+const skillTemp = "owl-skill-"
 
 // keepProbe caches p's download under input for probeLife, in place of
 // one before it; the folder is removed when it is replaced or expires, not
@@ -887,7 +887,7 @@ func keepProbe(input string, p *Probe, tmp string) {
 	}
 }
 
-// sweepStaleDownloads removes the downloads a myna that quit left in the
+// sweepStaleDownloads removes the downloads a owl that quit left in the
 // temp dir (#2321): a folder of ours over an hour old, longer than a probe
 // is kept or a fetch takes, so none in use.
 func sweepStaleDownloads() {
@@ -989,7 +989,7 @@ func fetchWhole(src Source, name string) (string, error) {
 	c := &http.Client{Timeout: 2 * time.Minute}
 	get := func(u string) (*http.Response, bool, error) {
 		req, _ := http.NewRequest("GET", u, nil)
-		req.Header.Set("User-Agent", "myna")
+		req.Header.Set("User-Agent", "owl")
 		return doGitHub(req, func(r *http.Request) (*http.Response, error) { return source.DoOfficial(c, r) })
 	}
 	if tooBig.has(src) {
@@ -2103,7 +2103,7 @@ func ownSkill(l *Library, name, agentID string) (*Skill, *Target, error) {
 	}
 	t := targetByID(id)
 	if t == nil || t.Skills == "" {
-		return nil, nil, fmt.Errorf("%s has no skills folder myna knows of", agentID)
+		return nil, nil, fmt.Errorf("%s has no skills folder owl knows of", agentID)
 	}
 	return s, t, nil
 }
@@ -2171,7 +2171,7 @@ func foundSkills(l *Library) []FoundSkill {
 			name := e.Name()
 			p := filepath.Join(pl.dir, name)
 			f := byName[name]
-			// myna's link to the library's folder is an agent having the
+			// owl's link to the library's folder is an agent having the
 			// one found there
 			if strings.HasPrefix(name, ".") || ours(p, name) && (f == nil || f.Library == "") || l.skill(name) != nil || !nameRe.MatchString(name) {
 				continue
@@ -2574,7 +2574,7 @@ func setAside(agent, p string) (string, error) {
 
 // sameTree is whether two skill folders (links followed) hold the same
 // files with the same bytes, leaving aside what Finder or version control
-// keeps in one (.DS_Store, .git) and the mark on myna's own copy.
+// keeps in one (.DS_Store, .git) and the mark on owl's own copy.
 // Two folders unchanged since they were last compared aren't read again
 // (treememo.go).
 func sameTree(a, b string) bool { return sameTreeIn(nil, a, b) }

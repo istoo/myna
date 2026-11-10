@@ -15,7 +15,7 @@ const { watchSettingsReads, settingsDrawn, reach } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const today = new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10);
-const WHY = "Qoder check-in: device identity runtime not found. Qoder gives the daily credits only to a device its own app identifies, and this machine has neither Qoder desktop nor Qoder CLI signed in; install one and sign in, and myna checks in again the next day";
+const WHY = "Qoder check-in: device identity runtime not found. Qoder gives the daily credits only to a device its own app identifies, and this machine has neither Qoder desktop nor Qoder CLI signed in; install one and sign in, and owl checks in again the next day";
 const OTHER = "this device has checked in today";
 const checkins = [
   ...["a1", "a2", "a3", "a4"].map((user) => ({ user, by: "plugin:qoder", vendor: "Qoder", day: today, outcome: "ineligible", msg: WHY })),
@@ -70,7 +70,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang));
         await watchSettingsReads(page);
-        await page.goto("http://myna.test/?view=usage");
+        await page.goto("http://owl.test/?view=usage");
         await settingsDrawn(page);
         await page.locator(".wb-checkin").nth(4).waitFor();
         const says = (await page.locator(".wb-checkin .ci-say").allInnerTexts()).map((s) => s.trim());
@@ -81,7 +81,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), "no sideways scroll on Usage");
 
         // Settings' line: the accounts, then the reason once
-        await page.goto("http://myna.test/?view=settings&tab=usage");
+        await page.goto("http://owl.test/?view=settings&tab=usage");
         await settingsDrawn(page);
         const tab = page.locator("#warmTab-plugins");
         await tab.waitFor();

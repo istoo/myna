@@ -12,11 +12,11 @@ package agent
 // On the openai wire protocol the app asks <url>/v1/models for its model
 // picker (models.list, when there is one, narrows it) and sends a chat to
 // <url>/v1/chat/completions, streamed, with apiKey as a bearer token and a
-// User-Agent of antigravity/hub/<version> (auth_method=gateway). myna's
-// gateway answers both, so what myna writes is that block at its own
+// User-Agent of antigravity/hub/<version> (auth_method=gateway). owl's
+// gateway answers both, so what owl writes is that block at its own
 // address, with a key that names the app, and the model the app starts on.
 // The user's own gateway, default model and model list are stashed and put
-// back when myna steps out. On a gateway the app asks for no Google
+// back when owl steps out. On a gateway the app asks for no Google
 // sign-in and uses none: Google's docs say the two can't be used at once.
 //
 // The same file is read by agy (Antigravity's CLI) too, below its own
@@ -32,10 +32,10 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/proc"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/proc"
+	"github.com/istoo/owl/internal/provider"
 )
 
 const (
@@ -69,7 +69,7 @@ func antigravity(home string) *Agent {
 	path := filepath.Join(dir, "settings.json")
 	model := jsonGet(path, antigravityModel)
 	stashGateway, stashModel, stashList := "antigravity:"+path+":gateway", "antigravity:"+path+":defaultModelId", "antigravity:"+path+":list"
-	// wired: the file's gateway is on and carries a key myna gave it
+	// wired: the file's gateway is on and carries a key owl gave it
 	wired := func() bool {
 		on, _ := edit.GetJSON(path, "gateway.enabled")
 		key, _ := edit.GetJSON(path, "gateway.apiKey")
@@ -133,25 +133,25 @@ func antigravity(home string) *Agent {
 			Key: "model", Label: "model",
 			Get: func() string {
 				if v := model(); wired() && v != "" {
-					return mynaID + "/" + v
+					return owlID + "/" + v
 				}
 				return model()
 			},
 			Set: func(v string) error {
 				on := wired()
-				if ref, ok := strings.CutPrefix(v, mynaID+"/"); ok && isMyna(ref) {
+				if ref, ok := strings.CutPrefix(v, owlID+"/"); ok && isOwl(ref) {
 					if !on {
 						g, _ := edit.GetJSONRaw(path, "gateway")
 						m, _ := edit.GetJSONRaw(path, antigravityModel)
 						l, _ := edit.GetJSONRaw(path, antigravityList)
 						stash(map[string]string{stashGateway: g, stashModel: m, stashList: l})
 					}
-					// a list of the user's would hide myna's models from
+					// a list of the user's would hide owl's models from
 					// the picker; it is stashed with their gateway
 					if err := edit.DelJSON(path, antigravityList); err != nil {
 						return err
 					}
-					// set again on myna, what the user added to its block stays
+					// set again on owl, what the user added to its block stays
 					block := any(gatewayBlock())
 					if on {
 						block = theirsKept(path, "gateway", func() any { return gatewayBlock() })()
@@ -190,7 +190,7 @@ func antigravity(home string) *Agent {
 				if c := cur["model"]; c != "" && !prefixed(c) {
 					own = []Option{{Value: c, Icon: modelIcon("", c), Direct: "Google"}}
 				}
-				return withVia(group("Antigravity", own), "antigravity", mynaID+"/")
+				return withVia(group("Antigravity", own), "antigravity", owlID+"/")
 			},
 		}, {
 			// how hard its models reason: the app's picker lists the
@@ -212,7 +212,7 @@ func antigravity(home string) *Agent {
 	}
 }
 
-// antigravityTidy takes out a models object myna left empty.
+// antigravityTidy takes out a models object owl left empty.
 func antigravityTidy(path string) error {
 	if v, ok := edit.GetJSON(path, "models"); ok && strings.TrimSpace(v) == "{}" {
 		return edit.DelJSON(path, "models")
@@ -222,7 +222,7 @@ func antigravityTidy(path string) error {
 
 // what antigravity says after a change (notice.go)
 var (
-	noticeAntigravity      = newNotice("Antigravity reads its gateway at start-up — restart Antigravity to use myna's models. On myna it doesn't use your Google sign-in; turning it off here gives that back. An agy not connected on its own row follows it too.")
-	noticeAntigravityAdmin = newNotice("Antigravity's {path} sets a gateway of its own, which wins over ~/.antigravity/settings.json, so it doesn't reach myna")
-	noticeAntigravityEnv   = newNotice("AGY_LLM_GATEWAY_URL is set to {url}, which wins over ~/.antigravity/settings.json, so Antigravity started with it doesn't reach myna")
+	noticeAntigravity      = newNotice("Antigravity reads its gateway at start-up — restart Antigravity to use owl's models. On owl it doesn't use your Google sign-in; turning it off here gives that back. An agy not connected on its own row follows it too.")
+	noticeAntigravityAdmin = newNotice("Antigravity's {path} sets a gateway of its own, which wins over ~/.antigravity/settings.json, so it doesn't reach owl")
+	noticeAntigravityEnv   = newNotice("AGY_LLM_GATEWAY_URL is set to {url}, which wins over ~/.antigravity/settings.json, so Antigravity started with it doesn't reach owl")
 )

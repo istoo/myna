@@ -13,9 +13,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // wbExhausted is WorkBuddy's 429 for credits used up, as the WorkBuddy
@@ -51,7 +51,7 @@ func TestCreditsExhaustedIsOutOfCredit(t *testing.T) {
 func TestOutOfCreditLeavesFreeModels(t *testing.T) {
 	bun := testenv.Bun(t)
 	fresh(t)
-	t.Setenv("MYNA_BUN", bun)
+	t.Setenv("OWL_BUN", bun)
 	t.Setenv("FAKE_DEEPSEEK", "1")
 	t.Cleanup(plugin.Settle)
 	old := allowances

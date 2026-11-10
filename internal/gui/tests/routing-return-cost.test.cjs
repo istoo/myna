@@ -108,7 +108,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     // settled: no frame of the page's for a while asks for anything new
     const settle = () => page.waitForTimeout(1200);
 
-    await page.goto("http://myna.test/?view=routing");
+    await page.goto("http://owl.test/?view=routing");
     await page.locator(".rt-req").first().waitFor();
     await page.locator(".rt-hub").waitFor();
     await page.locator(".rt-days .rt-day:not(.rt-day-more)").nth(1).click();

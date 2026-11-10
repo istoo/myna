@@ -82,7 +82,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang));
-        await page.goto("http://myna.test/?view=agents");
+        await page.goto("http://owl.test/?view=agents");
         await page.locator(`${codex} .ag-link`).waitFor();
         const y = await scrolled(page);
         assert.deepEqual(await isOpen(page), { open: false, aria: "false" });

@@ -1,6 +1,6 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // A custom provider's Balance field left empty shows, as its placeholder,
-// the field myna reads from a Balance URL whose reply it knows (#881):
+// the field owl reads from a Balance URL whose reply it knows (#881):
 // new-api's /api/usage/token and /api/user/self, a sub2api panel's
 // /api/v1/user/profile and its /v1/usage for a key, OpenAI's old
 // credit_grants; any other URL keeps
@@ -50,7 +50,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     await page.route("**/*", server());
     t.after(() => browser.close());
 
-    await page.goto("http://myna.test/?view=providers");
+    await page.goto("http://owl.test/?view=providers");
     await page.locator(".row.provider", { hasText: "Relay" }).click();
     const field = page.locator(".editor .bal-path");
     await field.waitFor({ state: "attached" });

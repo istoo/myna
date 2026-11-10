@@ -66,7 +66,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         const feed = {};
         await page.route("**/*", serve(feed));
-        await page.goto("http://myna.test/?view=routing");
+        await page.goto("http://owl.test/?view=routing");
         await page.locator(".rt-group").first().waitFor();
         await page.waitForTimeout(1500);
         // the reader wheels down to the groups, then puts the pointer on the

@@ -118,8 +118,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], asked = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, asked));
-        await page.addInitScript(() => { try { if (!sessionStorage.getItem("set")) { localStorage.clear(); localStorage.setItem("myna.usageTab", "context"); localStorage.setItem("myna.ctxLook", "grid"); sessionStorage.setItem("set", "1"); } } catch {} });
-        await page.goto("http://myna.test/?view=usage");
+        await page.addInitScript(() => { try { if (!sessionStorage.getItem("set")) { localStorage.clear(); localStorage.setItem("owl.usageTab", "context"); localStorage.setItem("owl.ctxLook", "grid"); sessionStorage.setItem("set", "1"); } } catch {} });
+        await page.goto("http://owl.test/?view=usage");
         assert.equal(await page.locator("#usageTab button.on").innerText(), w.tab);
 
         // each agent: its score, grade and tags; one session or more
@@ -202,8 +202,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       if (p === "/context.js" || p === "/api/state") order.push(p);
       await base(r);
     });
-    await page.addInitScript(() => { try { localStorage.clear(); localStorage.setItem("myna.usageTab", "context"); localStorage.setItem("myna.ctxLook", "grid"); } catch {} });
-    await page.goto("http://myna.test/?view=usage");
+    await page.addInitScript(() => { try { localStorage.clear(); localStorage.setItem("owl.usageTab", "context"); localStorage.setItem("owl.ctxLook", "grid"); } catch {} });
+    await page.goto("http://owl.test/?view=usage");
     await page.locator(".ctx-agent", { hasText: "Codex" }).waitFor({ timeout: 2500 });
     assert.equal(asked[0], "7");
     assert.deepEqual(order.slice(0, 2), ["/context.js", "/api/state"], "the state is read once context.js is in");
@@ -231,8 +231,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       if (new URL(r.request().url()).pathname === "/api/state") await historyDrawn;
       await base(r);
     });
-    await page.addInitScript(() => { try { localStorage.clear(); localStorage.setItem("myna.usageTab", "context"); localStorage.setItem("myna.ctxLook", "grid"); } catch {} });
-    await page.goto("http://myna.test/?view=usage");
+    await page.addInitScript(() => { try { localStorage.clear(); localStorage.setItem("owl.usageTab", "context"); localStorage.setItem("owl.ctxLook", "grid"); } catch {} });
+    await page.goto("http://owl.test/?view=usage");
     await page.waitForFunction(() => document.querySelectorAll(".ctx-agent").length === 2);
     drawn();
     await page.waitForFunction(() => [...document.querySelectorAll(".ctx-agent .ctx-who b")].map((b) => b.textContent).join() === "Codex,Claude Code");

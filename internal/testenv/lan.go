@@ -10,7 +10,7 @@ import (
 // address and dialled. macOS's Local Network privacy refuses a newly built
 // binary — the dial times out while curl and bun, signed differently,
 // reach it (#3, on this Mac on 11-05) — and a test that has a plugin or a
-// helper process call back to that address can say nothing about myna while
+// helper process call back to that address can say nothing about owl while
 // the OS refuses it. Such a test skips.
 func OwnAddrReachable(ip string) bool {
 	ln, err := net.Listen("tcp", net.JoinHostPort(ip, "0"))

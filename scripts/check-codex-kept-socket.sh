@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 # Checks the kept upstream WebSocket against a real ChatGPT account: two
 # turns of one session go to the ChatGPT backend on one socket, the second
-# as a delta after previous_response_id, and MYNA_DEBUG's line says so with
+# as a delta after previous_response_id, and OWL_DEBUG's line says so with
 # its bytes.
 #
-# Needs a ChatGPT account signed in to myna (the `codex` provider has a
+# Needs a ChatGPT account signed in to owl (the `codex` provider has a
 # model list; MODEL picks one, codex/gpt-5.5 by default). It builds and starts its own gateway on
 # $PORT, so the app's own gateway is untouched; nothing else should serve
 # that port.
 #
 #   scripts/check-codex-kept-socket.sh
-#   PORT=8899 MYNA_BIN=/path/to/myna scripts/check-codex-kept-socket.sh
+#   PORT=8899 OWL_BIN=/path/to/owl scripts/check-codex-kept-socket.sh
 #   MODEL=codex/gpt-5.6-terra scripts/check-codex-kept-socket.sh
 #
 # What it prints: the delta line, and every socket turn's line. It exits
@@ -23,10 +23,10 @@ BASE="http://127.0.0.1:$PORT"
 SESSION="kept-socket-check-$$"
 MODEL="${MODEL:-codex/gpt-5.5}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-BIN="${MYNA_BIN:-/tmp/myna-kept}"
-LOG="${LOG:-/tmp/myna-kept-socket.log}"
-TURN1="${TURN1:-/tmp/myna-kept-turn1.sse}"
-TURN2="${TURN2:-/tmp/myna-kept-turn2.sse}"
+BIN="${OWL_BIN:-/tmp/owl-kept}"
+LOG="${LOG:-/tmp/owl-kept-socket.log}"
+TURN1="${TURN1:-/tmp/owl-kept-turn1.sse}"
+TURN2="${TURN2:-/tmp/owl-kept-turn2.sse}"
 
 cleanup() {
 	if [[ -n "${PID:-}" ]]; then
@@ -42,7 +42,7 @@ if [[ ! -x "$BIN" ]]; then
 fi
 
 : >"$LOG"
-MYNA_ADDR="127.0.0.1:$PORT" MYNA_DEBUG=1 "$BIN" serve >>"$LOG" 2>&1 &
+OWL_ADDR="127.0.0.1:$PORT" OWL_DEBUG=1 "$BIN" serve >>"$LOG" 2>&1 &
 PID=$!
 
 started=
@@ -54,7 +54,7 @@ for _ in $(seq 1 240); do
 	sleep 0.25
 done
 if [[ -z "$started" ]]; then
-	echo "myna did not answer on $BASE; see $LOG" >&2
+	echo "owl did not answer on $BASE; see $LOG" >&2
 	exit 1
 fi
 

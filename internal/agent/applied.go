@@ -14,34 +14,34 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/filememo"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/lastgood"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/filememo"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/lastgood"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // An agent's config is a file anyone can write: another switcher, an
-// installer, the agent's own setup. One that takes myna out leaves the
-// row showing a myna model while the agent asks its own vendor for it, and
-// the user blames myna. So myna remembers what it last set on each agent
+// installer, the agent's own setup. One that takes owl out leaves the
+// row showing a owl model while the agent asks its own vendor for it, and
+// the user blames owl. So owl remembers what it last set on each agent
 // (applied.json, beside the stash) and says when that no longer holds —
 // Drift — with the way to set it again.
 
 var appliedMu sync.Mutex
 
-// applied is what myna last set on one agent, and when.
+// applied is what owl last set on one agent, and when.
 type applied struct {
 	At     time.Time         `json:"at"`
 	Fields map[string]string `json:"fields"` // field key → value
-	// Kept: the user took the agent's config as it was (Keep) while myna
-	// had it set up, which still says myna set it up (setUp)
+	// Kept: the user took the agent's config as it was (Keep) while owl
+	// had it set up, which still says owl set it up (setUp)
 	Kept bool `json:"kept,omitempty"`
 }
 
 func appliedPath() string { return filepath.Join(filepath.Dir(provider.Path()), "applied.json") }
 
-// appliedLoad is agent id → what myna set on it.
+// appliedLoad is agent id → what owl set on it.
 func appliedLoad() map[string]applied {
 	out := map[string]applied{}
 	if b, err := os.ReadFile(appliedPath()); err == nil {
@@ -50,7 +50,7 @@ func appliedLoad() map[string]applied {
 	return out
 }
 
-// appliedSave writes m as applied.json. It holds what myna set on every
+// appliedSave writes m as applied.json. It holds what owl set on every
 // agent, and appliedLoad reads a file that doesn't parse as empty: such a
 // file is copied aside first, and one that can't be copied isn't written
 // over (#2263).
@@ -70,8 +70,8 @@ func appliedOf(id string) applied {
 	return appliedLoad()[id]
 }
 
-// record keeps what a field reads after myna set it; a field put back to
-// the agent's default is myna's no longer.
+// record keeps what a field reads after owl set it; a field put back to
+// the agent's default is owl's no longer.
 func record(id, key, v string) {
 	appliedMu.Lock()
 	defer appliedMu.Unlock()
@@ -90,12 +90,12 @@ func record(id, key, v string) {
 	appliedSave(m)
 }
 
-// Apply sets one of the agent's fields and remembers it as myna's, so it
+// Apply sets one of the agent's fields and remembers it as owl's, so it
 // can be told apart from what something else writes there later. Every
-// setting of a field by the user goes through here. A field myna set
-// before that this one moves too is myna's doing as well: Claude Code's
-// Default takes its tiers and subagent model out with myna's endpoint,
-// which read as changed outside myna, and the drift kept the row up
+// setting of a field by the user goes through here. A field owl set
+// before that this one moves too is owl's doing as well: Claude Code's
+// Default takes its tiers and subagent model out with owl's endpoint,
+// which read as changed outside owl, and the drift kept the row up
 // among the connected ones while it said Not connected (#834).
 func (a *Agent) Apply(key, v string) error {
 	if a.Native != nil {
@@ -121,7 +121,7 @@ func (a *Agent) Apply(key, v string) error {
 		}
 	}
 	record(a.ID, f.Key, f.Get())
-	// myna picked in by the user's own hand (myna model, a pick in
+	// owl picked in by the user's own hand (owl model, a pick in
 	// the CLI) connects it again
 	if a.Wired() {
 		forget(a.ID + disconnectedKey)
@@ -129,12 +129,12 @@ func (a *Agent) Apply(key, v string) error {
 	return nil
 }
 
-// Drift is how an agent differs from what myna set on it.
+// Drift is how an agent differs from what owl set on it.
 type Drift struct {
 	// Kind says what is off:
-	//   "unwired"  the model is myna's but the config no longer sends it
-	//              through myna (Check);
-	//   "replaced" a myna model myna set was replaced by the agent's own;
+	//   "unwired"  the model is owl's but the config no longer sends it
+	//              through owl (Check);
+	//   "replaced" a owl model owl set was replaced by the agent's own;
 	//   "bypassed" the config is right, yet the agent was used since and
 	//              nothing of it reached the gateway — it runs on an old
 	//              config, or something outside the file overrides it;
@@ -158,11 +158,11 @@ type Drift struct {
 // then, a request the gateway missed says nothing about the agent.
 var started = time.Now()
 
-// Drift says what, if anything, keeps the agent off what myna set: its
-// config first (wiring, then each field against myna's record), then —
+// Drift says what, if anything, keeps the agent off what owl set: its
+// config first (wiring, then each field against owl's record), then —
 // the config being right — whether its latest use actually came through.
-// A field moved from one myna model to another (the agent's own picker)
-// isn't drift; one moved off myna is.
+// A field moved from one owl model to another (the agent's own picker)
+// isn't drift; one moved off owl is.
 func (a *Agent) Drift() *Drift {
 	if a.Native != nil {
 		s := a.Native.Read()
@@ -176,19 +176,19 @@ func (a *Agent) Drift() *Drift {
 	}
 	vals := a.Values()
 	opts := fieldOptions{}
-	// the field on one of myna's models: where drift shows, and what
+	// the field on one of owl's models: where drift shows, and what
 	// setting it again sets
-	on, onMyna := a.Fields[0], false
+	on, onOwl := a.Fields[0], false
 	for _, f := range a.Fields {
-		if mynaValueIn(a, f, vals[f.Key], vals, opts) {
-			on, onMyna = f, true
+		if owlValueIn(a, f, vals[f.Key], vals, opts) {
+			on, onOwl = f, true
 			break
 		}
 	}
-	// a provider named myna the user wrote by hand is theirs to keep as
-	// they like: there is nothing myna set to drift from, and Reapply
-	// would write myna's over it
-	if onMyna && a.handWired() {
+	// a provider named owl the user wrote by hand is theirs to keep as
+	// they like: there is nothing owl set to drift from, and Reapply
+	// would write owl's over it
+	if onOwl && a.handWired() {
 		return nil
 	}
 	if a.Check != nil {
@@ -197,30 +197,30 @@ func (a *Agent) Drift() *Drift {
 		}
 	}
 	rec := appliedOf(a.ID)
-	// still joined, a model off myna is one picked in the agent, beside
-	// myna's in its list (dsh's /model), not a change from outside; so is
+	// still joined, a model off owl is one picked in the agent, beside
+	// owl's in its list (dsh's /model), not a change from outside; so is
 	// one Codex picks beside its ChatGPT sign-in, which still goes through
-	// myna (#2424: the row went red with Reconnect)
+	// owl (#2424: the row went red with Reconnect)
 	joined := a.Joined != nil && a.Joined()
 	picked := joined || a.Beside != nil && a.Beside()
 	for _, f := range a.Fields {
 		want, ok := rec.Fields[f.Key]
 		// a field that reads empty while it follows another (Claude Code's
 		// tiers and subagents on its main model) runs on that one's model:
-		// the main model moved onto the one myna set the field to reads
+		// the main model moved onto the one owl set the field to reads
 		// as following it, not as the field put back to the agent's own
 		// default (#1050)
 		now := vals[f.Key]
 		if now == "" && f.Follows != "" {
 			now = vals[f.Follows]
 		}
-		if !ok || picked || now == want || !mynaValueIn(a, f, want, vals, opts) || mynaValueIn(a, f, now, vals, opts) || sameGroup(want, now) {
+		if !ok || picked || now == want || !owlValueIn(a, f, want, vals, opts) || owlValueIn(a, f, now, vals, opts) || sameGroup(want, now) {
 			continue
 		}
 		return &Drift{Kind: "replaced", Field: f.Key, Now: vals[f.Key], Want: want,
-			Detail: a.Name + "'s config was changed outside myna: " + f.Label + " is " + orDefault(vals[f.Key]) + ", not " + want + " as myna set it"}
+			Detail: a.Name + "'s config was changed outside owl: " + f.Label + " is " + orDefault(vals[f.Key]) + ", not " + want + " as owl set it"}
 	}
-	if onMyna || joined {
+	if onOwl || joined {
 		if d := a.unreachable(on, vals[on.Key]); d != nil {
 			return d
 		}
@@ -228,40 +228,40 @@ func (a *Agent) Drift() *Drift {
 			return d
 		}
 	}
-	if a.Reached != nil && onMyna {
+	if a.Reached != nil && onOwl {
 		if at, to, refused := a.Reached(rec.At); !at.IsZero() {
 			switch {
 			// a request the gateway saw since, or one to where the config
-			// keeps myna (Codex's kept address, a reverse proxy, #1985),
+			// keeps owl (Codex's kept address, a reverse proxy, #1985),
 			// came through
 			case !sameHost(to, gateway.URL()) && !sameHost(to, a.pointedAt()) && lastSeen(a.ID).Before(at.Add(-2*time.Second)):
 				return &Drift{Kind: "bypassed", Field: on.Key, Now: vals[on.Key], Want: vals[on.Key],
-					Detail: a.Name + "'s last request (" + at.Format("15:04") + ") went to " + hostOf(to) + ", not myna — it was started before myna set it up and still runs on its old config: quit and reopen it"}
+					Detail: a.Name + "'s last request (" + at.Format("15:04") + ") went to " + hostOf(to) + ", not owl — it was started before owl set it up and still runs on its old config: quit and reopen it"}
 			case refused:
 				return &Drift{Kind: "bypassed", Field: on.Key, Now: vals[on.Key], Want: vals[on.Key],
-					Detail: a.Name + " couldn't reach myna at " + at.Format("15:04") + " — myna wasn't running then, so it has none of myna's models: quit and reopen it"}
+					Detail: a.Name + " couldn't reach owl at " + at.Format("15:04") + " — owl wasn't running then, so it has none of owl's models: quit and reopen it"}
 			}
 		}
 	}
-	if a.LastUsed != nil && onMyna {
+	if a.LastUsed != nil && onOwl {
 		if used := a.LastUsed(); bypassed(used, rec.At, lastSeen(a.ID)) {
 			return &Drift{Kind: "bypassed", Field: on.Key, Now: vals[on.Key], Want: vals[on.Key],
-				Detail: a.Name + " was used at " + used.Format("15:04") + " but none of its requests reached myna — one started before myna set it up still runs on its old config: restart it"}
+				Detail: a.Name + " was used at " + used.Format("15:04") + " but none of its requests reached owl — one started before owl set it up still runs on its old config: restart it"}
 		}
 	}
 	return nil
 }
 
-// installedURL is the gateway of the myna people install, on its own
-// port, the one its Settings have; a myna MYNA_ADDR puts on another
-// (myna-dev, a sandbox) is run beside it.
+// installedURL is the gateway of the owl people install, on its own
+// port, the one its Settings have; a owl OWL_ADDR puts on another
+// (owl-dev, a sandbox) is run beside it.
 var installedURL = gateway.SavedURL
 
-// elsewhere: this myna is not on the installed one's port.
+// elsewhere: this owl is not on the installed one's port.
 func elsewhere() bool { return !sameHost(gateway.URL(), installedURL()) }
 
-// theInstalled: this myna runs beside the installed one, and the agent is
-// wired to that one's gateway, not this one's — the installed myna set it
+// theInstalled: this owl runs beside the installed one, and the agent is
+// wired to that one's gateway, not this one's — the installed owl set it
 // up, so it is that one's to check, not drift here. Otherwise the two would
 // take turns flagging each other's wiring.
 func (a *Agent) theInstalled() bool {
@@ -270,7 +270,7 @@ func (a *Agent) theInstalled() bool {
 	}
 	// the bytes filememo keeps, looked at in place: a copy of the file and
 	// two strings of it for each field's drift was 5 MB a poll of a Codex
-	// config.toml of 1.5 MB, in a myna beside the installed one (a dev
+	// config.toml of 1.5 MB, in a owl beside the installed one (a dev
 	// build)
 	b, err := filememo.Read("bytes", a.Path, func(b []byte) ([]byte, error) { return b, nil })
 	if err != nil {
@@ -279,7 +279,7 @@ func (a *Agent) theInstalled() bool {
 	return bytes.Contains(b, []byte(hostOf(installedURL()))) && !bytes.Contains(b, []byte(hostOf(gateway.URL())))
 }
 
-// bypassed: the agent was used — while this gateway was up and after myna
+// bypassed: the agent was used — while this gateway was up and after owl
 // last set it — and no request of it arrived since. A request leaves within
 // moments of the prompt; a little grace keeps one in flight from counting.
 // lastSeen is when the agent's last request reached this process's gateway
@@ -293,16 +293,16 @@ func bypassed(used, applied, seen time.Time) bool {
 		time.Since(used) > grace && seen.Before(used.Add(-2*time.Second))
 }
 
-// mynaValue: the value is one of myna's models as this agent spells it,
+// owlValue: the value is one of owl's models as this agent spells it,
 // its suffix after the model (SplitSuffix) aside; a list of models is the
 // user's own.
-func mynaValue(a *Agent, f Field, v string, vals map[string]string) bool {
-	return mynaValueIn(a, f, v, vals, nil)
+func owlValue(a *Agent, f Field, v string, vals map[string]string) bool {
+	return owlValueIn(a, f, v, vals, nil)
 }
 
 // fieldOptions keeps each field's options, by its key, for one look at an
-// agent's values: Drift asks mynaValue up to three times a field, and
-// Claude Code's options (claudeViaMyna, its own models) were made anew
+// agent's values: Drift asks owlValue up to three times a field, and
+// Claude Code's options (claudeViaOwl, its own models) were made anew
 // each time, 35 MB of what forty polls with real accounts allocated.
 type fieldOptions map[string][]Option
 
@@ -318,9 +318,9 @@ func (o fieldOptions) of(f Field, vals map[string]string) []Option {
 	return opts
 }
 
-// mynaValueIn is mynaValue reading a field's options from opts, made
+// owlValueIn is owlValue reading a field's options from opts, made
 // for the same vals; nil reads them anew.
-func mynaValueIn(a *Agent, f Field, v string, vals map[string]string, opts fieldOptions) bool {
+func owlValueIn(a *Agent, f Field, v string, vals map[string]string, opts fieldOptions) bool {
 	if v == "" {
 		return false
 	}
@@ -328,12 +328,12 @@ func mynaValueIn(a *Agent, f Field, v string, vals map[string]string, opts field
 	if !one || a.Spelled != nil && !a.Spelled(v) {
 		return false
 	}
-	if isMyna(v) {
+	if isOwl(v) {
 		return true
 	}
-	// spelled as myna's provider in the agent's own config (OpenCode's
-	// myna/…): myna's even when its list there doesn't have the model
-	if ref, ok := strings.CutPrefix(v, mynaID+"/"); ok && isMyna(ref) {
+	// spelled as owl's provider in the agent's own config (OpenCode's
+	// owl/…): owl's even when its list there doesn't have the model
+	if ref, ok := strings.CutPrefix(v, owlID+"/"); ok && isOwl(ref) {
 		return true
 	}
 	if f.Options == nil {
@@ -355,9 +355,9 @@ func groupNamed(v string) string {
 	// Claude Code's [1m] mark rides on the group's id as it does on a
 	// model's, and one of the two values here comes from the agent's own
 	// settings: without it off, a group read back marked is not the one
-	// myna set (GroupFor takes it off; so does GroupFinder)
+	// owl set (GroupFor takes it off; so does GroupFinder)
 	v = strings.TrimSuffix(strings.TrimSpace(v), "[1m]")
-	v = strings.TrimPrefix(v, mynaID+"/")
+	v = strings.TrimPrefix(v, owlID+"/")
 	if provider.IsGroupRef(v) {
 		return provider.CanonicalRef(v) // auto/<model> and group/auto-<slug> are one group
 	}
@@ -367,7 +367,7 @@ func groupNamed(v string) string {
 
 // sameGroup: two values of a field reach the same routing group, one by
 // the group's id and the other by its model's name (#750: Codex's config
-// read gpt-6.1-sol where myna had set group/auto-gpt-6-1-sol). Asked for
+// read gpt-6.1-sol where owl had set group/auto-gpt-6-1-sol). Asked for
 // either, the gateway serves the group, so the one is not the other
 // replaced.
 func sameGroup(a, b string) bool {
@@ -375,11 +375,11 @@ func sameGroup(a, b string) bool {
 	return g != "" && g == groupNamed(b)
 }
 
-// setAsGroup: myna set the agent's field to a routing group, and v names
-// that group by its model's name (sameGroup) — myna's model still, for an
-// agent whose config sends v to myna's gateway.
+// setAsGroup: owl set the agent's field to a routing group, and v names
+// that group by its model's name (sameGroup) — owl's model still, for an
+// agent whose config sends v to owl's gateway.
 func setAsGroup(id, key, v string) bool {
-	if v == "" || isMyna(v) {
+	if v == "" || isOwl(v) {
 		return false
 	}
 	want, ok := appliedOf(id).Fields[key]
@@ -393,9 +393,9 @@ func orDefault(v string) string {
 	return v
 }
 
-// Reapply sets again what myna set on the agent: what drifted, else its
-// fields as they read now — for a config taken off myna in a way no check
-// catches. A replaced field brings back the others myna set with it.
+// Reapply sets again what owl set on the agent: what drifted, else its
+// fields as they read now — for a config taken off owl in a way no check
+// catches. A replaced field brings back the others owl set with it.
 // Either way the record is renewed, so a use before now no longer counts.
 func (a *Agent) Reapply() error {
 	if a.Native != nil {
@@ -422,11 +422,11 @@ func (a *Agent) Reapply() error {
 	}
 	vals := a.Values()
 	for _, f := range a.Fields {
-		// myna as the agent's provider too (Claude Desktop's provider
-		// field, beside its tiers on myna's models), as Wired takes it:
+		// owl as the agent's provider too (Claude Desktop's provider
+		// field, beside its tiers on owl's models), as Wired takes it:
 		// left out, Reconnect set the tiers again and never the gateway
 		// Check found off (dumplings on Discord)
-		if v := vals[f.Key]; v != "" && (d != nil && f.Key == d.Field || v == mynaID || mynaValue(a, f, v, vals)) {
+		if v := vals[f.Key]; v != "" && (d != nil && f.Key == d.Field || v == owlID || owlValue(a, f, v, vals)) {
 			if err := a.Apply(f.Key, v); err != nil {
 				return err
 			}
@@ -435,10 +435,10 @@ func (a *Agent) Reapply() error {
 	return nil
 }
 
-// Keep takes the agent's config as it is now: what myna set before is
+// Keep takes the agent's config as it is now: what owl set before is
 // forgotten, and no longer said to have been changed. The agent stays one
-// myna set up (setUp): an entry with no fields is kept for it, so one
-// whose myna is spelled as a provider of its own config still reads as
+// owl set up (setUp): an entry with no fields is kept for it, so one
+// whose owl is spelled as a provider of its own config still reads as
 // connected.
 func (a *Agent) Keep() {
 	appliedMu.Lock()
@@ -451,8 +451,8 @@ func (a *Agent) Keep() {
 	appliedSave(m)
 }
 
-// forgetSetUp is Disconnect's Keep: what myna set is forgotten, and so is
-// that myna set the agent up at all.
+// forgetSetUp is Disconnect's Keep: what owl set is forgotten, and so is
+// that owl set the agent up at all.
 func (a *Agent) forgetSetUp() {
 	appliedMu.Lock()
 	defer appliedMu.Unlock()
@@ -464,11 +464,11 @@ func (a *Agent) forgetSetUp() {
 	appliedSave(m)
 }
 
-// setUp reports whether myna put the agent on myna and it hasn't been
+// setUp reports whether owl put the agent on owl and it hasn't been
 // disconnected since: a Connect, which stashes what the agent was on
 // (connect.was, since 10-03, which a Keep never took away), or a field
-// myna set to one of its models or to itself (applied.json, which Keep
-// keeps an entry in). A field set in myna to a model of the agent's own,
+// owl set to one of its models or to itself (applied.json, which Keep
+// keeps an entry in). A field set in owl to a model of the agent's own,
 // or its thinking level, doesn't set it up.
 func (a *Agent) setUp() bool {
 	if stashShared()[a.ID+".connect.was"] != "" {
@@ -479,52 +479,52 @@ func (a *Agent) setUp() bool {
 		return true
 	}
 	for k, v := range rec.Fields {
-		// myna/<model> as myna wrote it, its model since gone from the
+		// owl/<model> as owl wrote it, its model since gone from the
 		// catalog too
-		if f := a.Field(k); f != nil && (v == mynaID || prefixed(v) || mynaValue(a, *f, v, rec.Fields)) {
+		if f := a.Field(k); f != nil && (v == owlID || prefixed(v) || owlValue(a, *f, v, rec.Fields)) {
 			return true
 		}
 	}
 	return false
 }
 
-// handWired: myna is spelled as a provider of the agent's own config
-// (Spelled: Pi's myna/<model>, OpenCode's provider at the gateway), and
-// myna never set the agent up. A provider named myna that the user
+// handWired: owl is spelled as a provider of the agent's own config
+// (Spelled: Pi's owl/<model>, OpenCode's provider at the gateway), and
+// owl never set the agent up. A provider named owl that the user
 // wrote by hand is theirs (JFunfunfun on X): the agent isn't connected,
-// and myna neither syncs its list there, renames in it, nor takes it out
+// and owl neither syncs its list there, renames in it, nor takes it out
 // on Disconnect.
 //
 // An app connected natively (Aside) keeps ownership its own way: its
-// provider is myna's by the key myna wrote in it.
+// provider is owl's by the key owl wrote in it.
 func (a *Agent) handWired() bool { return a.Native == nil && a.Spelled != nil && !a.setUp() }
 
-// Wired reports whether myna is in the agent's config: a field on one of
-// myna's models, or on myna itself (an app whose one setting is myna
+// Wired reports whether owl is in the agent's config: a field on one of
+// owl's models, or on owl itself (an app whose one setting is owl
 // as its provider). A model on a provider of the agent's own config named
-// myna counts only where myna set the agent up (handWired).
+// owl counts only where owl set the agent up (handWired).
 func (a *Agent) Wired() bool {
 	if a.Native != nil {
 		return a.Native.Read().Provider == "connected"
 	}
-	// joined by a provider named myna in the agent's own config (Hermes's
-	// providers.myna, VS Code's myna group), as a model on it is
+	// joined by a provider named owl in the agent's own config (Hermes's
+	// providers.owl, VS Code's owl group), as a model on it is
 	if a.Joined != nil && a.Joined() || a.Beside != nil && a.Beside() {
 		return !a.handWired()
 	}
 	vals := a.Values()
 	for _, f := range a.Fields {
-		if v := vals[f.Key]; v == mynaID || mynaValue(a, f, v, vals) || a.Routed != nil && setAsGroup(a.ID, f.Key, v) && a.Routed() {
+		if v := vals[f.Key]; v == owlID || owlValue(a, f, v, vals) || a.Routed != nil && setAsGroup(a.ID, f.Key, v) && a.Routed() {
 			return !a.handWired()
 		}
 	}
 	return false
 }
 
-// Pick sets a field from the Agents page's model picker. One of myna's
+// Pick sets a field from the Agents page's model picker. One of owl's
 // models picked on an agent not connected yet connects it first, as its
 // switch does, then starts it on that model (the owner: the switch, and a
-// model picked in myna in one click, both): the agent gets myna's whole
+// model picked in owl in one click, both): the agent gets owl's whole
 // list, and Disconnect puts back what it had before.
 func (a *Agent) Pick(key, v string) error {
 	if a.Native != nil {
@@ -537,7 +537,7 @@ func (a *Agent) Pick(key, v string) error {
 	if f := a.Field(key); f != nil && !a.Wired() {
 		vals := a.Values()
 		vals[key] = v
-		if v == mynaID || mynaValue(a, *f, v, vals) {
+		if v == owlID || owlValue(a, *f, v, vals) {
 			if _, err := a.connect(); err != nil {
 				return err
 			}
@@ -546,24 +546,24 @@ func (a *Agent) Pick(key, v string) error {
 	return a.Apply(key, v)
 }
 
-// Connect puts myna into the agent's config, the Agents page's switch
-// (the owner: an agent is connected to myna, and its models are picked in
-// the agent): the agent's main field goes to one of myna's models — the
-// one serving the model it is on now, else the first — or to myna itself
-// for an app whose one setting is myna as its provider. Setting it writes
+// Connect puts owl into the agent's config, the Agents page's switch
+// (the owner: an agent is connected to owl, and its models are picked in
+// the agent): the agent's main field goes to one of owl's models — the
+// one serving the model it is on now, else the first — or to owl itself
+// for an app whose one setting is owl as its provider. Setting it writes
 // the provider and the whole catalog in, so the agent's own model list has
-// every one of myna's models. An agent that can keep the model it is on
+// every one of owl's models. An agent that can keep the model it is on
 // (Join) keeps it. An agent already connected is left as it is.
-// NoModelsError is Connect's answer while myna has no models to give
+// NoModelsError is Connect's answer while owl has no models to give
 // the agent: no provider or subscription has been added yet. The GUI says
 // it in the reader's language by its code (no_models).
 type NoModelsError struct{ Agent string }
 
 func (e *NoModelsError) Error() string {
-	return "Add a provider or subscription in myna first, then connect " + e.Agent
+	return "Add a provider or subscription in owl first, then connect " + e.Agent
 }
 
-// AllHiddenError is Connect's answer when myna has models but none of
+// AllHiddenError is Connect's answer when owl has models but none of
 // them is left in the agent's lists: the only ones picked for it are gone
 // with their provider, or every one is turned off for it (#1989). Saying
 // it can't be connected sent the user looking at the agent, when its model
@@ -572,7 +572,7 @@ func (e *NoModelsError) Error() string {
 type AllHiddenError struct{ Agent string }
 
 func (e *AllHiddenError) Error() string {
-	return "None of myna's models is left in " + e.Agent + "'s model list: pick one under Model list → Pick on the Agents page, then connect " + e.Agent
+	return "None of owl's models is left in " + e.Agent + "'s model list: pick one under Model list → Pick on the Agents page, then connect " + e.Agent
 }
 
 func (a *Agent) Connect() error {
@@ -582,19 +582,19 @@ func (a *Agent) Connect() error {
 
 // Connection is how Connect chose the model an agent starts on, for the
 // Agents page to say it (#726: Codex showed its last pick, Claude Code a
-// Sonnet through myna and Antigravity some model, with nothing saying
+// Sonnet through owl and Antigravity some model, with nothing saying
 // why). How is one of:
 //
 //   - "kept": it was connected already, left as it was
 //   - "again": the models it was on when it was switched off, put back
 //   - "joined": the model it is on stays its own (Codex signed in with
-//     ChatGPT), myna's models join its list
-//   - "myna": an app whose one setting is myna as its provider
-//   - "same": the model it is on now, through myna
-//   - "alike": the model its alias (opus) stands for, through myna
+//     ChatGPT), owl's models join its list
+//   - "owl": an app whose one setting is owl as its provider
+//   - "same": the model it is on now, through owl
+//   - "alike": the model its alias (opus) stands for, through owl
 //   - "default": on its own default with no model set: the first of its
-//     own models in its list (the newest, for Claude Code), through myna
-//   - "first": myna has none of the model it is on: the first on the
+//     own models in its list (the newest, for Claude Code), through owl
+//   - "first": owl has none of the model it is on: the first on the
 //     account it is signed in to, else a subscription's, else the first
 //
 // Field and Value are the field set and what it was set to, where Connect
@@ -606,7 +606,7 @@ type Connection struct {
 }
 
 // Rewired, when set, is told of an agent that Connect or Disconnect
-// changed: the library gives Codex its servers another way on myna.
+// changed: the library gives Codex its servers another way on owl.
 var Rewired func(id string)
 
 func (a *Agent) rewired(err error) {
@@ -635,7 +635,7 @@ const disconnectedKey = ".disconnected"
 // connected it since.
 func (a *Agent) Disconnected() bool { return stashShared()[a.ID+disconnectedKey] == "1" }
 
-// noModelLeft says why there is no model of myna's to connect the agent
+// noModelLeft says why there is no model of owl's to connect the agent
 // to: none added yet (NoModelsError), or every one taken out of its lists
 // (AllHiddenError); nil while one is left.
 func (a *Agent) noModelLeft() error {
@@ -645,7 +645,7 @@ func (a *Agent) noModelLeft() error {
 	if len(shown)+len(hidden) == 0 {
 		return &NoModelsError{Agent: a.Name}
 	}
-	// myna has models, and every one of them is taken out of the
+	// owl has models, and every one of them is taken out of the
 	// agent's lists (a picked model gone with its provider, one hidden by
 	// hand): saying the agent can't be connected sends the user looking
 	// at the agent, when its model list is what emptied it (#1989)
@@ -666,16 +666,16 @@ func (a *Agent) connect() (Connection, error) {
 	if ok, err := a.reconnect(now); ok || err != nil {
 		return Connection{How: "again"}, err
 	}
-	// the model it is on stays, where the agent can have myna's models
+	// the model it is on stays, where the agent can have owl's models
 	// beside it (the owner: Codex keeps its own last pick)
 	if a.Join != nil {
 		if ok, err := a.Join(); ok || err != nil {
 			return Connection{How: "joined"}, err
 		}
 	}
-	// the field myna is picked in: the one listing myna's models (for
+	// the field owl is picked in: the one listing owl's models (for
 	// Gemini CLI its model, its first field being how it signs in), else one
-	// whose value is myna itself
+	// whose value is owl itself
 	vals := a.Values()
 	var f *Field
 	var opts []Option
@@ -686,7 +686,7 @@ func (a *Agent) connect() (Connection, error) {
 			}
 			list := a.Fields[i].Options(vals)
 			for _, o := range list {
-				if pass == 0 && o.Ref != "" || pass == 1 && o.Value == mynaID {
+				if pass == 0 && o.Ref != "" || pass == 1 && o.Value == owlID {
 					f, opts = &a.Fields[i], list
 					break
 				}
@@ -700,7 +700,7 @@ func (a *Agent) connect() (Connection, error) {
 		if err := a.noModelLeft(); err != nil {
 			return Connection{}, err
 		}
-		return Connection{}, fmt.Errorf("%s can't be connected to myna", a.Name)
+		return Connection{}, fmt.Errorf("%s can't be connected to owl", a.Name)
 	}
 	cur := connectWas(vals[f.Key], opts)
 	if cur == "" && f.Key != a.Fields[0].Key {
@@ -710,25 +710,25 @@ func (a *Agent) connect() (Connection, error) {
 	if cur == "" {
 		// on its default: the first of its own models
 		for _, o := range opts {
-			if o.Ref == "" && o.Group == a.Name && o.Value != mynaID {
+			if o.Ref == "" && o.Group == a.Name && o.Value != owlID {
 				cur = connectWas(o.Value, opts)
 				break
 			}
 		}
 	}
-	// the model it is on now, through myna (or of its family, for an
+	// the model it is on now, through owl (or of its family, for an
 	// alias): on the account it is signed in to (its vendor's) first, then
 	// on a subscription, before a key's; else its own vendor's; else a
 	// subscription's; else the first
 	var pick, same, alike, own, sub, group string
 	sameRank, alikeRank := -1, -1
 	for _, o := range opts {
-		if o.Value == mynaID {
-			if err := a.Apply(f.Key, mynaID); err != nil {
+		if o.Value == owlID {
+			if err := a.Apply(f.Key, owlID); err != nil {
 				return Connection{}, err
 			}
-			// an app whose picker gets myna's models as listed for it
-			// (WorkBuddy, ZCode): with none listed, setting myna wrote
+			// an app whose picker gets owl's models as listed for it
+			// (WorkBuddy, ZCode): with none listed, setting owl wrote
 			// none, and the agent reads as not connected right after a
 			// connect that said it was (Lumens on Discord). One connected
 			// by its address alone (Cursor Private Inference) is connected
@@ -738,7 +738,7 @@ func (a *Agent) connect() (Connection, error) {
 					return Connection{}, err
 				}
 			}
-			return Connection{How: "myna", Field: f.Key, Value: mynaID}, nil
+			return Connection{How: "owl", Field: f.Key, Value: owlID}, nil
 		}
 		if o.Ref != "" && o.Group == RoutingGroups && group == "" {
 			group = o.Value
@@ -770,7 +770,7 @@ func (a *Agent) connect() (Connection, error) {
 			sub = o.Value
 		}
 	}
-	// the model it is on, of its own, as myna serves it on a sign-in of
+	// the model it is on, of its own, as owl serves it on a sign-in of
 	// the user's, which its field lists as its own (Codex's on a ChatGPT
 	// account it can't join, #940)
 	if same == "" && alike == "" && cur != "" && a.OwnVia != nil {
@@ -795,7 +795,7 @@ func (a *Agent) connect() (Connection, error) {
 		pick = group
 	}
 	if pick == "" {
-		return Connection{}, fmt.Errorf("myna has no models %s can use: add a subscription or a provider first", a.Name)
+		return Connection{}, fmt.Errorf("owl has no models %s can use: add a subscription or a provider first", a.Name)
 	}
 	return Connection{How: how, Field: f.Key, Value: pick}, a.Apply(f.Key, pick)
 }
@@ -818,12 +818,12 @@ func connectWas(v string, opts []Option) string {
 	return strings.TrimSpace(v)
 }
 
-// Disconnect takes myna out of the agent's config and puts back what the
-// user had, the Agents page's "Disconnect from myna" (Fate on Discord:
+// Disconnect takes owl out of the agent's config and puts back what the
+// user had, the Agents page's "Disconnect from owl" (Fate on Discord:
 // picking the agent's default did it, but nothing said so). Unwire first,
 // for an agent whose default would leave it as installed; then each field
-// still on myna goes to its default, as picking it does, and so does
-// each one myna set that reads as myna set it (an effort). What myna
+// still on owl goes to its default, as picking it does, and so does
+// each one owl set that reads as owl set it (an effort). What owl
 // remembered setting is forgotten.
 func (a *Agent) Disconnect() (err error) {
 	defer func() { a.rewired(err) }()
@@ -837,8 +837,8 @@ func (a *Agent) Disconnect() (err error) {
 	if !a.Wired() {
 		return nil
 	}
-	// the user's say, kept till they connect it again: nothing myna does
-	// by itself (a start's Sync, Codex's account failover) puts myna back
+	// the user's say, kept till they connect it again: nothing owl does
+	// by itself (a start's Sync, Codex's account failover) puts owl back
 	// in, this Disconnect's own writes included (paynezhuang on Discord)
 	stash(map[string]string{a.ID + disconnectedKey: "1"})
 	// the user's own say over a harness Kiro Crew's connect put on
@@ -852,9 +852,9 @@ func (a *Agent) Disconnect() (err error) {
 	for _, f := range a.Fields {
 		vals := a.Values()
 		v := vals[f.Key]
-		// set by myna: as it set it, or its group by the model's name
+		// set by owl: as it set it, or its group by the model's name
 		set := v != "" && (rec.Fields[f.Key] == v || sameGroup(rec.Fields[f.Key], v)) && before[f.Key] == v
-		if v == "" || !set && v != mynaID && !mynaValue(a, f, v, vals) {
+		if v == "" || !set && v != owlID && !owlValue(a, f, v, vals) {
 			continue
 		}
 		if err := f.Set(""); err != nil {
@@ -866,17 +866,17 @@ func (a *Agent) Disconnect() (err error) {
 	var was map[string]string
 	json.Unmarshal([]byte(unstash(a.ID+".connect.was")), &was)
 	after := a.Values()
-	// connected while on a provider named myna it had by hand: what it
-	// was on then is myna's route, its thinking level read off it too
+	// connected while on a provider named owl it had by hand: what it
+	// was on then is owl's route, its thinking level read off it too
 	// (dsh's), not the agent's own to put back
 	for _, f := range a.Fields {
-		if w := was[f.Key]; w == mynaID || mynaValue(a, f, w, was) {
+		if w := was[f.Key]; w == owlID || owlValue(a, f, w, was) {
 			was = nil
 			break
 		}
 	}
 	for _, f := range a.Fields {
-		if w := was[f.Key]; w != "" && after[f.Key] == "" && w != mynaID && !mynaValue(a, f, w, was) {
+		if w := was[f.Key]; w != "" && after[f.Key] == "" && w != owlID && !owlValue(a, f, w, was) {
 			if err := f.Set(w); err != nil {
 				return fmt.Errorf("%s: %w", f.Label, err)
 			}
@@ -887,12 +887,12 @@ func (a *Agent) Disconnect() (err error) {
 			return err
 		}
 	}
-	// what it was on through myna, for switching it on again
-	back := reconnection{Myna: map[string]string{}, Left: a.Values()}
+	// what it was on through owl, for switching it on again
+	back := reconnection{Owl: map[string]string{}, Left: a.Values()}
 	for _, f := range a.Fields {
 		if v := before[f.Key]; v != back.Left[f.Key] {
-			back.Myna[f.Key] = v
-			if v == mynaID || mynaValue(a, f, v, before) {
+			back.Owl[f.Key] = v
+			if v == owlID || owlValue(a, f, v, before) {
 				back.Routed = append(back.Routed, f.Key)
 			}
 		}
@@ -917,17 +917,17 @@ func (a *Agent) DisconnectOffline() error {
 }
 
 // reconnection is what Disconnect took an agent off: the values of its
-// fields it changed (Routed: those that were myna's) and what it left
+// fields it changed (Routed: those that were owl's) and what it left
 // every field at.
 type reconnection struct {
-	Myna   map[string]string `json:"magpie"`
+	Owl    map[string]string `json:"magpie"`
 	Routed []string          `json:"routed,omitempty"`
 	Left   map[string]string `json:"left"`
 }
 
 // reconnect puts back the models an agent was on when it was disconnected
 // (the owner: an agent remembers its last pick), if nothing has changed
-// it since and myna still routes them; false when it doesn't apply.
+// it since and owl still routes them; false when it doesn't apply.
 func (a *Agent) reconnect(now map[string]string) (bool, error) {
 	var rec reconnection
 	if json.Unmarshal([]byte(unstash(a.ID+".reconnect")), &rec) != nil || len(rec.Routed) == 0 {
@@ -940,21 +940,21 @@ func (a *Agent) reconnect(now map[string]string) (bool, error) {
 	}
 	for _, k := range rec.Routed {
 		f := a.Field(k)
-		if f == nil || rec.Myna[k] != mynaID && !mynaValue(a, *f, rec.Myna[k], rec.Myna) {
+		if f == nil || rec.Owl[k] != owlID && !owlValue(a, *f, rec.Owl[k], rec.Owl) {
 			return false, nil
 		}
 	}
 	// joined first, where the agent can be (Codex signed in with ChatGPT),
 	// as the switch connects it the first time: its own models stay
-	// through myna beside the one put back. Put back on a routing group
+	// through owl beside the one put back. Put back on a routing group
 	// alone, Codex was beside its sign-in and not joined, so picking one
-	// of its own on the Agents page took it off myna, every OpenAI model
-	// then said direct, and after a group again they said via myna
+	// of its own on the Agents page took it off owl, every OpenAI model
+	// then said direct, and after a group again they said via owl
 	// though a pick still went straight to OpenAI (NancyTom18 on X). One
-	// that can't join now (a provider of the user's own, myna API) is
-	// connected as at first unless its model was one of myna's, which
+	// that can't join now (a provider of the user's own, owl API) is
+	// connected as at first unless its model was one of owl's, which
 	// routes it: its subagents' or memories' model put back alone read as
-	// connected while its own model stayed off myna (#3868)
+	// connected while its own model stayed off owl (#3868)
 	if a.Join != nil {
 		ok, err := a.Join()
 		if err != nil {
@@ -964,28 +964,28 @@ func (a *Agent) reconnect(now map[string]string) (bool, error) {
 			return false, nil
 		}
 	}
-	// the models on myna first, as Connect sets them (setting Gemini
-	// CLI's model signs it in through myna, which its sign-in field
+	// the models on owl first, as Connect sets them (setting Gemini
+	// CLI's model signs it in through owl, which its sign-in field
 	// can't), then the rest that aren't so by then
 	var keys []string
 	for _, k := range rec.Routed {
-		if rec.Myna[k] != mynaID {
+		if rec.Owl[k] != owlID {
 			keys = append(keys, k)
 		}
 	}
 	for _, f := range a.Fields {
-		if _, ok := rec.Myna[f.Key]; ok && !slices.Contains(keys, f.Key) {
+		if _, ok := rec.Owl[f.Key]; ok && !slices.Contains(keys, f.Key) {
 			keys = append(keys, f.Key)
 		}
 	}
 	for _, k := range keys {
-		v := rec.Myna[k]
+		v := rec.Owl[k]
 		if v != a.Values()[k] {
 			if err := a.Apply(k, v); err != nil {
 				return true, err
 			}
 		} else {
-			// set along with the model (Codex's effort): myna's as before,
+			// set along with the model (Codex's effort): owl's as before,
 			// for Disconnect to take out again
 			record(a.ID, k, v)
 		}
@@ -1035,20 +1035,20 @@ func lastJSONLTime(path, key, textKey string) time.Time {
 }
 
 // sameHost: two URLs name the same server, whatever their scheme (Codex
-// asks myna's http gateway over ws) or path.
+// asks owl's http gateway over ws) or path.
 func sameHost(a, b string) bool { return hostOf(a) == hostOf(b) }
 
-// wiringOff checks what myna wrote into an agent's config to reach the
+// wiringOff checks what owl wrote into an agent's config to reach the
 // gateway — pairs of key and value, read with get — and says which no longer
 // holds, "" when all do. A URL is quoted; a key's value never is. A URL
-// that reaches myna another way (reachesMyna: a reverse proxy, #1985)
+// that reaches owl another way (reachesOwl: a reverse proxy, #1985)
 // holds. So does a key of the gateway's own the user put in place of
-// myna's (keyHolds).
+// owl's (keyHolds).
 func wiringOff(name, file string, get func(string) (string, bool), kvs ...string) string {
 	for i := 0; i+1 < len(kvs); i += 2 {
 		k, want := kvs[i], kvs[i+1]
 		v, _ := get(k)
-		if keyHolds(v, want) || v != "" && reachesMyna(v, want) {
+		if keyHolds(v, want) || v != "" && reachesOwl(v, want) {
 			continue
 		}
 		return whatsOff(name, file, k, v, want)
@@ -1057,15 +1057,15 @@ func wiringOff(name, file string, get func(string) (string, bool), kvs ...string
 }
 
 // whatsOff is what wiringOff says of k in an agent's config, v where
-// myna wrote want.
+// owl wrote want.
 func whatsOff(name, file, k, v, want string) string {
 	where := name + "'s " + k + " (" + filepath.Base(file) + ")"
 	switch {
 	case v == "":
-		return where + " is gone, so it no longer reaches myna"
+		return where + " is gone, so it no longer reaches owl"
 	case strings.Contains(strings.ToLower(k), "url"):
-		return where + " is " + v + ", not myna's gateway at " + want
+		return where + " is " + v + ", not owl's gateway at " + want
 	default:
-		return where + " was changed, so myna's gateway won't take its requests"
+		return where + " was changed, so owl's gateway won't take its requests"
 	}
 }

@@ -11,60 +11,60 @@ meet it.
 
 `claudeBinary` (and the sign-in's `claudeExecutable`) take
 `claudecode.Find`: the machine's own `claude` (`proc.FindTool`), else the
-one `myna claude-code install` downloaded into
+one `owl claude-code install` downloaded into
 `<cache>/claude-code/<version>/` (`internal/claudecode`), else, on Windows,
 one in WSL. The download is Anthropic's native build from
 `downloads.claude.ai/claude-code-releases`, the "latest" channel, as
 `claude.ai/install.sh` takes it: the release's `manifest.json` gives the
 platform's SHA-256 and size, and a build that doesn't match both is not
-kept. It is only made when the user asks (`myna claude-code install`, or
-yes to `myna accounts add claude`'s offer on a machine without one), for
+kept. It is only made when the user asks (`owl claude-code install`, or
+yes to `owl accounts add claude`'s offer on a machine without one), for
 a server or a container (Jorben on Discord). It is not on PATH and stands
-in for no agent. It doesn't update itself (every run myna starts sets
-`DISABLE_AUTOUPDATER`), so the serving myna keeps it current
+in for no agent. It doesn't update itself (every run owl starts sets
+`DISABLE_AUTOUPDATER`), so the serving owl keeps it current
 (`claudecode.KeepCurrent`, a `WhileServing` loop): a minute after it
 starts and every six hours it asks for the latest release and downloads a
 newer one, checked the same way. The version it replaced is removed on the
 next look, not at once, as a run being started may hold its path;
-`myna claude-code install` removes it at once. It does nothing when
-myna downloaded none, when the machine has its own `claude`, or when
-`DISABLE_AUTOUPDATER` is set for myna (alextjy on Discord: a container's
+`owl claude-code install` removes it at once. It does nothing when
+owl downloaded none, when the machine has its own `claude`, or when
+`DISABLE_AUTOUPDATER` is set for owl (alextjy on Discord: a container's
 download stayed at its first version across image updates). A failed look
 keeps the download as it is and is logged.
 
 A run is started with `--dangerously-skip-permissions` (`claudeCLIArgs`):
-its only tools are myna's MCP ones, answered by the client, and
+its only tools are owl's MCP ones, answered by the client, and
 Anthropic's web search. Claude Code run as root refuses that flag ("cannot
 be used with root/sudo privileges") unless `IS_SANDBOX` is `1` or
-`CLAUDE_CODE_BUBBLEWRAP` is set, so a run as root, myna's own euid 0 or
+`CLAUDE_CODE_BUBBLEWRAP` is set, so a run as root, owl's own euid 0 or
 a WSL distro whose default user is root (the probe's `uid`,
 `wslrun.Tool.Root`), is given `IS_SANDBOX=1` (`claudeCLI.asRoot`;
 FrierenF on Discord). A run as anyone else has its env as before. Only the
 bridge's run gets it; the warm-up and `/usage` runs don't skip
 permissions.
 
-Every Claude Code myna starts for the subscription (a turn's run, the
+Every Claude Code owl starts for the subscription (a turn's run, the
 warm-up and model test `askClaude`, `/usage`, and the sign-in's
 `auth login` and `auth status`) is given its proxy through one helper,
 `claudeCLI.proxied` in each package, which is
 `netproxy.EnvForBunWith`: the account's own proxy, else the
 subscription's, else the global one (`netproxy.EnvWith`), with a SOCKS5
-proxy replaced by myna's loopback HTTP bridge to it (`netproxy.Bridge`,
-as for every bun myna starts, #1409). Claude Code is built with Bun,
+proxy replaced by owl's loopback HTTP bridge to it (`netproxy.Bridge`,
+as for every bun owl starts, #1409). Claude Code is built with Bun,
 which takes only http:// and https:// proxies: given `socks5://`, every
 request failed as `UnsupportedProxyProtocol`, after about three minutes of
 Claude Code's own retries, as a 502 (#2651). A Claude Code in a WSL
 distro that doesn't share Windows' loopback (`wslrun.Tool.Host` set)
 can't reach the bridge, so there, and where the bridge can't start, a
 SOCKS proxy is refused before Claude Code starts, with an error that says
-to use an http:// proxy. The `settings.json` env that myna writes for the
+to use an http:// proxy. The `settings.json` env that owl writes for the
 user's own Claude Code sessions leaves a SOCKS proxy out (see
 [Providers and accounts](providers-accounts.md)).
 
-A saved account added by a setup-token (see [Providers and accounts](providers-accounts.md)) has no sign-in in its config directory. `inClaudeDir`, which builds the env of every run in a saved account's directory (a turn's run, the warm-up, `askClaude`, `/usage`), drops any `CLAUDE_CODE_OAUTH_TOKEN` it was given and sets it to `provider.ClaudeDirToken(configDir)` when that directory is a token account's: the token reaches the real Claude Code there and nowhere else, never on its command line, never in a log, and never to Claude Code's own account. myna asks Anthropic nothing with it; the entrypoint and everything else about the run are as for any account.
+A saved account added by a setup-token (see [Providers and accounts](providers-accounts.md)) has no sign-in in its config directory. `inClaudeDir`, which builds the env of every run in a saved account's directory (a turn's run, the warm-up, `askClaude`, `/usage`), drops any `CLAUDE_CODE_OAUTH_TOKEN` it was given and sets it to `provider.ClaudeDirToken(configDir)` when that directory is a token account's: the token reaches the real Claude Code there and nowhere else, never on its command line, never in a log, and never to Claude Code's own account. owl asks Anthropic nothing with it; the entrypoint and everything else about the run are as for any account.
 
 The helper offers each of the client's tools under `bridgeToolName`
-(`bridgeTools`), which Claude Code calls `mcp__myna__<name>`. Claude Code
+(`bridgeTools`), which Claude Code calls `mcp__owl__<name>`. Claude Code
 keeps only `[A-Za-z0-9_-]` of an MCP tool's name, so a name it would change
 (`spawn.agent`, `fs/read`), one longer than 51 (64 with the prefix) or one
 ending as a changed name ends (`_` and 12 hex digits) is cut, made of those
@@ -79,12 +79,12 @@ A client's MCP tool that it announced but hasn't loaded (Claude Code's
 tool search names deferred tools in a reminder and leaves them out of
 `tools` until `ToolSearch` loads them) is no tool of the run's, but the
 run's model reads its name in the conversation and calls it,
-`mcp__myna__<server>__<tool>`. `toolStart` hands that call over under
+`mcp__owl__<server>__<tool>`. `toolStart` hands that call over under
 the full name, which is the client's own, when the cut name maps to
 nothing and isn't in `subscriptionRun.tools`: handed over cut, as
 `<server>__<tool>`, the client answered "No such tool available" and the
 model had to load it and call again (packinggoods, 11-02,
-`TestClaudeBridgeHandsOverAnUnloadedMynaTool`). A deferred tool of
+`TestClaudeBridgeHandsOverAnUnloadedOwlTool`). A deferred tool of
 another client MCP server (`mcp__linear__…`) is still not handed over.
 
 A turn with `tool_choice` none is offered every tool the client sent, as
@@ -99,15 +99,15 @@ A call the turn makes anyway is answered at once with an error result
 client never sees it. A named `tool_choice` still offers only that tool.
 `TestClaudeToolChoiceNoneKeepsTheTools` holds it.
 
-The run's MCP server is myna itself (`myna claude-mcp-helper`,
+The run's MCP server is owl itself (`owl claude-mcp-helper`,
 `internal/claudebridge`), which hands each tool call back to the gateway
-at `POST /_myna/claude-mcp/<token>` (`mcpCall`), where the call is
+at `POST /_owl/claude-mcp/<token>` (`mcpCall`), where the call is
 registered in `b.calls` for the turn with its results to find. The token
 is `randomToken` (24 bytes from `crypto/rand`), one per run. The callback
 URL is written to `callback` in the run's own temp folder (0600) and the
 helper is given that file's path, so the token is never on Claude Code's
 command line. The helper calls the address the gateway listens on
-(`callbackBaseURL`: `MYNA_ADDR`, `0.0.0.0`/`::` as `127.0.0.1`), which,
+(`callbackBaseURL`: `OWL_ADDR`, `0.0.0.0`/`::` as `127.0.0.1`), which,
 pinned to one interface's address, isn't loopback, and it sends no
 gateway key. `lanGuard` therefore lets in exactly that path, by POST, with
 the token of a run now live (`ownCallback`: `addCallback` when the run is
@@ -125,7 +125,7 @@ entrypoint, and a `-p` run's `sdk-cli` costs about twice the plan's allowance of
 mode's `cli` (anthropics/claude-code#97074). The run is the real
 interactive Claude Code: nothing sets `CLAUDE_CODE_ENTRYPOINT`.
 
-The bridge starts `myna claude-tui-helper <claude> <the -p arguments>`
+The bridge starts `owl claude-tui-helper <claude> <the -p arguments>`
 (`internal/claudetui`) in place of `claude` when `claudeTUI` says so, and
 talks to it as it talks to `-p`: stream-json in and out. The helper:
 
@@ -133,8 +133,8 @@ talks to it as it talks to `-p`: stream-json in and out. The helper:
   `-p`, the stream-json formats, `--verbose`,
   `--include-partial-messages`, `--thinking-display`,
   `--dangerously-skip-permissions` and `--no-session-persistence` go;
-  `--permission-mode default --allowedTools mcp__myna[,WebSearch]
-  --no-chrome` come. Permissions are not skipped: only myna's MCP tools
+  `--permission-mode default --allowedTools mcp__owl[,WebSearch]
+  --no-chrome` come. Permissions are not skipped: only owl's MCP tools
   (and the web search `-p` was given) are allowed, and nothing else is
   offered (`--tools ""`). A new session is given `--session-id`;
 - starts Claude Code in a pseudo-terminal of its own (200x50), no tmux,
@@ -150,16 +150,16 @@ talks to it as it talks to `-p`: stream-json in and out. The helper:
   (Claude Code is told as a closed window tells it) and kills it after
   3s. Its `-p` fallback runs Claude Code as a child, since Windows has no
   exec. A Claude Code in WSL is run the same way, through `wsl.exe` in
-  the console: the gateway hands the helper `MYNA_CLAUDE_TUI_WSL`
+  the console: the gateway hands the helper `OWL_CLAUDE_TUI_WSL`
   (`claudetui.WSL`, `claudeCLI.tuiWSL`), wsl.exe's arguments up to
-  Claude Code's (`wslrun.Tool.Args`, `MYNA_WSL_RUN` among them), the
+  Claude Code's (`wslrun.Tool.Args`, `OWL_WSL_RUN` among them), the
   distro's mount of the drives, and the projects folder as Windows reads
   it: the account's config directory (handed in as
   `CLAUDE_CONFIG_DIR/p`), or the distro user's own `~/.claude/projects`
   through `\\wsl$\<distro>` (`wslrun.Tool.Home`, from the probe). `TERM` is
   added to `WSLENV`, and an image's path is pasted as the distro reads
   it (`/mnt/c/…`, `shim.path`). The helper itself is the Windows
-  myna.exe, not the `/mnt/c/…` path the MCP helper is started at.
+  owl.exe, not the `/mnt/c/…` path the MCP helper is started at.
   In the distro user's own folder, when Windows can't stat
   `\\wsl$\<distro>\<home>` (`tuiWSLUnread`: a session with no 9P
   redirector, as one over ssh, reads nothing there) or the probe found
@@ -173,13 +173,13 @@ talks to it as it talks to `-p`: stream-json in and out. The helper:
   shell's stdin, which ends it. Until 11-01 both cases were refused
   (`wslread`, `wsl-home`).
   Killing the gateway ended the distro's Claude Code with wsl.exe (tried
-  on Windows 11 26200, myna-desktop, Claude Code 2.1.289);
+  on Windows 11 26200, owl-desktop, Claude Code 2.1.289);
 - pastes each user message into the prompt (bracketed paste) and presses
   Enter. A message opening with `/`, `!`, `#` or `&` is pasted after a
   line break, so it is words, not a command (`pasteable`);
 - pastes a message's images as files (`userPieces`, `writeImage`): each
   base64 image is written to `image-N.<ext>` (0600) in a
-  `myna-claude-images-*` temp folder, and its path is pasted alone,
+  `owl-claude-images-*` temp folder, and its path is pasted alone,
   which Claude Code reads into the message as `[Image #N]` (a path inside
   other words stays words). Claude Code reads the file after the paste
   returns, so the helper waits for `[Image #N]` with N past the last
@@ -188,7 +188,7 @@ talks to it as it talks to `-p`: stream-json in and out. The helper:
   notes each one's path to the model (`[Image: source: …]`). The folder
   is removed once its message is sent (Claude Code has read the files
   by then), and when the helper ends, on SIGINT, SIGTERM and SIGHUP too:
-  myna's own handler (`endProbesOnSignal`) let go of the signals for
+  owl's own handler (`endProbesOnSignal`) let go of the signals for
   this command (`leaveSignals`), since it re-raised SIGTERM and killed the
   helper before it could end Claude Code and remove its files. Windows
   ends a run by killing its job, which no handler hears, so a helper
@@ -203,9 +203,9 @@ talks to it as it talks to `-p`: stream-json in and out. The helper:
 The transcript has a message only once it ends, so the tap streams it.
 Claude Code is a Bun program, and Bun loads first what `BUN_OPTIONS`
 names with `--preload`. The helper writes `tap.js` and an empty
-`tap.jsonl` to a `myna-claude-tap-*` temp folder, and starts Claude
+`tap.jsonl` to a `owl-claude-tap-*` temp folder, and starts Claude
 Code with `BUN_OPTIONS` set to the user's own value followed by
-`--preload <tap.js>`, and `MYNA_CLAUDE_TAP` set to the file. Claude Code
+`--preload <tap.js>`, and `OWL_CLAUDE_TAP` set to the file. Claude Code
 in WSL gets both through `WSLENV`, with the paths as WSL reads them, and
 not the user's Windows `BUN_OPTIONS`. `BUN_OPTIONS` has no quoting, so on
 Windows a path with a space takes its short name. A path that still has
@@ -262,14 +262,14 @@ reply when it is made (`written`). A reply told this way has no words or
 thinking: the model's text before its call is lost to the client.
 
 The user's own `~/.claude.json` and `~/.claude` are never written by
-myna (Claude Code writes them, as when it records its onboarding done,
+owl (Claude Code writes them, as when it records its onboarding done,
 below). Claude
 Code asks whether to trust a folder it has not run in; the helper answers
-yes only when the bridge sets `MYNA_CLAUDE_TUI_TRUST=1`, which it does
-for myna's own working folder or a saved account's config directory,
-both myna's. In the caller's folder under the account Claude Code is
+yes only when the bridge sets `OWL_CLAUDE_TUI_TRUST=1`, which it does
+for owl's own working folder or a saved account's config directory,
+both owl's. In the caller's folder under the account Claude Code is
 signed in to, the question is the user's: the helper ends there, saying
-so (`claudetui.Untrusted`), and the turn goes in myna's own folder,
+so (`claudetui.Untrusted`), and the turn goes in owl's own folder,
 told the caller's as any run whose folder isn't here is (`envElsewhere`;
 `startTrusted`). That folder is passed over for 10 minutes
 (`passedOver`, `untrustedFor`), then tried again, the user having maybe
@@ -303,7 +303,7 @@ path or isn't macOS, Linux or Windows. Nothing a request asks is refused
 any more (`claudePrint` keeps an image known by its URL, which
 `serveClaudeSubscription` has downloaded before any run, below).
 
-A JSON schema is answered through an answer tool of myna's
+A JSON schema is answered through an answer tool of owl's
 (`claude_tui_schema.go`): interactive Claude Code takes `--json-schema`
 and does nothing with it (2.1.316, a real run: its result's
 `structured_output` is null), since its `StructuredOutput` tool is
@@ -319,7 +319,7 @@ the kept input is the reply's `structured_output`; a turn that ended
 without one is told once to call the tool (`answerAsk`), and fails "no
 answer fitting the schema" when it still doesn't. Neither the call nor
 the words around it reach the client (`r.schema`). A real run (haiku,
-11-02) called `mcp__myna__StructuredOutput` at once, with input that
+11-02) called `mcp__owl__StructuredOutput` at once, with input that
 fit a `pattern`. A schema the compiler can't take is a 400 before any
 run (`TestClaudeTUISchemaAnswer`, `TestClaudeTUISchemaAskedOnce`,
 `TestAnswerTool`).
@@ -348,7 +348,7 @@ it builds each request, and nothing outside it changes that once it runs
 (2.1.316: a later `apply_flag_settings` or a rewritten `--settings` file
 changes nothing it sends). `startRun` puts them in its environment, and
 writes the same extra body to `guard.json` in the run's temp folder,
-named to the helper by `MYNA_CLAUDE_GUARD` (`claudetui.GuardEnv`). The
+named to the helper by `OWL_CLAUDE_GUARD` (`claudetui.GuardEnv`). The
 helper hands it to Claude Code as WSL reads it, and takes it out of the
 environment otherwise. On each `/v1/messages` request whose body is a
 string with a `safeguards` key, `tap.js` reads the file, puts its
@@ -430,19 +430,19 @@ unavailable"), and a panel with no figure otherwise is "Claude Code's
 kept for an account Claude Code refuses (`claudeUsageDenied`).
 
 These one-off interactive runs (`askClaudeTUI`, `claudeUsageTUI`) work in
-myna's shared work folder (`oneOffDir`: `claudeWorkDir`, a fresh temp
+owl's shared work folder (`oneOffDir`: `claudeWorkDir`, a fresh temp
 folder only when it can't be made), where the helper may answer the trust
 question, so a config directory holds one trusted entry for it instead of
-a new `myna-claude-<n>` entry each read (#4830, mydosu): 67 had piled up
-in one `~/.claude.json`. Entries left by older mynas stay; myna
-doesn't write that file. In a saved account's config directory, myna
+a new `owl-claude-<n>` entry each read (#4830, mydosu): 67 had piled up
+in one `~/.claude.json`. Entries left by older owls stay; owl
+doesn't write that file. In a saved account's config directory, owl
 writes the folder's entry itself before each run there (`trustWork`,
 `provider.ClaudeTrustFolder`), and so before a bridge run of that
-account in myna's folder: on mydosu's Windows (#4830) the helper's
+account in owl's folder: on mydosu's Windows (#4830) the helper's
 answer was never recorded there, and every read of the account waited
 out its time on the question. The entry is keyed as Claude Code 2.1.316
 looks a folder up (`claudeTrustKeys`): the path in NFC, with forward
-slashes on Windows (`C:/Users/<me>/AppData/Local/Temp/myna-claude-work`),
+slashes on Windows (`C:/Users/<me>/AppData/Local/Temp/owl-claude-work`),
 also with its links resolved (`/private/var/…` on a Mac), and the WSL
 mount path for a Claude Code in WSL. Only a direct child of
 `claude-accounts` is written, never `~/.claude.json`; every other key
@@ -456,7 +456,7 @@ its own, saying what Claude Code hadn't done and its last screen ("Claude
 Code hadn't drawn /usage's panel in the 16.9s its caller waits for it:
 …"). Killed at the deadline instead, it said nothing, and on Windows the
 reading's error was "exit status 1" alone. A run that still says nothing
-is "Claude Code's interactive mode said nothing before myna stopped
+is "Claude Code's interactive mode said nothing before owl stopped
 waiting for it" (`oneOffErr`), and the card says the reason
 (`quotaError`'s "Allowance unavailable: {why}"), its full text kept for the
 tooltip. A question about trust left unanswered at the deadline is named
@@ -474,7 +474,7 @@ The Claude Code provider editor's "Claude Code runs as" row
 (`claudeModeRow` in app.js, drawn by claudemode.js, which it loads with
 its first read) is a switch between Interactive mode (TUI) and claude
 -p: pressing one saves `claudePrintMode` as Settings' row does
-(`savePrefs`) and reads the mode again. In myna web it is the
+(`savePrefs`) and reads the mode again. In owl web it is the
 gateway's, and only its own Settings change it, so the switch is
 disabled. Hovering or focusing it opens what tells the two apart. It
 reads `GET /api/claude/mode` (`gateway.ClaudeModeNow`) as the page
@@ -485,7 +485,7 @@ opens, kept 30 seconds and dropped when the setting changes, not in
 the switch: turned off, that every request runs as claude -p; on where
 the interactive mode can't run, that Claude requests fail, and why;
 otherwise the last request, when it was the interactive mode's. A
-subscription with Only switch serves nothing through myna and shows no
+subscription with Only switch serves nothing through owl and shows no
 row.
 
 A turn the interactive mode can't take ends the run, and the next starts
@@ -503,7 +503,7 @@ security notes (`firstRun`), and Esc on whether to set up the terminal
 Apple_Terminal or vscode), so that nothing of the user's terminal is set
 up. Each key goes once its screen has stayed drawn 300ms (`trustSettle`).
 Claude Code then records the onboarding done itself (2.1.316:
-`hasCompletedOnboarding`, `lastOnboardingVersion`; myna writes neither
+`hasCompletedOnboarding`, `lastOnboardingVersion`; owl writes neither
 in the user's folder),
 and later runs show none of it. Until this change the notes ended the
 run, so with the interactive mode On every request and the `/usage` read
@@ -517,12 +517,12 @@ Claude Code signed in for `-p` only, as in a container given
 `CLAUDE_CODE_OAUTH_TOKEN`), stays on its first-run screens, or asks
 about a folder the user hasn't trusted, the helper ends, saying why on
 its stderr and in its exit (`fail` in `Run`). It never becomes `claude
--p`. Until 11-01 it did, and wrote `<cache>/myna/claude-tui-broken`,
+-p`. Until 11-01 it did, and wrote `<cache>/owl/claude-tui-broken`,
 after which every run went `-p` for up to a day; that mark is no longer
 written or read, and one left on disk does nothing.
 
 The helper answers the bridge's `initialize` only once the prompt is
-shown and Claude Code has listed the tools of myna's MCP server. Claude
+shown and Claude Code has listed the tools of owl's MCP server. Claude
 Code connects its MCP servers beside its prompt, and a first message sent
 at the prompt was answered without the agent's tools (MinhuWang on X, a pi
 agent whose tool server was slow to load; with the server held 8s, the
@@ -538,7 +538,7 @@ wait. `TestShimFirstMessageWaitsForTools` and
 control request's 10s), not the 10s of any other control request. With
 10s, a Claude Code slower than that to start (2 vCPU in Docker) was ended
 as the helper waited, and every try was answered 502 "Claude Code has
-not answered myna's initialize request in 10s" (#4504). A helper that
+not answered owl's initialize request in 10s" (#4504). A helper that
 answers nothing even then is ended (`tuiNoStart`), and the turn fails
 saying the interactive mode didn't start; the next turn tries it again.
 
@@ -548,7 +548,7 @@ A run started anew is told the whole conversation in one user message
 (`renderClaudePrompt`), a prefix the prompt cache has never seen, so the
 conversation is written to the cache again and its images are sent again.
 By default, that message holds the history in blocks of `historyChunk`
-messages, and myna's one mark (Claude Code keeps three of Anthropic's four) is on the
+messages, and owl's one mark (Claude Code keeps three of Anthropic's four) is on the
 last whole block, else on the caller's instructions: a later run started
 anew for the same conversation within the hour reads the history up to an
 earlier run's mark, found within Anthropic's 20-block lookback. A
@@ -780,11 +780,11 @@ minutes before its first word, and Claude Code hung up at 599s and
 started again from the replay, writing it to the cache once more (#3808).
 See [gateway routing](gateway-routing.md) for the keepalive rules.
 
-myna ends a run (`abort`) by asking Claude Code to end with SIGTERM
+owl ends a run (`abort`) by asking Claude Code to end with SIGTERM
 (`proc.Tree.Stop`) and kills its tree only once it has exited or
 `stopGrace` (5s) has passed; Windows kills the job at once. Claude Code
 removes `~/.claude/.oauth_refresh.lock` as it exits on SIGTERM (2.1.299
-exits within half a second), and the SIGKILL myna sent before left the
+exits within half a second), and the SIGKILL owl sent before left the
 lock for the next requests to fail on (#2195). The run counts as ended at
 once; the gateway stopping (`abortAll`) waits for every tree. Covered by
 `TestClaudeAbortAllowsLockCleanup` and `TestTreeStop*`.
@@ -859,7 +859,7 @@ the run waited on and the results it was last handed). Tool results a
 waiting run can't take (its safeguards can't be set, or it isn't
 waiting on those calls) end it with `abortFor`, and the log says why:
 "tool results process expired: <why>", where it said "process expired"
-alone and the run's end read "myna ended it" (#4804,
+alone and the run's end read "owl ended it" (#4804,
 `TestClaudeTUIToolResultsLogWhyTheRunEnded`).
 
 ## A turn the client gives up on (`letGo`, #780, #1365)
@@ -899,7 +899,7 @@ other (`serveSubscription`'s ended callback runs only when `gone()`
 stopped the `AfterFunc` that calls `letGo`), so it isn't those two of one
 request. `keepIdle` holds the rule whichever caller it was (#1596). Past `idleMost`, the
 eviction loop takes out the key it found as oldest, not the run's own.
-Before (X, Sma1lboy: myna at 158 GB after two days of omp agents), one
+Before (X, Sma1lboy: owl at 158 GB after two days of omp agents), one
 run under two keys was the oldest on every pass, the pass took out only
 its newer key, and the loop never ended: it held `b.mu`, stopping every
 Claude subscription request, and grew its list of runs to let go without
@@ -1032,7 +1032,7 @@ whose text is replaced by the line is not this shape, and starts anew.
 
 ## How many Claude Code processes run (`claudeRoom`, #2956)
 
-Every Claude Code myna starts for a Claude subscription takes a place in
+Every Claude Code owl starts for a Claude subscription takes a place in
 `claudeRoom` (`claude_room.go`) before it starts, and frees it once its
 process has exited: each conversation's run (`startRun`), busy, idle or
 parked on tool results, and each one-off test, warm-up and /usage read
@@ -1045,11 +1045,11 @@ six idle runs were enough for two OOM kills.
 How many may run (`claudeRunsMost`):
 
 - the user's `claudeRunsMost` in settings.json, set with
-  `myna claude-code runs N` (`auto` clears it). It is this machine's own
+  `owl claude-code runs N` (`auto` clears it). It is this machine's own
   setting (`KeepOwn`): a sync never brings a desktop's number to a server.
 - otherwise, on Linux, `(limit − 256 MiB) / 128 MiB`, at least 1, where
   the limit is the least of MemTotal, the cgroup v2 `memory.max` and
-  `memory.high` of myna's cgroup and every one above it, and the cgroup v1
+  `memory.high` of owl's cgroup and every one above it, and the cgroup v1
   `memory.limit_in_bytes` (`memLimit`). 512 MiB gives 2, 1 GiB 6, a 964 MiB
   machine with no cgroup limit 5. It is read once per process.
 - otherwise no bound: macOS, Windows, and a Linux whose limits can't be
@@ -1084,33 +1084,33 @@ the 503.
 ### Which ones run (`ClaudeRunsPath`)
 
 Each run is two processes: Claude Code, and the MCP helper it starts for
-the caller's tools (`myna claude-mcp-helper`, `internal/claudebridge`).
+the caller's tools (`owl claude-mcp-helper`, `internal/claudebridge`).
 Claude Code's parallel subagents are conversations of their own, so a
 session that starts eight has eight pairs running while they work and
 `idleMost` (6) pairs kept for an hour after. Those still waiting on tool
 calls stay for `runTimeout` (30 minutes) once their caller stops. A task
 manager names Claude Code by its version (its binary is
 `versions/2.1.311`), so on macOS Activity Monitor shows these as "2.1.311" and
-"myna", with nothing to say what they are (@Candydidi3 on X).
+"owl", with nothing to say what they are (@Candydidi3 on X).
 
-`GET /v1/myna/claude-runs` (`claude_runs.go`, loopback only, as the
+`GET /v1/owl/claude-runs` (`claude_runs.go`, loopback only, as the
 heap profile) lists each run with its pid, model, account, `state`
 (`answering`, `idle` for its next turn, `tools` waiting on the caller's
 tools) and `since`. It also gives `ends`, when its timer lets it go
 (`endIn` records it at each reset), and Claude Code's RSS. `live` is
-`claudeRoom`'s count, one-off asks included. `myna claude-code runs`
+`claudeRoom`'s count, one-off asks included. `owl claude-code runs`
 prints the list under the bound and says what the processes are.
-On 10-27, a sandbox `myna serve` with a made-up Claude sign-in and real
+On 10-27, a sandbox `owl serve` with a made-up Claude sign-in and real
 Claude Code 2.1.311 against a mock API got 8 concurrent subagent-like
 requests. It kept 6 Claude Code and 6 helpers, and the list named the same
-6 pids that `ps` showed. Quitting myna ended all 12 within a second.
+6 pids that `ps` showed. Quitting owl ended all 12 within a second.
 
 ## How large one Claude Code process may grow (`claudeRunBudget`, #3256)
 
 `claudeRoom` bounds how many Claude Code processes run, not how large each
 is. A run is kept for its conversation's next turn, turn after turn, and a
 service that is never restarted kept one for days: on a 31 GiB host a
-`node-MainThread` in myna.service reached 8 GiB RSS and the kernel's OOM
+`node-MainThread` in owl.service reached 8 GiB RSS and the kernel's OOM
 killer took the machine's other work with it.
 
 Each time a run's reply ends, `oversized` (`claude_rss.go`) reads the
@@ -1118,7 +1118,7 @@ resident memory of its process tree (`proc.Tree.RSS`: `/proc/<pid>/status`
 VmRSS on Linux, `ps -o rss=` on macOS, the working sets of every process in
 its job on Windows, where an npm install's `claude.cmd` is a cmd.exe with
 the node under it) and logs it with the pid. The budget is an eighth of the
-memory myna may use (`memLimit` on Linux, `proc.MemTotal` elsewhere), at
+memory owl may use (`memLimit` on Linux, `proc.MemTotal` elsewhere), at
 least 1 GiB, 4 GiB where neither is known. It is read once per process.
 
 - A whole turn (`ended`, stop) over the budget: the run is not kept idle.
@@ -1132,17 +1132,17 @@ least 1 GiB, 4 GiB where neither is known. It is read once per process.
 Each Claude Code a run starts logs its pid and model when it starts, and its
 run time, how it ended and its peak RSS (`proc.PeakRSS`, rusage
 `ru_maxrss`; not on Windows) when it ends: an OOM report's pid can be found
-in myna's log.
+in owl's log.
 
 ## The run's working folder (`clientWorkDir`)
 
 Claude Code tells its model the folder it runs in as the "Primary working
 directory". A run has no tools of its own: the client's run in the
-client's folder. Run in myna's shared work folder (`claudeWorkDir`,
-`<tmp>/myna-claude-work-<uid>`), the model was told that folder. It then
+client's folder. Run in owl's shared work folder (`claudeWorkDir`,
+`<tmp>/owl-claude-work-<uid>`), the model was told that folder. It then
 wrote the client's files there, through the client's own tools, while the
 client's own prompt named another folder. Under a real Claude Code client,
-`pelican.html` landed in myna's folder.
+`pelican.html` landed in owl's folder.
 
 A run therefore starts in the folder the caller names. `clientWorkDir`
 reads the system prompt and every message that is not the model's, and
@@ -1180,7 +1180,7 @@ block for the note alone. A caller on this computer that names no folder
 is told nothing more: Claude Code's platform and shell are its own.
 
 Claude Code has no option to leave its environment out. In 2.1.312 it
-is a `<system-reminder>` in the run's first message, before myna's
+is a `<system-reminder>` in the run's first message, before owl's
 text, with `--system-prompt-file` too; the SDK's `excludeDynamicSections`
 only moves it there. So a lean run (`claudeLeanPrompt`) is told the same
 in its system prompt (`leanSystem`), the named-folder note worded as
@@ -1208,14 +1208,14 @@ flag settings, which `--setting-sources` doesn't control
 (`disableDeepLinkSettings`). Auto memory is off, and
 `CLAUDE_CODE_DISABLE_GIT_INSTRUCTIONS=1` keeps the repository's status out
 of the prompt, which would change it, and Anthropic's cache with it,
-whenever a file changes. The system prompt myna sends is unchanged; only
+whenever a file changes. The system prompt owl sends is unchanged; only
 the folder Claude Code runs in is.
 
 A run's sessions are saved in that folder's project
 (`<config>/projects/<the caller's folder>`), beside the user's own Claude
 Code sessions there when the run is on the user's own sign-in. Claude
 Code's `--resume` picker lists them while they last. That project is never
-swept: only myna's own folder is (`sweepSessions`). A run's session is
+swept: only owl's own folder is (`sweepSessions`). A run's session is
 removed there by its id, when it ends or is discarded (`removeSession`).
 A session that a stopped gateway left there, and its temp files, stay
 there as the user's own sessions do; a sweep can't tell them apart.
@@ -1225,7 +1225,7 @@ there as the user's own sessions do; a sweep can't tell them apart.
 - Its session: `<config>/projects/<work project>/<session>.jsonl`, for
   `--resume` (`claudeSessions`). It is removed when the run ends unless
   shelved, and when a saved session is discarded (`removeSession`).
-  `sweepSessions` removes those a stopped gateway left in myna's own
+  `sweepSessions` removes those a stopped gateway left in owl's own
   work folder's project, once older than `idleLongest`; a caller's folder
   is never swept (`clientWorkDir`).
 - Claude Code's temp files for the session, the images it was given:
@@ -1238,7 +1238,7 @@ there as the user's own sessions do; a sweep can't tell them apart.
 
 A run started anew still sends every image in the conversation. Replacing
 earlier images with a placeholder would change what the model sees, and
-myna doesn't do it.
+owl doesn't do it.
 
 ## Tool results another request answers first
 
@@ -1380,7 +1380,7 @@ past call as a `[tool call <name> id=… args=…]` line and each result as
 text: Claude Code has no call to make, the turn ends with end_turn, and the
 client shows the lines as the reply's words while nothing runs (Zhenzhen on
 Discord: Claude Desktop on Fable 5.1 got
-`[tool call mcp__myna__Bash id=toolu_0Validate bash args={…}]`).
+`[tool call mcp__owl__Bash id=toolu_0Validate bash args={…}]`).
 
 - Such a prompt ends with a note (`pastCallsNote`) that the lines record
   earlier calls and that writing one calls nothing. A prompt with no call in
@@ -1454,14 +1454,14 @@ kept either.
 
 A Claude Code signed in to claude.ai (its sign-in field set to
 `claudeai`, `claudeSignIns` in `internal/agent/claude.go`) reads these into its status line's `rate_limits`, which
-claude-hud shows. One that signs in to myna with myna's key
+claude-hud shows. One that signs in to owl with owl's key
 (`ANTHROPIC_AUTH_TOKEN`) ignores them: Claude Code 2.1.293 reads the
 headers only for a claude.ai subscriber. A reply another provider answered
 carries none.
 
 ## A restart to update
 
-A run is a Claude Code process of this myna's, so a restart to update
+A run is a Claude Code process of this owl's, so a restart to update
 that hands the gateway to the new version ([GUI shell](gui-shell.md#a-restart-to-update-hands-the-gateway-over))
 waits for the bridge's turns, and for none of the gateway's other requests
 (`restartBusy` in [`handover.go`](../../internal/gui/handover.go): `Busy.Bridge`,

@@ -15,12 +15,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // This explicit check uses the signed-in account for one native Codex turn.
 func TestLiveCodexSealedAgentGuidance(t *testing.T) {
-	bin, home, codexHome := os.Getenv("MYNA_LIVE_CODEX_BIN"), os.Getenv("MYNA_LIVE_HOME"), os.Getenv("MYNA_LIVE_CODEX_HOME")
+	bin, home, codexHome := os.Getenv("OWL_LIVE_CODEX_BIN"), os.Getenv("OWL_LIVE_HOME"), os.Getenv("OWL_LIVE_CODEX_HOME")
 	if bin == "" || home == "" || codexHome == "" {
 		t.Skip("live Codex environment not set")
 	}

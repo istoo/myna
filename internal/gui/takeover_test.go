@@ -8,11 +8,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/owl/internal/gateway"
 )
 
-// A myna that found the gateway taken serves it once the one that had it
-// is gone (one left running from before an update, a myna serve).
+// A owl that found the gateway taken serves it once the one that had it
+// is gone (one left running from before an update, a owl serve).
 func TestGatewayTakenOver(t *testing.T) {
 	t.Setenv("HOME", t.TempDir())
 	t.Setenv("USERPROFILE", os.Getenv("HOME"))
@@ -22,14 +22,14 @@ func TestGatewayTakenOver(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Setenv("MYNA_ADDR", ln.Addr().String())
+	t.Setenv("OWL_ADDR", ln.Addr().String())
 	other := &http.Server{Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(`{"name":"myna"}`))
+		w.Write([]byte(`{"name":"owl"}`))
 	})}
 	go other.Serve(ln)
 	defer other.Close()
 	// the watch and the gateway it takes up end with the test, before its
-	// HOME and MYNA_ADDR are put back
+	// HOME and OWL_ADDR are put back
 	ctx, stop := context.WithCancel(context.Background())
 	watched := make(chan struct{})
 	t.Cleanup(func() {
@@ -48,7 +48,7 @@ func TestGatewayTakenOver(t *testing.T) {
 		watchGateway(ctx, 50*time.Millisecond)
 	}()
 	if serveGateway() != nil {
-		t.Fatal("served over another myna")
+		t.Fatal("served over another owl")
 	}
 	time.Sleep(200 * time.Millisecond)
 	if served.Load() != nil {
@@ -62,8 +62,8 @@ func TestGatewayTakenOver(t *testing.T) {
 	}
 }
 
-// A myna that holds the gateway's port but doesn't answer in time (the
-// service busy on a small server, or starting) still has it: myna web
+// A owl that holds the gateway's port but doesn't answer in time (the
+// service busy on a small server, or starting) still has it: owl web
 // beside it doesn't listen a second time, which only failed with "bind:
 // address already in use" (K.Liu on Discord), and leaves the port to it.
 func TestGatewayNotServedBesideASlowOne(t *testing.T) {
@@ -75,11 +75,11 @@ func TestGatewayNotServedBesideASlowOne(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Setenv("MYNA_ADDR", ln.Addr().String())
+	t.Setenv("OWL_ADDR", ln.Addr().String())
 	slow := make(chan struct{})
 	other := &http.Server{Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		<-slow
-		w.Write([]byte(`{"name":"myna"}`))
+		w.Write([]byte(`{"name":"owl"}`))
 	})}
 	go other.Serve(ln)
 	defer other.Close()
@@ -96,6 +96,6 @@ func TestGatewayNotServedBesideASlowOne(t *testing.T) {
 		takenSaid.Store(false)
 	})
 	if gw != nil {
-		t.Fatal("listened for the gateway on a port another myna holds")
+		t.Fatal("listened for the gateway on a port another owl holds")
 	}
 }

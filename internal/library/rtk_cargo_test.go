@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // What cargo printed on the Windows test box (cargo 1.99.1, a Chinese
@@ -38,7 +38,7 @@ func onWindows(t *testing.T, yes bool) {
 	t.Cleanup(func() { rtkOnWindows = old })
 }
 
-// A myna whose PATH has no cargo — started before Rust was installed, or
+// A owl whose PATH has no cargo — started before Rust was installed, or
 // from a shortcut whose PATH rustup never touched — upgrades the rtk in
 // cargo's folder with the cargo rustup put beside it, by its path. It had
 // no upgrade at all, and its Upgrade button did nothing (新v学员).
@@ -70,7 +70,7 @@ echo 1.1.0 > "`+filepath.Join(dir, "VERSION")+`"
 }
 
 // With no cargo anywhere, the card says so and what to run, and Upgrade's
-// error does too — not "myna can't tell how this RTK was installed".
+// error does too — not "owl can't tell how this RTK was installed".
 func TestRTKCargoMissingSaysSo(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("the fakes are shell scripts")
@@ -190,7 +190,7 @@ func TestRTKCargoInUseMovesAside(t *testing.T) {
 	}
 }
 
-// cargo's own build folder is myna's, so the retry builds nothing again
+// cargo's own build folder is owl's, so the retry builds nothing again
 // and no build is left behind in the user's temp folder.
 func TestRTKCargoTargetDir(t *testing.T) {
 	sandbox(t)

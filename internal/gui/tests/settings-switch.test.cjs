@@ -45,7 +45,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const bodies = [], errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", server(lang, bodies));
-      await page.goto("http://myna.test/?view=settings&tab=general");
+      await page.goto("http://owl.test/?view=settings&tab=general");
       await page.locator("#reduceMotionSegs [role=switch]").waitFor();
       // every two-state row the settings draw has its switch, its state and its name
       for (const [id, on, name] of [["reduceMotionSegs", "false", "Reduce motion"], ["colorblindSegs", "false", "Colorblind mode"], ["birdSegs", "true", "Loading bird"]]) {

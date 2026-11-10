@@ -30,7 +30,7 @@ func dshNoApp(t *testing.T) {
 // liby233 on Discord: in WSL, a dsh 0.2 that had booted no profile yet was
 // wired in ~/.dsh/config.yaml, which no dsh on npm reads (0.0.1-rc.1 on;
 // 0.2.1-rc.5 makes $DSH_HOME/profiles/web on `dsh web`, as dsh's
-// initProfile, and reads no config.yaml). myna now makes the web
+// initProfile, and reads no config.yaml). owl now makes the web
 // profile's patch list as dsh's template with its route in it, which dsh
 // keeps on its first boot; a dsh before profiles still gets config.yaml.
 func TestDshCLIWithNoProfileYet(t *testing.T) {
@@ -47,12 +47,12 @@ func TestDshCLIWithNoProfileYet(t *testing.T) {
 	if a.Path != web {
 		t.Fatalf("names %s, not the web profile's patch list", a.Path)
 	}
-	if err := a.Pick("model", "myna/deepseek/flash"); err != nil {
+	if err := a.Pick("model", "owl/deepseek/flash"); err != nil {
 		t.Fatal(err)
 	}
 	s := read(web)
 	if !strings.HasPrefix(s, strings.TrimSuffix(dshDesktopPatch, "[]\n")) || !strings.Contains(s, "apiKeyEnv: "+dshKeyRef) || !strings.Contains(s, "provider: "+dshRoute) || !strings.Contains(s, `model: "deepseek/flash"`) {
-		t.Fatalf("the web profile myna made:\n%s", s)
+		t.Fatalf("the web profile owl made:\n%s", s)
 	}
 	if _, err := os.Stat(legacy); err == nil {
 		t.Fatalf("wrote config.yaml, which this dsh doesn't read:\n%s", read(legacy))
@@ -61,12 +61,12 @@ func TestDshCLIWithNoProfileYet(t *testing.T) {
 	if !a.Wired() || a.Check() != "" || a.Drift() != nil {
 		t.Fatalf("not wired: wired %v, check %q, drift %+v", a.Wired(), a.Check(), a.Drift())
 	}
-	// Disconnect before dsh booted it: what myna made goes
+	// Disconnect before dsh booted it: what owl made goes
 	if err := a.Disconnect(); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := os.Stat(filepath.Join(dir, "profiles")); !os.IsNotExist(err) {
-		t.Fatalf("the profile myna made outlived Disconnect: %v\n%s", err, read(web))
+		t.Fatalf("the profile owl made outlived Disconnect: %v\n%s", err, read(web))
 	}
 
 	// a dsh before profiles keeps config.yaml
@@ -75,20 +75,20 @@ func TestDshCLIWithNoProfileYet(t *testing.T) {
 	if a.Path != legacy {
 		t.Fatalf("an old dsh names %s", a.Path)
 	}
-	if err := a.Pick("model", "myna/deepseek/flash"); err != nil {
+	if err := a.Pick("model", "owl/deepseek/flash"); err != nil {
 		t.Fatal(err)
 	}
-	if s := read(legacy); !strings.Contains(s, "- id: llm-deepseek # myna") {
+	if s := read(legacy); !strings.Contains(s, "- id: llm-deepseek # owl") {
 		t.Fatalf("an old dsh's config.yaml:\n%s", s)
 	}
 	if _, err := os.Stat(filepath.Join(dir, "profiles")); !os.IsNotExist(err) {
 		t.Fatal("made a profile for a dsh before profiles")
 	}
 	// its version not known: config.yaml with an entry of the user's says
-	// it is one before profiles; one with myna's alone says nothing
+	// it is one before profiles; one with owl's alone says nothing
 	dshVersionIs(t, "")
 	if dshBeforeProfiles(dir, "", false) {
-		t.Fatal("myna's entries alone taken for an old dsh's config")
+		t.Fatal("owl's entries alone taken for an old dsh's config")
 	}
 	if err := os.WriteFile(legacy, []byte("- id: tools\n  config:\n    disabled: []\n"+read(legacy)), 0o644); err != nil {
 		t.Fatal(err)
@@ -98,10 +98,10 @@ func TestDshCLIWithNoProfileYet(t *testing.T) {
 	}
 }
 
-// liby233's state: myna wired a dsh 0.2 in config.yaml before it booted a
+// liby233's state: owl wired a dsh 0.2 in config.yaml before it booted a
 // profile, and its first boot made the web profile as its template. The
-// sync carries myna's model over to the profile, and config.yaml loses
-// myna's entries; with no profile yet, it makes the web one.
+// sync carries owl's model over to the profile, and config.yaml loses
+// owl's entries; with no profile yet, it makes the web one.
 func TestDshConfigYamlCarriedToProfiles(t *testing.T) {
 	for _, booted := range []bool{true, false} {
 		home, dir, web := dshRouteHome(t)
@@ -112,12 +112,12 @@ func TestDshConfigYamlCarriedToProfiles(t *testing.T) {
 		legacy := filepath.Join(dir, "config.yaml")
 		read := func(p string) string { b, _ := os.ReadFile(p); return string(b) }
 
-		// what myna wrote before, for a dsh it took for an old one
+		// what owl wrote before, for a dsh it took for an old one
 		dshVersionIs(t, "0.0.0")
-		if err := dsh(home).Pick("model", "myna/deepseek/pro"); err != nil {
+		if err := dsh(home).Pick("model", "owl/deepseek/pro"); err != nil {
 			t.Fatal(err)
 		}
-		if !strings.Contains(read(legacy), "- id: llm-deepseek # myna") {
+		if !strings.Contains(read(legacy), "- id: llm-deepseek # owl") {
 			t.Fatalf("config.yaml:\n%s", read(legacy))
 		}
 		dshVersionIs(t, "0.2.1-rc.5")
@@ -131,13 +131,13 @@ func TestDshConfigYamlCarriedToProfiles(t *testing.T) {
 			t.Fatal(err)
 		}
 		s := read(web)
-		if !strings.Contains(s, "- id: llm-pi-ai # myna") || !strings.Contains(s, "provider: "+dshRoute) || !strings.Contains(s, `model: "deepseek/pro"`) {
+		if !strings.Contains(s, "- id: llm-pi-ai # owl") || !strings.Contains(s, "provider: "+dshRoute) || !strings.Contains(s, `model: "deepseek/pro"`) {
 			t.Fatalf("booted %v: the web profile after the sync:\n%s", booted, s)
 		}
-		if s := read(legacy); strings.Contains(s, "# myna") {
-			t.Fatalf("booted %v: config.yaml kept myna's entries:\n%s", booted, s)
+		if s := read(legacy); strings.Contains(s, "# owl") {
+			t.Fatalf("booted %v: config.yaml kept owl's entries:\n%s", booted, s)
 		}
-		if a = dsh(home); a.Field("model").Get() != "myna/deepseek/pro" || a.Check() != "" {
+		if a = dsh(home); a.Field("model").Get() != "owl/deepseek/pro" || a.Check() != "" {
 			t.Fatalf("booted %v: model %q, check %q", booted, a.Field("model").Get(), a.Check())
 		}
 	}

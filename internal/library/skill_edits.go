@@ -4,8 +4,8 @@ package library
 // agent itself edits the skill, or the user does in that agent's folder.
 // The copy then differs from the library's skill, as it does when the
 // library's has changed, and a sync made it again from the library's,
-// which undid the edit at the next start of myna (Joren on Discord). So
-// a sync first tells the two apart by myna's mark, written as the copy
+// which undid the edit at the next start of owl (Joren on Discord). So
+// a sync first tells the two apart by owl's mark, written as the copy
 // was made: a copy with anything in it newer than its mark was edited since,
 // and the library takes the newest such edit, which the sync then gives to
 // every other agent. The library's own change wins when it is newer still
@@ -48,7 +48,7 @@ func (l *Library) takeEdits(targets []*Target, res *Result) {
 				continue
 			}
 			p := filepath.Join(t.Skills, s.Name)
-			// an agent in WSL linked to myna's copy there: an edit made
+			// an agent in WSL linked to owl's copy there: an edit made
 			// through the link is in that copy (wsl_skills.go)
 			if t.Store != "" && ours(p, s.Name) && linked(p) {
 				p = filepath.Join(t.Store, s.Name)
@@ -131,7 +131,7 @@ func (l *Library) takeEdits(targets []*Target, res *Result) {
 	}
 }
 
-// copiedAt is when myna made the copy at p: its mark's time.
+// copiedAt is when owl made the copy at p: its mark's time.
 func copiedAt(p string) (time.Time, bool) {
 	fi, err := os.Stat(filepath.Join(p, marker))
 	if err != nil {
@@ -142,7 +142,7 @@ func copiedAt(p string) (time.Time, bool) {
 
 // changedAt is when anything in the folder last changed: the newest time
 // of what is in it, a file or a folder (one taken away changes its
-// folder's), leaving aside myna's mark and what Finder or version
+// folder's), leaving aside owl's mark and what Finder or version
 // control keep in it. An incomplete walk can't establish when it changed.
 func changedAt(dir string) (time.Time, error) {
 	var at time.Time
@@ -184,7 +184,7 @@ func keepLibrarySkill(name, lib string) (string, error) {
 
 // mirrorDir makes the folder to hold what from does: its files written
 // over to's, and what to has that from doesn't taken away, leaving aside
-// myna's mark and what Finder or version control keep. File by file, so
+// owl's mark and what Finder or version control keep. File by file, so
 // a library skill that is a folder of the user's stays that folder.
 func mirrorDir(from, to string) error {
 	err := filepath.WalkDir(from, func(p string, d fs.DirEntry, err error) error {

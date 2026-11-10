@@ -8,13 +8,13 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // A profile's patch list written in flow style, as dsh's own writers leave
 // the template's [] once they add a row (#445), is edited like a block one:
-// every profile gets the model, the user's row stays, and a file myna
+// every profile gets the model, the user's row stays, and a file owl
 // can't edit is named in the error, not as config.yaml.
 func TestDshFlowPatchList(t *testing.T) {
 	home := t.TempDir()
@@ -36,12 +36,12 @@ func TestDshFlowPatchList(t *testing.T) {
 	read := func(p string) string { b, _ := os.ReadFile(p); return string(b) }
 
 	f := dsh(home).Field("model")
-	if err := f.Set("myna/deepseek/pro"); err != nil {
+	if err := f.Set("owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	for _, p := range []string{web, def} {
 		s := read(p)
-		for _, want := range []string{"# Your patch layer", "- id: llm-pi-ai # myna", "- id: agent-default-model # myna", `model: "deepseek/pro"`} {
+		for _, want := range []string{"# Your patch layer", "- id: llm-pi-ai # owl", "- id: agent-default-model # owl", `model: "deepseek/pro"`} {
 			if !strings.Contains(s, want) {
 				t.Fatalf("missing %q in %s:\n%s", want, p, s)
 			}
@@ -55,7 +55,7 @@ func TestDshFlowPatchList(t *testing.T) {
 	if err := yaml.Unmarshal([]byte(s), &rows); err != nil || len(rows) != 4 || rows[0]["id"] != "some-plugin" || rows[0]["disabled"] != false {
 		t.Fatalf("%v %v\n%s", err, rows, s)
 	}
-	if f.Get() != "myna/deepseek/pro" {
+	if f.Get() != "owl/deepseek/pro" {
 		t.Fatalf("get: %q", f.Get())
 	}
 
@@ -69,7 +69,7 @@ func TestDshFlowPatchList(t *testing.T) {
 
 	// a file that is no list is named as itself
 	os.WriteFile(web, []byte("some-plugin:\n  disabled: false\n"), 0o644)
-	err := f.Set("myna/deepseek/pro")
+	err := f.Set("owl/deepseek/pro")
 	if err == nil || !strings.Contains(err.Error(), web) || strings.Contains(err.Error(), "config.yaml") {
 		t.Fatalf("error: %v", err)
 	}
@@ -93,7 +93,7 @@ func TestDshDocStart(t *testing.T) {
 	// the reporter's file (#2667), down to its quoting and trailing spaces
 	os.WriteFile(web, []byte("---\n- \n  id: \"ui-settings-general\"\n  name: \"@deepseek-ai/dsh-client-ui-settings-general\"\n  config: \n    welcomeNoticeVersion: \"2026-09-28.1\"\n"), 0o644)
 	f := dsh(home).Field("model")
-	if err := f.Set("myna/deepseek/pro"); err != nil {
+	if err := f.Set("owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	b, err := os.ReadFile(web)
@@ -107,12 +107,12 @@ func TestDshDocStart(t *testing.T) {
 	if !strings.Contains(s, "id: \"ui-settings-general\"") {
 		t.Fatalf("the user's entry lost:\n%s", s)
 	}
-	for _, want := range []string{"- id: llm-pi-ai # myna", "- id: agent-default-model # myna", `model: "deepseek/pro"`} {
+	for _, want := range []string{"- id: llm-pi-ai # owl", "- id: agent-default-model # owl", `model: "deepseek/pro"`} {
 		if !strings.Contains(s, want) {
 			t.Fatalf("missing %q in %s:\n%s", want, web, s)
 		}
 	}
-	if f.Get() != "myna/deepseek/pro" {
+	if f.Get() != "owl/deepseek/pro" {
 		t.Fatalf("get: %q", f.Get())
 	}
 }
@@ -167,7 +167,7 @@ func TestDshDocStartOnlyFirst(t *testing.T) {
 		"--- x\n- id: a\n",
 		"[]\n---\n- id: a\n",
 	} {
-		if _, _, err := dshParse("p.yml", raw); err == nil || !strings.Contains(err.Error(), "not a list of entries myna can edit") {
+		if _, _, err := dshParse("p.yml", raw); err == nil || !strings.Contains(err.Error(), "not a list of entries owl can edit") {
 			t.Fatalf("%q: want the file refused, got %v", raw, err)
 		}
 	}

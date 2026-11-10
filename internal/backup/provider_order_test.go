@@ -9,7 +9,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // Exporting and importing providers must keep the order the user chose,

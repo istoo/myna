@@ -159,7 +159,7 @@ func TestCopilotSameLoginOnTwoHosts(t *testing.T) {
 }
 
 // The editors signed in to mona on github.com, mona on an enterprise's
-// host signed in from myna is another account, kept beside it, not
+// host signed in from owl is another account, kept beside it, not
 // dropped as the editors' own (#1220).
 func TestCopilotOwnAndSameNamedGHE(t *testing.T) {
 	home := signIn(t)
@@ -180,7 +180,7 @@ func TestCopilotOwnAndSameNamedGHE(t *testing.T) {
 	if toks := copilotTokens(); toks["mona"] != "gho_own " || toks["mona@a.ghe.com"] != "gho_a.ghe.com a.ghe.com" {
 		t.Fatalf("tokens: %v", toks)
 	}
-	// github.com's mona signed in from myna is still the editors' own
+	// github.com's mona signed in from owl is still the editors' own
 	if st := copilotSignInAt(t, "github.com"); st.User != "mona" || !st.Using {
 		t.Fatalf("github.com: %+v", st)
 	}
@@ -229,7 +229,7 @@ func TestCopilotLoginsBeforeHosts(t *testing.T) {
 
 // The editors' own account on an enterprise's host, remembered by its
 // login alone before #1220, is the same account named with its host: still
-// hidden when it was removed in myna, with its id.
+// hidden when it was removed in owl, with its id.
 func TestCopilotOwnGHERenamed(t *testing.T) {
 	home := signIn(t)
 	t.Setenv("COPILOT_HOME", filepath.Join(home, "copilot-home"))
@@ -262,7 +262,7 @@ func TestCopilotOwnGHERenamed(t *testing.T) {
 	}
 }
 
-// oldGHEFiles writes logins.json as myna kept it before #1220 — mona
+// oldGHEFiles writes logins.json as owl kept it before #1220 — mona
 // on a.ghe.com saved under her login alone — and providers.json with
 // settings, data, under that login.
 func oldGHEFiles(t *testing.T, providers string) {

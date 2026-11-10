@@ -6,7 +6,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 // MLXServePreset is the MLX-Serve preset's id.

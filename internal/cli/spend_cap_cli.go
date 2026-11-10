@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
-	stats "github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/provider"
+	stats "github.com/istoo/owl/internal/usage"
 )
 
-const spendCapUsage = "myna provider spend-cap <id> [key [usd [day|month|total]|off]]"
+const spendCapUsage = "owl provider spend-cap <id> [key [usd [day|month|total]|off]]"
 
 // spendCapCmd shows, or sets, how much a provider's API keys may spend
 // (sparkling_lemur_62868 on Discord): in USD as the Usage page prices
@@ -23,7 +23,7 @@ func spendCapCmd(rest []string) error {
 		return err
 	}
 	if p.Account != nil {
-		return fmt.Errorf("%s is a subscription: a spend cap is for an API key (an account's cap is a share of its usage windows, myna provider account-cap)", p.Name)
+		return fmt.Errorf("%s is a subscription: a spend cap is for an API key (an account's cap is a share of its usage windows, owl provider account-cap)", p.Name)
 	}
 	if len(rest) > 2 {
 		period := ""

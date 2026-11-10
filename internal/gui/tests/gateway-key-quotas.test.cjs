@@ -27,7 +27,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const events = [], errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", fixture(lang, "light", events, { lan: true, keyHolds: { server: { models: ["relay/*"], quotas: true }, work: { models: ["relay/*"] } } }));
-        await page.goto("http://myna.test/?view=gateway");
+        await page.goto("http://owl.test/?view=gateway");
         await page.locator("#gatewayKeys .acc[data-key]").last().waitFor();
         const row = (id) => page.locator(`#gatewayKeys .acc[data-key="${id}"]`);
         const badge = (id) => row(id).getByRole("button", { name: w.label, exact: true });

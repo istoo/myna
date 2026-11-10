@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/source"
+	"github.com/istoo/owl/internal/source"
 )
 
 // with 「国内镜像」, bun installs from npmmirror, unless the environment

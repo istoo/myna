@@ -8,12 +8,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A provider's extra body fields (#1604) are saved from the editor, shown
 // back to it, kept by a save that doesn't send them, cleared by {}, and a
-// save naming a field myna sets itself is refused with why.
+// save naming a field owl sets itself is refused with why.
 func TestProviderExtraBodySaved(t *testing.T) {
 	t.Setenv("HOME", t.TempDir())
 	t.Setenv("USERPROFILE", os.Getenv("HOME"))

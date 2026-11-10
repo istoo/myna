@@ -4,12 +4,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // A read-only key (Steven on Discord: a desk display's) is made so by
 // add-key or access-key, is told so by Authenticate, and is made full
-// again; the sharing key, which myna gives its own agents, is never.
+// again; the sharing key, which owl gives its own agents, is never.
 func TestReadOnlyKey(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	display, err := Update("add-key", Change{Name: "Desk display", ReadOnly: true})

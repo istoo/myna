@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/gwmw"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/gwmw"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // heldMasker masks nothing, and holds each request it is asked about
@@ -58,9 +58,9 @@ func (heldMasker) Writer(w http.ResponseWriter) (http.ResponseWriter, func()) {
 
 // fremontdango on Discord: a Claude Code request sat on the Routing page
 // as routing for a long while that it was being masked. While a
-// request is masked its phase is "redact", on /v1/myna/concurrency and
+// request is masked its phase is "redact", on /v1/owl/concurrency and
 // on the route that shows it, and what masking took is kept, on its route
-// and in its usage record, as a part of myna's own time.
+// and in its usage record, as a part of owl's own time.
 func TestMaskingIsAPhaseWithItsTime(t *testing.T) {
 	unroutedLimits(t, 10*time.Millisecond, time.Minute)
 	fresh(t)
@@ -100,7 +100,7 @@ func TestMaskingIsAPhaseWithItsTime(t *testing.T) {
 			phase = a.Phase
 		}
 		for _, r := range s.Trace(context.Background(), 0, 0).Routes {
-			if !r.Done && r.Provider == "myna" {
+			if !r.Done && r.Provider == "owl" {
 				shown = r.Phase
 			}
 		}
@@ -164,10 +164,10 @@ func TestNoMaskingNoMaskingTime(t *testing.T) {
 	}
 }
 
-// lute on Discord: a masked request whose time myna can't split (here
+// lute on Discord: a masked request whose time owl can't split (here
 // the vendor refused it, so there is no first token) showed no masking
 // time at all. What masking took is kept whenever it took any, all of
-// it when myna's own time is unknown.
+// it when owl's own time is unknown.
 func TestMaskingTimeKeptWhenOwnIsUnknown(t *testing.T) {
 	fresh(t)
 	if err := settings.Save(settings.Settings{Redact: true}); err != nil {

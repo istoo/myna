@@ -9,7 +9,7 @@
 // grid are the ones that were there, patched, and the grid and its box
 // keep their height on every frame between. In Chromium and WebKit, at a
 // phone's width and a desk's; with the card open, and folded to its head
-// (myna.ctxShut), whose nodes, bar and height stay the same too.
+// (owl.ctxShut), whose nodes, bar and height stay the same too.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
@@ -79,14 +79,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const context = await browser.newContext({ viewport: { width, height } });
         const page = await context.newPage();
         // the block grid, the look these cells are drawn in (the map is the default)
-        await page.addInitScript(() => { try { localStorage.setItem("myna.ctxLook", "grid"); } catch {} });
+        await page.addInitScript(() => { try { localStorage.setItem("owl.ctxLook", "grid"); } catch {} });
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         const feed = { next: null };
         await page.route("**/*", serve(feed));
-        await page.goto("http://myna.test/?view=routing");
+        await page.goto("http://owl.test/?view=routing");
         await page.locator(".rt-req").nth(first.length - 1).waitFor();
         await page.locator(".rt-ctx .ctx-waffle").waitFor();
         await page.waitForTimeout(1500); // the cells come in, the first play ends
@@ -168,15 +168,15 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const context = await browser.newContext({ viewport: { width, height } });
         const page = await context.newPage();
         // the block grid, the look these cells are drawn in (the map is the default)
-        await page.addInitScript(() => { try { localStorage.setItem("myna.ctxLook", "grid"); } catch {} });
-        await page.addInitScript(() => { try { localStorage.setItem("myna.ctxShut", "1"); } catch {} });
+        await page.addInitScript(() => { try { localStorage.setItem("owl.ctxLook", "grid"); } catch {} });
+        await page.addInitScript(() => { try { localStorage.setItem("owl.ctxShut", "1"); } catch {} });
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         const feed = { next: null };
         await page.route("**/*", serve(feed));
-        await page.goto("http://myna.test/?view=routing");
+        await page.goto("http://owl.test/?view=routing");
         await page.locator(".rt-req").nth(first.length - 1).waitFor();
         await page.locator(".rt-ctx .ctx-card.shut").waitFor();
         await page.waitForTimeout(600);

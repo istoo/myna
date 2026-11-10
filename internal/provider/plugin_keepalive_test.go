@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // fakeSignIns replaces what the keeper sees and does: the sign-ins kept
@@ -29,7 +29,7 @@ func fakeSignIns(t *testing.T, ins *[]pluginSignIn, answer func(pluginSignIn) (p
 
 // The keeper asks the host of a sign-in only once it is due, and sleeps
 // until the next comes due (no longer than keepAliveLookMost, no shorter
-// than keepAliveLookLeast): an idle myna with nothing due asks nothing
+// than keepAliveLookLeast): an idle owl with nothing due asks nothing
 // (#5080).
 func TestKeeperAsksOnlyWhatIsDue(t *testing.T) {
 	now := time.Date(2026, 11, 3, 12, 0, 0, 0, time.UTC)
@@ -149,7 +149,7 @@ func TestKeeperBacksOffAFailedRenewal(t *testing.T) {
 }
 
 // A sign-in the host finds not due (it reckons the lead otherwise) is
-// held keepAliveLookMost, not asked every look; and a look made as myna
+// held keepAliveLookMost, not asked every look; and a look made as owl
 // stops records nothing of the sign-in it was renewing.
 func TestKeeperHoldsWhatTheHostFindsNotDue(t *testing.T) {
 	now := time.Date(2026, 11, 3, 12, 0, 0, 0, time.UTC)
@@ -180,7 +180,7 @@ func TestKeeperHoldsWhatTheHostFindsNotDue(t *testing.T) {
 	k = signInKeeper{}
 	k.look(ctx, now)
 	if len(k.held) != 0 {
-		t.Fatalf("a renewal cut short by myna stopping was held: %v", k.held)
+		t.Fatalf("a renewal cut short by owl stopping was held: %v", k.held)
 	}
 	if !errors.Is(ctx.Err(), context.Canceled) {
 		t.Fatal(ctx.Err())
@@ -202,7 +202,7 @@ func TestKeepAliveBackoff(t *testing.T) {
 func TestKeptSignInsAreTheOnesSwitchedOn(t *testing.T) {
 	bun := testenv.Bun(t)
 	claudeHome(t)
-	t.Setenv("MYNA_BUN", bun)
+	t.Setenv("OWL_BUN", bun)
 	t.Setenv("RENEW_LOG", filepath.Join(t.TempDir(), "renewals"))
 	t.Cleanup(plugin.Settle)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)

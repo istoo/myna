@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/usage"
 )
 
 func TestS3UsageListingMustFinish(t *testing.T) {
@@ -51,7 +51,7 @@ func TestS3UsageListingMustFinish(t *testing.T) {
 					}
 				}
 				truncated := tc.broken != "" || page < tc.pages
-				fmt.Fprintf(w, `<ListBucketResult><Contents><Key>%s%d.myna-usage</Key><ETag>etag-%d</ETag></Contents><IsTruncated>%t</IsTruncated><NextContinuationToken>%s</NextContinuationToken></ListBucketResult>`, q.Get("prefix"), page, page, truncated, next)
+				fmt.Fprintf(w, `<ListBucketResult><Contents><Key>%s%d.owl-usage</Key><ETag>etag-%d</ETag></Contents><IsTruncated>%t</IsTruncated><NextContinuationToken>%s</NextContinuationToken></ListBucketResult>`, q.Get("prefix"), page, page, truncated, next)
 			}))
 			defer srv.Close()
 			s, err := newS3(Config{URL: "s3://test-bucket", Endpoint: srv.URL})

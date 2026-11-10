@@ -42,7 +42,7 @@ async function open(engine, t) {
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", serve());
-  await page.goto("http://myna.test/");
+  await page.goto("http://owl.test/");
   await page.waitForFunction(() => !document.querySelector("#view-agents").classList.contains("loading"));
   return { page, errors };
 }

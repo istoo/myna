@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // codexViewImage is a Codex turn whose view_image call came back with an
@@ -15,7 +15,7 @@ import (
 // input_image, a data: URL (#1861).
 const codexViewImage = `{"model":"m","stream":true,"input":[
 {"type":"message","role":"user","content":[{"type":"input_text","text":"使用computer use截图当前屏幕看下"}]},
-{"type":"function_call","name":"view_image","arguments":"{\"path\":\"/tmp/myna_icon.png\"}","call_id":"call_view1"},
+{"type":"function_call","name":"view_image","arguments":"{\"path\":\"/tmp/owl_icon.png\"}","call_id":"call_view1"},
 {"type":"function_call_output","call_id":"call_view1","output":[{"type":"input_image","image_url":"data:image/png;base64,` + viewedPNG + `","detail":"high"}]}
 ]}`
 

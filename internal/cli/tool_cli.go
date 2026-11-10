@@ -1,6 +1,6 @@
 package cli
 
-// myna tools and myna tool: the tools myna's own MCP servers give
+// owl tools and owl tool: the tools owl's own MCP servers give
 // agents (image generation, image recognition, web search, plugins'
 // tools), listed and called from the terminal (iwinux on Discord). They
 // are asked of the running gateway's MCP servers themselves
@@ -24,38 +24,38 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/imagemcp"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/imagemcp"
 )
 
 const toolUsage = `usage:
-  myna tools                  every tool myna's MCP servers give agents, with its parameters
-  myna tools <name>           one tool: what it does and each parameter
-  myna tool <name> [--<param> <value>…] [<words>…] [-o <file|folder>] [--json]
-                                call one through the running myna, as an agent's MCP call is
+  owl tools                  every tool owl's MCP servers give agents, with its parameters
+  owl tools <name>           one tool: what it does and each parameter
+  owl tool <name> [--<param> <value>…] [<words>…] [-o <file|folder>] [--json]
+                                call one through the running owl, as an agent's MCP call is
 
   A parameter is --<param> <value> or --<param>=<value> (- and _ alike); a list
   parameter is given once per item. The words left over are the tool's one required
   text (generate_image's prompt, web_search's query, analyze_image's image), else its
-  prompt. A file named in a parameter is read by myna on this computer.
+  prompt. A file named in a parameter is read by owl on this computer.
   An image or video the tool makes is saved: -o names a file or a folder (with --n 2 or
   more a number is added to the name), else it goes in this folder, named from the
   prompt; a file that is there is never written over. Text is printed. --json prints
   the tool's answer as it came and saves nothing.
   An unknown parameter, or a missing required one, is refused before anything is
-  called. The models are the ones myna's Settings pick (Images › Image generation,
+  called. The models are the ones owl's Settings pick (Images › Image generation,
   Image recognition, Web search); generate_image and generate_video take --model
-  provider/model for another one set up (myna tools generate_image lists them). It asks the gateway at the port in Settings' Gateway
-  address (or MYNA_ADDR; MYNA_GATEWAY=<url> for another).
+  provider/model for another one set up (owl tools generate_image lists them). It asks the gateway at the port in Settings' Gateway
+  address (or OWL_ADDR; OWL_GATEWAY=<url> for another).
 
-  e.g. myna tool generate_image "a myna on a branch, watercolour" --size 1536x1024 -o hero.png
-       myna tool generate_image --n 2 --quality high --background transparent "an app icon"
-       myna tool analyze_image ./shot.png --prompt "what does the error say?"
-       myna tool web_search "go 1.27 release notes"`
+  e.g. owl tool generate_image "a owl on a branch, watercolour" --size 1536x1024 -o hero.png
+       owl tool generate_image --n 2 --quality high --background transparent "an app icon"
+       owl tool analyze_image ./shot.png --prompt "what does the error say?"
+       owl tool web_search "go 1.27 release notes"`
 
-// toolAgent is the User-Agent the calls go with: myna's own, as the
-// image tool's (gateway.DrawAgent), so a vendor is sent myna's.
-const toolAgent = "myna-tool/1"
+// toolAgent is the User-Agent the calls go with: owl's own, as the
+// image tool's (gateway.DrawAgent), so a vendor is sent owl's.
+const toolAgent = "owl-tool/1"
 
 // toolCallMost bounds one ask of the gateway: the image server answers
 // within about 20s, a plugin's tool within 55s, and a look at a large
@@ -77,21 +77,21 @@ type toolGateway struct {
 }
 
 func newToolGateway() *toolGateway {
-	base := strings.TrimRight(os.Getenv("MYNA_GATEWAY"), "/")
+	base := strings.TrimRight(os.Getenv("OWL_GATEWAY"), "/")
 	if base == "" {
 		base = gateway.URL()
 	}
 	return &toolGateway{base: base, client: &http.Client{Timeout: toolCallMost}}
 }
 
-// errNoMyna is a gateway that doesn't answer at all.
-type errNoMyna struct {
+// errNoOwl is a gateway that doesn't answer at all.
+type errNoOwl struct {
 	base string
 	err  error
 }
 
-func (e errNoMyna) Error() string {
-	return fmt.Sprintf("myna isn't running at %s: open the app or run myna serve, then try again (%v)", e.base, e.err)
+func (e errNoOwl) Error() string {
+	return fmt.Sprintf("owl isn't running at %s: open the app or run owl serve, then try again (%v)", e.base, e.err)
 }
 
 func (g *toolGateway) do(method, path string, body []byte) (*http.Response, error) {
@@ -107,7 +107,7 @@ func (g *toolGateway) do(method, path string, body []byte) (*http.Response, erro
 	r.Header.Set("User-Agent", toolAgent)
 	res, err := g.client.Do(r)
 	if err != nil {
-		return nil, errNoMyna{g.base, err}
+		return nil, errNoOwl{g.base, err}
 	}
 	return res, nil
 }
@@ -128,9 +128,9 @@ func (g *toolGateway) rpc(path, method string, params any) (json.RawMessage, err
 	}
 	switch {
 	case res.StatusCode == http.StatusNotFound:
-		return nil, fmt.Errorf("the myna at %s has no %s: it is older than this one, update it", g.base, path)
+		return nil, fmt.Errorf("the owl at %s has no %s: it is older than this one, update it", g.base, path)
 	case res.StatusCode != http.StatusOK:
-		return nil, fmt.Errorf("the myna at %s answered %s: %s", g.base, res.Status, strings.TrimSpace(string(data)))
+		return nil, fmt.Errorf("the owl at %s answered %s: %s", g.base, res.Status, strings.TrimSpace(string(data)))
 	}
 	var m struct {
 		Result json.RawMessage `json:"result"`
@@ -139,7 +139,7 @@ func (g *toolGateway) rpc(path, method string, params any) (json.RawMessage, err
 		} `json:"error"`
 	}
 	if err := json.Unmarshal(data, &m); err != nil {
-		return nil, fmt.Errorf("what %s answered isn't JSON-RPC: is it myna? (%v)", g.base, err)
+		return nil, fmt.Errorf("what %s answered isn't JSON-RPC: is it owl? (%v)", g.base, err)
 	}
 	if m.Error != nil {
 		return nil, errors.New(m.Error.Message)
@@ -148,12 +148,12 @@ func (g *toolGateway) rpc(path, method string, params any) (json.RawMessage, err
 }
 
 // fetch is a file the gateway made, at u's path on the gateway asked: a
-// URL may name the address agents are given (MYNA_PUBLIC_URL), and the
+// URL may name the address agents are given (OWL_PUBLIC_URL), and the
 // key goes nowhere else.
 func (g *toolGateway) fetch(u string) ([]byte, error) {
 	pu, err := url.Parse(u)
 	if err != nil || !strings.HasPrefix(pu.Path, "/") {
-		return nil, fmt.Errorf("%q isn't a file of myna's", u)
+		return nil, fmt.Errorf("%q isn't a file of owl's", u)
 	}
 	res, err := g.do(http.MethodGet, pu.RequestURI(), nil)
 	if err != nil {
@@ -256,7 +256,7 @@ func listTools(g *toolGateway) ([]listedTool, []string, error) {
 	for _, srv := range gateway.OwnMCPServers {
 		res, err := g.rpc(srv.Path, "tools/list", map[string]any{})
 		if err != nil {
-			var no errNoMyna
+			var no errNoOwl
 			if errors.As(err, &no) {
 				return nil, nil, err
 			}
@@ -336,15 +336,15 @@ func paramShape(p toolParam) string {
 	return "<" + shape + ">"
 }
 
-// toolsCmd: myna tools [<name>]
+// toolsCmd: owl tools [<name>]
 func toolsCmd(args []string) error {
 	for _, a := range args {
 		if strings.HasPrefix(a, "-") {
-			return fmt.Errorf("unknown flag %s (myna tools [<name>])", a)
+			return fmt.Errorf("unknown flag %s (owl tools [<name>])", a)
 		}
 	}
 	if len(args) > 1 {
-		return errors.New("myna tools takes one tool's name at most (myna tools [<name>])")
+		return errors.New("owl tools takes one tool's name at most (owl tools [<name>])")
 	}
 	g := newToolGateway()
 	tools, notes, err := listTools(g)
@@ -382,12 +382,12 @@ func toolsCmd(args []string) error {
 		}
 	}
 	if len(tools) == 0 {
-		fmt.Println(muted.Render("  no tools: the myna running has none on"))
+		fmt.Println(muted.Render("  no tools: the owl running has none on"))
 	}
 	for _, n := range notes {
 		fmt.Println(muted.Render("  " + n))
 	}
-	fmt.Println(muted.Render("\nmyna tools <name> for one in full · myna tool <name> --<param> <value> … to call it"))
+	fmt.Println(muted.Render("\nowl tools <name> for one in full · owl tool <name> --<param> <value> … to call it"))
 	return nil
 }
 
@@ -408,7 +408,7 @@ func toolHelp(t listedTool) string {
 		}
 	}
 	if w := t.wordsParam(); w != "" {
-		fmt.Fprintf(&b, "\n  the words after the name are its --%s: myna tool %s <%s>\n", w, t.Name, w)
+		fmt.Fprintf(&b, "\n  the words after the name are its --%s: owl tool %s <%s>\n", w, t.Name, w)
 	}
 	return b.String()
 }
@@ -418,9 +418,9 @@ func unknownTool(name string, tools []listedTool, notes []string) error {
 	for _, t := range tools {
 		names = append(names, t.Name)
 	}
-	msg := fmt.Sprintf("no tool called %q: nothing was called; there is %s (myna tools)", name, strings.Join(names, ", "))
+	msg := fmt.Sprintf("no tool called %q: nothing was called; there is %s (owl tools)", name, strings.Join(names, ", "))
 	if len(names) == 0 {
-		msg = fmt.Sprintf("no tool called %q: the myna running has no tools on", name)
+		msg = fmt.Sprintf("no tool called %q: the owl running has no tools on", name)
 	}
 	if len(notes) > 0 {
 		msg += " (" + strings.Join(notes, "; ") + ")"
@@ -435,7 +435,7 @@ type toolCall struct {
 	json   bool
 }
 
-// parseToolArgs reads in, what follows myna tool <name>, against t's
+// parseToolArgs reads in, what follows owl tool <name>, against t's
 // parameters: nothing is called on an error.
 func parseToolArgs(t listedTool, in []string) (toolCall, error) {
 	c := toolCall{args: map[string]any{}}
@@ -476,7 +476,7 @@ func parseToolArgs(t listedTool, in []string) (toolCall, error) {
 		name, val, hasVal := strings.Cut(a[2:], "=")
 		key := paramKey(props, name)
 		if key == "" {
-			return c, fmt.Errorf("%s takes no --%s: nothing was called; it takes %s (myna tools %s)", t.Name, name, paramList(t), t.Name)
+			return c, fmt.Errorf("%s takes no --%s: nothing was called; it takes %s (owl tools %s)", t.Name, name, paramList(t), t.Name)
 		}
 		p := props[key]
 		if !hasVal {
@@ -540,7 +540,7 @@ func parseToolArgs(t listedTool, in []string) (toolCall, error) {
 		}
 	}
 	if len(missing) > 0 {
-		return c, fmt.Errorf("%s needs %s: nothing was called (myna tools %s)", t.Name, strings.Join(missing, " and "), t.Name)
+		return c, fmt.Errorf("%s needs %s: nothing was called (owl tools %s)", t.Name, strings.Join(missing, " and "), t.Name)
 	}
 	return c, nil
 }
@@ -679,10 +679,10 @@ func callTool(g *toolGateway, t listedTool, args map[string]any) (json.RawMessag
 	return res, err
 }
 
-// toolCmd: myna tool <name> [--<param> <value>…] [<words>…] [-o <path>] [--json]
+// toolCmd: owl tool <name> [--<param> <value>…] [<words>…] [-o <path>] [--json]
 func toolCmd(args []string) error {
 	if len(args) == 0 || strings.HasPrefix(args[0], "-") {
-		return errors.New("myna tool needs a tool's name first: myna tool <name> --<param> <value> … (myna tools lists them)")
+		return errors.New("owl tool needs a tool's name first: owl tool <name> --<param> <value> … (owl tools lists them)")
 	}
 	g := newToolGateway()
 	tools, notes, err := listTools(g)

@@ -1,11 +1,11 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // Settings → Privacy → Subscription accounts (#1535, MaxHaiCom): whether
-// myna reads the agents' own sign-ins (Claude Code's and Codex's files,
+// owl reads the agents' own sign-ins (Claude Code's and Codex's files,
 // the Keychain) at all. On by default; Off first asks, naming the
 // subscriptions it stops (#1761: a click that didn't mean it left a user with
 // none working), and Cancel leaves it on with nothing posted; taken, Off posts
 // settings/account-discovery {off:true} and is drawn chosen, a save of
-// another setting keeps it, On takes it back. With MYNA_NO_ACCOUNTS set
+// another setting keeps it, On takes it back. With OWL_NO_ACCOUNTS set
 // the row says so and shows Off. The row fits a narrow window without the
 // page scrolling sideways, and no click moves the page. Every language; no
 // backend, the API is faked here.
@@ -24,7 +24,7 @@ function settingsPayload(over) {
     dock: false, dockWindow: false, proxy: "", redact: false, redactPersonal: false, redactWords: [],
     codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", workbuddyCheckin: false, noStats: false,
     trayUsage: "", trayUsages: [], trayUsageEvery: 3, vision: "", imageGen: "",
-    version: "0.1.400", dir: "~/.config/myna", gateway: "http://127.0.0.1:3425",
+    version: "0.1.400", dir: "~/.config/owl", gateway: "http://127.0.0.1:3425",
     proxyNow: "none", proxySource: "none", login: false,
     visionModels: [], imageGenModels: [], workbuddyCheckins: [], lanURLs: [],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
@@ -78,7 +78,7 @@ async function open(browser, lang, width, posts, over) {
   page.setDefaultNavigationTimeout(60000);
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", server(lang, posts, over));
-  await page.goto("http://myna.test/?view=usage");
+  await page.goto("http://owl.test/?view=usage");
   await page.locator("#prefs").click();
   await openPart(page, "privacy");
   await page.locator("#discoveryList .opt").first().waitFor();
@@ -186,12 +186,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           await context.close();
         });
       }
-      // MYNA_NO_ACCOUNTS: off for this run, and the row says why
+      // OWL_NO_ACCOUNTS: off for this run, and the row says why
       await t.test(lang + " env", async () => {
         const { context, page, errors } = await open(browser, lang, 900, [], { noAccountsEnv: true });
         const box = page.locator("#discoveryList");
-        assert.equal(await box.locator(".opt").nth(0).evaluate((b) => b.classList.contains("on")), true, "Off under MYNA_NO_ACCOUNTS");
-        assert((await box.locator(".sub").textContent()).includes("MYNA_NO_ACCOUNTS"));
+        assert.equal(await box.locator(".opt").nth(0).evaluate((b) => b.classList.contains("on")), true, "Off under OWL_NO_ACCOUNTS");
+        assert((await box.locator(".sub").textContent()).includes("OWL_NO_ACCOUNTS"));
         assert.deepEqual(errors, []);
         await context.close();
       });

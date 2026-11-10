@@ -10,9 +10,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // listing is a relay that lists ids and answers each request with the
@@ -50,7 +50,7 @@ func listing(t *testing.T, a *asked, ids ...string) *httptest.Server {
 // deepseek-v4.1-flash-1017 as deepseek-v4.1-flash, grok-4.6@500k as
 // grok-4.6) is that id on every route an agent reaches it by — the model
 // list, a request by provider/model, by the bare id through the group
-// myna finds, both protocols, a gateway key held to it — and the relay
+// owl finds, both protocols, a gateway key held to it — and the relay
 // is asked for it by its own id, which the usage record keeps as served.
 func TestLocalModelIDOnEveryRoute(t *testing.T) {
 	fresh(t)
@@ -157,7 +157,7 @@ func TestLocalModelIDOnEveryRoute(t *testing.T) {
 		}
 	}
 
-	// the bare id is the group myna found over both relays
+	// the bare id is the group owl found over both relays
 	gid, ok := provider.GroupFor("deepseek-v4.1-flash")
 	if !ok {
 		t.Fatal("no found group for deepseek-v4.1-flash")

@@ -142,8 +142,8 @@ async function open(page, lang, width, latest) {
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", serve(lang, [], latest));
-  await page.addInitScript(() => { try { if (!sessionStorage.getItem("set")) { localStorage.clear(); localStorage.setItem("myna.usageTab", "context"); sessionStorage.setItem("set", "1"); } } catch {} });
-  await page.goto("http://myna.test/?view=usage");
+  await page.addInitScript(() => { try { if (!sessionStorage.getItem("set")) { localStorage.clear(); localStorage.setItem("owl.usageTab", "context"); sessionStorage.setItem("set", "1"); } } catch {} });
+  await page.goto("http://owl.test/?view=usage");
   const card = await openSession(page);
   return { errors, card };
 }
@@ -251,7 +251,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal(await card.locator(".ctx-waffle > i").count(), 400);
         assert.ok(await map.isHidden());
         assert.equal(await card.locator(".ctx-look-b.on").getAttribute("aria-label"), w.grid);
-        assert.equal(await page.evaluate(() => localStorage.getItem("myna.ctxLook")), "grid");
+        assert.equal(await page.evaluate(() => localStorage.getItem("owl.ctxLook")), "grid");
         await page.reload();
         card = await openSession(page);
         await card.locator(".ctx-waffle > i").first().waitFor();
@@ -260,7 +260,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await wheelTo(page, card.locator(".ctx-look"));
         await card.locator('.ctx-look-b[data-k="map"]').click();
         await card.locator(".ctx-map .ctx-tile.free").waitFor();
-        assert.equal(await page.evaluate(() => localStorage.getItem("myna.ctxLook")), "map");
+        assert.equal(await page.evaluate(() => localStorage.getItem("owl.ctxLook")), "map");
 
         assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), "the page scrolls sideways");
         assert.deepEqual(errors, []);

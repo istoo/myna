@@ -4,11 +4,11 @@ import (
 	"cmp"
 	"net/http"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // museContext and museOutput are what Muse is told of a model whose window
-// or reply size myna doesn't know.
+// or reply size owl doesn't know.
 const (
 	museContext = 128000
 	museOutput  = 32000
@@ -34,10 +34,10 @@ func (s *Server) museModels(w http.ResponseWriter, r *http.Request) {
 			"attachment": e.Images, "reasoning": len(e.Efforts) > 0, "temperature": false, "tool_call": true,
 			"modalities": map[string]any{"input": input, "output": []string{"text"}},
 			"options":    map[string]any{"include": []string{}}, "variants": map[string]any{},
-			"description": labels[i] + " via myna"}
+			"description": labels[i] + " via owl"}
 		// the window and the most a reply may hold: Muse hides a model
 		// whose limit lacks either, and without a limit asks for replies
-		// of 128K tokens, more than most models give; one myna doesn't
+		// of 128K tokens, more than most models give; one owl doesn't
 		// know is told 128K and Muse's own 32K
 		ctx, out := cmp.Or(e.Context, museContext), e.PublishedOutput()
 		if out <= 0 {

@@ -46,8 +46,8 @@ func TestDiscoverTerminalsOffersRex(t *testing.T) {
 	if err := openTerminal("cd '/tmp' && claude --resume x", "Fix the build", rexBundleID); err != nil {
 		t.Fatal(err)
 	}
-	if f.bin != "/opt/rex/bin/rex" || len(f.sessions) != 3 || f.sessions[2].label != "myna" || !slices.Equal(f.sessions[2].windows, []string{"Fix the build"}) {
-		t.Fatalf("rex ran %q, sessions %+v: want a myna session, its tab named for the session's title", f.ran, f.sessions)
+	if f.bin != "/opt/rex/bin/rex" || len(f.sessions) != 3 || f.sessions[2].label != "owl" || !slices.Equal(f.sessions[2].windows, []string{"Fix the build"}) {
+		t.Fatalf("rex ran %q, sessions %+v: want a owl session, its tab named for the session's title", f.ran, f.sessions)
 	}
 	ran := len(f.ran)
 	rexFound = func() string { return "" }

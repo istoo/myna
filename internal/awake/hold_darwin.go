@@ -4,12 +4,12 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/proc"
 )
 
 // takeHold runs caffeinate -i, which keeps the Mac from idle sleep while it
-// runs, with -d its display from sleeping too; -w ends it with myna should
-// myna end without letting go.
+// runs, with -d its display from sleeping too; -w ends it with owl should
+// owl end without letting go.
 func takeHold(display bool) (func(), error) {
 	cmd := proc.Command("/usr/bin/caffeinate", caffeinateArgs(display, os.Getpid())...)
 	if err := cmd.Start(); err != nil {

@@ -12,7 +12,7 @@
 // hooks are what the shell asks of it: open, refresh (the window came
 // back), reload (Refresh in the sidebar), leave, and focus (a masked
 // call's badge opens its request).
-myna.plugin("redact", (ctx) => {
+owl.plugin("redact", (ctx) => {
   ctx.slots.add("page", {
     key: "masking",
     title: "Masking",

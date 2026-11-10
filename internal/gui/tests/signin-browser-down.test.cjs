@@ -39,7 +39,7 @@ function server(lang, st) {
     }
     if (url.pathname === "/api/library") {
       return json({
-        dir: "/h/.myna/library", backups: "/h/.myna/backups", home: "/h",
+        dir: "/h/.owl/library", backups: "/h/.owl/backups", home: "/h",
         agents: [{ id: "codex", name: "Codex", icon: "", skills: "/h/.codex/skills", mcp: "/h/.codex/mcp.json" }],
         instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [], skills: [],
         servers: [{ name: "cloudflare-api", transport: "http", url: "https://mcp.cloudflare.com/mcp", agents: ["codex"], signIn: { signedIn: false } }],
@@ -56,11 +56,11 @@ function server(lang, st) {
 }
 
 const W = {
-  en: { anyway: "Sign in anyway", again: "Open again", signIn: "Sign in", down: "myna couldn't open your browser: " + DOWN + ". Open the sign-in link below in a browser yourself." },
-  zh: { anyway: "仍然登录", again: "重新打开", signIn: "登录", down: "myna 没能打开浏览器：" + DOWN + "。请自己在浏览器中打开下面的登录链接。" },
-  "zh-TW": { anyway: "仍然登入", again: "重新開啟", signIn: "登入", down: "myna 無法開啟瀏覽器：" + DOWN + "。請自行在瀏覽器中開啟下方的登入連結。" },
-  ja: { anyway: "それでもサインイン", again: "もう一度開く", signIn: "サインイン", down: "myna はブラウザを開けませんでした：" + DOWN + "。下のサインインリンクをご自身でブラウザで開いてください。" },
-  de: { anyway: "Trotzdem anmelden", again: "Erneut öffnen", signIn: "Anmelden", down: "myna konnte den Browser nicht öffnen: " + DOWN + ". Öffne den Anmeldelink unten selbst in einem Browser." },
+  en: { anyway: "Sign in anyway", again: "Open again", signIn: "Sign in", down: "owl couldn't open your browser: " + DOWN + ". Open the sign-in link below in a browser yourself." },
+  zh: { anyway: "仍然登录", again: "重新打开", signIn: "登录", down: "owl 没能打开浏览器：" + DOWN + "。请自己在浏览器中打开下面的登录链接。" },
+  "zh-TW": { anyway: "仍然登入", again: "重新開啟", signIn: "登入", down: "owl 無法開啟瀏覽器：" + DOWN + "。請自行在瀏覽器中開啟下方的登入連結。" },
+  ja: { anyway: "それでもサインイン", again: "もう一度開く", signIn: "サインイン", down: "owl はブラウザを開けませんでした：" + DOWN + "。下のサインインリンクをご自身でブラウザで開いてください。" },
+  de: { anyway: "Trotzdem anmelden", again: "Erneut öffnen", signIn: "Anmelden", down: "owl konnte den Browser nicht öffnen: " + DOWN + ". Öffne den Anmeldelink unten selbst in einem Browser." },
 };
 
 // nothing reaches past the window's right edge
@@ -84,7 +84,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, st));
-        await page.goto("http://myna.test/?view=providers");
+        await page.goto("http://owl.test/?view=providers");
         await page.locator("#addProvider").click();
         const sheet = page.locator("#addSheet");
         await sheet.locator('.tile[data-pick="Factory"]').click();
@@ -114,13 +114,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
         // an MCP server's sign-in
         const ctx = await browser.newContext({ viewport: { width, height: 800 }, reducedMotion: "reduce" });
-        await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "mcp"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("owl.libTab", "mcp"); } catch {} });
         page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, st));
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         await navTo(page, "library");
         await page.locator("#view-library .lib-row", { has: page.locator(".name", { hasText: /^cloudflare-api/ }) }).click();
         const lib = page.locator("#modal .lib-signin");

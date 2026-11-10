@@ -9,10 +9,10 @@ package agent
 // sessions start on is the top-level model, one of those Muse lists from
 // <base_url's host>/muse-code/models, which the gateway serves it.
 //
-// myna sets endpoint_transport to the gateway with auth "none" — so the
-// Meta sign-in's token, which myna never reads, isn't sent to it either —
+// owl sets endpoint_transport to the gateway with auth "none" — so the
+// Meta sign-in's token, which owl never reads, isn't sent to it either —
 // and model to the catalog id; the endpoint_transport and model the user had
-// are stashed and put back when myna steps out, and the file's other keys
+// are stashed and put back when owl steps out, and the file's other keys
 // are left as they are.
 
 import (
@@ -22,7 +22,7 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/owl/internal/edit"
 )
 
 const (
@@ -44,19 +44,19 @@ func museAt(at place, cfg string) *Agent {
 	path := filepath.Join(dir, "settings.json")
 	keyTransport := "muse:" + path + ":" + museTransport
 	keyModel := "muse:" + path + ":" + museModel
-	// keyNew marks a file myna made, which goes again once nothing but
-	// the schema version myna gave it is left
+	// keyNew marks a file owl made, which goes again once nothing but
+	// the schema version owl gave it is left
 	keyNew := "muse:" + path + ":new"
 	// ours: Muse's requests go to the gateway
 	ours := func() bool { v, _ := edit.GetJSON(path, museTransport+".base_url"); return v == gatewayV1() }
 	model := func() string { v, _ := edit.GetJSON(path, museModel); return v }
-	// on: myna's — the endpoint is the gateway's, or the model one of
-	// myna's catalog, which no other endpoint serves (Meta's have no "/")
-	on := func() bool { return ours() || isMyna(model()) }
+	// on: owl's — the endpoint is the gateway's, or the model one of
+	// owl's catalog, which no other endpoint serves (Meta's have no "/")
+	on := func() bool { return ours() || isOwl(model()) }
 	get := func() string {
 		v := model()
 		if v != "" && on() {
-			return mynaID + "/" + v
+			return owlID + "/" + v
 		}
 		return v
 	}
@@ -68,7 +68,7 @@ func museAt(at place, cfg string) *Agent {
 		return edit.SetJSON(path, edit.KV{Path: museModel, Value: v})
 	}
 	// restore puts back the endpoint_transport the user had, or takes
-	// myna's out where they had none
+	// owl's out where they had none
 	restore := func() error {
 		if was := unstash(keyTransport); was != "" && json.Valid([]byte(was)) {
 			return edit.SetJSON(path, edit.KV{Path: museTransport, Value: json.RawMessage(was)})
@@ -91,7 +91,7 @@ func museAt(at place, cfg string) *Agent {
 				return ""
 			}
 			if model() == "" {
-				return "Muse Code's model (settings.json) is gone, so it no longer reaches myna"
+				return "Muse Code's model (settings.json) is gone, so it no longer reaches owl"
 			}
 			return wiringOff("Muse Code", path, func(k string) (string, bool) { return edit.GetJSON(path, museTransport+"."+k) },
 				"base_url", gatewayV1(), "auth", "none")
@@ -100,8 +100,8 @@ func museAt(at place, cfg string) *Agent {
 			Key: "model", Label: "model",
 			Get: get,
 			Set: func(v string) error {
-				if ref, ok := strings.CutPrefix(v, mynaID+"/"); ok && isMyna(ref) {
-					// what the user had, unless myna stashed it already
+				if ref, ok := strings.CutPrefix(v, owlID+"/"); ok && isOwl(ref) {
+					// what the user had, unless owl stashed it already
 					// and something else has since moved the endpoint
 					if !on() {
 						t, _ := edit.GetJSON(path, museTransport)
@@ -150,10 +150,10 @@ func museAt(at place, cfg string) *Agent {
 			},
 			Options: func(cur map[string]string) []Option {
 				var own []Option
-				if c := cur["model"]; c != "" && !usesMyna(c) {
+				if c := cur["model"]; c != "" && !usesOwl(c) {
 					own = append(own, Option{Value: c, Icon: museIcon(c)})
 				}
-				return withVia(group("Muse Code", own), "muse", mynaID+"/")
+				return withVia(group("Muse Code", own), "muse", owlID+"/")
 			},
 		}},
 	}, path)

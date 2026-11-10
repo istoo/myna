@@ -1,11 +1,11 @@
-// Package codexsummary is the compaction myna answers Codex with when it
-// compacts a conversation itself (a model of myna's, or Codex's own
-// models through myna's accounts), and the message it stands for.
+// Package codexsummary is the compaction owl answers Codex with when it
+// compacts a conversation itself (a model of owl's, or Codex's own
+// models through owl's accounts), and the message it stands for.
 //
 // Codex keeps a compaction item whole, encrypted_content and all, in its
-// rollout, and sends it back as it is with every later turn. myna's is
-// "myna1:" and the summary in base64, which only myna reads: sent to
-// OpenAI itself (myna quit, or disconnected) it is refused as
+// rollout, and sends it back as it is with every later turn. owl's is
+// "owl1:" and the summary in base64, which only owl reads: sent to
+// OpenAI itself (owl quit, or disconnected) it is refused as
 // invalid_encrypted_content, and the conversation can't go on (LukeMa on
 // X). What it is read as is the message Codex's own local compaction
 // keeps in its place: its summary prefix, a newline and the summary, as a
@@ -19,22 +19,22 @@ import (
 	"strings"
 )
 
-// Mark begins the encrypted_content of a compaction item myna made.
-const Mark = "myna1:"
+// Mark begins the encrypted_content of a compaction item owl made.
+const Mark = "owl1:"
 
 // Prefix is Codex's own (Apache-2.0, openai/codex,
 // prompts/templates/compact/summary_prefix.md).
 const Prefix = `Another language model started to solve this problem and produced a summary of its thinking process. You also have access to the state of the tools that were used by that language model. Use this to build on the work that has already been done and avoid duplicating work. Here is the summary produced by the other language model, use the information in this summary to assist with your own analysis:`
 
-// Encrypted is the encrypted_content of myna's compaction item for a
+// Encrypted is the encrypted_content of owl's compaction item for a
 // summary.
 func Encrypted(summary string) string {
 	return Mark + base64.StdEncoding.EncodeToString([]byte(summary))
 }
 
 // Message is what a compaction item's encrypted_content is read as: ours
-// is false for one myna didn't make (OpenAI's own, left as it is), and
-// msg nil for one of myna's whose summary can't be read, which is left
+// is false for one owl didn't make (OpenAI's own, left as it is), and
+// msg nil for one of owl's whose summary can't be read, which is left
 // out.
 func Message(encrypted string) (msg map[string]any, ours bool) {
 	b64, ok := strings.CutPrefix(encrypted, Mark)

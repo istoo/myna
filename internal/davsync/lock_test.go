@@ -14,10 +14,10 @@ import (
 	"time"
 )
 
-// TestLockHolder is the other myna of TestLock: it takes the lock, says
+// TestLockHolder is the other owl of TestLock: it takes the lock, says
 // so, and holds it until it is killed.
 func TestLockHolder(t *testing.T) {
-	if os.Getenv("MYNA_LOCK_HOLDER") == "" {
+	if os.Getenv("OWL_LOCK_HOLDER") == "" {
 		t.Skip("run by TestLock")
 	}
 	if _, err := lock(context.Background()); err != nil {
@@ -31,23 +31,23 @@ func TestLock(t *testing.T) {
 	newComputer(t).use(t)
 	ctx := context.Background()
 
-	// another myna holds it: this one waits, and gives up when told to
+	// another owl holds it: this one waits, and gives up when told to
 	holder := exec.Command(os.Args[0], "-test.run=^TestLockHolder$")
-	holder.Env = append(os.Environ(), "MYNA_LOCK_HOLDER=1")
+	holder.Env = append(os.Environ(), "OWL_LOCK_HOLDER=1")
 	out, _ := holder.StdoutPipe()
 	if err := holder.Start(); err != nil {
 		t.Fatal(err)
 	}
 	defer holder.Process.Kill()
 	if line, _ := bufio.NewReader(out).ReadString('\n'); line != "locked\n" {
-		t.Fatalf("the other myna: %q", line)
+		t.Fatalf("the other owl: %q", line)
 	}
 	short, cancel := context.WithTimeout(ctx, 300*time.Millisecond)
 	defer cancel()
 	if _, err := lock(short); !errors.Is(err, ErrBusy) {
-		t.Fatalf("taken while another myna held it: %v", err)
+		t.Fatalf("taken while another owl held it: %v", err)
 	}
-	// a wait called off, not run out, isn't another myna's doing
+	// a wait called off, not run out, isn't another owl's doing
 	called, stop := context.WithCancel(ctx)
 	time.AfterFunc(100*time.Millisecond, stop)
 	if _, err := lock(called); !errors.Is(err, context.Canceled) {
@@ -62,7 +62,7 @@ func TestLock(t *testing.T) {
 	defer cancel()
 	unlock, err := lock(short)
 	if err != nil {
-		t.Fatalf("after the other myna was killed: %v", err)
+		t.Fatalf("after the other owl was killed: %v", err)
 	}
 
 	// Off waits for a sync in progress, and goes on once it is done
@@ -80,8 +80,8 @@ func TestLock(t *testing.T) {
 }
 
 // What reads or writes the setup does it under the lock: a sync that
-// waited for another myna's reads the setup again, and does nothing when
-// that myna turned sync off meanwhile; Configure waits its turn.
+// waited for another owl's reads the setup again, and does nothing when
+// that owl turned sync off meanwhile; Configure waits its turn.
 func TestLockedSetup(t *testing.T) {
 	newComputer(t).use(t)
 	var reqs atomic.Int32
@@ -96,7 +96,7 @@ func TestLockedSetup(t *testing.T) {
 	}
 	ctx := context.Background()
 
-	unlock, err := lock(ctx) // another myna's sync
+	unlock, err := lock(ctx) // another owl's sync
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -122,7 +122,7 @@ func TestLockedSetup(t *testing.T) {
 	go func() { done <- Configure(cfg) }()
 	select {
 	case err := <-done:
-		t.Fatalf("configured while another myna held the lock: %v", err)
+		t.Fatalf("configured while another owl held the lock: %v", err)
 	case <-time.After(300 * time.Millisecond):
 	}
 	unlock()

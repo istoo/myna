@@ -8,12 +8,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/lastgood"
-	"github.com/istoo/myna/internal/steady"
+	"github.com/istoo/owl/internal/lastgood"
+	"github.com/istoo/owl/internal/steady"
 )
 
 // #1505: a Windows machine that went down mid-write left logins.json at
-// its full length, 10,783 bytes, every one 0x00, and myna started with
+// its full length, 10,783 bytes, every one 0x00, and owl started with
 // no accounts. Its last good generation, kept beside it, is read instead,
 // and the user told.
 func TestZeroedLoginsReadFromBackup(t *testing.T) {
@@ -29,7 +29,7 @@ func TestZeroedLoginsReadFromBackup(t *testing.T) {
 	if _, err := os.Stat(lastgood.Bak(p)); err != nil {
 		t.Fatalf("no last good generation kept: %v", err)
 	}
-	// the crash: the file as Zhangwier found it, and myna starting anew
+	// the crash: the file as Zhangwier found it, and owl starting anew
 	if err := os.WriteFile(p, make([]byte, 10783), 0o600); err != nil {
 		t.Fatal(err)
 	}

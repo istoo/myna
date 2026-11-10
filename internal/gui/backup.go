@@ -11,12 +11,12 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/backup"
-	"github.com/istoo/myna/internal/davsync"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/backup"
+	"github.com/istoo/owl/internal/davsync"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // backupRoutes are the Settings page's Export and Import, and the WebDAV
@@ -53,12 +53,12 @@ func backupRoutes(mux *http.ServeMux, w Windows) {
 			return
 		}
 		dir := downloads()
-		name := filepath.Join(dir, "myna-"+time.Now().Format("2006-01-02")+backup.Ext)
+		name := filepath.Join(dir, "owl-"+time.Now().Format("2006-01-02")+backup.Ext)
 		for i := 2; ; i++ { // never over an earlier one
 			if _, err := os.Stat(name); err != nil {
 				break
 			}
-			name = filepath.Join(dir, fmt.Sprintf("myna-%s-%d%s", time.Now().Format("2006-01-02"), i, backup.Ext))
+			name = filepath.Join(dir, fmt.Sprintf("owl-%s-%d%s", time.Now().Format("2006-01-02"), i, backup.Ext))
 		}
 		if err := edit.WriteAtomic(name, data); err != nil {
 			fail(rw, err)
@@ -261,7 +261,7 @@ func autoView() backup.AutoView {
 
 // writable says whether a file can be made in dir.
 func writable(dir string) error {
-	f, err := os.CreateTemp(dir, ".myna-backup-*.tmp")
+	f, err := os.CreateTemp(dir, ".owl-backup-*.tmp")
 	if err != nil {
 		return err
 	}
@@ -270,7 +270,7 @@ func writable(dir string) error {
 }
 
 // busy is what of a sync's failure the status doesn't hold: that it waited
-// its time out for another myna's. The rest is in the status.
+// its time out for another owl's. The rest is in the status.
 func busy(err error) error {
 	if errors.Is(err, davsync.ErrBusy) {
 		return err

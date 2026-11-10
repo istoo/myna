@@ -13,7 +13,7 @@ import (
 	"testing"
 )
 
-// desktopFixture is myna.exe on a Desktop, with myna's cache
+// desktopFixture is owl.exe on a Desktop, with owl's cache
 // elsewhere and a release asset to download.
 type desktopFixture struct {
 	desktop, exe, cache string
@@ -26,10 +26,10 @@ func newDesktopFixture(t *testing.T) *desktopFixture {
 	root := t.TempDir()
 	f := &desktopFixture{
 		desktop: filepath.Join(root, "Desktop"),
-		cache:   filepath.Join(root, "Local", "myna"),
+		cache:   filepath.Join(root, "Local", "owl"),
 		body:    []byte("MZ the next version"),
 	}
-	f.exe = filepath.Join(f.desktop, "myna.exe")
+	f.exe = filepath.Join(f.desktop, "owl.exe")
 	if err := os.MkdirAll(f.desktop, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -47,7 +47,7 @@ func newDesktopFixture(t *testing.T) *desktopFixture {
 	return f
 }
 
-// what is in the Desktop besides myna.exe and what an update moved
+// what is in the Desktop besides owl.exe and what an update moved
 // aside (removed at the next start, RemoveOld)
 func (f *desktopFixture) beside(t *testing.T) []string {
 	t.Helper()
@@ -57,15 +57,15 @@ func (f *desktopFixture) beside(t *testing.T) []string {
 	}
 	var out []string
 	for _, e := range es {
-		if n := e.Name(); n != "myna.exe" && n != "myna.exe.old" {
+		if n := e.Name(); n != "owl.exe" && n != "owl.exe.old" {
 			out = append(out, n)
 		}
 	}
 	return out
 }
 
-// An update waiting for the next restart is downloaded to myna's cache,
-// not beside the program as myna.exe.new, which showed on a Desktop and
+// An update waiting for the next restart is downloaded to owl's cache,
+// not beside the program as owl.exe.new, which showed on a Desktop and
 // came back after it was deleted (nianshou5 on Discord). The swap still
 // puts it in, and leaves nothing of the download behind.
 func TestUpdateStagedOutOfTheProgramsFolder(t *testing.T) {
@@ -75,7 +75,7 @@ func TestUpdateStagedOutOfTheProgramsFolder(t *testing.T) {
 		t.Fatal(err)
 	}
 	if got := f.beside(t); len(got) != 0 {
-		t.Fatalf("beside myna.exe while the update waits: %v", got)
+		t.Fatalf("beside owl.exe while the update waits: %v", got)
 	}
 	if !inFolder(staged, f.cache) {
 		t.Fatalf("staged at %s, not in the cache %s", staged, f.cache)
@@ -84,10 +84,10 @@ func TestUpdateStagedOutOfTheProgramsFolder(t *testing.T) {
 		t.Fatal(err)
 	}
 	if b, _ := os.ReadFile(f.exe); string(b) != string(f.body) {
-		t.Fatalf("myna.exe after the swap: %q", b)
+		t.Fatalf("owl.exe after the swap: %q", b)
 	}
 	if got := f.beside(t); len(got) != 0 {
-		t.Fatalf("beside myna.exe after the swap: %v", got)
+		t.Fatalf("beside owl.exe after the swap: %v", got)
 	}
 	if es, _ := os.ReadDir(filepath.Join(f.cache, "update")); len(es) != 0 {
 		t.Fatalf("left in the cache: %v", es)
@@ -103,11 +103,11 @@ func TestUpdateStagedHiddenWithoutTheCache(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if want := filepath.Join(f.desktop, besideStage, "myna.exe.new"); staged != want {
+	if want := filepath.Join(f.desktop, besideStage, "owl.exe.new"); staged != want {
 		t.Fatalf("staged at %s, want %s", staged, want)
 	}
 	if got := f.beside(t); !slices.Equal(got, []string{besideStage}) {
-		t.Fatalf("beside myna.exe while the update waits: %v", got)
+		t.Fatalf("beside owl.exe while the update waits: %v", got)
 	}
 	if !hiddenForTest(filepath.Join(f.desktop, besideStage)) {
 		t.Fatal(besideStage + " isn't hidden")
@@ -116,7 +116,7 @@ func TestUpdateStagedHiddenWithoutTheCache(t *testing.T) {
 		t.Fatal(err)
 	}
 	if got := f.beside(t); len(got) != 0 {
-		t.Fatalf("beside myna.exe after the swap: %v", got)
+		t.Fatalf("beside owl.exe after the swap: %v", got)
 	}
 }
 
@@ -130,16 +130,16 @@ func TestFailedDownloadLeavesNothing(t *testing.T) {
 		t.Fatal("a download that doesn't match its checksum was staged")
 	}
 	if got := f.beside(t); len(got) != 0 {
-		t.Fatalf("beside myna.exe: %v", got)
+		t.Fatalf("beside owl.exe: %v", got)
 	}
 	if es, _ := os.ReadDir(filepath.Join(f.cache, "update")); len(es) != 0 {
 		t.Fatalf("left in the cache: %v", es)
 	}
 }
 
-// What an earlier version downloaded beside the program (myna.exe.new)
+// What an earlier version downloaded beside the program (owl.exe.new)
 // goes at the next start once it is no newer than the program: an older
-// version, or this one over again. A newer one, which a myna still
+// version, or this one over again. A newer one, which a owl still
 // running may put in, stays.
 func TestStartClearsAnOlderDownloadBeside(t *testing.T) {
 	f := newDesktopFixture(t)
@@ -152,13 +152,13 @@ func TestStartClearsAnOlderDownloadBeside(t *testing.T) {
 	versions[left] = 4
 	RemoveStaleNew(f.exe)
 	if exists(left) {
-		t.Fatal("an older myna.exe.new was kept")
+		t.Fatal("an older owl.exe.new was kept")
 	}
 	os.WriteFile(left, []byte("MZ a newer one"), 0o755)
 	versions[left] = 6
 	RemoveStaleNew(f.exe)
 	if !exists(left) {
-		t.Fatal("a newer myna.exe.new was removed")
+		t.Fatal("a newer owl.exe.new was removed")
 	}
 	// the same in the cache
 	staged, err := stageBinaryFor(context.Background(), f.asset, f.exe)
@@ -172,7 +172,7 @@ func TestStartClearsAnOlderDownloadBeside(t *testing.T) {
 	}
 }
 
-// A start of a myna on the Desktop doesn't put myna.com back there
+// A start of a owl on the Desktop doesn't put owl.com back there
 // once deleted, though the Desktop is on PATH; one there is kept up to
 // date, and Add (cliPlace's writeCom) still writes it.
 func TestNoCompanionPutBackOnTheDesktop(t *testing.T) {
@@ -181,29 +181,29 @@ func TestNoCompanionPutBackOnTheDesktop(t *testing.T) {
 	t.Cleanup(func() { comLauncher, downloadFolder, installTarget = was, wasDL, wasTo })
 	comLauncher = []byte("MZ launcher")
 	downloadFolder = func(dir string) bool { return samePath(dir, f.desktop) }
-	installTarget = func() string { return "" } // runs where it is (portable, MYNA_NO_INSTALL)
+	installTarget = func() string { return "" } // runs where it is (portable, OWL_NO_INSTALL)
 	t.Setenv("PATH", f.desktop)
 	com := filepath.Join(f.desktop, comName)
 	if err := EnsureCompanion(f.exe); err != nil || exists(com) {
-		t.Fatalf("myna.com written on the Desktop: %v", err)
+		t.Fatalf("owl.com written on the Desktop: %v", err)
 	}
 	if _, err := writeCom([]byte("MZ older launcher"), f.exe); err != nil {
 		t.Fatal(err)
 	}
 	if err := EnsureCompanion(f.exe); err != nil || !comRuns(com, f.exe) {
-		t.Fatalf("myna.com there not kept: %v", err)
+		t.Fatalf("owl.com there not kept: %v", err)
 	}
 	if b, _ := os.ReadFile(com); string(b) != string(comText(comLauncher, f.exe)) {
-		t.Fatal("myna.com there not brought up to date")
+		t.Fatal("owl.com there not brought up to date")
 	}
 	os.Remove(com)
 	if err := EnsureCompanion(f.exe); err != nil || exists(com) {
-		t.Fatalf("a deleted myna.com came back: %v", err)
+		t.Fatalf("a deleted owl.com came back: %v", err)
 	}
 	// a folder of the user's own on PATH is as before
-	other := filepath.Join(t.TempDir(), "myna.exe")
+	other := filepath.Join(t.TempDir(), "owl.exe")
 	t.Setenv("PATH", filepath.Dir(other))
 	if err := EnsureCompanion(other); err != nil || !exists(filepath.Join(filepath.Dir(other), comName)) {
-		t.Fatalf("myna.com not written in a folder of the user's on PATH: %v", err)
+		t.Fatalf("owl.com not written in a folder of the user's on PATH: %v", err)
 	}
 }

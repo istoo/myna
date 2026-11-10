@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// The header's logo and name: in `myna web` they're shown whatever the
+// The header's logo and name: in `owl web` they're shown whatever the
 // machine, since a browser tab has no title bar of the app's to show them
 // (they were hidden everywhere but a Mac or Linux window); in the Windows
 // window they stay hidden, its title bar already has them.
@@ -51,7 +51,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(c.web));
-      await page.goto("http://myna.test/");
+      await page.goto("http://owl.test/");
       await page.waitForSelector("#nav button.on");
       const where = `${c.web ? "web" : "window"} on ${c.platform} at ${width}px`;
       const side = width >= 1024;
@@ -61,7 +61,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.ok(await brand.locator(".logo svg").isVisible(), `${where}: logo`);
         // a header short of room keeps the logo only (fitTop's tight)
         const tight = !side && await page.locator(".top.tight").count();
-        if (!tight) assert.ok(await brand.getByText("myna", { exact: true }).isVisible(), `${where}: name`);
+        if (!tight) assert.ok(await brand.getByText("owl", { exact: true }).isVisible(), `${where}: name`);
         // beside the tabs, not under them; above the sidebar's pages
         const [b, n] = [await brand.boundingBox(), await page.locator("#nav").boundingBox()];
         if (side) assert.ok(b.y + b.height <= n.y, `${where}: ${JSON.stringify(b)} overlaps the pages ${JSON.stringify(n)}`);

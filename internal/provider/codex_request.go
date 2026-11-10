@@ -15,9 +15,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/codexcat"
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/codexcat"
+	"github.com/istoo/owl/internal/proc"
 )
 
 // A ChatGPT account's requests are made the way Codex CLI makes them, as
@@ -158,7 +158,7 @@ func codexOS() string {
 }
 
 // codexPromptsPath is where the instructions of the account's models are
-// kept, next to its model list, for every myna process to find.
+// kept, next to its model list, for every owl process to find.
 func codexPromptsPath() string {
 	return filepath.Join(filepath.Dir(catalog.LivePath("codex")), "codex-prompts.json")
 }
@@ -253,7 +253,7 @@ var savedPrompts, codexCLIPrompts promptFile
 
 // codexInstructions is what Codex CLI would send as a model's
 // instructions: the account's model list's, Codex CLI's own copy of it
-// when myna hasn't asked yet, else its bundled catalog's for the model,
+// when owl hasn't asked yet, else its bundled catalog's for the model,
 // or Codex's prompt for a model it doesn't know (codexcat.Official).
 func codexInstructions(model string) string {
 	if s, ok := savedPrompts.get(codexPromptsPath(), model, func(b []byte) map[string]string {
@@ -504,7 +504,7 @@ func orphanOutput(it map[string]any, id string) map[string]any {
 // 200, then only an error event, "response protection is unavailable"
 // (#1270). Codex's turns declare the tool when search is on, but not every
 // request carrying the conversation does: a compaction Codex makes on its
-// own for a custom provider (tools: []), myna's summary request for a
+// own for a custom provider (tools: []), owl's summary request for a
 // compaction_trigger, a thread's description, a turn with function tools
 // alone. Each failed so on a real account, and each went through once the
 // tool was declared. The tool declared is the cached-only one, which

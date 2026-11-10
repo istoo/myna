@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A gateway key that names an account and no model (Linka on Discord:
@@ -108,11 +108,11 @@ func TestGatewayKeyAccountsOnlyHoldTheModels(t *testing.T) {
 	refused("embeddings", do(secrets[0], "POST", "/v1/embeddings", `{"model":"spare/m2","input":"hi"}`))
 	refused("codex backend", do(secrets[0], "POST", CodexPath+"/responses", `{"model":"spare/m2","input":"hi","stream":true}`))
 	refused("system one", do(secrets[0], "POST", "/v1/systemone", `{"model":"jev/jev-latest","state":{"message":"hi"},"questions":{"intent":{"type":"choice"}}}`))
-	refused("images", do(secrets[0], "POST", "/v1/images/generations", `{"model":"art/gpt-image-1","prompt":"a myna"}`))
+	refused("images", do(secrets[0], "POST", "/v1/images/generations", `{"model":"art/gpt-image-1","prompt":"a owl"}`))
 	if spare.calls != 0 || decided != 0 || drew != 0 {
 		t.Fatal("a held request reached another provider", spare.calls, decided, drew)
 	}
-	if w := do(secrets[1], "POST", "/v1/images/generations", `{"model":"art/gpt-image-1","prompt":"a myna"}`); w.Code != 200 || drew != 1 {
+	if w := do(secrets[1], "POST", "/v1/images/generations", `{"model":"art/gpt-image-1","prompt":"a owl"}`); w.Code != 200 || drew != 1 {
 		t.Errorf("a free key's drawing: %d %s", w.Code, w.Body.String())
 	}
 

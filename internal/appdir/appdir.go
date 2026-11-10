@@ -1,43 +1,43 @@
-// Package appdir decides where myna keeps its own files: the one place
+// Package appdir decides where owl keeps its own files: the one place
 // every other package asks (#508).
 //
-// Installed, that is ~/.config/myna ($XDG_CONFIG_HOME/myna) for what
-// myna keeps and ~/.cache/myna ($XDG_CACHE_HOME/myna) for what it
+// Installed, that is ~/.config/owl ($XDG_CONFIG_HOME/owl) for what
+// owl keeps and ~/.cache/owl ($XDG_CACHE_HOME/owl) for what it
 // can fetch again, as it always was. Portable, when a folder named "data"
-// (or a file named ".portable") sits beside myna, everything myna
+// (or a file named ".portable") sits beside owl, everything owl
 // keeps goes into that data folder, its caches into data/cache and the
 // Windows webview's profile into data/webview2 (no Start-menu shortcut or
 // App Paths entry is made either), and
-// nothing of myna's own is written to the user's profile, the way VS
-// Code's portable mode works. "Beside myna" is the folder holding the
+// nothing of owl's own is written to the user's profile, the way VS
+// Code's portable mode works. "Beside owl" is the folder holding the
 // executable, with links followed; for a Mac app it is the folder holding
-// Myna.app (a file put inside the bundle would break its signature), and
+// Owl.app (a file put inside the bundle would break its signature), and
 // for an AppImage the folder holding the .AppImage file, not the folder it
 // is mounted at while it runs.
 //
-// What isn't myna's own stays where its owner reads it: the agents'
+// What isn't owl's own stays where its owner reads it: the agents'
 // configs (~/.claude, ~/.codex…), the sign-ins they keep in the system
 // keychain, the folders the OS reads for autostart and link handling, and
 // temporary folders.
 //
 // A data folder in a folder every app or download shares (/Applications on
 // a Mac; the home folder, Downloads, Desktop and Documents everywhere) is
-// taken for myna's own only when it already holds myna's files and the
+// taken for owl's own only when it already holds owl's files and the
 // installed folder doesn't, or with a ".portable" marker: a "data" folder
 // there is as likely another app's or the user's own. Taking one showed a
-// user who had never asked for portable an empty myna (#989), and wrote
-// myna's files into a Downloads\data folder a Windows user's archiver
+// user who had never asked for portable an empty owl (#989), and wrote
+// owl's files into a Downloads\data folder a Windows user's archiver
 // empties, so a provider just added was gone (tangle778 on X). Where the
 // system keeps Downloads, Desktop or Documents off home (moved to D:\ or
 // OneDrive on Windows, ~/下载 on Linux) only a data folder holding none of
-// myna's files is passed over: before v0.1.2648 those folders weren't
-// judged at all, so a data folder there holding myna's files is one this
-// user's myna has been keeping its files in, and an update never moves
+// owl's files is passed over: before v0.1.2648 those folders weren't
+// judged at all, so a data folder there holding owl's files is one this
+// user's owl has been keeping its files in, and an update never moves
 // them back to an installed folder from long ago (jwaitq on Discord).
 //
-// The decision is made once, from the executable as it was when myna
-// started: an update moving the running copy aside (into .myna-update on
-// a Mac, to myna.exe.old on Windows) leaves it running from somewhere
+// The decision is made once, from the executable as it was when owl
+// started: an update moving the running copy aside (into .owl-update on
+// a Mac, to owl.exe.old on Windows) leaves it running from somewhere
 // else, and its files must not move with it.
 package appdir
 
@@ -51,10 +51,10 @@ import (
 )
 
 const (
-	// DataName is the folder beside myna that makes it portable and
+	// DataName is the folder beside owl that makes it portable and
 	// holds its files.
 	DataName = "data"
-	// MarkerName is a file beside myna that makes it portable too, its
+	// MarkerName is a file beside owl that makes it portable too, its
 	// files then going into a data folder made beside it.
 	MarkerName = ".portable"
 )
@@ -64,7 +64,7 @@ var (
 	portable string // the data folder, or "" when installed
 )
 
-// Portable is the data folder myna keeps everything in, or "" when it
+// Portable is the data folder owl keeps everything in, or "" when it
 // isn't portable.
 func Portable() string {
 	once.Do(func() {
@@ -75,15 +75,15 @@ func Portable() string {
 		portable = Resolve(exe)
 		if portable == "" {
 			if data := Passed(exe); data != "" {
-				log.Printf("appdir: %s is beside myna but not taken for its portable data: it is in a shared folder and %s has myna's files too; a .portable file beside myna makes it portable", data, installed())
+				log.Printf("appdir: %s is beside owl but not taken for its portable data: it is in a shared folder and %s has owl's files too; a .portable file beside owl makes it portable", data, installed())
 			}
 		}
 	})
 	return portable
 }
 
-// UseExecutable decides again as if myna ran from exe ("" for an
-// installed myna, whatever runs): for tests.
+// UseExecutable decides again as if owl ran from exe ("" for an
+// installed owl, whatever runs): for tests.
 func UseExecutable(exe string) {
 	once.Do(func() {})
 	portable = ""
@@ -92,7 +92,7 @@ func UseExecutable(exe string) {
 	}
 }
 
-// Resolve is the data folder of a myna run from exe, or "" when it isn't
+// Resolve is the data folder of a owl run from exe, or "" when it isn't
 // portable.
 func Resolve(exe string) string {
 	if real, err := filepath.EvalSymlinks(exe); err == nil {
@@ -109,9 +109,9 @@ func Resolve(exe string) string {
 	return ""
 }
 
-// Passed is the data folder beside a myna run from exe that holds
-// myna's files but that Resolve doesn't take for its own, because it is
-// in a shared folder while the installed folder has myna's files too, or
+// Passed is the data folder beside a owl run from exe that holds
+// owl's files but that Resolve doesn't take for its own, because it is
+// in a shared folder while the installed folder has owl's files too, or
 // "". A data folder holding none of them is someone else's and isn't named.
 func Passed(exe string) string {
 	if real, err := filepath.EvalSymlinks(exe); err == nil {
@@ -125,18 +125,18 @@ func Passed(exe string) string {
 	return ""
 }
 
-// shared says whether the data folder in dir can't be taken for myna's:
+// shared says whether the data folder in dir can't be taken for owl's:
 // dir is a folder every app or download shares, where a folder named data
 // is as likely another app's or the user's own, and either data holds none
-// of myna's files or the installed folder holds them too. One who keeps
-// myna portable there has its files in data and never ran it installed,
+// of owl's files or the installed folder holds them too. One who keeps
+// owl portable there has its files in data and never ran it installed,
 // and keeps it portable; a ".portable" marker beside it makes it portable
 // whatever is there.
 //
 // A data folder in the place the system keeps a user folder moved off home
-// (movedFolder) is passed over only when it holds none of myna's files.
+// (movedFolder) is passed over only when it holds none of owl's files.
 // Releases before v0.1.2648 took any data folder there, so one holding
-// myna's files is where this myna has kept them, maybe for months,
+// owl's files is where this owl has kept them, maybe for months,
 // while an installed folder with files of its own is from before then:
 // judging it as in home\Downloads moved a user back to that old setup on
 // updating (jwaitq on Discord).
@@ -154,7 +154,7 @@ func shared(dir, data string) bool {
 	return false
 }
 
-// hasFiles says whether dir holds myna's own files.
+// hasFiles says whether dir holds owl's own files.
 func hasFiles(dir string) bool {
 	for _, f := range []string{"providers.json", "logins.json", "settings.json"} {
 		if fi, err := os.Stat(filepath.Join(dir, f)); err == nil && !fi.IsDir() {
@@ -208,31 +208,31 @@ func sameAny(dir string, dirs []string) bool {
 	return false
 }
 
-// installed is the folder an installed myna keeps its files in, or ""
+// installed is the folder an installed owl keeps its files in, or ""
 // with no home folder.
 func installed() string {
 	if x := os.Getenv("XDG_CONFIG_HOME"); rooted(x) {
-		return filepath.Join(x, "myna")
+		return filepath.Join(x, "owl")
 	}
 	h, err := Home()
 	if err != nil {
 		return ""
 	}
-	return filepath.Join(h, ".config", "myna")
+	return filepath.Join(h, ".config", "owl")
 }
 
-// Beside is the folder a portable myna run from exe keeps its data folder
+// Beside is the folder a portable owl run from exe keeps its data folder
 // in: the executable's own, the one holding the .app on a Mac, the one
 // holding the .AppImage on Linux. APPIMAGE counts only for the AppImage
-// myna runs from (exe under its mount, APPDIR): every program an
-// AppImage starts inherits both, a myna started from an AppImage
+// owl runs from (exe under its mount, APPDIR): every program an
+// AppImage starts inherits both, a owl started from an AppImage
 // terminal too.
 func Beside(exe string) string {
 	if img := os.Getenv("APPIMAGE"); img != "" && runtime.GOOS == "linux" && within(exe, os.Getenv("APPDIR")) {
 		return filepath.Dir(img)
 	}
 	dir := filepath.Dir(exe)
-	// …/Myna.app/Contents/MacOS/myna
+	// …/Owl.app/Contents/MacOS/owl
 	if filepath.Base(dir) == "MacOS" && filepath.Base(filepath.Dir(dir)) == "Contents" {
 		if app := filepath.Dir(filepath.Dir(dir)); strings.EqualFold(filepath.Ext(app), ".app") {
 			return filepath.Dir(app)
@@ -259,31 +259,34 @@ func absolute(p string) string {
 
 var migrateConfigOnce sync.Once
 
-// Config is the folder myna keeps its settings, providers, usage and the
+// Config is the folder owl keeps its settings, providers, usage and the
 // rest of its own state in.
 func Config() string {
 	if p := Portable(); p != "" {
 		return p
 	}
 	if x := os.Getenv("XDG_CONFIG_HOME"); rooted(x) {
-		return Join(x, "myna")
+		return Join(x, "owl")
 	}
-	p := Join(Join(mustHome(), ".config"), "myna")
+	p := Join(Join(mustHome(), ".config"), "owl")
 	migrateConfigOnce.Do(func() {
 		if h, err := Home(); err == nil {
-			if src := migrate(legacyConfig(h), p); src != "" {
-				log.Printf("appdir: brought myna's files over from %s", src)
+			for _, from := range legacyConfigs(h) {
+				if src := migrate(from, p); src != "" {
+					log.Printf("appdir: brought owl's files over from %s", src)
+					break
+				}
 			}
 		}
 	})
 	return p
 }
 
-// Redirected is the folder myna keeps its files in when it is opened
-// from the Dock, the Start menu or a desktop launcher (~/.config/myna),
-// while this myna reads them from another that XDG_CONFIG_HOME, set in
-// the shell it was run from, names; "" when they are the same, or myna
-// is portable. A myna run in such a shell sees none of what the app's
+// Redirected is the folder owl keeps its files in when it is opened
+// from the Dock, the Start menu or a desktop launcher (~/.config/owl),
+// while this owl reads them from another that XDG_CONFIG_HOME, set in
+// the shell it was run from, names; "" when they are the same, or owl
+// is portable. A owl run in such a shell sees none of what the app's
 // window shows.
 func Redirected() string {
 	if Portable() != "" || os.Getenv("XDG_CONFIG_HOME") == "" {
@@ -293,7 +296,7 @@ func Redirected() string {
 	if err != nil {
 		return ""
 	}
-	if def := filepath.Join(h, ".config", "myna"); filepath.Clean(def) != filepath.Clean(Config()) {
+	if def := filepath.Join(h, ".config", "owl"); filepath.Clean(def) != filepath.Clean(Config()) {
 		return def
 	}
 	return ""
@@ -301,20 +304,23 @@ func Redirected() string {
 
 var migrateCacheOnce sync.Once
 
-// Cache is the folder for what myna can fetch again (the models.dev
+// Cache is the folder for what owl can fetch again (the models.dev
 // catalog, exchange rates, market lists).
 func Cache() string {
 	if p := Portable(); p != "" {
 		return Join(p, "cache")
 	}
 	if x := os.Getenv("XDG_CACHE_HOME"); rooted(x) {
-		return Join(x, "myna")
+		return Join(x, "owl")
 	}
-	p := Join(Join(mustHome(), ".cache"), "myna")
+	p := Join(Join(mustHome(), ".cache"), "owl")
 	migrateCacheOnce.Do(func() {
 		if h, err := Home(); err == nil {
-			if src := migrate(legacyCache(h), p); src != "" {
-				log.Printf("appdir: brought myna's cache over from %s", src)
+			for _, from := range legacyCaches(h) {
+				if src := migrate(from, p); src != "" {
+					log.Printf("appdir: brought owl's cache over from %s", src)
+					break
+				}
 			}
 		}
 	})
@@ -322,10 +328,10 @@ func Cache() string {
 }
 
 // Logs is the folder the desktop app writes its log in, where each system
-// keeps an app's logs: ~/Library/Logs/myna on a Mac (beside the launch
-// agent's serve.log, `myna daemon install`), %LOCALAPPDATA%\myna\logs
-// on Windows, and $XDG_STATE_HOME/myna (~/.local/state/myna) elsewhere;
-// portable, data/logs. A user asked for myna's log finds it there
+// keeps an app's logs: ~/Library/Logs/owl on a Mac (beside the launch
+// agent's serve.log, `owl daemon install`), %LOCALAPPDATA%\owl\logs
+// on Windows, and $XDG_STATE_HOME/owl (~/.local/state/owl) elsewhere;
+// portable, data/logs. A user asked for owl's log finds it there
 // (rayem1w on X: the app opened from the Finder had written none).
 func Logs() string {
 	return logsOn(runtime.GOOS)
@@ -338,26 +344,26 @@ func logsOn(goos string) string {
 	}
 	switch goos {
 	case "darwin":
-		return filepath.Join(mustHome(), "Library", "Logs", "myna")
+		return filepath.Join(mustHome(), "Library", "Logs", "owl")
 	case "windows":
 		local := os.Getenv("LOCALAPPDATA")
 		if !rooted(local) {
 			local = filepath.Join(mustHome(), "AppData", "Local")
 		}
-		return filepath.Join(local, "myna", "logs")
+		return filepath.Join(local, "owl", "logs")
 	}
 	if x := os.Getenv("XDG_STATE_HOME"); rooted(x) {
-		return filepath.Join(x, "myna")
+		return filepath.Join(x, "owl")
 	}
-	return filepath.Join(mustHome(), ".local", "state", "myna")
+	return filepath.Join(mustHome(), ".local", "state", "owl")
 }
 
 // WebView is the folder the Windows webview (WebView2) keeps its profile
 // in — its cache, cookies and the pages' storage — or "" for its own
 // default. Installed, that default is %APPDATA%\<exe name>, as it always
 // was, so nothing kept there is lost; portable, it is data\webview2, so a
-// portable myna leaves no myna.exe folder in the user's AppData (#508).
-// A Windows myna installed from a download under another name
+// portable owl leaves no owl.exe folder in the user's AppData (#508).
+// A Windows owl installed from a download under another name
 // (update.Settle) keeps the profile it had there: the WebViewNote beside
 // it names that folder.
 func WebView() string {
@@ -374,7 +380,7 @@ func WebView() string {
 	return noted(filepath.Join(filepath.Dir(exe), WebViewNote))
 }
 
-// WebViewNote is the file beside an installed Windows myna naming the
+// WebViewNote is the file beside an installed Windows owl naming the
 // webview profile it keeps, the one it had where it was downloaded.
 const WebViewNote = "webview-profile"
 
@@ -391,8 +397,8 @@ func noted(path string) string {
 	return ""
 }
 
-// SystemCache is the cache folder the OS names for myna
-// (~/Library/Caches/myna on a Mac, %LocalAppData%\myna on Windows),
+// SystemCache is the cache folder the OS names for owl
+// (~/Library/Caches/owl on a Mac, %LocalAppData%\owl on Windows),
 // which a few caches have always used; portable, it is Cache.
 func SystemCache() (string, error) {
 	if p := Portable(); p != "" {
@@ -402,5 +408,5 @@ func SystemCache() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(d, "myna"), nil
+	return filepath.Join(d, "owl"), nil
 }

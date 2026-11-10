@@ -12,7 +12,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 	"github.com/tidwall/gjson"
 )
 
@@ -82,7 +82,7 @@ func daybreak(t *testing.T) *daybreakBackend {
 	return d
 }
 
-// myna-releases#18 (NonMirror, OpenCode): a client's access_programs, the
+// owl-releases#18 (NonMirror, OpenCode): a client's access_programs, the
 // Daybreak program Codex CLI sends the ChatGPT backend on each turn it was
 // picked for (codex-rs ResponsesApiRequest.access_programs), reaches the
 // backend on a Codex account's model on every path that asks it: Responses
@@ -174,12 +174,12 @@ func TestCodexAccessProgramsReachBackend(t *testing.T) {
 	}
 }
 
-// myna-releases#18: the extraBody written for the built-in codex
+// owl-releases#18: the extraBody written for the built-in codex
 // provider (by hand: its editor has no box for it) goes on its requests,
 // as a key provider's does — filling in what the client left out, a
 // "!name" replacing it — on every API the request came in on. What Codex
 // CLI's request needs to be answered at all (store false, tool_choice
-// auto, its sealed reasoning asked back) stays myna's.
+// auto, its sealed reasoning asked back) stays owl's.
 func TestCodexAccountTakesExtraBody(t *testing.T) {
 	codexSignedIn(t)
 	d := daybreak(t)

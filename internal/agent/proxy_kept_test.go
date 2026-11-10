@@ -11,55 +11,55 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // corpProxy is a company's reverse proxy in front of the gateway, with a
-// path of its own before myna's (#1985).
-const corpProxy = "https://ai.corp.example/myna"
+// path of its own before owl's (#1985).
+const corpProxy = "https://ai.corp.example/owl"
 
 // localProxy is the reporter's: a company-mandated compliance proxy on this
-// machine, its route before myna's paths.
+// machine, its route before owl's paths.
 const localProxy = "http://127.0.0.1:8788/claude-code-anthropic/cc-7f3a9e"
 
-// fakeMynaAt answers mynaAt from answers (a base missing is no myna),
+// fakeOwlAt answers owlAt from answers (a base missing is no owl),
 // as the probe would have, and says which bases were asked.
-func fakeMynaAt(t *testing.T, answers map[string]bool) func() []string {
+func fakeOwlAt(t *testing.T, answers map[string]bool) func() []string {
 	t.Helper()
 	var mu sync.Mutex
 	var asked []string
-	was := mynaAt
-	mynaAt = func(base string) (bool, bool) {
+	was := owlAt
+	owlAt = func(base string) (bool, bool) {
 		mu.Lock()
 		defer mu.Unlock()
 		asked = append(asked, base)
 		return answers[base], true
 	}
-	t.Cleanup(func() { mynaAt = was })
+	t.Cleanup(func() { owlAt = was })
 	return func() []string { mu.Lock(); defer mu.Unlock(); return append([]string(nil), asked...) }
 }
 
-// davisjiahao (#1985): every agent connected to myna, then pointed by the
-// user at a proxy that forwards to the gateway, myna's key and model
-// kept: a company's nginx (https://ai.corp.example/myna), or the
+// davisjiahao (#1985): every agent connected to owl, then pointed by the
+// user at a proxy that forwards to the gateway, owl's key and model
+// kept: a company's nginx (https://ai.corp.example/owl), or the
 // reporter's own, a compliance proxy on this machine every request must go
 // through (http://127.0.0.1:8788/claude-code-anthropic/<route>). That is
-// still myna: no agent's Check calls it changed, and the sync every
+// still owl: no agent's Check calls it changed, and the sync every
 // start runs keeps the proxy's address, its path included. The same
 // address where something else answers (a relay CC Switch put there) is
 // still told, for every agent but Codex, which keeps an address with
-// myna's key in its provider table as it did for #816 and tries it
+// owl's key in its provider table as it did for #816 and tries it
 // (unreachable).
-func TestReverseProxyIsStillMyna(t *testing.T) {
+func TestReverseProxyIsStillOwl(t *testing.T) {
 	// named so the test's folders, which carry the name, hold no address
-	t.Run("nginx", func(t *testing.T) { reverseProxyIsStillMyna(t, corpProxy) })
-	t.Run("local", func(t *testing.T) { reverseProxyIsStillMyna(t, localProxy) })
+	t.Run("nginx", func(t *testing.T) { reverseProxyIsStillOwl(t, corpProxy) })
+	t.Run("local", func(t *testing.T) { reverseProxyIsStillOwl(t, localProxy) })
 }
 
-func reverseProxyIsStillMyna(t *testing.T, proxy string) {
-	t.Setenv("MYNA_ADDR", "")
+func reverseProxyIsStillOwl(t *testing.T, proxy string) {
+	t.Setenv("OWL_ADDR", "")
 	host := strings.SplitN(strings.SplitN(proxy, "://", 2)[1], "/", 2)[0]
 	home, _ := codexHome(t, "", "")
 	managed := claudeManaged
@@ -82,13 +82,13 @@ func reverseProxyIsStillMyna(t *testing.T, proxy string) {
 		var key, want string
 		for _, g := range a.Fields {
 			for _, o := range g.Options(a.Values()) {
-				if want == "" && (o.Ref == "fake/m1" || o.Value == mynaID) {
+				if want == "" && (o.Ref == "fake/m1" || o.Value == owlID) {
 					key, want = g.Key, o.Value
 				}
 			}
 		}
 		if want == "" {
-			t.Fatalf("%s: no field takes myna's models", a.ID)
+			t.Fatalf("%s: no field takes owl's models", a.ID)
 		}
 		if err := a.Apply(key, want); err != nil {
 			t.Fatalf("%s: %v", a.ID, err)
@@ -107,7 +107,7 @@ func reverseProxyIsStillMyna(t *testing.T, proxy string) {
 		os.WriteFile(p, []byte(strings.ReplaceAll(string(b), "http://127.0.0.1:3591", proxy)), 0o644)
 	}
 
-	asked := fakeMynaAt(t, map[string]bool{proxy: true})
+	asked := fakeOwlAt(t, map[string]bool{proxy: true})
 	for _, a := range agents {
 		if c := a.Check(); c != "" {
 			t.Errorf("%s behind the proxy: %s", a.ID, c)
@@ -122,16 +122,16 @@ func reverseProxyIsStillMyna(t *testing.T, proxy string) {
 		}
 	}
 
-	// a relay at that address, not myna: told
-	fakeMynaAt(t, map[string]bool{})
+	// a relay at that address, not owl: told
+	fakeOwlAt(t, map[string]bool{})
 	for _, a := range agents {
 		if c := a.Check(); (c == "") != (a.ID == "codex") {
 			t.Errorf("%s at a relay: %q", a.ID, c)
 		}
 	}
 
-	// the sync keeps the proxy, its /myna too
-	fakeMynaAt(t, map[string]bool{proxy: true})
+	// the sync keeps the proxy, its /owl too
+	fakeOwlAt(t, map[string]bool{proxy: true})
 	if err := provider.Save(provider.Provider{ID: "fake2", Name: "Fake2", Key: "k", Chat: "http://127.0.0.1:1/v1", Models: []string{"m2"}}); err != nil {
 		t.Fatal(err)
 	}
@@ -154,8 +154,8 @@ func reverseProxyIsStillMyna(t *testing.T, proxy string) {
 }
 
 // Claude Code's managed settings pointing it at the company's proxy to
-// myna win over the user's, and still reach myna: not drift.
-func TestClaudeManagedProxyIsStillMyna(t *testing.T) {
+// owl win over the user's, and still reach owl: not drift.
+func TestClaudeManagedProxyIsStillOwl(t *testing.T) {
 	home, _ := codexHome(t, "", "")
 	managed := claudeManaged
 	claudeManaged = func() string { return filepath.Join(home, "managed-settings.json") }
@@ -165,16 +165,16 @@ func TestClaudeManagedProxyIsStillMyna(t *testing.T) {
 		t.Fatal(err)
 	}
 	os.WriteFile(claudeManaged(), []byte(`{"env":{"ANTHROPIC_BASE_URL":"`+corpProxy+`"}}`), 0o644)
-	fakeMynaAt(t, map[string]bool{corpProxy: true})
+	fakeOwlAt(t, map[string]bool{corpProxy: true})
 	if d := cl.Drift(); d != nil {
-		t.Fatalf("managed proxy to myna: %+v", d)
+		t.Fatalf("managed proxy to owl: %+v", d)
 	}
 }
 
-// Where it reaches myna isn't known until the address has been tried,
+// Where it reaches owl isn't known until the address has been tried,
 // in the background: until then it isn't told as changed (Reconnect would
-// write the proxy away), once tried and not myna it is; an address on
-// this machine's loopback is myna's own on an older port, told at once,
+// write the proxy away), once tried and not owl it is; an address on
+// this machine's loopback is owl's own on an older port, told at once,
 // never tried.
 func TestReverseProxyTriedFirst(t *testing.T) {
 	home, path := claudeSettings(t, `{}`)
@@ -183,23 +183,23 @@ func TestReverseProxyTriedFirst(t *testing.T) {
 	if err := cl.Apply("model", "deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
-	was, wasAt, age := mynaProbe, mynaAt, reachAge
+	was, wasAt, age := owlProbe, owlAt, reachAge
 	release := make(chan struct{})
 	var mu sync.Mutex
 	var tried []string
-	mynaProbe = func(base string) bool {
+	owlProbe = func(base string) bool {
 		<-release
 		mu.Lock()
 		tried = append(tried, base)
 		mu.Unlock()
 		return false
 	}
-	mynaAt = func(base string) (bool, bool) {
-		return probed("myna "+base, func() bool { return mynaProbe(base) })
+	owlAt = func(base string) (bool, bool) {
+		return probed("owl "+base, func() bool { return owlProbe(base) })
 	}
 	reachAge = time.Hour
 	reachForget()
-	t.Cleanup(func() { mynaProbe, mynaAt, reachAge = was, wasAt, age; reachForget() })
+	t.Cleanup(func() { owlProbe, owlAt, reachAge = was, wasAt, age; reachForget() })
 
 	edit.SetJSON(path, edit.KV{Path: "env.ANTHROPIC_BASE_URL", Value: corpProxy + "/"})
 	if d := cl.Drift(); d != nil {
@@ -207,7 +207,7 @@ func TestReverseProxyTriedFirst(t *testing.T) {
 	}
 	close(release)
 	if d := driftSettled(t, cl); d == nil || d.Kind != "unwired" || !strings.Contains(d.Detail, corpProxy) {
-		t.Fatalf("not myna there, yet %+v", d)
+		t.Fatalf("not owl there, yet %+v", d)
 	}
 	if len(tried) != 1 || tried[0] != corpProxy {
 		t.Fatalf("tried %v", tried)
@@ -222,19 +222,19 @@ func TestReverseProxyTriedFirst(t *testing.T) {
 	}
 }
 
-// The probe takes myna's own answer at the proxy's path (the gateway's
-// GET /, forwarded), and nothing else: a relay's, an error page, myna's
+// The probe takes owl's own answer at the proxy's path (the gateway's
+// GET /, forwarded), and nothing else: a relay's, an error page, owl's
 // name in a page that isn't 200.
-func TestMynaProbe(t *testing.T) {
+func TestOwlProbe(t *testing.T) {
 	gw := gateway.New().Handler()
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
-		case strings.HasPrefix(r.URL.Path, "/myna/"):
-			r.URL.Path = strings.TrimPrefix(r.URL.Path, "/myna")
+		case strings.HasPrefix(r.URL.Path, "/owl/"):
+			r.URL.Path = strings.TrimPrefix(r.URL.Path, "/owl")
 			gw.ServeHTTP(w, r)
 		case r.URL.Path == "/broken/":
 			w.WriteHeader(502)
-			w.Write([]byte(`{"name":"myna"}`))
+			w.Write([]byte(`{"name":"owl"}`))
 		default:
 			w.WriteHeader(404)
 			w.Write([]byte(`{"error":{"message":"not found"}}`))
@@ -242,13 +242,13 @@ func TestMynaProbe(t *testing.T) {
 	}))
 	t.Cleanup(srv.Close)
 	for base, want := range map[string]bool{
-		srv.URL + "/myna":    true,
-		srv.URL + "/myna/":   true,
+		srv.URL + "/owl":     true,
+		srv.URL + "/owl/":    true,
 		srv.URL + "/relay":   false,
 		srv.URL + "/broken":  false,
 		"http://127.0.0.1:1": false,
 	} {
-		if got := realMynaProbe(base); got != want {
+		if got := realOwlProbe(base); got != want {
 			t.Errorf("%s: %v, want %v", base, got, want)
 		}
 	}
@@ -256,7 +256,7 @@ func TestMynaProbe(t *testing.T) {
 
 // Codex at the proxy (https, no port, a path of its own): kept as its
 // gateway as #816's address on another host is, written again there, and
-// a request its log says went there reached myna (bypassed was told
+// a request its log says went there reached owl (bypassed was told
 // from the host alone); one to chatgpt.com still didn't.
 func TestCodexBehindReverseProxy(t *testing.T) {
 	home, _ := codexAt(t, corpProxy)
@@ -287,9 +287,9 @@ func TestCodexBehindReverseProxy(t *testing.T) {
 			at, "responses_websocket.connect{}: "+body)
 		forgetReached()
 	}
-	log("connecting to websocket: wss://ai.corp.example/myna/backend-api/codex/responses")
+	log("connecting to websocket: wss://ai.corp.example/owl/backend-api/codex/responses")
 	if d := codex(home).Drift(); d != nil {
-		t.Fatalf("reached myna through the proxy: %+v", d)
+		t.Fatalf("reached owl through the proxy: %+v", d)
 	}
 	log("connecting to websocket: wss://chatgpt.com/backend-api/codex/responses")
 	if d := codex(home).Drift(); d == nil || d.Kind != "bypassed" {
@@ -304,14 +304,14 @@ func TestCodexBehindReverseProxy(t *testing.T) {
 	}
 }
 
-// The sync keeps a path before myna's only where every URL at the
+// The sync keeps a path before owl's only where every URL at the
 // address has it.
 func TestAwayPath(t *testing.T) {
 	g := "http://127.0.0.1:3591"
 	for _, c := range []struct{ was, data, want string }{
-		{`{"u":"https://x.example/myna"}`, `{"u":"` + g + `"}`, "/myna"},
-		{`{"u":"https://x.example/myna/v1"}`, `{"u":"` + g + `/v1"}`, "/myna"},
-		{`{"u":"https://x.example/myna","v":"https://x.example/myna/v1"}`, `{"u":"` + g + `","v":"` + g + `/v1"}`, "/myna"},
+		{`{"u":"https://x.example/owl"}`, `{"u":"` + g + `"}`, "/owl"},
+		{`{"u":"https://x.example/owl/v1"}`, `{"u":"` + g + `/v1"}`, "/owl"},
+		{`{"u":"https://x.example/owl","v":"https://x.example/owl/v1"}`, `{"u":"` + g + `","v":"` + g + `/v1"}`, "/owl"},
 		{`{"u":"https://x.example","v":"https://x.example/v1"}`, `{"u":"` + g + `","v":"` + g + `/v1"}`, ""},
 		{`{"u":"https://x.example/v1"}`, `{"u":"` + g + `/v1"}`, ""},
 		{`{"u":"https://x.example/a/v1","v":"https://x.example/b/v1"}`, `{"u":"` + g + `/v1","v":"` + g + `/v1"}`, ""},
@@ -322,8 +322,8 @@ func TestAwayPath(t *testing.T) {
 	}
 }
 
-// Codex signed in to ChatGPT reaches myna by openai_base_url alone,
-// myna not its provider: at the proxy that is still myna, though the
+// Codex signed in to ChatGPT reaches owl by openai_base_url alone,
+// owl not its provider: at the proxy that is still owl, though the
 // address's host isn't the one isCodexGatewayOn is asked about.
 func TestCodexSignedInBehindReverseProxy(t *testing.T) {
 	home, _ := codexHome(t, `{"tokens":{"access_token":"x","id_token":"x.e30.x"}}`, "")
@@ -331,8 +331,8 @@ func TestCodexSignedInBehindReverseProxy(t *testing.T) {
 	if err := cx.Apply("model", "fake/m1"); err != nil {
 		t.Fatal(err)
 	}
-	if p, _ := edit.GetTOMLTop(cx.Path, "model_provider"); p == mynaID {
-		t.Fatal("signed in, yet myna is Codex's provider")
+	if p, _ := edit.GetTOMLTop(cx.Path, "model_provider"); p == owlID {
+		t.Fatal("signed in, yet owl is Codex's provider")
 	}
 	b, _ := os.ReadFile(cx.Path)
 	if !strings.Contains(string(b), gateway.URL()) {
@@ -349,10 +349,10 @@ func TestCodexSignedInBehindReverseProxy(t *testing.T) {
 
 // The reporter's case (#1985, davisjiahao): Claude Code must go through a
 // compliance proxy on this machine (http://127.0.0.1:8788/<route>, which
-// forwards to the gateway). Once myna has answered there, picking a
-// model in myna keeps the proxy (it wrote 127.0.0.1:3425 back, bypassing
+// forwards to the gateway). Once owl has answered there, picking a
+// model in owl keeps the proxy (it wrote 127.0.0.1:3425 back, bypassing
 // the proxy the company requires), as does Reconnect, which isn't offered,
-// and the sync. A relay there is myna's to point away from on a pick.
+// and the sync. A relay there is owl's to point away from on a pick.
 func TestClaudeBehindLocalProxyKeepsIt(t *testing.T) {
 	home, path := claudeSettings(t, `{}`)
 	saveDeepseek(t)
@@ -361,7 +361,7 @@ func TestClaudeBehindLocalProxyKeepsIt(t *testing.T) {
 		t.Fatal(err)
 	}
 	edit.SetJSON(path, edit.KV{Path: "env.ANTHROPIC_BASE_URL", Value: localProxy})
-	fakeMynaAt(t, map[string]bool{localProxy: true})
+	fakeOwlAt(t, map[string]bool{localProxy: true})
 	url := func() string { u, _ := edit.GetJSON(path, "env.ANTHROPIC_BASE_URL"); return u }
 
 	if d := cl.Drift(); d != nil {
@@ -396,8 +396,8 @@ func TestClaudeBehindLocalProxyKeepsIt(t *testing.T) {
 		t.Fatalf("the sync wrote %s", u)
 	}
 
-	// a relay there, not myna: told, and a pick puts myna back
-	fakeMynaAt(t, map[string]bool{})
+	// a relay there, not owl: told, and a pick puts owl back
+	fakeOwlAt(t, map[string]bool{})
 	if d := cl.Drift(); d == nil || d.Kind != "unwired" {
 		t.Fatalf("a relay: %+v", d)
 	}
@@ -409,16 +409,16 @@ func TestClaudeBehindLocalProxyKeepsIt(t *testing.T) {
 	}
 }
 
-// zhangt2333 (#3480): Claude Code never connected to myna, its settings
+// zhangt2333 (#3480): Claude Code never connected to owl, its settings
 // pointing it at an endpoint of the user's own with a key of its own, got
-// GET / about every 30s from myna: each read of it while the Agents page
-// was up asked that address whether it was myna behind a proxy (#1985).
+// GET / about every 30s from owl: each read of it while the Agents page
+// was up asked that address whether it was owl behind a proxy (#1985).
 // Claude Code sending a key of its own is on the user's endpoint, never
-// asked: not by a read, its drift (a model named as one of myna's there
+// asked: not by a read, its drift (a model named as one of owl's there
 // is told by the address, as it is, an administrator's too), a pick, or a
 // request's stand-ins. Once it
-// sends myna's key, or keeps its claude.ai sign-in through myna, a
-// proxy put in by hand is asked, is still myna, and a pick keeps it.
+// sends owl's key, or keeps its claude.ai sign-in through owl, a
+// proxy put in by hand is asked, is still owl, and a pick keeps it.
 // After Disconnect, its own endpoint and key back, nothing is asked again,
 // though the claude.ai sign-in stays kept for the next time (its key in
 // ANTHROPIC_API_KEY, so none in ANTHROPIC_AUTH_TOKEN).
@@ -428,12 +428,12 @@ func TestClaudeOwnEndpointNeverAsked(t *testing.T) {
 }
 
 func claudeOwnEndpointNeverAsked(t *testing.T, proxy, ownKey string) {
-	t.Setenv("MYNA_ADDR", "")
+	t.Setenv("OWL_ADDR", "")
 	const own = "https://relay.example/anthropic"
 	home, path := claudeSettings(t, `{"model":"opus","env":{"ANTHROPIC_BASE_URL":"`+own+`","`+ownKey+`":"sk-own"}}`)
 	saveDeepseek(t)
-	// both would answer as myna: whether they are asked is the point
-	asked := fakeMynaAt(t, map[string]bool{own: true, proxy: true})
+	// both would answer as owl: whether they are asked is the point
+	asked := fakeOwlAt(t, map[string]bool{own: true, proxy: true})
 	env := func(k string) string { v, _ := edit.GetJSON(path, "env."+k); return v }
 	cl := claude(home)
 	read := func() {
@@ -460,13 +460,13 @@ func claudeOwnEndpointNeverAsked(t *testing.T, proxy, ownKey string) {
 	if cl.Wired() || cl.Drift() != nil {
 		t.Fatalf("never connected, yet wired %v, drift %+v", cl.Wired(), cl.Drift())
 	}
-	// a model of the endpoint's own named as one of myna's: the address
+	// a model of the endpoint's own named as one of owl's: the address
 	// is told as it is, an administrator's too, and none as gone
 	edit.SetJSON(path, edit.KV{Path: "model", Value: "deepseek/pro"})
 	read()
-	never("a model of myna's name")
+	never("a model of owl's name")
 	if d := cl.Drift(); d == nil || d.Kind != "unwired" || !strings.Contains(d.Detail, "ANTHROPIC_BASE_URL") || !strings.Contains(d.Detail, own) {
-		t.Fatalf("its own key, a model of myna's name: %+v", d)
+		t.Fatalf("its own key, a model of owl's name: %+v", d)
 	}
 	managed := claudeManaged
 	claudeManaged = func() string { return filepath.Join(home, "managed-settings.json") }
@@ -482,7 +482,7 @@ func claudeOwnEndpointNeverAsked(t *testing.T, proxy, ownKey string) {
 		t.Fatalf("its own key, no address: %+v", d)
 	}
 	edit.SetJSON(path, edit.KV{Path: "env.ANTHROPIC_BASE_URL", Value: own}, edit.KV{Path: "model", Value: "opus"})
-	// a pick writes myna's address and key, its own kept for Disconnect
+	// a pick writes owl's address and key, its own kept for Disconnect
 	if err := cl.Apply("model", "deepseek/flash"); err != nil {
 		t.Fatal(err)
 	}
@@ -491,12 +491,12 @@ func claudeOwnEndpointNeverAsked(t *testing.T, proxy, ownKey string) {
 		t.Fatalf("after a pick:\n%s", readFile(path))
 	}
 
-	// the proxy put in by hand, myna's key kept (#1985)
+	// the proxy put in by hand, owl's key kept (#1985)
 	edit.SetJSON(path, edit.KV{Path: "env.ANTHROPIC_BASE_URL", Value: proxy})
 	if d := cl.Drift(); d != nil {
-		t.Fatalf("myna's key at the proxy: %+v", d)
+		t.Fatalf("owl's key at the proxy: %+v", d)
 	}
-	// its claude.ai sign-in kept through myna: no key at all
+	// its claude.ai sign-in kept through owl: no key at all
 	if err := cl.Apply("login", "claudeai"); err != nil {
 		t.Fatal(err)
 	}
@@ -545,7 +545,7 @@ func TestWSLClaudeOwnEndpointNeverAsked(t *testing.T) {
 	a := wslAgent(wslKindOf("claude"), d)
 	at := d.place(a.ID)
 	path := filepath.Join(home, ".claude", "settings.json")
-	asked := fakeMynaAt(t, map[string]bool{own: true, corpProxy: true})
+	asked := fakeOwlAt(t, map[string]bool{own: true, corpProxy: true})
 	a.Values()
 	a.Wired()
 	a.Drift()
@@ -559,7 +559,7 @@ func TestWSLClaudeOwnEndpointNeverAsked(t *testing.T) {
 	}
 	edit.SetJSON(path, edit.KV{Path: "env.ANTHROPIC_BASE_URL", Value: corpProxy})
 	if dr := a.Drift(); dr != nil {
-		t.Fatalf("myna's key at the proxy: %+v", dr)
+		t.Fatalf("owl's key at the proxy: %+v", dr)
 	}
 	if err := a.Apply("login", "claudeai"); err != nil {
 		t.Fatal(err)
@@ -573,16 +573,16 @@ func TestWSLClaudeOwnEndpointNeverAsked(t *testing.T) {
 	noOwnClaude(t)
 }
 
-// davisjiahao (#1985), from a myna just started: Claude Code connected,
+// davisjiahao (#1985), from a owl just started: Claude Code connected,
 // its haiku tier given a model by hand, then pointed by hand at a proxy to
-// myna, myna's key kept. Nothing has asked the proxy yet whether myna
+// owl, owl's key kept. Nothing has asked the proxy yet whether owl
 // answers there, and a write doesn't take that for no: it asks, and waits
-// (mynaAsked). A pick keeps the proxy and the tier (it wrote 127.0.0.1
+// (owlAsked). A pick keeps the proxy and the tier (it wrote 127.0.0.1
 // over the proxy and put the tier back on the main model), a Sync (a
 // provider added runs one) keeps the auto mode review off (it took it
-// out), a tier is picked (it said to pick a model through myna first),
-// and Disconnect puts back the endpoint and key the user had before myna
-// (it left myna in and forgot them).
+// out), a tier is picked (it said to pick a model through owl first),
+// and Disconnect puts back the endpoint and key the user had before owl
+// (it left owl in and forgot them).
 func TestClaudeFirstWriteAsksTheProxy(t *testing.T) {
 	t.Run("nginx", func(t *testing.T) { claudeFirstWriteAsksTheProxy(t, corpProxy) })
 	t.Run("local", func(t *testing.T) { claudeFirstWriteAsksTheProxy(t, localProxy) })
@@ -591,7 +591,7 @@ func TestClaudeFirstWriteAsksTheProxy(t *testing.T) {
 func claudeFirstWriteAsksTheProxy(t *testing.T, proxy string) {
 	const own = "https://own.example/api"
 	behind := func(t *testing.T) (cl *Agent, env func(string) string, probed func() []string) {
-		t.Setenv("MYNA_ADDR", "")
+		t.Setenv("OWL_ADDR", "")
 		home, path := claudeSettings(t, `{"model":"opus","env":{"ANTHROPIC_BASE_URL":"`+own+`","ANTHROPIC_AUTH_TOKEN":"sk-own"}}`)
 		if err := provider.Save(provider.Provider{ID: "fake", Name: "Fake", Key: "k", Chat: "http://127.0.0.1:1/v1", Models: []string{"m1", "m2", "m3"}}); err != nil {
 			t.Fatal(err)
@@ -608,7 +608,7 @@ func claudeFirstWriteAsksTheProxy(t *testing.T, proxy string) {
 		if env(claudeReviewEnv) != "0" {
 			t.Fatalf("connected, the review isn't off:\n%s", readFile(path))
 		}
-		return cl, env, coldMyna(t, map[string]bool{proxy: true})
+		return cl, env, coldOwl(t, map[string]bool{proxy: true})
 	}
 	askedOnce := func(t *testing.T, probed []string) {
 		t.Helper()
@@ -636,7 +636,7 @@ func claudeFirstWriteAsksTheProxy(t *testing.T, proxy string) {
 			t.Fatal(err)
 		}
 		if v := env(claudeReviewEnv); v != "0" {
-			t.Errorf("the sync took out the review myna turned off: %q", v)
+			t.Errorf("the sync took out the review owl turned off: %q", v)
 		}
 		askedOnce(t, probed())
 	})
@@ -659,35 +659,35 @@ func claudeFirstWriteAsksTheProxy(t *testing.T, proxy string) {
 			t.Errorf("after Disconnect, %s with %q, not the user's own endpoint and key", u, k)
 		}
 		if h := env(tierEnv("haiku")); h != "" {
-			t.Errorf("myna's haiku tier stayed: %q", h)
+			t.Errorf("owl's haiku tier stayed: %q", h)
 		}
 		askedOnce(t, probed())
 	})
 }
 
-// coldMyna is myna just started: no answer from any address yet, as a
+// coldOwl is owl just started: no answer from any address yet, as a
 // probe a read starts in the background hasn't come back, until a write
-// asks and waits (mynaAsked). myna answers at the bases in answers. It
+// asks and waits (owlAsked). owl answers at the bases in answers. It
 // says which bases were probed.
-func coldMyna(t *testing.T, answers map[string]bool) func() []string {
+func coldOwl(t *testing.T, answers map[string]bool) func() []string {
 	t.Helper()
 	var mu sync.Mutex
 	var probed []string
-	was, wasAt, age := mynaProbe, mynaAt, reachAge
-	mynaProbe = func(base string) bool {
+	was, wasAt, age := owlProbe, owlAt, reachAge
+	owlProbe = func(base string) bool {
 		mu.Lock()
 		defer mu.Unlock()
 		probed = append(probed, base)
 		return answers[base]
 	}
-	mynaAt = func(base string) (bool, bool) {
+	owlAt = func(base string) (bool, bool) {
 		reach.Lock()
 		defer reach.Unlock()
-		a := reach.m["myna "+base]
+		a := reach.m["owl "+base]
 		return a.ok, !a.at.IsZero()
 	}
 	reachAge = time.Hour
 	reachForget()
-	t.Cleanup(func() { mynaProbe, mynaAt, reachAge = was, wasAt, age; reachForget() })
+	t.Cleanup(func() { owlProbe, owlAt, reachAge = was, wasAt, age; reachForget() })
 	return func() []string { mu.Lock(); defer mu.Unlock(); return append([]string(nil), probed...) }
 }

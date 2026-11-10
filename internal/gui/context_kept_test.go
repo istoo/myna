@@ -14,8 +14,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/sessions"
 )
 
 // keptMux is the Context tab's routes, the gateway's trace left out.

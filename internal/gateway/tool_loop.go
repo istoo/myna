@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 	"github.com/tidwall/gjson"
 )
 
@@ -379,12 +379,12 @@ func (l toolLoop) called() string {
 
 // why is what the Routing, Usage and Sessions views say of the turn.
 func (l toolLoop) why() string {
-	return fmt.Sprintf("tool loop: the same tool call got the same result %d turns in a row (%s); answered by myna, sent nowhere", l.turns, l.called())
+	return fmt.Sprintf("tool loop: the same tool call got the same result %d turns in a row (%s); answered by owl, sent nowhere", l.turns, l.called())
 }
 
 // notice is what the agent shows the user, as the turn's answer.
 func (l toolLoop) notice() string {
-	return fmt.Sprintf("myna stopped this turn before it reached the model: the agent ran the same tool call %d times in a row and got the same result every time (%s). The model is stuck repeating it, and each further turn would spend your quota with no progress, so this turn was sent nowhere. Tell the agent how to go on and the conversation continues; Settings › Models › Replies › Stop looping replies turns this check off.",
+	return fmt.Sprintf("owl stopped this turn before it reached the model: the agent ran the same tool call %d times in a row and got the same result every time (%s). The model is stuck repeating it, and each further turn would spend your quota with no progress, so this turn was sent nowhere. Tell the agent how to go on and the conversation continues; Settings › Models › Replies › Stop looping replies turns this check off.",
 		l.turns, l.called())
 }
 
@@ -392,9 +392,9 @@ func (l toolLoop) notice() string {
 // a stream as it asked: a finished assistant turn with no call in it.
 func writeLocalText(w http.ResponseWriter, from provider.Protocol, req *Request, text string) {
 	events := make(chan Event, 4)
-	events <- Event{Kind: KStart, MsgID: fmt.Sprintf("msg_myna_%d", time.Now().UnixNano()), Model: req.Model}
+	events <- Event{Kind: KStart, MsgID: fmt.Sprintf("msg_owl_%d", time.Now().UnixNano()), Model: req.Model}
 	events <- Event{Kind: KText, Text: text}
 	events <- Event{Kind: KStop, Stop: "stop"}
 	close(events)
-	relayStatus(w, from, "myna", req, events, &Usage{}, func() {})
+	relayStatus(w, from, "owl", req, events, &Usage{}, func() {})
 }

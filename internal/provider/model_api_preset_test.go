@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // OpenCode Zen serves TypeSafe's Jev on System One alone, at

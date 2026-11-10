@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-// `myna opencode a/m` wires OpenCode to myna; `myna opencode default`
+// `owl opencode a/m` wires OpenCode to owl; `owl opencode default`
 // puts back the model OpenCode was on before (#1900), as the Agents page's
 // Disconnect does. DevEco Code, OpenCode's fork with its own folder, the
 // same.
@@ -39,14 +39,14 @@ func TestAgentOpenCodeDefaultPutsBackTheModel(t *testing.T) {
 				t.Fatal(err)
 			}
 			s := read()
-			if !strings.Contains(s, `"model": "myna/a/m"`) || !strings.Contains(s, `"provider"`) {
+			if !strings.Contains(s, `"model": "owl/a/m"`) || !strings.Contains(s, `"provider"`) {
 				t.Fatalf("not wired:\n%s", s)
 			}
 			if err := run([]string{c.id, "default"}); err != nil {
 				t.Fatal(err)
 			}
 			s = read()
-			if !strings.Contains(s, `"model": "native/glm-5"`) || !strings.Contains(s, `"small_model": "native/glm-5-mini"`) || strings.Contains(s, `"myna"`) || strings.Contains(s, "baseURL") || !strings.Contains(s, `"theme": "dark"`) {
+			if !strings.Contains(s, `"model": "native/glm-5"`) || !strings.Contains(s, `"small_model": "native/glm-5-mini"`) || strings.Contains(s, `"owl"`) || strings.Contains(s, "baseURL") || !strings.Contains(s, `"theme": "dark"`) {
 				t.Fatalf("default didn't put back what was there:\n%s", s)
 			}
 		})

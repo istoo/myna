@@ -8,7 +8,7 @@ package catalog
 // (models.dev #11327) and kept its lab file (#11328), since not every
 // account may call it. An account that has it still lists it — Anthropic's
 // /v1/models with its key, the models Claude Code was told a Claude account
-// has — and myna describes it from its lab file (iebb on Discord).
+// has — and owl describes it from its lab file (iebb on Discord).
 
 import (
 	"context"
@@ -68,7 +68,7 @@ func syncLabs(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	req.Header.Set("User-Agent", "myna")
+	req.Header.Set("User-Agent", "owl")
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
@@ -113,8 +113,8 @@ func syncLabs(ctx context.Context) error {
 	return nil
 }
 
-// labsMissing says the provider catalog is myna's own but no lab catalog
-// was kept beside it, and none was asked for yet: one kept before myna
+// labsMissing says the provider catalog is owl's own but no lab catalog
+// was kept beside it, and none was asked for yet: one kept before owl
 // read labs is fetched again at once, not a day later.
 func labsMissing() bool {
 	if labsTried.Load() || labsURL() == "" || Source() != CachePath() {

@@ -22,7 +22,7 @@ func TestEnvRefsPerAgent(t *testing.T) {
 		name   string
 		f      mcpFile
 		file   string
-		web    []string // in the entry myna writes, as JSON
+		web    []string // in the entry owl writes, as JSON
 		fs     []string
 		absent []string // in neither
 	}{
@@ -208,7 +208,7 @@ func TestEnvRefsLibrary(t *testing.T) {
 // bearer_token_env_var reads as the one written; a variable the user
 // passes on (env_vars, Goose's env_keys) of a server whose library entry
 // has none stays, and isn't rewritten; the user's env_vars tables naming
-// the variables myna would are kept as they wrote them.
+// the variables owl would are kept as they wrote them.
 func TestEnvRefsKeepTheUsers(t *testing.T) {
 	codex := &mcpFile{Format: fmtCodex, Path: filepath.Join(t.TempDir(), "config.toml")}
 	if s, _ := codex.decode("x", map[string]any{"url": "u", "http_headers": map[string]any{"Authorization": "Bearer mine"}, "bearer_token_env_var": "T"}); s.Headers["Authorization"] != "Bearer mine" {
@@ -257,20 +257,20 @@ func TestEnvRefsKeepTheUsers(t *testing.T) {
 	}
 }
 
-// The health check reaches a server with myna's own value of the
+// The health check reaches a server with owl's own value of the
 // variable, and says which is unset rather than sending ${NAME}.
 func TestEnvRefsExpand(t *testing.T) {
-	t.Setenv("MYNA_T_SET", "v1")
-	t.Setenv("MYNA_T_UNSET", "")
-	os.Unsetenv("MYNA_T_UNSET")
-	got, unset := expandAll(map[string]string{"A": "Bearer ${MYNA_T_SET}", "B": "${MYNA_T_UNSET}-${MYNA_T_SET}", "C": "lit $X"})
-	if got["A"] != "Bearer v1" || got["C"] != "lit $X" || !slices.Equal(unset, []string{"MYNA_T_UNSET"}) {
+	t.Setenv("OWL_T_SET", "v1")
+	t.Setenv("OWL_T_UNSET", "")
+	os.Unsetenv("OWL_T_UNSET")
+	got, unset := expandAll(map[string]string{"A": "Bearer ${OWL_T_SET}", "B": "${OWL_T_UNSET}-${OWL_T_SET}", "C": "lit $X"})
+	if got["A"] != "Bearer v1" || got["C"] != "lit $X" || !slices.Equal(unset, []string{"OWL_T_UNSET"}) {
 		t.Errorf("%v %v", got, unset)
 	}
-	if h := checkStdio(t.Context(), &Server{Transport: "stdio", Command: "true", Env: map[string]string{"T": "${MYNA_T_UNSET}"}}); h.Why != "novar" || h.Detail != "MYNA_T_UNSET" {
+	if h := checkStdio(t.Context(), &Server{Transport: "stdio", Command: "true", Env: map[string]string{"T": "${OWL_T_UNSET}"}}); h.Why != "novar" || h.Detail != "OWL_T_UNSET" {
 		t.Errorf("stdio: %+v", h)
 	}
-	if _, h := remoteHeaders(t.Context(), &Server{Name: "x", Transport: "http", URL: "http://127.0.0.1:9/", Headers: map[string]string{"Authorization": "Bearer ${MYNA_T_UNSET}"}}); h == nil || h.Why != "novar" {
+	if _, h := remoteHeaders(t.Context(), &Server{Name: "x", Transport: "http", URL: "http://127.0.0.1:9/", Headers: map[string]string{"Authorization": "Bearer ${OWL_T_UNSET}"}}); h == nil || h.Why != "novar" {
 		t.Errorf("remote: %+v", h)
 	}
 }

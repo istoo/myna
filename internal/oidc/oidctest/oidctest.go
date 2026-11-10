@@ -17,7 +17,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/istoo/myna/internal/oidc"
+	"github.com/istoo/owl/internal/oidc"
 )
 
 // Issuer is one issuer. Fetches counts the times its keys were read;

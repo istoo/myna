@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 // Alibaba Cloud's Token Plan (Jeremy on Discord): its own host, apart from
@@ -203,7 +203,7 @@ func TestQwenCloud(t *testing.T) {
 			t.Fatalf("%s imported as %q at %q", chat, im.Preset, im.Chat)
 		}
 	}
-	q, err := ParseImport("myna://import?preset=qwencloud&region=us-east-1")
+	q, err := ParseImport("owl://import?preset=qwencloud&region=us-east-1")
 	if err != nil || q.Chat != "https://us-east-1.maas.qwencloudapi.com/compatible-mode/v1" {
 		t.Fatalf("import link: %+v (%v)", q, err)
 	}

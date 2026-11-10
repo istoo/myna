@@ -18,8 +18,8 @@ const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
 const options = [
-  { value: "myna/deepseek/pro", label: "DeepSeek Pro", ref: "deepseek/pro" },
-  { value: "myna/deepseek/flash", label: "DeepSeek Flash", ref: "deepseek/flash" },
+  { value: "owl/deepseek/pro", label: "DeepSeek Pro", ref: "deepseek/pro" },
+  { value: "owl/deepseek/flash", label: "DeepSeek Flash", ref: "deepseek/flash" },
 ];
 const LEVELS = ["auto", "off", "minimal", "low", "medium", "high", "xhigh", "max"].map((value) => ({ value }));
 const field = (key, label, value) => ({ key, label, value, options });
@@ -30,10 +30,10 @@ const fresh = () => ({
     {
       id: "omp", name: "omp", path: "/test/config.yml", icon: "omp", wired: true,
       fields: [
-        field("model", "model", "myna/deepseek/pro"),
+        field("model", "model", "owl/deepseek/pro"),
         field("subagent", "subagents", ""), level("subagent", "subagents", false),
         field("small", "smol", ""), level("small", "smol", false),
-        field("slow", "slow", "myna/deepseek/flash"), level("slow", "slow", true),
+        field("slow", "slow", "owl/deepseek/flash"), level("slow", "slow", true),
         field("plan", "plan", ""), level("plan", "plan", false),
         field("vision", "vision", ""), level("vision", "vision", false),
         field("advisor", "advisor", ""), level("advisor", "advisor", false),
@@ -45,8 +45,8 @@ const fresh = () => ({
     },
     // a named profile of omp (#1233) has the same roles
     { id: "omp#work", name: "omp · work", path: "/test/profiles/work/config.yml", icon: "omp", wired: true,
-      fields: [field("model", "model", "myna/deepseek/pro"), field("slow", "slow", "myna/deepseek/flash"), level("slow", "slow", true), field("plan", "plan", ""), level("plan", "plan", false)] },
-    { id: "opencode", name: "OpenCode", path: "/test/opencode.json", wired: true, fields: [field("model", "model", "myna/deepseek/pro"), field("small", "small", "")] },
+      fields: [field("model", "model", "owl/deepseek/pro"), field("slow", "slow", "owl/deepseek/flash"), level("slow", "slow", true), field("plan", "plan", ""), level("plan", "plan", false)] },
+    { id: "opencode", name: "OpenCode", path: "/test/opencode.json", wired: true, fields: [field("model", "model", "owl/deepseek/pro"), field("small", "small", "")] },
   ],
   profiles: [],
 });
@@ -129,7 +129,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         }
         await browser.close();
       });
-      await page.goto("http://myna.test/");
+      await page.goto("http://owl.test/");
       await page.locator(omp).waitFor();
       await page.locator(`${omp} .ag-link`).click();
 
@@ -191,7 +191,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.match(await page.locator("#pop:not([hidden]) #list li").first().innerText(), new RegExp(`${w.same}[\\s\\S]*DeepSeek Pro`));
       await page.locator("#pop:not([hidden]) #list li", { hasText: "DeepSeek Flash" }).first().click();
       await page.waitForFunction(() => document.querySelectorAll("#status").length && !document.querySelector("#pop:not([hidden])"));
-      assert.deepEqual(sets[1], { agent: "omp", field: "small", value: "myna/deepseek/flash" });
+      assert.deepEqual(sets[1], { agent: "omp", field: "small", value: "owl/deepseek/flash" });
 
       // plan: no "Same as model", omp picks unset
       await square.click();

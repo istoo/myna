@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // request is one gateway request the exporter watches: a root span, and

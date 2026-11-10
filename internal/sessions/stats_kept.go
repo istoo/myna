@@ -5,14 +5,14 @@ import (
 	"slices"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 // keptStats are the ranges statsReadAll last read, and what they were read
 // from. The Usage page asks for its range every 10 s and the Sessions page
 // for 7, 30 and every day every 15 s; between two polls the files mostly
 // haven't changed, and each read put every session of every range together
-// again: ~1.1 GB a minute and a third, a fifth of all myna allocated
+// again: ~1.1 GB a minute and a third, a fifth of all owl allocated
 // (#2278). Guarded by mu.
 var keptStats struct {
 	files  []keptFile

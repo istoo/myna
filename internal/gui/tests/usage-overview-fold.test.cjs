@@ -29,7 +29,7 @@ const sum = (k) => AGENTS.reduce((n, g) => n + g[k], 0);
 const USAGE = {
   calls: 30, errors: 0, input: sum("input"), output: sum("output"), reasoning: 0, cache_read: sum("cache_read"), cache_write: 0, unpriced: 0, cost: 0, bucket: "day",
   series: [{ label: "Oct 15", time: new Date().toISOString(), calls: 30, input: sum("input"), output: sum("output"), cache_read: sum("cache_read"), cache_write: 0, cost: 0 }],
-  path: "~/.config/myna/usage.jsonl",
+  path: "~/.config/owl/usage.jsonl",
   agents: AGENTS, models: MODELS, accounts: ACCOUNTS, callerKeys: KEYS,
 };
 // the Requests tab's totals, the reporter's: 183.2万 in, 71.1万 out, 8793.3万 cache
@@ -96,7 +96,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             p.setDefaultNavigationTimeout(60000);
             p.on("pageerror", (e) => errors.push(e.message));
             await p.route("**/*", server(lang));
-            await p.goto("http://myna.test/");
+            await p.goto("http://owl.test/");
             await goUsage(p);
             // drawn, folded or not: a reload may find Accounts folded away
             await p.locator("#usageAccounts .row.stat").first().waitFor({ state: "attached" });
@@ -219,7 +219,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           p.setDefaultNavigationTimeout(60000);
           p.on("pageerror", (e) => errors.push(e.message));
           await p.route("**/*", server(lang));
-          await p.goto("http://myna.test/");
+          await p.goto("http://owl.test/");
           await goUsage(p);
           await p.locator(":is(#usageTab .opt, .nav-s):visible").nth(1).click();
           await p.locator("#ledKpi .blk").first().waitFor();

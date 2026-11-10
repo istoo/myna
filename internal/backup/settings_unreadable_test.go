@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/lastgood"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/lastgood"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // A settings.json that is there but can't be read stops the backup, as an

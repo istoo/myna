@@ -5,7 +5,7 @@
 // 23% used" — the week's reset was left to the tooltip below 80%. Claude
 // Code and Codex accounts, every language, Chromium and WebKit, at a desk's
 // width, the window's narrowest and a phone's: the reset stays in the row
-// and the sheet doesn't scroll sideways. MYNA_ACC_ASSETS runs it on older
+// and the sheet doesn't scroll sideways. OWL_ACC_ASSETS runs it on older
 // assets.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -13,7 +13,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MYNA_ACC_ASSETS || path.resolve(__dirname, "../assets"));
+const assets = path.resolve(process.env.OWL_ACC_ASSETS || path.resolve(__dirname, "../assets"));
 const soon = new Date(Date.now() + 2 * 36e5).toISOString();
 const week = new Date(Date.now() + (6 * 24 + 1) * 36e5).toISOString();
 const provider = (id, name, icon, user) => ({
@@ -55,7 +55,7 @@ for (const [engine, browserType] of [["chromium", chromium], ["webkit", webkit]]
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, web));
-      await page.goto("http://myna.test/?view=providers");
+      await page.goto("http://owl.test/?view=providers");
       await page.locator(".row.provider", { hasText: p.name }).first().click();
       const row = page.locator(`.editor .acc[data-account-id="${p.account.user}"]`);
       await row.locator(".aq-w").nth(1).waitFor();

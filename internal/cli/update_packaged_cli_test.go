@@ -9,10 +9,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/update"
+	"github.com/istoo/owl/internal/update"
 )
 
-// `myna update` from the AUR's myna-bin (/usr/bin/myna) asked for the
+// `owl update` from the AUR's owl-bin (/usr/bin/owl) asked for the
 // password and replaced the package's file under pacman (shuhai on
 // Discord). It now says the version is out and the command that updates
 // the package, and replaces nothing.
@@ -21,13 +21,13 @@ func TestUpdatePackagedSaysTheManager(t *testing.T) {
 		if r.URL.Path == "/asset" {
 			t.Errorf("a packaged binary downloaded the release")
 		}
-		json.NewEncoder(w).Encode(update.Release{Version: "0.1.11", URL: "https://github.com/istoo/myna/releases/tag/v0.1.11",
+		json.NewEncoder(w).Encode(update.Release{Version: "0.1.11", URL: "https://github.com/istoo/owl/releases/tag/v0.1.11",
 			Assets: map[string]update.Asset{update.BinaryAsset(): {URL: "http://" + r.Host + "/asset"}}})
 	}))
 	defer srv.Close()
-	t.Setenv("MYNA_UPDATE_FEED", srv.URL)
-	exe := filepath.Join(t.TempDir(), "myna")
-	if err := os.WriteFile(exe, []byte("myna"), 0o755); err != nil {
+	t.Setenv("OWL_UPDATE_FEED", srv.URL)
+	exe := filepath.Join(t.TempDir(), "owl")
+	if err := os.WriteFile(exe, []byte("owl"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	wasV, wasX, wasE, wasP := version, updateExecutable, updateCanElevate, updatePackagedBy
@@ -35,13 +35,13 @@ func TestUpdatePackagedSaysTheManager(t *testing.T) {
 	version = "0.1.10"
 	updateExecutable = func() (string, error) { return exe, nil }
 	updateCanElevate = func() bool { return true }
-	updatePackagedBy = func(string) *update.Packaged { return &update.Packaged{Manager: "pacman", Package: "myna-bin"} }
+	updatePackagedBy = func(string) *update.Packaged { return &update.Packaged{Manager: "pacman", Package: "owl-bin"} }
 
 	err := updateCmd([]string{"update"})
-	if err == nil || !strings.Contains(err.Error(), "pacman") || !strings.Contains(err.Error(), "yay -S myna-bin") {
+	if err == nil || !strings.Contains(err.Error(), "pacman") || !strings.Contains(err.Error(), "yay -S owl-bin") {
 		t.Fatalf("%v", err)
 	}
-	if b, _ := os.ReadFile(exe); string(b) != "myna" {
+	if b, _ := os.ReadFile(exe); string(b) != "owl" {
 		t.Fatalf("the package's file was changed: %q", b)
 	}
 }

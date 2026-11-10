@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // TestCodexStreamCutToldTheClient (#3377): the ChatGPT backend closed every
@@ -75,7 +75,7 @@ func TestCodexStreamCutToldTheClient(t *testing.T) {
 }
 
 // A stream the backend cut inside a line still has its failure read: what
-// myna appends begins after a blank line, so the half line can't take
+// owl appends begins after a blank line, so the half line can't take
 // its first event into its data, which no client parses (#3377, as #2446
 // and #2580 for a relayed stream).
 func TestCodexStreamCutMidLineFailureParses(t *testing.T) {
@@ -109,7 +109,7 @@ func TestCodexStreamCutMidLineFailureParses(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// every event myna appended parses; the half line the cut left is
+	// every event owl appended parses; the half line the cut left is
 	// an event of its own, which a client skips
 	const half = `{"type":"response.output_text.delta","del`
 	failed := false
@@ -125,7 +125,7 @@ func TestCodexStreamCutMidLineFailureParses(t *testing.T) {
 			continue
 		}
 		if !json.Valid([]byte(d)) {
-			t.Fatalf("an event no client parses, the half line run into what myna appended: %q\n%s", ev, body)
+			t.Fatalf("an event no client parses, the half line run into what owl appended: %q\n%s", ev, body)
 		}
 		failed = failed || strings.Contains(d, `"response.failed"`)
 	}

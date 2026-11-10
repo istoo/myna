@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/gwmw"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/gwmw"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // unroutedLimits sets when a request held before routing shows, and when
@@ -24,7 +24,7 @@ func unroutedLimits(t *testing.T, show, most time.Duration) {
 }
 
 // unknownLimit sets how long a request may be held before routing in no
-// wait myna knows of.
+// wait owl knows of.
 func unknownLimit(t *testing.T, d time.Duration) {
 	t.Helper()
 	was := unroutedUnknown
@@ -33,7 +33,7 @@ func unknownLimit(t *testing.T, d time.Duration) {
 }
 
 // roomForRace gives a test that reads and routes hundreds of megabytes the
-// time -race needs for it: the hold that stops a request myna can't place
+// time -race needs for it: the hold that stops a request owl can't place
 // is 30s, and a 516 MB turn is several times that under -race (ubuntu and
 // macOS CI, 11-04). A run without -race keeps the real limits.
 func roomForRace(t *testing.T) {
@@ -121,7 +121,7 @@ func postWhole(srv *httptest.Server, body io.Reader) (int, string, error) {
 const unroutedHi = `{"model":"probe/text","messages":[{"role":"user","content":"hi"}]}`
 
 // sharwowwow on X: two minutes of a spinner before the 504. A request
-// held before routing in no wait myna knows of (here a lock routing
+// held before routing in no wait owl knows of (here a lock routing
 // needs, held and never let go) is answered once it has been held
 // unroutedUnknown, long before unroutedMost.
 func TestUnroutedUnknownHoldAnsweredSooner(t *testing.T) {
@@ -153,7 +153,7 @@ func TestUnroutedUnknownHoldAnsweredSooner(t *testing.T) {
 // heldSaved waits for the report of the request s answered 504 for
 // being held before routing: the 504 goes first and the report is saved
 // after it, so a test that returns on the 504 alone has its HOME removed
-// under the write ("TempDir RemoveAll cleanup: … myna/held: directory
+// under the write ("TempDir RemoveAll cleanup: … owl/held: directory
 // not empty" on mote, 10-29).
 func heldSaved(t *testing.T, s *Server) {
 	t.Helper()
@@ -340,7 +340,7 @@ func routesOf(s *Server, model string) []Route {
 }
 
 // heyusaku6 on X: Codex thought for over ten minutes on a model served
-// through myna, the Routing page showed nothing, and only restarting
+// through owl, the Routing page showed nothing, and only restarting
 // both ended it. A request held before any route is begun for it shows on
 // the Routing page as routing, and is answered with an error in bounded
 // time, whole, rather than left to wait with nothing said.
@@ -445,7 +445,7 @@ func TestUnroutedQuickRequestLeavesNoTrace(t *testing.T) {
 	}
 	time.Sleep(50 * time.Millisecond)
 	for _, r := range s.Trace(context.Background(), 0, 0).Routes {
-		if r.Provider == "myna" && !r.Done {
+		if r.Provider == "owl" && !r.Done {
 			t.Fatalf("a route left showing a request that was answered: %+v", r)
 		}
 	}
@@ -490,7 +490,7 @@ func TestUnroutedMostLeavesOutMasking(t *testing.T) {
 	heldSaved(t, s)
 }
 
-// A request another myna passed on is shown, while it waits to be
+// A request another owl passed on is shown, while it waits to be
 // routed, as the agent that made it there (callerFrom), read once as it
 // comes: the show's timer never reads its headers, which withCaller and
 // decodedBody change meanwhile (#3956's ubuntu race run).
@@ -505,7 +505,7 @@ func TestUnroutedShownAsItsCaller(t *testing.T) {
 	go func() {
 		req, _ := http.NewRequest(http.MethodPost, srv.URL+"/v1/chat/completions", pr)
 		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("User-Agent", "myna/0.1.0")
+		req.Header.Set("User-Agent", "owl/0.1.0")
 		req.Header.Set(AgentHeader, "pi")
 		resp, err := (&http.Client{Timeout: 30 * time.Second}).Do(req)
 		if err != nil {
@@ -537,7 +537,7 @@ func TestUnroutedShownAsItsCaller(t *testing.T) {
 		time.Sleep(5 * time.Millisecond)
 	}
 	if agent != "pi" {
-		t.Errorf("shown as %q while held, want pi, the agent another myna passed it on for", agent)
+		t.Errorf("shown as %q while held, want pi, the agent another owl passed it on for", agent)
 	}
 	if _, err := pw.Write([]byte(unroutedHi[10:])); err != nil {
 		t.Fatal(err)
@@ -549,7 +549,7 @@ func TestUnroutedShownAsItsCaller(t *testing.T) {
 }
 
 // Jason on Discord: a Codex turn on ChatGPT Pro accounts, held while it
-// was masked, showed on the Routing page as "myna · 0 on" over "Nothing
+// was masked, showed on the Routing page as "owl · 0 on" over "Nothing
 // could take ." — the route that shows a held request had no model,
 // because Codex's own path never told the watch what it asked for, as
 // the Chat, Responses, Messages and Gemini paths do. It names it.
@@ -594,7 +594,7 @@ func TestUnroutedCodexPathShowsItsModel(t *testing.T) {
 		}
 		time.Sleep(5 * time.Millisecond)
 	}
-	if rs := routesOf(s, "probe/text"); len(rs) != 1 || rs[0].Done || rs[0].Provider != "myna" {
+	if rs := routesOf(s, "probe/text"); len(rs) != 1 || rs[0].Done || rs[0].Provider != "owl" {
 		t.Fatalf("the held Codex request is shown without the model it asked for: %+v", s.Trace(context.Background(), 0, 0).Routes)
 	}
 	open()

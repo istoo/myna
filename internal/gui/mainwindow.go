@@ -7,7 +7,7 @@ import (
 
 	"github.com/wailsapp/wails/v3/pkg/application"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // mainMacWindow: the main window's Mac options. A window belongs to the
@@ -66,7 +66,7 @@ func closeStep(goos string, fullscreen bool) closeAction {
 // while the window is hidden, so it can't tell by itself.
 const mainClosedJS = "window.hideAccounts?.closed?.()"
 
-// hideMain hides the main window, and takes myna out of the Dock if it is
+// hideMain hides the main window, and takes owl out of the Dock if it is
 // there only while the window is shown.
 func (h *host) hideMain() {
 	application.InvokeSync(func() {

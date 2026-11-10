@@ -58,7 +58,7 @@ func TestSettleWaitsForTheHooksItTold(t *testing.T) {
 // returns (#1935, #1543): provider's OnSignIn hook writes the account's
 // lapse into logins.json, and run in the background with nothing waiting
 // for it, it wrote under a test's folder as the folder was removed
-// ("unlinkat .config/myna: directory not empty").
+// ("unlinkat .config/owl: directory not empty").
 func TestSettleWaitsForTheSignInHook(t *testing.T) {
 	storeSandbox(t)
 	Settle()
@@ -95,7 +95,7 @@ func TestSettleWaitsForTheSignInHook(t *testing.T) {
 // test's folder had being the one seen last: the change was told there,
 // in the background, and dropped what that test held.
 func TestSettleForgetsTheFoldersPlugins(t *testing.T) {
-	t.Setenv("MYNA_BUN", "") // no Bun, nor a host: nothing asks the plugins here
+	t.Setenv("OWL_BUN", "") // no Bun, nor a host: nothing asks the plugins here
 	storeSandbox(t)
 	t.Cleanup(Settle)
 	spec := "opencode-fake-auth"

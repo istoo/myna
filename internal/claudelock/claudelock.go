@@ -21,7 +21,7 @@ var (
 	Wait = 20 * time.Second
 	// poll is how often a held lock is looked at again.
 	poll = 100 * time.Millisecond
-	// touch is how often a lock myna holds is touched, as Claude
+	// touch is how often a lock owl holds is touched, as Claude
 	// Code's update (5s for the refresh locks, half the stale time for
 	// ~/.claude.json's), so it never reads as left behind.
 	touch = 2 * time.Second

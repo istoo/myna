@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // The gateway gives a drawing up to Settings' most minutes, and a video

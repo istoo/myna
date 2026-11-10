@@ -70,7 +70,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         p.on("pageerror", (e) => errors.push(e.message));
         let answer = () => overview("day");
         await p.route("**/*", serve(lang, () => answer()));
-        await p.goto("http://myna.test/");
+        await p.goto("http://owl.test/");
         await navTo(p, "usage");
         const labels = () => p.locator("#chart .labels span").allTextContents();
         const title = (i) => p.locator("#chart .bar").nth(i).getAttribute("title");

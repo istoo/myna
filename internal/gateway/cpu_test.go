@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // The CPU profile goes to the same callers as the heap profile and no
@@ -23,8 +23,8 @@ import (
 // second is recorded.
 func TestCPUProfileOnlyToThisComputer(t *testing.T) {
 	fresh(t)
-	t.Setenv("MYNA_ADDR", "")
-	t.Setenv("MYNA_PUBLIC_URL", "")
+	t.Setenv("OWL_ADDR", "")
+	t.Setenv("OWL_PUBLIC_URL", "")
 	_, secrets := newCaller(t, "Page")
 	s := settings.Load()
 	s.CORSOrigins = []string{"https://listed.example"}
@@ -66,7 +66,7 @@ func TestCPUProfileOnlyToThisComputer(t *testing.T) {
 	for _, host := range []string{"127.0.0.1:3425", "localhost:3425", "[::1]:3425"} {
 		w := call(true, "127.0.0.1:50123", host, "User-Agent", "Go-http-client/1.1")
 		if w.Code != http.StatusOK {
-			t.Fatalf("myna cpu at %s: %d %q", host, w.Code, w.Body.String())
+			t.Fatalf("owl cpu at %s: %d %q", host, w.Code, w.Body.String())
 		}
 		zr, err := gzip.NewReader(bytes.NewReader(w.Body.Bytes()))
 		if err != nil {
@@ -117,7 +117,7 @@ func TestCPUProfileSecondsBounded(t *testing.T) {
 // its recording, and the next profile can start.
 func TestCPUProfileOneAtATime(t *testing.T) {
 	fresh(t)
-	t.Setenv("MYNA_ADDR", "")
+	t.Setenv("OWL_ADDR", "")
 	srv := New()
 	ts := httptest.NewServer(srv.Handler())
 	defer ts.Close()

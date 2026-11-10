@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // lockedLog is the standard logger's output for a test, safe to read
@@ -83,7 +83,7 @@ func codexUpstreamAt(t *testing.T, h http.HandlerFunc) {
 // words for a body whose connection broke while it was read — and app.log
 // had nothing of the turn. The ChatGPT backend's connection broken off
 // inside a chunk, as a reset does, reaches Codex as a whole HTTP reply
-// whose stream says it failed (no broken body of myna's for Codex to
+// whose stream says it failed (no broken body of owl's for Codex to
 // fail to decode), and app.log says which side ended it and how.
 func TestCodexReplyBrokenOffLogged(t *testing.T) {
 	logs := catchLog(t)
@@ -117,7 +117,7 @@ func TestCodexReplyBrokenOffLogged(t *testing.T) {
 	defer res.Body.Close()
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		t.Fatalf("myna's reply broke off under the client (Codex: error decoding response body): %v\n%s", err, body)
+		t.Fatalf("owl's reply broke off under the client (Codex: error decoding response body): %v\n%s", err, body)
 	}
 	if !strings.Contains(string(body), "half a reply") || !strings.Contains(string(body), "response.failed") {
 		t.Fatalf("the reply's delta and its failure weren't both passed on:\n%s", body)
@@ -141,8 +141,8 @@ func TestCodexClientGoneLogged(t *testing.T) {
 			`data: {"type":"response.created","response":{"id":"r1","model":"gpt-6.1-sol"}}`,
 			`data: {"type":"response.output_text.delta","delta":"half a reply"}`))
 		w.(http.Flusher).Flush()
-		// the reply goes on until myna lets go of it: a write to the
-		// client that left is how myna learns it did
+		// the reply goes on until owl lets go of it: a write to the
+		// client that left is how owl learns it did
 		for {
 			select {
 			case <-r.Context().Done():

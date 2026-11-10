@@ -10,8 +10,8 @@ import (
 	"time"
 )
 
-// #1518: myna started at login, before the proxy app. The system has no
-// proxy yet, so requests go direct; once the proxy app sets one, myna
+// #1518: owl started at login, before the proxy app. The system has no
+// proxy yet, so requests go direct; once the proxy app sets one, owl
 // takes it within a few seconds, not the 15 a set proxy is kept for.
 func TestSystemProxySetAfterStartIsTakenSoon(t *testing.T) {
 	var p atomic.Value
@@ -35,7 +35,7 @@ func TestSystemProxySetAfterStartIsTakenSoon(t *testing.T) {
 	p.Store(Proxy{URL: "http://127.0.0.1:7890"})
 	time.Sleep(200 * time.Millisecond)
 	if got := System(); got.URL != "http://127.0.0.1:7890" {
-		t.Fatalf("the proxy app set the system proxy, but myna still reads %+v", got)
+		t.Fatalf("the proxy app set the system proxy, but owl still reads %+v", got)
 	}
 	// A proxy that is set is kept for its own while.
 	p.Store(Proxy{})

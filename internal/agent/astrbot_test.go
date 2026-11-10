@@ -11,8 +11,8 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // astrbotConfig is a cmd_config.json as AstrBot 4.28.2 writes it (json.dump,
@@ -76,7 +76,7 @@ const astrbotConfig = "\xef\xbb\xbf" + `{
 }`
 
 // astrbotHome is a HOME with the AstrBot desktop app's ~/.astrbot holding
-// body as its cmd_config.json, and myna with a provider of two models.
+// body as its cmd_config.json, and owl with a provider of two models.
 func astrbotHome(t *testing.T, body string) (home, path string) {
 	t.Helper()
 	home = t.TempDir()
@@ -130,7 +130,7 @@ func astrbotByID(t *testing.T, m map[string]any, k string) map[string]map[string
 }
 
 // astrbotReversed is r indented as AstrBot writes it, every object's keys in
-// the reverse of their order: the same settings, in an order myna doesn't
+// the reverse of their order: the same settings, in an order owl doesn't
 // write them in.
 func astrbotReversed(r gjson.Result, in string) string {
 	switch {
@@ -178,11 +178,11 @@ func astrbotPick(m map[string]any) any {
 	return m["agent_runner"].(map[string]any)["config"].(map[string]any)["model"].(map[string]any)["provider_id"]
 }
 
-// Connecting AstrBot adds myna's provider source and one model entry for
-// each of myna's models, typed as AstrBot's validator types them, and
+// Connecting AstrBot adds owl's provider source and one model entry for
+// each of owl's models, typed as AstrBot's validator types them, and
 // makes the one picked AstrBot's default chat model. The user's own source
 // and model stay as they were, the file keeps its BOM, a copy of it is kept
-// before myna writes, and Disconnect gives back the file byte for byte.
+// before owl writes, and Disconnect gives back the file byte for byte.
 func TestAstrBot(t *testing.T) {
 	home, path := astrbotHome(t, astrbotConfig)
 	a := astrbot(home)
@@ -196,48 +196,48 @@ func TestAstrBot(t *testing.T) {
 	var own, ours bool
 	for _, o := range f.Options(a.Values()) {
 		own = own || o.Value == "deepseek/deepseek-chat"
-		ours = ours || o.Value == "myna/kimi/k2"
+		ours = ours || o.Value == "owl/kimi/k2"
 	}
 	if !own || !ours {
-		t.Fatalf("options: own %v myna %v", own, ours)
+		t.Fatalf("options: own %v owl %v", own, ours)
 	}
 
-	if err := a.Pick("model", "myna/kimi/k2"); err != nil {
+	if err := a.Pick("model", "owl/kimi/k2"); err != nil {
 		t.Fatal(err)
 	}
 	m := astrbotRead(t, path)
-	if got := astrbotPick(m); got != "myna/kimi/k2" {
+	if got := astrbotPick(m); got != "owl/kimi/k2" {
 		t.Fatalf("default chat model %v", got)
 	}
-	if !a.Wired() || f.Get() != "myna/kimi/k2" {
+	if !a.Wired() || f.Get() != "owl/kimi/k2" {
 		t.Fatalf("wired %v, model %q", a.Wired(), f.Get())
 	}
 	if c := a.Check(); c != "" {
 		t.Fatalf("check: %s", c)
 	}
 	sources := astrbotByID(t, m, "provider_sources")
-	src := sources["myna"]
+	src := sources["owl"]
 	if src == nil || src["type"] != "openai_chat_completion" || src["provider_type"] != "chat_completion" ||
 		!strings.HasSuffix(src["api_base"].(string), "/v1") || src["timeout"] != float64(120) {
-		t.Fatalf("myna's source: %v", src)
+		t.Fatalf("owl's source: %v", src)
 	}
 	if k, _ := src["key"].([]any); len(k) != 1 || k[0] != agentKeyAt("astrbot", here(home).gw()) {
-		t.Fatalf("myna's key must be a list of the key naming AstrBot: %v", src["key"])
+		t.Fatalf("owl's key must be a list of the key naming AstrBot: %v", src["key"])
 	}
 	if !reflect.DeepEqual(sources["deepseek"]["key"], []any{"sk-user"}) {
 		t.Fatalf("the user's source: %v", sources["deepseek"])
 	}
 	models := astrbotByID(t, m, "provider")
-	k2, vision := models["myna/kimi/k2"], models["myna/kimi/k2-vision"]
+	k2, vision := models["owl/kimi/k2"], models["owl/kimi/k2-vision"]
 	if k2 == nil || vision == nil || models["deepseek/deepseek-chat"] == nil {
 		t.Fatalf("models: %v", models)
 	}
-	// k2 takes images only when myna describes them to it
+	// k2 takes images only when owl describes them to it
 	k2mods := []any{"text", "tool_use"}
 	if provider.Described != nil && provider.Described() {
 		k2mods = []any{"text", "image", "tool_use"}
 	}
-	if k2["provider_source_id"] != "myna" || k2["model"] != "kimi/k2" || k2["max_context_tokens"] != float64(262144) ||
+	if k2["provider_source_id"] != "owl" || k2["model"] != "kimi/k2" || k2["max_context_tokens"] != float64(262144) ||
 		!reflect.DeepEqual(k2["modalities"], k2mods) || !reflect.DeepEqual(k2["custom_extra_body"], map[string]any{}) {
 		t.Fatalf("k2: %v", k2)
 	}
@@ -245,7 +245,7 @@ func TestAstrBot(t *testing.T) {
 		t.Fatalf("k2-vision: %v", vision)
 	}
 	// the user's own entries are as they were, byte for byte, in front of
-	// myna's
+	// owl's
 	b, _ := os.ReadFile(path)
 	for _, own := range []string{
 		astrbotConfig[strings.Index(astrbotConfig, "    {\n      \"id\": \"deepseek\",") : strings.Index(astrbotConfig, "  ],\n  \"provider\": [")-1],
@@ -255,16 +255,16 @@ func TestAstrBot(t *testing.T) {
 			t.Fatalf("the user's entry changed or moved:\n%s\nin\n%s", own, b)
 		}
 	}
-	if bk, err := os.ReadFile(path + ".before-myna"); err != nil || string(bk) != astrbotConfig {
+	if bk, err := os.ReadFile(path + ".before-owl"); err != nil || string(bk) != astrbotConfig {
 		t.Fatalf("backup: %v\n%s", err, bk)
 	}
 
-	// switching between myna's models keeps what AstrBot was on before
-	// myna, and leaves the backup as it was
-	if err := a.Pick("model", "myna/kimi/k2-vision"); err != nil {
+	// switching between owl's models keeps what AstrBot was on before
+	// owl, and leaves the backup as it was
+	if err := a.Pick("model", "owl/kimi/k2-vision"); err != nil {
 		t.Fatal(err)
 	}
-	if bk, _ := os.ReadFile(path + ".before-myna"); string(bk) != astrbotConfig {
+	if bk, _ := os.ReadFile(path + ".before-owl"); string(bk) != astrbotConfig {
 		t.Fatalf("the backup was written over:\n%s", bk)
 	}
 	if err := a.Disconnect(); err != nil {
@@ -278,7 +278,7 @@ func TestAstrBot(t *testing.T) {
 	}
 }
 
-// What the user changes in myna's entries in AstrBot's WebUI — a timeout,
+// What the user changes in owl's entries in AstrBot's WebUI — a timeout,
 // a proxy, a model switched off — is theirs: a catalog sync rewrites the
 // list of models and the endpoint, not those. A sync that has nothing to
 // change doesn't write, though AstrBot wrote the entries' keys in an order
@@ -286,16 +286,16 @@ func TestAstrBot(t *testing.T) {
 func TestAstrBotSyncKeepsTheirs(t *testing.T) {
 	home, path := astrbotHome(t, astrbotConfig)
 	a := astrbot(home)
-	if err := a.Pick("model", "myna/kimi/k2"); err != nil {
+	if err := a.Pick("model", "owl/kimi/k2"); err != nil {
 		t.Fatal(err)
 	}
 	// as AstrBot's WebUI saves it: the whole file, from what it holds
 	astrbotEdit(t, path, func(m map[string]any) {
-		src := astrbotByID(t, m, "provider_sources")["myna"]
+		src := astrbotByID(t, m, "provider_sources")["owl"]
 		src["timeout"], src["proxy"] = 300, "http://127.0.0.1:7890"
-		astrbotByID(t, m, "provider")["myna/kimi/k2-vision"]["enable"] = false
+		astrbotByID(t, m, "provider")["owl/kimi/k2-vision"]["enable"] = false
 	})
-	// a model myna lists no more leaves AstrBot's list; one it lists
+	// a model owl lists no more leaves AstrBot's list; one it lists
 	// now comes in
 	if err := catalog.SaveLive("kimi", "https://api.moonshot.cn/v1", []catalog.Model{
 		{ID: "k2", Context: 262144}, {ID: "k2-vision", Images: true}, {ID: "k3"},
@@ -310,16 +310,16 @@ func TestAstrBotSyncKeepsTheirs(t *testing.T) {
 		t.Fatal(err)
 	}
 	m := astrbotRead(t, path)
-	src := astrbotByID(t, m, "provider_sources")["myna"]
+	src := astrbotByID(t, m, "provider_sources")["owl"]
 	if src["timeout"] != float64(300) || src["proxy"] != "http://127.0.0.1:7890" {
 		t.Fatalf("the user's timeout and proxy were written over: %v", src)
 	}
 	models := astrbotByID(t, m, "provider")
-	if models["myna/kimi/k2-vision"]["enable"] != false {
-		t.Fatalf("a model the user switched off came back on: %v", models["myna/kimi/k2-vision"])
+	if models["owl/kimi/k2-vision"]["enable"] != false {
+		t.Fatalf("a model the user switched off came back on: %v", models["owl/kimi/k2-vision"])
 	}
-	if models["myna/kimi/k3"] == nil {
-		t.Fatalf("a model myna lists now isn't in AstrBot's list: %v", models)
+	if models["owl/kimi/k3"] == nil {
+		t.Fatalf("a model owl lists now isn't in AstrBot's list: %v", models)
 	}
 
 	// AstrBot's WebUI writes every key back in an order of its own; the
@@ -335,12 +335,12 @@ func TestAstrBotSyncKeepsTheirs(t *testing.T) {
 	}
 }
 
-// Picking no model of myna's in the picker puts AstrBot back on the one it
-// was on before myna, and takes myna's source and models out.
+// Picking no model of owl's in the picker puts AstrBot back on the one it
+// was on before owl, and takes owl's source and models out.
 func TestAstrBotNoModelPutsTheirsBack(t *testing.T) {
 	home, path := astrbotHome(t, astrbotConfig)
 	a := astrbot(home)
-	if err := a.Pick("model", "myna/kimi/k2"); err != nil {
+	if err := a.Pick("model", "owl/kimi/k2"); err != nil {
 		t.Fatal(err)
 	}
 	if err := a.Field("model").Set(""); err != nil {
@@ -351,19 +351,19 @@ func TestAstrBotNoModelPutsTheirsBack(t *testing.T) {
 	}
 }
 
-// A default chat model the user picks in AstrBot while myna is wired is
-// theirs: Disconnect takes myna's source and models out and leaves the
+// A default chat model the user picks in AstrBot while owl is wired is
+// theirs: Disconnect takes owl's source and models out and leaves the
 // pick as it is.
 func TestAstrBotTheirPickStands(t *testing.T) {
 	home, path := astrbotHome(t, astrbotConfig)
 	a := astrbot(home)
-	if err := a.Pick("model", "myna/kimi/k2"); err != nil {
+	if err := a.Pick("model", "owl/kimi/k2"); err != nil {
 		t.Fatal(err)
 	}
 	b, _ := os.ReadFile(path)
-	writeFile(t, path, strings.Replace(string(b), `"provider_id": "myna/kimi/k2"`, `"provider_id": "openai/gpt-5"`, 1))
+	writeFile(t, path, strings.Replace(string(b), `"provider_id": "owl/kimi/k2"`, `"provider_id": "openai/gpt-5"`, 1))
 	if !a.Wired() {
-		t.Fatal("myna's models are still in AstrBot's list: it is connected")
+		t.Fatal("owl's models are still in AstrBot's list: it is connected")
 	}
 	if err := a.Disconnect(); err != nil {
 		t.Fatal(err)
@@ -372,18 +372,18 @@ func TestAstrBotTheirPickStands(t *testing.T) {
 	if got := astrbotPick(m); got != "openai/gpt-5" {
 		t.Fatalf("the user's pick became %v", got)
 	}
-	if _, ok := astrbotByID(t, m, "provider_sources")["myna"]; ok {
-		t.Fatal("myna's source stayed")
+	if _, ok := astrbotByID(t, m, "provider_sources")["owl"]; ok {
+		t.Fatal("owl's source stayed")
 	}
 	for id := range astrbotByID(t, m, "provider") {
-		if strings.HasPrefix(id, "myna/") {
-			t.Fatalf("myna's model %s stayed", id)
+		if strings.HasPrefix(id, "owl/") {
+			t.Fatalf("owl's model %s stayed", id)
 		}
 	}
 }
 
 // Before 4.28 AstrBot named its default chat model in
-// provider_settings.default_provider_id, with no agent_runner; myna sets
+// provider_settings.default_provider_id, with no agent_runner; owl sets
 // that one there, and puts it back.
 func TestAstrBotBeforeAgentRunner(t *testing.T) {
 	old := strings.Replace(astrbotConfig, `"web_search": false`, `"web_search": false,
@@ -394,14 +394,14 @@ func TestAstrBotBeforeAgentRunner(t *testing.T) {
 	if got := a.Field("model").Get(); got != "deepseek/deepseek-chat" {
 		t.Fatalf("model %q", got)
 	}
-	if err := a.Pick("model", "myna/kimi/k2"); err != nil {
+	if err := a.Pick("model", "owl/kimi/k2"); err != nil {
 		t.Fatal(err)
 	}
 	m := astrbotRead(t, path)
 	if _, ok := m["agent_runner"]; ok {
-		t.Fatal("myna made an agent_runner of its own")
+		t.Fatal("owl made an agent_runner of its own")
 	}
-	if got := m["provider_settings"].(map[string]any)["default_provider_id"]; got != "myna/kimi/k2" {
+	if got := m["provider_settings"].(map[string]any)["default_provider_id"]; got != "owl/kimi/k2" {
 		t.Fatalf("default_provider_id %v", got)
 	}
 	if err := a.Disconnect(); err != nil {
@@ -412,22 +412,22 @@ func TestAstrBotBeforeAgentRunner(t *testing.T) {
 	}
 }
 
-// myna writes no AstrBot settings of its own: with no cmd_config.json yet
+// owl writes no AstrBot settings of its own: with no cmd_config.json yet
 // (AstrBot never started) or one from before provider_sources (older than
 // 4.10), it says what to do and leaves the folder as it is.
 func TestAstrBotRefusesWithoutItsSettings(t *testing.T) {
 	home, path := astrbotHome(t, "")
 	os.MkdirAll(filepath.Join(home, ".astrbot"), 0o755)
 	a := astrbot(home)
-	if err := a.Pick("model", "myna/kimi/k2"); err == nil || !strings.Contains(err.Error(), "start AstrBot once") {
+	if err := a.Pick("model", "owl/kimi/k2"); err == nil || !strings.Contains(err.Error(), "start AstrBot once") {
 		t.Fatalf("no settings: %v", err)
 	}
 	if isFile(path) {
-		t.Fatal("myna made AstrBot's settings")
+		t.Fatal("owl made AstrBot's settings")
 	}
 	old := `{"provider": [{"id": "openai", "type": "openai_chat_completion", "key": ["sk"]}], "provider_settings": {"default_provider_id": "openai"}}`
 	writeFile(t, path, old)
-	if err := astrbot(home).Pick("model", "myna/kimi/k2"); err == nil || !strings.Contains(err.Error(), "4.10") {
+	if err := astrbot(home).Pick("model", "owl/kimi/k2"); err == nil || !strings.Contains(err.Error(), "4.10") {
 		t.Fatalf("before provider_sources: %v", err)
 	}
 	if got, _ := os.ReadFile(path); string(got) != old {
@@ -436,7 +436,7 @@ func TestAstrBotRefusesWithoutItsSettings(t *testing.T) {
 }
 
 // AstrBot's root: ASTRBOT_ROOT, the desktop app's ~/.astrbot, or a folder
-// `astrbot init` was run in that myna can know of.
+// `astrbot init` was run in that owl can know of.
 func TestAstrBotRoot(t *testing.T) {
 	home, _ := astrbotHome(t, "")
 	at := here(home)

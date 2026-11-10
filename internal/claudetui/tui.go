@@ -1,5 +1,5 @@
-// Package claudetui runs Claude Code's interactive mode for myna's Claude
-// subscription bridge, as `myna claude-tui-helper`: the bridge talks to
+// Package claudetui runs Claude Code's interactive mode for owl's Claude
+// subscription bridge, as `owl claude-tui-helper`: the bridge talks to
 // it as it talks to `claude -p --input-format stream-json --output-format
 // stream-json`, and it runs the real interactive Claude Code in a
 // pseudo-terminal of its own. A user message is pasted into Claude Code's
@@ -37,8 +37,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/wslrun"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/wslrun"
 )
 
 // ReadyWait is how long Claude Code may take to show its prompt before
@@ -110,7 +110,7 @@ type shim struct {
 	tap *tap
 	env []string
 
-	// listed is the file myna's tool server writes once Claude Code has
+	// listed is the file owl's tool server writes once Claude Code has
 	// listed its tools (mcpListed), "" for a run without it
 	listed string
 
@@ -127,7 +127,7 @@ type shim struct {
 // without the interactive mode's cache.
 func Run(args []string) error {
 	if len(args) < 1 {
-		return errors.New("usage: myna " + Command + " <claude> [claude -p's arguments]")
+		return errors.New("usage: owl " + Command + " <claude> [claude -p's arguments]")
 	}
 	path, pargs := args[0], args[1:]
 	var wsl *WSL
@@ -161,7 +161,7 @@ func Run(args []string) error {
 	if wsl != nil && wsl.Projects != "" {
 		s.projects = wsl.Projects
 	} else if wsl != nil {
-		dir, err := os.MkdirTemp("", "myna-claude-wsl-")
+		dir, err := os.MkdirTemp("", "owl-claude-wsl-")
 		if err != nil {
 			return fail(err.Error())
 		}
@@ -437,7 +437,7 @@ var signIn = regexp.MustCompile(`Select login method|Log in with your Claude acc
 // `claude` was never run, #4817), after its text style (theme): the
 // security notes, which Enter goes past as it would for a person, and,
 // in a terminal it knows how to set up (TERM_PROGRAM Apple_Terminal,
-// vscode, …), whether to set it up, which Esc skips: myna's terminal is
+// vscode, …), whether to set it up, which Esc skips: owl's terminal is
 // no one's. Once past them, Claude Code records the onboarding done
 // itself (2.1.316: hasCompletedOnboarding, lastOnboardingVersion), and
 // the next run shows none of them. They are matched in the screen's
@@ -548,7 +548,7 @@ func (s *shim) ready() error {
 				// drawn before Claude Code has its MCP servers' tools: it
 				// connects them as the prompt shows, and a message sent
 				// now is answered without the agent's tools, which
-				// myna's tool server carries (MinhuWang on X)
+				// owl's tool server carries (MinhuWang on X)
 				prompted = true
 				break
 			}
@@ -564,7 +564,7 @@ func (s *shim) ready() error {
 			return fmt.Errorf("Claude Code ended before it showed its prompt (%v): %s", s.exit, s.endedScreen())
 		case <-deadline:
 			if prompted {
-				return fmt.Errorf("Claude Code showed its prompt, but hadn't listed the tools of myna's tool server in %s", readyWait)
+				return fmt.Errorf("Claude Code showed its prompt, but hadn't listed the tools of owl's tool server in %s", readyWait)
 			}
 			doing, _ := s.doing.Load().(string)
 			return fmt.Errorf("Claude Code %s in %s: %s", doing, readyWait, s.lastScreen())
@@ -572,7 +572,7 @@ func (s *shim) ready() error {
 	}
 }
 
-// toolsListed is whether Claude Code has listed myna's tool server's
+// toolsListed is whether Claude Code has listed owl's tool server's
 // tools, or the run has no such server.
 func (s *shim) toolsListed() bool {
 	if s.listed == "" {
@@ -582,7 +582,7 @@ func (s *shim) toolsListed() bool {
 	return err == nil
 }
 
-// mcpListed is the file myna's tool server (MCPCommand) is told, in the
+// mcpListed is the file owl's tool server (MCPCommand) is told, in the
 // --mcp-config of args, to write once Claude Code has listed its tools;
 // "" when it isn't told one.
 func mcpListed(args []string) string {
@@ -940,7 +940,7 @@ func (s *shim) dropImages() {
 
 // imagesPrefix names the folders images are written to, the helper's pid
 // after it.
-const imagesPrefix = "myna-claude-images-"
+const imagesPrefix = "owl-claude-images-"
 
 // imagesLeft is how long an image or tap folder is left before another
 // helper removes it: one killed, as Windows ends a run, can't remove its
@@ -1236,11 +1236,11 @@ func newUUID() string {
 // interactiveArgs are `claude -p` arguments made the interactive mode's:
 // the same model, tools, MCP servers, settings, effort, system prompt and
 // session, without what only -p takes; its permission prompts kept, and
-// myna's MCP tools (and the web search -p was given) allowed without
+// owl's MCP tools (and the web search -p was given) allowed without
 // one, where -p skipped them all.
 func interactiveArgs(pargs []string) []string {
 	var out []string
-	allowed := []string{"mcp__myna"}
+	allowed := []string{"mcp__owl"}
 	for i := 0; i < len(pargs); i++ {
 		a := pargs[i]
 		switch a {

@@ -3,7 +3,7 @@ package provider
 import (
 	"net"
 
-	"github.com/istoo/myna/internal/netproxy"
+	"github.com/istoo/owl/internal/netproxy"
 )
 
 // SkipsRedaction says requests to p go unmasked: the user set Unredacted
@@ -13,10 +13,10 @@ import (
 // provider never had the switch): the editor cautions while it is on for
 // one not on this computer or the local network, which a signed-in
 // account's or a plugin's vendor never is, and nothing here looks one up.
-// Another myna is always masked: it masks on its own side, and what it
+// Another owl is always masked: it masks on its own side, and what it
 // is sent goes on to its vendors.
 func (p Provider) SkipsRedaction() bool {
-	if !p.Unredacted || p.IsRemoteMyna() {
+	if !p.Unredacted || p.IsRemoteOwl() {
 		return false
 	}
 	if p.Account != nil {

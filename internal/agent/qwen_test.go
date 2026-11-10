@@ -7,13 +7,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // qwenUser is a settings.json as Qwen Code leaves it for someone with a
-// custom model provider of their own, and settings myna has nothing to
+// custom model provider of their own, and settings owl has nothing to
 // do with.
 const qwenUser = `{
   "env": {
@@ -87,20 +87,20 @@ func TestQwen(t *testing.T) {
 	if got := a.Values()["model"]; got != "glm-5" {
 		t.Fatalf("model: %q", got)
 	}
-	// the picker: the user's own entries, then myna's catalog
+	// the picker: the user's own entries, then owl's catalog
 	opts := a.Field("model").Options(a.Values())
 	if opts[0].Value != "glm-5" || opts[0].Label != "[IdeaLab] glm-5" || opts[0].Group != "Qwen Code" {
 		t.Fatalf("own options: %+v", opts[:1])
 	}
 	var via bool
 	for _, o := range opts {
-		via = via || o.Value == "myna/deepseek/pro"
+		via = via || o.Value == "owl/deepseek/pro"
 	}
 	if !via {
-		t.Fatalf("no myna/deepseek/pro in %+v", opts)
+		t.Fatalf("no owl/deepseek/pro in %+v", opts)
 	}
 
-	if err := a.Apply("model", "myna/deepseek/pro"); err != nil {
+	if err := a.Apply("model", "owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	ms, order, f := qwenFile(t, path)
@@ -116,7 +116,7 @@ func TestQwen(t *testing.T) {
 		t.Fatalf("model: %v", m)
 	}
 	env := f["env"].(map[string]any)
-	if env["IDEALAB_API_KEY"] != "team-key" || env["MYNA_QWEN_API_KEY"] != gateway.Token {
+	if env["IDEALAB_API_KEY"] != "team-key" || env["OWL_QWEN_API_KEY"] != gateway.Token {
 		t.Fatalf("env: %v", env)
 	}
 	if auth := f["security"].(map[string]any)["auth"].(map[string]any)["selectedType"]; auth != "openai" {
@@ -131,18 +131,18 @@ func TestQwen(t *testing.T) {
 			t.Errorf("%s missing: %v", id, order)
 			continue
 		}
-		if e["name"] != listLabels("qwen")[id] || e["baseUrl"] != gatewayV1() || e["envKey"] != "MYNA_QWEN_API_KEY" {
+		if e["name"] != listLabels("qwen")[id] || e["baseUrl"] != gatewayV1() || e["envKey"] != "OWL_QWEN_API_KEY" {
 			t.Errorf("%s: %v", id, e)
 		}
 	}
-	if got := a.Values()["model"]; got != "myna/deepseek/pro" {
+	if got := a.Values()["model"]; got != "owl/deepseek/pro" {
 		t.Fatalf("model read back: %q", got)
 	}
 	if d := a.Check(); d != "" {
 		t.Fatalf("check: %s", d)
 	}
-	// another of myna's: the stash keeps the user's own
-	if err := a.Apply("model", "myna/anth/claude-sonnet-5"); err != nil {
+	// another of owl's: the stash keeps the user's own
+	if err := a.Apply("model", "owl/anth/claude-sonnet-5"); err != nil {
 		t.Fatal(err)
 	}
 	// a provider added since joins the picker on Sync
@@ -153,7 +153,7 @@ func TestQwen(t *testing.T) {
 	if ms, _, _ = qwenFile(t, path); ms["later/m1"] == nil {
 		t.Fatalf("sync: %v", ms)
 	}
-	// something else rewrote myna's entry: its baseUrl is the one
+	// something else rewrote owl's entry: its baseUrl is the one
 	// before its id, as the fields are ordered
 	cur := readFile(path)
 	at := strings.Index(cur, `"id": "anth/claude-sonnet-5"`)
@@ -171,7 +171,7 @@ func TestQwen(t *testing.T) {
 		t.Fatalf("check after sync: %s", d)
 	}
 
-	// reset: the user's model back, myna's entries and key gone, the
+	// reset: the user's model back, owl's entries and key gone, the
 	// rest as it was
 	if err := a.Apply("model", ""); err != nil {
 		t.Fatal(err)
@@ -185,12 +185,12 @@ func TestQwen(t *testing.T) {
 	_ = home
 }
 
-// Picking one of the user's own models while on myna's takes myna out.
+// Picking one of the user's own models while on owl's takes owl out.
 func TestQwenOwnModel(t *testing.T) {
 	_, path := qwenHome(t)
 	os.WriteFile(path, []byte(qwenUser), 0o644)
 	a := qwen(os.Getenv("HOME"))
-	if err := a.Apply("model", "myna/deepseek/pro"); err != nil {
+	if err := a.Apply("model", "owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	if err := a.Apply("model", "glm-5"); err != nil {
@@ -205,11 +205,11 @@ func TestQwenOwnModel(t *testing.T) {
 		t.Fatalf("model: %v", m)
 	}
 	env := f["env"].(map[string]any)
-	if _, ok := env["MYNA_QWEN_API_KEY"]; ok {
+	if _, ok := env["OWL_QWEN_API_KEY"]; ok {
 		t.Fatalf("key left: %v", env)
 	}
 	// and a reset after that leaves the user's choice, not the stash
-	if err := a.Apply("model", "myna/deepseek/pro"); err != nil {
+	if err := a.Apply("model", "owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	a.Apply("model", "")
@@ -218,7 +218,7 @@ func TestQwenOwnModel(t *testing.T) {
 	}
 }
 
-// No settings.json at all: myna adds only its own, and a reset leaves
+// No settings.json at all: owl adds only its own, and a reset leaves
 // the file as empty as it began.
 func TestQwenFresh(t *testing.T) {
 	home, path := qwenHome(t)
@@ -226,12 +226,12 @@ func TestQwenFresh(t *testing.T) {
 	if a.Values()["model"] != "" {
 		t.Fatal("model without a file")
 	}
-	if err := a.Apply("model", "myna/deepseek/flash"); err != nil {
+	if err := a.Apply("model", "owl/deepseek/flash"); err != nil {
 		t.Fatal(err)
 	}
 	if _, order, f := qwenFile(t, path); len(order) != 4 {
 		t.Fatalf("models: %v", order)
-	} else if env := f["env"].(map[string]any); env["MYNA_QWEN_API_KEY"] != gateway.Token {
+	} else if env := f["env"].(map[string]any); env["OWL_QWEN_API_KEY"] != gateway.Token {
 		t.Fatalf("env: %v", env)
 	}
 	if err := a.Apply("model", ""); err != nil {
@@ -241,7 +241,7 @@ func TestQwenFresh(t *testing.T) {
 		t.Fatalf("left: %s", got)
 	}
 	// a file Qwen Code never put a modelProviders in reads as no models
-	// of anyone at all, and myna touches none of it
+	// of anyone at all, and owl touches none of it
 	os.WriteFile(path, []byte("{\n  \"fastModel\": \"qwen3.8-flash\"\n}\n"), 0o644)
 	if got := a.Values()["model"]; got != "" {
 		t.Fatalf("model without modelProviders: %q", got)
@@ -250,18 +250,18 @@ func TestQwenFresh(t *testing.T) {
 		t.Fatal(err)
 	}
 	if got := readFile(path); got != "{\n  \"fastModel\": \"qwen3.8-flash\"\n}\n" {
-		t.Fatalf("nothing of myna's to take out:\n%s", got)
+		t.Fatalf("nothing of owl's to take out:\n%s", got)
 	}
 }
 
 // A model the user picked without a matching entry keeps no baseUrl;
-// one of the user's under myna's own env key name, and their auth
-// type, are stashed and put back when myna steps out.
+// one of the user's under owl's own env key name, and their auth
+// type, are stashed and put back when owl steps out.
 func TestQwenBareModelAndOwnEnvKey(t *testing.T) {
 	_, path := qwenHome(t)
 	bare := `{
   "env": {
-    "MYNA_QWEN_API_KEY": "the-user's-own"
+    "OWL_QWEN_API_KEY": "the-user's-own"
   },
   "security": {
     "auth": {
@@ -278,18 +278,18 @@ func TestQwenBareModelAndOwnEnvKey(t *testing.T) {
 	if got := a.Values()["model"]; got != "qwen3.8-max" {
 		t.Fatalf("bare model: %q", got)
 	}
-	if err := a.Apply("model", "myna/deepseek/pro"); err != nil {
+	if err := a.Apply("model", "owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
-	if _, _, f := qwenFile(t, path); f["env"].(map[string]any)["MYNA_QWEN_API_KEY"] != gateway.Token {
-		t.Fatalf("key not myna's: %v", f["env"])
+	if _, _, f := qwenFile(t, path); f["env"].(map[string]any)["OWL_QWEN_API_KEY"] != gateway.Token {
+		t.Fatalf("key not owl's: %v", f["env"])
 	}
 	if err := a.Apply("model", ""); err != nil {
 		t.Fatal(err)
 	}
 	var f map[string]any
 	json.Unmarshal([]byte(readFile(path)), &f)
-	if f["env"].(map[string]any)["MYNA_QWEN_API_KEY"] != "the-user's-own" {
+	if f["env"].(map[string]any)["OWL_QWEN_API_KEY"] != "the-user's-own" {
 		t.Fatalf("key not restored: %v", f["env"])
 	}
 	if got := f["security"].(map[string]any)["auth"].(map[string]any)["selectedType"]; got != "qwen-oauth" {
@@ -305,7 +305,7 @@ func TestQwenBareModelAndOwnEnvKey(t *testing.T) {
 }
 
 // An auth type of "openai" the user set themselves is told from
-// myna's, and stays when myna steps out.
+// owl's, and stays when owl steps out.
 func TestQwenAuthOpenAIOfTheUsersOwn(t *testing.T) {
 	_, path := qwenHome(t)
 	os.WriteFile(path, []byte(`{
@@ -320,7 +320,7 @@ func TestQwenAuthOpenAIOfTheUsersOwn(t *testing.T) {
 }
 `), 0o644)
 	a := qwen(os.Getenv("HOME"))
-	if err := a.Apply("model", "myna/deepseek/pro"); err != nil {
+	if err := a.Apply("model", "owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	if err := a.Sync(); err != nil {
@@ -348,8 +348,8 @@ func TestQwenHomeOverride(t *testing.T) {
 }
 
 // love1sbug on X: Names in agents' lists changed nothing in Qwen Code's
-// /model, which shows an entry's name (the id beside it), as myna named
-// every entry myna/<id>. The name follows the setting now, written again
+// /model, which shows an entry's name (the id beside it), as owl named
+// every entry owl/<id>. The name follows the setting now, written again
 // as it changes.
 func TestQwenNamesFollowSuffixMode(t *testing.T) {
 	_, path := qwenHome(t)
@@ -361,7 +361,7 @@ func TestQwenNamesFollowSuffixMode(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := a.Apply("model", "myna/deepseek/pro"); err != nil {
+	if err := a.Apply("model", "owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	catalog.Changed = SyncCatalog

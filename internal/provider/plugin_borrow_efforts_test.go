@@ -7,9 +7,9 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // laomao04_65777 on Discord: in Codex, SenseTime Raccoon's (商汤小浣熊's)
@@ -22,7 +22,7 @@ import (
 // variants keeps them, and one it doesn't say thinks gets none borrowed.
 func TestPluginThinkingModelBorrowsEfforts(t *testing.T) {
 	claudeHome(t)
-	t.Setenv("MYNA_BUN", "")
+	t.Setenv("OWL_BUN", "")
 	os.MkdirAll(filepath.Dir(catalog.CachePath()), 0o755)
 	os.WriteFile(catalog.CachePath(), []byte(`{
 	  "moonshotai":{"id":"moonshotai","models":{"kimi-k3":{"id":"kimi-k3","reasoning":true,

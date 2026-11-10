@@ -14,20 +14,20 @@ package agent
 //	 "models":{…}}
 //
 // The providers map's key is what --provider takes; an id inside an entry is
-// ignored. myna adds the entry "myna" at the gateway's /v1, on
+// ignored. owl adds the entry "owl" at the gateway's /v1, on
 // OpenAiCompatible — the wire style Ante speaks Chat Completions with, which
-// is what the gateway takes every model on — and lists myna's models in its
+// is what the gateway takes every model on — and lists owl's models in its
 // preferred_models, Ante's model picker. The user's own providers and the
 // models section are left as they are, and so is everything the user added
-// inside myna's own entry (an auth block, http_headers, extra_body,
+// inside owl's own entry (an auth block, http_headers, extra_body,
 // stream_idle_timeout_secs), which is what a gateway shared over the local
 // network or reached from WSL needs to send a key (#1103, theirsKept).
 //
-// No auth of myna's own: the gateway listens on loopback and lets any token
+// No auth of owl's own: the gateway listens on loopback and lets any token
 // in from this machine (gateway.Token's comment, lan.go's identifyCaller), and
 // Ante counts a provider with no auth block as authenticated ("Providers with
 // no `auth` block are always authenticated", catalog-reference). Writing a
-// bearer env_key instead would mean myna putting a key into Ante's
+// bearer env_key instead would mean owl putting a key into Ante's
 // environment, which the user would have to do themselves — the same decision
 // Empryo's entry makes, which sends no key of the user's either.
 //
@@ -37,18 +37,18 @@ package agent
 // values in ~/.ante/settings.json. When neither source specifies a choice,
 // Ante uses the auto-detection rules below… it uses the first authenticated
 // provider in catalog order" (catalog-reference). Providers it ships come
-// first, so myna's is one auto-detection never picks while the user has any
+// first, so owl's is one auto-detection never picks while the user has any
 // other signed in, and a user who set nothing is on Ante's own provider. So
-// myna sets those two as well and saves the pair it found there, which is
+// owl sets those two as well and saves the pair it found there, which is
 // what steps out puts back — the same pair Empryo's defaultModel and MiniMax
-// Code's defaultModel are. A pick the user makes in Ante while myna is
-// wired is theirs and stands; myna hands them what they moved off, not the
+// Code's defaultModel are. A pick the user makes in Ante while owl is
+// wired is theirs and stands; owl hands them what they moved off, not the
 // one it read when it wired in.
 //
 // Ante reads the catalog once per process (restart to pick an edit up) and
 // parses it leniently: an entry that doesn't deserialize is skipped with a
-// notice and the rest still load, so a bad file myna wrote costs the user
-// myna's provider, not their own.
+// notice and the rest still load, so a bad file owl wrote costs the user
+// owl's provider, not their own.
 
 import (
 	"path/filepath"
@@ -57,14 +57,14 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/provider"
 )
 
 const (
 	anteProviders = "providers"
-	anteProvider  = anteProviders + "." + mynaID
+	anteProvider  = anteProviders + "." + owlID
 	// anteProviderKey and anteModelKey are the two settings.json keys that
 	// decide which provider a session starts on (catalog-reference, "How a
 	// model and provider are chosen").
@@ -75,7 +75,7 @@ const (
 // anteDir is the folder Ante keeps catalog.json and settings.json in:
 // ANTE_HOME, else ~/.ante (catalog-reference: "~/.ante can be relocated with
 // the ANTE_HOME environment variable; the catalog is always
-// $ANTE_HOME/catalog.json"). A distro's ANTE_HOME isn't one myna can read,
+// $ANTE_HOME/catalog.json"). A distro's ANTE_HOME isn't one owl can read,
 // so there it is ~/.ante, as MiniMax Code's mcode (place.getenv).
 func anteDir(at place) string {
 	if d := strings.TrimSpace(at.getenv("ANTE_HOME")); d != "" {
@@ -95,14 +95,14 @@ func anteAt(at place) *Agent {
 	dir := anteDir(at)
 	path := filepath.Join(dir, "catalog.json")
 	settingsPath := filepath.Join(dir, "settings.json")
-	// keyNew marks a file myna made, which goes again once myna's own
+	// keyNew marks a file owl made, which goes again once owl's own
 	// keys are taken out of it and nothing is left
 	keyNew := "ante:" + path + ":new"
 	keyNewSettings := "ante:" + settingsPath + ":new"
 	// the provider and model Ante starts on, stashed for stepping out
 	keyProvider := at.key("ante.provider")
 	keyModel := at.key("ante.model")
-	// wired: myna's provider is in the catalog
+	// wired: owl's provider is in the catalog
 	wired := func() bool { _, ok := edit.GetJSON(path, anteProvider); return ok }
 	get := func(k string) string { v, _ := edit.GetJSON(settingsPath, k); return v }
 	set := func(k, v string) error {
@@ -111,24 +111,24 @@ func anteAt(at place) *Agent {
 		}
 		return edit.SetJSON(settingsPath, edit.KV{Path: k, Value: v})
 	}
-	// entry is myna's catalog entry, the user's own keys in it kept and
-	// preferred_models — myna's list alone — replaced
+	// entry is owl's catalog entry, the user's own keys in it kept and
+	// preferred_models — owl's list alone — replaced
 	entry := theirsKept(path, anteProvider, func() any { return anteProviderJSON(gatewayV1()) }, "preferred_models")
-	// ours is whether Ante starts on myna. Its settings name the provider
-	// and the model apart, so myna's provider is what makes the pair
-	// myna's; with no model named Ante takes the default of
-	// preferred_models, one of myna's.
-	ours := func() bool { return get(anteProviderKey) == mynaID }
-	// unwire takes Ante back off myna: the provider and model it found
+	// ours is whether Ante starts on owl. Its settings name the provider
+	// and the model apart, so owl's provider is what makes the pair
+	// owl's; with no model named Ante takes the default of
+	// preferred_models, one of owl's.
+	ours := func() bool { return get(anteProviderKey) == owlID }
+	// unwire takes Ante back off owl: the provider and model it found
 	// when it wired in — or nothing, which leaves Ante to its
-	// auto-detection — and myna's catalog entry out. What the user chose
+	// auto-detection — and owl's catalog entry out. What the user chose
 	// in Ante since is theirs and stands, and the pair saved for it goes
 	// rather than being written over their pick. Every step is a no-op when
 	// there is nothing to undo, which is how this survives Disconnect
 	// returning every field to its default: the first call takes the whole
 	// wiring out.
 	unwire := func() error {
-		if get(anteProviderKey) == mynaID {
+		if get(anteProviderKey) == owlID {
 			was, mine := unstash(keyProvider), unstash(keyModel)
 			if err := set(anteProviderKey, was); err != nil {
 				return err
@@ -139,8 +139,8 @@ func anteAt(at place) *Agent {
 		} else {
 			forget(keyProvider, keyModel)
 		}
-		// settings.json holding neither of myna's keys, and myna having
-		// made it, is myna's file to take away
+		// settings.json holding neither of owl's keys, and owl having
+		// made it, is owl's file to take away
 		if get(anteProviderKey) == "" && get(anteModelKey) == "" && unstash(keyNewSettings) != "" {
 			if raw, err := edit.Read(settingsPath); err == nil && len(gjson.ParseBytes(raw).Map()) == 0 {
 				if err := edit.Remove(settingsPath); err != nil {
@@ -163,7 +163,7 @@ func anteAt(at place) *Agent {
 				}
 			}
 		}
-		// a file myna made goes with its last entry
+		// a file owl made goes with its last entry
 		if unstash(keyNew) != "" {
 			if raw, err := edit.Read(path); err == nil && len(gjson.ParseBytes(raw).Map()) == 0 {
 				return edit.Remove(path)
@@ -171,17 +171,17 @@ func anteAt(at place) *Agent {
 		}
 		return nil
 	}
-	// put is myna's whole wiring in one step: myna's catalog entry, with
-	// the user's own keys in it kept, and Ante started on myna. What Ante
-	// named as its own provider is saved before myna writes over it, and
-	// only then — a value the user chose in Ante while myna was wired is
+	// put is owl's whole wiring in one step: owl's catalog entry, with
+	// the user's own keys in it kept, and Ante started on owl. What Ante
+	// named as its own provider is saved before owl writes over it, and
+	// only then — a value the user chose in Ante while owl was wired is
 	// theirs and is what comes back. An empty one is no value to restore,
 	// which leaves Ante to its auto-detection.
 	put := func(model string) error {
-		if get(anteProviderKey) != mynaID {
+		if get(anteProviderKey) != owlID {
 			stash(map[string]string{keyProvider: get(anteProviderKey), keyModel: get(anteModelKey)})
-		} else if m := get(anteModelKey); model == "" && isMyna(m) {
-			// already on myna: the model it was started on stays
+		} else if m := get(anteModelKey); model == "" && isOwl(m) {
+			// already on owl: the model it was started on stays
 			model = m
 		}
 		if !wired() && !isFile(path) {
@@ -193,7 +193,7 @@ func anteAt(at place) *Agent {
 		if err := edit.SetJSON(path, edit.KV{Path: anteProvider, Value: entry()}); err != nil {
 			return err
 		}
-		if err := set(anteProviderKey, mynaID); err != nil {
+		if err := set(anteProviderKey, owlID); err != nil {
 			return err
 		}
 		return set(anteModelKey, model)
@@ -208,7 +208,7 @@ func anteAt(at place) *Agent {
 			return ""
 		},
 		Check: func() string {
-			// myna's entry alone says nothing is off when Ante has been
+			// owl's entry alone says nothing is off when Ante has been
 			// moved to another provider in its own /providers: its settings
 			// decide what a session asks (commandcode's modelProvider is the
 			// same pair)
@@ -216,7 +216,7 @@ func anteAt(at place) *Agent {
 				return ""
 			}
 			if !ours() {
-				return "Ante's provider (settings.json) is " + orDefault(get(anteProviderKey)) + ", so it no longer asks myna"
+				return "Ante's provider (settings.json) is " + orDefault(get(anteProviderKey)) + ", so it no longer asks owl"
 			}
 			raw, err := edit.Read(path)
 			if err != nil {
@@ -232,13 +232,13 @@ func anteAt(at place) *Agent {
 			if !wired() {
 				return nil
 			}
-			// the user's own keys in myna's entry stay, preferred_models
-			// is myna's list, and a file that says the same as it does is
+			// the user's own keys in owl's entry stay, preferred_models
+			// is owl's list, and a file that says the same as it does is
 			// not written again (syncJSON, theirsKept)
 			return syncJSON(path, anteProvider, entry)
 		},
 		Fields: []Field{{
-			// This field is myna's models in Ante's picker: its entry in
+			// This field is owl's models in Ante's picker: its entry in
 			// the catalog, and Ante started on it (settings.json's
 			// provider). Get reads the entry alone, as Pencil's does, so
 			// Disconnect takes the entry out even when the user has since
@@ -246,7 +246,7 @@ func anteAt(at place) *Agent {
 			Key: "provider", Label: "provider",
 			Get: func() string {
 				if wired() {
-					return mynaID
+					return owlID
 				}
 				return ""
 			},
@@ -257,16 +257,16 @@ func anteAt(at place) *Agent {
 				return put("")
 			},
 			Options: func(map[string]string) []Option {
-				return []Option{{Value: mynaID, Label: "myna", Icon: "myna", Note: "every myna model in Ante's model picker, and Ante starts on myna"}}
+				return []Option{{Value: owlID, Label: "owl", Icon: "owl", Note: "every owl model in Ante's model picker, and Ante starts on owl"}}
 			},
 		}, {
 			// Ante names the model on its own, without a provider in front
 			// of it (its settings keep the two apart, and its picker lists
-			// the ids of preferred_models), so myna's catalog refs are
-			// written as they are — the ids myna put in preferred_models.
-			// A bare id says nothing on its own: read beside myna's
+			// the ids of preferred_models), so owl's catalog refs are
+			// written as they are — the ids owl put in preferred_models.
+			// A bare id says nothing on its own: read beside owl's
 			// provider only, so an id the user's own provider happens to
-			// serve the same way is not taken for one of myna's.
+			// serve the same way is not taken for one of owl's.
 			Key: "model", Label: "model",
 			Get: func() string {
 				if ours() {
@@ -276,15 +276,15 @@ func anteAt(at place) *Agent {
 			},
 			Set: func(v string) error {
 				if v == "" {
-					// no model of its own: Ante starts on myna and takes
-					// the default of preferred_models, one of myna's
+					// no model of its own: Ante starts on owl and takes
+					// the default of preferred_models, one of owl's
 					if ours() {
 						return set(anteModelKey, "")
 					}
 					return unwire()
 				}
-				if !isMyna(v) {
-					// a model of Ante's own: myna steps out and Ante is
+				if !isOwl(v) {
+					// a model of Ante's own: owl steps out and Ante is
 					// left on it — with no provider named, which is how Ante
 					// reaches the provider whose list holds that id
 					if err := unwire(); err != nil {
@@ -295,34 +295,34 @@ func anteAt(at place) *Agent {
 				return put(v)
 			},
 			Options: func(map[string]string) []Option {
-				return viaMyna("ante", "")
+				return viaOwl("ante", "")
 			},
 		}},
 	}, path, settingsPath)
 }
 
-// anteProviderJSON is myna's entry in Ante's catalog: the gateway's /v1 on
-// OpenAiCompatible, every myna model in preferred_models.
+// anteProviderJSON is owl's entry in Ante's catalog: the gateway's /v1 on
+// OpenAiCompatible, every owl model in preferred_models.
 //
 // A routing group is not told what it reasons at: which member answers, and
-// what that member takes, is the group's own to decide per turn, so myna's
-// other agents leave an effort off for one too (mynaModels sets no APIs for
+// what that member takes, is the group's own to decide per turn, so owl's
+// other agents leave an effort off for one too (owlModels sets no APIs for
 // a group for the same reason). Ante would otherwise ask for an effort the
 // member the group picked doesn't have.
 //
 // support_vision is left alone for every model: Ante takes a model as seeing
-// images unless it is told otherwise, and what myna knows is only as good
+// images unless it is told otherwise, and what owl knows is only as good
 // as a provider's own list — a relay's models are often not described at all,
 // so writing false would have Ante drop the reader's images before the
 // gateway, which describes them to a model that can't see them itself
-// (provider.Described). No other agent myna wires declares this either.
+// (provider.Described). No other agent owl wires declares this either.
 func anteProviderJSON(gw string) map[string]any {
 	ms := []map[string]any{}
 	for _, m := range sharedModels("ante") {
 		ms = append(ms, anteModelJSON(m))
 	}
 	p := map[string]any{
-		"display_name": "myna",
+		"display_name": "owl",
 		// gw is the gateway's /v1 already (place.v1), which is what Ante
 		// joins its own path onto
 		"base_url":   gw,
@@ -334,8 +334,8 @@ func anteProviderJSON(gw string) map[string]any {
 	return p
 }
 
-// anteModelJSON is one myna model as Ante's catalog entry lists it: what
-// myna knows of it, and nothing it doesn't. A routing group is not told
+// anteModelJSON is one owl model as Ante's catalog entry lists it: what
+// owl knows of it, and nothing it doesn't. A routing group is not told
 // what it reasons at (anteProviderJSON says why), so its levels are left out
 // with the rest of its capabilities.
 func anteModelJSON(m catalog.Model) map[string]any {
@@ -350,7 +350,7 @@ func anteModelJSON(m catalog.Model) map[string]any {
 	if n := anteMaxTokens(m); n > 0 {
 		e["max_tokens"] = n
 	}
-	// Ante's ladder is per provider and model family; a model myna knows
+	// Ante's ladder is per provider and model family; a model owl knows
 	// the levels of says which of them Ante may send. No default "effort" is
 	// written: a model then starts where Ante puts it, and written as the
 	// top rung it would make every one of them Ante's slowest and dearest
@@ -365,12 +365,12 @@ func anteModelJSON(m catalog.Model) map[string]any {
 // window, never equal to it. Ante 0.2.9 skips an entry whose max_tokens is
 // not less than its context_limit —
 //
-//	warning: skipped catalog entry providers.myna.preferred_models.b/eq:
+//	warning: skipped catalog entry providers.owl.preferred_models.b/eq:
 //	max_tokens (128000) must be less than context_limit (128000)
 //
 // and maxTokens hands out a reply limit capped at the window, so a model
 // whose list gives the same number for both (or a larger output) went
-// missing from Ante, and with it myna's provider when that was the model
+// missing from Ante, and with it owl's provider when that was the model
 // picked (#1179). Such a model is told one token less than its window.
 func anteMaxTokens(m catalog.Model) int {
 	n := maxTokens(m)
@@ -380,15 +380,15 @@ func anteMaxTokens(m catalog.Model) int {
 	return n
 }
 
-// anteLadder is Ante's effort scale, ascending, and the myna level each
-// of its rungs is. Ante's lowest rung, "min", is not a name myna lists:
+// anteLadder is Ante's effort scale, ascending, and the owl level each
+// of its rungs is. Ante's lowest rung, "min", is not a name owl lists:
 // Ante's reference says what it sends it as (docs.antigma.ai,
 // reference/catalog-reference, the supported_efforts row):
 //
 //	"OpenAI-compatible providers send the selected level as the same-named
 //	 reasoning_effort (min is sent as minimal)"
 //
-// so Ante's "min" is myna's "minimal", and myna's "none" — no thinking
+// so Ante's "min" is owl's "minimal", and owl's "none" — no thinking
 // asked for at all — has no rung of Ante's, which sends one whatever the
 // model was told it accepts. The PR's first version folded both into "min",
 // so a model that takes only "none" was asked for `reasoning_effort:
@@ -399,7 +399,7 @@ func anteMaxTokens(m catalog.Model) int {
 //	"An empty list (supported_efforts: []) declares that the model takes no
 //	 effort setting at all."
 //
-// which is what a model myna knows only "none" comes out as: Ante then
+// which is what a model owl knows only "none" comes out as: Ante then
 // shows no slider and sends none, rather than a level the model refuses.
 // The default is left off entirely — Ante's own words are
 //
@@ -408,7 +408,7 @@ func anteMaxTokens(m catalog.Model) int {
 //
 // — so a written default is a sent effort, and setting it to the top rung
 // made every model Ante's slowest and dearest one.
-var anteLadder = []struct{ ante, myna string }{
+var anteLadder = []struct{ ante, owl string }{
 	{"min", "minimal"},
 	{"low", "low"},
 	{"medium", "medium"},
@@ -422,7 +422,7 @@ var anteLadder = []struct{ ante, myna string }{
 func anteEfforts(levels []string) []string {
 	out := []string{}
 	for _, rung := range anteLadder {
-		if slices.Contains(levels, rung.myna) {
+		if slices.Contains(levels, rung.owl) {
 			out = append(out, rung.ante)
 		}
 	}

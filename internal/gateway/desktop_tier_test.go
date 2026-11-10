@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // Claude Desktop's Code tab runs a subagent on a tier only when the
@@ -91,7 +91,7 @@ func TestClaudeDesktopTiers(t *testing.T) {
 		t.Fatalf("claude-sonnet-5 with sonnet picked: %+v", r)
 	}
 	// Claude Code's own ids of a tier go to its pick, sonnet's too, which
-	// no row is tagged with; a Claude model myna serves stays as asked
+	// no row is tagged with; a Claude model owl serves stays as asked
 	for asked, want := range map[string]string{
 		"claude-sonnet-4-6": "m1", "claude-opus-4-8[1m]": "m1", "claude-3-5-haiku-20241022": "m2",
 		"claude-haiku-4-5-20251001": "m2", "claude-sonnet-5": "claude-sonnet-5",

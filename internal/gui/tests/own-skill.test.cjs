@@ -24,12 +24,12 @@ const { navTo } = require("./reader.cjs");
 const assets = path.resolve(__dirname, "../assets");
 const HOME = "/Users/stringke";
 const agent = (id, name) => ({ id, name, icon: "", skills: `${HOME}/.${id}/skills` });
-// the screenshot's five, as myna's sync words them
+// the screenshot's five, as owl's sync words them
 const builtIn = ["docx", "frontend-design", "pdf", "pptx", "xlsx"];
 const desktopProblems = builtIn.map((n) => ({ agent: "claude-desktop", what: "skill:" + n, error: "Claude Desktop already has a skill of its own called " + n, own: true }));
 const problem = { agent: "claude", what: "skill:impeccable", error: "Claude Code already has a skill of its own called impeccable", own: true };
 const lib = (agents, problems, foundSkills = []) => ({
-  dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
+  dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
   agents: [agent("claude", "Claude Code"), agent("codex", "Codex"), agent("gemini", "Gemini CLI"), agent("claude-desktop", "Claude Desktop")],
   instructions: { agents: [] }, servers: [], foundServers: [], projects: [], foundSkills,
   skills: [
@@ -114,13 +114,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     });
     const open = async (lang, posts, problems, libTab = "skills") => {
       const ctx = await browser.newContext({ viewport: { width: 980, height: 700 } });
-      await ctx.addInitScript((tab) => { try { localStorage.setItem("myna.libTab", tab); } catch {} }, libTab);
+      await ctx.addInitScript((tab) => { try { localStorage.setItem("owl.libTab", tab); } catch {} }, libTab);
       const page = await ctx.newPage();
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(60000);
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", server(lang, posts, problems));
-      await page.goto("http://myna.test/");
+      await page.goto("http://owl.test/");
       await navTo(page, "library");
       await page.locator("#view-library .lib-body:not(.lib-skel)" + (libTab === "skills" ? " .lib-row" : "")).first().waitFor();
       return page;

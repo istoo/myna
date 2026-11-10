@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/provider"
 	"gopkg.in/yaml.v3"
 )
 
@@ -44,7 +44,7 @@ func TestMorph(t *testing.T) {
 	if f.Get() != "gpt-5.4" || a.Check() != "" {
 		t.Fatalf("get: %q, check %q", f.Get(), a.Check())
 	}
-	if err := f.Set("myna/deepseek/pro"); err != nil {
+	if err := f.Set("owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	llm, raw := read()
@@ -55,18 +55,18 @@ func TestMorph(t *testing.T) {
 		!strings.Contains(raw, "# mine") || !strings.Contains(raw, "enabled: true") {
 		t.Fatalf("config:\n%s", raw)
 	}
-	if f.Get() != "myna/deepseek/pro" || a.Check() != "" {
+	if f.Get() != "owl/deepseek/pro" || a.Check() != "" {
 		t.Fatalf("get: %q, check %q", f.Get(), a.Check())
 	}
-	// another myna model keeps what was stashed first
-	if err := f.Set("myna/deepseek/flash"); err != nil {
+	// another owl model keeps what was stashed first
+	if err := f.Set("owl/deepseek/flash"); err != nil {
 		t.Fatal(err)
 	}
 	if llm, _ := read(); llm["model"] != "deepseek/flash" {
 		t.Fatalf("flash: %v", llm)
 	}
 
-	// its own model: what the user had comes back, myna's header goes
+	// its own model: what the user had comes back, owl's header goes
 	if err := f.Set("gpt-5.5"); err != nil {
 		t.Fatal(err)
 	}
@@ -78,8 +78,8 @@ func TestMorph(t *testing.T) {
 		t.Fatalf("own:\n%s", raw)
 	}
 
-	// reset from myna: back to what the user had
-	f.Set("myna/deepseek/flash")
+	// reset from owl: back to what the user had
+	f.Set("owl/deepseek/flash")
 	if err := f.Set(""); err != nil {
 		t.Fatal(err)
 	}
@@ -87,10 +87,10 @@ func TestMorph(t *testing.T) {
 		t.Fatalf("reset:\n%s", raw)
 	}
 
-	// a config with nothing under llm: nothing of myna's stays, headers
-	// myna's User-Agent was alone in included
+	// a config with nothing under llm: nothing of owl's stays, headers
+	// owl's User-Agent was alone in included
 	os.WriteFile(path, []byte("tools:\n  bash:\n    enabled: true\n"), 0o644)
-	f.Set("myna/deepseek/pro")
+	f.Set("owl/deepseek/pro")
 	if llm, raw = read(); llm["provider"] != nil {
 		t.Fatalf("provider written:\n%s", raw)
 	}
@@ -102,7 +102,7 @@ func TestMorph(t *testing.T) {
 	}
 
 	// the gateway's address changed under it: said so
-	f.Set("myna/deepseek/pro")
+	f.Set("owl/deepseek/pro")
 	b, _ := os.ReadFile(path)
 	os.WriteFile(path, []byte(strings.Replace(string(b), gateway.URL(), "http://127.0.0.1:1", 1)), 0o644)
 	if c := a.Check(); !strings.Contains(c, "endpoint") {
@@ -112,7 +112,7 @@ func TestMorph(t *testing.T) {
 	// MISTER_MORPH_CONFIG names the file
 	other := filepath.Join(home, "elsewhere.yaml")
 	t.Setenv("MISTER_MORPH_CONFIG", other)
-	if err := morph(home).Field("model").Set("myna/deepseek/pro"); err != nil {
+	if err := morph(home).Field("model").Set("owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	if b, err := os.ReadFile(other); err != nil || !strings.Contains(string(b), "deepseek/pro") {
@@ -124,7 +124,7 @@ func TestMorph(t *testing.T) {
 	}
 }
 
-// The window myna knows a model to take is handed to morph, which knows
+// The window owl knows a model to take is handed to morph, which knows
 // one only from a list of its own.
 func TestMorphContextWindow(t *testing.T) {
 	home := t.TempDir()
@@ -149,14 +149,14 @@ func TestMorphContextWindow(t *testing.T) {
 		return c.LLM.Window, string(b)
 	}
 	f := morph(home).Field("model")
-	if err := f.Set("myna/deepseek/pro"); err != nil {
+	if err := f.Set("owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	if n, raw := window(); n != 1000000 {
 		t.Fatalf("pro: %d\n%s", n, raw)
 	}
-	// one whose window myna doesn't know: morph's own guess, not pro's
-	if err := f.Set("myna/deepseek/flash"); err != nil {
+	// one whose window owl doesn't know: morph's own guess, not pro's
+	if err := f.Set("owl/deepseek/flash"); err != nil {
 		t.Fatal(err)
 	}
 	if n, raw := window(); n != 0 {

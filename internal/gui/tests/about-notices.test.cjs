@@ -11,7 +11,7 @@ const { openPart } = require("./reader.cjs");
 const words = {
   en: "Open-source licenses", zh: "开源许可", "zh-TW": "開源授權", ja: "オープンソースライセンス", de: "Open-Source-Lizenzen",
 };
-const text = "myna third-party notices\n" + "x".repeat(300) + "\n" + "line\n".repeat(400) + "4. V8 (ported code)\n";
+const text = "owl third-party notices\n" + "x".repeat(300) + "\n" + "line\n".repeat(400) + "4. V8 (ported code)\n";
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   for (const lang of Object.keys(words)) {
@@ -26,7 +26,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", fixture(lang, "light", []));
         await page.route("**/api/notices", (r) => r.fulfill({ json: { text } }));
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         await page.locator("#prefs").click();
         await openPart(page, "about");
         const row = page.locator("#about .row", { has: page.locator(".who", { hasText: words[lang] }) });

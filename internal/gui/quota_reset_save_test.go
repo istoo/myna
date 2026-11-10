@@ -6,12 +6,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // #2008: the editor knows nothing of the time of day a provider's daily
-// allowance comes back, set by `myna provider quota-rest <id> until
-// 08:00`, nor of its rest cap (`myna provider rest-cap`), so its save
+// allowance comes back, set by `owl provider quota-rest <id> until
+// 08:00`, nor of its rest cap (`owl provider rest-cap`), so its save
 // keeps both.
 func TestSaveKeepsQuotaResetAt(t *testing.T) {
 	home := t.TempDir()

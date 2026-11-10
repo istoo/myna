@@ -13,14 +13,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/agentenv"
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/desktopdir"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/agentenv"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/desktopdir"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // Claude Code reads its endpoint from the `env` block of settings.json.
@@ -28,8 +28,8 @@ import (
 // its model (and in the variables the aliases opus/sonnet/haiku resolve
 // through) is all it takes to run it on any provider.
 
-// env vars myna sets while routing through the gateway. ANTHROPIC_MODEL
-// only an older myna set: it outranks settings.json's model, so a model
+// env vars owl sets while routing through the gateway. ANTHROPIC_MODEL
+// only an older owl set: it outranks settings.json's model, so a model
 // picked in Claude Code's /model lasted only the session; it is taken out.
 var claudeEnv = append([]string{
 	"ANTHROPIC_BASE_URL", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_MODEL",
@@ -43,7 +43,7 @@ var claudeEnv = append([]string{
 // description /model shows for the tier, and _SUPPORTED_CAPABILITIES, what
 // it takes the model to do (2.1.293). Each is about the model it was written
 // beside, so one written for the user's own model, or for a model of
-// myna's the tier has left, names a model the tier no longer runs (#1227:
+// owl's the tier has left, names a model the tier no longer runs (#1227:
 // every tier on deepseek-flash, shown as grok-4.5).
 var claudeAbout = []string{"_NAME", "_DESCRIPTION", "_SUPPORTED_CAPABILITIES"}
 
@@ -59,12 +59,12 @@ var claudeAboutEnv = func() []string {
 }()
 
 // claudeOwnEnv are the models of claudeEnv a user may have set for their
-// own endpoint, which myna's take the place of while it is wired in and
+// own endpoint, which owl's take the place of while it is wired in and
 // gives back when it steps out, with what the user's env says about each
-// tier's model. ANTHROPIC_MODEL, their main model, too: myna takes it
+// tier's model. ANTHROPIC_MODEL, their main model, too: owl takes it
 // out while wired in (writeTiers), and it was lost for good. So is their
 // auto mode classifier's model (claudeAutoModeEnv), which isn't in
-// claudeEnv: one set while myna is wired in is left to the user.
+// claudeEnv: one set while owl is wired in is left to the user.
 var claudeOwnEnv = append([]string{
 	"ANTHROPIC_MODEL",
 	"ANTHROPIC_DEFAULT_OPUS_MODEL", "ANTHROPIC_DEFAULT_SONNET_MODEL",
@@ -91,8 +91,8 @@ var claudeNoClassifier = []string{"claude-sonnet-5-5", "claude-opus-5-5", "claud
 // (agentenv.ClaudeProviders) send its requests to, named as Claude Code
 // 2.1.300 names them. Each has an endpoint variable of its own
 // (ANTHROPIC_BEDROCK_BASE_URL, …), and ANTHROPIC_BASE_URL is passed over,
-// so a Claude Code with one on never reaches myna: Bedrock refused
-// myna's model ids (jw1dev on X).
+// so a Claude Code with one on never reaches owl: Bedrock refused
+// owl's model ids (jw1dev on X).
 var claudeClouds = map[string]string{
 	"CLAUDE_CODE_USE_BEDROCK":                "Amazon Bedrock",
 	"CLAUDE_CODE_USE_VERTEX":                 "Google Vertex AI",
@@ -114,7 +114,7 @@ func claudeSwitchOn(v string) bool {
 }
 
 // claudeShellEnv is a variable as a Claude Code started in a terminal has
-// it: the login shell's, else myna's own; a var so tests can say.
+// it: the login shell's, else owl's own; a var so tests can say.
 var claudeShellEnv = func(k string) string {
 	if v := loginEnv(k); v != "" {
 		return v
@@ -123,12 +123,12 @@ var claudeShellEnv = func(k string) string {
 }
 
 // claudeCloud says which provider switch (claudeClouds) takes the Claude
-// Code whose settings.json is at path onto a cloud, past myna, and where
+// Code whose settings.json is at path onto a cloud, past owl, and where
 // it is set; "" when none is on. Claude Code puts the env of .claude.json,
 // then of the user's settings, then of an administrator's managed settings
 // over the environment it was started in, so the last of those that has
 // the variable is the one it goes by. A project's .claude/settings.json is
-// not looked at: myna doesn't know which folders Claude Code runs in.
+// not looked at: owl doesn't know which folders Claude Code runs in.
 func claudeCloud(at place, path string) string {
 	managed := claudeManaged()
 	if at.sys != nil {
@@ -152,7 +152,7 @@ func claudeCloud(at place, path string) string {
 			set = true
 			break
 		}
-		// a distro's environment myna can't read
+		// a distro's environment owl can't read
 		if !set && at.spell == nil && claudeSwitchOn(claudeShellEnv(k)) {
 			return noticeClaudeCloudShell.say("var", k, "cloud", claudeClouds[k])
 		}
@@ -197,7 +197,7 @@ func claudeName(model string) string {
 // claudeEffortsFor is the levels Claude Code sends a model at, as 2.1.285
 // sends them: Opus 4.5 takes up to high, Opus and Sonnet 4.6 skip xhigh, the
 // Haiku and older Claude models none; any higher level runs as the highest
-// below it. A model it doesn't know (another vendor's through myna, a Claude
+// below it. A model it doesn't know (another vendor's through owl, a Claude
 // newer than it) gets the level as set.
 func claudeEffortsFor(model string) []string {
 	switch claudeName(model) {
@@ -267,7 +267,7 @@ var claudeAliases = []string{"default", "best", "opus", "sonnet", "haiku", "fabl
 const claudeContextEnv = "CLAUDE_CODE_MAX_CONTEXT_TOKENS"
 
 // claudeCompactEnv is where Claude Code compacts a conversation, the smaller
-// of it and the model's window, a [1m] one's too. myna sets it to
+// of it and the model's window, a [1m] one's too. owl sets it to
 // settings.WorkingWindow, so a 1M model isn't run to 1M with every turn
 // sending all of it (X: Chen, turns of ~550K tokens waiting 70–90s for a
 // first token); settings.FullContext leaves it out, and so does a Claude
@@ -291,9 +291,9 @@ const claudeUnknownOutput = 32000
 // "<model>=effort,xhigh_effort;<model>=…" (a trailing * a prefix, [1m]
 // taken off the model first, the model lowercased, the pattern not). Run on
 // a gateway (CLAUDE_CODE_USE_GATEWAY, as Claude Desktop's Code tab runs it)
-// it otherwise takes no model of myna's for one with effort, xhigh or max,
-// so "ultracode": true, which needs xhigh, did nothing (#430). Each myna
-// model is said to have only the levels myna knows it has, and xhigh
+// it otherwise takes no model of owl's for one with effort, xhigh or max,
+// so "ultracode": true, which needs xhigh, did nothing (#430). Each owl
+// model is said to have only the levels owl knows it has, and xhigh
 // with max: the gateway runs xhigh at max for one without it, and without
 // xhigh_effort Claude Code turns Ultracode down (leesunrise2364 on Discord).
 const claudeCapsEnv = "CLAUDE_CODE_MODEL_CAPABILITIES"
@@ -304,7 +304,7 @@ const claudeCapsEnv = "CLAUDE_CODE_MODEL_CAPABILITIES"
 // and names the gateway in a notice, "this session isn't eligible because
 // your requests go through 127.0.0.1:3425…" (1EFLOPS on X, Claude Code on
 // Codex). Anthropic's page on it says to set it to 0 for a gateway that
-// can't run the checks: myna does while none of the models Claude Code
+// can't run the checks: owl does while none of the models Claude Code
 // can reach through it is reviewed (claudeReviewed), and leaves it unset
 // while one is. One the user set is theirs.
 const claudeReviewEnv = "CLAUDE_CODE_AUTO_MODE_SERVER"
@@ -312,7 +312,7 @@ const claudeReviewEnv = "CLAUDE_CODE_AUTO_MODE_SERVER"
 // claudeSearchEnv turns Claude Code's tool search on: MCP tools are named
 // in a reminder and loaded by ToolSearch when the model needs them, not
 // sent whole on every request. Before 2.1.304 Claude Code kept it off
-// behind an ANTHROPIC_BASE_URL other than Anthropic's, so myna's MCP
+// behind an ANTHROPIC_BASE_URL other than Anthropic's, so owl's MCP
 // router sent its 245 tools' definitions, 124K tokens, on every request
 // (cybercaius on Discord). 2.1.304 and later turn it on there themselves;
 // "true" also keeps it on in a conversation begun without it, which
@@ -322,12 +322,12 @@ const claudeReviewEnv = "CLAUDE_CODE_AUTO_MODE_SERVER"
 const claudeSearchEnv = "ENABLE_TOOL_SEARCH"
 
 // Claude Code 2.1.295's Explore inherit cap can replace Desktop's
-// mythos-myna compatibility alias with Opus. Disable that cap while
-// Desktop is on myna, without forcing other subagents onto a model.
+// mythos-owl compatibility alias with Opus. Disable that cap while
+// Desktop is on owl, without forcing other subagents onto a model.
 const claudeExploreEnv = "CLAUDE_CODE_DISABLE_EXPLORE_INHERIT_CAP"
 
 // claudeReviewed reports whether a model Claude Code can reach through
-// myna has its actions reviewed by Anthropic (gateway.AutoModeReviewable:
+// owl has its actions reviewed by Anthropic (gateway.AutoModeReviewable:
 // a Claude model asked on the Messages API, not translated):
 // one shown to the agents in catalogs (Claude Code, Claude Desktop whose
 // Code tab is Claude Code, T3 Code's instance of it), a routing group's
@@ -368,7 +368,7 @@ func claudeReviewed(catalogs []string, models ...string) bool {
 		if p, m, ok := provider.Resolve(id); ok {
 			return reviewed(p, m)
 		}
-		// Not one myna knows: judged by its name, as the gateway would
+		// Not one owl knows: judged by its name, as the gateway would
 		// judge a request for it.
 		return gateway.AutoModeReviewed(provider.Provider{}, id)
 	})
@@ -395,11 +395,11 @@ func claudeCaps(levels []string) string {
 	return strings.Join(caps, ",")
 }
 
-// claudeCapabilities is claudeCapsEnv's value for myna's models as Claude
+// claudeCapabilities is claudeCapsEnv's value for owl's models as Claude
 // Code is shown them, and with desktop, as Claude Desktop hands them to it
-// (mythos-myna-<number>); first are the models it is set to, which go in
+// (mythos-owl-<number>); first are the models it is set to, which go in
 // before the rest. own leaves out the models Claude Code itself is shown,
-// for when only Desktop runs on myna. A model of Claude's it knows is
+// for when only Desktop runs on owl. A model of Claude's it knows is
 // said to have no more than it gives it, one with no levels isn't named.
 func claudeCapabilities(first []string, own, desktop bool) string {
 	type seg struct{ id, caps string }
@@ -464,7 +464,7 @@ func claudeCapabilities(first []string, own, desktop bool) string {
 // Claude Code runs its own small asks on the haiku tier — a session's
 // title, Explore subagents, WebFetch's reading — on Haiku, which on a Claude
 // subscription costs a fraction of Opus's limits (X, AncientTwo: the limits
-// went much faster through myna than in Claude Code itself).
+// went much faster through owl than in Claude Code itself).
 //
 // For fable, on any model that is no Fable, it is none: the fable tier is
 // left unset. Claude Code takes the model ANTHROPIC_DEFAULT_FABLE_MODEL
@@ -543,14 +543,14 @@ var claudeModelEnv = []string{
 	"ANTHROPIC_DEFAULT_HAIKU_MODEL", "ANTHROPIC_DEFAULT_FABLE_MODEL",
 }
 
-// claudeMynaModel says a model in Claude Code's env or its model, as
-// written there, is one of myna's: a provider/model name only myna's
+// claudeOwlModel says a model in Claude Code's env or its model, as
+// written there, is one of owl's: a provider/model name only owl's
 // gateway serves, at an effort or marked 1M or not. On Anthropic's own
 // endpoint it is a 404, "There's an issue with the selected model"
 // (roswellcsy on X).
-func claudeMynaModel(v string) bool {
+func claudeOwlModel(v string) bool {
 	m, _ := tierAt(provider.ClaudeRead(v))
-	return isMyna(strings.TrimSuffix(m, "[1m]"))
+	return isOwl(strings.TrimSuffix(m, "[1m]"))
 }
 
 // claudeSameModel says two of a tier's models as written are one model,
@@ -564,7 +564,7 @@ func claudeSameModel(a, b string) bool {
 
 // A tier (and the subagents' model) may run at an effort of its own (#536):
 // the model it is on, as Claude Code is given it, is "<model>:<level>"
-// (before a [1m] mark, which Claude Code takes off), and myna's gateway
+// (before a [1m] mark, which Claude Code takes off), and owl's gateway
 // asks that model for that level whatever Claude Code asked, as it does a
 // routing group's member fixed at one (#189). Claude Code has one effort for
 // a session, the main model's; the tier's model at that level is a model id
@@ -600,7 +600,7 @@ func tierWith(model, effort string) string {
 }
 
 // tierEfforts are the levels a tier on model can be fixed at: the ones
-// myna knows the model has, else those Claude Code sends it.
+// owl knows the model has, else those Claude Code sends it.
 func tierEfforts(model string) []string {
 	id := strings.TrimSuffix(model, "[1m]")
 	for _, m := range sharedModels("claude") {
@@ -618,7 +618,7 @@ func claude(home string) *Agent { return claudeIn(here(home)) }
 // reaches it from there.
 func claudeIn(at place) *Agent {
 	path := filepath.Join(at.claudeDir(), "settings.json")
-	// a model in the env is read as myna serves it, its dashed spelling
+	// a model in the env is read as owl serves it, its dashed spelling
 	// taken back (claudeModelEnv)
 	rawEnv := func(k string) string { v, _ := edit.GetJSON(path, "env."+k); return v }
 	env := func(k string) string {
@@ -628,11 +628,11 @@ func claudeIn(at place) *Agent {
 		}
 		return v
 	}
-	// spell is a model of myna's as Claude Code is given it: a dotted
+	// spell is a model of owl's as Claude Code is given it: a dotted
 	// Claude version dashed, which it would read as Claude Opus 4
 	spell := provider.ClaudeSpelled
 	model := jsonGet(path, "model")
-	// routed: on myna's gateway, or on a proxy to it where myna has
+	// routed: on owl's gateway, or on a proxy to it where owl has
 	// answered (#1985, claudeProxied), which a pick keeps (gwAt)
 	routed := func() bool { u := env("ANTHROPIC_BASE_URL"); return u == at.gw() || claudeProxied(at, path, u) }
 	gwAt := func() string {
@@ -645,18 +645,18 @@ func claudeIn(at place) *Agent {
 	// Code's /model saves, so a model picked there holds for its next
 	// sessions too (the owner: 去掉 ANTHROPIC_MODEL，让 /model 的选择对新会话也生效)
 	mainModel := func() string { return claudeMain(path) }
-	// the main model myna last wrote: a tier or the subagents on it follow
+	// the main model owl last wrote: a tier or the subagents on it follow
 	// the main model, as they do on none; on another they have one of their
 	// own. A pick in /model moves the main model alone, and those following
-	// it go with it when myna next looks (Follow).
+	// it go with it when owl next looks (Follow).
 	mainKey := at.key("claude.main")
 	wroteMain := func() string { return cmp.Or(stashShared()[mainKey], env("ANTHROPIC_MODEL")) }
-	// how Claude Code signs in to myna (its sign-in field): with myna's
+	// how Claude Code signs in to owl (its sign-in field): with owl's
 	// key, or ("claudeai") with its own claude.ai sign-in, which it keeps
 	// so: an empty ANTHROPIC_AUTH_TOKEN leaves it signed in, where a key
 	// signs it out of claude.ai, and the gateway never passes the sign-in
 	// on. Only where the gateway takes any key: from another machine,
-	// myna shared, it takes its sharing key alone. Kept in the stash,
+	// owl shared, it takes its sharing key alone. Kept in the stash,
 	// where set("") and Unwire leave it for the next time it is routed.
 	loginKey := at.key("claude.login")
 	signInHere := func() bool { return at.gwKey() == gateway.Token }
@@ -667,12 +667,12 @@ func claudeIn(at place) *Agent {
 		}
 		return at.gwKey()
 	}
-	// the gateway address myna last wrote as Claude Code's base URL
+	// the gateway address owl last wrote as Claude Code's base URL
 	wroteAt := at.key("claude" + wiredAt)
-	// the key in env is one myna wrote, at this gateway address or an
+	// the key in env is one owl wrote, at this gateway address or an
 	// older one: its own, or the empty one of the claude.ai sign-in kept,
-	// beside the address myna wrote with it. An empty key at an endpoint
-	// of the user's own is theirs, though myna once kept the sign-in.
+	// beside the address owl wrote with it. An empty key at an endpoint
+	// of the user's own is theirs, though owl once kept the sign-in.
 	keyOurs := func() bool {
 		tok, has := edit.GetJSON(path, "env.ANTHROPIC_AUTH_TOKEN")
 		if ourKey(tok) {
@@ -687,23 +687,23 @@ func claudeIn(at place) *Agent {
 	// model changes
 	ownKey := func(t string) string { return at.key("claude.tier_own." + t) }
 	own := func(t string) bool { return stashShared()[ownKey(t)] != "" }
-	// the auto mode classifier's model as myna last wrote it (the auto
-	// mode field); autoOurs: the env's is that one or another of myna's
-	// models, which goes when myna steps out. Any other is the user's.
+	// the auto mode classifier's model as owl last wrote it (the auto
+	// mode field); autoOurs: the env's is that one or another of owl's
+	// models, which goes when owl steps out. Any other is the user's.
 	autoKey := at.key("claude.auto_mode_model")
 	autoOurs := func() bool {
 		v := rawEnv(claudeAutoModeEnv)
-		return v != "" && (v == stashShared()[autoKey] || isMyna(env(claudeAutoModeEnv)))
+		return v != "" && (v == stashShared()[autoKey] || isOwl(env(claudeAutoModeEnv)))
 	}
-	// set once myna has taken what the env said about each tier's model
+	// set once owl has taken what the env said about each tier's model
 	// from before it routed Claude Code (claudeAbout): what is there after
-	// that the user wrote about myna's model, and stays while the tier
+	// that the user wrote about owl's model, and stays while the tier
 	// is on it
 	aboutKey := at.key("claude.tier_about")
 	// staleAbout is what the env says about a tier's model that the model
 	// it goes on (tiers, nil for each staying) isn't: all of it before
-	// myna has looked, kept to give back when myna steps out (an older
-	// myna routed Claude Code without taking it), else a tier's whose
+	// owl has looked, kept to give back when owl steps out (an older
+	// owl routed Claude Code without taking it), else a tier's whose
 	// model changes
 	staleAbout := func(tiers map[string]string) []string {
 		before := stashShared()[aboutKey] == ""
@@ -740,7 +740,7 @@ func claudeIn(at place) *Agent {
 		return nil
 	}
 	// follows says a tier on model m (its effort apart) follows the main
-	// model: on none, on the main model myna last wrote, or on the model
+	// model: on none, on the main model owl last wrote, or on the model
 	// it takes after that one (follow)
 	follows := func(t, m string) bool {
 		if own(t) {
@@ -760,18 +760,18 @@ func claudeIn(at place) *Agent {
 		}
 		return model()
 	}
-	// the context window myna last wrote, so a value the user wrote is
-	// never taken for myna's: that one is left as it is
+	// the context window owl last wrote, so a value the user wrote is
+	// never taken for owl's: that one is left as it is
 	windowKey := at.key("claude.context_tokens")
 	windowOurs := func() bool {
 		cur := env(claudeContextEnv)
 		return cur != "" && cur == stashShared()[windowKey]
 	}
-	// the modelSettings windows myna last wrote while Claude Desktop is
-	// on myna (claudePlan, #2025), as JSON {id: window}, and the
-	// top-level autoCompactWindow it wrote beside them: each is myna's
-	// only while it still says what myna wrote, so the user's own, an
-	// /autocompact among them, is never taken for myna's
+	// the modelSettings windows owl last wrote while Claude Desktop is
+	// on owl (claudePlan, #2025), as JSON {id: window}, and the
+	// top-level autoCompactWindow it wrote beside them: each is owl's
+	// only while it still says what owl wrote, so the user's own, an
+	// /autocompact among them, is never taken for owl's
 	budgetsKey := at.key("claude.model_budgets")
 	defaultKey := at.key("claude.compact_default")
 	budgetsOurs := func() map[string]int {
@@ -784,7 +784,7 @@ func claudeIn(at place) *Agent {
 		return ok && cur != "" && cur == stashShared()[defaultKey]
 	}
 	// writeBudgets puts in entries and the default (0 for none), and takes
-	// out what myna wrote before that they no longer have
+	// out what owl wrote before that they no longer have
 	writeBudgets := func(def int, entries map[string]int) error {
 		raw, _ := edit.GetJSON(path, "modelSettings")
 		cur := budgetsRead(raw)
@@ -799,7 +799,7 @@ func claudeIn(at place) *Agent {
 			if err := edit.DelJSON(path, del...); err != nil {
 				return err
 			}
-			// an id's object myna emptied goes too
+			// an id's object owl emptied goes too
 			raw, _ = edit.GetJSON(path, "modelSettings")
 			var per map[string]map[string]json.RawMessage
 			if json.Unmarshal([]byte(raw), &per) == nil {
@@ -865,7 +865,7 @@ func claudeIn(at place) *Agent {
 		}
 		return nil
 	}
-	// the reply length myna last wrote, kept apart from the user's own
+	// the reply length owl last wrote, kept apart from the user's own
 	// in the same way
 	outputKey := at.key("claude.output_tokens")
 	outputOurs := func() bool {
@@ -879,8 +879,8 @@ func claudeIn(at place) *Agent {
 		}
 		return nil
 	}
-	// the capabilities myna last wrote, kept apart from the user's own in
-	// the same way: theirs is left as it is, myna's adds to nothing
+	// the capabilities owl last wrote, kept apart from the user's own in
+	// the same way: theirs is left as it is, owl's adds to nothing
 	capsKey := at.key("claude.capabilities")
 	capsOurs := func() bool {
 		cur := env(claudeCapsEnv)
@@ -893,14 +893,14 @@ func claudeIn(at place) *Agent {
 		}
 		return nil
 	}
-	// the auto-compact window myna last wrote, kept apart from the
+	// the auto-compact window owl last wrote, kept apart from the
 	// user's own in the same way
 	compactKey := at.key("claude.compact_window")
 	compactOurs := func() bool {
 		cur := env(claudeCompactEnv)
 		return cur != "" && cur == stashShared()[compactKey]
 	}
-	// set while the window myna wrote is Long conversations' (not a
+	// set while the window owl wrote is Long conversations' (not a
 	// provider's Compact at): tune's card reads it as that one value
 	compactLongKey := at.key("claude.compact_long")
 	dropCompact := func() error {
@@ -915,7 +915,7 @@ func claudeIn(at place) *Agent {
 	// the variable would take precedence over them, so it goes
 	budgeted := false
 	// writeCompact has Claude Code compact at the working window
-	// (settings.WorkingWindow) on myna, unless settings.FullContext or the
+	// (settings.WorkingWindow) on owl, unless settings.FullContext or the
 	// main model is one of Anthropic's Claude models: Anthropic runs a [1m]
 	// one to its whole 1M, so it gets its own window (Max on Discord: a
 	// [1m] model stopped at 272K), or a routing group made only of
@@ -936,9 +936,9 @@ func claudeIn(at place) *Agent {
 		long := false
 		if s := settings.Load(); n == 0 && !claudeModel(main) && !provider.ClaudeGroup(main) {
 			n, long = s.Compact(), true
-			// myna's default gives way to an autoCompactWindow the user
+			// owl's default gives way to an autoCompactWindow the user
 			// set in Claude Code (/autocompact, its settings), which the env
-			// would take precedence over; one typed in myna doesn't (#876).
+			// would take precedence over; one typed in owl doesn't (#876).
 			// So does it to a window the user typed for the main model, on
 			// its group or its provider: Claude Code then runs to the window
 			// it is told (claudeContextEnv), as Codex is (provider.CompactFor,
@@ -963,17 +963,17 @@ func claudeIn(at place) *Agent {
 		return edit.SetJSON(path, edit.KV{Path: "env." + claudeCompactEnv, Value: w})
 	}
 	// Claude Code's /model lists what modelPicker says (2.1.287): while it
-	// runs on myna, that is every one of myna's models, the routing
-	// groups first as viaMyna lists them, so the user picks among them
-	// in Claude Code itself. Groups were left out, so one myna had just
+	// runs on owl, that is every one of owl's models, the routing
+	// groups first as viaOwl lists them, so the user picks among them
+	// in Claude Code itself. Groups were left out, so one owl had just
 	// made the main model and every tier wasn't in /model (#1575). One the
-	// user wrote is theirs. One whose every row says "via myna" is
-	// myna's though its mark is gone (an older myna's stash lost it),
+	// user wrote is theirs. One whose every row says "via owl" is
+	// owl's though its mark is gone (an older owl's stash lost it),
 	// so it is kept up to date rather than left as the user's: a WSL
 	// Claude Code's /model kept a list without the models added since
 	// (#2046, cjyrainbow).
 	pickerKey := at.key("claude.model_picker")
-	pickerOurs := func() bool { return stashShared()[pickerKey] != "" || mynasPicker(path) }
+	pickerOurs := func() bool { return stashShared()[pickerKey] != "" || owlsPicker(path) }
 	dropPicker := func() error {
 		defer forget(pickerKey)
 		if _, has := edit.GetJSON(path, "modelPicker"); has && pickerOurs() {
@@ -996,8 +996,8 @@ func claudeIn(at place) *Agent {
 		// keeps only the Default row and the picker's own), so a tier's
 		// model keeps its row then, or it would be in /model nowhere.
 		//
-		// A list narrowed in myna (only the picked models, or some taken
-		// out) asks the same: the built-in lineup's rows go to myna too
+		// A list narrowed in owl (only the picked models, or some taken
+		// out) asks the same: the built-in lineup's rows go to owl too
 		// while Claude Code runs on it, and the one no tier names (Fable,
 		// left unset for a main of no Fable) listed a model the user had
 		// not picked beside the routing groups they had (yyhhyyyyyy on
@@ -1006,7 +1006,7 @@ func claudeIn(at place) *Agent {
 		// the lineup.
 		// ownOption: the user's custom row, in settings.json's env or, for
 		// this computer's Claude Code, the login shell's (a distro's
-		// environment myna can't read)
+		// environment owl can't read)
 		ownOption := func() bool {
 			return env(claudeCustomOptionEnv) != "" || at.spell == nil && claudeShellEnv(claudeCustomOptionEnv) != ""
 		}
@@ -1026,10 +1026,10 @@ func claudeIn(at place) *Agent {
 		// it, by the Provider in model names setting (provider.Labels): the
 		// picker took the name alone, so none of the setting's three ways
 		// changed /model (love1sbug on X). A description that would say the
-		// provider the label already says is left "via myna".
+		// provider the label already says is left "via owl".
 		labels := listLabels("claude")
 		rows := []any{}
-		for _, o := range viaMynaShared("claude", "") {
+		for _, o := range viaOwlShared("claude", "") {
 			if slices.ContainsFunc(onTier, func(v string) bool { return claudeSameModel(v, o.Value) }) {
 				continue
 			}
@@ -1038,10 +1038,10 @@ func claudeIn(at place) *Agent {
 			// without its provider (Off, or a name the user gave) named
 			// neither in /model; the provider goes before the account then,
 			// as an API key's note says it (#1136, cjyrainbow)
-			if by, ok := strings.CutSuffix(note, " · via myna"); ok {
+			if by, ok := strings.CutSuffix(note, " · via owl"); ok {
 				switch {
 				case label != o.Label && strings.HasSuffix(label, " · "+by):
-					note = "via myna"
+					note = "via owl"
 				case o.Group != "" && o.Group != RoutingGroups && by != o.Group && !strings.HasSuffix(label, " · "+o.Group):
 					note = o.Group + " · " + note
 				}
@@ -1052,7 +1052,7 @@ func claudeIn(at place) *Agent {
 			return dropPicker()
 		}
 		// the switch that leaves a picker's own models out (#1642) reaches
-		// here too (#4548, raclen): /model is fed by myna all the same, so
+		// here too (#4548, raclen): /model is fed by owl all the same, so
 		// with the switch off it says replaceBuiltInOptions, which takes
 		// Claude Code's built-in lineup rows back out of /model — the Default
 		// row stays, Claude Code keeping it as its own fallback. The flag
@@ -1076,20 +1076,20 @@ func claudeIn(at place) *Agent {
 		}
 		mark1M := claude1M()
 		var refs []string
-		for _, o := range viaMynaShared("claude", "") {
+		for _, o := range viaOwlShared("claude", "") {
 			refs = append(refs, mark1M(o.Value))
 		}
 		return refs
 	}
-	// writeCaps says what myna's models can do, the ones in models first;
-	// Claude Desktop's ids too while it runs on myna, its Code tab being
+	// writeCaps says what owl's models can do, the ones in models first;
+	// Claude Desktop's ids too while it runs on owl, its Code tab being
 	// Claude Code on this settings.json
 	desktopOn := func() bool {
 		// a distro's: Claude Desktop on Windows runs a Code tab session
 		// whose host is WSL on the distro's Claude Code, which reads
 		// ${CLAUDE_CONFIG_DIR:-$HOME/.claude} there (4.29.0's remote
 		// probe), not Windows' settings.json, and is handed the same
-		// mythos-myna id and no window; only Windows' Desktop wired
+		// mythos-owl id and no window; only Windows' Desktop wired
 		// tells (young02036 on Discord: 500K group at "/ 200k" in WSL)
 		if at.sys != nil {
 			return desktopWiredAny(desktopSetsHere())
@@ -1097,7 +1097,7 @@ func claudeIn(at place) *Agent {
 		return at.id == "" && desktopWiredAny(desktopSets(desktopdir.OS, at.home, os.Getenv))
 	}
 	// Desktop's Explore compatibility flag has its own ownership: taking
-	// Claude Code off myna must leave it while Desktop still needs it.
+	// Claude Code off owl must leave it while Desktop still needs it.
 	exploreKey := at.key("claude.explore_inherit_cap")
 	writeExplore := func() error {
 		cur, has := edit.GetJSON(path, "env."+claudeExploreEnv)
@@ -1127,7 +1127,7 @@ func claudeIn(at place) *Agent {
 		return nil
 	}
 	// putCaps is writeCaps with own saying whether Claude Code's own
-	// models are among them, as they are while it runs on myna
+	// models are among them, as they are while it runs on owl
 	putCaps := func(own bool, models ...string) error {
 		if env(claudeCapsEnv) != "" && !capsOurs() {
 			forget(capsKey)
@@ -1144,7 +1144,7 @@ func claudeIn(at place) *Agent {
 		return edit.SetJSON(path, edit.KV{Path: "env." + claudeCapsEnv, Value: v})
 	}
 	writeCaps := func(models ...string) error { return putCaps(true, models...) }
-	// the auto mode review myna turned off (claudeReviewEnv), kept apart
+	// the auto mode review owl turned off (claudeReviewEnv), kept apart
 	// from the user's own in the same way
 	reviewKey := at.key("claude.auto_mode_server")
 	reviewOurs := func() bool {
@@ -1159,7 +1159,7 @@ func claudeIn(at place) *Agent {
 		return nil
 	}
 	// writeReview turns the review off while no model Claude Code can reach
-	// through myna runs it, and back on (unset) once one does
+	// through owl runs it, and back on (unset) once one does
 	writeReview := func(models ...string) error {
 		if rawEnv(claudeReviewEnv) != "" && !reviewOurs() {
 			forget(reviewKey)
@@ -1178,9 +1178,9 @@ func claudeIn(at place) *Agent {
 		}
 		return edit.SetJSON(path, edit.KV{Path: "env." + claudeReviewEnv, Value: "0"})
 	}
-	// tool search myna turned on (claudeSearchEnv) while Claude Code is
-	// on myna, kept apart from the user's own as the review is: a value
-	// there that isn't the one myna wrote, an empty one too, is theirs
+	// tool search owl turned on (claudeSearchEnv) while Claude Code is
+	// on owl, kept apart from the user's own as the review is: a value
+	// there that isn't the one owl wrote, an empty one too, is theirs
 	searchKey := at.key("claude.tool_search")
 	searchOurs := func() bool {
 		cur, has := edit.GetJSON(path, "env."+claudeSearchEnv)
@@ -1205,8 +1205,8 @@ func claudeIn(at place) *Agent {
 		return edit.SetJSON(path, edit.KV{Path: "env." + claudeSearchEnv, Value: "true"})
 	}
 	// desktopPlan is what writeWindow writes while Claude Desktop is on
-	// myna (claudePlan, #2025): the models its Code tab runs Claude Code
-	// on, and while Claude Code itself is on myna (main set) its main
+	// owl (claudePlan, #2025): the models its Code tab runs Claude Code
+	// on, and while Claude Code itself is on owl (main set) its main
 	// model's, tiers' and those /model offers (pickerRefs), each with its
 	// own window under the largest. A model Claude Code knows as Claude's has its own window.
 	desktopPlan := func(main string, tiers map[string]string) (top, def int, entries map[string]int) {
@@ -1214,14 +1214,14 @@ func claudeIn(at place) *Agent {
 		// the user's own top-level autoCompactWindow
 		cur, userTop := edit.GetJSON(path, "autoCompactWindow")
 		userTop = userTop && !defaultOurs()
-		// the window each model of myna's compacts at (claudeBudget's
+		// the window each model of owl's compacts at (claudeBudget's
 		// compact), as writeCompact gives the main model: the user's
 		// threshold for it first (#876); a Claude model, or a group of them,
 		// runs to its own (#1741), as does one whose window the user typed
-		// (#1809); the user's autoCompactWindow, unless they gave myna a
+		// (#1809); the user's autoCompactWindow, unless they gave owl a
 		// threshold for every model; then that one, the working window
 		// unless Full window. It is the model's own entry, so Desktop's
-		// models have it with Claude Code itself off myna too, where
+		// models have it with Claude Code itself off owl too, where
 		// Claude's own models compact as they did
 		work := func(ref string) int {
 			if n := provider.CompactSet(ref); n > 0 {
@@ -1277,7 +1277,7 @@ func claudeIn(at place) *Agent {
 		}
 		// the user's own top-level window is the one a model without an
 		// entry runs at ("auto": the one Claude Code is told), in place of
-		// myna's
+		// owl's
 		base := def
 		if userTop {
 			def = 0
@@ -1296,9 +1296,9 @@ func claudeIn(at place) *Agent {
 		return top, def, entries
 	}
 	// pickerApart says the main is one of Claude's own models (or a group
-	// of them), which Anthropic runs to its own window, myna tells
+	// of them), which Anthropic runs to its own window, owl tells
 	// Claude Code no window for the rest (claudeWindow 0), and /model
-	// offers a model of myna's whose window is known: picked there, it
+	// offers a model of owl's whose window is known: picked there, it
 	// would run at Claude Code's own 200K, so each gets its own through
 	// desktopPlan. A model Claude Code takes for 1M by its "[1m]", or
 	// knows as Claude's, has its own already. Any other main is as
@@ -1326,7 +1326,7 @@ func claudeIn(at place) *Agent {
 		return false
 	}
 	// writeWindow tells Claude Code the window of the models it runs on
-	// (claudeWindow). While Claude Desktop runs on myna too, it is the
+	// (claudeWindow). While Claude Desktop runs on owl too, it is the
 	// largest of theirs and each model below it gets its own
 	// (desktopPlan), and so while the main model is a [1m] one beside a
 	// tier that isn't: the main's own window, with each tier below it held
@@ -1378,11 +1378,11 @@ func claudeIn(at place) *Agent {
 		}
 		return edit.SetJSON(path, edit.KV{Path: "env." + claudeContextEnv, Value: v})
 	}
-	// dropStray takes myna's model names out of a Claude Code on
+	// dropStray takes owl's model names out of a Claude Code on
 	// Anthropic's own endpoint, where each is a 404 ("There's an issue
 	// with the selected model (claude/claude-opus-5-5)", roswellcsy on X):
 	// left in its env, ANTHROPIC_MODEL over settings.json's model, by an
-	// older myna that gave one back from the stash as the user's own on
+	// older owl that gave one back from the stash as the user's own on
 	// every Disconnect. The user's own models, and any at an endpoint of
 	// theirs, which may name its models so, are left as they are.
 	dropStray := func() error {
@@ -1391,11 +1391,11 @@ func claudeIn(at place) *Agent {
 		}
 		var keys []string
 		for _, k := range claudeModelEnv {
-			if claudeMynaModel(rawEnv(k)) {
+			if claudeOwlModel(rawEnv(k)) {
 				keys = append(keys, "env."+k)
 			}
 		}
-		if claudeMynaModel(model()) {
+		if claudeOwlModel(model()) {
 			keys = append(keys, "model")
 		}
 		if len(keys) == 0 {
@@ -1404,7 +1404,7 @@ func claudeIn(at place) *Agent {
 		return edit.DelJSON(path, keys...)
 	}
 	// desktopOnly is what is written while Claude Code itself isn't on
-	// myna: Claude Desktop's Code tab still runs Claude Code on this
+	// owl: Claude Desktop's Code tab still runs Claude Code on this
 	// settings.json while Desktop is, so the window and capabilities of
 	// Desktop's models alone; none at all when Desktop isn't either. Only
 	// Claude Code's being wired in wrote them before, so a user who wired
@@ -1414,7 +1414,7 @@ func claudeIn(at place) *Agent {
 			return err
 		}
 		// the review is turned off only for Claude Code's own requests to
-		// myna
+		// owl
 		if err := dropReview(); err != nil {
 			return err
 		}
@@ -1439,18 +1439,18 @@ func claudeIn(at place) *Agent {
 	// call names one, if the user gave it one of its own: Claude Code
 	// takes the Agent call's model, then the agent's frontmatter, then
 	// CLAUDE_CODE_SUBAGENT_MODEL, then the session's (2.1.287). Empty
-	// while it follows the main model, as myna writes it by itself.
+	// while it follows the main model, as owl writes it by itself.
 	// An effort with no model of their own is never written: the main
 	// model at that effort in CLAUDE_CODE_SUBAGENT_MODEL pins every
 	// subagent to the main model (KorenKrita on Discord).
 	subagentOwn := func() string {
 		w := env("CLAUDE_CODE_SUBAGENT_MODEL")
-		if m, _ := tierAt(w); routed() && isMyna(m) && (own("subagent") || m != wroteMain()) {
+		if m, _ := tierAt(w); routed() && isOwl(m) && (own("subagent") || m != wroteMain()) {
 			return w
 		}
 		return ""
 	}
-	// the effort an older myna wrote for subagents that follow the main
+	// the effort an older owl wrote for subagents that follow the main
 	// model, as the main model at that effort: "" for none
 	subagentFollowing := func() string {
 		m, e := tierAt(env("CLAUDE_CODE_SUBAGENT_MODEL"))
@@ -1489,11 +1489,11 @@ func claudeIn(at place) *Agent {
 		return main, tiers
 	}
 	// a provider switch the env has on (claudeClouds) sends Claude Code to
-	// that cloud, past ANTHROPIC_BASE_URL, so routing it through myna
+	// that cloud, past ANTHROPIC_BASE_URL, so routing it through owl
 	// takes the switch out, its value kept in the stash as the user wrote
-	// it (a string or JSON's true), and myna stepping out puts it back
-	// (jw1dev on X: CLAUDE_CODE_USE_BEDROCK=1 beside myna's wiring, and
-	// Bedrock refused myna's model). The cloud's own variables (AWS_*,
+	// it (a string or JSON's true), and owl stepping out puts it back
+	// (jw1dev on X: CLAUDE_CODE_USE_BEDROCK=1 beside owl's wiring, and
+	// Bedrock refused owl's model). The cloud's own variables (AWS_*,
 	// ANTHROPIC_VERTEX_PROJECT_ID, …) stay: without the switch Claude Code
 	// doesn't read them. One that is off stays as it is.
 	cloudKey := func(k string) string { return at.key("claude.cloud." + k) }
@@ -1532,8 +1532,8 @@ func claudeIn(at place) *Agent {
 		}
 		return edit.SetJSON(path, back...)
 	}
-	// unroute takes myna's endpoint and models out of Claude Code's env
-	// and puts back the endpoint and token the stash kept from before myna
+	// unroute takes owl's endpoint and models out of Claude Code's env
+	// and puts back the endpoint and token the stash kept from before owl
 	// was wired in; it answers the model Claude Code was on then, for
 	// Unwire to go back to
 	unroute := func() (string, error) {
@@ -1544,7 +1544,7 @@ func claudeIn(at place) *Agent {
 			return "", err
 		}
 		// the window and capabilities stay as Claude Desktop's Code tab
-		// needs them while Desktop is on myna (#1458)
+		// needs them while Desktop is on owl (#1458)
 		if err := desktopOnly(); err != nil {
 			return "", err
 		}
@@ -1555,7 +1555,7 @@ func claudeIn(at place) *Agent {
 			return "", err
 		}
 		if !routed() {
-			// myna's, left at a gateway address since changed: its
+			// owl's, left at a gateway address since changed: its
 			// endpoint, key and models all go, as set("") takes them
 			if keyOurs() {
 				keys := make([]string, len(claudeEnv))
@@ -1576,7 +1576,7 @@ func claudeIn(at place) *Agent {
 			return "", err
 		}
 		forget(aboutKey)
-		// the auto mode classifier's model goes only where it is myna's
+		// the auto mode classifier's model goes only where it is owl's
 		if autoOurs() {
 			if err := edit.DelJSON(path, "env."+claudeAutoModeEnv); err != nil {
 				return "", err
@@ -1587,9 +1587,9 @@ func claudeIn(at place) *Agent {
 		var back []edit.KV
 		for _, k := range claudeOwnEnv {
 			// one the user set again since is theirs as it is
-			// one of myna's kept by an older myna as the user's is no
+			// one of owl's kept by an older owl as the user's is no
 			// model of their endpoint's (roswellcsy on X)
-			if v := unstash(at.key("claude.env." + k)); v != "" && rawEnv(k) == "" && !(contains(claudeModelEnv, k) && claudeMynaModel(v)) {
+			if v := unstash(at.key("claude.env." + k)); v != "" && rawEnv(k) == "" && !(contains(claudeModelEnv, k) && claudeOwlModel(v)) {
 				back = append(back, edit.KV{Path: "env." + k, Value: v})
 			}
 		}
@@ -1610,17 +1610,17 @@ func claudeIn(at place) *Agent {
 	set := func(v string) error {
 		if v == "" {
 			// Claude Code's own model, on the endpoint the user had before
-			// myna: myna steps out, putting back their endpoint and
-			// token, which stay theirs (__jingling on X: myna claude
+			// owl: owl steps out, putting back their endpoint and
+			// token, which stay theirs (__jingling on X: owl claude
 			// model default took their ANTHROPIC_BASE_URL and token away
 			// for good)
 			if _, err := unroute(); err != nil {
 				return err
 			}
 			keys := []string{"model"}
-			// myna's, left at a gateway address since changed: its key,
+			// owl's, left at a gateway address since changed: its key,
 			// or, where Claude Code kept its claude.ai sign-in, an empty
-			// one beside myna's model
+			// one beside owl's model
 			if keyOurs() {
 				for _, k := range claudeEnv {
 					keys = append(keys, "env."+k)
@@ -1632,12 +1632,12 @@ func claudeIn(at place) *Agent {
 			}
 			return edit.DelJSON(path, keys...)
 		}
-		if isMyna(v) {
+		if isOwl(v) {
 			if !routed() {
 				// the user's own model, endpoint, token, tiers and
-				// subagent model: back with it when myna steps out
+				// subagent model: back with it when owl steps out
 				// (#1050). At an older gateway address they're all
-				// myna's, and what was kept when myna was wired in
+				// owl's, and what was kept when owl was wired in
 				// stays kept.
 				if !keyOurs() {
 					kept := map[string]string{
@@ -1647,18 +1647,18 @@ func claudeIn(at place) *Agent {
 					}
 					for _, k := range claudeOwnEnv {
 						// as the user wrote it, never respelled; one of
-						// myna's own left there is not theirs to get back
+						// owl's own left there is not theirs to get back
 						// (roswellcsy on X: it came back as their
 						// ANTHROPIC_MODEL with every Disconnect)
 						v := rawEnv(k)
-						if contains(claudeModelEnv, k) && claudeMynaModel(v) {
+						if contains(claudeModelEnv, k) && claudeOwlModel(v) {
 							v = ""
 						}
 						kept[at.key("claude.env."+k)] = v
 					}
 					// the auto mode classifier's model of their own
 					// endpoint waits in the stash, out of the env, as
-					// their tiers' do; one of myna's stays as it is
+					// their tiers' do; one of owl's stays as it is
 					theirs := rawEnv(claudeAutoModeEnv) != "" && !autoOurs()
 					if !theirs {
 						kept[at.key("claude.env."+claudeAutoModeEnv)] = ""
@@ -1697,9 +1697,9 @@ func claudeIn(at place) *Agent {
 				}
 				if w := env(tierEnv(t)); routed() && w != "" {
 					// at an effort of its own, it keeps that on the new model
-					// one not myna's on a tier that follows none (fable on a
+					// one not owl's on a tier that follows none (fable on a
 					// Claude model) is the user's own, left as written
-					if m, e := tierAt(w); !follows(t, m) && (isMyna(m) || follow(t, v) == "") {
+					if m, e := tierAt(w); !follows(t, m) && (isOwl(m) || follow(t, v) == "") {
 						tiers[t] = w
 						if same(t, m) {
 							stash(map[string]string{ownKey(t): "1"})
@@ -1712,7 +1712,7 @@ func claudeIn(at place) *Agent {
 			return writeTiers(v, tiers)
 		}
 		// a word that is no model: an effort level the model doesn't take,
-		// ultracode (myna claude ultra), a typo. Another endpoint's
+		// ultracode (owl claude ultra), a typo. Another endpoint's
 		// names are its own.
 		if u := env("ANTHROPIC_BASE_URL"); u == "" || routed() {
 			if err := claudeModelWord(v, get()); err != nil {
@@ -1745,7 +1745,7 @@ func claudeIn(at place) *Agent {
 		}
 		// subagents given a model of their own keep it; the others run on
 		// the session's, whatever /model picked, or on the tier they ask for.
-		// An older myna's effort on the main model goes out, kept unwritten.
+		// An older owl's effort on the main model goes out, kept unwritten.
 		if e := subagentFollowing(); e != "" && stashShared()[subEffortKey] == "" {
 			stash(map[string]string{subEffortKey: e})
 		}
@@ -1759,10 +1759,10 @@ func claudeIn(at place) *Agent {
 		}
 		gw := gwAt()
 		tok := wiredKey()
-		// a caller key of the gateway's own where myna's token goes goes
-		// through myna all the same: theirs stays, as a sync keeps one
+		// a caller key of the gateway's own where owl's token goes goes
+		// through owl all the same: theirs stays, as a sync keeps one
 		// (mergeKept, keyHolds); only a value the gateway would refuse is
-		// wired over (#2545). The sharing key myna made is myna's own,
+		// wired over (#2545). The sharing key owl made is owl's own,
 		// however much Authenticate takes it, so it never counts as theirs
 		// (Default): sharing going off brings gateway.Token back
 		if v, _ := edit.GetJSON(path, "env.ANTHROPIC_AUTH_TOKEN"); v != tok && keyHolds(v, tok) && !access.Default(v) {
@@ -1795,7 +1795,7 @@ func claudeIn(at place) *Agent {
 			return err
 		}
 		stash(map[string]string{mainKey: main, wroteAt: gw})
-		// the new model's window replaces the old one's, when myna knows
+		// the new model's window replaces the old one's, when owl knows
 		// it; one the user set is theirs
 		if err := writeWindow(main, tiers); err != nil {
 			return err
@@ -1854,7 +1854,7 @@ func claudeIn(at place) *Agent {
 				direct = hostOf(u)
 			}
 			// an alias names the model the user's own env gives its tier,
-			// as Claude Code reads it; myna's, while routed, isn't theirs
+			// as Claude Code reads it; owl's, while routed, isn't theirs
 			tier := func(t string) string {
 				if routed() {
 					return ""
@@ -1865,10 +1865,10 @@ func claudeIn(at place) *Agent {
 			for i := range own {
 				own[i].Direct = direct
 			}
-			// myna's Claude Code account is the one Claude Code asks on
+			// owl's Claude Code account is the one Claude Code asks on
 			// its own while that is Anthropic: the same models a second
 			// time, folded in the picker (#496). Only this machine's: a
-			// distro's Claude Code has a sign-in of its own, which myna
+			// distro's Claude Code has a sign-in of its own, which owl
 			// doesn't read
 			fold, key := name == "Claude Code" && at.id == "", "\x00claude-via"
 			if fold {
@@ -1904,7 +1904,7 @@ func claudeIn(at place) *Agent {
 			m := get()
 			if v != "" && !contains(claudeEfforts, v) {
 				if v == "ultra" || v == "ultracode" {
-					return fmt.Errorf("ultracode is a switch of Claude Code's beside its effort: myna claude ultracode on")
+					return fmt.Errorf("ultracode is a switch of Claude Code's beside its effort: owl claude ultracode on")
 				}
 				return fmt.Errorf("Claude Code keeps an effort of %s, not %q", strings.Join(claudeEfforts, ", "), v)
 			}
@@ -2003,10 +2003,10 @@ func claudeIn(at place) *Agent {
 					if v == "" {
 						return nil
 					}
-					return fmt.Errorf("pick a model through myna for Claude Code first; %s can then have its own", tier)
+					return fmt.Errorf("pick a model through owl for Claude Code first; %s can then have its own", tier)
 				}
-				if v != "" && !isMyna(v) {
-					return fmt.Errorf("%s: %q is not a model myna serves", tier, v)
+				if v != "" && !isOwl(v) {
+					return fmt.Errorf("%s: %q is not a model owl serves", tier, v)
 				}
 				main, tiers := curTiers()
 				// its effort, if it has one, goes with it to the new model
@@ -2029,7 +2029,7 @@ func claudeIn(at place) *Agent {
 				if !routed() {
 					return nil
 				}
-				return claudeViaMyna(false)
+				return claudeViaOwl(false)
 			},
 		})
 	}
@@ -2065,10 +2065,10 @@ func claudeIn(at place) *Agent {
 				if v == "" {
 					return nil
 				}
-				return fmt.Errorf("pick a model through myna for Claude Code first; its subagents can then have one of their own")
+				return fmt.Errorf("pick a model through owl for Claude Code first; its subagents can then have one of their own")
 			}
-			if v != "" && !isMyna(v) {
-				return fmt.Errorf("subagents: %q is not a model myna serves", v)
+			if v != "" && !isOwl(v) {
+				return fmt.Errorf("subagents: %q is not a model owl serves", v)
 			}
 			m, e := subagentAt()
 			if m == "" {
@@ -2089,11 +2089,11 @@ func claudeIn(at place) *Agent {
 			if !routed() {
 				return nil
 			}
-			return claudeViaMyna(false)
+			return claudeViaOwl(false)
 		},
 	})
 
-	// each tier's effort, and the subagents', fixed by myna's gateway on
+	// each tier's effort, and the subagents', fixed by owl's gateway on
 	// the model it is on (#536); empty, the session's effort as before
 	effortField := func(key, label, who string, at func() (string, string), put func(model, effort string) error) Field {
 		return Field{
@@ -2111,7 +2111,7 @@ func claudeIn(at place) *Agent {
 					if v == "" {
 						return nil
 					}
-					return fmt.Errorf("pick a model through myna for Claude Code first; %s can then have an effort of its own", who)
+					return fmt.Errorf("pick a model through owl for Claude Code first; %s can then have an effort of its own", who)
 				}
 				if v != "" && !contains(provider.MemberEfforts, v) {
 					return fmt.Errorf("%s: an effort is one of %s, not %q", label, strings.Join(provider.MemberEfforts, ", "), v)
@@ -2166,10 +2166,10 @@ func claudeIn(at place) *Agent {
 				if v == "" {
 					return nil
 				}
-				return fmt.Errorf("pick a model through myna for Claude Code first; its auto mode can then have a model of its own")
+				return fmt.Errorf("pick a model through owl for Claude Code first; its auto mode can then have a model of its own")
 			}
-			if v != "" && !isMyna(v) {
-				return fmt.Errorf("auto mode: %q is not a model myna serves", v)
+			if v != "" && !isOwl(v) {
+				return fmt.Errorf("auto mode: %q is not a model owl serves", v)
 			}
 			if contains(claudeNoClassifier, claudeName(v)) {
 				return fmt.Errorf("auto mode: Claude Code doesn't run its classifier on %s, and would take its own pick instead", v)
@@ -2186,12 +2186,12 @@ func claudeIn(at place) *Agent {
 			if !routed() {
 				return nil
 			}
-			return slices.DeleteFunc(claudeViaMyna(false), func(o Option) bool {
+			return slices.DeleteFunc(claudeViaOwl(false), func(o Option) bool {
 				return contains(claudeNoClassifier, claudeName(o.Value))
 			})
 		},
 	})
-	// its sign-in while it runs through myna: myna's key, or its own
+	// its sign-in while it runs through owl: owl's key, or its own
 	// claude.ai sign-in kept (loginKey), where the gateway takes any key
 	fields = append(fields, Field{
 		Key: "login", Label: "sign-in", Quiet: true, Closed: true,
@@ -2203,18 +2203,18 @@ func claudeIn(at place) *Agent {
 		},
 		Set: func(v string) error {
 			if v != "" && v != "claudeai" {
-				return fmt.Errorf("sign-in is claudeai or empty (myna's key), not %q", v)
+				return fmt.Errorf("sign-in is claudeai or empty (owl's key), not %q", v)
 			}
 			if !routed() {
 				if v == "" {
 					stash(map[string]string{loginKey: ""})
 					return nil
 				}
-				return fmt.Errorf("pick a model through myna for Claude Code first; it can then keep its claude.ai sign-in")
+				return fmt.Errorf("pick a model through owl for Claude Code first; it can then keep its claude.ai sign-in")
 			}
 			// one kept before stays so, taking effect where it can again
 			if v != "" && !signInHere() && stashShared()[loginKey] != v {
-				return fmt.Errorf("Claude Code reaches myna from another machine (%s), where myna, shared, takes only its sharing key, so it can't keep its claude.ai sign-in there", at.gw())
+				return fmt.Errorf("Claude Code reaches owl from another machine (%s), where owl, shared, takes only its sharing key, so it can't keep its claude.ai sign-in there", at.gw())
 			}
 			stash(map[string]string{loginKey: v, wroteAt: at.gw()})
 			return edit.SetJSON(path, edit.KV{Path: "env.ANTHROPIC_AUTH_TOKEN", Value: wiredKey()})
@@ -2226,10 +2226,10 @@ func claudeIn(at place) *Agent {
 			return claudeSignIns()
 		},
 	})
-	// myna's status line, offered where the user has none (claude_statusline.go)
+	// owl's status line, offered where the user has none (claude_statusline.go)
 	statusField := claudeStatusField(at, path, func() { stale = "" })
 	fields = append(fields, statusField)
-	// a write asks a proxy in front of myna first (claudeAsk): each
+	// a write asks a proxy in front of owl first (claudeAsk): each
 	// field's Set, Sync and Unwire. Follow writes only once routed, so a
 	// first look there leaves it for the next one, as reads do.
 	ask := func() { claudeAsk(at, path, env("ANTHROPIC_BASE_URL")) }
@@ -2245,7 +2245,7 @@ func claudeIn(at place) *Agent {
 		Bin: "claude", Dir: filepath.Dir(path), Path: path,
 		Fields:       fields,
 		ModelAliases: claudeAliases,
-		// Claude Code as it was before myna: its default puts it back as
+		// Claude Code as it was before owl: its default puts it back as
 		// installed, on Anthropic's endpoint, where this brings back the
 		// endpoint, token and model the user had
 		Unwire: func() error {
@@ -2258,28 +2258,28 @@ func claudeIn(at place) *Agent {
 			for _, k := range claudeOwnEnv {
 				forget(at.key("claude.env." + k))
 			}
-			// myna's status line goes with it; one of the user's own stays
+			// owl's status line goes with it; one of the user's own stays
 			if err := statusField.Set(""); err != nil {
 				return err
 			}
-			// myna's level in the env goes alone: the effortLevel under
+			// owl's level in the env goes alone: the effortLevel under
 			// it is the user's own, which Claude Code is back on
 			if e := env(claudeEffortEnv); e != "" && appliedOf(self.ID).Fields["effort"] == e {
 				if err := edit.DelJSON(path, "env."+claudeEffortEnv); err != nil {
 					return err
 				}
 			}
-			// the model left alone where myna had none to take over
+			// the model left alone where owl had none to take over
 			switch {
-			case was != "" && !isMyna(was):
+			case was != "" && !isOwl(was):
 				return edit.SetJSON(path, edit.KV{Path: "model", Value: was})
-			case isMyna(get()):
+			case isOwl(get()):
 				return edit.DelJSON(path, "model")
 			}
 			return nil
 		},
 		// the catalog's models, with their levels, as Claude Code is told
-		// them, while myna's are the ones it has
+		// them, while owl's are the ones it has
 		Sync: func() error {
 			ask()
 			if !routed() {
@@ -2288,23 +2288,23 @@ func claudeIn(at place) *Agent {
 				}
 				return desktopOnly()
 			}
-			// a switch turned on since, or left by an older myna
+			// a switch turned on since, or left by an older owl
 			if err := dropClouds(); err != nil {
 				return err
 			}
-			// routed by an older myna: what was said about the models
-			// before it is taken out as it is now when myna is wired in
+			// routed by an older owl: what was said about the models
+			// before it is taken out as it is now when owl is wired in
 			if stashShared()[aboutKey] == "" {
 				if err := dropAbout(nil); err != nil {
 					return err
 				}
 			}
-			// subagents an older myna pinned to the main model at an
+			// subagents an older owl pinned to the main model at an
 			// effort of theirs follow it again, the effort kept unwritten
 			if subagentFollowing() != "" {
 				return writeTiers(curTiers())
 			}
-			// a model of myna's an older myna wrote with a dotted Claude
+			// a model of owl's an older owl wrote with a dotted Claude
 			// version goes in as Claude Code is given it now (spell)
 			raw := []string{jsonGet(path, "model")()}
 			for _, k := range claudeModelEnv {
@@ -2312,7 +2312,7 @@ func claudeIn(at place) *Agent {
 			}
 			if slices.ContainsFunc(raw, func(v string) bool {
 				m, _ := tierAt(provider.ClaudeRead(v))
-				return v != "" && isMyna(m) && spell(provider.ClaudeRead(v)) != v
+				return v != "" && isOwl(m) && spell(provider.ClaudeRead(v)) != v
 			}) {
 				return writeTiers(curTiers())
 			}
@@ -2346,15 +2346,15 @@ func claudeIn(at place) *Agent {
 		},
 		// a model picked in Claude Code's /model is its main model: the tiers
 		// and subagents that followed the one before go with it, and an
-		// older myna's ANTHROPIC_MODEL, which held every session to that
+		// older owl's ANTHROPIC_MODEL, which held every session to that
 		// one, comes out
 		Follow: func() error {
 			main := mainModel()
 			bare := strings.TrimSuffix(main, "[1m]")
-			if !routed() || !isMyna(bare) {
+			if !routed() || !isOwl(bare) {
 				return nil
 			}
-			// a haiku tier an older myna left on the main model, where it
+			// a haiku tier an older owl left on the main model, where it
 			// now follows on that model's Haiku, moves too
 			m, _ := tierAt(env(tierEnv("haiku")))
 			light := follow("haiku", bare)
@@ -2369,13 +2369,13 @@ func claudeIn(at place) *Agent {
 			return set(bare)
 		},
 		Check: func() string {
-			if !isMyna(get()) {
+			if !isOwl(get()) {
 				return ""
 			}
 			getEnv := func(k string) (string, bool) { return edit.GetJSON(path, "env."+k) }
 			// an address that isn't the gateway's is asked whether it is
-			// myna behind a proxy (#1985) only while what Claude Code
-			// sends is for myna (claudeKeyed): with a key of the user's
+			// owl behind a proxy (#1985) only while what Claude Code
+			// sends is for owl (claudeKeyed): with a key of the user's
 			// own it is their endpoint, told as it is, never asked (#3480)
 			keyed := claudeKeyed(at, path)
 			// an administrator's settings win over the user's
@@ -2383,8 +2383,8 @@ func claudeIn(at place) *Agent {
 			if at.sys != nil {
 				managed = at.sys("/etc/claude-code/managed-settings.json")
 			}
-			if u, _ := edit.GetJSON(managed, "env.ANTHROPIC_BASE_URL"); u != "" && u != at.gw() && !(keyed && reachesMyna(u, at.gw())) {
-				return "Claude Code's managed settings (" + at.native(managed) + ") set ANTHROPIC_BASE_URL to " + u + ", which wins over myna's"
+			if u, _ := edit.GetJSON(managed, "env.ANTHROPIC_BASE_URL"); u != "" && u != at.gw() && !(keyed && reachesOwl(u, at.gw())) {
+				return "Claude Code's managed settings (" + at.native(managed) + ") set ANTHROPIC_BASE_URL to " + u + ", which wins over owl's"
 			}
 			if keyed {
 				if off := wiringOff("Claude Code", path, getEnv, "ANTHROPIC_BASE_URL", at.gw()); off != "" {
@@ -2397,13 +2397,13 @@ func claudeIn(at place) *Agent {
 				return why
 			}
 			// the key it sends: none where it keeps its claude.ai sign-in,
-			// which a key there would take the place of; myna's otherwise,
+			// which a key there would take the place of; owl's otherwise,
 			// one gone sending that sign-in instead, if it has one
 			tok, has := getEnv("ANTHROPIC_AUTH_TOKEN")
 			where := "Claude Code's ANTHROPIC_AUTH_TOKEN (" + filepath.Base(path) + ")"
 			switch {
 			case keepSignIn() && tok != "":
-				return where + " is set, so Claude Code sends myna that key, not its claude.ai sign-in as myna set it"
+				return where + " is set, so Claude Code sends owl that key, not its claude.ai sign-in as owl set it"
 			case keepSignIn():
 				return ""
 			case tok == "" && signInHere():
@@ -2411,7 +2411,7 @@ func claudeIn(at place) *Agent {
 				if has {
 					how = "is empty"
 				}
-				return where + " " + how + ", so Claude Code sends myna its claude.ai sign-in, if it has one, not myna's key — to keep it so, set its sign-in to claude.ai"
+				return where + " " + how + ", so Claude Code sends owl its claude.ai sign-in, if it has one, not owl's key — to keep it so, set its sign-in to claude.ai"
 			}
 			return wiringOff("Claude Code", path, getEnv, "ANTHROPIC_AUTH_TOKEN", at.gwKey())
 		},
@@ -2436,14 +2436,14 @@ func claudeIn(at place) *Agent {
 	return self
 }
 
-// claudeSignIns are the ways Claude Code signs in to myna, its sign-in
+// claudeSignIns are the ways Claude Code signs in to owl, its sign-in
 // field's options: what its claude.ai sign-in gives it is off under a key
 // (ANTHROPIC_AUTH_TOKEN), and Remote Control and ultrareview are off on any
 // address but Anthropic's own (2.1.290).
 func claudeSignIns() []Option {
 	return []Option{
-		{Value: "", Label: "myna's key", Note: "Claude Code sends myna its key and is signed out of claude.ai while it runs through myna: claude.ai's plan limits in /usage, its connectors, voice and /teleport are off"},
-		{Value: "claudeai", Label: "claude.ai", Note: "Claude Code keeps its claude.ai sign-in (/login), so those work; it sends that sign-in to myna, which never passes it on. Remote Control and ultrareview stay off: Claude Code has them only on Anthropic's own address"},
+		{Value: "", Label: "owl's key", Note: "Claude Code sends owl its key and is signed out of claude.ai while it runs through owl: claude.ai's plan limits in /usage, its connectors, voice and /teleport are off"},
+		{Value: "claudeai", Label: "claude.ai", Note: "Claude Code keeps its claude.ai sign-in (/login), so those work; it sends that sign-in to owl, which never passes it on. Remote Control and ultrareview stay off: Claude Code has them only on Anthropic's own address"},
 	}
 }
 
@@ -2464,7 +2464,7 @@ func claudeTakes(model, v string) error {
 }
 
 // claudeModelWord refuses a value given for Claude Code's model that is a
-// bare word and not one of its aliases: `myna claude ultra` wrote
+// bare word and not one of its aliases: `owl claude ultra` wrote
 // "model": "ultra" over the model.
 func claudeModelWord(v, model string) error {
 	w := strings.TrimSuffix(v, "[1m]")
@@ -2473,13 +2473,13 @@ func claudeModelWord(v, model string) error {
 	}
 	switch {
 	case w == "ultra" || w == "ultracode":
-		return fmt.Errorf("ultracode is a switch of Claude Code's, not a model: myna claude ultracode on")
+		return fmt.Errorf("ultracode is a switch of Claude Code's, not a model: owl claude ultracode on")
 	case contains(claudeEfforts, w):
 		if err := claudeTakes(model, w); err != nil {
 			return err
 		}
 	}
-	return fmt.Errorf("%q is no model of Claude Code's: give a model id (claude-…), one of its aliases (%s) or a model myna serves", v, strings.Join(claudeAliases, ", "))
+	return fmt.Errorf("%q is no model of Claude Code's: give a model id (claude-…), one of its aliases (%s) or a model owl serves", v, strings.Join(claudeAliases, ", "))
 }
 
 // claudeDropModelEffort takes the effort saved for model n out of
@@ -2560,7 +2560,7 @@ func claudeDated(opts []Option) []Option {
 // claude-sonnet-…, or the model ANTHROPIC_DEFAULT_SONNET_MODEL gives), best
 // the newest Opus, [1m] the same at 1M, opusplan Opus in plan mode and
 // Sonnet otherwise. default is the one Claude Code picks by the account's
-// plan, which myna doesn't say. ok is false for a value that is no alias.
+// plan, which owl doesn't say. ok is false for a value that is no alias.
 func claudeAliasOption(v string, ms []catalog.Model, tier func(string) string) (Option, bool) {
 	const mark = "[1m]"
 	w := strings.TrimSuffix(v, mark)
@@ -2612,7 +2612,7 @@ func claudeAliasOption(v string, ms []catalog.Model, tier func(string) string) (
 	return o, true
 }
 
-// claudeViaMyna is what myna serves Claude Code, a model with a window
+// claudeViaOwl is what owl serves Claude Code, a model with a window
 // of 1M or more marked [1m]: Claude Code takes any other for 200K, and
 // compacts long before a 1M model needs it. It drops the mark before asking.
 // fold marks Same those on the account Claude Code is signed in to, for a
@@ -2620,11 +2620,11 @@ func claudeAliasOption(v string, ms []catalog.Model, tier func(string) string) (
 // a copy of its own of the list built last (builtOptions): its model and
 // tier fields asked it each poll, for the picker and again for Drift, a
 // list built anew each time, 30 MB of forty polls with real accounts.
-func claudeViaMyna(fold bool) []Option {
+func claudeViaOwl(fold bool) []Option {
 	return slices.Clone(claudeViaShared(fold))
 }
 
-// claudeViaShared is claudeViaMyna without the caller's own copy, the
+// claudeViaShared is claudeViaOwl without the caller's own copy, the
 // list kept, read only: for a caller appending it to a list of its own,
 // which copies it anyway (Claude Code's model field, 5 MB of forty polls
 // copied twice).
@@ -2636,13 +2636,13 @@ func claudeViaShared(fold bool) []Option {
 	return builtOptions.shared(key, func() []Option { return buildClaudeVia(fold) })
 }
 
-// buildClaudeVia is claudeViaMyna built afresh.
+// buildClaudeVia is claudeViaOwl built afresh.
 func buildClaudeVia(fold bool) []Option {
 	big := map[string]bool{}
 	for _, m := range sharedModels("claude") {
 		big[m.ID] = m.Context >= 1_000_000
 	}
-	opts := viaMyna("claude", "")
+	opts := viaOwl("claude", "")
 	for i, o := range opts {
 		if big[o.Ref] {
 			opts[i].Value += "[1m]"
@@ -2652,8 +2652,8 @@ func buildClaudeVia(fold bool) []Option {
 	return claudeDated(opts)
 }
 
-// claude1M marks [1m] a myna model whose window is 1M or more, as
-// myna's list or models.dev gives it. Claude Code (2.1.284 and before)
+// claude1M marks [1m] a owl model whose window is 1M or more, as
+// owl's list or models.dev gives it. Claude Code (2.1.284 and before)
 // takes any Claude model not so marked for 200K, CLAUDE_CODE_MAX_CONTEXT_TOKENS
 // or not, and compacts it, over and over, long before it runs out; a ref
 // written in bare (typed, or picked while the window wasn't known) was left
@@ -2661,7 +2661,7 @@ func buildClaudeVia(fold bool) []Option {
 func claude1M() func(ref string) string { return claude1MFor("claude") }
 
 // claude1MFor is claude1M for a Claude Code run by another agent, by the
-// models myna shows that one (T3 Code's, t3code.go).
+// models owl shows that one (T3 Code's, t3code.go).
 func claude1MFor(agent string) func(ref string) string {
 	const mark = "[1m]"
 	window := map[string]int{}
@@ -2679,7 +2679,7 @@ func claude1MFor(agent string) func(ref string) string {
 	}
 }
 
-// claudeModel says a model ref (myna/v/claude-opus-5-5[1m], or Claude
+// claudeModel says a model ref (owl/v/claude-opus-5-5[1m], or Claude
 // Code's own claude-opus-5-5) is one of Anthropic's Claude models, by
 // whichever provider it comes and by whatever name it gives it: Amazon
 // Bedrock's us.anthropic.claude-opus-… too, which Claude Code knows by the
@@ -2709,7 +2709,7 @@ func claudeOwnCompact(path, model string) bool {
 		return false
 	}
 	// Claude Code keys it by the model as it was given it (ClaudeSpelled)
-	model = strings.ToLower(provider.ClaudeDashed(strings.TrimSuffix(strings.TrimPrefix(model, "myna/"), "[1m]")))
+	model = strings.ToLower(provider.ClaudeDashed(strings.TrimSuffix(strings.TrimPrefix(model, "owl/"), "[1m]")))
 	for k, v := range per {
 		if v.Window != nil && strings.ToLower(provider.ClaudeDashed(strings.TrimSuffix(k, "[1m]"))) == model {
 			return true
@@ -2718,7 +2718,7 @@ func claudeOwnCompact(path, model string) bool {
 	return false
 }
 
-// claudeLongMain says main is a model of myna's Claude Code takes for 1M
+// claudeLongMain says main is a model of owl's Claude Code takes for 1M
 // by its "[1m]", not one of Claude's own, which Anthropic runs to its own.
 func claudeLongMain(main string) bool {
 	m, _ := tierAt(main)
@@ -2727,7 +2727,7 @@ func claudeLongMain(main string) bool {
 }
 
 // claudeWindow is the context window to tell Claude Code for the models it
-// runs on, 0 when myna doesn't know it. One value serves every model not
+// runs on, 0 when owl doesn't know it. One value serves every model not
 // marked [1m]: the main model's, or when that one is marked, the smallest of
 // the tiers' that aren't, so none of them outgrows its own.
 func claudeWindow(main string, tiers map[string]string) int {
@@ -2757,7 +2757,7 @@ func claudeWindow(main string, tiers map[string]string) int {
 // max_input_tokens only to offer a 1M entry (2.31226.1), and Claude Code
 // takes no window from a gateway's /v1/models (its model catalog is
 // Anthropic's alone, and even there one past 200K counts as 200K for a
-// model it doesn't know). So a mythos-myna id of a 272K model ran as
+// model it doesn't know). So a mythos-owl id of a 272K model ran as
 // 200K, and with the auto-compact window shown in its place, a 1M one as
 // that (#1458). Left out are a model listed by its "[1m]" id, which is 1M
 // whatever this says, and one named as a Claude model Claude Code knows,
@@ -2823,11 +2823,11 @@ var claudeManaged = func() string {
 }
 
 // StandIn is the model Claude Code is set to use in place of one it named
-// that myna doesn't serve: claude-haiku-4-5-… for a title or a small
+// that owl doesn't serve: claude-haiku-4-5-… for a title or a small
 // task goes to its haiku tier's model, and a name of no tier to its main
 // model. For Codex, the model it is set to (codexStandIn), in a WSL
 // distro the distro's config names (wslCodexStandIn). "" when the
-// agent isn't routed through myna or is neither. For gateway.StandIn.
+// agent isn't routed through owl or is neither. For gateway.StandIn.
 func StandIn(agent, model string) string {
 	if agent != "claude" && agent != "codex" {
 		return ""
@@ -2852,11 +2852,11 @@ func StandIn(agent, model string) string {
 
 // ClassifierStandIn is the model Claude Code's auto mode classifier goes
 // to in place of the one it named, while the sonnet tier it named follows
-// a main model that /model has moved since myna last wrote the tiers.
+// a main model that /model has moved since owl last wrote the tiers.
 // Claude Code 2.1.310 runs the classifier, with CLAUDE_CODE_AUTO_MODE_MODEL
 // unset, on ANTHROPIC_DEFAULT_SONNET_MODEL ($Xe, BB in its bundle), not on
 // the session's model. A pick in /model saves the main model alone, and
-// the tiers following it move only when myna next looks (Follow), so
+// the tiers following it move only when owl next looks (Follow), so
 // the first classifier request after a switch named the model before it
 // (CyberCaius on Discord). "" leaves the model as asked. For
 // gateway.ClassifierStandIn.
@@ -2876,7 +2876,7 @@ func ClassifierStandIn(agent, model string) string {
 
 // claudeClassifierIn is ClassifierStandIn for the Claude Code at a place:
 // the main model the sonnet tier follows, at the tier's effort, when the
-// classifier named that tier as myna last wrote it and the main model
+// classifier named that tier as owl last wrote it and the main model
 // has moved on. A tier the user put on a model of its own, or an auto
 // mode model set for the classifier, is left as it is.
 func claudeClassifierIn(at place, model string) string {
@@ -2902,7 +2902,7 @@ func claudeClassifierIn(at place, model string) string {
 		return "" // the tier is on a model of its own
 	}
 	main := claudeMain(path)
-	if main == "" || bare(main) == was || !isMyna(bare(main)) {
+	if main == "" || bare(main) == was || !isOwl(bare(main)) {
 		return ""
 	}
 	return followAt("sonnet", bare(main), effort)
@@ -2942,9 +2942,9 @@ func claudeStandInAt(at place, path, model string) string {
 }
 
 // claudeKeyed says what the Claude Code at a place (its settings at path)
-// sends is for myna: a key the gateway takes (keyHolds, as Check asks of
-// it), or none where it keeps its claude.ai sign-in through myna, which
-// myna set (claude.login) on a Claude Code it wired (wired_at, which
+// sends is for owl: a key the gateway takes (keyHolds, as Check asks of
+// it), or none where it keeps its claude.ai sign-in through owl, which
+// owl set (claude.login) on a Claude Code it wired (wired_at, which
 // Disconnect forgets) where the gateway takes any key (signInHere).
 func claudeKeyed(at place, path string) bool {
 	if tok, _ := edit.GetJSON(path, "env.ANTHROPIC_AUTH_TOKEN"); tok != "" {
@@ -2956,19 +2956,19 @@ func claudeKeyed(at place, path string) bool {
 
 // claudeProxied says u, the base URL the Claude Code at a place (its
 // settings at path) has in place of the gateway's, is a proxy to it where
-// myna has answered (#1985, surelyMyna). It is asked only where it can
-// be another way to myna (proxyBase), and only while Claude Code sends
-// it what is for myna (claudeKeyed): with a key of the user's own, u is
+// owl has answered (#1985, surelyOwl). It is asked only where it can
+// be another way to owl (proxyBase), and only while Claude Code sends
+// it what is for owl (claudeKeyed): with a key of the user's own, u is
 // their endpoint. zhangt2333 (#3480) never connected Claude Code, and the
 // Agents page's reads of it sent GET / about every 30s to the endpoint in
 // its settings.
 func claudeProxied(at place, path, u string) bool {
 	_, ok := claudeProxyBase(at, path, u)
-	return ok && surelyMyna(u, at.gw())
+	return ok && surelyOwl(u, at.gw())
 }
 
-// claudeProxyBase is where claudeProxied asks whether myna answers: u's
-// proxyBase, while Claude Code sends it what is for myna (claudeKeyed).
+// claudeProxyBase is where claudeProxied asks whether owl answers: u's
+// proxyBase, while Claude Code sends it what is for owl (claudeKeyed).
 func claudeProxyBase(at place, path, u string) (string, bool) {
 	base, ok := proxyBase(u, at.gw())
 	if !ok || u == at.gw() {
@@ -2978,22 +2978,22 @@ func claudeProxyBase(at place, path, u string) (string, bool) {
 }
 
 // claudeAsk is what each write to the Claude Code at a place does first:
-// the proxy claudeProxied would ask about is asked now where myna hasn't
-// answered there yet (mynaAsked). Every write reads routed, and the first
-// one in a myna just started, the CLI's, read a proxy not asked yet as
+// the proxy claudeProxied would ask about is asked now where owl hasn't
+// answered there yet (owlAsked). Every write reads routed, and the first
+// one in a owl just started, the CLI's, read a proxy not asked yet as
 // no: a pick wrote 127.0.0.1 over it, the sync a provider added runs
-// turned the auto mode review back on, Disconnect left myna in and
+// turned the auto mode review back on, Disconnect left owl in and
 // forgot the endpoint the user had (#1985).
 func claudeAsk(at place, path, u string) {
 	if base, ok := claudeProxyBase(at, path, u); ok {
-		mynaAsked(base)
+		owlAsked(base)
 	}
 }
 
-// claudeMain is the model a Claude Code routed through myna runs on, as
+// claudeMain is the model a Claude Code routed through owl runs on, as
 // settings.json names it: its model, which /model saves, an alias there
 // resolved through its tier. With none, the ANTHROPIC_MODEL an older
-// myna wrote, else the sonnet tier's, as Claude Code on an API key
+// owl wrote, else the sonnet tier's, as Claude Code on an API key
 // starts with.
 func claudeMain(path string) string {
 	env := func(k string) string { v, _ := edit.GetJSON(path, "env."+k); return v }
@@ -3017,16 +3017,16 @@ var (
 	noticeClaudeUltracode = newNotice("an open Claude Code session keeps the ultracode it started with — restart it to use this.")
 )
 
-// why a Claude Code wired to myna goes to a cloud instead (claudeCloud)
+// why a Claude Code wired to owl goes to a cloud instead (claudeCloud)
 var (
-	noticeClaudeCloudFile  = newNotice("{file} sets {var}, so Claude Code sends its requests to {cloud}, not to myna: take it out there to go through myna.")
-	noticeClaudeCloudShell = newNotice("{var} is set in your shell's environment, so Claude Code started there sends its requests to {cloud}, not to myna: take it out of your shell's profile to go through myna.")
+	noticeClaudeCloudFile  = newNotice("{file} sets {var}, so Claude Code sends its requests to {cloud}, not to owl: take it out there to go through owl.")
+	noticeClaudeCloudShell = newNotice("{var} is set in your shell's environment, so Claude Code started there sends its requests to {cloud}, not to owl: take it out of your shell's profile to go through owl.")
 )
 
-// mynasPicker says whether settings.json's modelPicker is one myna
-// wrote: it has rows, and each one's description is myna's, which ends
-// "via myna" (writePicker in claudeIn).
-func mynasPicker(path string) bool {
+// owlsPicker says whether settings.json's modelPicker is one owl
+// wrote: it has rows, and each one's description is owl's, which ends
+// "via owl" (writePicker in claudeIn).
+func owlsPicker(path string) bool {
 	raw, has := edit.GetJSON(path, "modelPicker")
 	if !has {
 		return false
@@ -3041,7 +3041,7 @@ func mynasPicker(path string) bool {
 		return false
 	}
 	for _, o := range p.Options {
-		if o.Model == "" || !strings.HasSuffix(o.Description, "via myna") {
+		if o.Model == "" || !strings.HasSuffix(o.Description, "via owl") {
 			return false
 		}
 	}
@@ -3054,7 +3054,7 @@ func mynasPicker(path string) bool {
 const claudeCustomOptionEnv = "ANTHROPIC_CUSTOM_MODEL_OPTION"
 
 // claudeNarrowed says whether Claude Code's list leaves out some of
-// myna's catalog: only the models picked for it, some taken out one by
+// owl's catalog: only the models picked for it, some taken out one by
 // one, or a visibility of families (provider.CatalogFor's kept list).
 func claudeNarrowed() bool {
 	_, hidden := provider.CatalogFor("claude")

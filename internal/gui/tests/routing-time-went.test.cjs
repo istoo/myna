@@ -1,10 +1,10 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // Where a try's time went (gateway.TryNet; Discord, Magic_zero: the gateway
-// looked slow): a request's story says, under each try, myna's time, the
+// looked slow): a request's story says, under each try, owl's time, the
 // network's and the vendor's, and each part that took any, as one stacked
 // bar and named values, the queue for a slot among them. A part that took
 // none isn't named. A try sent through a plugin's own fetch, or traced
-// before myna measured it, has no network timing and no breakdown; the
+// before owl measured it, has no network timing and no breakdown; the
 // plugin's says it sent the request itself, so the missing split doesn't
 // read as lost (Discord, lute). Both engines, a narrow window, every language; no
 // part runs out of the story, no left-border accent. The API is faked.
@@ -54,7 +54,7 @@ function serve(lang) {
     if (url.pathname === "/api/usage/requests") return json({ period: url.searchParams.get("period"), rows: [], offset: 0, total: 0, calls: 0, errors: 0, input: 600, output: 80, cache_read: 0, cache_write: 0, reasoning: 0, cost: 0, unpriced: 2, agents: [{ id: "codex", name: "Codex", icon: "codex-color" }] });
     if (url.pathname === "/api/usage/requests/content") return json({ found: false, why: "read" });
     if (url.pathname === "/api/usage/quotas") return json([]);
-    if (url.pathname === "/api/usage") return json({ calls: 2, errors: 0, input: 600, output: 80, cache_read: 0, cache_write: 0, reasoning: 0, unpriced: 2, cost: 0, bucket: "day", series: [], agents: [], models: [], path: "~/.config/myna/usage.jsonl" });
+    if (url.pathname === "/api/usage") return json({ calls: 2, errors: 0, input: 600, output: 80, cache_read: 0, cache_write: 0, reasoning: 0, unpriced: 2, cost: 0, bucket: "day", series: [], agents: [], models: [], path: "~/.config/owl/usage.jsonl" });
     if (url.pathname === "/api/sessions") return json({ sessions: [], dirs: [] });
     if (url.pathname === "/api/sessions/stats") return json({ from: "", to: "", days: [], agents: {} });
     if (url.pathname.startsWith("/api/")) return json({});
@@ -65,11 +65,11 @@ function serve(lang) {
 }
 
 const want = {
-  en: { head: "Where the time went", vendor: "Vendor (first byte)", slot: "Waiting for a slot", plugin: "Its plugin sent this request itself, so myna can't split its time" },
-  zh: { head: "时间花在哪里", vendor: "供应商（首字节）", slot: "排队等空位", plugin: "此请求由插件自行发出，myna 无法拆分它的耗时" },
-  "zh-TW": { head: "時間花在哪裡", vendor: "供應商（首位元組）", slot: "排隊等空位", plugin: "此請求由外掛自行發出，myna 無法拆分它的耗時" },
-  ja: { head: "時間の内訳", vendor: "ベンダー（最初のバイト）", slot: "空き枠待ち", plugin: "このリクエストはプラグインが自ら送信したため、myna では時間の内訳を出せません" },
-  de: { head: "Wohin die Zeit ging", vendor: "Anbieter (erstes Byte)", slot: "Warten auf einen freien Platz", plugin: "Diese Anfrage hat die Erweiterung selbst gesendet, daher kann myna ihre Zeit nicht aufschlüsseln" },
+  en: { head: "Where the time went", vendor: "Vendor (first byte)", slot: "Waiting for a slot", plugin: "Its plugin sent this request itself, so owl can't split its time" },
+  zh: { head: "时间花在哪里", vendor: "供应商（首字节）", slot: "排队等空位", plugin: "此请求由插件自行发出，owl 无法拆分它的耗时" },
+  "zh-TW": { head: "時間花在哪裡", vendor: "供應商（首位元組）", slot: "排隊等空位", plugin: "此請求由外掛自行發出，owl 無法拆分它的耗時" },
+  ja: { head: "時間の内訳", vendor: "ベンダー（最初のバイト）", slot: "空き枠待ち", plugin: "このリクエストはプラグインが自ら送信したため、owl では時間の内訳を出せません" },
+  de: { head: "Wohin die Zeit ging", vendor: "Anbieter (erstes Byte)", slot: "Warten auf einen freien Platz", plugin: "Diese Anfrage hat die Erweiterung selbst gesendet, daher kann owl ihre Zeit nicht aufschlüsseln" },
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -90,7 +90,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         }
         await browser.close();
       });
-      await page.goto("http://myna.test/?view=routing");
+      await page.goto("http://owl.test/?view=routing");
       // the date bar's own buttons: the request-grouping controls share the
       // class, and on ubuntu's WebKit nth(1) of them all was one drawn hidden
       // (#13)
@@ -117,10 +117,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         };
       });
       assert.equal(seen.head, want[lang].head);
-      assert.deepEqual(seen.who, ["myna", "net", "vendor"]);
+      assert.deepEqual(seen.who, ["owl", "net", "vendor"]);
       // queue, own, DNS, connect, TLS, send, the vendor's wait, first
       // token, streaming: no pool, no requests before it
-      assert.deepEqual(seen.parts.map((p) => p[0]), ["myna", "myna", "net", "net", "net", "net", "vendor", "vendor", "vendor"]);
+      assert.deepEqual(seen.parts.map((p) => p[0]), ["owl", "owl", "net", "net", "net", "net", "vendor", "vendor", "vendor"]);
       assert.equal(seen.parts[0][1], want[lang].slot);
       assert.equal(seen.parts[6][1], want[lang].vendor);
       assert.match(seen.parts[0][2], /40/);

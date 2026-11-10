@@ -14,8 +14,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 	"github.com/tidwall/gjson"
 )
 
@@ -23,7 +23,7 @@ import (
 // X-Magpie-Provider and X-Magpie-Model headers always, relayed or
 // translated, streamed or not, after a failover too; its body's model the
 // group the agent asked for, unless ReplyModel member (or the request's
-// X-Magpie-Response-Model: member) asks for myna's provider/model id
+// X-Magpie-Response-Model: member) asks for owl's provider/model id
 // there — never for Claude Code or Codex, which read it themselves — or
 // ReplyModel or X-Magpie-Response-Model vendor for the vendor's own name,
 // for every agent. memberModel in a file from before ReplyModel still
@@ -332,19 +332,19 @@ func TestReplyNamesAskedModel(t *testing.T) {
 	}
 }
 
-// A reply to a request that came in under one of myna's own aliases for
+// A reply to a request that came in under one of owl's own aliases for
 // Claude Desktop or Claude Science keeps the vendor's own name (#4667):
-// the alias — myna-<n>.anthropic.claude-opus-5-5 among them — is
-// myna's deployment name, not one the vendor knows, and naming the reply
+// the alias — owl-<n>.anthropic.claude-opus-5-5 among them — is
+// owl's deployment name, not one the vendor knows, and naming the reply
 // with it put that name in Claude Code's usage records, where ccusage
 // counts it as a model of its own instead of the one the subscription
 // served. Before the asked-name rule these ids were served the vendor's
 // name, as every other agent still is.
-func TestReplyToMynaAliasKeepsVendorName(t *testing.T) {
+func TestReplyToOwlAliasKeepsVendorName(t *testing.T) {
 	const served = "opus-5-5" // what the subscription's reply says
 	aliases := []string{
-		"myna-" + aliasNumber("sub/claude-opus-5-5") + desktopClaudeInfix + "claude-opus-5-5",
-		"myna-" + aliasNumber("sub/claude-opus-5-5") + desktopClaudeInfix + "claude-opus-5-5[1m]",
+		"owl-" + aliasNumber("sub/claude-opus-5-5") + desktopClaudeInfix + "claude-opus-5-5",
+		"owl-" + aliasNumber("sub/claude-opus-5-5") + desktopClaudeInfix + "claude-opus-5-5[1m]",
 		aliasFor("sub/claude-opus-5-5"),
 		desktopEffortAlias + aliasNumber("sub/claude-opus-5-5"),
 		scienceAlias + aliasNumber("sub/claude-opus-5-5"),

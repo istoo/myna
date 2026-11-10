@@ -45,8 +45,8 @@ func TestFeedsAskInLang(t *testing.T) {
 		json.NewEncoder(w).Encode(Release{Version: "0.1.604", Notes: twoNotes})
 	}))
 	defer srv.Close()
-	t.Setenv("MYNA_UPDATE_FEED", srv.URL+"/latest")
-	t.Setenv("MYNA_NOTES_FEED", srv.URL+"/notes")
+	t.Setenv("OWL_UPDATE_FEED", srv.URL+"/latest")
+	t.Setenv("OWL_NOTES_FEED", srv.URL+"/notes")
 	ctx := context.Background()
 
 	rel, err := LatestIn(ctx, "zh")

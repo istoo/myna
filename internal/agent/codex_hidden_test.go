@@ -8,12 +8,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A model Codex hides from its own picker (gpt-6.1-terra) but the user
 // ticked on the Codex subscription is still offered in Codex's picker,
-// via myna, while one Codex lists is offered once, as Codex's own
+// via owl, while one Codex lists is offered once, as Codex's own
 // (ysm119 on Discord: 4 ticked, 3 to pick from).
 func TestCodexHiddenTickedModelOffered(t *testing.T) {
 	claims := func(m map[string]any) string {

@@ -66,7 +66,7 @@ func TestProjectSkillsLinked(t *testing.T) {
 	}
 	ok(t)(ProjectSkill(proj, "pdf", []string{"codex"}))
 	gone(t, filepath.Join(proj, ".claude/skills/pdf"))
-	gone(t, filepath.Join(proj, ".claude")) // myna made it, and it's empty
+	gone(t, filepath.Join(proj, ".claude")) // owl made it, and it's empty
 	if g := read(t, filepath.Join(proj, ".gitignore")); strings.Contains(g, ".claude") || !strings.Contains(g, "/.agents/skills/pdf") {
 		t.Errorf(".gitignore:\n%s", g)
 	}
@@ -100,7 +100,7 @@ func TestProjectSkillsCopied(t *testing.T) {
 	ok(t)(ProjectSkill(proj, "pdf", []string{"claude"}))
 	p := filepath.Join(proj, ".claude/skills/pdf")
 	if isLink(t, p) || !ours(p, "pdf") {
-		t.Fatal("not myna's copy")
+		t.Fatal("not owl's copy")
 	}
 	if s := read(t, filepath.Join(p, "scripts/run.sh")); s != "echo hi\n" {
 		t.Errorf("run.sh: %q", s)
@@ -152,7 +152,7 @@ func TestProjectRefusesForeignFolder(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(r.Problems) != 1 || r.Problems[0].Agent != proj || !strings.Contains(r.Problems[0].Error, "isn't myna's") {
+	if len(r.Problems) != 1 || r.Problems[0].Agent != proj || !strings.Contains(r.Problems[0].Error, "isn't owl's") {
 		t.Fatalf("problems: %+v", r.Problems)
 	}
 	if !strings.Contains(read(t, filepath.Join(proj, ".claude/skills/pdf/SKILL.md")), "The project's own") {
@@ -164,7 +164,7 @@ func TestProjectRefusesForeignFolder(t *testing.T) {
 	if g := read(t, filepath.Join(proj, ".gitignore")); strings.Contains(g, ".claude/skills/pdf") {
 		t.Errorf("the project's own is in .gitignore:\n%s", g)
 	}
-	// removing the project leaves the folder that isn't myna's
+	// removing the project leaves the folder that isn't owl's
 	ok(t)(ProjectSkill(proj, "pdf", nil))
 	ok(t)(RemoveProject(proj, false))
 	if _, err := os.Stat(filepath.Join(proj, ".claude/skills/pdf/SKILL.md")); err != nil {

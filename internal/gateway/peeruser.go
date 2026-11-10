@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"net/netip"
 
-	"github.com/istoo/myna/internal/gateway/peeruid"
+	"github.com/istoo/owl/internal/gateway/peeruid"
 )
 
 // A loopback request is this user's own only when the process on the other

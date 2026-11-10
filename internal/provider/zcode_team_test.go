@@ -157,7 +157,7 @@ func newZCodeTeamUpstream(t *testing.T) *zcodeTeamUpstream {
 }
 
 // A GLM key's team windows are asked where ZCode asks them, with the team
-// project's headers when the key is a team seat's myna holds.
+// project's headers when the key is a team seat's owl holds.
 func TestZhipuKeyTeamWindows(t *testing.T) {
 	signIn(t)
 	t.Setenv("ZCODE_CREDENTIAL_SECRET", "test-secret")
@@ -175,14 +175,14 @@ func TestZhipuKeyTeamWindows(t *testing.T) {
 	if u.quota.Header.Get("Bigmodel-Project") != "tp1" {
 		t.Fatalf("asked with: %v", u.quota.Header)
 	}
-	// a key that isn't a seat myna holds is asked without them, and has none
+	// a key that isn't a seat owl holds is asked without them, and has none
 	if _, ws, err := zhipuKeyTeamWindows(context.Background(), ZCodeBigModelBase, "other.key", nil); err != nil || len(ws) != 0 {
 		t.Fatalf("another key: %v %+v", err, ws)
 	}
 }
 
 // ZCode's own account, switched in ZCode to a team's plan, keeps no team
-// key: myna finds it as ZCode does, from ZCode's sign-in and the project
+// key: owl finds it as ZCode does, from ZCode's sign-in and the project
 // its settings name.
 func TestZCodeOwnTeam(t *testing.T) {
 	home := signIn(t)

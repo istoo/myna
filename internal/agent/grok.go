@@ -2,15 +2,15 @@ package agent
 
 // Grok Build, xAI's grok CLI, keeps its settings in ~/.grok/config.toml (or
 // $GROK_HOME's): the model new sessions start with under [models] default,
-// and models of the user's own as [model."<id>"] tables. myna adds one
-// such table per catalog model, named "myna/<provider>/<model>", pointing
-// at the gateway with myna's own key — a model with no key of its own
+// and models of the user's own as [model."<id>"] tables. owl adds one
+// such table per catalog model, named "owl/<provider>/<model>", pointing
+// at the gateway with owl's own key — a model with no key of its own
 // would be sent the user's xAI sign-in — so the catalog joins Grok's own
 // models in its /model picker.
 //
 // A signed-in Grok also takes remote "campaign" patches from xAI, applied
 // above config.toml, and a launch campaign sets models.default (September
-// 2026's grok-4.7-launch did): a default picked in myna was ignored and
+// 2026's grok-4.7-launch did): a default picked in owl was ignored and
 // every new session started on the campaign's model. So a default picked
 // here turns campaigns off ([features] campaigns = false), and clearing it
 // gives them back.
@@ -29,23 +29,23 @@ import (
 	toml "github.com/pelletier/go-toml/v2"
 	"github.com/tidwall/gjson"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // grokEfforts are the reasoning efforts Grok knows.
 var grokEfforts = []string{"none", "minimal", "low", "medium", "high", "xhigh", "max"}
 
-// grokModelTable is the header prefix of every table myna writes.
-var grokModelTable = `model."` + mynaID + "/"
+// grokModelTable is the header prefix of every table owl writes.
+var grokModelTable = `model."` + owlID + "/"
 
-// grokModelTables are myna's model tables, for a Grok that reaches the
-// gateway's /v1 at v1, and the context_window myna gives each model (by
+// grokModelTables are owl's model tables, for a Grok that reaches the
+// gateway's /v1 at v1, and the context_window owl gives each model (by
 // its catalog id), which the caller stashes. A context_window the user set
 // in a table themselves (grokOwnWindow: had is what the tables hold now,
-// wrote what myna last gave them, nil before myna kept a record) stays
+// wrote what owl last gave them, nil before owl kept a record) stays
 // as they set it.
 func grokModelTables(v1 string, had, wrote map[string]int) ([]edit.Table, map[string]int) {
 	var out []edit.Table
@@ -74,7 +74,7 @@ func grokModelTables(v1 string, had, wrote map[string]int) ([]edit.Table, map[st
 		if len(efforts) > 0 {
 			kvs = append(kvs, edit.KV{Path: "reasoning_efforts", Value: edit.Raw("[" + strings.Join(efforts, ", ") + "]")})
 		}
-		out = append(out, edit.Table{Name: "model." + strconv.Quote(mynaID+"/"+m.ID), KVs: kvs})
+		out = append(out, edit.Table{Name: "model." + strconv.Quote(owlID+"/"+m.ID), KVs: kvs})
 	}
 	return out, gave
 }
@@ -97,11 +97,11 @@ func grokWindow(st settings.Settings, m catalog.Model) int {
 	return st.Working(c)
 }
 
-// grokOwnWindow is a context_window the user set in myna's table for m
-// themselves, which a sync keeps: one other than myna last gave it. With
-// no record of myna's (wrote nil, a config an older myna wrote, or a
+// grokOwnWindow is a context_window the user set in owl's table for m
+// themselves, which a sync keeps: one other than owl last gave it. With
+// no record of owl's (wrote nil, a config an older owl wrote, or a
 // model new to the record), one other than the model's whole window, which
-// an older myna wrote, and other than w, which myna gives it now.
+// an older owl wrote, and other than w, which owl gives it now.
 func grokOwnWindow(m catalog.Model, w int, had, wrote map[string]int) (int, bool) {
 	n, ok := had[m.ID]
 	if !ok || n <= 0 || n == w {
@@ -113,7 +113,7 @@ func grokOwnWindow(m catalog.Model, w int, had, wrote map[string]int) (int, bool
 	return n, n != m.Context
 }
 
-// grokWindowsIn is the context_window of each of myna's model tables in
+// grokWindowsIn is the context_window of each of owl's model tables in
 // the config at path, by catalog id. A config that isn't there has none; one
 // that doesn't parse is an error, so a sync writes nothing over it.
 func grokWindowsIn(path string) (map[string]int, error) {
@@ -132,7 +132,7 @@ func grokWindowsIn(path string) (map[string]int, error) {
 	}
 	out := map[string]int{}
 	for name, t := range doc.Model {
-		id, ok := strings.CutPrefix(name, mynaID+"/")
+		id, ok := strings.CutPrefix(name, owlID+"/")
 		if !ok {
 			continue
 		}
@@ -143,7 +143,7 @@ func grokWindowsIn(path string) (map[string]int, error) {
 	return out, nil
 }
 
-// grokBackend is the api_backend a model of myna's is asked on: the API
+// grokBackend is the api_backend a model of owl's is asked on: the API
 // its provider serves it on natively, so the gateway relays what Grok sent
 // as it is instead of translating Chat Completions. Grok Build takes
 // "chat_completions" (its default), "responses" and "messages" (Anthropic
@@ -187,10 +187,10 @@ func grokIn(at place) *Agent {
 		}
 		return false, nil
 	}
-	// keyWindows is the context_window myna last gave each of its models,
+	// keyWindows is the context_window owl last gave each of its models,
 	// so one the user set by hand since is told from it and kept
 	keyWindows := "grok:" + path + ":windows"
-	writeMyna := func() error {
+	writeOwl := func() error {
 		had, err := grokWindowsIn(path)
 		if err != nil {
 			return err
@@ -210,7 +210,7 @@ func grokIn(at place) *Agent {
 		}
 		return nil
 	}
-	dropMyna := func() error {
+	dropOwl := func() error {
 		if err := edit.SetTOMLTables(path, []string{grokModelTable}, nil); err != nil {
 			return err
 		}
@@ -224,13 +224,13 @@ func grokIn(at place) *Agent {
 		}
 		return edit.SetTOMLKey(path, "features", "campaigns", false)
 	}
-	// the efforts of a model through myna, as its catalog entry has them
+	// the efforts of a model through owl, as its catalog entry has them
 	efforts := func(model string) []string {
-		ref, ok := strings.CutPrefix(model, mynaID+"/")
+		ref, ok := strings.CutPrefix(model, owlID+"/")
 		if !ok {
 			return nil
 		}
-		return catalog.Efforts(mynaModels("grok"), ref)
+		return catalog.Efforts(owlModels("grok"), ref)
 	}
 	return atomic(&Agent{
 		ID: "grok", Name: "Grok Build", Icon: "xai", Aliases: []string{"grok-build", "grok-cli"}, Spelled: prefixed,
@@ -254,7 +254,7 @@ func grokIn(at place) *Agent {
 					return err
 				}
 			}
-			return writeMyna()
+			return writeOwl()
 		},
 		Notice: func() string {
 			if Running(`(^|/)grok( |$)`) {
@@ -267,7 +267,7 @@ func grokIn(at place) *Agent {
 			if err != nil {
 				return err.Error()
 			}
-			if !usesMyna(v) {
+			if !usesOwl(v) {
 				return ""
 			}
 			t, err := edit.GetTOMLTable(path, "model."+strconv.Quote(v))
@@ -275,7 +275,7 @@ func grokIn(at place) *Agent {
 				return err.Error()
 			}
 			if t == nil {
-				return "Grok Build's [model." + strconv.Quote(v) + "] (config.toml) is gone, so it no longer reaches myna"
+				return "Grok Build's [model." + strconv.Quote(v) + "] (config.toml) is gone, so it no longer reaches owl"
 			}
 			return wiringOff("Grok Build", path, func(k string) (string, bool) { v, ok := t[k]; return v, ok },
 				"base_url", at.v1(), "api_key", at.gwKey())
@@ -300,13 +300,13 @@ func grokIn(at place) *Agent {
 						if err := edit.DelTOMLKey(path, "features", "campaigns"); err != nil {
 							return err
 						}
-						return dropMyna()
+						return dropOwl()
 					}
-					if ref, ok := strings.CutPrefix(v, mynaID+"/"); ok && isMyna(ref) {
-						if err := writeMyna(); err != nil {
+					if ref, ok := strings.CutPrefix(v, owlID+"/"); ok && isOwl(ref) {
+						if err := writeOwl(); err != nil {
 							return err
 						}
-					} else if err := dropMyna(); err != nil {
+					} else if err := dropOwl(); err != nil {
 						return err
 					}
 					if e != "" {
@@ -330,10 +330,10 @@ func grokIn(at place) *Agent {
 					return edit.SetTOMLKey(path, "models", "default", v)
 				},
 				Options: func(cur map[string]string) []Option {
-					// myna's rows for the account Grok Build is signed in
+					// owl's rows for the account Grok Build is signed in
 					// to are its own models a second time: they fold into
 					// one row (Fate on Discord: grokbuild 在登录态下会加载重复的模型)
-					opts := viaMyna("grok", mynaID+"/")
+					opts := viaOwl("grok", owlID+"/")
 					for i := range opts {
 						opts[i].Same = opts[i].own
 					}
@@ -355,7 +355,7 @@ func grokIn(at place) *Agent {
 					if es := efforts(cur["model"]); es != nil {
 						return static(es...)
 					}
-					// a model myna's catalog doesn't describe: the levels
+					// a model owl's catalog doesn't describe: the levels
 					// Grok knows, which it applies or ignores by the model
 					return static(grokEfforts...)
 				},
@@ -365,17 +365,17 @@ func grokIn(at place) *Agent {
 }
 
 // grokOwnOptions are the models Grok Build offers its signed-in account: as
-// it last listed them itself (models_cache.json in its home), and as myna
+// it last listed them itself (models_cache.json in its home), and as owl
 // last listed them for a Grok subscription; then the models of the user's
 // own config.toml tables, and the current one. Grok asks for them itself,
 // on its sign-in or their own key, so each says so (Direct): a row not
-// connected listed nothing of Grok's own, only myna's, unless a Grok
-// subscription was signed in in myna (EZN7L2C3, #834).
+// connected listed nothing of Grok's own, only owl's, unless a Grok
+// subscription was signed in in owl (EZN7L2C3, #834).
 func grokOwnOptions(dir, path, cur string) []Option {
 	seen := map[string]bool{}
 	var out []Option
 	add := func(id, name, direct string) {
-		if id == "" || seen[id] || strings.HasPrefix(id, mynaID+"/") {
+		if id == "" || seen[id] || strings.HasPrefix(id, owlID+"/") {
 			return
 		}
 		seen[id] = true
@@ -420,7 +420,7 @@ func grokOwnOptions(dir, path, cur string) []Option {
 			}
 		}
 	}
-	if cur != "" && !seen[cur] && !strings.HasPrefix(cur, mynaID+"/") {
+	if cur != "" && !seen[cur] && !strings.HasPrefix(cur, owlID+"/") {
 		out = append([]Option{{Value: cur, Icon: modelIcon("", cur), Direct: "xAI"}}, out...)
 	}
 	return group("Grok Build", out)

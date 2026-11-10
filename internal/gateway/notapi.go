@@ -9,7 +9,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // notAnAPIReply turns a 2xx reply that can't be a model API's answer into

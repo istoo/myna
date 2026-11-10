@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/proc"
 )
 
 // A Claude Code in WSL whose transcripts Windows can't read (the distro

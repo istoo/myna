@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // VS Code's Agents window runs `codex app-server` (main at 8fb6054,
@@ -47,13 +47,13 @@ func TestVSCodeAgentHostIsCodex(t *testing.T) {
 }
 
 // One of Codex's own models asked from the Agents window on Codex's
-// myna provider, which no account in myna serves, goes on Codex's own
-// sign-in as the Codex CLI's does (TestCodexOwnModelOnMynaThreadGoesOnSignIn),
-// not 404 "myna knows no model" (justruman on Discord: 7 of 23 calls
+// owl provider, which no account in owl serves, goes on Codex's own
+// sign-in as the Codex CLI's does (TestCodexOwnModelOnOwlThreadGoesOnSignIn),
+// not 404 "owl knows no model" (justruman on Discord: 7 of 23 calls
 // failed).
 func TestVSCodeAgentHostOwnModelGoesOnSignIn(t *testing.T) {
-	_, models := codexOwnOffMynaSetup(t, false)
-	req := codexOnMynaRequest("127.0.0.1:51000")
+	_, models := codexOwnOffOwlSetup(t, false)
+	req := codexOnOwlRequest("127.0.0.1:51000")
 	for k, v := range vscodeAgentHostHeader() {
 		req.Header[k] = v
 	}

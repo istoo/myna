@@ -16,10 +16,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/gwmw"
-	"github.com/istoo/myna/internal/pii"
-	"github.com/istoo/myna/internal/redact"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/gwmw"
+	"github.com/istoo/owl/internal/pii"
+	"github.com/istoo/owl/internal/redact"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // Masker masks as the settings say, read on each call.
@@ -262,7 +262,7 @@ func find(ctx context.Context, m pii.Model, texts []string) ([][]redact.Found, e
 	ch := make(chan res, 1)
 	go func() {
 		// a panic in the model is this request's error: on a goroutine
-		// of its own it would end myna (#4553)
+		// of its own it would end owl (#4553)
 		defer func() {
 			if r := recover(); r != nil {
 				log.Printf("masking: the local model panicked: %v\n%s", r, debug.Stack())

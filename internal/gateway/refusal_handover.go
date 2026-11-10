@@ -10,7 +10,7 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // refusalHandover is a try's stream let through on its reasoning, or on what

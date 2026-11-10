@@ -10,7 +10,7 @@ import (
 	"time"
 	"unique"
 
-	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/owl/internal/sessions"
 )
 
 // A page's sums are made of each chunk's own: its rows told apart by all a

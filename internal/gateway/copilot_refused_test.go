@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // #256: on a Copilot Student account, copilot/auto answered 400 "Copilot:

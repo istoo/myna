@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/probelog"
+	"github.com/istoo/owl/internal/probelog"
 )
 
 // logLines appends n calls from the i-th on to the log, as a gateway that
@@ -102,7 +102,7 @@ func TestStartReadsKeptLogBlocks(t *testing.T) {
 		t.Fatalf("%d probes", n)
 	}
 
-	// the log grows while myna isn't running
+	// the log grows while owl isn't running
 	logLines(t, 2*logBlockRows+300, logBlockRows)
 	restartLog()
 	kept := logRead(t, readLogSnapshot())

@@ -9,7 +9,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 	"github.com/tidwall/gjson"
 )
 
@@ -97,7 +97,7 @@ data: {"type":"message_stop"}`))
 // once answers it there with "use /v1/chat/completions" (01huadalang on
 // Discord: 为什么会转成 chat，我都设置的 response): the next request was
 // sent on chat completions, the first API the provider has a URL for,
-// for as long as myna ran. Now it is asked on Responses again, and the
+// for as long as owl ran. Now it is asked on Responses again, and the
 // relay's error reaches the agent rather than a request on an API the
 // user said the model isn't asked on.
 func TestModelAPIPickHoldsAfterWrongEndpoint(t *testing.T) {

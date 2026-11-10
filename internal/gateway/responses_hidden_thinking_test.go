@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/claudeseal"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/claudeseal"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A Claude turn that calls a tool and then thinks without showing it, a

@@ -63,7 +63,7 @@ func listSaysWhy(t *testing.T, throws string) {
 			t.Fatalf("account %s fell back saying %q (fellBack %v)", a.Key, a.ListError, a.FellBack)
 		}
 	}
-	// and so as myna reads it, its accounts read again from the sign-ins
+	// and so as owl reads it, its accounts read again from the sign-ins
 	for _, a := range Cached()[0].Accounts {
 		if !a.FellBack || a.ListError == "" {
 			t.Fatalf("Cached: account %s fell back saying %q (fellBack %v)", a.Key, a.ListError, a.FellBack)

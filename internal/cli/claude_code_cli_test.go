@@ -14,13 +14,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/claudecode"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/libc"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/claudecode"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/libc"
+	"github.com/istoo/owl/internal/settings"
 )
 
-// claudeCodeOut runs `myna claude-code args…` and gives what it printed.
+// claudeCodeOut runs `owl claude-code args…` and gives what it printed.
 func claudeCodeOut(t *testing.T, args ...string) (string, error) {
 	t.Helper()
 	r, w, err := os.Pipe()
@@ -44,7 +44,7 @@ func claudeCodeOut(t *testing.T, args ...string) (string, error) {
 	return out.String(), err
 }
 
-// `myna claude-code install --yes` on a machine with no Claude Code (a
+// `owl claude-code install --yes` on a machine with no Claude Code (a
 // container, Jorben on Discord) downloads the release's build, says from
 // where and to where, and the subscription then runs it.
 func TestClaudeCodeInstallDownloadsTheRelease(t *testing.T) {
@@ -77,7 +77,7 @@ func TestClaudeCodeInstallDownloadsTheRelease(t *testing.T) {
 	t.Cleanup(func() { claudecode.Base, claudeCode.own = oldBase, oldOwn; _ = claudecode.Remove() })
 
 	out, err := claudeCodeOut(t)
-	if err != nil || !strings.Contains(out, "myna claude-code install") {
+	if err != nil || !strings.Contains(out, "owl claude-code install") {
 		t.Fatalf("status before: %q, %v", out, err)
 	}
 	out, err = claudeCodeOut(t, "install", "--yes")
@@ -95,7 +95,7 @@ func TestClaudeCodeInstallDownloadsTheRelease(t *testing.T) {
 	if out, _ := claudeCodeOut(t, "install", "--yes"); !strings.Contains(out, "downloaded already") {
 		t.Errorf("a second install: %q", out)
 	}
-	if out, _ := claudeCodeOut(t); !strings.Contains(out, "downloaded by myna") {
+	if out, _ := claudeCodeOut(t); !strings.Contains(out, "downloaded by owl") {
 		t.Errorf("status after: %q", out)
 	}
 	if _, err := claudeCodeOut(t, "remove"); err != nil {
@@ -106,7 +106,7 @@ func TestClaudeCodeInstallDownloadsTheRelease(t *testing.T) {
 	}
 }
 
-// `myna claude-code runs N` is the user's own bound on Claude Code
+// `owl claude-code runs N` is the user's own bound on Claude Code
 // processes (#2956), which the gateway's 503 names; auto gives it back to
 // the machine's memory, and a value that isn't a count is refused and
 // writes nothing.
@@ -151,7 +151,7 @@ func TestClaudeCodeRunsSetsTheUsersOwn(t *testing.T) {
 	}
 }
 
-// noGateway has `myna claude-code runs` find no myna running, never
+// noGateway has `owl claude-code runs` find no owl running, never
 // the one on this computer.
 func noGateway(t *testing.T) {
 	t.Helper()
@@ -163,11 +163,11 @@ func noGateway(t *testing.T) {
 	t.Cleanup(func() { claudeCode.gateway = old })
 }
 
-// `myna claude-code runs` lists the Claude Code processes the running
-// myna has for Claude subscriptions, each with its pid, model, what it
+// `owl claude-code runs` lists the Claude Code processes the running
+// owl has for Claude subscriptions, each with its pid, model, what it
 // waits for, until when and its account, and says what they are: a task
-// manager names them by Claude Code's version and "myna", with nothing
-// to tell why so many run (@Candydidi3 on X). With no myna answering,
+// manager names them by Claude Code's version and "owl", with nothing
+// to tell why so many run (@Candydidi3 on X). With no owl answering,
 // it says none of its Claude Code runs.
 func TestClaudeCodeRunsListsTheProcesses(t *testing.T) {
 	t.Setenv("HOME", t.TempDir())
@@ -206,6 +206,6 @@ func TestClaudeCodeRunsListsTheProcesses(t *testing.T) {
 	noGateway(t)
 	out, err = claudeCodeOut(t, "runs")
 	if err != nil || !strings.Contains(out, "none of its Claude Code is running") {
-		t.Fatalf("with no myna running, runs said (%v):\n%s", err, out)
+		t.Fatalf("with no owl running, runs said (%v):\n%s", err, out)
 	}
 }

@@ -13,11 +13,11 @@ import (
 )
 
 // sherlock_23333 on X: the ChatGPT account Codex is signed in to ran out,
-// and the Codex app greyed Send for myna's models too, through restarts.
-// With Codex switched off or removed in myna nothing read the account,
-// so myna never became Codex's provider while the app held it. Its hold
-// is read still, while Codex takes myna's models, and only then: the
-// account Codex is on alone, its sign-in never renewed by myna.
+// and the Codex app greyed Send for owl's models too, through restarts.
+// With Codex switched off or removed in owl nothing read the account,
+// so owl never became Codex's provider while the app held it. Its hold
+// is read still, while Codex takes owl's models, and only then: the
+// account Codex is on alone, its sign-in never renewed by owl.
 func TestCodexHoldReadLeftAlone(t *testing.T) {
 	home := signIn(t)
 	rememberLogins(true)
@@ -53,15 +53,15 @@ func TestCodexHoldReadLeftAlone(t *testing.T) {
 		p    map[string]any
 	}{
 		{"switched off", map[string]any{"id": "codex", "off": true}},
-		{"removed from myna", map[string]any{"id": "codex", "hidden": true}},
+		{"removed from owl", map[string]any{"id": "codex", "hidden": true}},
 	} {
 		writeFile(t, Path(), map[string]any{"providers": []map[string]any{c.p}})
-		// not taking myna's models: left alone, nothing read
+		// not taking owl's models: left alone, nothing read
 		matters = false
 		fresh()
 		usage.Store(0)
 		if CodexUsedUp(t.Context()) || usage.Load() != 0 {
-			t.Fatalf("%s, Codex not on myna: read %d times", c.name, usage.Load())
+			t.Fatalf("%s, Codex not on owl: read %d times", c.name, usage.Load())
 		}
 		// taking them: the app's hold is read, and known after
 		matters = true

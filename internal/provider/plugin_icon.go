@@ -11,11 +11,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/owl/internal/plugin"
 )
 
 // PluginIcon is the icon a plugin's provider shows: the picture its plugin
-// gives it (the auth hook's icon, or package.json's myna.icon), kept as
+// gives it (the auth hook's icon, or package.json's owl.icon), kept as
 // a picture given by hand is, else the one the plugin market gives it.
 func PluginIcon(pp plugin.Provider) string {
 	if ic := pluginOwnIcon(pp.Icon); ic != "" {
@@ -145,7 +145,7 @@ func pluginOwnIcon(said string) string {
 }
 
 // RepoIcons are the Icon values of the pictures plugins not installed yet
-// give in their package.json (repositories tagged myna-plugin), checked
+// give in their package.json (repositories tagged owl-plugin), checked
 // and kept as an installed plugin's are: "" where there is none to show.
 // An https picture not fetched before is waited for up to wait, so the
 // list's first answer has it (yetone: 非官方插件显示不出来 logo); one

@@ -6,8 +6,8 @@ import (
 	"io/fs"
 	"os"
 
-	"github.com/istoo/myna/internal/lastgood"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/lastgood"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // AuthEntries is plugin-auth.json's sign-ins by key, each as written, for

@@ -1,8 +1,8 @@
 package plugin
 
-// Plugin updates, as myna keeps itself up to date: the community's
+// Plugin updates, as owl keeps itself up to date: the community's
 // plugins (@magpie-community/*, the ones the built-in subscriptions move
-// onto) update by themselves, a little after myna starts and every hour; anyone else's new version waits for the reader, who sees a dot
+// onto) update by themselves, a little after owl starts and every hour; anyone else's new version waits for the reader, who sees a dot
 // on Plugins and updates it with a click. A plugin pinned to a version
 // stays on it. Updating never cuts a reply streaming through a plugin:
 // the host it runs on finishes it (see Restart).
@@ -23,20 +23,20 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/ghtoken"
-	"github.com/istoo/myna/internal/lastgood"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/steady"
-	"github.com/istoo/myna/internal/update"
+	"github.com/istoo/owl/internal/ghtoken"
+	"github.com/istoo/owl/internal/lastgood"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/steady"
+	"github.com/istoo/owl/internal/update"
 )
 
-// Updates is what myna's last look at npm found for the plugins.
+// Updates is what owl's last look at npm found for the plugins.
 type Updates struct {
 	Checked time.Time `json:"checked"`
-	// Waiting are the plugins with a newer version that myna leaves to
+	// Waiting are the plugins with a newer version that owl leaves to
 	// the reader: someone else's, or one pinned to a version.
 	Waiting []Waiting `json:"waiting"`
-	// Updated are the plugins myna updated by itself, the latest last.
+	// Updated are the plugins owl updated by itself, the latest last.
 	Updated []Updated `json:"updated"`
 }
 
@@ -52,7 +52,7 @@ type Waiting struct {
 	Git     bool   `json:"git,omitempty"`
 }
 
-// Updated is a plugin myna updated by itself.
+// Updated is a plugin owl updated by itself.
 type Updated struct {
 	Package string    `json:"package"`
 	From    string    `json:"from"`
@@ -61,19 +61,19 @@ type Updated struct {
 }
 
 const (
-	// updateEvery is how often myna looks for plugin updates: a fix to a
+	// updateEvery is how often owl looks for plugin updates: a fix to a
 	// community plugin reaches its users within the hour (one look at npm's
 	// metadata for the plugins installed; six hours left someone told of a
 	// fix installing it by hand, #681)
 	updateEvery = time.Hour
-	// bunEvery is how often myna looks for a newer Bun
+	// bunEvery is how often owl looks for a newer Bun
 	bunEvery = 6 * time.Hour
-	// keepUpdated is how many updates myna remembers making
+	// keepUpdated is how many updates owl remembers making
 	keepUpdated = 20
 )
 
-// Official is whether the package is the community's, myna's own,
-// which myna keeps up to date by itself.
+// Official is whether the package is the community's, owl's own,
+// which owl keeps up to date by itself.
 func Official(pkg string) bool { return strings.HasPrefix(pkg, "@magpie-community/") }
 
 // Pinned is whether spec names a version (or a range or a tag other than
@@ -91,10 +91,10 @@ var (
 	updatesMu sync.Mutex
 	// latestOf is the version npm has of each package, asked now, "" for
 	// one it never told (tests stub it). Not Info's answer of up to an
-	// hour ago: a myna started after a community fix was published, or
+	// hour ago: a owl started after a community fix was published, or
 	// the hourly look, found the version before it and updated nothing
 	// for another hour (ysm119 on Discord: Cursor's 0.2.25 a quarter of an
-	// hour after it was published, on a myna started since).
+	// hour after it was published, on a owl started since).
 	latestOf = func(ctx context.Context, names []string) map[string]string {
 		out := map[string]string{}
 		for n, i := range infoWithin(ctx, names, 0) {
@@ -118,7 +118,7 @@ func readUpdates() Updates {
 }
 
 // writeUpdates writes b as plugin-updates.json. readUpdates reads a file
-// that doesn't parse as no updates, and Updated, the plugins myna updated
+// that doesn't parse as no updates, and Updated, the plugins owl updated
 // by itself, can't be found again: such a file is kept aside first, and
 // one that can't be isn't written over.
 func writeUpdates(b []byte) error {
@@ -192,7 +192,7 @@ func PendingUpdates() Updates {
 	return u
 }
 
-// LastUpdated is the update myna made by itself to the package since
+// LastUpdated is the update owl made by itself to the package since
 // the time given, if it made one.
 func LastUpdated(pkg string, since time.Time) (Updated, bool) {
 	u := PendingUpdates()
@@ -311,8 +311,8 @@ func InstallMissing(ctx context.Context) (int, error) {
 	return n, errors.Join(errs...)
 }
 
-// KeepUpdated looks for plugin updates a little after myna starts, then
-// every updateEvery, run by the myna serving the gateway (one myna,
+// KeepUpdated looks for plugin updates a little after owl starts, then
+// every updateEvery, run by the owl serving the gateway (one owl,
 // never two at once).
 func KeepUpdated(ctx context.Context) {
 	t := time.NewTimer(30 * time.Second)
@@ -361,7 +361,7 @@ type VersionCheck struct {
 	// because GitHub's rate limit was used up, for the page to say so in
 	// its own words, as the library's skills do (#1942)
 	Limited *GitHubLimit `json:"limited,omitempty"`
-	// Auto is whether myna updates it by itself (the community's,
+	// Auto is whether owl updates it by itself (the community's,
 	// unpinned, switched on), so an update found would come anyway
 	Auto bool `json:"auto"`
 	Off  bool `json:"off"`

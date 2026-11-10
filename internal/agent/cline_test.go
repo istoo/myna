@@ -9,9 +9,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/provider"
 )
 
 func TestCline(t *testing.T) {
@@ -80,7 +80,7 @@ func TestCline(t *testing.T) {
 	if f.Get() != "claude-opus-5" || e.Get() != "high" {
 		t.Fatalf("get: %q %q", f.Get(), e.Get())
 	}
-	if err := f.Set("myna/deepseek/pro"); err != nil {
+	if err := f.Set("owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	c, raw := read()
@@ -88,16 +88,16 @@ func TestCline(t *testing.T) {
 	if c.LastUsed != "openai-compatible" || s["model"] != "deepseek/pro" || s["baseUrl"] != gatewayV1() || s["apiKey"] != gateway.Token ||
 		s["headers"].(map[string]any)["User-Agent"] != "cline" || s["reasoning"].(map[string]any)["effort"] != "high" ||
 		c.Providers["anthropic"].Settings["apiKey"] != "sk-a" {
-		t.Fatalf("myna:\n%s", raw)
+		t.Fatalf("owl:\n%s", raw)
 	}
-	// Cline's openai-compatible lists only gpt-4o: myna's models take
+	// Cline's openai-compatible lists only gpt-4o: owl's models take
 	// its place in models.json, the user's other entries kept
 	ml, mraw := models()
 	if m := ml["openai-compatible"]; m.Provider["baseUrl"] != gatewayV1() || m.Provider["defaultModelId"] != "deepseek/pro" ||
 		m.Models["deepseek/pro"] == nil || m.Models["deepseek/flash"] == nil || m.Models["mine"] != nil || ml["ollama"].Models["q"] == nil {
 		t.Fatalf("models:\n%s", mraw)
 	}
-	if f.Get() != "myna/deepseek/pro" || e.Get() != "high" || a.Check() != "" {
+	if f.Get() != "owl/deepseek/pro" || e.Get() != "high" || a.Check() != "" {
 		t.Fatalf("get: %q %q %q", f.Get(), e.Get(), a.Check())
 	}
 	st, sec := vscode()
@@ -106,9 +106,9 @@ func TestCline(t *testing.T) {
 		st["telemetrySetting"] != "disabled" || sec["openAiApiKey"] != gateway.Token || sec["anthropicApiKey"] != "sk-a" {
 		t.Fatalf("vscode: %v %v", st, sec)
 	}
-	// another myna model keeps what was stashed first; the effort is set
-	// on myna's provider
-	if err := f.Set("myna/deepseek/flash"); err != nil {
+	// another owl model keeps what was stashed first; the effort is set
+	// on owl's provider
+	if err := f.Set("owl/deepseek/flash"); err != nil {
 		t.Fatal(err)
 	}
 	if err := e.Set("low"); err != nil {
@@ -164,14 +164,14 @@ func TestCline(t *testing.T) {
 		t.Fatalf("vscode own: %v %v", st, sec)
 	}
 
-	// reset from myna, with no Cline settings before it: nothing of
-	// myna's is left
+	// reset from owl, with no Cline settings before it: nothing of
+	// owl's is left
 	os.Remove(path)
 	os.Remove(mpath)
 	if f.Get() != "" {
 		t.Fatalf("empty get: %q", f.Get())
 	}
-	if err := f.Set("myna/deepseek/pro"); err != nil {
+	if err := f.Set("owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	c, raw = read()
@@ -202,11 +202,11 @@ func TestCline(t *testing.T) {
 	}
 }
 
-// What the user set on myna's entry in Cline's models.json stays through
+// What the user set on owl's entry in Cline's models.json stays through
 // every sync and pick (#2030's siblings): a key of the provider's, and on a
-// model myna lists what myna doesn't write (an override from the VS Code
+// model owl lists what owl doesn't write (an override from the VS Code
 // extension's model editor). The address, default model and model list stay
-// myna's.
+// owl's.
 func TestClineKeepsTheUsersSettings(t *testing.T) {
 	home := syncHome(t)
 	t.Setenv("CLINE_DIR", "")
@@ -214,7 +214,7 @@ func TestClineKeepsTheUsersSettings(t *testing.T) {
 	mpath := filepath.Join(home, ".cline", "data", "settings", "models.json")
 	a := cline(home)
 	f := a.Field("model")
-	if err := f.Set("myna/relay/glm-4.6"); err != nil {
+	if err := f.Set("owl/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	slot := "providers." + clineSlot
@@ -251,13 +251,13 @@ func TestClineKeepsTheUsersSettings(t *testing.T) {
 		if e.Provider["modelsSourceUrl"] != "https://x/models" || e.Provider["protocol"] != "openai-chat" || e.Models["relay/glm-4.6"]["temperature"] != 0.3 {
 			t.Errorf("%s: the user's settings not kept:\n%s", when, raw)
 		}
-		if e.Provider["baseUrl"] == "http://127.0.0.1:1/v1" || e.Provider["name"] != "myna" || e.Models["gone/old"] != nil ||
+		if e.Provider["baseUrl"] == "http://127.0.0.1:1/v1" || e.Provider["name"] != "owl" || e.Models["gone/old"] != nil ||
 			e.Models["deepseek/pro"] == nil || e.Models["relay/glm-4.6"]["name"] == nil {
-			t.Errorf("%s: myna's own parts not written:\n%s", when, raw)
+			t.Errorf("%s: owl's own parts not written:\n%s", when, raw)
 		}
 	}
 	check("sync")
-	if err := f.Set("myna/deepseek/pro"); err != nil {
+	if err := f.Set("owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	check("pick")

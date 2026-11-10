@@ -8,7 +8,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // Cloudflare's clef-flash says a confidence of its own calibration, far

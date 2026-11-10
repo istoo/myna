@@ -10,10 +10,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/applog"
+	"github.com/istoo/owl/internal/applog"
 )
 
-// logOut runs `myna log` with args and returns what it printed.
+// logOut runs `owl log` with args and returns what it printed.
 func logOut(t *testing.T, args ...string) (string, error) {
 	t.Helper()
 	r, w, err := os.Pipe()
@@ -43,20 +43,20 @@ func writeLog(t *testing.T, s string) {
 	t.Cleanup(func() { os.Remove(applog.Path()) })
 }
 
-// `myna log` says where the app's log is, there or not yet; --path
+// `owl log` says where the app's log is, there or not yet; --path
 // prints the path alone, for a script or a reply to paste it in.
 func TestLogSaysWhere(t *testing.T) {
 	os.Remove(applog.Path())
 	out, err := logOut(t)
 	if err != nil || !strings.HasPrefix(out, applog.Path()+"\n") || !strings.Contains(out, "nothing yet") {
-		t.Fatalf("myna log, no log yet: %v\n%s", err, out)
+		t.Fatalf("owl log, no log yet: %v\n%s", err, out)
 	}
 	writeLog(t, "one\n")
 	if out, err = logOut(t); err != nil || !strings.Contains(out, "Settings › About › Log") {
-		t.Errorf("myna log: %v\n%s", err, out)
+		t.Errorf("owl log: %v\n%s", err, out)
 	}
 	if out, err = logOut(t, "--path"); err != nil || out != applog.Path()+"\n" {
-		t.Errorf("myna log --path: %v, %q, want the path alone", err, out)
+		t.Errorf("owl log --path: %v, %q, want the path alone", err, out)
 	}
 }
 
@@ -65,12 +65,12 @@ func TestLogLastLines(t *testing.T) {
 	writeLog(t, "one\ntwo\nthree\nfour\n")
 	for n, want := range map[string]string{"2": "three\nfour\n", "0": "", "9": "one\ntwo\nthree\nfour\n"} {
 		if out, err := logOut(t, "-n", n); err != nil || out != want {
-			t.Errorf("myna log -n %s: %v, %q, want %q", n, err, out, want)
+			t.Errorf("owl log -n %s: %v, %q, want %q", n, err, out, want)
 		}
 	}
 	os.Remove(applog.Path())
 	if _, err := logOut(t, "-n", "5"); err == nil || !strings.Contains(err.Error(), "isn't there yet") {
-		t.Errorf("myna log -n with no log: %v", err)
+		t.Errorf("owl log -n with no log: %v", err)
 	}
 }
 
@@ -78,11 +78,11 @@ func TestLogLastLines(t *testing.T) {
 func TestLogRefusesWhatItDoesntKnow(t *testing.T) {
 	for _, args := range [][]string{{"--bogus"}, {"-n"}, {"-n", "many"}, {"-n", "-3"}, {"--path", "-f"}, {"app.log"}} {
 		if out, err := logOut(t, args...); err == nil {
-			t.Errorf("myna log %v: no error\n%s", args, out)
+			t.Errorf("owl log %v: no error\n%s", args, out)
 		}
 	}
-	if !strings.Contains(helpFor([]string{"log", "--help"}), "usage: myna log") {
-		t.Errorf("myna log --help: %q", helpFor([]string{"log", "--help"}))
+	if !strings.Contains(helpFor([]string{"log", "--help"}), "usage: owl log") {
+		t.Errorf("owl log --help: %q", helpFor([]string{"log", "--help"}))
 	}
 }
 

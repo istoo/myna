@@ -20,8 +20,8 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/istoo/myna/internal/redact"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/redact"
+	"github.com/istoo/owl/internal/settings"
 )
 
 const GatewayRetention = 7 * 24 * time.Hour
@@ -199,7 +199,7 @@ func SetGatewayRecording(on, clear bool) error {
 		return err
 	}
 	if clear {
-		// deleted sessions' text in myna's trash is recorded text too
+		// deleted sessions' text in owl's trash is recorded text too
 		return errors.Join(os.RemoveAll(gatewayDir()), clearGatewayTrash(nil))
 	}
 	return nil
@@ -231,7 +231,7 @@ func HasGatewayConversations() bool {
 func PruneGatewayConversations(now time.Time) error {
 	gatewayMu.Lock()
 	root, generation := gatewayDir(), gatewayGeneration
-	// a deleted session's text in myna's trash expires as it would have
+	// a deleted session's text in owl's trash expires as it would have
 	trashErr := clearGatewayTrash(func(d string) bool {
 		date, err := time.Parse(time.DateOnly, d)
 		return err == nil && !date.Add(24*time.Hour).After(now.Add(-GatewayRetention))

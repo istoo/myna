@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // openClawConfig is openclaw.json as OpenClaw 2026.10.8 writes it after
@@ -111,7 +111,7 @@ const openClawConfig = `{
 `
 
 // openClawHomeWith is a HOME with OpenClaw's ~/.openclaw holding body as
-// its openclaw.json ("" for none), and myna with a provider of two
+// its openclaw.json ("" for none), and owl with a provider of two
 // models, one of them with effort levels.
 func openClawHomeWith(t *testing.T, body string) (home, path string) {
 	t.Helper()
@@ -162,8 +162,8 @@ func openClawAt_(m map[string]any, keys ...string) any {
 	return v
 }
 
-// Connecting OpenClaw adds myna as a provider of its own — the gateway,
-// with a key naming OpenClaw, and every one of myna's models — and makes
+// Connecting OpenClaw adds owl as a provider of its own — the gateway,
+// with a key naming OpenClaw, and every one of owl's models — and makes
 // the model picked the primary. The rest of OpenClaw's file stays, and
 // Disconnect gives it back byte for byte.
 func TestOpenClaw(t *testing.T) {
@@ -179,28 +179,28 @@ func TestOpenClaw(t *testing.T) {
 	var own, ours bool
 	for _, o := range f.Options(a.Values()) {
 		own = own || o.Value == "deepseek/deepseek-v4-pro"
-		ours = ours || o.Value == "myna/kimi/k2"
+		ours = ours || o.Value == "owl/kimi/k2"
 	}
 	if !own || !ours {
-		t.Fatalf("options: own %v myna %v", own, ours)
+		t.Fatalf("options: own %v owl %v", own, ours)
 	}
 
-	if err := a.Pick("model", "myna/kimi/k2"); err != nil {
+	if err := a.Pick("model", "owl/kimi/k2"); err != nil {
 		t.Fatal(err)
 	}
 	m := openClawParse(t, path)
-	if p := openClawAt_(m, "agents", "defaults", "model"); !reflect.DeepEqual(p, map[string]any{"primary": "myna/kimi/k2"}) {
+	if p := openClawAt_(m, "agents", "defaults", "model"); !reflect.DeepEqual(p, map[string]any{"primary": "owl/kimi/k2"}) {
 		t.Fatalf("agents.defaults.model: %v", p)
 	}
-	if !a.Wired() || f.Get() != "myna/kimi/k2" {
+	if !a.Wired() || f.Get() != "owl/kimi/k2" {
 		t.Fatalf("wired %v, model %q", a.Wired(), f.Get())
 	}
 	if c := a.Check(); c != "" {
 		t.Fatalf("check: %s", c)
 	}
-	p, _ := openClawAt_(m, "models", "providers", "myna").(map[string]any)
+	p, _ := openClawAt_(m, "models", "providers", "owl").(map[string]any)
 	if p["baseUrl"] != here(home).v1() || p["api"] != "openai-completions" || p["apiKey"] != agentKeyAt("openclaw", here(home).gw()) {
-		t.Fatalf("myna's provider: %v", p)
+		t.Fatalf("owl's provider: %v", p)
 	}
 	models := map[string]map[string]any{}
 	for _, x := range p["models"].([]any) {
@@ -219,7 +219,7 @@ func TestOpenClaw(t *testing.T) {
 	}
 	// as `openclaw models set` does, beside the user's own entry
 	if ms := openClawAt_(m, "agents", "defaults", "models"); !reflect.DeepEqual(ms, map[string]any{
-		"deepseek/deepseek-v4-pro": map[string]any{"alias": "DeepSeek"}, "myna/kimi/k2": map[string]any{}}) {
+		"deepseek/deepseek-v4-pro": map[string]any{"alias": "DeepSeek"}, "owl/kimi/k2": map[string]any{}}) {
 		t.Fatalf("agents.defaults.models: %v", ms)
 	}
 	for _, k := range []string{"plugins", "meta", "gateway", "tools", "auth", "wizard"} {
@@ -233,16 +233,16 @@ func TestOpenClaw(t *testing.T) {
 		t.Fatal("the user's own provider is gone")
 	}
 
-	// switching between myna's models keeps what OpenClaw was on before;
+	// switching between owl's models keeps what OpenClaw was on before;
 	// a model ref with a dot is one key
-	if err := a.Pick("model", "myna/kimi/k2.5-vision"); err != nil {
+	if err := a.Pick("model", "owl/kimi/k2.5-vision"); err != nil {
 		t.Fatal(err)
 	}
-	if got := f.Get(); got != "myna/kimi/k2.5-vision" {
+	if got := f.Get(); got != "owl/kimi/k2.5-vision" {
 		t.Fatalf("model %q", got)
 	}
 	ms, _ := openClawAt_(openClawParse(t, path), "agents", "defaults", "models").(map[string]any)
-	if _, on := ms["myna/kimi/k2.5-vision"]; !on || len(ms) != 2 {
+	if _, on := ms["owl/kimi/k2.5-vision"]; !on || len(ms) != 2 {
 		t.Fatalf("agents.defaults.models after a switch: %v", ms)
 	}
 	if err := a.Disconnect(); err != nil {
@@ -271,18 +271,18 @@ func TestOpenClawShapes(t *testing.T) {
 				os.MkdirAll(filepath.Dir(path), 0o700) // detected
 			}
 			a := openClaw(home)
-			if err := a.Pick("model", "myna/kimi/k2"); err != nil {
+			if err := a.Pick("model", "owl/kimi/k2"); err != nil {
 				t.Fatal(err)
 			}
 			m := openClawParse(t, path)
 			got := openClawAt_(m, "agents", "defaults", "model")
 			switch name {
 			case "fallback":
-				if !reflect.DeepEqual(got, map[string]any{"primary": "myna/kimi/k2", "fallbacks": []any{"openai/gpt-5.5"}}) {
+				if !reflect.DeepEqual(got, map[string]any{"primary": "owl/kimi/k2", "fallbacks": []any{"openai/gpt-5.5"}}) {
 					t.Fatalf("model: %v", got)
 				}
 			default:
-				if got != "myna/kimi/k2" {
+				if got != "owl/kimi/k2" {
 					t.Fatalf("model: %v", got)
 				}
 			}
@@ -297,7 +297,7 @@ func TestOpenClawShapes(t *testing.T) {
 			b, err := os.ReadFile(path)
 			if body == "" {
 				if !os.IsNotExist(err) {
-					t.Fatalf("myna's own file is left: %v\n%s", err, b)
+					t.Fatalf("owl's own file is left: %v\n%s", err, b)
 				}
 				return
 			}
@@ -308,17 +308,17 @@ func TestOpenClawShapes(t *testing.T) {
 	}
 }
 
-// A model allow-list that has nothing of myna's gets myna's models
+// A model allow-list that has nothing of owl's gets owl's models
 // in, or OpenClaw refuses them; Disconnect takes them out again.
 func TestOpenClawAllowList(t *testing.T) {
 	body := "{\n  \"agents\": {\n    \"defaults\": {\n      \"model\": \"deepseek/deepseek-v4-pro\",\n      \"modelPolicy\": {\n        \"allow\": [\n          \"deepseek/*\"\n        ]\n      }\n    }\n  }\n}\n"
 	home, path := openClawHomeWith(t, body)
 	a := openClaw(home)
-	if err := a.Pick("model", "myna/kimi/k2"); err != nil {
+	if err := a.Pick("model", "owl/kimi/k2"); err != nil {
 		t.Fatal(err)
 	}
 	allow := openClawAt_(openClawParse(t, path), "agents", "defaults", "modelPolicy", "allow")
-	if !reflect.DeepEqual(allow, []any{"deepseek/*", "myna/*"}) {
+	if !reflect.DeepEqual(allow, []any{"deepseek/*", "owl/*"}) {
 		t.Fatalf("allow: %v", allow)
 	}
 	if err := a.Disconnect(); err != nil {
@@ -333,12 +333,12 @@ func TestOpenClawAllowList(t *testing.T) {
 	}
 }
 
-// A model of OpenClaw's own picked while it is on myna takes myna
+// A model of OpenClaw's own picked while it is on owl takes owl
 // out, and keeps the fallbacks.
-func TestOpenClawOwnModelTakesMynaOut(t *testing.T) {
+func TestOpenClawOwnModelTakesOwlOut(t *testing.T) {
 	home, path := openClawHomeWith(t, openClawConfig)
 	a := openClaw(home)
-	if err := a.Pick("model", "myna/kimi/k2"); err != nil {
+	if err := a.Pick("model", "owl/kimi/k2"); err != nil {
 		t.Fatal(err)
 	}
 	if err := a.Pick("model", "deepseek/deepseek-v4-flash"); err != nil {
@@ -353,17 +353,17 @@ func TestOpenClawOwnModelTakesMynaOut(t *testing.T) {
 	}
 }
 
-// What the user sets in myna's provider — a header, a timeout, a
+// What the user sets in owl's provider — a header, a timeout, a
 // model's maxTokens — is theirs: a catalog sync rewrites the endpoint and
 // the models, not those. A sync with nothing to change doesn't write.
 func TestOpenClawSyncKeepsTheirs(t *testing.T) {
 	home, path := openClawHomeWith(t, openClawConfig)
 	a := openClaw(home)
-	if err := a.Pick("model", "myna/kimi/k2"); err != nil {
+	if err := a.Pick("model", "owl/kimi/k2"); err != nil {
 		t.Fatal(err)
 	}
 	m := openClawParse(t, path)
-	p := openClawAt_(m, "models", "providers", "myna").(map[string]any)
+	p := openClawAt_(m, "models", "providers", "owl").(map[string]any)
 	p["headers"] = map[string]any{"X-Mine": "1"}
 	p["timeoutSeconds"] = 600
 	p["baseUrl"] = "http://127.0.0.1:1/v1"
@@ -381,7 +381,7 @@ func TestOpenClawSyncKeepsTheirs(t *testing.T) {
 	if err := a.Sync(); err != nil {
 		t.Fatal(err)
 	}
-	p = openClawAt_(openClawParse(t, path), "models", "providers", "myna").(map[string]any)
+	p = openClawAt_(openClawParse(t, path), "models", "providers", "owl").(map[string]any)
 	if p["baseUrl"] != here(home).v1() || p["timeoutSeconds"] != float64(600) || !reflect.DeepEqual(p["headers"], map[string]any{"X-Mine": "1"}) {
 		t.Fatalf("after a sync: %v", p)
 	}
@@ -404,13 +404,13 @@ func TestOpenClawSyncKeepsTheirs(t *testing.T) {
 	}
 }
 
-// openclaw.json in JSON5, which OpenClaw reads and myna can't, is left
+// openclaw.json in JSON5, which OpenClaw reads and owl can't, is left
 // as it is, and said so.
 func TestOpenClawJSON5LeftAlone(t *testing.T) {
 	body := "// mine\n{\n  agents: { defaults: { model: 'deepseek/deepseek-v4-pro' } },\n}\n"
 	home, path := openClawHomeWith(t, body)
 	a := openClaw(home)
-	if err := a.Pick("model", "myna/kimi/k2"); err == nil {
+	if err := a.Pick("model", "owl/kimi/k2"); err == nil {
 		t.Fatal("a JSON5 file was written")
 	}
 	if got, _ := os.ReadFile(path); string(got) != body {

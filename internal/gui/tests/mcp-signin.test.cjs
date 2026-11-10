@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// #615: a remote MCP server is signed in to once, in myna. Its editor has
+// #615: a remote MCP server is signed in to once, in owl. Its editor has
 // a Sign in that follows the sign-in to the end, the row then says Signed
 // in, and Sign out puts it back; a server run as a command has none. In
 // English and Chinese, and no click moves the page. No backend: the API is
@@ -15,7 +15,7 @@ const assets = path.resolve(__dirname, "../assets");
 const HOME = "/Users/aimer";
 const agent = (id, name) => ({ id, name, icon: "", skills: `${HOME}/.${id}/skills`, mcp: `${HOME}/.${id}/mcp.json` });
 const base = () => ({
-  dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
+  dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
   agents: [agent("codex", "Codex"), agent("claude", "Claude Code")],
   instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [], skills: [],
   servers: [
@@ -29,11 +29,11 @@ const base = () => ({
 // mcpauth.ErrNoSignIn, as the API says it
 const noSignIn = "this server already works without signing in, so there is nothing to sign in to: the agents given it can use it as it is. A key it takes goes in Headers; a server that signs in at another address (as Exa's ?login) needs that URL";
 // mcpauth.ErrClientRefused: Figma's registration 403s any app it doesn't list (#1619)
-const refused = "this server's sign-in admits only the apps it lists and turned myna away, so myna can't sign in for the agents. The agents given it still have the server's own address: sign in from each agent itself (in Claude Code, run /mcp and pick the server)";
+const refused = "this server's sign-in admits only the apps it lists and turned owl away, so owl can't sign in for the agents. The agents given it still have the server's own address: sign in from each agent itself (in Claude Code, run /mcp and pick the server)";
 
 // mcpauth.ErrTurnedAway: a firewall's 403 page in front of the server
 // (fremontdango on Discord, Cloudflare at agents.stackoverflow.com)
-const turnedAway = "a firewall in front of this server turned myna's request away (403) before the server could offer a sign-in. It judges the network the request came from: try again on another network, or give myna a proxy in Settings";
+const turnedAway = "a firewall in front of this server turned owl's request away (403) before the server could offer a sign-in. It judges the network the request came from: try again on another network, or give owl a proxy in Settings";
 
 function server(lang, calls) {
   const lib = base();
@@ -88,8 +88,8 @@ function server(lang, calls) {
 }
 
 const words = {
-  en: { signIn: "Sign in", signOut: "Sign out", signed: "Signed in", label: "Sign-in", done: "Signed in to neon — the agents given it use myna's sign-in", out: "Signed out of neon — the agents are given the server's own address again", exaDone: "Signed in to exa — the agents given it use myna's sign-in", noSignIn: "already works without signing in", refused: "admits only the apps it lists", turnedAway: "a firewall in front of this server", saveSignIn: "Save and sign in" },
-  zh: { signIn: "登录", signOut: "退出登录", signed: "已登录", label: "登录", done: "已登录 neon，分配到它的 agent 共用 myna 的登录", out: "已退出 neon，agent 改回使用服务器自身的地址", exaDone: "已登录 exa，分配到它的 agent 共用 myna 的登录", noSignIn: "无需登录即可使用", refused: "只接受它列出的应用", turnedAway: "服务器前面的防火墙拦下了", saveSignIn: "保存并登录" },
+  en: { signIn: "Sign in", signOut: "Sign out", signed: "Signed in", label: "Sign-in", done: "Signed in to neon — the agents given it use owl's sign-in", out: "Signed out of neon — the agents are given the server's own address again", exaDone: "Signed in to exa — the agents given it use owl's sign-in", noSignIn: "already works without signing in", refused: "admits only the apps it lists", turnedAway: "a firewall in front of this server", saveSignIn: "Save and sign in" },
+  zh: { signIn: "登录", signOut: "退出登录", signed: "已登录", label: "登录", done: "已登录 neon，分配到它的 agent 共用 owl 的登录", out: "已退出 neon，agent 改回使用服务器自身的地址", exaDone: "已登录 exa，分配到它的 agent 共用 owl 的登录", noSignIn: "无需登录即可使用", refused: "只接受它列出的应用", turnedAway: "服务器前面的防火墙拦下了", saveSignIn: "保存并登录" },
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -106,13 +106,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const w = words[lang];
         const calls = [];
         const ctx = await browser.newContext({ viewport: { width: 980, height: 800 } });
-        await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "mcp"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("owl.libTab", "mcp"); } catch {} });
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, calls));
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         await navTo(page, "library");
         const row = (name) => page.locator("#view-library .lib-row", { has: page.locator(".name", { hasText: new RegExp("^" + name) }) });
         await row("neon").waitFor();

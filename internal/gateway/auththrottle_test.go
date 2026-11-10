@@ -47,7 +47,7 @@ func TestAuthThrottleBurstThenRefills(t *testing.T) {
 // gets in while the attacker is clamped.
 func TestAuthThrottleSparesValidAndLocal(t *testing.T) {
 	fresh(t) // resets the bucket
-	t.Setenv("MYNA_ADDR", "")
+	t.Setenv("OWL_ADDR", "")
 	h := lanGuard(New().Handler())
 	_, secrets := newCaller(t, "LAN client")
 	key := secrets[0]
@@ -61,7 +61,7 @@ func TestAuthThrottleSparesValidAndLocal(t *testing.T) {
 	t.Cleanup(resetAuthThrottle)
 
 	call := func(from string, hdr ...string) (int, http.Header) {
-		r := httptest.NewRequest("GET", "/v1/myna/quotas", nil)
+		r := httptest.NewRequest("GET", "/v1/owl/quotas", nil)
 		r.RemoteAddr = from
 		for i := 0; i+1 < len(hdr); i += 2 {
 			r.Header.Set(hdr[i], hdr[i+1])
@@ -113,10 +113,10 @@ func TestAuthThrottleSparesValidAndLocal(t *testing.T) {
 // 429 (the burst does not swallow ordinary mistypes).
 func TestAuthThrottleKeepsFirstRefusalHelpful(t *testing.T) {
 	fresh(t)
-	t.Setenv("MYNA_ADDR", "")
+	t.Setenv("OWL_ADDR", "")
 	h := lanGuard(New().Handler())
 	newCaller(t, "LAN client")
-	r := httptest.NewRequest("GET", "/v1/myna/quotas", nil)
+	r := httptest.NewRequest("GET", "/v1/owl/quotas", nil)
 	r.RemoteAddr = "10.0.0.7:5000"
 	r.Header.Set("Authorization", "Bearer mgp-typo-key-9z7q")
 	w := httptest.NewRecorder()

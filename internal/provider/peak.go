@@ -5,7 +5,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 // peakBill is a vendor that bills DeepSeek's models by the hour a call is

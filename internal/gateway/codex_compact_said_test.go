@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // codexErrorMessage is error.message of a reply, as Codex reads it
@@ -70,7 +70,7 @@ func TestCodexOwnCompactErrorAsSaid(t *testing.T) {
 	}
 }
 
-// A myna model's summary request that fails goes back said as the
+// A owl model's summary request that fails goes back said as the
 // compaction's, with who answered it: "Fake: 502 Bad Gateway" alone read
 // as Codex's own failure, whatever the provider said or didn't.
 func TestCodexCompactFailureSaysCompaction(t *testing.T) {

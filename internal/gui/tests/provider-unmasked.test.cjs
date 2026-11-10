@@ -3,13 +3,13 @@
 // provider they added (AcMilan on Discord): the editor's Redaction row is
 // there whatever the address, opens as it was saved, and Save posts it.
 // Turned on, a caution under it names an address not on this computer or
-// the local network (a relay, a vendor, a name myna says resolves elsewhere:
+// the local network (a relay, a vendor, a name owl says resolves elsewhere:
 // /api/local-hosts); a local one (localhost, a private IP, a name of the
 // user's own DNS resolving only to the local network) has none. A
 // name is asked about only once the switch is on, so an editor merely
 // opened asks nothing. A signed-in account or a plugin's provider has the
 // row too (isee1_1 on Discord), its caution always shown while on: its
-// vendor is never local. Another myna has none. In English and Chinese,
+// vendor is never local. Another owl has none. In English and Chinese,
 // wide and narrow.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -34,7 +34,7 @@ const local = { ...base, id: "local", name: "Local Box", chat: "http://localhost
 const lan = { ...base, id: "lan", name: "LAN Box", chat: "http://192.168.1.20:8000/v1", unredacted: true };
 const relay = { ...base, id: "relay", name: "Relay", chat: "https://relay.example.com/v1" };
 const named = { ...base, id: "named", name: "Corp LLM", chat: "http://llm.corp.lan:8000/v1" };
-// what myna says each name resolves to: only the local network, or not
+// what owl says each name resolves to: only the local network, or not
 const lanHosts = { "llm.corp.lan": true, "relay.example.com": false, "api.vendor.example": false };
 const codex = {
   id: "codex", name: "Codex", icon: "codex-color", chat: "", responses: "", anthropic: "", catalog: "",
@@ -42,12 +42,12 @@ const codex = {
   account: { agent: "codex", agentName: "Codex", user: "me@example.com", plan: "PLUS", logins: [{ user: "me@example.com", plan: "PLUS", active: true, on: true }] },
   proxy: "",
 };
-// a community plugin's provider, keyless, and another myna
+// a community plugin's provider, keyless, and another owl
 const plugin = {
   ...base, id: "translate", name: "Translate Plugin", chat: "plugin://translate", unredacted: true,
   account: { agent: "translate", agentName: "Translate Plugin", user: "translate", plan: "", logins: [{ user: "translate", active: true, on: true }] },
 };
-const home = { ...base, id: "home", name: "Home myna", preset: "remote-myna", anthropic: "http://192.168.1.5:3425" };
+const home = { ...base, id: "home", name: "Home owl", preset: "remote-owl", anthropic: "http://192.168.1.5:3425" };
 
 function serve(lang, posts, asked) {
   const providers = { providers: [local, lan, relay, named, codex, plugin, home], presets: [], excluded: [], gateway: { running: true, window: true } };
@@ -102,11 +102,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const posts = [];
         const asked = [];
         await page.route("**/*", serve(lang, posts, asked));
-        await page.goto("http://myna.test/?view=providers");
-        // another myna's row is the list's last, under its sticky foot
+        await page.goto("http://owl.test/?view=providers");
+        // another owl's row is the list's last, under its sticky foot
         // at 440 in Linux WebKit (#4484): it is clicked as an event
         const pick = page.locator(".row.provider", { hasText: name });
-        await (name === "Home myna" ? pick.dispatchEvent("click") : pick.click());
+        await (name === "Home owl" ? pick.dispatchEvent("click") : pick.click());
         await unfold(page);
         await page.locator(".editor .bar").waitFor();
         return { page, errors, posts, asked };
@@ -195,7 +195,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.deepEqual(errors, []);
       });
 
-      test(`${engine} ${lang} ${width}: one at a LAN name myna finds local has no caution, and is saved unmasked`, async (t) => {
+      test(`${engine} ${lang} ${width}: one at a LAN name owl finds local has no caution, and is saved unmasked`, async (t) => {
         const { page, errors, posts, asked } = await open(t, "Corp LLM");
         await box(page).scrollIntoViewIfNeeded();
         await box(page).check();
@@ -209,7 +209,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.deepEqual(errors, []);
       });
 
-      test(`${engine} ${lang} ${width}: a name typed in loses the caution once myna finds it local, and one it doesn't gets it`, async (t) => {
+      test(`${engine} ${lang} ${width}: a name typed in loses the caution once owl finds it local, and one it doesn't gets it`, async (t) => {
         const { page, errors, asked } = await open(t, "Relay");
         await box(page).scrollIntoViewIfNeeded();
         await box(page).check();
@@ -256,8 +256,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.deepEqual(errors, []);
       });
 
-      test(`${engine} ${lang} ${width}: another myna has no such row`, async (t) => {
-        const { page, errors } = await open(t, "Home myna");
+      test(`${engine} ${lang} ${width}: another owl has no such row`, async (t) => {
+        const { page, errors } = await open(t, "Home owl");
         assert.equal(await row(page).count(), 0);
         assert.deepEqual(errors, []);
       });

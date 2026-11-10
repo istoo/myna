@@ -12,13 +12,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/ghtoken"
-	"github.com/istoo/myna/internal/middleware"
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/ghtoken"
+	"github.com/istoo/owl/internal/middleware"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // OpenCode's provider plugins (internal/plugin): the providers they sign
@@ -27,7 +27,7 @@ import (
 
 // pluginSubJSON is a plugin's provider as the add sheet lists it.
 type pluginSubJSON struct {
-	ID       string          `json:"id"`  // myna's
+	ID       string          `json:"id"`  // owl's
 	PID      string          `json:"pid"` // OpenCode's, which the plugin knows it by
 	Name     string          `json:"name"`
 	Icon     string          `json:"icon"`
@@ -98,14 +98,14 @@ type pluginEntryJSON struct {
 	Providers []string `json:"providers"`         // the names of those it signs in to
 	Version   string   `json:"version,omitempty"` // installed
 	Latest    string   `json:"latest,omitempty"`  // on npm, when the market asked
-	// Icon is the picture its own package.json gives (myna.icon), as
+	// Icon is the picture its own package.json gives (owl.icon), as
 	// the page can show it: the plugin's, which its row shows before any
 	// of its providers' own (#1775)
 	Icon string `json:"icon,omitempty"`
 	// Package is the package installed from a git repository, which its
 	// own package.json names
 	Package string `json:"package,omitempty"`
-	// OwnName is the name its package.json gives itself (myna.name),
+	// OwnName is the name its package.json gives itself (owl.name),
 	// which its row shows when the community's list doesn't name it
 	OwnName string `json:"ownName,omitempty"`
 	// Commit is the commit of its repository a git one was installed at,
@@ -121,7 +121,7 @@ type pluginEntryJSON struct {
 	// the row's "Serves" chip names after Moved's (#3902): only when the
 	// two come to two or more, as one provider alone is the row's title
 	Serves []string `json:"serves,omitempty"`
-	// AutoUpdated is the update myna made to it by itself lately
+	// AutoUpdated is the update owl made to it by itself lately
 	AutoUpdated *plugin.Updated `json:"autoUpdated,omitempty"`
 	// Middleware is the gateway middleware it has, run in the gateway
 	// rather than the host: its hooks, how often they ran and how long
@@ -144,29 +144,29 @@ type pluginEntryJSON struct {
 	MiddlewareOnly bool `json:"middlewareOnly,omitempty"`
 	// Agent is the agent it adds (internal/agentplug), or why it isn't
 	// listed; IsAgent is whether its package has one, said of one switched
-	// off too; InMynaOnly is whether all it has runs in myna itself,
+	// off too; InOwlOnly is whether all it has runs in owl itself,
 	// middleware and an agent, no provider to sign in to
-	Agent      *pluginAgentJSON `json:"agent,omitempty"`
-	IsAgent    bool             `json:"isAgent,omitempty"`
-	InMynaOnly bool             `json:"inMynaOnly,omitempty"`
-	// Page is the page it adds to the window (myna.page), said of one
+	Agent     *pluginAgentJSON `json:"agent,omitempty"`
+	IsAgent   bool             `json:"isAgent,omitempty"`
+	InOwlOnly bool             `json:"inOwlOnly,omitempty"`
+	// Page is the page it adds to the window (owl.page), said of one
 	// switched off too: what the row shows before it is turned on, with
-	// what the page may read of myna's
+	// what the page may read of owl's
 	Page *pluginPageInfoJSON `json:"page,omitempty"`
-	// Panels are the panels it adds to myna's own pages
-	// (myna.panels), said of one switched off too, and PanelReads what
-	// they may read of myna's
+	// Panels are the panels it adds to owl's own pages
+	// (owl.panels), said of one switched off too, and PanelReads what
+	// they may read of owl's
 	Panels     []pluginPanelInfoJSON `json:"panels,omitempty"`
 	PanelReads []string              `json:"panelReads,omitempty"`
-	// Actions are the items its page adds to myna's menus
-	// (myna.actions), said of one switched off too
+	// Actions are the items its page adds to owl's menus
+	// (owl.actions), said of one switched off too
 	Actions []pluginActionInfoJSON `json:"actions,omitempty"`
 	// Clashes are the providers it signs in to that another plugin signs
 	// in to as well (a plugin of the user's own beside a third party's):
 	// the host runs one plugin for each, and the row says which, with a
 	// way to pick this one
 	Clashes []pluginClashJSON `json:"clashes,omitempty"`
-	// Tools are the tools it gives, which myna's plugin tools MCP server
+	// Tools are the tools it gives, which owl's plugin tools MCP server
 	// offers every agent under MCP's name: with their descriptions while
 	// the host runs, by name alone from what it noted last when it doesn't
 	Tools []pluginToolJSON `json:"tools,omitempty"`
@@ -205,7 +205,7 @@ type pluginClashJSON struct {
 	Name string `json:"name"` // the provider's, as the plugin serving it names it
 }
 
-// autoUpdatedFor is how long a plugin's row says myna updated it.
+// autoUpdatedFor is how long a plugin's row says owl updated it.
 const autoUpdatedFor = 3 * 24 * time.Hour
 
 type pluginsJSON struct {
@@ -213,8 +213,8 @@ type pluginsJSON struct {
 	Bun     bool              `json:"bun"` // Bun is here; adding the first plugin downloads it otherwise
 	BunVer  string            `json:"bunVersion"`
 	Error   string            `json:"error,omitempty"` // the plugins couldn't be asked
-	// Picker is whether this myna can show the system's folder picker:
-	// `myna web` has none, and the page then offers no button for it
+	// Picker is whether this owl can show the system's folder picker:
+	// `owl web` has none, and the page then offers no button for it
 	Picker bool `json:"picker"`
 	// Movable are the built-ins with accounts a plugin could run, which
 	// its card and its row offer to move
@@ -338,7 +338,7 @@ func pluginsState(ctx context.Context, w Windows) pluginsJSON {
 		j.OptionsExample = plugin.OptionsExample(plugin.Target(e.Spec))
 		if file, _ := plugin.Agent(plugin.Target(e.Spec)); file != "" {
 			j.IsAgent = true
-			j.InMynaOnly = plugin.InMynaOnly(plugin.Target(e.Spec))
+			j.InOwlOnly = plugin.InOwlOnly(plugin.Target(e.Spec))
 			if !e.Off {
 				j.Agent = pluginAgentOf(e.Spec, agentErrs)
 			}
@@ -360,7 +360,7 @@ func pluginsState(ctx context.Context, w Windows) pluginsJSON {
 			for _, a := range w.Actions {
 				j.Actions = append(j.Actions, pluginActionInfoJSON{Menu: a.Menu, Title: a.Title})
 			}
-			j.InMynaOnly = plugin.InMynaOnly(plugin.Target(e.Spec))
+			j.InOwlOnly = plugin.InOwlOnly(plugin.Target(e.Spec))
 		}
 		for _, c := range clashes[e.Spec] {
 			n := idName[c.ID]
@@ -435,7 +435,7 @@ func npmNames(es []plugin.Entry) []string {
 	return out
 }
 
-// pluginListings are the plugins myna suggests, each with what npm said
+// pluginListings are the plugins owl suggests, each with what npm said
 // of it last (asking npm again is /api/plugins/npm's), so Discover is drawn
 // without waiting on npm.
 func pluginListings(ctx context.Context) []pluginListingJSON {
@@ -504,7 +504,7 @@ func listingIcons(ls []pluginListingJSON, wait time.Duration) {
 	}
 }
 
-// npmIcons puts the picture each package gives (myna.icon) as the page
+// npmIcons puts the picture each package gives (owl.icon) as the page
 // can show it, kept here as a GitHub-tagged plugin's is: a data URI or an
 // https URL isn't sent on to the page. One not kept by wait is left out.
 func npmIcons(ns []*plugin.NPM, wait time.Duration) {
@@ -521,7 +521,7 @@ func npmIcons(ns []*plugin.NPM, wait time.Duration) {
 	}
 }
 
-// pluginMarketJSON is the plugin market: the plugins myna suggests, what npm
+// pluginMarketJSON is the plugin market: the plugins owl suggests, what npm
 // says of each, and those added.
 type pluginMarketJSON struct {
 	Listings []pluginListingJSON `json:"listings"`
@@ -593,7 +593,7 @@ func pluginRoutes(mux *http.ServeMux, w Windows) {
 	mux.HandleFunc("GET /api/plugins/agents", func(rw http.ResponseWriter, r *http.Request) {
 		writeJSON(rw, pluginAgents(r.Context()))
 	})
-	// repositories on GitHub tagged myna-plugin: nobody's list, shown
+	// repositories on GitHub tagged owl-plugin: nobody's list, shown
 	// apart as not reviewed, installed from the repository
 	mux.HandleFunc("GET /api/plugins/github", func(rw http.ResponseWriter, r *http.Request) {
 		// Try again asks GitHub at once when the list standing isn't its
@@ -715,7 +715,7 @@ func pluginRoutes(mux *http.ServeMux, w Windows) {
 		}
 		writeJSON(rw, map[string]bool{"mirror": in.On})
 	})
-	// the npm registry set in myna, "" for none of its own: an address
+	// the npm registry set in owl, "" for none of its own: an address
 	// that isn't an http(s) one is refused, not kept
 	mux.HandleFunc("POST /api/plugins/registry", func(rw http.ResponseWriter, r *http.Request) {
 		var in struct{ URL string }
@@ -744,7 +744,7 @@ func pluginRoutes(mux *http.ServeMux, w Windows) {
 		}
 		// a first plugin downloads Bun, and npm installs it. It goes on
 		// though the page's connection goes: a proxy or tunnel in front of
-		// myna web gives up first (Cloudflare after 100 seconds, #2032),
+		// owl web gives up first (Cloudflare after 100 seconds, #2032),
 		// and bun stopped halfway leaves plugins/ half-written
 		ctx, cancel := context.WithTimeout(context.WithoutCancel(r.Context()), 5*time.Minute)
 		defer cancel()
@@ -914,7 +914,7 @@ func pluginAgentOf(spec string, errs map[string]string) *pluginAgentJSON {
 
 // taggedWhyKind is what kind of failure keeps GitHub's list from being
 // whole: "slow" when GitHub didn't answer in time, "limited" when it
-// turned myna away for its rate limit, "" for anything else (the page
+// turned owl away for its rate limit, "" for anything else (the page
 // shows that error as it is).
 func taggedWhyKind(err error) string {
 	var lim ghtoken.Limited

@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // setPort is Settings' gateway port set to p, as the Settings page saves it.
@@ -37,11 +37,11 @@ func filesWith(home, s string) []string {
 }
 
 // The gateway's port set in Settings (Magic_zero on Discord) moves every
-// agent myna connected: each one's config is written with the gateway's
+// agent owl connected: each one's config is written with the gateway's
 // URL on the new port, none keeps the old one, and each is still connected
 // with nothing off.
 func TestPortMovesEveryAgent(t *testing.T) {
-	t.Setenv("MYNA_ADDR", "")
+	t.Setenv("OWL_ADDR", "")
 	home, _ := codexHome(t, "", "")
 	managed := claudeManaged
 	claudeManaged = func() string { return filepath.Join(home, "managed-settings.json") }
@@ -75,13 +75,13 @@ func TestPortMovesEveryAgent(t *testing.T) {
 		var key, want string
 		for _, g := range a.Fields {
 			for _, o := range g.Options(a.Values()) {
-				if want == "" && (o.Ref == "fake/m1" || o.Value == mynaID) {
+				if want == "" && (o.Ref == "fake/m1" || o.Value == owlID) {
 					key, want = g.Key, o.Value
 				}
 			}
 		}
 		if want == "" {
-			t.Fatalf("%s: no field takes myna's models", a.ID)
+			t.Fatalf("%s: no field takes owl's models", a.ID)
 		}
 		if err := a.Apply(key, want); err != nil {
 			t.Fatalf("%s: %v", a.ID, err)
@@ -132,11 +132,11 @@ func containsAgent(as []*Agent, id string) bool {
 	return false
 }
 
-// Codex signed in with ChatGPT is joined to myna beside its own models:
+// Codex signed in with ChatGPT is joined to owl beside its own models:
 // the move writes its base URL on the new port and keeps the model it was
-// on, rather than putting it on one of myna's.
+// on, rather than putting it on one of owl's.
 func TestPortMovesJoinedCodex(t *testing.T) {
-	t.Setenv("MYNA_ADDR", "")
+	t.Setenv("OWL_ADDR", "")
 	home, read := codexHome(t, `{"auth_mode":"chatgpt","tokens":{"access_token":"at","refresh_token":"rt","id_token":"x.e30.x","account_id":"acc"}}`, "model = \"gpt-5.1\"\n")
 	setPort(t, 3591)
 	cx := codex(home)
@@ -161,10 +161,10 @@ func TestPortMovesJoinedCodex(t *testing.T) {
 	}
 }
 
-// An agent taken off myna before the port moved is left as it is: it is
+// An agent taken off owl before the port moved is left as it is: it is
 // the user's to set again, not the move's.
 func TestPortLeavesAnUnwiredAgent(t *testing.T) {
-	t.Setenv("MYNA_ADDR", "")
+	t.Setenv("OWL_ADDR", "")
 	home, read := codexHome(t, "", "")
 	setPort(t, 3591)
 	cx := codex(home)
@@ -179,16 +179,16 @@ func TestPortLeavesAnUnwiredAgent(t *testing.T) {
 		t.Fatal(err)
 	}
 	if strings.Contains(read(), "127.0.0.1:3592") {
-		t.Fatalf("an agent taken off myna was moved:\n%s", read())
+		t.Fatalf("an agent taken off owl was moved:\n%s", read())
 	}
 }
 
-// A myna MYNA_ADDR puts beside the installed one tells the installed
+// A owl OWL_ADDR puts beside the installed one tells the installed
 // one's wiring by the port the installed one's Settings have, not 3425.
-func TestDriftInstalledMynaOnItsPort(t *testing.T) {
+func TestDriftInstalledOwlOnItsPort(t *testing.T) {
 	home, _ := codexHome(t, "", "")
 	setPort(t, 3591)
-	t.Setenv("MYNA_ADDR", "127.0.0.1:3426")
+	t.Setenv("OWL_ADDR", "127.0.0.1:3426")
 	cx := codex(home)
 	if err := cx.Apply("model", "fake/m1"); err != nil {
 		t.Fatal(err)
@@ -196,15 +196,15 @@ func TestDriftInstalledMynaOnItsPort(t *testing.T) {
 	cfg := filepath.Join(home, ".codex", "config.toml")
 	os.WriteFile(cfg, []byte("openai_base_url = \"http://127.0.0.1:3591"+gateway.CodexPath+"\"\nmodel = \"fake/m1\"\n"), 0o644)
 	if d := cx.Drift(); d != nil {
-		t.Fatalf("the installed myna's wiring taken for drift: %+v", d)
+		t.Fatalf("the installed owl's wiring taken for drift: %+v", d)
 	}
 }
 
-// Moved, an agent still puts back what it had before myna when switched
-// off: its own endpoint and token, not myna's at the old port, which
+// Moved, an agent still puts back what it had before owl when switched
+// off: its own endpoint and token, not owl's at the old port, which
 // setting it again there would otherwise have noted as its own.
 func TestPortKeepsWhatAnAgentHadBefore(t *testing.T) {
-	t.Setenv("MYNA_ADDR", "")
+	t.Setenv("OWL_ADDR", "")
 	home, _ := codexHome(t, "", "")
 	managed := claudeManaged
 	claudeManaged = func() string { return filepath.Join(home, "managed-settings.json") }

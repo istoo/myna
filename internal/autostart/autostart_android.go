@@ -5,13 +5,13 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/owl/internal/edit"
 )
 
 // Termux:Boot runs executable scripts in ~/.termux/boot after Android boots.
 func record() string {
 	home, _ := os.UserHomeDir()
-	return filepath.Join(home, ".termux", "boot", "myna")
+	return filepath.Join(home, ".termux", "boot", "owl")
 }
 
 func enabled() bool {

@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // installedAt fakes the package installed at version v.
@@ -86,7 +86,7 @@ func TestCheckUpdates(t *testing.T) {
 		t.Fatal("an update older than asked for was told")
 	}
 
-	// the reader updates theirs: it waits no more, before myna looks again
+	// the reader updates theirs: it waits no more, before owl looks again
 	installedAt(t, theirs, "1.0.0")
 	if p := PendingUpdates(); len(p.Waiting) != 1 || p.Waiting[0].Package != pinned {
 		t.Fatalf("after updating %s, Waiting = %+v", theirs, p.Waiting)

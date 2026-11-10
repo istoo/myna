@@ -13,8 +13,8 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/istoo/myna/internal/sessions"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/sessions"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // TestSessionsListMakesOnlyTheGatewayRowsItShows: while a session grew,

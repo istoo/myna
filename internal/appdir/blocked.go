@@ -10,11 +10,11 @@ import (
 	"syscall"
 )
 
-// Blocked is the folder that keeps myna from writing its own files, or ""
-// when it can: myna's config or cache folder that this user can't write,
+// Blocked is the folder that keeps owl from writing its own files, or ""
+// when it can: owl's config or cache folder that this user can't write,
 // or, while one of them isn't there yet, the folder it would be made in. A
-// ~/.config that a command run under sudo made belongs to root, so myna
-// couldn't make ~/.config/myna and every save failed with "permission
+// ~/.config that a command run under sudo made belongs to root, so owl
+// couldn't make ~/.config/owl and every save failed with "permission
 // denied" (YouWhat on Discord). Only a folder inside the home folder is
 // named: one outside it (an XDG_CONFIG_HOME on a shared disk) isn't the
 // user's to take back.
@@ -68,7 +68,7 @@ func startsUp(rel string) bool {
 	return len(rel) >= 3 && rel[:3] == ".."+string(filepath.Separator)
 }
 
-// Own says whether p is myna's own folder or inside it: its config or
+// Own says whether p is owl's own folder or inside it: its config or
 // cache folder. A repair may take back everything in it; anything above
 // it is changed only by itself.
 func Own(p string) bool {

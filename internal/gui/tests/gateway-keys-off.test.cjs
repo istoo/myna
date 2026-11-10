@@ -3,7 +3,7 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 const { fixture } = require("./fixtures/caller-keys.cjs");
 
-// Gateway keys are left out of Gateway while myna isn't shared, and a
+// Gateway keys are left out of Gateway while owl isn't shared, and a
 // tunnel to loopback (Cloudflare Tunnel) is refused until it is. DD on
 // Discord looked for the keys to put a tunnel behind one and found none:
 // the page says where they come from, and sharing is switched on right
@@ -15,13 +15,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
         t.after(() => browser.close());
         const page = await (await browser.newContext({ viewport: { width, height: 760 }, reducedMotion: "reduce" })).newPage();
-        await page.addInitScript(() => { try { localStorage.setItem("myna.gwConnectFolded", "0"); } catch {} }); // Connect opened, as a user who reads it
+        await page.addInitScript(() => { try { localStorage.setItem("owl.gwConnectFolded", "0"); } catch {} }); // Connect opened, as a user who reads it
         page.setDefaultTimeout(6000);
         page.setDefaultNavigationTimeout(60000);
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", fixture(locale, "dark", []));
-        await page.goto("http://myna.test/?view=gateway");
+        await page.goto("http://owl.test/?view=gateway");
         await page.locator("#connect .snip").waitFor();
 
         const hint = page.locator("#gatewayKeysOff");

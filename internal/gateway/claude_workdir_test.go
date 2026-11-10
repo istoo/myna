@@ -11,11 +11,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/gwmw"
-	"github.com/istoo/myna/internal/masking"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/gwmw"
+	"github.com/istoo/owl/internal/masking"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // claudeWorkDirs runs two Claude subscription requests through a script
@@ -155,8 +155,8 @@ func TestClaudeWorkDirSymlinkIsAvoided(t *testing.T) {
 
 // A caller that says which folder it works in has Claude Code run there:
 // Claude Code tells its model the folder it runs in as the working
-// directory, and a model told myna's own folder wrote the caller's files
-// into it (a pelican.html left in myna-claude-work), through tools that
+// directory, and a model told owl's own folder wrote the caller's files
+// into it (a pelican.html left in owl-claude-work), through tools that
 // run in the caller's. Each client's way of saying it is read, the last
 // said counting. The caller's folder keeps sessions of its own, which are
 // never swept, and its repository's status is not added to the prompt.
@@ -212,7 +212,7 @@ func TestClaudeRunsInTheCallersWorkDir(t *testing.T) {
 }
 
 // A folder the caller names that isn't one here (a caller on another
-// computer), or isn't absolute, leaves the runs in myna's own folder.
+// computer), or isn't absolute, leaves the runs in owl's own folder.
 // Claude Code's prompt then gives this computer's platform and folder, and
 // the caller's another's, so the run is told after the caller's
 // instructions that theirs is where the tools run (vv_nil on X: a Mac
@@ -365,7 +365,7 @@ func TestClaudeRunsWhereTheCallerRunsNotWhereATurnQuotes(t *testing.T) {
 // named for the user, say) stands in the request as a placeholder, which
 // names no folder on disk. The run never works in the folder unmasked:
 // Claude Code tells its vendor the folder it runs in, so the masked word
-// would leave the machine as it is. It works in myna's folder and is
+// would leave the machine as it is. It works in owl's folder and is
 // told the caller's environment is the one its tools run in (#4449).
 func TestClaudeNeverRunsInAMaskedFolderUnmasked(t *testing.T) {
 	const word = "someuser"
@@ -395,7 +395,7 @@ func TestClaudeNeverRunsInAMaskedFolderUnmasked(t *testing.T) {
 		return masked
 	})
 	if len(dirs) != 2 || dirs[0] != work || dirs[1] != work {
-		t.Fatalf("working directories %q, want myna's %s: the caller's names a masked word", dirs, work)
+		t.Fatalf("working directories %q, want owl's %s: the caller's names a masked word", dirs, work)
 	}
 	for _, d := range dirs {
 		if strings.Contains(d, word) {
@@ -403,6 +403,6 @@ func TestClaudeNeverRunsInAMaskedFolderUnmasked(t *testing.T) {
 		}
 	}
 	if !strings.Contains(told, "every tool runs in") {
-		t.Fatalf("a run in myna's folder was not told the caller's environment is where its tools run: %s", told)
+		t.Fatalf("a run in owl's folder was not told the caller's environment is where its tools run: %s", told)
 	}
 }

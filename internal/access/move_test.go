@@ -6,7 +6,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // The keys are kept in the order the user drags them into (alextjy on
@@ -51,7 +51,7 @@ func TestMoveKeyKeepsOrder(t *testing.T) {
 	}
 	order := func() []string {
 		t.Helper()
-		// read from the file itself, as a myna started again would
+		// read from the file itself, as a owl started again would
 		b, err := os.ReadFile(Path())
 		if err != nil {
 			t.Fatal(err)

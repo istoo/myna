@@ -4,7 +4,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // The window opens at the size it was last given, the default before

@@ -3,7 +3,7 @@ package gateway
 import (
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // WorkBuddy AI's last chunk for gemini-3.5-flash, as it came on 10-16:

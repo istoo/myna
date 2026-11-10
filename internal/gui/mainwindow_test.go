@@ -10,10 +10,10 @@ import (
 
 	"github.com/wailsapp/wails/v3/pkg/application"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
-// StringKe on Discord: myna restarted for an update while another app was
+// StringKe on Discord: owl restarted for an update while another app was
 // full screen, and from then on its window opened only on that app's Space.
 // The window moves to the Space the user is on when shown, and can still go
 // full screen; it doesn't join every Space.
@@ -57,7 +57,7 @@ func TestCloseStepLeavesFullscreen(t *testing.T) {
 
 // lainbo on v0.1.819 (#763): with the Dock set to hidden, a full-screen window
 // had no close, minimise or full-screen buttons, and only Esc took it out of
-// full screen. A full-screen window keeps myna in the Dock, whatever the setting.
+// full screen. A full-screen window keeps owl in the Dock, whatever the setting.
 func TestFullscreenKeepsDock(t *testing.T) {
 	hidden, window, shown := settings.Settings{DockNever: true}, settings.Settings{DockWindow: true}, settings.Settings{Dock: true}
 	cases := []struct {
@@ -82,7 +82,7 @@ func TestFullscreenKeepsDock(t *testing.T) {
 
 // ShouguangCao on X: with Show in Dock left as it came, the open window was
 // out of Command-Tab, so going back to it to paste a key copied in another
-// app took the menu bar. Out of the box myna is in the Dock while its
+// app took the menu bar. Out of the box owl is in the Dock while its
 // window is open and leaves it when the window closes; Hide keeps it out,
 // and Show keeps it in.
 func TestDockFollowsWindowByDefault(t *testing.T) {
@@ -144,7 +144,7 @@ func TestClosingHidesShownAccounts(t *testing.T) {
 // shangyuan0818 on Discord: on Windows the top of the page, under the
 // title bar, resized the window's height as its frame does. Wails' page
 // script arms that edge whenever it is told the window is resizable, which
-// Wails says once its script is ready, before or after myna's hook runs;
+// Wails says once its script is ready, before or after owl's hook runs;
 // either way, and with the hook run twice, the edge stays off. Its stand-in
 // here keeps what each setResizable call said, as drag.ts does.
 func TestFrameOnlyResizeStaysOff(t *testing.T) {

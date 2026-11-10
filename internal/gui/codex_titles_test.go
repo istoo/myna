@@ -7,13 +7,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/agentenv"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/agentenv"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // Settings' Codex thread titles (#705) is set on its own: off, a model
-// myna serves (one it doesn't is refused), or back to Codex's own; the
+// owl serves (one it doesn't is refused), or back to Codex's own; the
 // Settings page's other saves, which never send it, keep it; and the page
 // is told the models it may name.
 func TestCodexTitlesSetting(t *testing.T) {
@@ -56,7 +56,7 @@ func TestCodexTitlesSetting(t *testing.T) {
 		t.Errorf("another save (%d) lost the setting: %q", code, settings.Load().CodexTitles)
 	}
 	if code, _ := call("/api/settings/codex-titles", `{"model":"nope/x"}`); code < 400 || settings.Load().CodexTitles != "off" {
-		t.Errorf("a model myna doesn't serve: %d, %q", code, settings.Load().CodexTitles)
+		t.Errorf("a model owl doesn't serve: %d, %q", code, settings.Load().CodexTitles)
 	}
 	if code, out := call("/api/settings/codex-titles", `{"model":"fake/m1"}`); code != 200 || out["codexTitles"] != "fake/m1" {
 		t.Errorf("a model: %d %v", code, out["codexTitles"])

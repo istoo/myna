@@ -1,11 +1,11 @@
 package update
 
 // A new version that this computer won't run (#894): Windows 11's Smart
-// App Control, or another application control policy, refuses myna's
+// App Control, or another application control policy, refuses owl's
 // unsigned builds it doesn't know yet, and an update that put one in place
 // left nothing that starts. The download is tried before it goes in
 // (canStart), the restart into it waits for it to say it is up
-// (AwaitPredecessor writes MYNA_STARTED's file), and a version refused
+// (AwaitPredecessor writes OWL_STARTED's file), and a version refused
 // either way is put back and noted (NoteBlocked), so the automatic checks
 // don't download it again; a check asked for tries it once more.
 
@@ -19,8 +19,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/proc"
 )
 
 // BlockedError is a new version that couldn't be started on this computer.
@@ -32,7 +32,7 @@ type BlockedError struct {
 
 func (e *BlockedError) Error() string {
 	if e.Policy() {
-		return "Windows didn't let the new version start (" + e.Err.Error() + "): Smart App Control or another application control policy blocks myna's unsigned builds; download it from " + Site + " and run it yourself, or turn Smart App Control off, then check for updates again"
+		return "Windows didn't let the new version start (" + e.Err.Error() + "): Smart App Control or another application control policy blocks owl's unsigned builds; download it from " + Site + " and run it yourself, or turn Smart App Control off, then check for updates again"
 	}
 	return "the new version couldn't start: " + e.Err.Error() + "; download it from " + Site + " and run it yourself"
 }
@@ -41,7 +41,7 @@ func (e *BlockedError) Unwrap() error { return e.Err }
 
 // Policy is whether Windows' code integrity refused the program: Smart App
 // Control, App Control for Business (WDAC), AppLocker or a software
-// restriction policy, which the user can't let through from myna.
+// restriction policy, which the user can't let through from owl.
 func (e *BlockedError) Policy() bool { return policyRefused(e.Err) }
 
 // errAccessDisabledByPolicy is AppLocker's and software restriction
@@ -67,12 +67,12 @@ func policyRefused(err error) bool {
 // downloaded whole. A var for tests.
 var canStart = trialStart
 
-// startWait is how long a restarted myna has to say it is up.
+// startWait is how long a restarted owl has to say it is up.
 var startWait = 20 * time.Second
 
-// startedEnv names the file a relaunched myna writes once it runs
+// startedEnv names the file a relaunched owl writes once it runs
 // (AwaitPredecessor), for the one that started it to know.
-const startedEnv = "MYNA_STARTED"
+const startedEnv = "OWL_STARTED"
 
 // launch starts a program with args and env, detached from this one; the
 // channel is closed when it exits, and kill ends it. A var for tests.
@@ -94,7 +94,7 @@ var launch = func(exe string, args, env []string) (<-chan struct{}, func(), erro
 // it is ended and old — this running version, moved aside for it — goes
 // back in its place.
 func startChecked(exe, old string, args, env []string) error {
-	marker := filepath.Join(os.TempDir(), "myna-started-"+strconv.Itoa(os.Getpid()))
+	marker := filepath.Join(os.TempDir(), "owl-started-"+strconv.Itoa(os.Getpid()))
 	os.Remove(marker)
 	defer os.Remove(marker)
 	exited, kill, err := launch(exe, args, append(env, startedEnv+"="+marker))
@@ -162,7 +162,7 @@ func putBack(exe, old string) error {
 	return nil
 }
 
-// reportStarted writes the file the myna that started this one waits
+// reportStarted writes the file the owl that started this one waits
 // for, once.
 func reportStarted() {
 	p := os.Getenv(startedEnv)

@@ -17,7 +17,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 // The routings besides the default, smart, in order.
@@ -121,7 +121,7 @@ func SetCountFree(id string, on bool) error {
 }
 
 // SetKeepLogin keeps Codex or Claude Code signed in to the account the
-// user made first (Provider.KeepLogin), or lets myna move it on again.
+// user made first (Provider.KeepLogin), or lets owl move it on again.
 // Either way it is no longer kept on one of the user's choosing
 // (KeepLoginAs): it is signed in to the first again.
 func SetKeepLogin(id string, keep bool) error {
@@ -130,7 +130,7 @@ func SetKeepLogin(id string, keep bool) error {
 		return err
 	}
 	if p.Account == nil || p.Account.Agent != p.ID || !slices.Contains(switchedAgents, p.ID) {
-		return fmt.Errorf("myna doesn't sign %s in to another of its accounts", p.Name)
+		return fmt.Errorf("owl doesn't sign %s in to another of its accounts", p.Name)
 	}
 	if keep && p.SwitchOnly {
 		return errSwitchOnly(*p)
@@ -146,7 +146,7 @@ func SetKeepLogin(id string, keep bool) error {
 	return nil
 }
 
-// SetSwitchOnly has myna only move Codex's or Claude Code's own sign-in
+// SetSwitchOnly has owl only move Codex's or Claude Code's own sign-in
 // between its accounts (Provider.SwitchOnly): Codex's requests never sent
 // through the gateway for account failover, Claude's accounts serving no
 // request through the gateway (KeptToAgent). Off, both are as before.
@@ -156,13 +156,13 @@ func SetSwitchOnly(id string, on bool) error {
 		return err
 	}
 	if p.Account == nil || p.Account.Agent != p.ID || p.ID != "codex" && p.ID != "claude" {
-		return fmt.Errorf("myna doesn't route %s's own requests for account failover", p.Name)
+		return fmt.Errorf("owl doesn't route %s's own requests for account failover", p.Name)
 	}
 	p.SwitchOnly = on
 	return Save(*p)
 }
 
-// SetRestartApp has myna restart the Codex app's app-server when it
+// SetRestartApp has owl restart the Codex app's app-server when it
 // changes Codex's account by itself, or leave the app on its account till
 // it is restarted (Provider.RestartApp).
 func SetRestartApp(id string, on bool) error {
@@ -171,13 +171,13 @@ func SetRestartApp(id string, on bool) error {
 		return err
 	}
 	if p.ID != "codex" || p.Account == nil || p.Account.Agent != p.ID {
-		return fmt.Errorf("myna restarts no app of %s's", p.Name)
+		return fmt.Errorf("owl restarts no app of %s's", p.Name)
 	}
 	p.RestartApp = on
 	return Save(*p)
 }
 
-// codexRestartsApp is whether the user had myna restart the Codex app's
+// codexRestartsApp is whether the user had owl restart the Codex app's
 // app-server for a change it makes by itself (Provider.RestartApp). While
 // providers.json can't be read it is unknown, and the app is left be: a
 // restart missed is the user's to make, one made shows as a crash.
@@ -194,10 +194,10 @@ var codexRestartsApp = func() bool {
 	return false
 }
 
-// SwitchOnly reports whether myna only moves agent's own sign-in between
+// SwitchOnly reports whether owl only moves agent's own sign-in between
 // its accounts, sending none of its requests through the gateway for
 // account failover (Provider.SwitchOnly). While providers.json can't be
-// read the user's choice is unknown, and failover, myna's own idea, is
+// read the user's choice is unknown, and failover, owl's own idea, is
 // not taken up on it.
 func SwitchOnly(agent string) bool {
 	f, err := read()
@@ -247,7 +247,7 @@ var usedCache struct {
 }
 
 // firstWait is how long a request waits for an agent's allowances the
-// first time they are asked for, so the first requests after myna
+// first time they are asked for, so the first requests after owl
 // starts are routed by them too; later ones never wait.
 var firstWait = 3 * time.Second
 
@@ -259,7 +259,7 @@ var unwaited atomic.Int32
 // model is there, not which account a request goes to. Every agent's model
 // list asks the gateway whether a model sees images, and the migrations at
 // start read Pi's effort, which builds its list: each agent's first ask
-// waited firstWait for its accounts' usage over the network, and myna's
+// waited firstWait for its accounts' usage over the network, and owl's
 // gateway listened ~9 s after start.
 func Unwaited() (release func()) {
 	unwaited.Add(1)
@@ -793,7 +793,7 @@ func Allowances(agent string) map[string]Allowance {
 
 // UsageRead is when user's allowance under agent was last read well, and
 // whether the last try to read it failed (or was held back); ok is false
-// when it hasn't been tried since myna started. A careful provider holds
+// when it hasn't been tried since owl started. A careful provider holds
 // an account whose reading is too old or failed (Provider.CapCareful).
 func UsageRead(agent, user string) (at time.Time, failed, ok bool) {
 	c := &usedCache

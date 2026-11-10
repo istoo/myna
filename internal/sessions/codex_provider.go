@@ -21,21 +21,21 @@ import (
 	toml "github.com/pelletier/go-toml/v2"
 	"github.com/tidwall/gjson"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/filelock"
-	"github.com/istoo/myna/internal/filememo"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/steady"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/filelock"
+	"github.com/istoo/owl/internal/filememo"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/steady"
 )
 
 // Codex lists, in its history and its resume picker, only the sessions made
 // with the provider it uses now: a rollout's session_meta names its
 // model_provider, and so does the thread's row in Codex's state database
 // (state_<n>.sqlite). Sessions made through CC Switch ("custom") are gone
-// from that list once Codex uses myna, though their files are all there
+// from that list once Codex uses owl, though their files are all there
 // (#887). MoveCodexProvider changes a session's provider, in its files and
 // in that row, and nothing else: its messages, id, title and archive stay as
-// they were. A copy of each file as it was is kept in myna's trash folder
+// they were. A copy of each file as it was is kept in owl's trash folder
 // first, and moving it back to the provider it had is the undo.
 
 // codexProviderRe is what a provider id may be: a key of config.toml's
@@ -193,7 +193,7 @@ func codexProviders(out []Managed, groups map[string][]file) {
 // Codex's state database. A session written to in the last minute is left
 // as it is (ErrActive), as Codex may be running it, and so is one a Codex
 // has open (holdCodexThread). Each file is copied to
-// <myna dir>/trash/codex-provider/ before it is changed, and rewritten
+// <owl dir>/trash/codex-provider/ before it is changed, and rewritten
 // whole into a file beside it that then takes its place, keeping its time.
 func MoveCodexProvider(id, to string) (CodexMove, error) {
 	if !safeID.MatchString(id) {
@@ -454,10 +454,10 @@ func codexThreadsOn(home, p string) []string {
 // MoveCodexThreads moves every thread of a Codex folder its state database
 // keeps on the provider from to the provider to, each as MoveCodexProvider
 // moves one: its files' session_meta and its row, a copy of the files kept
-// in myna's trash first. Codex lists only the threads of the provider it
+// in owl's trash first. Codex lists only the threads of the provider it
 // is on (app-server thread/list, the TUI's resume picker), so the threads
-// started while myna was Codex's provider were gone from Codex's lists
-// once Codex was off myna (kaizaoji on X: "the context doesn't exist").
+// started while owl was Codex's provider were gone from Codex's lists
+// once Codex was off owl (kaizaoji on X: "the context doesn't exist").
 // A thread written to in the last minute, or one a Codex has open, is left
 // for the next call, and so is one whose files can't be found; it says
 // what it moved and the first error it met, having gone on past it.
@@ -576,7 +576,7 @@ func rewriteCodexProvider(path, to string) (bool, error) {
 		return false, err
 	}
 	defer in.Close()
-	tmp, err := os.CreateTemp(filepath.Dir(path), ".myna-"+filepath.Base(path)+"-*")
+	tmp, err := os.CreateTemp(filepath.Dir(path), ".owl-"+filepath.Base(path)+"-*")
 	if err != nil {
 		return false, err
 	}
@@ -685,7 +685,7 @@ func moveCodexThread(path, id, to string) (bool, error) {
 // file is read or written when the ids are one length (Codex's "openai"
 // and upstream's "magpie"), so a history of thousands of threads moves in
 // moments where MoveCodexThreads would copy and rewrite every one of them;
-// a shorter or longer id (myna's "myna") leaves one file rewritten whole,
+// a shorter or longer id (owl's "owl") leaves one file rewritten whole,
 // atomically, for that thread alone. Moving it back is the undo, and no
 // copy is kept. Rollouts Codex has packed (.zst, a week after their last
 // turn) are left on from, and so is a thread written to in the last
@@ -872,7 +872,7 @@ func rewriteHead(path string, was, now []byte, mod time.Time) error {
 	out := make([]byte, 0, len(b)-len(was)+len(now))
 	out = append(out, now...)
 	out = append(out, b[len(was):]...)
-	tmp, err := os.CreateTemp(filepath.Dir(path), ".myna-codex-*")
+	tmp, err := os.CreateTemp(filepath.Dir(path), ".owl-codex-*")
 	if err != nil {
 		return err
 	}

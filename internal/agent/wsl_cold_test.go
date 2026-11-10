@@ -9,12 +9,12 @@ import (
 )
 
 // #3896: an agent made for a stopped distro opens none of its files, as
-// opening one starts the distro again; the user stopped it, and myna
+// opening one starts the distro again; the user stopped it, and owl
 // started it every few seconds while its window was up. Every kind is made
 // at a cold place in a child run, whose -test.testlogfile lists each file
 // the os package was asked to stat or open.
 func TestWSLColdPlaceOpensNothing(t *testing.T) {
-	if root := os.Getenv("MYNA_TEST_COLD_ROOT"); root != "" {
+	if root := os.Getenv("OWL_TEST_COLD_ROOT"); root != "" {
 		for _, k := range wslKinds {
 			d := distro{Name: "Stopped", Root: root, Home: "/home/me", Has: map[string]bool{"dir:." + k.id: true}}
 			k.in(d.place(k.id + "@wsl:Stopped"))
@@ -49,7 +49,7 @@ func TestWSLColdPlaceOpensNothing(t *testing.T) {
 	}
 	log := filepath.Join(t.TempDir(), "testlog")
 	cmd := exec.Command(os.Args[0], "-test.run=^TestWSLColdPlaceOpensNothing$", "-test.testlogfile="+log)
-	cmd.Env = append(os.Environ(), "MYNA_TEST_COLD_ROOT="+root)
+	cmd.Env = append(os.Environ(), "OWL_TEST_COLD_ROOT="+root)
 	if out, err := cmd.CombinedOutput(); err != nil {
 		t.Fatalf("%v\n%s", err, out)
 	}

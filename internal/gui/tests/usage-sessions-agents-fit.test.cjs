@@ -54,8 +54,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang));
-      await page.addInitScript(() => { localStorage.setItem("myna.usageTab", "sessions"); localStorage.setItem("myna.sessRange", "all"); localStorage.setItem("myna.usageEvery", "0"); });
-      await page.goto("http://myna.test/?view=usage");
+      await page.addInitScript(() => { localStorage.setItem("owl.usageTab", "sessions"); localStorage.setItem("owl.sessRange", "all"); localStorage.setItem("owl.usageEvery", "0"); });
+      await page.goto("http://owl.test/?view=usage");
       const pick = page.locator("#sessAgent");
       await pick.waitFor({ state: "visible" });
       assert.equal(await pick.evaluate((e) => e.tagName + "." + e.className), "BUTTON.sess-pick", "the agent filter is the same menu button as the model and folder ones");

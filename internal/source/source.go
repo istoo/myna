@@ -1,4 +1,4 @@
-// Package source chooses where myna reads from, with a mirror as a
+// Package source chooses where owl reads from, with a mirror as a
 // fallback when the official address can't be reached. The official source
 // stays first; a mirror is only asked when it fails. The Plugins page's
 // 「国内镜像」 switch (China) puts a mirror in China first for the few
@@ -16,7 +16,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 const (
@@ -41,7 +41,7 @@ var China = func() bool { return settings.Load().ChinaMirror }
 // official address: npmmirror for npm's registry and Bun's releases (whose
 // zips are checked against Bun's checksums all the same), jsDelivr for the
 // community repo's plugin list, hf-mirror for the masking models. Never a proxy such as gh-proxy, which
-// would hand myna whatever it liked.
+// would hand owl whatever it liked.
 func chinaFirst(raw string) string {
 	u, err := url.Parse(raw)
 	if err != nil || u.Scheme != "https" {
@@ -96,9 +96,9 @@ func modelMirror(u *url.URL) string {
 }
 
 // Enabled reports whether mirror fallback was turned on with
-// MYNA_MIRRORS=on (or true, 1, cn).
+// OWL_MIRRORS=on (or true, 1, cn).
 func Enabled() bool {
-	switch strings.ToLower(strings.TrimSpace(os.Getenv("MYNA_MIRRORS"))) {
+	switch strings.ToLower(strings.TrimSpace(os.Getenv("OWL_MIRRORS"))) {
 	case "on", "true", "1", "cn":
 		return true
 	}
@@ -106,14 +106,14 @@ func Enabled() bool {
 }
 
 func npmBase() string {
-	if v := strings.TrimRight(strings.TrimSpace(os.Getenv("MYNA_NPM_REGISTRY")), "/"); v != "" {
+	if v := strings.TrimRight(strings.TrimSpace(os.Getenv("OWL_NPM_REGISTRY")), "/"); v != "" {
 		return v
 	}
 	return npmMirror
 }
 
 func githubBase() string {
-	if v := strings.TrimRight(strings.TrimSpace(os.Getenv("MYNA_GITHUB_MIRROR")), "/"); v != "" {
+	if v := strings.TrimRight(strings.TrimSpace(os.Getenv("OWL_GITHUB_MIRROR")), "/"); v != "" {
 		return v
 	}
 	return githubMirror
@@ -123,7 +123,7 @@ func githubBase() string {
 // official one when there is no mirror for it; with the 「国内镜像」 switch
 // on, a mirror in China comes before it. A masking model's file has
 // hf-mirror after it with no switch at all (modelMirror); every other
-// fallback mirror waits for MYNA_MIRRORS.
+// fallback mirror waits for OWL_MIRRORS.
 func URLs(raw string) []string {
 	out := faithful(raw)
 	u, err := url.Parse(raw)

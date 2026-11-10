@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-// A repository of gateway hooks alone, package.json's myna.hooks with
+// A repository of gateway hooks alone, package.json's owl.hooks with
 // no main, exports or index.js, installs and runs, but the GitHub list
 // took it for one whose index.js Bun loads, found none, and left it out
 // without a word (MengXiangxi, #3821). It is listed now, a request hook,

@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // xaiUndecryptable is what xAI answers — a Grok API key or a SuperGrok
@@ -506,7 +506,7 @@ func TestForeignSealGrokRelayCompactionBlob(t *testing.T) {
 
 // openaiUndecryptable is what OpenAI told hheei (#3887) of a web search
 // another ChatGPT account ran, with code invalid_encrypted_content, and
-// myna passed on as "Codex: Encrypted content could not be decrypted or
+// owl passed on as "Codex: Encrypted content could not be decrypted or
 // parsed.". It names no item.
 const openaiUndecryptable = "Encrypted content could not be decrypted or parsed."
 
@@ -674,12 +674,12 @@ func askThread(s *Server, path, model, signedIn string, items ...string) (int, s
 	return rec.Code, rec.Body.String()
 }
 
-// Where a Codex conversation is asked through myna's Codex accounts: one
+// Where a Codex conversation is asked through owl's Codex accounts: one
 // of Codex's own models signed in, the codex provider's model, and a
 // routing group of it.
 var codexAccountRoutes = []struct{ name, path, model string }{
 	{"signed in", CodexPath + "/responses", "gpt-5.5"},
-	{"myna model", "/v1/responses", "codex/gpt-5.5"},
+	{"owl model", "/v1/responses", "codex/gpt-5.5"},
 	{"group", "/v1/responses", "group/g"},
 }
 

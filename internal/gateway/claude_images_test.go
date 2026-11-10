@@ -15,7 +15,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // tallShot is a screenshot as DeepSeek Harness sends one: a JPEG 400 px

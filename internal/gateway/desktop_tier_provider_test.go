@@ -3,7 +3,7 @@ package gateway
 import (
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // cybercaius on Discord: Claude Desktop's chat was on AgentRouter's

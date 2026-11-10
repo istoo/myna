@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/filememo"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/filememo"
 )
 
 // TestLoadReadOnceARequest: every Providers page poll asked Load, and

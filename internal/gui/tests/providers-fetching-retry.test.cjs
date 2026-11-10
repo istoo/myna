@@ -14,7 +14,7 @@ const path = require("node:path");
 const vm = require("node:vm");
 const { test } = require("node:test");
 
-const APP = process.env.MYNA_APP_JS || path.resolve(__dirname, "../assets/app.js");
+const APP = process.env.OWL_APP_JS || path.resolve(__dirname, "../assets/app.js");
 const source = fs.readFileSync(APP, "utf8").replace(/\r\n/g, "\n");
 
 // lift a top-level function out of app.js whole: from its `function` line to
@@ -42,7 +42,7 @@ function page() {
   const script = [
     `
 let view = "providers", editing = null, adding = false;
-const myna = { page: (v) => (v === "gateway" ? { loads: "providers" } : undefined) };
+const owl = { page: (v) => (v === "gateway" ? { loads: "providers" } : undefined) };
 `,
     pageLine[0],
     `

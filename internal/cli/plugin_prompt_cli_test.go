@@ -3,7 +3,7 @@ package cli
 import (
 	"testing"
 
-	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/owl/internal/plugin"
 )
 
 // TestAskPromptPasswordIsUnseen: a plugin question of type "password" (a

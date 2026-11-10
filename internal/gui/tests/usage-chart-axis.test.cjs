@@ -117,7 +117,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             p.setDefaultNavigationTimeout(60000);
             p.on("pageerror", (e) => errors.push(e.message));
             await p.route("**/*", serve(lang, currency, scale, false));
-            await p.goto("http://myna.test/");
+            await p.goto("http://owl.test/");
             await navTo(p, "usage");
             await p.locator(":is(#usageTab .opt, .nav-s):visible").nth(1).click();
             await p.locator("#ledChart svg").waitFor();
@@ -143,7 +143,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             p.setDefaultNavigationTimeout(60000);
             p.on("pageerror", (e) => errors.push(e.message));
             await p.route("**/*", serve(lang, currency, scale, true));
-            await p.goto("http://myna.test/?mode=panel");
+            await p.goto("http://owl.test/?mode=panel");
             await p.locator('[data-ptab="stats"]').click();
             await p.locator("#panelUsage .pu-card .led-chart svg").waitFor();
             for (let i = 0; i < 3; i++) {

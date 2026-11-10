@@ -8,9 +8,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // deepseekImageRefusal is DeepSeek's own 400 for an image sent to a model
@@ -55,9 +55,9 @@ func (u *sightUp) sent() []string {
 
 // sameModelTwice is xyenon's setup: DeepSeek-V4.1-Flash at two providers,
 // pa's a relay that takes text only but whose list says nothing of images
-// (models.dev says the model sees, so myna counted it as seeing), pb's
+// (models.dev says the model sees, so owl counted it as seeing), pb's
 // one that sees; pa falls back to pb. The Image recognition model is
-// v/eye, unless vision is "" (myna picks) or "off".
+// v/eye, unless vision is "" (owl picks) or "off".
 func sameModelTwice(t *testing.T, vision string) (s *Server, pa, pb *sightUp, eye *eyeUp) {
 	t.Helper()
 	fresh(t)

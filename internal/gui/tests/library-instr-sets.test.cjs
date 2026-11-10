@@ -16,7 +16,7 @@ const { navTo } = require("./reader.cjs");
 const assets = path.resolve(__dirname, "../assets");
 const HOME = "/Users/fate";
 const library = (claudeOn) => ({
-  dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
+  dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
   agents: [{ id: "claude", name: "Claude Code", icon: "", instructions: `${HOME}/.claude/CLAUDE.md` }],
   instructions: {
     shared: "",
@@ -67,14 +67,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await t.test(lang, async () => {
         const w = words[lang];
         const ctx = await browser.newContext({ viewport: { width: 980, height: 860 }, reducedMotion: "reduce" });
-        await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "instructions"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("owl.libTab", "instructions"); } catch {} });
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         const sent = [];
         await page.route("**/*", server(lang, library(false), sent));
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         await navTo(page, "library");
         const reads = page.locator(`${view} .lib-reads`);
         await reads.waitFor();

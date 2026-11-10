@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/proc"
 )
 
 // A server taken out of an agent's config keeps running in an agent that
@@ -18,7 +18,7 @@ import (
 // out are ended, once no agent's config names that command any more.
 
 // ending ends the processes of the servers a change took out, before the
-// change returns, as myna library mcp exits after it; tests keep it from
+// change returns, as owl library mcp exits after it; tests keep it from
 // ending anything on the machine running them.
 var ending = endDropped
 

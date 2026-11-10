@@ -5,14 +5,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/daemon"
+	"github.com/istoo/owl/internal/daemon"
 )
 
-// zaidu259434 on X: myna in WSL, its agents failed once myna tui was
+// zaidu259434 on X: owl in WSL, its agents failed once owl tui was
 // closed, nothing serving the gateway. The terminal quitting with an agent
-// connected hands the gateway to myna's service, installing it where
+// connected hands the gateway to owl's service, installing it where
 // systemd runs it and the user never removed it, starting it where it is
-// installed, else to a myna serve in the background. Off Linux, with
+// installed, else to a owl serve in the background. Off Linux, with
 // nothing connected, or where the app opens at login, it only says the
 // gateway stopped.
 func TestKeepGatewayAsTheTerminalQuits(t *testing.T) {
@@ -36,7 +36,7 @@ func TestKeepGatewayAsTheTerminalQuits(t *testing.T) {
 	gone := gatewayGoneNote()
 
 	d := setup("linux", false, false, false, nil)
-	if msg := keepGateway(true); !d.installed || d.bg || !strings.Contains(msg, "myna daemon uninstall") {
+	if msg := keepGateway(true); !d.installed || d.bg || !strings.Contains(msg, "owl daemon uninstall") {
 		t.Errorf("no service: %+v %q", *d, msg)
 	}
 	d = setup("linux", false, true, false, nil)
@@ -63,11 +63,11 @@ func TestKeepGatewayAsTheTerminalQuits(t *testing.T) {
 			t.Errorf("%s: %+v %q", name, *d, msg)
 		}
 	}
-	// myna opens at login: the gateway is left to the app, and the
+	// owl opens at login: the gateway is left to the app, and the
 	// note says how to have it handed on where no desktop logs in, as
 	// with a package's entry on NixOS-WSL (#3756)
 	d = setup("linux", true, false, false, nil)
-	if msg := keepGateway(true); d.installed || d.bg || d.started || !strings.HasPrefix(msg, gone) || !strings.Contains(msg, "myna autostart off") {
+	if msg := keepGateway(true); d.installed || d.bg || d.started || !strings.HasPrefix(msg, gone) || !strings.Contains(msg, "owl autostart off") {
 		t.Errorf("app at login: %+v %q", *d, msg)
 	}
 }

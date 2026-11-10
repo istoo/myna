@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/istoo/myna/internal/appdir"
+	"github.com/istoo/owl/internal/appdir"
 )
 
 // omp (oh-my-pi, a fork of Pi) keeps its sessions as Pi does, a file per
@@ -21,7 +21,7 @@ import (
 // id>.jsonl, theirs in turn one folder deeper), which count in the session
 // they ran in. `omp --resume <id>` picks one up again.
 
-// OmpDir is omp's agent folder, ~/.omp/agent, as myna's omp agent has it.
+// OmpDir is omp's agent folder, ~/.omp/agent, as owl's omp agent has it.
 func OmpDir() string {
 	home, _ := os.UserHomeDir()
 	return filepath.Join(home, ".omp", "agent")

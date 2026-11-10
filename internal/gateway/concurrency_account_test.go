@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // laneRig is a gateway in front of slow vendors, and a way to send it

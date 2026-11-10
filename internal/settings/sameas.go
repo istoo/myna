@@ -7,7 +7,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 // The catalog hears what the user said a model is the same as

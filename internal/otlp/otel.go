@@ -15,10 +15,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/istoo/myna/internal/netproxy"
-	"github.com/istoo/myna/internal/sessions"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/netproxy"
+	"github.com/istoo/owl/internal/sessions"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/usage"
 )
 
 const otelQueueSize = 128
@@ -39,7 +39,7 @@ type Record = usage.Record
 
 // Exporter sends the gateway's requests, the ledger's rows and the agents'
 // sessions to an OpenTelemetry collector, as settings.OTel says. It is a
-// usage.Observer: plugins/otel registers one while it is on, and myna's
+// usage.Observer: plugins/otel registers one while it is on, and owl's
 // core never exports on its own.
 type Exporter struct {
 	running atomic.Pointer[otelExporter]

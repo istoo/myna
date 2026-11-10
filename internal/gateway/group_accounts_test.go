@@ -9,8 +9,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // keyedUpstream answers chat, messages and count_tokens, each reply
@@ -298,7 +298,7 @@ func TestGroupAccountsAndAKeysAccounts(t *testing.T) {
 
 // SaveGroup takes an account by its name or id, refuses one the provider
 // doesn't have, and a shared group carries no accounts: they are this
-// myna's.
+// owl's.
 func TestGroupAccountsSaved(t *testing.T) {
 	groupAccountsSetup(t)
 	if err := provider.SaveGroup(provider.Group{Name: "Bad", Members: []string{"relay/m"}, Accounts: []string{"relay/nobody"}}); err == nil {
@@ -321,7 +321,7 @@ func TestGroupAccountsSaved(t *testing.T) {
 	if strings.Contains(text, provider.KeyID("sk-work")) {
 		t.Fatalf("shared with its accounts: %s", text)
 	}
-	// one shared with accounts in it (by hand, or an older myna's)
+	// one shared with accounts in it (by hand, or an older owl's)
 	// is imported without them
 	text = strings.Replace(text, `"name":"Work"`, `"name":"Imported","accounts":["`+work+`"]`, 1)
 	if !strings.Contains(text, `"accounts"`) {

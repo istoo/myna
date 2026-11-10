@@ -64,7 +64,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const posts = [], errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", server(lang, posts));
-      await page.goto("http://myna.test/?view=settings&tab=network");
+      await page.goto("http://owl.test/?view=settings&tab=network");
       const box = page.locator("#proxySegs");
       const address = box.locator("input.proxy");
       const user = box.getByRole("textbox", { name: l.user, exact: true });
@@ -198,7 +198,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       page.on("pageerror", (e) => errors.push(e.message));
       // as one typed whole before: a raw @ in the password, as Go reads it
       await page.route("**/*", server(lang, posts, "https://al%20ice:se@cr%23et@proxy.example:8443"));
-      await page.goto("http://myna.test/?view=settings&tab=network");
+      await page.goto("http://owl.test/?view=settings&tab=network");
       const box = page.locator("#proxySegs");
       assert.equal(await box.locator("input.proxy").inputValue(), "https://proxy.example:8443");
       assert.equal(await box.getByRole("textbox", { name: l.user, exact: true }).inputValue(), "al ice");

@@ -25,7 +25,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [], events = [], options = { lan: true };
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", fixture(lang, "light", events, options));
-      await page.goto("http://myna.test/?view=gateway");
+      await page.goto("http://owl.test/?view=gateway");
       const rows = page.locator("#gatewayKeys .acc[data-key]");
       await rows.last().waitFor();
       const order = () => rows.evaluateAll((rs) => rs.map((r) => r.dataset.key).join(","));

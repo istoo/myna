@@ -92,7 +92,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], posts = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, posts, windows));
-        await page.goto("http://myna.test/?view=providers");
+        await page.goto("http://owl.test/?view=providers");
         await page.locator(".row.provider", { hasText: "Antigravity" }).first().click();
         await page.locator(".editor .accts .acc .aq-w").first().waitFor();
         return { page, errors, posts };

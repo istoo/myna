@@ -248,12 +248,12 @@ export { sleep };
 // it, and it counts what the page changes. Each read answers [how many
 // changes so far, ms since the last one].
 const WATCH = `(() => {
-  if (!window.__mynaWatch) {
-    const w = window.__mynaWatch = { n: 0, at: 0 };
+  if (!window.__owlWatch) {
+    const w = window.__owlWatch = { n: 0, at: 0 };
     new MutationObserver((r) => { w.n += r.length; w.at = Date.now(); })
       .observe(document, { subtree: true, childList: true, attributes: true, characterData: true });
   }
-  const w = window.__mynaWatch;
+  const w = window.__owlWatch;
   return [w.n, w.at ? Date.now() - w.at : 1e9];
 })()`;
 
@@ -273,7 +273,7 @@ export async function watch(t, frame, sid) {
     let ctx = t.worlds.get(k);
     if (!ctx) {
       try {
-        ctx = (await send(t.tabId, "Page.createIsolatedWorld", { frameId: frame, worldName: "myna-watch" }, sid)).executionContextId;
+        ctx = (await send(t.tabId, "Page.createIsolatedWorld", { frameId: frame, worldName: "owl-watch" }, sid)).executionContextId;
         t.worlds.set(k, ctx);
       } catch { return null; }
     }

@@ -41,7 +41,7 @@ const body = (sg) => JSON.stringify({ model: "m", messages: [{ role: "user", con
   await ask(url, JSON.stringify({ model: "m", messages: [] }));
   await ask("https://api.anthropic.com/v1/messages/count_tokens", body([{ c: "a" }]));
   await s.fetch(url, { method: "POST", headers, body: new TextEncoder().encode(body([{ c: "a" }])) });
-  console.log(JSON.stringify({ env: process.env.CLAUDE_CODE_EXTRA_BODY, guardEnv: process.env.MYNA_CLAUDE_GUARD || null }));
+  console.log(JSON.stringify({ env: process.env.CLAUDE_CODE_EXTRA_BODY, guardEnv: process.env.OWL_CLAUDE_GUARD || null }));
 })();
 `
 

@@ -29,7 +29,7 @@ import (
 // had a reply on, Codex names that reply (previous_response_id) and
 // sends only what came after it, where over HTTP it sends the whole
 // conversation every turn, images and all (#4058, kevinzhow and
-// neighbads on X). myna answered the upgrade 426 (a87dc1ff2), which
+// neighbads on X). owl answered the upgrade 426 (a87dc1ff2), which
 // has Codex use HTTP for the session.
 //
 // Each response.create is served as the POST it stands for: the request
@@ -191,7 +191,7 @@ func (s *Server) serveResponsesSocket(w http.ResponseWriter, r *http.Request) bo
 	// check here is the library's: Origin's host must be the Host); the
 	// guards the upgrade passed judged it already
 	if s.sockets.ending() {
-		http.Error(w, "myna is restarting", http.StatusServiceUnavailable)
+		http.Error(w, "owl is restarting", http.StatusServiceUnavailable)
 		return true
 	}
 	c, err := websocket.Accept(w, r, &websocket.AcceptOptions{CompressionMode: websocket.CompressionNoContextTakeover})
@@ -207,7 +207,7 @@ func (s *Server) serveResponsesSocket(w http.ResponseWriter, r *http.Request) bo
 	c.SetReadLimit(most)
 	sock := &responsesSocket{s: s, o: o, path: r.URL.Path, c: c, ctx: o.ctx}
 	if !s.sockets.add(sock) {
-		c.Close(websocket.StatusGoingAway, "myna is restarting")
+		c.Close(websocket.StatusGoingAway, "owl is restarting")
 		return true
 	}
 	defer s.sockets.remove(sock)
@@ -226,7 +226,7 @@ func (rs *responsesSocket) goingAway() {
 	rs.mu.Unlock()
 	if idle {
 		// Close waits for the client's reply: not one socket after another
-		go rs.c.Close(websocket.StatusGoingAway, "myna is restarting")
+		go rs.c.Close(websocket.StatusGoingAway, "owl is restarting")
 	}
 }
 
@@ -282,7 +282,7 @@ func (rs *responsesSocket) serve() {
 			continue
 		default:
 			rs.writeError(ctx, http.StatusBadRequest, "invalid_request_error", "unsupported_message",
-				fmt.Sprintf("myna serves response.create on this socket, not %q", kind), "type")
+				fmt.Sprintf("owl serves response.create on this socket, not %q", kind), "type")
 			continue
 		}
 		rs.mu.Lock()
@@ -340,7 +340,7 @@ func (rs *responsesSocket) serve() {
 			return
 		}
 		if away {
-			rs.c.Close(websocket.StatusGoingAway, "myna is restarting")
+			rs.c.Close(websocket.StatusGoingAway, "owl is restarting")
 			return
 		}
 	}
@@ -797,7 +797,7 @@ func (w *socketTurnWriter) event(data []byte) error {
 	case "response.incomplete", "response.failed", "response.cancelled", "error":
 		w.ended = true
 	case "codex.response.metadata":
-		// the model list's tag as myna gives it (modelsEtag), which the
+		// the model list's tag as owl gives it (modelsEtag), which the
 		// reply's header has
 		if v := w.h.Get("X-Models-Etag"); v != "" && gjson.GetBytes(data, "headers.x-models-etag").Exists() {
 			if b, ok := withModelsEtag(data, v); ok {

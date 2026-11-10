@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 // The models.dev catalog's anthropic rows, as models.dev served them on
@@ -40,7 +40,7 @@ func writeAnthropicCatalog(t *testing.T, rows ...string) {
 // A Claude model models.dev lists after the Claude account's list was
 // last fetched is served at once, as the catalog has it: the copy a fetch
 // keeps doesn't hold it out until the next Refresh (wakaka on Discord:
-// Haiku 5.5 in Claude Code on the same account, not in myna).
+// Haiku 5.5 in Claude Code on the same account, not in owl).
 func TestClaudeAccountServesModelsListedSinceItsFetch(t *testing.T) {
 	home := claudeHome(t)
 	claudeSignIn(t, home, time.Now().Add(time.Hour))

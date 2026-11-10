@@ -118,7 +118,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           }
           await browser.close();
         });
-        await page.goto("http://myna.test/?view=" + view);
+        await page.goto("http://owl.test/?view=" + view);
         return { page, errors, lifted };
       };
 

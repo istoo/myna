@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/update"
+	"github.com/istoo/owl/internal/update"
 )
 
 // xyxyxy_15591 on Discord: an update put in by itself shouldn't put the
@@ -21,9 +21,9 @@ import (
 func TestRestartBySelfComesBackQuietly(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("XDG_CONFIG_HOME", home)
-	mark := filepath.Join(home, "myna", quietRestartFile)
+	mark := filepath.Join(home, "owl", quietRestartFile)
 
-	exe := filepath.Join(t.TempDir(), "myna")
+	exe := filepath.Join(t.TempDir(), "owl")
 	os.WriteFile(exe, []byte("old"), 0o755)
 	self, _ := os.Stat(exe)
 	os.WriteFile(exe, []byte("newer"), 0o755) // in already: install has nothing to swap
@@ -66,7 +66,7 @@ func TestRestartBySelfComesBackQuietly(t *testing.T) {
 		}
 	}
 
-	// myna web restarts in place: nothing to mark
+	// owl web restarts in place: nothing to mark
 	if !restartInto(true, false, "", true) {
 		t.Fatal("web restart failed")
 	}

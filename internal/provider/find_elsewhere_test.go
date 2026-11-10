@@ -7,16 +7,16 @@ import (
 	"testing"
 )
 
-// A myna run in a shell whose XDG_CONFIG_HOME moves its files says so when
+// A owl run in a shell whose XDG_CONFIG_HOME moves its files says so when
 // a provider isn't found, naming the folder the app keeps them in (蒙面人 on
-// Discord: `myna provider refresh antigravity` found no Antigravity, which
+// Discord: `owl provider refresh antigravity` found no Antigravity, which
 // the window showed signed in); without the variable it says nothing more.
 func TestFindSaysFilesAreElsewhere(t *testing.T) {
 	h := t.TempDir()
 	t.Setenv("HOME", h)
 	t.Setenv("USERPROFILE", h)
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(h, ".cache"))
-	app := filepath.Join(h, ".config", "myna")
+	app := filepath.Join(h, ".config", "owl")
 	if err := os.MkdirAll(app, 0o700); err != nil {
 		t.Fatal(err)
 	}

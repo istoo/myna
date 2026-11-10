@@ -59,7 +59,7 @@ function serve(lang, posts) {
 
 const strings = [
   "Certificate", "Don't check its certificate",
-  "For your own server with a self-signed certificate or one from your company's CA. myna then can't tell it from another machine answering at its address: turn it on only on a network you trust.",
+  "For your own server with a self-signed certificate or one from your company's CA. owl then can't tell it from another machine answering at its address: turn it on only on a network you trust.",
 ];
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -82,7 +82,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         const posts = [];
         await page.route("**/*", serve(lang, posts));
-        await page.goto("http://myna.test/?view=providers");
+        await page.goto("http://owl.test/?view=providers");
         const w = await page.evaluate(([lang, ks]) => Object.fromEntries(ks.map((k) => [k, (I18N[lang] || {})[k] || k])), [lang, [...strings, "Save", "Fetch models"]]);
         await page.locator(".row.provider", { hasText: name }).click();
         await page.locator(".editor .bar").waitFor();

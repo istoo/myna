@@ -11,13 +11,13 @@ import (
 // and Anthropic's Messages API only when its provider's compat says
 // sendSessionAffinityHeaders, omp (18.6.1) on Chat and Responses only to
 // OpenAI itself. Both were run against a header dump: with the provider
-// block myna writes, Pi sends x-session-affinity on Chat and Messages
+// block owl writes, Pi sends x-session-affinity on Chat and Messages
 // and session_id on Responses, omp x-session-affinity on Chat and
 // Responses (and X-Claude-Code-Session-Id on Messages, as before).
 func TestPiNamesItsSessionToTheGateway(t *testing.T) {
 	home := syncHome(t)
 	piModels := filepath.Join(home, ".pi", "agent", "models.json")
-	if err := pi(home).Fields[0].Set("myna/relay/glm-4.6"); err != nil {
+	if err := pi(home).Fields[0].Set("owl/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	compat, _ := providerAt(t, piModels, "providers")["compat"].(map[string]any)
@@ -26,9 +26,9 @@ func TestPiNamesItsSessionToTheGateway(t *testing.T) {
 	}
 
 	// one the user turned off stays off, through a sync and a pick
-	writeFile(t, piModels, `{"providers":{"myna":{"name":"myna","baseUrl":"http://127.0.0.1:3425/v1","api":"openai-completions","apiKey":"myna","compat":{"sendSessionAffinityHeaders":false,"supportsStore":false},"models":[]}}}`)
+	writeFile(t, piModels, `{"providers":{"owl":{"name":"owl","baseUrl":"http://127.0.0.1:3425/v1","api":"openai-completions","apiKey":"owl","compat":{"sendSessionAffinityHeaders":false,"supportsStore":false},"models":[]}}}`)
 	SyncCatalog()
-	if err := pi(home).Fields[0].Set("myna/relay/glm-4.6"); err != nil {
+	if err := pi(home).Fields[0].Set("owl/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	compat, _ = providerAt(t, piModels, "providers")["compat"].(map[string]any)

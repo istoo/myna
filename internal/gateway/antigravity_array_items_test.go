@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 	"github.com/tidwall/gjson"
 )
 
@@ -114,7 +114,7 @@ func TestGroupFailsOverGoogleSchema400(t *testing.T) {
 		want   bool
 	}{
 		{400, arrayItems400, true},
-		// as myna passed it on to the agent
+		// as owl passed it on to the agent
 		{400, `{"error":{"message":"Antigravity: * GenerateContentRequest.tools[0].function_declarations[26].parameters.properties[batch].items: missing field.\n"}}`, true},
 		// Google's other wording for a schema keyword it doesn't take (#187)
 		{400, `{"error":{"code":400,"message":"Invalid JSON payload received. Unknown name \"exclusiveMinimum\" at 'request.tools[0].function_declarations[3].parameters.properties[0].value': Cannot find field.","status":"INVALID_ARGUMENT"}}`, true},

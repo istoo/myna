@@ -80,7 +80,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             const errors = [], asks = [];
             page.on("pageerror", (e) => errors.push(e.message));
             await page.route("**/*", serve(lang, asks));
-            await page.goto("http://myna.test/?view=routing");
+            await page.goto("http://owl.test/?view=routing");
             const act = page.locator(".rt-act", { hasText: "work@example.com" }).first();
             await act.locator(".wins span").first().waitFor();
             assert.deepEqual(await act.locator(".wins span").allTextContents(), words[lang]);

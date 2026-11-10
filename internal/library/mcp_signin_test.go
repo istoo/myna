@@ -3,17 +3,17 @@ package library
 import (
 	"testing"
 
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/mcpauth"
-	"github.com/istoo/myna/internal/mcpauth/mcpauthtest"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/mcpauth"
+	"github.com/istoo/owl/internal/mcpauth/mcpauthtest"
 )
 
-// A remote server myna signed in to (#615) is given to the agents at the
+// A remote server owl signed in to (#615) is given to the agents at the
 // gateway's /mcp/<name>, without the Authorization the library has for it,
-// and only while myna is signed in: before, after signing out and for an
+// and only while owl is signed in: before, after signing out and for an
 // SSE server, the agents are given the server's own address as before. A
 // rename keeps the sign-in, and a server taken out of the library loses it.
-func TestSignedInServerGoesThroughMyna(t *testing.T) {
+func TestSignedInServerGoesThroughOwl(t *testing.T) {
 	sandbox(t)
 	f := mcpauthtest.New(t)
 	agents := []string{"claude", "codex", "cursor"}
@@ -39,7 +39,7 @@ func TestSignedInServerGoesThroughMyna(t *testing.T) {
 		}
 	}
 
-	f.SignIn(t, "neon") // the agents are given myna's address as it ends
+	f.SignIn(t, "neon") // the agents are given owl's address as it ends
 	local := gateway.URL() + "/mcp/neon"
 	for id, s := range given("neon") {
 		if s == nil || s.URL != local || s.Transport != "http" || s.Headers["Authorization"] != "" || s.Headers["X-Team"] != "acme" {
@@ -79,7 +79,7 @@ func TestSignedInServerGoesThroughMyna(t *testing.T) {
 		}
 	}
 
-	// another URL is another server, which myna isn't signed in to
+	// another URL is another server, which owl isn't signed in to
 	moved := renamed
 	moved.URL = f.URL + "?v=2"
 	ok(t)(SaveServer("neon2", moved))

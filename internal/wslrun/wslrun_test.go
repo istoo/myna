@@ -7,7 +7,7 @@ import (
 	"time"
 	"unicode/utf16"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 func TestParseProbe(t *testing.T) {
@@ -99,9 +99,9 @@ func TestProbeSkipsWindowsOwn(t *testing.T) {
 func TestLinux(t *testing.T) {
 	tool := Tool{Mount: "/mnt/"}
 	for in, want := range map[string]string{
-		`C:\Users\me\myna\myna.exe`: "/mnt/c/Users/me/myna/myna.exe",
-		`D:\`:                       "/mnt/d/",
-		`/already/linux`:            "/already/linux",
+		`C:\Users\me\owl\owl.exe`: "/mnt/c/Users/me/owl/owl.exe",
+		`D:\`:                     "/mnt/d/",
+		`/already/linux`:          "/already/linux",
 	} {
 		if got := tool.Linux(in); got != want {
 			t.Errorf("Linux(%q) = %q, want %q", in, got, want)

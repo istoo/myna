@@ -67,7 +67,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             pluginState.plugins[0].options = body.options ?? undefined;
             return r.fulfill({ json: pluginState });
           });
-          await page.goto("http://myna.test/?view=plugins");
+          await page.goto("http://owl.test/?view=plugins");
           const view = page.locator("#view-plugins");
           await page.locator(":is(.lib-tabs .opt, .nav-s):visible", { hasText: w.installed }).click();
           const names = { [DEVIN]: "Devin Auth", [PLAIN]: "Plain Auth", [OFF]: "Offco Auth" };

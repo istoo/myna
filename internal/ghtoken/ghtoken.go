@@ -1,4 +1,4 @@
-// Package ghtoken has myna's requests to GitHub's REST API carry the
+// Package ghtoken has owl's requests to GitHub's REST API carry the
 // user's GitHub token, and says plainly when GitHub turns them away.
 //
 // GitHub's API answers an address 60 requests an hour without a token,
@@ -11,7 +11,7 @@
 // Plugins page's git plugins both ask GitHub through here (#1942).
 //
 // A token GitHub refuses (401) is one that no longer reads: the request is
-// asked again without it, and the token isn't sent again while myna runs
+// asked again without it, and the token isn't sent again while owl runs
 // (till on Discord). For a token from the environment that is the whole of
 // it. The token set in Settings is the user's own choice, so its refusal is
 // also said (SettingsRefused): the checks go on without a token, not with
@@ -30,7 +30,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // Env names the environment variables a token is taken from when Settings
@@ -59,7 +59,7 @@ func Token() (token, from string) {
 }
 
 // refused holds the tokens GitHub answered 401, Settings' included, for as
-// long as myna runs: keyed by the token, so a variable or a Settings
+// long as owl runs: keyed by the token, so a variable or a Settings
 // field set to another one is tried afresh.
 var refused = struct {
 	sync.Mutex
@@ -95,7 +95,7 @@ func markSettingsRefused(t string) {
 
 // SettingsRefused is when GitHub refused the token set in Settings, and
 // whether it did. From then on the checks ask GitHub without a token until
-// that field is changed or myna restarts, so a stale token costs the user
+// that field is changed or owl restarts, so a stale token costs the user
 // the 5,000 an hour it was for and not every check (#3926).
 func SettingsRefused() (time.Time, bool) {
 	now := strings.TrimSpace(settings.Load().GitHubToken)

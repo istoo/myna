@@ -29,7 +29,7 @@ func openCodeInstall(t *testing.T) (dir, ran string) {
 	}
 	root := t.TempDir()
 	ran = filepath.Join(root, "ran")
-	t.Setenv("MYNA_PROC_RAN", ran)
+	t.Setenv("OWL_PROC_RAN", ran)
 	dir = filepath.Join(root, "Programs", "ai.opencode.desktop")
 	if err := os.MkdirAll(filepath.Join(dir, "resources"), 0o755); err != nil {
 		t.Fatal(err)
@@ -48,7 +48,7 @@ func openCodeInstall(t *testing.T) (dir, ran string) {
 
 // With OpenCode's install folder on PATH, `opencode` is OpenCode.exe
 // (Windows looks names up without case), and a version probe never runs
-// it: run, it opens OpenCode's window, which myna's version check did at
+// it: run, it opens OpenCode's window, which owl's version check did at
 // each start and after each update (saint carol on Discord). The CLI
 // beside it still answers.
 func TestProbeNeverOpensAWindowsApp(t *testing.T) {

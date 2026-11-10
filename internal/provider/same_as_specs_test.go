@@ -6,8 +6,8 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // pinmmis on X (10-29): one model from several relays, renamed to be told

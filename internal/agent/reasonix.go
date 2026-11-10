@@ -1,7 +1,7 @@
 package agent
 
 // Reasonix Studio 2.x and its CLI share config.toml and .env under REASONIX_HOME,
-// ~/.reasonix, or %APPDATA%/reasonix on Windows. Myna owns one [[providers]]
+// ~/.reasonix, or %APPDATA%/reasonix on Windows. Owl owns one [[providers]]
 // entry, never the user's other providers. Project/session overrides stay theirs.
 
 import (
@@ -18,13 +18,13 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/provider"
 	"github.com/pelletier/go-toml/v2"
 )
 
-const reasonixKey = "MYNA_REASONIX_API_KEY"
+const reasonixKey = "OWL_REASONIX_API_KEY"
 
 var reasonixKeyLine = regexp.MustCompile(`(?m)^\s*(?:export\s+)?` + reasonixKey + `\s*=`)
 
@@ -136,10 +136,10 @@ func reasonixIn(at place) *Agent {
 	}
 	checkOwner := func(cfg reasonixConfig, state *reasonixState) error {
 		for _, p := range cfg.Providers {
-			if p.Name == mynaID && (state == nil || p.APIKeyEnv != reasonixKey) {
-				return fmt.Errorf("Reasonix already has a provider named myna that myna does not own")
+			if p.Name == owlID && (state == nil || p.APIKeyEnv != reasonixKey) {
+				return fmt.Errorf("Reasonix already has a provider named owl that owl does not own")
 			}
-			if p.Name != mynaID && p.APIKeyEnv == reasonixKey {
+			if p.Name != owlID && p.APIKeyEnv == reasonixKey {
 				return fmt.Errorf("Reasonix's %s is used by another provider", reasonixKey)
 			}
 		}
@@ -153,7 +153,7 @@ func reasonixIn(at place) *Agent {
 			return fmt.Errorf("Reasonix credentials repeat %s", reasonixKey)
 		}
 		if _, exists := edit.GetEnvFile(env, reasonixKey); exists && state == nil {
-			return fmt.Errorf("Reasonix's %s already exists; it was not created by myna", reasonixKey)
+			return fmt.Errorf("Reasonix's %s already exists; it was not created by owl", reasonixKey)
 		}
 		return nil
 	}
@@ -164,7 +164,7 @@ func reasonixIn(at place) *Agent {
 		if err != nil {
 			return err
 		}
-		return edit.SetTOMLArrayTable(path, "providers", "name", mynaID, string(b))
+		return edit.SetTOMLArrayTable(path, "providers", "name", owlID, string(b))
 	}
 	// Restore only what this adapter added. A later native selection and edits to
 	// other providers, credentials, and the desktop access list survive.
@@ -178,12 +178,12 @@ func reasonixIn(at place) *Agent {
 		if err := checkOwner(cfg, state); err != nil {
 			return err
 		}
-		if cfg.Agent.Planner != nil && usesMyna(*cfg.Agent.Planner) {
+		if cfg.Agent.Planner != nil && usesOwl(*cfg.Agent.Planner) {
 			// Keep the connection while the independently selected Plan uses it.
 			if native != "" {
 				return edit.SetTOMLTopPreserving(path, edit.KV{Path: "default_model", Value: native})
 			}
-			if cfg.DefaultModel != nil && usesMyna(*cfg.DefaultModel) {
+			if cfg.DefaultModel != nil && usesOwl(*cfg.DefaultModel) {
 				if state.Default != nil {
 					return edit.SetTOMLTopPreserving(path, edit.KV{Path: "default_model", Value: *state.Default})
 				}
@@ -191,14 +191,14 @@ func reasonixIn(at place) *Agent {
 			}
 			return nil
 		}
-		if err := edit.DelTOMLArrayTable(path, "providers", "name", mynaID); err != nil {
+		if err := edit.DelTOMLArrayTable(path, "providers", "name", owlID); err != nil {
 			return err
 		}
 		if native != "" {
 			if err := edit.SetTOMLTopPreserving(path, edit.KV{Path: "default_model", Value: native}); err != nil {
 				return err
 			}
-		} else if cfg.DefaultModel != nil && usesMyna(*cfg.DefaultModel) {
+		} else if cfg.DefaultModel != nil && usesOwl(*cfg.DefaultModel) {
 			if state.Default != nil {
 				if err := edit.SetTOMLTopPreserving(path, edit.KV{Path: "default_model", Value: *state.Default}); err != nil {
 					return err
@@ -207,8 +207,8 @@ func reasonixIn(at place) *Agent {
 				return err
 			}
 		}
-		if state.AddedAccess && slices.Contains(cfg.Desktop.Access, mynaID) {
-			access := slices.DeleteFunc(cfg.Desktop.Access, func(v string) bool { return v == mynaID })
+		if state.AddedAccess && slices.Contains(cfg.Desktop.Access, owlID) {
+			access := slices.DeleteFunc(cfg.Desktop.Access, func(v string) bool { return v == owlID })
 			if err := edit.SetTOMLKey(path, "desktop", "provider_access", reasonixArray(access)); err != nil {
 				return err
 			}
@@ -237,9 +237,9 @@ func reasonixIn(at place) *Agent {
 	}
 	ensureGateway := func(cfg reasonixConfig, state **reasonixState, ref, selected string) error {
 		currentState := *state
-		models := mynaModels("reasonix")
+		models := owlModels("reasonix")
 		if !slices.ContainsFunc(models, func(m catalog.Model) bool { return m.ID == ref }) {
-			return fmt.Errorf("myna has no visible model %q", ref)
+			return fmt.Errorf("owl has no visible model %q", ref)
 		}
 		if err := checkOwner(cfg, currentState); err != nil {
 			return err
@@ -248,14 +248,14 @@ func reasonixIn(at place) *Agent {
 			_, cErr := os.Stat(path)
 			_, eErr := os.Stat(env)
 			currentState = &reasonixState{Version: 1, Default: cfg.DefaultModel, NewConfig: os.IsNotExist(cErr), NewEnv: os.IsNotExist(eErr)}
-			currentState.AddedAccess = cfg.Desktop.Access != nil && !slices.Contains(cfg.Desktop.Access, mynaID)
+			currentState.AddedAccess = cfg.Desktop.Access != nil && !slices.Contains(cfg.Desktop.Access, owlID)
 		}
-		p := reasonixCatalogAt(models, selected, cfg.myna().Effort, at.v1())
+		p := reasonixCatalogAt(models, selected, cfg.owl().Effort, at.v1())
 		if err := writeProvider(p); err != nil {
 			return err
 		}
-		if cfg.Desktop.Access != nil && !slices.Contains(cfg.Desktop.Access, mynaID) {
-			access := append(cfg.Desktop.Access, mynaID)
+		if cfg.Desktop.Access != nil && !slices.Contains(cfg.Desktop.Access, owlID) {
+			access := append(cfg.Desktop.Access, owlID)
 			if err := edit.SetTOMLKey(path, "desktop", "provider_access", reasonixArray(access)); err != nil {
 				return err
 			}
@@ -281,8 +281,8 @@ func reasonixIn(at place) *Agent {
 		if err != nil {
 			return err
 		}
-		ref, myna := strings.CutPrefix(v, mynaID+"/")
-		if !myna {
+		ref, owl := strings.CutPrefix(v, owlID+"/")
+		if !owl {
 			known := cfg.hasModel(v) || cfg.DefaultModel != nil && *cfg.DefaultModel == v ||
 				state != nil && state.Default != nil && *state.Default == v
 			if v != "" && !known {
@@ -304,14 +304,14 @@ func reasonixIn(at place) *Agent {
 			return noticeReasonix.String()
 		},
 		Check: func() string {
-			ref, on := strings.CutPrefix(model(), mynaID+"/")
+			ref, on := strings.CutPrefix(model(), owlID+"/")
 			if !on {
 				cfg, _, err := load()
 				if err != nil {
 					return "Reasonix configuration cannot be read"
 				}
 				if cfg.Agent.Planner != nil {
-					ref, on = strings.CutPrefix(*cfg.Agent.Planner, mynaID+"/")
+					ref, on = strings.CutPrefix(*cfg.Agent.Planner, owlID+"/")
 				}
 				if !on {
 					return ""
@@ -321,24 +321,24 @@ func reasonixIn(at place) *Agent {
 			if err != nil {
 				return "Reasonix configuration cannot be read"
 			}
-			p := cfg.myna()
+			p := cfg.owl()
 			if state == nil || p.APIKeyEnv != reasonixKey {
-				return "Reasonix's myna provider or restore record is missing"
+				return "Reasonix's owl provider or restore record is missing"
 			}
 			if err := checkOwner(cfg, state); err != nil {
 				return err.Error()
 			}
-			if p.Kind != "openai" || p.BaseURL != at.v1() && !reachesMyna(p.BaseURL, at.v1()) {
-				return "Reasonix's myna base_url or kind changed"
+			if p.Kind != "openai" || p.BaseURL != at.v1() && !reachesOwl(p.BaseURL, at.v1()) {
+				return "Reasonix's owl base_url or kind changed"
 			}
 			if token, _ := edit.GetEnvFile(env, reasonixKey); !keyHolds(token, gwKey()) {
 				return "Reasonix's gateway credential changed"
 			}
-			if !slices.Contains(p.Models, ref) || cfg.Agent.Planner != nil && usesMyna(*cfg.Agent.Planner) && !slices.Contains(p.Models, strings.TrimPrefix(*cfg.Agent.Planner, mynaID+"/")) {
-				return "Reasonix's selected model is missing from the myna catalog"
+			if !slices.Contains(p.Models, ref) || cfg.Agent.Planner != nil && usesOwl(*cfg.Agent.Planner) && !slices.Contains(p.Models, strings.TrimPrefix(*cfg.Agent.Planner, owlID+"/")) {
+				return "Reasonix's selected model is missing from the owl catalog"
 			}
-			if cfg.Desktop.Access != nil && !slices.Contains(cfg.Desktop.Access, mynaID) {
-				return "Reasonix Studio's provider_access excludes myna"
+			if cfg.Desktop.Access != nil && !slices.Contains(cfg.Desktop.Access, owlID) {
+				return "Reasonix Studio's provider_access excludes owl"
 			}
 			return ""
 		},
@@ -353,13 +353,13 @@ func reasonixIn(at place) *Agent {
 			if err := checkOwner(cfg, state); err != nil {
 				return err
 			}
-			current := cfg.myna()
+			current := cfg.owl()
 			if current.Name == "" {
 				return nil
 			}
-			models := mynaModels("reasonix")
+			models := owlModels("reasonix")
 			if len(models) == 0 {
-				return fmt.Errorf("myna has no visible Reasonix models")
+				return fmt.Errorf("owl has no visible Reasonix models")
 			}
 			next := reasonixCatalogAt(models, current.Default, current.Effort, at.v1())
 			if reflect.DeepEqual(current, next) {
@@ -373,7 +373,7 @@ func reasonixIn(at place) *Agent {
 					cfg, state, _ := load()
 					var own []Option
 					for _, p := range cfg.Providers {
-						if p.Name == mynaID {
+						if p.Name == owlID {
 							continue
 						}
 						models := p.Models
@@ -385,7 +385,7 @@ func reasonixIn(at place) *Agent {
 						}
 					}
 					addNative := func(v string) {
-						if v != "" && !usesMyna(v) && !slices.ContainsFunc(own, func(o Option) bool { return o.Value == v }) {
+						if v != "" && !usesOwl(v) && !slices.ContainsFunc(own, func(o Option) bool { return o.Value == v }) {
 							own = append(own, Option{Value: v, Icon: ModelIcon(v)})
 						}
 					}
@@ -393,14 +393,14 @@ func reasonixIn(at place) *Agent {
 						addNative(*state.Default)
 					}
 					addNative(cur["model"])
-					return withVia(group("Reasonix Studio", own), "reasonix", mynaID+"/")
+					return withVia(group("Reasonix Studio", own), "reasonix", owlID+"/")
 				},
 			},
 			{Key: "effort", Label: "effort", Quiet: true, Closed: true,
 				Get: func() string {
 					cfg, _ := readReasonix(path)
-					if usesMyna(model()) {
-						return cfg.myna().Effort
+					if usesOwl(model()) {
+						return cfg.owl().Effort
 					}
 					return ""
 				},
@@ -409,17 +409,17 @@ func reasonixIn(at place) *Agent {
 					if err != nil {
 						return err
 					}
-					if state == nil || cfg.DefaultModel == nil || !usesMyna(*cfg.DefaultModel) {
+					if state == nil || cfg.DefaultModel == nil || !usesOwl(*cfg.DefaultModel) {
 						if v == "" {
 							return nil
 						}
-						return fmt.Errorf("select a myna model in Reasonix before setting effort")
+						return fmt.Errorf("select a owl model in Reasonix before setting effort")
 					}
 					if err := checkOwner(cfg, state); err != nil {
 						return err
 					}
-					p := cfg.myna()
-					ref := strings.TrimPrefix(*cfg.DefaultModel, mynaID+"/")
+					p := cfg.owl()
+					ref := strings.TrimPrefix(*cfg.DefaultModel, owlID+"/")
 					if v == "auto" {
 						v = ""
 					}
@@ -430,12 +430,12 @@ func reasonixIn(at place) *Agent {
 					return writeProvider(p)
 				},
 				Options: func(cur map[string]string) []Option {
-					ref, ok := strings.CutPrefix(cur["model"], mynaID+"/")
+					ref, ok := strings.CutPrefix(cur["model"], owlID+"/")
 					if !ok {
 						return nil
 					}
 					cfg, _ := readReasonix(path)
-					levels := cfg.myna().Overrides[ref].Efforts
+					levels := cfg.owl().Overrides[ref].Efforts
 					if len(levels) == 0 {
 						return nil
 					}
@@ -459,11 +459,11 @@ func reasonixIn(at place) *Agent {
 		if off {
 			v = ""
 		}
-		ref, via := strings.CutPrefix(v, mynaID+"/")
+		ref, via := strings.CutPrefix(v, owlID+"/")
 		if via {
 			selected := ref
-			if cfg.DefaultModel != nil && usesMyna(*cfg.DefaultModel) {
-				selected = strings.TrimPrefix(*cfg.DefaultModel, mynaID+"/")
+			if cfg.DefaultModel != nil && usesOwl(*cfg.DefaultModel) {
+				selected = strings.TrimPrefix(*cfg.DefaultModel, owlID+"/")
 			}
 			if err := ensureGateway(cfg, &state, ref, selected); err != nil {
 				return err
@@ -500,7 +500,7 @@ func reasonixIn(at place) *Agent {
 				return err
 			}
 		}
-		if !via && !usesMyna(model()) {
+		if !via && !usesOwl(model()) {
 			next, _, err := load()
 			if err != nil {
 				return err
@@ -514,7 +514,7 @@ func reasonixIn(at place) *Agent {
 		choices := options(cur)
 		cfg, state, _ := load()
 		addNative := func(ref *string) {
-			if ref != nil && *ref != "" && !usesMyna(*ref) && !slices.ContainsFunc(choices, func(o Option) bool { return o.Value == *ref }) {
+			if ref != nil && *ref != "" && !usesOwl(*ref) && !slices.ContainsFunc(choices, func(o Option) bool { return o.Value == *ref }) {
 				choices = append(choices, Option{Value: *ref, Icon: ModelIcon(*ref), Group: "Reasonix Studio"})
 			}
 		}
@@ -592,8 +592,8 @@ func readReasonix(path string) (reasonixConfig, error) {
 	}
 	names := map[string]bool{}
 	for _, p := range cfg.Providers {
-		if strings.TrimSpace(p.Name) == mynaID && p.Name != mynaID {
-			return cfg, fmt.Errorf("Reasonix provider has a noncanonical myna name")
+		if strings.TrimSpace(p.Name) == owlID && p.Name != owlID {
+			return cfg, fmt.Errorf("Reasonix provider has a noncanonical owl name")
 		}
 		if names[p.Name] {
 			return cfg, fmt.Errorf("Reasonix has duplicate provider %q", p.Name)
@@ -603,9 +603,9 @@ func readReasonix(path string) (reasonixConfig, error) {
 	return cfg, nil
 }
 
-func (cfg reasonixConfig) myna() reasonixProvider {
+func (cfg reasonixConfig) owl() reasonixProvider {
 	for _, p := range cfg.Providers {
-		if p.Name == mynaID {
+		if p.Name == owlID {
 			return p
 		}
 	}
@@ -614,7 +614,7 @@ func (cfg reasonixConfig) myna() reasonixProvider {
 
 func (cfg reasonixConfig) hasModel(ref string) bool {
 	for _, p := range cfg.Providers {
-		if p.Name == mynaID {
+		if p.Name == owlID {
 			continue
 		}
 		if ref == p.Name || ref == p.Model || slices.Contains(p.Models, ref) {
@@ -634,7 +634,7 @@ func reasonixCatalog(models []catalog.Model, selected, effort string) reasonixPr
 // reasonixCatalogAt is reasonixCatalog for a Reasonix reaching the
 // gateway's /v1 at v1.
 func reasonixCatalogAt(models []catalog.Model, selected, effort, v1 string) reasonixProvider {
-	p := reasonixProvider{Name: mynaID, Kind: "openai", BaseURL: v1, APIKeyEnv: reasonixKey,
+	p := reasonixProvider{Name: owlID, Kind: "openai", BaseURL: v1, APIKeyEnv: reasonixKey,
 		Default: selected, Protocol: "openai", NoProxy: true, Overrides: map[string]reasonixModel{}}
 	for _, m := range models {
 		p.Models = append(p.Models, m.ID)

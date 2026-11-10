@@ -3,7 +3,7 @@
 // whether their issue was fixed). After an upgrade the window opens a dialog
 // with the notes of every release since, newest first, once: the app is told
 // they were seen, and a reload doesn't show them again. A fresh install shows
-// nothing, nor does the tray's panel; myna web's page shows it as the
+// nothing, nor does the tray's panel; owl web's page shows it as the
 // window does, and opens its links in a tab. #464 links the issue and opens it in
 // the browser through the app, as markdown links do; a javascript: link is
 // text, and HTML in the notes is shown as text, never run. Settings' What's new
@@ -31,12 +31,12 @@ const NOTES_604 = [
   "",
   "## Improvements",
   "",
-  "- See [the guide](https://github.com/istoo/myna/blob/main/docs) and [not a link](javascript:window.__pwned=2).",
+  "- See [the guide](https://github.com/istoo/owl/blob/main/docs) and [not a link](javascript:window.__pwned=2).",
 ].join("\n");
 const RELEASES = [
-  { version: "0.1.604", notes: NOTES_604, url: "https://github.com/istoo/myna/releases/tag/v0.1.604" },
+  { version: "0.1.604", notes: NOTES_604, url: "https://github.com/istoo/owl/releases/tag/v0.1.604" },
   // the Chinese notes' translation words a heading its own way, or keeps
-  // the English (Wei He on Discord); a heading myna doesn't know reads as
+  // the English (Wei He on Discord); a heading owl doesn't know reads as
   // written
   { version: "0.1.603", notes: "## 缺陷修复\n\n- Fixed reading Kimi keys. (#446)\n\n## Bug fixes:\n\n- Another.\n\n## Thanks\n\n- @someone" },
 ];
@@ -47,14 +47,14 @@ function settingsPayload(lang) {
     dock: false, dockWindow: false, proxy: "", redact: false, redactPersonal: false, redactWords: [],
     codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", workbuddyCheckin: false, noStats: false,
     trayUsage: "", trayUsageEvery: 3, vision: "", imageGen: "",
-    version: "0.1.604", dir: "~/.config/myna", gateway: "http://127.0.0.1:3425",
+    version: "0.1.604", dir: "~/.config/owl", gateway: "http://127.0.0.1:3425",
     proxyNow: "none", proxySource: "none", login: false,
     visionModels: [], imageGenModels: [], workbuddyCheckins: [], lanURLs: [],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
   };
 }
 
-// ctl.upgraded: myna started on a newer version than it last ran
+// ctl.upgraded: owl started on a newer version than it last ran
 function serve(lang, ctl) {
   return async (route) => {
     const req = route.request(), url = new URL(req.url());
@@ -113,7 +113,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("dialog", (d) => { errors.push("dialog: " + d.message()); d.dismiss(); });
         await page.route("**/*", serve(lang, ctl));
         await watchSettingsReads(page);
-        await page.goto("http://myna.test/" + q);
+        await page.goto("http://owl.test/" + q);
         await settingsDrawn(page); // rows found are the ones that stay (#1659)
         await page.locator("#agents").waitFor({ state: "attached" });
         return { page, errors };
@@ -134,15 +134,15 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.close();
       }
 
-      // myna web's page shows it too, and opens a link in a tab of its own
+      // owl web's page shows it too, and opens a link in a tab of its own
       {
         const ctl = fresh({ upgraded: true, web: true });
         const { page, errors } = await open(ctl);
         await dialog(page).waitFor();
         await page.evaluate(() => { window.open = (u) => { window.__opened = u; return null; }; });
         await dialog(page).getByRole("link", { name: "#446" }).click();
-        assert.equal(await page.evaluate(() => window.__opened), "https://github.com/istoo/myna/issues/446");
-        assert.equal(page.url(), "http://myna.test/");
+        assert.equal(await page.evaluate(() => window.__opened), "https://github.com/istoo/owl/issues/446");
+        assert.equal(page.url(), "http://owl.test/");
         assert.equal(ctl.seen, 1);
         assert.deepEqual(errors, []);
         await page.close();
@@ -196,9 +196,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert((await notes.locator("li", { hasText: "tags stay text" }).textContent()).startsWith('<img src=x onerror="window.__pwned=1"> <b>raw</b> tags stay text.'));
       // links: issues, markdown http(s) links; javascript: is text
       const issue = notes.getByRole("link", { name: "#464" });
-      assert.equal(await issue.getAttribute("href"), "https://github.com/istoo/myna/issues/464");
-      assert.equal(await dialog(page).getByRole("link", { name: "#446" }).getAttribute("href"), "https://github.com/istoo/myna/issues/446");
-      assert.equal(await notes.getByRole("link", { name: "the guide" }).getAttribute("href"), "https://github.com/istoo/myna/blob/main/docs");
+      assert.equal(await issue.getAttribute("href"), "https://github.com/istoo/owl/issues/464");
+      assert.equal(await dialog(page).getByRole("link", { name: "#446" }).getAttribute("href"), "https://github.com/istoo/owl/issues/446");
+      assert.equal(await notes.getByRole("link", { name: "the guide" }).getAttribute("href"), "https://github.com/istoo/owl/blob/main/docs");
       assert.equal(await notes.getByRole("link", { name: "not a link" }).count(), 0, "a javascript: link is not a link");
       assert.equal(await dialog(page).locator("a[href^='javascript']").count(), 0);
       assert.equal(ctl.seen, 1, "the app is told they were seen");
@@ -207,9 +207,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const before = await body.evaluate((e) => [e.scrollTop, document.scrollingElement.scrollTop]);
       await issue.click();
       for (let i = 0; i < 40 && !ctl.opened.length; i++) await page.waitForTimeout(25);
-      assert.deepEqual(ctl.opened, ["https://github.com/istoo/myna/issues/464"]);
+      assert.deepEqual(ctl.opened, ["https://github.com/istoo/owl/issues/464"]);
       assert.deepEqual(await body.evaluate((e) => [e.scrollTop, document.scrollingElement.scrollTop]), before, "the click moved the page");
-      assert.equal(page.url(), "http://myna.test/", "the page didn't navigate");
+      assert.equal(page.url(), "http://owl.test/", "the page didn't navigate");
       assert.equal(await page.evaluate(() => window.__pwned), undefined, "nothing in the notes ran");
       const border = await page.evaluate(() => [...document.querySelectorAll("#modal .whatsnew, #modal .whatsnew *")].map((e) => getComputedStyle(e).borderLeftWidth).filter((b) => parseFloat(b) > 1));
       assert.deepEqual(border, [], "no left-border accent");
@@ -237,14 +237,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.equal(await dialog(page).count(), 0, "shown once");
 
       // Settings → What's new → Open opens them again, the waiting update's first
-      ctl.update = { state: "ready", current: "0.1.604", latest: "0.1.607", notes: "## New Features\n\n- A new thing. (#470)", url: "https://github.com/istoo/myna/releases/tag/v0.1.607" };
+      ctl.update = { state: "ready", current: "0.1.604", latest: "0.1.607", notes: "## New Features\n\n- A new thing. (#470)", url: "https://github.com/istoo/owl/releases/tag/v0.1.607" };
       ctl.ahead = [
         { version: "0.1.607", notes: ctl.update.notes, url: ctl.update.url, pending: true },
         { version: "0.1.606", notes: "- Six.", pending: true },
         { version: "0.1.605", notes: "- Five.", pending: true },
       ];
       await watchSettingsReads(page);
-      await page.goto("http://myna.test/?view=settings&tab=about");
+      await page.goto("http://owl.test/?view=settings&tab=about");
       await settingsDrawn(page); // rows found are the ones that stay (#1659)
       const notesRow = page.locator("#about .row.pref.whatsnew-row");
       assert.equal(await notesRow.locator(".name").textContent(), w.again);

@@ -21,7 +21,7 @@ function server(lang, posts) {
   const agent = (id, name) => ({ id, name, icon: "", skills: `${HOME}/.${id}/skills`, how: "link" });
   const readers = () => (st.shared ? ["codex", "pi"] : []);
   const lib = () => ({
-    dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME, copySkills: false,
+    dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME, copySkills: false,
     sharedSkills: st.shared, sharedDir: `${HOME}/.agents/skills`,
     agents: [agent("claude", "Claude Code"), agent("codex", "Codex"), agent("pi", "Pi")],
     instructions: { agents: [] }, servers: [], foundServers: [], projects: [], foundSkills: [],
@@ -116,14 +116,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     });
     const open = async (lang, width, posts) => {
       const ctx = await browser.newContext({ viewport: { width, height: 760 } });
-      await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "skills"); } catch {} });
+      await ctx.addInitScript(() => { try { localStorage.setItem("owl.libTab", "skills"); } catch {} });
       const page = await ctx.newPage();
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(60000);
       page.on("pageerror", (e) => errors.push(e.message));
       page.on("dialog", (d) => { errors.push("a browser dialog: " + d.message()); d.dismiss(); });
       await page.route("**/*", server(lang, posts));
-      await page.goto("http://myna.test/");
+      await page.goto("http://owl.test/");
       await navTo(page, "library");
       await page.locator("#view-library .lib-body:not(.lib-skel) .lib-row").first().waitFor();
       return page;

@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // standInGroup is 01huadalang's setup (Discord, #feedback): a group "G"
@@ -271,7 +271,7 @@ func TestGroupStandInStaysWithinATurn(t *testing.T) {
 	}
 }
 
-// TestGroupStandInSurvivesARestart: myna restarted (an update) while
+// TestGroupStandInSurvivesARestart: owl restarted (an update) while
 // the backup stands in still knows it stood in, from affinity.json, and
 // gives the conversation back once Codex is.
 func TestGroupStandInSurvivesARestart(t *testing.T) {

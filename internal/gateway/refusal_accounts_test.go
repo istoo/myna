@@ -13,9 +13,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/testenv"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/testenv"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // OpenAI's safety filter refusing a Codex turn, as the ChatGPT backend said

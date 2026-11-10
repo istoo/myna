@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 func TestPanelShortcutNames(t *testing.T) {
@@ -53,7 +53,7 @@ func TestWaylandSession(t *testing.T) {
 			t.Errorf("waylandSession(%s, %v) = %v", c.goos, c.env, got)
 		}
 	}
-	if got := shellWord("/opt/My Apps/myna"); got != `'/opt/My Apps/myna'` {
+	if got := shellWord("/opt/My Apps/owl"); got != `'/opt/My Apps/owl'` {
 		t.Errorf("shellWord: %s", got)
 	}
 }

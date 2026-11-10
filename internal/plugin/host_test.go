@@ -16,7 +16,7 @@ import (
 )
 
 // fakeHost is a host whose stdout the test writes, so its real read and
-// dispatch run without Bun. What myna writes to the child (fetch, credit,
+// dispatch run without Bun. What owl writes to the child (fetch, credit,
 // abort) is drained into f.sent, so a test can see the control traffic without
 // a writer goroutine parked on a pipe.
 type fakeHost struct {
@@ -68,7 +68,7 @@ func newFakeHostNonce(t *testing.T, maxLine int, nonce string) *fakeHost {
 	return f
 }
 
-// drain records what myna wrote to the child, until the host is gone.
+// drain records what owl wrote to the child, until the host is gone.
 func (f *fakeHost) drain() {
 	for {
 		select {
@@ -89,14 +89,14 @@ func (f *fakeHost) drain() {
 	}
 }
 
-// wrote is every message myna wrote to the child so far.
+// wrote is every message owl wrote to the child so far.
 func (f *fakeHost) wrote() []map[string]any {
 	f.outMu.Lock()
 	defer f.outMu.Unlock()
 	return append([]map[string]any(nil), f.sent...)
 }
 
-// methods are the methods myna wrote, in order.
+// methods are the methods owl wrote, in order.
 func (f *fakeHost) methods() []string {
 	var out []string
 	for _, m := range f.wrote() {
@@ -106,7 +106,7 @@ func (f *fakeHost) methods() []string {
 	return out
 }
 
-// credited is how many bytes myna gave back as credit so far.
+// credited is how many bytes owl gave back as credit so far.
 func (f *fakeHost) credited() int {
 	var n int
 	for _, m := range f.wrote() {
@@ -516,7 +516,7 @@ func TestHostShutdownWithoutAnswerEndsRead(t *testing.T) {
 	}
 }
 
-// TestHostStreamBoundsTheHeadEnvelope: a head's headers are capped by myna's
+// TestHostStreamBoundsTheHeadEnvelope: a head's headers are capped by owl's
 // own envelope — entries and serialized bytes — so a vendor's unbounded header
 // set is not a free zero-charge line. A head just under both is taken.
 func TestHostStreamBoundsTheHeadEnvelope(t *testing.T) {

@@ -13,7 +13,7 @@ import (
 )
 
 // CanRunElevated reports whether RunElevated can ask for an
-// administrator here: Windows' own prompt (UAC). myna's self-update
+// administrator here: Windows' own prompt (UAC). owl's self-update
 // doesn't use it (CanElevate is false on Windows); an agent's npm, whose
 // global folder is Node.js's under Program Files, does.
 func CanRunElevated() bool { return true }
@@ -48,8 +48,8 @@ const (
 // RunElevated runs argv as administrator, after Windows asks the user
 // (UAC), in dir with env, and returns what it printed. ErrCanceled is the
 // prompt declined. A process started elevated gets the user's environment
-// afresh, not this one's, so env's values that differ from myna's own
-// (the proxy myna's requests take, a PATH put first) and PATH are set
+// afresh, not this one's, so env's values that differ from owl's own
+// (the proxy owl's requests take, a PATH put first) and PATH are set
 // by the script it runs; its output comes back through a file, as an
 // elevated process can't write into this one's pipes.
 func RunElevated(ctx context.Context, dir string, env []string, argv ...string) ([]byte, error) {
@@ -64,9 +64,9 @@ func RunElevated(ctx context.Context, dir string, env []string, argv ...string) 
 	if berr != nil || base == "" {
 		base = os.TempDir()
 	}
-	tmp, err := os.MkdirTemp(base, "myna-elevated-*")
+	tmp, err := os.MkdirTemp(base, "owl-elevated-*")
 	if err != nil {
-		tmp, err = os.MkdirTemp("", "myna-elevated-*")
+		tmp, err = os.MkdirTemp("", "owl-elevated-*")
 	}
 	if err != nil {
 		return nil, err

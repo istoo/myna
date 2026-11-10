@@ -18,7 +18,7 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // testdata/opaque.heic (32x24) and alpha.heic (24x24, transparent around
@@ -271,7 +271,7 @@ func TestHEICReachesPluginAsJPEG(t *testing.T) {
 		seen = nil
 		mu.Unlock()
 		req := httptest.NewRequest("POST", c.path, strings.NewReader(c.body))
-		req.Header.Set("Authorization", "Bearer myna")
+		req.Header.Set("Authorization", "Bearer owl")
 		rec := httptest.NewRecorder()
 		h.ServeHTTP(rec, req)
 		if rec.Code != 200 {

@@ -24,7 +24,7 @@ const gh = (name, description, off) => ({
   agents: ["claude", "codex"], ...(off ? { offHere: true } : {}),
 });
 const lib = () => ({
-  dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
+  dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
   agents: [agent("claude", "Claude Code"), agent("codex", "Codex")],
   instructions: { agents: [] }, servers: [], foundServers: [], projects: [], foundSkills: [], newSkills: [],
   checkDue: false,
@@ -67,13 +67,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     for (const width of [860, 400]) for (const lang of Object.keys(tags)) {
       await t.test(`${lang} at ${width}px`, async () => {
         const ctx = await browser.newContext({ viewport: { width, height: 900 } });
-        await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "skills"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("owl.libTab", "skills"); } catch {} });
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang));
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         await navTo(page, "library");
         const v = page.locator("#view-library");
         const row = (n) => v.locator(".lib-skill", { has: page.locator(".name", { hasText: new RegExp("^" + n) }) });

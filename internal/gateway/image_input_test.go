@@ -13,9 +13,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 func TestKnownTextOnlyModelRejectsImagesBeforeUpstream(t *testing.T) {
@@ -55,7 +55,7 @@ func TestKnownTextOnlyModelRejectsImagesBeforeUpstream(t *testing.T) {
 		if rec.Code != 400 || !strings.Contains(rec.Body.String(), "does not support image input") {
 			t.Errorf("%s: %d %s", tc.path, rec.Code, rec.Body.String())
 		}
-		// it says why myna takes it for text-only, and where that is
+		// it says why owl takes it for text-only, and where that is
 		// changed (KimYx0207 on X)
 		if b := rec.Body.String(); !strings.Contains(b, "Probe's model list marks it as not taking images") || !strings.Contains(b, "Providers → Probe → Names, prices & levels") {
 			t.Errorf("%s: doesn't say why or where: %s", tc.path, b)
@@ -521,7 +521,7 @@ func TestTextOnlyRefusalSaysWhyAndWhere(t *testing.T) {
 	s := New()
 	body := `{"model":"MODEL","messages":[{"role":"user","content":[{"type":"text","text":"read"},{"type":"image_url","image_url":{"url":"data:image/png;base64,aGVsbG8="}}]}]}`
 	for model, want := range map[string]string{
-		"probe/sol":   "Accepts images is turned off for it in myna, in Providers → Probe → Names, prices & levels",
+		"probe/sol":   "Accepts images is turned off for it in owl, in Providers → Probe → Names, prices & levels",
 		"group/words": "no model in the group Words is marked as taking images",
 	} {
 		rec := httptest.NewRecorder()

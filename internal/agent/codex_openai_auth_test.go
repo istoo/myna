@@ -7,26 +7,26 @@ import (
 	"testing"
 )
 
-// Qyburn3 on X: with myna as Codex's provider for a Codex signed in to
+// Qyburn3 on X: with owl as Codex's provider for a Codex signed in to
 // ChatGPT, the Codex app (ChatGPT.app 26.1021) lost its ChatGPT account:
 // app-server's account/read and getAuthStatus answer no account and no
 // token for a provider without requires_openai_auth, and the app's
 // ChatGPT mode showed no chats or projects ("Work" sessions gone) while
-// myna's models still answered. The table says requires_openai_auth
+// owl's models still answered. The table says requires_openai_auth
 // while that sign-in has room, and not for one the Codex app holds (Send
 // would grey again, #540), an API key (its image tool), or no sign-in (a
-// login screen). Sync brings a table an older myna wrote up to date,
+// login screen). Sync brings a table an older owl wrote up to date,
 // both ways.
-func TestCodexMynaProviderKeepsChatGPTAccount(t *testing.T) {
-	// the table as an older myna wrote it, bytes from a live config.toml
-	const older = "model = \"fake/m1\"\nmodel_provider = \"myna\"\nmodel_catalog_json = \"myna-models.json\"\n\n" +
-		"[model_providers.myna]\nname = \"myna\"\nbase_url = \"http://127.0.0.1:3425/v1\"\nwire_api = \"responses\"\n" +
-		"experimental_bearer_token = \"myna\"\nhttp_headers = { \"x-openai-actor-authorization\" = \"myna\" }\n"
+func TestCodexOwlProviderKeepsChatGPTAccount(t *testing.T) {
+	// the table as an older owl wrote it, bytes from a live config.toml
+	const older = "model = \"fake/m1\"\nmodel_provider = \"owl\"\nmodel_catalog_json = \"owl-models.json\"\n\n" +
+		"[model_providers.owl]\nname = \"owl\"\nbase_url = \"http://127.0.0.1:3425/v1\"\nwire_api = \"responses\"\n" +
+		"experimental_bearer_token = \"owl\"\nhttp_headers = { \"x-openai-actor-authorization\" = \"owl\" }\n"
 	flag := func(t *testing.T, cfg string) string {
 		t.Helper()
-		i := strings.Index(cfg, "[model_providers.myna]")
+		i := strings.Index(cfg, "[model_providers.owl]")
 		if i < 0 {
-			t.Fatalf("no myna provider table:\n%s", cfg)
+			t.Fatalf("no owl provider table:\n%s", cfg)
 		}
 		rest := cfg[i+1:]
 		if j := strings.Index(rest, "\n["); j >= 0 {
@@ -40,7 +40,7 @@ func TestCodexMynaProviderKeepsChatGPTAccount(t *testing.T) {
 		return ""
 	}
 
-	t.Run("ChatGPT, myna API", func(t *testing.T) {
+	t.Run("ChatGPT, owl API", func(t *testing.T) {
 		home, read := codexHome(t, `{"tokens":{"access_token":"x","id_token":"x.e30.x"}}`, "")
 		cx := codex(home)
 		if err := cx.Field("login").Set("api"); err != nil {
@@ -50,11 +50,11 @@ func TestCodexMynaProviderKeepsChatGPTAccount(t *testing.T) {
 			t.Fatal(err)
 		}
 		cfg := read()
-		if !strings.Contains(cfg, `model_provider = "myna"`) || flag(t, cfg) != "true" {
-			t.Fatalf("myna its provider beside a ChatGPT sign-in with room: requires_openai_auth wanted:\n%s", cfg)
+		if !strings.Contains(cfg, `model_provider = "owl"`) || flag(t, cfg) != "true" {
+			t.Fatalf("owl its provider beside a ChatGPT sign-in with room: requires_openai_auth wanted:\n%s", cfg)
 		}
-		if !strings.Contains(cfg, `"x-openai-actor-authorization" = "myna"`) || !strings.Contains(cfg, "experimental_bearer_token") {
-			t.Fatalf("myna's key and actor header kept:\n%s", cfg)
+		if !strings.Contains(cfg, `"x-openai-actor-authorization" = "owl"`) || !strings.Contains(cfg, "experimental_bearer_token") {
+			t.Fatalf("owl's key and actor header kept:\n%s", cfg)
 		}
 		// the account runs out: the takeover's way, no account in the app
 		codexUsedUp = func() bool { return true }
@@ -83,11 +83,11 @@ func TestCodexMynaProviderKeepsChatGPTAccount(t *testing.T) {
 		if err := cx.Fields[0].Set("fake/m1"); err != nil {
 			t.Fatal(err)
 		}
-		if cfg := read(); !strings.Contains(cfg, `model_provider = "myna"`) || flag(t, cfg) != "" {
-			t.Fatalf("codex.out: myna its provider with no requires_openai_auth:\n%s", cfg)
+		if cfg := read(); !strings.Contains(cfg, `model_provider = "owl"`) || flag(t, cfg) != "" {
+			t.Fatalf("codex.out: owl its provider with no requires_openai_auth:\n%s", cfg)
 		}
 		// the reset: back beside the sign-in, the table kept for the
-		// threads started on myna, now keeping the account too
+		// threads started on owl, now keeping the account too
 		codexUsedUp = func() bool { return false }
 		if err := cx.Sync(); err != nil {
 			t.Fatal(err)
@@ -98,7 +98,7 @@ func TestCodexMynaProviderKeepsChatGPTAccount(t *testing.T) {
 	})
 
 	// 蛋仔 on Discord: requires_openai_auth = false written by hand, to have
-	// the Codex app on myna with no ChatGPT account, was set back to true
+	// the Codex app on owl with no ChatGPT account, was set back to true
 	// by the next sync while the sign-in had room
 	t.Run("user's own false kept", func(t *testing.T) {
 		home, read := codexHome(t, `{"tokens":{"access_token":"x","id_token":"x.e30.x"}}`, "")
@@ -145,7 +145,7 @@ func TestCodexMynaProviderKeepsChatGPTAccount(t *testing.T) {
 			t.Fatal(err)
 		}
 		if cfg := read(); flag(t, cfg) != "true" {
-			t.Fatalf("an older myna's table, synced: requires_openai_auth wanted:\n%s", cfg)
+			t.Fatalf("an older owl's table, synced: requires_openai_auth wanted:\n%s", cfg)
 		}
 	})
 
@@ -159,7 +159,7 @@ func TestCodexMynaProviderKeepsChatGPTAccount(t *testing.T) {
 			if err := cx.Fields[0].Set("fake/m1"); err != nil {
 				t.Fatal(err)
 			}
-			if cfg := read(); !strings.Contains(cfg, `model_provider = "myna"`) || flag(t, cfg) != "" {
+			if cfg := read(); !strings.Contains(cfg, `model_provider = "owl"`) || flag(t, cfg) != "" {
 				t.Fatalf("no ChatGPT account: no requires_openai_auth:\n%s", cfg)
 			}
 		})

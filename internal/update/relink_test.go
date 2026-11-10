@@ -8,7 +8,7 @@ import (
 )
 
 // withCLIVersion points cliVersion at a fixed answer for one test, so the
-// version decision is exercised without building or running a myna.
+// version decision is exercised without building or running a owl.
 func withCLIVersion(t *testing.T, v string) {
 	t.Helper()
 	was := cliVersion
@@ -16,13 +16,13 @@ func withCLIVersion(t *testing.T, v string) {
 	t.Cleanup(func() { cliVersion = was })
 }
 
-// StaleCLI says only what deserves saying: a copied `myna` command that
+// StaleCLI says only what deserves saying: a copied `owl` command that
 // is a release *behind* the app — the stale build behind #531's wedged
 // sync. It stays quiet for the installer's link (already follows the app),
 // an absent command, a copy at or ahead of the app, and a copy that isn't a
 // release (a source build, or one that won't run): none of those is a stale
 // release to nag about. The bin dir is pointed at a temp dir through
-// MYNA_BIN_DIR, the one install.sh honors, so the test needs no real
+// OWL_BIN_DIR, the one install.sh honors, so the test needs no real
 // $HOME; only the Mac has the two-places problem, so it skips elsewhere.
 func TestStaleCLI(t *testing.T) {
 	if runtime.GOOS != "darwin" {
@@ -30,8 +30,8 @@ func TestStaleCLI(t *testing.T) {
 	}
 	const app = "0.1.500"
 	bin := t.TempDir()
-	t.Setenv("MYNA_BIN_DIR", bin)
-	cli := filepath.Join(bin, "myna")
+	t.Setenv("OWL_BIN_DIR", bin)
+	cli := filepath.Join(bin, "owl")
 	writeCopy := func() { os.WriteFile(cli, []byte("a build"), 0o755) }
 
 	t.Run("a copied release behind the app is stale", func(t *testing.T) {
@@ -76,7 +76,7 @@ func TestStaleCLI(t *testing.T) {
 
 	t.Run("the installer's link is quiet", func(t *testing.T) {
 		os.Remove(cli)
-		os.Symlink("/Applications/myna.app/Contents/MacOS/myna", cli)
+		os.Symlink("/Applications/owl.app/Contents/MacOS/owl", cli)
 		withCLIVersion(t, "0.1.000") // would look old if we dereferenced it
 		if got := StaleCLI(app); got != "" {
 			t.Errorf("StaleCLI = %q, want empty: a link already follows the app", got)

@@ -9,7 +9,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // needsEffort is an upstream whose model turns away a request with no
@@ -117,7 +117,7 @@ func TestCodexSideCallAskedAtAnEffortTheModelTakes(t *testing.T) {
 	if got := up.efforts(); len(got) != 1 || got[0] != "low" {
 		t.Fatalf("the upstream was asked at %q", got)
 	}
-	// Codex's auto-review, asked with no effort on a model of myna's
+	// Codex's auto-review, asked with no effort on a model of owl's
 	// whose levels Codex isn't told
 	if rec := codexAsks(s, "fx/m1", "guardian", leadAsk); rec.Code != 200 {
 		t.Fatalf("auto-review: %d %s", rec.Code, rec.Body.String())
@@ -127,7 +127,7 @@ func TestCodexSideCallAskedAtAnEffortTheModelTakes(t *testing.T) {
 	}
 }
 
-// A model whose levels myna doesn't know, turning a request with no
+// A model whose levels owl doesn't know, turning a request with no
 // effort away as needing one, is asked again once at low, on Responses
 // and on Chat Completions.
 func TestEffortRequiredRefusalAskedAgainAtLow(t *testing.T) {

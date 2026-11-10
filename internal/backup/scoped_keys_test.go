@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/library"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/library"
+	"github.com/istoo/owl/internal/settings"
 )
 
 func TestRestoreLibraryKeysScope(t *testing.T) {

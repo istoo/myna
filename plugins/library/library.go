@@ -4,8 +4,8 @@
 package library
 
 import (
-	lib "github.com/istoo/myna/internal/library"
-	"github.com/istoo/myna/internal/pluginrt"
+	lib "github.com/istoo/owl/internal/library"
+	"github.com/istoo/owl/internal/pluginrt"
 )
 
 func init() {

@@ -7,22 +7,22 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/gateway"
 )
 
-// a value Claude Desktop sealed with a keystore myna can't open (another
+// a value Claude Desktop sealed with a keystore owl can't open (another
 // user's DPAPI on Windows, the Keychain's "Claude Safe Storage" on macOS)
 var desktopForeignSeal = desktopSealed + base64.StdEncoding.EncodeToString([]byte("not this user's keystore"))
 
-// Claude Desktop 4.4212 seals inferenceGatewayApiKey in myna's profile at
-// its next start. Desktop still runs on myna: the check doesn't say the
+// Claude Desktop 4.4212 seals inferenceGatewayApiKey in owl's profile at
+// its next start. Desktop still runs on owl: the check doesn't say the
 // key was changed, and Sync and Reconnect leave nothing to undo.
 func TestClaudeDesktopSealedKeyIsNotChanged(t *testing.T) {
 	home, p := desktopSandbox(t)
 	os.MkdirAll(p.dir, 0o755)
 	a := claudeDesktop(home)
-	if err := a.Field("provider").Set("myna"); err != nil {
+	if err := a.Field("provider").Set("owl"); err != nil {
 		t.Fatal(err)
 	}
 	if err := edit.SetJSON(p.prof, edit.KV{Path: "inferenceGatewayApiKey", Value: "  " + desktopForeignSeal}); err != nil {
@@ -39,7 +39,7 @@ func TestClaudeDesktopSealedKeyIsNotChanged(t *testing.T) {
 		t.Errorf("sync rewrote the profile:\n%s", b)
 	}
 
-	// a key in the clear that isn't myna's is still a change
+	// a key in the clear that isn't owl's is still a change
 	edit.SetJSON(p.prof, edit.KV{Path: "inferenceGatewayApiKey", Value: "sk-someone-elses"})
 	if c := a.Check(); !strings.Contains(c, "inferenceGatewayApiKey") || !strings.Contains(c, "was changed") {
 		t.Errorf("check with another key: %q", c)
@@ -57,21 +57,21 @@ func TestClaudeDesktopSealedKeyIsNotChanged(t *testing.T) {
 	}
 }
 
-// An imported profile for myna's gateway Desktop applies, its key
-// sealed: on myna, and Sync doesn't write a key over Desktop's.
+// An imported profile for owl's gateway Desktop applies, its key
+// sealed: on owl, and Sync doesn't write a key over Desktop's.
 func TestClaudeDesktopImportedSealedKeyStays(t *testing.T) {
 	const imported = "3f6c2a8e-9b1d-4e57-a0c4-7d2e5f81b9a6"
 	home, p := desktopSandbox(t)
 	os.MkdirAll(p.dir, 0o755)
 	a := claudeDesktop(home)
-	if err := a.Field("provider").Set("myna"); err != nil {
+	if err := a.Field("provider").Set("owl"); err != nil {
 		t.Fatal(err)
 	}
 	f := filepath.Join(p.library, imported+".json")
 	prof := `{"inferenceProvider":"gateway","inferenceGatewayBaseUrl":"` + gateway.URL() +
 		`","inferenceGatewayApiKey":"` + desktopForeignSeal + `","inferenceGatewayAuthScheme":"bearer"}`
 	desktopWrite(t, f, prof)
-	desktopWrite(t, p.meta, `{"appliedId":"`+imported+`","entries":[{"id":"`+desktopProfileID+`","name":"myna"},{"id":"`+imported+`","name":"myna"}]}`)
+	desktopWrite(t, p.meta, `{"appliedId":"`+imported+`","entries":[{"id":"`+desktopProfileID+`","name":"owl"},{"id":"`+imported+`","name":"owl"}]}`)
 	if c := a.Check(); c != "" {
 		t.Errorf("check: %s", c)
 	}
@@ -84,7 +84,7 @@ func TestClaudeDesktopImportedSealedKeyStays(t *testing.T) {
 }
 
 func TestDesktopOpenNotSealed(t *testing.T) {
-	for _, v := range []string{"", "myna-claude-desktop", "__sealed__:v2:abc", "x__sealed__:v1:"} {
+	for _, v := range []string{"", "owl-claude-desktop", "__sealed__:v2:abc", "x__sealed__:v1:"} {
 		if got, known := desktopOpen("inferenceGatewayApiKey", v); !known || got != v {
 			t.Errorf("%q: %q %v", v, got, known)
 		}

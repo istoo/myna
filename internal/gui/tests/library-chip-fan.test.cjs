@@ -34,7 +34,7 @@ function server(lang, lib) {
     if (url.pathname === "/api/groups") return json({ groups: [], pools: [] });
     if (url.pathname === "/api/usage/quotas") return json([]);
     if (url.pathname.startsWith("/api/")) return json({});
-    if (url.host !== "myna.test") return route.fulfill({ status: 404, body: "" });
+    if (url.host !== "owl.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -42,7 +42,7 @@ function server(lang, lib) {
 }
 
 const lib = () => ({
-  dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
+  dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
   agents: structuredClone(AGENTS),
   instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [], problems: [], skills: [],
   servers: [{ name: "context7", transport: "stdio", command: "npx", args: ["-y", "@upstash/context7-mcp"], agents: ALL.slice(0, 3) }],
@@ -71,7 +71,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     for (const lang of ["en", "zh", "zh-TW", "ja", "de"]) for (const motion of ["no-preference", "reduce"]) {
       await t.test(`${lang} ${motion}`, async () => {
         const ctx = await browser.newContext({ viewport: { width: 1000, height: 700 }, reducedMotion: motion });
-        await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "mcp"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("owl.libTab", "mcp"); } catch {} });
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
@@ -79,7 +79,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, lib()));
         try {
-          await page.goto("http://myna.test/");
+          await page.goto("http://owl.test/");
           await navTo(page, "library");
           const strip = page.locator("#view-library .lib-row > .lib-agents").first();
           await strip.locator(".lib-ag[data-agent]").first().waitFor();

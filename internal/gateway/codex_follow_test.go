@@ -8,7 +8,7 @@ import (
 )
 
 // codexFollowSetup is Codex signed in to ChatGPT, its conversation put on
-// a relay's model (third/gpt-6-astra) through myna, and Codex's config
+// a relay's model (third/gpt-6-astra) through owl, and Codex's config
 // naming no model for its subagents or memories unless set says so.
 func codexFollowSetup(t *testing.T, set bool) (*chatgptSeen, *relayOfChatGPT, *Server) {
 	t.Helper()
@@ -33,10 +33,10 @@ func codexSide(t *testing.T, s *Server, kind, input string) {
 }
 
 // mengxiao on Discord: Codex's subagent model left "Same as the lead" in
-// myna, the user asked the lead for a subagent on GPT-6.1 Terra, and
-// myna put it on the lead's model all the same. Codex starts a spawn
+// owl, the user asked the lead for a subagent on GPT-6.1 Terra, and
+// owl put it on the lead's model all the same. Codex starts a spawn
 // that names no model on its lead's, so a subagent asking for one of
-// Codex's own models under a lead on myna's was named that model: it
+// Codex's own models under a lead on owl's was named that model: it
 // goes on it, through the ChatGPT sign-in, and the trace marks no move.
 func TestCodexSubagentKeepsTheModelItWasNamed(t *testing.T) {
 	up, relay, s := codexFollowSetup(t, false)
@@ -119,7 +119,7 @@ func codexAppSide(t *testing.T, s *Server, source, session string) {
 	s.Handler().ServeHTTP(httptest.NewRecorder(), req)
 }
 
-// cybercaius on Discord: with the conversation put on one of myna's
+// cybercaius on Discord: with the conversation put on one of owl's
 // models in the Codex app, and nothing in Codex's config, the app's thread
 // titles, descriptions and composer predictions still went to ChatGPT on
 // its own models. They follow the session now, as the memories do.
@@ -146,7 +146,7 @@ func TestCodexAppSideTurnsFollowTheSession(t *testing.T) {
 // cybercaius on Discord: after switching Codex to another model, the first
 // new conversation's title still came from the model before. Codex writes
 // it on a temporary thread with no link to the conversation, started as
-// the first message is sent, so it can reach myna before that
+// the first message is sent, so it can reach owl before that
 // conversation's first turn, when the key's last turn is still the old
 // conversation's. It waits for the turn now, and goes on its model.
 func TestCodexTitleBeforeTheFirstTurnFollowsTheSwitch(t *testing.T) {
@@ -220,7 +220,7 @@ func TestCodexPredictionFollowsTheThreadItForks(t *testing.T) {
 	}
 }
 
-// A title for a conversation myna has seen a turn of goes on its model
+// A title for a conversation owl has seen a turn of goes on its model
 // at once, however long ago that turn was, with no wait.
 func TestCodexTitleOfAKnownThreadDoesNotWait(t *testing.T) {
 	_, relay, s := codexFollowSetup(t, false)
@@ -239,7 +239,7 @@ func TestCodexTitleOfAKnownThreadDoesNotWait(t *testing.T) {
 }
 
 // A conversation on Codex's own model keeps its side turns on ChatGPT,
-// even with one of myna's models in Codex's config: they follow the
+// even with one of owl's models in Codex's config: they follow the
 // session, not the config.
 func TestCodexAppSideTurnsStayWithAnOwnModelSession(t *testing.T) {
 	up := codexSubagentSetup(t)
@@ -259,7 +259,7 @@ func TestCodexAppSideTurnsStayWithAnOwnModelSession(t *testing.T) {
 }
 
 // Codex consolidates its memories as it starts, before any turn of its
-// has come through myna: with one of myna's models in its config,
+// has come through owl: with one of owl's models in its config,
 // they go on that model, not to ChatGPT.
 func TestCodexMemoriesBeforeAnyTurnFollowTheConfig(t *testing.T) {
 	up := codexSubagentSetup(t)
@@ -321,7 +321,7 @@ func beforeTheTurn(t *testing.T, s *Server, side, turn func()) {
 
 // cybercaius on Discord: after switching Codex's model, does the first of
 // each side call go on the new model, as the title does? Each kind, sent
-// before the first turn on the new model reaches myna: a new
+// before the first turn on the new model reaches owl: a new
 // conversation's title and description (a temporary thread of the app's),
 // its composer prediction (a fork of it), and its memories, which Codex
 // starts with every turn of a conversation (phase 1 under the
@@ -366,7 +366,7 @@ func TestCodexSideCallsBeforeTheFirstTurnFollowTheSwitch(t *testing.T) {
 
 // The model switched in a conversation already under way: Codex starts its
 // memories with the conversation's next turn, under that thread, and the
-// memory call that beats the turn to myna goes on the new model, not on
+// memory call that beats the turn to owl goes on the new model, not on
 // the thread's last. A composer prediction of that thread asked after the
 // turn is on the new model too.
 func TestCodexMemoryOfASwitchedConversationFollowsTheSwitch(t *testing.T) {
@@ -394,7 +394,7 @@ func TestCodexMemoryOfASwitchedConversationFollowsTheSwitch(t *testing.T) {
 	}
 }
 
-// Codex with myna as its provider asks for its memories on a model of
+// Codex with owl as its provider asks for its memories on a model of
 // its own by its bare name (codexMemoryStandIn): the one that beats the
 // first turn after a switch goes on the model switched to, not on the
 // last turn's.

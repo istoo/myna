@@ -8,13 +8,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/owl/internal/gateway"
 )
 
-// myna update tells the myna running what it put in, and says what
-// came of it: a restart, a wait, myna serve, an older myna (404), or
+// owl update tells the owl running what it put in, and says what
+// came of it: a restart, a wait, owl serve, an older owl (404), or
 // none running.
-func TestUpdateAsksTheRunningMynaToRestart(t *testing.T) {
+func TestUpdateAsksTheRunningOwlToRestart(t *testing.T) {
 	var reply gateway.RestartReply
 	var asked string
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -33,7 +33,7 @@ func TestUpdateAsksTheRunningMynaToRestart(t *testing.T) {
 	}{
 		{gateway.RestartReply{State: "restarting", Version: "v0.1.1", Handover: true}, "restarts into v0.1.2 now, handing its gateway over"},
 		{gateway.RestartReply{State: "waiting", Version: "v0.1.1", Busy: &gateway.Busy{Requests: 2}}, "once the 2 request(s)"},
-		{gateway.RestartReply{State: "unsupported", Version: "v0.1.1"}, "myna serve"},
+		{gateway.RestartReply{State: "unsupported", Version: "v0.1.1"}, "owl serve"},
 		{gateway.RestartReply{State: "current", Version: "v0.1.1"}, "another copy"},
 	} {
 		reply = c.reply
@@ -47,7 +47,7 @@ func TestUpdateAsksTheRunningMynaToRestart(t *testing.T) {
 	old := httptest.NewServer(http.NotFoundHandler())
 	defer old.Close()
 	if got := restartRunning(old.URL, "v0.1.2"); !strings.Contains(got, "quit and reopen") {
-		t.Errorf("an older myna: %q", got)
+		t.Errorf("an older owl: %q", got)
 	}
 	old.Close()
 	if got := restartRunning(old.URL, "v0.1.2"); !strings.Contains(got, "isn't running") {

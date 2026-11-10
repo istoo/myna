@@ -64,7 +64,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           }
           await browser.close();
         });
-        await page.goto("http://myna.test/?view=routing");
+        await page.goto("http://owl.test/?view=routing");
         await page.locator(".rt-days .rt-day").nth(1).click();
         await page.locator(".rt-req").nth(cases.length - 1).waitFor();
 

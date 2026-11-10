@@ -6,7 +6,7 @@ package agent
 // it can't follow: Lstat says it is there (Go reports it irregular), but
 // Readlink fails ("Incorrect function"), and opening, listing or removing
 // it says it isn't there. A link Windows makes there (os.Symlink) is an
-// empty folder in the distro, not a link at all. So myna makes, reads
+// empty folder in the distro, not a link at all. So owl makes, reads
 // and removes a distro's links with wsl.exe, in the distro, where they are
 // read (tried on Windows 11 with WSL 2 and Ubuntu 24.04).
 
@@ -23,7 +23,7 @@ var wslExec = func(distro string, argv ...string) ([]byte, error) {
 	return wslRun(30*time.Second, append([]string{"-d", distro, "--exec"}, argv...)...)
 }
 
-// distroAt is the running distro local, a path as myna opens it, is in:
+// distroAt is the running distro local, a path as owl opens it, is in:
 // under its root, or under where one of its Links leads (distro.native).
 func distroAt(local string) (distro, bool) {
 	wsl.Lock()
@@ -76,7 +76,7 @@ const wslUnlinkScript = `if [ -L "$1" ]; then rm -f -- "$1"; elif [ -e "$1" ]; t
 // where it leads to a line.
 const wslLinksScript = `for f in "$1"/* "$1"/.[!.]*; do [ -L "$f" ] && printf '%s\t%s\n' "${f##*/}" "$(readlink -- "$f")"; done; true`
 
-// WSLSymlink makes link a link to target, both in a's distro as myna
+// WSLSymlink makes link a link to target, both in a's distro as owl
 // opens them, from inside the distro: a link the agent there follows. A
 // link at link already is replaced; a folder or file there is refused.
 func WSLSymlink(a *Agent, target, link string) error {
@@ -93,7 +93,7 @@ func WSLSymlink(a *Agent, target, link string) error {
 }
 
 // WSLRemoveLink takes the link at local, a path in a running distro as
-// myna opens it, away from inside the distro; what it leads to stays.
+// owl opens it, away from inside the distro; what it leads to stays.
 // Anything there but a link is refused.
 func WSLRemoveLink(local string) error {
 	d, ok := distroAt(local)
@@ -148,7 +148,7 @@ func splitLocal(local string) (string, string) {
 }
 
 // WSLReadlink is where the link at local, a path in a running distro as
-// myna opens it, leads, as myna opens that: false when local is in no
+// owl opens it, leads, as owl opens that: false when local is in no
 // running distro or isn't a link there. It is asked where Windows can't
 // read the link itself (Readlink fails through \\wsl.localhost).
 func WSLReadlink(local string) (string, bool) {
@@ -195,10 +195,10 @@ func parseLinks(out string) map[string]string {
 	return m
 }
 
-// WSLInDistro is whether local, a path of a's as myna opens it, is in
+// WSLInDistro is whether local, a path of a's as owl opens it, is in
 // the distro's own files (under \\wsl.localhost\<distro>), not on a
 // Windows drive a link there leads to: where the distro can make a link
-// myna reads back.
+// owl reads back.
 func WSLInDistro(a *Agent, local string) bool {
 	d, err := agentDistro(a)
 	if err != nil || local == "" {

@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // Shares of an allowance past which an account is kept for when the others
@@ -91,7 +91,7 @@ func byLeft(seats []Seat, before func(a, b Seat) bool) func(i, j int) int {
 }
 
 // fewerTokens is what Pace and LeastUsed go by after a wallet's balance:
-// what myna sent a seat lately, the least first. It sets the places
+// what owl sent a seat lately, the least first. It sets the places
 // wallets of two kinds keep between them (byLeft).
 func fewerTokens(a, b Seat) bool { return a.Tokens < b.Tokens }
 
@@ -126,7 +126,7 @@ func identity(n int) []int {
 //
 // One not known that tells what it has left as it answers goes first,
 // once: else, kept after those known, it would never answer and never be
-// known (Anthropic's usage endpoint can turn myna away for hours).
+// known (Anthropic's usage endpoint can turn owl away for hours).
 var Smart = Strategy{Order: func(_ string, seats []Seat) []int {
 	left := byLeft(seats, nil)
 	var fine, low, spent []int
@@ -271,7 +271,7 @@ var Rotate = Strategy{Order: func(pool string, seats []Seat) []int {
 
 // LeastUsed puts a subscription, or a key that reads its own windows, by the
 // share of its allowance used, as the vendor says; then, and for other
-// keys, by what myna sent it lately; prepaid wallets, which have no
+// keys, by what owl sent it lately; prepaid wallets, which have no
 // share, by what they have left first (Seat.Left). Of those all but used up, one that
 // goes on on its credits goes first (spentBefore). A seat that tells no
 // share — a pay-as-you-go key, a wallet, an account whose use wasn't read
@@ -350,7 +350,7 @@ var LeastUsed = Strategy{ByUse: true, Order: func(_ string, seats []Seat) []int 
 // not known that tells what it has left as it answers goes first while it
 // isn't, as in Smart, else it would never be known; then the pace, those
 // alike within a tenth by what a wallet has left (Seat.Left), then by what
-// myna sent them lately, then in their
+// owl sent them lately, then in their
 // order, keeping the vendor's prompt cache warm. An account not known
 // counts as a whole week ahead of it; a key has no week, unless it reads
 // its own windows (a sub2api key's limits). A Codex account that spends a

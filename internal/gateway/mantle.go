@@ -9,7 +9,7 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // Amazon Bedrock's Mantle endpoint (@marktoown on X) serves its OpenAI APIs

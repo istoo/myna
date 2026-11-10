@@ -1,5 +1,5 @@
-// Myna Browser: myna's gateway hands this extension the browser tool
-// calls of the agents it serves (myna mcp browser), and it carries them
+// Owl Browser: owl's gateway hands this extension the browser tool
+// calls of the agents it serves (owl mcp browser), and it carries them
 // out in this browser's own tabs, signed in to whatever the user is.
 
 import { GATEWAY } from "./config.js";
@@ -30,7 +30,7 @@ async function connect() {
   const base = await gatewayURL();
   let s;
   try {
-    s = new WebSocket(base.replace(/\/$/, "") + "/v1/myna/browser/extension");
+    s = new WebSocket(base.replace(/\/$/, "") + "/v1/owl/browser/extension");
   } catch (e) {
     connecting = false;
     setStatus({ connected: false, gateway: base, error: String(e.message || e) });
@@ -77,7 +77,7 @@ function setStatus(s) {
 // a message every 20s keeps the service worker alive while connected;
 // the alarm brings it back to reconnect when Chrome stopped it
 setInterval(() => { if (ws && ws.readyState === 1) ws.send(JSON.stringify({ type: "ping" })); }, 20000);
-chrome.alarms.create("myna-reconnect", { periodInMinutes: 0.5 });
+chrome.alarms.create("owl-reconnect", { periodInMinutes: 0.5 });
 chrome.alarms.onAlarm.addListener(() => connect());
 chrome.runtime.onStartup.addListener(() => connect());
 chrome.runtime.onInstalled.addListener(() => connect());
@@ -100,8 +100,8 @@ connect();
 
 // ---- sessions: each agent's tab ------------------------------------------
 
-// Each agent session (gateway.BrowserSessionHeader: one `myna mcp
-// browser`, or one caller of myna's MCP router) works in a tab of its
+// Each agent session (gateway.BrowserSessionHeader: one `owl mcp
+// browser`, or one caller of owl's MCP router) works in a tab of its
 // own and opens its tabs in a tab group of its own, so two agents at once
 // never act in one tab unless one picks the other's by its id.
 const sessions = new Map(); // session → tabId
@@ -180,7 +180,7 @@ async function open(session, url, front) {
 }
 
 // group puts a tab the session opened in the session's tab group in that
-// window: "Myna" for the first session, "Myna 2", "Myna 3" for the
+// window: "Owl" for the first session, "Owl 2", "Owl 3" for the
 // ones working beside it. A group no live session has (one an earlier run
 // left) is taken over by its title.
 async function group(session, tabId, windowId) {
@@ -193,7 +193,7 @@ async function group(session, tabId, windowId) {
     const others = new Set([...groups].filter(([k]) => k !== session).map(([, v]) => v));
     const inWindow = await chrome.tabGroups.query({ windowId });
     for (let n = 1; ; n++) {
-      const title = n === 1 ? "Myna" : `Myna ${n}`;
+      const title = n === 1 ? "Owl" : `Owl ${n}`;
       const g = inWindow.find((x) => x.title === title);
       if (g && others.has(g.id)) continue;
       let id;
@@ -241,7 +241,7 @@ function failure(e) {
 async function run(m) {
   try {
     const tool = TOOLS[m.tool];
-    if (!tool) return fail(`myna's browser extension has no tool ${m.tool}: update it (myna writes it again on start; reload it in chrome://extensions)`);
+    if (!tool) return fail(`owl's browser extension has no tool ${m.tool}: update it (owl writes it again on start; reload it in chrome://extensions)`);
     return await tool(m.session || "default", m.args || {});
   } catch (e) {
     return failure(e);
@@ -253,7 +253,7 @@ async function ready(session, args) {
   const t = state(tabId);
   if (t.stoppedByUser) {
     t.stoppedByUser = false;
-    throw fault("USER_STOPPED", "the user stopped Myna Browser in this tab (Cancel on Chrome's bar): ask them before going on. The next call attaches to it again.");
+    throw fault("USER_STOPPED", "the user stopped Owl Browser in this tab (Cancel on Chrome's bar): ask them before going on. The next call attaches to it again.");
   }
   t.by = session; // whose call this is: act moves that session on to a tab it opens
   await attach(tabId);
@@ -698,7 +698,7 @@ const TOOLS = {
       const isInput = await call(t, el, 'function(){ return this.tagName === "INPUT" && this.type === "file" }');
       const set = (backendNodeId, sid) => send(t.tabId, "DOM.setFileInputFiles", { files, backendNodeId }, sid).catch((e) => {
         const m = String(e.message || e);
-        if (/not allowed|permission|denied/i.test(m)) throw fault("UNACTIONABLE", "Chrome didn't let Myna Browser choose files: turn on \"Allow access to file URLs\" for Myna Browser in chrome://extensions");
+        if (/not allowed|permission|denied/i.test(m)) throw fault("UNACTIONABLE", "Chrome didn't let Owl Browser choose files: turn on \"Allow access to file URLs\" for Owl Browser in chrome://extensions");
         throw e;
       });
       if (isInput) return void (await set(el.backend, el.sid));
@@ -828,7 +828,7 @@ const TOOLS = {
     let logs = t.logs.filter((l) => !levels || levels.includes(l.level));
     const n = Math.min(Number(args.limit) || 50, 300);
     logs = logs.slice(-n);
-    if (!logs.length) return { content: [text("Nothing logged since Myna Browser started watching this tab.")] };
+    if (!logs.length) return { content: [text("Nothing logged since Owl Browser started watching this tab.")] };
     return { content: [text(logs.map((l) => `[${new Date(l.at).toISOString().slice(11, 19)}] ${l.level}: ${l.text}`).join("\n"))] };
   },
 

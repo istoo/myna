@@ -6,11 +6,11 @@ package agent
 // custom-providers):
 //
 //	providers:
-//	  - id: myna
-//	    name: myna
+//	  - id: owl
+//	    name: owl
 //	    base_url: http://127.0.0.1:3425/v1   # OpenAI compatible, without /chat/completions
 //	    api_keys:
-//	      myna: myna-raycast
+//	      owl: owl-raycast
 //	    models:
 //	      - id: <provider>/<model>
 //	        name: …
@@ -24,10 +24,10 @@ package agent
 //
 // Raycast watches the file and picks a change up without a restart. The
 // model is picked in Raycast's own model picker (Quick AI, AI Chat, AI
-// Commands), not in a file, so what myna sets is whether its models are in
-// that picker: one entry of the providers list, id "myna". The user's other
+// Commands), not in a file, so what owl sets is whether its models are in
+// that picker: one entry of the providers list, id "owl". The user's other
 // entries, the top-level tools block and comments stay, and so does a key
-// myna doesn't write in its own entry (include_user_email,
+// owl doesn't write in its own entry (include_user_email,
 // additional_parameters, a model's description). Raycast's User-Agent isn't
 // known, so its requests are told apart by their key.
 
@@ -42,8 +42,8 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/gateway"
 )
 
 // raycastApp is Raycast's macOS bundle.
@@ -79,13 +79,13 @@ func raycast(home string) *Agent {
 			Key: "provider", Label: "provider",
 			Get: func() string {
 				if raycastWired(path) {
-					return mynaID
+					return owlID
 				}
 				return ""
 			},
 			Set: func(v string) error { return write(v != "") },
 			Options: func(map[string]string) []Option {
-				return []Option{{Value: mynaID, Label: "myna", Icon: "myna", Note: "every myna model in Raycast AI's model picker (Raycast Pro)"}}
+				return []Option{{Value: owlID, Label: "owl", Icon: "owl", Note: "every owl model in Raycast AI's model picker (Raycast Pro)"}}
 			},
 		}},
 	}
@@ -119,9 +119,9 @@ type raycastProvider struct {
 	Models  []raycastModel    `yaml:"models"`
 }
 
-// raycastProviderYAML is myna's entry in providers.yaml for a gateway at
+// raycastProviderYAML is owl's entry in providers.yaml for a gateway at
 // gw. Every ability is said, as Raycast assumes tools and vision off and
-// temperature on when one isn't: tools on, as every model myna serves an
+// temperature on when one isn't: tools on, as every model owl serves an
 // agent takes them and Raycast's AI Extensions need them; vision on a model
 // that takes images; temperature off on one that refuses it; reasoning
 // effort on a model with effort levels.
@@ -136,11 +136,11 @@ func raycastProviderYAML(gw string) raycastProvider {
 			ReasoningEffort: raycastSupported{len(m.Efforts) > 0},
 		}})
 	}
-	return raycastProvider{ID: mynaID, Name: "myna", BaseURL: gw + "/v1",
-		APIKeys: map[string]string{mynaID: agentKeyAt("raycast", gw)}, Models: ms}
+	return raycastProvider{ID: owlID, Name: "owl", BaseURL: gw + "/v1",
+		APIKeys: map[string]string{owlID: agentKeyAt("raycast", gw)}, Models: ms}
 }
 
-// raycastWired says whether providers.yaml has myna's entry.
+// raycastWired says whether providers.yaml has owl's entry.
 func raycastWired(path string) bool {
 	b, err := edit.Read(path)
 	if err != nil || len(bytes.TrimSpace(b)) == 0 {
@@ -157,11 +157,11 @@ func raycastWired(path string) bool {
 	return slices.ContainsFunc(doc.Providers, func(p struct {
 		ID any `yaml:"id"`
 	}) bool {
-		return p.ID == mynaID
+		return p.ID == owlID
 	})
 }
 
-// raycastIndex is the place of myna's entry in the providers list, -1
+// raycastIndex is the place of owl's entry in the providers list, -1
 // when it has none.
 func raycastIndex(seq *yaml.Node) int {
 	for i, it := range seq.Content {
@@ -169,7 +169,7 @@ func raycastIndex(seq *yaml.Node) int {
 			continue
 		}
 		for j := 0; j+1 < len(it.Content); j += 2 {
-			if it.Content[j].Value == "id" && it.Content[j+1].Value == mynaID {
+			if it.Content[j].Value == "id" && it.Content[j+1].Value == owlID {
 				return i
 			}
 		}
@@ -177,8 +177,8 @@ func raycastIndex(seq *yaml.Node) int {
 	return -1
 }
 
-// raycastWire puts myna's entry into providers.yaml, made when there is
-// none; an entry there already keeps what myna doesn't write in it. The
+// raycastWire puts owl's entry into providers.yaml, made when there is
+// none; an entry there already keeps what owl doesn't write in it. The
 // file is written only when the entry says something else.
 func raycastWire(path string, p raycastProvider) error {
 	var want yaml.Node
@@ -227,7 +227,7 @@ func raycastWire(path string, p raycastProvider) error {
 	return nil
 }
 
-// raycastUnwire takes myna's entry out of providers.yaml, the list with it
+// raycastUnwire takes owl's entry out of providers.yaml, the list with it
 // when it was the only one, and the file when nothing is left in it.
 func raycastUnwire(path string) error {
 	if !raycastWired(path) {
@@ -256,7 +256,7 @@ func raycastUnwire(path string) error {
 }
 
 // mergeYAMLKept is want with each key of have that want lacks, mappings in
-// both merged alike and the models list matched by id: a key myna doesn't
+// both merged alike and the models list matched by id: a key owl doesn't
 // write, at any depth, is the user's and stays with its comments, while a
 // model gone from the catalog leaves the list.
 func mergeYAMLKept(have, want *yaml.Node) *yaml.Node {

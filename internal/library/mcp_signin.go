@@ -8,16 +8,16 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/mcpauth"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/mcpauth"
 )
 
 // A remote server that asks for an OAuth sign-in is signed in to once, in
-// myna, and every agent given it reaches it through the gateway's
-// /mcp/<name>, which adds myna's token (#615): the agents are given that
-// address in place of the server's. A server myna isn't signed in to is
+// owl, and every agent given it reaches it through the gateway's
+// /mcp/<name>, which adds owl's token (#615): the agents are given that
+// address in place of the server's. A server owl isn't signed in to is
 // given as it is, and the agent signs in itself as before.
 
 func init() {
@@ -33,7 +33,7 @@ func init() {
 }
 
 // relaysAny says whether any of the library's servers is given through the
-// gateway: one myna is signed in to.
+// gateway: one owl is signed in to.
 func relaysAny() bool {
 	mu.Lock()
 	l, err := load()
@@ -64,7 +64,7 @@ func through(s *Server, base string) *Server {
 	c.URL = strings.TrimRight(base, "/") + "/mcp/" + url.PathEscape(s.Name)
 	c.Headers = nil
 	for k, v := range s.Headers {
-		// myna's token goes in its place
+		// owl's token goes in its place
 		if strings.EqualFold(k, "Authorization") {
 			continue
 		}
@@ -77,7 +77,7 @@ func through(s *Server, base string) *Server {
 		// from another machine (a WSL distro under NAT) the gateway refuses
 		// a call without an enabled key, with a 401 the agent would take
 		// for the server asking it to sign in; the relay drops this
-		// Authorization for myna's token
+		// Authorization for owl's token
 		if c.Headers == nil {
 			c.Headers = map[string]string{}
 		}
@@ -94,9 +94,9 @@ func gatewayOf(t *Target) string {
 	return gateway.URL()
 }
 
-var errNotHTTP = errors.New("myna signs in only to a server reached over streamable HTTP")
+var errNotHTTP = errors.New("owl signs in only to a server reached over streamable HTTP")
 
-// SignInServer starts signing myna in to the library's server called
+// SignInServer starts signing owl in to the library's server called
 // name: the State's URL is the page to open in a browser.
 func SignInServer(ctx context.Context, name string) (mcpauth.State, error) {
 	mu.Lock()
@@ -119,6 +119,6 @@ func SignInServer(ctx context.Context, name string) (mcpauth.State, error) {
 	return mcpauth.StartWith(ctx, s.Name, s.URL, app)
 }
 
-// SignOutServer forgets myna's sign-in to the server called name, and
+// SignOutServer forgets owl's sign-in to the server called name, and
 // gives the agents the server's own address again.
 func SignOutServer(name string) error { return mcpauth.SignOut(name) }

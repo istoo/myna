@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/agentenv"
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/agentenv"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // copyTree copies the fixtures somewhere the test may change them.

@@ -6,10 +6,10 @@ import (
 )
 
 // A Codex of the user's own provider (CC Switch's custom, an older
-// takeover's): model_provider at the top and its table. Picking a myna
+// takeover's): model_provider at the top and its table. Picking a owl
 // model beside the ChatGPT sign-in took the line down silently, and every
 // thread saved with the user's provider stopped resuming
-// (modelProviderMismatch, #4347). myna goes by the provider instead,
+// (modelProviderMismatch, #4347). owl goes by the provider instead,
 // the user's spelling kept in the stash, and stepping out puts it back.
 func TestCodexTakeoverKeepsUserProvider(t *testing.T) {
 	home, read := codexHome(t, chatGPTAuth,
@@ -19,9 +19,9 @@ func TestCodexTakeoverKeepsUserProvider(t *testing.T) {
 		t.Fatal(err)
 	}
 	cfg := read()
-	if !strings.Contains(cfg, `model_provider = "myna"`) || !strings.Contains(cfg, `model = "fake/m1"`) ||
-		!strings.Contains(cfg, "[model_providers.custom]") || !strings.Contains(cfg, "[model_providers.myna]") {
-		t.Fatalf("a myna model over the user's provider:\n%s", cfg)
+	if !strings.Contains(cfg, `model_provider = "owl"`) || !strings.Contains(cfg, `model = "fake/m1"`) ||
+		!strings.Contains(cfg, "[model_providers.custom]") || !strings.Contains(cfg, "[model_providers.owl]") {
+		t.Fatalf("a owl model over the user's provider:\n%s", cfg)
 	}
 	// and stepping out puts the user's provider back
 	if err := cx.Disconnect(); err != nil {
@@ -32,7 +32,7 @@ func TestCodexTakeoverKeepsUserProvider(t *testing.T) {
 	}
 }
 
-// A reset takes myna's keys out, not the user's: a provider of the
+// A reset takes owl's keys out, not the user's: a provider of the
 // user's at the top stays, and Codex goes on resuming the threads it
 // saved with (#4347).
 func TestCodexResetKeepsUserProvider(t *testing.T) {

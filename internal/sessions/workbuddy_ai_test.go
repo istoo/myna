@@ -47,7 +47,7 @@ func TestWorkBuddyAI(t *testing.T) {
 	}
 
 	// its calls reach the usage ledger, the one its own models.json names
-	// as myna's gateway left to the gateway, as WorkBuddy's are (its own
+	// as owl's gateway left to the gateway, as WorkBuddy's are (its own
 	// calls alone: the fixture's message ids are WorkBuddy's, which the
 	// ledger counts once over every agent)
 	cs := map[string]Call{}
@@ -60,7 +60,7 @@ func TestWorkBuddyAI(t *testing.T) {
 		t.Fatalf("WorkBuddy AI's reply: %+v (%v)", m, cs)
 	}
 	if _, dup := cs["wm1"]; dup {
-		t.Fatalf("a call made to myna's gateway was read from the file too: %+v", cs["wm1"])
+		t.Fatalf("a call made to owl's gateway was read from the file too: %+v", cs["wm1"])
 	}
 	if _, ok := cs["wm2"]; !ok {
 		t.Fatalf("no call for the user's own custom provider: %+v", cs)
@@ -82,27 +82,27 @@ func TestWorkBuddyAI(t *testing.T) {
 }
 
 // WorkBuddy AI's own models.json says which of its calls went through
-// myna's gateway, not WorkBuddy's: with the China build's model pointed at
-// myna and the international build's same id at the user's own provider,
+// owl's gateway, not WorkBuddy's: with the China build's model pointed at
+// owl and the international build's same id at the user's own provider,
 // the international build's call is its own, read from its file.
 func TestWorkBuddyAIGatewayIsItsOwn(t *testing.T) {
 	inZone(t, 0)
 	home := setupAgents(t)
 	copyTree(t, "testdata/workbuddy", filepath.Join(home, ".workbuddy-ai"))
-	// WorkBuddy's own-proxy/glm-5 is myna's; WorkBuddy AI's keeps the
+	// WorkBuddy's own-proxy/glm-5 is owl's; WorkBuddy AI's keeps the
 	// fixture's models.json, where it is the user's
-	viaMyna := `[{"id": "own-proxy/glm-5", "name": "GLM-5", "vendor": "myna",
-  "apiKey": "myna-workbuddy", "url": "http://127.0.0.1:3425/v1/chat/completions"}]
+	viaOwl := `[{"id": "own-proxy/glm-5", "name": "GLM-5", "vendor": "owl",
+  "apiKey": "owl-workbuddy", "url": "http://127.0.0.1:3425/v1/chat/completions"}]
 `
-	if err := os.WriteFile(filepath.Join(home, ".workbuddy", "models.json"), []byte(viaMyna), 0o600); err != nil {
+	if err := os.WriteFile(filepath.Join(home, ".workbuddy", "models.json"), []byte(viaOwl), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	Reset()
 	if !workbuddyGateway("custom-local:own-proxy/glm-5") {
-		t.Fatal("WorkBuddy's models.json is not read as naming myna's gateway")
+		t.Fatal("WorkBuddy's models.json is not read as naming owl's gateway")
 	}
 	if buddyGateway(WorkBuddyAIDir(), "custom-local:own-proxy/glm-5") {
-		t.Fatal("WorkBuddy AI's own provider is read as myna's gateway")
+		t.Fatal("WorkBuddy AI's own provider is read as owl's gateway")
 	}
 	var ai, wb bool
 	for _, c := range Calls(time.Time{}) {

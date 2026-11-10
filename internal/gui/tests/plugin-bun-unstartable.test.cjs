@@ -2,7 +2,7 @@
 // A plugin's install on a machine whose Windows or processor can't start
 // Bun at all (zgcwkj on Discord: bun add … exit status 0xc0000139 on an
 // older Windows) says in the reader's language why, and what to do,
-// instead of bun's exit status: in the desktop window and in myna web.
+// instead of bun's exit status: in the desktop window and in owl web.
 // No backend: the API is faked here, and nothing is ever installed.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -17,13 +17,13 @@ const listings = [{ package: PKG, name: "Raccoon", icon: "raccoon", providers: [
 
 // what the server answers, its English message as plugin.BunUnstartableError says it
 const ANSWER = {
-  windows: { error: "bun add " + PKG + "@latest: Bun can't start on this version of Windows: … (C:\\myna\\cache\\bun\\1.4.2\\myna-bun.exe exited with 0xc0000139, entry point not found) …", code: "bun_unstartable", bun: "C:\\myna\\cache\\bun\\1.4.2\\myna-bun.exe", bunWhy: "windows", said: "" },
-  cpu: { error: "bun add " + PKG + "@latest: Bun can't start on this computer's processor: …", code: "bun_unstartable", bun: "/root/.cache/myna/bun/1.4.2/myna-bun", bunWhy: "cpu", said: "" },
+  windows: { error: "bun add " + PKG + "@latest: Bun can't start on this version of Windows: … (C:\\owl\\cache\\bun\\1.4.2\\owl-bun.exe exited with 0xc0000139, entry point not found) …", code: "bun_unstartable", bun: "C:\\owl\\cache\\bun\\1.4.2\\owl-bun.exe", bunWhy: "windows", said: "" },
+  cpu: { error: "bun add " + PKG + "@latest: Bun can't start on this computer's processor: …", code: "bun_unstartable", bun: "/root/.cache/owl/bun/1.4.2/owl-bun", bunWhy: "cpu", said: "" },
 };
 
 // said is the i18n.js key the server chose (bunSaid in api.go)
-ANSWER.windows.said = "Bun, which runs plugins, can't start on this version of Windows: it needs Windows 10 version 1809 or later, or Windows Server 2019 or later. Update Windows to use plugins, or set MYNA_BUN to a bun that runs here.";
-ANSWER.cpu.said = "Bun, which runs plugins, can't start on this computer's processor: it needs an x64 processor with SSE4.2 (Intel or AMD from 2008 on; in a virtual machine, a CPU type that passes it through). Run myna on such a processor to use plugins, or set MYNA_BUN to a bun that runs here.";
+ANSWER.windows.said = "Bun, which runs plugins, can't start on this version of Windows: it needs Windows 10 version 1809 or later, or Windows Server 2019 or later. Update Windows to use plugins, or set OWL_BUN to a bun that runs here.";
+ANSWER.cpu.said = "Bun, which runs plugins, can't start on this computer's processor: it needs an x64 processor with SSE4.2 (Intel or AMD from 2008 on; in a virtual machine, a CPU type that passes it through). Run owl on such a processor to use plugins, or set OWL_BUN to a bun that runs here.";
 
 function server(lang, web, why, asked) {
   const state = { bun: true, bunVersion: "1.4.2", plugins: [] };
@@ -43,7 +43,7 @@ function server(lang, web, why, asked) {
       return route.fulfill({ status: 400, json: ANSWER[why] });
     }
     if (url.pathname.startsWith("/api/")) return json({});
-    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "myna.test") return route.fulfill({ status: 404, body: "" });
+    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "owl.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -53,8 +53,8 @@ function server(lang, web, why, asked) {
 const SAID = {
   en: {
     install: "Install",
-    windows: "Bun, which runs plugins, can't start on this version of Windows: it needs Windows 10 version 1809 or later, or Windows Server 2019 or later. Update Windows to use plugins, or set MYNA_BUN to a bun that runs here.",
-    cpu: "Bun, which runs plugins, can't start on this computer's processor: it needs an x64 processor with SSE4.2 (Intel or AMD from 2008 on; in a virtual machine, a CPU type that passes it through). Run myna on such a processor to use plugins, or set MYNA_BUN to a bun that runs here.",
+    windows: "Bun, which runs plugins, can't start on this version of Windows: it needs Windows 10 version 1809 or later, or Windows Server 2019 or later. Update Windows to use plugins, or set OWL_BUN to a bun that runs here.",
+    cpu: "Bun, which runs plugins, can't start on this computer's processor: it needs an x64 processor with SSE4.2 (Intel or AMD from 2008 on; in a virtual machine, a CPU type that passes it through). Run owl on such a processor to use plugins, or set OWL_BUN to a bun that runs here.",
   },
   zh: { install: "安装", windows: /^运行插件的 Bun 无法在这个版本的 Windows 上启动：它需要 Windows 10 1809 或更新版本/, cpu: /^运行插件的 Bun 无法在这台电脑的处理器上启动：它需要支持 SSE4\.2 的 x64 处理器/ },
   "zh-TW": { install: "安裝", windows: /^執行外掛的 Bun 無法在這個版本的 Windows 上啟動/, cpu: /^執行外掛的 Bun 無法在這台電腦的處理器上啟動/ },
@@ -81,7 +81,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           page.setDefaultNavigationTimeout(60000);
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", server(lang, web, why, asked));
-          await page.goto("http://myna.test/?view=plugins");
+          await page.goto("http://owl.test/?view=plugins");
           const act = page.locator(`#view-plugins .pm-card[data-pkg="${PKG}"] .pm-act`);
           await act.filter({ hasText: want.install }).waitFor();
           await act.click();

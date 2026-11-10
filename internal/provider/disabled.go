@@ -6,12 +6,12 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // Disabled models (#1867): models the user turned off for every request
-// through myna. Settings' DisabledModels holds them as patterns, an exact
+// through owl. Settings' DisabledModels holds them as patterns, an exact
 // id or a glob ("*fable*", "anthropic/claude-fable-5*"), each matched,
 // ignoring case, against a model's "<provider>/<model>", its bare id and
 // the bare id's last segment. A disabled model is left out of the catalog
@@ -23,7 +23,7 @@ import (
 // lastDisabled is the list as last read whole. settings.json that can't be
 // read, or doesn't parse with no last good generation, holds a list nobody
 // knows: it is never taken for "none disabled". The one read last stays in
-// force; with none read since myna started, Disabled says it is unknown.
+// force; with none read since owl started, Disabled says it is unknown.
 var lastDisabled struct {
 	sync.Mutex
 	list   []string

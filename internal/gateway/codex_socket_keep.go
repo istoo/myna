@@ -20,7 +20,7 @@ import (
 // response.completed, under the session that turn belongs to. Codex's own
 // client keeps one socket and sends each later turn on it as a delta after
 // previous_response_id, so its messages stay small on a long conversation
-// (codex-rs responses_websocket.rs, and the 1009 myna met: codex_socket.go).
+// (codex-rs responses_websocket.rs, and the 1009 owl met: codex_socket.go).
 // A turn that can't be matched to the kept turn is sent whole on the same
 // socket, as before; a session whose kept socket is busy dials another and
 // sends whole, since a delta only means anything on the socket that saw the
@@ -60,7 +60,7 @@ type codexSocketCounts struct {
 
 var codexSocketCount codexSocketCounts
 
-// codexSocketDebug prints a kept socket's turn, as MYNA_DEBUG does a call.
+// codexSocketDebug prints a kept socket's turn, as OWL_DEBUG does a call.
 var codexSocketDebug atomic.Bool
 
 // codexSocketUsed notes a turn written on a socket, sent bytes of whole.

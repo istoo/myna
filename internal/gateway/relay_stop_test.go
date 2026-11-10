@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // Anthropic-shaped relays in front of other vendors' models (Grok's, as
@@ -22,7 +22,7 @@ import (
 
 // relayAnthropic serves a translated request's model from an Anthropic
 // upstream answering with events, as they are, and returns the Chat
-// stream myna made of it.
+// stream owl made of it.
 func relayAnthropic(t *testing.T, events ...string) string {
 	t.Helper()
 	fresh(t)
@@ -136,7 +136,7 @@ func TestRelayStreamEndedShort(t *testing.T) {
 
 // relayResponses serves a translated request's model from a Responses
 // upstream answering with events, as they are, and returns the Chat
-// stream myna made of it.
+// stream owl made of it.
 func relayResponses(t *testing.T, events ...string) string {
 	t.Helper()
 	fresh(t)
@@ -256,7 +256,7 @@ func TestNonStreamEndedShort(t *testing.T) {
 }
 
 // The upstream's own stop reason is kept with the request, for a reply
-// that ended too soon to be told apart by: the relay's word, not myna's.
+// that ended too soon to be told apart by: the relay's word, not owl's.
 func TestRelayStopReasonRecorded(t *testing.T) {
 	relayAnthropic(t, anthStart("grok-4", 5), anthText("Done."), relayStop("end_turn"), relayEnd)
 	recs := usage.Load(time.Time{})

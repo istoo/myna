@@ -6,14 +6,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// #750: Codex put on the group myna found for gpt-6.1-sol
+// #750: Codex put on the group owl found for gpt-6.1-sol
 // (group/auto-gpt-6-1-sol), and its config.toml then naming the model as
-// vendors spell it, gpt-6.1-sol, with openai_base_url still myna's: the
+// vendors spell it, gpt-6.1-sol, with openai_base_url still owl's: the
 // gateway takes gpt-6.1-sol as that same group, so Codex is connected, not
-// "switched off group/auto-gpt-6-1-sol outside myna". A model of
+// "switched off group/auto-gpt-6-1-sol outside owl". A model of
 // another group, or of none, is still drift.
 func TestCodexGroupByItsModelName(t *testing.T) {
 	for _, auth := range []string{`{"tokens":{"access_token":"x","id_token":"x.e30.x"}}`, ""} {
@@ -49,14 +49,14 @@ func TestCodexGroupByItsModelName(t *testing.T) {
 		if d := cx.Drift(); d != nil {
 			t.Errorf("auth %q: drift on gpt-6.1-sol, the same group: %+v", auth, d)
 		}
-		// with nothing sending it to myna, gpt-6.1-sol goes to OpenAI
+		// with nothing sending it to owl, gpt-6.1-sol goes to OpenAI
 		os.WriteFile(path, []byte("model = \"gpt-6.1-sol\"\n"), 0o644)
 		if cx.Wired() {
-			t.Errorf("auth %q: wired on gpt-6.1-sol with no route to myna", auth)
+			t.Errorf("auth %q: wired on gpt-6.1-sol with no route to owl", auth)
 		}
-		// another group's model is not what myna set, nor is one no group
+		// another group's model is not what owl set, nor is one no group
 		// has; beside the ChatGPT sign-in either is a pick in Codex's /model
-		// that still goes through myna, not a change from outside (#2424)
+		// that still goes through owl, not a change from outside (#2424)
 		for _, m := range []string{"gpt-6.1", "gpt-5.5"} {
 			os.WriteFile(path, []byte(strings.Replace(cfg, `model = "auto/gpt-6.1-sol"`, `model = "`+m+`"`, 1)), 0o644)
 			d := cx.Drift()

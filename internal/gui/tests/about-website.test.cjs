@@ -4,7 +4,7 @@ const { chromium, webkit } = require("playwright");
 const { fixture } = require("./fixtures/caller-keys.cjs");
 const { openPart } = require("./reader.cjs");
 
-// Settings › About had Discord and GitHub but no link to github.com/istoo/myna (the
+// Settings › About had Discord and GitHub but no link to github.com/istoo/owl (the
 // owner). Its Website row names the site and opens it, in every language and
 // at the tray panel's width.
 const words = {
@@ -23,15 +23,15 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", fixture(lang, "light", []));
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         await page.locator("#prefs").click();
         await openPart(page, "about");
         const row = page.locator("#about .row", { has: page.locator(".who", { hasText: words[lang] }) });
         await row.waitFor();
-        assert.equal(await row.locator("code").textContent(), "github.com/istoo/myna");
+        assert.equal(await row.locator("code").textContent(), "github.com/istoo/owl");
         const opened = page.waitForRequest((r) => r.url().includes("/api/open"));
         await row.locator("button.text").click();
-        assert.equal(JSON.parse((await opened).postData()).url, "https://github.com/istoo/myna");
+        assert.equal(JSON.parse((await opened).postData()).url, "https://github.com/istoo/owl");
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, "About wider than the window");
         assert.deepEqual(errors, []);
       });

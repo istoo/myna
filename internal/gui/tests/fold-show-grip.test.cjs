@@ -66,7 +66,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", server(lang));
-      await page.goto("http://myna.test/?view=agents");
+      await page.goto("http://owl.test/?view=agents");
       const tops = () => page.evaluate(() => [document.scrollingElement.scrollTop, document.querySelector("#view-agents")?.scrollTop]);
       const top = await tops();
       await page.locator(".agent-more").click();
@@ -96,7 +96,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.deepEqual(await tops(), top, "no click moved the page");
 
       // the Usage page's cards
-      await page.goto("http://myna.test/?view=usage");
+      await page.goto("http://owl.test/?view=usage");
       const card = page.locator(".subscription-card").first();
       const handle = card.locator(".us-handle");
       await handle.waitFor();

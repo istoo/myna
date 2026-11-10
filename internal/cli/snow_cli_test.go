@@ -7,8 +7,8 @@ import (
 	"testing"
 )
 
-// `myna snow a/m` puts Snow CLI on a myna profile and makes it the
-// active one; `myna snow default` puts back the profile the user was on,
+// `owl snow a/m` puts Snow CLI on a owl profile and makes it the
+// active one; `owl snow default` puts back the profile the user was on,
 // its files as they were.
 func TestAgentSnowDefault(t *testing.T) {
 	groupsHome(t)
@@ -42,14 +42,14 @@ func TestAgentSnowDefault(t *testing.T) {
 	if err := run([]string{"snow", "a/m"}); err != nil {
 		t.Fatal(err)
 	}
-	s := read("profiles/myna.json")
+	s := read("profiles/owl.json")
 	for _, want := range []string{`"advancedModel": "a/m"`, `"baseUrlMode": "base"`, `"requestMethod": "chat"`, `/v1"`} {
 		if !strings.Contains(s, want) {
 			t.Fatalf("not wired (%s missing):\n%s", want, s)
 		}
 	}
-	if !strings.Contains(read("active-profile.json"), `"myna"`) || read("config.json") != s {
-		t.Fatalf("myna's profile isn't the active one:\n%s\n%s", read("active-profile.json"), read("config.json"))
+	if !strings.Contains(read("active-profile.json"), `"owl"`) || read("config.json") != s {
+		t.Fatalf("owl's profile isn't the active one:\n%s\n%s", read("active-profile.json"), read("config.json"))
 	}
 	if err := run([]string{"snow", "default"}); err != nil {
 		t.Fatal(err)
@@ -59,7 +59,7 @@ func TestAgentSnowDefault(t *testing.T) {
 			t.Errorf("%s not put back:\n%s", f, got)
 		}
 	}
-	if _, err := os.Stat(filepath.Join(dir, "profiles", "myna.json")); !os.IsNotExist(err) {
-		t.Error("myna.json left")
+	if _, err := os.Stat(filepath.Join(dir, "profiles", "owl.json")); !os.IsNotExist(err) {
+		t.Error("owl.json left")
 	}
 }

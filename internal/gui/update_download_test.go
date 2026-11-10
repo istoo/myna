@@ -13,8 +13,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/update"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/update"
 )
 
 // #2296 (meifu2027): on a metered network or a proxy billed by traffic,
@@ -30,7 +30,7 @@ func TestUpdateDownloadWaitsForAClick(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(h, ".config"))
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(h, ".cache"))
 
-	body := []byte("new myna")
+	body := []byte("new owl")
 	sum := sha256.Sum256(body)
 	var latest atomic.Value
 	latest.Store("0.1.11")
@@ -46,7 +46,7 @@ func TestUpdateDownloadWaitsForAClick(t *testing.T) {
 		}})
 	}))
 	defer srv.Close()
-	t.Setenv("MYNA_UPDATE_FEED", srv.URL)
+	t.Setenv("OWL_UPDATE_FEED", srv.URL)
 	oldV := Version
 	Version = "0.1.10"
 	defer func() { Version = oldV }()

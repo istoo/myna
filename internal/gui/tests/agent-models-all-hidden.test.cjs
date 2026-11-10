@@ -22,7 +22,7 @@ function fixture(lang) {
     stateCalls++;
     // its own models, and the catalog's shown ones
     const options = [{ value: "deepseek-v4-pro", label: "DeepSeek-V4-Pro", group: "DeepSeek Harness" },
-      ...list.filter((m) => !m.hidden).map((m) => ({ value: "myna/" + m.id, label: m.name, ref: m.id }))];
+      ...list.filter((m) => !m.hidden).map((m) => ({ value: "owl/" + m.id, label: m.name, ref: m.id }))];
     return {
       agents: [{
         id: "dsh", name: "DeepSeek Harness", path: "/test/.dsh/config.json", icon: "deepseek-color", wired: true,
@@ -83,7 +83,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         }
         await browser.close();
       });
-      await page.goto("http://myna.test/");
+      await page.goto("http://owl.test/");
       const row = page.locator('.row.agent[data-id="dsh"]');
       await row.locator(".ag-link").click();
       const entry = row.locator(".ag-exp .ag-chips .ag-quiet");

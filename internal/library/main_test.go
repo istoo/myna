@@ -7,14 +7,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // The tests run in a home of their own, never the user's real files, with
 // a temp dir of their own: what they leave in it is theirs, and a skill's
 // download left there fails the run (#2321).
 func TestMain(m *testing.M) {
-	// started as myna's own image or browser server (Args mcp image,
+	// started as owl's own image or browser server (Args mcp image,
 	// mcp browser): the fake server, for the hub to take it for that one
 	if len(os.Args) >= 3 && os.Args[1] == "mcp" && (os.Args[2] == "image" || os.Args[2] == "browser") {
 		os.Args = []string{os.Args[0], "-test.run=^TestFakeMCPServer$"}
@@ -22,7 +22,7 @@ func TestMain(m *testing.M) {
 	if os.Getenv(testenv.Marker) != "" {
 		testenv.Main(m) // started again by a test: in its temp dir already
 	}
-	tmp, err := os.MkdirTemp("", "myna-library-test-")
+	tmp, err := os.MkdirTemp("", "owl-library-test-")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

@@ -109,7 +109,7 @@ for (const engine of engines) for (const lang of langs) for (const width of [160
     const errors = [];
     page.on("pageerror", (e) => errors.push(e.message));
     await page.route("**/*", serve(lang, routeOf(how)));
-    await page.goto("http://myna.test/?view=routing");
+    await page.goto("http://owl.test/?view=routing");
     const w = await words(page, lang);
     const want = `${w.answering} · ${w.picked}`;
     if (how === "fold") await page.waitForFunction((want) => [...document.querySelectorAll(".rt-accts li.rt-fold > em")].some((e) => e.textContent.includes(want)), want);

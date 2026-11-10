@@ -12,7 +12,7 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // GgbondHi6930 on X: a Smart group of DeepSeek and a Claude API key.

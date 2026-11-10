@@ -7,14 +7,14 @@
 // place, before the field, with its head, a word that it is looking and
 // cards still to come; let go, its cards come in where those were and the
 // word goes. A search while it waits shows the same. When the ask fails,
-// the section says so with Try again, which asks again. myna answering
+// the section says so with Try again, which asks again. owl answering
 // with an error beside the list (GitHub unreachable from the reader's
 // desktop: till on Discord, where the section just wasn't there) is said
 // too: with no list, in the section's place with why and Try again, which
-// has myna ask GitHub at once (?again=1); with the cards it could give,
+// has owl ask GitHub at once (?again=1); with the cards it could give,
 // a line over them saying how many more couldn't be read, and why. English, Chinese,
 // Japanese and German, wide and 440px, in Chromium and WebKit; nothing
-// scrolls on a click. MYNA_WAIT_ASSETS names an older assets directory,
+// scrolls on a click. OWL_WAIT_ASSETS names an older assets directory,
 // to see this fail on the code before it.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -22,7 +22,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MYNA_WAIT_ASSETS || path.resolve(__dirname, "../assets"));
+const assets = path.resolve(process.env.OWL_WAIT_ASSETS || path.resolve(__dirname, "../assets"));
 
 const REPOS = [
   { spec: "opencode-claude-auth", repo: "griffinmartin/opencode-claude-auth", url: "https://github.com/griffinmartin/opencode-claude-auth", owner: "griffinmartin", description: "OpenCode plugin that uses your existing Claude Code credentials — no separate login needed. ", stars: 1301, license: "MIT", pushed: "2026-09-22T23:47:15Z", package: "opencode-claude-auth", version: "2.2.1" },
@@ -33,7 +33,7 @@ const LISTINGS = [
 ];
 
 // gh: how /api/plugins/github answers each time it is asked, in turn: a
-// promise held until let go, "fail", or { json } as myna's answer;
+// promise held until let go, "fail", or { json } as owl's answer;
 // urls: each ask's URL
 function server(lang, gh, urls = []) {
   let asked = 0;
@@ -53,11 +53,11 @@ function server(lang, gh, urls = []) {
       if (next?.json) return json(next.json);
       if (next === "fail") return route.fulfill({ status: 502, contentType: "text/plain", body: "GitHub didn't answer" });
       await next;
-      return json({ repos: REPOS, topic: "myna-plugin" }).catch(() => {});
+      return json({ repos: REPOS, topic: "owl-plugin" }).catch(() => {});
     }
     if (url.pathname === "/api/plugins/search") return json({ hits: [] });
     if (url.pathname.startsWith("/api/")) return json({});
-    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "myna.test") return route.fulfill({ status: 404, body: "" });
+    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "owl.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -94,8 +94,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             const errors = [];
             page.on("pageerror", (e) => errors.push(e.message));
             await page.route("**/*", server(lang, gh, urls));
-            await page.addInitScript(() => { try { localStorage.setItem("myna.pluginTab", "discover"); } catch {} });
-            await page.goto("http://myna.test/?view=plugins");
+            await page.addInitScript(() => { try { localStorage.setItem("owl.pluginTab", "discover"); } catch {} });
+            await page.goto("http://owl.test/?view=plugins");
             const view = page.locator("#view-plugins");
             await view.waitFor({ state: "visible" });
             await view.locator(".pm-card", { hasText: "Zed" }).waitFor();
@@ -111,7 +111,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const order = await view.locator(".pm-body > *").evaluateAll((es) => es.map((e) => e.className));
           assert.ok(order.findIndex((c) => c.includes("pm-ghsec")) < order.findIndex((c) => c.includes("pm-manual")), "before the field: " + order);
           assert.equal(await sec.getAttribute("aria-busy"), "true");
-          assert.match(await sec.locator(".pm-sechead > span").first().innerText(), /myna-plugin/);
+          assert.match(await sec.locator(".pm-sechead > span").first().innerText(), /owl-plugin/);
           const look = sec.locator(".pm-ghlook");
           assert.equal((await look.innerText()).trim(), w.look);
           assert.equal(await look.getAttribute("role"), "status");
@@ -162,12 +162,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           assert.equal(await f.sec.locator(".pm-ghnone").count(), 0);
           assert.deepEqual(f.errors, []);
 
-          // myna answers, but GitHub couldn't give it the list: said in
+          // owl answers, but GitHub couldn't give it the list: said in
           // the section's place with why, never the section gone
           const why = 'http://raw.githubusercontent.com/a/b/main/package.json: Get "https://raw.githubusercontent.com/a/b/main/package.json": dial tcp: i/o timeout';
           const urls = [];
           const later = held();
-          const e = await open([{ json: { repos: [], topic: "myna-plugin", error: why, missing: 12 } }, later], urls);
+          const e = await open([{ json: { repos: [], topic: "owl-plugin", error: why, missing: 12 } }, later], urls);
           t.after(() => e.ctx.close());
           await e.sec.locator(".pm-ghnone").waitFor();
           const said = await e.sec.locator(".pm-ghnone").innerText();
@@ -182,7 +182,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           await e.sec.locator(".pm-ghnone").waitFor();
           await eq.fill("");
           await e.sec.locator(".pm-ghnone").waitFor();
-          // Try again has myna ask GitHub at once (wheeled into sight
+          // Try again has owl ask GitHub at once (wheeled into sight
           // first, clear of the window's footer, as a reader would)
           const eAgain = e.sec.getByRole("button", { name: w.again });
           await e.page.mouse.move(width / 2, 300);
@@ -199,7 +199,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           // them saying so with Try again, which keeps the cards meanwhile
           const urls2 = [];
           const later2 = held();
-          const m = await open([{ json: { repos: REPOS, topic: "myna-plugin", error: why, missing: 12 } }, later2], urls2);
+          const m = await open([{ json: { repos: REPOS, topic: "owl-plugin", error: why, missing: 12 } }, later2], urls2);
           t.after(() => m.ctx.close());
           await m.sec.locator(".pm-ghwarn").waitFor();
           assert.match(await m.sec.locator(".pm-ghwarn").innerText(), w.more);
@@ -217,12 +217,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           assert.deepEqual(urls2, ["/api/plugins/github", "/api/plugins/github?again=1"]);
           assert.deepEqual(m.errors, []);
 
-          // GitHub too slow, as myna tells it (why: "slow"): the line
+          // GitHub too slow, as owl tells it (why: "slow"): the line
           // says so in the reader's language, not Go's "no answer in 8s"
           // in the middle of the page, and the error as it came is its
           // hover (the Kiko03O1 reply on X: ui 设计能不能好看点); Try
           // again reads as a button, in the accent
-          const s = await open([{ json: { repos: REPOS, topic: "myna-plugin", error: "no answer in 8s", why: "slow", missing: 7 } }]);
+          const s = await open([{ json: { repos: REPOS, topic: "owl-plugin", error: "no answer in 8s", why: "slow", missing: 7 } }]);
           t.after(() => s.ctx.close());
           const sLine = s.sec.locator(".pm-ghwarn");
           await sLine.waitFor();
@@ -235,7 +235,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
           // a failed ask after a list was had: the list stands, and the
           // line says it is from before
-          const k = await open([{ json: { repos: REPOS, topic: "myna-plugin" } }, { json: { repos: [], topic: "myna-plugin", error: "GitHub's search: 403 rate limit" } }]);
+          const k = await open([{ json: { repos: REPOS, topic: "owl-plugin" } }, { json: { repos: [], topic: "owl-plugin", error: "GitHub's search: 403 rate limit" } }]);
           t.after(() => k.ctx.close());
           await k.sec.locator(".pm-card:not(.ghost)").first().waitFor();
           await k.page.evaluate(() => window.loadPlugins());

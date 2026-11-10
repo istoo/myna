@@ -6,12 +6,12 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/proc"
 )
 
 // An omp bun installed is asked its version though ~/.bun/bin isn't on
-// myna's PATH, as on Windows and in WSL (whqtian on Discord: on Ubuntu
-// omp's models still offered xhigh in place of max). A `myna serve`, or
+// owl's PATH, as on Windows and in WSL (whqtian on Discord: on Ubuntu
+// omp's models still offered xhigh in place of max). A `owl serve`, or
 // a service started with a PATH that lacks it, found no omp at all, so its
 // version stayed unknown and was taken for one older than 16.4.0.
 func TestOmpVersionOffPath(t *testing.T) {

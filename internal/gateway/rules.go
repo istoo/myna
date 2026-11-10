@@ -16,7 +16,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // ruleClock is the time a turn's rules look at (a rule's hours), and its
@@ -32,7 +32,7 @@ type RuleHit struct {
 	More []string `json:"more,omitempty"`
 	When []string `json:"when,omitempty"`
 	Held bool     `json:"held,omitempty"` // decided when the turn began
-	// Waits: the turn began before myna saw it (or its rule was changed
+	// Waits: the turn began before owl saw it (or its rule was changed
 	// since), so no rule moves it; the next turn is looked at afresh
 	Waits bool `json:"waits,omitempty"`
 	// Grown: within the turn the conversation grew past what the model it
@@ -122,7 +122,7 @@ type turnRule struct {
 	// answered is when the vendor last answered the conversation: its
 	// cache of it is read from then (ruleAnswered)
 	answered time.Time
-	size     int // how long myna took the conversation's last request to be (estimate)
+	size     int // how long owl took the conversation's last request to be (estimate)
 	// hour is what the vendor said it keeps of the conversation for an
 	// hour (Anthropic's 1-hour cache writes), warm past cacheCold (#2302)
 	hour hourCache
@@ -796,7 +796,7 @@ func ruleOver(hit *RuleHit, ms []provider.Member, cs []candidate, pl planned, af
 // group's rule decides for that group's members only, so a member of the
 // outer group outside it isn't asked its effort (ms are the outer
 // group's, each with the groups it is reached through). A model whose
-// levels aren't known is asked as it would be without the rule: myna
+// levels aren't known is asked as it would be without the rule: owl
 // can't tell it thinks. "" for none.
 // A rule after it that only fails over (Then) asks nothing of its own:
 // its member is asked the first rule's, as every other member is.
@@ -910,5 +910,5 @@ func pausedError(asked string, paused []provider.Paused) string {
 		}
 		bits = append(bits, fmt.Sprintf("%s (%s: %s)", p.Member, by, strings.Join(p.When, " · ")))
 	}
-	return fmt.Sprintf("every model of %s is paused now by its rules: %s; change the rules on Myna's Routing page, or ask again when they end", asked, strings.Join(bits, ", "))
+	return fmt.Sprintf("every model of %s is paused now by its rules: %s; change the rules on Owl's Routing page, or ask again when they end", asked, strings.Join(bits, ", "))
 }

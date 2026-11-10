@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // Concurrent requests on one provider can fail differently: a 402 out of
@@ -70,7 +70,7 @@ func TestShorterRestDoesNotReplaceLongerOne(t *testing.T) {
 	}
 }
 
-// A quota rest myna only guessed (a refusal that named no time: the
+// A quota rest owl only guessed (a refusal that named no time: the
 // 15 minutes of quotaRest, asked again a minute on) gives way to the same
 // refusal's time when the vendor names one later, though it is sooner:
 // the guess stood in for the vendor's word. Another kind's shorter rest
@@ -113,7 +113,7 @@ func TestNamedQuotaTimeReplacesAGuess(t *testing.T) {
 	}
 	r, ok := restOf(acct.restKey())
 	if !ok || r.By != "resets" {
-		t.Fatalf("the vendor's own time didn't replace myna's guess: %v %q", ok, r.By)
+		t.Fatalf("the vendor's own time didn't replace owl's guess: %v %q", ok, r.By)
 	}
 	if d := time.Until(r.Until); d > 3*time.Minute || d < time.Minute {
 		t.Fatalf("resting %v, not the vendor's 2 minutes", d.Round(time.Second))

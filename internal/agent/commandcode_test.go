@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 func TestCommandCode(t *testing.T) {
@@ -34,15 +34,15 @@ func TestCommandCode(t *testing.T) {
 	if f.Get() != "deepseek/deepseek-v4-flash" {
 		t.Fatalf("get: %q", f.Get())
 	}
-	if err := f.Set("myna/deepseek/pro"); err != nil {
+	if err := f.Set("owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	s, p := read(settingsPath), read(providersPath)
-	if s["model"] != "myna/deepseek/pro" || s["modelProvider"] != "myna" || s["theme"] != "dark" {
+	if s["model"] != "owl/deepseek/pro" || s["modelProvider"] != "owl" || s["theme"] != "dark" {
 		t.Fatalf("settings: %v", s)
 	}
 	ps := p["provider"].(map[string]any)
-	m, ok := ps["myna"].(map[string]any)
+	m, ok := ps["owl"].(map[string]any)
 	if !ok || ps["mine"] == nil || m["apiKey"] != false || m["api"] != "openai-completions" {
 		t.Fatalf("providers: %v", p)
 	}
@@ -50,22 +50,22 @@ func TestCommandCode(t *testing.T) {
 		t.Fatalf("models: %v", ms)
 	}
 
-	// its own model: myna steps out
+	// its own model: owl steps out
 	if err := f.Set("moonshotai/kimi-k3"); err != nil {
 		t.Fatal(err)
 	}
 	s, p = read(settingsPath), read(providersPath)
-	if s["model"] != "moonshotai/kimi-k3" || s["modelProvider"] != nil || p["provider"].(map[string]any)["myna"] != nil || p["provider"].(map[string]any)["mine"] == nil {
+	if s["model"] != "moonshotai/kimi-k3" || s["modelProvider"] != nil || p["provider"].(map[string]any)["owl"] != nil || p["provider"].(map[string]any)["mine"] == nil {
 		t.Fatalf("own: %v %v", s, p)
 	}
 
-	// through myna, then reset
-	f.Set("myna/deepseek/flash")
+	// through owl, then reset
+	f.Set("owl/deepseek/flash")
 	if err := f.Set(""); err != nil {
 		t.Fatal(err)
 	}
 	s, p = read(settingsPath), read(providersPath)
-	if s["model"] != nil || s["modelProvider"] != nil || s["theme"] != "dark" || p["provider"].(map[string]any)["myna"] != nil {
+	if s["model"] != nil || s["modelProvider"] != nil || s["theme"] != "dark" || p["provider"].(map[string]any)["owl"] != nil {
 		t.Fatalf("reset: %v %v", s, p)
 	}
 }

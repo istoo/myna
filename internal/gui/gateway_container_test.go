@@ -9,16 +9,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/settings"
 )
 
-// A myna in a container holding the gateway's port (leslie_luo on
-// Discord: myna v0.1.552 in OrbStack had 3425, held on the Mac by
+// A owl in a container holding the gateway's port (leslie_luo on
+// Discord: owl v0.1.552 in OrbStack had 3425, held on the Mac by
 // OrbStack Helper). The take-over names it as a container's, not as a
 // program to quit, and leaves it running; and Settings' port, which was
-// refused while "another myna" served, moves this myna's gateway to a
-// port of its own. A myna program of this computer's on the port still
+// refused while "another owl" served, moves this owl's gateway to a
+// port of its own. A owl program of this computer's on the port still
 // has its port set there. Run against copies of the test binary, on ports
 // of the test's own.
 func TestGatewayHeldByAContainer(t *testing.T) {
@@ -29,7 +29,7 @@ func TestGatewayHeldByAContainer(t *testing.T) {
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(h, ".cache"))
 	t.Setenv("APPDATA", filepath.Join(h, "AppData", "Roaming"))
 	t.Setenv("LOCALAPPDATA", filepath.Join(h, "AppData", "Local"))
-	t.Setenv("MYNA_ADDR", "")
+	t.Setenv("OWL_ADDR", "")
 	from := freePort(t)
 	addr := "127.0.0.1:" + strconv.Itoa(from)
 	s := settings.Load()
@@ -71,7 +71,7 @@ func TestGatewayHeldByAContainer(t *testing.T) {
 			}
 		}
 		cmd := exec.Command(bin, "-test.run=^$")
-		cmd.Env = append(os.Environ(), "MYNA_TEST_FAKE_GATEWAY="+addr)
+		cmd.Env = append(os.Environ(), "OWL_TEST_FAKE_GATEWAY="+addr)
 		if err := cmd.Start(); err != nil {
 			t.Fatal(err)
 		}
@@ -86,10 +86,10 @@ func TestGatewayHeldByAContainer(t *testing.T) {
 		return cmd, ended
 	}
 
-	// a myna of this computer's on the port: its port is set there
-	local, localEnded := start("myna")
+	// a owl of this computer's on the port: its port is set there
+	local, localEnded := start("owl")
 	if _, err := setPort(freePort(t)); err == nil || settings.Load().Port != from {
-		t.Fatalf("moved past a myna of this computer's: %v", err)
+		t.Fatalf("moved past a owl of this computer's: %v", err)
 	}
 	local.Process.Kill()
 	<-localEnded
@@ -120,7 +120,7 @@ func TestGatewayHeldByAContainer(t *testing.T) {
 	}
 	select {
 	case <-helperEnded:
-		t.Fatal("the container's myna was ended")
+		t.Fatal("the container's owl was ended")
 	default:
 	}
 }

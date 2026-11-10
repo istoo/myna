@@ -1,6 +1,6 @@
 // Account discovery off (#1535, MaxHaiCom): with Settings → Privacy's
-// "Subscription accounts" off, `myna accounts discovery off`, or
-// MYNA_NO_ACCOUNTS=1, myna reads no agent's sign-in — no
+// "Subscription accounts" off, `owl accounts discovery off`, or
+// OWL_NO_ACCOUNTS=1, owl reads no agent's sign-in — no
 // ~/.claude/.credentials.json, ~/.codex/auth.json, Copilot, Cursor, Kiro,
 // Devin or other credential file, no Keychain or Secret Service item, and
 // no agent CLI asked who is signed in — and serves no subscription. API-key
@@ -9,7 +9,7 @@
 // The gates sit at every source (the readers below Accounts, Logins,
 // usage, renewal, warm-up, session identities) and every sink that would
 // write a sign-in (switching, forgetting, sign-in, imports, moves onto
-// plugins), so a route that skips Accounts still reads nothing. What myna
+// plugins), so a route that skips Accounts still reads nothing. What owl
 // kept of its own (logins.json, plugin-auth.json) is left as it is, unread
 // and unwritten, and comes back when discovery is turned on again.
 // Middleware plugins and Pi extensions in the plugin host are not
@@ -23,10 +23,10 @@ import (
 	"errors"
 	"os"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
-var errAccountDiscoveryOff = errors.New("subscription accounts are off in myna (Settings → Privacy, or `myna accounts discovery on`)")
+var errAccountDiscoveryOff = errors.New("subscription accounts are off in owl (Settings → Privacy, or `owl accounts discovery on`)")
 
 // discoveryOff is whether agents' sign-ins are left unread; see above.
 func discoveryOff() bool { return settings.AccountDiscoveryOff() }

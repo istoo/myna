@@ -1,10 +1,10 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// #514: removing a project took away every skill and MCP server myna had
-// put in it, so a project given some once had to stay in myna for good.
+// #514: removing a project took away every skill and MCP server owl had
+// put in it, so a project given some once had to stay in owl for good.
 // The Remove dialog now has "Keep its skills and MCP servers": checked, its
 // text says what stays, and Remove posts projects/remove with keep, the
 // status saying they were kept; unchecked, it posts as before. A project
-// myna put nothing in has no such box. Pressing the box scrolls nothing;
+// owl put nothing in has no such box. Pressing the box scrolls nothing;
 // in English and Chinese. No backend: the API is faked here.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -18,7 +18,7 @@ const HOME = "/Users/emo";
 const APP = HOME + "/code/app", BARE = HOME + "/code/bare";
 const agent = (id, name, more = {}) => ({ id, name, icon: "", skills: `${HOME}/.${id}/skills`, mcp: `${HOME}/.${id}/mcp.json`, ...more });
 const lib = (projects) => ({
-  dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
+  dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
   agents: [
     agent("claude", "Claude Code", { projectSkills: ".claude/skills", projectMCP: ".mcp.json" }),
     agent("pi", "Pi", { projectSkills: ".agents/skills", projectMCP: ".pi/mcp.json", projectNoSSE: true }),
@@ -74,13 +74,13 @@ const words = {
     kept: "app removed, its skills and servers kept", removed: "bare removed", remove: "Remove",
   },
   zh: {
-    keep: "保留项目里的技能和 MCP 服务器", gone: "移除 myna 放入的", stays: "原样保留",
+    keep: "保留项目里的技能和 MCP 服务器", gone: "移除 owl 放入的", stays: "原样保留",
     kept: "已移除 app，项目里的技能和服务器已保留", removed: "已移除 bare", remove: "移除",
   },
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
-  test(engine + ": a project removed, keeping what myna put in it", async (t) => {
+  test(engine + ": a project removed, keeping what owl put in it", async (t) => {
     assert(["chromium", "webkit"].includes(engine), "BROWSER must be chromium or webkit");
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     const errors = [];
@@ -92,19 +92,19 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await t.test(lang, async () => {
         const w = words[lang], posts = [];
         const ctx = await browser.newContext({ viewport: { width: 860, height: 700 } });
-        await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "mcp"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("owl.libTab", "mcp"); } catch {} });
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, posts));
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         await navTo(page, "library");
         const cards = page.locator("#view-library .lib-project");
         await cards.nth(1).waitFor();
         const dialog = page.locator("#modal .editor");
 
-        // a project myna wrote servers into: the box is there, unchecked
+        // a project owl wrote servers into: the box is there, unchecked
         await press(page, cards.filter({ hasText: "app" }).first().locator(".lib-icon.danger"));
         await dialog.waitFor();
         await still(page);
@@ -125,7 +125,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.deepEqual(posts, [{ dir: APP, keep: true }]);
         await page.waitForFunction(() => document.querySelectorAll("#view-library .lib-project").length === 1);
 
-        // one myna put nothing in: no box, removed as before
+        // one owl put nothing in: no box, removed as before
         await page.waitForFunction(() => document.querySelector("#modal").hidden);
         await press(page, cards.first().locator(".lib-icon.danger"));
         await page.waitForFunction(() => document.querySelector("#modal .editor b")?.textContent.includes("bare"));

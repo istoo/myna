@@ -10,10 +10,10 @@ import (
 	"testing"
 )
 
-// The window's advice about a copied `myna` command is a bare Lstat — no
-// version read, because `myna version` isn't read-only: the old binary
+// The window's advice about a copied `owl` command is a bare Lstat — no
+// version read, because `owl version` isn't read-only: the old binary
 // runs its old migrations over the user's real settings first. Only
-// `myna update`, which the user started, reads versions. The advice can
+// `owl update`, which the user started, reads versions. The advice can
 // be dismissed, and the dismiss is kept per version: the next app update
 // asks once more.
 func TestCLIBehindIsLstatOnlyAndDismissible(t *testing.T) {
@@ -23,7 +23,7 @@ func TestCLIBehindIsLstatOnlyAndDismissible(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("XDG_CONFIG_HOME", home)
 	bin := t.TempDir()
-	t.Setenv("MYNA_BIN_DIR", bin)
+	t.Setenv("OWL_BIN_DIR", bin)
 	wasV, wasOnce, wasVal := Version, cliBehindOnce, cliBehindVal
 	t.Cleanup(func() { Version, cliBehindOnce, cliBehindVal = wasV, wasOnce, wasVal })
 	Version = "0.1.500"
@@ -32,7 +32,7 @@ func TestCLIBehindIsLstatOnlyAndDismissible(t *testing.T) {
 
 	// a copy: the window says so without running anything (nothing here is
 	// executable — a binary would have to be run to report a version)
-	cli := filepath.Join(bin, "myna")
+	cli := filepath.Join(bin, "owl")
 	if err := os.WriteFile(cli, []byte("not executable"), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -54,7 +54,7 @@ func TestCLIBehindIsLstatOnlyAndDismissible(t *testing.T) {
 	if got := cliBehind(); got != "" {
 		t.Fatalf("cliBehind = %q after dismiss, want empty", got)
 	}
-	b, err := os.ReadFile(filepath.Join(home, "myna", cliQuietFile))
+	b, err := os.ReadFile(filepath.Join(home, "owl", cliQuietFile))
 	if err != nil || string(b) != Version+"\n" {
 		t.Fatalf("dismiss file = %q, %v; want this version, so the next one asks again", b, err)
 	}
@@ -77,7 +77,7 @@ func TestCLIBehindIsLstatOnlyAndDismissible(t *testing.T) {
 
 	// a link, not a copy: quiet even undismissed
 	os.Remove(cli)
-	if err := os.Symlink("/Applications/myna.app/Contents/MacOS/myna", cli); err != nil {
+	if err := os.Symlink("/Applications/owl.app/Contents/MacOS/owl", cli); err != nil {
 		t.Fatal(err)
 	}
 	cliBehindOnce = new(sync.Once)

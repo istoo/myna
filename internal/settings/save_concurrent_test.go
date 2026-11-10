@@ -8,7 +8,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/istoo/myna/internal/steady"
+	"github.com/istoo/owl/internal/steady"
 )
 
 func TestSaveConcurrent(t *testing.T) {

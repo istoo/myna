@@ -6,7 +6,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 // Best in family (Steven on Discord): with nothing picked, only the newest

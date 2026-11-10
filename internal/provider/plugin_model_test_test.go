@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // testingPlugin installs the fake plugin with one signed-in account and
@@ -20,7 +20,7 @@ func testingPlugin(t *testing.T, ctx context.Context, vendor http.Handler) Provi
 	t.Helper()
 	bun := testenv.Bun(t)
 	claudeHome(t)
-	t.Setenv("MYNA_BUN", bun)
+	t.Setenv("OWL_BUN", bun)
 	testenv.FakeVendor(t, vendor)
 	t.Cleanup(plugin.Settle)
 	abs, _ := filepath.Abs("../plugin/testdata/fake/index.js")

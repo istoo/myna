@@ -2,9 +2,9 @@ package provider
 
 // The line Claude Code's status line shows (#1997, kensenzhao): the model a
 // session's latest turn went to, then each subscription and plan with the
-// windows myna last read. `myna statusline` and the gateway's
-// GET /v1/myna/statusline (for a Claude Code on another computer than
-// the gateway, steven_4422 running myna in Docker) both print it from
+// windows owl last read. `owl statusline` and the gateway's
+// GET /v1/owl/statusline (for a Claude Code on another computer than
+// the gateway, steven_4422 running owl in Docker) both print it from
 // here, so the two never differ.
 
 import (
@@ -27,7 +27,7 @@ func StatuslineText(model string, qs []Quota, only []string, now time.Time) stri
 }
 
 // StatuslineCards are the subscriptions and plans with windows to show:
-// those named, else those that answered through myna lately, else all.
+// those named, else those that answered through owl lately, else all.
 func StatuslineCards(qs []Quota, only []string) []Quota {
 	var withWindows, served []Quota
 	for _, q := range qs {

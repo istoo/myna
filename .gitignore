@@ -1,9 +1,9 @@
-/myna
-/myna.exe
-/myna.app/
+/owl
+/owl.exe
+/owl.app/
 /dist/
-/myna-dev
+/owl-dev
 /rsrc_windows_*.syso
-/myna-dev-backend
-/myna-dev.new
+/owl-dev-backend
+/owl-dev.new
 /internal/update/launcher-*.com

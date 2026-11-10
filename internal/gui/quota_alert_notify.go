@@ -13,9 +13,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/wailsapp/wails/v3/pkg/services/notifications"
 )
@@ -93,14 +93,14 @@ func (n *notifier) problem() string {
 }
 
 // turnNotice is the id a turn's end is notified under, an alert's
-// "myna-alert-"; maskNotice a value masked for the first time, followed
+// "owl-alert-"; maskNotice a value masked for the first time, followed
 // by its record's key and "-"
 const (
-	turnNotice = "myna-turn-"
-	maskNotice = "myna-mask-"
+	turnNotice = "owl-turn-"
+	maskNotice = "owl-mask-"
 )
 
-func (n *notifier) send(title, body string) { n.sendAs("myna-alert-", title, body) }
+func (n *notifier) send(title, body string) { n.sendAs("owl-alert-", title, body) }
 
 func (n *notifier) sendAs(kind, title, body string) {
 	if !n.allowed() {
@@ -125,7 +125,7 @@ func (n *notifier) sendAs(kind, title, body string) {
 const linuxClick = "default"
 
 var clickCategory = notifications.NotificationCategory{
-	ID:      "myna-click",
+	ID:      "owl-click",
 	Actions: []notifications.NotificationAction{{ID: linuxClick, Title: "Open"}},
 }
 
@@ -141,7 +141,7 @@ func notice(goos, id, title, body string) notifications.NotificationOptions {
 // clickView is the page a response to a notification opens, "" for none.
 // A click on an alert opens Usage; on a value masked, the 脱敏 page at the
 // request that masked it. On a turn's end, where the user goes is their
-// agent, not myna. On Linux only a click (linuxClick) is one: an alert
+// agent, not owl. On Linux only a click (linuxClick) is one: an alert
 // dismissed there opened the main window, maximised if it was left so,
 // over the desktop with the focus (#2513).
 func clickView(goos string, r notifications.NotificationResponse) string {

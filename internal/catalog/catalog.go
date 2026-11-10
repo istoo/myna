@@ -1,5 +1,5 @@
 // Package catalog knows which models exist. It reads the models.dev catalog
-// (from myna's own cache or OpenCode's), Codex's model cache, and falls back
+// (from owl's own cache or OpenCode's), Codex's model cache, and falls back
 // to a small built-in list so the picker is never empty.
 package catalog
 
@@ -22,8 +22,8 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/filememo"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/filememo"
 )
 
 // Model is one entry the picker can offer.
@@ -41,7 +41,7 @@ type Model struct {
 	// APIs, when the vendor says, are the APIs the model is served on
 	// ("chat", "responses", "anthropic"); empty is not known.
 	APIs []string `json:",omitempty"`
-	// Endpoints, in myna's own models for an agent, are the gateway
+	// Endpoints, in owl's own models for an agent, are the gateway
 	// paths a request for it is relayed on as it is
 	// (provider.NativeEndpoints, /v1/models' native_endpoints); none for a
 	// group or a model translated anyway.
@@ -74,12 +74,12 @@ type Model struct {
 	// provider.CompactFor): the window it is told when Context is longer.
 	// 0 is none set, for the one for every model (settings.Compact).
 	Compact int `json:",omitempty"`
-	// Plain, on a model of another myna's list, is its name there alone
-	// (display_name), when Name is its label there, with that myna's
+	// Plain, on a model of another owl's list, is its name there alone
+	// (display_name), when Name is its label there, with that owl's
 	// provider after it (magpie_label): the name Provider in model names
 	// Off has here (ARNO on Discord).
 	Plain string `json:",omitempty"`
-	// Apart, in a list myna hands Codex, is what tells the model from
+	// Apart, in a list owl hands Codex, is what tells the model from
 	// another entry Codex's picker would call the same (two providers
 	// named Codex each serving GPT-6.1-Sol, nb5p on Discord): its
 	// provider's id. Said in the entry's display_name alone
@@ -92,7 +92,7 @@ type Model struct {
 	Fast bool `json:",omitempty"`
 	// Tiers, in one ChatGPT account's own model list, are the service
 	// tiers its plan offers on the model ("priority", "ultrafast"); in
-	// another myna's, the tiers it offers its Codex on the model
+	// another owl's, the tiers it offers its Codex on the model
 	// (#1234); in a provider plugin's, the tiers it says its vendor serves
 	// the model at (#2514).
 	Tiers []string `json:",omitempty"`
@@ -114,11 +114,11 @@ type Model struct {
 	// a relay's flux): kept with the list for Settings → Images, never
 	// offered to agents as a model to talk to.
 	Draws bool `json:",omitempty"`
-	// Films is set on a model another myna lists as one it makes videos
-	// with (a Remote myna's Grok Imagine Video): kept with the list for
+	// Films is set on a model another owl lists as one it makes videos
+	// with (a Remote owl's Grok Imagine Video): kept with the list for
 	// its videos API, never offered as a model to talk to or draw with.
 	Films bool `json:",omitempty"`
-	// Decides marks a decision model another myna explicitly lists,
+	// Decides marks a decision model another owl explicitly lists,
 	// including models whose ids don't name Jev.
 	Decides bool `json:",omitempty"`
 	// Free is set on a model a subscription serves at no cost to its
@@ -146,19 +146,19 @@ type Model struct {
 	// at when none is asked: Kimi Code's think_efforts.default_effort
 	// (reasoning.effort.default). "" is not said.
 	DefaultEffort string `json:",omitempty"`
-	// WebSearch is how another myna (a Remote myna) searches the web
+	// WebSearch is how another owl (a Remote owl) searches the web
 	// for the model when a web search tool is offered: "native", its own
-	// provider by itself, or "myna", with that myna's searcher; "" it
+	// provider by itself, or "owl", with that owl's searcher; "" it
 	// doesn't, or didn't say. A plugin's model it says searches by itself
 	// (m.searches) is "native" too.
 	WebSearch string `json:",omitempty"`
 	// Codex, on a model a vendor lists the way Codex's own catalog does
 	// (a sub2api asked with Codex's client_version), is that entry as the
 	// vendor gave it (CodexEntry): Codex is handed it as it is, its
-	// instructions and window and all, rather than an entry myna made up
+	// instructions and window and all, rather than an entry owl made up
 	// from models.dev (ctopsc on Discord). Its context_window,
 	// max_context_window, input_modalities and reasoning levels are read
-	// into the fields above too, so the rest of myna says what it says.
+	// into the fields above too, so the rest of owl says what it says.
 	Codex json.RawMessage `json:",omitempty"`
 }
 
@@ -266,7 +266,7 @@ type Tier struct {
 	CacheWrite1h float64 `json:"cache_write_1h,omitempty"`
 }
 
-// UnmarshalJSON reads a price as myna writes it, and as models.dev does,
+// UnmarshalJSON reads a price as owl writes it, and as models.dev does,
 // whose tiers name their size as {"tier": {"type": "context", "size": N}}
 // and may leave a part out, which is then the base price's. A tier of
 // another type, or of no size, is left out.
@@ -475,7 +475,7 @@ func (p mdProvider) levels(m mdModel, providerID string) []string {
 	}
 	// the kin is kept by its id, date and levels, not as &x: a pointer to
 	// the loop's copy put every model of p on the heap, for every model
-	// asked (~6 GB in 48 minutes of a user's myna, #1956)
+	// asked (~6 GB in 48 minutes of a user's owl, #1956)
 	var kinID, kinDate string
 	var kin []string
 	for id := range p.Models {
@@ -585,7 +585,7 @@ var (
 	syncCh = make(chan struct{}, 1)
 )
 
-// CachePath is where `myna sync` stores the models.dev catalog.
+// CachePath is where `owl sync` stores the models.dev catalog.
 func CachePath() string { return appdir.Join(appdir.Cache(), "models.json") }
 
 func opencodeCache() string {
@@ -821,7 +821,7 @@ func syncLock(ctx context.Context, onlyIfMissing bool) error {
 	if err != nil {
 		return err
 	}
-	req.Header.Set("User-Agent", "myna")
+	req.Header.Set("User-Agent", "owl")
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
@@ -854,7 +854,7 @@ func syncLock(ctx context.Context, onlyIfMissing bool) error {
 }
 
 // Stale reports whether no catalog exists or the cache is older than a day
-// (fresh.go), or myna's has no lab catalog beside it yet (labs.go).
+// (fresh.go), or owl's has no lab catalog beside it yet (labs.go).
 func Stale() bool {
 	src := Source()
 	if src == "" || labsMissing() {
@@ -1474,7 +1474,7 @@ func lookupIn[T any](b string, table map[string]T, spellings, user bool) (T, boo
 // vendor spells it with (settings' ModelSameAs; the settings package sets
 // it). A model models.dev lists by its very id is that model; one it
 // doesn't is looked up as the model the user named, before any guess of
-// myna's (renamed, normalFor): a relay's rename no rule can read,
+// owl's (renamed, normalFor): a relay's rename no rule can read,
 // "ds.4.1(WB)" for deepseek-v4.1-flash (pinmmis on X), has that model's
 // window, reply limit, levels and images.
 var UserSame func(bare string) (string, bool)
@@ -2193,7 +2193,7 @@ func parseCodex(b []byte) ([]Model, error) {
 	sort.SliceStable(cache.Models, func(i, j int) bool { return cache.Models[i].Priority < cache.Models[j].Priority })
 	var out []Model
 	for _, m := range cache.Models {
-		if m.Visibility == "hide" || MynaAdded(cache.ETag, m.Slug, m.Description) {
+		if m.Visibility == "hide" || OwlAdded(cache.ETag, m.Slug, m.Description) {
 			continue
 		}
 		// the window Codex holds a conversation to (272K on a ChatGPT
@@ -2214,15 +2214,15 @@ func parseCodex(b []byte) ([]Model, error) {
 	return out, nil
 }
 
-// MynaAdded reports whether an entry of Codex's models_cache.json is one
-// of myna's, not Codex's own: the list Codex keeps is the one it was last
-// handed, and handed through the gateway it has myna's models in it too
-// ("group/semantic", "deepseek/deepseek-v4", "codex/gpt-5.5" — myna's ids,
+// OwlAdded reports whether an entry of Codex's models_cache.json is one
+// of owl's, not Codex's own: the list Codex keeps is the one it was last
+// handed, and handed through the gateway it has owl's models in it too
+// ("group/semantic", "deepseek/deepseek-v4", "codex/gpt-5.5" — owl's ids,
 // which Codex's slugs never look like). Read back as Codex's own, they were
 // listed under OpenAI, and kept there after Codex was routed elsewhere.
-func MynaAdded(etag, slug, description string) bool {
-	return strings.HasSuffix(description, " via myna") ||
-		strings.Contains(etag, "+myna-") && strings.Contains(slug, "/")
+func OwlAdded(etag, slug, description string) bool {
+	return strings.HasSuffix(description, " via owl") ||
+		strings.Contains(etag, "+owl-") && strings.Contains(slug, "/")
 }
 
 // EffortRank orders the reasoning levels agents and vendors name, weakest

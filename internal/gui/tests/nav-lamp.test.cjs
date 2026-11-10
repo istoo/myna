@@ -26,12 +26,12 @@ function serve(lang, theme) {
     if (url.pathname === "/boot.js") return route.fulfill({ contentType: "text/javascript", body: `window.bootPrefs = {lang:${JSON.stringify(lang)},theme:${JSON.stringify(theme)},web:false,sideGateway:{url:"http://127.0.0.1:3425",running:true}};` });
     if (url.pathname === "/wails/runtime.js") return route.fulfill({ contentType: "text/javascript", body: "export const Window = {};" });
     if (url.pathname === "/api/state") return json({ agents: [], profiles: [], settings: { lang, theme } });
-    if (url.pathname === "/api/settings") return json({ lang, theme, tray: "panel", version: "0.1.400", dir: "~/.config/myna", gateway: "http://127.0.0.1:3425", lanURLs: [], visionModels: [], imageGenModels: [], workbuddyCheckins: [], redactWords: [] });
+    if (url.pathname === "/api/settings") return json({ lang, theme, tray: "panel", version: "0.1.400", dir: "~/.config/owl", gateway: "http://127.0.0.1:3425", lanURLs: [], visionModels: [], imageGenModels: [], workbuddyCheckins: [], redactWords: [] });
     if (url.pathname === "/api/plugins") return json({ plugins: [] });
     if (url.pathname === "/api/usage/quotas") return json([]);
     if (url.pathname === "/api/groups") return json({ groups: [], pools: [] });
     if (url.pathname.startsWith("/api/")) return json({});
-    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "myna.test") return route.fulfill({ status: 404, body: "" });
+    if (!/^\/[\w./-]*$/.test(url.pathname) || url.host !== "owl.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -76,7 +76,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, theme));
-      await page.goto("http://myna.test/?view=settings");
+      await page.goto("http://owl.test/?view=settings");
       await page.waitForSelector(".nav-sub > .nav-s + .nav-s");
       await page.mouse.move(40, 300); // over the sidebar, which loads the lamp
       await page.waitForFunction(() => document.documentElement.classList.contains("navlamp"));
@@ -158,7 +158,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, theme));
-      await page.goto("http://myna.test/?view=agents");
+      await page.goto("http://owl.test/?view=agents");
       await page.waitForSelector("body.side-nav #side #nav > button[data-view]");
       await page.mouse.move(40, 300); // over the sidebar, which loads the lamp
       await page.waitForFunction(() => document.documentElement.classList.contains("navlamp"));

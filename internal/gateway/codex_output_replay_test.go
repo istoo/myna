@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // copilotRefusesOutputReplay is Copilot's /responses turning away output
@@ -17,7 +17,7 @@ import (
 const copilotRefusesOutputReplay = `{"error":{"message":"Invalid value: 'output.encrypted_content'. Supported values are: 'file_search_call.results', 'web_search_call.results', 'web_search_call.action.sources', 'message.input_image.image_url', 'computer_call_output.output.image_url', 'code_interpreter_call.outputs', 'reasoning.encrypted_content', and 'message.output_text.logprobs'.","type":"invalid_request_error","param":"include","code":"invalid_value"}}`
 
 // Codex with output token replay on asks a provider named "OpenAI" (its
-// built-in one, which reaches myna signed in) for
+// built-in one, which reaches owl signed in) for
 // output.encrypted_content, and sends back each earlier message's and
 // call's sealed copy in its encrypted_content. Under any other name it
 // leaves both out (client.rs: include only when is_openai, and
@@ -113,7 +113,7 @@ func TestCodexOutputReplayStaysWithOpenAI(t *testing.T) {
 	}
 }
 
-// A request myna builds again for a Responses upstream asks for output
+// A request owl builds again for a Responses upstream asks for output
 // token replay only of OpenAI's API and the ChatGPT backend.
 func TestResponsesOutputReplayOnlyToOpenAI(t *testing.T) {
 	r, err := parseResponses([]byte(`{"model":"m","input":"hi","reasoning":{"effort":"low"},"include":["reasoning.encrypted_content","output.encrypted_content"]}`))

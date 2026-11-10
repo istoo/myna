@@ -5,7 +5,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 // Which models a provider can't be asked for (#2094) is weighed for each

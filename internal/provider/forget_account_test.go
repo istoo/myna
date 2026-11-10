@@ -7,11 +7,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/testenv"
 )
 
-// #694: a plugin's subscription removed from myna was listed among the
+// #694: a plugin's subscription removed from owl was listed among the
 // removed as "plugin", and nothing signed it out, so adding it back always
 // brought the old account back. Removed, it is named as its row was, and
 // ForgetAccount signs its accounts out of plugin-auth.json and logins.json:
@@ -19,7 +19,7 @@ import (
 func TestForgetRemovedPluginAccount(t *testing.T) {
 	bun := testenv.Bun(t)
 	claudeHome(t)
-	t.Setenv("MYNA_BUN", bun)
+	t.Setenv("OWL_BUN", bun)
 	t.Cleanup(plugin.Settle)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()

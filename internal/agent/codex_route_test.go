@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/provider"
 )
 
 func codexHome(t *testing.T, auth, config string) (home string, read func() string) {
@@ -51,9 +51,9 @@ func codexHome(t *testing.T, auth, config string) (home string, read func() stri
 	}
 }
 
-// Signed in, a myna model points Codex's built-in OpenAI provider at
-// myna and leaves the provider as it is; one of Codex's own models takes
-// the base URL away again and brings back what was there. myna's provider
+// Signed in, a owl model points Codex's built-in OpenAI provider at
+// owl and leaves the provider as it is; one of Codex's own models takes
+// the base URL away again and brings back what was there. owl's provider
 // table is written all the same, for threads started on it.
 func TestCodexSignedInRoutesByBaseURL(t *testing.T) {
 	home, read := codexHome(t, `{"tokens":{"access_token":"x","id_token":"x.e30.x"}}`,
@@ -65,10 +65,10 @@ func TestCodexSignedInRoutesByBaseURL(t *testing.T) {
 	cfg := read()
 	if !strings.Contains(cfg, `openai_base_url = "http://127.0.0.1:`) || !strings.Contains(cfg, `/backend-api/codex"`) ||
 		!strings.Contains(cfg, `model = "fake/m1"`) || strings.Contains(cfg, "model_provider =") ||
-		strings.Contains(cfg, "model_catalog_json") || !strings.Contains(cfg, "[model_providers.myna]") {
-		t.Fatalf("myna model:\n%s", cfg)
+		strings.Contains(cfg, "model_catalog_json") || !strings.Contains(cfg, "[model_providers.owl]") {
+		t.Fatalf("owl model:\n%s", cfg)
 	}
-	if _, err := os.Stat(filepath.Join(home, ".codex", "myna-models.json")); err == nil {
+	if _, err := os.Stat(filepath.Join(home, ".codex", "owl-models.json")); err == nil {
 		t.Error("catalog file written")
 	}
 	if err := cx.Fields[0].Set("gpt-5.4"); err != nil {
@@ -81,34 +81,34 @@ func TestCodexSignedInRoutesByBaseURL(t *testing.T) {
 	}
 }
 
-// A myna set up as a provider of Codex's, from before, moves to the base
-// URL the next time a myna model is picked, and its table stays: threads
+// A owl set up as a provider of Codex's, from before, moves to the base
+// URL the next time a owl model is picked, and its table stays: threads
 // started on it name it, and without it Codex can't open them (#129).
 func TestCodexSignedInLeavesProviderTable(t *testing.T) {
 	home, read := codexHome(t, `{"tokens":{"access_token":"x","id_token":"x.e30.x"}}`,
-		"model = \"fake/m1\"\nmodel_provider = \"myna\"\nmodel_catalog_json = \"/x/myna-models.json\"\n\n[model_providers.myna]\nname = \"myna\"\nbase_url = \"http://127.0.0.1:3425/v1\"\nwire_api = \"responses\"\n")
+		"model = \"fake/m1\"\nmodel_provider = \"owl\"\nmodel_catalog_json = \"/x/owl-models.json\"\n\n[model_providers.owl]\nname = \"owl\"\nbase_url = \"http://127.0.0.1:3425/v1\"\nwire_api = \"responses\"\n")
 	if err := codex(home).Fields[0].Set("fake/m1"); err != nil {
 		t.Fatal(err)
 	}
 	cfg := read()
 	if !strings.Contains(cfg, "openai_base_url") || strings.Contains(cfg, "model_provider =") || strings.Contains(cfg, "model_catalog_json") ||
-		!strings.Contains(cfg, "[model_providers.myna]") || !strings.Contains(cfg, `experimental_bearer_token = "myna"`) {
+		!strings.Contains(cfg, "[model_providers.owl]") || !strings.Contains(cfg, `experimental_bearer_token = "owl"`) {
 		t.Fatalf("\n%s", cfg)
 	}
 }
 
 // A provider table the user wrote with spaces around the dots — valid TOML —
-// is the same table to myna: it is reused in place, and left for the
+// is the same table to owl: it is reused in place, and left for the
 // threads started on it when Codex steps back to its own models, as if
-// myna had written it.
+// owl had written it.
 func TestCodexSpacedProviderTable(t *testing.T) {
-	home, read := codexHome(t, "", "model = \"gpt-5.5\"\n\n[ model_providers . myna ]\nname = \"myna\"\nbase_url = \"http://127.0.0.1:1/v1\"\n\n[[skills.config]]\npath = \"/skill\"\n")
+	home, read := codexHome(t, "", "model = \"gpt-5.5\"\n\n[ model_providers . owl ]\nname = \"owl\"\nbase_url = \"http://127.0.0.1:1/v1\"\n\n[[skills.config]]\npath = \"/skill\"\n")
 	cx := codex(home)
 	if err := cx.Fields[0].Set("fake/m1"); err != nil {
 		t.Fatal(err)
 	}
 	cfg := read()
-	if strings.Count(cfg, "model_providers") != 1 || !strings.Contains(cfg, `model_provider = "myna"`) {
+	if strings.Count(cfg, "model_providers") != 1 || !strings.Contains(cfg, `model_provider = "owl"`) {
 		t.Fatalf("provider table was not reused:\n%s", cfg)
 	}
 	if err := cx.Fields[0].Set(""); err != nil {
@@ -120,8 +120,8 @@ func TestCodexSpacedProviderTable(t *testing.T) {
 	}
 }
 
-// Not signed in, Codex's OpenAI provider can't run, so myna is a provider
-// of its own; the base URL is myna's too, for the threads started on the
+// Not signed in, Codex's OpenAI provider can't run, so owl is a provider
+// of its own; the base URL is owl's too, for the threads started on the
 // built-in provider (#259).
 func TestCodexSignedOutUsesProvider(t *testing.T) {
 	home, read := codexHome(t, "", "")
@@ -130,24 +130,24 @@ func TestCodexSignedOutUsesProvider(t *testing.T) {
 		t.Fatal(err)
 	}
 	cfg := read()
-	if !strings.Contains(cfg, `openai_base_url = "`+codexGatewayURL()+`"`) || !strings.Contains(cfg, `model_provider = "myna"`) ||
-		!strings.Contains(cfg, "[model_providers.myna]") || !strings.Contains(cfg, "model_catalog_json") {
+	if !strings.Contains(cfg, `openai_base_url = "`+codexGatewayURL()+`"`) || !strings.Contains(cfg, `model_provider = "owl"`) ||
+		!strings.Contains(cfg, "[model_providers.owl]") || !strings.Contains(cfg, "model_catalog_json") {
 		t.Fatalf("\n%s", cfg)
 	}
 	if err := cx.Fields[0].Set(""); err != nil {
 		t.Fatal(err)
 	}
 	if cfg = read(); strings.Contains(cfg, "model =") || strings.Contains(cfg, "openai_base_url") || strings.Contains(cfg, "model_provider =") ||
-		strings.Contains(cfg, "model_catalog_json") || !strings.Contains(cfg, "[model_providers.myna]") {
+		strings.Contains(cfg, "model_catalog_json") || !strings.Contains(cfg, "[model_providers.owl]") {
 		t.Fatalf("reset:\n%s", cfg)
 	}
-	if _, err := os.Stat(filepath.Join(home, ".codex", "myna-models.json")); err == nil {
+	if _, err := os.Stat(filepath.Join(home, ".codex", "owl-models.json")); err == nil {
 		t.Error("catalog file left")
 	}
 }
 
 // A ChatGPT account that has used its allowance up keeps the Codex app from
-// sending, so myna is a provider of Codex's then, as when signed out.
+// sending, so owl is a provider of Codex's then, as when signed out.
 func TestCodexUsedUpUsesProvider(t *testing.T) {
 	home, read := codexHome(t, `{"tokens":{"access_token":"x","id_token":"x.e30.x"}}`, "")
 	codexUsedUp = func() bool { return true }
@@ -155,14 +155,14 @@ func TestCodexUsedUpUsesProvider(t *testing.T) {
 		t.Fatal(err)
 	}
 	cfg := read()
-	if !strings.Contains(cfg, "openai_base_url") || !strings.Contains(cfg, `model_provider = "myna"`) ||
-		!strings.Contains(cfg, "[model_providers.myna]") || !strings.Contains(cfg, `model = "fake/m1"`) {
+	if !strings.Contains(cfg, "openai_base_url") || !strings.Contains(cfg, `model_provider = "owl"`) ||
+		!strings.Contains(cfg, "[model_providers.owl]") || !strings.Contains(cfg, `model = "fake/m1"`) {
 		t.Fatalf("\n%s", cfg)
 	}
 }
 
-// Subagents can be given a myna model of their own once Codex runs through
-// myna; it goes with myna when Codex steps back to its own models, where
+// Subagents can be given a owl model of their own once Codex runs through
+// owl; it goes with owl when Codex steps back to its own models, where
 // a user's own choice of one of those stays.
 func TestCodexSubagentModel(t *testing.T) {
 	home, read := codexHome(t, `{"tokens":{"access_token":"x","id_token":"x.e30.x"}}`,
@@ -173,11 +173,11 @@ func TestCodexSubagentModel(t *testing.T) {
 		t.Fatal("no subagent field")
 	}
 	if err := sub.Set("fake/m1"); err == nil {
-		t.Error("a myna model was taken before Codex runs through myna")
+		t.Error("a owl model was taken before Codex runs through owl")
 	}
 	for _, o := range sub.Options(nil) {
-		if isMyna(o.Value) {
-			t.Errorf("myna model offered before Codex runs through myna: %s", o.Value)
+		if isOwl(o.Value) {
+			t.Errorf("owl model offered before Codex runs through owl: %s", o.Value)
 		}
 	}
 	if err := cx.Fields[0].Set("fake/m1"); err != nil {
@@ -196,7 +196,7 @@ func TestCodexSubagentModel(t *testing.T) {
 		t.Fatal(err)
 	}
 	if cfg := read(); strings.Contains(cfg, "default_subagent_model") || !strings.Contains(cfg, "max_threads = 6") {
-		t.Fatalf("stepping out of myna:\n%s", cfg)
+		t.Fatalf("stepping out of owl:\n%s", cfg)
 	}
 	if err := sub.Set("gpt-5.4-mini"); err != nil {
 		t.Fatal(err)
@@ -215,9 +215,9 @@ func TestCodexSubagentModel(t *testing.T) {
 	}
 }
 
-// #1633 (laacmilan): the model myna puts every Codex subagent on offers
+// #1633 (laacmilan): the model owl puts every Codex subagent on offers
 // another provider's models, not only a ChatGPT account's, and takes one;
-// one of Codex's own bare names, which myna can't put a request on, is
+// one of Codex's own bare names, which owl can't put a request on, is
 // refused.
 func TestCodexSubagentModelTakesAnyProvider(t *testing.T) {
 	home, _ := codexHome(t, `{"tokens":{"access_token":"x","id_token":"x.e30.x"}}`, "model = \"gpt-5.5\"\n")
@@ -246,7 +246,7 @@ func TestCodexSubagentModelTakesAnyProvider(t *testing.T) {
 	}
 }
 
-// The GUI shows one setting for the subagents' model, the one myna puts
+// The GUI shows one setting for the subagents' model, the one owl puts
 // them all on: a pick there, Default too, takes away Codex's own [agents]
 // default_subagent_model, which read the same and nobody could tell apart,
 // and keeps the user's other [agents] keys; a refused pick leaves it.
@@ -275,7 +275,7 @@ func TestCodexSubagentModelReplacesConfigs(t *testing.T) {
 
 // Subagents can start at an effort of their own (#469): Codex's [agents]
 // default_subagent_reasoning_effort, used when a spawn names none. Codex
-// refuses a spawn at a level the subagents' model lacks, so myna takes
+// refuses a spawn at a level the subagents' model lacks, so owl takes
 // only one it has, and drops one a new subagent model doesn't.
 func TestCodexSubagentEffort(t *testing.T) {
 	home, read := codexHome(t, "", "model = \"gpt-a\"\n\n[agents]\nmax_threads = 6\n")
@@ -325,7 +325,7 @@ func TestCodexSubagentEffort(t *testing.T) {
 }
 
 func TestCodexSubagentReadErrorStopsChanges(t *testing.T) {
-	const input = "model = \"fake/m1\"\nmodel_provider = \"myna\"\n\n[agents]\ndefault_subagent_model = [\n"
+	const input = "model = \"fake/m1\"\nmodel_provider = \"owl\"\n\n[agents]\ndefault_subagent_model = [\n"
 	for _, model := range []string{"", "gpt-native"} {
 		t.Run("model="+model, func(t *testing.T) {
 			home := t.TempDir()
@@ -353,7 +353,7 @@ func TestCodexSubagentReadErrorStopsChanges(t *testing.T) {
 
 func TestCodexCheckReportsTOMLParseErrors(t *testing.T) {
 	for _, profile := range []string{"", "profile = \"work\"\n"} {
-		input := "model = \"fake/m1\"\nmodel_provider = \"myna\"\n" + profile + "\n[model_providers.myna]\ninvalid = [\n"
+		input := "model = \"fake/m1\"\nmodel_provider = \"owl\"\n" + profile + "\n[model_providers.owl]\ninvalid = [\n"
 		home, read := codexHome(t, "", input)
 		path := filepath.Join(home, ".codex", "config.toml")
 		message := codex(home).Check()
@@ -366,9 +366,9 @@ func TestCodexCheckReportsTOMLParseErrors(t *testing.T) {
 	}
 }
 
-// The sign-in field's api puts myna in as Codex's provider while Codex is
+// The sign-in field's api puts owl in as Codex's provider while Codex is
 // signed in to ChatGPT, so the Codex app is in its API state; back to
-// ChatGPT, Codex keeps its sign-in and myna's table stays for the threads
+// ChatGPT, Codex keeps its sign-in and owl's table stays for the threads
 // started meanwhile. The choice outlasts a pick of Codex's own models.
 func TestCodexLoginAPI(t *testing.T) {
 	home, read := codexHome(t, `{"tokens":{"access_token":"x","id_token":"x.e30.x"}}`, "model = \"gpt-5.5\"\n")
@@ -390,8 +390,8 @@ func TestCodexLoginAPI(t *testing.T) {
 		t.Fatal(err)
 	}
 	cfg := read()
-	if !strings.Contains(cfg, "openai_base_url") || !strings.Contains(cfg, `model_provider = "myna"`) ||
-		!strings.Contains(cfg, "[model_providers.myna]") || !strings.Contains(cfg, "model_catalog_json") {
+	if !strings.Contains(cfg, "openai_base_url") || !strings.Contains(cfg, `model_provider = "owl"`) ||
+		!strings.Contains(cfg, "[model_providers.owl]") || !strings.Contains(cfg, "model_catalog_json") {
 		t.Fatalf("api:\n%s", cfg)
 	}
 	if err := login.Set(""); err != nil {
@@ -399,14 +399,14 @@ func TestCodexLoginAPI(t *testing.T) {
 	}
 	cfg = read()
 	if !strings.Contains(cfg, "openai_base_url") || strings.Contains(cfg, "model_provider =") ||
-		strings.Contains(cfg, "model_catalog_json") || !strings.Contains(cfg, "[model_providers.myna]") ||
+		strings.Contains(cfg, "model_catalog_json") || !strings.Contains(cfg, "[model_providers.owl]") ||
 		!strings.Contains(cfg, `model = "fake/m1"`) {
 		t.Fatalf("back to ChatGPT:\n%s", cfg)
 	}
 	if err := login.Set("api"); err != nil {
 		t.Fatal(err)
 	}
-	if cfg = read(); !strings.Contains(cfg, `model_provider = "myna"`) || strings.Count(cfg, "openai_base_url") != 1 {
+	if cfg = read(); !strings.Contains(cfg, `model_provider = "owl"`) || strings.Count(cfg, "openai_base_url") != 1 {
 		t.Fatalf("api again:\n%s", cfg)
 	}
 	if err := cx.Fields[0].Set(""); err != nil {
@@ -418,13 +418,13 @@ func TestCodexLoginAPI(t *testing.T) {
 	if err := cx.Fields[0].Set("fake/m1"); err != nil {
 		t.Fatal(err)
 	}
-	if cfg = read(); !strings.Contains(cfg, `model_provider = "myna"`) {
+	if cfg = read(); !strings.Contains(cfg, `model_provider = "owl"`) {
 		t.Fatalf("api after default:\n%s", cfg)
 	}
 }
 
-// A Codex routed by base URL whose provider table an older myna took away
-// gets it back at the next sync, so its threads started on myna open.
+// A Codex routed by base URL whose provider table an older owl took away
+// gets it back at the next sync, so its threads started on owl open.
 func TestCodexSyncPutsProviderTableBack(t *testing.T) {
 	home, read := codexHome(t, `{"tokens":{"access_token":"x","id_token":"x.e30.x"}}`,
 		"model = \"fake/m1\"\nopenai_base_url = \""+codexGatewayURL()+"\"\n")
@@ -432,11 +432,11 @@ func TestCodexSyncPutsProviderTableBack(t *testing.T) {
 		t.Fatal(err)
 	}
 	cfg := read()
-	if !strings.Contains(cfg, "[model_providers.myna]") || !strings.Contains(cfg, `wire_api = "responses"`) ||
+	if !strings.Contains(cfg, "[model_providers.owl]") || !strings.Contains(cfg, `wire_api = "responses"`) ||
 		strings.Contains(cfg, "model_provider =") {
 		t.Fatalf("\n%s", cfg)
 	}
-	// Codex on its own model, not through myna: nothing is added
+	// Codex on its own model, not through owl: nothing is added
 	home, read = codexHome(t, `{"tokens":{"access_token":"x","id_token":"x.e30.x"}}`, "model = \"gpt-5.5\"\n")
 	if err := codex(home).Sync(); err != nil {
 		t.Fatal(err)
@@ -447,7 +447,7 @@ func TestCodexSyncPutsProviderTableBack(t *testing.T) {
 }
 
 // #2545: a key made under Gateway keys, put in the provider table's
-// experimental_bearer_token in place of myna's, goes through myna all
+// experimental_bearer_token in place of owl's, goes through owl all
 // the same, so a model pick keeps it, as a sync keeps one. A key the
 // gateway doesn't take is still wired over.
 func TestCodexPickKeepsAGatewayKeyOfTheUsers(t *testing.T) {
@@ -457,7 +457,7 @@ func TestCodexPickKeepsAGatewayKeyOfTheUsers(t *testing.T) {
 	if err := cx.Fields[0].Set("fake/m1"); err != nil {
 		t.Fatal(err)
 	}
-	if cfg := read(); !strings.Contains(cfg, `experimental_bearer_token = "myna"`) {
+	if cfg := read(); !strings.Contains(cfg, `experimental_bearer_token = "owl"`) {
 		t.Fatalf("not wired:\n%s", cfg)
 	}
 	secret, err := access.Update("add-key", access.Change{Name: "codex"})
@@ -465,7 +465,7 @@ func TestCodexPickKeepsAGatewayKeyOfTheUsers(t *testing.T) {
 		t.Fatal(err)
 	}
 	path := filepath.Join(home, ".codex", "config.toml")
-	if err := edit.SetTOMLKey(path, "model_providers.myna", "experimental_bearer_token", secret); err != nil {
+	if err := edit.SetTOMLKey(path, "model_providers.owl", "experimental_bearer_token", secret); err != nil {
 		t.Fatal(err)
 	}
 	if err := cx.Fields[0].Set("fake/m1"); err != nil {
@@ -474,7 +474,7 @@ func TestCodexPickKeepsAGatewayKeyOfTheUsers(t *testing.T) {
 	if cfg := read(); !strings.Contains(cfg, `experimental_bearer_token = "`+secret+`"`) {
 		t.Fatalf("a model pick wrote over the user's caller key:\n%s", cfg)
 	}
-	if err := edit.SetTOMLKey(path, "model_providers.myna", "experimental_bearer_token", "sk-not-this-gateways"); err != nil {
+	if err := edit.SetTOMLKey(path, "model_providers.owl", "experimental_bearer_token", "sk-not-this-gateways"); err != nil {
 		t.Fatal(err)
 	}
 	if err := cx.Fields[0].Set("fake/m1"); err != nil {

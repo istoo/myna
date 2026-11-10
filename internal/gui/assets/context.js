@@ -24,7 +24,7 @@
   const CELLS = 400;
   const partName = (k) => t(PART_NAMES[k] || k);
   // the Codexes here before 0.163 or of no known version (app.js too)
-  const codexHeld = window.codexHeld = (held) => t("{who}: the share needs Codex 0.163 or later; until it's updated myna writes only async_compaction = true, at 65%", { who: held.map((r) => t({ app: "Codex app", ide: "Codex editor extension", wsl: "Codex in WSL" }[r.kind] || "Codex CLI") + (r.version ? " " + r.version : "")).join(", ") });
+  const codexHeld = window.codexHeld = (held) => t("{who}: the share needs Codex 0.163 or later; until it's updated owl writes only async_compaction = true, at 65%", { who: held.map((r) => t({ app: "Codex app", ide: "Codex editor extension", wsl: "Codex in WSL" }[r.kind] || "Codex CLI") + (r.version ? " " + r.version : "")).join(", ") });
 
   const fmtK = (n) => {
     n = Math.max(0, Math.round(n || 0));
@@ -58,7 +58,7 @@
   };
 
   // what an item of the prompt is called: a file's path or a tool's name
-  // as it is; myna's own names for the rest in the reader's language
+  // as it is; owl's own names for the rest in the reader's language
   const ITEM_NAMES = {
     prompt: "Agent prompt", harness: "Harness messages", billing: "Billing header",
     environment: "Environment notes", context: "Context", skills: "Skills",
@@ -268,7 +268,7 @@
   // of the window. The map is the default; the grid is kept for those who
   // had it.
   let ctxLook = "map";
-  try { if (localStorage.getItem("myna.ctxLook") === "grid") ctxLook = "grid"; } catch {}
+  try { if (localStorage.getItem("owl.ctxLook") === "grid") ctxLook = "grid"; } catch {}
 
   // squarify lays vals ([{v}]) in the rect x, y, w, h as rects whose sides
   // are as near alike as it can (Bruls, Huizing, van Wijk), in vals' order
@@ -404,7 +404,7 @@
   // head alone with how full the window is, so the request list has room
   // (0xBCD18E on X: it took most of the height)
   let ctxShut = false;
-  try { ctxShut = localStorage.getItem("myna.ctxShut") === "1"; } catch {}
+  try { ctxShut = localStorage.getItem("owl.ctxShut") === "1"; } catch {}
   // opts.open: this request was opened to see its context window (the
   // Usage page's Context tab), so it shows unfolded, it alone: the next
   // request drawn in the card takes the reader's choice again
@@ -637,7 +637,7 @@
     const setLook = (k) => {
       if (viz.dataset.look === k) return;
       ctxLook = k;
-      try { localStorage.setItem("myna.ctxLook", k); } catch {}
+      try { localStorage.setItem("owl.ctxLook", k); } catch {}
       const quiet = opts.still || calm();
       const h0 = viz.offsetHeight;
       tip.hidden = true;
@@ -746,7 +746,7 @@
           card.classList.toggle("shut", ctxShut);
           tip.hidden = true;
           e.currentTarget.setAttribute("aria-expanded", String(!ctxShut));
-          try { localStorage.setItem("myna.ctxShut", ctxShut ? "1" : "0"); } catch {}
+          try { localStorage.setItem("owl.ctxShut", ctxShut ? "1" : "0"); } catch {}
           opts.onFold?.(ctxShut);
         };
         title = fold;
@@ -985,7 +985,7 @@
 
   const CTX_RANGES = [["1", "Today"], ["7", "7 days"], ["30", "30 days"]];
   let ctxDays = "7";
-  try { const d = localStorage.getItem("myna.ctxDays"); if (CTX_RANGES.some(([id]) => id === d)) ctxDays = d; } catch {}
+  try { const d = localStorage.getItem("owl.ctxDays"); if (CTX_RANGES.some(([id]) => id === d)) ctxDays = d; } catch {}
   let ctxData = null, ctxJSON = "", ctxRead = 0, ctxOpen = "", ctxAgent = "all";
   // the days the pane shows "Reading…" for: a second read before the history
   // answers (the page opened, then the first state's refresh) leaves it be,
@@ -1356,7 +1356,7 @@
       : t("A token estimate only: it doesn't measure how well the agent keeps the task after a compaction. The lower the window, the more often it compacts.")));
 
     const foot = el("div", "ctx-tune-foot");
-    // the advice myna put in is "In use" in every range, Now at it too
+    // the advice owl put in is "In use" in every range, Now at it too
     // (hoobnn: over 7 and 30 days it read "Already the leanest")
     const verdict = !lean && (same || applied)
       ? el("span", "ctx-chip good", "")
@@ -1369,7 +1369,7 @@
     if (set.locked) note.textContent = t("{name} is set and comes first", { name: set.locked });
     else if (own) note.textContent = t("{model} compacts at its own {value}, which comes first", { model: own.model, value: fmtK(own.value) });
     else if (set.source == "long") note.textContent = t("Long conversations, shared by Codex, Claude Code and Grok Build");
-    else if (set.ours) note.textContent = t("Set by myna");
+    else if (set.ours) note.textContent = t("Set by owl");
     else if (set.value && a.compact && +set.value > a.compact.window && a.compact.window) note.textContent = t("You set {value}; the model's {window} comes first", { value: show(set.value), window: fmtK(a.compact.window) });
     else if (set.value) note.textContent = t("You set {value}", { value: show(set.value) });
     else note.textContent = t("The agent's default");
@@ -1518,7 +1518,7 @@
     // theirs, so no row of its own stands empty above the pane
     $("#ctxRange")?.replaceChildren(segs(CTX_RANGES.map(([id, n]) => [id, t(n)]), ctxDays, (id) => {
       ctxDays = id;
-      try { localStorage.setItem("myna.ctxDays", id); } catch {}
+      try { localStorage.setItem("owl.ctxDays", id); } catch {}
       loadContext();
     }));
     pane.replaceChildren();
@@ -1531,12 +1531,12 @@
       return;
     }
     const seen = el("div", "row-head ctx-sess-head");
-    seen.append(el("span", "label", t("Through myna")), el("span", "grow"));
+    seen.append(el("span", "label", t("Through owl")), el("span", "grow"));
     pane.append(seen);
-    pane.append(el("p", "usage-note", t("What each agent's prompts hold, as myna's gateway read them: the score and tags are worked out from the requests of the range.")));
+    pane.append(el("p", "usage-note", t("What each agent's prompts hold, as owl's gateway read them: the score and tags are worked out from the requests of the range.")));
     if (!ctxData.agents.length) {
       const empty = el("div", "ctx-none");
-      empty.append(el("b", "", t("No prompts read yet")), el("span", "", t("Requests your agents send through myna show here.")));
+      empty.append(el("b", "", t("No prompts read yet")), el("span", "", t("Requests your agents send through owl show here.")));
       pane.append(empty);
       return;
     }

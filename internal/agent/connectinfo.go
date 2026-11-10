@@ -12,9 +12,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // What the Agents page says beside an agent's 「接入」 switch (the owner's
@@ -23,7 +23,7 @@ import (
 // it on touches; once on, whether copies of it already running still have
 // the list they started with.
 
-// Source is what an agent not connected to myna runs on now: "sub" (a
+// Source is what an agent not connected to owl runs on now: "sub" (a
 // Claude subscription), "chatgpt" (a ChatGPT sign-in), "key" (an API key
 // of its own), "providers:N" (N providers of its own); "" when unknown.
 //
@@ -83,7 +83,7 @@ func (a *Agent) Source() string {
 				n[k] = true
 			}
 		}
-		delete(n, mynaID)
+		delete(n, owlID)
 		if len(n) > 0 {
 			return "providers:" + strconv.Itoa(len(n))
 		}
@@ -92,29 +92,29 @@ func (a *Agent) Source() string {
 }
 
 // FailoverSaid is, for an agent not connected whose requests still go
-// through myna for account failover alone (FailingOver), what the CLI
+// through owl for account failover alone (FailingOver), what the CLI
 // and the TUI say of it, the Agents page's line in words of their own:
-// why it goes through myna, and what turns that off (#1385). "" when it
+// why it goes through owl, and what turns that off (#1385). "" when it
 // doesn't.
 func (a *Agent) FailoverSaid() string {
 	if a.FailingOver == nil || !a.FailingOver() {
 		return ""
 	}
-	return "not connected · goes through myna only to fail over to your other ChatGPT accounts; tick Only switch Codex's sign-in under Providers › Codex (myna accounts switch-only codex on), or switch them off, to stop it"
+	return "not connected · goes through owl only to fail over to your other ChatGPT accounts; tick Only switch Codex's sign-in under Providers › Codex (owl accounts switch-only codex on), or switch them off, to stop it"
 }
 
-// startsWith is, for an agent that reads myna's models only as it
+// startsWith is, for an agent that reads owl's models only as it
 // starts, how to find its processes (patterns for pgrep -f), the files it
-// reads them from, and the part of those files myna writes for it. The
-// files' times alone don't say when myna changed that part: the agent
+// reads them from, and the part of those files owl writes for it. The
+// files' times alone don't say when owl changed that part: the agent
 // writes the same files (Codex keeps each project's trust, a notice seen,
 // the model picked in its app in config.toml), and a copy started before
-// such a write has myna's list all the same (#729).
+// such a write has owl's list all the same (#729).
 //
 // Of Codex's model lists only which models they hold counts, not every
 // byte of each entry: the Codex app's list (deskList) carries the ChatGPT
 // backend's entries as the backend sends them, asked for again each hour,
-// and every entry's details follow myna's version and models.dev. A
+// and every entry's details follow owl's version and models.dev. A
 // copy running from before such a rewrite has the same models to pick
 // and works on, yet the row told the user to quit and reopen the Codex
 // app several times a day (Qyburn3 on X).
@@ -139,22 +139,22 @@ func (a *Agent) startsWith() (pats []string, files []string, reads func() string
 	return nil, nil, nil
 }
 
-// codexLists are the model lists myna writes beside Codex's config at
+// codexLists are the model lists owl writes beside Codex's config at
 // path: its catalog as Codex's provider, and the Codex app's list beside
 // the sign-in (deskList).
 func codexLists(path string) (list, desk string) {
 	dir := filepath.Dir(path)
-	return filepath.Join(dir, "myna-models.json"), filepath.Join(dir, "myna-desktop-models.json")
+	return filepath.Join(dir, "owl-models.json"), filepath.Join(dir, "owl-desktop-models.json")
 }
 
-// codexWiring writes where Codex's config sends it, as myna writes it:
-// its provider, its catalog's name, its base URL and myna's table.
+// codexWiring writes where Codex's config sends it, as owl writes it:
+// its provider, its catalog's name, its base URL and owl's table.
 func codexWiring(b *strings.Builder, path string) {
 	for _, k := range []string{"model_provider", "model_catalog_json", "openai_base_url"} {
 		v, _ := edit.GetTOMLTop(path, k)
 		b.WriteString(k + "=" + v + "\n")
 	}
-	t, _ := edit.GetTOMLTable(path, "model_providers."+mynaID)
+	t, _ := edit.GetTOMLTable(path, "model_providers."+owlID)
 	j, _ := json.Marshal(t)
 	b.Write(j)
 }
@@ -185,7 +185,7 @@ func listedModels(path string) string {
 	return "\n" + filepath.Base(path) + ":" + strings.Join(ms, ",")
 }
 
-// readsBefore is what an older myna read of the files startsWith names,
+// readsBefore is what an older owl read of the files startsWith names,
 // for a digest it stashed to be taken as the one of now when nothing
 // changed since: Codex's lists byte for byte. Without it every Codex
 // started before the update was told to reopen once more. nil for an
@@ -217,9 +217,9 @@ type runningProc struct {
 // can say.
 var running = listRunning
 
-// changedAt is when myna last changed what the agent reads at start. It
+// changedAt is when owl last changed what the agent reads at start. It
 // is kept in the stash with a digest of what that was, so neither the
-// agent's own writes to the same files nor myna starting again move it;
+// agent's own writes to the same files nor owl starting again move it;
 // a change first seen is put at the files' latest write, or at now when
 // no file was written since the last one. Zero when the files aren't
 // there.
@@ -241,7 +241,7 @@ func (a *Agent) changedAt(files []string, reads func() string) time.Time {
 	if ok && err == nil && was == digest {
 		return time.Unix(0, n)
 	}
-	// stashed by an older myna, over the same files as they are now
+	// stashed by an older owl, over the same files as they are now
 	if ok && err == nil && a.readsBefore() != nil {
 		old := sha256.Sum256([]byte(a.readsBefore()()))
 		if was == hex.EncodeToString(old[:8]) {
@@ -259,7 +259,7 @@ func (a *Agent) changedAt(files []string, reads func() string) time.Time {
 }
 
 // Stale is how many copies of the agent are running that started before
-// myna last changed what it reads at start: they still have the list
+// owl last changed what it reads at start: they still have the list
 // they started with until reopened. On Windows only the Codex daemon is
 // told.
 func (a *Agent) Stale() int { return len(a.StaleCopies()) }

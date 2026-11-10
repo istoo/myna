@@ -10,13 +10,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/codexcat"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/codexcat"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/testenv"
 	"gopkg.in/yaml.v3"
 )
 
@@ -89,7 +89,7 @@ func readFile(path string) string {
 // 128K one.
 func TestPiModelsCarryContextWindow(t *testing.T) {
 	syncHome(t)
-	b, _ := json.Marshal(mynaProviderJSON("pi"))
+	b, _ := json.Marshal(owlProviderJSON("pi"))
 	if !strings.Contains(string(b), `"id":"relay/glm-4.6"`) || !strings.Contains(string(b), `"contextWindow":204800`) {
 		t.Fatalf("%s", b)
 	}
@@ -101,14 +101,14 @@ func TestPiModelsCarryMaxTokens(t *testing.T) {
 	syncHome(t)
 	os.WriteFile(catalog.CachePath(), []byte(`{"zai":{"models":{"glm-4.6":{"id":"glm-4.6","name":"GLM-4.6","limit":{"context":204800,"output":131072}}}}}`), 0o644)
 	catalog.Reset()
-	b, _ := json.Marshal(mynaProviderJSON("pi"))
+	b, _ := json.Marshal(owlProviderJSON("pi"))
 	if !strings.Contains(string(b), `"maxTokens":131072`) {
 		t.Fatalf("%s", b)
 	}
 
 	os.WriteFile(catalog.CachePath(), []byte(`{"zai":{"models":{"glm-4.6":{"id":"glm-4.6","name":"GLM-4.6","limit":{"context":204800}}}}}`), 0o644)
 	catalog.Reset()
-	b, _ = json.Marshal(mynaProviderJSON("pi"))
+	b, _ = json.Marshal(owlProviderJSON("pi"))
 	if strings.Contains(string(b), "maxTokens") {
 		t.Fatalf("unknown output sent: %s", b)
 	}
@@ -122,7 +122,7 @@ func TestCrushModelsCarryMaxTokens(t *testing.T) {
 	syncHome(t)
 	os.WriteFile(catalog.CachePath(), []byte(`{"zai":{"models":{"glm-4.6":{"id":"glm-4.6","name":"GLM-4.6","limit":{"context":204800,"output":131072}}}}}`), 0o644)
 	catalog.Reset()
-	b, _ := json.Marshal(mynaProviderJSON("crush"))
+	b, _ := json.Marshal(owlProviderJSON("crush"))
 	if !strings.Contains(string(b), `"id":"relay/glm-4.6"`) || !strings.Contains(string(b), `"context_window":204800`) ||
 		!strings.Contains(string(b), `"default_max_tokens":131072`) {
 		t.Fatalf("%s", b)
@@ -130,7 +130,7 @@ func TestCrushModelsCarryMaxTokens(t *testing.T) {
 
 	os.WriteFile(catalog.CachePath(), []byte(`{"zai":{"models":{"glm-4.6":{"id":"glm-4.6","name":"GLM-4.6","limit":{"context":204800}}}}}`), 0o644)
 	catalog.Reset()
-	b, _ = json.Marshal(mynaProviderJSON("crush"))
+	b, _ = json.Marshal(owlProviderJSON("crush"))
 	if !strings.Contains(string(b), `"default_max_tokens":16384`) {
 		t.Fatalf("unknown output took Crush's default away: %s", b)
 	}
@@ -138,7 +138,7 @@ func TestCrushModelsCarryMaxTokens(t *testing.T) {
 
 // An output limit above the model's window (models.dev lists deepseek-chat's
 // 384000 against 128000 of context) is cut to the window for every agent
-// myna hands an output limit; one whose window isn't known keeps its
+// owl hands an output limit; one whose window isn't known keeps its
 // output. ZCode and WorkBuddy cap it at zcodeMaxOutput besides, Crush falls
 // back to 16384 without a known output, OpenCode is handed no limit without
 // a window, and AtomCode and Snow CLI, each told a window of its own when
@@ -150,16 +150,16 @@ func TestMaxTokensWithinContextWindow(t *testing.T) {
 		t.Helper()
 		os.WriteFile(catalog.CachePath(), []byte(`{"zai":{"models":{"glm-4.6":{"id":"glm-4.6","name":"GLM-4.6","limit":{`+limit+`}}}}}`), 0o644)
 		catalog.Reset()
-		pi, _ := json.Marshal(mynaProviderJSON("pi"))
+		pi, _ := json.Marshal(owlProviderJSON("pi"))
 		cline, _ := json.Marshal(clineModels(""))
 		omp, _ := yaml.Marshal(ompProvider())
-		dshRoute, _ := yaml.Marshal(dshRouteConfig(mynaModels("dsh"), "", gateway.URL()))
+		dshRoute, _ := yaml.Marshal(dshRouteConfig(owlModels("dsh"), "", gateway.URL()))
 		droid, _ := json.Marshal(droidEntries())
 		qoder, _ := json.Marshal(qoderProvider("qoder", ""))
 		hanako, _ := json.Marshal(hanakoProvider())
-		opencode, _ := json.Marshal(mynaProviderJSON("opencode"))
+		opencode, _ := json.Marshal(owlProviderJSON("opencode"))
 		zc, _ := json.Marshal(zcodeProviderJSON(filepath.Join(home, "none.json"), true))
-		crush, _ := json.Marshal(mynaProviderJSON("crush"))
+		crush, _ := json.Marshal(owlProviderJSON("crush"))
 		atomcode := filepath.Join(t.TempDir(), "config.toml")
 		if err := edit.SetTOMLTables(atomcode, nil, atomcodeTables(atomcode)); err != nil {
 			t.Fatal(err)
@@ -224,22 +224,22 @@ func TestMaxTokensWithinContextWindow(t *testing.T) {
 	check(`"context":64000,"output":384000`, 64000, 64000)
 }
 
-// A provider added after a myna model was picked reaches the lists agents
-// keep of myna's models; a file myna wrote nothing into stays as it is.
+// A provider added after a owl model was picked reaches the lists agents
+// keep of owl's models; a file owl wrote nothing into stays as it is.
 func TestSyncCatalogRewritesAgentLists(t *testing.T) {
 	home := syncHome(t)
 	piModels := filepath.Join(home, ".pi", "agent", "models.json")
-	writeFile(t, piModels, `{"providers":{"mine":{"baseUrl":"http://x"},"myna":{"name":"myna","models":[]}}}`)
-	// connected: a block of myna's name in an agent not on myna is the
-	// user's own (TestCatalogSyncLeavesAHandWrittenMynaBlock)
-	writeFile(t, filepath.Join(home, ".pi", "agent", "settings.json"), `{"defaultProvider":"myna","defaultModel":"relay/glm-4.6"}`)
-	setUpInMyna("pi")
+	writeFile(t, piModels, `{"providers":{"mine":{"baseUrl":"http://x"},"owl":{"name":"owl","models":[]}}}`)
+	// connected: a block of owl's name in an agent not on owl is the
+	// user's own (TestCatalogSyncLeavesAHandWrittenOwlBlock)
+	writeFile(t, filepath.Join(home, ".pi", "agent", "settings.json"), `{"defaultProvider":"owl","defaultModel":"relay/glm-4.6"}`)
+	setUpInOwl("pi")
 	crushCfg := filepath.Join(home, ".config", "crush", "crush.json")
 	crushBody := `{"providers":{"mine":{"base_url":"http://x"}}}`
 	writeFile(t, crushCfg, crushBody)
 	codexDir := filepath.Join(home, ".codex")
-	codexCat := filepath.Join(codexDir, "myna-models.json")
-	writeFile(t, filepath.Join(codexDir, "config.toml"), "model = \"relay/glm-4.6\"\nmodel_provider = \"myna\"\nmodel_catalog_json = '"+codexCat+"'\n")
+	codexCat := filepath.Join(codexDir, "owl-models.json")
+	writeFile(t, filepath.Join(codexDir, "config.toml"), "model = \"relay/glm-4.6\"\nmodel_provider = \"owl\"\nmodel_catalog_json = '"+codexCat+"'\n")
 	writeFile(t, codexCat, `{"models":[]}`)
 
 	if err := provider.Save(provider.Provider{ID: "added", Name: "Added", Key: "k", Chat: "http://127.0.0.1:1/v1", Models: []string{"m2"}}); err != nil {
@@ -253,7 +253,7 @@ func TestSyncCatalogRewritesAgentLists(t *testing.T) {
 		t.Errorf("pi models.json:\n%s", pi)
 	}
 	if got := readFile(crushCfg); got != crushBody {
-		t.Errorf("crush config without myna changed:\n%s", got)
+		t.Errorf("crush config without owl changed:\n%s", got)
 	}
 	cx := readFile(codexCat)
 	if !strings.Contains(cx, `"slug": "added/m2"`) || !strings.Contains(cx, `"context_window": 204800`) {
@@ -271,7 +271,7 @@ func TestSyncCatalogRewritesAgentLists(t *testing.T) {
 }
 
 // Signed in, Codex asks the gateway for its list and keeps it until it
-// ages; a cache from before myna's list changed is aged at once, one of
+// ages; a cache from before owl's list changed is aged at once, one of
 // the list as it is stays as it is.
 func TestSyncCatalogAgesCodexCache(t *testing.T) {
 	home := syncHome(t)
@@ -308,23 +308,23 @@ func must(b []byte, err error) []byte {
 }
 
 // OpenCode is handed each model's window, so it compacts when the model
-// needs it; and a sync puts myna's provider back when a model of
-// myna's is chosen but the provider is gone from the file.
+// needs it; and a sync puts owl's provider back when a model of
+// owl's is chosen but the provider is gone from the file.
 func TestOpenCodeModelsCarryContextAndSyncRestores(t *testing.T) {
 	home := syncHome(t)
-	b, _ := json.Marshal(mynaProviderJSON("opencode"))
+	b, _ := json.Marshal(owlProviderJSON("opencode"))
 	if !strings.Contains(string(b), `"relay/glm-4.6":{`) || !strings.Contains(string(b), `"limit":{"context":204800,"output":0}`) {
 		t.Fatalf("%s", b)
 	}
 	cfg := filepath.Join(home, ".config", "opencode", "opencode.json")
-	writeFile(t, cfg, `{"model":"myna/relay/glm-4.6","provider":{"mine":{"name":"mine"}}}`)
+	writeFile(t, cfg, `{"model":"owl/relay/glm-4.6","provider":{"mine":{"name":"mine"}}}`)
 	if err := opencode(home, filepath.Join(home, ".config")).Sync(); err != nil {
 		t.Fatal(err)
 	}
-	if s := readFile(cfg); !strings.Contains(s, `"myna"`) || !strings.Contains(s, `"mine"`) || !strings.Contains(s, `204800`) {
+	if s := readFile(cfg); !strings.Contains(s, `"owl"`) || !strings.Contains(s, `"mine"`) || !strings.Contains(s, `204800`) {
 		t.Fatalf("%s", s)
 	}
-	// one that doesn't use myna gets nothing
+	// one that doesn't use owl gets nothing
 	body := `{"model":"mine/x","provider":{"mine":{"name":"mine"}}}`
 	writeFile(t, cfg, body)
 	if err := opencode(home, filepath.Join(home, ".config")).Sync(); err != nil {
@@ -335,67 +335,67 @@ func TestOpenCodeModelsCarryContextAndSyncRestores(t *testing.T) {
 	}
 }
 
-// A model of myna's chosen for OpenCode that a provider of the file's own
-// already sends to myna is named there, and myna's flat provider isn't
+// A model of owl's chosen for OpenCode that a provider of the file's own
+// already sends to owl is named there, and owl's flat provider isn't
 // added beside it with the same models again.
 func TestOpenCodeKeepsItsOwnGatewayProviders(t *testing.T) {
 	home := syncHome(t)
 	cfg := filepath.Join(home, ".config", "opencode", "opencode.json")
 	writeFile(t, cfg, `{
   "provider": {
-    "myna-relay": {"npm": "@ai-sdk/openai-compatible", "options": {"baseURL": "http://localhost:3425/v1/"}, "models": {"relay/glm-4.6": {}}},
+    "owl-relay": {"npm": "@ai-sdk/openai-compatible", "options": {"baseURL": "http://localhost:3425/v1/"}, "models": {"relay/glm-4.6": {}}},
     "elsewhere": {"options": {"baseURL": "https://example.com/v1"}, "models": {"relay/glm-4.6": {}}}
   },
-  "model": "myna-relay/relay/glm-4.6"
+  "model": "owl-relay/relay/glm-4.6"
 }`)
 	oc := opencode(home, filepath.Join(home, ".config"))
-	if err := oc.Fields[0].Set("myna/relay/glm-4.6"); err != nil {
+	if err := oc.Fields[0].Set("owl/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
-	if v, _ := edit.GetJSON(cfg, "model"); v != "myna-relay/relay/glm-4.6" {
+	if v, _ := edit.GetJSON(cfg, "model"); v != "owl-relay/relay/glm-4.6" {
 		t.Fatalf("model = %q", v)
 	}
-	if _, ok := edit.GetJSON(cfg, "provider.myna"); ok {
-		t.Fatal("myna's provider added beside the file's own")
+	if _, ok := edit.GetJSON(cfg, "provider.owl"); ok {
+		t.Fatal("owl's provider added beside the file's own")
 	}
-	// a model none of them lists still gets myna's provider
-	os.WriteFile(cfg, []byte(`{"provider": {"myna-relay": {"options": {"baseURL": "http://127.0.0.1:3425/v1"}, "models": {}}}}`), 0o644)
-	if err := oc.Fields[0].Set("myna/relay/glm-4.6"); err != nil {
+	// a model none of them lists still gets owl's provider
+	os.WriteFile(cfg, []byte(`{"provider": {"owl-relay": {"options": {"baseURL": "http://127.0.0.1:3425/v1"}, "models": {}}}}`), 0o644)
+	if err := oc.Fields[0].Set("owl/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
-	if v, _ := edit.GetJSON(cfg, "model"); v != "myna/relay/glm-4.6" {
+	if v, _ := edit.GetJSON(cfg, "model"); v != "owl/relay/glm-4.6" {
 		t.Fatalf("model = %q", v)
 	}
-	if _, ok := edit.GetJSON(cfg, "provider.myna"); !ok {
-		t.Fatal("myna's provider not added")
+	if _, ok := edit.GetJSON(cfg, "provider.owl"); !ok {
+		t.Fatal("owl's provider not added")
 	}
 }
 
 // OpenCode 2 keeps a provider under providers, its base URL in settings,
 // as OpenChamber's provider form saves one, and reads it there before the
-// same name under provider: a provider of the user's own at myna's
+// same name under provider: a provider of the user's own at owl's
 // gateway there is the file's own as one under provider is (#3915).
 func TestOpenCodeKeepsItsOwnGatewayProvidersUnderProviders(t *testing.T) {
 	home := syncHome(t)
 	cfg := filepath.Join(home, ".config", "opencode", "opencode.json")
 	writeFile(t, cfg, `{
   "providers": {
-    "myna-relay": {"package": "aisdk:@ai-sdk/openai-compatible", "settings": {"baseURL": "http://localhost:3425/v1/"}, "models": {"relay/glm-4.6": {}}},
+    "owl-relay": {"package": "aisdk:@ai-sdk/openai-compatible", "settings": {"baseURL": "http://localhost:3425/v1/"}, "models": {"relay/glm-4.6": {}}},
     "elsewhere": {"settings": {"baseURL": "https://example.com/v1"}, "models": {"relay/glm-4.6": {}}}
   },
-  "model": "myna-relay/relay/glm-4.6"
+  "model": "owl-relay/relay/glm-4.6"
 }`)
 	oc := opencode(home, filepath.Join(home, ".config"))
-	if err := oc.Fields[0].Set("myna/relay/glm-4.6"); err != nil {
+	if err := oc.Fields[0].Set("owl/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
-	if v, _ := edit.GetJSON(cfg, "model"); v != "myna-relay/relay/glm-4.6" {
+	if v, _ := edit.GetJSON(cfg, "model"); v != "owl-relay/relay/glm-4.6" {
 		t.Fatalf("model = %q", v)
 	}
-	if _, ok := edit.GetJSON(cfg, "provider.myna"); ok {
-		t.Fatal("myna's provider added beside the file's own")
+	if _, ok := edit.GetJSON(cfg, "provider.owl"); ok {
+		t.Fatal("owl's provider added beside the file's own")
 	}
-	// one named as myna's relay, at the gateway: its model is myna's
+	// one named as owl's relay, at the gateway: its model is owl's
 	writeFile(t, cfg, `{"providers": {"relay": {"settings": {"baseURL": "http://127.0.0.1:3425/v1"}, "models": {"glm-4.6": {}}}}, "model": "relay/glm-4.6"}`)
 	if got := oc.Models(); len(got) != 1 || got[0] != "relay/glm-4.6" {
 		t.Fatalf("models = %v", got)
@@ -415,28 +415,28 @@ func TestOpenCodeKeepsItsOwnGatewayProvidersUnderProviders(t *testing.T) {
   "provider": {"mine": {"options": {"baseURL": "http://localhost:3425/v1/"}, "models": {"relay/glm-4.6": {}}}},
   "providers": {"mine": {"settings": {"baseURL": "https://example.com/v1"}, "models": {"relay/glm-4.6": {}}}}
 }`)
-	if err := oc.Fields[0].Set("myna/relay/glm-4.6"); err != nil {
+	if err := oc.Fields[0].Set("owl/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
-	if v, _ := edit.GetJSON(cfg, "model"); v != "myna/relay/glm-4.6" {
+	if v, _ := edit.GetJSON(cfg, "model"); v != "owl/relay/glm-4.6" {
 		t.Fatalf("picked on the provider under provider: model = %q", v)
 	}
 }
 
-// MiMo Code shares OpenCode's config shape: a sync writes myna's provider
+// MiMo Code shares OpenCode's config shape: a sync writes owl's provider
 // into its own mimocode.json, and reads its own model list.
 func TestMiMoCodeMirrorsOpenCode(t *testing.T) {
 	home := syncHome(t)
 	cfg := filepath.Join(home, ".config", "mimocode", "mimocode.json")
-	writeFile(t, cfg, `{"model":"myna/relay/glm-4.6","provider":{"mine":{"name":"mine"}}}`)
+	writeFile(t, cfg, `{"model":"owl/relay/glm-4.6","provider":{"mine":{"name":"mine"}}}`)
 	if err := mimocode(home, filepath.Join(home, ".config")).Sync(); err != nil {
 		t.Fatal(err)
 	}
 	s := readFile(cfg)
-	if !strings.Contains(s, `"myna"`) || !strings.Contains(s, `"mine"`) || !strings.Contains(s, `204800`) {
+	if !strings.Contains(s, `"owl"`) || !strings.Contains(s, `"mine"`) || !strings.Contains(s, `204800`) {
 		t.Fatalf("%s", s)
 	}
-	// one that doesn't use myna gets nothing
+	// one that doesn't use owl gets nothing
 	body := `{"model":"mine/x","provider":{"mine":{"name":"mine"}}}`
 	writeFile(t, cfg, body)
 	if err := mimocode(home, filepath.Join(home, ".config")).Sync(); err != nil {
@@ -453,7 +453,7 @@ func TestMiMoCodeMirrorsOpenCode(t *testing.T) {
 func TestMiMoCodeConfigAsTheAppFindsIt(t *testing.T) {
 	home := syncHome(t)
 	plain := filepath.Join(home, ".config", "mimocode", "config.json")
-	writeFile(t, plain, `{"model":"myna/relay/glm-4.6","provider":{"mine":{"name":"mine"}}}`)
+	writeFile(t, plain, `{"model":"owl/relay/glm-4.6","provider":{"mine":{"name":"mine"}}}`)
 	a := mimocode(home, filepath.Join(home, ".config"))
 	if a.Path != plain {
 		t.Fatalf("config at %s, want %s", a.Path, plain)
@@ -461,7 +461,7 @@ func TestMiMoCodeConfigAsTheAppFindsIt(t *testing.T) {
 	if err := a.Sync(); err != nil {
 		t.Fatal(err)
 	}
-	if s := readFile(plain); !strings.Contains(s, `"myna"`) || !strings.Contains(s, `"mine"`) {
+	if s := readFile(plain); !strings.Contains(s, `"owl"`) || !strings.Contains(s, `"mine"`) {
 		t.Fatalf("%s", s)
 	}
 	// its own name comes first
@@ -483,7 +483,7 @@ func TestMiMoCodeConfigAsTheAppFindsIt(t *testing.T) {
 	}
 }
 
-// mynaProviderJSONFor reads the catalog narrowed under the agent's own id,
+// owlProviderJSONFor reads the catalog narrowed under the agent's own id,
 // while the config shape stays OpenCode's: a visibility on mimocode narrows
 // its provider block and leaves OpenCode's alone.
 func TestMiMoCodeCatalogNarrowedSeparately(t *testing.T) {
@@ -492,8 +492,8 @@ func TestMiMoCodeCatalogNarrowedSeparately(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { settings.Save(settings.Settings{}) })
-	mimo := mynaProviderJSONFor("opencode", "mimocode").(map[string]any)["models"].(orderedJSON)
-	oc := mynaProviderJSON("opencode").(map[string]any)["models"].(orderedJSON)
+	mimo := owlProviderJSONFor("opencode", "mimocode").(map[string]any)["models"].(orderedJSON)
+	oc := owlProviderJSON("opencode").(map[string]any)["models"].(orderedJSON)
 	has := func(ms orderedJSON, id string) bool {
 		return slices.IndexFunc(ms, func(p jsonPair) bool { return p.k == id }) >= 0
 	}

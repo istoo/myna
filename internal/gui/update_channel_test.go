@@ -13,8 +13,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/update"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/update"
 )
 
 // Settings' Update channel (ssharpcc on X). Every version found 0.1.12
@@ -24,7 +24,7 @@ import (
 // page that doesn't send the channel keeps it.
 func TestUpdateChannelSwitch(t *testing.T) {
 	sandboxHome(t)
-	body := []byte("new myna")
+	body := []byte("new owl")
 	sum := sha256.Sum256(body)
 	var downloads atomic.Int32
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -42,7 +42,7 @@ func TestUpdateChannelSwitch(t *testing.T) {
 		}})
 	}))
 	defer srv.Close()
-	t.Setenv("MYNA_UPDATE_FEED", srv.URL)
+	t.Setenv("OWL_UPDATE_FEED", srv.URL)
 	oldV := Version
 	Version = "0.1.10"
 	defer func() { Version = oldV }()
@@ -138,7 +138,7 @@ func TestWhatsNewKeyedByChannel(t *testing.T) {
 	if got := notesKey("zh"); got != "zh|stable" {
 		t.Fatalf("stable: %q", got)
 	}
-	t.Setenv("MYNA_NOTES_FEED", "http://127.0.0.1:1/") // never the real one
+	t.Setenv("OWL_NOTES_FEED", "http://127.0.0.1:1/") // never the real one
 	oldV := Version
 	Version = "0.1.100"
 	defer func() { Version = oldV }()
@@ -167,7 +167,7 @@ func TestWhatsNewKeyedByChannel(t *testing.T) {
 // stayed on 0.1.10. The version found stands, download and all.
 func TestUpdateFeedBehindKeepsDownload(t *testing.T) {
 	sandboxHome(t)
-	body := []byte("new myna")
+	body := []byte("new owl")
 	sum := sha256.Sum256(body)
 	var downloads atomic.Int32
 	var behind atomic.Bool
@@ -186,7 +186,7 @@ func TestUpdateFeedBehindKeepsDownload(t *testing.T) {
 		}})
 	}))
 	defer srv.Close()
-	t.Setenv("MYNA_UPDATE_FEED", srv.URL)
+	t.Setenv("OWL_UPDATE_FEED", srv.URL)
 	oldV := Version
 	Version = "0.1.10"
 	defer func() { Version = oldV }()

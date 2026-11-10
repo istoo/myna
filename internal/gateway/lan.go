@@ -16,12 +16,12 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/budget"
-	"github.com/istoo/myna/internal/netguard"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/budget"
+	"github.com/istoo/owl/internal/netguard"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // The gateway accepts named caller keys locally and, while shared or on the
@@ -29,7 +29,7 @@ import (
 // stale named key.
 
 // listenAddr is where the gateway listens: every interface while it is
-// shared, on its port, else its address. A host MYNA_ADDR names itself
+// shared, on its port, else its address. A host OWL_ADDR names itself
 // (127.0.0.1 behind Tailscale Serve, one interface's address) is kept
 // while shared too: sharing asks remote callers for a gateway key, and
 // never widens the listener past the address the user chose (#1112).
@@ -40,10 +40,10 @@ func listenAddr() string {
 	return Addr()
 }
 
-// pinnedHost is the host MYNA_ADDR names, "" when it isn't set or names
+// pinnedHost is the host OWL_ADDR names, "" when it isn't set or names
 // every interface (0.0.0.0, ::, or no host).
 func pinnedHost() string {
-	a := os.Getenv("MYNA_ADDR")
+	a := os.Getenv("OWL_ADDR")
 	if a == "" {
 		return ""
 	}
@@ -73,15 +73,15 @@ func migrateLANKeyBestEffort() {
 }
 
 func logInvalidPublicURL() {
-	log.Printf("ignoring invalid MYNA_PUBLIC_URL: expected an HTTP or HTTPS address with a host")
+	log.Printf("ignoring invalid OWL_PUBLIC_URL: expected an HTTP or HTTPS address with a host")
 }
 
 var warnInvalidPublicURL = sync.OnceFunc(logInvalidPublicURL)
 
-// publicURL is the validated MYNA_PUBLIC_URL, with a scheme and without
+// publicURL is the validated OWL_PUBLIC_URL, with a scheme and without
 // trailing slashes. An invalid value is treated as unset and warned once.
 func publicURL() string {
-	u := strings.TrimSpace(os.Getenv("MYNA_PUBLIC_URL"))
+	u := strings.TrimSpace(os.Getenv("OWL_PUBLIC_URL"))
 	if u == "" {
 		return ""
 	}
@@ -102,10 +102,10 @@ func publicURL() string {
 	return u
 }
 
-// PublicURL is MYNA_PUBLIC_URL, with a scheme; "" when it isn't set.
+// PublicURL is OWL_PUBLIC_URL, with a scheme; "" when it isn't set.
 func PublicURL() string { return publicURL() }
 
-// OnNetwork: MYNA_ADDR puts the gateway beyond loopback (0.0.0.0 in the
+// OnNetwork: OWL_ADDR puts the gateway beyond loopback (0.0.0.0 in the
 // Docker image, a server's or one interface's address), so it is reached
 // from other machines, and from a container's host, whether or not it is
 // shared from Settings. Such callers need an enabled gateway key, as they
@@ -120,7 +120,7 @@ func OnNetwork() bool {
 // gateway key — while the gateway is shared, or listens on the network.
 func remoteKeyed() bool { return settings.Load().LAN || OnNetwork() }
 
-// PublicHost is MYNA_PUBLIC_URL's host, "" when it isn't set.
+// PublicHost is OWL_PUBLIC_URL's host, "" when it isn't set.
 func PublicHost() string {
 	u, err := url.Parse(publicURL())
 	if err != nil {
@@ -129,8 +129,8 @@ func PublicHost() string {
 	return u.Hostname()
 }
 
-// ContainerAddrs: the addresses myna finds for itself are a container's,
-// which other machines can't reach, and MYNA_PUBLIC_URL doesn't say the
+// ContainerAddrs: the addresses owl finds for itself are a container's,
+// which other machines can't reach, and OWL_PUBLIC_URL doesn't say the
 // host's. A container on the host's network (network_mode: host, which
 // NAS panels offer) has the host's own addresses, and they are said as
 // they are.
@@ -165,14 +165,14 @@ var ifaceNames = func() []string {
 }
 
 // ContainerHostURL is where other containers on this host reach the
-// gateway while myna runs in a container on a bridge network: the host
+// gateway while owl runs in a container on a bridge network: the host
 // at the container's default route, the bridge's gateway (Docker's
 // 172.17.0.1), on the gateway's port as published. The container's own
 // address is reached only from its own Docker network, and the host's LAN
 // address may not be reached from a container through the NAS's firewall
 // (jiezhengj on Discord: 192.168.31.218 worked from other devices, and
 // other containers on the NAS needed 172.17.0.1); host.docker.internal is
-// not there on Linux unless a container is given it. "" when myna is
+// not there on Linux unless a container is given it. "" when owl is
 // not in a container, is on the host's network, or has no default route.
 func ContainerHostURL() string {
 	if !inThisContainer() || hostNetwork(ifaceNames()) {
@@ -221,7 +221,7 @@ func defaultGateway(table string) string {
 	return ""
 }
 
-// InContainer: this myna runs in a container (Docker, Podman, a
+// InContainer: this owl runs in a container (Docker, Podman, a
 // Kubernetes pod), whose image is what gets updated, not its binary.
 func InContainer() bool { return inContainer("/") }
 
@@ -243,14 +243,14 @@ func inContainer(root string) bool {
 }
 
 // LANURLs are the addresses other machines on the network reach the
-// gateway at: MYNA_PUBLIC_URL when set, else one per IPv4 address this
+// gateway at: OWL_PUBLIC_URL when set, else one per IPv4 address this
 // computer has there.
 func LANURLs() []string {
 	if u := publicURL(); u != "" {
 		return []string{u}
 	}
-	// a gateway MYNA_ADDR keeps on one host is reached there alone; on
-	// loopback, only through a proxy, whose address MYNA_PUBLIC_URL says
+	// a gateway OWL_ADDR keeps on one host is reached there alone; on
+	// loopback, only through a proxy, whose address OWL_PUBLIC_URL says
 	if h := pinnedHost(); h != "" {
 		if ip := net.ParseIP(h); h == "localhost" || ip != nil && ip.IsLoopback() {
 			return nil
@@ -267,7 +267,7 @@ func LANURLs() []string {
 // LANHosts are this computer's IPv4 addresses other machines can reach it
 // at, on every interface that is up: a private one, and a public one an
 // ISP assigns to the network card itself. The gateway's addresses and
-// `myna web`'s links are both made from these, so the two list the
+// `owl web`'s links are both made from these, so the two list the
 // same computer the same way (a static public address was in one and not
 // the other). Private ones come first: in the interfaces' order the public
 // one came first, and Settings offered it as the address under "Share on
@@ -438,21 +438,21 @@ func lanGuard(next http.Handler) http.Handler {
 		remote := !local(r)
 		if !remote && rebound(r) {
 			log.Printf("refused %s %s: a web page reached loopback under the name %q", r.Method, r.URL.Path, r.Host)
-			writeError(w, provider.Chat, http.StatusForbidden, "myna doesn't answer a browser that reached it as "+r.Host+" (a web site's name pointed at this computer): call it as localhost or 127.0.0.1, or send an enabled gateway key")
+			writeError(w, provider.Chat, http.StatusForbidden, "owl doesn't answer a browser that reached it as "+r.Host+" (a web site's name pointed at this computer): call it as localhost or 127.0.0.1, or send an enabled gateway key")
 			return
 		}
 		if remote && !remoteKeyed() {
 			if viaPagePort(r) {
-				log.Printf("refused %s %s on myna web's page port: myna isn't shared", r.Method, r.URL.Path)
-				http.Error(w, "this request came to myna web's page port, which answers the gateway's routes as from another machine (the port may sit behind a proxy or a forward): only while Settings → Network and sharing → Share on local network is on, with an enabled gateway key (Gateway → Gateway keys) sent as Authorization: Bearer <key> or x-api-key. An agent on this computer calls the gateway's own address ("+URL()+") instead, which needs no key", http.StatusForbidden)
+				log.Printf("refused %s %s on owl web's page port: owl isn't shared", r.Method, r.URL.Path)
+				http.Error(w, "this request came to owl web's page port, which answers the gateway's routes as from another machine (the port may sit behind a proxy or a forward): only while Settings → Network and sharing → Share on local network is on, with an enabled gateway key (Gateway → Gateway keys) sent as Authorization: Bearer <key> or x-api-key. An agent on this computer calls the gateway's own address ("+URL()+") instead, which needs no key", http.StatusForbidden)
 				return
 			}
 			if proxied(r) {
-				log.Printf("refused %s %s through a proxy or tunnel: myna isn't shared", r.Method, r.URL.Path)
-				http.Error(w, "this request came through a proxy or tunnel (it carries a forwarding header such as X-Forwarded-For or Cf-Connecting-IP), so myna answers it as one from another machine: only while Settings → Network and sharing → Share on local network is on, with an enabled gateway key (Gateway → Gateway keys) sent as Authorization: Bearer <key> or x-api-key", http.StatusForbidden)
+				log.Printf("refused %s %s through a proxy or tunnel: owl isn't shared", r.Method, r.URL.Path)
+				http.Error(w, "this request came through a proxy or tunnel (it carries a forwarding header such as X-Forwarded-For or Cf-Connecting-IP), so owl answers it as one from another machine: only while Settings → Network and sharing → Share on local network is on, with an enabled gateway key (Gateway → Gateway keys) sent as Authorization: Bearer <key> or x-api-key", http.StatusForbidden)
 				return
 			}
-			http.Error(w, "myna isn't shared on the local network", http.StatusForbidden)
+			http.Error(w, "owl isn't shared on the local network", http.StatusForbidden)
 			return
 		}
 		// a browser's preflight carries no key, and CORS forbids putting
@@ -525,11 +525,11 @@ func dropCallback(token string) {
 	callbacks.Unlock()
 }
 
-// ownCallback: r is the MCP helper of a Claude Code myna runs handing a
+// ownCallback: r is the MCP helper of a Claude Code owl runs handing a
 // tool call back, on the path it was given — POST claudeMCPPath and the
 // callback token of a run now live, nothing else. It is let in without a
 // gateway key from wherever it comes: the helper calls the address the
-// gateway listens on, and with MYNA_ADDR on one interface's address (a
+// gateway listens on, and with OWL_ADDR on one interface's address (a
 // LAN, Tailscale or loopback-alias IP), which isn't loopback, it was asked
 // for a key it doesn't have (401). Its tool call never reached the run,
 // so every turn with tool results found no run waiting and started a new
@@ -545,9 +545,9 @@ func ownCallback(r *http.Request) bool {
 	if !ok || token == "" {
 		return false
 	}
-	// while the myna this one took the gateway over from finishes, a
+	// while the owl this one took the gateway over from finishes, a
 	// token this one doesn't have may be one of that one's runs: it is
-	// passed on there (forwardCallback), and that myna judges it as it
+	// passed on there (forwardCallback), and that owl judges it as it
 	// would its own
 	if forwarding() {
 		return true
@@ -569,9 +569,9 @@ func ownCallback(r *http.Request) bool {
 // gateway: it sends no Origin on a GET, or one equal to the Host, so
 // corsGuard lets it by, and on loopback a call needs no key, so the page
 // could read the models and quotas and spend the user's subscriptions.
-// Agents call myna as localhost or an IP, and send none of a browser's
-// marks; a hostname of this computer's own (MYNA_PUBLIC_URL's,
-// MYNA_ADDR's, its own name, a container runtime's name for the host)
+// Agents call owl as localhost or an IP, and send none of a browser's
+// marks; a hostname of this computer's own (OWL_PUBLIC_URL's,
+// OWL_ADDR's, its own name, a container runtime's name for the host)
 // isn't a web site's. An enabled gateway key, which such a page can't
 // know, still lets a call in.
 func rebound(r *http.Request) bool {
@@ -661,7 +661,7 @@ func identifyCaller(w http.ResponseWriter, r *http.Request) (*http.Request, bool
 			// no unbounded work) until the bucket refills. A valid key never
 			// reaches here, so a real caller is not held.
 			w.Header().Set("Retry-After", strconv.Itoa(int(retry.Seconds())+1))
-			writeError(w, provider.Chat, http.StatusTooManyRequests, "too many failed authentications; slow down and send an enabled myna gateway key")
+			writeError(w, provider.Chat, http.StatusTooManyRequests, "too many failed authentications; slow down and send an enabled owl gateway key")
 			return r, false
 		}
 		msg := refusedKey(callerKey(r))
@@ -742,11 +742,11 @@ func callerKey(r *http.Request) string {
 // header that carries none ("Authorization: Bearer ", sent beside an
 // x-api-key by a client with no token set) is passed over, and a client
 // that sends two different values — a stale or placeholder token in
-// Authorization (ANTHROPIC_AUTH_TOKEN left at myna), the key in x-api-key
+// Authorization (ANTHROPIC_AUTH_TOKEN left at owl), the key in x-api-key
 // — is let in by whichever is an enabled gateway key. Loopback takes any
 // token, so this mattered only from another computer, which was refused
 // what this one was answered (悠悠哥 on Discord: a client's model list from
-// myna shared on a NAS failed, from myna on 127.0.0.1 it came).
+// owl shared on a NAS failed, from owl on 127.0.0.1 it came).
 func callerKeys(r *http.Request) []string {
 	var out []string
 	add := func(v string) {
@@ -768,7 +768,7 @@ func callerKeys(r *http.Request) []string {
 	return out
 }
 
-// managedKey: the request carries a named gateway key's form (sk-myna-…),
+// managedKey: the request carries a named gateway key's form (sk-owl-…),
 // or a key's own value a user gave it, in any of the places a key is read.
 func managedKey(r *http.Request) bool {
 	return slices.ContainsFunc(callerKeys(r), access.Named)
@@ -780,18 +780,18 @@ func managedKey(r *http.Request) bool {
 // key (#545).
 func refusedKey(key string) string {
 	if key == "" {
-		return "no API key was sent: send a myna gateway key as Authorization: Bearer <key> (or x-api-key)"
+		return "no API key was sent: send a owl gateway key as Authorization: Bearer <key> (or x-api-key)"
 	}
 	which := "the API key sent"
 	if len(key) >= 12 { // a short one isn't named, so as not to give most of it away
 		which = "the API key ending in " + key[len(key)-4:]
 	}
-	return which + " is not an enabled myna gateway key: it is disabled, removed or mistyped"
+	return which + " is not an enabled owl gateway key: it is disabled, removed or mistyped"
 }
 
 // local is a request from this computer: one that reached the gateway on
 // loopback, from a process of this user (sameOSUser), wasn't passed on by
-// a proxy or tunnel running here, and didn't come through `myna web`'s
+// a proxy or tunnel running here, and didn't come through `owl web`'s
 // page port (viaPagePort).
 func local(r *http.Request) bool {
 	host, _, err := net.SplitHostPort(r.RemoteAddr)
@@ -805,14 +805,14 @@ func local(r *http.Request) bool {
 // forwardHeaders are what a proxy or tunnel adds to a request it passes
 // on: cloudflared (Cf-Connecting-IP, and X-Forwarded-For beside it),
 // ngrok, Tailscale serve and funnel, frp's and Caddy's and nginx's HTTP
-// proxies. An agent calling myna sends none of them.
+// proxies. An agent calling owl sends none of them.
 var forwardHeaders = []string{"Forwarded", "X-Forwarded-For", "X-Real-IP", "Cf-Connecting-IP", "True-Client-IP", "Tailscale-User-Login"}
 
 // proxied: the request came to loopback through a proxy or tunnel on this
 // computer (#1022, znjhahaha: a Cloudflare Tunnel to 127.0.0.1:3425), so it
 // is someone else's, from wherever the proxy reaches, and is treated as
-// from another machine: answered only while myna is shared, with an
-// enabled gateway key. MYNA_TRUST_PROXY=1 says a proxy here signs its
+// from another machine: answered only while owl is shared, with an
+// enabled gateway key. OWL_TRUST_PROXY=1 says a proxy here signs its
 // clients in itself, and keeps what it forwards local, as before.
 func proxied(r *http.Request) bool {
 	if trustProxy() {
@@ -822,6 +822,6 @@ func proxied(r *http.Request) bool {
 }
 
 func trustProxy() bool {
-	v, _ := strconv.ParseBool(strings.TrimSpace(os.Getenv("MYNA_TRUST_PROXY")))
+	v, _ := strconv.ParseBool(strings.TrimSpace(os.Getenv("OWL_TRUST_PROXY")))
 	return v
 }

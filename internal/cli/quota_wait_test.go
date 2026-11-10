@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // fakeWait runs quotaWait on a clock that moves only when it sleeps, and
@@ -175,7 +175,7 @@ func TestQuotaWaitResetUntold(t *testing.T) {
 	}
 }
 
-// An account switched off in myna is passed over when waiting on its
+// An account switched off in owl is passed over when waiting on its
 // provider: its room would never be used.
 func TestQuotaWaitSkipsOff(t *testing.T) {
 	f := &fakeWait{now: t0, at: func(now time.Time) []provider.SubscriptionQuota {

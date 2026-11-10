@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // codexUsedUpReal is codexUsedUp as the sync runs it: TestMain stands in for

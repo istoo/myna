@@ -10,13 +10,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
-// foobra12 on Discord: "myna会自动使用codex重置卡吗 我发现刚才好像不小心
-// 自动给我使用了一张". A reset myna spent by itself was said only in the
-// gateway's log, so a reset gone from the card read the same whether myna
-// used it, the user did, or it ran out. Each one myna spends is kept, with
+// foobra12 on Discord: "owl会自动使用codex重置卡吗 我发现刚才好像不小心
+// 自动给我使用了一张". A reset owl spent by itself was said only in the
+// gateway's log, so a reset gone from the card read the same whether owl
+// used it, the user did, or it ran out. Each one owl spends is kept, with
 // why, and the account's reading carries them, newest first: one spent as
 // it was about to run out, one by hand, and one as the week was used up.
 func TestResetUsesKept(t *testing.T) {

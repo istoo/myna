@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // issueDSML is #1845's reply: DeepSeek's DSML for a call of the request's
@@ -184,7 +184,7 @@ func TestTextWrittenCallWhole(t *testing.T) {
 }
 
 // The issue's DSML through each translation of a Chat upstream, which
-// myna always asks streamed: a Responses or Anthropic client, streamed
+// owl always asks streamed: a Responses or Anthropic client, streamed
 // or whole, and a Chat client's request for one body that is asked
 // streamed (DashScope's thinking models), all get the call.
 func TestTextWrittenCallWholeTranslated(t *testing.T) {

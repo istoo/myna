@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"runtime"
 
-	"github.com/istoo/myna/internal/autostart"
+	"github.com/istoo/owl/internal/autostart"
 )
 
-// myna autostart [on|off]: whether myna opens at login, in the tray.
+// owl autostart [on|off]: whether owl opens at login, in the tray.
 func autostartCmd(args []string) error {
 	if len(args) > 1 {
-		return fmt.Errorf("usage: myna autostart [on|off]")
+		return fmt.Errorf("usage: owl autostart [on|off]")
 	}
 	if len(args) == 1 {
 		switch args[0] {
@@ -19,21 +19,21 @@ func autostartCmd(args []string) error {
 				return err
 			}
 		default:
-			return fmt.Errorf("usage: myna autostart [on|off]")
+			return fmt.Errorf("usage: owl autostart [on|off]")
 		}
 	}
 	switch autostart.Enabled() {
 	case autostart.NeedsAllowing:
 		// the record is there, and Set(true) can't undo the user's switch
-		fmt.Println("myna is set to open at login, but it is switched off in System Settings › General › Login Items › Allow in the Background: switch it on there")
+		fmt.Println("owl is set to open at login, but it is switched off in System Settings › General › Login Items › Allow in the Background: switch it on there")
 	case autostart.On:
 		if runtime.GOOS == "android" {
-			fmt.Println(green.Render("✓"), "myna starts the gateway at boot (requires Termux:Boot)")
+			fmt.Println(green.Render("✓"), "owl starts the gateway at boot (requires Termux:Boot)")
 		} else {
-			fmt.Println(green.Render("✓"), "myna opens at login, in the tray")
+			fmt.Println(green.Render("✓"), "owl opens at login, in the tray")
 		}
 	default:
-		fmt.Println("myna doesn't open at login")
+		fmt.Println("owl doesn't open at login")
 	}
 	return nil
 }

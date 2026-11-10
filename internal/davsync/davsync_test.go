@@ -3,7 +3,7 @@ package davsync
 import (
 	"context"
 	"fmt"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/testenv"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -16,13 +16,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/agentenv"
-	"github.com/istoo/myna/internal/backup"
-	"github.com/istoo/myna/internal/library"
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/profile"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/agentenv"
+	"github.com/istoo/owl/internal/backup"
+	"github.com/istoo/owl/internal/library"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/profile"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // fakeDAV is a WebDAV server with one user, keeping files in memory.
@@ -133,7 +133,7 @@ func (f *fakeDAV) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // urlDir is the folder a URL path is in: a URL's, with / on every system
 func urlDir(p string) string { return p[:max(strings.LastIndex(p, "/"), 1)] }
 
-// computer is one machine's myna: its own home, which the test moves
+// computer is one machine's owl: its own home, which the test moves
 // between.
 type computer string
 
@@ -208,7 +208,7 @@ func TestSync(t *testing.T) {
 	if v := now(t); v.Error != "" || v.Last.IsZero() || v.Notice != nil {
 		t.Fatalf("first: %+v", v)
 	}
-	up := fake.files["/dav/myna/myna.myna-backup"]
+	up := fake.files["/dav/owl/owl.owl-backup"]
 	if len(up) == 0 || strings.Contains(string(up), "deepseek") || strings.Contains(string(up), `"providers"`) {
 		t.Fatalf("on the server: %q", up)
 	}
@@ -345,7 +345,7 @@ func TestSync(t *testing.T) {
 	if ps, _ := provider.Stored(); len(ps) != 1 || ps[0].Name != "Kimi 2" || ps[0].Key != "k2" {
 		t.Fatalf("a after c renamed: %+v", ps)
 	}
-	remote, _ := backup.Open(fake.files["/dav/myna/myna.myna-backup"], "correct horse")
+	remote, _ := backup.Open(fake.files["/dav/owl/owl.owl-backup"], "correct horse")
 	if remote.Providers[0].Key != "k2" {
 		t.Fatalf("the server lost the key: %+v", remote.Providers)
 	}
@@ -389,7 +389,7 @@ func TestSyncNutstore(t *testing.T) {
 	if err := Now(context.Background()); err != nil {
 		t.Fatal(err)
 	}
-	if v := Status(); v.Error != "" || len(fake.files["/dav/myna/myna.myna-backup"]) == 0 || !fake.dirs["/dav/myna"] {
+	if v := Status(); v.Error != "" || len(fake.files["/dav/owl/owl.owl-backup"]) == 0 || !fake.dirs["/dav/owl"] {
 		t.Fatalf("first sync: %+v", v)
 	}
 }
@@ -543,7 +543,7 @@ func TestSyncLibrary(t *testing.T) {
 	if got := shared(); got != "Mine alone." {
 		t.Fatalf("c's library was synced: %q", got)
 	}
-	remote, _ := backup.Open(fake.files["/dav/myna/myna.myna-backup"], "correct horse")
+	remote, _ := backup.Open(fake.files["/dav/owl/owl.owl-backup"], "correct horse")
 	if remote.Library == nil || remote.Library.Texts["default"] != "Be thorough." {
 		t.Fatalf("the server's library: %+v", remote.Library)
 	}
@@ -552,11 +552,11 @@ func TestSyncLibrary(t *testing.T) {
 // Another computer syncing between this one's read and write: the write
 // is refused, and it syncs again over the other's.
 func TestSyncRace(t *testing.T) {
-	fake := &fakeDAV{files: map[string][]byte{}, etags: map[string]string{}, dirs: map[string]bool{"/dav": true, "/dav/myna": true}}
+	fake := &fakeDAV{files: map[string][]byte{}, etags: map[string]string{}, dirs: map[string]bool{"/dav": true, "/dav/owl": true}}
 	var once sync.Once
 	var raced []byte
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodPut && fake.files["/dav/myna/myna.myna-backup"] != nil {
+		if r.Method == http.MethodPut && fake.files["/dav/owl/owl.owl-backup"] != nil {
 			once.Do(func() { // someone else's write lands first
 				fake.mu.Lock()
 				fake.n++
@@ -593,7 +593,7 @@ func TestSyncRace(t *testing.T) {
 	if n := Status().Notice; n == nil || !slices.Equal(n.There, []string{"providers"}) {
 		t.Fatalf("notice: %+v", n)
 	}
-	remote, err := backup.Open(fake.files["/dav/myna/myna.myna-backup"], "p")
+	remote, err := backup.Open(fake.files["/dav/owl/owl.owl-backup"], "p")
 	if err != nil || !slices.ContainsFunc(remote.Providers, func(p provider.Provider) bool { return p.ID == "three" }) {
 		t.Fatalf("server: %v %+v", err, remote.Providers)
 	}

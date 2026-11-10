@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// On a phone (myna web, 420 wide) an agent's model picker may grow to the
+// On a phone (owl web, 420 wide) an agent's model picker may grow to the
 // window's height, more than the 420 it was placed by. Opened upward from
 // a row low in the page it ran off the top: its filter and first rows out
 // of reach. Upward or down, it now keeps to the room it was placed in and
@@ -12,7 +12,7 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
-const options = Array.from({ length: 24 }, (_, i) => ({ value: `p/m-${i}`, label: `Model ${i}`, note: "P · via myna", group: "P", ref: `p/m-${i}` }));
+const options = Array.from({ length: 24 }, (_, i) => ({ value: `p/m-${i}`, label: `Model ${i}`, note: "P · via owl", group: "P", ref: `p/m-${i}` }));
 const state = { agents: [{ id: "claude", name: "Claude Code", icon: "claudecode-color", path: "/test/settings.json", wired: false,
   fields: [{ key: "model", label: "model", value: "p/m-0", options }] }], profiles: [] };
 
@@ -52,7 +52,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           page.setDefaultNavigationTimeout(60000);
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", server(lang));
-          await page.goto("http://myna.test/");
+          await page.goto("http://owl.test/");
           await page.locator(row).waitFor();
           await page.locator(`${row} .field[data-key="model"]`).first().click();
           await page.locator("#pop:not([hidden]) #list li").first().waitFor();

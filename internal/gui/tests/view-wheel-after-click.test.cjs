@@ -15,13 +15,13 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = process.env.MYNA_AFTER_CLICK_ASSETS || path.resolve(__dirname, "../assets");
+const assets = process.env.OWL_AFTER_CLICK_ASSETS || path.resolve(__dirname, "../assets");
 const LANGS = ["en", "zh", "zh-TW", "ja", "de"];
 const AGENTS = Array.from({ length: 10 }, (_, i) => ({
   id: "a" + i, name: "Agent " + i, path: "/t/a" + i + ".json", icon: "generic", wired: true,
   fields: [{ key: "model", label: "model", value: "m", options: [{ value: "m", label: "M", ref: "a/m" }] }],
 }));
-const group = (i) => ({ id: "g" + i, name: "Agent " + i, fields: [{ key: "model", label: "model", value: "myna/x/m" + i }, { key: "effort", label: "effort", value: "high" }] });
+const group = (i) => ({ id: "g" + i, name: "Agent " + i, fields: [{ key: "model", label: "model", value: "owl/x/m" + i }, { key: "effort", label: "effort", value: "high" }] });
 // "long" holds more than a window shows, "short" a few lines
 const PROFILES = [
   ...Array.from({ length: 4 }, (_, i) => ({ name: "p" + i, summary: "", agents: [] })),
@@ -90,7 +90,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         if (deaf) await p.addInitScript(DEAF);
         await p.route("**/*", server(lang));
         const view = p.locator("#view-agents");
-        await p.goto("http://myna.test/?view=agents");
+        await p.goto("http://owl.test/?view=agents");
         await p.locator("#view-agents .ag-lead").first().waitFor();
         await p.locator("#profiles .chip").first().waitFor();
         await rested(p, view);

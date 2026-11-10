@@ -5,9 +5,9 @@ package provider
 // platform.stepfun.ai or .com), not to a key, which is refused there ("api
 // key not permitted for this method"). The user signs in there in their
 // own browser; the session's cookie is HttpOnly and the platform returns
-// to no app, so a bookmarklet of myna's, run on the signed-in page, asks
+// to no app, so a bookmarklet of owl's, run on the signed-in page, asks
 // the platform to renew it as the page does and copies what it gets, and
-// the user pastes that into myna (SaveStepFunPaste). From then on myna
+// the user pastes that into owl (SaveStepFunPaste). From then on owl
 // renews the session and asks the platform itself, as the page does:
 //
 //	POST <platform>/passport/proto.api.passport.v1.PassportService/RefreshToken
@@ -40,8 +40,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/istoo/myna/internal/filememo"
-	"github.com/istoo/myna/internal/lastgood"
+	"github.com/istoo/owl/internal/filememo"
+	"github.com/istoo/owl/internal/lastgood"
 )
 
 // stepfunSites are StepFun's two platforms, by the API host a provider uses.
@@ -74,11 +74,11 @@ func StepFunSignInURL(site string) string {
 }
 
 // stepfunPaste starts what the bookmarklet copies, the JSON of a session.
-const stepfunPaste = "myna-stepfun:"
+const stepfunPaste = "owl-stepfun:"
 
 // StepFunBookmarklet is the bookmarklet the user runs on a StepFun platform
 // page they are signed in on: it renews the session as the page does, on
-// either site, and copies it to be pasted into myna.
+// either site, and copies it to be pasted into owl.
 func StepFunBookmarklet() string {
 	sites := map[string][2]string{}
 	for id, s := range stepfunSites {
@@ -93,8 +93,8 @@ func StepFunBookmarklet() string {
 		`const c=a?JSON.parse(atob(a.split(".")[1].replace(/-/g,"+").replace(/_/g,"/"))):{};` +
 		`if(!c.activated||!f){alert("Sign in to StepFun first / 请先登录 StepFun");return}` +
 		`const t="` + stepfunPaste + `"+JSON.stringify({site:s[0],access:a,refresh:f,webId:w});` +
-		`try{await navigator.clipboard.writeText(t);alert("Copied: paste it into myna / 已复制，回 myna 粘贴")}` +
-		`catch{prompt("Copy this and paste it into myna / 复制这段，回 myna 粘贴",t)}` +
+		`try{await navigator.clipboard.writeText(t);alert("Copied: paste it into owl / 已复制，回 owl 粘贴")}` +
+		`catch{prompt("Copy this and paste it into owl / 复制这段，回 owl 粘贴",t)}` +
 		`}catch(e){alert(String(e))}})()`
 }
 
@@ -278,7 +278,7 @@ func (c stepfunClaims) account() string {
 	return ""
 }
 
-// StepFunSignedIn reports whether myna has a sign-in for the provider.
+// StepFunSignedIn reports whether owl has a sign-in for the provider.
 // StepFunSignedIn reads the file once until it changes: a provider list
 // asks it for each StepFun provider on every poll, and each read was a
 // file open, most often of a file that isn't there. One with a site's
@@ -607,7 +607,7 @@ func stepPlanQuota(ctx context.Context, p Provider) SubscriptionQuota {
 	return q
 }
 
-// stepPlanQuotas is a card for each StepFun provider in use that myna
+// stepPlanQuotas is a card for each StepFun provider in use that owl
 // has a sign-in for: one per provider, not per site, as two on one site
 // can be two accounts (#2384).
 func stepPlanQuotas(ctx context.Context) []SubscriptionQuota {

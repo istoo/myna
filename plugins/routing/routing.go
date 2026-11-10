@@ -6,8 +6,8 @@
 package routing
 
 import (
-	"github.com/istoo/myna/internal/pluginrt"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/pluginrt"
+	"github.com/istoo/owl/internal/provider"
 )
 
 func init() {

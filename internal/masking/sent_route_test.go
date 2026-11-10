@@ -8,9 +8,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/pii"
-	"github.com/istoo/myna/internal/redact"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/pii"
+	"github.com/istoo/owl/internal/redact"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // slowReader is the local model on a slow CPU: a text it is asked about

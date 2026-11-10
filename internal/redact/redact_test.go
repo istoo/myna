@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/claudeseal"
+	"github.com/istoo/owl/internal/claudeseal"
 )
 
 const (
@@ -210,7 +210,7 @@ func TestMaskJSONSignedGoesBackAsWritten(t *testing.T) {
 	}
 }
 
-// Claude's block myna gave a Responses client to carry back
+// Claude's block owl gave a Responses client to carry back
 // (claudeseal) goes back byte for byte: Claude's own text in it, with the
 // placeholders Claude was sent, is what its signature is checked against.
 func TestMaskJSONKeepsClaudeBlocks(t *testing.T) {

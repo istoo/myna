@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/filememo"
+	"github.com/istoo/owl/internal/filememo"
 )
 
 // TestStepFunSignedInReadOnce: a provider list asked each StepFun

@@ -1,9 +1,9 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// myna web added to an iPhone's home screen opened in Safari with its
+// owl web added to an iPhone's home screen opened in Safari with its
 // address bar (ninja_s6114 on Discord). The page now names a web app
 // manifest and the iOS meta tags, so it opens as an app of its own. Opened
 // so, with the status bar, the notch and the home indicator over the
-// screen's edges, the header's myna, icons and tabs are inside the safe
+// screen's edges, the header's owl, icons and tabs are inside the safe
 // area; the theme colour is the app window's alone, so a browser's tab
 // and the desktop app's window take none of it.
 const assert = require("node:assert/strict");
@@ -46,21 +46,21 @@ async function load(page, web) {
   page.errors = [];
   page.on("pageerror", (e) => page.errors.push(e.message));
   await page.route("**/*", serve(web));
-  await page.goto("http://myna.test/?view=providers");
+  await page.goto("http://owl.test/?view=providers");
   await page.waitForSelector("#view-providers", { state: "visible" });
   await page.waitForTimeout(300);
   return page;
 }
 
-// myna web opened from the home screen: Chromium's app window (--app),
+// owl web opened from the home screen: Chromium's app window (--app),
 // opened on a data: page (about:blank isn't made an app), whose
 // display-mode is standalone as a home-screen app's is (CDP's
 // emulated media has no display-mode), with an iPhone's safe area
 async function openStandalone(t, opts, insets) {
   const { isMobile, defaultBrowserType, ...rest } = opts;
   opts = rest;
-  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "myna-webapp-"));
-  const context = await chromium.launchPersistentContext(dir, { channel: "chromium", reducedMotion: "reduce", ...opts, args: ["--app=data:text/html,myna"] });
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "owl-webapp-"));
+  const context = await chromium.launchPersistentContext(dir, { channel: "chromium", reducedMotion: "reduce", ...opts, args: ["--app=data:text/html,owl"] });
   t.after(async () => { await context.close(); await fs.rm(dir, { recursive: true, force: true }); });
   const page = context.pages()[0] || await context.newPage();
   const cdp = await context.newCDPSession(page);
@@ -88,12 +88,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     assert.equal(await attr('meta[name="apple-mobile-web-app-status-bar-style"]', "content"), "default", "the status bar keeps its own ground, the page starting under it");
     const manifest = JSON.parse(await fs.readFile(path.join(assets, await attr('link[rel="manifest"]', "href")), "utf8"));
     assert.equal(manifest.display, "standalone");
-    assert.equal(manifest.name, "myna");
+    assert.equal(manifest.name, "owl");
     // the files are there (TestWebAppAddsToHomeScreen checks how they are served)
     for (const ic of [...manifest.icons, { src: await attr('link[rel="apple-touch-icon"]', "href") }]) {
       await fs.access(path.join(assets, ic.src));
     }
-    // a browser's tab takes no theme colour from myna
+    // a browser's tab takes no theme colour from owl
     assert.deepEqual(await themeColours(page), []);
     // nor does the app's window
     const win = await open(browser, { viewport: { width: 1200, height: 800 } }, false);
@@ -106,7 +106,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     t.after(() => browser.close());
     const page = await open(browser, phone, true);
     const brand = await box(page, ".top .brand");
-    assert.ok(brand.y < 20, `the myna at the top as before: ${brand.y}`);
+    assert.ok(brand.y < 20, `the owl at the top as before: ${brand.y}`);
     assert.deepEqual(page.errors, []);
   });
 

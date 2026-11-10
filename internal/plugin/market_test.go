@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-// The list built in is what a myna that can't reach the market shows:
+// The list built in is what a owl that can't reach the market shows:
 // every entry a real package name, said in English and Chinese, once.
 func TestBuiltinMarket(t *testing.T) {
 	l, err := parseMarket(builtinMarket)
@@ -27,7 +27,7 @@ func TestBuiltinMarket(t *testing.T) {
 			t.Errorf("%s: summary needs en and zh", x.Package)
 		}
 		if !x.Community {
-			t.Errorf("%s: only myna's community's plugins are listed", x.Package)
+			t.Errorf("%s: only owl's community's plugins are listed", x.Package)
 		}
 		// gateway middleware signs in to nothing
 		if x.Kind == "middleware" {
@@ -60,7 +60,7 @@ func TestMarketSources(t *testing.T) {
 		w.Write([]byte(`{"version":1,"plugins":[{"package":"opencode-x-auth","name":"X","community":true},{"package":"not a name","community":true},{"package":"opencode-other-auth","name":"Other"}]}`))
 	}))
 	defer srv.Close()
-	t.Setenv("MYNA_PLUGIN_MARKET", srv.URL)
+	t.Setenv("OWL_PLUGIN_MARKET", srv.URL)
 	ctx := context.Background()
 
 	reset()
@@ -79,7 +79,7 @@ func TestMarketSources(t *testing.T) {
 		t.Fatalf("down, nothing kept: %d, want the %d built in", len(l), len(builtin))
 	}
 	up = true
-	t.Setenv("MYNA_PLUGIN_MARKET", "off")
+	t.Setenv("OWL_PLUGIN_MARKET", "off")
 	reset()
 	if l := Market(ctx); len(l) != len(builtin) {
 		t.Fatalf("off: %d", len(l))
@@ -92,7 +92,7 @@ func TestMarketSources(t *testing.T) {
 // magpie-community/plugins#479: such a listing is right to leave the flag
 // out, and is shown under its publisher when someone searches). PinK as
 // registry.json had it before plugins#617, beside a community plugin:
-// it was dropped, so no search in myna found it. Only the community's
+// it was dropped, so no search in owl found it. Only the community's
 // are called by a short name.
 func TestMarketKeepsAuthorsOwnListings(t *testing.T) {
 	b, err := os.ReadFile(filepath.Join("testdata", "registry-pink.json"))
@@ -107,7 +107,7 @@ func TestMarketKeepsAuthorsOwnListings(t *testing.T) {
 		t.Fatalf("%d listed, want River and PinK: %+v", len(l), l)
 	}
 	pink := l[1]
-	if pink.Package != "myna-plugin-pink" || pink.Name != "PinK" || pink.Kind != "agent" || pink.Community {
+	if pink.Package != "owl-plugin-pink" || pink.Name != "PinK" || pink.Kind != "agent" || pink.Community {
 		t.Errorf("PinK: %+v", pink)
 	}
 	if pink.Summary["en"] == "" || !strings.HasPrefix(pink.Icon, "https://") {
@@ -120,7 +120,7 @@ func TestMarketKeepsAuthorsOwnListings(t *testing.T) {
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.Write(b) }))
 	defer srv.Close()
-	t.Setenv("MYNA_PLUGIN_MARKET", srv.URL)
+	t.Setenv("OWL_PLUGIN_MARKET", srv.URL)
 	RefreshMarket()
 	marketMu.Lock()
 	marketList = nil
@@ -134,8 +134,8 @@ func TestMarketKeepsAuthorsOwnListings(t *testing.T) {
 	if got, err := resolve(ctx, "pink"); err != nil || got != "pink" {
 		t.Errorf("pink: %q %v", got, err)
 	}
-	if got, _ := resolve(ctx, "myna-plugin-pink"); got != "myna-plugin-pink" {
-		t.Errorf("myna-plugin-pink: %q", got)
+	if got, _ := resolve(ctx, "owl-plugin-pink"); got != "owl-plugin-pink" {
+		t.Errorf("owl-plugin-pink: %q", got)
 	}
 }
 

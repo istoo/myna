@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/owl/internal/plugin"
 )
 
-// Two ZCode accounts of one name, the ZCode app's own removed in myna
-// (hidden) and one signed in through myna beside it: Remove on the one
+// Two ZCode accounts of one name, the ZCode app's own removed in owl
+// (hidden) and one signed in through owl beside it: Remove on the one
 // listed takes that one, by its slot, and leaves the hidden one as it was
 // (dev on Discord). The own account's saved id is the mover's "ZCode",
 // named after the app's sign-in now, so the two read alike unless the
@@ -30,7 +30,7 @@ func TestRemoveListedAccountLeavesHiddenNamesake(t *testing.T) {
 	})
 	ls := Logins("zcode")
 	if len(ls) != 1 || ls[0].Own {
-		t.Fatalf("listed %+v, want the one myna signed in", ls)
+		t.Fatalf("listed %+v, want the one owl signed in", ls)
 	}
 	if err := ForgetLogin("zcode", ls[0].User); err != nil {
 		t.Fatal(err)
@@ -78,8 +78,8 @@ func TestPluginOwnNameKeepsSlotApart(t *testing.T) {
 	}
 }
 
-// The built-in path: an agent's own account hidden in myna and one of
-// myna's of the same name, the latter listed. Removing it removes it,
+// The built-in path: an agent's own account hidden in owl and one of
+// owl's of the same name, the latter listed. Removing it removes it,
 // not the hidden one.
 func TestForgetSideLoginTakesTheListedOne(t *testing.T) {
 	claudeHome(t)
@@ -90,14 +90,14 @@ func TestForgetSideLoginTakesTheListedOne(t *testing.T) {
 	usable := func(savedLogin) bool { return true }
 	ls := sideLogins("side", "a@x", usable)
 	if len(ls) != 1 || ls[0].saved.own() {
-		t.Fatalf("listed %+v, want myna's", ls)
+		t.Fatalf("listed %+v, want owl's", ls)
 	}
 	var gone savedLogin
 	if err := forgetSideLogin("side", "a@x", ls, func(l savedLogin) { gone = l }); err != nil {
 		t.Fatal(err)
 	}
 	if len(gone.Auth) == 0 {
-		t.Errorf("told of %+v going, not myna's", gone)
+		t.Errorf("told of %+v going, not owl's", gone)
 	}
 	var left []savedLogin
 	for _, l := range readLogins() {

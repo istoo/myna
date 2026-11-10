@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // kimiRefusePairs answers as api.kimi.com/coding/v1 did on 2026-10-26 a

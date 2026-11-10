@@ -8,7 +8,7 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // deepseekRefuseAnthropic answers as api.deepseek.com/anthropic does
@@ -302,7 +302,7 @@ func TestWithThinkingOnToolTurnsUnchanged(t *testing.T) {
 // OpenRouter's Anthropic endpoint takes a turn's effort, the output_config
 // Claude Code 2.1.302 puts on a {role: "system"} message, as a reasoning
 // configuration_update, and turns it away on DeepSeek and GLM with the
-// 400 #3696 quotes. myna asks again without it (withoutTurnEffort), and
+// 400 #3696 quotes. owl asks again without it (withoutTurnEffort), and
 // from then on sends OpenRouter none; the request's own effort and the
 // system message's text stay. On DeepSeek the tool turn's thinking says
 // its signature too (#2883), or the second try is refused for that.

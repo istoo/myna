@@ -4,8 +4,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // nb5p on Discord: a custom provider set to the Responses API, whose Chat
@@ -13,7 +13,7 @@ import (
 // dsh asked them on Chat Completions. And with Provider in model names
 // off, its GPT-6.1 Terra, which another provider serves too, was named
 // "GPT-6.1 Terra · MyGateway" beside the group found for it while its
-// GPT-6.1 Sol had no suffix. The models go on myna-responses (dsh's
+// GPT-6.1 Sol had no suffix. The models go on owl-responses (dsh's
 // pi-ai takes "openai-responses" for a route), both named alone.
 func TestDshCustomResponsesProvider(t *testing.T) {
 	home, dir, web := dshRouteHome(t)
@@ -41,23 +41,23 @@ func TestDshCustomResponsesProvider(t *testing.T) {
 	}
 	os.WriteFile(web, []byte("# Your patch layer for this dsh profile.\n"), 0o644)
 	a := dsh(home)
-	if err := a.Field("model").Set("myna/mygateway/gpt-6.1-sol"); err != nil {
+	if err := a.Field("model").Set("owl/mygateway/gpt-6.1-sol"); err != nil {
 		t.Fatal(err)
 	}
 	ps := dshPiProviders(t, web)
 	b, _ := os.ReadFile(web)
 	names := map[string]string{}
-	for _, m := range ps["myna-responses"].Models {
+	for _, m := range ps["owl-responses"].Models {
 		names[m.ID] = m.Name
 	}
 	for id, want := range map[string]string{"mygateway/gpt-6.1-sol": "GPT-6.1 Sol", "mygateway/gpt-6.1-terra": "GPT-6.1 Terra"} {
 		got, ok := names[id]
 		if !ok {
-			t.Errorf("%s isn't on myna-responses", id)
+			t.Errorf("%s isn't on owl-responses", id)
 		} else if got != want {
 			t.Errorf("%s named %q, want %q", id, got, want)
 		}
-		if contains(dshRouteModelIDs(ps["myna"]), id) {
+		if contains(dshRouteModelIDs(ps["owl"]), id) {
 			t.Errorf("%s is on the Chat route", id)
 		}
 	}

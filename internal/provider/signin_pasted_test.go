@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-// LuvLetter (Discord, 10-27): myna in Docker, a ChatGPT sign-in whose
+// LuvLetter (Discord, 10-27): owl in Docker, a ChatGPT sign-in whose
 // browser ended on http://localhost:1455/auth/callback?code=…&state=…, and
 // that address pasted into the Import box beside the sign-in. The box read
 // it as a refresh token, sent it to ChatGPT, and said the token had been

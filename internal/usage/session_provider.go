@@ -5,9 +5,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/istoo/myna/internal/filememo"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/sessions"
+	"github.com/istoo/owl/internal/filememo"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/sessions"
 )
 
 type desktopSessionInfo struct {
@@ -174,7 +174,7 @@ func (r *sessionResolver) desktopIdentity(c sessions.Call) (desktopSessionIdenti
 	// Only a file under a desktop root's local-agent-mode-sessions can
 	// name one: the rest (every Claude Code session, ~380k calls in a
 	// long history, asked twice each) skip the Rel and the Split, which
-	// were a fifth of what a started myna's first Requests read
+	// were a fifth of what a started owl's first Requests read
 	// allocated.
 	roots := r.roots
 	if !strings.Contains(c.File, desktopAgentSessions) {

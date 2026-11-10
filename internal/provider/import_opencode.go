@@ -9,8 +9,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/edit"
 )
 
 // OpenCode's own sign-ins, as `opencode auth login` keeps them: auth.json in
@@ -18,7 +18,7 @@ import (
 // (xdg-basedir's, on Windows too). It maps a provider id (models.dev's) to
 // {"type":"api","key":…}, {"type":"oauth",…} or {"type":"wellknown",…}
 // (packages/opencode/src/auth/index.ts). It holds keys only, never where
-// they go: an id is imported when myna has its preset.
+// they go: an id is imported when owl has its preset.
 
 func openCodeAuthPath() string {
 	if d := appdir.Getenv("XDG_DATA_HOME"); d != "" {
@@ -28,7 +28,7 @@ func openCodeAuthPath() string {
 	return filepath.Join(home, ".local", "share", "opencode", "auth.json")
 }
 
-// openCodePresets are OpenCode's provider ids by the myna preset at the
+// openCodePresets are OpenCode's provider ids by the owl preset at the
 // same address. An id at a host the preset doesn't serve (SiliconFlow's
 // .com beside the preset's .cn) is left out: its key would be sent there.
 // The ids' hosts are models.dev's api for each, what OpenCode itself sends
@@ -79,7 +79,7 @@ func readOpenCodeAuth(path string) ([]AppImport, error) {
 		skip := ""
 		switch {
 		case e.Type == "oauth" || e.Type == "wellknown":
-			skip = "it is a sign-in, not a key; add the subscription in myna"
+			skip = "it is a sign-in, not a key; add the subscription in owl"
 		case e.Type != "api":
 			continue
 		case pr == nil:

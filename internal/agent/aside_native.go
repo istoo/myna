@@ -12,12 +12,12 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/filememo"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/proc"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/filememo"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/proc"
+	"github.com/istoo/owl/internal/provider"
 )
 
 var asideRead = func(account string) (map[string]json.RawMessage, error) {
@@ -27,11 +27,11 @@ var asideRead = func(account string) (map[string]json.RawMessage, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), asideTimeout)
 	defer cancel()
 	out, err := proc.CommandContext(ctx, "aside", "repl", "--account", account, "--host", "local",
-		"console.log('MYNA_ASIDE_STATE '+JSON.stringify({defaultModel:aside.settings.get('defaultModel'),modelCategories:aside.settings.get('modelCategories'),imageGenerationModel:aside.settings.get('imageGenerationModel')}))").Output()
+		"console.log('OWL_ASIDE_STATE '+JSON.stringify({defaultModel:aside.settings.get('defaultModel'),modelCategories:aside.settings.get('modelCategories'),imageGenerationModel:aside.settings.get('imageGenerationModel')}))").Output()
 	if err != nil {
 		return nil, fmt.Errorf("Aside settings could not be read: %w", err)
 	}
-	_, tail, ok := bytes.Cut(out, []byte("MYNA_ASIDE_STATE "))
+	_, tail, ok := bytes.Cut(out, []byte("OWL_ASIDE_STATE "))
 	if !ok {
 		return nil, fmt.Errorf("Aside returned no settings snapshot")
 	}
@@ -65,7 +65,7 @@ type asideConnection struct {
 func newAsideConnection(at place) *asideConnection {
 	id := asideChoice(at)
 	dir := asideAccountDir(at, id)
-	// what myna remembers of an account's settings is that account's:
+	// what owl remembers of an account's settings is that account's:
 	// u0's keeps the name it had before there was a choice
 	record := "aside-state.json"
 	if id != 0 {
@@ -115,7 +115,7 @@ func (c *asideConnection) reconcileSettings(snapshot map[string]json.RawMessage,
 			if len(field.Pending) == 0 || !asideSameSetting(asideRaw(c.snapshot, asideFieldPath(key)), field.Pending) {
 				continue
 			}
-			if strings.HasPrefix(asideSelection(field.Pending), "myna/") {
+			if strings.HasPrefix(asideSelection(field.Pending), "owl/") {
 				field.Last = field.Pending
 				field.Pending = nil
 				r.Fields[key] = field
@@ -147,14 +147,14 @@ func asideOwnOptions(path, cur string) []Option {
 	sort.Strings(names)
 	for _, p := range names {
 		v := s.Providers[p]
-		if p == "myna" {
+		if p == "owl" {
 			continue
 		}
 		for _, m := range v.Models {
 			out = append(out, Option{Value: p + "/" + m.ID, Label: m.Name, Group: p})
 		}
 	}
-	if cur != "" && !strings.HasPrefix(cur, "myna/") {
+	if cur != "" && !strings.HasPrefix(cur, "owl/") {
 		found := false
 		for _, o := range out {
 			if o.Value == cur {
@@ -245,7 +245,7 @@ func (c *asideConnection) load() (asideRecord, error) {
 		return r, nil
 	}
 	// Legacy stash entries exist only for selections explicitly replaced by
-	// myna. Reading them does not adopt fields with no restore point.
+	// owl. Reading them does not adopt fields with no restore point.
 	legacy := stashLoad()
 	for _, key := range append([]string{"model", "image"}, asideRoles...) {
 		if _, ok := r.Fields[key]; ok {
@@ -257,7 +257,7 @@ func (c *asideConnection) load() (asideRecord, error) {
 		}
 		value, ok := legacy[c.at.key(name)]
 		p, m, valid := strings.Cut(value, "/")
-		if !ok || !valid || p == "" || m == "" || p == "myna" {
+		if !ok || !valid || p == "" || m == "" || p == "owl" {
 			continue
 		}
 		raw, _ := edit.GetJSON(c.path, asideFieldPath(key))
@@ -297,7 +297,7 @@ func (c *asideConnection) provider() (string, string) {
 	if len(bytes.TrimSpace(b)) != 0 && !json.Valid(b) {
 		return "foreign", "Aside's provider configuration could not be read"
 	}
-	raw, ok := edit.GetJSON(c.models, "providers.myna")
+	raw, ok := edit.GetJSON(c.models, "providers.owl")
 	if !ok {
 		return "disconnected", ""
 	}
@@ -311,22 +311,22 @@ func (c *asideConnection) provider() (string, string) {
 		return "invalid", "Aside's provider configuration could not be read"
 	}
 	if p.Key == "" || p.URL == "" {
-		return "foreign", "Aside's myna provider has no ownership credential; it will not be overwritten"
+		return "foreign", "Aside's owl provider has no ownership credential; it will not be overwritten"
 	}
 	if p.Key != gateway.TokenFor("aside") && p.Key != agentKeyAt("aside", c.at.gw()) {
-		return "foreign", "Aside's myna provider belongs to another configuration; it will not be overwritten"
+		return "foreign", "Aside's owl provider belongs to another configuration; it will not be overwritten"
 	}
 	if !sameGateway(p.URL, c.at.v1()) {
-		return "invalid", "Aside's myna provider points to another gateway; reconnect explicitly to use this one"
+		return "invalid", "Aside's owl provider points to another gateway; reconnect explicitly to use this one"
 	}
 	if p.API == "" || len(p.Models) == 0 {
-		return "invalid", "Aside's myna provider has an incomplete model catalog; reconnect the provider"
+		return "invalid", "Aside's owl provider has an incomplete model catalog; reconnect the provider"
 	}
 	return "connected", ""
 }
 
 func (c *asideConnection) block() any {
-	p := mynaProviderJSONAt("pi", "aside", c.at.gw()).(map[string]any)
+	p := owlProviderJSONAt("pi", "aside", c.at.gw()).(map[string]any)
 	p["apiKey"] = agentKeyAt("aside", c.at.gw())
 	return p
 }
@@ -343,9 +343,9 @@ func (c *asideConnection) connectLocked() error {
 		return fmt.Errorf("%s", detail)
 	}
 	if status == "connected" {
-		return syncJSON(c.models, "providers.myna", c.kept())
+		return syncJSON(c.models, "providers.owl", c.kept())
 	}
-	return edit.SetJSON(c.models, edit.KV{Path: "providers.myna", Value: c.kept()()})
+	return edit.SetJSON(c.models, edit.KV{Path: "providers.owl", Value: c.kept()()})
 }
 
 func (c *asideConnection) sync() error {
@@ -355,10 +355,10 @@ func (c *asideConnection) sync() error {
 	if status != "connected" {
 		return nil
 	}
-	return syncJSON(c.models, "providers.myna", c.kept())
+	return syncJSON(c.models, "providers.owl", c.kept())
 }
 
-// kept is the block with what else Aside's providers.myna holds kept
+// kept is the block with what else Aside's providers.owl holds kept
 // (theirsKept).
 func (c *asideConnection) kept() func() any {
 	return piBlockKept(c.models, c.block)
@@ -378,7 +378,7 @@ func (c *asideConnection) state() NativeState {
 	for _, key := range append([]string{"model", "image"}, asideRoles...) {
 		value := c.value(key)
 		f := NativeField{Value: value, Status: "unmanaged"}
-		if strings.HasPrefix(value, "myna/") {
+		if strings.HasPrefix(value, "owl/") {
 			f.Status = "managed"
 			if owned, ok := r.Fields[key]; !ok || len(owned.Before) == 0 {
 				f.Status = "missingRestorePoint"
@@ -397,9 +397,9 @@ func (c *asideConnection) state() NativeState {
 		} else if _, ok := r.Fields[key]; ok {
 			f.Status = "userChanged"
 		}
-		if strings.HasPrefix(value, "myna/") && status == "disconnected" {
+		if strings.HasPrefix(value, "owl/") && status == "disconnected" {
 			f.Status = "unavailable"
-			f.Detail = "The myna provider is missing; reconnect the provider without changing this selection"
+			f.Detail = "The owl provider is missing; reconnect the provider without changing this selection"
 		}
 		if owned, ok := r.Fields[key]; ok && len(owned.Pending) > 0 {
 			f.Status = "pendingRestart"
@@ -425,7 +425,7 @@ func asideImages(drawers func(provider.Provider) []catalog.Model) []Option {
 		}
 		for _, m := range drawers(p) {
 			ref := p.ID + "/" + m.ID
-			out = append(out, Option{Value: "myna/" + ref, Ref: ref, Label: m.Name, Group: p.Name, Icon: p.Icon, Note: "image generation · via myna"})
+			out = append(out, Option{Value: "owl/" + ref, Ref: ref, Label: m.Name, Group: p.Name, Icon: p.Icon, Note: "image generation · via owl"})
 		}
 	}
 	return out
@@ -434,8 +434,8 @@ func asideImages(drawers func(provider.Provider) []catalog.Model) []Option {
 func asideImageOffered(value string) bool {
 	// a ChatGPT account's gpt-image-2.5, offered before #1865, is its one
 	// GPT Image, which draws the same
-	if ref, ok := strings.CutPrefix(value, "myna/"); ok {
-		value = "myna/" + gateway.ListedDrawer(ref)
+	if ref, ok := strings.CutPrefix(value, "owl/"); ok {
+		value = "owl/" + gateway.ListedDrawer(ref)
 	}
 	// one unticked in its editor still draws: Aside set to it keeps it
 	for _, o := range asideImages(gateway.Drawers) {
@@ -455,7 +455,7 @@ func (c *asideConnection) validateSelection(key, value string) (string, error) {
 		return value, nil
 	}
 	value = strings.TrimSpace(value)
-	if strings.HasPrefix(value, "myna/") {
+	if strings.HasPrefix(value, "owl/") {
 		if _, err := a.Spell(key, value); err != nil {
 			return "", err
 		}
@@ -464,7 +464,7 @@ func (c *asideConnection) validateSelection(key, value string) (string, error) {
 	if !ok || p == "" || m == "" {
 		return "", fmt.Errorf("expected provider/model")
 	}
-	if key == "image" && p == "myna" && !asideImageOffered(value) {
+	if key == "image" && p == "owl" && !asideImageOffered(value) {
 		return "", fmt.Errorf("%s is not an image generation model", value)
 	}
 	return value, nil
@@ -504,14 +504,14 @@ func (c *asideConnection) apply(key, value string) error {
 	if len(before) == 0 {
 		before = json.RawMessage("null")
 	}
-	if _, ok := r.Fields[key]; ok && !strings.HasPrefix(asideSelection(before), "myna/") {
+	if _, ok := r.Fields[key]; ok && !strings.HasPrefix(asideSelection(before), "owl/") {
 		delete(r.Fields, key)
 	}
-	if strings.HasPrefix(value, "myna/") {
+	if strings.HasPrefix(value, "owl/") {
 		if err := c.connectLocked(); err != nil {
 			return err
 		}
-		if _, ok := r.Fields[key]; !ok && !strings.HasPrefix(asideSelection(before), "myna/") {
+		if _, ok := r.Fields[key]; !ok && !strings.HasPrefix(asideSelection(before), "owl/") {
 			r.Fields[key] = asideOwned{Before: append(json.RawMessage(nil), before...)}
 			if err := c.save(r); err != nil {
 				return err
@@ -579,13 +579,13 @@ func (c *asideConnection) apply(key, value string) error {
 		return fmt.Errorf("Aside did not apply %s; its current selection is %s", key, c.value(key))
 	}
 	if key == "effort" {
-		if owned, ok := r.Fields["model"]; ok && strings.HasPrefix(asideSelection(got), "myna/") {
+		if owned, ok := r.Fields["model"]; ok && strings.HasPrefix(asideSelection(got), "owl/") {
 			owned.Last = append(json.RawMessage(nil), got...)
 			r.Fields["model"] = owned
 		}
 	}
 	if owned, ok := r.Fields[key]; ok {
-		if strings.HasPrefix(value, "myna/") {
+		if strings.HasPrefix(value, "owl/") {
 			owned.Last = append(json.RawMessage(nil), got...)
 			owned.Pending = nil
 			r.Fields[key] = owned
@@ -644,7 +644,7 @@ func (c *asideConnection) planLocked() (*DisconnectPlan, error) {
 	for _, key := range append([]string{"model", "image"}, asideRoles...) {
 		path := asideFieldPath(key)
 		now := asideRaw(saved, path)
-		if !strings.HasPrefix(asideSelection(now), "myna/") {
+		if !strings.HasPrefix(asideSelection(now), "owl/") {
 			continue
 		}
 		owned, ok := r.Fields[key]
@@ -667,7 +667,7 @@ func (c *asideConnection) planLocked() (*DisconnectPlan, error) {
 	if err != nil {
 		return nil, err
 	}
-	without, err := edit.PatchJSON(models, nil, []string{"providers.myna"})
+	without, err := edit.PatchJSON(models, nil, []string{"providers.owl"})
 	if err != nil {
 		return nil, err
 	}

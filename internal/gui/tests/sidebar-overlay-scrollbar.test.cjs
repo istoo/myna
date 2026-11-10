@@ -60,9 +60,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
-        await page.addInitScript(() => { try { localStorage.setItem("myna.navLayout", "side"); } catch {} });
+        await page.addInitScript(() => { try { localStorage.setItem("owl.navLayout", "side"); } catch {} });
         await page.route("**/*", serve(lang));
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         await page.waitForSelector("#nav button.on");
         await page.locator("#side").waitFor();
         await frame(page);
@@ -116,9 +116,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const page = await context.newPage();
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(60000);
-      await page.addInitScript(() => { try { localStorage.setItem("myna.navLayout", "side"); } catch {} });
+      await page.addInitScript(() => { try { localStorage.setItem("owl.navLayout", "side"); } catch {} });
       await page.route("**/*", serve("en"));
-      await page.goto("http://myna.test/");
+      await page.goto("http://owl.test/");
       await page.waitForSelector("#nav button.on");
       await frame(page);
       const s = await bar(page);

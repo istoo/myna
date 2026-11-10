@@ -16,13 +16,13 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/istoo/myna/internal/proc"
+	"github.com/istoo/owl/internal/proc"
 )
 
 // Rex (superlogical.com/rex, a terminal multiplexer) claims no .command
 // file, only public.item and rex://, so Launch Services never lists it as
 // a terminal and `open -a` can't hand it a script (StringKe, #4565). Its
-// own CLI opens a command in it, in a tab of a Rex session of myna's own
+// own CLI opens a command in it, in a tab of a Rex session of owl's own
 // (openInRex). Rex is offered when its CLI is found, on PATH or in the app.
 const rexBundleID = "com.superlogical.rex"
 
@@ -142,11 +142,11 @@ func rexScript(command string) []string {
 }
 
 // rexLabel is a tab's label: the session's or agent's name on one line,
-// cut to 60 characters; "myna" when it has none.
+// cut to 60 characters; "owl" when it has none.
 func rexLabel(s string) string {
 	s = strings.Join(strings.Fields(s), " ")
 	if s == "" {
-		return "myna"
+		return "owl"
 	}
 	if utf8.RuneCountInString(s) > 60 {
 		s = string([]rune(s)[:59]) + "…"
@@ -164,19 +164,19 @@ var rexRun = func(ctx context.Context, bin string, args ...string) ([]byte, erro
 // rexShow brings Rex forward, a var so a test opens nothing.
 var rexShow = func() { proc.Command("open", "-b", rexBundleID).Run() }
 
-// rexSessionLabel labels the Rex session myna opens its tabs in.
-const rexSessionLabel = "myna"
+// rexSessionLabel labels the Rex session owl opens its tabs in.
+const rexSessionLabel = "owl"
 
 // openInRex opens command in a new tab of Rex, through its CLI at bin.
 //
 // Outside Rex the CLI has no session of its own, and `rex run` with no -s
 // takes the only session there is: with none, or more than one (the usual
 // case), it exits 3, which means a target not found or ambiguous (StringKe,
-// #4565). Nor can the CLI tell which session the app shows. So myna keeps
-// a session of its own, labelled myna: found by `rex ls`, given by its full
+// #4565). Nor can the CLI tell which session the app shows. So owl keeps
+// a session of its own, labelled owl: found by `rex ls`, given by its full
 // ID (a label can be shared), a tab added with `rex run -s` and named for
 // the session or agent with `rex window rename` (run's --label names the
-// block, not the tab). With none, `rex new myna --window <label>` makes it,
+// block, not the tab). With none, `rex new owl --window <label>` makes it,
 // its first tab so named; so does a 3 from run, the session having ended
 // since the list.
 //
@@ -287,8 +287,8 @@ func rexSelect(ctx context.Context, bin, session, window string) {
 	rexRun(ctx, bin, args...)
 }
 
-// rexOwnSession is the full ID of myna's own Rex session, "" with none:
-// one labelled exactly myna, else one so labelled in another case.
+// rexOwnSession is the full ID of owl's own Rex session, "" with none:
+// one labelled exactly owl, else one so labelled in another case.
 func rexOwnSession(ctx context.Context, bin string) (string, error) {
 	out, err := rexRun(ctx, bin, "ls", "--json")
 	if err != nil {

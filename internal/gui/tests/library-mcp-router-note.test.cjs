@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// packinggoodsllc_07668 on Discord: two mynas, one in China and one in
+// packinggoodsllc_07668 on Discord: two owls, one in China and one in
 // Los Angeles, serve the same MCP tools through their routers, and an
 // agent fetching Google should pick the one in Los Angeles. With the
 // router on, the Library's MCP tab has a Router name row under the
@@ -23,8 +23,8 @@ const { strings } = require("./strings.cjs");
 const assets = path.resolve(__dirname, "../assets");
 const HOME = "/Users/mg";
 const fixture = (st) => ({
-  dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
-  mcpHub: st.on, hubPath: "/mcp/myna/hub/", hubNote: st.note, hubName: "la-box",
+  dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
+  mcpHub: st.on, hubPath: "/mcp/owl/hub/", hubNote: st.note, hubName: "la-box",
   agents: [{ id: "claude", name: "Claude Code", icon: "claudecode-color", skills: `${HOME}/.claude/skills`, mcp: `${HOME}/.claude.json`, ...(st.on ? { hub: "on" } : {}) }],
   instructions: { agents: [], sets: [] }, foundServers: [], projects: [], foundSkills: [], skills: [], problems: [],
   servers: [{ name: "fetch", transport: "stdio", command: "uvx", args: ["mcp-server-fetch"], agents: ["claude"] }],
@@ -60,7 +60,7 @@ function server(lang, st) {
     if (url.pathname === "/api/groups") return json({ groups: [] });
     if (url.pathname === "/api/providers") return json({ providers: [], gateway: { running: true } });
     if (url.pathname.startsWith("/api/")) return json({});
-    if (url.host !== "myna.test") return route.fulfill({ status: 404, body: "" });
+    if (url.host !== "owl.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -100,13 +100,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const st = { on: false, note: "", sent: [], web: width < 800 };
         const errors = [];
         const ctx = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: "reduce" });
-        await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "mcp"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("owl.libTab", "mcp"); } catch {} });
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", server(lang, st));
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         await navTo(page, "library");
         const v = page.locator("#view-library");
         await v.locator(".lib-hub").waitFor();
@@ -116,13 +116,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
         st.on = true;
         const ctx2 = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: "reduce" });
-        await ctx2.addInitScript(() => { try { localStorage.setItem("myna.libTab", "mcp"); } catch {} });
+        await ctx2.addInitScript(() => { try { localStorage.setItem("owl.libTab", "mcp"); } catch {} });
         const p = await ctx2.newPage();
         p.setDefaultTimeout(5000);
         p.setDefaultNavigationTimeout(60000);
         p.on("pageerror", (e) => errors.push(e.message));
         await p.route("**/*", server(lang, st));
-        await p.goto("http://myna.test/");
+        await p.goto("http://owl.test/");
         await navTo(p, "library");
         const row = p.locator("#view-library .lib-hubnoterow");
         await row.waitFor();

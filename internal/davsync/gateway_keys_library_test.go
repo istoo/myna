@@ -8,12 +8,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/backup"
-	"github.com/istoo/myna/internal/library"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/backup"
+	"github.com/istoo/owl/internal/library"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // Adding gateway keys to a keyless backup must not make a later library
@@ -50,7 +50,7 @@ func TestGatewayKeysPreserveLibrarySecretsSync(t *testing.T) {
 	remote := func() backup.Bundle {
 		t.Helper()
 		f.mu.Lock()
-		data := slices.Clone(f.objects["team x+y/myna/myna.myna-backup"])
+		data := slices.Clone(f.objects["team x+y/owl/owl.owl-backup"])
 		f.mu.Unlock()
 		got, err := backup.Open(data, cfg.Passphrase)
 		if err != nil {
@@ -174,7 +174,7 @@ func TestGatewayKeysWithLibraryOffSync(t *testing.T) {
 	remote := func() backup.Bundle {
 		t.Helper()
 		f.mu.Lock()
-		data := slices.Clone(f.objects["team x+y/myna/myna.myna-backup"])
+		data := slices.Clone(f.objects["team x+y/owl/owl.owl-backup"])
 		f.mu.Unlock()
 		got, err := backup.Open(data, cfg.Passphrase)
 		if err != nil {

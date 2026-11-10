@@ -9,9 +9,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 func TestDrawingResolvesLiveImageModels(t *testing.T) {
@@ -42,7 +42,7 @@ func TestDrawingResolvesLiveImageModels(t *testing.T) {
 	for _, model := range []string{"gpt-image-2", "gpt-image-2.5-flare", "relay/gpt-image-2"} {
 		t.Run(model, func(t *testing.T) {
 			code, answer, raw := postImages(t, s, "/v1/images/generations", "application/json",
-				fmt.Sprintf(`{"model":%q,"prompt":"a myna"}`, model))
+				fmt.Sprintf(`{"model":%q,"prompt":"a owl"}`, model))
 			upstreamModel := strings.TrimPrefix(model, "relay/")
 			if code != 200 || answer.Model != "relay/"+upstreamModel {
 				t.Fatalf("%d %s", code, raw)
@@ -53,12 +53,12 @@ func TestDrawingResolvesLiveImageModels(t *testing.T) {
 			}
 		})
 	}
-	code, answer, raw := postImages(t, s, "/v1/images/generations", "application/json", `{"prompt":"a myna"}`)
+	code, answer, raw := postImages(t, s, "/v1/images/generations", "application/json", `{"prompt":"a owl"}`)
 	if code != 200 || answer.Model != st.ImageGen {
 		t.Fatalf("default: %d %s", code, raw)
 	}
 	before := len(e.got("/v1/images/generations"))
-	code, _, raw = postImages(t, s, "/v1/images/generations", "application/json", `{"model":"painter-missing","prompt":"a myna"}`)
+	code, _, raw = postImages(t, s, "/v1/images/generations", "application/json", `{"model":"painter-missing","prompt":"a owl"}`)
 	if code != 404 || len(e.got("/v1/images/generations")) != before {
 		t.Fatalf("unknown model: %d %s", code, raw)
 	}
@@ -66,17 +66,17 @@ func TestDrawingResolvesLiveImageModels(t *testing.T) {
 	if err := settings.Save(st); err != nil {
 		t.Fatal(err)
 	}
-	code, _, raw = postImages(t, s, "/v1/images/generations", "application/json", `{"model":"gpt-image-2","prompt":"a myna"}`)
+	code, _, raw = postImages(t, s, "/v1/images/generations", "application/json", `{"model":"gpt-image-2","prompt":"a owl"}`)
 	if code != 200 {
 		t.Fatalf("explicit model with default off: %d %s", code, raw)
 	}
-	code, _, raw = postImages(t, s, "/v1/images/generations", "application/json", `{"prompt":"a myna"}`)
+	code, _, raw = postImages(t, s, "/v1/images/generations", "application/json", `{"prompt":"a owl"}`)
 	if code != 400 {
 		t.Fatalf("default off: %d %s", code, raw)
 	}
 	image := "data:image/png;base64," + base64.StdEncoding.EncodeToString(pngBytes)
 	code, _, raw = postImages(t, s, "/v1/images/edits", "application/json",
-		fmt.Sprintf(`{"model":"gpt-image-2","prompt":"a blue myna","image":%q}`, image))
+		fmt.Sprintf(`{"model":"gpt-image-2","prompt":"a blue owl","image":%q}`, image))
 	if code != 200 || len(e.got("/v1/images/edits")) != 1 || len(e.got("/v1/chat/completions")) != 0 {
 		t.Fatalf("edit: %d %s", code, raw)
 	}
@@ -98,7 +98,7 @@ func TestDrawingResolvesLiveImageModels(t *testing.T) {
 	if err := writer.WriteField("model", "gpt-image-2.5-flare"); err != nil {
 		t.Fatal(err)
 	}
-	if err := writer.WriteField("prompt", "a blue myna"); err != nil {
+	if err := writer.WriteField("prompt", "a blue owl"); err != nil {
 		t.Fatal(err)
 	}
 	part, err := writer.CreateFormFile("image", "input.png")
@@ -121,7 +121,7 @@ func TestDrawingResolvesLiveImageModels(t *testing.T) {
 // which draws the same for any gpt-image-* name (#1865): the one Codex CLI
 // asks its provider for (gpt-image-2) draws on the relay before the relay's
 // list names it, as on a ChatGPT account (TestCodexDrawsANewerModelByIts-
-// BareName), not turned away by myna (#4432).
+// BareName), not turned away by owl (#4432).
 func TestRelayDrawsTheGPTImageFamilyByItsBareName(t *testing.T) {
 	fresh(t)
 	e := &easel{}
@@ -137,7 +137,7 @@ func TestRelayDrawsTheGPTImageFamilyByItsBareName(t *testing.T) {
 		t.Fatal(err)
 	}
 	s := New()
-	code, a, raw := postImages(t, s, "/v1/images/generations", "application/json", `{"model":"gpt-image-2","prompt":"a myna"}`)
+	code, a, raw := postImages(t, s, "/v1/images/generations", "application/json", `{"model":"gpt-image-2","prompt":"a owl"}`)
 	if code != 200 || a.Model != "relay/gpt-image-2" {
 		t.Fatalf("%d %s", code, raw)
 	}
@@ -155,7 +155,7 @@ func TestRelayDrawingNoGPTImageClaimsNoneOfTheFamily(t *testing.T) {
 	plain := drawingRelay(t, "plain")
 	painter := drawingRelay(t, "painter", "gpt-image-2.5-flare")
 	s := New()
-	code, a, raw := postImages(t, s, "/v1/images/generations", "application/json", `{"model":"gpt-image-2","prompt":"a myna"}`)
+	code, a, raw := postImages(t, s, "/v1/images/generations", "application/json", `{"model":"gpt-image-2","prompt":"a owl"}`)
 	if code != 200 || a.Model != "painter/gpt-image-2" {
 		t.Fatalf("%d %s", code, raw)
 	}
@@ -168,7 +168,7 @@ func TestRelayDrawingNoGPTImageClaimsNoneOfTheFamily(t *testing.T) {
 	if err := provider.Delete("painter"); err != nil {
 		t.Fatal(err)
 	}
-	code, _, raw = postImages(t, s, "/v1/images/generations", "application/json", `{"model":"gpt-image-2","prompt":"a myna"}`)
+	code, _, raw = postImages(t, s, "/v1/images/generations", "application/json", `{"model":"gpt-image-2","prompt":"a owl"}`)
 	if code != 404 || len(plain.got("/v1/images/generations")) != 0 {
 		t.Fatalf("chat-only relay alone: %d %s", code, raw)
 	}
@@ -205,7 +205,7 @@ func TestRelayDrawsTheGPTImageFamilyFromANamespacedList(t *testing.T) {
 		{"gpt-image-future", "gpt-image-future"},
 	} {
 		before := len(e.got("/v1/images/generations"))
-		code, a, raw := postImages(t, s, "/v1/images/generations", "application/json", `{"model":"`+c.asked+`","prompt":"a myna"}`)
+		code, a, raw := postImages(t, s, "/v1/images/generations", "application/json", `{"model":"`+c.asked+`","prompt":"a owl"}`)
 		if code != 200 || a.Model != "relay/"+c.want {
 			t.Fatalf("%s: %d %s", c.asked, code, raw)
 		}
@@ -228,8 +228,8 @@ func TestCodexNativeDrawsItsOwnModelOnANamespacedRelay(t *testing.T) {
 		t.Fatal(err)
 	}
 	s := New()
-	drawingMainTurn(t, s, "relay/text", "session-a", "turn-a", "", "myna-codex")
-	code, answer, raw := drawingToolCall(t, s, "/v1/images/generations", "gpt-image-2", "", "turn-a", "myna-codex")
+	drawingMainTurn(t, s, "relay/text", "session-a", "turn-a", "", "owl-codex")
+	code, answer, raw := drawingToolCall(t, s, "/v1/images/generations", "gpt-image-2", "", "turn-a", "owl-codex")
 	if code != 200 || answer.Model != "relay/gpt-image-2" {
 		t.Fatalf("%d %s", code, raw)
 	}
@@ -246,8 +246,8 @@ func TestCodexNativeDrawsByTheRelaysNamespacedName(t *testing.T) {
 	fresh(t)
 	relay := drawingRelay(t, "relay", "openai/gpt-image-2.5-flare", "openai/gpt-image-2")
 	s := New()
-	drawingMainTurn(t, s, "relay/text", "session-a", "turn-a", "", "myna-codex")
-	code, answer, raw := drawingToolCall(t, s, "/v1/images/generations", "gpt-image-2", "", "turn-a", "myna-codex")
+	drawingMainTurn(t, s, "relay/text", "session-a", "turn-a", "", "owl-codex")
+	code, answer, raw := drawingToolCall(t, s, "/v1/images/generations", "gpt-image-2", "", "turn-a", "owl-codex")
 	if code != 200 || answer.Model != "relay/openai/gpt-image-2" {
 		t.Fatalf("%d %s", code, raw)
 	}
@@ -259,7 +259,7 @@ func TestCodexNativeDrawsByTheRelaysNamespacedName(t *testing.T) {
 
 // Codex's native image tool asks its turn's provider for the one it names
 // (gpt-image-2, #870): on a Codex backend whose list names another of the
-// family, it draws there as the one it asked for, not as myna's pick
+// family, it draws there as the one it asked for, not as owl's pick
 // instead of it (#4432).
 func TestCodexNativeDrawsItsOwnModelOnARelay(t *testing.T) {
 	fresh(t)
@@ -270,8 +270,8 @@ func TestCodexNativeDrawsItsOwnModelOnARelay(t *testing.T) {
 		t.Fatal(err)
 	}
 	s := New()
-	drawingMainTurn(t, s, "relay/text", "session-a", "turn-a", "", "myna-codex")
-	code, answer, raw := drawingToolCall(t, s, "/v1/images/generations", "gpt-image-2", "", "turn-a", "myna-codex")
+	drawingMainTurn(t, s, "relay/text", "session-a", "turn-a", "", "owl-codex")
+	code, answer, raw := drawingToolCall(t, s, "/v1/images/generations", "gpt-image-2", "", "turn-a", "owl-codex")
 	if code != 200 || answer.Model != "relay/gpt-image-2" {
 		t.Fatalf("%d %s", code, raw)
 	}

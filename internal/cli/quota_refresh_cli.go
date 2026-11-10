@@ -9,17 +9,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// quotaRefreshGap is how soon myna quota refresh asks a card's vendor
-// again, as the gateway's refresh for another myna keeps to
+// quotaRefreshGap is how soon owl quota refresh asks a card's vendor
+// again, as the gateway's refresh for another owl keeps to
 // (remoteRefreshGap): a script or a status line run in a loop shows what
 // was read rather than starting Claude Code, or asking the vendor, each time.
 const quotaRefreshGap = 30 * time.Second
 
-// quotaRefreshCmd: myna quota refresh <provider> [<account>] [--json] —
+// quotaRefreshCmd: owl quota refresh <provider> [<account>] [--json] —
 // the card's refresh button on the Usage page, from a terminal (#2104).
 func quotaRefreshCmd(args []string) error {
 	asJSON := false
@@ -40,7 +40,7 @@ func quotaRefreshCmd(args []string) error {
 	case 1:
 		id = names[0]
 		// <provider>/<account>, unless the whole of it is a provider (a
-		// remote myna's card, office/codex)
+		// remote owl's card, office/codex)
 		if p, u, ok := strings.Cut(id, "/"); ok && !provider.IsRemoteCard(id) {
 			if _, err := provider.Find(p); err == nil {
 				id, user = p, u
@@ -49,7 +49,7 @@ func quotaRefreshCmd(args []string) error {
 	case 2:
 		id, user = names[0], names[1]
 	default:
-		return fmt.Errorf("usage: myna quota refresh <provider> [<account>] [--json]")
+		return fmt.Errorf("usage: owl quota refresh <provider> [<account>] [--json]")
 	}
 	if p, err := provider.Find(id); err == nil && !provider.IsRemoteCard(id) {
 		id = p.ID
@@ -78,9 +78,9 @@ func quotaRefreshCmd(args []string) error {
 	}
 	if len(qs) == 0 {
 		if user != "" {
-			return fmt.Errorf("no card of %s · %s · myna quota %s lists its accounts", id, user, id)
+			return fmt.Errorf("no card of %s · %s · owl quota %s lists its accounts", id, user, id)
 		}
-		return fmt.Errorf("no subscription, plan or key balance of %s · myna quota lists them", id)
+		return fmt.Errorf("no subscription, plan or key balance of %s · owl quota lists them", id)
 	}
 	if asJSON {
 		b, _ := json.MarshalIndent(qs, "", "  ")
@@ -91,8 +91,8 @@ func quotaRefreshCmd(args []string) error {
 	return nil
 }
 
-// refreshedCard is whether q is the card myna quota refresh asked for:
-// the provider's (a remote myna's every card when it is the remote), of
+// refreshedCard is whether q is the card owl quota refresh asked for:
+// the provider's (a remote owl's every card when it is the remote), of
 // the account named by its login or its alias.
 func refreshedCard(q provider.Quota, id, user string) bool {
 	if !strings.EqualFold(q.Provider, id) && !strings.HasPrefix(strings.ToLower(q.Provider), strings.ToLower(id)+"/") {
@@ -101,7 +101,7 @@ func refreshedCard(q provider.Quota, id, user string) bool {
 	return user == "" || strings.EqualFold(q.User, user) || q.Alias != "" && strings.EqualFold(q.Alias, user)
 }
 
-// The times quota refresh last asked each card, kept beside myna's
+// The times quota refresh last asked each card, kept beside owl's
 // other caches, so that one run after another keeps to quotaRefreshGap.
 func refreshStampsPath() string { return filepath.Join(appdir.Cache(), "quota-refresh.json") }
 

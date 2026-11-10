@@ -37,7 +37,7 @@ func TestUnroutedHeldReportSaved(t *testing.T) {
 	if resp.StatusCode != http.StatusGatewayTimeout {
 		t.Fatalf("held request answered %d %s", resp.StatusCode, b)
 	}
-	if !strings.Contains(string(b), "Copy Report") || !strings.Contains(string(b), "Routing page") || strings.Contains(string(b), "myna's log") {
+	if !strings.Contains(string(b), "Copy Report") || !strings.Contains(string(b), "Routing page") || strings.Contains(string(b), "owl's log") {
 		t.Fatalf("the 504 doesn't send its user to the report: %s", b)
 	}
 

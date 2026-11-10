@@ -3,9 +3,9 @@ package profile
 import (
 	"testing"
 
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/library"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/library"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // inUse is which of the saved profiles InUse names, read as the GUI's state
@@ -56,7 +56,7 @@ func same(a, b []string) bool {
 	return true
 }
 
-// Which profile is in use (superhtoooth on X: nothing in myna said). A
+// Which profile is in use (superhtoooth on X: nothing in owl said). A
 // profile is in use while applying it would change nothing: the agents'
 // fields, their model lists and the library's setup are as it has them.
 // Saved, it is in use at once; another applied, that one is; a setting

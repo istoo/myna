@@ -11,9 +11,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 func drawingRelay(t *testing.T, id string, imageIDs ...string) *easel {
@@ -65,7 +65,7 @@ func drawingMainTurn(t *testing.T, s *Server, model, session, turn, kind, token 
 
 func drawingToolCall(t *testing.T, s *Server, path, model, session, turn, token string) (int, imagesAnswer, string) {
 	t.Helper()
-	body := map[string]any{"model": model, "prompt": "a myna"}
+	body := map[string]any{"model": model, "prompt": "a owl"}
 	if path == "/v1/images/edits" {
 		body["image"] = "data:image/png;base64," + base64.StdEncoding.EncodeToString(pngBytes)
 	}
@@ -97,15 +97,15 @@ func TestCodexDrawingFollowsItsTurnProvider(t *testing.T) {
 		t.Fatal(err)
 	}
 	s := New()
-	drawingMainTurn(t, s, "main/text", "session-a", "turn-a", "", "myna-codex")
-	drawingMainTurn(t, s, "other/text", "session-b", "turn-b", "", "myna-codex")
-	drawingMainTurn(t, s, "other/text", "session-a", "turn-a", "review", "myna-codex")
+	drawingMainTurn(t, s, "main/text", "session-a", "turn-a", "", "owl-codex")
+	drawingMainTurn(t, s, "other/text", "session-b", "turn-b", "", "owl-codex")
+	drawingMainTurn(t, s, "other/text", "session-a", "turn-a", "review", "owl-codex")
 	for _, test := range []struct{ path, model string }{
 		{"/v1/images/generations", "gpt-image-2"},
 		{"/v1/images/edits", "gpt-image-2"},
 		{"/v1/images/generations", "gpt-image-next"},
 	} {
-		code, answer, raw := drawingToolCall(t, s, test.path, test.model, "", "turn-a", "myna-codex")
+		code, answer, raw := drawingToolCall(t, s, test.path, test.model, "", "turn-a", "owl-codex")
 		if code != 200 || answer.Model != "main/"+test.model {
 			t.Fatalf("%s %s: %d %s", test.path, test.model, code, raw)
 		}
@@ -113,16 +113,16 @@ func TestCodexDrawingFollowsItsTurnProvider(t *testing.T) {
 	if len(other.got("/v1/images/generations")) != 0 || len(main.got("/v1/images/edits")) != 1 {
 		t.Fatal("used another session or background request's provider")
 	}
-	code, answer, raw := drawingToolCall(t, s, "/v1/images/generations", "gpt-image-2", "session-a", "unknown-turn", "myna-codex")
+	code, answer, raw := drawingToolCall(t, s, "/v1/images/generations", "gpt-image-2", "session-a", "unknown-turn", "owl-codex")
 	if code != 200 || answer.Model != st.ImageGen {
 		t.Fatalf("unknown turn with known session: %d %s", code, raw)
 	}
-	code, answer, raw = drawingToolCall(t, s, "/v1/images/generations", "gpt-image-2", "session-a", "", "myna-codex")
+	code, answer, raw = drawingToolCall(t, s, "/v1/images/generations", "gpt-image-2", "session-a", "", "owl-codex")
 	if code != 200 || answer.Model != "main/gpt-image-2" {
 		t.Fatalf("session fallback: %d %s", code, raw)
 	}
-	drawingMainTurn(t, s, "other/text", "session-a", "turn-a-next", "", "myna-codex")
-	code, answer, raw = drawingToolCall(t, s, "/v1/images/generations", "gpt-image-2", "", "turn-a-next", "myna-codex")
+	drawingMainTurn(t, s, "other/text", "session-a", "turn-a-next", "", "owl-codex")
+	code, answer, raw = drawingToolCall(t, s, "/v1/images/generations", "gpt-image-2", "", "turn-a-next", "owl-codex")
 	if code != 200 || answer.Model != "other/gpt-image-2" {
 		t.Fatalf("changed main model: %d %s", code, raw)
 	}
@@ -130,7 +130,7 @@ func TestCodexDrawingFollowsItsTurnProvider(t *testing.T) {
 	if err := settings.Save(st); err != nil {
 		t.Fatal(err)
 	}
-	code, answer, raw = drawingToolCall(t, s, "/v1/images/generations", "gpt-image-2", "", "turn-a", "myna-codex")
+	code, answer, raw = drawingToolCall(t, s, "/v1/images/generations", "gpt-image-2", "", "turn-a", "owl-codex")
 	if code != 200 || answer.Model != "main/gpt-image-2" {
 		t.Fatalf("primary with fallback off: %d %s", code, raw)
 	}
@@ -152,7 +152,7 @@ func TestCodexDrawingConcurrentTurns(t *testing.T) {
 		go func() {
 			defer turns.Done()
 			selected := []string{"first", "second"}[index%2]
-			drawingMainTurn(t, server, selected+"/text", fmt.Sprintf("session-%d", index), fmt.Sprintf("turn-%d", index), "", "myna-codex")
+			drawingMainTurn(t, server, selected+"/text", fmt.Sprintf("session-%d", index), fmt.Sprintf("turn-%d", index), "", "owl-codex")
 		}()
 	}
 	turns.Wait()
@@ -161,7 +161,7 @@ func TestCodexDrawingConcurrentTurns(t *testing.T) {
 		go func() {
 			defer turns.Done()
 			selected := []string{"first", "second"}[index%2]
-			code, answer, raw := drawingToolCall(t, server, "/v1/images/generations", "gpt-image-2", "", fmt.Sprintf("turn-%d", index), "myna-codex")
+			code, answer, raw := drawingToolCall(t, server, "/v1/images/generations", "gpt-image-2", "", fmt.Sprintf("turn-%d", index), "owl-codex")
 			if code != 200 || answer.Model != selected+"/gpt-image-2" {
 				t.Errorf("turn %d: %d %s", index, code, raw)
 			}
@@ -180,8 +180,8 @@ func TestCodexDrawingFollowsLunaReserveTurn(t *testing.T) {
 		t.Fatal(err)
 	}
 	server := New()
-	drawingMainTurn(t, server, "main/text", "session", "turn", "luna_reserve", "myna-codex")
-	code, answer, raw := drawingToolCall(t, server, "/v1/images/generations", "gpt-image-2", "", "turn", "myna-codex")
+	drawingMainTurn(t, server, "main/text", "session", "turn", "luna_reserve", "owl-codex")
+	code, answer, raw := drawingToolCall(t, server, "/v1/images/generations", "gpt-image-2", "", "turn", "owl-codex")
 	if code != 200 || answer.Model != "main/gpt-image-2" {
 		t.Fatalf("reserve turn: %d %s", code, raw)
 	}
@@ -198,7 +198,7 @@ func TestCodexDrawingFallsBackToImageSetting(t *testing.T) {
 		t.Fatal(err)
 	}
 	s := New()
-	drawingMainTurn(t, s, "text-only/text", "session", "turn", "", "myna-codex")
+	drawingMainTurn(t, s, "text-only/text", "session", "turn", "", "owl-codex")
 	for _, test := range []struct{ model, session, turn, want string }{
 		{"gpt-image-2", "", "turn", st.ImageGen},
 		{"gpt-image-future", "", "turn", st.ImageGen},
@@ -208,7 +208,7 @@ func TestCodexDrawingFallsBackToImageSetting(t *testing.T) {
 		{"unrelated/gpt-image-2", "", "turn", "unrelated/gpt-image-2"},
 		{"", "", "turn", st.ImageGen},
 	} {
-		code, answer, raw := drawingToolCall(t, s, "/v1/images/generations", test.model, test.session, test.turn, "myna-codex")
+		code, answer, raw := drawingToolCall(t, s, "/v1/images/generations", test.model, test.session, test.turn, "owl-codex")
 		if code != 200 || answer.Model != test.want {
 			t.Fatalf("%+v: %d %s", test, code, raw)
 		}
@@ -217,7 +217,7 @@ func TestCodexDrawingFallsBackToImageSetting(t *testing.T) {
 	if err := settings.Save(st); err != nil {
 		t.Fatal(err)
 	}
-	code, _, raw := drawingToolCall(t, s, "/v1/images/generations", "gpt-image-2", "", "turn", "myna-codex")
+	code, _, raw := drawingToolCall(t, s, "/v1/images/generations", "gpt-image-2", "", "turn", "owl-codex")
 	if code != 400 || !strings.Contains(raw, "Settings") {
 		t.Fatalf("fallback off: %d %s", code, raw)
 	}
@@ -225,7 +225,7 @@ func TestCodexDrawingFallsBackToImageSetting(t *testing.T) {
 	if err := settings.Save(st); err != nil {
 		t.Fatal(err)
 	}
-	code, answer, raw := drawingToolCall(t, s, "/v1/images/generations", "gpt-image-2", "", "turn", "myna-codex")
+	code, answer, raw := drawingToolCall(t, s, "/v1/images/generations", "gpt-image-2", "", "turn", "owl-codex")
 	if code != 200 || answer.Model != AutoDrawer() {
 		t.Fatalf("automatic fallback: %d %s", code, raw)
 	}
@@ -272,8 +272,8 @@ func TestCodexDrawingDoesNotRetryThroughSetting(t *testing.T) {
 		t.Fatal(err)
 	}
 	s := New()
-	drawingMainTurn(t, s, "main/text", "session", "turn", "", "myna-codex")
-	code, _, raw := drawingToolCall(t, s, "/v1/images/generations", "gpt-image-2", "", "turn", "myna-codex")
+	drawingMainTurn(t, s, "main/text", "session", "turn", "", "owl-codex")
+	code, _, raw := drawingToolCall(t, s, "/v1/images/generations", "gpt-image-2", "", "turn", "owl-codex")
 	if code != 401 || len(main.got("/v1/images/generations")) != 1 || len(fallback.got("/v1/images/generations")) != 0 {
 		t.Fatalf("image failure retried: %d %s", code, raw)
 	}
@@ -309,8 +309,8 @@ func TestCodexDrawingFollowsActualGroupMember(t *testing.T) {
 		t.Fatal(err)
 	}
 	server := New()
-	drawingMainTurn(t, server, "group/drawing", "session", "turn", "", "myna-codex")
-	code, answer, raw := drawingToolCall(t, server, "/v1/images/generations", "gpt-image-2", "", "turn", "myna-codex")
+	drawingMainTurn(t, server, "group/drawing", "session", "turn", "", "owl-codex")
+	code, answer, raw := drawingToolCall(t, server, "/v1/images/generations", "gpt-image-2", "", "turn", "owl-codex")
 	if code != 200 || answer.Model != "second/gpt-image-2" || len(first.got("/v1/images/generations")) != 0 || len(second.got("/v1/images/generations")) != 1 {
 		t.Fatalf("group member: %d %s", code, raw)
 	}
@@ -322,7 +322,7 @@ func TestCodexDrawingFollowsActualGroupMember(t *testing.T) {
 	if err := provider.Save(*secondProvider); err != nil {
 		t.Fatal(err)
 	}
-	code, answer, raw = drawingToolCall(t, server, "/v1/images/generations", "gpt-image-2", "", "turn", "myna-codex")
+	code, answer, raw = drawingToolCall(t, server, "/v1/images/generations", "gpt-image-2", "", "turn", "owl-codex")
 	if code != 200 || answer.Model != st.ImageGen {
 		t.Fatalf("disabled preferred provider: %d %s", code, raw)
 	}

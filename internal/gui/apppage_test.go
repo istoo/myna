@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/owl/internal/gateway"
 )
 
 // appPageTest is a fresh home and a fresh appPage in appPageServer's place,
@@ -67,7 +67,7 @@ func appPageGet(t *testing.T, port int, path, cookie string, hdr ...string) *htt
 	t.Helper()
 	r, _ := http.NewRequest("GET", "http://127.0.0.1:"+strconv.Itoa(port)+path, nil)
 	if cookie != "" {
-		r.AddCookie(&http.Cookie{Name: "myna_web_" + strconv.Itoa(port), Value: cookie})
+		r.AddCookie(&http.Cookie{Name: "owl_web_" + strconv.Itoa(port), Value: cookie})
 	}
 	for i := 0; i+1 < len(hdr); i += 2 {
 		r.Header.Set(hdr[i], hdr[i+1])
@@ -81,7 +81,7 @@ func appPageGet(t *testing.T, port int, path, cookie string, hdr ...string) *htt
 }
 
 // jiakun_zhao on X: the page the app's window shows, served to a browser
-// (through a Cloudflare tunnel) by the app itself rather than `myna web`
+// (through a Cloudflare tunnel) by the app itself rather than `owl web`
 // kept running beside it. It is off until Settings turns it on, and never
 // answers without its key: not the page, not its API, not the gateway's
 // client routes without a gateway key; a new key turns every browser
@@ -161,7 +161,7 @@ func TestAppPageServesOnlyWithItsKey(t *testing.T) {
 	res := appPageGet(t, port, "/?k="+key, "")
 	var cookie string
 	for _, c := range res.Cookies() {
-		if c.Name == "myna_web_"+strconv.Itoa(port) {
+		if c.Name == "owl_web_"+strconv.Itoa(port) {
 			cookie = c.Value
 		}
 	}
@@ -198,7 +198,7 @@ func TestAppPageServesOnlyWithItsKey(t *testing.T) {
 	}
 }
 
-// A port another program holds (`myna web`, or the myna before a
+// A port another program holds (`owl web`, or the owl before a
 // restart to update) is said, and taken once it is let go.
 func TestAppPageWaitsForABusyPort(t *testing.T) {
 	var reached bool
@@ -259,7 +259,7 @@ func TestAppPageTurnsDownBadChoices(t *testing.T) {
 	var reached bool
 	appPageTest(t, &reached)
 	gwPort := freePort(t)
-	t.Setenv("MYNA_ADDR", "127.0.0.1:"+strconv.Itoa(gwPort))
+	t.Setenv("OWL_ADDR", "127.0.0.1:"+strconv.Itoa(gwPort))
 	for _, body := range []string{`{"mode":"everywhere"}`, `{"port":80}`, `{"port":70000}`, `{"port":` + strconv.Itoa(gwPort) + `}`} {
 		if code, _ := appPagePost(t, body); code == 200 {
 			t.Errorf("%s was taken", body)
@@ -273,7 +273,7 @@ func TestAppPageTurnsDownBadChoices(t *testing.T) {
 // A browser on the app's page is a browser tab: its page says web, the
 // app's Browser access isn't on its API (it can't turn the page off under
 // itself, nor read the key), and it doesn't make the app's own windows
-// `myna web`'s (webPage).
+// `owl web`'s (webPage).
 func TestAppPageBrowserIsATab(t *testing.T) {
 	onePortHome(t)
 	webPage.Store(false)
@@ -284,7 +284,7 @@ func TestAppPageBrowserIsATab(t *testing.T) {
 	}
 	h := Handler(b, nil)
 	if webPage.Load() {
-		t.Error("the app's page set webPage, as myna web's does")
+		t.Error("the app's page set webPage, as owl web's does")
 	}
 	for _, m := range []string{"GET", "POST"} {
 		r := httptest.NewRequest(m, "/api/web-page", strings.NewReader(`{"mode":"lan"}`))

@@ -4,7 +4,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/owl/internal/gateway"
 )
 
 // A Kiro request's prompt is counted as Kiro counts it, prompt tokens but

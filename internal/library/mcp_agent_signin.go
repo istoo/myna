@@ -12,7 +12,7 @@ import (
 // does, and keeps the tokens in its own .credentials.json; `codex mcp
 // login` does, keeping them in its keyring or, when its config's
 // mcp_oauth_credentials_store is file or the keyring is missing, in a
-// .credentials.json of its own. myna's check connects without them, so
+// .credentials.json of its own. owl's check connects without them, so
 // such a server answers it 401 and its row said "needs sign-in" while the
 // agent used it fine (CyberCaius on Discord: the server signed in to in
 // Claude Code in WSL). The check says which agents hold their own sign-in
@@ -21,7 +21,7 @@ import (
 // Every target is read where it keeps its files, so an agent in a running
 // WSL distro is read under the distro's home (wslTargetOf), as its
 // settings are; a stopped distro has no target and is never started for
-// this. On a Mac Claude Code keeps the tokens in the Keychain, which myna
+// this. On a Mac Claude Code keeps the tokens in the Keychain, which owl
 // never reads: there only the file, when Claude Code fell back to it.
 
 // ownSignIns are the agents signed in to a server themselves, by

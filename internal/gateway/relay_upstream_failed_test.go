@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // upstreamFailed400 is a relay's own word that the provider behind it
@@ -58,7 +58,7 @@ func TestUpstreamFailedWordsFailARelayOver(t *testing.T) {
 		want   bool
 	}{
 		{400, upstreamFailed400, true},
-		// as myna tells it on, with the relay's name before, and the
+		// as owl tells it on, with the relay's name before, and the
 		// relay's own type around it; and apex's, whose type said
 		// invalid_request_error (#1511)
 		{400, `{"error":{"message":"apex: Upstream request failed","type":"invalid_request_error"}}`, true},

@@ -3,8 +3,8 @@ package davsync
 import (
 	"testing"
 
-	"github.com/istoo/myna/internal/backup"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/backup"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // Which account an agent is kept signed in to is this computer's own

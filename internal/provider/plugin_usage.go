@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/owl/internal/plugin"
 )
 
 // movedCards are the names and icons the built-ins' usage cards have,

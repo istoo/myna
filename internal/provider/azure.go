@@ -5,13 +5,13 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 // Azure OpenAI is reached at the user's own resource, never at one host
-// myna knows: https://<resource>.openai.azure.com (or the
+// owl knows: https://<resource>.openai.azure.com (or the
 // cognitiveservices.azure.com and services.ai.azure.com hosts newer
-// resources are given). myna asks it on the v1 API under /openai/v1 —
+// resources are given). owl asks it on the v1 API under /openai/v1 —
 // Azure's generally available one since August 2025 — where chat
 // completions, Responses and the model list sit at the paths OpenAI's do,
 // the model in the body is the deployment's name, and no api-version is

@@ -9,13 +9,13 @@ import (
 
 	"github.com/pelletier/go-toml/v2"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // keptEffortHome is a sandbox HOME with a provider of thinking models: deep
-// (none, low, high: myna's default high) and wide (low, medium, high:
-// myna's default medium).
+// (none, low, high: owl's default high) and wide (low, medium, high:
+// owl's default medium).
 func keptEffortHome(t *testing.T, models ...string) string {
 	t.Helper()
 	home := t.TempDir()
@@ -49,21 +49,21 @@ func keptEffortModels(t *testing.T, models ...string) {
 	}
 }
 
-// 悠悠哥 on Discord: the default thinking effort set on one of myna's
-// models in WorkBuddy was put back to myna's on every sync. WorkBuddy's
+// 悠悠哥 on Discord: the default thinking effort set on one of owl's
+// models in WorkBuddy was put back to owl's on every sync. WorkBuddy's
 // Settings > Models saves an edited model whole into models.json, with
 // reasoning.defaultEffort (empty for its Auto) and the vendor of the
-// provider it matches, "Custom" for myna's (WorkBuddy 5.x's
+// provider it matches, "Custom" for owl's (WorkBuddy 5.x's
 // inferProviderIdFromLocalCustomModel and the form's save); one set by hand
-// keeps vendor myna. Either way a sync keeps the user's effort while the
-// model offers it, a new model gets myna's default, and a model myna no
+// keeps vendor owl. Either way a sync keeps the user's effort while the
+// model offers it, a new model gets owl's default, and a model owl no
 // longer has is taken out, with no second entry of any model.
 func TestWorkBuddyKeepsTheUsersDefaultEffort(t *testing.T) {
 	home := keptEffortHome(t)
 	path := filepath.Join(home, ".workbuddy", "models.json")
 	os.MkdirAll(filepath.Dir(path), 0o755)
 	a := workbuddy(home)
-	if err := a.Field("provider").Set(mynaID); err != nil {
+	if err := a.Field("provider").Set(owlID); err != nil {
 		t.Fatal(err)
 	}
 	read := func() map[string]map[string]any {
@@ -104,7 +104,7 @@ func TestWorkBuddyKeepsTheUsersDefaultEffort(t *testing.T) {
 
 	ms := read()
 	if effort(ms["think/deep"]) != "high" || effort(ms["think/wide"]) != "medium" {
-		t.Fatalf("myna's defaults: %v %v", effort(ms["think/deep"]), effort(ms["think/wide"]))
+		t.Fatalf("owl's defaults: %v %v", effort(ms["think/deep"]), effort(ms["think/wide"]))
 	}
 
 	// deep set by hand; wide saved from WorkBuddy's model settings
@@ -118,7 +118,7 @@ func TestWorkBuddyKeepsTheUsersDefaultEffort(t *testing.T) {
 		t.Fatal(err)
 	}
 	ms = read()
-	if len(ms) != 2 || effort(ms["think/deep"]) != "low" || effort(ms["think/wide"]) != "high" || ms["think/wide"]["vendor"] != mynaID {
+	if len(ms) != 2 || effort(ms["think/deep"]) != "low" || effort(ms["think/wide"]) != "high" || ms["think/wide"]["vendor"] != owlID {
 		t.Fatalf("after sync: %v", ms)
 	}
 
@@ -133,7 +133,7 @@ func TestWorkBuddyKeepsTheUsersDefaultEffort(t *testing.T) {
 		t.Fatalf("Auto: %v", ms["think/wide"])
 	}
 
-	// an effort the model no longer offers gives way to myna's default
+	// an effort the model no longer offers gives way to owl's default
 	ms["think/deep"]["reasoning"].(map[string]any)["defaultEffort"] = "xhigh"
 	write(ms)
 	if err := a.Sync(); err != nil {
@@ -143,7 +143,7 @@ func TestWorkBuddyKeepsTheUsersDefaultEffort(t *testing.T) {
 		t.Fatalf("unoffered effort: %v", effort(ms["think/deep"]))
 	}
 
-	// a new model gets myna's default; a model gone is taken out, the
+	// a new model gets owl's default; a model gone is taken out, the
 	// one saved from WorkBuddy's settings too
 	ms["think/deep"]["reasoning"].(map[string]any)["defaultEffort"] = "low"
 	ms["think/wide"]["vendor"] = "Custom"
@@ -175,7 +175,7 @@ func TestCodeBuddyKeepsTheUsersDefaultEffort(t *testing.T) {
 	path := filepath.Join(home, ".codebuddy", "models.json")
 	os.MkdirAll(filepath.Dir(path), 0o755)
 	a := codebuddy(home)
-	if err := a.Field("model").Set("myna/think/deep"); err != nil {
+	if err := a.Field("model").Set("owl/think/deep"); err != nil {
 		t.Fatal(err)
 	}
 	b, _ := os.ReadFile(path)
@@ -202,15 +202,15 @@ func TestZCodeKeepsTheUsersDefaultLevel(t *testing.T) {
 	path := filepath.Join(home, ".zcode", "v2", "config.json")
 	os.MkdirAll(filepath.Dir(path), 0o755)
 	a := zcode(home)
-	if err := a.Field("provider").Set(mynaID); err != nil {
+	if err := a.Field("provider").Set(owlID); err != nil {
 		t.Fatal(err)
 	}
 	var doc map[string]any
 	b, _ := os.ReadFile(path)
 	json.Unmarshal(b, &doc)
-	r := doc["provider"].(map[string]any)[mynaID].(map[string]any)["models"].(map[string]any)["think/wide"].(map[string]any)["reasoning"].(map[string]any)
+	r := doc["provider"].(map[string]any)[owlID].(map[string]any)["models"].(map[string]any)["think/wide"].(map[string]any)["reasoning"].(map[string]any)
 	if r["defaultLevel"] != "medium" {
-		t.Fatalf("myna's default: %s", b)
+		t.Fatalf("owl's default: %s", b)
 	}
 	r["defaultLevel"] = "high"
 	b, _ = json.Marshal(doc)
@@ -227,13 +227,13 @@ func TestZCodeKeepsTheUsersDefaultLevel(t *testing.T) {
 	}
 	b, _ = os.ReadFile(path)
 	json.Unmarshal(b, &c)
-	ms := c.Provider[mynaID].Models
+	ms := c.Provider[owlID].Models
 	if ms["think/deep"].Reasoning.DefaultLevel != "high" || ms["think/wide"].Reasoning.DefaultLevel != "high" {
 		t.Fatalf("after sync: %s", b)
 	}
 }
 
-// A default a myna before #3852 wrote as defaultVariant — a key ZCode
+// A default a owl before #3852 wrote as defaultVariant — a key ZCode
 // never read — is carried over: the user's choice survives the first sync
 // on the keys ZCode reads.
 func TestZCodeCarriesTheOldDefaultVariantOver(t *testing.T) {
@@ -241,13 +241,13 @@ func TestZCodeCarriesTheOldDefaultVariantOver(t *testing.T) {
 	path := filepath.Join(home, ".zcode", "v2", "config.json")
 	os.MkdirAll(filepath.Dir(path), 0o755)
 	a := zcode(home)
-	if err := a.Field("provider").Set(mynaID); err != nil {
+	if err := a.Field("provider").Set(owlID); err != nil {
 		t.Fatal(err)
 	}
 	var doc map[string]any
 	b, _ := os.ReadFile(path)
 	json.Unmarshal(b, &doc)
-	r := doc["provider"].(map[string]any)[mynaID].(map[string]any)["models"].(map[string]any)["think/wide"].(map[string]any)["reasoning"].(map[string]any)
+	r := doc["provider"].(map[string]any)[owlID].(map[string]any)["models"].(map[string]any)["think/wide"].(map[string]any)["reasoning"].(map[string]any)
 	delete(r, "defaultLevel")
 	r["defaultVariant"] = "high"
 	b, _ = json.Marshal(doc)
@@ -264,26 +264,26 @@ func TestZCodeCarriesTheOldDefaultVariantOver(t *testing.T) {
 	}
 	b, _ = os.ReadFile(path)
 	json.Unmarshal(b, &c)
-	ms := c.Provider[mynaID].Models
+	ms := c.Provider[owlID].Models
 	if ms["think/wide"].Reasoning.DefaultLevel != "high" {
 		t.Fatalf("after sync: %s", b)
 	}
 }
 
-// Kimi Code's default_effort set by hand on one of myna's models stays
+// Kimi Code's default_effort set by hand on one of owl's models stays
 // through a sync.
 func TestKimiKeepsTheUsersDefaultEffort(t *testing.T) {
 	home := keptEffortHome(t)
 	path := filepath.Join(home, ".kimi-code", "config.toml")
 	writeFile(t, path, "")
 	a := kimi(home)
-	if err := a.Field("model").Set("myna/think/deep"); err != nil {
+	if err := a.Field("model").Set("owl/think/deep"); err != nil {
 		t.Fatal(err)
 	}
 	b, _ := os.ReadFile(path)
-	at := strings.Index(string(b), `[models."myna/think/wide"]`)
+	at := strings.Index(string(b), `[models."owl/think/wide"]`)
 	if at < 0 || !strings.Contains(string(b[at:]), `default_effort = "high"`) {
-		t.Fatalf("myna's default: %s", b)
+		t.Fatalf("owl's default: %s", b)
 	}
 	s := string(b[:at]) + strings.Replace(string(b[at:]), `default_effort = "high"`, `default_effort = "low"`, 1)
 	os.WriteFile(path, []byte(s), 0o600)
@@ -299,7 +299,7 @@ func TestKimiKeepsTheUsersDefaultEffort(t *testing.T) {
 	if err := toml.Unmarshal(b, &c); err != nil {
 		t.Fatalf("%v\n%s", err, b)
 	}
-	if c.Models["myna/think/wide"].DefaultEffort != "low" || c.Models["myna/think/deep"].DefaultEffort != "high" {
+	if c.Models["owl/think/wide"].DefaultEffort != "low" || c.Models["owl/think/deep"].DefaultEffort != "high" {
 		t.Fatalf("after sync: %s", b)
 	}
 }
@@ -309,12 +309,12 @@ func TestMiniMaxKeepsTheUsersDefaultEffort(t *testing.T) {
 	home, path := miniMaxHome(t)
 	keptEffortModels(t)
 	a := miniMax(home)
-	if err := a.Field("model").Set("myna/think/deep"); err != nil {
+	if err := a.Field("model").Set("owl/think/deep"); err != nil {
 		t.Fatal(err)
 	}
 	c, raw := readMiniMax(t, path)
-	if c.CustomProvider[mynaID].Models["think~wide"].Thinking.DefaultEffort != "high" {
-		t.Fatalf("myna's default:\n%s", raw)
+	if c.CustomProvider[owlID].Models["think~wide"].Thinking.DefaultEffort != "high" {
+		t.Fatalf("owl's default:\n%s", raw)
 	}
 	at := strings.Index(raw, "think~wide:")
 	raw = raw[:at] + strings.Replace(raw[at:], "defaultEffort: high", "defaultEffort: low", 1)
@@ -323,7 +323,7 @@ func TestMiniMaxKeepsTheUsersDefaultEffort(t *testing.T) {
 		t.Fatal(err)
 	}
 	c, raw = readMiniMax(t, path)
-	ms := c.CustomProvider[mynaID].Models
+	ms := c.CustomProvider[owlID].Models
 	if ms["think~wide"].Thinking.DefaultEffort != "low" || ms["think~deep"].Thinking.DefaultEffort != "high" {
 		t.Fatalf("after sync:\n%s", raw)
 	}
@@ -331,19 +331,19 @@ func TestMiniMaxKeepsTheUsersDefaultEffort(t *testing.T) {
 
 // ZCode's config.json: providerOptionsByLevel a user wrote for a level
 // (the workaround #3852's reporter could have had in place) stays through
-// a sync; the levels they left alone get myna's.
+// a sync; the levels they left alone get owl's.
 func TestZCodeKeepsTheUsersLevelOptions(t *testing.T) {
 	home := keptEffortHome(t)
 	path := filepath.Join(home, ".zcode", "v2", "config.json")
 	os.MkdirAll(filepath.Dir(path), 0o755)
 	a := zcode(home)
-	if err := a.Field("provider").Set(mynaID); err != nil {
+	if err := a.Field("provider").Set(owlID); err != nil {
 		t.Fatal(err)
 	}
 	var doc map[string]any
 	b, _ := os.ReadFile(path)
 	json.Unmarshal(b, &doc)
-	r := doc["provider"].(map[string]any)[mynaID].(map[string]any)["models"].(map[string]any)["think/deep"].(map[string]any)["reasoning"].(map[string]any)
+	r := doc["provider"].(map[string]any)[owlID].(map[string]any)["models"].(map[string]any)["think/deep"].(map[string]any)["reasoning"].(map[string]any)
 	r["providerOptionsByLevel"] = map[string]any{"high": map[string]any{"thinking": map[string]any{"type": "adaptive"}}}
 	b, _ = json.Marshal(doc)
 	os.WriteFile(path, b, 0o644)
@@ -366,7 +366,7 @@ func TestZCodeKeepsTheUsersLevelOptions(t *testing.T) {
 	}
 	b, _ = os.ReadFile(path)
 	json.Unmarshal(b, &c)
-	o := c.Provider[mynaID].Models["think/deep"].Reasoning.Options
+	o := c.Provider[owlID].Models["think/deep"].Reasoning.Options
 	if o["high"].Thinking.Type != "adaptive" || o["high"].Thinking.Budget != 0 {
 		t.Fatalf("the user's high level was written over: %s", b)
 	}

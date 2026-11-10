@@ -13,9 +13,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/update"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/update"
 )
 
 // updater keeps the app current. It asks the feed at start-up and every six
@@ -78,14 +78,14 @@ type updater struct {
 	onWait   func()
 	loops    sync.WaitGroup // the waits going on
 	// With Settings' AutoRestart, the clock has autoRestart run (the app's
-	// or myna web's restart) once a downloaded update is ready and the
+	// or owl web's restart) once a downloaded update is ready and the
 	// gateway idle (#2096); autoSkip is the version whose wait the user
 	// called off, which isn't restarted into by itself again.
 	autoRestart func() bool
 	autoSkip    string
 	waitAsked   bool // the restart waiting was a click's
 	// installed: this process put an update in (install), and is leaving
-	// for it; followed: it is restarting into one another myna put in
+	// for it; followed: it is restarting into one another owl put in
 	// (restartBeside). Either way what is on disk is no longer another's
 	// for followReplaced to restart into.
 	installed bool
@@ -99,10 +99,10 @@ type updateJSON struct {
 	Notes   string `json:"notes,omitempty"`
 	URL     string `json:"url,omitempty"`
 	Stuck   string `json:"stuck,omitempty"` // available: why it can't update itself
-	// available, stuck "not-writable": the folder myna may not write to
+	// available, stuck "not-writable": the folder owl may not write to
 	StuckDir string `json:"stuckDir,omitempty"`
 	// available, stuck "package": the package manager that installed
-	// myna and updates it (pacman's myna-bin from the AUR, say), and
+	// owl and updates it (pacman's owl-bin from the AUR, say), and
 	// the command that does
 	Packaged *packagedJSON `json:"packaged,omitempty"`
 	Retry    bool          `json:"retry,omitempty"` // error: a click downloads it again
@@ -144,8 +144,8 @@ func updateDue(s settings.Settings, last, now time.Time) bool {
 
 func (u *updater) start() {
 	u.place(runtime.GOOS, update.GUI)
-	gateway.SetRestarter(u.restartBeside) // myna update in a terminal
-	go u.followReplaced(backendCtx)       // the app's or myna web's update (visamzh on X)
+	gateway.SetRestarter(u.restartBeside) // owl update in a terminal
+	go u.followReplaced(backendCtx)       // the app's or owl web's update (visamzh on X)
 	if u.bundle != "" {
 		go update.ForgetOldStaging(u.bundle) // #3965
 	}
@@ -177,15 +177,15 @@ var (
 
 // place takes what an update replaces on goos: the .app the binary is in,
 // else the binary itself. On a Mac that is the terminal build too (gui
-// false: myna-cli-darwin, or `myna web` from it), which has no .app to
-// be in and which `myna update` replaces the same way; before, its page
+// false: owl-cli-darwin, or `owl web` from it), which has no .app to
+// be in and which `owl update` replaces the same way; before, its page
 // only ever offered the release page. The app's own binary copied out of
 // its .app isn't replaced by the terminal build.
 func (u *updater) place(goos string, gui bool) {
 	if b := bundleOf(); b != "" {
 		if u.stuck = update.Stuck(b); u.stuck == "" {
 			u.bundle = b
-			// what `myna update` replacing the .app is told by
+			// what `owl update` replacing the .app is told by
 			// (replaced)
 			if exe, err := executable(); err == nil {
 				u.bundleExe = exe
@@ -201,9 +201,9 @@ func (u *updater) place(goos string, gui bool) {
 
 // placeExe takes exe as the binary an update replaces, or
 // says why it can't be (stuck). A binary a package manager installed is
-// left to it ("package"), even where myna may write or ask for the
+// left to it ("package"), even where owl may write or ask for the
 // administrator's password: replacing it under the manager is what made
-// the two fight (shuhai on Discord, the AUR's myna-bin).
+// the two fight (shuhai on Discord, the AUR's owl-bin).
 func (u *updater) placeExe(exe string) {
 	u.exeDir = filepath.Dir(exe)
 	if p := packagedBy(exe); p != nil {
@@ -216,16 +216,16 @@ func (u *updater) placeExe(exe string) {
 	u.exe = exe
 	u.self, _ = os.Stat(exe)
 	update.RemoveOld(exe)       // what the last updates on Windows moved aside
-	update.RemoveStaleNew(exe)  // what a myna left running downloaded again
-	update.EnsureCompanion(exe) // Windows: the myna.com a terminal runs, of this version (#3737)
+	update.RemoveStaleNew(exe)  // what a owl left running downloaded again
+	update.EnsureCompanion(exe) // Windows: the owl.com a terminal runs, of this version (#3737)
 	u.blocked = update.ReadBlocked(Version)
 }
 
 // exeStuck says why the binary in dir can't be replaced, or "" when it
-// can: "not-writable" when myna may not write to dir and this system
-// can't ask for the administrator's password. On Windows a myna.exe kept
+// can: "not-writable" when owl may not write to dir and this system
+// can't ask for the administrator's password. On Windows a owl.exe kept
 // at C:\ updated only by opening the release page, with nothing saying why
-// (#1277). "container" is that in a container (the Docker image's /myna,
+// (#1277). "container" is that in a container (the Docker image's /owl,
 // run as nonroot): there the new image is pulled, and "move it to a folder
 // you can write to" was the wrong advice.
 func exeStuck(dir string) string {
@@ -345,7 +345,7 @@ func (u *updater) freshen() {
 	}
 }
 
-// An answer of "latest" is about the moment the feed was asked, and myna
+// An answer of "latest" is about the moment the feed was asked, and owl
 // releases many times a day: Settings' Version row said 已是最新 on
 // v0.1.1402 with v0.1.1517 out (RickyWei on Discord, Windows), the answer
 // of a check made while 1402 was the newest and never made again (automatic
@@ -461,7 +461,7 @@ func (u *updater) run() {
 		u.state = "blocked"
 		return
 	case u.replaced():
-		// another myna put the update in already: a restart is all
+		// another owl put the update in already: a restart is all
 		u.state = "ready"
 		if u.onReady != nil {
 			go u.onReady(rel.Version)
@@ -508,7 +508,7 @@ func (u *updater) install(ask bool) bool {
 	u.mu.Lock()
 	defer u.mu.Unlock()
 	if u.replaced() {
-		// another myna updated the binary after this one started: it is
+		// another owl updated the binary after this one started: it is
 		// in, and swapping this one's download in would move it aside (the
 		// download is left: it may be the other's, staged at the same name)
 		u.staged, u.installed = "", true
@@ -571,7 +571,7 @@ func (u *updater) assetSize(rel *update.Release) int64 {
 }
 
 // replaced is whether the binary, or the .app, was updated by another
-// myna since this one started (`myna update` in a terminal), which
+// owl since this one started (`owl update` in a terminal), which
 // runs on from where it was moved aside.
 func (u *updater) replaced() bool {
 	switch {
@@ -635,7 +635,7 @@ func (u *updater) jsonIn(lang string) updateJSON {
 		}
 	}
 	if u.latest != nil {
-		// the notes without their download links: myna downloads it itself
+		// the notes without their download links: owl downloads it itself
 		j.Latest, j.Notes, j.URL = u.latest.Version, update.StripInstall(u.latest.Notes), u.latest.URL
 	}
 	return j
@@ -803,7 +803,7 @@ func restartFrom(w Windows, view string) bool {
 }
 
 // restartToUpdate installs the staged version and arranges for it to open
-// once this process is gone; the caller then quits. myna web runs on as
+// once this process is gone; the caller then quits. owl web runs on as
 // the new version in its own place (Web.Wait) instead of opening the app.
 // Off the Mac, the new one opens its window on view when window is set, and
 // only the tray icon when not; the Mac's always opens its window.

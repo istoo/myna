@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Add to myna</title>
-<meta name="description" content="Open this link in myna to add a model provider to every agent you use.">
+<title>Add to owl</title>
+<meta name="description" content="Open this link in owl to add a model provider to every agent you use.">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#fafafa">
 <meta name="referrer" content="no-referrer">
@@ -26,9 +26,9 @@
 <script>try{if(/Linux/.test(navigator.userAgent)&&!/Android/.test(navigator.userAgent)||localStorage.getItem("omarchy")||/[?&]omarchy=/.test(location.search))document.write('<script src="/omarchy.js"><\/script>')}catch(e){}</script>
 <link rel="icon" href="/favicon.png" type="image/png">
 <link rel="stylesheet" href="/docs.css">
-<meta property="og:title" content="Add to myna">
-<meta property="og:description" content="Open this link in myna to add a model provider to every agent you use.">
-<meta property="og:image" content="https://github.com/istoo/myna/img/og.png">
+<meta property="og:title" content="Add to owl">
+<meta property="og:description" content="Open this link in owl to add a model provider to every agent you use.">
+<meta property="og:image" content="https://github.com/istoo/owl/img/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <style>
 body { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; }
@@ -60,23 +60,23 @@ dd .m { display: inline-block; font-size: 12.5px; border: 1px solid var(--line);
 
 <div class="stage">
   <div class="card" id="card">
-    <div class="mark"><div class="tile" id="tile">?</div><span class="plus">→</span><div class="tile"><img class="bird" src="/img/myna-small.svg" alt="myna"></div></div>
-    <h1 id="title">Add to myna</h1>
-    <p class="sub" id="sub">Opening myna…</p>
+    <div class="mark"><div class="tile" id="tile">?</div><span class="plus">→</span><div class="tile"><img class="bird" src="/img/owl-small.svg" alt="owl"></div></div>
+    <h1 id="title">Add to owl</h1>
+    <p class="sub" id="sub">Opening owl…</p>
     <dl id="facts"></dl>
     <div class="actions" id="actions">
-      <a class="btn" id="open" href="#"><img class="bird-inv" src="/img/myna-small.svg" alt="">Open in myna</a>
-      <a class="btn ghost" id="dl" href="/#get">Don’t have myna? Download it</a>
+      <a class="btn" id="open" href="#"><img class="bird-inv" src="/img/owl-small.svg" alt="">Open in owl</a>
+      <a class="btn ghost" id="dl" href="/#get">Don’t have owl? Download it</a>
     </div>
-    <p class="fine" id="fine">myna shows you everything before it adds anything. Needs myna 0.1.8 or later.</p>
+    <p class="fine" id="fine">owl shows you everything before it adds anything. Needs owl 0.1.8 or later.</p>
   </div>
 </div>
-<div class="foot"><a href="/">github.com/istoo/myna</a> · <a href="/docs/import">Add myna links to your site</a></div>
+<div class="foot"><a href="/">github.com/istoo/owl</a> · <a href="/docs/import">Add owl links to your site</a></div>
 
 <script>
 (() => {
   // The link's parameters are in the fragment, which never reaches a
-  // server; this page only turns them into myna://import?… and shows
+  // server; this page only turns them into owl://import?… and shows
   // what they describe. The key is never displayed.
   const raw = location.hash.slice(1);
   const q = new URLSearchParams(raw);
@@ -110,8 +110,8 @@ dd .m { display: inline-block; font-size: 12.5px; border: 1px solid var(--line);
   const known = PRESETS[preset];
   const name = q.get("name") || (known ? known[0] : "");
   if (!raw || (!name && !preset)) {
-    $("title").textContent = "Add to myna";
-    $("sub").textContent = "This page opens myna import links, and this one carries nothing to import.";
+    $("title").textContent = "Add to owl";
+    $("sub").textContent = "This page opens owl import links, and this one carries nothing to import.";
     $("tile").textContent = "?";
     $("open").href = "/docs/import";
     $("open").lastChild.textContent = "How import links work";
@@ -120,14 +120,14 @@ dd .m { display: inline-block; font-size: 12.5px; border: 1px solid var(--line);
   }
 
   const label = name || preset;
-  $("title").textContent = "Add " + label + " to myna";
+  $("title").textContent = "Add " + label + " to owl";
   $("tile").textContent = label.trim().charAt(0).toUpperCase() || "?";
   if (known && known[1] && !q.get("name")) {
     const img = document.createElement("img");
     img.src = "/icons/" + known[1]; img.alt = "";
     $("tile").replaceChildren(img);
   }
-  document.title = "Add " + label + " to myna";
+  document.title = "Add " + label + " to owl";
 
   const hosts = [];
   for (const k of ["chat", "responses", "anthropic", "gemini"]) {
@@ -140,27 +140,27 @@ dd .m { display: inline-block; font-size: 12.5px; border: 1px solid var(--line);
   const models = (q.get("models") || "").split(",").map((s) => s.trim()).filter(Boolean);
   if (models.length) row("Models", models.slice(0, 12).map((m) => text("span", m, "m")).concat(models.length > 12 ? [text("span", "+" + (models.length - 12))] : []));
 
-  const link = "myna://import?" + raw;
+  const link = "owl://import?" + raw;
   $("open").href = link;
-  $("sub").textContent = "myna will ask before adding it.";
+  $("sub").textContent = "owl will ask before adding it.";
 
-  // myna runs on computers; on a phone, say where to open this.
+  // owl runs on computers; on a phone, say where to open this.
   if (/iPhone|iPad|iPod|Android/.test(ua)) {
-    $("sub").textContent = "Open this link on the computer where you use myna.";
+    $("sub").textContent = "Open this link on the computer where you use owl.";
     $("actions").remove();
     $("fine").innerHTML = "";
-    $("fine").append("myna is a desktop app for macOS, Windows and Linux. ", Object.assign(document.createElement("a"), { href: "/", textContent: "Learn more" }));
+    $("fine").append("owl is a desktop app for macOS, Windows and Linux. ", Object.assign(document.createElement("a"), { href: "/", textContent: "Learn more" }));
     return;
   }
 
   // One attempt on arrival; the button is there when the browser wants a
-  // click first, or when myna isn't installed yet.
+  // click first, or when owl isn't installed yet.
   let left = false;
   addEventListener("blur", () => (left = true));
   document.addEventListener("visibilitychange", () => document.hidden && (left = true));
   setTimeout(() => { location.href = link; }, 350);
   setTimeout(() => {
-    if (!left) $("sub").textContent = "Nothing happened? Open it below, or install myna first.";
+    if (!left) $("sub").textContent = "Nothing happened? Open it below, or install owl first.";
   }, 2600);
 })();
 </script>

@@ -6,10 +6,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/gwbudget"
-	"github.com/istoo/myna/internal/pluginrt"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/gwbudget"
+	"github.com/istoo/owl/internal/pluginrt"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 func TestMain(m *testing.M) { testenv.Main(m) }

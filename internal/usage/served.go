@@ -7,7 +7,7 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // Which model answered: a vendor may serve a request with another model
@@ -34,7 +34,7 @@ var vendorDot = regexp.MustCompile(`^(?:(?:global|us-gov|[a-z]{2,4})\.)?(?:anthr
 // its context: claude-opus-5[1m].
 var contextTail = regexp.MustCompile(`\[[^\]]*\]$`)
 
-// windowTail is the window myna offers a model at beside its default
+// windowTail is the window owl offers a model at beside its default
 // (grok-4.7@500k, Cursor's grok-4.7@256k): the vendor answers under the
 // plain name, which is the same model (#1645).
 var windowTail = regexp.MustCompile(`@\d+[km]?$`)
@@ -61,7 +61,7 @@ func bareModel(m string) string {
 // reply names the family, not the variant (#462). Another level is another
 // model, as AntigravitySentID has it. A vendor's "auto" (Copilot's,
 // Cursor's) asked it to pick, so whichever answers wasn't swapped in, nor
-// is the member another myna's routing group sent it to (GroupRouted),
+// is the member another owl's routing group sent it to (GroupRouted),
 // nor a vendor's own name for the deployment serving the model
 // (ServingName), nor the model a relay sold under a name of its own
 // (RelayRenamed), nor the model at a region's deployment (RegionTail).
@@ -145,7 +145,7 @@ type listedEntry struct {
 	at    time.Time
 }
 
-// listedModels is the provider's models as myna lists them; a test
+// listedModels is the provider's models as owl lists them; a test
 // replaces it.
 var listedModels = func(prov string) map[string]string {
 	p, err := provider.Find(prov)
@@ -296,8 +296,8 @@ func SameSpelled(sent, served string) bool {
 	return a != "" && a == squash(bareModel(served))
 }
 
-// GroupRouted reports whether sent is a routing group of another myna
-// (a remote myna's "group/<id>", the one name only a myna answers
+// GroupRouted reports whether sent is a routing group of another owl
+// (a remote owl's "group/<id>", the one name only a owl answers
 // to) and served the model its reply named: the member the group routed
 // the request to, which is the group doing its job, not the vendor
 // serving another model than asked (莫 on Discord: group/auto-… answered
@@ -306,7 +306,7 @@ func GroupRouted(sent, served string) bool {
 	return strings.TrimSpace(served) != "" && remoteGroup(strings.TrimSpace(sent))
 }
 
-// remoteGroup reports whether id is a routing group's id as a myna
+// remoteGroup reports whether id is a routing group's id as a owl
 // gives it: group/<id>, or auto/<model> for a group it found.
 func remoteGroup(id string) bool {
 	return strings.HasPrefix(id, provider.GroupPrefix) || strings.HasPrefix(id, provider.AutoPrefix)

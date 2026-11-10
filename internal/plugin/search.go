@@ -13,13 +13,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/filememo"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/steady"
+	"github.com/istoo/owl/internal/filememo"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/steady"
 )
 
 // SearchDef is a web search API a plugin gives: its search hook
-// ({search: {<id>: {name, keysURL, keyOptional, url, execute}}}). myna
+// ({search: {<id>: {name, keysURL, keyOptional, url, execute}}}). owl
 // lists it beside Tavily, Brave and the rest, keeps its keys and order, and
 // asks it through the gateway's search path (internal/gateway/search_api.go).
 type SearchDef struct {
@@ -38,7 +38,7 @@ type PluginSearch struct {
 	SearchDef
 }
 
-// VendorID is how the search API is known in myna's list and in
+// VendorID is how the search API is known in owl's list and in
 // providers.json: the plugin's short name and its own id, so no plugin's
 // id can take a built-in's place or another plugin's.
 func (p PluginSearch) VendorID() string {
@@ -59,7 +59,7 @@ type SearchPage struct {
 }
 
 // SearchRefused is a plugin's search API turning the key away: the status
-// it threw (401, 402, 403, 429…), which myna treats as it does a built-in
+// it threw (401, 402, 403, 429…), which owl treats as it does a built-in
 // API's.
 type SearchRefused struct {
 	Status     int

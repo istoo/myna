@@ -12,8 +12,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // arkKeyVideos is a Volcengine Ark pay-as-you-go endpoint (/api/v3) that

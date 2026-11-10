@@ -8,9 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/library"
-	"github.com/istoo/myna/internal/mcpauth"
-	"github.com/istoo/myna/internal/mcpauth/mcpauthtest"
+	"github.com/istoo/owl/internal/library"
+	"github.com/istoo/owl/internal/mcpauth"
+	"github.com/istoo/owl/internal/mcpauth/mcpauthtest"
 )
 
 // browserDown is a desktop whose browser doesn't start, as Windows'

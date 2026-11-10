@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 	"github.com/tidwall/gjson"
 )
 
@@ -176,7 +176,7 @@ func keptThenFailed(t *testing.T, code int, body, model string) {
 	}
 }
 
-// #3728's own route: fx on myna's codex provider (Codex's sign-in), its
+// #3728's own route: fx on owl's codex provider (Codex's sign-in), its
 // Chat turn asked on the ChatGPT backend, which hangs up once fx was kept
 // alive, each time it is asked. The error is the report's EOF.
 func TestKeptAliveChatOnCodexErrorNamesTheModel(t *testing.T) {

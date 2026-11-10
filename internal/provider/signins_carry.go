@@ -1,7 +1,7 @@
 package provider
 
 // Sign-ins a backup or a sync carries, when the user turned that on
-// ("Include sign-ins", off by default): the subscription accounts myna
+// ("Include sign-ins", off by default): the subscription accounts owl
 // keeps in logins.json (Codex, Claude Code, Gemini CLI, Copilot, …) and
 // the plugins' sign-ins in plugin-auth.json. They go only inside a sealed
 // backup, and are put back without writing over what is newer here:
@@ -34,13 +34,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/lastgood"
-	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/owl/internal/lastgood"
+	"github.com/istoo/owl/internal/plugin"
 )
 
 // SignIns are the sign-ins a backup carries.
 type SignIns struct {
-	// Logins are the subscription accounts myna keeps, with their
+	// Logins are the subscription accounts owl keeps, with their
 	// credentials: logins.json's records as written there.
 	Logins []savedLogin `json:"logins,omitempty"`
 	// Plugins are the plugins' sign-ins by key, plugin-auth.json's.
@@ -72,9 +72,9 @@ type signInRec struct {
 }
 
 // carried is whether an account of logins.json goes with the sign-ins:
-// one holding its credential in the file, myna's own copy — not the
+// one holding its credential in the file, owl's own copy — not the
 // agent's own sign-in read in place, one kept in a folder of its own
-// (Home), one removed in myna, a plugin's or a retired built-in's.
+// (Home), one removed in owl, a plugin's or a retired built-in's.
 func carried(l savedLogin) bool {
 	return !l.own() && l.Home == "" && l.Hidden == "" &&
 		!strings.HasPrefix(l.Agent, "plugin:") && !BuiltinRetired(l.Agent)
@@ -114,7 +114,7 @@ func credHash(b []byte) string {
 
 // credTime is when a credential was renewed, as it says itself: Codex's
 // last_refresh, an access token's expiry (Claude's expiresAt, Google's
-// expiry_date, a plugin's expires), else when myna renewed it. Zero:
+// expiry_date, a plugin's expires), else when owl renewed it. Zero:
 // it doesn't say.
 func credTime(auth json.RawMessage, renewed time.Time) time.Time {
 	var a struct {
@@ -206,7 +206,7 @@ func readLoginsFile() ([]savedLogin, error) {
 }
 
 // CollectSignIns gathers the sign-ins to carry. Codex's own sign-in here
-// is taken from its auth.json, fresher than myna's copy of it. A file
+// is taken from its auth.json, fresher than owl's copy of it. A file
 // that can't be read is an error: carried as no sign-ins, a sync would
 // take them away elsewhere.
 func CollectSignIns() (*SignIns, error) {
@@ -571,7 +571,7 @@ func applyPlugins(put []signInRec, gone map[string]bool, seen map[string]string,
 // signCodexIn signs Codex in to l where it is signed out: auth.json (or
 // the store its config.toml names) gets l's sign-in, written beside the
 // old file and renamed in. Codex signed in, its sign-in unreadable, or
-// its account removed in myna: nothing is written.
+// its account removed in owl: nothing is written.
 func signCodexIn(l savedLogin) (bool, error) {
 	if l.Agent != "codex" || len(l.Auth) == 0 || accountRemoved("codex") {
 		return false, nil

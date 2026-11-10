@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/maskrec"
-	"github.com/istoo/myna/internal/redact"
+	"github.com/istoo/owl/internal/maskrec"
+	"github.com/istoo/owl/internal/redact"
 )
 
 // fakeMaskAlerts is maskAlerts on a clock the test moves, its flush run

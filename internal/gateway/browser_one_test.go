@@ -12,7 +12,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/browserext"
+	"github.com/istoo/owl/internal/browserext"
 )
 
 // Every action is one of the extension's tools, and the one schema names

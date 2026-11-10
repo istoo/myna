@@ -6,10 +6,10 @@ import (
 	"testing"
 	"time"
 
-	stats "github.com/istoo/myna/internal/usage"
+	stats "github.com/istoo/owl/internal/usage"
 )
 
-// myna usage --last and --days read a rolling window ending now (#2075):
+// owl usage --last and --days read a rolling window ending now (#2075):
 // what --csv rows and the summary both cover, where the presets begin at a
 // local midnight.
 func TestUsageRollingWindow(t *testing.T) {

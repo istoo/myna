@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // resumeHarness runs Claude subscription requests through a script
@@ -159,7 +159,7 @@ func eventually(t *testing.T, what string, ok func() bool) {
 // turn's message alone, where a run started anew is told the whole
 // conversation in one message, all of it written to the prompt cache again
 // (X, AncientTwo: a Claude subscription's limits went much faster through
-// myna than in Claude Code itself).
+// owl than in Claude Code itself).
 func TestClaudeLetGoConversationResumesItsSession(t *testing.T) {
 	h := newResumeHarness(t)
 	h.ask("rules A", "a1")

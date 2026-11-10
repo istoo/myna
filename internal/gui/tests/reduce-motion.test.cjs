@@ -61,7 +61,7 @@ const looks = (page) => page.evaluate(() => {
 });
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
-  test(`${engine}: Reduce motion stills myna as the system's switch does`, async (t) => {
+  test(`${engine}: Reduce motion stills owl as the system's switch does`, async (t) => {
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     t.after(() => browser.close());
     const page = await (await browser.newContext({ viewport: { width: 1000, height: 800 }, reducedMotion: "no-preference" })).newPage();
@@ -71,7 +71,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     page.on("pageerror", (e) => errors.push(e.message));
     const st = { reduceMotion: true }, posted = [];
     await page.route("**/*", serve(st, posted));
-    await page.goto("http://myna.test/?view=settings");
+    await page.goto("http://owl.test/?view=settings");
     const sw = page.locator("#reduceMotionSegs [role=switch]");
     await sw.waitFor();
 

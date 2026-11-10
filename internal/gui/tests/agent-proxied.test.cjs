@@ -1,9 +1,9 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Codex connected to myna while its requests for 127.0.0.1 go through a
+// Codex connected to owl while its requests for 127.0.0.1 go through a
 // proxy that doesn't pass them on (Muma102kMichael on X: every project and
 // every new chat 502) is not shown connected. Its row says a proxy is in the
 // way; its pill says how to fix it, in a dialog, and the dialog has
-// Disconnect from myna, which asks to put Codex's config back. The window
+// Disconnect from owl, which asks to put Codex's config back. The window
 // at 560px and the tray panel at 440px; nothing runs off the side. English,
 // Chinese (both), Japanese and German, Chromium and WebKit.
 const assert = require("node:assert/strict");
@@ -13,7 +13,7 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
-const detail = "Codex sends its requests for myna (127.0.0.1:3425/v1) through the proxy at http://127.0.0.1:7890, set in Windows' proxy settings, and that proxy doesn't pass them on to myna: every turn fails, with 502 Bad Gateway, whichever model it is on. Have the proxy send 127.0.0.1 direct (a DIRECT rule for 127.0.0.0/8, or rule mode rather than global), or add 127.0.0.1 to \"Don't use the proxy server for addresses beginning with\" in Windows' proxy settings (127.* there is not enough for Codex), then quit and reopen Codex. Until then, Disconnect from myna puts Codex's config back as it was.";
+const detail = "Codex sends its requests for owl (127.0.0.1:3425/v1) through the proxy at http://127.0.0.1:7890, set in Windows' proxy settings, and that proxy doesn't pass them on to owl: every turn fails, with 502 Bad Gateway, whichever model it is on. Have the proxy send 127.0.0.1 direct (a DIRECT rule for 127.0.0.0/8, or rule mode rather than global), or add 127.0.0.1 to \"Don't use the proxy server for addresses beginning with\" in Windows' proxy settings (127.* there is not enough for Codex), then quit and reopen Codex. Until then, Disconnect from owl puts Codex's config back as it was.";
 const codex = { id: "codex", name: "Codex", icon: "codex", path: "/c", wired: true,
   fields: [{ key: "model", label: "model", value: "fake/m1", options: [{ value: "fake/m1", label: "m1", ref: "fake/m1" }] }] };
 const filler = Array.from({ length: 4 }, (_, i) => ({ id: "pi" + i, name: "Pi " + i, path: "/p", fields: [{ key: "model", label: "model", value: "", options: [] }] }));
@@ -42,11 +42,11 @@ function serve(lang, calls) {
 }
 
 const words = {
-  en: { why: "Codex reaches myna through a proxy that doesn't pass its requests on", fix: "How to fix", off: "Disconnect from myna", ask: "Disconnect Codex from myna?" },
-  zh: { why: "Codex 经代理连 myna，但这个代理没把它的请求转给 myna", fix: "如何修复", off: "断开 myna（还原配置）", ask: null },
-  "zh-TW": { why: "Codex 經代理連 myna，但這個代理沒把它的請求轉給 myna", fix: "如何修復", off: "斷開 myna（還原設定）", ask: null },
-  ja: { why: "Codex はプロキシ経由で myna につなぎますが、そのプロキシがリクエストを myna に渡していません", fix: "直し方", off: "myna から切断", ask: null },
-  de: { why: "Codex erreicht myna über einen Proxy, der seine Anfragen nicht an myna weitergibt", fix: "So beheben", off: "Von myna trennen", ask: null },
+  en: { why: "Codex reaches owl through a proxy that doesn't pass its requests on", fix: "How to fix", off: "Disconnect from owl", ask: "Disconnect Codex from owl?" },
+  zh: { why: "Codex 经代理连 owl，但这个代理没把它的请求转给 owl", fix: "如何修复", off: "断开 owl（还原配置）", ask: null },
+  "zh-TW": { why: "Codex 經代理連 owl，但這個代理沒把它的請求轉給 owl", fix: "如何修復", off: "斷開 owl（還原設定）", ask: null },
+  ja: { why: "Codex はプロキシ経由で owl につなぎますが、そのプロキシがリクエストを owl に渡していません", fix: "直し方", off: "owl から切断", ask: null },
+  de: { why: "Codex erreicht owl über einen Proxy, der seine Anfragen nicht an owl weitergibt", fix: "So beheben", off: "Von owl trennen", ask: null },
 };
 const row = `.row.agent[data-id="codex"]`;
 const noSideScroll = (page) => page.evaluate(() => document.scrollingElement.scrollWidth <= innerWidth);
@@ -67,7 +67,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, calls));
-        await page.goto("http://myna.test/" + (mode ? "?mode=" + mode : ""));
+        await page.goto("http://owl.test/" + (mode ? "?mode=" + mode : ""));
         await page.locator(`${row}.drifted .ag-fix`).waitFor();
         return page;
       };

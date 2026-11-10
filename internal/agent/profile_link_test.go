@@ -29,7 +29,7 @@ func moveBehindLink(t *testing.T, live string) {
 }
 
 // A Hermes profile folder that is a link is still a profile whose config
-// myna writes (#2268).
+// owl writes (#2268).
 func TestHermesProfileBehindALink(t *testing.T) {
 	home := syncHome(t)
 	root := filepath.Join(home, ".hermes")

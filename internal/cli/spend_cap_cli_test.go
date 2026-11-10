@@ -3,10 +3,10 @@ package cli
 import (
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// myna provider spend-cap gives a key a spend cap in USD (by its name or
+// owl provider spend-cap gives a key a spend cap in USD (by its name or
 // id), a day by default, a month or in all; off takes it off. With no
 // amount it lists the keys' caps. A key the provider hasn't, an amount or
 // a period it doesn't know, and --help as a value are refused, and

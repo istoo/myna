@@ -8,7 +8,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // arkUp stands in for ark.cn-beijing.volces.com, in process: its System
@@ -39,7 +39,7 @@ func (u *arkUp) RoundTrip(r *http.Request) (*http.Response, error) {
 		Body: io.NopCloser(strings.NewReader(arkChoiceReply)), Request: r}, nil
 }
 
-// axelburks on Discord: myna's System One API, asked for Ark's decision
+// axelburks on Discord: owl's System One API, asked for Ark's decision
 // model, reaches Ark with its beta header and gives its answer back.
 func TestArkSystemOneSendsBetaHeader(t *testing.T) {
 	fresh(t)

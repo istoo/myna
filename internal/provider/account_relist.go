@@ -1,11 +1,11 @@
 package provider
 
-// A signed-in account's model list is fetched once by FetchNew, when myna
+// A signed-in account's model list is fetched once by FetchNew, when owl
 // has none for it yet, and after that only when Refresh is pressed. A model
-// the vendor adds to the plan later never reached a myna left running, nor
+// the vendor adds to the plan later never reached a owl left running, nor
 // one restarted, as the list it had was not new: OpenAI served GPT-6.1 Terra
-// to ChatGPT accounts on 10-26, and Codex routed through myna still listed
-// what the ChatGPT backend had on 10-12 (cliff_26651 on Discord). The myna
+// to ChatGPT accounts on 10-26, and Codex routed through owl still listed
+// what the ChatGPT backend had on 10-12 (cliff_26651 on Discord). The owl
 // serving the gateway now asks each account's vendor again once the list it
 // has is accountListAge old, as KeepPluginsListed does for a plugin's.
 
@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-// accountRelistEvery is how often the gateway's myna looks for an
+// accountRelistEvery is how often the gateway's owl looks for an
 // account's list that is due; accountRelistFirst is how long after it
 // starts it first does (FetchNew lists the new accounts meanwhile);
 // accountListAge is how old a list is before it is asked for again.
@@ -26,7 +26,7 @@ var (
 )
 
 // KeepAccountsListed fetches each signed-in account's list again once it
-// is accountListAge old, in the myna serving the gateway.
+// is accountListAge old, in the owl serving the gateway.
 func KeepAccountsListed(ctx context.Context) {
 	t := time.NewTimer(accountRelistFirst)
 	defer t.Stop()

@@ -21,12 +21,12 @@ const found = [
   { name: "notes", description: "Mine", agents: ["codex"] },
 ];
 const lib = (foundSkills) => ({
-  dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
+  dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
   agents: [agent("codex", "Codex"), agent("pi", "Pi")],
   instructions: { agents: [] }, servers: [], skills: [], foundServers: [], projects: [], foundSkills,
 });
 
-// fail, when given, is a skill the fake myna can't bring in
+// fail, when given, is a skill the fake owl can't bring in
 function server(lang, posts, fail) {
   return async (route) => {
     const req = route.request(), url = new URL(req.url());
@@ -65,13 +65,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     });
     const open = async (lang, posts, fail) => {
       const ctx = await browser.newContext({ viewport: { width: 980, height: 800 } });
-      await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "skills"); } catch {} });
+      await ctx.addInitScript(() => { try { localStorage.setItem("owl.libTab", "skills"); } catch {} });
       const page = await ctx.newPage();
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(60000);
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", server(lang, posts, fail));
-      await page.goto("http://myna.test/");
+      await page.goto("http://owl.test/");
       await navTo(page, "library");
       await page.locator("#view-library .lib-body:not(.lib-skel) .lib-row").first().waitFor();
       return page;

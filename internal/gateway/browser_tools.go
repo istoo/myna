@@ -5,9 +5,9 @@ package gateway
 // (browser_one.go), whose actions are these; their names are still taken
 // from a client that listed them before.
 
-const browserInstructions = `The browser tool uses the user's own browser (Chrome, Edge or another Chromium browser with Myna Browser installed): its real tabs, signed in to the sites the user is signed in to. Use it when a task needs the user's sessions or a real browser.
+const browserInstructions = `The browser tool uses the user's own browser (Chrome, Edge or another Chromium browser with Owl Browser installed): its real tabs, signed in to the sites the user is signed in to. Use it when a task needs the user's sessions or a real browser.
 How to work:
-- Start with action tabs or snapshot. Calls go to the tab the user is looking at until you open or select another (to a new tab of your own when another agent works in that one); tabs you open go in your own tab group ("Myna", or "Myna 2" and on beside other agents). Leave the tabs that tabs marks ~ to the agents working in them.
+- Start with action tabs or snapshot. Calls go to the tab the user is looking at until you open or select another (to a new tab of your own when another agent works in that one); tabs you open go in your own tab group ("Owl", or "Owl 2" and on beside other agents). Leave the tabs that tabs marks ~ to the agents working in them.
 - With two browsers connected (Chrome and Edge, or two profiles), calls go to the last to connect: action browsers lists them, and use_browser picks one.
 - snapshot shows the page as an accessibility tree. Elements you can act on carry a ref (e12); pass it to click, type and the rest. Refs stay the element's while the page keeps it. Every action answers with the page after it, so you rarely need another snapshot.
 - Frames from other sites (a payment form, a sign-in box, an embedded editor) are read and acted on like the rest of the page.
@@ -46,7 +46,7 @@ func browserTools() []any {
 		return map[string]any{"type": "array", "items": map[string]any{"type": "string"}, "description": desc}
 	}
 	return []any{
-		browserTool("browser_tabs", "Tabs", "List the browser's tabs, open a new one (in this session's Myna tab group), switch the tab calls go to, or close one. With more than one browser connected: list them (browsers), or pick the one calls go to (use).", false, map[string]any{
+		browserTool("browser_tabs", "Tabs", "List the browser's tabs, open a new one (in this session's Owl tab group), switch the tab calls go to, or close one. With more than one browser connected: list them (browsers), or pick the one calls go to (use).", false, map[string]any{
 			"action":  enum("list (default), new, select, close, browsers or use", "list", "new", "select", "close", "browsers", "use"),
 			"url":     str("For new: the page to open in it."),
 			"front":   boolean("For new: show it to the user, only when they asked to see it; it opens behind their tab otherwise."),
@@ -117,7 +117,7 @@ func browserTools() []any {
 		browserTool("browser_text", "Page text", "Read the page's visible text, without the tree.", true, map[string]any{
 			"maxChars": num("The most characters to return (default 40000)."),
 		}),
-		browserTool("browser_console", "Console", "Read the tab's console messages, script errors and failed requests since myna started watching it.", true, map[string]any{
+		browserTool("browser_console", "Console", "Read the tab's console messages, script errors and failed requests since owl started watching it.", true, map[string]any{
 			"level": enum("all (default), errors or network", "all", "errors", "network"),
 			"limit": num("The most recent messages to return (default 50)."),
 		}),

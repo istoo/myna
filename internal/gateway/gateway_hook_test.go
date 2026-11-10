@@ -14,15 +14,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/plugin"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/plugin"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 func TestAsyncGatewayResponseDoesNotHoldStream(t *testing.T) {
-	t.Setenv("MYNA_BUN", testenv.Bun(t))
+	t.Setenv("OWL_BUN", testenv.Bun(t))
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
 	t.Cleanup(plugin.Settle)
@@ -78,7 +78,7 @@ export async function onResponse(body,ctx){await fetch(ctx.options.url,{method:"
 	// Client reads the first delta while upstream generation is still blocked.
 	go func() {
 		req, _ := http.NewRequestWithContext(t.Context(), "POST", gw.URL+"/v1/chat/completions", strings.NewReader(`{"model":"fake/m1","stream":true,"messages":[{"role":"user","content":"question"}]}`))
-		req.Header.Set("Authorization", "Bearer myna")
+		req.Header.Set("Authorization", "Bearer owl")
 		res, err := gw.Client().Do(req)
 		if err != nil {
 			first <- err.Error()
@@ -119,7 +119,7 @@ export async function onResponse(body,ctx){await fetch(ctx.options.url,{method:"
 // Exercise the asynchronous host and server guard with all agent wire APIs.
 // Service-specific contracts belong to companion plugin integration tests.
 func TestAsyncGatewayThroughProtocols(t *testing.T) {
-	t.Setenv("MYNA_BUN", testenv.Bun(t))
+	t.Setenv("OWL_BUN", testenv.Bun(t))
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
 	t.Cleanup(plugin.Settle)
@@ -189,7 +189,7 @@ export async function onRequest(body,ctx) {
 			t.Fatal(err)
 		}
 		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("Authorization", "Bearer myna-codex")
+		req.Header.Set("Authorization", "Bearer owl-codex")
 		req.Header.Set(SessionHeader, session)
 		res, err := gw.Client().Do(req)
 		if err != nil {
@@ -215,7 +215,7 @@ export async function onRequest(body,ctx) {
 			if strings.Count(got, "QUARTZ-8413") != 1 || !strings.Contains(got, "session-a") || !strings.Contains(got, "Quartz codename?") {
 				t.Fatalf("recall did not reach provider exactly once: %s", got)
 			}
-			if strings.Contains(got, "context-test") || strings.Contains(got, "myna-codex") {
+			if strings.Contains(got, "context-test") || strings.Contains(got, "owl-codex") {
 				t.Fatalf("plugin credentials leaked upstream: %s", got)
 			}
 			query := <-queries
@@ -276,7 +276,7 @@ func TestGatewayQueryUsesUserWords(t *testing.T) {
 // Exercise provenance through authentication and the real Bun lifecycle; a
 // client's body/header claims cannot replace the host's classification.
 func TestAsyncGatewayOrigin(t *testing.T) {
-	t.Setenv("MYNA_BUN", testenv.Bun(t))
+	t.Setenv("OWL_BUN", testenv.Bun(t))
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
 	t.Cleanup(plugin.Settle)
@@ -295,7 +295,7 @@ func TestAsyncGatewayOrigin(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// the sharing key myna makes and writes into this computer's agents
+	// the sharing key owl makes and writes into this computer's agents
 	if err := access.ConfigureLAN(true, false); err != nil {
 		t.Fatal(err)
 	}
@@ -336,22 +336,22 @@ export async function onResponse(reply,ctx){await fetch(ctx.options.url,{method:
 		{"remote", "10.0.0.1:1234", "", key, "0", "gateway-key"},
 		{"proxy", "127.0.0.1:1234", "X-Forwarded-For", key, "0", "gateway-key"},
 		{"friend-own-value", "10.0.0.1:1234", "", friend, "0", "gateway-key"},
-		{"myna-key-loopback", "127.0.0.1:1234", "", mine, "0", "myna-key"},
-		{"myna-key-own-address", "192.168.50.7:1234", "", mine, "0", "myna-key"},
-		{"myna-key-wsl-nat", "172.28.80.9:1234", "", mine, "0", "myna-key"},
+		{"owl-key-loopback", "127.0.0.1:1234", "", mine, "0", "owl-key"},
+		{"owl-key-own-address", "192.168.50.7:1234", "", mine, "0", "owl-key"},
+		{"owl-key-wsl-nat", "172.28.80.9:1234", "", mine, "0", "owl-key"},
 		// the same key copied to another computer (Gateway keys' Copy) or
 		// handed to a friend is not the owner's own agent
-		{"myna-key-elsewhere", "10.0.0.1:1234", "", mine, "0", "gateway-key"},
-		{"myna-key-proxied", "127.0.0.1:1234", "X-Forwarded-For", mine, "0", "gateway-key"},
-		{"myna-key-trusted-proxy", "127.0.0.1:1234", "Forwarded", mine, "1", "gateway-key"},
+		{"owl-key-elsewhere", "10.0.0.1:1234", "", mine, "0", "gateway-key"},
+		{"owl-key-proxied", "127.0.0.1:1234", "X-Forwarded-For", mine, "0", "gateway-key"},
+		{"owl-key-trusted-proxy", "127.0.0.1:1234", "Forwarded", mine, "1", "gateway-key"},
 		{"trusted-proxy", "127.0.0.1:1234", "Forwarded", "", "1", "remote"},
 		{"trusted-tunnel", "127.0.0.1:1234", "Tailscale-User-Login", "", "1", "remote"},
 		{"unknown-peer", "malformed", "", "", "0", "remote"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			t.Setenv("MYNA_TRUST_PROXY", tc.trust)
+			t.Setenv("OWL_TRUST_PROXY", tc.trust)
 			// The guard requires sharing for nonlocal peers, without opening a listener.
-			t.Setenv("MYNA_ADDR", "0.0.0.0:3425")
+			t.Setenv("OWL_ADDR", "0.0.0.0:3425")
 			req := httptest.NewRequest("POST", "http://127.0.0.1/v1/chat/completions", strings.NewReader(`{"model":"fake/m1","origin":"local","messages":[{"role":"user","content":"hello"}]}`))
 			req.RemoteAddr = tc.peer
 			req.Header.Set("X-Magpie-Origin", "local")
@@ -414,7 +414,7 @@ func TestGatewayHookSeesReplyAfterClientHangsUp(t *testing.T) {
 		}
 	})
 	defer close(held)
-	t.Setenv("MYNA_BUN", testenv.Bun(t))
+	t.Setenv("OWL_BUN", testenv.Bun(t))
 	t.Cleanup(plugin.Settle)
 	completed := make(chan map[string]any, 1)
 	observer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -467,10 +467,10 @@ export async function onResponse(reply,ctx){await fetch(ctx.options.url,{method:
 
 // A hooks package with its own page saves its options from that page. The
 // host hands each hook the options it loaded with, so the save starts the
-// host again; one that didn't left the hook on the old options until myna
+// host again; one that didn't left the hook on the old options until owl
 // restarted (magpie-community/plugins#117's PowerContext page).
 func TestGatewayHookSeesOptionsSavedFromItsPage(t *testing.T) {
-	t.Setenv("MYNA_BUN", testenv.Bun(t))
+	t.Setenv("OWL_BUN", testenv.Bun(t))
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	t.Setenv("XDG_CACHE_HOME", t.TempDir())
 	t.Cleanup(plugin.Settle)

@@ -17,10 +17,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/istoo/myna/internal/filememo"
-	"github.com/istoo/myna/internal/lastgood"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/steady"
+	"github.com/istoo/owl/internal/filememo"
+	"github.com/istoo/owl/internal/lastgood"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/steady"
 )
 
 // Method is a way a plugin signs in: "oauth" (a browser, then a code
@@ -29,7 +29,7 @@ type Method struct {
 	Type  string `json:"type"`
 	Label string `json:"label"`
 	// Placeholder is the hint an "api" method gives in its key's field
-	// (myna's own field: OpenCode's says "API key")
+	// (owl's own field: OpenCode's says "API key")
 	Placeholder string `json:"placeholder,omitempty"`
 	// Keyless skips personal-key entry; authorize supplies the credential.
 	Keyless bool `json:"keyless,omitempty"`
@@ -123,7 +123,7 @@ type Model struct {
 	Decides bool `json:"decides,omitempty"`
 	// Searches is set by the plugin on a model that searches the web by
 	// itself when asked in plain words (m.searches: Trae's search model),
-	// which myna may then search with for other models.
+	// which owl may then search with for other models.
 	Searches bool `json:"searches,omitempty"`
 }
 
@@ -143,8 +143,8 @@ type Provider struct {
 	// Checkin says the plugin presses its vendor's daily check-in for each
 	// account (auth.checkin)
 	Checkin bool `json:"checkin,omitempty"`
-	// Renews says the plugin renews its accounts' sign-ins through myna
-	// (auth.refresh) and lets the gateway's myna do it in the background
+	// Renews says the plugin renews its accounts' sign-ins through owl
+	// (auth.refresh) and lets the gateway's owl do it in the background
 	// as each comes due (auth.keepAlive not false); RenewLead is how long
 	// before a token expires it is due, in milliseconds (auth.refreshLead,
 	// 5 minutes when not said), as the host reckons it (RenewAt).
@@ -154,7 +154,7 @@ type Provider struct {
 	// (auth.options, #2038), as the host checked them
 	Options []Option `json:"options,omitempty"`
 	// Decide says the plugin serves a decision API (TypeSafe's System
-	// One) for this provider: its config hook set decide on it. myna
+	// One) for this provider: its config hook set decide on it. owl
 	// posts the questions to the provider's own base, at /systemone,
 	// through the plugin's fetch (#1514).
 	Decide bool `json:"decide,omitempty"`
@@ -179,22 +179,22 @@ type Provider struct {
 	// Single is the auth hook declaring that sign-in replaces one identity.
 	Single bool `json:"single,omitempty"`
 	// MaxConcurrency is how many requests the plugin says each of its
-	// accounts takes at once (myna's own field, which OpenCode ignores:
+	// accounts takes at once (owl's own field, which OpenCode ignores:
 	// the auth hook's maxConcurrency, else package.json's
-	// myna.maxConcurrency); 0 for none said. The user's setting on the
+	// owl.maxConcurrency); 0 for none said. The user's setting on the
 	// provider goes over it.
 	MaxConcurrency int `json:"maxConcurrency,omitempty"`
 	// MaxAccounts is how many of its accounts the plugin says may take
 	// requests at the same time (the auth hook's maxAccounts, else
-	// package.json's myna.maxAccounts: a vendor that blocks an address
+	// package.json's owl.maxAccounts: a vendor that blocks an address
 	// asking for more accounts at once); 0 for none said. The user's
 	// setting on the provider goes over it.
 	MaxAccounts int `json:"maxAccounts,omitempty"`
 }
 
 // Option is a switch a plugin declares for its provider (auth.options,
-// #2038): myna shows it, keeps the user's value in settings'
-// PluginOptions and hands it to the plugin (input.myna.option). A change
+// #2038): owl shows it, keeps the user's value in settings'
+// PluginOptions and hands it to the plugin (input.owl.option). A change
 // has the providers listed again (SetProviderOptions); nothing else runs.
 type Option struct {
 	Key         string `json:"key"`
@@ -433,11 +433,11 @@ func refreshProvidersInBackground(ctx context.Context, epoch uint64) {
 
 // ProxyFor is the proxy choice (netproxy.With's) of the provider's
 // account at key, or of the provider for key "": set by the providers
-// myna keeps, which know them.
+// owl keeps, which know them.
 var ProxyFor func(provider, key string) string
 
 // ListingOff is the plugin providers (by the plugin's own id) switched off
-// in myna: set by the providers myna keeps, which know them. A
+// in owl: set by the providers owl keeps, which know them. A
 // listing asks none of them their models (ChangQiu on Discord): Off means no request
 // goes to the provider, and a models hook asks its vendor, renewing the
 // sign-in first.
@@ -658,7 +658,7 @@ func Settle() {
 }
 
 // Cached is the plugins' providers as last asked, without starting the
-// host: what is known of them when myna has only just started. A
+// host: what is known of them when owl has only just started. A
 // provider's sign-in is read afresh from plugin-auth.json.
 func Cached() []Provider {
 	checkList()

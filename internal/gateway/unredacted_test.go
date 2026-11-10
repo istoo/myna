@@ -11,11 +11,11 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/istoo/myna/internal/gwmw"
-	"github.com/istoo/myna/internal/masking"
-	"github.com/istoo/myna/internal/netproxy"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/gwmw"
+	"github.com/istoo/owl/internal/masking"
+	"github.com/istoo/owl/internal/netproxy"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // lc on Discord: a model on this machine or the local network the user set

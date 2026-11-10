@@ -7,12 +7,12 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// cleary5779 on Discord: an agent built on myna reads /v1/models and
-// shows what a call costs. Each model myna knows a price of carries it
+// cleary5779 on Discord: an agent built on owl reads /v1/models and
+// shows what a call costs. Each model owl knows a price of carries it
 // as OpenRouter's list does, USD a token as decimal strings, at the price
 // the Usage page counts it at; a model no price is known for has no
 // pricing at all, never a 0.

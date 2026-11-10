@@ -3,8 +3,8 @@ package gui
 import (
 	"testing"
 
-	"github.com/istoo/myna/internal/sessions"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/sessions"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // A list, a manage page and a detail never read a gateway session's days,

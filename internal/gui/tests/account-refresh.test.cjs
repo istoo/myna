@@ -14,7 +14,7 @@ const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
-const assets = path.resolve(process.env.MYNA_GUI_ASSETS || path.resolve(__dirname, "../assets"));
+const assets = path.resolve(process.env.OWL_GUI_ASSETS || path.resolve(__dirname, "../assets"));
 const claude = () => ({
   id: "claude", name: "Claude Code", icon: "claude-color", chat: "", responses: "", anthropic: "", catalog: "", routing: "",
   models: [{ id: "claude-opus-5-5", name: "Claude Opus 5.5", on: true }], agents: [], fallback: [], headers: {}, keyList: [],
@@ -65,7 +65,7 @@ for (const [engine, browserType] of [["chromium", chromium], ["webkit", webkit]]
       const errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, web, ctl));
-      await page.goto("http://myna.test/?view=providers");
+      await page.goto("http://owl.test/?view=providers");
       await page.locator(".row.provider", { hasText: "Claude Code" }).first().click();
       const row = (u) => page.locator(`.editor .accts .acc[data-account-id="${u}"]`);
       await row("first@example.com").locator(".aq-w").waitFor();

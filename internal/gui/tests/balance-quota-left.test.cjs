@@ -84,7 +84,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, left));
-        await page.goto("http://myna.test/?view=usage&tab=usage");
+        await page.goto("http://owl.test/?view=usage&tab=usage");
         await page.waitForFunction(() => document.querySelectorAll("#subscriptionUsage > [data-key]").length >= 3);
         assert.equal(await figure(part(page, ".subscription-card", said[lang][left].daily)), said[lang][left].daily);
         assert.equal(await fill(part(page, ".subscription-card", said[lang][left].daily)), width[left].daily);
@@ -98,13 +98,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
         // the tray panel's Allowances tab: the same words
         const context = await browser.newContext({ viewport: { width: 380, height: 640 }, reducedMotion: "reduce" });
-        await context.addInitScript(() => { try { localStorage.setItem("myna.panelTab", "usage"); } catch {} });
+        await context.addInitScript(() => { try { localStorage.setItem("owl.panelTab", "usage"); } catch {} });
         const panel = await context.newPage();
         panel.setDefaultTimeout(5000);
         panel.setDefaultNavigationTimeout(60000);
         panel.on("pageerror", (e) => errors.push(e.message));
         await panel.route("**/*", serve(lang, left));
-        await panel.goto("http://myna.test/?mode=panel");
+        await panel.goto("http://owl.test/?mode=panel");
         const daily = panel.locator(".pq-card.bal", { hasText: "Custom" });
         await daily.waitFor();
         assert.equal(await figure(daily.locator(".pq-lead")), said[lang][left].daily);

@@ -5,17 +5,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/codexrelay"
-	"github.com/istoo/myna/internal/gateway"
+	"github.com/istoo/owl/internal/codexrelay"
+	"github.com/istoo/owl/internal/gateway"
 )
 
-// gatewayFreeEvery is how often myna serve, waiting for the gateway's
+// gatewayFreeEvery is how often owl serve, waiting for the gateway's
 // port (awaitGatewayFree), looks again: as often as the app does
 // (gui.gatewayWatch). A var for tests.
 var gatewayFreeEvery = 15 * time.Second
 
-// plainServe says args are myna serve's for the gateway alone: no
-// --web, whose page shows the gateway another myna serves and so starts
+// plainServe says args are owl serve's for the gateway alone: no
+// --web, whose page shows the gateway another owl serves and so starts
 // beside it (gui.StartWeb), and nothing serveCmd refuses, which it says
 // at once.
 func plainServe(args []string) bool {
@@ -32,26 +32,26 @@ func plainServe(args []string) bool {
 }
 
 // awaitGatewayFree returns once nothing holds the gateway's port, looking
-// every so often while another myna serves it (the app, a second
+// every so often while another owl serves it (the app, a second
 // service, the copy an update left finishing its requests) or another
-// program holds it. myna serve waits here before it moves or starts
+// program holds it. owl serve waits here before it moves or starts
 // anything: started beside the app by the service (launchd's KeepAlive,
 // systemd's Restart), it used to run the start-up moves, start the plugin
 // host and fetch every account's models, fail to bind and exit 1, and be
 // started again 5s later, 6,035 times in two days in #4938: serve.log at
 // 279MB, and the logins lock held against the app's requests till they
 // went 504. Waiting, it does nothing until the port is free, and then
-// serves, as the app does beside a myna serving (gui.watchGateway).
+// serves, as the app does beside a owl serving (gui.watchGateway).
 func awaitGatewayFree(every time.Duration) {
 	said := false
 	for {
-		// the Codex relay a myna quitting left at the port lets go of
+		// the Codex relay a owl quitting left at the port lets go of
 		// it for this one, as for the app (codexrelay)
 		codexrelay.Leave()
 		o := gateway.ServedBy()
 		if !o.Running && !gateway.Taken() {
 			if said {
-				fmt.Println(green.Render("●"), "the gateway's port is free: this myna serves it now")
+				fmt.Println(green.Render("●"), "the gateway's port is free: this owl serves it now")
 			}
 			return
 		}
@@ -63,11 +63,11 @@ func awaitGatewayFree(every time.Duration) {
 	}
 }
 
-// standbyLine says, once, why myna serve waits: who has the port.
+// standbyLine says, once, why owl serve waits: who has the port.
 func standbyLine(o gateway.Served) string {
 	who := "another program has " + gateway.URL()
 	if o.Running {
-		who = "another myna serves the gateway on " + gateway.URL()
+		who = "another owl serves the gateway on " + gateway.URL()
 		var about []string
 		if o.Serves != "" {
 			about = append(about, o.Serves)

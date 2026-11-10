@@ -136,7 +136,7 @@ func TestGitCommitAsBunWritesIt(t *testing.T) {
 		}
 	}
 	write(filepath.Join(Dir(), "package.json"), `{
-  "name": "myna-plugins",
+  "name": "owl-plugins",
   "private": true,
   "dependencies": {
     "opencode-codearts-auth": "github:yuweihao17/codearts"
@@ -147,7 +147,7 @@ func TestGitCommitAsBunWritesIt(t *testing.T) {
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "myna-plugins",
+      "name": "owl-plugins",
       "dependencies": {
         "opencode-codearts-auth": "github:yuweihao17/codearts",
       },

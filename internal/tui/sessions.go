@@ -19,11 +19,11 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/proc"
-	"github.com/istoo/myna/internal/sessions"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/proc"
+	"github.com/istoo/owl/internal/sessions"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // sessRange is a range the page offers: its name and days (0 for all).
@@ -59,10 +59,10 @@ func (m model) sessShown() []sessions.Session {
 }
 
 // sessNothing is what an empty range says: until the user allows an
-// agent (RustCats on X), myna reads no agent's sessions, and says how.
+// agent (RustCats on X), owl reads no agent's sessions, and says how.
 func sessNothing() string {
 	if !sessions.SettleReads().Asked {
-		return "myna reads no agent's session history until you allow it · myna sessions read on all (or on <agent>), or the app's Sessions page"
+		return "owl reads no agent's session history until you allow it · owl sessions read on all (or on <agent>), or the app's Sessions page"
 	}
 	return "nothing in this range · Claude Code's, Codex's, OpenCode's and Pi's sessions on this computer show up here"
 }

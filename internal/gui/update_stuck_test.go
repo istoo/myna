@@ -9,10 +9,10 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/istoo/myna/internal/update"
+	"github.com/istoo/owl/internal/update"
 )
 
-// #1277: a myna.exe kept at C:\ may not write there, so it can't replace
+// #1277: a owl.exe kept at C:\ may not write there, so it can't replace
 // itself. It still says a new version is out, and says why it opens the
 // release page instead of updating, naming the folder.
 func TestUpdateNotWritableSaysWhy(t *testing.T) {
@@ -25,7 +25,7 @@ func TestUpdateNotWritableSaysWhy(t *testing.T) {
 		}})
 	}))
 	defer srv.Close()
-	t.Setenv("MYNA_UPDATE_FEED", srv.URL)
+	t.Setenv("OWL_UPDATE_FEED", srv.URL)
 	old := Version
 	Version = "0.1.10"
 	defer func() { Version = old }()
@@ -33,8 +33,8 @@ func TestUpdateNotWritableSaysWhy(t *testing.T) {
 	defer func() { canElevate = was }()
 
 	dir := t.TempDir()
-	exe := filepath.Join(dir, "myna.exe")
-	if err := os.WriteFile(exe, []byte("myna"), 0o755); err != nil {
+	exe := filepath.Join(dir, "owl.exe")
+	if err := os.WriteFile(exe, []byte("owl"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.Chmod(dir, 0o555); err != nil {
@@ -48,7 +48,7 @@ func TestUpdateNotWritableSaysWhy(t *testing.T) {
 	u.check()
 	j := u.json()
 	if j.State != "available" || j.Stuck != "not-writable" || j.StuckDir != dir {
-		t.Fatalf("a binary in a folder myna can't write to: %+v", j)
+		t.Fatalf("a binary in a folder owl can't write to: %+v", j)
 	}
 
 	// where the system can ask for the password, it updates as before

@@ -9,26 +9,26 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/daemon"
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/gui"
+	"github.com/istoo/owl/internal/daemon"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/gui"
 )
 
-const daemonUsage = "usage: myna daemon [install|uninstall|start|stop|restart|status] · myna daemon install [--web] [--lan] [--addr host:port] [--no-web] [--tls-cert <file> --tls-key <file>|--no-tls] · myna daemon web [on|off] [--lan] [--addr host:port]"
+const daemonUsage = "usage: owl daemon [install|uninstall|start|stop|restart|status] · owl daemon install [--web] [--lan] [--addr host:port] [--no-web] [--tls-cert <file> --tls-key <file>|--no-tls] · owl daemon web [on|off] [--lan] [--addr host:port]"
 
 // daemonWait is how long install, start and restart wait for the gateway
 // to answer before saying where its log is; a var for the tests.
 var daemonWait = 5 * time.Second
 
 // daemonWeb is what a daemon command says of the page the service serves
-// beside the gateway (`myna serve --web`, HuanCheng on Discord).
+// beside the gateway (`owl serve --web`, HuanCheng on Discord).
 type daemonWeb struct {
 	set  bool   // the command says whether it is served; not set, it stays as it is
 	on   bool   // served
 	addr string // where, "" for the default
 }
 
-// parseDaemon reads myna daemon's arguments: the command, and what it
+// parseDaemon reads owl daemon's arguments: the command, and what it
 // says of the page.
 func parseDaemon(args []string) (cmd string, w daemonWeb, err error) {
 	cmd = "status"
@@ -65,24 +65,24 @@ func parseDaemon(args []string) (cmd string, w daemonWeb, err error) {
 		case strings.HasPrefix(a, "--addr="):
 			w.addr = strings.TrimPrefix(a, "--addr=")
 		default:
-			return "", w, fmt.Errorf("myna daemon %s: unknown %q · %s", cmd, a, daemonUsage)
+			return "", w, fmt.Errorf("owl daemon %s: unknown %q · %s", cmd, a, daemonUsage)
 		}
 	}
 	if w.addr != "" {
 		if _, _, err := net.SplitHostPort(w.addr); err != nil {
-			return "", w, fmt.Errorf("myna daemon %s: --addr %s isn't host:port", cmd, w.addr)
+			return "", w, fmt.Errorf("owl daemon %s: --addr %s isn't host:port", cmd, w.addr)
 		}
 	}
 	// --lan and --addr say where the page is: it is served
 	if lan || w.addr != "" {
 		if cmd == "web" && w.set && !w.on || off {
-			return "", w, fmt.Errorf("myna daemon %s: --lan and --addr are for a page that is served", cmd)
+			return "", w, fmt.Errorf("owl daemon %s: --lan and --addr are for a page that is served", cmd)
 		}
 		w.set, w.on = true, true
 	}
 	if off {
 		if w.on {
-			return "", w, errors.New("myna daemon install: --web and --no-web both")
+			return "", w, errors.New("owl daemon install: --web and --no-web both")
 		}
 		w.set = true
 	}
@@ -98,7 +98,7 @@ func parseDaemon(args []string) (cmd string, w daemonWeb, err error) {
 
 // webOptions is what the service is to serve: what w asks, or what it
 // serves now (prevAddr, prevKey) when w says nothing. The page keeps its
-// key across installs, so a browser stays signed in: MYNA_WEB_KEY
+// key across installs, so a browser stays signed in: OWL_WEB_KEY
 // (envKey) when set, else the key the service has, else a new one.
 func webOptions(w daemonWeb, prevAddr, prevKey, envKey string) (daemon.Options, error) {
 	if !w.set {
@@ -120,11 +120,11 @@ func webOptions(w daemonWeb, prevAddr, prevKey, envKey string) (daemon.Options, 
 	return daemon.Options{Web: w.addr, Key: key}, nil
 }
 
-// myna daemon …: `myna serve` as a service of the user's, started at
+// owl daemon …: `owl serve` as a service of the user's, started at
 // boot or login and again when it stops (systemd --user, launchd).
 func daemonCmd(args []string) error {
 	// install takes the gateway's TLS files, written into the service as
-	// MYNA_TLS_CERT and MYNA_TLS_KEY (daemon.carried); a pair that
+	// OWL_TLS_CERT and OWL_TLS_KEY (daemon.carried); a pair that
 	// doesn't load is refused before anything is written. --no-tls takes
 	// the service's away.
 	noTLS := false
@@ -142,7 +142,7 @@ func daemonCmd(args []string) error {
 			return err
 		}
 		if noTLS && gateway.TLSOn() {
-			return errors.New("myna daemon install: --no-tls and a certificate both")
+			return errors.New("owl daemon install: --no-tls and a certificate both")
 		}
 		args = append([]string{"install"}, rest...)
 	}
@@ -163,7 +163,7 @@ func daemonCmd(args []string) error {
 			return daemonWebStatus()
 		}
 		if st, _ := daemon.Get(); !st.Installed && !web.on {
-			fmt.Println("the myna service isn't installed ·", muted.Render("myna daemon install"))
+			fmt.Println("the owl service isn't installed ·", muted.Render("owl daemon install"))
 			return nil
 		}
 		err = daemonInstall(web)
@@ -171,7 +171,7 @@ func daemonCmd(args []string) error {
 		if err := daemon.Uninstall(); err != nil {
 			return err
 		}
-		fmt.Println(green.Render("✓"), "the myna service is removed")
+		fmt.Println(green.Render("✓"), "the owl service is removed")
 		return nil
 	case "start":
 		err = daemon.Start()
@@ -179,7 +179,7 @@ func daemonCmd(args []string) error {
 		if err := daemon.Stop(); err != nil {
 			return err
 		}
-		fmt.Println(green.Render("✓"), "the myna service is stopped")
+		fmt.Println(green.Render("✓"), "the owl service is stopped")
 		return nil
 	case "restart":
 		err = daemon.Restart()
@@ -192,7 +192,7 @@ func daemonCmd(args []string) error {
 	st, _ := daemon.Get()
 	switch cmd {
 	case "install", "web":
-		fmt.Println(green.Render("✓"), "myna serves the gateway as a service, from boot or login, started again when it stops")
+		fmt.Println(green.Render("✓"), "owl serves the gateway as a service, from boot or login, started again when it stops")
 		fmt.Println(muted.Render("  file   "), st.File)
 		if c, _ := gateway.TLSFiles(); c != "" && gateway.TLSOn() {
 			fmt.Println(muted.Render("  TLS    "), c, muted.Render("· https:// from other computers"))
@@ -206,10 +206,10 @@ func daemonCmd(args []string) error {
 			fmt.Println(amber.Render("!"), a)
 		}
 		if daemon.Node() == "" {
-			fmt.Println(amber.Render("!"), "no node on the service's PATH: plugins, and the MCP servers they start, need Node.js; install it, then run `myna daemon install` again")
+			fmt.Println(amber.Render("!"), "no node on the service's PATH: plugins, and the MCP servers they start, need Node.js; install it, then run `owl daemon install` again")
 		}
 	default:
-		fmt.Println(green.Render("✓"), "the myna service is "+cmd+"ed")
+		fmt.Println(green.Render("✓"), "the owl service is "+cmd+"ed")
 	}
 	deadline := time.Now().Add(daemonWait)
 	for {
@@ -247,7 +247,7 @@ func keepTLS(noTLS bool) {
 // daemonInstall installs the service, serving the page as w says.
 func daemonInstall(w daemonWeb) error {
 	a, k := daemon.Web()
-	o, err := webOptions(w, a, k, os.Getenv("MYNA_WEB_KEY"))
+	o, err := webOptions(w, a, k, os.Getenv("OWL_WEB_KEY"))
 	if err != nil {
 		return err
 	}
@@ -270,19 +270,19 @@ func printDaemonWeb(addr, key string) {
 	}
 }
 
-// daemonWebStatus: myna daemon web — the page the service serves.
+// daemonWebStatus: owl daemon web — the page the service serves.
 func daemonWebStatus() error {
 	st, err := daemon.Get()
 	if err != nil {
 		return err
 	}
 	if !st.Installed {
-		fmt.Println("the myna service isn't installed ·", muted.Render("myna daemon install --web"))
+		fmt.Println("the owl service isn't installed ·", muted.Render("owl daemon install --web"))
 		return nil
 	}
 	a, k := daemon.Web()
 	if a == "" {
-		fmt.Println("the myna service serves no page ·", muted.Render("myna daemon web on"))
+		fmt.Println("the owl service serves no page ·", muted.Render("owl daemon web on"))
 		return nil
 	}
 	printDaemonWeb(a, k)
@@ -296,9 +296,9 @@ func daemonStatus() error {
 	}
 	served := gateway.ServedBy()
 	if !st.Installed {
-		fmt.Println("the myna service isn't installed ·", muted.Render("myna daemon install"))
+		fmt.Println("the owl service isn't installed ·", muted.Render("owl daemon install"))
 		if served.Running {
-			fmt.Println(muted.Render("  another myna (the app, myna serve) answers on"), gateway.URL())
+			fmt.Println(muted.Render("  another owl (the app, owl serve) answers on"), gateway.URL())
 		}
 		return nil
 	}
@@ -306,7 +306,7 @@ func daemonStatus() error {
 	if st.Running {
 		mark, word = green.Render("●"), "running"
 	}
-	line := "the myna service is " + word
+	line := "the owl service is " + word
 	if st.PID > 0 {
 		line += " · pid " + strconv.Itoa(st.PID)
 	}

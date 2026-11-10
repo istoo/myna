@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/filememo"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/filememo"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // lml on Discord (Windows, about ten providers): the Providers page took
@@ -35,7 +35,7 @@ func TestProviderListReadsSettingsOnce(t *testing.T) {
 		t.Fatal(err)
 	}
 	// image answers of other providers' models too, as a long-used
-	// myna's settings hold
+	// owl's settings hold
 	images := map[string]bool{"relay/model-7": true}
 	for i := range 200 {
 		images[fmt.Sprintf("other-%d/some-model-%d", i%50, i)] = i%2 == 0

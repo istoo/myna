@@ -1,6 +1,6 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // #959: the tray panel, opened, showed an account's old usage while the
-// window had the new, until refreshed by hand. myna answers usage/quotas
+// window had the new, until refreshed by hand. owl answers usage/quotas
 // at once with what it kept and reads the accounts again behind it; such an
 // answer says so (X-Magpie-Reading: 1), and the page asks again until the
 // new reading has landed. The panel and the window both show it without a
@@ -56,7 +56,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.on("pageerror", (e) => errors.push(e.message));
         const read = { asks: 0, stale: 2 };
         await page.route("**/*", serve(lang, read));
-        await page.goto(surface === "panel" ? "http://myna.test/?mode=panel" : "http://myna.test/?view=usage");
+        await page.goto(surface === "panel" ? "http://owl.test/?mode=panel" : "http://owl.test/?view=usage");
         if (surface === "panel") await page.locator('button[data-ptab="usage"]').click();
         const card = surface === "panel" ? ".pq-card" : ".subscription-card";
         await page.waitForFunction((s) => document.querySelector(s)?.textContent.includes("40%"), card);
@@ -77,7 +77,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.clock.install();
       const read = { asks: 0, stale: Infinity };
       await page.route("**/*", serve(lang, read));
-      await page.goto("http://myna.test/?mode=panel");
+      await page.goto("http://owl.test/?mode=panel");
       await page.locator('button[data-ptab="usage"]').click();
       await page.waitForFunction(() => document.querySelector(".pq-card")?.textContent.includes("40%"));
       const first = read.asks;

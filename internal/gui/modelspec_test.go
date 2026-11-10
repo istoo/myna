@@ -7,10 +7,10 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// What myna model spec sets (Dani Ariyanto on Discord) is what the
+// What owl model spec sets (Dani Ariyanto on Discord) is what the
 // providers' state behind the app's model badges says: the window, the
 // reply limit, images and the levels given a model nothing knew; a model
 // sent no reasoning field is said to be so, with no level kept.

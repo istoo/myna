@@ -6,14 +6,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/filememo"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/filememo"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// KeepCodexDaemonCurrent looks at the daemon when myna writes a file
+// KeepCodexDaemonCurrent looks at the daemon when owl writes a file
 // (what Codex reads at start among them), every 15s only while the daemon
 // is behind, and otherwise only now and then (#3185: a look every 15s woke
-// an idle myna).
+// an idle owl).
 func TestCodexDaemonLooksOnWrites(t *testing.T) {
 	codexHome(t, "", `model = "gpt-5"`)
 	was := daemonCheck
@@ -36,7 +36,7 @@ func TestCodexDaemonLooksOnWrites(t *testing.T) {
 	for n := 1; n <= 2; n++ {
 		for end := time.Now().Add(5 * time.Second); looked() < n; time.Sleep(10 * time.Millisecond) {
 			if time.Now().After(end) {
-				t.Fatalf("myna's writes had the daemon looked at %d times in 5s, want %d", looked(), n)
+				t.Fatalf("owl's writes had the daemon looked at %d times in 5s, want %d", looked(), n)
 			}
 			filememo.Forget()
 		}

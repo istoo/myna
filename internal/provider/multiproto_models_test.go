@@ -10,8 +10,8 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/istoo/myna/internal/agentenv"
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/agentenv"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 // A provider whose protocols are served at bases of their own is asked

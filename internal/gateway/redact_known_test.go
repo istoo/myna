@@ -10,8 +10,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // The vendor answers about a placeholder in words of its own, the agent

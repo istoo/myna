@@ -1,7 +1,7 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// Claude Code wired to myna while a provider switch myna can't take out
+// Claude Code wired to owl while a provider switch owl can't take out
 // sends its requests elsewhere (jw1dev on X: CLAUDE_CODE_USE_BEDROCK=1 kept
-// in the env, Bedrock refused myna's model, myna said nothing). Check
+// in the env, Bedrock refused owl's model, owl said nothing). Check
 // says which variable and where, and the row says it in the window's
 // language: the line under the name and the Reconnect pill carry the advice,
 // with its file, variable and cloud as given. Both notices (a file, the
@@ -14,8 +14,8 @@ const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
-const FILE = "{file} sets {var}, so Claude Code sends its requests to {cloud}, not to myna: take it out there to go through myna.";
-const SHELL = "{var} is set in your shell's environment, so Claude Code started there sends its requests to {cloud}, not to myna: take it out of your shell's profile to go through myna.";
+const FILE = "{file} sets {var}, so Claude Code sends its requests to {cloud}, not to owl: take it out there to go through owl.";
+const SHELL = "{var} is set in your shell's environment, so Claude Code started there sends its requests to {cloud}, not to owl: take it out of your shell's profile to go through owl.";
 const cases = [
   { name: "managed settings", en: FILE, vars: { file: "/Library/Application Support/ClaudeCode/managed-settings.json", var: "CLAUDE_CODE_USE_BEDROCK", cloud: "Amazon Bedrock" } },
   { name: "the shell", en: SHELL, vars: { var: "CLAUDE_CODE_USE_VERTEX", cloud: "Google Vertex AI" } },
@@ -49,7 +49,7 @@ function serve(lang, detail) {
 const row = `.row.agent[data-id="claude"]`;
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
-  test(engine + ": a Claude provider switch that bypasses myna is said in the window's language", async (t) => {
+  test(engine + ": a Claude provider switch that bypasses owl is said in the window's language", async (t) => {
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     const errors = [];
     t.after(async () => {
@@ -66,7 +66,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             page.on("pageerror", (e) => errors.push(e.message));
             const given = fill(c.en, c.vars);
             await page.route("**/*", serve(lang, given));
-            await page.goto("http://myna.test/");
+            await page.goto("http://owl.test/");
             await page.locator(`${row} .ag-fix`).waitFor();
             const want = await page.evaluate(([en, vars]) => t(en, vars), [c.en, c.vars]);
             if (lang !== "en") assert.notEqual(want, given, "untranslated");

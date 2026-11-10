@@ -30,13 +30,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       t.after(() => browser.close());
       const context = await browser.newContext({ viewport: { width: 1000, height: 760 }, reducedMotion: "reduce", colorScheme: "light" });
       const page = await context.newPage();
-      await page.addInitScript(() => { try { localStorage.setItem("myna.gwConnectFolded", "0"); } catch {} }); // Connect opened, as a user who reads it
+      await page.addInitScript(() => { try { localStorage.setItem("owl.gwConnectFolded", "0"); } catch {} }); // Connect opened, as a user who reads it
       page.setDefaultTimeout(6000);
       page.setDefaultNavigationTimeout(60000);
       const events = [], errors = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", fixture("en", theme, events, { lan: true }));
-      await page.goto("http://myna.test/?view=gateway");
+      await page.goto("http://owl.test/?view=gateway");
       await page.locator('#gatewayKeys .acc[data-key="server"] .dot').click();
       await page.locator('#gatewayKeys .acc.off[data-key="server"]').waitFor();
       await page.locator("#addGatewayKey").click();
@@ -95,7 +95,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.locator("#modal").waitFor({ state: "hidden" });
       assert.equal(events.filter((e) => e.action === "rotate-key").length, 0);
 
-      await page.goto("http://myna.test/?view=settings&tab=network");
+      await page.goto("http://owl.test/?view=settings&tab=network");
       const on = page.locator("#lanList").getByRole("button", { name: "On", exact: true });
       await on.waitFor();
       // the settings are read twice as the page opens (its own read and the

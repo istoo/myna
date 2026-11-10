@@ -4,15 +4,15 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // TestClaudeOutputTokens: Claude Code asks a model it doesn't know for a
 // reply of 32000 tokens at most, so a reasoning model stopped at "Claude's
 // response exceeded the 32000 output token maximum" (H20, DeepSeek through
-// WorkBuddy). myna tells it the longest reply the models it runs on can
+// WorkBuddy). owl tells it the longest reply the models it runs on can
 // write (CLAUDE_CODE_MAX_OUTPUT_TOKENS): the least of theirs, none when one
 // isn't known, is no more than 32000 or the main model is Claude's own, and
 // never over a value the user set.
@@ -79,18 +79,18 @@ func TestClaudeOutputTokens(t *testing.T) {
 	// installed
 	set("model", "claude-opus-4-8")
 	if output() != "" {
-		t.Fatalf("Claude's own model kept myna's value: %q", output())
+		t.Fatalf("Claude's own model kept owl's value: %q", output())
 	}
 	set("model", "v/deep")
 	set("model", "")
 	if output() != "" {
-		t.Fatalf("reset kept myna's value: %q", output())
+		t.Fatalf("reset kept owl's value: %q", output())
 	}
 	if v, _ := edit.GetJSON(path, "theme"); v != "dark" {
 		t.Fatal("theme lost")
 	}
 
-	// the user's own value is theirs, set before myna or over myna's
+	// the user's own value is theirs, set before owl or over owl's
 	if err := edit.SetJSON(path, edit.KV{Path: "env." + claudeOutputEnv, Value: "64000"}); err != nil {
 		t.Fatal(err)
 	}
@@ -110,15 +110,15 @@ func TestClaudeOutputTokens(t *testing.T) {
 	set("model", "v/mid")
 	set("model", "")
 	if output() != "100000" {
-		t.Fatalf("a value the user changed myna's to: %q", output())
+		t.Fatalf("a value the user changed owl's to: %q", output())
 	}
-	// and one the same as myna would write, but not written by it
+	// and one the same as owl would write, but not written by it
 	if err := edit.SetJSON(path, edit.KV{Path: "env." + claudeOutputEnv, Value: "64000"}); err != nil {
 		t.Fatal(err)
 	}
 	set("model", "v/mid")
 	set("model", "")
 	if output() != "64000" {
-		t.Fatalf("the user's 64000 was taken for myna's: %q", output())
+		t.Fatalf("the user's 64000 was taken for owl's: %q", output())
 	}
 }

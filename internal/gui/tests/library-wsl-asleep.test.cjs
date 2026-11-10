@@ -1,10 +1,10 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // cybercaius on Discord: with WSL not started, the Library's MCP page
 // didn't list the agents installed in it. A stopped distro's agents
-// (asleep) are listed by what myna last saw there: a chip is lit as the
+// (asleep) are listed by what owl last saw there: a chip is lit as the
 // library has it, quietly greyer, and says the distro isn't running; a
-// click is sent as any is, and myna writes it there when the distro
-// next runs. One whose places myna never saw (unseen) is only on the
+// click is sent as any is, and owl writes it there when the distro
+// next runs. One whose places owl never saw (unseen) is only on the
 // rows that name it, greyed out, kept by every click on the row, and a
 // click on it says why. One line under the list names the distro. Nothing
 // here starts WSL (#3896): the page only reads /api/library. The
@@ -25,7 +25,7 @@ const HOME = "/Users/me", D = "Ubuntu-24.04";
 const CX = "codex@wsl:" + D, PI = "pi@wsl:" + D;
 const srv = (name, agents, more = {}) => ({ name, transport: "stdio", command: "uvx", args: [name], agents, ...more });
 const lib = (servers, instructions = { agents: [] }) => ({
-  dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
+  dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
   agents: [
     { id: "claude", name: "Claude Code", icon: "", instructions: `${HOME}/.claude/CLAUDE.md`, mcp: `${HOME}/.claude.json`, skills: `${HOME}/.claude/skills` },
     { id: CX, name: "Codex · WSL " + D, icon: "", mcp: "\\\\wsl.localhost\\" + D + "\\home\\me\\.codex\\config.toml", skills: "\\\\wsl.localhost\\" + D + "\\home\\me\\.codex\\skills", noSSE: true, mustCopy: true, how: "copy", asleep: D },
@@ -34,7 +34,7 @@ const lib = (servers, instructions = { agents: [] }) => ({
   instructions, servers, skills: [], foundServers: [], projects: [], foundSkills: [], problems: [],
 });
 // the Instructions page's rows: Claude Code here, Codex in the stopped
-// distro at the file myna last saw, and Pi on there, its file never seen
+// distro at the file owl last saw, and Pi on there, its file never seen
 const instr = (on) => ({
   shared: "Be brief.", sets: [{ id: "default", name: "", active: true, text: "Be brief." }],
   agents: [
@@ -81,7 +81,7 @@ function server(lang, state, posts) {
     if (url.pathname === "/api/groups") return json({ groups: [] });
     if (url.pathname === "/api/providers") return json({ providers: [], gateway: { running: true } });
     if (url.pathname.startsWith("/api/")) return json({});
-    if (url.host !== "myna.test") return route.fulfill({ status: 404, body: "" });
+    if (url.host !== "owl.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -111,14 +111,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const state = { servers: [srv("fetch", [CX, PI]), srv("git", ["claude"]), srv("events", [], { transport: "sse", command: "", url: "https://example.invalid/sse" })] };
         const posts = [], errors = [];
         const ctx = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: "reduce" });
-        await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "mcp"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("owl.libTab", "mcp"); } catch {} });
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         page.on("dialog", (d) => { errors.push("a browser dialog: " + d.message()); d.dismiss(); });
         await page.route("**/*", server(lang, state, posts));
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         await navTo(page, "library");
         const v = page.locator("#view-library");
         const row = (name) => v.locator(".lib-server").filter({ has: page.locator(".name", { hasText: new RegExp("^" + name) }) });
@@ -134,7 +134,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.match(await cx.getAttribute("class"), /\basleep\b/);
         assert.equal(await cx.getAttribute("aria-pressed"), "true");
         assert.equal(await cx.getAttribute("aria-disabled"), null);
-        assert.equal(await cx.getAttribute("title"), w("WSL {distro} isn't running: {agent} has it — click to take it away, and myna writes the change there the next time it runs", { distro: D, agent: "Codex · WSL " + D }));
+        assert.equal(await cx.getAttribute("title"), w("WSL {distro} isn't running: {agent} has it — click to take it away, and owl writes the change there the next time it runs", { distro: D, agent: "Codex · WSL " + D }));
         assert.equal(await chip("git", CX).getAttribute("title"), w("WSL {distro} isn't running: a click gives it to {agent} the next time the distro runs", { distro: D, agent: "Codex · WSL " + D }));
         // what it can't take says so, as on any chip: no SSE for Codex
         assert.match(await chip("events", CX).getAttribute("class"), /\bblocked\b/);
@@ -143,14 +143,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.match(await pi.getAttribute("class"), /\bunseen\b/);
         assert.equal(await pi.getAttribute("aria-disabled"), "true");
         assert.equal(await pi.getAttribute("aria-pressed"), "true");
-        const unseen = w("WSL {distro} isn't running, and myna hasn't seen {agent}'s files there yet: start the distro to change this", { distro: D, agent: "Pi · WSL " + D });
+        const unseen = w("WSL {distro} isn't running, and owl hasn't seen {agent}'s files there yet: start the distro to change this", { distro: D, agent: "Pi · WSL " + D });
         assert.equal(await pi.getAttribute("title"), unseen);
         // one line for the distro, naming Pi; the line of agents with no
         // MCP servers doesn't
         const aside = v.locator(".lib-asleep");
         assert.equal(await aside.count(), 1);
-        assert.equal(await aside.textContent(), w("WSL {distro} isn't running: its agents show what myna last saw there, and what you change is written there the next time it runs.", { distro: D }) + " " + w("{agents} can be changed once it runs.", { agents: "Pi · WSL " + D }));
-        assert.equal(await v.locator(".lib-aside").filter({ hasText: w("{agents} has no MCP servers myna can write.", { agents: "Pi · WSL " + D }) }).count(), 0);
+        assert.equal(await aside.textContent(), w("WSL {distro} isn't running: its agents show what owl last saw there, and what you change is written there the next time it runs.", { distro: D }) + " " + w("{agents} can be changed once it runs.", { agents: "Pi · WSL " + D }));
+        assert.equal(await v.locator(".lib-aside").filter({ hasText: w("{agents} has no MCP servers owl can write.", { agents: "Pi · WSL " + D }) }).count(), 0);
         assert.deepEqual(await sideways(page), [], "sideways with the rows");
 
         // Pi's chip clicked: nothing sent, the reason shown
@@ -177,9 +177,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   // #4182: the Instructions page leaves them out no more. Codex's row is
-  // at the file myna last saw, greyer, its path no button (the file
+  // at the file owl last saw, greyer, its path no button (the file
   // manager would start WSL); its switch says the distro isn't running and
-  // is sent as any is. Pi, on, whose file myna never saw, is greyed out
+  // is sent as any is. Pi, on, whose file owl never saw, is greyed out
   // and kept on by every switch: before, a switch sent the agents without
   // the stopped distro's, which took them off.
   test(engine + ": a stopped WSL distro's agents are on the Instructions page as last seen", async (t) => {
@@ -193,18 +193,18 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const state = { servers: [], instr: instr(["claude", PI]) };
         const posts = [], errors = [];
         const ctx = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: "reduce" });
-        await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "instructions"); } catch {} });
+        await ctx.addInitScript(() => { try { localStorage.setItem("owl.libTab", "instructions"); } catch {} });
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.on("pageerror", (e) => errors.push(e.message));
         page.on("dialog", (d) => { errors.push("a browser dialog: " + d.message()); d.dismiss(); });
         await page.route("**/*", server(lang, state, posts));
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         await navTo(page, "library");
         const v = page.locator("#view-library");
         const row = (name) => v.locator(".lib-row:not(.lib-set)").filter({ has: page.locator(".name", { hasText: new RegExp("^" + name) }) });
         const sw = (name) => row(name).locator(".lib-switch");
-        const asleep = w("WSL {distro} isn't running: its agents show what myna last saw there, and what you change is written there the next time it runs.", { distro: D });
+        const asleep = w("WSL {distro} isn't running: its agents show what owl last saw there, and what you change is written there the next time it runs.", { distro: D });
         await row("Codex").waitFor();
 
         assert.doesNotMatch(await row("Claude Code").getAttribute("class"), /\basleep\b/);
@@ -217,7 +217,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal(await row("Pi").locator(".lib-path").count(), 0);
         assert.equal(await sw("Pi").getAttribute("aria-checked"), "true");
         assert.equal(await sw("Pi").getAttribute("aria-disabled"), "true");
-        assert.equal(await sw("Pi").getAttribute("title"), w("WSL {distro} isn't running, and myna hasn't seen {agent}'s files there yet: start the distro to change this", { distro: D, agent: "Pi · WSL " + D }));
+        assert.equal(await sw("Pi").getAttribute("title"), w("WSL {distro} isn't running, and owl hasn't seen {agent}'s files there yet: start the distro to change this", { distro: D, agent: "Pi · WSL " + D }));
         // one line for the distro, naming Pi; neither is said to keep no
         // instructions file
         const aside = v.locator(".lib-asleep");
@@ -254,24 +254,24 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 }
 
 // #4237, #4238: the Hooks and Subagents pages list the stopped distro's
-// Codex as they do while the distro runs: its chip greyed, saying myna
+// Codex as they do while the distro runs: its chip greyed, saying owl
 // gives no agent in WSL any yet, named in the line under the list, and a
-// click on it sends nothing. Pi, whose places myna never saw, isn't on
+// click on it sends nothing. Pi, whose places owl never saw, isn't on
 // a row that doesn't name it. The page draws what /api/library says
 // (hooksView and subagentsView list the stopped agents); this holds it to
 // that.
 const GREYED = {
   hooks: {
-    lib: { hooks: [{ name: "notify", event: "turn-end", command: "notify-send done", agents: ["claude"] }], hookAgents: [{ id: "claude", file: `${HOME}/.claude/settings.json`, events: ["Stop"] }, { id: CX, no: "myna gives hooks only to agents on this computer, not yet to Codex · WSL " + D + " in WSL", wsl: true }] },
+    lib: { hooks: [{ name: "notify", event: "turn-end", command: "notify-send done", agents: ["claude"] }], hookAgents: [{ id: "claude", file: `${HOME}/.claude/settings.json`, events: ["Stop"] }, { id: CX, no: "owl gives hooks only to agents on this computer, not yet to Codex · WSL " + D + " in WSL", wsl: true }] },
     row: ".lib-hook", name: "notify",
-    tip: "myna gives hooks only to agents on this computer, not yet to {agent} in WSL",
-    line: [".lib-hooks-no", "myna can't give hooks to {agents} yet: their chips are greyed, and say why."],
+    tip: "owl gives hooks only to agents on this computer, not yet to {agent} in WSL",
+    line: [".lib-hooks-no", "owl can't give hooks to {agents} yet: their chips are greyed, and say why."],
   },
   subagents: {
-    lib: { subagents: [{ name: "reviewer", description: "Reviews a diff", prompt: "Review it.", skills: [], mcp: [], agents: ["claude"] }], subagentAgents: [{ id: "claude", dir: `${HOME}/.claude/agents`, skills: true, mcp: true }, { id: CX, no: "myna gives no subagents to an agent in WSL yet", wsl: true }] },
+    lib: { subagents: [{ name: "reviewer", description: "Reviews a diff", prompt: "Review it.", skills: [], mcp: [], agents: ["claude"] }], subagentAgents: [{ id: "claude", dir: `${HOME}/.claude/agents`, skills: true, mcp: true }, { id: CX, no: "owl gives no subagents to an agent in WSL yet", wsl: true }] },
     row: ".lib-subagent", name: "reviewer",
-    tip: "myna gives subagents only to agents on this computer, not yet to {agent} in WSL",
-    line: [".lib-subagents-no", "myna can't give subagents to {agents} yet: their chips are greyed, and say why."],
+    tip: "owl gives subagents only to agents on this computer, not yet to {agent} in WSL",
+    line: [".lib-subagents-no", "owl can't give subagents to {agents} yet: their chips are greyed, and say why."],
   },
 };
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) for (const [tab, g] of Object.entries(GREYED)) {
@@ -286,13 +286,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const state = { servers: [], more: g.lib };
         const posts = [], errors = [];
         const ctx = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: "reduce" });
-        await ctx.addInitScript((tab) => { try { localStorage.setItem("myna.libTab", tab); } catch {} }, tab);
+        await ctx.addInitScript((tab) => { try { localStorage.setItem("owl.libTab", tab); } catch {} }, tab);
         const page = await ctx.newPage();
         page.setDefaultTimeout(5000);
         page.on("pageerror", (e) => errors.push(e.message));
         page.on("dialog", (d) => { errors.push("a browser dialog: " + d.message()); d.dismiss(); });
         await page.route("**/*", server(lang, state, posts));
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         await navTo(page, "library");
         const v = page.locator("#view-library");
         const row = v.locator(g.row).filter({ has: page.locator(".name", { hasText: new RegExp("^" + g.name) }) });

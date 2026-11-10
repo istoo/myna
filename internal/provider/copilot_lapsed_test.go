@@ -14,7 +14,7 @@ import (
 )
 
 // lapsedCopilot is a machine with the editors signed in to octocat (gho_x,
-// taken) and myna to hubot (gho_kept), whose trade for a session token
+// taken) and owl to hubot (gho_kept), whose trade for a session token
 // answers what status says.
 func lapsedCopilot(t *testing.T) *atomic.Int32 {
 	t.Helper()
@@ -219,7 +219,7 @@ func TestCopilotStandInIsNotSignedOut(t *testing.T) {
 
 // The editors' token refused with the CLI signed in to another account:
 // nothing stands in, so the editors' own account is signed out, and
-// signed in again from myna it is kept and in use.
+// signed in again from owl it is kept and in use.
 func TestCopilotEditorRefusedSignsOut(t *testing.T) {
 	staleEditor(t, "hubot")
 	t.Cleanup(resetCopilotState)
@@ -236,7 +236,7 @@ func TestCopilotEditorRefusedSignsOut(t *testing.T) {
 	if l := copilotLapsedOf(t, "octocat"); l != copilotLapsedText {
 		t.Fatalf("refused, the editors' account reads %q", l)
 	}
-	if err := addCopilotLogin("octocat", "Business", "gho_myna", ""); err != nil {
+	if err := addCopilotLogin("octocat", "Business", "gho_owl", ""); err != nil {
 		t.Fatal(err)
 	}
 	if l := copilotLapsedOf(t, "octocat"); l != "" {
@@ -244,7 +244,7 @@ func TestCopilotEditorRefusedSignsOut(t *testing.T) {
 	}
 	p, _ = find(All(), "copilot")
 	if _, err := p.Fetch(context.Background()); err != nil {
-		t.Fatalf("with myna's sign-in: %v", err)
+		t.Fatalf("with owl's sign-in: %v", err)
 	}
 }
 
@@ -293,7 +293,7 @@ func TestCopilotUsageRefusedSignsOut(t *testing.T) {
 }
 
 // The Copilot CLI's own sign-in revoked (401 from GitHub): its account is
-// signed out, and signed in again from myna the new token is kept and
+// signed out, and signed in again from owl the new token is kept and
 // used in its place, the account listed once.
 func TestCopilotCLIRefusedSignsOut(t *testing.T) {
 	home := signIn(t)
@@ -335,7 +335,7 @@ func TestCopilotCLIRefusedSignsOut(t *testing.T) {
 	// a restart forgets the refusal; the sign-in asks GitHub again
 	resetCopilotState()
 	copilotProbeEditor(context.Background(), "octocat", "")
-	if err := addCopilotLogin("octocat", "Pro", "gho_myna", ""); err != nil {
+	if err := addCopilotLogin("octocat", "Pro", "gho_owl", ""); err != nil {
 		t.Fatal(err)
 	}
 	if l := copilotLapsedOf(t, "octocat"); l != "" {
@@ -345,7 +345,7 @@ func TestCopilotCLIRefusedSignsOut(t *testing.T) {
 	for _, c := range copilotLogins(copilotConfigDir()) {
 		if strings.EqualFold(c.User, "octocat") {
 			n++
-			if c.app.Token != "gho_myna" {
+			if c.app.Token != "gho_owl" {
 				t.Fatalf("signed in again, the account sends %q", c.app.Token)
 			}
 		}

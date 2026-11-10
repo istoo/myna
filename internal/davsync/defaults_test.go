@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/backup"
-	"github.com/istoo/myna/internal/profile"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/backup"
+	"github.com/istoo/owl/internal/profile"
 )
 
 // Two computers exchange an explicit default, a chosen model, and then a
@@ -60,7 +60,7 @@ func TestSyncAgentDefaults(t *testing.T) {
 		t.Fatal(err)
 	}
 	now()
-	remote, err := backup.Open(f.objects["team x+y/myna/myna.myna-backup"], cfg.Passphrase)
+	remote, err := backup.Open(f.objects["team x+y/owl/owl.owl-backup"], cfg.Passphrase)
 	if err != nil {
 		t.Fatal(err)
 	}

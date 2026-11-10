@@ -9,11 +9,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // openCodeBareBody is what OpenCode's gateway answered s-leeq's turn-start
-// requests (istoo/myna#3740): a 400 whose body names the model and
+// requests (istoo/owl#3740): a 400 whose body names the model and
 // nothing else — no error in it, no reason, no request id.
 const openCodeBareBody = `{"model":"deepseek-v4.1-flash"}`
 

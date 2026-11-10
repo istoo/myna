@@ -18,15 +18,15 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/masking"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/masking"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// An agent's request that myna holds before routing it went nowhere a
+// An agent's request that owl holds before routing it went nowhere a
 // user could see (heyusaku6 on X): Codex thought for over ten minutes on a
 // routing group's model, then on two others, the Routing page showed none
-// of them, and only a restart of Codex and myna ended it. Codex waits for
+// of them, and only a restart of Codex and owl ended it. Codex waits for
 // a reply's headers with no limit of its own, and a request shows on the
 // Routing page once a route is begun for it, so whatever held it before
 // that (a lock, a wait with no end) held it in silence.
@@ -34,16 +34,16 @@ import (
 // What held it isn't known. So a request with no route begun for it is
 // shown on the Routing page as routing once it has waited unroutedShow,
 // and is answered with an error once it has waited unroutedMost, with
-// myna's log saying where every goroutine stood. Its context ends then
+// owl's log saying where every goroutine stood. Its context ends then
 // too, so what waits on it lets go.
 //
 // Two minutes of a spinner before that error was a torment of its own
-// (sharwowwow on X). Most of what comes before a route is a wait myna
+// (sharwowwow on X). Most of what comes before a route is a wait owl
 // knows of and that may rightly be long: the body still arriving (an
 // image over a slow link), masking (the local model), the routing
 // group's decision model, an image described for a model that can't see,
 // a Codex reset spent, the plugins' gateway hooks and JS middleware, a
-// slot or a minute's room (noteWait, notePhase). The rest is myna's own
+// slot or a minute's room (noteWait, notePhase). The rest is owl's own
 // work: parsing, the catalog, the plan. A request that has spent
 // unroutedUnknown in none of those waits, added up however they came, is
 // answered then with the same error; one in those waits still has
@@ -74,7 +74,7 @@ const unroutedUploadRate = 32 << 10
 var unroutedUploadGrace = 8 * time.Minute
 
 // unroutedWatched is whether a request to path is an agent's turn, which
-// is given a route once myna knows where it goes: Chat, Responses,
+// is given a route once owl knows where it goes: Chat, Responses,
 // Messages, Gemini and Codex's own backend. A compaction or a model list
 // has no route of its own, and an MCP or a search call is not a turn.
 func unroutedWatched(path string) bool {
@@ -99,20 +99,20 @@ func unroutedProto(path string) provider.Protocol {
 	return provider.Chat
 }
 
-// errUnrouted ends a request's context when myna stopped holding it.
-var errUnrouted = errors.New("myna held the request too long before routing it")
+// errUnrouted ends a request's context when owl stopped holding it.
+var errUnrouted = errors.New("owl held the request too long before routing it")
 
-// heldWriter is the client's writer while myna may still answer for its
-// handler: what the handler writes goes through it, and once myna has
+// heldWriter is the client's writer while owl may still answer for its
+// handler: what the handler writes goes through it, and once owl has
 // answered (gaveUp) the handler's writes go nowhere. The handler's headers
-// are its own until it writes, so myna's answer never shares a map
+// are its own until it writes, so owl's answer never shares a map
 // another goroutine is filling.
 type heldWriter struct {
 	w      http.ResponseWriter
 	mu     sync.Mutex
 	hdr    http.Header
 	wrote  bool // the handler began its reply
-	gaveUp bool // myna answered for it
+	gaveUp bool // owl answered for it
 }
 
 func newHeldWriter(w http.ResponseWriter) *heldWriter {
@@ -129,7 +129,7 @@ func (h *heldWriter) Header() http.Header {
 }
 
 // begin is the handler's reply starting: its headers go to the client's.
-// Called with mu held; false once myna has answered.
+// Called with mu held; false once owl has answered.
 func (h *heldWriter) begin() bool {
 	if h.gaveUp {
 		return false
@@ -177,7 +177,7 @@ func (h *heldWriter) FlushError() error {
 // Unwrap is for http.ResponseController's deadlines.
 func (h *heldWriter) Unwrap() http.ResponseWriter { return h.w }
 
-// answer writes myna's own reply, whole, unless the handler began one.
+// answer writes owl's own reply, whole, unless the handler began one.
 // Its length is said, so the client has all of it while the handler may
 // still be held: a reply of no length ends only when the handler does.
 func (h *heldWriter) answer(proto provider.Protocol, status int, msg string) bool {
@@ -215,21 +215,21 @@ type unroutedHold struct {
 	cancel context.CancelCauseFunc
 	asked  atomic.Value // string: the model it asked for, once read
 	shown  *Route       // under f.mu
-	ended  bool         // under f.mu: answered by myna
+	ended  bool         // under f.mu: answered by owl
 	over   bool         // under f.mu: its handler returned
 	// masking counts the maskings under way for it: one held there waits
 	// for Settings → Privacy's local model, and its error says so
 	masking atomic.Int32
 	// the body as it arrives (waitedBody): the bytes read, when the last
 	// came (unix nanoseconds), whether a read met its end (or an error),
-	// and stopped once myna answered for it while it was still
+	// and stopped once owl answered for it while it was still
 	// arriving, so its handler reads no more of it
 	bodyRead    atomic.Int64
 	bodyLast    atomic.Int64
 	bodyEnded   atomic.Bool
 	bodyStopped atomic.Bool
 
-	// the waits myna knows it is in (noteWait), under wmu: how many are
+	// the waits owl knows it is in (noteWait), under wmu: how many are
 	// under way, since when one has been, the time spent in one before
 	// that, and whether unknown fired in one and looks again at its end
 	wmu     sync.Mutex
@@ -356,7 +356,7 @@ func (u *unroutedHold) checkMost() {
 // hold is answered at most that late.
 func unroutedRecheck() time.Duration { return min(time.Second, unroutedMost/8) }
 
-// noteWait tells ctx's watch its request is in a wait myna knows of
+// noteWait tells ctx's watch its request is in a wait owl knows of
 // until the func it answers is called: the time it spends there counts
 // toward unroutedMost alone, not unroutedUnknown.
 // kind names the wait in the report of a request held too long
@@ -499,9 +499,9 @@ func (b waitedBody) Read(p []byte) (int, error) {
 	return n, err
 }
 
-// errBodyStopped is a body read after myna answered for its request
+// errBodyStopped is a body read after owl answered for its request
 // while the body was still arriving.
-var errBodyStopped = errors.New("myna stopped reading this request's body: it was still arriving when myna answered for it")
+var errBodyStopped = errors.New("owl stopped reading this request's body: it was still arriving when owl answered for it")
 
 // inBody is whether u's request is reading its body now.
 func (u *unroutedHold) inBody() bool {
@@ -520,14 +520,14 @@ func (u *unroutedHold) inBody() bool {
 // the request's own Content-Length says, or, for a body of no said
 // length (chunked), no read has met its end yet. The hold can run out in
 // the gap between two reads of a trickled body, and a read's absence
-// alone answered such a request 504, as if myna held it of its own (a
+// alone answered such a request 504, as if owl held it of its own (a
 // full run raced one out there, #4511); a body short of its length is
 // still arriving, and the time is the client's. Not before its first read: a request waiting for body
-// room (bodyRoom.take) is held by myna, whose 503 or 504 says so, and
+// room (bodyRoom.take) is held by owl, whose 503 or 504 says so, and
 // its client may have sent the whole body already. A chunked body's
 // decoder spends its time between reads too (empty gzip members, #4775
 // review), and judged by the read alone it was answered 504 there, as
-// myna's own hold. A body read whole and an empty one are not arriving.
+// owl's own hold. A body read whole and an empty one are not arriving.
 func (u *unroutedHold) bodyArriving() bool {
 	d := u.r.ContentLength
 	if d == 0 || u.bodyEnded.Load() || d > 0 && u.bodyRead.Load() >= d {
@@ -575,9 +575,9 @@ func byteWord(n int64) string {
 
 // unroutedBodyMsg is the error of a request whose body was still arriving
 // when it had been held for held: the time went to the client sending it,
-// not to myna, and it says so.
+// not to owl, and it says so.
 func unroutedBodyMsg(held time.Duration, body string) string {
-	return fmt.Sprintf("myna stopped this request after %s because its body was still arriving from the client (read: %s), before it could be routed to any provider. The upload exhausted its time allowance (32 KiB/s with a two-minute grace period, at most eight additional minutes). Check the connection or proxy to myna, or compact the conversation and reduce inline images before retrying. "+heldSay, held, body, heldWhere())
+	return fmt.Sprintf("owl stopped this request after %s because its body was still arriving from the client (read: %s), before it could be routed to any provider. The upload exhausted its time allowance (32 KiB/s with a two-minute grace period, at most eight additional minutes). Check the connection or proxy to owl, or compact the conversation and reduce inline images before retrying. "+heldSay, held, body, heldWhere())
 }
 
 // watchUnrouted watches r, counted as f, until the func it answers is
@@ -639,7 +639,7 @@ func (u *unroutedHold) show() {
 // showLocked begins the route that shows it; f.mu is held.
 func (u *unroutedHold) showLocked() {
 	asked, _ := u.asked.Load().(string)
-	rt := Route{Time: u.f.start, Agent: u.agent, Session: u.f.session, Model: asked, Provider: "myna"}
+	rt := Route{Time: u.f.start, Agent: u.agent, Session: u.f.session, Model: asked, Provider: "owl"}
 	if rt.Agent == "" {
 		rt.Agent = u.f.agent
 	}
@@ -662,7 +662,7 @@ func (u *unroutedHold) routed() (drop *Route) {
 // giveUp answers the request with an error, when no route was begun for it
 // and its handler wrote nothing, ends its context, and says on its route
 // and in the log what held it. unknown: it was held unroutedUnknown in no
-// wait myna knows of, rather than unroutedMost other than masking and
+// wait owl knows of, rather than unroutedMost other than masking and
 // earned upload time.
 func (u *unroutedHold) giveUp(unknown bool) {
 	f := u.f
@@ -675,7 +675,7 @@ func (u *unroutedHold) giveUp(unknown bool) {
 	msg, where, status := unroutedMsg(held, u.masking.Load() > 0), "", http.StatusGatewayTimeout
 	switch {
 	case unknown:
-		where = fmt.Sprintf(" %s of it in no wait myna knows of", unroutedUnknown)
+		where = fmt.Sprintf(" %s of it in no wait owl knows of", unroutedUnknown)
 	case u.masking.Load() > 0:
 		where = " masking it"
 	case u.inBody() || u.bodyArriving():
@@ -733,18 +733,18 @@ func unroutedMsg(held time.Duration, masking bool) string {
 		if b := modelBusy(); b != "" {
 			why = " (" + b + ")"
 		}
-		return fmt.Sprintf("myna held this request for %s waiting for the local masking model (Settings → Privacy) to mask it%s, so it was stopped rather than sent masked by the rules alone. Send it again. To send requests without waiting for the model, turn it off in Settings → Privacy.", held, why)
+		return fmt.Sprintf("owl held this request for %s waiting for the local masking model (Settings → Privacy) to mask it%s, so it was stopped rather than sent masked by the rules alone. Send it again. To send requests without waiting for the model, turn it off in Settings → Privacy.", held, why)
 	}
 	if masking {
-		return fmt.Sprintf("myna held this request for %s while masking it (Settings → Privacy), before routing it to any provider, so it was stopped rather than left waiting. Send it again. "+heldSay, held, heldWhere())
+		return fmt.Sprintf("owl held this request for %s while masking it (Settings → Privacy), before routing it to any provider, so it was stopped rather than left waiting. Send it again. "+heldSay, held, heldWhere())
 	}
-	return fmt.Sprintf("myna held this request for %s without routing it to any provider, so it was stopped rather than left waiting. Send it again. "+heldSay, held, heldWhere())
+	return fmt.Sprintf("owl held this request for %s without routing it to any provider, so it was stopped rather than left waiting. Send it again. "+heldSay, held, heldWhere())
 }
 
 // heldSay is where the error of a request held too long sends its user:
-// the report myna saved of it (heldReport), which a desktop app's user
+// the report owl saved of it (heldReport), which a desktop app's user
 // can reach, where its log goes only to a stderr nobody sees.
-const heldSay = "If it keeps happening, report it with the report myna saved of where it was held: Copy Report on this request on myna's Routing page, or the newest file in %s."
+const heldSay = "If it keeps happening, report it with the report owl saved of where it was held: Copy Report on this request on owl's Routing page, or the newest file in %s."
 
 // modelOn and modelBusy are internal/masking's, a test's
 // to stand in for.

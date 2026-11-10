@@ -178,7 +178,7 @@ func TestRemoveFoundServerOwn(t *testing.T) {
 	}
 }
 
-// Every agent whose MCP file myna reads: a server of the user's there is
+// Every agent whose MCP file owl reads: a server of the user's there is
 // found, and removed from each file it is in, in that agent's own format;
 // the user's other server there, and a key of theirs in it, stay.
 func TestRemoveFoundServerEveryAgent(t *testing.T) {
@@ -229,7 +229,7 @@ func TestRemoveFoundServerEveryAgent(t *testing.T) {
 	}
 }
 
-// Every format myna reads an agent's servers in, the agents a sandbox
+// Every format owl reads an agent's servers in, the agents a sandbox
 // doesn't find included (Hermes, Zed, Kimi, Devin, Grok, Cline, …): the
 // entry goes, the user's other server and their key in it stay, and the
 // file is backed up first.

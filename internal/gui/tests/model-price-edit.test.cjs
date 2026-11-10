@@ -1,11 +1,11 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // #819 (ITea312: 图形界面找不到给某个模型单独定价，只能用全局倍率): a model's
-// price, which only `myna model price` set, is given in the provider
+// price, which only `owl model price` set, is given in the provider
 // editor's Names, prices & levels, beside its name. Each box shows the model's list
 // price until one is typed, a part left empty takes the list's, and
 // Restore default gives it its list price again; all made with the
-// provider's Save. A Remote myna's model says its list price is what the
-// other myna counts it at (Sorghum on Discord), and an off-peak one when
+// provider's Save. A Remote owl's model says its list price is what the
+// other owl counts it at (Sorghum on Discord), and an off-peak one when
 // it counts double (treeMan on Discord). English and Chinese.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -22,7 +22,7 @@ function serve(lang, posts) {
     { id: "model-1", name: "Model 1", on: true, efforts: [], images: false, list },
     { id: "model-2", name: "Model 2", on: true, efforts: [], images: false, list, price: { input: 0.5, output: 2, cache_read: 0.05, cache_write: 0 } },
     { id: "model-3", name: "Model 3", on: true, efforts: [], images: false },
-    // a Remote myna's: its list price is what that myna counts it at
+    // a Remote owl's: its list price is what that owl counts it at
     { id: "model-4", name: "Model 4", on: true, efforts: [], images: false, list, remoteList: true },
     // billed by the hour (treeMan on Discord): the list price is off-peak
     { id: "model-5", name: "Model 5", on: true, efforts: [], images: false, list: { ...list, peak: "deepseek" } },
@@ -67,7 +67,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const errors = [], posts = [];
       page.on("pageerror", (e) => errors.push(e.message));
       await page.route("**/*", serve(lang, posts));
-      await page.goto("http://myna.test/?view=providers");
+      await page.goto("http://owl.test/?view=providers");
       const zh = lang === "zh";
       const L = { names: zh ? "名称、价格与推理档位" : "Names, prices & levels", price: zh ? "价格（$ / 百万 tokens）" : "Price, $ / 1M tokens", input: zh ? "输入" : "Input", output: zh ? "输出" : "Output",
         unsaved: zh ? "未保存" : "unsaved", save: zh ? "保存" : "Save", reset: zh ? "恢复默认" : "Restore default", nolist: zh ? "model-3 没有官方价格：请填写输入和输出价格" : "model-3 has no list price: give its input and output prices" };
@@ -82,9 +82,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.deepEqual(await boxes("model-2").evaluateAll((is) => is.map((i) => i.value)), ["0.5", "2", "0.05", "0", ""]);
       assert.equal(await row("model-1").getByRole("textbox", { name: L.input, exact: true }).count(), 1);
       assert.equal(await row("model-1").locator("select").count(), 0);
-      // whose list price it is: models.dev's, or the other myna's
+      // whose list price it is: models.dev's, or the other owl's
       assert.match(await row("model-1").locator(".mprice").getAttribute("title"), zh ? /留空即官方价格/ : /empty: its list price/);
-      assert.match(await row("model-4").locator(".mprice").getAttribute("title"), zh ? /留空即另一台 myna 计费用的价格/ : /empty: what the other myna counts it at/);
+      assert.match(await row("model-4").locator(".mprice").getAttribute("title"), zh ? /留空即另一台 owl 计费用的价格/ : /empty: what the other owl counts it at/);
       // an off-peak list price says when it counts double, and that a
       // price set here does too; DeepSeek's own but for China's public
       // holidays

@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/usage"
 )
 
 func TestReasoningSpeedEvidence(t *testing.T) {
@@ -86,7 +86,7 @@ func TestReasoningSpeedThroughGateway(t *testing.T) {
 	}
 }
 
-// A reply's speed is over the time it took to come, not what myna
+// A reply's speed is over the time it took to come, not what owl
 // writes down of it once it has: a busy disk held saving sticks after the
 // answer for seconds, and the reply's ms with it, so a reply that streamed
 // at its pace read as one held back and let go in a burst, and told no
@@ -127,7 +127,7 @@ func TestSpeedEndsWithTheReply(t *testing.T) {
 		t.Fatalf("%d %+v %s", rec.Code, u, rec.Body)
 	}
 	if u.Millis >= held.Milliseconds() {
-		t.Fatalf("the reply's ms %d count the %v myna took saving after it", u.Millis, held)
+		t.Fatalf("the reply's ms %d count the %v owl took saving after it", u.Millis, held)
 	}
 	if n, w := u.Decode(); n != 120 || w < usage.MinDecodeMs || w > u.Millis {
 		t.Fatalf("a reply that came at its pace tells no speed: %d/%d %+v", n, w, u)

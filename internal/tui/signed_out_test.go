@@ -4,11 +4,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // An account whose every sign-in in use was refused reads as signed out
-// on the Providers page, as myna providers and the app say it (LeeHom on
+// on the Providers page, as owl providers and the app say it (LeeHom on
 // Discord), not as a green signed-in account.
 func TestProvidersSaySignedOut(t *testing.T) {
 	home(t)

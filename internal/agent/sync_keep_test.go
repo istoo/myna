@@ -17,23 +17,23 @@ func providerAt(t *testing.T, path, top string) map[string]any {
 	if err := json.Unmarshal([]byte(readFile(path)), &f); err != nil || json.Unmarshal(f[top], &ps) != nil {
 		t.Fatalf("%s: %v\n%s", path, err, readFile(path))
 	}
-	return ps[mynaID]
+	return ps[owlID]
 }
 
 // #1103: pi-cache-optimizer's /cache-optimizer fix adds
-// providers.myna.compat.sendSessionAffinityHeaders to Pi's models.json.
-// A catalog sync, and a pick of a myna model in Pi, keep it; the model
-// list is still myna's, so a model gone from the catalog leaves it, and
+// providers.owl.compat.sendSessionAffinityHeaders to Pi's models.json.
+// A catalog sync, and a pick of a owl model in Pi, keep it; the model
+// list is still owl's, so a model gone from the catalog leaves it, and
 // a sync with nothing new writes nothing.
-func TestPiKeepsTheirKeysInMynasProvider(t *testing.T) {
+func TestPiKeepsTheirKeysInOwlsProvider(t *testing.T) {
 	home := syncHome(t)
 	piModels := filepath.Join(home, ".pi", "agent", "models.json")
-	// the block as myna wrote it, with the optimizer's key added
+	// the block as owl wrote it, with the optimizer's key added
 	writeFile(t, piModels, `{
   "providers": {
-    "myna": {
+    "owl": {
       "api": "openai-completions",
-      "apiKey": "myna",
+      "apiKey": "owl",
       "baseUrl": "http://127.0.0.1:3425/v1",
       "compat": {
         "sendSessionAffinityHeaders": true
@@ -44,14 +44,14 @@ func TestPiKeepsTheirKeysInMynasProvider(t *testing.T) {
           "name": "Old"
         }
       ],
-      "name": "myna"
+      "name": "owl"
     }
   }
 }
 `)
-	// Pi runs a model of myna's: connected, so its list follows
-	writeFile(t, filepath.Join(home, ".pi", "agent", "settings.json"), `{"defaultProvider":"myna","defaultModel":"relay/glm-4.6"}`)
-	setUpInMyna("pi")
+	// Pi runs a model of owl's: connected, so its list follows
+	writeFile(t, filepath.Join(home, ".pi", "agent", "settings.json"), `{"defaultProvider":"owl","defaultModel":"relay/glm-4.6"}`)
+	setUpInOwl("pi")
 	SyncCatalog()
 	p := providerAt(t, piModels, "providers")
 	compat, _ := p["compat"].(map[string]any)
@@ -60,7 +60,7 @@ func TestPiKeepsTheirKeysInMynasProvider(t *testing.T) {
 	}
 	ms, _ := json.Marshal(p["models"])
 	if strings.Contains(string(ms), "gone/old-model") || !strings.Contains(string(ms), "relay/glm-4.6") {
-		t.Fatalf("models not myna's list: %s", ms)
+		t.Fatalf("models not owl's list: %s", ms)
 	}
 
 	// synced already: the next sync writes nothing
@@ -72,8 +72,8 @@ func TestPiKeepsTheirKeysInMynasProvider(t *testing.T) {
 		t.Errorf("models.json rewritten though nothing changed:\n%s", readFile(piModels))
 	}
 
-	// picking a myna model in Pi writes the block too
-	if err := pi(home).Fields[0].Set("myna/relay/glm-4.6"); err != nil {
+	// picking a owl model in Pi writes the block too
+	if err := pi(home).Fields[0].Set("owl/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	compat, _ = providerAt(t, piModels, "providers")["compat"].(map[string]any)
@@ -82,12 +82,12 @@ func TestPiKeepsTheirKeysInMynasProvider(t *testing.T) {
 	}
 }
 
-// The same for OpenCode's provider.myna (an options key of the user's
-// own) and Crush's providers.myna.
-func TestOpenCodeAndCrushKeepTheirKeysInMynasProvider(t *testing.T) {
+// The same for OpenCode's provider.owl (an options key of the user's
+// own) and Crush's providers.owl.
+func TestOpenCodeAndCrushKeepTheirKeysInOwlsProvider(t *testing.T) {
 	home := syncHome(t)
 	cfg := filepath.Join(home, ".config", "opencode", "opencode.json")
-	writeFile(t, cfg, `{"model":"myna/relay/glm-4.6","provider":{"myna":{"name":"myna","npm":"@ai-sdk/openai-compatible","options":{"baseURL":"http://127.0.0.1:3425/v1","apiKey":"myna","setCacheKey":true},"models":{"gone/old-model":{"name":"Old"}}}}}`)
+	writeFile(t, cfg, `{"model":"owl/relay/glm-4.6","provider":{"owl":{"name":"owl","npm":"@ai-sdk/openai-compatible","options":{"baseURL":"http://127.0.0.1:3425/v1","apiKey":"owl","setCacheKey":true},"models":{"gone/old-model":{"name":"Old"}}}}}`)
 	oc := opencode(home, filepath.Join(home, ".config"))
 	if err := oc.Sync(); err != nil {
 		t.Fatal(err)
@@ -98,7 +98,7 @@ func TestOpenCodeAndCrushKeepTheirKeysInMynasProvider(t *testing.T) {
 	if opts["setCacheKey"] != true || ms["gone/old-model"] != nil || ms["relay/glm-4.6"] == nil {
 		t.Fatalf("opencode sync:\n%s", readFile(cfg))
 	}
-	if err := oc.Fields[0].Set("myna/relay/glm-4.6"); err != nil {
+	if err := oc.Fields[0].Set("owl/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	if opts, _ := providerAt(t, cfg, "provider")["options"].(map[string]any); opts["setCacheKey"] != true {
@@ -106,7 +106,7 @@ func TestOpenCodeAndCrushKeepTheirKeysInMynasProvider(t *testing.T) {
 	}
 
 	cr := filepath.Join(home, ".config", "crush", "crush.json")
-	writeFile(t, cr, `{"providers":{"myna":{"type":"openai","name":"myna","base_url":"http://127.0.0.1:3425/v1","api_key":"myna","extra_headers":{"X-Mine":"1"},"models":[]}}}`)
+	writeFile(t, cr, `{"providers":{"owl":{"type":"openai","name":"owl","base_url":"http://127.0.0.1:3425/v1","api_key":"owl","extra_headers":{"X-Mine":"1"},"models":[]}}}`)
 	c := crushAt(here(home), cr, filepath.Join(home, ".local", "share", "crush", "crush.json"))
 	if err := c.Sync(); err != nil {
 		t.Fatal(err)
@@ -114,7 +114,7 @@ func TestOpenCodeAndCrushKeepTheirKeysInMynasProvider(t *testing.T) {
 	if h, _ := providerAt(t, cr, "providers")["extra_headers"].(map[string]any); h["X-Mine"] != "1" {
 		t.Fatalf("crush sync:\n%s", readFile(cr))
 	}
-	if err := c.Fields[0].Set("myna/relay/glm-4.6"); err != nil {
+	if err := c.Fields[0].Set("owl/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	if h, _ := providerAt(t, cr, "providers")["extra_headers"].(map[string]any); h["X-Mine"] != "1" {

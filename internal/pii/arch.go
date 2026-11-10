@@ -6,11 +6,11 @@ import (
 	"golang.org/x/sys/cpu"
 )
 
-// osArch is the system myna was built for.
+// osArch is the system owl was built for.
 var osArch = runtime.GOOS + "-" + runtime.GOARCH
 
-// target is this system's name in serveSHA: the one myna was built
-// for, but Apple silicon's where an Intel myna runs under Rosetta.
+// target is this system's name in serveSHA: the one owl was built
+// for, but Apple silicon's where an Intel owl runs under Rosetta.
 // Rosetta before macOS 15 has no AVX, so the Intel pf-serve ended with
 // SIGILL on its first instruction of it, on Metal and on the CPU alike
 // (echo_yip on X); Apple silicon's runs there natively, on Metal.

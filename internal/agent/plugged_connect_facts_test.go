@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // An agent plugin's connect is told, of each model in models and of
@@ -30,7 +30,7 @@ export function connect({ gateway, model, models }) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := a.Field("model").Set("myna/deepseek/pro"); err != nil {
+	if err := a.Field("model").Set("owl/deepseek/pro"); err != nil {
 		t.Fatal(err)
 	}
 	b, err := os.ReadFile(filepath.Join(home, ".facts.json"))

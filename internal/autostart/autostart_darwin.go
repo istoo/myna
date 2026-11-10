@@ -8,10 +8,10 @@ import (
 	"path/filepath"
 	"regexp"
 
-	"github.com/istoo/myna/internal/edit"
+	"github.com/istoo/owl/internal/edit"
 )
 
-const label = "com.istoo.myna"
+const label = "com.istoo.owl"
 
 func record() string {
 	home, _ := os.UserHomeDir()
@@ -20,7 +20,7 @@ func record() string {
 
 // launchd loads no job that names neither its own label nor a program to
 // run: a record a write left short of either sits in LaunchAgents, is
-// refused, and myna never opens at login however long the file is there.
+// refused, and owl never opens at login however long the file is there.
 var ourLabel = regexp.MustCompile(`<key>Label</key>\s*<string>` + regexp.QuoteMeta(label) + `</string>`)
 
 func enabled() bool {
@@ -54,7 +54,7 @@ var legacyStatus = func(path string) int { return smUnknown }
 func heldBack() bool { return legacyStatus(record()) == smRequiresApproval }
 
 // a launch agent the system loads at the next login: the app itself, run
-// once, not kept alive — quitting myna quits it until then
+// once, not kept alive — quitting owl quits it until then
 func enable(exe string) error {
 	p := record()
 	if err := os.MkdirAll(filepath.Dir(p), 0o755); err != nil {
@@ -66,10 +66,10 @@ func enable(exe string) error {
 // plist is the launch agent for exe. AssociatedBundleIdentifiers names the
 // app the program belongs to: without it, System Settings' Login Items
 // lists a launch agent under the name on its signature, the developer's
-// own (#1512), rather than as myna with its icon. AbandonProcessGroup: launchd kills
+// own (#1512), rather than as owl with its icon. AbandonProcessGroup: launchd kills
 // whatever a job started once the job exits, and a restart to update is
 // the job quitting with the shell that opens the new version still
-// waiting for it to go — without the key, a myna opened at login never
+// waiting for it to go — without the key, a owl opened at login never
 // came back from an update.
 func plist(exe string) []byte {
 	return []byte(fmt.Sprintf(`<?xml version="1.0" encoding="UTF-8"?>
@@ -114,10 +114,19 @@ func associated(exe string) string {
 // launchd refuses the job
 var program = regexp.MustCompile(`<key>ProgramArguments</key>\s*<array><string>([^<]+)</string>`)
 
-// refresh writes a launch agent an older myna wrote over as this one
+// dropLegacy removes the launch agent this fork wrote as myna (until it
+// became owl): the myna it names may still be installed, and both opening
+// at login fight for one port. A job already loaded stays till log-out.
+func dropLegacy() {
+	home, _ := os.UserHomeDir()
+	_ = os.Remove(filepath.Join(home, "Library", "LaunchAgents", "com.istoo.myna.plist"))
+}
+
+// refresh writes a launch agent an older owl wrote over as this one
 // would, for the program it names: the path stays the one the user turned
-// it on for, whichever copy of myna is running now.
+// it on for, whichever copy of owl is running now.
 func refresh() error {
+	dropLegacy()
 	p := record()
 	b, err := os.ReadFile(p)
 	if err != nil {
@@ -125,7 +134,7 @@ func refresh() error {
 	}
 	m := program.FindSubmatch(b)
 	if m == nil {
-		return nil // not one myna wrote
+		return nil // not one owl wrote
 	}
 	exe := html.UnescapeString(string(m[1]))
 	if associated(exe) == "" && bytes.Contains(b, []byte("<key>AssociatedBundleIdentifiers</key>")) {

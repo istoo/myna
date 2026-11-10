@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/istoo/myna/internal/access"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/access"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // KeysPath issues short-lived gateway keys (xazaj on X: an orchestrator
@@ -21,14 +21,14 @@ import (
 // KeysPath/{id} revokes one early.
 //
 // Who may issue: a gateway key the user let issue keys (Key.Issues,
-// myna gateway-key issuer <id> on), from wherever it is let in, every
+// owl gateway-key issuer <id> on), from wherever it is let in, every
 // key it issues bounded by it (access.IssueKey); or, with no key, a
 // program on this computer over loopback that carries no browser's marks
 // (profileRefused's rule), which may already use every model and could
-// run myna gateway-key itself. A page in a browser, another machine
+// run owl gateway-key itself. A page in a browser, another machine
 // without such a key, a held or read-only key and an issued key never
 // may.
-const KeysPath = "/v1/myna/keys"
+const KeysPath = "/v1/owl/keys"
 
 // issuedKeyBody is a POST's body.
 type issuedKeyBody struct {
@@ -51,12 +51,12 @@ func keyIssuer(r *http.Request) (string, int, string) {
 			return "", http.StatusForbidden, "this gateway key was issued itself, so it can't issue keys"
 		}
 		if !who.Issues {
-			return "", http.StatusForbidden, "this gateway key can't issue keys: let it with myna gateway-key issuer " + who.KeyID + " on"
+			return "", http.StatusForbidden, "this gateway key can't issue keys: let it with owl gateway-key issuer " + who.KeyID + " on"
 		}
 		return who.KeyID, 0, ""
 	}
-	if why := profileRefused(r, "keys", "myna gateway-key issue"); why != "" {
-		return "", http.StatusForbidden, why + ", or send a gateway key that may issue keys (myna gateway-key issuer <id> on)"
+	if why := profileRefused(r, "keys", "owl gateway-key issue"); why != "" {
+		return "", http.StatusForbidden, why + ", or send a gateway key that may issue keys (owl gateway-key issuer <id> on)"
 	}
 	return "", 0, ""
 }

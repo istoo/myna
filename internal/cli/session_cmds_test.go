@@ -14,8 +14,8 @@ func TestSessionCommandsSkipStartUp(t *testing.T) {
 	was := startUp
 	startUp = func() { ran++ }
 	t.Cleanup(func() { startUp = was })
-	t.Setenv("MYNA_ADDR", "127.0.0.1:1")
-	t.Setenv("MYNA_MCP_CALLBACK", "")
+	t.Setenv("OWL_ADDR", "127.0.0.1:1")
+	t.Setenv("OWL_MCP_CALLBACK", "")
 	null, err := os.Open(os.DevNull)
 	if err != nil {
 		t.Fatal(err)

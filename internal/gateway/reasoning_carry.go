@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // A Responses upstream's sealed reasoning across a client of another API
@@ -23,11 +23,11 @@ import (
 //
 // So the reasoning items that come before a step's first call ride in
 // that call's id, as Gemini's signatures do (gemini_signature.go): they
-// are kept in myna's folder (keepSignature, by their hash) and the id
+// are kept in owl's folder (keepSignature, by their hash) and the id
 // carries the key, <id>__rk16__<key>. Every client sends a call's id back
 // as it was given, and on the way back the items go in front of the
 // assistant turn that made the call, and the id is the call's own again.
-// A key myna no longer has (or an id a client shortened) is no
+// A key owl no longer has (or an id a client shortened) is no
 // reasoning: the step goes as before.
 
 const (
@@ -79,7 +79,7 @@ func reasonedID(id string, items []json.RawMessage) string {
 }
 
 // unreasonedID splits an id reasonedID made into the call's own id and
-// the reasoning items it refers to (none when myna no longer has them).
+// the reasoning items it refers to (none when owl no longer has them).
 // Any other id comes back as it is.
 func unreasonedID(id string) (string, []json.RawMessage) {
 	at := len(id) - reasonKeyLen - len(reasonTail)

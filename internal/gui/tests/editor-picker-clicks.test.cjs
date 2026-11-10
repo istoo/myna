@@ -17,8 +17,8 @@ const assets = path.resolve(__dirname, "../assets");
 const options = [
   { value: "glm-5-2", label: "glm-5-2", note: "routing group", group: "Routing groups" },
   { value: "seed-evolving", label: "Seed Evolving", note: "routing group", group: "Routing groups" },
-  { value: "volc/doubao-seed", label: "doubao-seed", note: "Volcengine · via myna", icon: "volcengine-color", group: "Volcengine", ref: "volc/doubao-seed" },
-  { value: "zhipu/glm-5-2", label: "GLM-5.2", note: "Zhipu · via myna", icon: "zhipu-color", group: "Zhipu", ref: "zhipu/glm-5-2" },
+  { value: "volc/doubao-seed", label: "doubao-seed", note: "Volcengine · via owl", icon: "volcengine-color", group: "Volcengine", ref: "volc/doubao-seed" },
+  { value: "zhipu/glm-5-2", label: "GLM-5.2", note: "Zhipu · via owl", icon: "zhipu-color", group: "Zhipu", ref: "zhipu/glm-5-2" },
 ];
 const state = (value) => ({
   agents: [{ id: "claude", name: "Claude Code", icon: "claudecode-color", path: "/test/settings.json", wired: true,
@@ -76,7 +76,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           page.setDefaultNavigationTimeout(60000);
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", serve(lang, sets));
-          await page.goto("http://myna.test/?view=providers");
+          await page.goto("http://owl.test/?view=providers");
           await page.locator('.row.provider[data-id="volc"]').click();
           const chip = page.locator(".modal .achip");
           await chip.waitFor();

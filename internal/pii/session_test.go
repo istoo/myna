@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/redact"
+	"github.com/istoo/owl/internal/redact"
 )
 
 // sessionBody is turn n of an agent's Chat Completions session, as a

@@ -39,7 +39,7 @@ function server(lang, state, posts) {
     if (url.pathname === "/api/groups") return json({ groups: [], pools: [] });
     if (url.pathname === "/api/usage/quotas") return json([]);
     if (url.pathname.startsWith("/api/")) return json({});
-    if (url.host !== "myna.test") return route.fulfill({ status: 404, body: "" });
+    if (url.host !== "owl.test") return route.fulfill({ status: 404, body: "" });
     const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
     const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
     try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -68,21 +68,21 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await t.test(lang + " " + i, async () => {
           const state = {
             lib: {
-              dir: `${HOME}/.myna/library`, backups: `${HOME}/.myna/backups`, home: HOME,
+              dir: `${HOME}/.owl/library`, backups: `${HOME}/.owl/backups`, home: HOME,
               agents: [agent("claude", "Claude Code", "claudecode-color"), agent("codex", "Codex", "openai")],
               instructions: { agents: [], sets: [] }, servers: [], foundServers: [], projects: [], foundSkills: [], problems: [],
               skills: c.skills,
             },
           };
           const ctx = await browser.newContext({ viewport: { width: 1100, height: 760 }, reducedMotion: "reduce" });
-          await ctx.addInitScript(() => { try { localStorage.setItem("myna.libTab", "skills"); } catch {} });
+          await ctx.addInitScript(() => { try { localStorage.setItem("owl.libTab", "skills"); } catch {} });
           const page = await ctx.newPage();
           page.setDefaultTimeout(5000);
           page.setDefaultNavigationTimeout(60000);
           const errors = [];
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", server(lang, state, []));
-          await page.goto("http://myna.test/");
+          await page.goto("http://owl.test/");
           await navTo(page, "library");
           const v = page.locator("#view-library");
           await v.locator(".lib-subhead").first().waitFor();

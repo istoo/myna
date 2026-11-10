@@ -1,5 +1,5 @@
 // The credits read from commit subjects (credits.mjs). Every subject here is
-// one from istoo/myna's own history, word for word.
+// one from istoo/owl's own history, word for word.
 import test from "node:test";
 import assert from "node:assert/strict";
 import { parse, credit, everyone, thanks, what, wall, renderWall } from "./credits.mjs";
@@ -39,13 +39,13 @@ test("a lone bracketed handle is credited when shaped like one or named elsewher
 
 test("a quote after the name is not part of it", () => {
   assert.deepEqual(names("zen: Test with the public key asks each API for a free model Zen serves on it, and leaves out an API no free model is on (z'x on Discord; #2385)"), ["z'x"]);
-  assert.deepEqual(parse("zen: Test with the public key asks each API for a free model Zen serves on it, and leaves out an API no free model is on (z'x on Discord; #2385)").refs, [{ repo: "istoo/myna", n: 2385 }]);
+  assert.deepEqual(parse("zen: Test with the public key asks each API for a free model Zen serves on it, and leaves out an API no free model is on (z'x on Discord; #2385)").refs, [{ repo: "istoo/owl", n: 2385 }]);
 });
 
 test("the maintainer, the owner and descriptions of someone are nobody", () => {
   assert.deepEqual(names("plugins: the GitHub list waits up to 3s for a repository's https icon fetched the first time (yetone: 非官方插件显示不出来 logo)"), []);
-  assert.deepEqual(names("tray: with the menu bar's myna icon off, a click opens the panel on the tab left last, not Allowances (the owner: 每次都会自动跳转到 allowances，我记得之前是可以的)"), []);
-  assert.deepEqual(names("gui: a Claude account saved in myna can be removed while Claude Code is signed out (𝕏 user on Discord: a banned account logged out, and its line in Providers had nothing to remove it with) — saved accounts are listed"), []);
+  assert.deepEqual(names("tray: with the menu bar's owl icon off, a click opens the panel on the tab left last, not Allowances (the owner: 每次都会自动跳转到 allowances，我记得之前是可以的)"), []);
+  assert.deepEqual(names("gui: a Claude account saved in owl can be removed while Claude Code is signed out (𝕏 user on Discord: a banned account logged out, and its line in Providers had nothing to remove it with) — saved accounts are listed"), []);
 });
 
 test("code, labels and words beside an issue number are not people", () => {
@@ -54,30 +54,30 @@ test("code, labels and words beside an issue number are not people", () => {
     "routing: picking Live or a day keeps the page where it is, and a list with no requests says what it is for (Image #59) — a day or Live picked",
     "gui tests: the Routing page's tests pick a day from the date bar, not the By request button (#860 flake) — remote-group-served's zh case",
     "mcpauth: a sign-in asks for offline_access when the authorization server offers it, so Vercel's MCP stays signed in (#615: \"vercel老是掉\"; Neon, Notion and Supabase stay) — mcp.vercel.com's",
-    "codex: a client's access_programs and the account's extraBody reach the ChatGPT backend, and its refusal comes back as it said it (myna-releases#18)",
+    "codex: a client's access_programs and the account's extraBody reach the ChatGPT backend, and its refusal comes back as it said it (owl-releases#18)",
     "efd1b697e sessions: a cached file's calls are read into a slice made for them",
   ]) assert.deepEqual(names(s), [], s);
   // a word beside a credit is a person only when named somewhere else
-  assert.deepEqual(names("agent: Claude Desktop on myna keeps the language picked signed in with Anthropic (memory, Osal on Discord)"), ["Osal"]);
+  assert.deepEqual(names("agent: Claude Desktop on owl keeps the language picked signed in with Anthropic (memory, Osal on Discord)"), ["Osal"]);
 });
 
 test("issue and PR numbers are kept for their authors, in either repository", () => {
-  assert.deepEqual(parse("redact: a file named like an address (…@2x.jpg) is not masked as an email (#3029)").refs, [{ repo: "istoo/myna", n: 3029 }]);
+  assert.deepEqual(parse("redact: a file named like an address (…@2x.jpg) is not masked as an email (#3029)").refs, [{ repo: "istoo/owl", n: 3029 }]);
   assert.deepEqual(parse("redact: Codex's tool server names, stream_options and snake_case words go as written (#3143, #3144)").refs.map((r) => r.n), [3143, 3144]);
   assert.deepEqual(parse("provider: Devin's plugin min is 0.1.30, its opt-in cache keepalive (plugins#592)").refs, [{ repo: "magpie-community/plugins", n: 592 }]);
   assert.deepEqual(parse("provider: WorkBuddy's mover asks for opencode-workbuddy-auth 0.2.9, whose declared models take images (plugins #572)").refs, [{ repo: "magpie-community/plugins", n: 572 }]);
   const s = "redact: Codex's tool server names, stream_options and snake_case words go as written (#3143, #3144)";
-  const issueAuthors = { "istoo/myna#3143": "hhh2210", "istoo/myna#3144": "dependabot[bot]" };
+  const issueAuthors = { "istoo/owl#3143": "hhh2210", "istoo/owl#3144": "dependabot[bot]" };
   const got = credit([{ subject: s, author: "yetone" }], { issueAuthors })[0];
   assert.deepEqual(got.map((p) => [p.name, p.github]), [["hhh2210", "hhh2210"]]);
   // a name and an issue in one bracket: both
-  assert.deepEqual(names("provider: a Max output kept for a model no longer listed doesn't block the editor's Save (#3305, LoKi)", { issueAuthors: { "istoo/myna#3305": "LoKi" } }), ["LoKi"]);
-  assert.deepEqual(names("sessions: Terminal is opened through proc.Command, as every command myna runs is (spotted by @hezhizhen in #103)"), ["hezhizhen"]);
+  assert.deepEqual(names("provider: a Max output kept for a model no longer listed doesn't block the editor's Save (#3305, LoKi)", { issueAuthors: { "istoo/owl#3305": "LoKi" } }), ["LoKi"]);
+  assert.deepEqual(names("sessions: Terminal is opened through proc.Command, as every command owl runs is (spotted by @hezhizhen in #103)"), ["hezhizhen"]);
 });
 
 test("commit authors and co-authors are credited, agents and machines not, and no email is given", () => {
   const per = credit([
-    { subject: "gui: a group's Save no longer leaves the Routing page blank (#884)", author: "wizzy-yang", email: "244719629+wizzy-yang@users.noreply.github.com", coauthors: [{ name: "myna-fix", email: "fix@localhost" }] },
+    { subject: "gui: a group's Save no longer leaves the Routing page blank (#884)", author: "wizzy-yang", email: "244719629+wizzy-yang@users.noreply.github.com", coauthors: [{ name: "owl-fix", email: "fix@localhost" }] },
     { subject: "gateway: count usage from multiline and final SSE events (#94)", author: "Charan Rathore", email: "charan-rathore@users.noreply.github.com", coauthors: [{ name: "Instinct Agent", email: "agent@instinct.com" }, { name: "Claude Opus 5.5", email: "noreply@anthropic.com" }] },
     { subject: "docker: a server image and a multi-arch build workflow (#245)", author: "Shelken", email: "shelken@example.com", coauthors: [{ name: "glm-5.3-flash", email: "hakase@ooooo.space" }, { name: "yetone", email: "yetoneful@gmail.com" }] },
     { subject: "Merge pull request #1 from someone/branch", author: "ggbdpq", email: "x@y", parents: 2 },
@@ -108,8 +108,8 @@ test("the release notes' thanks line, in English and Chinese", () => {
     { subject: "guard: the local masking model reads text a third faster on amd64 (mrwl666)" },
     { subject: "gateway: a HEIC photo is sent once (qikamatata on X)" },
   ]));
-  assert.equal(thanks(people, "en"), "Thanks to packinggoodsllc\\_07668, qikamatata and mrwl666, whose reports and code went into this release. Everyone who helped: [contributors](https://github.com/istoo/myna/blob/main/docs/contributors).");
-  assert.equal(thanks(people, "zh"), "感谢 packinggoodsllc\\_07668、qikamatata 和 mrwl666：这次更新里有你们的反馈与代码。所有贡献者见[贡献墙](https://github.com/istoo/myna/blob/main/docs/zh/contributors)。");
+  assert.equal(thanks(people, "en"), "Thanks to packinggoodsllc\\_07668, qikamatata and mrwl666, whose reports and code went into this release. Everyone who helped: [contributors](https://github.com/istoo/owl/blob/main/docs/contributors).");
+  assert.equal(thanks(people, "zh"), "感谢 packinggoodsllc\\_07668、qikamatata 和 mrwl666：这次更新里有你们的反馈与代码。所有贡献者见[贡献墙](https://github.com/istoo/owl/blob/main/docs/zh/contributors)。");
   assert.equal(thanks(people.slice(0, 1), "en").startsWith("Thanks to packinggoodsllc\\_07668, whose"), true);
   assert.match(thanks(people.slice(0, 1), "zh"), /里有你的/);
   assert.equal(thanks([], "en"), "");
@@ -135,15 +135,15 @@ test("the page shows what each person's reports led to, newest first", () => {
 });
 
 test("issue authors GitHub can't give are left out, not guessed", async () => {
-  const refs = [{ repo: "istoo/myna", n: 1 }, { repo: "istoo/myna", n: 2 }];
+  const refs = [{ repo: "istoo/owl", n: 1 }, { repo: "istoo/owl", n: 2 }];
   const ok = async () => ({ ok: true, json: async () => ({ data: { repository: { i1: { author: { login: "alice", __typename: "User" } }, i2: { author: { login: "dependabot", __typename: "Bot" } } } } }) });
-  assert.deepEqual(await authors(refs, { fetchImpl: ok, tok: "t" }), { "istoo/myna#1": "alice", "istoo/myna#2": "dependabot[bot]" });
+  assert.deepEqual(await authors(refs, { fetchImpl: ok, tok: "t" }), { "istoo/owl#1": "alice", "istoo/owl#2": "dependabot[bot]" });
   const down = async () => ({ ok: false, status: 502 });
   const err = process.stderr.write;
   process.stderr.write = () => true;
   try {
     assert.deepEqual(await authors(refs, { fetchImpl: down, tok: "t" }), {});
-    assert.deepEqual(await authors(refs, { fetchImpl: down, tok: "t", known: { "istoo/myna#1": "alice" } }), { "istoo/myna#1": "alice" });
+    assert.deepEqual(await authors(refs, { fetchImpl: down, tok: "t", known: { "istoo/owl#1": "alice" } }), { "istoo/owl#1": "alice" });
     assert.deepEqual(await authors(refs, { fetchImpl: ok, tok: "" }), {});
   } finally { process.stderr.write = err; }
 });

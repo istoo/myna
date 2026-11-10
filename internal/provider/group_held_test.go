@@ -7,11 +7,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // groupHeldFixture is a dozen providers serving the same models, so
-// myna finds a group of each, and a group of the user's of four.
+// owl finds a group of each, and a group of the user's of four.
 func groupHeldFixture(t *testing.T) {
 	t.Helper()
 	isolate(t)
@@ -20,7 +20,7 @@ func groupHeldFixture(t *testing.T) {
 	t.Setenv("USERPROFILE", home)
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
 	t.Setenv("XDG_CACHE_HOME", filepath.Join(home, ".cache"))
-	t.Setenv("MYNA_NO_ACCOUNTS", "1")
+	t.Setenv("OWL_NO_ACCOUNTS", "1")
 	var models []string
 	for i := range 10 {
 		models = append(models, fmt.Sprintf("m%d", i))
@@ -132,7 +132,7 @@ func TestGroupLooksParseNoSettingsPerGroupWhileHeld(t *testing.T) {
 }
 
 // BenchmarkGroupEntries is the groups' entries of a catalog of 30
-// providers serving the same 60 models (60 groups myna finds, of 30
+// providers serving the same 60 models (60 groups owl finds, of 30
 // members each), built afresh: what each request built several times.
 func BenchmarkGroupEntries(b *testing.B) {
 	isolate(b)
@@ -141,7 +141,7 @@ func BenchmarkGroupEntries(b *testing.B) {
 	b.Setenv("USERPROFILE", home)
 	b.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
 	b.Setenv("XDG_CACHE_HOME", filepath.Join(home, ".cache"))
-	b.Setenv("MYNA_NO_ACCOUNTS", "1")
+	b.Setenv("OWL_NO_ACCOUNTS", "1")
 	var models []string
 	for i := range 60 {
 		models = append(models, fmt.Sprintf("m%d", i))
@@ -294,7 +294,7 @@ func BenchmarkGroupLooksHeld(b *testing.B) {
 	b.Setenv("USERPROFILE", home)
 	b.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
 	b.Setenv("XDG_CACHE_HOME", filepath.Join(home, ".cache"))
-	b.Setenv("MYNA_NO_ACCOUNTS", "1")
+	b.Setenv("OWL_NO_ACCOUNTS", "1")
 	var models []string
 	for i := range 60 {
 		models = append(models, fmt.Sprintf("m%d", i))

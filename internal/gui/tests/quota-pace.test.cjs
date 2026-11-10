@@ -32,7 +32,7 @@ function settingsPayload(over) {
     dock: false, dockWindow: false, proxy: "", redact: false, redactPersonal: false, redactWords: [],
     codexWarmup: "", claudeWarmup: "", codexWarmAt: "", claudeWarmAt: "", workbuddyCheckin: false, noStats: false,
     trayUsage: "claude|dee@example.com", trayUsages: ["claude|dee@example.com"], trayUsageEvery: 3, vision: "", imageGen: "",
-    version: "0.1.400", dir: "~/.config/myna", gateway: "http://127.0.0.1:3999",
+    version: "0.1.400", dir: "~/.config/owl", gateway: "http://127.0.0.1:3999",
     proxyNow: "none", proxySource: "none", login: false,
     visionModels: [], imageGenModels: [], workbuddyCheckins: [], lanURLs: [],
     fx: { rate: 7.2, at: new Date().toISOString(), stale: false },
@@ -84,7 +84,7 @@ async function open(browser, lang, width, over = {}, posts = [], platform = "Mac
   page.setDefaultTimeout(5000);
   page.setDefaultNavigationTimeout(60000);
   await page.route("**/*", serve(lang, posts, over));
-  await page.goto("http://myna.test/?view=usage");
+  await page.goto("http://owl.test/?view=usage");
   return { context, page };
 }
 
@@ -157,7 +157,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const row = page.locator("#trayPaceRow");
         await row.waitFor();
         assert.equal((await row.locator(".name").textContent()).trim(), want[lang].row, where);
-        assert.equal(await row.evaluate((r) => r.previousElementSibling.id), "trayBirdRow", `${where}: under the myna icon row`);
+        assert.equal(await row.evaluate((r) => r.previousElementSibling.id), "trayBirdRow", `${where}: under the owl icon row`);
         assert.equal(await row.evaluate((r) => getComputedStyle(r).borderLeftWidth), "0px");
         assert.equal(await row.evaluate((r) => r.scrollWidth <= r.clientWidth + 1 && r.getBoundingClientRect().right <= innerWidth), true, `${where}: the row is cut`);
         const opts = row.locator("#trayPaceSegs [role=switch]");

@@ -57,7 +57,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const saved = [];
       await page.route("**/*", serve(lang, saved));
       await watchSettingsReads(page);
-      await page.goto("http://myna.test/?view=settings&tab=models");
+      await page.goto("http://owl.test/?view=settings&tab=models");
       await settingsDrawn(page); // rows found are the ones that stay (#1659)
       const row = page.locator("#replyList #claudeLeanRow");
       await row.waitFor();

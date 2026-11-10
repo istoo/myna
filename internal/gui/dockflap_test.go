@@ -59,7 +59,9 @@ func TestDockFlapIsTheLogos(t *testing.T) {
 	if !ok {
 		t.Fatal("index.html's bird or a clip path didn't parse")
 	}
-	if len(bird.ops) < 100 || bird.ops[0] != 'M' {
+	// the owl's drawing is six subpaths (body, two eyes, two pupils, beak),
+	// 38 ops; one read empty or cut short is far fewer
+	if len(bird.ops) < 30 || bird.ops[0] != 'M' {
 		t.Errorf("the bird read as %d ops", len(bird.ops))
 	}
 	for i, c := range clips {

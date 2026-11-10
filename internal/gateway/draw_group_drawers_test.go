@@ -8,9 +8,9 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // jzw690 on X: a key provider's live list has a chat model and
@@ -23,7 +23,7 @@ import (
 // is no model agents are offered for a conversation.
 func TestImageGroupOfUnpickedImageModelsDraws(t *testing.T) {
 	s, e := easeled(t)
-	t.Setenv("MYNA_PUBLIC_URL", "")
+	t.Setenv("OWL_PUBLIC_URL", "")
 	t.Cleanup(s.imageStore.running.Wait)
 	var brokeAsked atomic.Int32
 	broke := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -68,14 +68,14 @@ func TestImageGroupOfUnpickedImageModelsDraws(t *testing.T) {
 	}
 
 	// named at the images API: the first member's 502, then pix draws
-	code, a, raw := postImages(t, s, "/v1/images/generations", "application/json", `{"model":"group/images","prompt":"a myna"}`)
+	code, a, raw := postImages(t, s, "/v1/images/generations", "application/json", `{"model":"group/images","prompt":"a owl"}`)
 	if code != 200 || a.Model != "pix/gpt-image-2" || brokeAsked.Load() == 0 {
 		t.Fatalf("group/images: %d %s (first member asked %d)", code, raw, brokeAsked.Load())
 	}
 	if got := e.got("/v1/images/generations"); len(got) != 1 || !strings.Contains(got[0], `"model":"gpt-image-2"`) {
 		t.Fatalf("pix asked %v", got)
 	}
-	code, a, raw = postImages(t, s, "/v1/images/generations", "application/json", `{"model":"group/pix-images","prompt":"a myna"}`)
+	code, a, raw = postImages(t, s, "/v1/images/generations", "application/json", `{"model":"group/pix-images","prompt":"a owl"}`)
 	if code != 200 || a.Model != "pix/gpt-image-2" {
 		t.Fatalf("group/pix-images: %d %s", code, raw)
 	}
@@ -89,7 +89,7 @@ func TestImageGroupOfUnpickedImageModelsDraws(t *testing.T) {
 	if Drawer() != "group/pix-images" || DrawerMissing() != "" {
 		t.Fatalf("the group pick isn't what draws: %q missing %q", Drawer(), DrawerMissing())
 	}
-	code, a, raw = postImages(t, s, "/v1/images/generations", "application/json", `{"prompt":"a myna"}`)
+	code, a, raw = postImages(t, s, "/v1/images/generations", "application/json", `{"prompt":"a owl"}`)
 	if code != 200 || a.Model != "pix/gpt-image-2" {
 		t.Fatalf("Settings pick: %d %s", code, raw)
 	}

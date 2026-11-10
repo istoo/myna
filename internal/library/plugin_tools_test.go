@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/gateway"
-	"github.com/istoo/myna/internal/plugin"
+	"github.com/istoo/owl/internal/gateway"
+	"github.com/istoo/owl/internal/plugin"
 )
 
 // fakePlugins has the plugins installed be specs (none on when off), each
@@ -101,11 +101,11 @@ func TestPluginToolsInHub(t *testing.T) {
 			t.Errorf("search's schema: %s", x.Spec["inputSchema"])
 		}
 	}
-	res, err := hub.Call(ctx, "claude", "search1api", "search", json.RawMessage(`{"query":"myna"}`))
-	if err != nil || hubText(t, res) != `found {"query":"myna"}` {
+	res, err := hub.Call(ctx, "claude", "search1api", "search", json.RawMessage(`{"query":"owl"}`))
+	if err != nil || hubText(t, res) != `found {"query":"owl"}` {
 		t.Fatalf("search: %s %v", res, err)
 	}
-	if want := `@magpie-community/tools-search1api search {"query":"myna"} claude`; len(f.ran) != 1 || f.ran[0] != want {
+	if want := `@magpie-community/tools-search1api search {"query":"owl"} claude`; len(f.ran) != 1 || f.ran[0] != want {
 		t.Errorf("ran %q, want %q", f.ran, want)
 	}
 	if _, err := hub.Call(ctx, "codex", "search1api", "search", json.RawMessage(`{}`)); err == nil || !strings.Contains(err.Error(), "isn't switched on for codex") {

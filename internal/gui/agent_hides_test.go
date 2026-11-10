@@ -5,8 +5,8 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/istoo/myna/internal/agent"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/agent"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // Kylin_Cloud on X: models left out of an agent's own list on the Agents

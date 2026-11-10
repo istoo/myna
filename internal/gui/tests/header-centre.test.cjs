@@ -65,7 +65,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const page = await ctx.newPage();
         page.on("pageerror", (e) => { if (!/ResizeObserver loop/.test(e.message)) errors.push(e.message); }); // WebKit reports a layout loop it recovers from as a page error
         await page.route("**/*", server(lang));
-        await page.goto("http://myna.test/");
+        await page.goto("http://owl.test/");
         await page.waitForSelector("#nav button.on");
         await page.waitForFunction(() => !document.querySelector("#update").hidden);
         let middle = 0, inrow = 0;

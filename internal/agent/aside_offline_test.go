@@ -10,9 +10,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/edit"
-	"github.com/istoo/myna/internal/proc"
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/edit"
+	"github.com/istoo/owl/internal/proc"
+	"github.com/istoo/owl/internal/provider"
 )
 
 func TestAsideInitialReadOffersStageWithoutWrites(t *testing.T) {
@@ -21,7 +21,7 @@ func TestAsideInitialReadOffersStageWithoutWrites(t *testing.T) {
 	before := readFile(settings) + readFile(models) + readFile(c.record)
 	asideRead = func(string) (map[string]json.RawMessage, error) { return nil, errors.New("offline") }
 	asideSet = func(string, string) error { t.Fatal("unavailable apply called daemon set"); return nil }
-	err := mustFindAside(t).Pick("model", "myna/relay/glm-4.6")
+	err := mustFindAside(t).Pick("model", "owl/relay/glm-4.6")
 	var unavailable *RuntimeUnavailableError
 	if !errors.As(err, &unavailable) || unavailable.Offline != OfflineStage {
 		t.Fatalf("initial read must return typed unavailable error, got %T: %v", err, err)
@@ -36,7 +36,7 @@ func TestAsideOfflineDisconnectRestoresWithoutDaemon(t *testing.T) {
 	before := readFile(settings)
 	a := mustFindAside(t)
 	for _, key := range []string{"model", "fast", "deep"} {
-		if err := a.Native.Stage(key, "myna/relay/glm-4.6"); err != nil {
+		if err := a.Native.Stage(key, "owl/relay/glm-4.6"); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -49,7 +49,7 @@ func TestAsideOfflineDisconnectRestoresWithoutDaemon(t *testing.T) {
 	if proc.FindTool(a.Bin) != "" {
 		t.Fatal("fixture must have no Aside executable")
 	}
-	missing := &Agent{ID: "dsh", Name: "Native fixture", Bin: "myna-test-missing-native", Dir: a.Dir, Path: a.Path, Native: a.Native}
+	missing := &Agent{ID: "dsh", Name: "Native fixture", Bin: "owl-test-missing-native", Dir: a.Dir, Path: a.Path, Native: a.Native}
 	if !missing.CLIMissing() {
 		t.Fatal("native fixture must report missing CLI")
 	}
@@ -62,7 +62,7 @@ func TestAsideOfflineDisconnectRestoresWithoutDaemon(t *testing.T) {
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("restored %s; want %s", readFile(settings), before)
 	}
-	if _, ok := edit.GetJSON(models, "providers.myna"); ok {
+	if _, ok := edit.GetJSON(models, "providers.owl"); ok {
 		t.Fatal("provider retained")
 	}
 	r, err := newAsideConnection(here("")).load()
@@ -85,8 +85,8 @@ func TestAsideUnavailableBoundary(t *testing.T) {
 		{"model", "", true, ""},
 		{"unknown", "native/model", false, ""},
 		{"model", "malformed", false, ""},
-		{"model", "myna/relay/missing", false, ""},
-		{"image", "myna/relay/glm-4.6", false, ""},
+		{"model", "owl/relay/missing", false, ""},
+		{"image", "owl/relay/glm-4.6", false, ""},
 	} {
 		t.Run(tt.key+"/"+tt.value, func(t *testing.T) {
 			settings, models := asideHome(t)
@@ -126,7 +126,7 @@ func TestAsidePostReadFailuresNeverOfferOffline(t *testing.T) {
 			case "corrupt record":
 				writeFile(t, c.record, "{invalid")
 			case "save record":
-				if err := a.Native.Stage("model", "myna/relay/glm-4.6"); err != nil {
+				if err := a.Native.Stage("model", "owl/relay/glm-4.6"); err != nil {
 					t.Fatal(err)
 				}
 				refuseWrites(t, c.record)
@@ -145,12 +145,12 @@ func TestAsidePostReadFailuresNeverOfferOffline(t *testing.T) {
 					return inner(account)
 				}
 			}
-			err := a.Pick("fast", "myna/relay/glm-4.6")
+			err := a.Pick("fast", "owl/relay/glm-4.6")
 			var unavailable *RuntimeUnavailableError
 			if err == nil || errors.As(err, &unavailable) {
 				t.Fatalf("post-read failure offered fallback: %T %v", err, err)
 			}
-			if _, ok := edit.GetJSON(models, "providers.myna"); !ok {
+			if _, ok := edit.GetJSON(models, "providers.owl"); !ok {
 				t.Fatal("failed apply removed provider")
 			}
 		})
@@ -170,9 +170,9 @@ func TestAsideOfflineRestoresCompleteSelectionsAndPreservesUserChanges(t *testin
 	before := readFile(settings)
 	a := mustFindAside(t)
 	for _, key := range []string{"model", "fast", "standard", "deep", "visual", "image"} {
-		value := "myna/relay/glm-4.6"
+		value := "owl/relay/glm-4.6"
 		if key == "image" {
-			value = "myna/art/gpt-image-1"
+			value = "owl/art/gpt-image-1"
 		}
 		if err := a.Native.Stage(key, value); err != nil {
 			t.Fatal(err)
@@ -203,8 +203,8 @@ func TestAsideOfflineRestoresCompleteSelectionsAndPreservesUserChanges(t *testin
 	if _, ok := edit.GetJSON(models, "providers.native"); !ok {
 		t.Fatal("native provider lost")
 	}
-	if _, ok := edit.GetJSON(models, "providers.myna"); ok {
-		t.Fatal("myna retained")
+	if _, ok := edit.GetJSON(models, "providers.owl"); ok {
+		t.Fatal("owl retained")
 	}
 	c := newAsideConnection(here(""))
 	r, err := c.load()
@@ -220,7 +220,7 @@ func TestAsideOfflinePlanGuards(t *testing.T) {
 			settings, models := asideHome(t)
 			a := mustFindAside(t)
 			c := newAsideConnection(here(""))
-			if err := a.Native.Stage("model", "myna/relay/glm-4.6"); err != nil {
+			if err := a.Native.Stage("model", "owl/relay/glm-4.6"); err != nil {
 				t.Fatal(err)
 			}
 			plan, err := a.Native.Disconnect()
@@ -235,7 +235,7 @@ func TestAsideOfflinePlanGuards(t *testing.T) {
 			case "record":
 				edit.SetJSON(c.record, edit.KV{Path: "fields.model.before.modelId", Value: "changed"})
 			case "foreign":
-				edit.SetJSON(models, edit.KV{Path: "providers.myna.apiKey", Value: "someone-else"})
+				edit.SetJSON(models, edit.KV{Path: "providers.owl.apiKey", Value: "someone-else"})
 			case "nil":
 				plan = nil
 			case "structure":
@@ -258,7 +258,7 @@ func TestAsideOfflinePlanGuards(t *testing.T) {
 
 func TestAsideOfflineLegacyRecordDoesNotResurrect(t *testing.T) {
 	settings, _ := asideHome(t)
-	edit.SetJSON(settings, edit.KV{Path: "defaultModel.provider", Value: "myna"}, edit.KV{Path: "defaultModel.modelId", Value: "relay/glm-4.6"})
+	edit.SetJSON(settings, edit.KV{Path: "defaultModel.provider", Value: "owl"}, edit.KV{Path: "defaultModel.modelId", Value: "relay/glm-4.6"})
 	stash(map[string]string{"aside.was": "native/native-model"})
 	a := mustFindAside(t)
 	if err := a.Connect(); err != nil {
@@ -294,7 +294,7 @@ func TestAsideOfflineWriteFailureRollsBack(t *testing.T) {
 	settings, models := asideHome(t)
 	a := mustFindAside(t)
 	c := newAsideConnection(here(""))
-	if err := a.Native.Stage("model", "myna/relay/glm-4.6"); err != nil {
+	if err := a.Native.Stage("model", "owl/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	plan, err := a.Native.Disconnect()
@@ -318,7 +318,7 @@ func TestAsideDisconnectUnavailableOnlyAtInitialRead(t *testing.T) {
 		t.Run(kind, func(t *testing.T) {
 			_, models := asideHome(t)
 			a := mustFindAside(t)
-			if err := a.Native.Stage("model", "myna/relay/glm-4.6"); err != nil {
+			if err := a.Native.Stage("model", "owl/relay/glm-4.6"); err != nil {
 				t.Fatal(err)
 			}
 			plan, err := a.Native.Disconnect()
@@ -353,7 +353,7 @@ func TestAsideDisconnectUnavailableOnlyAtInitialRead(t *testing.T) {
 			if unavailable != nil && unavailable.Offline != OfflineDisconnect {
 				t.Fatal("disconnect action missing")
 			}
-			if _, ok := edit.GetJSON(models, "providers.myna"); !ok {
+			if _, ok := edit.GetJSON(models, "providers.owl"); !ok {
 				t.Fatal("failed live disconnect removed provider")
 			}
 		})
@@ -387,7 +387,7 @@ func TestAsideStageAndApplyShareSpellingAndValidation(t *testing.T) {
 	if err := a.Pick("model", "relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
-	if got := mustFindAside(t).Field("model").Get(); got != "myna/relay/glm-4.6" {
+	if got := mustFindAside(t).Field("model").Get(); got != "owl/relay/glm-4.6" {
 		t.Fatalf("apply spelling %s", got)
 	}
 	if err := a.Disconnect(); err != nil {
@@ -400,12 +400,12 @@ func TestAsideStageAndApplyShareSpellingAndValidation(t *testing.T) {
 	if err := a.Native.Stage("model", value); err != nil {
 		t.Fatal(err)
 	}
-	if got := mustFindAside(t).Field("model").Get(); got != "myna/relay/glm-4.6" {
+	if got := mustFindAside(t).Field("model").Get(); got != "owl/relay/glm-4.6" {
 		t.Fatalf("stage spelling %s", got)
 	}
 	c := newAsideConnection(here(""))
 	before := readFile(settings) + readFile(models) + readFile(c.record)
-	for _, tt := range []struct{ key, value string }{{"unknown", "native/model"}, {"model", "invalid"}, {"model", "myna/relay/missing"}, {"image", "myna/relay/glm-4.6"}, {"effort", "high"}, {"fast", ""}} {
+	for _, tt := range []struct{ key, value string }{{"unknown", "native/model"}, {"model", "invalid"}, {"model", "owl/relay/missing"}, {"image", "owl/relay/glm-4.6"}, {"effort", "high"}, {"fast", ""}} {
 		if err := a.Native.Stage(tt.key, tt.value); err == nil {
 			t.Fatalf("invalid stage accepted: %+v", tt)
 		}
@@ -421,7 +421,7 @@ func TestAsideOfflineUnsetDefaultIsRemoved(t *testing.T) {
 		t.Fatal(err)
 	}
 	a := mustFindAside(t)
-	if err := a.Native.Stage("model", "myna/relay/glm-4.6"); err != nil {
+	if err := a.Native.Stage("model", "owl/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	asideRead = func(string) (map[string]json.RawMessage, error) { t.Fatal("offline read daemon"); return nil, nil }
@@ -468,7 +468,7 @@ func TestAsideOfflineImageRestoresFullSavedObject(t *testing.T) {
 	if err := provider.Save(provider.Provider{ID: "art", Key: "fixture", Chat: "https://art.invalid/v1", Models: []string{"gpt-image-1"}}); err != nil {
 		t.Fatal(err)
 	}
-	if err := a.Native.Stage("image", "myna/art/gpt-image-1"); err != nil {
+	if err := a.Native.Stage("image", "owl/art/gpt-image-1"); err != nil {
 		t.Fatal(err)
 	}
 	asideRead = func(string) (map[string]json.RawMessage, error) {
@@ -488,7 +488,7 @@ func TestAsideOfflineImageRestoresFullSavedObject(t *testing.T) {
 func TestAsideOfflineProviderWriteFailureRollsBackAllFiles(t *testing.T) {
 	settings, models := asideHome(t)
 	a := mustFindAside(t)
-	if err := a.Native.Stage("model", "myna/relay/glm-4.6"); err != nil {
+	if err := a.Native.Stage("model", "owl/relay/glm-4.6"); err != nil {
 		t.Fatal(err)
 	}
 	targetDir := t.TempDir()

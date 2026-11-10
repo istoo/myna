@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
-	"github.com/istoo/myna/internal/wslrun"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
+	"github.com/istoo/owl/internal/wslrun"
 )
 
 // leanRun is what a run of a leanHarness was started with and told (its
@@ -153,7 +153,7 @@ func TestClaudeLeanPromptRunNotResumedAcrossTheSetting(t *testing.T) {
 // mount of the drive.
 func TestClaudeLeanPromptFileInWSL(t *testing.T) {
 	c := claudeCLI{wsl: &wslrun.Tool{Path: "/usr/bin/claude"}}
-	if got := c.file(`C:\Users\me\AppData\Local\Temp\myna-claude-1\system.md`); got != "/mnt/c/Users/me/AppData/Local/Temp/myna-claude-1/system.md" {
+	if got := c.file(`C:\Users\me\AppData\Local\Temp\owl-claude-1\system.md`); got != "/mnt/c/Users/me/AppData/Local/Temp/owl-claude-1/system.md" {
 		t.Fatalf("%q", got)
 	}
 	if got := (claudeCLI{}).file("/tmp/x/system.md"); got != "/tmp/x/system.md" {

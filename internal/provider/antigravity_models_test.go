@@ -5,11 +5,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 // antigravityListed is what Antigravity's fetchAvailableModels said for
-// an account (2026-09), as myna keeps it.
+// an account (2026-09), as owl keeps it.
 var antigravityListed = []catalog.Model{
 	{ID: "claude-opus-4-6-thinking", Name: "Claude Opus 4.6 (Thinking)", Images: true},
 	{ID: "gemini-3-flash", Name: "Gemini 3 Flash", Images: true},
@@ -89,7 +89,7 @@ func TestCollapseAntigravityModels(t *testing.T) {
 }
 
 // Picks saved before the levels were one model name Antigravity's own
-// ids: each is the model myna offers for it now, once, where it was;
+// ids: each is the model owl offers for it now, once, where it was;
 // the rest stay.
 func TestAntigravityLegacyPicks(t *testing.T) {
 	home := t.TempDir()
@@ -132,7 +132,7 @@ func TestAntigravityLegacyPicks(t *testing.T) {
 
 // A model Antigravity leaves unnamed has a name all the same: a -tiered
 // id its model's with "(Tiered)" (EZN7L2C3, #955: agy's list showed
-// myna/antigravity/gemini-3.6-flash-tiered), any other its id.
+// owl/antigravity/gemini-3.6-flash-tiered), any other its id.
 func TestAntigravityUnnamedModels(t *testing.T) {
 	raw := []catalog.Model{
 		{ID: "gemini-3.6-flash-high", Name: "Gemini 3.6 Flash (High)"},

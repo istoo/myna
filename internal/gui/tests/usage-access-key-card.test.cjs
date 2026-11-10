@@ -68,7 +68,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         page.setDefaultNavigationTimeout(60000);
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang));
-        await page.goto("http://myna.test/?view=usage");
+        await page.goto("http://owl.test/?view=usage");
 
         const v = page.locator(".subscription-card", { hasText: "Volcengine Ark" });
         const err = v.locator(".subscription-error");

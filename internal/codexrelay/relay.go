@@ -1,17 +1,17 @@
-// Package codexrelay keeps the Codex threads open when myna quits
-// working until myna is opened again or they end.
+// Package codexrelay keeps the Codex threads open when owl quits
+// working until owl is opened again or they end.
 //
-// Codex signed in to ChatGPT sends its turns to myna's gateway while
-// myna fails it over (agent.EndCodexFailover). At quit myna takes that
+// Codex signed in to ChatGPT sends its turns to owl's gateway while
+// owl fails it over (agent.EndCodexFailover). At quit owl takes that
 // base URL out of Codex's config, but a thread already open, in the Codex
 // app above all, keeps the URL it started with, and every turn after went
 // to a closed port: "503 Service Unavailable: Unknown error" through a
-// system proxy, "Connection refused" without one, until myna was opened
-// again (idkatbro on X). So at quit, with Codex running, myna starts a
-// small process of its own (`myna codex-relay`) that takes the port up
+// system proxy, "Connection refused" without one, until owl was opened
+// again (idkatbro on X). So at quit, with Codex running, owl starts a
+// small process of its own (`owl codex-relay`) that takes the port up
 // once the gateway lets go of it and passes those turns on to the ChatGPT
 // backend on Codex's own sign-in (gateway.CodexRelay). It ends once every
-// Codex process it was started for has, and leaves when the next myna
+// Codex process it was started for has, and leaves when the next owl
 // starts (Leave), finishing the turns it is streaming first: no running
 // turn is cut.
 package codexrelay
@@ -35,24 +35,24 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/istoo/myna/internal/proc"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/proc"
+	"github.com/istoo/owl/internal/settings"
 )
 
-// Command is the myna command a relay runs as.
+// Command is the owl command a relay runs as.
 const Command = "codex-relay"
 
-// LeavePath is where the next myna tells the relay to leave; with
+// LeavePath is where the next owl tells the relay to leave; with
 // TokenHeader holding the token the relay wrote in its state file.
 const (
-	LeavePath   = "/.myna-codex-relay/leave"
+	LeavePath   = "/.owl-codex-relay/leave"
 	TokenHeader = "X-Magpie-Relay-Token"
 )
 
 // Timings, vars for tests.
 var (
 	// bindFor is how long the relay waits for the gateway's port: the
-	// quitting myna holds it until its own requests have finished.
+	// quitting owl holds it until its own requests have finished.
 	bindFor = 60 * time.Second
 	// watchEvery is how often the relay looks for its Codex processes.
 	watchEvery = 15 * time.Second
@@ -84,12 +84,12 @@ func Start(addr string, pids []int) error {
 	}
 	cmd := proc.Command(exe, Command, "--addr", addr, "--pids", strings.Join(ids, ","))
 	detach(cmd)
-	// reaped when it ends while myna runs: a released one stayed
-	// <defunct> until myna quit
+	// reaped when it ends while owl runs: a released one stayed
+	// <defunct> until owl quit
 	return proc.StartReaped(cmd)
 }
 
-// Main is `myna codex-relay --addr host:port --pids 1,2`, serving h.
+// Main is `owl codex-relay --addr host:port --pids 1,2`, serving h.
 func Main(args []string, h http.Handler) error {
 	var addr string
 	var pids []int
@@ -115,11 +115,11 @@ func Main(args []string, h http.Handler) error {
 				i++
 			}
 		default:
-			return fmt.Errorf("codex-relay: unknown argument %q (myna starts this itself when it quits)", args[i])
+			return fmt.Errorf("codex-relay: unknown argument %q (owl starts this itself when it quits)", args[i])
 		}
 	}
 	if addr == "" || len(pids) == 0 {
-		return errors.New("usage: myna codex-relay --addr host:port --pids pid,… (myna starts this itself when it quits)")
+		return errors.New("usage: owl codex-relay --addr host:port --pids pid,… (owl starts this itself when it quits)")
 	}
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, os.Interrupt, syscall.SIGTERM)
@@ -128,7 +128,7 @@ func Main(args []string, h http.Handler) error {
 	return Run(ctx, addr, pids, h)
 }
 
-// Run serves h at addr until ctx ends, the next myna tells it to leave,
+// Run serves h at addr until ctx ends, the next owl tells it to leave,
 // or none of pids runs and nothing is in flight; then it finishes the
 // requests it has, for up to drainFor.
 func Run(ctx context.Context, addr string, pids []int, h http.Handler) error {
@@ -159,7 +159,7 @@ func Run(ctx context.Context, addr string, pids []int, h http.Handler) error {
 				http.Error(w, "forbidden", http.StatusForbidden)
 				return
 			}
-			// the port is free once this is answered: the next myna
+			// the port is free once this is answered: the next owl
 			// binds it at once, while the streams here finish
 			srv.SetKeepAlivesEnabled(false)
 			ln.Close()
@@ -278,7 +278,7 @@ func dropState(token string) {
 }
 
 // Leave tells a relay serving at the gateway's port to let go of it,
-// for the myna starting to serve there. It returns once the relay has
+// for the owl starting to serve there. It returns once the relay has
 // closed its listener (its streams go on finishing), or at once when
 // there is none.
 func Leave() {

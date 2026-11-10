@@ -10,14 +10,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/testenv"
-	"github.com/istoo/myna/internal/wslrun"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/testenv"
+	"github.com/istoo/owl/internal/wslrun"
 )
 
 // claudeRootRefusal is what Claude Code 2.1.296 prints, and exits 1 on,
 // when it is run as root with --dangerously-skip-permissions, IS_SANDBOX
-// not "1" and CLAUDE_CODE_BUBBLEWRAP unset (FrierenF on Discord, myna
+// not "1" and CLAUDE_CODE_BUBBLEWRAP unset (FrierenF on Discord, owl
 // on a server as root).
 const claudeRootRefusal = "--dangerously-skip-permissions cannot be used with root/sudo privileges for security reasons"
 
@@ -129,7 +129,7 @@ func TestClaudeAsRootEnv(t *testing.T) {
 		}
 	}
 
-	// a WSL distro's user decides, not myna's on Windows; and IS_SANDBOX
+	// a WSL distro's user decides, not owl's on Windows; and IS_SANDBOX
 	// goes into the distro only for root
 	claudeEuid = func() int { return 1000 }
 	wslenv := func(env []string) string {

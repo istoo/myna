@@ -1,5 +1,5 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// A web search myna ran for a model that can't search by itself, after
+// A web search owl ran for a model that can't search by itself, after
 // the searcher picked in Settings › Models › Web search failed or found
 // nothing, says so in its Routing row: which searcher was asked first, for
 // whom, why it didn't search, and which one searched in its place
@@ -15,43 +15,43 @@ const { chromium, webkit } = require("playwright");
 const assets = path.resolve(__dirname, "../assets");
 const words = {
   en: {
-    failed: /grok\/grok-4\.3, the searcher picked in Settings › Models › Web search, didn't search for Codex's zai\/glm-5\.2: 502 upstream closed\. So myna had codex\/gpt-6\.1-sol, the next searcher it can use, search in its place\. Not a turn of the conversation\.$/,
-    nothing: /grok\/grok-4\.3, the searcher myna picked, didn't search for Codex's zai\/glm-5\.2: its reply named no page it found\. So myna had codex\/gpt-6\.1-sol/,
-    notSearched: /grok\/grok-4\.3, the searcher myna picked, didn't search for Codex's zai\/glm-5\.2: it answered without searching the web, so its account or plan may not offer web search\. So myna had codex\/gpt-6\.1-sol/,
+    failed: /grok\/grok-4\.3, the searcher picked in Settings › Models › Web search, didn't search for Codex's zai\/glm-5\.2: 502 upstream closed\. So owl had codex\/gpt-6\.1-sol, the next searcher it can use, search in its place\. Not a turn of the conversation\.$/,
+    nothing: /grok\/grok-4\.3, the searcher owl picked, didn't search for Codex's zai\/glm-5\.2: its reply named no page it found\. So owl had codex\/gpt-6\.1-sol/,
+    notSearched: /grok\/grok-4\.3, the searcher owl picked, didn't search for Codex's zai\/glm-5\.2: it answered without searching the web, so its account or plan may not offer web search\. So owl had codex\/gpt-6\.1-sol/,
   },
   zh: {
-    failed: /grok\/grok-4\.3 是在 设置 › 模型 › 联网搜索 里选的代搜模型，但它没能为 Codex 的 zai\/glm-5\.2 搜索：502 upstream closed。所以 myna 改让下一个可用的代搜模型 codex\/gpt-6\.1-sol 来搜。不属于对话轮次。$/,
-    nothing: /grok\/grok-4\.3 是 myna 自动选的代搜模型，但它没能为 Codex 的 zai\/glm-5\.2 搜索：它的回复里没有搜到的网页。/,
-    notSearched: /grok\/grok-4\.3 是 myna 自动选的代搜模型，但它没能为 Codex 的 zai\/glm-5\.2 搜索：它没有联网搜索就直接回答了，它的账号或套餐可能不支持联网搜索。/,
+    failed: /grok\/grok-4\.3 是在 设置 › 模型 › 联网搜索 里选的代搜模型，但它没能为 Codex 的 zai\/glm-5\.2 搜索：502 upstream closed。所以 owl 改让下一个可用的代搜模型 codex\/gpt-6\.1-sol 来搜。不属于对话轮次。$/,
+    nothing: /grok\/grok-4\.3 是 owl 自动选的代搜模型，但它没能为 Codex 的 zai\/glm-5\.2 搜索：它的回复里没有搜到的网页。/,
+    notSearched: /grok\/grok-4\.3 是 owl 自动选的代搜模型，但它没能为 Codex 的 zai\/glm-5\.2 搜索：它没有联网搜索就直接回答了，它的账号或套餐可能不支持联网搜索。/,
   },
   "zh-TW": {
-    failed: /grok\/grok-4\.3 是在 設定 › 模型 › 聯網搜尋 裡選的代搜模型，但它沒能為 Codex 的 zai\/glm-5\.2 搜尋：502 upstream closed。所以 myna 改讓下一個可用的代搜模型 codex\/gpt-6\.1-sol 來搜。不屬於對話輪次。$/,
-    nothing: /grok\/grok-4\.3 是 myna 自動選的代搜模型，但它沒能為 Codex 的 zai\/glm-5\.2 搜尋：它的回覆裡沒有搜到的網頁。/,
-    notSearched: /grok\/grok-4\.3 是 myna 自動選的代搜模型，但它沒能為 Codex 的 zai\/glm-5\.2 搜尋：它沒有聯網搜尋就直接回答了，它的帳號或方案可能不支援聯網搜尋。/,
+    failed: /grok\/grok-4\.3 是在 設定 › 模型 › 聯網搜尋 裡選的代搜模型，但它沒能為 Codex 的 zai\/glm-5\.2 搜尋：502 upstream closed。所以 owl 改讓下一個可用的代搜模型 codex\/gpt-6\.1-sol 來搜。不屬於對話輪次。$/,
+    nothing: /grok\/grok-4\.3 是 owl 自動選的代搜模型，但它沒能為 Codex 的 zai\/glm-5\.2 搜尋：它的回覆裡沒有搜到的網頁。/,
+    notSearched: /grok\/grok-4\.3 是 owl 自動選的代搜模型，但它沒能為 Codex 的 zai\/glm-5\.2 搜尋：它沒有聯網搜尋就直接回答了，它的帳號或方案可能不支援聯網搜尋。/,
   },
   ja: {
-    failed: /設定 › モデル › ウェブ検索 で選んだ検索モデル grok\/grok-4\.3 は Codex の zai\/glm-5\.2 の代わりに検索できませんでした：502 upstream closed。そのため myna は次に使える検索モデル codex\/gpt-6\.1-sol に代わりに検索させました。会話のターンではありません。$/,
-    nothing: /myna が自動で選んだ検索モデル grok\/grok-4\.3 は Codex の zai\/glm-5\.2 の代わりに検索できませんでした：返答に見つけたページがありませんでした。/,
-    notSearched: /myna が自動で選んだ検索モデル grok\/grok-4\.3 は Codex の zai\/glm-5\.2 の代わりに検索できませんでした：ウェブ検索をせずに回答しました。アカウントやプランがウェブ検索に対応していない可能性があります。/,
+    failed: /設定 › モデル › ウェブ検索 で選んだ検索モデル grok\/grok-4\.3 は Codex の zai\/glm-5\.2 の代わりに検索できませんでした：502 upstream closed。そのため owl は次に使える検索モデル codex\/gpt-6\.1-sol に代わりに検索させました。会話のターンではありません。$/,
+    nothing: /owl が自動で選んだ検索モデル grok\/grok-4\.3 は Codex の zai\/glm-5\.2 の代わりに検索できませんでした：返答に見つけたページがありませんでした。/,
+    notSearched: /owl が自動で選んだ検索モデル grok\/grok-4\.3 は Codex の zai\/glm-5\.2 の代わりに検索できませんでした：ウェブ検索をせずに回答しました。アカウントやプランがウェブ検索に対応していない可能性があります。/,
   },
   de: {
-    failed: /grok\/grok-4\.3, der unter Einstellungen › Modelle › Websuche gewählte Sucher, hat nicht für zai\/glm-5\.2 von Codex gesucht: 502 upstream closed\. Daher ließ myna codex\/gpt-6\.1-sol, den nächsten nutzbaren Sucher, an seiner Stelle suchen\. Keine Runde des Gesprächs\.$/,
-    nothing: /grok\/grok-4\.3, der von myna gewählte Sucher, hat nicht für zai\/glm-5\.2 von Codex gesucht: seine Antwort nannte keine gefundene Seite\./,
-    notSearched: /grok\/grok-4\.3, der von myna gewählte Sucher, hat nicht für zai\/glm-5\.2 von Codex gesucht: es hat ohne Websuche geantwortet, daher bietet sein Konto oder Tarif möglicherweise keine Websuche\./,
+    failed: /grok\/grok-4\.3, der unter Einstellungen › Modelle › Websuche gewählte Sucher, hat nicht für zai\/glm-5\.2 von Codex gesucht: 502 upstream closed\. Daher ließ owl codex\/gpt-6\.1-sol, den nächsten nutzbaren Sucher, an seiner Stelle suchen\. Keine Runde des Gesprächs\.$/,
+    nothing: /grok\/grok-4\.3, der von owl gewählte Sucher, hat nicht für zai\/glm-5\.2 von Codex gesucht: seine Antwort nannte keine gefundene Seite\./,
+    notSearched: /grok\/grok-4\.3, der von owl gewählte Sucher, hat nicht für zai\/glm-5\.2 von Codex gesucht: es hat ohne Websuche geantwortet, daher bietet sein Konto oder Tarif möglicherweise keine Websuche\./,
   },
 };
 
 const now = new Date();
 const day = [now.getFullYear(), now.getMonth() + 1, now.getDate()].map((n) => String(n).padStart(2, "0")).join("-");
 const route = (id, f) => ({
-  id, seq: id, time: new Date(now.getTime() - id * 60e3).toISOString(), agent: "myna", model: "codex/gpt-6.1-sol", provider: "codex",
+  id, seq: id, time: new Date(now.getTime() - id * 60e3).toISOString(), agent: "owl", model: "codex/gpt-6.1-sol", provider: "codex",
   kind: "web_search", for: { agent: "codex", model: "zai/glm-5.2", instead: "grok/grok-4.3", ...f },
   order: [{ id: "codex", provider: "codex", name: "Codex", who: "a@b.c", kind: "account", model: "gpt-6.1-sol" }],
   tries: [{ id: "codex", model: "gpt-6.1-sol", start: new Date(now.getTime() - id * 60e3).toISOString(), done: true, status: 200, ms: 900 }],
   done: true, status: 200, ms: 900, tokens: 1200,
 });
 // newest first: the picked searcher that failed (a row kept from before a
-// picked searcher stopped being handed on), myna's own pick that found
+// picked searcher stopped being handed on), owl's own pick that found
 // nothing, and its pick that answered without searching
 const routes = [route(1, { picked: true, why: "502 upstream closed" }), route(2, { nothingFound: true }), route(3, { notSearched: true })];
 
@@ -59,7 +59,7 @@ function serve(lang) {
   const settings = { lang, theme: "light", searcher: "grok/grok-4.3", gateway: "http://127.0.0.1:3999", port: 3999 };
   const state = {
     agents: [], profiles: [], settings,
-    clients: [{ id: "codex", name: "Codex", icon: "codex" }, { id: "myna", name: "myna", icon: "myna" }],
+    clients: [{ id: "codex", name: "Codex", icon: "codex" }, { id: "owl", name: "owl", icon: "owl" }],
   };
   return async (r) => {
     const url = new URL(r.request().url());
@@ -94,7 +94,7 @@ async function open(t, engine, lang, width) {
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/*", serve(lang));
-  await page.goto("http://myna.test/?view=routing");
+  await page.goto("http://owl.test/?view=routing");
   return { page, errors };
 }
 

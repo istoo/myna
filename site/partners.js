@@ -1,6 +1,6 @@
 // The add sheet's Partners: the services that pay to be listed first in
-// myna's "Add provider" sheet, under a heading that says they sponsor
-// myna. The app fetches this list from /api/partners every six hours and
+// owl's "Add provider" sheet, under a heading that says they sponsor
+// owl. The app fetches this list from /api/partners every six hours and
 // keeps it (internal/provider/partners.go), so a change here reaches users
 // with `npx wrangler deploy`, no release. At most 12 whose term hasn't
 // ended are listed, in this order.
@@ -27,7 +27,7 @@
 //
 // Every URL is https. An entry that breaks a rule is left out by the app.
 //
-// The app gets keysUrl and website (a region's too) as github.com/istoo/myna/go/…
+// The app gets keysUrl and website (a region's too) as github.com/istoo/owl/go/…
 // links, which count the click and send the browser on (worker.js). The
 // providers users add keep those links, so an entry stays here after its
 // term ends: /api/partners leaves it out, /go still finds it. Remove one
@@ -38,15 +38,15 @@ export const PARTNERS = [
     name: "Kimi Code",
     regionLabel: "Plan",
     regions: [
-      { id: "cn", name: "China", chat: "https://api.kimi.com/coding/v1", anthropic: "https://api.kimi.com/coding", catalog: "kimi-code-plan-cn", keysUrl: "https://www.kimi.com/code?aff=myna", website: "https://www.kimi.com/code?aff=myna" },
-      { id: "global", name: "Global", chat: "https://api.kimi.ai/coding/v1", anthropic: "https://api.kimi.ai/coding", catalog: "kimi-code-plan-global", keysUrl: "https://www.kimi.ai/code?aff=myna", website: "https://www.kimi.ai/code?aff=myna" },
-      { id: "api-cn", name: "Pay as you go · China", chat: "https://api.moonshot.cn/v1", anthropic: "https://api.moonshot.cn/anthropic", catalog: "moonshotai", keysUrl: "https://platform.kimi.com?aff=myna", website: "https://platform.kimi.com?aff=myna" },
-      { id: "api", name: "Pay as you go · Global", chat: "https://api.moonshot.ai/v1", anthropic: "https://api.moonshot.ai/anthropic", catalog: "moonshotai", keysUrl: "https://platform.kimi.ai?aff=myna", website: "https://platform.kimi.ai?aff=myna" },
+      { id: "cn", name: "China", chat: "https://api.kimi.com/coding/v1", anthropic: "https://api.kimi.com/coding", catalog: "kimi-code-plan-cn", keysUrl: "https://www.kimi.com/code?aff=owl", website: "https://www.kimi.com/code?aff=owl" },
+      { id: "global", name: "Global", chat: "https://api.kimi.ai/coding/v1", anthropic: "https://api.kimi.ai/coding", catalog: "kimi-code-plan-global", keysUrl: "https://www.kimi.ai/code?aff=owl", website: "https://www.kimi.ai/code?aff=owl" },
+      { id: "api-cn", name: "Pay as you go · China", chat: "https://api.moonshot.cn/v1", anthropic: "https://api.moonshot.cn/anthropic", catalog: "moonshotai", keysUrl: "https://platform.kimi.com?aff=owl", website: "https://platform.kimi.com?aff=owl" },
+      { id: "api", name: "Pay as you go · Global", chat: "https://api.moonshot.ai/v1", anthropic: "https://api.moonshot.ai/anthropic", catalog: "moonshotai", keysUrl: "https://platform.kimi.ai?aff=owl", website: "https://platform.kimi.ai?aff=owl" },
     ],
     catalog: "kimi-code-plan-cn",
-    keysUrl: "https://www.kimi.com/code?aff=myna",
-    website: "https://www.kimi.com/code?aff=myna",
-    iconUrl: "https://github.com/istoo/myna/img/partner-kimi.png",
+    keysUrl: "https://www.kimi.com/code?aff=owl",
+    website: "https://www.kimi.com/code?aff=owl",
+    iconUrl: "https://github.com/istoo/owl/img/partner-kimi.png",
     notes: {
       en: "One subscription, one K3 quota shared by every agent",
       zh: "一份订阅，所有 agent 共享 K3 额度",
@@ -66,9 +66,9 @@ export const PARTNERS = [
     chat: "https://api.apikey.fan/v1",
     responses: "https://api.apikey.fan/v1",
     anthropic: "https://api.apikey.fan",
-    keysUrl: "https://apikey.fan/?aff=myna",
-    website: "https://apikey.fan/?aff=myna",
-    iconUrl: "https://github.com/istoo/myna/img/partner-apikeyfan.png",
+    keysUrl: "https://apikey.fan/?aff=owl",
+    website: "https://apikey.fan/?aff=owl",
+    iconUrl: "https://github.com/istoo/owl/img/partner-apikeyfan.png",
     notes: {
       en: "Enterprise-grade AI API gateway to the world's leading models",
       zh: "企业级 AI 中转站，连接全球主流大模型",
@@ -84,9 +84,9 @@ export const PARTNERS = [
     chat: "https://api.wandapi.ai/v1",
     responses: "https://api.wandapi.ai/v1",
     anthropic: "https://api.wandapi.ai",
-    keysUrl: "https://wandapi.ai/r/mynaapp",
+    keysUrl: "https://wandapi.ai/r/owlapp",
     website: "https://wandapi.ai",
-    iconUrl: "https://github.com/istoo/myna/img/partner-wandapi.png",
+    iconUrl: "https://github.com/istoo/owl/img/partner-wandapi.png",
     notes: {
       en: "Enterprise-grade AI gateway, seamless access to global AI models",
       zh: "企业级 AI 网关，畅连全球 AI 大模型",
@@ -101,13 +101,13 @@ export const PARTNERS = [
     chat: "https://corecode.live/v1",
     responses: "https://corecode.live/v1",
     anthropic: "https://corecode.live",
-    keysUrl: "https://corecode.live/keys?ref=myna",
-    website: "https://corecode.live/sign-in?ref=myna",
-    iconUrl: "https://github.com/istoo/myna/img/partner-corecode.png",
+    keysUrl: "https://corecode.live/keys?ref=owl",
+    website: "https://corecode.live/sign-in?ref=owl",
+    iconUrl: "https://github.com/istoo/owl/img/partner-corecode.png",
     notes: {
-      en: "Full-strength Claude. Low prices. Enterprise-grade caching. Invoices available. Sign up for myna and get $3 free.",
-      zh: "满血 Claude，超低折扣，企业级缓存优化，可开票。myna 用户注册送 $3。",
-      "zh-TW": "滿血 Claude，超低折扣，企業級快取優化，可開票。myna 用戶註冊送 $3。",
+      en: "Full-strength Claude. Low prices. Enterprise-grade caching. Invoices available. Sign up for owl and get $3 free.",
+      zh: "满血 Claude，超低折扣，企业级缓存优化，可开票。owl 用户注册送 $3。",
+      "zh-TW": "滿血 Claude，超低折扣，企業級快取優化，可開票。owl 用戶註冊送 $3。",
     },
     from: "2026-10-26T00:00:00+08:00",
     until: "2026-11-26T00:00:00+08:00",
@@ -116,12 +116,12 @@ export const PARTNERS = [
     id: "sidrune",
     name: "Sidrune AI",
     regions: [
-      { id: "cn", name: "China", chat: "https://sidrune.ai/v1", responses: "https://sidrune.ai/v1", anthropic: "https://sidrune.ai", keysUrl: "https://sidrune.ai/register?promo=MYNA3", website: "https://sidrune.ai/" },
-      { id: "global", name: "Global", chat: "https://global.sidrune.ai/v1", responses: "https://global.sidrune.ai/v1", anthropic: "https://global.sidrune.ai", keysUrl: "https://global.sidrune.ai/register?promo=MYNA3", website: "https://global.sidrune.ai/" },
+      { id: "cn", name: "China", chat: "https://sidrune.ai/v1", responses: "https://sidrune.ai/v1", anthropic: "https://sidrune.ai", keysUrl: "https://sidrune.ai/register?promo=OWL3", website: "https://sidrune.ai/" },
+      { id: "global", name: "Global", chat: "https://global.sidrune.ai/v1", responses: "https://global.sidrune.ai/v1", anthropic: "https://global.sidrune.ai", keysUrl: "https://global.sidrune.ai/register?promo=OWL3", website: "https://global.sidrune.ai/" },
     ],
-    keysUrl: "https://sidrune.ai/register?promo=MYNA3",
+    keysUrl: "https://sidrune.ai/register?promo=OWL3",
     website: "https://sidrune.ai/",
-    iconUrl: "https://github.com/istoo/myna/img/partner-sidrune.png",
+    iconUrl: "https://github.com/istoo/owl/img/partner-sidrune.png",
     notes: {
       en: "Stable Claude API Access with 85% off; $3 free credit upon registration",
       zh: "低至1.5折，稳定使用满血Claude；注册送$3，可开发票。",
@@ -137,9 +137,9 @@ export const PARTNERS = [
     chat: "https://www.fastaitoken.com/v1",
     responses: "https://www.fastaitoken.com/v1",
     anthropic: "https://www.fastaitoken.com",
-    keysUrl: "https://www.fastaitoken.com/register?aff=MYNA&utm=soft",
-    website: "https://www.fastaitoken.com/register?aff=MYNA&utm=soft",
-    iconUrl: "https://github.com/istoo/myna/img/partner-fastai.png",
+    keysUrl: "https://www.fastaitoken.com/register?aff=OWL&utm=soft",
+    website: "https://www.fastaitoken.com/register?aff=OWL&utm=soft",
+    iconUrl: "https://github.com/istoo/owl/img/partner-fastai.png",
     notes: {
       en: "One-stop access to Claude, GPT and DeepSeek, from 6% of list price",
       zh: "Claude / GPT / Deepseek 一站式接入方案，最低0.6折，支持对公",

@@ -13,10 +13,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
-// listClaudeRuns asks srv for its Claude Code runs as `myna claude-code
+// listClaudeRuns asks srv for its Claude Code runs as `owl claude-code
 // runs` does, over loopback.
 func listClaudeRuns(t *testing.T, srv *Server) ClaudeRuns {
 	t.Helper()
@@ -52,16 +52,16 @@ func runsUntil(t *testing.T, srv *Server, what string, ok func(ClaudeRuns) bool)
 }
 
 // A Claude account's conversations, a subagent's each, run on Claude Code
-// processes of their own that myna keeps for the next turn or while the
+// processes of their own that owl keeps for the next turn or while the
 // client's tools run, and a task manager shows them as Claude Code's
-// version and "myna" (@Candydidi3 on X: "myna里拉起很多子进程").
+// version and "owl" (@Candydidi3 on X: "owl里拉起很多子进程").
 // ClaudeRunsPath names each: its pid, model and account, whether it
 // answers, waits for its next turn or on tools, since when and until
-// when myna keeps it, and drops it once it ends.
+// when owl keeps it, and drops it once it ends.
 func TestClaudeRunsNamesEachProcess(t *testing.T) {
 	fresh(t)
-	t.Setenv("MYNA_ADDR", "")
-	t.Setenv("MYNA_PUBLIC_URL", "")
+	t.Setenv("OWL_ADDR", "")
+	t.Setenv("OWL_PUBLIC_URL", "")
 
 	t.Run("kept for its next turn", func(t *testing.T) {
 		fakeClaude(t)
@@ -153,7 +153,7 @@ func TestClaudeRunsNamesEachProcess(t *testing.T) {
 
 	t.Run("to this computer's programs only", func(t *testing.T) {
 		srv := New()
-		for _, c := range profileCallersRefused("myna-no-such-key") {
+		for _, c := range profileCallersRefused("owl-no-such-key") {
 			r := httptest.NewRequest("GET", ClaudeRunsPath, nil)
 			r.RemoteAddr, r.Host = c.remote, c.host
 			for i := 0; i+1 < len(c.hdr); i += 2 {

@@ -74,7 +74,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [], posts = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang, posts));
-        await page.goto("http://myna.test/?view=providers");
+        await page.goto("http://owl.test/?view=providers");
         const open = async () => {
           await page.locator(".row.provider", { hasText: p.name }).first().click();
           await page.locator(".editor .accts").first().waitFor();
@@ -161,7 +161,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           const errors = [];
           page.on("pageerror", (e) => errors.push(e.message));
           await page.route("**/*", serve(lang, [], ["rotation"]));
-          await page.goto("http://myna.test/?view=providers");
+          await page.goto("http://owl.test/?view=providers");
           await page.locator(".row.provider", { hasText: p.name }).first().click();
           await page.locator(".editor .accts").first().waitFor();
           const btn = page.locator(".editor .route-pick-btn");

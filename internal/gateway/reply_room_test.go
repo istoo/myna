@@ -11,7 +11,7 @@ import (
 
 	"github.com/tidwall/gjson"
 
-	"github.com/istoo/myna/internal/provider"
+	"github.com/istoo/owl/internal/provider"
 )
 
 // deepseekWindow is a fake of DeepSeek's chat API that counts the reply
@@ -137,7 +137,7 @@ func TestReplyLeft(t *testing.T) {
 
 // Claude Code and Codex reach an endpoint speaking Anthropic's API (as
 // DeepSeek's /anthropic does) with a reply limit of their own (Claude
-// Code's 64000) or the model's whole (Codex names none, so myna asks
+// Code's 64000) or the model's whole (Codex names none, so owl asks
 // the model's, #1792). Told a 1M window, they compact only near it, and
 // a turn whose prompt and reply together pass it was refused, so Codex
 // stopped with "ran out of room in the model's context window" (da34,

@@ -11,7 +11,7 @@ import (
 )
 
 // HandOverSkills gives skills kept in ~/.agents/skills to the library to
-// manage (tnt1223 on Discord, "统一移入 myna 的资源库文件夹，交给 myna
+// manage (tnt1223 on Discord, "统一移入 owl 的资源库文件夹，交给 owl
 // 管理"). Several agents read that folder themselves, so a skill there is
 // on for each of them whatever the library ticks, and turning it off for
 // one, or on this computer alone (OffHere), can't work. Handed over:
@@ -180,7 +180,7 @@ func handOver(l *Library, found *[]FoundSkill, ts []*Target, name string) (left 
 // left is what of from couldn't be taken away after its whole copy was
 // in (a file in it held open, on Windows).
 func moveIn(from, lib string) (left string, err error) {
-	tmp := filepath.Join(filepath.Dir(lib), "."+filepath.Base(lib)+".myna-in-"+time.Now().Format("20060102150405.000"))
+	tmp := filepath.Join(filepath.Dir(lib), "."+filepath.Base(lib)+".owl-in-"+time.Now().Format("20060102150405.000"))
 	renamed := os.Rename(from, tmp) == nil
 	if !renamed {
 		if err := copyDir(from, tmp); err != nil {
@@ -255,7 +255,7 @@ func HandBackSkill(name string) (*Result, error) {
 			if !ours(p, name) {
 				return fmt.Errorf("%s has a %s of its own", sharedSkillsDir(), name)
 			}
-			// myna's own link there (for Goose, Kimi Code or Cindy)
+			// owl's own link there (for Goose, Kimi Code or Cindy)
 			if err := unlink(p); err != nil {
 				return err
 			}

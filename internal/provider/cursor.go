@@ -28,10 +28,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/istoo/myna/internal/appdir"
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/proc"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/appdir"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/proc"
+	"github.com/istoo/owl/internal/settings"
 )
 
 // CursorExecutable finds the cursor-agent CLI; a var so tests can fake it.
@@ -186,7 +186,7 @@ func cursorContext(id, name string) int {
 }
 
 // withCursorContexts fills in a saved list's contexts, fetched before
-// myna kept them.
+// owl kept them.
 func withCursorContexts(ms []catalog.Model) []catalog.Model {
 	out := slices.Clone(ms)
 	for i, m := range out {
@@ -232,7 +232,7 @@ var cursorTok struct {
 }
 
 // cursorTokenTTL is how long a token read from the Keychain is taken as
-// it: a sign-in or out in myna reads it afresh (forgetCursorStatus), one
+// it: a sign-in or out in owl reads it afresh (forgetCursorStatus), one
 // made in cursor-agent is seen within it.
 const cursorTokenTTL = 10 * time.Second
 

@@ -9,25 +9,33 @@ import (
 	"path/filepath"
 )
 
-// This build keeps its files in myna's own folders, but a user coming
-// from upstream has theirs in magpie's: the first start copies them over,
-// once, so the sign-ins, providers and settings are all there. The copy
-// goes to a temporary folder that is renamed into place, so a start that
-// is killed part way leaves nothing half-written to be trusted next time.
+// This build keeps its files in owl's own folders, but a user coming from
+// myna (this fork's name until it became owl) or from upstream magpie has
+// theirs in those: the first start copies them over, once, so the sign-ins,
+// providers and settings are all there. The copy goes to a temporary folder
+// that is renamed into place, so a start that is killed part way leaves
+// nothing half-written to be trusted next time.
 
-// The upstream build's folders, which this one copies from. Spelled out
-// here rather than derived from myna's name: they are history, fixed.
+// The folders older builds kept their files in, newest first, which this one
+// copies from. Spelled out here rather than derived from owl's name: they
+// are history, fixed.
 const (
-	legacyConfigName = "magpie"
-	legacyCacheName  = "magpie"
+	legacyMyName = "myna"
+	legacyUpName = "magpie"
 )
 
-func legacyConfig(home string) string {
-	return filepath.Join(home, ".config", legacyConfigName)
+func legacyConfigs(home string) []string {
+	return []string{
+		filepath.Join(home, ".config", legacyMyName),
+		filepath.Join(home, ".config", legacyUpName),
+	}
 }
 
-func legacyCache(home string) string {
-	return filepath.Join(home, ".cache", legacyCacheName)
+func legacyCaches(home string) []string {
+	return []string{
+		filepath.Join(home, ".cache", legacyMyName),
+		filepath.Join(home, ".cache", legacyUpName),
+	}
 }
 
 // migrate copies src to dst once, when dst holds nothing yet. It reports
@@ -95,12 +103,12 @@ func copyTree(src, dst string) error {
 			}
 			return copyFile(p, to)
 		default:
-			return nil // sockets and devices aren't files of myna's
+			return nil // sockets and devices aren't files of owl's
 		}
 	})
 }
 
-// skipRuntimeFile says whether a file is one a running myna made rather
+// skipRuntimeFile says whether a file is one a running owl made rather
 // than something the user would miss.
 func skipRuntimeFile(name string) bool {
 	switch filepath.Ext(name) {

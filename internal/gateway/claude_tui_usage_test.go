@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/claudetui"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/claudetui"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // With the interactive mode on, /usage is typed in it, through its
@@ -25,7 +25,7 @@ func TestClaudeUsageTUIOn(t *testing.T) {
 	os.Unsetenv("CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC")
 	log := filepath.Join(t.TempDir(), "log")
 	text := "Current session: 99% used · resets 7pm (Asia/Shanghai)\nCurrent week (all models): 81% used · resets Nov 4 at 6am (Asia/Shanghai)"
-	helper := filepath.Join(t.TempDir(), "myna")
+	helper := filepath.Join(t.TempDir(), "owl")
 	testenv.Program(t, helper, `#!/bin/sh
 [ "$1" = "`+claudetui.Command+`" ] || exit 9
 shift 2
@@ -66,13 +66,13 @@ cat > /dev/null
 	}
 }
 
-// A /usage read in the interactive mode works in myna's own folder
+// A /usage read in the interactive mode works in owl's own folder
 // (claudeWorkDir), every time the same: Claude Code asks whether to trust
 // a folder once for each state file, and a folder of each read's own was
 // asked again each time and left one more trusted project in the account's
 // state file (#4830, mydosu: 67 of them). A session the run told is
 // removed after it.
-func TestClaudeUsageTUIWorksInMynasFolder(t *testing.T) {
+func TestClaudeUsageTUIWorksInOwlsFolder(t *testing.T) {
 	fakeWarmClaude(t, `{}`, 0)
 	claudeTUIRuns = true
 	t.Cleanup(func() { claudeTUIRuns = false })
@@ -89,7 +89,7 @@ func TestClaudeUsageTUIWorksInMynasFolder(t *testing.T) {
 		left = append(left, filepath.Join(d, sid+".jsonl"))
 	}
 	log := filepath.Join(t.TempDir(), "log")
-	helper := filepath.Join(t.TempDir(), "myna")
+	helper := filepath.Join(t.TempDir(), "owl")
 	testenv.Program(t, helper, `#!/bin/sh
 echo "pwd:$(pwd)" >> '`+log+`'
 printf '%s\n' '{"type":"system","subtype":"init","session_id":"`+sid+`"}'
@@ -110,7 +110,7 @@ cat > /dev/null
 	real, _ := filepath.EvalSymlinks(work)
 	for _, l := range strings.Split(strings.TrimSpace(string(b)), "\n") {
 		if d := strings.TrimPrefix(l, "pwd:"); d != work && d != real {
-			t.Errorf("a read worked in %s, not myna's folder %s:\n%s", d, work, b)
+			t.Errorf("a read worked in %s, not owl's folder %s:\n%s", d, work, b)
 		}
 	}
 	for _, f := range left {
@@ -129,7 +129,7 @@ func TestClaudeUsageTUISaysItsDeadline(t *testing.T) {
 	claudeTUIRuns = true
 	t.Cleanup(func() { claudeTUIRuns = false })
 	log := filepath.Join(t.TempDir(), "log")
-	helper := filepath.Join(t.TempDir(), "myna")
+	helper := filepath.Join(t.TempDir(), "owl")
 	// a helper that heeds no deadline and says nothing
 	testenv.Program(t, helper, `#!/bin/sh
 echo "by:$`+claudetui.DeadlineEnv+`" > '`+log+`'
@@ -141,7 +141,7 @@ exec sleep 30
 	defer cancel()
 	dl, _ := ctx.Deadline()
 	_, err := claudeUsage(ctx, t.TempDir())
-	if err == nil || !strings.Contains(err.Error(), "said nothing before myna stopped waiting") {
+	if err == nil || !strings.Contains(err.Error(), "said nothing before owl stopped waiting") {
 		t.Fatalf("got %v", err)
 	}
 	b, _ := os.ReadFile(log)

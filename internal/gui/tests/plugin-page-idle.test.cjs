@@ -1,10 +1,10 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // A plugin's page the reader left (pluginpages.js): a frame in a hidden view
 // isn't hidden to itself, so the page is told as the reader leaves and
-// comes back (myna.onVisibility, myna.visible), and its frame, with its
+// comes back (owl.onVisibility, owl.visible), and its frame, with its
 // scripts, timers and connections, is let go after 10 minutes away. Back
 // sooner, it is the same frame; opened after, it loads again. A page whose
-// package says myna.page.keepAlive keeps its frame however long. A clock
+// package says owl.page.keepAlive keeps its frame however long. A clock
 // stands in for time, so nothing waits; the API is faked.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -18,12 +18,12 @@ const bridge = path.resolve(__dirname, "../pagebridge.js");
 const IDLE = "e".repeat(32), KEEP = "f".repeat(32);
 const entry = (tok, name, more = {}) => ({
   spec: "/x/" + name, name, key: "plugin-" + name, title: name, reads: [],
-  url: `/_myna/plugin/${tok}/index.html`, ...more,
+  url: `/_owl/plugin/${tok}/index.html`, ...more,
 });
 const pages = [entry(IDLE, "idle"), entry(KEEP, "keep", { keepAlive: true })];
 // what the page heard, kept where the test reads it
-const PAGE = `<!doctype html><meta charset="utf-8"><script src="_myna/bridge.js"></script>
-<script>window.heard = []; myna.onVisibility((v) => heard.push(v));</script><p>page</p>`;
+const PAGE = `<!doctype html><meta charset="utf-8"><script src="_owl/bridge.js"></script>
+<script>window.heard = []; owl.onVisibility((v) => heard.push(v));</script><p>page</p>`;
 
 async function server(route) {
   const url = new URL(route.request().url());
@@ -36,14 +36,14 @@ async function server(route) {
   if (url.pathname === "/api/plugin-pages") return json(pages);
   if (url.pathname === "/api/plugin-panels") return json([]);
   if (url.pathname.startsWith("/api/")) return json({});
-  const m = url.pathname.match(/^\/_myna\/plugin\/([0-9a-f]{32})\/(.+)$/);
+  const m = url.pathname.match(/^\/_owl\/plugin\/([0-9a-f]{32})\/(.+)$/);
   if (m) {
     const headers = { "X-Content-Type-Options": "nosniff", "Cache-Control": "no-cache" };
-    if (m[2] === "_myna/bridge.js") return route.fulfill({ headers: { ...headers, "Content-Type": "text/javascript" }, body: await fs.readFile(bridge) });
+    if (m[2] === "_owl/bridge.js") return route.fulfill({ headers: { ...headers, "Content-Type": "text/javascript" }, body: await fs.readFile(bridge) });
     if (m[2] === "index.html") return route.fulfill({ headers: { ...headers, "Content-Type": "text/html" }, body: PAGE });
     return route.fulfill({ status: 404, body: "" });
   }
-  if (url.host !== "myna.test") return route.fulfill({ status: 404, body: "" });
+  if (url.host !== "owl.test") return route.fulfill({ status: 404, body: "" });
   const file = path.join(assets, url.pathname === "/" ? "index.html" : url.pathname);
   const contentType = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" }[path.extname(file)];
   try { await route.fulfill({ body: await fs.readFile(file), contentType }); } catch { await route.fulfill({ status: 404, body: "" }); }
@@ -63,7 +63,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     page.on("pageerror", (e) => errors.push(e.message));
     await page.clock.install({ time: Date.now() });
     await page.route("**/*", server);
-    await page.goto("http://myna.test/");
+    await page.goto("http://owl.test/");
     await page.locator("#nav button[data-plugin-page]").nth(1).waitFor({ state: "attached" });
 
     const frames = (key) => page.locator(`#view-plugin-${key} iframe.plugin-frame`).count();
@@ -73,26 +73,26 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.waitForFunction((tok) => [...document.querySelectorAll("iframe.plugin-frame")].some((f) => f.src.includes(tok)), tok);
       let f;
       for (let i = 0; i < 100 && !(f = page.frames().find((x) => x.url().includes(tok))); i++) await page.waitForTimeout(50);
-      await f.waitForFunction(() => window.myna?.theme);
+      await f.waitForFunction(() => window.owl?.theme);
       return f;
     }
     const pass = async (ms) => { await page.clock.runFor(ms); await page.waitForTimeout(100); };
 
     const idle = await opened("idle", IDLE);
     await idle.evaluate(() => { window.mark = 1; });
-    assert.deepEqual(await idle.evaluate(() => [myna.visible, heard]), [true, []], "open: seen, nothing heard yet");
+    assert.deepEqual(await idle.evaluate(() => [owl.visible, heard]), [true, []], "open: seen, nothing heard yet");
 
     // left: told at once, and its frame still there short of 10 minutes
     await page.evaluate(() => show("agents"));
     await idle.waitForFunction(() => heard.length === 1);
-    assert.deepEqual(await idle.evaluate(() => [myna.visible, heard]), [false, [false]], "left: told it is hidden");
+    assert.deepEqual(await idle.evaluate(() => [owl.visible, heard]), [false, [false]], "left: told it is hidden");
     await pass(9 * MIN);
     assert.equal(await frames("idle"), 1, "kept 9 minutes away");
 
     // back before then: the same frame, told it is seen, its timer done
     await page.evaluate(() => show("plugin-idle"));
     await idle.waitForFunction(() => heard.length === 2);
-    assert.deepEqual(await idle.evaluate(() => [myna.visible, heard, window.mark]), [true, [false, true], 1], "back: the same frame, seen");
+    assert.deepEqual(await idle.evaluate(() => [owl.visible, heard, window.mark]), [true, [false, true], 1], "back: the same frame, seen");
     await pass(11 * MIN);
     assert.equal(await frames("idle"), 1, "a page the reader is on is never let go");
 
@@ -104,13 +104,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     await pass(10 * MIN + 1000);
     assert.equal(await frames("idle"), 0, "let go 10 minutes after it was left");
     assert.equal(await frames("keep"), 1, "keepAlive: kept");
-    assert.deepEqual(await keep.evaluate(() => [myna.visible, heard, window.mark]), [false, [false], 2], "keepAlive: told, still running");
+    assert.deepEqual(await keep.evaluate(() => [owl.visible, heard, window.mark]), [false, [false], 2], "keepAlive: told, still running");
     await pass(60 * MIN);
     assert.equal(await frames("keep"), 1, "keepAlive: kept an hour on");
 
     // opened again: it loads again, and is seen
     const again = await opened("idle", IDLE);
-    assert.deepEqual(await again.evaluate(() => [myna.visible, heard, window.mark]), [true, [], undefined], "opened after: a new frame");
+    assert.deepEqual(await again.evaluate(() => [owl.visible, heard, window.mark]), [true, [], undefined], "opened after: a new frame");
     assert.equal(await frames("idle"), 1);
     // and nothing the window held for the one let go says it broke
     await pass(11e3);

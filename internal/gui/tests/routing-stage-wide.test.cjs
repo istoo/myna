@@ -1,10 +1,10 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // refeccd on Discord: in a full-screen window the Routing stage kept the
-// agent and myna in columns of 124px each, the agent cut to "Claude
+// agent and owl in columns of 124px each, the agent cut to "Claude
 // Desk…", while the group's member rows ran on across the rest of the
 // screen. The two columns are as wide as their words now, at least 124px
 // and at most 15% of the stage: at 2560px and 1920px the agent's name, its
-// model and myna's address read whole, the wires still start and end at
+// model and owl's address read whole, the wires still start and end at
 // the cards, and at 1100px down to a phone's width nothing is wider than
 // it was (124px each, or the narrow layout's two halves) and nothing
 // scrolls sideways. Every language, both engines.
@@ -80,7 +80,7 @@ const measure = () => {
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
   for (const lang of ["en", "zh", "zh-TW", "ja", "de"]) {
     for (const width of [2560, 1920, 1100, 800, 560, 390]) {
-      test(`${engine} ${lang} ${width}px: the agent and myna take the room a wide stage has, and no more than before on a narrow one`, async (t) => {
+      test(`${engine} ${lang} ${width}px: the agent and owl take the room a wide stage has, and no more than before on a narrow one`, async (t) => {
         const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
         const page = await (await browser.newContext({ viewport: { width, height: 1000 }, reducedMotion: "reduce" })).newPage();
         page.setDefaultTimeout(8000);
@@ -95,7 +95,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           await browser.close();
         });
         await page.route("**/*", serve(lang));
-        await page.goto("http://myna.test/?view=routing");
+        await page.goto("http://owl.test/?view=routing");
         await page.waitForFunction(() => document.querySelector(".rt-src b")?.textContent === "Claude Desktop" && document.querySelectorAll(".rt-accts li:not(.idle)").length >= 2);
         // laid out on the frame after a resize (client.js's stage observer)
         await page.evaluate(() => new Promise((ok) => requestAnimationFrame(() => requestAnimationFrame(ok))));
@@ -103,7 +103,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const msg = JSON.stringify(m);
         assert.equal(m.sideways, 0, `no sideways scroll: ${msg}`);
         if (m.narrow) {
-          // the narrow layout: the agent and myna side by side, halves of the stage
+          // the narrow layout: the agent and owl side by side, halves of the stage
           assert.equal(m.cols.length, 2, msg);
         } else {
           assert.equal(m.cols.length, 3, msg);
@@ -114,14 +114,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           }
           // where 15% is no more than 124px, as before: the member rows lose nothing
           if (m.stageW * .15 <= 124) for (const c of m.cols.slice(0, 2)) assert(Math.abs(c - 124) <= .5, `as wide as before: ${msg}`);
-          // the agent's wire runs from its card to myna's
+          // the agent's wire runs from its card to owl's
           assert(Math.abs(m.wireFrom - m.srcRight) <= 1, `the agent's wire starts at its card: ${msg}`);
-          assert(Math.abs(m.wireTo - m.hubLeft) <= 1, `the agent's wire ends at myna's card: ${msg}`);
+          assert(Math.abs(m.wireTo - m.hubLeft) <= 1, `the agent's wire ends at owl's card: ${msg}`);
         }
         if (width >= 1920) {
           assert(!m.nameCut, `the agent's name reads whole: ${msg}`);
           assert(!m.modelCut, `the agent's model reads whole: ${msg}`);
-          assert(!m.hubCut, `myna's address reads whole: ${msg}`);
+          assert(!m.hubCut, `owl's address reads whole: ${msg}`);
         }
         assert.deepEqual(errors, []);
       });

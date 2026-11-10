@@ -15,9 +15,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/claudetui"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/testenv"
+	"github.com/istoo/owl/internal/claudetui"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/testenv"
 )
 
 // ylorn on Discord: a lead Claude Code routed by group/orchestrator to a
@@ -84,7 +84,7 @@ while read -r line; do
   esac
   echo '{"type":"stream_event","event":{"type":"message_start","message":{"id":"m","model":"claude-opus-5-5","usage":{"input_tokens":1}}}}'
   for k in 1 2 3; do
-    echo '{"type":"stream_event","event":{"type":"content_block_start","index":'$k',"content_block":{"type":"tool_use","id":"toolu_L'$$'_'$k'","name":"mcp__myna__Agent"}}}'
+    echo '{"type":"stream_event","event":{"type":"content_block_start","index":'$k',"content_block":{"type":"tool_use","id":"toolu_L'$$'_'$k'","name":"mcp__owl__Agent"}}}'
     echo '{"type":"stream_event","event":{"type":"content_block_delta","index":'$k',"delta":{"type":"input_json_delta","partial_json":"{\"part\":'$k'}"}}}'
     echo '{"type":"stream_event","event":{"type":"content_block_stop","index":'$k'}}'
   done
@@ -114,7 +114,7 @@ wait
 	srv := httptest.NewServer(s.Handler())
 	t.Cleanup(srv.Close)
 	t.Cleanup(s.subscription.abortAll) // before srv.Close: a run's MCP call holds a request open
-	t.Setenv("MYNA_ADDR", srv.Listener.Addr().String())
+	t.Setenv("OWL_ADDR", srv.Listener.Addr().String())
 
 	post := func(messages string) (int, string) {
 		res, err := http.Post(srv.URL+"/v1/messages", "application/json", strings.NewReader(
@@ -296,12 +296,12 @@ while read -r line; do
     *"Fork started"*) say "told it whole"; continue ;;
   esac
   echo '{"type":"stream_event","event":{"type":"message_start","message":{"id":"m'$$'","model":"claude-opus-5-5","usage":{"input_tokens":1}}}}'
-  echo '{"type":"stream_event","event":{"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"toolu_L'$$'","name":"mcp__myna__Agent"}}}'
+  echo '{"type":"stream_event","event":{"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"toolu_L'$$'","name":"mcp__owl__Agent"}}}'
   echo '{"type":"stream_event","event":{"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"{\"part\":1}"}}}'
   echo '{"type":"stream_event","event":{"type":"content_block_stop","index":0}}'
   echo '{"type":"user","uuid":"ask-'$$'","sessionId":"'$sid'"}' >> "$file"
   echo '{"type":"assistant","uuid":"line-'$$'","sessionId":"'$sid'","message":{"id":"m'$$'","model":"claude-opus-5-5"}}' >> "$file"
-  echo '{"type":"assistant","uuid":"line-'$$'","message":{"id":"m'$$'","model":"claude-opus-5-5","content":[{"type":"tool_use","id":"toolu_L'$$'","name":"mcp__myna__Agent","input":{"part":1}}]}}'
+  echo '{"type":"assistant","uuid":"line-'$$'","message":{"id":"m'$$'","model":"claude-opus-5-5","content":[{"type":"tool_use","id":"toolu_L'$$'","name":"mcp__owl__Agent","input":{"part":1}}]}}'
   echo '{"type":"stream_event","event":{"type":"message_delta","delta":{"stop_reason":"tool_use"},"usage":{"output_tokens":3}}}'
   echo '{"type":"stream_event","event":{"type":"message_stop"}}'
   (
@@ -319,7 +319,7 @@ wait
 		// Code as it was asked, saying the run is the interactive mode's
 		claudeTUIRuns = true
 		t.Cleanup(func() { claudeTUIRuns = false })
-		helper := filepath.Join(t.TempDir(), "myna")
+		helper := filepath.Join(t.TempDir(), "owl")
 		testenv.Program(t, helper, `#!/bin/sh
 [ "$1" = "`+claudetui.Command+`" ] || exit 9
 shift; claude=$1; shift
@@ -337,7 +337,7 @@ FAKE_TUI=interactive exec "$claude" "$@"
 	srv := httptest.NewServer(s.Handler())
 	t.Cleanup(srv.Close)
 	t.Cleanup(s.subscription.abortAll) // before srv.Close: a run's MCP call holds a request open
-	t.Setenv("MYNA_ADDR", srv.Listener.Addr().String())
+	t.Setenv("OWL_ADDR", srv.Listener.Addr().String())
 
 	post := func(messages string) (int, string) {
 		res, err := http.Post(srv.URL+"/v1/messages", "application/json", strings.NewReader(

@@ -3,12 +3,12 @@ package cli
 import (
 	"testing"
 
-	"github.com/istoo/myna/internal/catalog"
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/catalog"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
-// myna model suffix off has the agents' lists name models alone, on
+// owl model suffix off has the agents' lists name models alone, on
 // names them with their providers again (#335), own all but the names the
 // user gave (#92); anything else is refused.
 func TestModelSuffixCmd(t *testing.T) {

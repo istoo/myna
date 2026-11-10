@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/istoo/myna/internal/catalog"
+	"github.com/istoo/owl/internal/catalog"
 )
 
 // OMLXPreset is the oMLX preset's id.

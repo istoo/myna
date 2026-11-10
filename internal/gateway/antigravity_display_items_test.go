@@ -9,7 +9,7 @@ import (
 // displayItemsAsk is a Claude Code request with a tool whose display
 // property is an untyped array of choices: items, with the choices as a
 // string enum beside them. ferock on Discord sent such a request through
-// a routing group of a remote myna's Antigravity Gemini, and Google
+// a routing group of a remote owl's Antigravity Gemini, and Google
 // turned it away: 400 "GenerateContentRequest.tools[0].
 // function_declarations[19].parameters.properties[display].items: field
 // predicate failed: $type == Type.ARRAY". The tool's literal schema
@@ -42,7 +42,7 @@ func TestGeminiToolTypesItemsBeforeEnum(t *testing.T) {
 
 // Every node Antigravity is sent has items only as an array and
 // properties only as an object, on each route: the tool as Claude Code
-// sent it, as this version's local myna passes it on, and as a myna
+// sent it, as this version's local owl passes it on, and as a owl
 // from before passed it on (display typed "string").
 func TestAntigravityItemsOnlyOnArrays(t *testing.T) {
 	older := `{"model":"group/gemini-3-8-flash","max_tokens":32,"messages":[{"role":"user","content":"hi"}],

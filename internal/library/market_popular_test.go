@@ -12,9 +12,9 @@ import (
 
 // The owner: the MCP market had too little in it. Before anything is
 // searched it offers the featured servers and then the registry's most
-// starred (a snapshot shipped with myna, the registry not asked); one a
+// starred (a snapshot shipped with owl, the registry not asked); one a
 // featured server already is, two that start the same package, and one
-// myna can't fill in are offered once or not at all. A word search gets
+// owl can't fill in are offered once or not at all. A word search gets
 // the registry's ranked results first, then the popular ones whose words
 // have it, and up to 100 of the registry's, not 30.
 func TestMarketServersPopular(t *testing.T) {
@@ -108,7 +108,7 @@ func TestMarketServersPopular(t *testing.T) {
 	}
 }
 
-// What myna ships: hundreds of the registry's servers, each one myna
+// What owl ships: hundreds of the registry's servers, each one owl
 // can add, none a Smithery wrapper, and none twice.
 func TestPopularServersSnapshot(t *testing.T) {
 	list := readPopular(serversSnapshot)

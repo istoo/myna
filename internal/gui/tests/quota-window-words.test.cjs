@@ -2,7 +2,7 @@
 // yi_time on Discord: a plugin names and counts its usage windows in
 // English (WorkBuddy's "Credits" and "Extra credits", in "credits"), and
 // the Usage page's card says them in the page's language, in every
-// language myna has, as the tray's tooltip does (traywords.go). No
+// language owl has, as the tray's tooltip does (traywords.go). No
 // backend, the API is faked here.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -62,7 +62,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
         await page.route("**/*", serve(lang));
-        await page.goto("http://myna.test/?view=usage");
+        await page.goto("http://owl.test/?view=usage");
 
         const card = page.locator(".subscription-card", { hasText: "WorkBuddy" });
         await card.locator(".quota-name").first().waitFor();

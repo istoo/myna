@@ -4,11 +4,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/istoo/myna/internal/provider"
-	"github.com/istoo/myna/internal/settings"
+	"github.com/istoo/owl/internal/provider"
+	"github.com/istoo/owl/internal/settings"
 )
 
-// myna model id lists a provider's model by an id of the user's, shows
+// owl model id lists a provider's model by an id of the user's, shows
 // it, lists every one under ids and takes it off with --reset; it refuses
 // a flag or a bad id taken as one, and a model the provider doesn't have.
 func TestModelIDCmd(t *testing.T) {
@@ -48,7 +48,7 @@ func TestModelIDCmd(t *testing.T) {
 			t.Fatalf("took %v", bad)
 		}
 	}
-	if out, err = runOut(t, "model", "id", "--help"); err != nil || !strings.Contains(out, "myna model id <provider/model> <id>") {
+	if out, err = runOut(t, "model", "id", "--help"); err != nil || !strings.Contains(out, "owl model id <provider/model> <id>") {
 		t.Fatalf("--help: %q %v", out, err)
 	}
 	if got := settings.Load().ModelIDs; len(got) != 1 {

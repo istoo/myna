@@ -71,8 +71,8 @@ function server(lang, sets) {
 
 // the words as i18n.js has them
 const W = {
-  en: { unset: "Codex memories model: Codex's own: gpt-5.6-terra/luna, or the session's myna model", def: "Default", set: "Codex memories model: GPT-5.4 mini" },
-  zh: { unset: "Codex 记忆整理模型：Codex 自带的 gpt-5.6-terra/luna，或会话正在用的 myna 模型", def: "默认", set: "Codex 记忆整理模型：GPT-5.4 mini" },
+  en: { unset: "Codex memories model: Codex's own: gpt-5.6-terra/luna, or the session's owl model", def: "Default", set: "Codex memories model: GPT-5.4 mini" },
+  zh: { unset: "Codex 记忆整理模型：Codex 自带的 gpt-5.6-terra/luna，或会话正在用的 owl 模型", def: "默认", set: "Codex 记忆整理模型：GPT-5.4 mini" },
 };
 
 const codex = '.row.agent[data-id="codex@wsl:Ubuntu-24.04"]';
@@ -95,7 +95,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         }
         await browser.close();
       });
-      await page.goto("http://myna.test/");
+      await page.goto("http://owl.test/");
       await page.locator(codex).waitFor();
       // Codex's own card: its settings have the row, so no square here
       await page.locator('.row.agent[data-id="codex"] .ag-link').click();

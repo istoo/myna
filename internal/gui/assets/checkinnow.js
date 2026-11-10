@@ -71,7 +71,7 @@ function checkinNowLine(r, who) {
   switch (r?.outcome) {
     case "claimed":
     case "done":
-      if (r.again) return { text: t("{user}: {name} says already checked in; myna asks again later", { user: who, name: checkinVendorName(r) }) };
+      if (r.again) return { text: t("{user}: {name} says already checked in; owl asks again later", { user: who, name: checkinVendorName(r) }) };
       if (r.outcome === "claimed" && r.asked) return { text: t("Checked in {who}", { who }) + (r.credit ? " +" + r.credit : "") + (r.streak ? " · " + t("{n}-day streak", { n: r.streak }) : "") };
       return { text: t("{who} was already checked in today", { who }) };
     case "ineligible":

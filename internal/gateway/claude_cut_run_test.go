@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/istoo/myna/internal/claudetui"
-	"github.com/istoo/myna/internal/testenv"
-	"github.com/istoo/myna/internal/usage"
+	"github.com/istoo/owl/internal/claudetui"
+	"github.com/istoo/owl/internal/testenv"
+	"github.com/istoo/owl/internal/usage"
 )
 
 // A Claude subscription run whose Claude Code exits after its reply
@@ -55,7 +55,7 @@ func TestClaudeSubscriptionRunExitedMidReplyFails(t *testing.T) {
 							// running the Claude Code it was handed
 							claudeTUIRuns = true
 							t.Cleanup(func() { claudeTUIRuns = false })
-							helper := filepath.Join(t.TempDir(), "myna")
+							helper := filepath.Join(t.TempDir(), "owl")
 							testenv.Program(t, helper, "#!/bin/sh\n[ \"$1\" = \""+claudetui.Command+"\" ] || exit 9\necho start >> '"+helped+"'\nshift; claude=$1; shift\nexec \"$claude\" \"$@\"\n")
 							claudeTUIHelper = helper
 							t.Cleanup(func() { claudeTUIHelper = "" })
