@@ -1,95 +1,89 @@
 <div align="center">
 
-<a href="https://github.com/istoo/owl/releases/latest"><img src="site/public/img/icon-256.png" width="112" alt="owl"></a>
+<a href="https://github.com/istoo/owl"><img src="site/public/img/icon-256.png" width="112" alt="owl"></a>
 
 # owl
 
-### 所有 Agent 的模型，一处搞定。
+### 每个 agent 的模型，都在一个地方。
 
-**Claude Code 跑 Kimi，Codex 跑 DeepSeek，Gemini CLI 跑 GLM，OpenCode 用你的 ChatGPT 订阅。**<br>
-在菜单栏一点就能切换。所有 Agent 共用一个本地网关，<br>
-额度用完时，它会悄悄切到你的下一个账号。
+**Claude Code 跑 Kimi。Codex 跑 DeepSeek。Gemini CLI 跑 GLM。OpenCode 跑你的 ChatGPT 订阅。**<br>
+一个列表里任选，给任意 agent。一个本地网关服务所有 agent，<br>
+某个额度用完时，它默默换到你的下一个账号。
 
-> **owl 基于 [yetone/magpie](https://github.com/yetone/magpie) 二次开发。**
-> 它是 magpie 的衍生发行版：保留原有插件生态与协议（`magpie` 插件键、`@magpie-community/*`、`X-Magpie-*` 请求头），
-> 品牌、更新链路与网络依赖由本项目独立维护。原项目及其贡献者的版权与 MIT 许可证一并保留。
+> **owl 是 [yetone/magpie](https://github.com/yetone/magpie) 的二次开发。**
+> 它是一个衍生发行版：插件生态与契约（`magpie` 插件键、`@magpie-community/*`、
+> `X-Magpie-*` 请求头）保留，品牌、更新源与网络依赖独立维护。
+> 原项目的版权与 MIT 许可证一并保留。
 
-[![Release](https://img.shields.io/github/v/release/istoo/owl?label=release&color=111111)](https://github.com/istoo/owl/releases/latest) [![Stars](https://img.shields.io/github/stars/istoo/owl?style=flat&color=111111)](https://github.com/istoo/owl/stargazers) [![Discord](https://img.shields.io/badge/Discord-加入社区-5865F2?logo=discord&logoColor=white)](https://discord.gg/vGSnD3ZKQF) [![License](https://img.shields.io/badge/license-MIT-111111)](LICENSE)<br>
+[![Release](https://img.shields.io/github/v/release/istoo/owl?label=release&color=111111)](https://github.com/istoo/owl/releases/latest) [![Stars](https://img.shields.io/github/stars/istoo/owl?style=flat&color=111111)](https://github.com/istoo/owl/stargazers) [![License](https://img.shields.io/badge/license-MIT-111111)](LICENSE)<br>
 ![macOS](https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=white) ![Windows](https://img.shields.io/badge/Windows-0078D4?logo=windows&logoColor=white) ![Linux](https://img.shields.io/badge/Linux-FCC624?logo=linux&logoColor=black) ![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white) ![Termux](https://img.shields.io/badge/Termux-000000?logo=android&logoColor=white)
 
-<sub>赞助商</sub>
-
-<a href="https://github.com/istoo/owl/go/apinebula/readme"><picture><source media="(prefers-color-scheme: dark)" srcset="site/public/img/sponsor-apinebula-dark.svg"><img src="site/public/img/sponsor-apinebula.svg" width="144" height="36" alt="APINEBULA"></picture></a>&emsp;&emsp;<a href="https://github.com/istoo/owl/go/zerotoken/readme"><picture><source media="(prefers-color-scheme: dark)" srcset="site/public/img/sponsor-zerotoken-dark.svg"><img src="site/public/img/sponsor-zerotoken.svg" width="144" height="36" alt="零词元"></picture></a>&emsp;&emsp;<a href="https://github.com/istoo/owl/go/kimi-cn/readme"><picture><source media="(prefers-color-scheme: dark)" srcset="site/public/img/sponsor-kimi-dark.svg"><img src="site/public/img/sponsor-kimi.svg" width="144" height="36" alt="Kimi"></picture></a><br>
-<a href="https://github.com/istoo/owl/go/apikeyfan/readme"><picture><source media="(prefers-color-scheme: dark)" srcset="site/public/img/sponsor-apikeyfan-cn-dark.svg"><img src="site/public/img/sponsor-apikeyfan-cn.svg" width="144" height="36" alt="APIKEY.FAN"></picture></a>&emsp;&emsp;<a href="https://github.com/istoo/owl/go/wandapi/readme"><picture><source media="(prefers-color-scheme: dark)" srcset="site/public/img/sponsor-wandapi-cn-dark.svg"><img src="site/public/img/sponsor-wandapi-cn.svg" width="144" height="36" alt="WandAPI"></picture></a>&emsp;&emsp;<a href="https://github.com/istoo/owl/go/aigocode/readme"><picture><source media="(prefers-color-scheme: dark)" srcset="site/public/img/sponsor-aigocode-readme-dark.png"><img src="site/public/img/sponsor-aigocode-readme.png" width="144" height="36" alt="AIGoCode"></picture></a>
-
-**[下载](https://github.com/istoo/owl/releases/latest)** &nbsp;·&nbsp; **[文档](https://github.com/istoo/owl/blob/main/docs/zh/start)** &nbsp;·&nbsp; **[完整参考（英文）](docs/reference.md)** &nbsp;·&nbsp; **[插件](https://github.com/magpie-community/plugins)** &nbsp;·&nbsp; **[Discord](https://discord.gg/vGSnD3ZKQF)** &nbsp;·&nbsp; [English](README.md) · **简体中文**
+**[下载](https://github.com/istoo/owl/releases/latest)** &nbsp;·&nbsp; **[文档](https://github.com/istoo/owl/blob/main/site/public/docs/zh/start.html)** &nbsp;·&nbsp; **[完整参考（英文）](docs/reference.md)** &nbsp;·&nbsp; **[插件](https://github.com/magpie-community/plugins)** &nbsp;·&nbsp; [English](README.md)
 
 <br>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="site/public/img/agents-zh-dark.png">
-  <img src="site/public/img/agents-zh-light.png" width="900" alt="owl 的 Agents 页：Claude Code 用 Kimi K3，Codex 用 DeepSeek V4 Pro，Gemini CLI 用 GLM-5.3，都在一个列表里选">
+  <source media="(prefers-color-scheme: dark)" srcset="site/public/img/agents-dark.png">
+  <img src="site/public/img/agents-light.png" width="900" alt="owl 的 Agents 页：Claude Code 跑 Kimi K3，Codex 跑 DeepSeek V4 Pro，Gemini CLI 跑 GLM-5.3，都从一个列表里选">
 </picture>
 
 </div>
 
 <br>
 
-## owl 适合你吗？
+## 为什么用 owl
 
-每个 Agent 都把模型写在自己的配置文件里，格式各不相同，key 和 base URL 各管各的。花钱买的订阅只能在一个 Agent 里用。owl 把这些收进一个应用和一个本地网关：
+每个 agent 都把自己的模型写在各自的文件里，格式不同，密钥和 base URL 也不同。你付费的订阅只能在一个 agent 里用。owl 把这些都放到一个应用和一个本地网关后面：
 
-- **任意 Agent 用任意模型**，在一张表里选。owl 只改 Agent 配置里该改的那一个键。
-- **一个 provider 处处能用**：API key、本地模型，或者你登录着的 Claude、ChatGPT、Copilot、Gemini、Grok 订阅。
-- **额度用完也不断**：同一个服务商的下一个账号自动接上，路由组还能换到别的模型或服务商，Agent 看不到报错。只有一个账号又没建路由组时，没有可换的，报错会原样回给 Agent。
-- **密钥不出你的电脑**：在 **设置 → 隐私** 打开脱敏后（默认关闭），提示词里的密钥、密码、邮箱，在请求离开电脑前就在本地脱敏，回复里再换回原值。
+- **任意模型，任意 agent。** 从一个列表里选；owl 只改 agent 配置里真正起作用的那一个键，原来的注释和排版不动。
+- **一个供应商，处处可用。** 一个 API key、一个本地模型，或者你已登录的 Claude、ChatGPT、Copilot、Gemini、Grok 订阅。
+- **额度用完自动续上。** 同一供应商的下一个账号接手；路由分组会换到另一个模型或供应商，agent 看不到错误。只有一个账号又没有分组时，无处可换，错误才会到 agent 手上。
+- **密钥不离开你的电脑。** 打开脱敏后，提示词里的密钥、密码和邮箱会在本机换成占位符，回复时再换回来。
 
-如果你用不止一个 Agent、不止一个 provider 或不止一个账号，它就适合你。如果你只用一个 Agent、只用它自家的订阅，而且够用，那就不需要 owl。
+同时用多个 agent、多个供应商或多个账号，owl 就是为你做的。如果只有一个 agent、用它自己厂商的订阅就够，你不需要它。
 
-支持 macOS、Windows 和 Linux（菜单栏应用、窗口、TUI、Web 界面和 CLI），也能跑在 Docker 和 Termux 上。
+支持 macOS、Windows 和 Linux（菜单栏应用、窗口、TUI、网页界面和 CLI），也能跑在 Docker 与 Termux 上。
 
-## 快速开始
+## 安装
 
-**1 · 安装**。从 **[github.com/istoo/owl](https://github.com/istoo/owl/releases/latest)** 下载应用，或者运行：
+从 **[Releases](https://github.com/istoo/owl/releases/latest)** 下载应用，或者运行：
 
 ```sh
 curl -fsSL https://github.com/istoo/owl/releases/latest/download/install.sh | sh
 ```
 
-<sub>Mac 版已签名并公证，每个版本都会自动更新。Linux 上脚本装桌面版，桌面上没装 WebKitGTK 4.1 时会先用系统的包管理器装上（sudo 会要密码）；没有桌面或没有终端可问时装终端版，并告诉你该装哪个包。用 `--gui` 或 `--tui` 可以自己选。网络受限时可用 `--proxy` 或 `--mirror`。也可以 `go install github.com/istoo/owl@latest`，或者用 [Docker 镜像](https://github.com/istoo/owl/blob/main/docs/zh/docker)。 用 `curl -fsSL https://github.com/istoo/owl/releases/latest/download/install.sh | sh -s -- --uninstall` 卸载脚本装上的东西；`~/.config/owl` 里的设置会保留，加 `--purge` 才会断开 Agent 并一起删除。</sub>
+<sub>在桌面上，脚本安装桌面应用。Linux 上没有 WebKitGTK 4.1 时，脚本先用包管理器装上（sudo 会问密码）；没有桌面、或者没有终端可以询问时，安装终端版，并告诉你要补哪个包。`--gui` 或 `--tui` 可以指定。防火墙后面用 `--proxy` 或 `--mirror`。也可以用 `go install github.com/istoo/owl@latest`，或者 [Docker 镜像](https://github.com/istoo/owl/blob/main/docs/docker)。每个构建都会自己更新，更新说明只来自这个仓库。卸载时用同一条命令加 `sh -s -- --uninstall`；`~/.config/owl` 里的设置会保留，除非加上 `--purge`——那会断开你的 agent 并一起删掉。</sub>
 
-**2 · 添加 provider**。打开 owl，进入 **Providers → 添加 provider**。选一个预设、粘贴 key，或者登录一个订阅。
+## 快速上手
 
-**3 · 选模型**。在 **Agents** 页给每个 Agent 选一个模型。开一个新会话就用上了。
-
-也可以全程在终端里操作：
+1. **添加供应商。** 打开 owl，进入 **供应商 → 添加供应商**。选一个预设、粘贴 key，或者用订阅登录。
+2. **给每个 agent 选模型。** 在 **Agents** 页选好，开一个新会话就生效。
+3. **或者全在终端里做：**
 
 ```sh
 owl provider add deepseek sk-…              # 预设只需要 key
-owl claude deepseek/deepseek-v4-pro          # Claude Code 用 DeepSeek
-owl codex moonshot/kimi-k2.5                 # Codex 用 Kimi
+owl claude deepseek/deepseek-v4-pro          # Claude Code 跑 DeepSeek
+owl codex moonshot/kimi-k2.5                 # Codex 跑 Kimi
 owl group add "Opus anywhere" models=claude/claude-opus-5-5,copilot/claude-opus-5.5 routing=smart
-owl claude group/opus-anywhere               # 在多个订阅间自动切换
-owl save work && owl use work             # 方案
-owl quota                                    # 每个套餐还剩多少
-owl settings set theme dark                  # 设置里的每一项，也能在终端改
-owl tool generate_image "一只喜鹊，水彩" -o hero.png   # 直接调用 owl 的生图、识图、搜索工具
-owl tui                                      # 全部功能，在终端里
+owl claude group/opus-anywhere               # 在多个订阅之间故障转移
+owl save work && owl use work                # 配置档
+owl quota                                    # 每个订阅还剩多少
+owl settings set theme dark                  # 设置里的每一项，都能在终端改
+owl tui                                      # 整个应用，在终端里跑
 ```
 
-owl 通过读取智能体的登录信息（Claude Code 和 Codex 的文件、钥匙串）找到它们登录的订阅。不想让它读取，可以在 设置 → 隐私 里关闭「订阅账号」，或运行 `owl accounts discovery off`（`on` 重新开启）。`OWL_NO_ACCOUNTS=1` 只对这一次运行关闭，不改动保存的设置。API Key 服务商不受影响。
+owl 通过读取 agent 的登录信息（Claude Code 和 Codex 的文件、钥匙串）来发现你已经登录的订阅。不想让它读，关掉 **设置 → 隐私 → 订阅账号**，或者运行 `owl accounts discovery off`（`on` 打开）。`OWL_NO_ACCOUNTS=1` 只在这一次运行里关掉，不改已保存的设置。用 API key 的供应商不受影响。
 
-## 支持的 Agent
+## 它是怎么连起来的
 
-<table>
-<tr><td>
+`127.0.0.1:3425` 上的网关会说 OpenAI Chat、OpenAI Responses、Anthropic Messages 和 Gemini，并在它们之间翻译——流式输出、工具调用和推理都包括。agent 指向它；路由分组、插件和脱敏都在路径上。
 
-Claude Code · Claude Desktop · Claude Science · Codex · Gemini CLI · Antigravity CLI · OpenCode · OpenChamber · MiMo Code · DevEco Code · Pi · oh-my-pi · StepCode · MothX · PenguinHarness · Aside · OmO · Prime Agent · Goose · Cursor CLI · Cursor Private Inference · Zed · VS Code Chat · VS Code Insiders · VSCodium Chat · Zoo Code · JetBrains Air · Air (JetBrains IDEs) · Copilot (JetBrains) · Copilot CLI · Crush · DeepSeek Harness · Reasonix Studio · Command Code · fx · Devin · Hermes Agent · Mister Morph · Kimi Code · jcode · Qwen Code · Muse Code · Empryo · MiniMax Code · Droid · Cline · Qoder · Qoder CN · Grok Build · Grok App · ZCode · WorkBuddy · WorkBuddy AI · CodeBuddy · Pencil · OpenPencil · OpenBot · NewMax · Raycast · Kiro Crew · T3 Code · OpenHanako · AtomCode · Snow CLI · Alma · Cindy · Lody · AionUi · Ante · AstrBot · QwenPaw · OpenClaw
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="site/public/img/architecture-dark.svg">
+  <img src="site/public/img/architecture.svg" alt="owl 的连接方式：agent 把请求发给 127.0.0.1:3425 上的网关，网关经过路由分组和插件，送到你的 API key、订阅和本地模型">
+</picture>
 
-</td></tr>
-</table>
-
-owl 只显示你电脑上装了的 Agent；部分 Agent 的配置说明见[参考文档](docs/reference.md#notes-on-some-agents)（英文）。其他任何能填 base URL 的工具也都能用这个网关：
+任何接受 base URL 的工具也能用这个网关：
 
 ```sh
 export OPENAI_BASE_URL=http://127.0.0.1:3425/v1     OPENAI_API_KEY=owl
@@ -97,130 +91,80 @@ export ANTHROPIC_BASE_URL=http://127.0.0.1:3425     ANTHROPIC_API_KEY=owl
 export GOOGLE_GEMINI_BASE_URL=http://127.0.0.1:3425 GEMINI_API_KEY=owl
 ```
 
-## 整体结构
-
-`127.0.0.1:3425` 上的网关同时支持 OpenAI Chat、OpenAI Responses、Anthropic Messages 和 Gemini，并在它们之间互相转换，流式输出、工具调用和推理都支持。
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="site/public/img/architecture-zh-dark.svg">
-  <img src="site/public/img/architecture-zh.svg" alt="owl 的整体结构：你的 Agent 把请求发到 127.0.0.1:3425 上的 owl 网关，经路由组和插件，再发往你的 API key、订阅和本地模型。">
-</picture>
-
-
-## 功能
-
-### 任意模型，任意 Agent
-
-点一下模型，弹出可搜索的列表：你添加的每个 provider 的每个模型，格式是 `provider/model`。选中后 owl 原子地改写 Agent 的配置，注释、顺序和格式原样保留。**方案**（Profile）把所有 Agent 的配置存成一个名字，比如「省钱」「专注」，一键全部切回去。每个 Agent 还可以有自己的常用模型短名单，方案也会一并保存。
-
-<table>
-<tr>
-<td width="50%">
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="site/public/img/panel-dark.png">
-  <img src="site/public/img/panel-light.png" alt="菜单栏面板">
-</picture>
-</td>
-<td width="50%">
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="site/public/img/picker-dark.png">
-  <img src="site/public/img/picker-light.png" alt="模型选择器">
-</picture>
-</td>
-</tr>
-</table>
+## 它能做什么
 
 ### 隐私脱敏
 
-Agent 会把读到的东西放进提示词：一个 `.env`、一份配置、一段带 token 的日志。打开脱敏后，请求离开电脑前，owl 在本地把这些值换成占位符，回复里再换回来。Agent 和你的文件里始终是真值，厂商一个也看不到。
+agent 会把读到的东西放进提示词：一个 `.env`、一份配置、一段带 token 的日志。打开脱敏后，owl 在请求离开电脑之前把这些值换成占位符，回复时再换回来。agent 和你的文件保留真实值，供应商看不到。
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="site/public/img/masking-zh-dark.png">
-  <img src="site/public/img/masking-zh-light.png" width="900" alt="观测 › 脱敏：7 天里没让厂商看到的 5,812 处，从 Claude Code 和 Codex 经 owl 流向 OpenAI、Kimi 和 DeepSeek，以及每个请求遮掉的值">
+  <source media="(prefers-color-scheme: dark)" srcset="site/public/img/masking-dark.png">
+  <img src="site/public/img/masking-light.png" width="900" alt="洞察 › 脱敏：7 天里从供应商手里留下的 5,812 个值，从 Claude Code 和 Codex 经过 owl 流到 OpenAI、Kimi 和 DeepSeek，以及每个请求被脱敏的值">
 </picture>
 
 | | |
 | :-- | :-- |
-| **两种方式找** | 规则管确定的：API key、私钥、token、邮箱，以及校验位对得上的银行卡号和证件号；需要的话，再加一个在这台电脑上运行的模型，找规则找不到的人名、地址和密码（下载 1.6 GB，用 CPU 跑） |
-| **处处换回** | 值变成 `{{API_KEY_k3v9x2mq}}` 这样的占位符，回复里的占位符都换回原值，流式文本和工具调用参数也算，所以 Agent 执行的命令里是真的 key |
-| **什么都不坏** | 同一个值每次的占位符都一样，对话上下文、提示词缓存和 thinking 签名都不受影响。一个值遮过一次，以后出现在哪里都会遮 |
-| **从不落盘** | 原值只在内存里。记录只留每个值的类型、长度和开头几个字符。脱敏打开却运行不了时，请求会被拦下（503），绝不按原样发出 |
-| **看得见** | **观测 › 脱敏** 列出它改过的每个请求，厂商实际收到了什么，左右对照；设置里的 **试一试** 能看一段文字会变成什么 |
-| **你说了算** | 机密和个人信息各自开关，更细的类型（护照、IBAN、MAC、公网 IP…），自己的词和规则，以及找到值后是 **脱敏**、只 **提醒**，还是 **拦截** |
+| **两种发现方式** | 规则找出确定的（API key、私钥、token、邮箱，以及校验和能对上的卡号和证件号）；如果你愿意，还可以在本机跑一个模型，找出规则找不到的姓名、地址和密码（下载 1.6 GB，用 CPU） |
+| **到处都能换回来** | 一个值变成 `{{API_KEY_k3v9x2mq}}` 这样的占位符，回复里每个占位符都换回原值——流式文本和工具调用参数也一样，所以 agent 执行的命令拿到的是真 key |
+| **不会弄坏对话** | 同一个值每次都得到同一个占位符，对话、提示词缓存和 thinking 签名都保持有效。一个值被脱敏过一次，之后出现在哪里都会脱敏 |
+| **不落盘** | 值只保存在内存里。记录里只有它的类型、长度和开头几个字符。脱敏开着但跑不起来时，请求会被拦下（503），不会原样发出去 |
+| **可以检查** | **洞察 › 脱敏** 列出每一个被改过的请求，和供应商实际收到的内容并排显示；设置里的 **试试看** 会告诉你一段文字会变成什么 |
+| **你自己的规则** | 密钥和个人信息可以分开开关，还有更细的类型（护照、IBAN、MAC、公网 IP……）、你自己的词和模式，以及命中后是脱敏、只警告，还是拦下（**脱敏**、**警告**、**拦截**） |
 
-代价：模型看到的是 `{{API_KEY_…}}` 而不是 key，所以针对值本身的任务（比如这个 token 为什么被拒）没法做，这类值可以加进 **从不脱敏**。规则偶尔会判错，在脱敏页一眼就能看到。默认关闭，在 **设置 → 隐私** 里打开。专门留作示例的域名（`example.com`、`.test`、`.invalid`）下的邮箱不会脱敏。
+代价是：模型看到的是 `{{API_KEY_…}}`，不是 key 本身，所以"这个 token 为什么被拒"这类针对值本身的任务做不了。把这类值放进 **永不脱敏**。规则偶尔也会判断错，脱敏页就是发现它的地方。它默认关闭，在 **设置 → 隐私** 里打开。示例域名（`example.com`、`.test`、`.invalid`）下的邮箱会原样保留。
 
-### Provider
+### 供应商与订阅
 
-选一个预设，粘贴 key。模型列表直接来自厂商，名称和推理档位从 [models.dev](https://models.dev) 补全，今天早上刚发布的模型，下次刷新就出现在你的选择器里。
+选预设、粘贴 key。模型列表来自供应商，名称和推理档位由 [models.dev](https://models.dev) 补全，所以今早刚发布的模型，下次刷新就在你的选择列表里。
 
-> **预设包括** Anthropic · OpenAI · Google Gemini · Amazon Bedrock（runtime 与 Mantle）· DeepSeek · Kimi · 智谱 GLM · MiniMax · 阶跃星辰 · LongCat · 通义千问 · 百度千帆 · 腾讯云 · 华为云 MaaS · 火山方舟 · Mistral · Groq · Nous Portal · xAI · OpenRouter · Together · Fireworks · 硅基流动 · NVIDIA NIM · 魔搭 · Ollama · LM Studio …… 以及任何兼容 OpenAI 或 Anthropic 的地址。
+> **预设包括** Anthropic · OpenAI · Google Gemini · Google Vertex AI · Amazon Bedrock（runtime 与 Mantle）· DeepSeek · Kimi · 智谱 GLM · MiniMax · StepFun · LongCat · Qwen · 百度千帆 · 腾讯云 · 华为云 MaaS · 火山引擎方舟 · Mistral · Groq · Nous Portal · xAI · OpenRouter · Together · Fireworks · SiliconFlow · NVIDIA NIM · ModelScope · Ollama · LM Studio……以及任何 OpenAI 或 Anthropic 兼容的 URL。
 
-**导入**能读取你在 CC Switch、Claude Code、Codex 和 Alma 里配置的 provider。[**「添加到 owl」链接**](https://github.com/istoo/owl/blob/main/docs/zh/import)让 provider 网站一键把配置交给 owl。每个 key 和每个账号都可以走自己的代理。
+**导入** 可以从 CC Switch、Claude Code、Codex 和 Alma 带入供应商。**[Add to owl](https://github.com/istoo/owl/blob/main/docs/import)** 链接让供应商官网一键把配置交给 owl。每个 key、每个账号都可以走自己的代理。
+
+你已经登录的 agent 是一个**订阅**，后面有一串模型，于是 owl 可以把它当成供应商给所有其他 agent 用。同一个订阅可以加多个账号，owl 会在它们之间故障转移。
+
+- **Claude**：驱动本机真实的 `claude` 二进制，并通过 MCP 桥接你的 agent 的工具
+- **Codex / ChatGPT**：你的 ChatGPT 订阅里的模型，给其他所有 agent 用
+- **GitHub Copilot**、**Gemini（Code Assist）**、**Antigravity**、**Grok（SuperGrok）** 等
+- npm 上**任何 OpenCode 登录插件或 pi 包**
+
+**每日预热** 会在你指定的时间，或者上一个窗口重置的那一刻，开启每个 Claude 和 ChatGPT 账号的 5 小时窗口。
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="site/public/img/add-zh-dark.png">
-  <img src="site/public/img/add-zh-light.png" width="900" alt="添加 provider：可登录的订阅、厂商、中转站和本地服务">
+  <source media="(prefers-color-scheme: dark)" srcset="site/public/img/add-dark.png">
+  <img src="site/public/img/add-light.png" width="900" alt="添加供应商：可登录的订阅、厂商、中转和本地服务器">
 </picture>
 
-### 订阅
+### 路由分组
 
-你登录过的 Agent 背后就是一个带模型的订阅，owl 把它当成 provider 给其他所有 Agent 用。每个订阅可以加多个账号，owl 会在它们之间自动切换。
+**路由分组**是几个模型，agent 把它们当成一个来选，比如 `group/daily-coding`。网关把请求分到每个成员的 key 和账号上：
 
-- **Claude**：驱动本机真正的 `claude` 程序，通过 MCP 桥接你的 Agent 的工具
-- **Codex / ChatGPT**：你的 ChatGPT 订阅里的模型，给所有其他 Agent 用
-- **GitHub Copilot**、**Gemini（Code Assist）**、**Antigravity**、**Grok（SuperGrok）** 等等
-- **任何 OpenCode 登录插件或 pi 包**，直接从 npm 安装
-
-**每日预热**会在你选定的时间，或者上一个窗口刚重置时，启动每个 Claude 和 ChatGPT 账号的 5 小时窗口。
-
-### 路由组
-
-**路由组**是 Agent 当作一个模型来选的一组模型，比如 `group/daily-coding`。网关会把请求分摊到每个成员的 key 和账号上：
-
-| 模式 | 作用 |
+| 模式 | 它会做什么 |
 | :-- | :-- |
-| **`smart`** | 在还有额度的订阅里，优先用最快重置的那个，重置时浪费得最少 |
-| **`order`** | 先用第一个模型，它答不了再用下一个 |
-| **`rotate`** | 每一轮换下一个成员 |
-| **`usage`** | 优先用用得最少的成员 |
-| **`pace`** | 优先用距离重置前每小时剩余周额度最多的账号 |
+| **`smart`** | 在还有额度的订阅里，用最早重置的那个，重置时浪费得最少 |
+| **`order`** | 一直用第一个模型，直到它答不上来，再换下一个 |
+| **`rotate`** | 每一轮换到下一个成员 |
+| **`usage`** | 先用用得最少的成员 |
+| **`pace`** | 用每小时剩余额度最多的账号，直到它重置 |
 
-只要厂商的提示词缓存还值得保留，**对话就留在回答它的那个账号上**。路由组可以嵌套。[**意图路由**](https://github.com/istoo/owl/blob/main/docs/zh/intent)由你选的一个小模型读每一轮新消息，写测试交给强模型，简单问题交给便宜的模型。路由页实时展示每一次决策。
+只要供应商的提示词缓存还值得保留，一段对话就**留在回答它的那个账号上**。分组里可以再放分组。**[意图路由](https://github.com/istoo/owl/blob/main/docs/intent)** 让你选一个小模型读每一轮的新请求，测试交给强模型，简单问题交给便宜的模型。Routing 页会实时显示每一次决定。
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="site/public/img/routing-zh-dark.png">
-  <img width="760" src="site/public/img/routing-zh-light.png" alt="路由页：四个 Agent 经过 owl 连到七个 provider，实时显示">
+  <source media="(prefers-color-scheme: dark)" srcset="site/public/img/routing-dark.png">
+  <img width="760" src="site/public/img/routing-light.png" alt="Routing 页：四个 agent 经过 owl 到七个供应商，实时">
 </picture>
-
-<table>
-<tr>
-<td width="50%">
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="site/public/img/intent-trace-zh-dark.png">
-  <img src="site/public/img/intent-trace-zh-light.png" alt="一轮意图路由，逐步解释">
-</picture>
-</td>
-<td width="50%">
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="site/public/img/nested-routing-zh-dark.png">
-  <img src="site/public/img/nested-routing-zh-light.png" alt="路由组里套路由组">
-</picture>
-</td>
-</tr>
-</table>
 
 ### 插件
 
 ```sh
 owl plugin add opencode-gemini-auth   # npm 上的 OpenCode 插件
-owl plugin add pi-antigravity         # pi 包，同样的方式
-owl plugin login google-plugin        # 在 owl 里走它自己的登录流程
+owl plugin add pi-antigravity         # pi 包，同样的装法
+owl plugin login google-plugin        # 它自己的登录流程，在 owl 里
 ```
 
-插件运行在 [Bun](https://bun.sh) 上，第一次需要时自动下载。插件负责登录、列出模型和发送请求，Agent 像用其他 provider 一样用它的模型。去 **[magpie-community/plugins](https://github.com/magpie-community/plugins)** 逛逛，或者[自己写一个](https://github.com/istoo/owl/blob/main/docs/zh/plugins)。
+插件跑在 [Bun](https://bun.sh) 上，第一次需要时自动下载。插件负责登录、列出模型、发出请求；agent 像用其他供应商一样用这些模型。去 **[magpie-community/plugins](https://github.com/magpie-community/plugins)** 找，或者[自己写一个](https://github.com/istoo/owl/blob/main/docs/plugins)。
 
-插件还可以是**网关中间件**：一段 JavaScript，能看到每个 Agent 发出和收到的内容。`onRequest` 可以改写或拒绝请求，`onEvent` 看到每个流式事件，`onResponse` 看到完整回复。钩子抛错或超时，请求原样放行。
+插件也可以是**网关中间件**：看得见每个 agent 发出去和收回来的一切的 JavaScript。`onRequest` 可以改写请求或拦下它，`onEvent` 看得见每个流式事件，`onResponse` 看到完整回复。抛错或者跑太久的钩子不会影响请求，请求按原样发出。
 
 ```js
 // alias.middleware.js — owl plugin add ./alias.middleware.js
@@ -230,88 +174,92 @@ export function onRequest(body, ctx) {
 ```
 
 <details>
-<summary><b>现成的中间件</b>，大多对应 <a href="https://github.com/QuantumNous/new-api">New API</a> 给渠道做的事，JSON 格式也一样</summary>
+<summary><b>现成的中间件</b>，大部分是 <a href="https://github.com/QuantumNous/new-api">New API</a> 给渠道做的功能，JSON 也一样</summary>
 
 <br>
 
-| 包 | 作用 |
+| 包 | 它做什么 |
 | :-- | :-- |
-| `param-override` | New API 的 `param_override`：按条件设置、删除、移动或改写请求字段，或拒绝请求 |
-| `model-map` | New API 的 `model_mapping`：把模型换个名字发出去，回复里仍是原来请求的名字 |
-| `system-prompt` | 给所有请求，或某些 Agent、某些模型的请求加上你的系统提示词 |
-| `word-guard` | New API 的敏感词过滤：在用户发送的内容和回复里拒绝或屏蔽敏感词 |
-| `think-tags` | 去掉回复里的 `<think>…</think>`，或把 `reasoning_content` 放进回复 |
+| `param-override` | New API 的 `param_override`：按条件设置、删除、移动或改写请求字段，或者拦下请求 |
+| `model-map` | New API 的 `model_mapping`：用另一个名字发出模型；回复仍然用被请求的名字 |
+| `system-prompt` | 给每个请求加上你的 system prompt，或者只给某些 agent、某些模型 |
+| `word-guard` | New API 的敏感词过滤：拦下或替换用户发来的词，以及回复里的词 |
+| `think-tags` | 把 ` thinking…` 从回复里拿掉，或者把 `reasoning_content` 放进去 |
 
 ```sh
 owl plugin add @magpie-community/middleware-model-map
 owl plugin options model-map '{"mapping": {"fast": "deepseek/deepseek-chat"}}'
 ```
 
-在「插件 › 发现 › 网关中间件」里可以找到它们。详见[网关中间件](https://github.com/istoo/owl/blob/main/docs/zh/plugins#middleware)。
+在 插件 › 发现 › 网关中间件 里能找到它们。见[网关中间件](https://github.com/istoo/owl/blob/main/site/public/docs/zh/plugins.html#middleware)。
 
 </details>
 
-### 用量和花费
+### 用量、共享和其他
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="site/public/img/usage-zh-dark.png">
-  <img src="site/public/img/usage-zh-light.png" width="900" alt="用量页：余额、token、缓存命中率和花费">
+  <source media="(prefers-color-scheme: dark)" srcset="site/public/img/usage-dark.png">
+  <img src="site/public/img/usage-light.png" width="900" alt="用量页：余额、token、缓存命中率和花费">
 </picture>
 
 | | |
 | :-- | :-- |
-| **token 和花费** | token、缓存读写、推理和调用次数，按官方价格算花费，美元或人民币；任何模型都能自定义价格 |
-| **额度** | 每个 key、套餐和账号的余额和额度窗口（`owl quota`），窗口还剩很多就要重置时提醒你 |
-| **会话** | 每个 Agent 对话的花费和标题，一键在终端里重新打开 |
-| **上下文** | 每个请求的上下文窗口用了多满、多少来自缓存、被什么占着 |
-| **账单** | 按账号、按上游 key 统计，还能 OTLP 导出到你自己的可观测性系统 |
+| **Token 与花费** | token、缓存读写、推理和调用次数，按标价用美元或人民币计价；任何模型都可以设自己的价格 |
+| **额度** | 每个 key、订阅和账号的余额与额度窗口（`owl quota`），窗口重置前还有大量没用会提醒 |
+| **会话** | 每一段 agent 对话和它的花费、标题，一键在终端里重新打开 |
+| **上下文** | 每个请求的上下文窗口有多满、多少来自缓存、是什么占满的 |
+| **账单** | 按账号和按上游 key 统计，并可导出 OTLP 到你自己的可观测性平台 |
+| **局域网** | 打开 **在局域网共享**，给每个客户端一个命名的网关 key，各自有每天、每周或每月的 token 和花费上限 |
+| **[远程 owl](https://github.com/istoo/owl/blob/main/docs/remote)** | 笔记本用你台式机上 owl 的供应商、账号和分组，同时仍然接自己的 agent |
+| **[Docker](https://github.com/istoo/owl/blob/main/docs/docker)** | 在服务器或 NAS 上跑 `ghcr.io/istoo/owl`，从网页界面管理 |
+| **同步** | 备份到文件，或者通过 WebDAV（坚果云、Nextcloud……）、S3，或 GitHub 上的加密仓库在机器之间同步 |
 
-### 共享
+- **资料库**：指令、MCP 服务器、技能和子 agent 只写一次；owl 按各 agent 的格式写进它的文件，并且只删除自己写进去的东西。
+- **给任何模型加联网搜索**：不会搜索的模型可以用 owl 的搜索——一个能搜的供应商，或者搜索 API（Tavily、Brave、Exa、Firecrawl、You.com、DeepSeek、豆包搜索、腾讯元宝搜索、SearXNG），按你拖动的顺序尝试。任何 agent 都能把同一个搜索挂成 MCP 服务器，带 `web_search` 和 `web_fetch`。
+- **图片与视频**：通过 MCP 给任何 agent 图片工具，模型由你选；视频用 Grok 订阅或 MiniMax 的 API key。
+- **让 agent 保持最新**：Agents 页显示每个 CLI 的版本，按它安装的方式更新，没有安装的给出安装命令。
+- **WSL**、**保持唤醒**、明暗主题，以及在 [Omarchy](https://omarchy.org) 上跟随主题。
 
-| | |
-| :-- | :-- |
-| **局域网** | 打开「局域网共享」，给每个客户端一个命名的网关 key，各自设每天、每周或每月的 token 和花费上限 |
-| **[远程 owl](https://github.com/istoo/owl/blob/main/docs/zh/remote)** | 笔记本用台式机上那个 owl 的 provider、账号和路由组，同时照样配置自己的 Agent |
-| **[Docker](https://github.com/istoo/owl/blob/main/docs/zh/docker)** | 在服务器或 NAS 上跑 `ghcr.io/istoo/owl`，用 Web 界面管理 |
-| **同步** | 备份到文件，或者通过 WebDAV（坚果云、Nextcloud……）或 S3 在多台机器间同步 |
+## 支持的 agent
 
-### 还有
+<table>
+<tr><td>
 
-- **资料库**：指令、MCP 服务器、技能和子代理只写一次，owl 按每个 Agent 的格式写进它的文件，删除时只删自己写的部分。
-- **任何模型都能联网搜索**：不能搜索的模型由 owl 代为搜索，用能搜索的 provider 或搜索 API（Tavily、Brave、Exa、Firecrawl、You.com、DeepSeek、火山引擎豆包搜索、腾讯云元宝搜索、SearXNG），按你拖好的顺序调用，每个都能单独关闭而不删除密钥。一个 API 可以填多个密钥：搜索默认轮流使用（`pick=order` 则按顺序），最近被拒的密钥最后才用；Tavily 的每个密钥用了多少额度，在设置页和 `owl search` 里都能看到。任何 Agent 都能把同一个搜索挂成 MCP 服务器，提供 `web_search` 工具和按 URL 读取网页的 `web_fetch` 工具。
-- **图片和视频**：通过 MCP 给任何 Agent 一个生图工具，用你选的模型；有 Grok 订阅或 MiniMax API Key（MiniMax H3）还能生成视频。
-- **Agent 保持最新**：Agents 页显示每个 CLI 的版本，按当初的安装方式更新，没装的也给出安装命令。
-- **WSL**：在 Windows 上，WSL 发行版里的 Agent 一样能配置，会话也一样统计。
-- **保持唤醒**、浅色和深色，在 [Omarchy](https://omarchy.org) 上跟随你的主题。
+Claude Code · Claude Desktop · Claude Science · Codex · Gemini CLI · Antigravity CLI · OpenCode · OpenChamber · MiMo Code · DevEco Code · Pi · oh-my-pi · StepCode · MothX · PenguinHarness · Aside · OmO · Prime Agent · Goose · Cursor CLI · Cursor Private Inference · Zed · VS Code Chat · VS Code Insiders · VSCodium Chat · Zoo Code · JetBrains Air · Air（JetBrains IDE）· Copilot（JetBrains）· Copilot CLI · Crush · DeepSeek Harness · Reasonix Studio · Command Code · fx · Devin · Hermes Agent · Mister Morph · Kimi Code · jcode · Qwen Code · Muse Code · Empryo · MiniMax Code · Droid · Cline · Qoder · Qoder CN · Grok Build · Grok App · ZCode · WorkBuddy · WorkBuddy AI · CodeBuddy · Pencil · OpenPencil · OpenBot · NewMax · Raycast · Kiro Crew · T3 Code · OpenHanako · AtomCode · Snow CLI · Alma · Cindy · Lody · AionUi · Ante · AstrBot · QwenPaw · OpenClaw
+
+</td></tr>
+</table>
+
+owl 只显示你机器上装了的 agent；其中一些的安装说明在[完整参考](docs/reference.md#notes-on-some-agents)里。
 
 ## 文档
 
 | | |
 | :-- | :-- |
-| **[快速上手](https://github.com/istoo/owl/blob/main/docs/zh/start)** | 入门导览 |
-| **[完整参考](docs/reference.md)**（英文） | 每个 Agent、provider 选项、网关接口、CLI 命令和文件 |
-| **[插件](https://github.com/istoo/owl/blob/main/docs/zh/plugins)** | 使用插件和编写插件 |
-| **[意图路由](https://github.com/istoo/owl/blob/main/docs/zh/intent)** | 按每轮对话的内容选择模型 |
-| **[导入链接](https://github.com/istoo/owl/blob/main/docs/zh/import)** | 给 provider 网站用的「添加到 owl」按钮 |
-| **[远程 owl](https://github.com/istoo/owl/blob/main/docs/zh/remote)** | 在其他电脑上用同一个 owl 的 provider 和路由组 |
-| **[Docker](https://github.com/istoo/owl/blob/main/docs/zh/docker)** | 在服务器或 NAS 上运行 owl |
+| **[快速上手](https://github.com/istoo/owl/blob/main/site/public/docs/zh/start.html)** | 一步步的导览 |
+| **[完整参考（英文）](docs/reference.md)** | 每个 agent、供应商选项、网关端点、CLI 命令和文件 |
+| **[插件](https://github.com/istoo/owl/blob/main/site/public/docs/zh/plugins.html)** | 使用插件，以及自己写 |
+| **[意图路由](https://github.com/istoo/owl/blob/main/site/public/docs/zh/intent.html)** | 按每一轮要做什么来路由 |
+| **[导入链接](https://github.com/istoo/owl/blob/main/site/public/docs/zh/import.html)** | 给供应商官网用的 "Add to owl" 按钮 |
+| **[远程 owl](https://github.com/istoo/owl/blob/main/site/public/docs/zh/remote.html)** | 在别的电脑上用一台 owl 的供应商和分组 |
+| **[Docker](https://github.com/istoo/owl/blob/main/site/public/docs/zh/docker.html)** | 在服务器或 NAS 上跑 owl |
 
 ## 隐私
 
-你的提示词、回复、密钥和账号只发给你用的供应商；打开[隐私脱敏](#隐私脱敏)后，其中的密钥连供应商也收不到。这个 Owl 构建不向官方上报任何东西：没有用量事件、没有伙伴列表、没有图标代理。它的更新、发行说明和显示的图片都不经过任何服务，只来自你自己的 GitHub 仓库。
+你的提示词、回复、密钥和账号只发给你用的供应商；打开[隐私脱敏](#隐私脱敏)后，其中的密钥连供应商也收不到。这个 owl 构建不向官方上报任何东西：没有用量事件、没有伙伴列表、没有图标代理。它的更新、发行说明和显示的图片都不经过别的服务，只来自这个 GitHub 仓库。
 
 ## 社区
 
-有问题、有想法，或者某个模型就是不出现？请到 **[Discord](https://discord.gg/vGSnD3ZKQF)** 反馈。
+有问题、有想法，或者某个模型就是不出现？**[开一个 issue](https://github.com/istoo/owl/issues)**，反馈都走这里。
 
-**本仓库不接受 Pull Request**，只有维护者能提交。想要修复或新功能，请在 Discord 里描述清楚，我们来实现。
+**本仓库不接受 Pull Request**，只有维护者能提交。想要修复或新功能，在 issue 里描述清楚，我们来实现。
 
 如果 owl 帮你少改了一次配置文件，**点个 ⭐ 能让更多人发现它。**
 
 <a href="https://star-history.com/#istoo/owl&Date">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=istoo/owl&type=Date&theme=dark">
-    <img src="https://api.star-history.com/svg?repos=istoo/owl&type=Date" width="600" alt="Star history">
+    <img src="https://api.star-history.com/svg?repos=istoo/owl&type=Date" width="600" alt="Star 历史">
   </picture>
 </a>
 
@@ -319,4 +267,4 @@ owl plugin options model-map '{"mapping": {"fast": "deepseek/deepseek-chat"}}'
 
 [MIT](LICENSE)
 
-owl 与 [Apache Owl](https://owl.apache.org) 及 [Apache 软件基金会](https://apache.org)没有隶属关系。
+owl 与 [Apache Owl](https://owl.apache.org) 及 [Apache Software Foundation](https://apache.org) 无关。
