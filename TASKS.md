@@ -255,4 +255,10 @@
       测的是"听不到滚轮"时的记账（waitsBack），属应用侧。同类还有 view-wheel-after-click（3 条）。
 - [x] 第二份完整 full webkit（42720704172，`cd12a16ba`）：127 红 / 101 个不同 (file,test)（上一份 166 / 134）。
       69 条消失，36 条是同一断言换语言/宽度，没有回归。清单与分布已更新到 #13。
+- [x] provider-levels-save（en、zh）与 model-reasonless（1100 de）：WebKitGTK 把 sheet 的 `.ebody` 网格首帧按 616(含滚动条) 算宽，
+      字段比实际多 10px，直到 sheet 里**第一个控件拿到焦点**才重排；德国文案的行正好在换行边界，行高 131→191，
+      复选框在按下与松开之间下移 60px，点击落到旁边的输入框（provider-levels-save 报 "Clicking the checkbox did not change its state"）。
+      新增 `fixtures/press.cjs`：先 focus，等控件位置连续 3 帧不变，再 click。容器 1.65 webkit 12/12、macOS chromium 12/12、macOS webkit 12/12。`414e1ad3a`
+      应用侧未改：给 `.ebody` 加 `scrollbar-gutter: stable` 或 `overflow-y: scroll` 都只能让首帧宽 10px 或 20px（重排仍发生），
+      是 WebKitGTK 的网格首帧计算问题，不是本次测试错。桌面版（body.linux，`.ebody` 已是 `overflow-y: scroll`）是否也丢第一下点击未验证。
 - [ ] 已知限制：CI 的字体集与本地镜像不同，德语 560 宽的 9px/6px 溢出本地复现不了；已在镜像里跑 `playwright install-deps` 试图对齐。
