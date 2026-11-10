@@ -469,7 +469,9 @@ func spotlightBundles(id string) []string {
 	var paths []string
 	if out, err := spotlightRun(ctx, id); err == nil {
 		for _, p := range strings.Split(strings.TrimSpace(string(out)), "\n") {
-			if p = strings.TrimSpace(p); p != "" {
+			// an app dragged to the Trash, as a Mac app is uninstalled,
+			// is still in Spotlight: it isn't installed
+			if p = strings.TrimSpace(p); p != "" && !inTrash(p) {
 				paths = append(paths, p)
 			}
 		}
@@ -484,6 +486,12 @@ func spotlightBundles(id string) []string {
 	close(wait)
 	spotlight.Unlock()
 	return paths
+}
+
+// inTrash reports whether p is in a Mac's Trash: the user's ~/.Trash, or
+// a volume's .Trashes.
+func inTrash(p string) bool {
+	return strings.Contains(p, "/.Trash/") || strings.Contains(p, "/.Trashes/")
 }
 
 // AppVersion is the version of the agent's desktop app installed here, ""
