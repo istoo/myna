@@ -502,7 +502,7 @@ var indexFiles = []string{"index.ts", "index.tsx", "index.js", "index.mjs", "ind
 // notPlugin says why the plugin at target is nothing the host can load,
 // or nil: a package that names no file to import (main, exports), has no
 // index file, and is neither pi's nor a middleware — a command alone
-// (bin), an MCP server like owl-x-search, is installed fine and then
+// (bin), an MCP server like myna-x-search, is installed fine and then
 // never loads (#1327).
 func notPlugin(target string) error {
 	st, err := os.Stat(target)

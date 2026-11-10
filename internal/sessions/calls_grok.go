@@ -156,7 +156,8 @@ func grokGateway(model string) bool {
 	if model == "" {
 		return false
 	}
-	if strings.HasPrefix(model, grokGatewayPrefix) {
+	// owl's prefix, and the one this fork used as myna
+	if strings.HasPrefix(model, grokGatewayPrefix) || strings.HasPrefix(model, "myna/") {
 		return true
 	}
 	return grokGatewayModels()[model]

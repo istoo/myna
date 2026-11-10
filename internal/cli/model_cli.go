@@ -15,15 +15,15 @@ import (
 // A model's name and reasoning levels, from the terminal: owl model.
 
 const modelUsage = `usage:
-  owl model name <provider/model>             the name the model goes by
-  owl model name <provider/model> <name>      name it so everywhere: in owl, in the gateway's
+  owl model name <provider/model>              the name the model goes by
+  owl model name <provider/model> <name>       name it so everywhere: in owl, in the gateway's
                                                model list, and in the lists owl writes into the agents
-  owl model name <provider/model> --reset     give it back its own name
-  owl model efforts <provider/model>          the reasoning levels it offers, and those it has
-  owl model efforts <provider/model> <l>,<l>  offer only these of them, e.g. low,medium,high
-  owl model efforts <provider/model> --reset  offer every level it has again
-  owl model efforts <provider/model> off      send it no reasoning field at all
-  owl model price <provider/model>            what the model costs you, and what you said it costs
+  owl model name <provider/model> --reset      give it back its own name
+  owl model efforts <provider/model>           the reasoning levels it offers, and those it has
+  owl model efforts <provider/model> <l>,<l>   offer only these of them, e.g. low,medium,high
+  owl model efforts <provider/model> --reset   offer every level it has again
+  owl model efforts <provider/model> off       send it no reasoning field at all
+  owl model price <provider/model>             what the model costs you, and what you said it costs
   owl model price <provider/model> <in>,<out>,<cache read>,<cache write>
                                                say what it costs, in USD per million tokens, all four parts as
                                                0.12,1.20,0.01,0.15; 0 is a model served for nothing, which is
@@ -32,35 +32,35 @@ const modelUsage = `usage:
   owl model price <provider/model> <in>,<out>,<cache read>,<cache write> --tier 272k <in>,<out>,<cr>,<cw>
                                                and what a request whose input, cached tokens included, is over
                                                272K costs, the whole request; --tier may be given again
-  owl model price <provider/model> --reset    take your price off this model
+  owl model price <provider/model> --reset     take your price off this model
   owl model price <model> <in>,<out>,<cache read>,<cache write>
                                                what the model costs from any provider you have not priced it
                                                for, kept as '*/<model>': for usage whose provider is gone, or
                                                a model models.dev doesn't price, e.g. gemini-3-pro-preview
-  owl model prices                            the models you priced
-  owl model context <provider/model>          how long a request it takes, and what you said it takes
-  owl model context <provider/model> <n>      say how long, as 200000 or 1m; '<provider>/*' is every model
-  owl model context <provider/model> --reset  take your limit off this model
-  owl model output <provider/model>           the most a reply of it may hold, and what you said
-  owl model output <provider/model> <n>       say the most, as 128000 or 128k; '<provider>/*' is every model
-  owl model output <provider/model> --reset   take your limit off this model
-  owl model spec <provider/model>             its context window, max output, vision and reasoning levels
+  owl model prices                             the models you priced
+  owl model context <provider/model>           how long a request it takes, and what you said it takes
+  owl model context <provider/model> <n>       say how long, as 200000 or 1m; '<provider>/*' is every model
+  owl model context <provider/model> --reset   take your limit off this model
+  owl model output <provider/model>            the most a reply of it may hold, and what you said
+  owl model output <provider/model> <n>        say the most, as 128000 or 128k; '<provider>/*' is every model
+  owl model output <provider/model> --reset    take your limit off this model
+  owl model spec <provider/model>              its context window, max output, vision and reasoning levels
   owl model spec <provider/model> [--context <n>] [--output <n>] [--vision on|off] [--reasoning <levels>]
                                                say any of them at once, e.g. --reasoning low-high; auto as a
                                                value goes back to the vendor's list (owl model spec --help)
-  owl model spec <provider/model> --reset     take every value you set off this model
-  owl model specs                             the models you gave a spec
-  owl model wire <provider/model>             the name the vendor is asked for, and the one you gave
-  owl model wire <provider/model> <name>      ask for the model by this name, for a relay that serves it
-  owl model wire '<provider>/*' <name>        ask for every model of that provider by this name; a * in
+  owl model spec <provider/model> --reset      take every value you set off this model
+  owl model specs                              the models you gave a spec
+  owl model wire <provider/model>              the name the vendor is asked for, and the one you gave
+  owl model wire <provider/model> <name>       ask for the model by this name, for a relay that serves it
+  owl model wire '<provider>/*' <name>         ask for every model of that provider by this name; a * in
                                                it is the model, so vendor-c/* asks for model-3 as
                                                vendor-c/model-3. Quote it: a shell reads a bare * as a glob
-  owl model wire <provider/model> --reset     ask for it by the name owl knows it by again, under an
+  owl model wire <provider/model> --reset      ask for it by the name owl knows it by again, under an
                                                id of its own for a provider that has since been deleted,
                                                and says when there was no name of its own to take away
-  owl model wires                             the names your vendors are asked for models by
-  owl model id <provider/model>               the id owl lists the model by, and the provider's own
-  owl model id <provider/model> <id>          list the model by this id at that provider, e.g.
+  owl model wires                              the names your vendors are asked for models by
+  owl model id <provider/model>                the id owl lists the model by, and the provider's own
+  owl model id <provider/model> <id>           list the model by this id at that provider, e.g.
                                                relay-a/deepseek-v4.1-flash-1017 deepseek-v4.1-flash: agents,
                                                /v1/models, routing groups, the groups owl finds, gateway keys
                                                and Usage all use it, and relay-a is still asked for
@@ -68,32 +68,32 @@ const modelUsage = `usage:
                                                latest model given an id has it, and a model of the provider's
                                                own with that id is not listed while another is. A provider of
                                                your own (a key) only
-  owl model id <provider/model> --reset       list it by the provider's own id again
-  owl model ids                               the models you list by an id of your own
-  owl model names                             the models you named or narrowed
-  owl model alias <model> <name>              count the model's usage under another model id in Usage,
+  owl model id <provider/model> --reset        list it by the provider's own id again
+  owl model ids                                the models you list by an id of your own
+  owl model names                              the models you named or narrowed
+  owl model alias <model> <name>               count the model's usage under another model id in Usage,
                                                Sessions and the usage summaries, e.g. deepseek-v4.1-flash
                                                deepseek-flash: two ids of one model are one row. Each call is
                                                still priced by the id it was made under. Requests, routing and
                                                the agents' model lists never change. Ids match as the routing
                                                groups match them: a vendor/ prefix, case, "_" or a snapshot
                                                date make no difference
-  owl model alias <model>                     the name the model's usage is counted under
-  owl model alias <model> --reset             count its usage under its own id again
-  owl model aliases                           the models whose usage you count under another id
-  owl model disable <model> [<model>...]      turn models off for every request through owl: each an id
+  owl model alias <model>                      the name the model's usage is counted under
+  owl model alias <model> --reset              count its usage under its own id again
+  owl model aliases                            the models whose usage you count under another id
+  owl model disable <model> [<model>...]       turn models off for every request through owl: each an id
                                                (provider/model or a bare model id) or a glob, * any run of
                                                characters and ? one, as '*fable*'. A disabled model leaves
                                                every list and routing group, and the gateway refuses it on
                                                every route (403). Quote a glob: a shell reads a bare *
-  owl model enable <model> [<model>...]       take them off the disabled list, as written there
-  owl model disabled                          the disabled list, and the models each one turns off now
-  owl model suffix [on|own|off]               whether the agents' lists name each model with its provider
+  owl model enable <model> [<model>...]        take them off the disabled list, as written there
+  owl model disabled                           the disabled list, and the models each one turns off now
+  owl model suffix [on|own|off]                whether the agents' lists name each model with its provider
                                                (or "routing group") after it: on, as by default, "Sol · OpenAI";
                                                own, a name you gave a model just as you wrote it, "Opus 5.5",
                                                the others as on; off, "Sol" alone — but two a list would name
                                                the same keep it
-  owl model compact [on|off|<size>]           whether Codex, Claude Code and Grok Build compact a long
+  owl model compact [on|off|<size>]            whether Codex, Claude Code and Grok Build compact a long
                                                conversation at 272K: on, as by default, for a model of a
                                                longer window (in Claude Code, a Claude model runs to its
                                                own); off, at the model's whole window, 1M for a [1m] one; a

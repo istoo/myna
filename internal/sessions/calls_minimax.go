@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/istoo/owl/internal/appdir"
@@ -43,8 +44,9 @@ func MiniMaxDir() string {
 
 func minimaxSessions() string { return filepath.Join(MiniMaxDir(), "v2", "sessions") }
 
-// mcodeGateway is the provider MiniMax Code names a call to owl's entry by.
-const mcodeGateway = "custom_provider:owl"
+// mcodeGateway is the provider MiniMax Code names a call to owl's entry by,
+// and the name this fork used as myna, which a user's older calls are under.
+var mcodeGateway = []string{"custom_provider:owl", "custom_provider:myna"}
 
 // minimaxCallFiles are each session's messages files: messages.jsonl, and
 // any other generation of it the session's history-catalog.json keeps
@@ -134,7 +136,7 @@ func readMiniMaxCalls(f file) (*callFile, bool) {
 // minimaxCall is an assistant message as a call.
 func minimaxCall(st *callFile, l mcodeLine) (Call, bool) {
 	m := l.Message
-	if m == nil || m.Role != "assistant" || m.Usage == nil || m.Provider == mcodeGateway {
+	if m == nil || m.Role != "assistant" || m.Usage == nil || slices.Contains(mcodeGateway, m.Provider) {
 		return Call{}, false
 	}
 	at := ms(m.Timestamp)

@@ -450,14 +450,19 @@ func dshConvs(content json.RawMessage) []string {
 		return nil
 	}
 	t := jsString(parts[0].Text)
-	out := make([]string, 0, 3)
-	for _, m := range []string{
-		`{"role":"user","content":` + t + `}`,
-		`{"role":"user","content":[{"type":"text","text":` + t + `}]}`,
-		`{"role":"user","content":[{"type":"text","text":` + t + `,"cache_control":{"type":"ephemeral"}}]}`,
-	} {
-		sum := sha256.Sum256([]byte(m))
-		out = append(out, "owl-"+hex.EncodeToString(sum[:12]))
+	// the prefix the gateway gives them now, and the one this fork used
+	// before it was owl: dsh's older sessions keep the id they were
+	// recorded under, and are still found by it
+	out := make([]string, 0, 6)
+	for _, pre := range []string{"owl-", "myna-"} {
+		for _, m := range []string{
+			`{"role":"user","content":` + t + `}`,
+			`{"role":"user","content":[{"type":"text","text":` + t + `}]}`,
+			`{"role":"user","content":[{"type":"text","text":` + t + `,"cache_control":{"type":"ephemeral"}}]}`,
+		} {
+			sum := sha256.Sum256([]byte(m))
+			out = append(out, pre+hex.EncodeToString(sum[:12]))
+		}
 	}
 	return out
 }

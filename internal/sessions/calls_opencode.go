@@ -27,7 +27,11 @@ import (
 // matched afterwards.
 
 // ocGatewayProvider is whether an OpenCode provider id is owl's gateway.
-func ocGatewayProvider(id string) bool { return id == "owl" || id == "dial" }
+// ocGatewayProvider: owl's own provider id, or the one this fork used as
+// myna, which a user's older sessions are under (as "magpie's" before it)
+func ocGatewayProvider(id string) bool {
+	return id == "owl" || id == "myna" || id == "magpie" || id == "dial"
+}
 
 // ocCallList is the last listing of OpenCode's database, kept while the
 // database and its WAL are as they were.
