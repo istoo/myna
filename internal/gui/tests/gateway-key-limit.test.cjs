@@ -2,6 +2,7 @@
 // its editor under the key's row, staged until Save.
 const assert = require("node:assert/strict");
 const { test } = require("node:test");
+const { wheelRest } = require("./fixtures/wheel-rest.cjs");
 const { chromium, webkit } = require("playwright");
 const { fixture } = require("./fixtures/caller-keys.cjs");
 
@@ -55,7 +56,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const scrolled = async () => [await view.evaluate((v) => v.scrollTop), await page.evaluate(() => window.scrollY)];
       await page.mouse.move(500, 300);
       await page.mouse.wheel(0, 120);
-      await page.waitForTimeout(100);
+      // the wheel's coast ends after its last step: the place is taken at
+      // rest, not between two of its scrolls (a loaded Linux runner, #13)
+      await wheelRest(page, "#view-gateway");
       const at = await scrolled();
       // open Work's editor: staged, nothing sent
       await row("work").getByRole("button", { name: w.limit, exact: true }).click();
