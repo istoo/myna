@@ -327,3 +327,5 @@
 - [ ] 等 f5f171f03 的 Test 全绿（含 claudetui ptmx）
 - [x] 2026-11-11 01:0x：backport 93a33d817（OpenBot 图标/请求归属/Library skills）→ e9b52ce34
 - [ ] OpenBot 的 GUI 浏览器测试未跑（本机无 Playwright）；待 CI 或装 Playwright 后补
+- [x] 2026-11-11 02:2x：38f43bdf1 的 test(macos) 红：TestTOMLBigFileParsesInLinearTime 比值 24.6>24（负载擦边）；TestSearchQueueKeepsCodexAlive/cancel 挂 19m 致整包 30m 超时 → 测试清理已修（99a5924ba）
+- [ ] TOML 比值阈值 24 在慢 runner 上擦边，未改；若再红需换成更稳的度量或放宽
