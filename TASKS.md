@@ -350,3 +350,5 @@
 - [x] 2026-11-11 09:1x：backport add47afd8（用量卡片 ⋯ 菜单）
 - [x] 2026-11-11 09:3x：TOML 比值阈值 24→32（两次 macOS CI 擦边 24.6/24.3）
 - [ ] TestGrokPluginDraws 在 macOS CI 单次红（plugin answered no response），本机绿；再红需查插件 host 时序
+- [x] 2026-11-11 10:2x：抓帖 497 条（新增 GPUStack、Antigravity 假 429、WorkBuddy 合并已在 ups 修复）；backport 662546e78（缓存命中率不再四舍五入成 100%）→ 本地提交
+- [ ] 下一批：3ebb1ba2c（Antigravity 假 429：每词两个零宽空格）、68d1fda92（GPUStack）、9522288b1（WorkBuddy 国内国际版合并）
