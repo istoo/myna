@@ -479,6 +479,33 @@ func byKey(files []file, keep func(*file) bool) map[string][]file {
 // ClaudeDir is Claude Code's folder: $CLAUDE_CONFIG_DIR, else ~/.claude.
 func ClaudeDir() string { return appdir.ClaudeDir() }
 
+// ClaudeDirs are every Claude Code folder of the user's, ClaudeDir first:
+// one Claude account is one CLAUDE_CONFIG_DIR (appdir.ClaudeHomes).
+func ClaudeDirs() []string { return appdir.ClaudeHomes() }
+
+// claudeFiles are the Claude Code session files of every folder
+// (ClaudeDirs), a session once: the same id kept in two folders (one
+// copied to the other) is counted under the first.
+func claudeFiles() []file {
+	dirs := ClaudeDirs()
+	if len(dirs) == 1 {
+		return ccFiles("claude", dirs[0])
+	}
+	var out []file
+	owner := map[string]string{}
+	for _, d := range dirs {
+		for _, f := range ccFiles("claude", d) {
+			// a subagent's key is its session's: it goes where its session is
+			if o, ok := owner[f.key]; ok && o != d {
+				continue
+			}
+			owner[f.key] = d
+			out = append(out, f)
+		}
+	}
+	return out
+}
+
 // CodexDir is Codex's folder: $CODEX_HOME, else ~/.codex.
 func CodexDir() string { return appdir.CodexHome() }
 
@@ -796,7 +823,7 @@ func distinctPaths(fs []file) []file {
 // Dirs are the folders the sessions are read from: Claude Code's and
 // Codex's, and the other agents' where they keep sessions on this computer.
 func Dirs() []string {
-	out := []string{ClaudeDir()}
+	out := ClaudeDirs()
 	out = append(out, CodexDirs()...)
 	var named []os.FileInfo
 	for _, d := range []struct{ dir, sessions string }{

@@ -299,6 +299,15 @@ Codex's newest rollout's last line before owl restarts Codex
 `TestSettleReadsKeepsWhatWasThere`, `TestSessionReadsRoutes`,
 `sessions-reads.test.cjs`.
 
+Claude Code's sessions are read from every folder it is run in
+(`appdir.ClaudeHomes`, `sessions.ClaudeDirs`): `$CLAUDE_CONFIG_DIR` or
+`~/.claude`, a folder beside it or in the home folder whose name starts with
+`claude` or `.claude` (or one level down) and holds `projects/`, and the
+folders of the Claude accounts saved in owl. A session id kept in two of
+them is one session, under the first. Verification:
+`TestClaudeHomesIn`, `TestCallsReadEveryClaudeFolder`,
+`TestListReadsEveryClaudeFolderOnce`.
+
 ## Local Gateway Conversation Recording
 
 The Sessions page offers an explicit, default-off recording switch. Confirmation

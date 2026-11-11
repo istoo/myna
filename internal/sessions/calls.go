@@ -304,7 +304,7 @@ func callsFor(since time.Time, session, agent string) []Call {
 // the callers that list more add theirs and keep each path once, over
 // all of them (distinctOf).
 func callFileLists(codex []file) [][]file {
-	lists := [][]file{ccFiles("claude", ClaudeDir())}
+	lists := [][]file{claudeFiles()}
 	for _, d := range desktopReadDirs() {
 		// Cowork keeps a Claude Code folder of its own for each session
 		homes, _ := SessionGlob(filepath.Join(d, "local-agent-mode-sessions", "*", "*", "local_*", ".claude"))
