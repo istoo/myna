@@ -281,6 +281,10 @@ func claudeSignIn(t *testing.T, home string, expiry time.Time) string {
 		// what owl must not clobber when it writes a refreshed token back
 		"mcpOAuth": map[string]any{"plugin:slack:slack|x": map[string]any{"serverName": "Slack"}},
 	})
+	// what was read before the sign-in was written is no sign-in now: a
+	// reader between claudeHome and here (a goroutine an earlier test
+	// left, on a loaded runner) cached "signed out" for claudeCacheTTL
+	forgetClaudeCredential()
 	return path
 }
 
