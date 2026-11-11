@@ -319,7 +319,9 @@ included, so such a row doesn't answer "no such session" (#2273,
 On Windows, [`internal/sessions/wsl.go`](../../internal/sessions/wsl.go)
 reads running distros through their WSL shared paths. A stopped distro keeps
 its cached listing and is not opened; running distros are relisted at most
-every 30 seconds.
+every 30 seconds. When `wsl.exe` answers with no distro that has an agent,
+the kept listings go (`WSLListed`, `TestWSLAgentsGoneListingDrops`); with no
+answer they stay, cold, as before.
 
 For omp, [`ompRootsIn`](../../internal/sessions/omp.go) includes both
 `~/.omp/agent/sessions` and

@@ -38,6 +38,7 @@ func init() {
 	// the Sessions page reads the sessions of the agents in WSL distros
 	sessions.WSLHomes = wslHomes
 	sessions.WSLRunning = WSLRunning
+	sessions.WSLListed = wslAnswered
 	sessions.WSLOff = func() bool { return !wslLooks() }
 	// an agy conversation started on owl's gateway is picked up again
 	// there, with the variables and --model it was started with
