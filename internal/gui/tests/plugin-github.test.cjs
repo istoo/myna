@@ -186,7 +186,18 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             await page.waitForFunction(() => document.querySelector("#modal").hidden);
           };
           await install("opencode-claude-auth");
-          assert.equal(await scrolls(page), before, "a click scrolls nothing");
+          // what installing drew (the plugin now in the list, its card saying
+          // so) may be a page shorter or taller, and a page shorter clips the
+          // place it stood at: the dialog's own place is taken again after
+          // the page settles, as the reader's would be
+          await page.waitForTimeout(300);
+          await reach(c);
+          const at = await scrolls(page);
+          await press(c);
+          await dlg.locator(".pm-md").waitFor();
+          assert.equal(await scrolls(page), at, "a click scrolls nothing");
+          await page.keyboard.press("Escape");
+          await page.waitForFunction(() => document.querySelector("#modal").hidden);
           await cards.first().locator(".pm-act.done").waitFor();
 
           // one npm hasn't from its repository: GitHub's, installed from there

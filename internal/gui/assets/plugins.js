@@ -23,7 +23,8 @@
   const heads = {};      // /api/plugins/git: a git plugin's spec → the commit its repository is at
   let failed = "";       // why what's installed couldn't be loaded
   let failedList = "";   // ...and the plugins suggested
-  let tab = "discover", regBox;
+  let tab = "discover", regBox, order = null;
+  import("./pmorder.js").then((m) => { order = m; drawBody(); }).catch(() => {});
   try { tab = localStorage.getItem("owl.pluginTab") || tab; } catch {}
   let query = "";
   let hits = null;       // npm's answer for query: { q, list } | { q, loading } | { q, error }
@@ -944,11 +945,11 @@
     if (!f) {
       out.push(intro());
       // owl's community's alone: others' plugins are found by a search
-      const ours = ls.filter((l) => l.community && kindOf(l) === "pv");
-      const mws = ls.filter((l) => l.community && kindOf(l) === "mw");
-      const ags = ls.filter((l) => l.community && kindOf(l) === "ag");
-      const tls = ls.filter((l) => l.community && kindOf(l) === "tl");
-      const pgs = ls.filter((l) => l.community && kindOf(l) === "pg");
+      let m = {};
+      for (const k of ["pv", "mw", "ag", "tl", "pg"]) m[k] = ls.filter((l) => l.community && kindOf(l) === k);
+      // which kind, in what order (pmorder.js)
+      if (order) { const o = order.mk(m, drawBody, !!agentsFor); out.push(o.bar); m = o.lists; }
+      const { pv: ours, mw: mws, ag: ags, tl: tls, pg: pgs } = m;
       if (ours.length) out.push(section(t("Subscriptions"), t("written for owl, checked against its own sign-ins"), ours));
       if (mws.length) out.push(section(t("Gateway middleware"), t("runs in owl's gateway on what every agent sends and gets back, whichever provider serves it"), mws));
       const agSec = ags.length ? section(t("Agents"), t("agents owl has no setup of its own for, connected to it as its own are"), ags) : null;
@@ -1006,10 +1007,9 @@
     text.append(el("p", "", t("Plugins sign in to coding plans and make their requests; the models then work in every agent, like any provider's. They're OpenCode's provider plugins or pi's packages, run on Bun.")));
     const mw = el("p", "");
     mw.append(document.createTextNode(t("A plugin can also run in owl's gateway on what agents send and get back, pick which account a routing asks, give every agent tools, connect an agent, or add a page of its own.") + " "));
-    // the docs in the reader's language: the site has en, zh and ja, and
-    // Chinese is nearer a zh-TW reader than English is
+    // the repository's docs (the READMEs' links) in en, zh or ja; zh for zh-TW
     const how = el("a", "pm-link pm-write", "");
-    how.href = "https://github.com/istoo/owl/blob/main/docs/" + ({ zh: "zh/", "zh-TW": "zh/", ja: "ja/" }[lang()] || "") + "plugins";
+    how.href = "https://github.com/istoo/owl/blob/main/site/public/docs/" + ({ zh: "zh/", "zh-TW": "zh/", ja: "ja/" }[lang()] || "") + "plugins.html";
     how.append(el("span", "", t("Write a plugin")), glyph(OUTL, 11, 1.5));
     how.onclick = (ev) => { ev.preventDefault(); api("open", { url: how.href }).catch(() => {}); };
     mw.append(how);

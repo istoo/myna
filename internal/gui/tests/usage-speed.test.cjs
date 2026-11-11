@@ -201,7 +201,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           assert(view.w <= 1200, what + " at most 1200 wide: " + JSON.stringify(view));
           assert(Math.abs(view.l - view.r) < 24, what + " in the middle: " + JSON.stringify(view));
         };
-        await centred(".row.agent", "an agent's row");
+        // the list itself: at a wide window the agents are cards in it
+        await centred("#agents", "the agents' list");
         await p.locator("#prefs").click();
         await p.locator("#view-settings .row.pref").first().waitFor();
         await p.waitForTimeout(200);

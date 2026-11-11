@@ -78,7 +78,7 @@ function baselineFile(file) {
 // fetched by the page itself, apart from any preload) isn't drawn yet
 let serving = 0;
 
-function server(lang, original = false, opened = [], headless = false) {
+function server(lang, original = false, opened = [], headless = false, unsorted = false) {
   return async route => {
     const url = new URL(route.request().url());
     const json = data => route.fulfill({ json: data });
@@ -121,13 +121,16 @@ function server(lang, original = false, opened = [], headless = false) {
       // desktop picture's current page is drawn without the module and its
       // styles, the block app.css ends with, so the rest is still compared.
       if (headless && file === "pagehead.js") body = "export function start() {}";
+      // Discover's kinds and order (pmorder.js, plugin-order.test.cjs), the
+      // same until BASE_REF has it: not found, the page draws without it
+      if (unsorted && file === "pmorder.js") throw new Error("not in " + base);
       if (headless && file === "app.css") body = body.toString().split("\n/* ---- a page's head (pagehead.js)")[0];
       await route.fulfill({ body, contentType });
     } catch { await route.fulfill({ status: 404 }); } finally { serving--; }
   };
 }
 
-async function open(browser, lang, width, { original = false, touch = true, opened = [], headless = false } = {}) {
+async function open(browser, lang, width, { original = false, touch = true, opened = [], headless = false, unsorted = false } = {}) {
   const page = await browser.newPage({ viewport: { width, height: 900 }, hasTouch: touch, reducedMotion: "reduce", colorScheme: "light" });
   page.setDefaultTimeout(5000);
   page.setDefaultNavigationTimeout(60000);
@@ -138,7 +141,7 @@ async function open(browser, lang, width, { original = false, touch = true, open
       static now() { return new RealDate(at).getTime(); }
     };
   }, at);
-  await page.route("http://owl.test/**", server(lang, original, opened, headless));
+  await page.route("http://owl.test/**", server(lang, original, opened, headless, unsorted));
   await page.goto("http://owl.test/");
   await page.locator("#nav button").first().waitFor();
   return page;
@@ -333,7 +336,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       });
       for (const width of [900, 1280]) {
         await t.test(`${lang} ${width}: desktop matches ${base}`, async () => {
-          const current = await open(browser, lang, width, { touch: false, headless: !baselineHas("pagehead.js") });
+          const current = await open(browser, lang, width, { touch: false, headless: !baselineHas("pagehead.js"), unsorted: !baselineHas("pmorder.js") });
           const original = await open(browser, lang, width, { touch: false, original: true });
           try {
             for (const view of views) {

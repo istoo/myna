@@ -95,7 +95,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
         // a page with a toolbar of its own keeps the crumb, and has no head
         await page.locator('#nav button[data-view="usage"]').click();
-        await page.waitForFunction(() => !document.querySelector("main.view > .ph") && getComputedStyle(document.querySelector("#crumb")).visibility === "visible");
+        // its head stays with the page it belongs to, out of sight with it
+        await page.waitForFunction(() => !document.querySelector("#view-usage > .ph") && getComputedStyle(document.querySelector("#crumb")).visibility === "visible");
         await page.locator('#nav button[data-view="providers"]').click();
         await page.locator("#view-providers > .ph .ph-a #addProvider").waitFor();
 

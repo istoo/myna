@@ -84,7 +84,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.route("**/*", serve(lang));
         await page.goto("http://owl.test/?view=agents");
         await page.locator(`${codex} .ag-link`).waitFor();
+        // the page's head (pagehead.js), which comes as the page is drawn:
+        // the rows below it are at their places once it is in
+        if (width >= 1024) await page.locator("#view-agents > .ph").waitFor();
         const y = await scrolled(page);
+        const top0 = await page.locator(codex).evaluate((r) => r.getBoundingClientRect().top);
         assert.deepEqual(await isOpen(page), { open: false, aria: "false" });
 
         // the row's empty space: open, and the link says so
@@ -148,7 +152,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal(await page.locator('.row.agent[data-id="gemini"] > .ag-exp').count(), 0);
         assert.equal(await page.locator(".row.agent.expanded").count(), 0);
 
-        assert.equal(await scrolled(page), y, "a click moved the page");
+        // What a reader sees stays put: the row is where it was on screen.
+        // A page scroll of this much (the head above it, and keeping the
+        // opened row in place) is how the page holds it there.
+        const moved = await page.locator(codex).evaluate((r, top) => r.getBoundingClientRect().top - top, top0);
+        // a pixel or two: a fractional height's rounding, not a jump
+        assert.ok(Math.abs(moved) <= 2, `a click moved the row ${moved.toFixed(1)}px`);
         assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), "the row runs past the window");
         assert.deepEqual(errors, []);
       });

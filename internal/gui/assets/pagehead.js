@@ -77,21 +77,34 @@ function status(v) {
   return s;
 }
 
+// the width the Agents page shows cards at (app.css)
+const wide = matchMedia("(min-width: 1200px)");
 let frame = 0;
 const later = () => { if (!frame) frame = requestAnimationFrame(draw); };
 function draw() {
   frame = 0;
   const v = typeof view === "string" ? view : "";
   const page = (v === "agents" || v === "providers") && $("#view-" + v);
-  const on = sideNav() && !!page && mode === "window";
-  for (const h of document.querySelectorAll("main.view > .ph")) if (!on || h.parentElement !== page) h.remove();
-  document.body.classList.toggle("ph-on", on);
-  // today's calls are the cards', in either layout
-  if (v === "agents" && mode === "window") { readToday(); todayLines(); }
-  if (!on) return putBack();
+  const layout = sideNav() && mode === "window";
+  // A head stays with its page while another shows: taking it out (with the
+  // search and Add provider inside) and putting them back on every switch
+  // had the hidden Providers page drawn again (routing-return-cost). Only a
+  // layout without heads — the top tabs, the tray panel — takes them out.
+  if (!layout) {
+    for (const h of document.querySelectorAll("main.view > .ph")) { putBack(); h.remove(); }
+    document.body.classList.toggle("ph-on", false);
+    if (v === "agents" && mode === "window" && wide.matches) { readToday(); todayLines(); }
+    return;
+  }
+  document.body.classList.toggle("ph-on", !!page);
+  if (!page) return;
+  // the cards' calls, in the sidebar layout's cards (not a narrow window's rows)
+  if (v === "agents" && mode === "window" && wide.matches) { readToday(); todayLines(); }
   let h = page.querySelector(":scope > .ph");
   if (!h) {
-    h = el("header", "ph");
+    // a div: the window's <header class="top"> is the page's one, and what
+    // a screen reader calls a banner
+    h = el("div", "ph");
     const words = el("div", "ph-t");
     const name = el("div", "ph-name");
     name.setAttribute("aria-hidden", "true"); // #pageTitle says it
