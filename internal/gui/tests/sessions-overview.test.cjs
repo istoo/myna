@@ -166,7 +166,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
       await t.test("session shape, by messages, time and tool calls", async () => {
         const shape = page.locator("#sessShape");
-        assert.equal(await shape.locator(".label").innerText(), lang === "en" ? "SESSION SHAPE" : "会话形态");
+        assert.equal(await shape.locator(".label").innerText(), lang === "en" ? "Session shape" : "会话形态");
         assert.equal(await shape.locator(".tz").innerText(), lang === "en" ? "42 sessions" : "42 个会话");
         assert.deepEqual(await shape.locator(".col > span").allInnerTexts(), ["1–5", "6–15", "16–30", "31–60", "61–120", "121+"]);
         assert.deepEqual(await shape.locator(".col .plot > b").allInnerTexts(), ["3", "10", "14", "9", "4", "2"]);
@@ -225,7 +225,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
       await t.test("top skills", async () => {
         const skills = page.locator("#sessSkills");
-        assert.equal(await skills.locator(".label").innerText(), lang === "en" ? "TOP SKILLS" : "常用 Skills".toUpperCase());
+        assert.equal(await skills.locator(".label").innerText(), lang === "en" ? "Top skills" : "常用 Skills");
         assert.equal(await skills.locator(".tz").innerText(), lang === "en" ? "30 calls · 12 skills" : "30 次调用 · 12 个技能");
         assert.equal(await skills.locator(".sess-skill").count(), 2);
         assert.equal(await skills.locator(".sess-skill .n").first().innerText(), "artifact-design");

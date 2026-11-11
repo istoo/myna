@@ -82,10 +82,10 @@ function serve(lang, withKeys = true) {
 // session, and its own wording per language ("1 个会话", "1 件のセッション",
 // "1 Sitzung" — the plural picks itself).
 const want = {
-  en: { kpi: /^1\nSESSIONS/, note: /· 1 session ·/ },
+  en: { kpi: /^1\nsessions/, note: /· 1 session ·/ },
   zh: { kpi: /^1\n会话数/, note: /· 1 个会话 ·/ },
   ja: { kpi: /^1\nセッション/, note: /· 1 件のセッション ·/ },
-  de: { kpi: /^1\nSITZUNGEN/, note: /· 1 Sitzung ·/ },
+  de: { kpi: /^1\nSitzungen/, note: /· 1 Sitzung ·/ },
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
