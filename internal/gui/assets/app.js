@@ -4451,17 +4451,16 @@ function updateBusyText(b) {
 }
 
 // updatePath asks for the update's state or the release notes in the
-// page's language: the notes follow Settings' language, Chinese where a
-// release has it (freecss on Discord).
+// page's language: the notes follow Settings' language (freecss on Discord).
 function updatePath(p) {
   return p + (p.includes("?") ? "&" : "?") + "lang=" + encodeURIComponent(locale);
 }
 
 // renderUpdateBadge shows the header's Update pill once a newer owl is
 // downloaded (a click restarts into it) or, where owl can't replace
-// itself, out (a click opens the release page). The user may keep it away:
-// for good (Settings), or for this version (its ×, or a right-click), until
-// a newer one is out. owl still downloads it and puts it in on quitting.
+// itself, out (a click opens the release page). The user may keep it away,
+// for good (Settings) or for this version (its ×), until a newer one is
+// out; owl still downloads it and puts it in on quitting.
 async function renderUpdateBadge() {
   const b = $("#update"), label = b.querySelector("span");
   const u = await api(updatePath("update")).catch(() => null);
@@ -4476,6 +4475,7 @@ async function renderUpdateBadge() {
   // a package manager's owl: Settings names its command, no pill
   const on = pulling || (!!u && !updatePillOff(u.latest) && (u.state === "ready" || (u.state === "available" && !u.packaged) || u.state === "found" || (u.state === "error" && u.retry)));
   if (b.hidden !== !on) b.hidden = !on, fitTop();
+  if (mode === "panel") import("./panelupdate.js").then((m) => m.panelUpdate(u), () => {}); // its line about the update
   if (!on) return;
   const hide = $("#updateHide");
   hide.setAttribute("aria-label", t("Hide until the next version"));
@@ -4555,9 +4555,9 @@ async function renderUpdateBadge() {
 }
 
 // downloadingText is the pill's word while an update downloads: its
-// percent once there is one. The answer leaves done out while it is 0, and
-// total too while the size isn't known yet, so the first reads have none —
-// they said "NaN%" (inaction on Discord).
+// percent once there is one. The answer leaves done out while it is 0 and
+// total while the size is unknown, so the first reads had "NaN%"
+// (inaction on Discord).
 function downloadingText(u) {
   const p = u?.total > 0 ? Math.floor(((u.done || 0) / u.total) * 100) : NaN;
   return Number.isFinite(p) ? t("Downloading… {p}%", { p: Math.min(100, Math.max(0, p)) }) : t("Downloading…");
@@ -4597,9 +4597,8 @@ async function backAsNew(was) {
 }
 
 // servedAnew reloads a browser's page that another version of owl now
-// answers for, after another's update (visamzh on X: it ran on as the old
-// page, offering the version already in), and says whether it did. Once:
-// the pill and Settings' row both ask, and a second reload refetches (#7).
+// answers for (visamzh on X: it ran on as the old page, offering the version
+// already in). Once: the pill and Settings' row both ask (#7).
 let reloading = false;
 const reloadOnce = () => reloading || (reloading = true, location.reload());
 function servedAnew(u) {
@@ -4630,12 +4629,10 @@ function updateStuck(u) {
 const ISSUES = "https://github.com/istoo/owl/issues/";
 let whatsNewAsked = false;
 // cliBehindOnce: the terminal's owl is a copied file rather than the
-// installer's link, so it can't follow the app's updates (#531's lesson: a
-// stale command wedged the WebDAV sync). The window can't tell a stale copy
-// from a current one — that would mean running the old binary, whose
-// start-up migrates settings — so this is advice, shown once per load, only
-// in the window (the panel is too small), and dismissable until the next
-// version.
+// installer's link, so it can't follow the app's updates (#531: a stale
+// command wedged the WebDAV sync). Telling a stale copy from a current one
+// would mean running it, whose start-up migrates settings; so this is
+// advice, once per load, in the window alone, until the next version.
 let cliBehindAsked = false;
 function cliBehindOnce() {
   if (cliBehindAsked || mode === "panel" || !$("#modal").hidden) return; // another dialog owns the screen: the advice waits for the next load
@@ -23576,4 +23573,6 @@ if (mode === "window" && params.get("import")) {
   }).catch(() => {});
 }
 if (mode === "window" && params.get("ask") === "quit") { params.delete("ask"); history.replaceState(null, "", "?" + params); askQuit(); }
+// the panel's "What's new" after an update (panelUpdate)
+if (mode === "window" && params.get("notes") === "1") { params.delete("notes"); history.replaceState(null, "", "?" + params); openWhatsNew(null); }
 if (mode === "window" && params.get("view") === "providers" && params.get("edit")) editing = params.get("edit");

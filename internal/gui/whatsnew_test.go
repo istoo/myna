@@ -323,3 +323,54 @@ func TestWhatsNewListsEveryReleaseUpToTheWaitingUpdate(t *testing.T) {
 		t.Fatalf("latest: %v pending %v", vs, pending)
 	}
 }
+
+// The tray panel's line after an update: Updated says this run is the
+// first of a version owl updated to, a restart owl made by itself
+// (Settings' AutoRestart) included, which shows no notes by itself, until
+// they are seen. A fresh install, the same version again and a build from
+// source have none.
+func TestWhatsNewUpdatedForThePanel(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("XDG_CONFIG_HOME", home)
+	dir := filepath.Join(home, "owl")
+	t.Setenv("OWL_NOTES_FEED", "http://127.0.0.1:1/")
+	t.Setenv("OWL_UPDATE_FEED", "http://127.0.0.1:1/")
+	oldV := Version
+	defer func() { Version = oldV }()
+	run := func(v string) *whatsNew {
+		Version = v
+		n := &whatsNew{}
+		n.start()
+		return n
+	}
+	updated := func(n *whatsNew) bool { return n.get(context.Background(), false, "en").Updated }
+	if n := run("0.1.700"); updated(n) {
+		t.Fatal("a fresh install reads as updated")
+	}
+	if n := run("0.1.700"); updated(n) {
+		t.Fatal("the same version again reads as updated")
+	}
+	// a restart owl made into 0.1.701, by itself: quiet, but updated
+	if err := os.WriteFile(filepath.Join(dir, updatedInAppFile), []byte("0.1.701\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	n := run("0.1.701")
+	if j := n.get(context.Background(), false, "en"); j.Show || !j.Updated || j.Current != "0.1.701" {
+		t.Fatalf("after a restart owl made: %+v", j)
+	}
+	n.seen()
+	if updated(n) {
+		t.Fatal("still updated once its notes were seen")
+	}
+	if n := run("0.1.701"); updated(n) {
+		t.Fatal("the next run of the same version reads as updated")
+	}
+	// an update put in as owl quit, its notes shown by the window: updated
+	// until then
+	if n := run("0.1.702"); !updated(n) {
+		t.Fatal("an update put in on quitting isn't updated")
+	}
+	if n := run("0.1.702-dev"); updated(n) {
+		t.Fatal("a build from source reads as updated")
+	}
+}

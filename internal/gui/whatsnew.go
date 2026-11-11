@@ -188,7 +188,13 @@ func usedBefore(dir string) bool {
 }
 
 type whatsNewJSON struct {
-	Show     bool          `json:"show"`
+	Show bool `json:"show"`
+	// Updated: this run is the first of a version owl updated to, and
+	// nothing has shown its notes or been told to forget it yet (seen): a
+	// restart owl made by itself (Settings' AutoRestart) included, which
+	// shows no notes by itself. The tray panel says so with a line of its
+	// own until it is closed.
+	Updated  bool          `json:"updated,omitempty"`
 	Current  string        `json:"current"`
 	Releases []update.Note `json:"releases"`
 	// Total: how many releases the notes since the last update cover when
@@ -218,6 +224,7 @@ func (n *whatsNew) get(ctx context.Context, all bool, lang string) whatsNewJSON 
 	popup := pending && !shown && !n.quiet && !quietToday()
 	n.mu.Unlock()
 	j := whatsNewJSON{Current: Version, Releases: []update.Note{}}
+	j.Updated = pending && !shown && update.Released(Version)
 	if (!popup && !all) || !update.Released(Version) {
 		return j
 	}

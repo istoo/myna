@@ -241,6 +241,11 @@ func mainView(q url.Values) string {
 			}
 		}
 	}
+	// the panel's line about an update owl made: the window opens on
+	// Settings with the release notes since the last version
+	if view == "settings" && q.Get("notes") == "1" {
+		view += "&notes=1"
+	}
 	// the panel's picker making a routing group of a model kept for groups
 	// and in none: the window opens on a new group of it
 	if m := q.Get("newgroup"); view == "routing" && m != "" {

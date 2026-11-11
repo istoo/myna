@@ -16,6 +16,10 @@ func TestMainURL(t *testing.T) {
 	}{
 		{mainView(url.Values{"view": {"routing"}, "req": {"42"}}), "/?view=routing&req=42&lang=en"},
 		{mainView(url.Values{"view": {"settings"}}), "/?view=settings&lang=en"},
+		// the panel's "What's new" after an update owl made; elsewhere, nothing
+		{mainView(url.Values{"view": {"settings"}, "notes": {"1"}}), "/?view=settings&notes=1&lang=en"},
+		{mainView(url.Values{"view": {"settings"}, "notes": {"x&y"}}), "/?view=settings&lang=en"},
+		{mainView(url.Values{"view": {"routing"}, "notes": {"1"}}), "/?view=routing&lang=en"},
 		{mainView(url.Values{"view": {"usage"}, "tab": {"requests"}, "provider": {"relay team"}, "agent": {"claude-desktop"}}), "/?view=usage&tab=requests&provider=relay+team&agent=claude-desktop&lang=en"},
 		{mainView(url.Values{"view": {"usage"}, "tab": {"usage"}, "provider": {"codex"}}), "/?view=usage&tab=usage&provider=codex&lang=en"},
 		{mainView(url.Values{"view": {"usage"}, "tab": {"usage"}, "card": {"codex|a+b&c@test"}}), "/?view=usage&tab=usage&card=codex%7Ca%2Bb%26c%40test&lang=en"},

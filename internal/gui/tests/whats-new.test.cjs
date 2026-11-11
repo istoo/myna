@@ -3,7 +3,9 @@
 // whether their issue was fixed). After an upgrade the window opens a dialog
 // with the notes of every release since, newest first, once: the app is told
 // they were seen, and a reload doesn't show them again. A fresh install shows
-// nothing, nor does the tray's panel; owl web's page shows it as the
+// nothing; the tray's panel shows no dialog and leaves them unseen for the
+// window, asking only whether owl updated (its line, panel-update.test.cjs);
+// owl web's page shows it as the
 // window does, and opens its links in a tab. #464 links the issue and opens it in
 // the browser through the app, as markdown links do; a javascript: link is
 // text, and HTML in the notes is shown as text, never run. Settings' What's new
@@ -148,13 +150,15 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.close();
       }
 
-      // the tray's panel never shows it, nor asks
+      // the tray's panel never shows it, nor says it was seen: it asks once,
+      // for its line about the update, and the window still shows the notes
       {
         const ctl = fresh({ upgraded: true });
         const { page, errors } = await open(ctl, "?mode=panel");
         await page.waitForTimeout(500);
         assert.equal(await dialog(page).count(), 0, "no dialog in the panel");
-        assert.deepEqual(ctl.asked, []);
+        assert.deepEqual(ctl.asked, ["start"]);
+        assert.equal(ctl.seen, 0, "the panel left the notes unseen");
         assert.deepEqual(errors, []);
         await page.close();
       }
