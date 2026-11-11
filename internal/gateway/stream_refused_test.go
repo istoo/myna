@@ -8,8 +8,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/tidwall/gjson"
 	"github.com/istoo/owl/internal/provider"
+	"github.com/tidwall/gjson"
 )
 
 // A claude-relay-service Responses endpoint answers a request for one body
