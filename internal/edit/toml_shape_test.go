@@ -102,7 +102,11 @@ func TestTOMLBigFileParsesInLinearTime(t *testing.T) {
 		t.Errorf("last key %+v of %d lines", k, len(small))
 	}
 	_, dLarge := parseTOMLTimed(t, large)
-	if ratio := float64(dLarge) / float64(dSmall); ratio > 24 {
+	// 32, not 24: two macOS CI runs on a loaded runner parsed the still
+	// linear file at 24.6× and 24.3× (runs 42860876555 and 42932712115),
+	// and a quadratic parse still needs 64×. 8 and 32 leave the same room
+	// on both sides.
+	if ratio := float64(dLarge) / float64(dSmall); ratio > 32 {
 		t.Errorf("an 8 MB file took %v to parse, %.1f× the 1 MB one's %v: near the 64× of size squared, not the 8× of size", dLarge, ratio, dSmall)
 	}
 }
