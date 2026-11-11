@@ -3263,7 +3263,7 @@ function dragCards(e, handle, card, list, cards, commit, idle = () => {}, layout
   const { scroll, scroll0, seen, speedAt } = dragScroll(list);
   let dragging = false, ended = false, to = from, x = e.clientX, y = e.clientY, frame = 0, lastTime = 0, slot = null;
   const x0 = x, y0 = y, t0 = performance.now(), pointer = e.pointerId;
-  const r0 = rects[from], box = list.getBoundingClientRect();
+  const r0 = rects[from], box = list.getBoundingClientRect(), mins = cards.map((c) => c.style.minHeight);
   const paint = (time) => {
     frame = 0;
     if (!card.isConnected) return finish(false);
@@ -3286,6 +3286,9 @@ function dragCards(e, handle, card, list, cards, commit, idle = () => {}, layout
       if (i === from) return;
       const mx = at[i].left - rects[i].left, my = at[i].top - rects[i].top;
       c.style.transform = Math.abs(mx) > .5 || Math.abs(my) > .5 ? `translate(${mx}px, ${my}px)` : "";
+      // a layout that says a height (usageLayout): the card shown at it,
+      // its own min-height (packUsage's stretch) put by till the drag ends
+      if (at[i].height != null) { c.style.minHeight = "0px"; c.style.height = at[i].height + "px"; }
     });
     const fresh = !slot;
     if (fresh) {
@@ -3294,6 +3297,7 @@ function dragCards(e, handle, card, list, cards, commit, idle = () => {}, layout
       slot.style.width = r0.width + "px";
       slot.style.height = r0.height + "px";
     }
+    if (at[from].height != null) slot.style.height = at[from].height + "px";
     slot.style.transform = `translate(${at[from].left - box.left - list.clientLeft}px, ${at[from].top - box.top - list.clientTop}px)`;
     if (fresh) list.prepend(slot);
     if (speed) frame = requestAnimationFrame(paint);
@@ -3333,7 +3337,7 @@ function dragCards(e, handle, card, list, cards, commit, idle = () => {}, layout
     list.classList.remove("sorting");
     card.classList.remove("dragging");
     slot?.remove();
-    cards.forEach((c) => { c.style.transform = ""; });
+    cards.forEach((c, i) => { c.style.transform = ""; c.style.height = ""; c.style.minHeight = mins[i]; });
     if (save && dragging && to !== from) commit(to);
     idle();
     setTimeout(() => delete handle.dataset.dragged, 0);
@@ -15368,22 +15372,10 @@ function usagePlace(n, hs) {
   }
   return { at, ends };
 }
-// usageLayout: dragCards' layout for the packed Usage cards
-function usageLayout(rects) {
-  const list = $("#subscriptionUsage");
-  const n = usagePacked?.n;
-  if (!n || !list?.classList.contains("packed")) return null;
-  const hs = rects.map((r) => r.height), now = usagePlace(n, hs).at;
-  const left = [];
-  now.forEach(([c], i) => { left[c] ??= rects[i].left; });
-  if (left.length < n || left.includes(undefined)) return null;
-  const top0 = rects[0].top - now[0][1];
-  return (order) => {
-    const at = [];
-    usagePlace(n, order.map((i) => hs[i])).at.forEach(([c, top], k) => { at[order[k]] = { left: left[c], top: top0 + top }; });
-    return at;
-  };
-}
+// usageLayout: dragCards' layout for the packed Usage cards (usagelayout.js),
+// none until it is in, the cards then placed as the grid has them
+let usageLayout = null;
+import("./usagelayout.js").then((m) => { usageLayout = m.usageLayout; }).catch(() => {});
 
 const usagePack = new ResizeObserver(() => { if (!usagePackFrame) usagePackFrame = requestAnimationFrame(packUsage); });
 function packUsageNow(list) {
