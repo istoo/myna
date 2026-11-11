@@ -160,10 +160,11 @@ test("compat.js is the first of the page's own scripts", async () => {
   // providerserr.js when Providers' first read fails, navmore.js when a
   // narrow window holds pages in More, palette.js when ⌘K opens the
   // palette, editor.js when a provider's editor is first drawn,
-  // phonetabs.js when owl web is laid out for a phone; the
-  // checks above
+  // phonetabs.js when owl web is laid out for a phone, navkeys.js once
+  // the window is up (⌘1–9 and the sidebar's arrows), usagelayout.js with
+  // it (where a dragged Usage card's neighbours stand); the checks above
   // still read them
-  for (const f of await scripts()) if (!["webfonts.js", "cfgblocked.js", "signsheets.js", "ruleedit.js", "ratewindows.js", "traywindows.js", "autoresetown.js", "registry.js", "navlamp.js", "whatsnew.js", "claudemode.js", "ctxtext.js", "resetask.js", "quotaall.js", "quitask.js", "checkinnow.js", "autobackup.js", "scrollends.js", "profilerename.js", "settingshints.js", "keyspend.js", "syncfiles.js", "aboutrows.js", "providerserr.js", "navmore.js", "palette.js", "editor.js", "phonetabs.js"].includes(f)) assert(all.includes(f), f + " is not loaded by index.html");
+  for (const f of await scripts()) if (!["webfonts.js", "cfgblocked.js", "signsheets.js", "ruleedit.js", "ratewindows.js", "traywindows.js", "autoresetown.js", "registry.js", "navlamp.js", "whatsnew.js", "claudemode.js", "ctxtext.js", "resetask.js", "quotaall.js", "quitask.js", "checkinnow.js", "autobackup.js", "scrollends.js", "profilerename.js", "settingshints.js", "keyspend.js", "syncfiles.js", "aboutrows.js", "providerserr.js", "navmore.js", "palette.js", "editor.js", "phonetabs.js", "navkeys.js", "usagelayout.js"].includes(f)) assert(all.includes(f), f + " is not loaded by index.html");
 });
 
 test("the styles hold up in Safari 15.0", async () => {
