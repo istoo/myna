@@ -89,6 +89,12 @@ for (const engine of engines) {
         const hint = mcp.locator(":scope > .who > .sub").first();
         const text = (await hint.textContent()).trim();
         assert.ok(text.length > 20, "the MCP server row has its explanation");
+        // the window itself doesn't scroll: the held-out lines sit in their
+        // row's box, not against the page (kalicyh on X)
+        if (width === 1100) {
+          await page.waitForTimeout(150);
+          assert.equal(await page.evaluate(() => document.scrollingElement.scrollHeight - innerHeight), 0, "the window itself can scroll");
+        }
 
         // at rest: out of sight, but in the page
         assert.equal(await hint.evaluate(inSight), false, "the explanation shows at rest");
