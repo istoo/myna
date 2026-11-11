@@ -3135,11 +3135,15 @@ function dragScroll(list) {
   while (scroll && !/(auto|scroll)/.test(getComputedStyle(scroll).overflowY)) scroll = scroll.parentElement;
   scroll ||= document.scrollingElement;
   const bounds = scroll.getBoundingClientRect(), edge = 36;
-  // an edge scrolls once the pointer has left it
+  // an edge scrolls once the pointer has left it: seen on every move, as a
+  // busy machine paints no frame while the pointer crosses into the edge
   let up = false, down = false;
-  return { scroll, scroll0: scroll.scrollTop, speedAt: (y) => {
+  const seen = (y) => {
     if (y >= bounds.top + edge) up = true;
     if (y <= bounds.bottom - edge) down = true;
+  };
+  return { scroll, scroll0: scroll.scrollTop, seen, speedAt: (y) => {
+    seen(y);
     return up && y < bounds.top + edge ? -Math.min(1, (bounds.top + edge - y) / edge)
       : down && y > bounds.bottom - edge ? Math.min(1, (y - bounds.bottom + edge) / edge) : 0;
   } };
@@ -3167,7 +3171,7 @@ function dragRows(e, handle, row, list, rows, commit, start = () => {}, idle = (
   if (from < 0) return false;
   const base = () => list.getBoundingClientRect().top - list.scrollTop - rows[0].offsetTop;
   const lift = rows[0].getBoundingClientRect().top - base() - rows[0].offsetTop, grab = e.clientY - row.getBoundingClientRect().top;
-  const { scroll, speedAt } = dragScroll(list);
+  const { scroll, seen, speedAt } = dragScroll(list);
   let dragging = false, ended = false, to = from, y = e.clientY, frame = 0, lastTime = 0;
   const y0 = y, x0 = e.clientX, t0 = performance.now(), pointer = e.pointerId;
   const paint = (time) => {
@@ -3202,6 +3206,7 @@ function dragRows(e, handle, row, list, rows, commit, start = () => {}, idle = (
     if (ev.pointerId !== pointer) return;
     if (!row.isConnected || !handle.isConnected) return finish(false, ev);
     y = ev.clientY;
+    seen(y);
     if (!dragging) {
       if (Math.abs(y - y0) < 4) return;
       dragging = true;
@@ -3255,7 +3260,7 @@ function dragCards(e, handle, card, list, cards, commit, idle = () => {}, layout
     return at;
   });
   const orderTo = (to) => { const o = cards.map((_, i) => i); o.splice(to, 0, ...o.splice(from, 1)); return o; };
-  const { scroll, scroll0, speedAt } = dragScroll(list);
+  const { scroll, scroll0, seen, speedAt } = dragScroll(list);
   let dragging = false, ended = false, to = from, x = e.clientX, y = e.clientY, frame = 0, lastTime = 0, slot = null;
   const x0 = x, y0 = y, t0 = performance.now(), pointer = e.pointerId;
   const r0 = rects[from], box = list.getBoundingClientRect();
@@ -3298,6 +3303,7 @@ function dragCards(e, handle, card, list, cards, commit, idle = () => {}, layout
     if (!card.isConnected || !handle.isConnected) return finish(false, ev);
     x = ev.clientX;
     y = ev.clientY;
+    seen(y);
     if (!dragging) {
       if (Math.hypot(x - x0, y - y0) < 4) return;
       dragging = true;

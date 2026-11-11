@@ -189,11 +189,20 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     assert.deepEqual(await ids(page), prior); assert.equal(f.posted.length, count);
     // Background quota refresh cannot replace a captured row; edge scroll
     // reaches rows below the fold without rebuilding during the drag.
+    // No frame is painted while the pointer crosses into the foot's edge, as
+    // on a busy machine: the edge still scrolls, its pointer seen on each
+    // move and not only when a frame is painted (red on CI under load).
     const a = await point(rows(page).first());
     const bounds = await page.locator(".ebody").boundingBox();
+    await page.evaluate(() => {
+      const raf = window.requestAnimationFrame;
+      window.__raf = raf;
+      window.requestAnimationFrame = (f) => raf.call(window, () => setTimeout(() => f(performance.now()), 400));
+    });
     await page.mouse.move(a.x, a.y); await page.mouse.down();
     await page.mouse.move(a.x, bounds.y + bounds.height - 5, { steps: 20 });
     await page.locator(".acc.dragging").waitFor();
+    await page.evaluate(() => { window.requestAnimationFrame = window.__raf; });
     await page.waitForFunction(() => document.querySelector(".ebody").scrollTop > 100);
     assert(await page.evaluate(() => { const row = document.querySelector(".acc.dragging"); renderProviders(); return row === document.querySelector(".acc.dragging") && accountRenderPending; }));
     await page.mouse.up(); await settled(page); await checkFirst(page, f, "antigravity");
