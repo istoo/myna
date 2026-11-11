@@ -3117,8 +3117,7 @@ function agentHandle(a, row, inFold) {
   return b;
 }
 
-// dragAgent: a row (the window's cards) moves with the pointer, the others
-// making room, and letting go keeps the new order
+// dragAgent: a row (a card) moves with the pointer
 function dragAgent(e, handle, row) {
   if (agentArranging) return;
   const list = $("#agents"), rows = [...list.children].filter((r) => r.classList.contains("agent")), to = (i) => moveAgent(row.dataset.id, i), idle = () => {
