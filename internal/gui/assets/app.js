@@ -3117,16 +3117,15 @@ function agentHandle(a, row, inFold) {
   return b;
 }
 
-// dragAgent moves a row in view up and down the list with the pointer; the
-// others make room as it passes, and letting go keeps the new order.
+// dragAgent: a row (the window's cards) moves with the pointer, the others
+// making room, and letting go keeps the new order
 function dragAgent(e, handle, row) {
   if (agentArranging) return;
-  const list = $("#agents");
-  agentArranging = dragRows(e, handle, row, list, [...list.children].filter((r) => r.classList.contains("agent")),
-    (to) => moveAgent(row.dataset.id, to), closeAgentMenu, () => {
-      agentArranging = false;
-      if (agentRenderPending) { agentRenderPending = false; renderAgents(); }
-    });
+  const list = $("#agents"), rows = [...list.children].filter((r) => r.classList.contains("agent")), to = (i) => moveAgent(row.dataset.id, i), idle = () => {
+    agentArranging = false;
+    if (agentRenderPending) { agentRenderPending = false; renderAgents(); }
+  };
+  agentArranging = mode == "panel" ? dragRows(e, handle, row, list, rows, to, closeAgentMenu, idle) : dragCards(e, handle, row, list, rows, to, idle);
 }
 
 // dragScroll: the box a drag scrolls, and how fast a pointer at y scrolls it

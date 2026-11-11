@@ -17,8 +17,9 @@ const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
 const now = new Date();
-// rows enough for a page several screens tall
-const AGENTS = Array.from({ length: 40 }, (_, i) => ({
+// rows enough for a page several screens tall, three cards to a row at
+// the widest
+const AGENTS = Array.from({ length: 120 }, (_, i) => ({
   id: "a" + i, name: "Agent " + i, path: "/t/a" + i + ".json", icon: "generic", wired: true,
   fields: [{ key: "model", label: "model", value: "m", options: [{ value: "m", label: "M", ref: "a/m" }] }],
 }));

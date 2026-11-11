@@ -84,15 +84,16 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
 
         const view = page.locator("#view-providers");
         assert.equal(await page.locator("#view-providers > .view-room").count(), 0, "no room may be left under the list");
-        // the list, its new account and Add provider are on the page, which
-        // ends where they do: no empty page under them
+        // the list and its new account are on the page, which ends where
+        // the page's last shown part does (the list, or Add provider under
+        // it where the page has no head): no empty page under them
         const at = await view.evaluate((v) => {
-          const b = v.getBoundingClientRect(), add = v.querySelector("#addProvider").getBoundingClientRect();
+          const b = v.getBoundingClientRect(), add = { bottom: Math.max(...[...v.children].filter((e) => e.getClientRects().length).map((e) => e.getBoundingClientRect().bottom)) };
           const row = v.querySelector('#providers .row[data-id="qoder-cn"]').getBoundingClientRect();
           return { gap: b.bottom - add.bottom, row: row.top - b.top, rowBottom: row.bottom - b.top, height: b.height };
         });
         assert(at.row >= 0 && at.rowBottom <= at.height, `the new account's row must be in sight (${Math.round(at.row)}..${Math.round(at.rowBottom)} of ${Math.round(at.height)})`);
-        assert(at.gap < 150, `the page left ${Math.round(at.gap)}px empty under Add provider`);
+        assert(at.gap < 150, `the page left ${Math.round(at.gap)}px empty under its last part`);
         await page.context().close();
       });
     }

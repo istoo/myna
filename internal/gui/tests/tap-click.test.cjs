@@ -71,12 +71,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal(await page.locator("#agents > .row.dragging").count(), 0);
         await page.keyboard.press("Escape");
 
-        // a drag the length of a row is still a drag
+        // a drag the length of a row is still a drag: past the next row in
+        // the panel's list, onto the next card's place in the window's cards
         const before = await page.locator("#agents > .row.agent").evaluateAll((rs) => rs.map((r) => r.dataset.id));
+        const next = mode === "window" ? await page.locator("#agents > .row.agent").nth(2).locator(".ag-handle").boundingBox() : null;
         await page.mouse.move(x, y);
         await page.mouse.down();
         await page.waitForTimeout(350);
-        await page.mouse.move(x, y + box.height * 2.2, { steps: 12 });
+        await page.mouse.move(next ? next.x + next.width / 2 : x, next ? next.y + next.height / 2 : y + box.height * 2.2, { steps: 12 });
         await page.mouse.up();
         await page.waitForFunction(() => document.querySelector("#agents > .row.dragging") === null);
         assert.equal(f.posted.length, 1, "a drag past the next row moved nothing");

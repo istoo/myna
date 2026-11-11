@@ -13,6 +13,8 @@ const pageMod = (e) => (mac ? e.metaKey && !e.ctrlKey : e.ctrlKey && !e.metaKey)
 const nameOf = (b) => (b.querySelector("span[data-t]") || b.querySelector("span"))?.textContent?.trim() || "";
 
 export function start() {
+  // each page's head, in place of the title bar's crumb (pagehead.js)
+  import("./pagehead.js").then((m) => m.start()).catch(statusErr);
   const nav = $("#nav");
   // each page's shortcut, in its tooltip when the pointer comes to it
   if (!isWeb()) nav.addEventListener("pointerover", (e) => {

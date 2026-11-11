@@ -5057,3 +5057,49 @@ body .row.agent .ag-prefs .row.pref .who { display: block; }
 .palette-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .palette-kind { margin-left: auto; flex: none; color: var(--muted); font-size: 11px; }
 .palette-none { padding: 22px 12px; text-align: center; color: var(--muted); font-size: 12.5px; }
+
+/* ---- a page's head (pagehead.js), in the sidebar's layout: the page's
+   name, a line on where it stands, its own actions at the right; the title
+   bar's crumb gives way to it ---- */
+body.ph-on #crumb { visibility: hidden; }
+.ph { display: flex; align-items: center; gap: 16px; margin: 0 0 14px; min-height: 40px; flex: none; }
+.ph-t { flex: 1; min-width: 0; }
+.ph-name { font-size: 22px; line-height: 1.25; font-weight: 650; letter-spacing: -.015em; color: var(--fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ph-s { display: flex; flex-wrap: wrap; gap: 2px 12px; margin-top: 3px; font-size: 12.5px; line-height: 18px; color: var(--muted); }
+.ph-s[hidden] { display: none; }
+.ph-s b { font-weight: 600; color: var(--fg); font-variant-numeric: tabular-nums; }
+.ph-dot { display: inline-block; width: 7px; height: 7px; margin-right: 6px; border-radius: 50%; background: var(--green); vertical-align: 1px; }
+.ph-a { display: flex; align-items: center; gap: 8px; flex: 0 1 auto; min-width: 0; }
+#view-providers .ph-a > .pv-head { margin: 0; min-width: 0; }
+.ph-a > #addProvider { flex: none; height: 30px; padding: 0 14px; border-radius: 8px; color: var(--accent-fg); background: var(--accent); font-weight: 500; }
+.ph-a > #addProvider:hover { filter: brightness(1.08); }
+.after-list:empty { display: none; }
+
+/* ---- the Agents page in the window: the agents in use are cards, two or
+   more to a row, each with its model across the card and today's calls at
+   its foot; the rest (folded) stay a list under them. Details stays in the
+   top line, where it was in a row: what it opens comes in under it, so it
+   doesn't move under the pointer that opened or closed it ---- */
+body.window #agents.list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr)); gap: 12px; align-items: start; background: none; border: 0; border-radius: 0; overflow: visible; }
+body.window #agents.list > :not(.row.agent) { grid-column: 1 / -1; }
+body.window #agents > .row.agent { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto auto auto; column-gap: 12px; row-gap: 12px; align-items: center; align-self: stretch; align-content: start; min-height: 0; padding: 14px 14px 12px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); }
+body.window #agents > .row.agent + .row.agent { border-top: 1px solid var(--line); }
+body.window #agents > .row.agent > * { grid-column: 1 / -1; order: 3; margin-left: 0; }
+body.window #agents > .row.agent > .ag-handle { grid-column: 1; grid-row: 1; order: 0; align-self: start; }
+body.window #agents > .row.agent > .ag-handle .ic { width: 30px; height: 30px; }
+body.window #agents > .row.agent > .who { grid-column: 2; grid-row: 1; order: 1; width: auto; min-height: 0; }
+body.window #agents > .row.agent > .who .name { font-size: 14.5px; font-weight: 600; }
+body.window #agents > .row.agent > :is(.ag-add, .ag-cant, .ag-show) { grid-column: 3; grid-row: 1; order: 2; align-self: start; justify-self: end; margin: 0; }
+body.window #agents > .row.agent > .ag-conn { grid-column: 5; grid-row: 1; order: 2; align-self: start; justify-self: end; margin: 4px 0 0; }
+body.window #agents > .row.agent > .field.ag-start { width: auto; height: 34px; border-radius: 9px; }
+body.window #agents > .row.agent > .fields { width: auto; }
+body.window #agents > .row.agent > .ag-today { order: 8; }
+body.window #agents > .row.agent > .ag-link { grid-column: 4; grid-row: 1; order: 2; align-self: start; margin: 1px 0 0; }
+.ag-today { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 12px; min-width: 0; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.ag-today b { font-weight: 600; color: var(--fg); }
+.ag-today .cost { color: var(--green); }
+body.window #agents > .agent-fold > .agent-fold-inner { border: 1px solid var(--line); border-radius: 12px; background: var(--card); }
+body.window #agents > .agent-fold:not(.open) > .agent-fold-inner { border-color: transparent; background: none; }
+body.window #agents > .agent-fold .agent-fold-inner > :first-child { border-top: 0; }
+body.window #agents > .ag-manage-bar { border-top: 0; padding: 0; }
+body.window #agents.sorting { position: relative; }

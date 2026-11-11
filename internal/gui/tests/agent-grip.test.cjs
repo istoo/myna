@@ -104,11 +104,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.waitForFunction(() => [...document.querySelectorAll("#agents > .row.agent .ag-handle")].every((h) => getComputedStyle(h, "::before").opacity === "0"));
         assert.deepEqual(await shown(), g.map(() => "0"));
 
-        // dragging by the grip moves the row
+        // dragging by the grip moves the row: onto the next one's place,
+        // under it in the panel's list, beside it in the window's cards
         const before = await order(page);
         await page.mouse.move(g[0].x, g[0].y);
         await page.mouse.down();
-        await page.mouse.move(g[0].x, g[1].y + 14, { steps: 12 });
+        await page.mouse.move(g[1].x, g[1].y + 14, { steps: 12 });
         await page.locator("#agents > .row.dragging").waitFor();
         await page.mouse.up();
         await page.waitForFunction((id) => document.querySelector("#agents > .row.agent").dataset.id === id, before[1]);
