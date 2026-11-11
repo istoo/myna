@@ -54,3 +54,32 @@ func TestListReadsEveryClaudeFolderOnce(t *testing.T) {
 		t.Fatalf("rows = %v, want main1 and work1 once each", n)
 	}
 }
+
+// Claude folders' files are listed first and the answer made at their total:
+// grown file by file, a pass with a few folders allocated ~1 MB, and the
+// Sessions page runs a pass every 10 s.
+func TestClaudeFilesMadeAtTheirSize(t *testing.T) {
+	d := setupCalls(t)
+	home, _ := os.UserHomeDir()
+	work := filepath.Join(home, ".claude-work")
+	user := func(id string) string {
+		return `{"type":"user","timestamp":"` + stamp(0) + `","message":{"role":"user","content":"hello"},"cwd":"/work/app","sessionId":"` + id + `"}`
+	}
+	for i := range 20 {
+		id := "main" + itoa(i)
+		writeLines(t, filepath.Join(d.claude, "projects", "-a", id+".jsonl"), user(id))
+		id = "work" + itoa(i)
+		writeLines(t, filepath.Join(work, "projects", "-b", id+".jsonl"), user(id))
+	}
+	writeLines(t, filepath.Join(work, "projects", "-a", "main0.jsonl"), user("main0"))
+	if len(ClaudeDirs()) != 2 {
+		t.Fatalf("folders %v", ClaudeDirs())
+	}
+	fs := claudeFiles()
+	if len(fs) != 40 {
+		t.Fatalf("%d files, want 40", len(fs))
+	}
+	if cap(fs) != 41 {
+		t.Fatalf("listed into room for %d, want the 41 listed", cap(fs))
+	}
+}
