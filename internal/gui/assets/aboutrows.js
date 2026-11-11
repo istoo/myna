@@ -89,12 +89,6 @@ export function aboutRows(ctx) {
   }
   // OWL_PUBLIC_URL, where other machines reach it (#1551)
   if (s.publicURL && gw !== s.publicURL) row(t("Public address"), t("OWL_PUBLIC_URL: where other computers reach the gateway, with a gateway key"), s.publicURL, copyBtn(s.publicURL, t("Public address"))).id = "publicURLRow";
-  const site = el("button", "text", t("Open"));
-  site.onclick = () => api("open", { url: "https://github.com/istoo/owl" }).catch(() => {});
-  row(t("Website"), t("downloads, docs and what's new"), "github.com/istoo/owl", site);
-  const lic = el("button", "text", t("View"));
-  lic.onclick = showNotices;
-  row(t("Open-source licenses"), t("the notices of the code and data owl is built with"), "", lic);
   // issues and the code are on GitHub
   const repo = el("button", "github");
   repo.innerHTML = GITHUB_SVG;

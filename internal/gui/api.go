@@ -122,8 +122,8 @@ func cliBehindRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/cli", func(rw http.ResponseWriter, r *http.Request) {
 		writeJSON(rw, update.ReadCLI())
 	})
-	// Settings › About's Open-source licenses: the notices this binary
-	// carries (notices.Text, THIRD_PARTY_NOTICES)
+	// the notices this binary carries (notices.Text, THIRD_PARTY_NOTICES),
+	// which `owl notices` prints
 	mux.HandleFunc("GET /api/notices", func(rw http.ResponseWriter, r *http.Request) {
 		writeJSON(rw, map[string]string{"text": notices.Text})
 	})
