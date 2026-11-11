@@ -368,8 +368,15 @@
       - [ ] 设置页收窄居中（预览已出）、Agent 页状态行（预览已出），待定。
 - [x] 打磨（2026-11-11，用户在真界面并排对比图上全选）：侧栏图标一套（20 网格 1.6 笔画）、供应商行小开关+悬停、小节名不再全大写、页内搜索 28px、窗口最窄时用量行花费不被挤出；新测试 `nav-polish.test.cjs`。
 - [x] 全量 GUI 跑出 account-arrange（WebKit）不稳定：拖拽边缘滚动的"离开过边缘"只在动画帧里判断，忙时永不滚动；主干同负载 1/4 红。已在 dragScroll 修根因（每次 pointermove 都判断），测试注入帧延迟后修前必红。
-- [ ] `usage-drag.test.cjs` 在本机 macOS 上 4/4 红（origin/main 4bbb177fc 干净副本同样 4/4），CI（Linux）绿：松手后其余卡片比拖拽时显示的位置偏 18px/98px（"codex stays where it was shown: …403 vs …385"）。疑为落点预测在 macOS 字体高度下不准，用户在 Mac 上会看到卡片落地后跳一下；待查 97916bf04 的 layout 预测。
-- [ ] `claude-tui-setting.test.cjs` 的 420 宽度在本机红（"saved once"，origin/main 4bbb177fc 干净副本 chromium 同样 2/4 语言红），CI 绿；待查窄宽度下开关是否保存了两次。
-- [ ] `TestGatewayFixQuitsOnlyAOwl` 在 GUI 全量并跑时红一次（"owl didn't answer"，10s 固定等待），单跑 3/3 绿；与 GUI 改动无关，再红就改成等状态。
+- [x] `usage-drag.test.cjs` 在本机 macOS 上 4/4 红（origin/main 4bbb177fc 干净副本同样 4/4），CI（Linux）绿：松手后其余卡片比拖拽时显示的位置偏 18px/98px（"codex stays where it was shown: …403 vs …385"）。疑为落点预测在 macOS 字体高度下不准，用户在 Mac 上会看到卡片落地后跳一下；待查 97916bf04 的 layout 预测。 → 已修（11-11）：落点预测按卡片自然高度算，每列末张卡拖拽中就显示成落地后的拉伸高度；预测函数移到按需加载的 usagelayout.js，核心体积不涨。
+- [x] `claude-tui-setting.test.cjs` 的 420 宽度在本机红（"saved once"，origin/main 4bbb177fc 干净副本 chromium 同样 2/4 语言红），CI 绿；待查窄宽度下开关是否保存了两次。 → 已修：不是保存两次，是点击落在手机标签栏上（测试只避开了窗口底），reader.cjs 新增 footTop。
+- [x] `TestGatewayFixQuitsOnlyAOwl` 在 GUI 全量并跑时红一次（"owl didn't answer"，10s 固定等待），单跑 3/3 绿；与 GUI 改动无关，再红就改成等状态。 → 已修：三个起假 owl 的测试共用 awaitFakeOwl，子进程活着就等（上限 1 分钟），退出即失败；注入 12s 启动延迟，旧代码红、新代码绿。
+- [x] 11-11 本机 GUI 全量（逐文件重跑）收尾，共 20 个文件，均已修复并复跑通过：
+      - 我上一轮推送带进来的 3 处：侧栏底部在矮窗口（≤370px 且设置子列表展开）把「设置」挤下 30px（底部改为可收缩）；old-webkit 的按需模块名单缺 navkeys.js；KPI 改为正常大小写后，sessions-in-range / sessions-spoke-not-spent / sessions-overview 还在匹配大写。
+      - 产品 bug 2 个：用量卡片 ⋯ 在页面打开后第一秒内点不关（quotaPressed 初值 0，上游已是 -Infinity，移植时漏了）；用量卡片拖拽落点高度跳变（见上）。
+      - 测试与 owl 实际行为不符的移植测试：reader.navTo 在手机上同时找到两个 More；phone-tabs 用上游的 .nav-more 类名，且网关模式下的资源库期望按上游写（owl 未移植 f285426ac）；nav-priority 仍在找手机上的 #navMore；modal-title-drag 用上游添加面板的选择器；usage-drag 缺导航超时（nav-timeout 守卫）。
+      - 手机宽度点击落到底部标签栏上：claude-tui-setting、loop-guard-setting、rest-try-now、found-skill-pick-remove、group-editor-selected，以及先前修过的 redact-rule-edit、agent-models-redraw。
+      - 其余：rest-try-now 的指针停在自带滚动的步骤框上；provider-levels-scroll 在 Mac 字体下列表偏低，取消勾选时编辑器被 Playwright 滚动；update-network 在顶栏标为 crowded 之前就去测量。
+- [ ] 候选移植：f285426ac（网关模式保留资源库页 / MCP 路由），phone-tabs 现按 owl 行为断言。
 - [ ] 第 3 阶段：Agent 页与供应商页首屏动线。
 - [ ] 第 4 阶段：托盘面板信息密度。

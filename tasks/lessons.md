@@ -47,3 +47,11 @@ CI 日志、`ls`、`npm config` 里出现的那个 8 字符小写串，是 npm �
 - 2026-11-10：本机用 `--test-concurrency=8` 跑全量，2875 项里 2303 项以 "Promise resolution is still pending but the event loop has already resolved" 整文件失败；
   挑出三个失败文件单独跑，30/22/20 项全绿。是浏览器被并发压垮，不是代码问题。
 - 规则：用 `make test-ui`（`UI_TEST_CONCURRENCY` 默认 2）；本机最多 4。整文件报上面这句时，先单独跑该文件再下结论。
+
+## CI 的 GUI 推送只跑冒烟集，全量是“只报告”
+
+- 2026-11-11：上一轮汇报写“CI 的 GUI 全套在 cac2297c7 上全绿”，实际 gui.yml 在 push 时只跑 7 个冒烟文件；
+  全量只在每晚定时任务或手动触发 `mode=full` 时跑，而且只跑 Chromium，结果为报告模式（exit 0），全绿的颜色不代表没有红。
+  手机标签栏移植后，一个晚上的全量都没跑过，十几个文件就一直红着。
+- 规则：说“GUI 全绿”之前，要么本机逐文件跑完，要么 `gh workflow run gui.yml -f mode=full`，然后读日志里的 `shard N/4, chromium: X failed`
+  和 `- \`file\`` 清单，不看颜色。汇报里写清楚跑的是冒烟集还是全量。
