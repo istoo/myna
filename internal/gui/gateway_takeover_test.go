@@ -122,11 +122,7 @@ func TestGatewayFixQuitsOnlyAOwl(t *testing.T) {
 		ended := make(chan struct{})
 		go func() { cmd.Wait(); close(ended) }()
 		t.Cleanup(func() { cmd.Process.Kill(); <-ended })
-		for deadline := time.Now().Add(10 * time.Second); gateway.ServedBy().Version != "0.1.550"; time.Sleep(50 * time.Millisecond) {
-			if time.Now().After(deadline) {
-				t.Fatalf("%s didn't answer", name)
-			}
-		}
+		awaitFakeOwl(t, name, "0.1.550", ended)
 		return cmd, ended
 	}
 

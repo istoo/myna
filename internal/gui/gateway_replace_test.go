@@ -90,12 +90,26 @@ func startFakeOwl(t *testing.T, addr, v, serves string) (ended chan struct{}) {
 	ended = make(chan struct{})
 	go func() { cmd.Wait(); close(ended) }()
 	t.Cleanup(func() { cmd.Process.Kill(); <-ended })
-	for deadline := time.Now().Add(10 * time.Second); gateway.ServedBy().Version != v; time.Sleep(50 * time.Millisecond) {
+	awaitFakeOwl(t, "the fake owl "+v, v, ended)
+	return ended
+}
+
+// awaitFakeOwl waits for a fake owl (a copy of the test binary) to serve the
+// gateway at version v. Started under a loaded machine's full suite, the copy
+// took longer than a fixed 10s to answer (TestGatewayFixQuitsOnlyAOwl): it is
+// waited on while it runs, and one that has ended fails at once.
+func awaitFakeOwl(t *testing.T, name, v string, ended <-chan struct{}) {
+	t.Helper()
+	for deadline := time.Now().Add(time.Minute); gateway.ServedBy().Version != v; time.Sleep(50 * time.Millisecond) {
+		select {
+		case <-ended:
+			t.Fatalf("%s ended before it answered", name)
+		default:
+		}
 		if time.Now().After(deadline) {
-			t.Fatalf("the fake owl %s didn't answer", v)
+			t.Fatalf("%s didn't answer in a minute", name)
 		}
 	}
-	return ended
 }
 
 // matrix0487 on Discord: after an update the app kept the gateway an older
