@@ -398,3 +398,10 @@
 - [x] 分类：发现页顶部筛选条（全部 / 订阅 / 网关中间件 / Agent / 给 Agent 的工具 / 页面，各带数量），选中项存 localStorage（`pmorder.js`）
 - [x] 排序：推荐（市场原序）/ 下载最多（npm 上周下载量，未统计的排最后），同样记住选择
 - [x] 测试：`plugin-order.test.cjs`（两引擎×五语言×两宽度：数量、排序、单类、重载后保持）；去掉模块时 11 条全红
+
+## 2026-11-11 夜：CI 基础设施与偶发红（登记）
+
+- [ ] ubuntu 的 Test job 反复卡在 `Install GTK and WebKitGTK` 15 分钟超时（apt），GUI 全量四次都卡在 `Install Playwright`：
+      纯 runner 网络问题，代码无关；本地两引擎各 1595/1595 全绿。等 runner 恢复后重跑到绿再合入。
+- [ ] #18 `TestPluginPageServiceProxied`：流里第二个事件丢失（上游连接被 owl 侧关闭）；本地 -race 4200 次未复现。
+- [ ] #20 `TestStaleLatestIsNotUpToDate`：一次 fresh 读取后 feed 被问了两次；本地注入延迟 + 英文系统语言未复现。
