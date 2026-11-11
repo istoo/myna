@@ -67,7 +67,10 @@ where owl writes it into the owner's own agents; `gateway-key` for any
 other named key, on loopback too (one the owner made for someone else, a
 value a user brought, a `sk-owl-` key that didn't authenticate), and for
 the sharing key from anywhere else: Gateway keys lists it with a Copy
-button and offers it to connect other computers, so a friend may hold it;
+button and offers it to connect other computers, so a friend may hold it,
+and Settings › Network and sharing shows it as the Password those computers
+send, with Copy and New password (`lanKeyId` and `lanKeyMask` in the
+settings state; `TestLANSettingSharesCallerKeyStore`, `lan-public.test.cjs`);
 otherwise `remote`. owl has no "this named key is mine" mark, so every
 key the owner made reads `gateway-key`. A plugin that serves the owner's own
 agents beyond `local` checks `owl-key`, never `gateway-key`

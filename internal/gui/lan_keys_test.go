@@ -45,13 +45,21 @@ func TestLANSettingSharesCallerKeyStore(t *testing.T) {
 	if err != nil || strings.Contains(key.Masked, old) {
 		t.Fatal("LAN settings leaked secret", key, err)
 	}
+	// the page copies the sharing key from the Password row: its id and
+	// mask, never the secret
+	if s["lanKeyId"] != id || s["lanKeyMask"] != key.Masked {
+		t.Fatalf("the Password row's key: %v", s)
+	}
+	if mask, _ := s["lanKeyMask"].(string); mask == "" || strings.Contains(mask, old) {
+		t.Fatalf("the Password row leaked the key: %v", s)
+	}
 	created := post("/api/caller-keys/add-key", `{"name":"Remote laptop"}`)
 	secret := created["secret"].(string)
 	if who, ok := access.Authenticate(secret); !ok || who.KeyName != "Remote laptop" {
 		t.Fatal("named key is not shared", who, ok)
 	}
 	off := post("/api/settings/lan", `{"on":false,"newKey":true}`)
-	if off["lan"] != nil || off["lanKey"] != nil {
+	if off["lan"] != nil || off["lanKey"] != nil || off["lanKeyId"] != nil || off["lanKeyMask"] != nil {
 		t.Fatal("legacy rotate request changed settings", off)
 	}
 	if _, ok := access.Authenticate(secret); !ok {

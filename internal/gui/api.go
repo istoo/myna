@@ -403,6 +403,12 @@ type settingsJSON struct {
 	AllowIPsEnv     string   `json:"allowIPsEnv,omitempty"`
 	AllowIPsFromEnv []string `json:"allowIPsFromEnv,omitempty"`
 	OnNetwork       bool     `json:"onNetwork,omitempty"`
+	// LANKeyID and LANKeyMask name the sharing key other computers send
+	// as the gateway key while the gateway is shared (Settings' Password
+	// row): the key's id, so the page can copy it, and its masked value.
+	// Never the secret (settingsState clears it).
+	LANKeyID   string `json:"lanKeyId,omitempty"`
+	LANKeyMask string `json:"lanKeyMask,omitempty"`
 	// Dir is the data folder beside a portable owl (#508)
 	Portable bool `json:"portable,omitempty"`
 	// Log is the log the desktop app writes (applog), as shown; "" for a
@@ -738,6 +744,16 @@ func settingsState() settingsJSON {
 	}
 	if s.LAN || gateway.OnNetwork() {
 		s.PublicURL = gateway.PublicURL()
+	}
+	if s.LAN {
+		if keys, err := access.List(); err == nil {
+			for _, k := range keys {
+				if k.LAN {
+					s.LANKeyID, s.LANKeyMask = k.ID, k.Masked
+					break
+				}
+			}
+		}
 	}
 	s.WSL = runtime.GOOS == "windows"
 	s.Web = webPage.Load()

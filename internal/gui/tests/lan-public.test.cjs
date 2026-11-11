@@ -95,6 +95,20 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await menu.getByText("http://203.236.50.70:3425/v1").click();
       return text;
     };
+    await t.test("the password other computers send", async () => {
+      const { page, errors } = await open("en", { lanKeyId: "lan-key", lanKeyMask: "sk-owl-…wxyz" });
+      const pwd = page.locator("#lanList .row.pref").filter({ hasText: "Other computers send it as the gateway key" });
+      await pwd.waitFor();
+      assert.equal((await pwd.locator("code").textContent()).trim(), "sk-owl-…wxyz", "the sharing key is shown masked");
+      assert.equal(await pwd.getByRole("button", { name: "Copy password" }).count(), 1);
+      await pwd.getByRole("button", { name: "New password" }).click();
+      const ask = page.locator("#lanList .lan-new-ask");
+      await ask.waitFor();
+      assert((await ask.textContent()).includes("they stop working until they are given the new one"), "a new password says it breaks the other computers");
+      await ask.getByRole("button", { name: "Cancel" }).click();
+      assert.equal(await page.locator("#lanList .lan-new-ask").count(), 0, "Cancel leaves the password as it is");
+      assert.deepEqual(errors, []);
+    });
     for (const lang of ["en", "zh"]) {
       const w = words[lang];
       await t.test(lang, async () => {

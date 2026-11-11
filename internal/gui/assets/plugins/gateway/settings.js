@@ -269,7 +269,7 @@ function renderAllow(s) {
 
 // renderLAN: the gateway shared on the local network, for agents on other
 // machines. Gateway keys and connection examples live together in Gateway.
-let lanSelectedURL = "", lanProtocol = "openai";
+let lanSelectedURL = "", lanProtocol = "openai", lanNewAsk = false;
 // the address picked under Share on local network is kept like Connect's
 let lanWant = "";
 try { lanWant = localStorage.getItem("owl.lanAddress") || ""; } catch {}
@@ -384,6 +384,39 @@ function renderLAN(s) {
     const addressRow = row(t("Address"), "", "", controls);
     addressRow.classList.add("lan-address-row");
     update();
+  }
+  // the password others must send: the sharing key, shown masked and
+  // copied whole, and one button to replace it (WJaunita45604 on X: the
+  // address was shown with no password, so a shared owl looked open)
+  if (s.lanKeyId) {
+    const cp = copyBtn("", t("Password"));
+    cp.setAttribute("aria-label", t("Copy password"));
+    cp.onclick = async () => {
+      try {
+        const out = await api("caller-keys/copy-key", { key: s.lanKeyId });
+        await copy(out.secret, t("Password"), cp);
+      } catch (e) { status(t(e.message), "err"); }
+    };
+    const tools = [cp];
+    if (!lanNewAsk) {
+      const nw = el("button", "text", t("New password"));
+      nw.onclick = () => { lanNewAsk = true; renderSettings(); };
+      tools.push(nw);
+    }
+    row(t("Password"), t("Other computers send it as the gateway key: Authorization: Bearer <password> or x-api-key"), s.lanKeyMask || "", ...tools);
+    if (lanNewAsk) {
+      const ask = el("div", "row pref lan-new-ask");
+      const who = el("div", "who");
+      who.append(el("div", "sub", t("A new password replaces the one the other computers use: they stop working until they are given the new one")));
+      const val = el("div", "val");
+      const no = el("button", "text", t("Cancel"));
+      no.onclick = () => { lanNewAsk = false; renderSettings(); };
+      const yes = el("button", "text", t("New password"));
+      yes.onclick = () => { lanNewAsk = false; set({ on: true, newKey: true }).then(() => status(t("New password made: give it to the other computers"), "ok", 2500)); };
+      val.append(no, yes);
+      ask.append(who, val);
+      box.append(ask);
+    }
   }
   if (sub) row(t("In a container"), sub, "").classList.add("lan-container");
 }
