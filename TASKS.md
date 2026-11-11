@@ -348,3 +348,5 @@
 - [x] 2026-11-11 08:4x：backport 5068e46fb（ZCode 插件 min 0.1.58，1310 只休息模型）
 - [x] cde667056 的 GUI 绿（用量拖拽）；Test 待确认
 - [x] 2026-11-11 09:1x：backport add47afd8（用量卡片 ⋯ 菜单）
+- [x] 2026-11-11 09:3x：TOML 比值阈值 24→32（两次 macOS CI 擦边 24.6/24.3）
+- [ ] TestGrokPluginDraws 在 macOS CI 单次红（plugin answered no response），本机绿；再红需查插件 host 时序
