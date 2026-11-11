@@ -1310,6 +1310,13 @@ body.masked :hover > .acct-eye, body.masked .pq-card:hover .acct-eye, body.maske
 .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; flex: none; }
 .stats.empty { display: block; background: var(--card); }
 .stats .none { padding: 18px 16px; color: var(--muted); text-align: center; line-height: 1.5; }
+/* a page with no calls says what to do (the usage page's #stats): the
+   period's line, why, and the two ways to fill it */
+#stats .none { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 52px 20px 56px; }
+#stats .none b { color: var(--fg); font-weight: 600; font-size: 14px; }
+#stats .none .why { max-width: 420px; font-size: 12.5px; }
+#stats .none-acts { display: flex; gap: 8px; margin-top: 10px; }
+#stats .none-acts .text { padding: 5px 12px; border-radius: 7px; }
 .kpi { background: var(--card); padding: 12px 14px 11px; display: flex; flex-direction: column; min-width: 0; }
 .kpi b { font-size: 20px; font-weight: 600; letter-spacing: -.01em; font-variant-numeric: tabular-nums; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .kpi b .u { font-style: normal; font-size: 13px; font-weight: 500; letter-spacing: 0; color: var(--muted); margin: 0 3px 0 2px; }

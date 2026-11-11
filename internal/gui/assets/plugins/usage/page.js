@@ -662,7 +662,19 @@ function renderUsage() {
   if (empty) {
     stats.classList.add("empty");
     const none = noCallsIn(period);
-    stats.append(el("div", "none", t(none) + " " + t("Point an agent at a catalog model and use it; every call through the gateway is counted here.")));
+    // a page with nothing on it still says what to do: the period's line,
+    // why it is empty, and the two ways to fill it. Rebuilt of parts, the
+    // words stay whole in a language that orders them otherwise.
+    const box = el("div", "none");
+    box.append(el("b", "", t(none)), el("span", "why", t("Point an agent at a catalog model and use it; every call through the gateway is counted here.")));
+    const acts = el("div", "none-acts");
+    const connect = el("button", "text primary", t("Connect an agent"));
+    connect.onclick = () => show("agents");
+    const add = el("button", "text action", t("Add a provider"));
+    add.onclick = () => show("providers");
+    acts.append(connect, add);
+    box.append(acts);
+    stats.append(box);
     $("#usageNote").textContent = "";
     $("#usageClear").hidden = true;
     return;

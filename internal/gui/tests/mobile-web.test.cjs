@@ -449,6 +449,20 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
                 for (const p of [current, original]) await p.evaluate(() => document.querySelector(".side-find-row")?.remove());
                 await current.waitForTimeout(350);
               }
+              // Usage with no calls now says why and gives the two ways to
+              // fill it: until BASE_REF has that, both pictures show the one
+              // line it had.
+              if (view === "usage" && !baselineFile("plugins/usage/page.js").toString().includes("none-acts")) {
+                const html = await original.evaluate(() => document.querySelector("#stats")?.innerHTML || "");
+                await current.evaluate((h) => {
+                  const s = document.querySelector("#stats");
+                  if (!s) return;
+                  s.innerHTML = h;
+                  const n = s.querySelector(".none");
+                  if (n) n.setAttribute("style", "display:block;padding:18px 16px;color:var(--muted);text-align:center;line-height:1.5");
+                }, html);
+                await current.waitForTimeout(350);
+              }
               const before = PNG.sync.read(await still(original));
               const after = PNG.sync.read(await still(current));
               const sameSize = before.width === after.width && before.height === after.height;
