@@ -24,8 +24,8 @@ func TestMissingKeyIsErrNeedsKey(t *testing.T) {
 		if err != nil {
 			t.Fatalf("%s: %v", pr.ID, err)
 		}
-		if pr.NoKey || pr.Endpoint != "" || p.IsVertex() {
-			continue // a local server takes no key; a resource's address is asked first
+		if pr.NoKey || pr.Kind == KindLocal || pr.Endpoint != "" || p.IsVertex() {
+			continue // a local server takes no key at its own address (keyOptional); a resource's address is asked first
 		}
 		_, err = Add(p)
 		if err == nil {
