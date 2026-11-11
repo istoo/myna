@@ -48,7 +48,7 @@ async function open(browser, lang, gateway, view) {
   await page.route("**/*", serve(lang, gateway));
   await page.goto("http://owl.test/" + (view ? "?view=" + view : ""));
   await page.waitForSelector("#nav", { state: "visible" });
-  await page.waitForFunction(() => document.querySelector("#nav .nav-more") || document.querySelectorAll("#nav > button[data-view]").length);
+  await page.waitForFunction(() => document.querySelector("#nav .tb-more") || document.querySelectorAll("#nav > button[data-view]").length);
   await page.waitForTimeout(300);
   return page;
 }
@@ -72,7 +72,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         t.after(() => browser.close());
         const page = await open(browser, lang, gateway, gateway ? "providers" : "agents");
         const all = await pages(page);
-        assert.ok(all.includes("library"), "the Library is a page here");
+        // owl's gateway mode leaves out the Library with Agents (app.js
+        // gatewayModeSub); upstream keeps it since f285426ac, not ported
+        assert.equal(all.includes("library"), !gateway, "the Library is a page here unless gateway mode leaves it out");
         assert.equal(all.includes("agents"), !gateway, "Agents shows unless gateway mode leaves it out");
         const bar = await tabs(page);
         assert.equal(bar.length, 5, "five tabs: " + JSON.stringify(bar.map((b) => b.view)));
@@ -95,13 +97,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const rest = all.filter((v) => !onBar.includes(v));
         assert.ok(rest.length >= 1);
         for (const v of rest) {
-          await page.locator("#nav .nav-more").tap();
+          await page.locator("#nav .tb-more").tap();
           const menu = page.locator(".nav-more-menu");
           await menu.waitFor({ state: "visible" });
           const items = await menu.locator(".pm-item").count();
           assert.equal(items, rest.length, "More lists every page the bar hasn't");
           assert.equal(await menu.locator(".pm-item .nav-ic").count(), rest.length, "each with its tab's icon");
-          const mb = await menu.boundingBox(), more = await page.locator("#nav .nav-more").boundingBox();
+          const mb = await menu.boundingBox(), more = await page.locator("#nav .tb-more").boundingBox();
           assert.ok(mb.y + mb.height <= more.y + 1, "the menu opens above the bar");
           assert.ok(mb.x >= 0 && mb.x + mb.width <= vw + 0.5, "inside the window");
           await menu.locator(".pm-item").nth(rest.indexOf(v)).tap();
@@ -150,7 +152,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     await page.goto("http://owl.test/?view=providers");
     await page.waitForSelector("#view-providers", { state: "visible" });
     await page.waitForTimeout(300);
-    assert.equal(await page.locator("#nav .nav-more").count(), 0);
+    assert.equal(await page.locator("#nav .tb-more").count(), 0);
     assert.equal(await page.locator("#nav .tb-over").count(), 0);
     const nav = await page.locator("#nav").boundingBox();
     assert.ok(nav.y < 200, "the tabs are at the top: " + JSON.stringify(nav));

@@ -11,6 +11,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { wheelRest } = require("./fixtures/wheel-rest.cjs");
+const { footTop } = require("./reader.cjs");
 const { chromium, webkit } = require("playwright");
 
 const assets = path.resolve(__dirname, "../assets");
@@ -91,8 +92,32 @@ const scrolled = (page) => page.evaluate(() => [window.scrollY, ...[...document.
 const sideways = (page) => page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
 // a reader wheels down to it, and it is the button under the pointer
 async function reach(page, go) {
-  await page.mouse.move(200, 300);
-  for (let i = 0; i < 30 && !(await go.evaluate((e) => e.getBoundingClientRect().bottom < innerHeight - 80)); i++) await page.mouse.wheel(0, 200);
+  // over the edge of the box that scrolls the button (the page, or an
+  // editor's body), inside it: at 420 in ja the Routing steps box, which
+  // scrolls on its own and keeps its wheel (overscroll contain), sat under
+  // (200, 300) and the page never moved
+  const at = await go.evaluate((e) => {
+    let p = e.parentElement;
+    while (p && !(/(auto|scroll)/.test(getComputedStyle(p).overflowY) && p.scrollHeight > p.clientHeight)) p = p.parentElement;
+    const r = (p || document.documentElement).getBoundingClientRect();
+    return { x: r.left + 4, y: r.top + Math.min(r.height, innerHeight - r.top) / 2 };
+  });
+  await page.mouse.move(at.x, at.y);
+  // clear of the foot: on a phone the tab bar covers the page's end. A wheel
+  // step moves WebKit's view less than Chromium's (15px, not 200, at 420 in
+  // ja), so it wheels on while the view still moves, not a fixed 30 times
+  // the box that scrolls it: the page, or an editor's body
+  const top = () => go.evaluate((e) => {
+    let p = e.parentElement;
+    while (p && !(/(auto|scroll)/.test(getComputedStyle(p).overflowY) && p.scrollHeight > p.clientHeight)) p = p.parentElement;
+    return (p || document.scrollingElement).scrollTop;
+  });
+  for (let i = 0, still = 0; i < 200 && still < 5 && !(await go.evaluate((e, foot) => e.getBoundingClientRect().bottom < foot - 8, await footTop(page))); i++) {
+    const was = await top();
+    await page.mouse.wheel(0, 200);
+    await page.waitForTimeout(20);
+    still = (await top()) === was ? still + 1 : 0;
+  }
   // the coast after the last wheel ends on its own; the button is under the
   // pointer only once the view has stopped (a loaded Linux runner, #13)
   await wheelRest(page, "#view-routing");

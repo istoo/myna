@@ -93,6 +93,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             };
             tick();
           }));
+          // fitTop can mark the header crowded a little after those three
+          // frames (the Update pill drawn late): the page is read once nothing
+          // overflows, or after 3s, when what still overflows is the red
+          await page.waitForFunction(() => document.scrollingElement.scrollWidth <= document.scrollingElement.clientWidth, null, { timeout: 3000 }).catch(() => {});
           const over = await page.evaluate(() => document.scrollingElement.scrollWidth - document.scrollingElement.clientWidth);
           assert.ok(over <= 0, "no sideways scroll at " + width + ": " + over);
           const box = await row.boundingBox(), sbox = await row.locator(".sub").boundingBox();

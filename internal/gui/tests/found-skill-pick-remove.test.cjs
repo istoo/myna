@@ -15,7 +15,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
-const { navTo } = require("./reader.cjs");
+const { navTo, footTop } = require("./reader.cjs");
 const { strings } = require("./strings.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
@@ -87,10 +87,11 @@ const reach = async (page, loc) => {
   for (let i = 0; i < 20; i++) {
     const b = await loc.boundingBox();
     if (b && await loc.evaluate((e, [x, y]) => e.contains(document.elementFromPoint(x, y)), [b.x + b.width / 2, b.y + b.height / 2])) return;
-    // inside the window: a row below the fold puts b.y - 40 past its foot,
-    // where a wheel scrolls nothing
-    const vh = page.viewportSize().height;
-    await page.mouse.move(b.x + b.width / 2, Math.min(Math.max(b.y - 40, 10), vh - 30));
+    // inside the page: a row below the fold puts b.y - 40 past its foot,
+    // where a wheel scrolls nothing, and on a phone the tab bar covers the
+    // page's last 50px (footTop)
+    const foot = await footTop(page);
+    await page.mouse.move(b.x + b.width / 2, Math.min(Math.max(b.y - 40, 10), foot - 30));
     await page.mouse.wheel(0, 120);
     await page.waitForTimeout(80);
   }

@@ -95,19 +95,20 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
             assert.ok(got.save.h >= 28 && got.save.font >= 13, `${at}: Save is a push button's size (${got.save.h}px, ${got.save.font}px)`);
             assert.ok(got.cancel.h >= 28 && got.cancel.font >= 13, `${at}: Cancel matches it (${got.cancel.h}px, ${got.cancel.font}px)`);
             // scrolled to the foot, the bar is where it always was: after
-            // the editor's last row
+            // the editor's last row. The page's foot is the window's, or on a
+            // phone (owl web) the tab bar's top, under which the page ends
             {
               const b = await ed.boundingBox();
               const step = Math.max(40, Math.round((b.y + b.height - 700 + 40) / 10));
               // WebKit can put a wheel back as one it never heard of: wheel
               // again, the same way, as the reader would, till the foot shows
               for (let i = 0; i < 60; i++) {
-                if (await page.evaluate(() => document.querySelector(".rt-gedit").getBoundingClientRect().bottom <= innerHeight)) break;
+                if (await page.evaluate(() => document.querySelector(".rt-gedit").getBoundingClientRect().bottom <= Math.min(innerHeight, (() => { const n = document.querySelector(".top #nav"); return n && getComputedStyle(n).position === "fixed" ? n.getBoundingClientRect().top : innerHeight; })()))) break;
                 await page.mouse.wheel(0, step);
                 await page.waitForTimeout(30);
               }
             }
-            await page.waitForFunction(() => document.querySelector(".rt-gedit").getBoundingClientRect().bottom <= innerHeight, null, { timeout: 15000 });
+            await page.waitForFunction(() => document.querySelector(".rt-gedit").getBoundingClientRect().bottom <= Math.min(innerHeight, (() => { const n = document.querySelector(".top #nav"); return n && getComputedStyle(n).position === "fixed" ? n.getBoundingClientRect().top : innerHeight; })()), null, { timeout: 15000 });
             const foot = await page.evaluate(() => {
               const ed = document.querySelector(".rt-gedit"), bar = ed.querySelector(":scope > .bar");
               const last = bar.previousElementSibling;

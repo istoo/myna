@@ -61,6 +61,15 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       if (r.top < l.top || r.bottom > l.bottom) throw new Error(`${id}'s levels can't be scrolled into sight`);
       return e.scrollTop;
     }, id);
+    // the list itself wholly in the window first, its editor's body scrolled
+    // to it: with the Mac's fonts a row is taller and the list sat low enough
+    // that the middle row's box was under the window's foot, so the untick's
+    // own scroll-into-view moved the editor, not the app
+    await list.evaluate((e) => {
+      const body = e.closest(".ebody");
+      if (body) body.scrollTop += e.getBoundingClientRect().top - body.getBoundingClientRect().top - 8;
+    });
+    await page.waitForFunction(() => { const l = document.querySelector(".mnames:not([hidden])").getBoundingClientRect(); return l.top >= 0 && l.bottom <= innerHeight; });
     let before = await into("model-5");
     assert(before > 0);
     const fifth = page.locator(".mname", { has: page.locator("code", { hasText: "model-5" }) });

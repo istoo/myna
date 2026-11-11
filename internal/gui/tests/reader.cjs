@@ -228,6 +228,17 @@ async function pickItem(page, locator) {
   throw new Error("the picker's item never settled: " + last);
 }
 
+// footTop: where what covers the page's end begins, the window's foot or,
+// on a phone (owl web), the tab bar fixed over it (phonetabs.js): a click
+// meant for the page lands above it
+function footTop(page) {
+  return page.evaluate(() => {
+    const nav = document.querySelector(".top #nav");
+    const bar = nav && getComputedStyle(nav).position === "fixed" ? nav.getBoundingClientRect().top : innerHeight;
+    return Math.min(innerHeight, bar, document.querySelector("footer.foot")?.getBoundingClientRect().top ?? innerHeight);
+  });
+}
+
 // navTo opens a page by its tab: at a narrow width the tab is under More,
 // which reaches it. The open page's own tab stays in the row.
 async function navTo(page, view) {
@@ -236,7 +247,8 @@ async function navTo(page, view) {
   // the fit runs a frame after a resize, and a page redraw can close More's
   // menu under the click: wait for the row, and open the menu again if so.
   // A phone's tab bar has its own More (phonetabs.js); the header's is #navMore.
-  const more = page.locator("#nav .tb-more").or(page.locator("#navMore"));
+  // Both sit in #nav on a phone, the header's hidden: the one shown is clicked.
+  const more = page.locator("#nav .tb-more:visible, #navMore:visible");
   await more.waitFor({ state: "visible", timeout: 1000 }).catch(() => {});
   if (await b.isVisible()) return b.click();
   const name = (await b.textContent()).trim();
@@ -261,4 +273,4 @@ async function openPage(page, view) {
   await page.locator(`#view-${view}`).waitFor();
 }
 
-module.exports = { openPage, settled, inView, reach, wheelTo, click, openPart, watchSettingsReads, settingsDrawn, agentRow, openAgentSettings, pickItem, navTo };
+module.exports = { footTop, openPage, settled, inView, reach, wheelTo, click, openPart, watchSettingsReads, settingsDrawn, agentRow, openAgentSettings, pickItem, navTo };
