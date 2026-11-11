@@ -344,3 +344,4 @@
 - [x] b4c6aff83 的 Test 与 GUI 全绿（手机 tab bar）
 - [x] 2026-11-11 07:3x：backport d374168d0（侧栏 Settings 按钮不随列表上移）
 - [x] 6ee8cf0f2 的 Test 与 GUI 全绿（菜单栏图标位置）
+- [x] 2026-11-11 08:0x：backport 0a44c1c84（用量卡片拖拽只动自己、显示落点）
