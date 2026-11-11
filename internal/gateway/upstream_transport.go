@@ -34,11 +34,66 @@ var upstreamTLS *tls.Config
 // Image generation timeout gives it (drawWithin), up to 60 minutes.
 func upstreamTransport() http.RoundTripper {
 	return drawsApart{
-		any:     codexSocket{replayable{netproxy.Dispatch(vendorTransport(upstreamHeaderWait))}},
+		any: codexSocket{replayable{netproxy.Dispatch(vendorTransport(upstreamHeaderWait))}},
+		large: newUploadLanes(uploadLaneCount, func() http.RoundTripper {
+			return codexSocket{replayable{netproxy.Dispatch(vendorTransport(upstreamHeaderWait))}}
+		}),
 		draws:   replayable{netproxy.Dispatch(vendorTransport(0))},
 		uploads: codexSocket{replayable{netproxy.Dispatch(uploadTransport(upstreamHeaderWait))}},
 		slow:    new(atomic.Int64),
 	}
+}
+
+// uploadLaneCount is how many large bodies to one vendor go out at once, each
+// on an HTTP/2 connection of its own (uploadLanes).
+// debt: a fixed count; past it two large bodies share a lane again. Make
+// it grow with the requests in flight if users run more agents than this.
+const uploadLaneCount = 8
+
+// uploadLanes sends each request through the first of its transports no other
+// request is going through, else the least busy: each transport keeps
+// connections of its own, so a large body is not queued behind another's
+// bytes in one socket. Every request to a vendor shared one HTTP/2
+// connection, and while one agent's turn of a few MB was going up on a
+// ~1MB/s uplink, a small request to the same vendor took 2.2-4.1s
+// instead of 0.8-1.2s, and two large turns sent together both ended at
+// ~20s. A transport, with its connections, is kept for the next request
+// that finds it free, so a turn alone goes on the connection the last
+// one warmed.
+type uploadLanes struct {
+	rts  []http.RoundTripper
+	busy []atomic.Int32
+}
+
+func newUploadLanes(n int, one func() http.RoundTripper) *uploadLanes {
+	l := &uploadLanes{rts: make([]http.RoundTripper, n), busy: make([]atomic.Int32, n)}
+	for i := range l.rts {
+		l.rts[i] = one()
+	}
+	return l
+}
+
+func (l *uploadLanes) RoundTrip(r *http.Request) (*http.Response, error) {
+	i := l.take()
+	defer l.busy[i].Add(-1)
+	return l.rts[i].RoundTrip(r)
+}
+
+// take is the lane r goes on, counted busy until its RoundTrip returns.
+func (l *uploadLanes) take() int {
+	for i := range l.busy {
+		if l.busy[i].CompareAndSwap(0, 1) {
+			return i
+		}
+	}
+	least := 0
+	for i := range l.busy {
+		if l.busy[i].Load() < l.busy[least].Load() {
+			least = i
+		}
+	}
+	l.busy[least].Add(1)
+	return least
 }
 
 // upstreamHeaderWait is how long a vendor is given to begin answering a
@@ -71,7 +126,7 @@ func vendorTransport(wait time.Duration) *http.Transport {
 		MaxIdleConnsPerHost:   8,
 		IdleConnTimeout:       90 * time.Second,
 		ForceAttemptHTTP2:     true,
-		TLSClientConfig:       upstreamTLS,
+		TLSClientConfig:       upstreamTLS.Clone(), // its own: a transport adds h2 to it on first use
 		// a silent HTTP/2 connection is pinged and dropped (#2843)
 		HTTP2: netproxy.HTTP2Health(),
 	}
@@ -97,9 +152,9 @@ func uploading(r *http.Request) bool {
 		(r.ContentLength < 0 || r.ContentLength >= uploadBytes)
 }
 
-// drawsApart sends a drawing's request (drawWaitOf) through draws, every
-// other through any, but for a large body (uploading) on an uplink found
-// slow: through uploads.
+// drawsApart sends a drawing's request (drawWaitOf) through draws, a
+// large body (uploading) through large, or on an uplink found slow
+// through uploads, and every other through any.
 //
 // The ping stays on a large body by default, as a silent connection
 // (#2843) takes a body that fits its send buffer and answers nothing for
@@ -110,6 +165,9 @@ func uploading(r *http.Request) bool {
 // costs nothing more: the new one is dialled either way.
 type drawsApart struct {
 	any, draws, uploads http.RoundTripper
+	// large is what a large body goes through, on a connection apart from
+	// the small requests' and from the other large bodies' (uploadLanes)
+	large http.RoundTripper
 	// slow is when the uplink was last found slow, in Unix nanoseconds.
 	slow *atomic.Int64
 }
@@ -124,7 +182,11 @@ func (t drawsApart) RoundTrip(r *http.Request) (*http.Response, error) {
 	if time.Since(time.Unix(0, t.slow.Load())) < slowFor {
 		return t.uploads.RoundTrip(r)
 	}
-	res, err := t.any.RoundTrip(r)
+	large := t.large
+	if large == nil {
+		large = t.any
+	}
+	res, err := large.RoundTrip(r)
 	if err == nil || !lostPing(err) || r.GetBody == nil || r.Context().Err() != nil {
 		return res, err
 	}
