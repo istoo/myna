@@ -429,8 +429,11 @@ body.window.mac .side-top { height: calc(50px / var(--zoom, 1)); padding: calc(2
    they are as Settings' tabs open over the button and the foot grows up
    (jen_celeus on X), and a foot too short for them scrolls from its end.
    The order is the reading order, top down: tabs, Settings, the gateway */
-.side-foot { flex: none; max-height: 55%; overflow-y: auto; display: flex; flex-direction: column-reverse; gap: 1px; padding: 8px 10px 10px; border-top: .5px solid var(--line-2); }
-/* a foot too short for them scrolls, its rows kept whole */
+.side-foot { flex: 0 1 auto; min-height: 0; max-height: 55%; overflow-y: auto; display: flex; flex-direction: column-reverse; gap: 1px; padding: 8px 10px 10px; border-top: .5px solid var(--line-2); }
+/* a foot too short for them scrolls, its rows kept whole; the foot itself
+   gives way when the sidebar has less room than its max-height leaves (a
+   short window with Search's row and Settings' tabs open), so it is the
+   foot that scrolls, not the sidebar that runs past the window's end */
 .side-foot > * { flex: none; }
 .side-foot > .side-gw { order: 0; }
 .side-foot > #prefs { order: 1; }

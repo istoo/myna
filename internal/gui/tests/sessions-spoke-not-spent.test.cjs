@@ -81,10 +81,10 @@ function serve(lang) {
 // three sessions: the KPI label, the note beside the list (the plural picks
 // itself: German "3 Sitzungen", the others' plurals as in sessions-in-range)
 const want = {
-  en: { kpi: /^3\nSESSIONS/, note: /· 3 sessions ·/ },
+  en: { kpi: /^3\nsessions/, note: /· 3 sessions ·/ },
   zh: { kpi: /^3\n会话数/, note: /· 3 个会话 ·/ },
   ja: { kpi: /^3\nセッション/, note: /· 3 件のセッション ·/ },
-  de: { kpi: /^3\nSITZUNGEN/, note: /· 3 Sitzungen ·/ },
+  de: { kpi: /^3\nSitzungen/, note: /· 3 Sitzungen ·/ },
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
