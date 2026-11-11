@@ -56,7 +56,7 @@ for (const engine of process.env.BROWSER ? [process.env.BROWSER] : ["chromium", 
         const modal = page.locator("#modal");
         const kinds = [
           ["the provider editor", async () => { await page.locator('#providers .row.provider[data-id="relay"]').click(); }],
-          ["a new provider's editor, from the add sheet", async () => { await page.locator("#addProvider").click(); await page.locator("#addSheet .row-head .custom").click(); }],
+          ["a new provider's editor, from the add sheet", async () => { await page.locator("#addProvider").click(); await page.locator("#addSheet .custom-foot .custom").click(); }],
         ];
         for (const [name, open] of kinds) {
           await open();

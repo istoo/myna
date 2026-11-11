@@ -10,7 +10,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { test } = require("node:test");
 const { chromium, webkit } = require("playwright");
-const { watchSettingsReads, settingsDrawn } = require("./reader.cjs");
+const { watchSettingsReads, settingsDrawn, footTop } = require("./reader.cjs");
 
 const assets = path.resolve(__dirname, "../assets");
 const words = {
@@ -68,7 +68,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.mouse.move(width / 2, 450);
       for (let i = 0; i < 40; i++) {
         const box = await row.boundingBox();
-        if (box && box.y >= 0 && box.y + box.height <= 900) break;
+        if (box && box.y >= 0 && box.y + box.height <= await footTop(page) - 4) break;
         await page.mouse.wheel(0, 120);
         await page.waitForTimeout(50);
       }
