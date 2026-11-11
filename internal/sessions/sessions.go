@@ -498,6 +498,15 @@ func stat(f *file) bool {
 // ~21k files one after another was most of that walk (#3493): each folder
 // is read in one listing where the system has one (dirent.Stats), and the
 // rest are stat()ed on a few goroutines.
+// statGood is a file's size and time as statFiles last read them; statMemo
+// holds them by path for a stat that fails and says nothing of the file.
+type statGood struct {
+	size int64
+	mod  time.Time
+}
+
+var statMemo sync.Map
+
 func statFiles(files []file, follow bool) []file {
 	dirs := map[string]dirent.Listing{}
 	var order []string
@@ -530,8 +539,23 @@ func statFiles(files []file, follow bool) []file {
 				return
 			}
 		}
-		if fi, err := statOne(f.path, follow); err == nil && fi.Mode().IsRegular() {
+		fi, err := statOne(f.path, follow)
+		switch {
+		case err == nil && fi.Mode().IsRegular():
 			f.size, f.mod, ok[i] = fi.Size(), fi.ModTime(), true
+			if last, seen := statMemo.Load(f.path); !seen || last != (statGood{f.size, f.mod}) {
+				statMemo.Store(f.path, statGood{f.size, f.mod})
+			}
+		case err != nil && !errors.Is(err, fs.ErrNotExist):
+			// A stat that failed for any reason but the file's absence says
+			// nothing about it (a busy disk, a share that blinked): keep what
+			// it last was, or the session vanishes until the next good poll.
+			if last, seen := statMemo.Load(f.path); seen {
+				g := last.(statGood)
+				f.size, f.mod, ok[i] = g.size, g.mod, true
+			}
+		default:
+			statMemo.Delete(f.path)
 		}
 	})
 	for i, l := range listed {

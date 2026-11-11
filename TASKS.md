@@ -352,3 +352,8 @@
 - [ ] TestGrokPluginDraws 在 macOS CI 单次红（plugin answered no response），本机绿；再红需查插件 host 时序
 - [x] 2026-11-11 10:2x：抓帖 497 条（新增 GPUStack、Antigravity 假 429、WorkBuddy 合并已在 ups 修复）；backport 662546e78（缓存命中率不再四舍五入成 100%）→ 本地提交
 - [ ] 下一批：3ebb1ba2c（Antigravity 假 429：每词两个零宽空格）、68d1fda92（GPUStack）、9522288b1（WorkBuddy 国内国际版合并）
+- [x] 2026-11-11 10:4x：v0.2.1 已发布（f97b79647；11 个资产，Latest=v0.2.1；Test 与 GUI 均绿；GUI 首次红为 click-scroll 抖动，已记录 issue #13）
+- [x] 2026-11-11 11:0x：backport 9522288b1（WorkBuddy 双版合并）→ bef9c7088；68d1fda92（GPUStack）→ 2d5cdb79d（本机 chromium+webkit 各 11/11 绿）
+- [x] 2d5cdb79d 的 TestMissingKeyIsErrNeedsKey 红：本地预设（GPUStack）可无 key，测试跳过 KindLocal
+- [x] 2026-11-11 11:2x：backport e12244aca + 58e541faa（会话目录/文件读失败保留上次）与 f2039c13f（usage 日志 stat 失败保留上次）、296a9292c（Claude 用量首次失败按等待重试）；provider/sessions/usage 全包绿
+- [ ] f2039c13f 上游无测试，本机未做注入验证
