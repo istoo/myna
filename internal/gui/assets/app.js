@@ -15103,6 +15103,7 @@ function renderQuotas(lazy) {
     // in the card's head, beside its name, of the keys in sight (the
     // folded ones are the foot's button's)
     if (several) head.append(usageMore(folded.size ? subs.filter((q) => !folded.has(q)) : subs, "text quota-more"));
+    head.append(quotaCardMore(card, subs)); // its menu, where it is seen (page.js)
     if (keys && (folded.size || usageKeysAll.has(first.provider))) card.append(keysMore(first.provider, folded.size));
     if (accts && (folded.size || usageAcctsAll.has(first.provider))) card.append(acctsMore(first.provider, folded.size));
     subscriptions.append(card);
