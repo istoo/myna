@@ -357,3 +357,19 @@
 - [x] 2d5cdb79d 的 TestMissingKeyIsErrNeedsKey 红：本地预设（GPUStack）可无 key，测试跳过 KindLocal
 - [x] 2026-11-11 11:2x：backport e12244aca + 58e541faa（会话目录/文件读失败保留上次）与 f2039c13f（usage 日志 stat 失败保留上次）、296a9292c（Claude 用量首次失败按等待重试）；provider/sessions/usage 全包绿
 - [ ] f2039c13f 上游无测试，本机未做注入验证
+
+## 界面改版（2026-11-10 起，规格见 docs/owl-design.md）
+
+- [x] 第 1 阶段：侧栏搜索入口（⌘K）、⌘1–9 切页；新测试 `side-find.test.cjs`。
+      新配色试过一版被用户否决（"比原版难看"），已撤回，配色保持原版。
+- [ ] 第 2 阶段：页头与空状态统一。
+      - [x] 用量页空状态：时段一句话 + 原因 + 两个主操作；新测试 `usage-empty-acts.test.cjs`（旧资源 0 个按钮、新资源 2 个）。
+      - [x] 侧栏键盘操作：↑/↓、Home/End、首字母跳转、Enter 打开。
+      - [ ] 设置页收窄居中（预览已出）、Agent 页状态行（预览已出），待定。
+- [x] 打磨（2026-11-11，用户在真界面并排对比图上全选）：侧栏图标一套（20 网格 1.6 笔画）、供应商行小开关+悬停、小节名不再全大写、页内搜索 28px、窗口最窄时用量行花费不被挤出；新测试 `nav-polish.test.cjs`。
+- [x] 全量 GUI 跑出 account-arrange（WebKit）不稳定：拖拽边缘滚动的"离开过边缘"只在动画帧里判断，忙时永不滚动；主干同负载 1/4 红。已在 dragScroll 修根因（每次 pointermove 都判断），测试注入帧延迟后修前必红。
+- [ ] `usage-drag.test.cjs` 在本机 macOS 上 4/4 红（origin/main 4bbb177fc 干净副本同样 4/4），CI（Linux）绿：松手后其余卡片比拖拽时显示的位置偏 18px/98px（"codex stays where it was shown: …403 vs …385"）。疑为落点预测在 macOS 字体高度下不准，用户在 Mac 上会看到卡片落地后跳一下；待查 97916bf04 的 layout 预测。
+- [ ] `claude-tui-setting.test.cjs` 的 420 宽度在本机红（"saved once"，origin/main 4bbb177fc 干净副本 chromium 同样 2/4 语言红），CI 绿；待查窄宽度下开关是否保存了两次。
+- [ ] `TestGatewayFixQuitsOnlyAOwl` 在 GUI 全量并跑时红一次（"owl didn't answer"，10s 固定等待），单跑 3/3 绿；与 GUI 改动无关，再红就改成等状态。
+- [ ] 第 3 阶段：Agent 页与供应商页首屏动线。
+- [ ] 第 4 阶段：托盘面板信息密度。

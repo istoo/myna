@@ -463,6 +463,27 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
                 }, html);
                 await current.waitForTimeout(350);
               }
+              // The window's polish (nav-polish.test.cjs): one set of sidebar
+              // icons, a provider's small switch, sections' names in their own
+              // case, 28px finds, a usage row's breakdown that gives way. Until
+              // BASE_REF has it, the current page takes the original's icons
+              // and sizes back, so the rest of the page is still compared.
+              if (!baselineFile("app.css").toString().includes(".provider .pswitch.on i { transform: translateX(12px); }")) {
+                const icons = await original.evaluate(() => [...document.querySelectorAll("#nav button[data-view] > svg.nav-ic, #prefs > svg")].map((s) => [s.closest("button").dataset.view || "", s.outerHTML]));
+                await current.evaluate((icons) => {
+                  for (const [v, html] of icons) {
+                    const s = document.querySelector(v ? `#nav button[data-view="${v}"] > svg.nav-ic` : "#prefs > svg");
+                    if (s) s.outerHTML = html;
+                  }
+                }, icons);
+                await current.addStyleTag({ content: `
+                  .provider .pswitch { width: 32px; height: 19px; } .provider .pswitch i { width: 15px; height: 15px; } .provider .pswitch.on i { transform: translateX(13px); }
+                  .label, .kpi span, .sess-chart-head .label, .sess-card-head .label, .warm-tabs button, .set-searching .set-page::before { font-size: 11px; letter-spacing: .05em; text-transform: uppercase; }
+                  .sess-filter { height: 26px; padding: 0 9px; border-radius: 7px; }
+                  body.side-nav #prefs svg { width: 15px; height: 15px; margin: 0 .5px; }
+                  .row.stat .num { flex: none; } .row.stat .num small { max-width: none; overflow: visible; }` });
+                await current.waitForTimeout(350);
+              }
               const before = PNG.sync.read(await still(original));
               const after = PNG.sync.read(await still(current));
               const sameSize = before.width === after.width && before.height === after.height;

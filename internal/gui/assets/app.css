@@ -477,7 +477,7 @@ body.side-nav #side #nav.hl-on button[data-view]:is(.on, :hover, :active) { back
 body.side-nav #nav.hl-on button[data-view] { transition: color .22s var(--ease); }
 body.side-nav #nav.hl-on button[data-view] .nav-ic { transition: color .22s var(--ease); }
 body.side-nav .nav-ic { display: block; flex: none; color: var(--muted); }
-body.side-nav #prefs svg { flex: none; width: 15px; height: 15px; margin: 0 .5px; color: var(--muted); }
+body.side-nav #prefs svg { flex: none; width: 16px; height: 16px; color: var(--muted); }
 /* graphite, as a Mac sidebar is: no colour of its own, the page open in the
    text's own ink; the accent is kept for what acts */
 body.side-nav :is(#nav button.on .nav-ic, #prefs.on svg) { color: var(--fg); }
@@ -1321,7 +1321,7 @@ body.masked :hover > .acct-eye, body.masked .pq-card:hover .acct-eye, body.maske
 .kpi b { font-size: 20px; font-weight: 600; letter-spacing: -.01em; font-variant-numeric: tabular-nums; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .kpi b .u { font-style: normal; font-size: 13px; font-weight: 500; letter-spacing: 0; color: var(--muted); margin: 0 3px 0 2px; }
 .kpi b .u:last-child { margin-right: 0; }
-.kpi span { font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-top: 3px; }
+.kpi span { font-size: 12px; font-weight: 600; color: var(--muted); margin-top: 3px; }
 .kpi small { font-size: 11px; color: var(--muted); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* the Overview's tokens tile names how they are counted, a pop-up of the two
    ways (#2378): the label's own look, a small chevron after it */
@@ -1345,9 +1345,11 @@ body.masked :hover > .acct-eye, body.masked .pq-card:hover .acct-eye, body.maske
 .row.stat .who .name.faint { color: var(--faint); font-weight: 400; }
 .row.stat .share { flex: 1 1 auto; height: 4px; border-radius: 2px; background: var(--pill); overflow: hidden; margin: 0 6px; }
 .row.stat .share i { display: block; height: 100%; border-radius: 2px; background: var(--accent); opacity: .7; }
-.row.stat .num { display: flex; flex-direction: column; align-items: flex-end; flex: none; min-width: 64px; font-variant-numeric: tabular-nums; }
+/* the window at its narrowest: the breakdown gives way, ending in an
+   ellipsis, so the cost after it is never pushed off the card */
+.row.stat .num { display: flex; flex-direction: column; align-items: flex-end; flex: 0 1 auto; min-width: 64px; font-variant-numeric: tabular-nums; }
 .row.stat .num b { font-weight: 600; }
-.row.stat .num small { font-size: 10.5px; color: var(--muted); white-space: nowrap; }
+.row.stat .num small { max-width: 100%; overflow: hidden; text-overflow: ellipsis; font-size: 10.5px; color: var(--muted); white-space: nowrap; }
 .row.stat .cost { flex: none; min-width: 58px; text-align: right; color: var(--green); font-variant-numeric: tabular-nums; font-size: 12px; }
 /* an Agents row's actions: shown as the row is hovered, as a Finder row's are,
    and always where nothing hovers */
@@ -1731,7 +1733,7 @@ details.cx-part[open] > summary .cx-h { margin-bottom: 2px; }
 /* ---- sessions, a segment of usage ------------------------------------------ */
 .sess-tools { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; flex: none; }
 .sess-tools .grow { flex: 1; }
-.sess-filter { width: 220px; max-width: 100%; height: 26px; padding: 0 9px; border-radius: 7px; border: 1px solid var(--line); background: var(--card); color: var(--fg); font-size: 12px; outline: none; }
+.sess-filter { width: 220px; max-width: 100%; height: 28px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--fg); font-size: 12px; outline: none; }
 .sess-filter:focus { border-color: var(--accent); }
 .sess-tools { flex-wrap: wrap; row-gap: 6px; }
 .sess-pick { flex: none; display: inline-flex; align-items: center; gap: 4px; max-width: 180px; height: 26px; padding: 0 7px 0 9px; border-radius: 7px; border: 1px solid var(--line); background: var(--card); color: var(--muted); font: inherit; font-size: 12px; cursor: default; }
@@ -1752,7 +1754,7 @@ details.cx-part[open] > summary .cx-h { margin-bottom: 2px; }
 .sess-menu .sc-list { display: grid; gap: 1px; }
 .sess-menu .sc-none, .sess-menu .sc-more { padding: 8px 8px 6px; font-size: 11px; color: var(--muted); }
 .sess-chart-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin: -2px 0 8px; }
-.sess-chart-head .label { font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+.sess-chart-head .label { font-size: 12px; font-weight: 600; color: var(--muted); }
 .sess-chart-head .grow { flex: 1; }
 .sess-chart-head .segs { align-self: center; }
 .sess-chart-head .segs .opt { height: 20px; padding: 0 9px; font-size: 11px; }
@@ -1794,7 +1796,7 @@ details.cx-part[open] > summary .cx-h { margin-bottom: 2px; }
 .sess-card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px 10px; min-width: 0; display: flex; flex-direction: column; }
 @container (max-width: 700px) { .sess-grid { grid-template-columns: minmax(0, 1fr); } }
 .sess-card-head { display: flex; align-items: center; gap: 8px; margin: -2px 0 8px; min-height: 20px; }
-.sess-card-head .label { font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+.sess-card-head .label { font-size: 12px; font-weight: 600; color: var(--muted); }
 .sess-card-head .grow { flex: 1; }
 .sess-card-head .segs .opt { height: 20px; padding: 0 9px; font-size: 11px; }
 .sess-card-head .tz { font-size: 10.5px; color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -2229,7 +2231,10 @@ body.panel .foot { min-height: 0; padding: 5px 8px 7px 14px; border-top: 1px sol
 .profiles .chip .x { width: 20px; height: 20px; font-size: 13px; }
 .profiles .chips .hint { line-height: 30px; }
 .row-head { display: flex; align-items: center; height: 26px; }
-.label { font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+/* a section's name, as every 11px label once in small capitals: in its own
+   case at 12px; the 10.5px capitals (table heads, badges, a menu's groups)
+   are metadata and keep theirs */
+.label { font-size: 12px; font-weight: 600; color: var(--muted); }
 /* several accounts: the button opening the ones in brief, in the head */
 .subscription-card .quota-more { margin: -4px -7px -4px auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; font-size: 11px; color: var(--muted); }
 .subscription-card .quota-more:hover { color: var(--fg); }
@@ -2789,7 +2794,11 @@ body.window .ag-sk-icon { width: 22px; height: 22px; border-radius: 6px; }
    chips' 16px line as its height, so it stands as tall as they do (nb5p) */
 .row.model .minfo .mi-img, .rt-gedit .fbrow .minfo .mi-img { padding: 0 4px; height: 16px; box-sizing: border-box; }
 .row.model .minfo .mi-img svg, .rt-gedit .fbrow .minfo .mi-img svg { display: block; }
-.provider .pswitch { margin-left: 8px; }
+/* the small switch the Library, Plugins and allowances use: the name is
+   what a row is read by, not its switch */
+.provider .pswitch { margin-left: 8px; width: 28px; height: 16px; }
+.provider .pswitch i { width: 12px; height: 12px; }
+.provider .pswitch.on i { transform: translateX(12px); }
 .editor .off-note { grid-column: 1 / -1; }
 .uses { display: flex; align-items: center; gap: 4px; margin-left: auto; flex: none; }
 .use {
@@ -3732,7 +3741,7 @@ body.window .ag-sk-icon { width: 22px; height: 22px; border-radius: 6px; }
    in the headings' small capitals, the one picked darker on a soft pill,
    the picked one's card alone under them */
 .warm-tabs { display: flex; align-items: center; gap: 2px; margin-left: -7px; }
-.warm-tabs button { height: 22px; padding: 0 7px; border-radius: 6px; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); transition: color .12s, background-color .12s; }
+.warm-tabs button { height: 22px; padding: 0 7px; border-radius: 6px; font-size: 12px; font-weight: 600; color: var(--muted); transition: color .12s, background-color .12s; }
 .warm-tabs button:hover:not(.on) { color: var(--fg-2); }
 .warm-tabs button.on { color: var(--fg); background: var(--pill); }
 .warm-tabs button[hidden] { display: none; }
@@ -3776,7 +3785,7 @@ body:not(.side-nav) #view-settings .set-head.stuck::before { box-shadow: 0 1px 0
 .set-searching .warm-panes { margin-bottom: 0; }
 .set-searching .warm-panes > [role="tabpanel"] { margin-bottom: 8px; }
 .set-searching .warm-panes > [role="tabpanel"]::before { content: attr(data-agent); display: block; padding: 6px 11px 0; font-size: 11px; font-weight: 600; color: var(--muted); }
-.set-searching .set-page::before { content: attr(data-part); display: block; margin: 4px 2px 6px; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+.set-searching .set-page::before { content: attr(data-part); display: block; margin: 4px 2px 6px; font-size: 12px; font-weight: 600; color: var(--muted); }
 .set-none { margin: 18px 2px; font-size: 13px; color: var(--muted); text-align: center; }
 .set-page > .list:not(:last-child) { margin-bottom: 8px; }
 /* Plugins › Built-in: what the list is over its rows, and a row in use
@@ -4137,6 +4146,12 @@ input.words.search-key, input.words.search-url { flex: 1 1 120px; width: auto; m
 .icon:active { transform: scale(.9); }
 .row.provider { transition: background .16s var(--ease); }
 .row.provider:active { background: var(--card-2); }
+/* the whole row opens its editor: under a pointer it says so, its › a step
+   toward where it goes */
+@media (hover: hover) {
+  .row.provider:hover:not(.selected, :active) { background: var(--pill); }
+  .row.provider:hover:not(.selected) .chev { transform: translateX(2px); }
+}
 .chips .chip { transition: background .16s var(--ease), color .16s var(--ease), transform .14s var(--ease); }
 .chips .chip:active { transform: scale(.96); }
 .status { transition: opacity .2s var(--ease); }
