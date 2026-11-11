@@ -23091,13 +23091,18 @@ if (mode === "window") {
   // More opens on click, Enter, Space or ArrowDown
   $("#navMore").onclick = (e) => { e.stopPropagation(); navMoreOpen?.(view); };
   $("#navMore").onkeydown = (e) => { if (e.key === "ArrowDown") { e.preventDefault(); navMoreOpen?.(view); } };
-  // ⌘K opens the palette (palette.js); "/" the page's search
+  // ⌘K opens the palette (palette.js), its door the sidebar's Search; "/"
+  // the page's search. navkeys.js adds ⌘1–⌘9 and the arrows once it is in.
   let paletteLoad = null;
+  const palette = () => (paletteLoad ||= import("./palette.js")).then((m) => m.openPalette()).catch(statusErr);
+  $("#sideFind").onclick = () => { $("#sideFind").blur(); palette(); };
+  $("#sideFind kbd").textContent = /^Mac/.test(navigator.platform) ? "⌘K" : "Ctrl K";
+  import("./navkeys.js").then((m) => m.start()).catch(statusErr);
   addEventListener("keydown", (e) => {
     const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName || "") || !!document.activeElement?.isContentEditable;
     if ((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === "k") {
       e.preventDefault();
-      (paletteLoad ||= import("./palette.js")).then((m) => m.openPalette()).catch(statusErr);
+      palette();
     } else if (e.key === "/" && !typing && !e.metaKey && !e.ctrlKey && !e.altKey && $("#modal").hidden) {
       const box = $("#view-" + view).querySelector('input[type="search"], .sess-filter, .find');
       if (box) { e.preventDefault(); box.focus(); box.select?.(); }

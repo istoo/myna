@@ -442,6 +442,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
                 });
                 await current.waitForTimeout(350);
               }
+              // The sidebar's Search takes a row of its own above the pages:
+              // until BASE_REF has it, both pictures show the sidebar without
+              // it, the pages back at the height they had.
+              if (!baselineFile("index.html").toString().includes('id="sideFind"')) {
+                for (const p of [current, original]) await p.evaluate(() => document.querySelector(".side-find-row")?.remove());
+                await current.waitForTimeout(350);
+              }
               const before = PNG.sync.read(await still(original));
               const after = PNG.sync.read(await still(current));
               const sameSize = before.width === after.width && before.height === after.height;

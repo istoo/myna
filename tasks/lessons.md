@@ -41,3 +41,9 @@ CI 日志、`ls`、`npm config` 里出现的那个 8 字符小写串，是 npm �
 
 - 夜间全量 4 片：4,887 / 5,332 / 4,617 项，失败 47 / 55 / 83，两个引擎都有，多数是字体与滚动步进差异（300px 滚轮在 Linux WebKit 只滚 15px），本机同文件全绿。
 - 规则：夜间全量永远成功、把失败数写进 job summary、日志留 artifact；push 上的冒烟子集才是门禁。清单见 issue #13。
+
+## GUI 套件按 Makefile 的并发跑，别自己加大
+
+- 2026-11-10：本机用 `--test-concurrency=8` 跑全量，2875 项里 2303 项以 "Promise resolution is still pending but the event loop has already resolved" 整文件失败；
+  挑出三个失败文件单独跑，30/22/20 项全绿。是浏览器被并发压垮，不是代码问题。
+- 规则：用 `make test-ui`（`UI_TEST_CONCURRENCY` 默认 2）；本机最多 4。整文件报上面这句时，先单独跑该文件再下结论。
