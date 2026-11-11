@@ -10,11 +10,11 @@
 Pick any of them for any agent, from one list. One local gateway serves them all,<br>
 and when a quota runs out it moves on to your next account.
 
-> **owl is a secondary development of [yetone/magpie](https://github.com/yetone/magpie).**
-> It is a derived distribution: the plugin ecosystem and contracts (`magpie` plugin key,
-> `@magpie-community/*`, `X-Magpie-*` headers) are kept, while branding, the update feed and
-> network dependencies are maintained independently. The original project's copyright and
-> MIT license are retained.
+> **owl is an independent distribution built on the plugin ecosystem of
+> [yetone/magpie](https://github.com/yetone/magpie).** The plugin contracts (`magpie`
+> plugin key, `@magpie-community/*`, `X-Magpie-*` headers) stay compatible, while the
+> product, its updates and its network dependencies are owl's own. The original
+> project's copyright and MIT license are retained.
 
 [![Release](https://img.shields.io/github/v/release/istoo/owl?label=release&color=111111)](https://github.com/istoo/owl/releases/latest) [![Stars](https://img.shields.io/github/stars/istoo/owl?style=flat&color=111111)](https://github.com/istoo/owl/stargazers) [![License](https://img.shields.io/badge/license-MIT-111111)](LICENSE)<br>
 ![macOS](https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=white) ![Windows](https://img.shields.io/badge/Windows-0078D4?logo=windows&logoColor=white) ![Linux](https://img.shields.io/badge/Linux-FCC624?logo=linux&logoColor=black) ![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white) ![Termux](https://img.shields.io/badge/Termux-000000?logo=android&logoColor=white)

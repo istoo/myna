@@ -10,10 +10,9 @@
 一个列表里任选，给任意 agent。一个本地网关服务所有 agent，<br>
 某个额度用完时，它默默换到你的下一个账号。
 
-> **owl 是 [yetone/magpie](https://github.com/yetone/magpie) 的二次开发。**
-> 它是一个衍生发行版：插件生态与契约（`magpie` 插件键、`@magpie-community/*`、
-> `X-Magpie-*` 请求头）保留，品牌、更新源与网络依赖独立维护。
-> 原项目的版权与 MIT 许可证一并保留。
+> **owl 是基于 [yetone/magpie](https://github.com/yetone/magpie) 插件生态的独立发行版。**
+> 插件契约（`magpie` 插件 key、`@magpie-community/*`、`X-Magpie-*` 头）保持兼容，
+> 产品本身、更新源与网络依赖由 owl 独立维护；原项目的版权与 MIT 许可予以保留。
 
 [![Release](https://img.shields.io/github/v/release/istoo/owl?label=release&color=111111)](https://github.com/istoo/owl/releases/latest) [![Stars](https://img.shields.io/github/stars/istoo/owl?style=flat&color=111111)](https://github.com/istoo/owl/stargazers) [![License](https://img.shields.io/badge/license-MIT-111111)](LICENSE)<br>
 ![macOS](https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=white) ![Windows](https://img.shields.io/badge/Windows-0078D4?logo=windows&logoColor=white) ![Linux](https://img.shields.io/badge/Linux-FCC624?logo=linux&logoColor=black) ![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white) ![Termux](https://img.shields.io/badge/Termux-000000?logo=android&logoColor=white)
