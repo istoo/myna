@@ -123,7 +123,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       const pressOn = async (btn) => {
         const [y, top, bottom] = await btn.evaluate((e) => {
           const r = e.getBoundingClientRect(), v = e.closest(".view").getBoundingClientRect();
-          return [r.top + r.height / 2, v.top, Math.min(v.bottom, document.querySelector("footer.foot")?.getBoundingClientRect().top ?? v.bottom)];
+          // the foot: the window's, or on a phone the tab bar over the page's end
+          const nav = document.querySelector(".top #nav"), bar = nav && getComputedStyle(nav).position === "fixed" ? nav.getBoundingClientRect().top : v.bottom;
+          return [r.top + r.height / 2, v.top, Math.min(v.bottom, bar, document.querySelector("footer.foot")?.getBoundingClientRect().top ?? v.bottom)];
         });
         if (y < top + 20 || y > bottom - 20) {
           await page.mouse.move(width / 2, (top + bottom) / 2);

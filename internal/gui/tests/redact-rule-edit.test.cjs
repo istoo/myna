@@ -83,10 +83,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const scroll = () => page.evaluate(() => [scrollX, scrollY, ...[...document.querySelectorAll("*")].filter((e) => e.scrollTop).map((e) => e.scrollTop)]);
         const click = async (loc) => {
           // the app undoes a script's scroll, so scroll as a reader does
-          // until the target clears the foot
+          // until the target clears the foot: the window's, or on a phone
+          // the tab bar over the page's end (app.css, body.web #nav)
           await page.mouse.move(200, 300);
           for (let i = 0; i < 20; i++) {
-            const [b, top] = await Promise.all([loc.boundingBox(), page.evaluate(() => document.querySelector("footer.foot")?.getBoundingClientRect().top ?? innerHeight)]);
+            const [b, top] = await Promise.all([loc.boundingBox(), page.evaluate(() => {
+              const nav = document.querySelector(".top #nav"), bar = nav && getComputedStyle(nav).position === "fixed" ? nav.getBoundingClientRect().top : innerHeight;
+              return Math.min(document.querySelector("footer.foot")?.getBoundingClientRect().top ?? innerHeight, bar);
+            })]);
             if (b.y >= 0 && b.y + b.height <= top - 4) break;
             await page.mouse.wheel(0, b.y < 0 ? -200 : 200);
             await page.waitForTimeout(80);
