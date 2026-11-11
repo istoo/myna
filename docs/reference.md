@@ -614,17 +614,13 @@ The gateway issues **gateway keys** for clients, separate from a provider's
 upstream API keys. Turn on **Settings → Network and sharing → Share on local network**, then open
 **Gateway → Gateway keys → Add gateway key**. This block appears only while
 sharing is on. Create a named key for each client and copy it from its row.
-To move from another gateway without touching its clients, enter the key they
-already send in **Your own key (optional)** (8–256 characters, no spaces, not
-starting with `sk-owl-`, unlike any other key); left empty, owl makes
-one. The list shows only its last four characters, and it is counted,
-limited and restricted as any other key, from this computer too.
+Every key's value is one owl makes, random (`sk-owl-key-` and 48 hex
+digits); a value of your own is refused, as one a person picks can be
+guessed. A key an older owl gave a value of your own keeps working, its
+last four characters shown, until it is rotated.
 Rename, disable, rotate or remove keys independently; rotation and removal
 ask for confirmation. Rotation keeps the name, enabled state, limits and usage
-history; other keys are unchanged. Its dialog takes an optional value of
-your own, checked as a new key's is (8–256 printable ASCII characters, no
-spaces, not starting with `sk-owl-`, no other gateway key's and none of
-your providers' API keys); left empty, owl makes one. While sharing is on, **Gateway → Connect**
+history, and gives the key a new random value; other keys are unchanged. While sharing is on, **Gateway → Connect**
 offers loopback and shared addresses, plus enabled gateway keys, for all
 connection examples. With sharing off, Connect keeps the original **API key**
 field and local `owl` token, without a gateway-key picker. Its arbitrary
@@ -634,10 +630,8 @@ For a headless gateway, use the CLI before exposing the port:
 
 ```sh
 owl gateway-key add "Remote laptop" # prints the new credential once
-owl gateway-key add Family --key -  # keeps a key clients already send, read from stdin
 owl gateway-key list                # ids, names, enabled state and masked keys
 owl gateway-key rotate <id>         # prints the replacement; identity stays the same
-owl gateway-key rotate <id> --key -  # gives it a value of your own instead, read from stdin
 owl gateway-key remove <id>         # revokes remote access
 owl gateway-key limit <id> week --tokens 2m --cost 5   # its own limit
 owl gateway-key limit <id> list     # each limit, used, left and reset

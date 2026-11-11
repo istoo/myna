@@ -72,27 +72,8 @@ func gatewayKeysTo(out io.Writer, args []string) error {
 			args = slices.Delete(slices.Clone(args), 1+i, 2+i)
 		}
 	}
-	// add <name> --key <value>: the key keeps a value its clients already
-	// send (love1sbug on X); rotate <id> --key <value> gives a key one
-	// (isaac_bai on Discord); "--key -" reads it from stdin, out of the
-	// shell's history
-	var own string
-	if (action == "add" || action == "rotate") && len(args) == 4 && args[2] == "--key" {
-		own = args[3]
-		if own == "-" {
-			b, err := io.ReadAll(io.LimitReader(os.Stdin, 4096))
-			if err != nil {
-				return err
-			}
-			own = strings.TrimSpace(string(b))
-			if own == "" {
-				return fmt.Errorf("no key came on stdin")
-			}
-		}
-		args = args[:2]
-	}
 	if (action == "list" && len(args) != 1) || (action != "list" && len(args) != 2) {
-		return fmt.Errorf("usage: owl gateway-key list | add <name> [--key <value> | --key -] [--read-only] | rotate <id> [--key <value> | --key -] | remove <id> | limit <id> [list | off | reset [<n>] | remove <n> | [add] day|week|month|<N>d|<N>h [--tokens N] [--cost USD] [--cache-reads]] | models <id> [all | <provider>/<model>|<provider>/* ...] | accounts <id> [all | <provider>/<account>|<provider>/<key id> ...] | quotas <id> [on | off] | access <id> [read-only | full] | move <id> <place> | issue --ttl <duration> [--name <name>] [--models a,b] [--accounts a,b] [--tokens N] [--cost USD] [--read-only] [--from <id>] | issuer <id> [on | off] | oidc [list | add --key <id> --repo owner/name … | remove <rule id>]")
+		return fmt.Errorf("usage: owl gateway-key list | add <name> [--read-only] | rotate <id> | remove <id> | limit <id> [list | off | reset [<n>] | remove <n> | [add] day|week|month|<N>d|<N>h [--tokens N] [--cost USD] [--cache-reads]] | models <id> [all | <provider>/<model>|<provider>/* ...] | accounts <id> [all | <provider>/<account>|<provider>/<key id> ...] | quotas <id> [on | off] | access <id> [read-only | full] | move <id> <place> | issue --ttl <duration> [--name <name>] [--models a,b] [--accounts a,b] [--tokens N] [--cost USD] [--read-only] [--from <id>] | issuer <id> [on | off] | oidc [list | add --key <id> --repo owner/name … | remove <rule id>]")
 	}
 	switch action {
 	case "list", "add", "rotate", "remove":
@@ -149,11 +130,8 @@ func gatewayKeysTo(out io.Writer, args []string) error {
 		return w.Flush()
 	}
 	in := access.Change{Key: args[1]}
-	if action == "rotate" {
-		in.Secret = own
-	}
 	if action == "add" {
-		in = access.Change{Name: args[1], Secret: own, ReadOnly: readOnly}
+		in = access.Change{Name: args[1], ReadOnly: readOnly}
 	}
 	secret, err := access.Update(action+"-key", in)
 	if err != nil {

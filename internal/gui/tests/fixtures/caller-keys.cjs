@@ -129,23 +129,21 @@ function fixture(lang, theme, events, options = {}) {
       events.push({ action, body });
       const k = keys.find((k) => k.id === body.key);
       let secret = "";
+      // owl makes every key's value: one of the user's own is refused, as access.Update does
+      if ((action === "add-key" || action === "rotate-key") && body.secret !== undefined) return route.fulfill({ status: 400, json: { error: "owl makes every gateway key's value: leave the key empty" } });
       if (action === "add-key") {
         if (!body.name.trim()) return route.fulfill({ status: 400, json: { error: "Use a name between 1 and 120 characters" } });
-        // a value of the user's own, checked as access.ownSecret does
-        if (body.secret !== undefined && body.secret.trim().length < 8) return route.fulfill({ status: 400, json: { error: "Use a key between 8 and 256 characters" } });
         const id = "new-key-" + (++serial);
-        secret = body.secret?.trim() || "fixture-created-" + serial;
+        secret = "fixture-created-" + serial;
         secrets.set(id, secret);
-        keys.push({ id, name: body.name, masked: body.secret ? "…" + secret.slice(-4) : "sk-owl-key-…created" });
+        keys.push({ id, name: body.name, masked: "sk-owl-key-…created" });
       }
       if (action === "rename-key") k.name = body.name;
       if (action === "rotate-key") {
-        // a value of the user's own, checked as access.ownSecret does
-        if (body.secret !== undefined && body.secret.trim().length < 8) return route.fulfill({ status: 400, json: { error: "Use a key between 8 and 256 characters" } });
-        secret = body.secret?.trim() || "fixture-rotated-" + (++rotations);
+        secret = "fixture-rotated-" + (++rotations);
         secrets.set(k.id, secret);
         if (k.id === lanKeyID) lanSecret = secret;
-        k.masked = body.secret ? "…" + secret.slice(-4) : "sk-owl-key-…" + secret.slice(-6);
+        k.masked = "sk-owl-key-…" + secret.slice(-6);
       }
       if (action === "remove-key") keys = keys.filter((v) => v !== k);
       if (action === "on-key" || action === "off-key") k.off = action === "off-key";

@@ -21,7 +21,6 @@ import (
 
 	"github.com/istoo/owl/internal/edit"
 	"github.com/istoo/owl/internal/filelock"
-	"github.com/istoo/owl/internal/provider"
 	"github.com/istoo/owl/internal/settings"
 )
 
@@ -82,50 +81,6 @@ func ownSecrets() map[string]struct{} {
 	}
 	own.size, own.mod, own.secrets = fi.Size(), fi.ModTime().UnixNano(), m
 	return m
-}
-
-// ownSecret checks a key value a user brings (one their clients already
-// send, from another gateway they move from, such as CLIProxyAPI's
-// api-keys, which are any string): what an HTTP header carries, and no
-// other key's.
-func ownSecret(secret string, keys []Key) (string, error) {
-	secret = strings.TrimSpace(secret)
-	if n := len(secret); n < 8 || n > 256 {
-		return "", errors.New("Use a key between 8 and 256 characters")
-	}
-	for i := 0; i < len(secret); i++ {
-		if c := secret[i]; c <= ' ' || c > '~' {
-			return "", errors.New("A key can have only letters, digits and ASCII symbols, no spaces")
-		}
-	}
-	if strings.HasPrefix(secret, legacyLANPrefix) {
-		return "", errors.New("A key of your own can't start with sk-owl-: leave the key empty and owl makes one")
-	}
-	for _, k := range keys {
-		if subtle.ConstantTimeCompare([]byte(secret), []byte(k.Secret)) == 1 {
-			return "", errors.New("Another gateway key already has this key")
-		}
-	}
-	if upstreamKey(secret) {
-		return "", errors.New("This is one of your providers' API keys: give the gateway key a value of its own")
-	}
-	return secret, nil
-}
-
-// upstreamKey: secret is a key owl sends a provider, which a gateway
-// key handed to others must never be.
-func upstreamKey(secret string) bool {
-	for _, p := range provider.All() {
-		if p.Key != "" && subtle.ConstantTimeCompare([]byte(secret), []byte(p.Key)) == 1 {
-			return true
-		}
-		for _, k := range p.Keys {
-			if k.Key != "" && subtle.ConstantTimeCompare([]byte(secret), []byte(k.Key)) == 1 {
-				return true
-			}
-		}
-	}
-	return false
 }
 
 type Key struct {
@@ -366,9 +321,9 @@ type Change struct {
 	// Issues is what "issuer-key" sets: the key may issue short-lived
 	// keys under itself (Key.Issues).
 	Issues bool `json:"issues,omitempty"`
-	// Secret is the value "add-key" gives the new key, one its clients
-	// already send (love1sbug on X: keys handed out from another gateway),
-	// or "rotate-key" gives the key; "" for one owl makes.
+	// Secret is refused: "add-key" and "rotate-key" give a key a random
+	// value owl makes. A key given a value of its own by an older owl
+	// keeps it until rotated.
 	Secret string `json:"secret,omitempty"`
 }
 
@@ -389,6 +344,12 @@ func Update(action string, in Change) (string, error) {
 			return "", errors.New("Use a name between 1 and 120 characters")
 		}
 	}
+	// a key's value is always one owl makes, random: a value a person
+	// picks is one another can guess, and the key is what lets another
+	// computer spend this one's subscriptions
+	if strings.TrimSpace(in.Secret) != "" {
+		return "", errors.New("owl makes every gateway key's value: leave the key empty")
+	}
 	var secret string
 	var mirror *Key
 	if action == "add-key" {
@@ -396,17 +357,11 @@ func Update(action string, in Change) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		if in.Secret != "" {
-			if secret, err = ownSecret(in.Secret, keys); err != nil {
-				return "", err
-			}
-		} else {
-			token, err := random(24)
-			if err != nil {
-				return "", err
-			}
-			secret = Prefix + token
+		token, err := random(24)
+		if err != nil {
+			return "", err
 		}
+		secret = Prefix + token
 		keys = append(keys, Key{ID: id, Name: name, Secret: secret, ReadOnly: in.ReadOnly})
 	} else {
 		i := slices.IndexFunc(keys, func(k Key) bool { return k.ID == in.Key })
@@ -419,20 +374,11 @@ func Update(action string, in Change) (string, error) {
 		}
 		switch action {
 		case "rotate-key":
-			// a value of the user's own (isaac_bai on Discord: one easy to
-			// remember and pass on), checked as add-key's is; none, a new
-			// one owl makes
-			if in.Secret != "" {
-				if secret, err = ownSecret(in.Secret, slices.Delete(slices.Clone(keys), i, i+1)); err != nil {
-					return "", err
-				}
-			} else {
-				token, err := random(24)
-				if err != nil {
-					return "", err
-				}
-				secret = Prefix + token
+			token, err := random(24)
+			if err != nil {
+				return "", err
 			}
+			secret = Prefix + token
 			keys[i].Secret = secret
 		case "rename-key":
 			keys[i].Name = name

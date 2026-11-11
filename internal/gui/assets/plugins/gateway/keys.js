@@ -1,8 +1,5 @@
 // Caller keys use the same account list and edit controls as provider keys.
 let gatewayKeys = null, gatewayKeyDraft = null, gatewayKeysBusy = false;
-// gatewayOwnDraft is the value typed for a new key of the user's own (one
-// its clients already send, love1sbug on X); "" lets owl make one
-let gatewayOwnDraft = "";
 // gatewayAccountNames maps a key's stored account entry ("<provider>/<id>",
 // #905) to how it is shown; what no provider has now is shown as it is kept
 let gatewayAccountNames = {};
@@ -156,23 +153,16 @@ function gatewayKeyForm() {
   const name = input(gatewayKeyDraft, t("Key name, e.g. Laptop"));
   name.setAttribute("aria-label", t("Gateway key name"));
   name.oninput = () => { gatewayKeyDraft = name.value; };
-  const own = input(gatewayOwnDraft, t("Your own key (optional)"), "password");
-  own.setAttribute("aria-label", t("Gateway key value"));
-  own.title = t("Leave empty and owl makes a key. Or enter one your clients already send, from another gateway, so they keep working.");
-  own.autocomplete = "off";
-  own.oninput = () => { gatewayOwnDraft = own.value; };
   const add = el("button", "text primary", t("Create"));
   const go = async () => {
     add.disabled = true;
-    const mine = own.value.trim() !== "";
-    const out = await gatewayKeyAction("add-key", mine ? { name: name.value, secret: own.value } : { name: name.value });
+    const out = await gatewayKeyAction("add-key", { name: name.value });
     if (!out) { add.disabled = false; return; }
-    gatewayOwnDraft = "";
-    status(t(mine ? "Gateway key created. Clients that send this key reach owl now." : "Gateway key created. Use Copy on its row to connect a client."), "ok");
+    status(t("Gateway key created. Use Copy on its row to connect a client."), "ok");
   };
   add.onclick = go;
-  const cancelled = () => { gatewayKeyDraft = null; gatewayOwnDraft = ""; renderGatewayKeys(); };
-  for (const i of [name, own]) i.onkeydown = (e) => {
+  const cancelled = () => { gatewayKeyDraft = null; renderGatewayKeys(); };
+  name.onkeydown = (e) => {
     e.stopPropagation();
     if (e.key === "Enter" && !add.disabled) go();
     else if (e.key === "Escape") cancelled();
@@ -180,7 +170,7 @@ function gatewayKeyForm() {
   const cancel = el("button", "text", t("Cancel"));
   cancel.onclick = cancelled;
   const fields = el("div", "kf");
-  fields.append(name, own);
+  fields.append(name);
   const bar = el("div", "kb");
   bar.append(el("span", "grow"), cancel, add);
   box.append(fields, bar);
@@ -356,16 +346,6 @@ function askGatewayKey(k, rotate) {
   ed.append(head, el("p", "lib-confirm", t(rotate
     ? "Clients using {name} will need the new key. Its name and usage history stay the same."
     : "Clients using {name} will lose access from other computers. Its usage history is kept.", { name: k.name })));
-  // a value of one's own in place of the one owl makes (isaac_bai on
-  // Discord: one easy to remember and pass on)
-  let own = null;
-  if (rotate) {
-    own = input("", t("Your own key (optional)"), "password");
-    own.setAttribute("aria-label", t("Gateway key value"));
-    own.title = t("Leave empty and owl makes a key. Or enter one your clients already send, from another gateway, so they keep working.");
-    own.onkeydown = (e) => { e.stopPropagation(); if (e.key === "Enter") go.click(); else if (e.key === "Escape") closeConfirmAsk(); };
-    ed.append(el("label", "", t("Gateway key")), own);
-  }
   const bar = el("div", "bar");
   const cancel = el("button", "text", t("Cancel"));
   cancel.onclick = (e) => { e.stopPropagation(); closeConfirmAsk(); };
@@ -374,11 +354,10 @@ function askGatewayKey(k, rotate) {
     e.stopPropagation();
     if (go.disabled) return;
     go.disabled = true;
-    const mine = !!own?.value.trim();
-    const out = await gatewayKeyAction(rotate ? "rotate-key" : "remove-key", mine ? { key: k.id, secret: own.value } : { key: k.id });
+    const out = await gatewayKeyAction(rotate ? "rotate-key" : "remove-key", { key: k.id });
     if (!out) { go.disabled = false; return; }
     closeConfirmAsk();
-    if (rotate) status(t(mine ? "Gateway key changed. Clients that send this key reach owl now." : "Gateway key rotated. Update clients on other computers."), "ok");
+    if (rotate) status(t("Gateway key rotated. Update clients on other computers."), "ok");
   };
   bar.append(el("span", "grow"), cancel, go);
   ed.append(bar);

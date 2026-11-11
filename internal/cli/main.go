@@ -128,7 +128,7 @@ const usage = `owl — one place to pick every agent's model
   owl cpu [<file>] [--seconds N]   a Go CPU profile of the running owl over 30s (5..120) while you use it, for a report of it using too much CPU
   owl goroutines [<file>]      every goroutine of the running owl, its stack and how long it waited, for a report of it stuck at something
   owl log [--path] [-n N] [-f]  where owl's logs are, to send with a report: the app's (app.log), the service's; -n prints the app log's last N lines, -f follows it
-  owl gateway-key list|add <name> [--read-only]|rotate <id> [--key -]|remove <id>   manage the keys clients use to call a shared gateway
+  owl gateway-key list|add <name> [--read-only]|rotate <id>|remove <id>   manage the keys clients use to call a shared gateway
   owl gateway-key limit <id> [list|off|reset [n]|remove <n>|[add] day|week|month|<N>d|<N>h --tokens N --cost USD --cache-reads]   a key's own limits, and what it used
   owl gateway-key models <id> [all|<provider>/<model>|<provider>/* ...]   the models a key may use, every one unless it names some
   owl gateway-key quotas <id> [on|off]   whether a key held to a budget, models or accounts is told the quotas of what it may use

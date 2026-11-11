@@ -91,9 +91,10 @@ func TestGatewayKeysJoinKeepsUnseenKeys(t *testing.T) {
 	if !ok {
 		t.Fatal("fixture: the added gateway key does not authenticate")
 	}
-	own, err := access.Update("add-key", access.Change{Name: "Own", Secret: "fixture-own-client-key"})
-	if err != nil {
-		t.Fatal(err)
+	// a value of the user's own, from an older owl
+	const own = "fixture-own-client-key"
+	if keys, err := access.Export(); err != nil || access.Restore(append(keys, access.Key{ID: "own", Name: "Own", Secret: own})) != nil {
+		t.Fatal("fixture: the key of the user's own", err)
 	}
 	if err := Configure(cfg); err != nil {
 		t.Fatal(err)

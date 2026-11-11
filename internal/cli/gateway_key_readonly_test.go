@@ -28,10 +28,7 @@ func TestGatewayKeyCLIReadOnly(t *testing.T) {
 		return strings.TrimSpace(out.String())
 	}
 	display := call("add", "Desk display", "--read-only")
-	laptop := call("add", "--read-only", "Laptop", "--key", "cpa-laptop-key-0042")
-	if laptop != "cpa-laptop-key-0042" {
-		t.Fatal("--read-only beside --key:", laptop)
-	}
+	laptop := call("add", "--read-only", "Laptop")
 	for _, s := range []string{display, laptop} {
 		if who, ok := access.Authenticate(s); !ok || !who.ReadOnly {
 			t.Fatal("added read-only:", who, ok)

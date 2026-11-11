@@ -15,9 +15,9 @@ import (
 	"github.com/istoo/owl/internal/usage"
 )
 
-// A key given its own value — one clients already send, from another
-// gateway (love1sbug on X) — is that key from another computer and from
-// this one, as a sk-owl- key is: counted as it, and never sent on.
+// A key an older owl gave its own value — one clients already send, from
+// another gateway (love1sbug on X) — is that key from another computer and
+// from this one, as a sk-owl- key is: counted as it, and never sent on.
 func TestOwnKeyValueIsTheKey(t *testing.T) {
 	fresh(t)
 	up := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -37,8 +37,9 @@ func TestOwnKeyValueIsTheKey(t *testing.T) {
 		t.Fatal(err)
 	}
 	const own = "cpa-family-key-0042"
-	if _, err := access.Update("add-key", access.Change{Name: "Family", Secret: own}); err != nil {
-		t.Fatal(err)
+	// a value of the user's own, from an older owl
+	if keys, err := access.Export(); err != nil || access.Restore(append(keys, access.Key{ID: "family", Name: "Family", Secret: own})) != nil {
+		t.Fatal("fixture: the key of the user's own", err)
 	}
 	h := lanGuard(New().Handler()) // as the real server has it
 	call := func(from, key string) int {
@@ -79,10 +80,10 @@ func TestOwnKeyValueIsTheKey(t *testing.T) {
 	}
 }
 
-// A key owl made, rotated to a value of the user's own (isaac_bai on
-// Discord), is still that key: from another computer and from this one
-// it is let in, counted as it and held to its limit, and its old value
-// is refused.
+// A key owl made, rotated to a value of the user's own by an older owl
+// (isaac_bai on Discord), is still that key: from another computer and
+// from this one it is let in, counted as it and held to its limit, and
+// its old value is refused.
 func TestRotatedOwnValueKeepsTheKeysLimit(t *testing.T) {
 	fresh(t)
 	budget.Forget()
@@ -91,7 +92,12 @@ func TestRotatedOwnValueKeepsTheKeysLimit(t *testing.T) {
 	keys, secrets := newCaller(t, "Family")
 	setLimit(t, keys[0].ID, &access.Limit{Period: "day", Tokens: 700})
 	const own = "family-easy-to-share"
-	if _, err := access.Update("rotate-key", access.Change{Key: keys[0].ID, Secret: own}); err != nil {
+	stored, err := access.Export()
+	if err != nil {
+		t.Fatal(err)
+	}
+	stored[0].Secret = own // as an older owl's rotate-key wrote it
+	if err := access.Restore(stored); err != nil {
 		t.Fatal(err)
 	}
 	h := lanGuard(New().Handler())

@@ -290,10 +290,10 @@ func TestAsyncGatewayOrigin(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// a key of the user's own value, made for a friend, is a named key too
-	friend, err := access.Update("add-key", access.Change{Name: "Friend", Secret: "a-friends-own-key-0042"})
-	if err != nil {
-		t.Fatal(err)
+	// a value of the user's own, from an older owl
+	const friend = "a-friends-own-key-0042"
+	if keys, err := access.Export(); err != nil || access.Restore(append(keys, access.Key{ID: "friend", Name: "Friend", Secret: friend})) != nil {
+		t.Fatal("fixture: the key of the user's own", err)
 	}
 	// the sharing key owl makes and writes into this computer's agents
 	if err := access.ConfigureLAN(true, false); err != nil {

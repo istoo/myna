@@ -65,41 +65,26 @@ func TestGatewayKeyCLI(t *testing.T) {
 	}
 }
 
-// add --key keeps a value clients already send (love1sbug on X); "-"
-// takes it from stdin.
-func TestGatewayKeyCLIOwnValue(t *testing.T) {
+// add and rotate take no value of the user's own: owl makes every key's
+// value, random, and --key is refused without writing a key.
+func TestGatewayKeyCLIRefusesOwnValue(t *testing.T) {
 	t.Setenv("HOME", t.TempDir())
 	t.Setenv("USERPROFILE", os.Getenv("HOME"))
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	var out bytes.Buffer
-	if err := gatewayKeysTo(&out, []string{"gateway-key", "add", "Family", "--key", "cpa-family-key-0042"}); err != nil || strings.TrimSpace(out.String()) != "cpa-family-key-0042" {
+	if err := gatewayKeysTo(&out, []string{"gateway-key", "add", "Family"}); err != nil || !strings.HasPrefix(strings.TrimSpace(out.String()), access.Prefix) {
 		t.Fatal(out.String(), err)
 	}
-	r, w, err := os.Pipe()
-	if err != nil {
-		t.Fatal(err)
-	}
-	w.WriteString("cpa-friend-key-0007\n")
-	w.Close()
-	stdin := os.Stdin
-	os.Stdin = r
-	defer func() { os.Stdin = stdin }()
-	if err := gatewayKeysTo(&bytes.Buffer{}, []string{"gateway-key", "add", "Friend", "--key", "-"}); err != nil {
-		t.Fatal(err)
-	}
-	for _, k := range []string{"cpa-family-key-0042", "cpa-friend-key-0007"} {
-		if _, ok := access.Authenticate(k); !ok {
-			t.Fatal("not a key:", k)
-		}
-	}
-	out.Reset()
-	if err := gatewayKeysTo(&out, []string{"gateway-key", "list"}); err != nil || strings.Contains(out.String(), "cpa-family") || !strings.Contains(out.String(), "…0042") {
-		t.Fatal("list must mask an own value", out.String(), err)
-	}
-	for _, args := range [][]string{{"add", "X", "--key"}, {"add", "X", "--key", "short"}, {"add", "X", "--key", "cpa-family-key-0042"}, {"rotate", "x", "--key", "cpa-other-key-0001"}} {
+	for _, args := range [][]string{{"add", "X", "--key", "dddddddddddd"}, {"add", "X", "--key", "-"}, {"rotate", "x", "--key", "family-easy-to-share"}} {
 		if err := gatewayKeysTo(&bytes.Buffer{}, append([]string{"gateway-key"}, args...)); err == nil {
 			t.Error("accepted", args)
 		}
+	}
+	if keys, _ := access.List(); len(keys) != 1 {
+		t.Fatal("a refused key was written", keys)
+	}
+	if _, ok := access.Authenticate("dddddddddddd"); ok {
+		t.Fatal("a value of the user's own became a key")
 	}
 }
 

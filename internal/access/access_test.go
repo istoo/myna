@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"os"
 	"reflect"
+	"regexp"
 	"runtime"
 	"strings"
 	"sync"
 	"testing"
 
-	"github.com/istoo/owl/internal/provider"
 	"github.com/istoo/owl/internal/settings"
 )
 
@@ -304,22 +304,52 @@ func TestLANRotationKeepsOlderOwlWorking(t *testing.T) {
 	}
 }
 
-// A key can be given a value of the user's own, one their clients already
-// send (love1sbug on X), checked as a header can carry it and unlike any
-// other key's.
-func TestOwnKeyValue(t *testing.T) {
+// A key's value is always one owl makes, random: a value of the user's
+// own, for a new key or a rotated one, is refused and writes nothing.
+func TestKeyValueIsAlwaysOwls(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
-	const own = "cpa-family-key-0042"
-	if Named(own) {
-		t.Fatal("named before it is a key")
+	for _, own := range []string{"dddddddddddd", "family-easy-to-share", " padded-own-value \n"} {
+		if got, err := Update("add-key", Change{Name: "Family", Secret: own}); err == nil {
+			t.Fatalf("add-key took %q: %q", own, got)
+		}
 	}
-	got, err := Update("add-key", Change{Name: "Family", Secret: "  " + own + "\n"})
-	if err != nil || got != own {
-		t.Fatal(got, err)
+	if keys, _ := List(); len(keys) != 0 {
+		t.Fatal("a refused key was kept", keys)
 	}
-	keys, err := List()
-	if err != nil || len(keys) != 1 || keys[0].Masked != "…0042" || keys[0].Secret != "" {
-		t.Fatal(keys, err)
+	random := regexp.MustCompile("^" + Prefix + "[0-9a-f]{48}$")
+	made, err := Update("add-key", Change{Name: "Family"})
+	if err != nil || !random.MatchString(made) {
+		t.Fatal(made, err)
+	}
+	other, err := Update("add-key", Change{Name: "Other"})
+	if err != nil || other == made {
+		t.Fatal("two keys made alike", other, err)
+	}
+	keys, _ := List()
+	id := keys[0].ID
+	if _, err := Update("rotate-key", Change{Key: id, Secret: "family-easy-to-share"}); err == nil {
+		t.Fatal("rotate-key took a value of the user's own")
+	}
+	if who, ok := Authenticate(made); !ok || who.KeyName != "Family" {
+		t.Fatal("a refused value changed the key", who, ok)
+	}
+	again, err := Update("rotate-key", Change{Key: id})
+	if err != nil || !random.MatchString(again) || again == made {
+		t.Fatal(again, err)
+	}
+	if _, ok := Authenticate(made); ok {
+		t.Fatal("the old value still works")
+	}
+}
+
+// A key an older owl gave a value of the user's own keeps working, named
+// and limited as any other, showing only its end, until it is rotated to
+// one owl makes.
+func TestOlderOwnValueKeepsWorking(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	const own = "family-easy-to-share"
+	if err := save([]Key{{ID: "family", Name: "Family", Secret: own}, {ID: "short", Name: "Short", Secret: "abcd1234"}}); err != nil {
+		t.Fatal(err)
 	}
 	if who, ok := Authenticate(own); !ok || who.KeyName != "Family" {
 		t.Fatal(who, ok)
@@ -327,28 +357,16 @@ func TestOwnKeyValue(t *testing.T) {
 	if !Named(own) || Named(own+"x") || Named("") || !Named(Prefix+"abc") {
 		t.Fatal("Named")
 	}
-	for _, bad := range []string{"short", own, "has a space in it", "tab\there-and-more", "非ascii-key-value", "sk-owl-key-mine-1234", strings.Repeat("k", 257)} {
-		if _, err := Update("add-key", Change{Name: "Other", Secret: bad}); err == nil {
-			t.Fatalf("accepted %q", bad)
-		}
+	keys, err := List()
+	if err != nil || keys[0].Masked != "…hare" || keys[0].Secret != "" || keys[1].Masked != "…" {
+		t.Fatal(keys, err)
 	}
-	if keys, _ := List(); len(keys) != 1 {
-		t.Fatal("a refused key was kept", keys)
-	}
-	// rotating it gives it one owl makes; the old value no longer works
-	rotated, err := Update("rotate-key", Change{Key: keys[0].ID})
+	rotated, err := Update("rotate-key", Change{Key: "family"})
 	if err != nil || !strings.HasPrefix(rotated, Prefix) {
 		t.Fatal(rotated, err)
 	}
 	if _, ok := Authenticate(own); ok || Named(own) {
 		t.Fatal("the old value still works")
-	}
-	short, err := Update("add-key", Change{Name: "Short", Secret: "abcd1234"})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if keys, _ := List(); keys[1].Masked != "…" {
-		t.Fatal("a short key shows its end", keys[1].Masked, short)
 	}
 }
 
@@ -364,8 +382,10 @@ func TestAuthenticateTellsTheDefaultKey(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		brought, err := Update("add-key", Change{Name: "Brought", Secret: "a-much-longer-key-of-my-own"})
-		if err != nil {
+		// a value of the user's own, from an older owl
+		const brought = "a-much-longer-key-of-my-own"
+		keys, _ := Export()
+		if err := save(append(keys, Key{ID: "brought", Name: "Brought", Secret: brought})); err != nil {
 			t.Fatal(err)
 		}
 		if err := ConfigureLAN(true, false); err != nil {
@@ -408,57 +428,4 @@ func TestAuthenticateTellsTheDefaultKey(t *testing.T) {
 			t.Fatal(who, ok)
 		}
 	})
-}
-
-// A key owl made can be given a value of the user's own when it is
-// rotated (isaac_bai on Discord: one easy to remember and pass on),
-// checked as add-key's is, and never a key owl sends a provider.
-func TestRotateToOwnValue(t *testing.T) {
-	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
-	made, err := Update("add-key", Change{Name: "Family"})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if _, err := Update("add-key", Change{Name: "Other", Secret: "other-key-of-mine"}); err != nil {
-		t.Fatal(err)
-	}
-	if err := provider.Save(provider.Provider{ID: "plan", Name: "Plan", Key: "upstream-first-key", Keys: []provider.KeyAccount{{Key: "upstream-second-key"}}, Chat: "http://127.0.0.1:1/v1", Models: []string{"m1"}}); err != nil {
-		t.Fatal(err)
-	}
-	keys, _ := List()
-	id := keys[0].ID
-	for _, bad := range []string{"short", "has a space in it", "非ascii-key-value", "sk-owl-key-mine-1234", "other-key-of-mine", "upstream-first-key", "upstream-second-key", strings.Repeat("k", 257)} {
-		if _, err := Update("rotate-key", Change{Key: id, Secret: bad}); err == nil {
-			t.Fatalf("accepted %q", bad)
-		}
-	}
-	if who, ok := Authenticate(made); !ok || who.KeyName != "Family" {
-		t.Fatal("a refused value changed the key", who, ok)
-	}
-	const own = "family-easy-to-share"
-	got, err := Update("rotate-key", Change{Key: id, Secret: " " + own + "\n"})
-	if err != nil || got != own {
-		t.Fatal(got, err)
-	}
-	if who, ok := Authenticate(own); !ok || who.KeyName != "Family" || who.KeyID != id {
-		t.Fatal(who, ok)
-	}
-	if _, ok := Authenticate(made); ok || !Named(own) {
-		t.Fatal("the old value still works, or the new one isn't named")
-	}
-	if keys, _ := List(); keys[0].Masked != "…hare" || keys[0].Secret != "" {
-		t.Fatal(keys[0])
-	}
-	// its own value again is no other key's
-	if _, err := Update("rotate-key", Change{Key: id, Secret: own}); err != nil {
-		t.Fatal(err)
-	}
-	// none: owl makes one again
-	if again, err := Update("rotate-key", Change{Key: id}); err != nil || !strings.HasPrefix(again, Prefix) {
-		t.Fatal(again, err)
-	}
-	// a new key can't take a provider's key either
-	if _, err := Update("add-key", Change{Name: "Leak", Secret: "upstream-first-key"}); err == nil {
-		t.Fatal("add-key took a provider's key")
-	}
 }

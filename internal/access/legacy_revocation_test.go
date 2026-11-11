@@ -140,7 +140,7 @@ func TestRemovedDefaultKeyStaysRemovedOnReshare(t *testing.T) {
 	if err := ConfigureLAN(true, false); err != nil {
 		t.Fatal(err)
 	}
-	own, err := Update("add-key", Change{Name: "Mine", Secret: "a-much-longer-key-of-my-own"})
+	own, err := Update("add-key", Change{Name: "Mine"})
 	if err != nil {
 		t.Fatal(err)
 	}
