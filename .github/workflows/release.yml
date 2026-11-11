@@ -146,10 +146,13 @@ jobs:
         run: |
           TAG="${{ needs.version.outputs.tag }}"
           PREV=$(git describe --tags --abbrev=0 "$TAG^" 2>/dev/null || true)
+          # none before it in its history: the first tag after the history
+          # was squashed into one commit, whose tags are not its ancestors;
+          # every commit since that one is the release's
           if [ -n "$PREV" ]; then
             git log --no-merges --pretty='- %s' "$PREV..$TAG" > NOTES.md
           else
-            git log -1 --pretty='- %s' "$TAG" > NOTES.md
+            git log --no-merges --pretty='- %s' "$TAG" > NOTES.md
           fi
 
       - name: Feed files
