@@ -1,0 +1,182 @@
+name: GUI
+
+# The browser regressions under internal/gui/tests, which the Test workflow
+# doesn't run: a GUI change used to be checked only on the machine that made
+# it, and reds an unrelated page's file held went unseen for days (LESSONS.md,
+# 10-14 to 10-16). A push that touches the GUI runs a smoke subset, the pages
+# and mechanisms every GUI change goes through; the whole suite runs nightly
+# and on demand, since 1,182 files over 4 shards is hours of runners.
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "smoke (a subset) or full (every file, sharded)"
+        type: choice
+        options: [smoke, full]
+        default: smoke
+      browser:
+        description: "which engine a full run uses (smoke runs both)"
+        type: choice
+        options: [chromium, webkit, both]
+        default: chromium
+  schedule:
+    - cron: "37 3 * * *" # nightly, full
+  push:
+    branches: [main]
+    paths:
+      - "internal/gui/**"
+      - ".github/workflows/gui.yml"
+
+concurrency:
+  group: gui-${{ github.ref }}
+  cancel-in-progress: false # a cancelled shard leaves a file untested
+
+permissions:
+  contents: read
+
+env:
+  PLAYWRIGHT_VERSION: "1.65.0"
+
+jobs:
+  gui:
+    name: gui (shard ${{ matrix.shard }}/4)
+    runs-on: ubuntu-latest
+    # A full shard took 133 to 143 minutes on the first webkit run (42618144294),
+    # which killed shard 3 at its step's 140m with its totals unwritten. The
+    # whole suite is 1,182 files in four shards, and a red is 5s of waits
+    # each; 200 leaves a shard room to finish and still bounds a hang.
+    timeout-minutes: 200
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # origin/main, for mobile-web's screenshot baseline
+
+      # 24, not 22: on 22 --test-shard is accepted and ignored, and the run
+      # passes having run no test at all (checked with npx node@22: "1..0").
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      # Playwright and its browsers live outside the checkout: the app has no
+      # frontend dependency, and the suite asks for Playwright by module name
+      # (NODE_PATH).
+      #
+      # The two browsers are a few hundred MB a shard, and the version is
+      # fixed, so they are kept between runs: a hit downloads nothing, run
+      # 42809799587's shard 4 died at this step's 20-minute timeout. The
+      # system libraries are installed every run, cached browsers or not:
+      # with the hit skipping them, run 42860876261's WebKit tests all went
+      # red on a runner image without libevent-2.1.so.7.
+      - name: Playwright browsers cache
+        id: pwcache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
+      - name: Install Playwright
+        timeout-minutes: 20
+        run: |
+          mkdir -p "$RUNNER_TEMP/pw" && cd "$RUNNER_TEMP/pw"
+          npm init -y >/dev/null
+          npm i --no-audit --no-fund "playwright@$PLAYWRIGHT_VERSION"
+          npx playwright install chromium webkit
+          npx playwright install-deps chromium webkit
+          echo "NODE_PATH=$RUNNER_TEMP/pw/node_modules" >> "$GITHUB_ENV"
+
+      # The smoke set is what every GUI change passes through: translations
+      # complete, the window's scrolling, the Routing and Plugins pages, and
+      # three Update pages that hold the header's layout. It runs whole in one
+      # shard; the other three say so and stop.
+      - name: Files
+        id: files
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ inputs.mode }}" = "full" ]; then
+            echo "shards=4" >> "$GITHUB_OUTPUT"
+            echo "mode=full" >> "$GITHUB_OUTPUT"
+            ls internal/gui/tests/*.test.cjs > "$RUNNER_TEMP/files.txt"
+          else
+            echo "shards=1" >> "$GITHUB_OUTPUT"
+            echo "mode=smoke" >> "$GITHUB_OUTPUT"
+            printf '%s\n' \
+              internal/gui/tests/i18n-keys.test.cjs \
+              internal/gui/tests/click-scroll.test.cjs \
+              internal/gui/tests/routing-js.test.cjs \
+              internal/gui/tests/plugin-kernel.test.cjs \
+              internal/gui/tests/update-hide.test.cjs \
+              internal/gui/tests/update-served-anew.test.cjs \
+              internal/gui/tests/market-have.test.cjs > "$RUNNER_TEMP/files.txt"
+          fi
+          echo "files=$(wc -l < "$RUNNER_TEMP/files.txt")" >> "$GITHUB_OUTPUT"
+
+      - name: Run
+        timeout-minutes: 190
+        shell: bash
+        env:
+          SHARDS: ${{ steps.files.outputs.shards }}
+          SHARD: ${{ matrix.shard }}
+          MODE: ${{ steps.files.outputs.mode }}
+          PICK: ${{ inputs.browser }}
+        run: |
+          if [ "$SHARD" -gt "$SHARDS" ]; then
+            echo "shard $SHARD of 4: the smoke set runs in $SHARDS shard, nothing to do here"
+            exit 0
+          fi
+          # The whole suite runs one engine here. Linux's WebKit differs from
+          # the Mac's in ways its tests assume (a 300 px wheel scrolls 15, a
+          # page scrolls sideways by 9 px at 560 in de, a 5 s wait is short):
+          # the first full run had 46 such reds on webkit and 1 real one,
+          # filed together. A Chromium run covers the product logic; webkit
+          # still runs the smoke set, and `browser: webkit` asks for the
+          # whole suite in it when a change is about that engine.
+          browser="$PICK"
+          if [ -z "$browser" ]; then
+            if [ "$MODE" = full ]; then browser=chromium; else browser=both; fi
+          fi
+          if [ "$browser" != both ]; then export BROWSER="$browser"; fi
+          set +e
+          node --test --test-concurrency=2 --test-shard="$SHARD/$SHARDS" \
+            $(tr '\n' ' ' < "$RUNNER_TEMP/files.txt") 2>&1 | tee "$RUNNER_TEMP/gui.log"
+          status=${PIPESTATUS[0]}
+          fails=$(sed -n 's/^ℹ fail \([0-9]*\)$/\1/p' "$RUNNER_TEMP/gui.log" | tail -1)
+          {
+            echo "shard $SHARD/$SHARDS, $browser: ${fails:-?} failed of $(sed -n 's/^ℹ tests \([0-9]*\)$/\1/p' "$RUNNER_TEMP/gui.log" | tail -1)"
+            # no totals: the step was cut off, and the log ends where it was
+            [ -n "$fails" ] || echo "the log has no totals: the step was cut off before the suite ended"
+            # A red is named with its file, in the summary the run leaves: the
+            # log is an artifact of four shards, and a count nobody can act on
+            # (LESSONS.md: a suite's log is kept whole until its reds are named)
+            if [ -n "$fails" ] && [ "$fails" != 0 ]; then
+              echo ""
+              echo "<details><summary>the tests that failed</summary>"
+              echo ""
+              awk '/^test at internal\/gui\/tests\// { f = $3; sub(/^internal\/gui\/tests\//, "", f); next }
+                   /^✖ / { if (f != "") { print "- `" f "` " substr($0, index($0, " ") + 1); f = "" } }' \
+                "$RUNNER_TEMP/gui.log" | head -40
+              echo ""
+              echo "</details>"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+          # The smoke set is the gate (it is green here). A full run is a
+          # report: the whole suite on Linux has layout and timing
+          # differences of its own (issue #13), and a nightly that is always
+          # red tells nobody anything — the count is in the summary and the
+          # log is an artifact.
+          if [ "$MODE" = smoke ]; then exit "$status"; fi
+          exit 0
+
+      # A shard that fails keeps its whole log: a red is named with its file
+      # and its output, never a tail of the run (LESSONS.md).
+      # A full run exits 0 by design, so `failure()` alone would never keep
+      # its log: the summary names up to 40 reds, and the assertion each one
+      # gave lives here (LESSONS.md, 10-17 and 10-28).
+      - uses: actions/upload-artifact@v4
+        if: failure() || steps.files.outputs.mode == 'full'
+        with:
+          name: gui-log-${{ matrix.shard }}
+          path: ${{ runner.temp }}/gui.log
+          if-no-files-found: ignore

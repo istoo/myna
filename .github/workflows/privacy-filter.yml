@@ -1,0 +1,121 @@
+name: Privacy Filter
+
+# pf-serve, the program that runs Privacy Filter (Settings › Privacy's
+# 1.6 GB local model), built for each system and published as a release's
+# assets. internal/pii pins a tag (serveTag) and each system's sha256; a
+# run of this workflow on a pf-v* tag makes the release that pin names.
+# The model is not here: LocalAI's q8 GGUF is downloaded by owl itself.
+#
+# A repository with no pf-v* release yet, as this fork was, gives the
+# model's download a 404 and Privacy Filter can't be turned on (the first
+# run of this workflow fixes that).
+on:
+  workflow_dispatch:
+    inputs:
+      targets:
+        description: "comma-separated targets to build (darwin-arm64, darwin-amd64, linux-amd64, linux-arm64, windows-amd64)"
+        default: "darwin-arm64"
+  push:
+    tags:
+      - "pf-v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: build (${{ matrix.target }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: darwin-arm64
+            os: macos-latest
+          - target: darwin-amd64
+            os: macos-latest
+          - target: linux-amd64
+            os: ubuntu-22.04
+          - target: linux-arm64
+            os: ubuntu-24.04-arm
+          - target: windows-amd64
+            os: ubuntu-22.04
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Choose targets
+        id: pick
+        shell: bash
+        run: |
+          wanted="${{ github.event_name == 'push' && 'all' || inputs.targets }}"
+          if [ "$wanted" = "all" ] || [[ ",$wanted," == *",${{ matrix.target }},"* ]] \
+            || { [ "$wanted" = "apple" ] && [[ "${{ matrix.target }}" == *darwin* ]]; } \
+            || { [ "$wanted" = "linux" ] && [[ "${{ matrix.target }}" == *linux* ]]; } \
+            || { [ "$wanted" = "windows" ] && [[ "${{ matrix.target }}" == *windows* ]]; }; then
+            echo "build=yes" >> "$GITHUB_OUTPUT"
+          else
+            echo "build=no" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Tools
+        if: steps.pick.outputs.build == 'yes'
+        shell: bash
+        run: |
+          case "$RUNNER_OS" in
+            macOS) brew install ninja ;;
+            Linux)
+              sudo apt-get update
+              sudo apt-get install -y ninja-build zip
+              if [ "${{ matrix.target }}" = windows-amd64 ]; then
+                sudo apt-get install -y mingw-w64
+              else
+                # ggml-vulkan's find_package(Vulkan) wants the loader's
+                # library; build.sh brings the headers, the loader's .def
+                # and glslc, not libvulkan.so
+                sudo apt-get install -y libvulkan-dev
+              fi
+              ;;
+          esac
+
+      # build.sh fetches privacy-filter.cpp and ggml at the pinned commit
+      # and writes pf-serve-<target>.zip; pf-serve-base and
+      # pf-serve-vulkan are in the same zip where the target has them.
+      - name: Build
+        if: steps.pick.outputs.build == 'yes'
+        shell: bash
+        working-directory: native/privacy-filter
+        run: ./build.sh "${{ matrix.target }}" "$RUNNER_TEMP/pf-serve-${{ matrix.target }}.zip"
+
+      - name: Record the digest
+        if: steps.pick.outputs.build == 'yes'
+        shell: bash
+        run: |
+          sha256sum "$RUNNER_TEMP/pf-serve-${{ matrix.target }}.zip" | tee "$RUNNER_TEMP/sha.txt"
+          echo "sha=$(cut -d' ' -f1 "$RUNNER_TEMP/sha.txt")" >> "$GITHUB_OUTPUT"
+        id: digest
+
+      - uses: actions/upload-artifact@v4
+        if: steps.pick.outputs.build == 'yes'
+        with:
+          name: pf-serve-${{ matrix.target }}
+          path: |
+            ${{ runner.temp }}/pf-serve-${{ matrix.target }}.zip
+            ${{ runner.temp }}/sha.txt
+
+      # A pf-v* tag publishes each system's zip under the tag's name, the
+      # file names internal/pii asks for (pf-serve-<target>.zip).
+      - name: Publish
+        if: steps.pick.outputs.build == 'yes' && github.event_name == 'push'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          # --latest=false: the app's updater reads
+          # releases/latest/download/latest.json, so a pf-v* release must
+          # never take Latest from the app's own release (LESSONS: an older
+          # release published later took it and the tap went back with it)
+          gh release view "$tag" >/dev/null 2>&1 || \
+            gh release create "$tag" --title "Privacy Filter $tag" --notes "pf-serve for each system; sha256 in each run's log." --latest=false
+          gh release upload "$tag" "$RUNNER_TEMP/pf-serve-${{ matrix.target }}.zip" --clobber

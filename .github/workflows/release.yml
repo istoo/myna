@@ -1,0 +1,178 @@
+name: Release
+
+# A v* tag builds Owl here and publishes it as a GitHub release of this
+# repository. The app's updater reads latest.json and notes.json from the
+# newest release's assets, and downloads the files those name, so nothing
+# of upstream's release pipeline is involved.
+#
+# There is no Developer ID here: the app is signed with owl's own
+# self-signed certificate (MACOS_SIGN_P12), the same one every release.
+# An ad-hoc signature has no signer, so a firewall such as Little Snitch
+# knows the app only by its checksum and warned "The program has been
+# modified" on every update; a certificate's key is an identity that
+# stays. The updater's check still holds: a signature that verifies, by
+# the same "team" as the installed app, which a certificate not from
+# Apple has none of, as an ad-hoc signature hasn't.
+#
+# The Linux desktop app links GTK 3 and WebKitGTK 4.1 through cgo, so it
+# is built natively on an Ubuntu runner, in a job of its own, and the
+# release waits for it: the installer's desktop path looks for
+# owl-linux-<arch> among the release's assets.
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (no v prefix; the v tag must exist)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+      tag: ${{ steps.v.outputs.tag }}
+    steps:
+      - name: Version
+        id: v
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="$INPUT_VERSION"
+          else
+            VERSION="${REF_NAME#v}"
+          fi
+          [[ "$VERSION" =~ ^[0-9][0-9A-Za-z.+-]*$ ]] || { echo "bad version: $VERSION" >&2; exit 1; }
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+
+  linux:
+    needs: version
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Install GTK and WebKitGTK
+        timeout-minutes: 15
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev
+      - name: Build the Linux desktop app
+        run: make release-linux VERSION=${{ needs.version.outputs.version }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: owl-linux
+          path: dist/owl-linux-*
+
+  release:
+    needs: [version, linux]
+    # macos-14's arm64 configuration was withdrawn from this account's
+    # runners (v0.1.2904's release job was cancelled with "The
+    # configuration 'macos-14-arm64-us-default' is not supported");
+    # macos-latest is an arm64 image, as the app it packs is
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: owl-linux
+          path: dist
+
+      - name: Build the app
+        run: make app VERSION=${{ needs.version.outputs.version }}
+
+      # signed again over make's ad-hoc signature, with the certificate
+      # every release is signed with; none is a failed release, never an
+      # ad-hoc one, which would make each firewall ask about owl again
+      - name: Sign the app
+        env:
+          P12: ${{ secrets.MACOS_SIGN_P12 }}
+          P12_PASSWORD: ${{ secrets.MACOS_SIGN_P12_PASSWORD }}
+        run: |
+          test -n "$P12" && test -n "$P12_PASSWORD" || { echo "::error::MACOS_SIGN_P12 is not set"; exit 1; }
+          kc="$RUNNER_TEMP/sign.keychain-db"
+          kp=$(openssl rand -hex 16)
+          echo "$P12" | base64 --decode > "$RUNNER_TEMP/sign.p12"
+          security create-keychain -p "$kp" "$kc"
+          security set-keychain-settings -lut 21600 "$kc"
+          security unlock-keychain -p "$kp" "$kc"
+          security import "$RUNNER_TEMP/sign.p12" -k "$kc" -P "$P12_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$kp" "$kc" >/dev/null
+          rm -f "$RUNNER_TEMP/sign.p12"
+          codesign --force --deep --sign "owl (istoo) code signing" --keychain "$kc" owl.app
+          codesign --verify --deep --strict owl.app
+          codesign -d -r- owl.app 2>&1 | grep -q 'certificate root = H"0ef43d03a1acfa3fbe4219cdb53645d279c2ea00"' || { echo "::error::owl.app is not signed with owl's certificate"; codesign -d -r- owl.app; exit 1; }
+          security delete-keychain "$kc"
+
+      - name: Package the app
+        run: ditto -c -k --keepParent owl.app owl-darwin-arm64.zip
+
+      - name: The install script
+        run: |
+          mkdir -p dist
+          cp site/public/install.sh dist/install.sh
+
+      - name: Build the command-line builds
+        run: |
+          mkdir -p dist
+          for t in darwin/arm64 darwin/amd64 linux/amd64 linux/arm64 windows/amd64 windows/arm64; do
+            os=${t%/*}; arch=${t#*/}; ext=""
+            [ "$os" = windows ] && ext=.exe
+            echo "  $os/$arch"
+            CGO_ENABLED=0 GOOS=$os GOARCH=$arch go build -tags nogui -trimpath \
+              -ldflags="-s -w -X main.version=${{ needs.version.outputs.version }}" \
+              -o "dist/owl-cli-$os-$arch$ext" . || exit 1
+          done
+
+      - name: Notes
+        run: |
+          TAG="${{ needs.version.outputs.tag }}"
+          PREV=$(git describe --tags --abbrev=0 "$TAG^" 2>/dev/null || true)
+          if [ -n "$PREV" ]; then
+            git log --no-merges --pretty='- %s' "$PREV..$TAG" > NOTES.md
+          else
+            git log -1 --pretty='- %s' "$TAG" > NOTES.md
+          fi
+
+      - name: Feed files
+        run: |
+          mkdir -p prev
+          gh release download --repo "$GITHUB_REPOSITORY" --pattern notes.json --dir prev 2>/dev/null || true
+          python3 scripts/release_feed.py \
+            --repo "$GITHUB_REPOSITORY" \
+            --version "${{ needs.version.outputs.version }}" \
+            --notes NOTES.md \
+            --out dist \
+            --previous prev/notes.json \
+            owl-darwin-arm64.zip dist/owl-cli-* dist/owl-linux-*
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.version.outputs.tag }}
+        run: |
+          gh release create "$TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Owl $TAG" \
+            --notes-file NOTES.md \
+            owl-darwin-arm64.zip dist/owl-cli-* dist/owl-linux-* dist/latest.json dist/notes.json dist/install.sh

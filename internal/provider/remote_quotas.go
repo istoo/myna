@@ -1,0 +1,530 @@
+package provider
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"net/http"
+	"net/url"
+	"slices"
+	"strings"
+	"sync"
+	"time"
+
+	"github.com/istoo/owl/internal/catalog"
+)
+
+// A remote owl's quotas (莫 on Discord): a computer whose providers are
+// another's owl (remote-owl) has the accounts signed in there, not
+// here, so its Usage page, menu bar and owl quota had nothing to show.
+// They now show the other owl's cards as it last read them, each named
+// with that owl ("Codex · office") and its provider id put after the
+// remote's ("office/codex"), so they never meet this computer's own.
+//
+// Only the owl holding the sign-ins asks the vendors. It answers
+// RemoteCardsPath from what it has kept (CachedCards: its page's cards and
+// what was read behind the requests since, cards_kept.go) and asks nobody;
+// a card's refresh here asks it to read that card again
+// (RemoteRefreshPath), which is the one time a vendor is asked for us.
+
+// RemoteCardsPath is the gateway's answer of its kept cards.
+const RemoteCardsPath = "/v1/owl/quotas/cards"
+
+// RemoteRefreshPath has the gateway read a card (?provider=, &user=)
+// again, or every card when no provider is named, then answer as
+// RemoteCardsPath.
+const RemoteRefreshPath = "/v1/owl/quotas/refresh"
+
+// RemoteCodexResetPath has the gateway spend one of its Codex account's
+// rate-limit resets (?user=, the account always named; &credit=, one of
+// its resets.each, else the one that runs out first), as its Usage page's
+// "Use a reset" does (#3850, prgrmrwy): a reset shown on another owl's
+// card, or in an app reading the cards, can be used from there too. It
+// can't be undone, so the gateway takes it only with a gateway key of full
+// access, never from a page or app it lets in without one.
+const RemoteCodexResetPath = "/v1/owl/quotas/codex-reset"
+
+// RemoteResetWait is how long a remote owl is waited for to spend a
+// reset: its use (20s at most) and its wait for routing to know (10s).
+const RemoteResetWait = 35 * time.Second
+
+// remoteCardsFor is how long another owl's cards are kept here before
+// they are asked for again: reading its cache costs it nothing from the
+// vendors, but the menu bar and alerts ask often.
+const remoteCardsFor = 30 * time.Second
+
+// errRemoteNothingRead is a remote owl that has read no card since it
+// started: it is asked to only when a card is refreshed here.
+const errRemoteNothingRead = "nothing read on that owl yet; refresh to have it read"
+
+// errRemoteNoShare is a remote owl too old to answer RemoteCardsPath.
+const errRemoteNoShare = "remote owl doesn't share its quotas; update owl on that computer"
+
+// errRemoteNotShared is a remote owl that answers models but not its
+// quotas (403): it isn't shared on its local network, as an older owl's
+// gateway that OWL_ADDR opened (Docker's) wasn't until it was (Fim980 on
+// X: the card said only "Allowance unavailable"). A newer one asks a key of
+// every other machine and, given one, answers the quotas too.
+const errRemoteNotShared = "remote owl isn't shared; turn on Share on local network on that computer"
+
+// errRemoteKey is a remote owl that didn't take this provider's key (401).
+const errRemoteKey = "remote owl didn't take this key; use one of its enabled gateway keys"
+
+// KeyReadOnlyCode is the error code a gateway answers a read-only key
+// with on a route that uses or changes anything.
+const KeyReadOnlyCode = "gateway_key_read_only"
+
+// errRemoteReadOnly is a remote owl whose key here is read-only: it
+// shows the cards, and spends nothing.
+const errRemoteReadOnly = "this key is read-only on the remote owl; give the provider a key with full access to use a reset from here"
+
+// KeyHeldCode is the error code a gateway answers a key held to a budget,
+// models or accounts with, where its own accounts would be told (#1981):
+// the key is someone else's to use, and is told its own limit alone.
+const KeyHeldCode = "gateway_key_held"
+
+// errKeyHeld is a remote owl that holds this provider's key to a
+// budget, models or accounts: it tells the key's own card (remoteKeyCards)
+// and none of its accounts', so none is shown, not even one kept from
+// before the key was held.
+var errKeyHeld = errors.New("remote owl holds this key to a budget, models or accounts")
+
+// errRemoteUnreachable starts the error of a remote owl that couldn't
+// be reached at all.
+const errRemoteUnreachable = "couldn't reach the remote owl"
+
+// CachedCards is the Usage page's cards as this owl last read them,
+// each with its kind, for another owl to show: no vendor is asked,
+// whatever their age, and another owl's cards shown here aren't
+// passed on.
+//
+// The cards are the page's with what was read of the same accounts and
+// keys behind it since (cards_kept.go): a owl serving only other
+// owls has nobody on its page (#1313).
+func CachedCards(now time.Time) []SubscriptionQuota {
+	c := &subscriptionUsageCache
+	c.Lock()
+	data := c.data
+	c.Unlock()
+	subs := withDailyCredits(visibleQuotas(withAccountReadings(data)), now)
+	p := &planQuotaCache
+	p.Lock()
+	plans := slices.Clone(p.data)
+	p.Unlock()
+	b := &keyBalanceCache
+	b.Lock()
+	balances := slices.Clone(b.data)
+	b.Unlock()
+	ps := keyCardProviders()
+	if plans == nil || balances == nil {
+		keptPlans, keptBalances := keptKeyCards(ps)
+		if plans == nil {
+			plans = keptPlans
+		}
+		if balances == nil {
+			balances = keptBalances
+		}
+	}
+	plans, balances = withKeyReadings(plans, ps, "plan"), withKeyReadings(balances, ps, "balance")
+	plans, subs = seatCards(plans, subs)
+	subs = withAccountNames(subs)
+	out := []SubscriptionQuota{}
+	for _, g := range []struct {
+		kind string
+		qs   []SubscriptionQuota
+	}{{"subscription", subs}, {"plan", plans}, {"balance", balances}} {
+		for _, q := range g.qs {
+			if q.From == "" {
+				q.Kind = g.kind
+				out = append(out, q)
+			}
+		}
+	}
+	return out
+}
+
+// ReadAllCards has every card read again, the page's Refresh asked by
+// another owl whose card of this one's said nothing was read yet.
+func ReadAllCards(ctx context.Context) {
+	AskUsage()
+	ForgetBalances()
+	forgetPlanQuotas()
+	Quotas(Asked(ctx))
+}
+
+var remoteCardCache struct {
+	sync.Mutex
+	m map[string]remoteCardsRead
+}
+
+type remoteCardsRead struct {
+	at    time.Time
+	cards []SubscriptionQuota // as the remote has them, not yet named
+	err   string
+	held  bool // the remote holds the key: no card of its accounts is shown
+}
+
+// remoteCardsID is what a remote's cards are kept here by: the provider
+// and its key, so cards read with one key are never shown under another
+// (a key replaced by one the remote holds shows none of them).
+func remoteCardsID(p Provider) string {
+	return p.ID + "\x00" + keyID(p.Key)
+}
+
+// ForgetRemoteCardsForTest drops the remote owls' cards kept here, for
+// a test run again (-count) to ask its own fake remote afresh.
+func ForgetRemoteCardsForTest() {
+	c := &remoteCardCache
+	c.Lock()
+	c.m = nil
+	c.Unlock()
+	k := &remoteKeyCache
+	k.Lock()
+	k.m = nil
+	k.Unlock()
+}
+
+// ForgetKeptCardsForTest has the cards kept on disk (quotas.json) read
+// again from the home a test has set: they are read once per process.
+func ForgetKeptCardsForTest() {
+	c := &lastQuotas
+	c.Lock()
+	c.m, c.loaded = nil, false
+	c.Unlock()
+}
+
+// remoteOwls are the remote owls this owl uses.
+func remoteOwls() []Provider {
+	var out []Provider
+	for _, p := range All() {
+		if p.IsRemoteOwl() && !p.Hidden && !p.Off && p.Key != "" && p.Anthropic != "" {
+			out = append(out, p)
+		}
+	}
+	return out
+}
+
+// RemoteCards is every remote owl's cards, named for this computer.
+func RemoteCards(ctx context.Context) []SubscriptionQuota {
+	ps := remoteOwls()
+	got := make([][]SubscriptionQuota, len(ps))
+	var wg sync.WaitGroup
+	for i, p := range ps {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			// its keys' own limits (#1547), read beside its cards
+			keys := make(chan []SubscriptionQuota, 1)
+			go func() { keys <- remoteKeyCards(ctx, p, false, "") }()
+			got[i] = append(remoteCards(ctx, p, false), <-keys...)
+		}()
+	}
+	wg.Wait()
+	return slices.Concat(got...)
+}
+
+// remoteCards is p's cards, from what was kept here when it is recent and
+// fresh isn't asked. A remote that can't be asked keeps showing its last
+// cards, as old as they are; with none, one card says why.
+func remoteCards(ctx context.Context, p Provider, fresh bool) []SubscriptionQuota {
+	id := remoteCardsID(p)
+	c := &remoteCardCache
+	c.Lock()
+	r, ok := c.m[id]
+	c.Unlock()
+	if !ok || fresh || time.Since(r.at) >= remoteCardsFor {
+		asked := time.Now()
+		cards, err := askRemote(ctx, p, http.MethodGet, RemoteCardsPath)
+		r = keepRemoteCards(id, asked, cards, err)
+	}
+	name := remoteName(p)
+	if r.held {
+		return nil
+	}
+	if len(r.cards) == 0 {
+		msg := r.err
+		if msg == "" {
+			msg = errRemoteNothingRead
+		}
+		return []SubscriptionQuota{{Provider: p.ID, Name: name, Icon: "owl", Kind: "subscription", From: name, Windows: []QuotaWindow{}, Error: msg}}
+	}
+	out := make([]SubscriptionQuota, 0, len(r.cards))
+	for _, q := range r.cards {
+		if q.From != "" || q.Provider == "" {
+			continue
+		}
+		q.Provider = p.ID + "/" + q.Provider
+		q.Name += " · " + name
+		q.From = name
+		// what is pressed on a card acts on this computer's accounts:
+		// a check-in is the other owl's to do. A Codex reset is
+		// spent there when pressed here (UseRemoteCodexReset, #3850);
+		// a GLM team's (byWindow) is spent on the vendor's page
+		if q.Provider != p.ID+"/codex" || q.Resets != nil && q.Resets.ByWindow {
+			q.Resets = nil
+		}
+		q.Checkins, q.CheckinBy, q.Checkin, q.CheckinOff = false, "", nil, false
+		if q.Windows == nil {
+			q.Windows = []QuotaWindow{}
+		}
+		out = append(out, q)
+	}
+	return out
+}
+
+func remoteName(p Provider) string {
+	if p.Name != "" {
+		return p.Name
+	}
+	return p.ID
+}
+
+// remoteOf is the remote owl a card's provider id names, and the id of
+// the card there ("" for the card that stands for the remote itself).
+func remoteOf(id string) (Provider, string, bool) {
+	rid, card, _ := strings.Cut(id, "/")
+	for _, p := range remoteOwls() {
+		if p.ID == rid {
+			return p, card, true
+		}
+	}
+	return Provider{}, "", false
+}
+
+// IsRemoteCard is whether id is a card this owl has from a remote
+// owl, or the card standing for the remote itself.
+func IsRemoteCard(id string) bool {
+	_, _, ok := remoteOf(id)
+	return ok
+}
+
+// refreshRemote has the remote owl read its card again (every card,
+// for the remote's own), then keeps what it now has.
+func refreshRemote(ctx context.Context, p Provider, card, user string) {
+	// a key's limit card is read again with that key (or every key's)
+	if card == remoteKeyCard {
+		remoteKeyCards(ctx, p, true, user)
+		return
+	}
+	q := url.Values{}
+	if card != "" {
+		q.Set("provider", card)
+		if user != "" {
+			q.Set("user", user)
+		}
+	}
+	path := RemoteRefreshPath
+	if len(q) > 0 {
+		path += "?" + q.Encode()
+	}
+	asked := time.Now()
+	if _, err := askRemote(ctx, p, http.MethodPost, path); err != nil {
+		keepRemoteCards(remoteCardsID(p), asked, nil, err)
+	}
+	remoteCards(ctx, p, true)
+}
+
+// keepRemoteCards keeps what a read of a remote's cards asked at asked
+// got, and gives back what is now kept. A failed read keeps the cards
+// read before, with its error; a key the remote holds drops them. A read
+// that comes back after one asked later is not kept over it, so a slow
+// answer from before the key was held can't bring its cards back.
+func keepRemoteCards(id string, asked time.Time, cards []SubscriptionQuota, err error) remoteCardsRead {
+	c := &remoteCardCache
+	c.Lock()
+	defer c.Unlock()
+	r := c.m[id]
+	if asked.Before(r.at) {
+		return r
+	}
+	r.at = asked
+	switch {
+	case errors.Is(err, errKeyHeld):
+		r.cards, r.err, r.held = nil, "", true
+	case err != nil:
+		r.err = err.Error()
+	default:
+		r.cards, r.err, r.held = cards, "", false
+	}
+	if c.m == nil {
+		c.m = map[string]remoteCardsRead{}
+	}
+	c.m[id] = r
+	return r
+}
+
+// RemoteQuotaHistories is every remote owl's quota history since days
+// ago, as its own GET /v1/owl/quotas/history has it (read from its
+// disk, no vendor asked), the providers named as RemoteCards names them.
+func RemoteQuotaHistories(ctx context.Context, days string) []QuotaHistory {
+	ps := remoteOwls()
+	got := make([][]QuotaHistory, len(ps))
+	var wg sync.WaitGroup
+	for i, p := range ps {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			var hs []QuotaHistory
+			if err := remoteJSON(ctx, p, http.MethodGet, "/v1/owl/quotas/history?days="+url.QueryEscape(days), &hs); err != nil {
+				return
+			}
+			for j := range hs {
+				hs[j].Provider = p.ID + "/" + hs[j].Provider
+			}
+			got[i] = hs
+		}()
+	}
+	wg.Wait()
+	return slices.Concat(got...)
+}
+
+func askRemote(ctx context.Context, p Provider, method, path string) ([]SubscriptionQuota, error) {
+	var cards []SubscriptionQuota
+	if err := remoteJSON(ctx, p, method, path, &cards); err != nil {
+		return nil, err
+	}
+	return cards, nil
+}
+
+// signRemote puts on req, a request of owl's own to the remote owl
+// p (its cards, a refresh, its quota history, a key's limit), key and p's
+// Headers, as its model list and its API requests carry them (Yirasumi on
+// Discord: the Usage page's read of the remote went without the headers a
+// proxy in front of it asks for). It is no turn of a conversation:
+// ${sessionId} and ${threadId} are an id of its own (conversation.go).
+// The key goes as Authorization: Bearer, which a user's Authorization
+// replaces (a proxy's own scheme), and always as x-api-key (remoteKey).
+func (p Provider) signRemote(req *http.Request, key string) {
+	req.Header.Set("Authorization", "Bearer "+key)
+	for k, v := range p.SentHeaders(context.Background()) {
+		catalog.PutUserHeader(req.Header, k, v)
+	}
+	remoteKey(req.Header, key)
+}
+
+// remoteKey writes key as x-api-key, in place of the header in any case:
+// to a remote owl that header is owl's key, which a gateway reads
+// beside Authorization, so a user's header (a proxy's Authorization) never
+// leaves the request without it, and a key's limit is read with that key.
+func remoteKey(h http.Header, key string) {
+	for k := range h {
+		if strings.EqualFold(k, "x-api-key") {
+			delete(h, k)
+		}
+	}
+	h.Set("x-api-key", key)
+}
+
+// remoteJSON asks p's gateway, with its key, for a {"data": …} list.
+func remoteJSON(ctx context.Context, p Provider, method, path string, dst any) error {
+	b, err := remoteBody(ctx, p, method, path, 8*time.Second)
+	if err != nil {
+		return err
+	}
+	var list struct {
+		Data json.RawMessage `json:"data"`
+	}
+	if err := json.Unmarshal(b, &list); err != nil {
+		return err
+	}
+	if len(list.Data) == 0 {
+		return nil
+	}
+	return json.Unmarshal(list.Data, dst)
+}
+
+// remoteBody asks p's gateway, with its key, waiting wait at most, and
+// gives back the body of a 2xx answer; any other is an error that says
+// what to do about it.
+func remoteBody(ctx context.Context, p Provider, method, path string, wait time.Duration) ([]byte, error) {
+	ctx, cancel := context.WithTimeout(ctx, wait)
+	defer cancel()
+	req, err := http.NewRequestWithContext(ctx, method, p.Anthropic+path, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Accept", "application/json")
+	p.signRemote(req, p.Key)
+	res, err := p.Do(http.DefaultClient, req)
+	if err != nil {
+		return nil, fmt.Errorf("%s %s: %w", errRemoteUnreachable, remoteName(p), err)
+	}
+	defer res.Body.Close()
+	b, err := io.ReadAll(io.LimitReader(res.Body, 8<<20))
+	if err != nil && ctx.Err() != nil {
+		return nil, fmt.Errorf("%s %s: %w", errRemoteUnreachable, remoteName(p), ctx.Err())
+	}
+	var e struct {
+		Error struct {
+			Code    string `json:"code"`
+			Message string `json:"message"`
+		} `json:"error"`
+	}
+	switch {
+	case res.StatusCode == http.StatusNotFound || res.StatusCode == http.StatusMethodNotAllowed:
+		return nil, fmt.Errorf("%s", errRemoteNoShare)
+	case res.StatusCode == http.StatusForbidden:
+		json.Unmarshal(b, &e)
+		switch e.Error.Code {
+		case KeyHeldCode:
+			return nil, errKeyHeld
+		case KeyReadOnlyCode:
+			return nil, fmt.Errorf("%s", errRemoteReadOnly)
+		}
+		return nil, fmt.Errorf("%s", errRemoteNotShared)
+	case res.StatusCode == http.StatusUnauthorized:
+		return nil, fmt.Errorf("%s", errRemoteKey)
+	case res.StatusCode < 200 || res.StatusCode >= 300:
+		if json.Unmarshal(b, &e) == nil && e.Error.Message != "" {
+			return nil, fmt.Errorf("%s: %s", remoteName(p), e.Error.Message)
+		}
+		return nil, fmt.Errorf("%s answered %s", remoteName(p), res.Status)
+	}
+	return b, nil
+}
+
+// errRemoteResetUnknown is a reset asked of a remote owl that didn't
+// answer in time: it may have been spent there, so it isn't asked again.
+const errRemoteResetUnknown = "%s didn't say in time whether the reset was used; it may have been. Refresh the card to see before asking again"
+
+// UseRemoteCodexReset has the remote owl whose card id is (its Codex
+// card, "office/codex") spend one of user's resets there, as its own
+// Usage page would (#3850, prgrmrwy: the card here said "1 reset", and
+// using it took a walk to the other computer). credit is one of the
+// card's resets.each, "" for the one that runs out first. The account is
+// always named: which one the remote is signed in to isn't known here,
+// and a reset can't be undone. The remote's cards are read afresh after,
+// so the card shows its windows started again.
+func UseRemoteCodexReset(ctx context.Context, id, user, credit string) (ResetOutcome, error) {
+	p, card, ok := remoteOf(id)
+	if !ok || card != "codex" {
+		return ResetOutcome{}, fmt.Errorf("%s is no remote owl's Codex card", id)
+	}
+	if user == "" {
+		return ResetOutcome{}, errors.New("name the Codex account whose reset is used")
+	}
+	q := url.Values{"user": {user}}
+	if credit != "" {
+		q.Set("credit", credit)
+	}
+	b, err := remoteBody(ctx, p, http.MethodPost, RemoteCodexResetPath+"?"+q.Encode(), RemoteResetWait)
+	if err != nil {
+		// no answer: the remote may have spent it all the same
+		if errors.Is(err, context.DeadlineExceeded) {
+			return ResetOutcome{}, fmt.Errorf(errRemoteResetUnknown, remoteName(p))
+		}
+		return ResetOutcome{}, err
+	}
+	var out ResetOutcome
+	if err := json.Unmarshal(b, &out); err != nil || out.Code == "" {
+		return ResetOutcome{}, fmt.Errorf(errRemoteResetUnknown, remoteName(p))
+	}
+	// the remote read the card again after the reset; what it has now
+	read, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
+	remoteCards(read, p, true)
+	cancel()
+	toldUsage()
+	return out, nil
+}
