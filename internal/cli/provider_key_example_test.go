@@ -19,8 +19,8 @@ func TestAddWithoutKeySaysTheCommand(t *testing.T) {
 	checked := 0
 	for _, pr := range provider.Presets() {
 		p, err := provider.FromPreset(pr.ID)
-		if err != nil || pr.NoKey || pr.Endpoint != "" || p.IsVertex() {
-			continue // a local server takes no key; a resource's address is asked first
+		if err != nil || pr.NoKey || pr.Kind == provider.KindLocal || pr.Endpoint != "" || p.IsVertex() {
+			continue // a local server takes no key at its own address (keyOptional); a resource's address is asked first
 		}
 		err = addProvider([]string{pr.ID})
 		if err == nil {
