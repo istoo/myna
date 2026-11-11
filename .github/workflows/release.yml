@@ -117,7 +117,11 @@ jobs:
           security import "$RUNNER_TEMP/sign.p12" -k "$kc" -P "$P12_PASSWORD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple: -s -k "$kp" "$kc" >/dev/null
           rm -f "$RUNNER_TEMP/sign.p12"
-          codesign --force --deep --sign "owl (istoo) code signing" --keychain "$kc" owl.app
+          # in the search list, or codesign finds no identity there: the
+          # certificate isn't Apple's, so none of it is "valid" on its own
+          # (v0.2.6's release: "no identity found"); named by its SHA-1
+          security list-keychains -d user -s "$kc" $(security list-keychains -d user | tr -d '"')
+          codesign --force --deep --sign 0EF43D03A1ACFA3FBE4219CDB53645D279C2EA00 --keychain "$kc" owl.app
           codesign --verify --deep --strict owl.app
           codesign -d -r- owl.app 2>&1 | grep -q 'certificate root = H"0ef43d03a1acfa3fbe4219cdb53645d279c2ea00"' || { echo "::error::owl.app is not signed with owl's certificate"; codesign -d -r- owl.app; exit 1; }
           security delete-keychain "$kc"
