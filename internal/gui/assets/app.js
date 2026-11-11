@@ -3135,8 +3135,14 @@ function dragScroll(list) {
   while (scroll && !/(auto|scroll)/.test(getComputedStyle(scroll).overflowY)) scroll = scroll.parentElement;
   scroll ||= document.scrollingElement;
   const bounds = scroll.getBoundingClientRect(), edge = 36;
-  return { scroll, scroll0: scroll.scrollTop, speedAt: (y) => y < bounds.top + edge ? -Math.min(1, (bounds.top + edge - y) / edge)
-    : y > bounds.bottom - edge ? Math.min(1, (y - bounds.bottom + edge) / edge) : 0 };
+  // an edge scrolls once the pointer has left it
+  let up = false, down = false;
+  return { scroll, scroll0: scroll.scrollTop, speedAt: (y) => {
+    if (y >= bounds.top + edge) up = true;
+    if (y <= bounds.bottom - edge) down = true;
+    return up && y < bounds.top + edge ? -Math.min(1, (bounds.top + edge - y) / edge)
+      : down && y > bounds.bottom - edge ? Math.min(1, (y - bounds.bottom + edge) / edge) : 0;
+  } };
 }
 // dragListen: a drag's listeners (letting go saves; Escape, blur, resize cancel)
 function dragListen(handle, move, finish) {
@@ -3235,18 +3241,24 @@ function dragRows(e, handle, row, list, rows, commit, start = () => {}, idle = (
   return true;
 }
 
-// dragCards is dragRows for cards laid out in a grid: the card follows the
-// pointer both ways, the slot nearest its middle is where it goes, and the
-// cards between move a slot over to make room.
-function dragCards(e, handle, card, list, cards, commit, idle = () => {}) {
+// dragCards is dragRows for a grid: the card goes to the order that puts it
+// nearest where it is held, and a slot shows where. layout(rects) gives each
+// card's place in an order; by default card k stands where card k is now.
+function dragCards(e, handle, card, list, cards, commit, idle = () => {}, layout = null) {
   if (e.button !== 0 || e.isPrimary === false || cards.length < 2) return false;
   const from = cards.indexOf(card);
   if (from < 0) return false;
   const rects = cards.map((c) => c.getBoundingClientRect());
+  const place = layout?.(rects) || ((order) => {
+    const at = [];
+    order.forEach((i, k) => { at[i] = { left: rects[k].left, top: rects[k].top }; });
+    return at;
+  });
+  const orderTo = (to) => { const o = cards.map((_, i) => i); o.splice(to, 0, ...o.splice(from, 1)); return o; };
   const { scroll, scroll0, speedAt } = dragScroll(list);
-  let dragging = false, ended = false, to = from, x = e.clientX, y = e.clientY, frame = 0, lastTime = 0;
+  let dragging = false, ended = false, to = from, x = e.clientX, y = e.clientY, frame = 0, lastTime = 0, slot = null;
   const x0 = x, y0 = y, t0 = performance.now(), pointer = e.pointerId;
-  const r0 = rects[from];
+  const r0 = rects[from], box = list.getBoundingClientRect();
   const paint = (time) => {
     frame = 0;
     if (!card.isConnected) return finish(false);
@@ -3257,17 +3269,28 @@ function dragCards(e, handle, card, list, cards, commit, idle = () => {}) {
     if (speed) scroll.scrollTop += speed * dt * .6;
     const dx = x - x0, dy = y - y0 + scroll.scrollTop - scroll0;
     card.style.transform = `translate(${dx}px, ${dy}px)`;
-    const cx = r0.left + r0.width / 2 + dx, cy = r0.top + r0.height / 2 + dy;
-    let best = Infinity;
-    rects.forEach((r, i) => {
-      const d = (cx - r.left - r.width / 2) ** 2 + (cy - r.top - r.height / 2) ** 2;
-      if (d < best) { best = d; to = i; }
-    });
+    // the order shown is kept until another is clearly nearer
+    const fx = r0.left + dx, fy = r0.top + dy, far = (at) => Math.hypot(at[from].left - fx, at[from].top - fy);
+    let at = place(orderTo(to)), best = far(at) - 8;
+    for (let i = 0; i < cards.length; i++) {
+      if (i === to) continue;
+      const a = place(orderTo(i)), d = far(a);
+      if (d < best) { best = d; to = i; at = a; }
+    }
     cards.forEach((c, i) => {
       if (i === from) return;
-      const j = i > from && i <= to ? i - 1 : i < from && i >= to ? i + 1 : i;
-      c.style.transform = j !== i ? `translate(${rects[j].left - rects[i].left}px, ${rects[j].top - rects[i].top}px)` : "";
+      const mx = at[i].left - rects[i].left, my = at[i].top - rects[i].top;
+      c.style.transform = Math.abs(mx) > .5 || Math.abs(my) > .5 ? `translate(${mx}px, ${my}px)` : "";
     });
+    const fresh = !slot;
+    if (fresh) {
+      slot = el("div", "drag-slot");
+      slot.setAttribute("aria-hidden", "true");
+      slot.style.width = r0.width + "px";
+      slot.style.height = r0.height + "px";
+    }
+    slot.style.transform = `translate(${at[from].left - box.left - list.clientLeft}px, ${at[from].top - box.top - list.clientTop}px)`;
+    if (fresh) list.prepend(slot);
     if (speed) frame = requestAnimationFrame(paint);
   };
   const move = (ev) => {
@@ -3303,6 +3326,7 @@ function dragCards(e, handle, card, list, cards, commit, idle = () => {}) {
     if (handle.hasPointerCapture(pointer)) handle.releasePointerCapture(pointer);
     list.classList.remove("sorting");
     card.classList.remove("dragging");
+    slot?.remove();
     cards.forEach((c) => { c.style.transform = ""; });
     if (save && dragging && to !== from) commit(to);
     idle();
@@ -15234,20 +15258,16 @@ function usageAcctFold(q, open) {
   return b;
 }
 
-// The Usage page's cards in the order they were dragged to (settings
-// usageOrder, by provider id), as the Agents page's rows are; one it doesn't
-// name keeps the order owl sends them in after them, the Providers
-// page's (provider.InProviderOrder). The tray panel's Usage tab follows it
-// too.
+// The Usage cards in their dragged order (usageOrder); the rest after, in
+// provider.InProviderOrder. The tray's Usage tab follows it too.
 function byUsageOrder(list) {
   const order = state.settings?.usageOrder || [];
   const rank = (q) => { const i = order.indexOf(q.provider); return i < 0 ? order.length : i; };
   return list.map((q, i) => [q, i]).sort(([a, i], [b, j]) => rank(a) - rank(b) || i - j).map(([q]) => q);
 }
 
-// keyCards puts a key's balance on its plan's card, a row under the
-// windows, rather than a second card of one name (#1658); one that failed
-// keeps its own card. balanceCard is its id, for the menu bar.
+// keyCards puts a key's balance on its plan's card (#1658); a failed one
+// keeps its own. balanceCard is its id, for the menu bar.
 function keyCards(list) {
   list = sharedBalances(list);
   const plan = (q) => q.windows?.length && !q.balance && !q.error;
@@ -15265,9 +15285,8 @@ function keyCards(list) {
   return gone.size ? list.filter((q) => !gone.has(q)).map((q) => merged.get(q) || q) : list;
 }
 
-// packUsage lays the Usage cards in 260px columns, the next card to the
-// column that ends highest, the order still the page's (#860); each
-// column's last reaches the tallest's end (ikunbots on X).
+// packUsage lays the Usage cards in 260px columns, each card to the column
+// that ends highest (#860), as tall as what it holds (jen_celeus on X).
 const USAGE_MIN = 260, USAGE_GAP = 7;
 let usagePacked = null, usagePackFrame = 0;
 function packUsage() {
@@ -15283,16 +15302,11 @@ function packUsage() {
     usagePacked = null;
     return;
   }
-  const keys = cards.map((c) => c.dataset.key || "").join();
+  // sorted: a drag keeps the columns it was shown in
+  const keys = cards.map((c) => c.dataset.key || "").sort().join();
   const most = Math.max(1, Math.min(cards.length, Math.floor((width + USAGE_GAP) / (USAGE_MIN + USAGE_GAP))));
   const place = (n, hs) => {
-    const ends = Array(n).fill(0), at = [];
-    for (const h of hs.map(Math.ceil)) {
-      // the leftmost of those ending within a pixel of the highest
-      const low = Math.min(...ends), c = ends.findIndex((e) => e <= low + 1);
-      at.push([c, ends[c], h]);
-      ends[c] += h + USAGE_GAP;
-    }
+    const { at, ends } = usagePlace(n, hs);
     const tall = Math.max(...ends) - USAGE_GAP;
     // what stands empty under the columns' ends, by the columns' width
     const empty = ends.reduce((s, e) => s + tall - (e - USAGE_GAP), 0) * (width - (n - 1) * USAGE_GAP) / n;
@@ -15339,6 +15353,34 @@ function packUsage() {
 // the rows it was given, so one whose content only shrinks (a curve made
 // small again) keeps its own size: what is in it is watched too (#2059,
 // mengyianx: 剩余额度走势 closed left the box as tall as when open).
+// usagePlace packs heights hs into n columns: [column, top, height] each
+function usagePlace(n, hs) {
+  const ends = Array(n).fill(0), at = [];
+  for (const h of hs.map(Math.ceil)) {
+    // the leftmost of those ending within a pixel of the highest
+    const low = Math.min(...ends), c = ends.findIndex((e) => e <= low + 1);
+    at.push([c, ends[c], h]);
+    ends[c] += h + USAGE_GAP;
+  }
+  return { at, ends };
+}
+// usageLayout: dragCards' layout for the packed Usage cards
+function usageLayout(rects) {
+  const list = $("#subscriptionUsage");
+  const n = usagePacked?.n;
+  if (!n || !list?.classList.contains("packed")) return null;
+  const hs = rects.map((r) => r.height), now = usagePlace(n, hs).at;
+  const left = [];
+  now.forEach(([c], i) => { left[c] ??= rects[i].left; });
+  if (left.length < n || left.includes(undefined)) return null;
+  const top0 = rects[0].top - now[0][1];
+  return (order) => {
+    const at = [];
+    usagePlace(n, order.map((i) => hs[i])).at.forEach(([c, top], k) => { at[order[k]] = { left: left[c], top: top0 + top }; });
+    return at;
+  };
+}
+
 const usagePack = new ResizeObserver(() => { if (!usagePackFrame) usagePackFrame = requestAnimationFrame(packUsage); });
 function packUsageNow(list) {
   packUsage();
@@ -15350,9 +15392,8 @@ function packUsageNow(list) {
   }
 }
 
-// usageHandle is a card's logo, which is also its handle: drag it to move
-// the card among the others, Alt+arrows move it from the keyboard. The grip
-// that says so shows by the logo on hover (app.css).
+// usageHandle: a card's logo is its handle (drag, or Alt+arrows); a grip
+// shows by it on hover.
 let usageArranging = false, usageRenderPending = false;
 function usageHandle(sub, card) {
   const b = el("button", "ag-handle us-handle");
@@ -15375,7 +15416,7 @@ function usageHandle(sub, card) {
     usageArranging = dragCards(e, b, card, list, [...list.children], (to) => moveUsage(sub.provider, to), () => {
       usageArranging = false;
       if (usageRenderPending) { usageRenderPending = false; renderQuotas(); }
-    });
+    }, usageLayout);
   };
   return b;
 }
@@ -15406,12 +15447,9 @@ async function moveUsage(key, to) {
   }
 }
 
-// creditDays: the credits (or money, in its unit's currency) one of an
-// account's windows used each day of the period, as owl counted them
-// from its readings of the vendor's meter, which tells only what the cycle
-// has used so far — a bar a day, and the period's sum; a day before owl
-// first read it is not known rather than nothing. named: the window's name
-// beside the head, for a card with several.
+// creditDays: what a window used each day of the period, from owl's
+// readings of the meter (a day before the first is unknown, not nothing).
+// named: the window's name by the head, for a card with several.
 function creditDays(daily, named) {
   const box = el("div", "credit-days");
   const { since, days, window: pool, unit } = daily;
