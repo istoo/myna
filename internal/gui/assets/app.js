@@ -4468,15 +4468,18 @@ async function renderUpdateBadge() {
   const u = await api(updatePath("update")).catch(() => null);
   if (servedAnew(u)) return;
   if (u) updateLast = u, u.at = Date.now();
-  // pulling: a click is downloading it again, and restarts once it's in
+  // pulling: a click downloads again, and restarts once it's in
   const pulling = !!u && !!b.dataset.pulling && ["checking", "downloading", "ready"].includes(u.state);
   if (b.dataset.pulling && !pulling) {
     delete b.dataset.pulling;
     b.classList.remove("busy");
   }
-  // a package manager's owl: Settings names its command, no pill
+  // packaged: Settings names the command, no pill
   const on = pulling || (!!u && !updatePillOff(u.latest) && (u.state === "ready" || (u.state === "available" && !u.packaged) || u.state === "found" || (u.state === "error" && u.retry)));
-  if (b.hidden !== !on) b.hidden = !on, fitTop();
+  if (b.hidden !== !on) {
+    b.hidden = !on;
+    b.style.animation = "none", fitTop(), b.style.animation = ""; // #19
+  }
   if (mode === "panel") import("./panelupdate.js").then((m) => m.panelUpdate(u), () => {}); // its line about the update
   if (!on) return;
   const hide = $("#updateHide");
@@ -4488,8 +4491,8 @@ async function renderUpdateBadge() {
   const restart = async () => {
     b.classList.add("busy");
     label.textContent = t("Updating…");
-    // an answer means it didn't: the password prompt dismissed, the swap
-    // failed, or a newer version is out and downloading first (dawnmarch7429)
+    // an answer means it didn't: the prompt dismissed, the swap failed,
+    // or a newer version is downloading first (dawnmarch7429)
     const a = await api("update/install", installFrom()).catch(() => ({}));
     if (!a) return backAsNew(u.current);
     if (a) {
@@ -16738,7 +16741,7 @@ function panelQuotaCard(q) {
   const pace = line ? quotaEtaText(line, Date.now()) : "";
   if (pace) say.append(el("span", "pq-pace", " · " + pace));
   card.append(pqLine(say, q));
-  const rings = el("span", "pq-rings" + (ws.length > 4 ? " many" : ""));
+  const rings = el("span", "pq-rings");
   for (const w of ws) {
     const used = to100(w.used);
     const r = el("span", "pq-ring" + (used >= 90 ? " full" : ""));
@@ -22523,7 +22526,7 @@ function wag() {
 document.querySelector(".brand")?.addEventListener("mouseenter", wag);
 setTimeout(wag, 250);
 
-// owl web on a phone, or a browser as narrow: the tabs are a bar at the foot
+// owl web on a phone, or a browser as narrow: tabs at the foot
 function phoneWeb() { return document.body.classList.contains("web") && matchMedia("(max-width: 760px), (pointer: coarse) and (max-width: 1024px)").matches; }
 matchMedia("(max-width: 760px), (pointer: coarse) and (max-width: 1024px)").addEventListener?.("change", () => { layoutNav(); fitTop(); });
 

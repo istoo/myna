@@ -308,7 +308,7 @@ body.panel .seg { display: none; }
   color: var(--accent); background: var(--accent-soft);
   box-shadow: inset 0 0 0 .5px color-mix(in srgb, var(--accent) 35%, transparent);
   transition: background .15s, color .15s, transform .12s var(--ease), opacity .15s;
-  animation: update-in .45s var(--ease);
+  animation: update-in .45s var(--ease); /* renderUpdateBadge takes it off for the one fit that measures it: the header is fitted at the pill's width, not the nothing it opens from (#19) */
 }
 .update[hidden] { display: none; }
 .update:hover { background: var(--accent); color: var(--accent-fg); }
