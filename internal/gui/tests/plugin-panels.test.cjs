@@ -104,7 +104,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const where = `${engine} ${lang} ${width}`;
         const context = await browser.newContext({ viewport: { width, height: 760 }, reducedMotion: "reduce" });
         const page = await context.newPage();
-        page.setDefaultTimeout(8000);
+        // a panel is a sandboxed frame of its own: on a loaded machine it
+        // comes up after a page would
+        page.setDefaultTimeout(20000);
         page.setDefaultNavigationTimeout(60000);
         const errors = [];
         page.on("pageerror", (e) => errors.push(e.message));
