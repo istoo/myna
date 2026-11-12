@@ -4319,7 +4319,7 @@ function fit(extra = 0, glide) {
   if (h === fit.last) return;
   fit.last = h;
   const still = !glide || calm();
-  api("window/fit?h=" + h + (still ? "" : "&ms=" + glide.ms + "&ease=" + glide.ease), {});
+  api("window/fit?h=" + h + (still ? "" : "&ms=" + glide.ms + "&ease=" + glide.ease), {}).catch(() => {});
 }
 
 // the panel brought up on its Allowances tab is the reader opening them
@@ -4452,17 +4452,16 @@ function updateBusyText(b) {
   return parts.join(" · ");
 }
 
-// updatePath asks for the update's state or the release notes in the
-// page's language: the notes follow Settings' language (freecss on Discord).
+// updatePath asks for the state or the notes in the page's language (freecss).
 function updatePath(p) {
   return p + (p.includes("?") ? "&" : "?") + "lang=" + encodeURIComponent(locale);
 }
 
-// renderUpdateBadge shows the header's Update pill once a newer owl is
-// downloaded (a click restarts into it) or, where owl can't replace
-// itself, out (a click opens the release page). The user may keep it away,
-// for good (Settings) or for this version (its ×), until a newer one is
-// out; owl still downloads it and puts it in on quitting.
+// renderUpdateBadge shows the Update pill once a newer owl is downloaded
+// (a click restarts into it) or, where owl can't replace itself, out (a
+// click opens the release page). It may be kept away, for good (Settings)
+// or this version (its ×), until a newer one; owl still installs it on
+// quitting.
 async function renderUpdateBadge() {
   const b = $("#update"), label = b.querySelector("span");
   const u = await api(updatePath("update")).catch(() => null);
@@ -5862,7 +5861,7 @@ document.addEventListener("keydown", (e) => {
   if (editing !== null || importingApps) cancelEdit();
   else if (adding && !$("#view-providers").hidden && providers.providers.length) closeAddSheet();
   else if (profileEscape()) e.preventDefault();
-  else if (mode === "panel") api("window/hide", {});
+  else if (mode === "panel") api("window/hide", {}).catch(() => {});
 });
 
 // ---------- profiles ----------
@@ -10446,7 +10445,7 @@ function renderModels(p) {
     for (const id of none.slice(0, 4)) {
       const b = el("button", "text action", t("Make a routing group of {model}", { model: id }));
       b.dataset.feature = "routing"; // made on the Routing page
-      b.onclick = (ev) => { if (mode !== "window") api("window/main?view=routing&newgroup=" + encodeURIComponent(p.id + "/" + id), {}); else window.newGroupWith?.(p.id + "/" + id, "", ev); };
+      b.onclick = (ev) => { if (mode !== "window") api("window/main?view=routing&newgroup=" + encodeURIComponent(p.id + "/" + id), {}).catch(() => {}); else window.newGroupWith?.(p.id + "/" + id, "", ev); };
       lost.append(b);
     }
   };
@@ -16352,7 +16351,7 @@ function renderPanelUse() {
   open.type = "button";
   open.dataset.feature = "usage"; // it opens on the Usage page
   open.onclick = (e) => {
-    api("window/main?" + new URLSearchParams({ view: "usage", tab: "requests", ...(panelUseProvider ? { provider: panelUseProvider } : {}), ...(panelUseComputer ? { computer: panelUseComputer } : {}) }), {});
+    api("window/main?" + new URLSearchParams({ view: "usage", tab: "requests", ...(panelUseProvider ? { provider: panelUseProvider } : {}), ...(panelUseComputer ? { computer: panelUseComputer } : {}) }), {}).catch(() => {});
     e.currentTarget.blur();
   };
   // as the window's Usage has it: what is shown read again now
@@ -22400,7 +22399,7 @@ function renderBuiltins(box, list, done) {
 window.renderBuiltins = renderBuiltins;
 // openSettings: the Settings page, in the window (the panel opens it there)
 function openSettings() {
-  if (mode !== "window") { api("window/main?view=settings", {}); return; }
+  if (mode !== "window") { api("window/main?view=settings", {}).catch(() => {}); return; }
   // a pick list or a menu open over the page is put away with it
   closeProtoMenu();
   closeAgentMenu();
@@ -22497,14 +22496,14 @@ $("#sync").onclick = async () => {
     } else stop();
   }
 };
-$("#open").onclick = () => api("window/main", {});
-$("#openMain").onclick = () => api("window/main", {});
+$("#open").onclick = () => api("window/main", {}).catch(() => {});
+$("#openMain").onclick = () => api("window/main", {}).catch(() => {});
 // the app says which edge of the placed panel is nearest the tray
 // (panelside.go); that edge alone opens the main window
 window.owlPanelOpenAt = (side) => {
   if (mode === "panel" && (side === "head" || side === "foot")) document.body.dataset.openAt = side;
 };
-$("#quit").onclick = () => api("window/quit", {});
+$("#quit").onclick = () => api("window/quit", {}).catch(() => {});
 $("#winclose").onclick = () => winRuntime.then((w) => w?.Window.Close()); // hides it: the tray stays
 $(".top").addEventListener("dblclick", (e) => {
   if (document.body.classList.contains("linux") && !e.target.closest("button, nav")) winRuntime.then((w) => w?.Window.ToggleMaximise());

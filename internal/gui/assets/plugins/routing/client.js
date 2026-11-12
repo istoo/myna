@@ -8050,7 +8050,7 @@ function routingPage(part) {
     } else sum.append(el("span", "skeleton pr-sk"));
     const open = el("button", "text", t("Open Routing"));
     open.type = "button";
-    open.onclick = (e) => { api("window/main?view=routing", {}); e.currentTarget.blur(); };
+    open.onclick = (e) => { api("window/main?view=routing", {}).catch(() => {}); e.currentTarget.blur(); };
     head.append(el("span", anyLive() ? "rt-livedot on" : "rt-livedot"), sum, el("span", "grow"), open);
     const out = [head];
     if (picks) out.push(picks);
@@ -8179,7 +8179,7 @@ function routingPage(part) {
     line.append(to, el("span", "meta", meta.join(" · ")));
     b.append(asked, when, line);
     b.title = reqTitle(r, how, tr);
-    b.onclick = (e) => { api("window/main?view=routing&req=" + r.id, {}); e.currentTarget.blur(); };
+    b.onclick = (e) => { api("window/main?view=routing&req=" + r.id, {}).catch(() => {}); e.currentTarget.blur(); };
     return b;
   }
 
