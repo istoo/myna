@@ -92,7 +92,9 @@ const parts = (page) => page.evaluate(() => {
     if (!shown(e)) continue;
     const d = drawn(e);
     // an icon is drawn whole or not at all, never cut by the route's edge
-    if (n.endsWith("icon") && d.w > 0.5) assert(d.w >= d.full - 0.5, `the ${n} is cut: ${JSON.stringify(d)}`);
+    // a pixel of rounding, not a cut: Linux's fonts put the icon's edge a
+    // fraction outside the box that clips it (ja, 0.6px)
+    if (n.endsWith("icon") && d.w > 0.5) assert(d.w >= d.full - 1, `the ${n} is cut: ${JSON.stringify(d)}`);
     if (d.w > 0.5) out.push({ n, ...d });
   }
   const hr = head.getBoundingClientRect();

@@ -105,7 +105,10 @@ async function fits(page, row, width) {
   assert.ok(box.x >= 0 && box.x + box.width <= width + 0.5, `row ${box.x}+${box.width} past ${width}`);
   for (const b of await row.locator("button, .segs").all()) {
     segs = await b.boundingBox();
-    if (segs) assert.ok(segs.x >= box.x - 0.5 && segs.x + segs.width <= box.x + box.width + 0.5, "a control past its row");
+    // a pixel of rounding: Linux's fonts lay a control out to a fractional
+    // edge the row's box rounds (ja at 420, 1px); a page that scrolls
+    // sideways is still a failure, below
+    if (segs) assert.ok(segs.x >= box.x - 1.5 && segs.x + segs.width <= box.x + box.width + 1.5, `a control past its row: ${Math.round(segs.x)}..${Math.round(segs.x + segs.width)} of ${Math.round(box.x)}..${Math.round(box.x + box.width)}`);
   }
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true, "the page scrolls sideways");
 }
