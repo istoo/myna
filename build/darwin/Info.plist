@@ -20,6 +20,6 @@
 			<key>CFBundleURLSchemes</key><array><string>owl</string></array>
 		</dict>
 	</array>
-	<key>NSHumanReadableCopyright</key><string>yetone</string>
+	<key>NSHumanReadableCopyright</key><string>owl · MIT · based on yetone/magpie</string>
 </dict>
 </plist>

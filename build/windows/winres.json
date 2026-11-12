@@ -34,7 +34,7 @@
           "0409": {
             "CompanyName": "owl",
             "FileDescription": "owl",
-            "LegalCopyright": "© 2026 yetone · MIT",
+            "LegalCopyright": "© 2026 owl · MIT · based on yetone/magpie",
             "OriginalFilename": "owl.exe",
             "ProductName": "owl"
           }
