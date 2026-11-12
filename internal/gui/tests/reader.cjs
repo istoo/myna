@@ -243,6 +243,17 @@ function footTop(page) {
 // which reaches it. The open page's own tab stays in the row.
 async function navTo(page, view) {
   const b = page.locator(`#nav button[data-view="${view}"]`).first();
+  // the row's fit runs after the window is laid out (renderNavOver, a
+  // script of its own loaded when the window starts), and a page drawn as
+  // it comes leaves some tabs out: on a loaded runner a narrow window's
+  // Usage tab was still one the fit had not moved under More when the
+  // click was tried, and Playwright waited its 5s on a tab that would
+  // never show (#23). Waited for the state, not a stretch of time.
+  await page.waitForFunction((view) => {
+    const t = document.querySelector(`#nav button[data-view="${view}"]`);
+    if (!t) return true;
+    return t.getClientRects().length > 0 || t.classList.contains("nav-over");
+  }, view, { timeout: 15000 }).catch(() => {});
   if (await b.isVisible()) return b.click();
   // the fit runs a frame after a resize, and a page redraw can close More's
   // menu under the click: wait for the row, and open the menu again if so.
