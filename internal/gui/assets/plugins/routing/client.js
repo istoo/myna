@@ -8156,8 +8156,10 @@ function routingPage(part) {
       to.append(el("span", "pr-where", last ? endWord(r, last) : `${r.status || ""} ${r.error || ""}`.trim()));
     } else {
       to.append(el("span", "pr-where", place));
+      // the model that answered, when it isn't the one asked for, named
+      // on the line above: a group's member, a model a rule sent it to
       const model = tr?.model || w?.model;
-      if (model) to.append(el("span", "pr-m", model));
+      if (model && model !== r.model && !r.model.endsWith("/" + model)) to.append(el("span", "pr-m", model));
       if (tr?.swapped && tr.done) to.append(swapTag(tr, true));
       else if (tr?.routed && tr.done) to.append(routedTag(tr));
       if (tr?.upstream && tr.done) to.append(upstreamTag(tr));

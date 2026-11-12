@@ -122,7 +122,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.deepEqual(rows.map((r) => r.model), ["relay/gpt-6-sol", "claude/claude-opus-5", "relay/gpt-6-sol", "claude/claude-opus-5"]);
       assert.deepEqual(rows.map((r) => r.who), ["Codex", "Claude Code", "Codex", "Claude Code"]);
       assert.equal(rows[0].where, "Relay · team");
-      assert.equal(rows[0].served, "gpt-6-sol");
+      // the model that answered is named only when it isn't the one asked
+      // for, which the line above says already
+      assert.equal(rows[0].served, "");
       assert.equal(rows[1].where, "Claude · ann@example.com");
       assert.deepEqual(rows.map((r) => r.swap), [want[lang].swap, "", "", ""], "only the request answered by another model is marked, not a dated name");
       assert.match(rows[2].where, want[lang].fail);

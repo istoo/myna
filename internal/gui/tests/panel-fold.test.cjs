@@ -141,9 +141,14 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await toEnd(page);
       await stays(page, "Show less", ".agent-more");
       assert.equal(await page.locator(".agent-more").getAttribute("aria-expanded"), "false");
-      // a row opened above the open one, which closes, then closed again
+      // a row opened above the open one, which closes, then closed again;
+      // at the list's end the row is under the tabs, so the reader wheels
+      // it into sight first, as they would to click it (a click out of
+      // sight is Playwright scrolling, not the panel)
       await toEnd(page);
       const row = '.row.agent[data-id="agent-9"]';
+      const under = await page.evaluate((r) => document.querySelector("#view-agents").getBoundingClientRect().top - document.querySelector(r).getBoundingClientRect().top, row);
+      if (under > 0) { await page.mouse.wheel(0, -Math.ceil(under)); await page.waitForTimeout(400); }
       await stays(page, "opening a row", row + " .ag-sum", row);
       assert.equal(await page.locator(row).getAttribute("aria-expanded"), "true");
       await stays(page, "closing a row", row + " .ag-sum", row);

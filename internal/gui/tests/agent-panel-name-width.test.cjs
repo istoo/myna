@@ -5,8 +5,10 @@
 // name was squeezed to 10px at 550px, to nothing at 440px and below, and to
 // nothing at any width once the pointer was on the row and the model's logo
 // came in. The name keeps its width now and the words cut first, on every
-// row with a summary, hovered or not, in every language. No backend: the API
-// is faked here.
+// row with a summary, hovered or not, in every language. Since 11-12 a
+// connected agent's words sit on a line of their own under its name; a
+// row in the fold keeps them beside it. Either way they are not over it.
+// No backend: the API is faked here.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
@@ -67,6 +69,7 @@ const measure = (page) => page.evaluate((ids) => Object.fromEntries(ids.map((id)
     name: name.getBoundingClientRect().width, nameFull: name.scrollWidth, nameCut: name.scrollWidth > name.clientWidth + 1,
     wordsCut: vt.scrollWidth > vt.clientWidth + 1, sumRight: sb.right, sumLeft: sb.left,
     rowInner: rb.right - pad, nameRight: name.getBoundingClientRect().right,
+    sumTop: sb.top, nameBottom: name.getBoundingClientRect().bottom,
   }];
 })), IDS);
 
@@ -91,12 +94,20 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           for (const id of IDS) await page.locator(`${row(id)} .ag-sum`).waitFor();
           for (const hovered of [false, true]) {
             if (hovered) {
-              await page.locator(`${row("workbuddy")} .name`).hover();
-              // the logo eased all the way in
-              await page.locator(`${row("workbuddy")} .ag-sum .mi`).evaluate((mi) => new Promise((done) => {
-                const check = () => (mi.getBoundingClientRect().width > 4 && !mi.getAnimations().length ? done() : requestAnimationFrame(check));
-                check();
-              }));
+              // the logo eased all the way in; the pointer put on the name
+              // again while the list above is still coming in (Get started
+              // easing open moves the rows down from under it), and a bound
+              // on the wait, where it was a loop with none
+              for (let k = 0; ; k++) {
+                await page.locator(`${row("workbuddy")} .name`).hover();
+                const ok = await page.locator(`${row("workbuddy")} .ag-sum .mi`).evaluate((mi) => new Promise((done) => {
+                  const end = performance.now() + 2000;
+                  const check = () => (mi.getBoundingClientRect().width > 4 && !mi.getAnimations().length ? done(true) : performance.now() > end ? done(false) : requestAnimationFrame(check));
+                  check();
+                }));
+                if (ok) break;
+                assert(k < 3, `${lang} ${width}: workbuddy's logo never eased in under the pointer`);
+              }
             }
             const m = await measure(page);
             const at = `${lang} ${width}${hovered ? " hovered" : ""}`;
@@ -106,15 +117,13 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
               assert(!m[id].nameCut, `${at}: ${id}'s name cut to ${m[id].name}px of ${m[id].nameFull}`);
               assert(m[id].name >= m[id].nameFull - 1, `${at}: ${id}'s name ${m[id].name}px of ${m[id].nameFull}`);
               // the words after it, inside the row
-              assert(m[id].sumLeft >= m[id].nameRight, `${at}: ${id}'s words over its name`);
+              assert(m[id].sumLeft >= m[id].nameRight || m[id].sumTop >= m[id].nameBottom - 0.5, `${at}: ${id}'s words over its name`);
               assert(m[id].sumRight <= m[id].rowInner + 1, `${at}: ${id}'s words past the row`);
               // and their right edges in one column down the list
               assert(Math.abs(m[id].sumRight - m.crush.sumRight) < 1, `${at}: ${id}'s words out of the column`);
             }
-            // the model lists cut, not the name; one model's label only where
-            // it doesn't fit
-            for (const id of ["workbuddy", "claude-desktop"]) assert(m[id].wordsCut, `${at}: ${id}'s words not cut`);
-            if (width === 360) assert(m.codex.wordsCut, `${at}: codex's words not cut`);
+            // the model lists cut where they don't fit, never the name (above);
+            // a short one never
             assert(!m.crush.wordsCut, `${at}: a short model cut`);
             assert(await noSideScroll(page), `${at}: the panel scrolls sideways`);
           }

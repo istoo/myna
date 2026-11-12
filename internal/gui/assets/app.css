@@ -1926,17 +1926,18 @@ details.cx-part[open] > summary .cx-h { margin-bottom: 2px; }
 
 /* ---- the panel's tabs: agents, usage, profiles ---------------------------- */
 /* outside the scrolling page, so they stay put under the header */
-.ptabs { position: relative; display: flex; flex: none; gap: 2px; margin: 0 12px 8px; }
+/* a line under them, the open one underlined on it */
+.ptabs { position: relative; display: flex; flex: none; gap: 0; margin: 0 14px 12px; border-bottom: 1px solid var(--line); }
 /* the view scrolls, so it clips at its own top: the card's edge is a ring
    outside its box and needs the 2px the tabs give up to be drawn whole */
 body.panel .view { padding-top: 2px; }
-.ptabs > .thumb { top: 0; bottom: 0; border-radius: 7px; box-shadow: 0 1px 2px rgba(0, 0, 0, .08), var(--card-edge); }
+.ptabs > .thumb { top: auto; bottom: -1px; height: 2px; border-radius: 2px; background: var(--fg); box-shadow: none; }
 .ptabs[hidden] { display: none; }
-.ptabs button { position: relative; z-index: 1; flex: 1; display: flex; align-items: center; justify-content: center; gap: 3px; height: 26px; border-radius: 7px; font-size: 12px; color: var(--muted); transition: color .15s, background-color .15s; }
+.ptabs button { position: relative; z-index: 1; flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; height: 32px; border-radius: 0; font-size: 12.5px; color: var(--muted); transition: color .15s, background-color .15s; }
 .ptabs button:hover:not(.on) { color: var(--fg-2); }
-.ptabs button.on { color: var(--fg); font-weight: 550; }
+.ptabs button.on { color: var(--fg); font-weight: 600; }
 .ptabs button[hidden] { display: none; }
-.ptabs em { font-style: normal; font-weight: 400; color: var(--faint); font-variant-numeric: tabular-nums; }
+.ptabs em { padding: 0 5px; border-radius: 8px; font-style: normal; font-size: 10.5px; line-height: 16px; font-weight: 400; color: var(--muted); background: var(--card-2); font-variant-numeric: tabular-nums; }
 body.panel[data-ptab="usage"] :is(#agents, #panelRouting, #panelUsage),
 body.panel[data-ptab="stats"] :is(#agents, #panelRouting, #panelQuota),
 body.panel[data-ptab="routing"] :is(#agents, #panelQuota, #panelUsage),
@@ -1955,6 +1956,24 @@ body.panel .row.agent .who { display: flex; align-items: center; gap: 6px; min-w
 body.panel .row.agent > .ag-sum { justify-self: end; }
 body.panel .row.agent { transition: background-color .3s ease; }
 body.panel .row.agent.open { background: var(--card-2); }
+/* the agents connected are cards of their own, one a line: the icon, the
+   name over the model, the effort's bars at the end. Not a grid of two:
+   one opened in the right column would jump to a line of its own under
+   the pointer. The ones not set up stay rows, in the fold under them. */
+body.panel #agents { display: flex; flex-direction: column; gap: 8px; padding: 1px 2px; border: 0; border-radius: 0; background: none; box-shadow: none; }
+body.panel #agents > .row.agent { grid-template-columns: 32px minmax(0, 1fr) auto; grid-template-rows: auto auto; column-gap: 12px; row-gap: 1px; align-items: center; min-height: 58px; padding: 10px 14px 10px 12px; border: 0; border-radius: 14px; background: var(--card); box-shadow: var(--card-edge); }
+body.panel #agents > .row.agent .ag-handle { grid-row: 1 / 3; width: 32px; height: 32px; }
+body.panel #agents > .row.agent .ag-handle .ic { width: 26px; height: 26px; }
+body.panel #agents > .row.agent .who { grid-row: 1; grid-column: 2; align-self: end; }
+body.panel #agents > .row.agent .name { font-size: 13.5px; font-weight: 600; letter-spacing: -.01em; }
+body.panel #agents > .row.agent > .ag-sum { grid-row: 2; grid-column: 2 / 4; justify-self: stretch; align-self: start; grid-template-columns: minmax(0, 1fr) 12px 10px; font-size: 11.5px; }
+body.panel #agents > .row.agent > .ag-sum .v { justify-content: flex-start; }
+body.panel #agents > .row.agent > .ag-sum .vt { text-align: left; }
+body.panel #agents > .row.agent > .ag-open { grid-column: 1 / -1; }
+body.panel #agents > .agent-more { border: 1px dashed var(--line); border-radius: 12px; }
+body.panel #agents > .agent-fold .agent-fold-inner { border-radius: 12px; background: var(--card); box-shadow: var(--card-edge); }
+/* rolled up it has no height, and its edge would draw a line */
+body.panel #agents > .agent-fold:not(.open, .moving) .agent-fold-inner { box-shadow: none; }
 .ag-sum { display: grid; grid-template-columns: auto 12px 10px; align-items: center; gap: 10px; min-width: 0; max-width: 100%; font-size: 12px; color: var(--muted); }
 .ag-sum .v { display: flex; align-items: center; justify-content: flex-end; min-width: 0; }
 .ag-sum .vt { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: right; }
@@ -2061,7 +2080,7 @@ body.panel .profiles #save { height: 25px; } /* the field's: the line keeps its 
 .panel-update .pu-x:hover { color: var(--fg); }
 .panel-quota { flex: none; display: flex; flex-direction: column; gap: 14px; padding: 2px 2px 6px; }
 .pq-group { display: flex; flex-direction: column; gap: 8px; }
-.pq-gh { display: flex; align-items: center; gap: 8px; font-size: 10.5px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--faint); }
+.pq-gh { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
 .pq-gh .ic { width: 14px; height: 14px; flex: none; }
 .pq-gn { flex: 0 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* how many accounts: a quiet count set by the name, on its cap height */
@@ -2099,27 +2118,34 @@ body.panel .profiles #save { height: 25px; } /* the field's: the line keeps its 
 .pq-mode.flash { animation: pq-mode-flash .9s ease-out; }
 @keyframes pq-mode-flash { 0%, 30% { background: var(--accent-soft); color: var(--accent); } }
 @media (prefers-reduced-motion: reduce) { .pq-mode.flash { animation: none; } }
-.pq-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 4px 12px; padding: 10px 12px; border-radius: 11px; background: var(--card); box-shadow: var(--card-edge); }
+/* the account and when it resets on one line, the account first: its
+   name keeps up to 60%, the reset cuts first */
+.pq-card { display: grid; grid-template-columns: fit-content(60%) minmax(0, 1fr); align-items: center; gap: 4px 12px; padding: 12px 14px; border-radius: 14px; background: var(--card); box-shadow: var(--card-edge); }
 .pq-who { display: flex; align-items: center; gap: 2px; min-width: 0; }
 .pq-user { flex: 0 1 auto; min-width: 0; font-size: 12.5px; color: var(--fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pq-sub { font-size: 11px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .pq-sub.err { color: var(--muted); white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 /* a line with the card's refresh: the words shorten, the refresh keeps
    its slot at their end (#3569: Chinese pushed it out of the ellipsis) */
-.pq-sub.pq-line { display: flex; align-items: baseline; min-width: 0; }
+.pq-sub.pq-line { display: flex; align-items: baseline; justify-content: flex-end; min-width: 0; }
+.pq-sub.err, .pq-card.stale > .pq-sub { grid-column: 1 / -1; justify-content: flex-start; }
 .pq-line > .pq-say { flex: 0 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pq-line > .quota-refresh { flex: none; }
 .pq-sub.err.pq-line > .pq-say { white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
-.pq-rings { grid-row: 1 / 3; grid-column: 2; display: flex; gap: 12px; }
-.pq-rings.many { gap: 7px; }
-.pq-ring { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; }
-.pq-dial { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: conic-gradient(var(--fg-2) calc(var(--p) * 1%), color-mix(in srgb, var(--fg) 9%, transparent) 0); }
-.pq-dial b { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--card); font-size: 9.5px; font-weight: 600; color: var(--fg-2); font-variant-numeric: tabular-nums; }
-.pq-ring.full .pq-dial { background: conic-gradient(var(--amber) calc(var(--p) * 1%), color-mix(in srgb, var(--amber) 18%, transparent) 0); }
+/* each window a bar, a line of its own under the account: its name, how
+   much is used and the share at its end; the pace's curve under them all
+   (11-12, in place of a ring each beside the account) */
+.pq-rings { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.pq-ring { display: grid; grid-template-columns: minmax(3em, 7.5em) minmax(0, 1fr) 3.2em; align-items: center; gap: 10px; cursor: pointer; }
+.pq-dial { position: relative; height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--fg-2) calc(var(--p) * 1%), color-mix(in srgb, var(--fg) 9%, transparent) 0); }
+.pq-dial b { position: absolute; top: 50%; right: calc(-3.2em - 10px); width: 3.2em; transform: translateY(-50%); text-align: right; font-size: 12px; font-weight: 600; color: var(--fg-2); font-variant-numeric: tabular-nums; }
+.pq-ring.full .pq-dial { background: linear-gradient(90deg, var(--amber) calc(var(--p) * 1%), color-mix(in srgb, var(--amber) 18%, transparent) 0); }
 .pq-ring.full b { color: var(--fg); }
-.pq-rn { max-width: 44px; font-size: 9.5px; line-height: 1.2; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.pq-rn2 { display: flex; flex-direction: column; align-items: center; }
-.pq-rn2 > span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.pq-rn { order: -1; font-size: 11.5px; line-height: 1.3; color: var(--fg-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* a window named in two parts (Gemini · 5h) says them on its one line */
+.pq-rn2 { display: flex; gap: 4px; }
+.pq-rn2 > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.pq-rn2 > span + span { flex: none; color: var(--muted); }
 /* the first window's current cycle, a thin line across the card (#651) */
 .pq-spark-box { grid-column: 1 / -1; display: block; height: 30px; }
 .pq-spark { display: block; width: 100%; height: 30px; overflow: hidden; }
@@ -2195,8 +2221,12 @@ body.panel .profiles #save { height: 25px; } /* the field's: the line keeps its 
    line's right, before its resets' switch, plan and fold */
 .subscription-account .acct-warm { flex: none; margin: -2px 0 -2px auto; font-size: 11px; padding: 2px 7px; }
 .subscription-account .acct-warm ~ :is(.acct-auto, .plan) { margin-left: 0; }
-.pq-bals { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-.pq-card.bal { grid-template-columns: minmax(0, 1fr); }
+/* the balances one card, a line each: the name, the amount at its end,
+   anything more a balance says under them */
+.pq-bals { display: grid; grid-template-columns: minmax(0, 1fr); overflow: hidden; border-radius: 14px; background: var(--card); box-shadow: var(--card-edge); }
+.pq-card.bal { grid-template-columns: minmax(0, 1fr) auto; border-radius: 0; background: none; box-shadow: none; }
+.pq-card.bal > :not(.pq-bn, .pq-amt) { grid-column: 1 / -1; }
+.pq-card.bal + .pq-card.bal { border-top: 1px solid var(--line-2); }
 .pq-bn { display: flex; align-items: center; gap: 6px; }
 .pq-bn > span:not(.ic) { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .pq-bn .ic { width: 14px; height: 14px; flex: none; }
@@ -2220,7 +2250,7 @@ body.panel .profiles #save { height: 25px; } /* the field's: the line keeps its 
 .pq-card > .pq-asof { grid-column: 1 / -1; }
 .pq-card > .quota-balance { grid-column: 1 / -1; margin-top: 4px; }
 .pq-card .skeleton.sk-aq { width: 130px; height: 9px; border-radius: 4px; }
-.pq-card .skeleton.sk-ring { width: 34px; height: 34px; border-radius: 50%; }
+.pq-card .skeleton.sk-ring { grid-column: 1 / -1; width: 100%; height: 6px; border-radius: 3px; }
 /* the panel's footer: a hairline over it, as much room above as below */
 /* even to the eye: the rule above is a pixel of the top's space, and the
    panel's rim takes about one off the bottom's, so 1+5 over, 7 under */
@@ -4588,21 +4618,34 @@ body.panel .modal { padding: 16px 12px; }
 }
 /* ---- the panel's Usage tab: the window's Requests, made small ---------------- */
 .panel-usage { flex: none; display: flex; flex-direction: column; gap: 8px; padding: 2px 2px 6px; }
-.pu-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-height: 24px; }
+/* the period across the whole first line, the provider and the actions on
+   the second: the four of them never fit one line of the panel, and the
+   one that wrapped stood alone under them */
+.pu-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-height: 24px; }
 .pu-bar .grow { flex: 1; }
-.pu-bar .segs .opt { height: 22px; padding: 0 9px; font-size: 11.5px; }
-.pu-bar .sess-pick { min-width: 0; max-width: 150px; }
+.pu-bar > .segs { flex: 1 1 100%; display: flex; }
+.pu-bar > .segs .opt { flex: 1; height: 26px; padding: 0 9px; font-size: 12px; }
+.pu-bar .sess-pick { min-width: 0; max-width: 150px; height: 26px; }
 .pu-bar .text { flex: none; font-size: 12px; }
 .pu-bar .pu-again { width: 22px; height: 22px; flex: none; }
-.pu-tot { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-radius: 11px; background: var(--card); box-shadow: var(--card-edge); }
-.pu-tot .blk { min-width: 0; padding: 8px 10px 8px; }
-.pu-tot .blk + .blk { border-left: 1px solid var(--line-2); }
-.pu-tot .k { display: block; font-size: 10.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.pu-tot .v { display: block; margin-top: 1px; font-size: 16px; font-weight: 600; letter-spacing: -.01em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+/* what the totals count, under them all */
+.panel-usage > .usage-note { order: 9; padding: 0 4px; }
+/* the tokens large on the left, the other three a line each on the right */
+.pu-tot { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); grid-template-rows: repeat(3, auto); padding: 6px 0; border-radius: 14px; background: var(--card); box-shadow: var(--card-edge); }
+.pu-tot .blk { min-width: 0; }
+.pu-tot .k { display: block; font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pu-tot .v { display: block; font-weight: 600; letter-spacing: -.01em; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .pu-tot .v.cost { color: var(--green); }
-.pu-tot .sub { display: block; margin-top: 1px; font-size: 10.5px; color: var(--muted); white-space: normal; overflow: visible; text-overflow: clip; }
+.pu-tot .sub { display: block; margin-top: 1px; font-size: 10.5px; color: var(--muted); }
 .pu-tot .sub.bad { color: var(--red); }
-.pu-card { padding: 8px 10px 6px; border-radius: 11px; background: var(--card); box-shadow: var(--card-edge); }
+.pu-tot .blk:first-child { grid-row: 1 / 4; display: flex; flex-direction: column; justify-content: center; padding: 10px 16px; border-right: 1px solid var(--line-2); }
+.pu-tot .blk:first-child .v { margin: 4px 0 6px; font-size: 30px; font-weight: 650; letter-spacing: -.03em; line-height: 1.1; }
+.pu-tot .blk:first-child .sub { line-height: 1.45; }
+.pu-tot .blk:not(:first-child) { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; column-gap: 8px; padding: 5px 14px; }
+.pu-tot .blk:not(:first-child) .v { grid-row: 1; grid-column: 2; font-size: 15px; }
+.pu-tot .blk:not(:first-child) .sub { grid-column: 1 / -1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pu-tot .blk:nth-child(n + 3) { border-top: 1px solid var(--line-2); }
+.pu-card { padding: 12px 14px 10px; border-radius: 14px; background: var(--card); box-shadow: var(--card-edge); }
 .pu-card .led-bar { margin-bottom: 4px; }
 .pu-card .led-bar .segs .opt { height: 20px; padding: 0 8px; font-size: 11px; }
 .pu-card .led-chart .plot { height: 124px; }
@@ -4612,11 +4655,6 @@ body.panel .modal { padding: 16px 12px; }
 .skeleton.pu-sk { height: 52px; border-radius: 11px; }
 .panel-usage.pu-loading :is(.pu-tot, .pu-card) { opacity: .55; }
 .panel-usage :is(.pu-tot, .pu-card) { transition: opacity .15s; }
-@media (max-width: 400px) {
-  .pu-tot { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .pu-tot .blk:nth-child(3) { border-left: 0; }
-  .pu-tot .blk:nth-child(n + 3) { border-top: 1px solid var(--line-2); }
-}
 
 /* how often the Usage page reads its numbers again, and a way to read them now */
 .usage-refresh { display: inline-flex; align-items: center; gap: 2px; margin-right: 10px; }
