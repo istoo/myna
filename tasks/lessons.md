@@ -61,3 +61,21 @@ CI 日志、`ls`、`npm config` 里出现的那个 8 字符小写串，是 npm �
 - 2026-11-11 同一天第三次踩：`for f in $L` 在 zsh 里把整串当一个值，清单文件只写出一行，容器里的循环全部跑空；
   `docker exec` 不带 `-i` 时 stdin 也传不进去。两次都“成功退出、零输出”。
 - 规则：拼文件清单一律 `bash -c '...'` 或直接用数组字面量；循环跑完先 `wc -l` 清单、再看汇总行数是否等于文件数，零输出就是没跑。
+
+## 懒加载脚本要登记进 old-webkit 的闸门
+
+- 2026-11-12：`panelupdate.js` 由 app.js 动态 import，old-webkit 的清单没登记，main 上该测试一直红
+  （"panelupdate.js is not loaded by index.html"）。push 只跑冒烟集，没跑到它，所以红了没人看见。
+- 规则：新增 `assets/*.js` 并被动态 import 时，同一个提交把它写进 `old-webkit.test.cjs` 的清单和注释，并本地跑一次 old-webkit。
+
+## 发给窗口的单向请求要自己吞掉失败
+
+- 2026-11-12：面板每次重绘都发 `window/fit` 且不等结果；reload 或关窗时请求被取消，未捕获的 rejection 在 WebKit 变成页面错误
+  "TypeError: Load failed"，update-hide 在 Linux CI 红（#24）。
+- 规则：`api("window/...")` 这类不看返回值的调用一律 `.catch(() => {})`；这样改过的面板测试要断言 `errors` 为空。
+
+## “shard 1/4” 不代表全量
+
+- 2026-11-12：push 触发的 GUI 也是 4 个分片，容易当成全量；实际只跑 7 个冒烟文件。全量要读日志里的 `mode=full`
+  和 `shard N/4, browser: X failed of Y`——它是报告模式，有红也 exit 0。
+- 规则：说“全量全绿”必须贴 `failed of` 的数字；本机跑全量并发最多 4（并发 6 在负载 27 时出现 180 秒卡顿）。
