@@ -40,12 +40,15 @@ function renderPort(s) {
   } else if (d.err) {
     sub.textContent = d.err;
     sub.classList.add("err");
+    // said here, where it is corrected, and read out: floated, a long
+    // message lay over the row's own Add in a 520px tall window (WebKit)
+    if (d.fresh) { sub.setAttribute("role", "alert"); d.fresh = false; }
   } else sub.textContent = t("Only the port is set here, 1024 to 65535; OWL_ADDR=host:port sets the whole address instead. Agents owl connected move with it. Now {url}", { url: s.gateway || "" });
   who.append(sub);
   save.onclick = () => {
     const p = Number(field.value.trim());
     if (!Number.isInteger(p) || p < 1024 || p > 65535) {
-      d.value = field.value; d.err = t("A port is a number from 1024 to 65535");
+      d.value = field.value; d.err = t("A port is a number from 1024 to 65535"); d.fresh = true;
       return renderPort(s);
     }
     if (p === (s.port || 3425)) { d.value = null; d.err = ""; return renderPort(s); }
@@ -63,7 +66,7 @@ function renderPort(s) {
         if (providers) loadProviders().catch(() => {});
         renderSettings();
       })
-      .catch((e) => { d.value = field.value; d.err = portSays(e.message); status(d.err, "err"); renderSettings(); });
+      .catch((e) => { d.value = field.value; d.err = portSays(e.message); d.fresh = true; renderSettings(); });
   };
   field.oninput = () => { d.value = field.value; };
   field.onkeydown = (e) => { e.stopPropagation(); if (e.key === "Enter") save.onclick(); if (e.key === "Escape") { portDraft = { value: null, err: "" }; renderPort(s); } };
@@ -149,7 +152,7 @@ function renderCORS(s) {
   const d = corsDraft;
   const set = (next, done) => writingPrefs(api("settings/cors", { origins: next }))
     .then((ns) => { prefs = ns; d.err = ""; done?.(); renderSettings(); status(t("Saved"), "ok", 1500); })
-    .catch((e) => { d.err = corsSays(e.message); status(d.err, "err"); renderSettings(); });
+    .catch((e) => { d.err = corsSays(e.message); d.fresh = true; renderSettings(); });
   const field = input(d.value, "http://localhost:3000");
   field.className = "words rule-match";
   field.setAttribute("aria-label", t("Web page origin"));
@@ -165,8 +168,9 @@ function renderCORS(s) {
   field.onkeydown = (e) => { e.stopPropagation(); if (e.key === "Enter") add.onclick(); };
   const r = el("div", "row pref rule-row");
   const who = el("div", "who");
-  who.append(el("div", "name", t("Web pages that may call owl")),
-    el("div", "sub" + (d.err ? " err" : ""), d.err || t("Scripts on these origins can call the gateway from a browser, each request with a gateway key from Gateway. A page from any other site is refused; pages on this computer are not")));
+  const corsSub = el("div", "sub" + (d.err ? " err" : ""), d.err || t("Scripts on these origins can call the gateway from a browser, each request with a gateway key from Gateway. A page from any other site is refused; pages on this computer are not"));
+  if (d.err && d.fresh) { corsSub.setAttribute("role", "alert"); d.fresh = false; }
+  who.append(el("div", "name", t("Web pages that may call owl")), corsSub);
   const val = el("div", "val rule-add");
   val.append(field, add);
   r.append(who, val);
@@ -215,13 +219,15 @@ function renderAllow(s) {
       d.err = allowSays(e.message);
       d.addr = /shut out (\S+), the address/.exec(e.message)?.[1] || "";
       d.tried = d.addr ? { next, done } : null;
-      status(d.err, "err"); renderSettings();
+      d.fresh = true; renderSettings();
     });
   const r = el("div", "row pref rule-row");
   const who = el("div", "who");
   const sub = d.err || (env ? t("Set by OWL_ALLOW_IPS. Other computers reach owl only from these addresses, even with a gateway key; this computer always can")
     : t("Other computers reach owl only from these addresses or ranges (CIDR), even with a gateway key; this computer always can. None listed lets every address in"));
-  who.append(el("div", "name", t("Allowed addresses")), el("div", "sub" + (d.err ? " err" : ""), sub));
+  const allowSub = el("div", "sub" + (d.err ? " err" : ""), sub);
+  if (d.err && d.fresh) { allowSub.setAttribute("role", "alert"); d.fresh = false; }
+  who.append(el("div", "name", t("Allowed addresses")), allowSub);
   // the address the refusal named, added to the list that was refused in
   // one click
   if (d.err && d.addr && d.tried && !env) {

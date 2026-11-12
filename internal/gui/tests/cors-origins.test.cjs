@@ -192,6 +192,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           before = await scroll();
           await row.locator("button", { hasText: w.add }).click();
           await page.waitForFunction((s) => document.querySelector("#corsList .rule-row .sub.err")?.textContent.trim() === s, says);
+          // read out where it is corrected; no floating status over the row's
+          // Add, which a long message covered twice in WebKit (#23)
+          assert.equal(await row.locator(".sub.err").getAttribute("role"), "alert", "the refusal is announced");
+          assert.notEqual(await page.locator("#status").textContent(), says, "the refusal is not floated over the row as well");
           assert.equal(await row.locator("input").inputValue(), bad, "what the user wrote stays, to be corrected");
           assert.equal(await box.locator(".row:not(.rule-row)").count(), 3);
           assert.equal(await scroll(), before, "a refusal moved the page");
