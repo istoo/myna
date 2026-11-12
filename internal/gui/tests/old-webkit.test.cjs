@@ -147,7 +147,8 @@ test("compat.js is the first of the page's own scripts", async () => {
   // a provider editor draws its rate windows, traywindows.js when the menu
   // bar shows a card, autoresetown.js when Settings draws Codex's auto-use
   // rows, registry.js when Plugins draws its npm registry, navlamp.js when
-  // the pointer comes over the sidebar, whatsnew.js when release notes
+  // the pointer comes over the sidebar, panelupdate.js when the tray panel
+  // says a newer version is out, whatsnew.js when release notes
   // open, claudemode.js when a Claude provider's editor opens, ctxtext.js
   // when a context window part is opened, resetask.js when a Codex reset's
   // Use is pressed, quotaall.js when a provider has two accounts,
@@ -166,7 +167,7 @@ test("compat.js is the first of the page's own scripts", async () => {
   // it (where a dragged Usage card's neighbours stand), pmorder.js when
   // the Plugins page is drawn (Discover's kinds and order); the checks above
   // still read them
-  for (const f of await scripts()) if (!["webfonts.js", "cfgblocked.js", "signsheets.js", "ruleedit.js", "ratewindows.js", "traywindows.js", "autoresetown.js", "registry.js", "navlamp.js", "whatsnew.js", "claudemode.js", "ctxtext.js", "resetask.js", "quotaall.js", "quitask.js", "checkinnow.js", "autobackup.js", "scrollends.js", "profilerename.js", "settingshints.js", "keyspend.js", "syncfiles.js", "aboutrows.js", "providerserr.js", "navmore.js", "palette.js", "editor.js", "phonetabs.js", "navkeys.js", "pagehead.js", "usagelayout.js", "pmorder.js"].includes(f)) assert(all.includes(f), f + " is not loaded by index.html");
+  for (const f of await scripts()) if (!["webfonts.js", "cfgblocked.js", "signsheets.js", "ruleedit.js", "ratewindows.js", "traywindows.js", "autoresetown.js", "registry.js", "navlamp.js", "panelupdate.js", "whatsnew.js", "claudemode.js", "ctxtext.js", "resetask.js", "quotaall.js", "quitask.js", "checkinnow.js", "autobackup.js", "scrollends.js", "profilerename.js", "settingshints.js", "keyspend.js", "syncfiles.js", "aboutrows.js", "providerserr.js", "navmore.js", "palette.js", "editor.js", "phonetabs.js", "navkeys.js", "pagehead.js", "usagelayout.js", "pmorder.js"].includes(f)) assert(all.includes(f), f + " is not loaded by index.html");
 });
 
 test("the styles hold up in Safari 15.0", async () => {
