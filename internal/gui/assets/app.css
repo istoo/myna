@@ -2136,7 +2136,8 @@ body.panel .profiles #save { height: 25px; } /* the field's: the line keeps its 
    much is used and the share at its end; the pace's curve under them all
    (11-12, in place of a ring each beside the account) */
 .pq-rings { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
-.pq-ring { display: grid; grid-template-columns: minmax(3em, 7.5em) minmax(0, 1fr) 3.2em; align-items: center; gap: 10px; cursor: pointer; }
+.pq-ring { display: grid; grid-template-columns: minmax(3em, 7.5em) minmax(0, 1fr) 3.2em; align-items: center; gap: 10px; min-height: 24px; cursor: pointer; }
+/* 6px of bar in 24px of row: the row is what a touch can reach */
 .pq-dial { position: relative; height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--fg-2) calc(var(--p) * 1%), color-mix(in srgb, var(--fg) 9%, transparent) 0); }
 .pq-dial b { position: absolute; top: 50%; right: calc(-3.2em - 10px); width: 3.2em; transform: translateY(-50%); text-align: right; font-size: 12px; font-weight: 600; color: var(--fg-2); font-variant-numeric: tabular-nums; }
 .pq-ring.full .pq-dial { background: linear-gradient(90deg, var(--amber) calc(var(--p) * 1%), color-mix(in srgb, var(--amber) 18%, transparent) 0); }
