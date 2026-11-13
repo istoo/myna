@@ -87,3 +87,8 @@ CI 日志、`ls`、`npm config` 里出现的那个 8 字符小写串，是 npm �
   60 个 1 MB 请求 GC 后残留 147 MB，改成只存 `Done()` channel 后 31 MB（再给 `modelOf` 加 `strings.Clone` 后 18 MB）。
 - 规则：要判断"请求还在不在"就存 `context.Done()`；凡是会被长期结构保留的、从 body 读出的字符串（gjson/decodeJSON 可能共享底层字节），
   一律 `strings.Clone`。新增长期结构时用"60 个 1 MB 请求后活堆不涨"的测试兜底（`route_bodies_test.go`）。
+
+## 打标签前必须先读等待器的结论
+
+- 2026-11-13：我用 `cat 等待器输出; git tag …` 串成一条命令，等待器输出的是 `failure attempt 1`（gofmt 因新测试文件少了行尾换行而红），标签却照样打上并推了，Release 已开始构建才被我发现；只能取消工作流、删本地与远端标签、修格式、重推、等新 run 再打。
+- 规则：标签只在读到 `success` 的分支里打——`grep -q '^success' || exit 1`，或先单独确认结论再执行下一条命令；本地提交前跑 `gofmt -l $(git ls-files '*.go')`，新文件尤其容易漏行尾换行。
