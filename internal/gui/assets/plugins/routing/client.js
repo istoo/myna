@@ -229,12 +229,18 @@ function routingPage(part) {
   purposeClear.id = "rtPurposeClear";
   purposeClear.append(svg(CROSS, 11, 1.6));
   purposeTools.append(purposePick, purposeClear);
+  // own: the time owl itself took on a request before it went out
+  // (routing, masking, rewriting), so a gateway in the middle shows what
+  // it costs ("中转会很慢吗", Suercha007 on X)
   const metricOptions = [["duration", "Duration"], ["ttft", "First token"], ["tokens", "Tokens"],
-    ["cache", "Cache hit rate"], ["speed", "Output speed"], ["cost", "Cost"]];
+    ["cache", "Cache hit rate"], ["speed", "Output speed"], ["cost", "Cost"], ["own", "Time owl took"]];
   let visibleMetrics = metricOptions.map(([key]) => key);
   try {
+    // a pick the reader saved covers the options there were when they
+    // saved it; one added since shows until they leave it out
     const saved = JSON.parse(localStorage.getItem("owl.routingMetrics"));
-    if (Array.isArray(saved)) visibleMetrics = metricOptions.map(([key]) => key).filter((key) => saved.includes(key));
+    const known = JSON.parse(localStorage.getItem("owl.routingMetricsKnown")) || ["duration", "ttft", "tokens", "cache", "speed", "cost"];
+    if (Array.isArray(saved)) visibleMetrics = metricOptions.map(([key]) => key).filter((key) => saved.includes(key) || !known.includes(key));
   } catch {}
   const metricPick = el("button", "text rt-metric-pick"), metricLabel = el("span");
   metricPick.type = "button";
@@ -247,7 +253,10 @@ function routingPage(part) {
     if (metricPick.classList.contains("open")) return closeProtoMenu();
     openProtoMenu(metricPick, metricOptions.map(([v, name]) => ({ v, name, note: "" })), visibleMetrics, (keys) => {
       visibleMetrics = keys;
-      try { localStorage.setItem("owl.routingMetrics", JSON.stringify(keys)); } catch {}
+      try {
+        localStorage.setItem("owl.routingMetrics", JSON.stringify(keys));
+        localStorage.setItem("owl.routingMetricsKnown", JSON.stringify(metricOptions.map(([key]) => key)));
+      } catch {}
       steady(renderHist);
     }, "Metrics to show", "rt-metric-menu", "right", true);
   };
@@ -384,6 +393,9 @@ function routingPage(part) {
     return t("{n} d", { n: Math.round(m / 1440) });
   }
   const took = (ms = 0) => ms < 1000 ? t("{n} ms", { n: ms }) : t("{n} s", { n: (ms / 1000).toFixed(ms < 10e3 ? 1 : 0) });
+  // ownOf: what owl took of a finished request on its own, masking it
+  // among it (Route.Own); null for one that never went out
+  const ownOf = (r) => r.done && (r.own || r.sent) ? r.own || 0 : null;
   // (the formats made once: made for each call, they were much of what the
   // accounts' countdowns cost), made again when the GUI's language changes
   let fmtLang = null, HM, WD;
@@ -477,13 +489,14 @@ function routingPage(part) {
         t("Cache hit rate") + ": " + t("The share of the prompt read from the cache")],
       speed: ["speed", "Speed", speed ? t("{n} tok/s", { n: Math.round(speed) }) : "—",
         t("Output tokens a second after the first, over the streamed replies") + ". " + t("A reply that reasoned counts only its answer, from its first text: the reasoning was written before the stream showed it") + ". " + t("No answer text: speed includes reasoning only when visible reasoning streamed; hidden reasoning has no speed")],
+      own: ["own", "owl", ownOf(r) !== null ? "+" + took(Math.round(ownOf(r))) : "—", t("What owl itself took before the request went out: masking, routing, rewriting. The rest is the vendor and the network")],
       cost: ["cost", "Cost", routeCost(r), [r.priced ? costNote() : routeCredits([r]) ? "" : t("No known price or token counts for this request"), routeCredits([r]) ? creditsNote() : ""].filter(Boolean).join("\n")],
     };
     return visibleMetrics.map((key) => values[key]).filter((metric) => metric[2] !== "—");
   }
   function metricElement([cls, label, value, help], compact = false) {
     const metric = el("span", "rt-metric " + (cls === "cost" ? "cost-metric" : cls));
-    if (!compact || cls === "ttft" || cls === "cache-hit") metric.append(el("span", "k", t(label)));
+    if (!compact || cls === "ttft" || cls === "cache-hit" || cls === "own") metric.append(el("span", "k", t(label)));
     metric.append(el("span", "v" + (cls === "cost" ? " cost" : ""), value));
     if (compact && cls === "tokens") metric.append(el("span", "k", t("{n} tokens", { n: "" }).trim()));
     metric.title = help || t(label);
@@ -2543,6 +2556,9 @@ function routingPage(part) {
       + (many > 1 ? " · " + t("{n} agents at once", { n: many }) : "");
     if (what.childElementCount !== 2 || what.firstChild.textContent !== name || what.lastChild.textContent !== tail) what.replaceChildren(el("b", "", name), el("span", "", tail));
     // keys that read their own windows are weighed as accounts are
+    // how the routing works folds to a line (app.js owlQuiet); why
+    // nothing took a request is said whole
+    window.owlQuiet?.(mode, !none);
     setText(mode, none ? noneWhy(r) : lone ? t(LONE) : g && routing === "order" ? t(GROUP_ORDER) : g && routing === "weight" ? t(GROUP_WEIGHT) : t(!routing && f?.kind === "key" && !r.order.some((x) => x.known) && !g ? KEYS_SMART : m[1]));
     holdMode(r);
   }
@@ -2977,7 +2993,18 @@ function routingPage(part) {
   // grown since it was measured (a font come in): measured again as it is
   // and the head's line told again, so it is held from the first width
   // on, not from the second's next telling (a pick before it isn't held)
-  new ResizeObserver(() => { storyW = steps.clientWidth; storyDrawn = ""; holdStory(); if (headOf) header(...headOf); }).observe(steps);
+  // On the next frame, not in the observer's own call: the held heights
+  // cleared and measured again change the page's height there, which
+  // WebKit reports as a ResizeObserver loop (a folded head line beside a
+  // whole one, owlQuiet: routing-masking at 440px)
+  let storySized = 0;
+  new ResizeObserver(() => {
+    if (storySized) return;
+    storySized = requestAnimationFrame(() => {
+      storySized = 0;
+      storyW = steps.clientWidth; storyDrawn = ""; holdStory(); if (headOf) header(...headOf);
+    });
+  }).observe(steps);
   // renderCtx draws the request's context window under its story, with
   // its session's prompts request by request; drawn again only when what
   // it shows changes. Live, the next request is patched into the card
@@ -4100,6 +4127,17 @@ function routingPage(part) {
     kids.forEach((k, i) => { if (i < was.length) morphRow(was[i], k); else old.append(k); });
     for (let i = kids.length; i < was.length; i++) was[i].remove();
   }
+  // errLine: a vendor's error as a row says it, one line: the message a
+  // JSON error carries ({"error":{"message":…}}), after who said it, in
+  // place of the JSON; else the error's first line
+  function errLine(said) {
+    const m = said.match(/"message"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+    if (!m) return said.split("\n")[0];
+    let msg = m[1];
+    try { msg = JSON.parse(`"${m[1]}"`); } catch {}
+    const who = said.slice(0, said.indexOf("{")).replace(/[\s:]*\d{3}[\s:]*$/, "").replace(/:\s*$/, "").trim();
+    return (who ? who + ": " : "") + msg.split("\n")[0];
+  }
   function reqRow(r, said, how, tr, ag, meta, metrics, title) {
     const b = el("button", "rt-req " + how);
     const when = el("span", "at", rowClock(r.time));
@@ -4129,6 +4167,17 @@ function routingPage(part) {
     // has it (Jiabubu on Discord)
     const by = tr && tried(r, tr);
     to.append(el("i"), ...(by ? [icon(logoOf(by))] : []), sd);
+    // a request that failed says what the vendor said, its first line,
+    // in the row, not only its status (saiksy on X: 只能看到状态码，具体
+    // 报错藏得深); the whole of it in its title and the request's story
+    if (how === "bad") {
+      const said = String(r.tries?.[r.tries.length - 1]?.error || r.error || "").trim();
+      if (said) {
+        const er = el("span", "rt-err", errLine(said));
+        er.title = said;
+        to.append(er);
+      }
+    }
     if (tr?.effort) {
       const ef = el("span", "ef" + (tr.picked ? " picked" : ""));
       const was = r.effort && r.effort !== tr.effort;

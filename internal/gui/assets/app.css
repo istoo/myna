@@ -5154,3 +5154,10 @@ body.ph-on #crumb { visibility: hidden; }
   body.window.side-nav #agents > .ag-manage-bar { border-top: 0; padding: 0; }
   body.window.side-nav #agents.sorting { position: relative; }
 }
+
+/* a page's words on how a part works, to their first line until opened
+   (app.js owlQuiet); their own ink, cut with an ellipsis */
+.owl-quiet { cursor: pointer; border-radius: 6px; }
+.owl-quiet:not(.open) { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; line-clamp: 1; overflow: hidden; }
+.owl-quiet:hover { text-decoration: underline dotted; text-decoration-color: var(--faint); text-underline-offset: 3px; }
+.owl-quiet:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }

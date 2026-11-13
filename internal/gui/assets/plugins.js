@@ -1003,7 +1003,18 @@
   function intro() {
     const box = el("div", "pm-intro");
     const text = el("div", "pm-introtext");
-    text.append(el("h2", "", t("Plugins extend owl")));
+    // folded to its title and the trust line (app.js owlQuiet's way): what
+    // plugins are and how to write one a click away, the warning never
+    const head = el("div", "pm-introhead"), more = el("button", "text pm-intromore", t("Show all"));
+    more.type = "button";
+    more.setAttribute("aria-expanded", "false");
+    more.onclick = () => {
+      const open = box.classList.toggle("open");
+      more.textContent = t(open ? "Show less" : "Show all");
+      more.setAttribute("aria-expanded", String(open));
+    };
+    head.append(el("h2", "", t("Plugins extend owl")), more);
+    text.append(head);
     text.append(el("p", "", t("Plugins sign in to coding plans and make their requests; the models then work in every agent, like any provider's. They're OpenCode's provider plugins or pi's packages, run on Bun.")));
     const mw = el("p", "");
     mw.append(document.createTextNode(t("A plugin can also run in owl's gateway on what agents send and get back, pick which account a routing asks, give every agent tools, connect an agent, or add a page of its own.") + " "));

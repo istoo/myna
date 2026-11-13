@@ -405,3 +405,54 @@
       纯 runner 网络问题，代码无关；本地两引擎各 1595/1595 全绿。等 runner 恢复后重跑到绿再合入。
 - [ ] #18 `TestPluginPageServiceProxied`：流里第二个事件丢失（上游连接被 owl 侧关闭）；本地 -race 4200 次未复现。
 - [ ] #20 `TestStaleLatestIsNotUpToDate`：一次 fresh 读取后 feed 被问了两次；本地注入延迟 + 英文系统语言未复现。
+
+## 2026-11-13 界面重构：竖向图标栏（参考 zernonia 的菜单栏监控面板）
+
+用户定：原 indigo 配色；主窗口 + 菜单栏面板都改。原型：/tmp/owl-panel-preview/rail.css、rail.js，对比图 full/compare-*.png。
+- [ ] 主窗口：侧栏 → 78px 竖向图标栏（图标在上、文字在下，分组改分隔线，选中=浅灰底+accent 图标文字）；
+      侧栏子页签列表不再出现，页面自己的页签回到内容区（药丸）；侧栏宽度拖拽去掉；
+      #prefs（齿轮）与 #sideGw（网关地址）移到底部状态栏；KPI 拆成独立卡片；分段控件改药丸；卡片圆角 14px
+- [ ] 主窗口受影响的 GUI 测试（nav-sub 9、sideGw 7、side-nav 19、side-width、side-find、nav-* 等）逐个改
+- [ ] 菜单栏面板：顶部页签 → 左侧竖向图标栏，底部 .foot 作状态栏
+- [ ] 面板受影响的 panel-* 测试
+- [ ] 全量 GUI 两引擎、go test ./internal/gui、gofmt/vet；CI 绿后发 v0.2.N
+      快照全量（11-14）已知红：builtins 两引擎（插件页签移进内容区，选择器改 `.lib-tabs .opt`，已修）；
+      ctx-head-narrow webkit 26/26（HEAD 26/26 绿）。根因：thumbFit 在 ResizeObserver 回调里同步写 thumb 宽度；
+      跨 SIDE_AT 时药丸样式切换让 segs 同帧变尺寸，WebKit 报 loop。试验结论：只读、空回调都不报，只写一次宽度就报。
+      修复：thumbFit 只收集要处理的盒子，下一帧统一摆放（同 topFit/byWidth）。ctx-head-narrow 和 14 个 thumb 相关文件共 210/210 通过。
+      快照全量在 2h 处被终止：865 文件 14405 过 / 60 红（11 文件），334 文件未跑。用当前树重跑这 11 个文件：9 个通过；
+      profile-confirm（面板多了左侧图标栏，列表右移到 68–428，测试里点 420 落在列表上，改为点列表右侧空白处）和
+      routing-request-metrics（菜单从 6 项变 7 项，测试一并取消勾选新指标）已改，14/14 通过。
+      当前树全量分两半跑（/tmp/gui-half-aa、ab；日志 /tmp/owl-gui-aa.log、ab.log）。
+      前一半 10033 项：10022 通过，7 项失败（mobile-web：插件页说明收起，比对前先展开；nav-timeout：两个新测试缺导航超时），都已修。
+      后一半 10146 项：10078 通过，64 项失败、4 项取消。其中：
+        - routing-masking：rt-steps 观察器在回调里重新测量行高，改为下一帧做；
+        - sessions-toolbar：药丸样式下 8 个页签放不下，把 .sm-agents 排除在药丸样式外；
+        - usage-overview-fold：kpi-pick 的 margin 没有抵消它自身 1px 的内边距；
+        - usage-phone-head：桌面药丸高 26px，断言放宽到 ≤26；
+        - view-open-wheel：48 项都是 900s 超时引起的连锁失败，没有断言失败。HEAD 上单跑 chromium，600s 时也没跑完，说明它本来就慢。
+      修完后在当前树重跑 routing/sessions/usage 等受影响文件（/tmp/owl-gui-rt.log）。
+- [x] v0.2.18 的 macOS test job 两次 cancelled：注解为 "The job was not acquired by Runner of type hosted"，
+      即 GitHub macOS arm64 容量不足，不是测试卡住；第三次尝试已分到 runner。
+
+## 2026-11-14 帖子反馈（Suercha007 的 X 帖子与评论）
+
+- [x] 路由行：失败的请求显示供应商原话（JSON 取 message，前缀是谁报的错，完整原文放在 title 里）；新增「owl 自己花的时间」指标（Route.Own）。
+      用户已保存的指标选择里，如果没出现过这个新指标，默认显示；明确去掉的保持隐藏。
+- [x] 说明文字默认收起成一行（owlQuiet）：Agents 页的引导语、路由方式、插件页介绍；欢迎语和「为什么没人接」保持完整。
+- [ ] 跑受影响的测试：agent-models-loading、getting-started、routing-*、view-*，然后单独提交
+
+## 2026-11-13 内存：0.2.17 仍有持有者 → 已定位并修复
+
+- [x] 0.2.17 运行 15–21 分钟 live heap 780–996 MB；pprof：`insertAt`（withPlaceholderNote 的副本）58–59 个对象，每个 7.1–7.7 MB；`bytes.growSlice` 252–363 MB。
+      对象个数 ≈ traceKeep(60)，即 Route 持有。
+- [x] 根因：`effortOf` 对已是小写的 level 返回 `strings.ToLower(s)`，Go 原样返回 s，s 是 decodeJSON 共享的 body 字节；
+      Route.Tries[].Effort 因此拖住整份改写后的 body（占位说明副本、withoutTurnEffort 副本、翻译 buffer 各一份）。
+      之前「已排除 Try.Effort」不成立：那次测试没走脱敏占位 + 翻译路径。修复：每个 level 返回常量（ir.go）。
+- [x] 回归测试 `TestKeptRoutesHoldNoTranslatedBody`（effort + service_tier + 脱敏占位 + Chat 翻译，整包/流式）：旧代码 191 MB，修复后 18–19 MB。
+- [ ] 发版后真机 `owl heap` 复核 insertAt / growSlice 消失
+      v0.2.18 已发布（11-14，Release 第 2 次尝试成功，11 个资产，Latest=0.2.18；第 1 次同样是 macOS runner 未接单）。
+      本机已升级；启动 8s：live 166 MB。
+- [x] 0.2.18 运行 57 分钟：live 233.6 MB（0.2.17 在 15–21 分钟就到 780–996 MB）；insertAt 不再出现，growSlice 从 252–363 MB 降到 13.9 MB。
+- [x] 下一个大户：ccUUIDsOf 的集合占 51 MB（734 个会话文件，每个 uuid 存成一个 48 字节字符串）→ 改成存 16 字节（2fad5277b）。
+      每个 uuid 占用从 83.1 字节降到 23.6 字节；sessions 包普通 785、race 779 都通过。等 CI 绿后跟界面改动一起发版。

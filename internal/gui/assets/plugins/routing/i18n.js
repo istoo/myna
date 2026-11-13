@@ -2,6 +2,8 @@
 // kernel adds them to i18n.js's (owl.strings).
 owl.strings({
   zh: {
+    "Time owl took": "owl 自身耗时",
+    "What owl itself took before the request went out: masking, routing, rewriting. The rest is the vendor and the network": "请求发出前 owl 自己花的时间：脱敏、路由、改写。其余是厂商和网络的",
     "sign-in refused (answered since)": "登录曾被拒（之后已应答）",
     "Free first uses it before paid ones, and Cheapest first counts it as costing nothing": "免费优先会先用它再用付费的，最便宜优先把它算作不花钱",
     "{name}, {n} accounts: {windows}": "{name}（{n} 个账号）：{windows}",
@@ -662,6 +664,8 @@ owl.strings({
     "This group may spend every account of {provider}": "这个组可以消耗 {provider} 的每个账号",
   },
   "zh-TW": {
+    "Time owl took": "owl 自身耗時",
+    "What owl itself took before the request went out: masking, routing, rewriting. The rest is the vendor and the network": "請求送出前 owl 自己花的時間：脫敏、路由、改寫。其餘是廠商和網路的",
     "sign-in refused (answered since)": "登入曾被拒（之後已應答）",
     "Free first uses it before paid ones, and Cheapest first counts it as costing nothing": "免費優先會先用它再用付費的，最便宜優先把它算作不花錢",
     "{name}, {n} accounts: {windows}": "{name}（{n} 個帳號）：{windows}",
@@ -1322,6 +1326,8 @@ owl.strings({
     "This group may spend every account of {provider}": "這個組可以消耗 {provider} 的每個帳號",
   },
   ja: {
+    "Time owl took": "owl 自身の時間",
+    "What owl itself took before the request went out: masking, routing, rewriting. The rest is the vendor and the network": "リクエストを送る前に owl 自身がかけた時間（マスク、ルーティング、書き換え）。残りはベンダーとネットワークの時間です",
     "sign-in refused (answered since)": "サインイン拒否（その後は応答あり）",
     "Free first uses it before paid ones, and Cheapest first counts it as costing nothing": "無料優先は有料より先にこれを使い、最安優先はこれを費用ゼロとして数えます",
     "{name}, {n} accounts: {windows}": "{name}（{n} アカウント）：{windows}",
@@ -1982,6 +1988,8 @@ owl.strings({
     "This group may spend every account of {provider}": "このグループは {provider} のすべてのアカウントを使えます",
   },
   de: {
+    "Time owl took": "Eigene Zeit von owl",
+    "What owl itself took before the request went out: masking, routing, rewriting. The rest is the vendor and the network": "Die Zeit, die owl selbst brauchte, bevor die Anfrage hinausging: Maskieren, Weiterleiten, Umschreiben. Der Rest entfällt auf Anbieter und Netzwerk",
     "sign-in refused (answered since)": "Anmeldung abgelehnt (seitdem beantwortet)",
     "Free first uses it before paid ones, and Cheapest first counts it as costing nothing": "„Kostenlos zuerst“ nutzt es vor bezahlten, „Günstigste zuerst“ zählt es als kostenlos",
     "{name}, {n} accounts: {windows}": "{name}, {n} Konten: {windows}",

@@ -478,6 +478,18 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
                 }, html);
                 await current.waitForTimeout(350);
               }
+              // Plugins' words on how plugins work fold to their first line
+              // (quiet-notes.test.cjs, Suercha007's thread on X). Until
+              // BASE_REF has it, the current page is opened whole and its
+              // Show all left out, so the rest of the page is still compared.
+              if (view === "plugins" && !baselineFile("plugins.js").toString().includes("pm-intromore")) {
+                await current.evaluate(() => {
+                  const more = document.querySelector(".pm-intromore");
+                  if (more?.getAttribute("aria-expanded") === "false") more.click();
+                });
+                await current.addStyleTag({ content: ".pm-intromore { display: none; }" });
+                await current.waitForTimeout(350);
+              }
               // The window's polish (nav-polish.test.cjs): one set of sidebar
               // icons, a provider's small switch, sections' names in their own
               // case, 28px finds, a usage row's breakdown that gives way. Until

@@ -201,7 +201,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.match(await group.locator(".rt-token-total").getAttribute("title"), lang === "zh" ? /输出: 4,800/ : /Output: 4,800/, "session tooltip updates even when list token totals do not change");
       await page.locator("#rtMetrics").click();
       const menu = page.locator(".rt-metric-menu");
-      assert.equal(await menu.locator('[role="menuitemcheckbox"]').count(), 6);
+      assert.equal(await menu.locator('[role="menuitemcheckbox"]').count(), 7);
       // Keep only cache and speed. Each click updates the list immediately,
       // with the menu open and focus on the checkbox for continued selection.
       const labels = lang === "zh" ? ["耗时", "首字耗时", "Token", "费用"] : ["Duration", "First token", "Tokens", "Cost"];
@@ -213,6 +213,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.equal(await menu.isVisible(), true, "menu remains open while the list updates");
         assert.equal(await option.evaluate((e) => document.activeElement === e), true, "checkbox retains focus");
       }
+      // owl's own time: these rows were kept before it was, so they show none,
+      // and leaving it out changes no row
+      await menu.getByRole("menuitemcheckbox", { name: lang === "zh" ? "owl 自身耗时" : "Time owl took", exact: true }).click();
+      assert.equal(await rows.nth(0).locator(".rt-metric").count(), 2);
       const duration = menu.getByRole("menuitemcheckbox", { name: labels[0], exact: true });
       await duration.focus();
       await page.keyboard.press("Space");

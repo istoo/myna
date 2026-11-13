@@ -121,6 +121,15 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const intro = page.locator("#view-plugins .pm-intro");
         await intro.waitFor();
         assert.equal((await intro.locator("h2").innerText()).trim(), w.h);
+        // folded to its title and the trust line (Suercha007's thread on X:
+        // pages full of notes); the rest a click away, the warning never
+        assert.match(await intro.locator(".pm-trust").innerText(), w.trust);
+        assert.doesNotMatch(await intro.innerText(), w.p, "what plugins do waits to be asked for");
+        assert.equal(await intro.locator(".pm-art").isVisible(), false);
+        const more = intro.locator(".pm-intromore");
+        assert.equal(await more.getAttribute("aria-expanded"), "false");
+        await more.click();
+        assert.equal(await more.getAttribute("aria-expanded"), "true");
         assert.match(await intro.innerText(), w.p);
         assert.match(await intro.locator(".pm-trust").innerText(), w.trust);
         const y = await page.evaluate(() => [document.scrollingElement.scrollTop, ...[...document.querySelectorAll("*")].filter((e) => e.scrollTop).map((e) => e.scrollTop)].join());

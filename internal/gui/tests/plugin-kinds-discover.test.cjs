@@ -86,7 +86,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.ok((await pg.innerText()).includes("Glance page"));
         assert.deepEqual(await kinds(pg), [w.page]);
 
-        // the way to write one: the docs in the window's language, opened outside
+        // the way to write one: the docs in the window's language, opened
+        // outside, a click away in the folded intro (Show all)
+        await view.locator(".pm-intro .pm-intromore").click();
         const how = view.locator(".pm-intro .pm-write");
         assert.equal((await how.innerText()).trim(), w.write);
         assert.equal(await how.getAttribute("href"), w.docs);

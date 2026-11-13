@@ -28,6 +28,11 @@
     var(--card);
 }
 .pm-introtext { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.pm-introhead { display: flex; align-items: baseline; gap: 10px; }
+.pm-intromore { flex: none; font-size: 12px; }
+/* folded: the title and the trust line; the rest is the reader's to open */
+.pm-intro:not(.open) { padding: 12px 16px; }
+.pm-intro:not(.open) :is(.pm-art, .pm-introtext > p:not(.pm-trust)) { display: none; }
 .pm-intro h2 { margin: 0; font-size: 15px; font-weight: 650; letter-spacing: -.01em; text-wrap: balance; }
 .pm-intro p { margin: 0; font-size: 12px; line-height: 1.55; color: var(--fg-2); max-width: 560px; }
 .pm-intro .pm-trust { display: flex; align-items: center; gap: 6px; margin-top: 3px; font-size: 11.5px; color: var(--muted); }

@@ -254,6 +254,46 @@ const blurOnEnter = (i) => { i.onkeydown = (e) => { e.stopPropagation(); if (e.k
 
 // el makes a tag with a class and its content: text, or a node put inside
 // it as it is, never written out as "[object HTMLButtonElement]" (#2181).
+// owlQuiet: a page's words on how a part of it works kept to their first
+// line until the reader asks for the rest, with a click or Enter: the
+// pages say what they show, not how to read it (EulerRap on X: 每个功能卡
+// 恨不得都直接写，信息量爆炸). off gives a box its whole words back (an
+// Agents page's welcome, which is the page then).
+function owlQuiet(box, on = true) {
+  if (!box) return box;
+  if (!on) {
+    if (box.dataset.quiet) {
+      delete box.dataset.quiet;
+      box.classList.remove("owl-quiet", "open");
+      for (const a of ["tabindex", "role", "aria-expanded", "title"]) box.removeAttribute(a);
+    }
+    return box;
+  }
+  if (box.dataset.quiet) return box;
+  box.dataset.quiet = "1";
+  box.classList.add("owl-quiet");
+  box.tabIndex = 0;
+  box.setAttribute("role", "button");
+  const say = () => {
+    const open = box.classList.contains("open");
+    box.setAttribute("aria-expanded", String(open));
+    box.title = open ? t("Show less") : t("Show all");
+  };
+  const flip = () => { box.classList.toggle("open"); say(); };
+  // once a box: a box quieted again after its words came back (a line
+  // whose words change with what it says) is not listened to twice. A
+  // drag to copy the words isn't a click to fold them
+  if (!box.owlQuietWired) {
+    box.owlQuietWired = true;
+    box.addEventListener("click", () => { if (box.dataset.quiet && !String(window.getSelection?.() || "")) flip(); });
+    box.addEventListener("keydown", (e) => {
+      if (box.dataset.quiet && e.target === box && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); flip(); }
+    });
+  }
+  say();
+  return box;
+}
+window.owlQuiet = owlQuiet;
 function el(tag, cls, text) {
   const e = document.createElement(tag);
   if (cls) e.className = cls;
@@ -1696,6 +1736,7 @@ function agentsLead(list) {
   const g = guideShown();
   lead.classList.toggle("guiding", !!g);
   if (g) {
+    owlQuiet(lead, false);
     lead.hidden = false;
     lead.classList.remove("welcome");
     lead.append(guideCard(g));
@@ -1706,6 +1747,7 @@ function agentsLead(list) {
   if (lead.hidden) return;
   const first = !state.agents.some((a) => a.wired);
   lead.classList.toggle("welcome", first);
+  owlQuiet(lead, !first);
   if (!first) {
     const [pre, post] = t("Switch an agent on and the models you set up in owl show up as the {owl} provider in its own model list; or pick its model right here.").split("{owl}");
     lead.append(pre, el("b", "", "owl"), post || "");
