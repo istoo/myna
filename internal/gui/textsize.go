@@ -11,7 +11,7 @@ import "math"
 // panelMax keeps the panel a drop-down, not most of the screen: longer
 // content (the usage of many accounts) scrolls in it (#124). These are the
 // page's CSS pixels; at a larger text size the panel is that much larger.
-const panelWidth, panelMin, panelMax = 440, 220, 560
+const panelWidth, panelMin, panelMax = 500, 220, 560
 
 // The main window's smallest size, in the page's CSS pixels too.
 const windowMinW, windowMinH = 560, 420

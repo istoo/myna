@@ -391,136 +391,101 @@ body.window .top.inrow .actions { margin-left: 0; }
 @keyframes update-in { from { opacity: 0; max-width: 0; margin-right: 0; padding: 0; } }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ---- the sidebar (app.js layoutNav) -------------------------------------- */
-/* the sidebar has the pages down the left, in groups, the open page's own
-   tabs under it, Settings and the gateway at the foot; the same #nav that
-   is the header's tabs otherwise */
+/* ---- the rail (app.js layoutNav) ----------------------------------------- */
+/* the window's pages down a narrow rail at its left, each an icon over its
+   name, as a menu bar app's panel has them; the groups a thin line apart.
+   The same #nav that is the header's tabs otherwise. Settings and the
+   gateway are in the status bar under the page (#sideStatus) */
 .nav-gl, .nav-ic, .side-l, .crumb { display: none; }
-/* at any width the reader picks it (app.js layoutNav); in a narrow window
-   it gives the page more of the room */
-body.side-nav { --side-w: 212px; padding-left: var(--side-w); }
-@media (max-width: 859px) { body.side-nav { --side-w: 184px; } }
+body.side-nav { --side-w: 78px; padding-left: var(--side-w); }
 .sidebar {
   position: fixed; left: 0; top: 0; bottom: 0; z-index: 10; width: var(--side-w);
   display: flex; flex-direction: column;
   background: var(--bg); border-right: .5px solid var(--line);
 }
-/* its edge drags it wider or narrower, as a Mac app's sidebar's does
-   (app.js sideDrag): the reach a little either side of the line, the line
-   itself unchanged */
-.side-edge { position: absolute; top: 0; bottom: 0; right: -4px; width: 8px; z-index: 1; cursor: col-resize; touch-action: none; }
-/* a finger needs more than a pointer's reach: an iPad's in owl web */
-@media (pointer: coarse) { .side-edge { right: -12px; width: 24px; } }
-.side-edge:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 4px; }
-body.side-drag, body.side-drag * { cursor: col-resize !important; user-select: none; }
-/* its top is the title bar's left end: the sidebar's button (app.js
-   layoutNav), then the owl, at the header's own height and left padding,
-   so the button is in the one place whether the sidebar shows or not, as
-   Finder's and Notes' is (ztf4080 on X) */
-.side-top { flex: none; display: flex; align-items: center; gap: 8px; height: 46px; padding: 0 18px 0 14px; }
+/* its top is the title bar's left end: the sidebar's button, then the
+   owl, at the header's own height and left padding, so the button is in
+   the one place whether the rail shows or not (app.js layoutNav). A Mac's
+   traffic lights have it instead: the two start the title bar there, the
+   button as far from the window's edge as with the rail hidden */
+.side-top { flex: none; display: flex; align-items: center; gap: 8px; height: 46px; padding: 0 0 0 14px; }
 .side-top .brand { font-size: 13.5px; }
-/* a sidebar too narrow for the name keeps the bird (app.js fitTop) */
-.side-top.tight .brand > span:not(.logo) { display: none; }
-/* the traffic lights are the sidebar's top left, as in a Mac app's sidebar;
-   the button and the owl beside them, level with them (see .top above) */
-body.window.mac .side-top { height: calc(50px / var(--zoom, 1)); padding: calc(2px / var(--zoom, 1)) 0 0 calc(96px / var(--zoom, 1)); }
-.side-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 0 10px 10px; }
-/* laid from its end, Settings' button and the gateway's line kept where
-   they are as Settings' tabs open over the button and the foot grows up
-   (jen_celeus on X), and a foot too short for them scrolls from its end.
-   The order is the reading order, top down: tabs, Settings, the gateway */
-.side-foot { flex: 0 1 auto; min-height: 0; max-height: 55%; overflow-y: auto; display: flex; flex-direction: column-reverse; gap: 1px; padding: 8px 10px 10px; border-top: .5px solid var(--line-2); }
-/* a foot too short for them scrolls, its rows kept whole; the foot itself
-   gives way when the sidebar has less room than its max-height leaves (a
-   short window with Search's row and Settings' tabs open), so it is the
-   foot that scrolls, not the sidebar that runs past the window's end */
-.side-foot > * { flex: none; }
-.side-foot > .side-gw { order: 0; }
-.side-foot > #prefs { order: 1; }
-.side-foot > .nav-sub { order: 2; }
-/* the palette's door (index.html #sideFind) */
-.side-find-row { flex: none; padding: 0 10px 8px; }
-.side-find { display: flex; align-items: center; gap: 8px; width: 100%; height: 30px; padding: 0 6px 0 9px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--muted); font-size: 12.5px; text-align: left; white-space: nowrap; transition: border-color .15s var(--ease), color .15s var(--ease); }
+.side-top .brand > span:not(.logo) { display: none; }
+body.window.mac .side-top { height: calc(50px / var(--zoom, 1)); padding: 0; }
+body.window.mac.side-nav .top { padding-left: max(8px, calc(96px / var(--zoom, 1) - var(--side-w))); }
+.side-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 0 7px 10px; }
+/* the palette's door (index.html #sideFind): its glass alone, the words
+   and the shortcut in its tooltip */
+.side-find-row { flex: none; display: flex; justify-content: center; padding: 2px 0 8px; }
+.side-find { display: flex; align-items: center; justify-content: center; width: 44px; height: 30px; padding: 0; border-radius: 9px; border: 1px solid var(--line); background: var(--card); color: var(--muted); transition: border-color .15s var(--ease), color .15s var(--ease); }
 .side-find:hover { border-color: color-mix(in srgb, var(--fg) 22%, var(--line)); color: var(--fg-2); }
-.side-find > span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.side-find > :is(span, kbd) { display: none; }
 .side-find > svg { flex: none; }
-.side-find > kbd { flex: none; padding: 1px 5px; border-radius: 4px; border: 1px solid var(--line); background: var(--pill); font: 500 10.5px/1.4 var(--ui-font, var(--font)); color: var(--muted); }
-.side-top.tight ~ .side-find-row .side-find > kbd { display: none; }
 @media (prefers-reduced-motion: reduce) { .side-find { transition: none; } }
-/* a short window's sidebar keeps no bar beside its pages: a thin one is laid
+/* a short window's rail keeps no bar beside its pages: a thin one is laid
    over them while they scroll and fades once they stop, as a Mac's overlay
    scroll bar does (app.js sideBars), the same in WebKit, WebView2 and
    WebKitGTK, whose own bars would take a gutter at rest */
-:is(.side-scroll, .side-foot) { scrollbar-width: none; }
-:is(.side-scroll, .side-foot)::-webkit-scrollbar { display: none; width: 0; height: 0; }
+.side-scroll { scrollbar-width: none; }
+.side-scroll::-webkit-scrollbar { display: none; width: 0; height: 0; }
 .side-bar { position: absolute; right: 4px; width: 11px; z-index: 2; opacity: 0; pointer-events: none; transition: opacity .35s ease .1s; }
 .side-bar.on, .side-bar.drag { opacity: 1; pointer-events: auto; transition-duration: .1s; transition-delay: 0s; }
 .side-bar[hidden] { display: none; }
 .side-bar > i { position: absolute; right: 2px; top: 0; width: 6px; min-height: 24px; border-radius: 3px; background: var(--muted); opacity: .55; transition: width .15s ease, opacity .15s ease; touch-action: none; }
 .side-bar:hover > i, .side-bar.drag > i { width: 8px; opacity: .75; border-radius: 4px; }
 @media (prefers-reduced-motion: reduce) { .side-bar, .side-bar > i { transition: none; } }
-body.side-nav #nav { position: relative; left: auto; top: auto; transform: none; display: flex; flex-direction: column; gap: 1px; padding: 0; border-radius: 0; }
-body.side-nav .nav-gl { display: block; padding: 14px 8px 4px; font-size: 11px; font-weight: 500; letter-spacing: .04em; color: var(--muted); }
-body.side-nav .nav-gl:first-child { padding-top: 2px; }
-body.side-nav :is(#nav button[data-view], #prefs) {
-  display: flex; align-items: center; justify-content: flex-start; gap: 9px;
-  width: 100%; height: 30px; padding: 0 8px; border-radius: 7px;
-  font-size: 13px; color: var(--fg-2); text-align: left; white-space: nowrap;
+body.side-nav #nav { position: relative; left: auto; top: auto; transform: none; display: flex; flex-direction: column; gap: 2px; padding: 0; border-radius: 0; }
+/* a group's name is a line between groups; the first has none above it */
+body.side-nav .nav-gl { display: block; height: 1px; margin: 6px 14px; padding: 0; overflow: hidden; font-size: 0; background: var(--line); }
+body.side-nav .nav-gl:first-child, body.side-nav .nav-gl[hidden] { display: none; }
+body.side-nav #nav button[data-view] {
+  position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  width: 100%; min-height: 54px; padding: 8px 2px 7px; border-radius: 11px;
+  font-size: 10.5px; line-height: 1.15; font-weight: 500; color: var(--fg-2); text-align: center;
 }
-body.side-nav :is(#nav button[data-view], #prefs) > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-body.side-nav :is(#nav button[data-view], #prefs):hover:not(.on) { background: var(--pill); color: var(--fg); }
-body.side-nav :is(#nav button[data-view], #prefs).on { background: var(--card); color: var(--fg); box-shadow: var(--seg-edge); font-weight: 500; }
-/* the open page's row: one shape that moves from row to row on a spring
-   (app.js navTopGo), the rows' own ground given up to it. As with the
-   sub-rows', a row hovered or pressed has no ground of its own, which
-   would lie over the shape as it comes */
+/* a long name (ゲートウェイ, Weiterleitung) breaks onto a second line,
+   hyphenated where the language has a rule for it, never cut */
+body.side-nav #nav button[data-view] > span { max-width: 100%; white-space: normal; overflow-wrap: anywhere; hyphens: auto; -webkit-hyphens: auto; text-wrap: balance; }
+body.side-nav #nav button[data-view]:hover:not(.on) { background: var(--pill); color: var(--fg); }
+/* graphite, as a Mac sidebar is: the page open on a soft ground, in the
+   text's own ink; the accent is kept for what acts */
+body.side-nav #nav button[data-view].on { background: color-mix(in srgb, var(--fg) 9%, transparent); color: var(--fg); }
+/* the open page's ground: one shape that moves from row to row on a spring
+   (app.js navTopGo), the rows' own ground given up to it: a row hovered or
+   pressed has no ground of its own, which would lie over the shape as it
+   comes */
 .nav-top-hl { display: none; }
-body.side-nav #nav > .nav-top-hl:not([hidden]) { display: block; position: absolute; z-index: 0; top: 0; left: 0; right: 0; height: 30px; border-radius: 7px; background: var(--card); box-shadow: var(--seg-edge); pointer-events: none; will-change: transform; }
+body.side-nav #nav > .nav-top-hl:not([hidden]) { display: block; position: absolute; z-index: 0; top: 0; left: 0; right: 0; height: 54px; border-radius: 11px; background: color-mix(in srgb, var(--fg) 9%, transparent); pointer-events: none; will-change: transform; }
 body.side-nav #side #nav.hl-on button[data-view]:is(.on, :hover, :active) { background: transparent; box-shadow: none; }
 body.side-nav #nav.hl-on button[data-view] { transition: color .22s var(--ease); }
 body.side-nav #nav.hl-on button[data-view] .nav-ic { transition: color .22s var(--ease); }
-body.side-nav .nav-ic { display: block; flex: none; color: var(--muted); }
-body.side-nav #prefs svg { flex: none; width: 16px; height: 16px; color: var(--muted); }
-/* graphite, as a Mac sidebar is: no colour of its own, the page open in the
-   text's own ink; the accent is kept for what acts */
-body.side-nav :is(#nav button.on .nav-ic, #prefs.on svg) { color: var(--fg); }
-body.side-nav .side-l { display: inline; }
-body.side-nav #nav button.has-dot::after { top: 50%; right: 10px; margin-top: -3px; width: 6px; height: 6px; }
-/* the open page's tabs, under it on a thin line */
-.nav-sub { position: relative; display: flex; flex-direction: column; gap: 1px; margin: 2px 0 6px 16px; padding-left: 8px; }
-.nav-sub.moving { overflow: hidden; }
-/* Settings' tabs, over its button at the sidebar's foot (app.js navSubs),
-   close to the button they come from; the foot takes more of a short
-   sidebar while they show */
-.side-foot > .nav-sub { margin: 6px 0 2px 16px; }
-.side-foot.has-sub { max-height: 80%; }
-.nav-sub::before { content: ""; position: absolute; left: 0; top: 3px; bottom: 3px; width: 1px; background: var(--line); }
-/* rows keep their size while the list unrolls or folds: squeezed, a strip
-   drawn again then (Installed gets its count) marked the selection a third
-   of a row up, over Discover (#1787) */
-.nav-sub > button { position: relative; z-index: 1; flex: none; display: flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 6px; font-size: 12.5px; color: var(--ctl-fg); text-align: left; white-space: nowrap; transition: color .2s var(--ease); }
-.nav-sub > button > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-.nav-sub > button > em { margin-left: auto; font-style: normal; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
-/* an update waiting, in the sidebar's dot colour, as the words the dot means */
-.nav-sub > button > em.up { color: var(--accent); font-weight: 500; }
-/* the selection (.nav-hl) is the only shape in the list: a row hovered or
-   pressed has no ground of its own, which would show where the finger is
-   before the selection slides there */
-.nav-s:hover:not(.cur) { color: var(--fg); }
-.nav-s.cur { color: var(--fg); font-weight: 500; }
+body.side-nav #nav button[data-view] > * { position: relative; z-index: 1; }
+body.side-nav .nav-ic { display: block; flex: none; width: 21px; height: 21px; color: var(--muted); }
+body.side-nav #nav button.on .nav-ic { color: var(--fg); }
+body.side-nav #nav button.has-dot::after { top: 7px; right: 14px; width: 6px; height: 6px; }
+/* the status bar under the page beside the rail: where the gateway listens,
+   then Settings' gear at its right end */
+.side-status { flex: none; display: flex; align-items: center; gap: 12px; height: 30px; padding: 0 10px 0 12px; border-top: .5px solid var(--line); font-size: 11.5px; color: var(--muted); }
+.side-status[hidden] { display: none; }
+/* a status (Saved) stands above the bar, never on its edge */
+body.window.side-nav .foot .status:not(:empty):not(.lift), body.window.side-nav .foot .status.lift { bottom: 48px; }
+.side-status > #prefs { flex: none; margin-left: auto; display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 24px; padding: 0; border-radius: 6px; color: var(--muted); }
+.side-status > #prefs svg { width: 16px; height: 16px; }
+.side-status > #prefs:hover:not(.on) { background: var(--pill); color: var(--fg); }
+.side-status > #prefs.on { background: color-mix(in srgb, var(--fg) 9%, transparent); color: var(--fg); }
 /* the row under the pointer is lit as by a torch (navlamp.js), a page's
-   row, a sub-list's and the gateway's address alike: --lx is the pointer's place in the word, --si
-   how lit the row is, --lo the row's own ink. Its heart is a step past the
-   text's ink (--fg taken to white in dark, black in light), the rest of the
-   row 15% of the way to it, and the plain hover above stands down. Where
-   color-mix is missing (Safari 15) the plain hover stays. */
+   row and the gateway's address alike: --lx is the pointer's place in the
+   word, --si how lit the row is, --lo the row's own ink. Its heart is a
+   step past the text's ink (--fg taken to white in dark, black in light),
+   the rest of the row 15% of the way to it, and the plain hover above
+   stands down. Where color-mix is missing (Safari 15) the plain hover
+   stays. */
 @supports (color: color-mix(in oklab, red, blue)) {
-  .navlamp .nav-s:hover:not(.cur) { color: var(--ctl-fg); }
-  .navlamp body.side-nav :is(#nav button[data-view], #prefs):hover:not(.on) { color: var(--fg-2); }
-  .navlamp body.side-nav :is(#nav button[data-view], #prefs) > span { --lo: var(--fg-2); }
+  .navlamp body.side-nav #nav button[data-view]:hover:not(.on) { color: var(--fg-2); }
+  .navlamp body.side-nav #nav button[data-view] > span { --lo: var(--fg-2); }
   .navlamp .side-gw:hover { color: var(--muted); }
   .side-gw > span { --lo: var(--muted); }
-  :is(.nav-s, #nav button, #prefs, .side-gw) > span.lit {
+  :is(#nav button, .side-gw) > span.lit {
     --hi: var(--fg);
     --hot: color-mix(in oklab, var(--hi) calc(var(--si) * 100%), var(--lo, var(--ctl-fg)));
     --far: color-mix(in oklab, var(--fg) calc(var(--si) * 15%), var(--lo, var(--ctl-fg)));
@@ -528,17 +493,35 @@ body.side-nav #nav button.has-dot::after { top: 50%; right: 10px; margin-top: -3
     -webkit-background-clip: text; background-clip: text; color: transparent;
   }
 }
-@supports (color: oklch(from red round(l) c h)) { :is(.nav-s, #nav button, #prefs, .side-gw) > span.lit { --hi: oklch(from var(--fg) round(l) 0 h); } }
+@supports (color: oklch(from red round(l) c h)) { :is(#nav button, .side-gw) > span.lit { --hi: oklch(from var(--fg) round(l) 0 h); } }
 /* a row pressed darkens, as a Mac sidebar's does: it never shrinks the way a
    button does (.seg button:active, .icon:active below) */
 body.side-nav #side button:active { transform: none; }
-body.side-nav :is(#nav button[data-view], #prefs, .side-gw):active:not(.on) { background: color-mix(in srgb, var(--fg) 10%, transparent); }
-/* the selection: one shape, sliding from row to row, setting off as the row
-   is pressed (app.js navSubGlide) and most of the way there in a tenth of a
-   second, so it is under the finger, not catching up with it */
-.nav-hl { position: absolute; z-index: 0; top: 0; left: 8px; right: 0; height: 26px; border-radius: 6px; background: color-mix(in srgb, var(--fg) 6.5%, transparent); pointer-events: none; will-change: transform; transition: transform .3s cubic-bezier(.25, .9, .3, 1), height .3s cubic-bezier(.25, .9, .3, 1); }
-.nav-hl.still { transition: none; }
-@media (prefers-reduced-motion: reduce) { .nav-hl { transition: none; } }
+body.side-nav :is(#nav button[data-view], .side-gw):active:not(.on) { background: color-mix(in srgb, var(--fg) 10%, transparent); }
+/* the pages beside the rail, and the panel's, in the rail's shapes: a
+   choice is a row of pills, the one picked on a deeper ground, its words in
+   their own ink (no sliding thumb); a page's figures are tiles of their
+   own, the label over the number. Sessions' agent strip keeps its own
+   control (sessions.css): as pills its eight agents no longer fit beside
+   the search even at 1800px, and it fell back to its menu
+   (sessions-toolbar.test.cjs) */
+body:is(.side-nav, .panel) .view .segs:not(.sortby, .sm-agents) { gap: 6px; padding: 0; background: none; }
+body:is(.side-nav, .panel) .view .segs:not(.sortby, .sm-agents) > .thumb { display: none; }
+body:is(.side-nav, .panel) .view .segs:not(.sortby, .sm-agents) .opt { height: 26px; padding: 0 12px; border-radius: 999px; background: var(--pill); }
+body:is(.side-nav, .panel) .view .segs:not(.sortby, .sm-agents) .opt:hover:not(.on) { background: color-mix(in srgb, var(--fg) 10%, transparent); }
+body:is(.side-nav, .panel) .view .segs:not(.sortby, .sm-agents) .opt.on { background: color-mix(in srgb, var(--fg) 16%, transparent); }
+body.side-nav .warm-tabs { gap: 6px; margin-left: 0; }
+body.side-nav .warm-tabs button { height: 26px; padding: 0 12px; border-radius: 999px; background: var(--pill); }
+body.side-nav .warm-tabs button.on { background: color-mix(in srgb, var(--fg) 16%, transparent); }
+/* the page's tabs and its filters, two rows of pills side by side, a line
+   between them */
+body.side-nav .usage-head > #usageTab:not([hidden]) { margin-right: 6px; padding-right: 12px; border-right: 1px solid var(--line); border-radius: 0; }
+body.side-nav .stats:not(.empty, .indexing) { gap: 10px; background: none; border: 0; border-radius: 0; overflow: visible; }
+body.side-nav .stats:not(.empty, .indexing) > .kpi { border: 1px solid var(--line); border-radius: 12px; }
+body.side-nav .stats .kpi > :is(span, .kpi-pick) { order: -1; margin: 0 0 4px; font-weight: 500; }
+/* the pop-up's own 1px padding taken back, so its words sit as a plain label's */
+body.side-nav .stats .kpi > .kpi-pick { margin: -1px 0 3px -4px; }
+body.side-nav .stats .kpi b { font-size: 22px; font-weight: 650; }
 /* beside the sidebar a page whose head holds only its tools has them in the
    title bar, to the right of where the reader is (app.js sets the room);
    the head's own row goes, the empty band it left with it. The bar between
@@ -555,6 +538,7 @@ body.side-nav.mac :is(#view-library .lib-head, #view-plugins .pm-head, #view-set
 body.side-nav :is(#view-library .lib-head, #view-plugins .pm-head, #view-settings .set-head) > * { pointer-events: auto; --wails-draggable: no-drag; min-width: 0; }
 body.side-nav :is(#view-library .lib-head, #view-plugins .pm-head)::before { display: none; }
 body.side-nav :is(#view-library .lib-headacts) { flex-wrap: nowrap; }
+body.side-nav :is(#view-library .lib-head, #view-plugins .pm-head) > .lib-tabs { align-self: center; }
 /* a narrow window (#2625): the buttons keep their size and the fields
    their least, so what doesn't fit shows as too wide (app.js tools), never
    run left over the title. First the buttons give their words up for
@@ -566,24 +550,22 @@ body.side-nav.tools-tight :is(#view-library .lib-headacts button, #view-plugins 
 body.side-nav .crumb { max-width: var(--crumb-max, none); }
 body.side-nav .crumb > [hidden] { display: none; }
 body.side-nav :is(#view-library, #view-plugins, #view-settings) { padding-top: 8px; }
-/* the gateway, under Settings: where it listens; a click opens its page */
-.side-gw { display: flex; align-items: center; gap: 8px; height: 26px; margin-top: 2px; padding: 0 9px; border-radius: 6px; font-size: 11.5px; color: var(--muted); text-align: left; white-space: nowrap; }
+/* the gateway, in the status bar: where it listens; a click opens its page */
+.side-gw { display: flex; align-items: center; gap: 8px; min-width: 0; height: 24px; padding: 0 8px; margin-left: -2px; border-radius: 6px; font-size: 11.5px; color: var(--muted); text-align: left; white-space: nowrap; }
 .side-gw:hover { background: var(--pill); color: var(--fg-2); }
 .side-gw > i { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 3px var(--green-soft); }
 .side-gw.off > i { background: var(--faint); box-shadow: none; }
 .side-gw > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
 /* it opens the Gateway page, so it says so with the arrow every other row
    that goes somewhere has */
-.side-gw > .side-gw-chev { flex: none; display: inline-flex; margin-left: auto; color: var(--faint); font-variant-numeric: normal; }
-/* beside the sidebar the header says where the reader is, "Work / Library /
-   MCP servers", and holds the icons; the pages' own tab strips are the
-   sidebar's now */
-body.side-nav .top, body.window.mac.side-nav .top { padding-left: 20px; }
+.side-gw > .side-gw-chev { flex: none; display: inline-flex; color: var(--faint); font-variant-numeric: normal; }
+/* beside the rail the header says where the reader is, "Work / Library /
+   MCP servers", and holds the icons; each page keeps its own tab strip */
+body.side-nav:not(.mac) .top { padding-left: 14px; }
 body.side-nav .crumb { display: flex; align-items: baseline; gap: 7px; min-width: 0; overflow: hidden; white-space: nowrap; font-size: 13.5px; }
 .crumb > span { color: var(--muted); }
 .crumb > i { font-style: normal; color: var(--faint); }
 .crumb > b { font-weight: 600; color: var(--fg); overflow: hidden; text-overflow: ellipsis; }
-body.side-nav :is(#usageTab, #view-library .lib-tabs, #view-plugins .lib-tabs, #setTabs) { display: none !important; }
 /* the sidebar's button (app.js toggleSideNav), in the title bar where a Mac
    app has it: the drawing's left pane filled while the sidebar shows */
 .side-toggle { flex: none; }
@@ -1924,20 +1906,42 @@ details.cx-part[open] > summary .cx-h { margin-bottom: 2px; }
   .sess-detail { padding-left: 12px; }
 }
 
-/* ---- the panel's tabs: agents, usage, profiles ---------------------------- */
-/* outside the scrolling page, so they stay put under the header */
-/* a line under them, the open one underlined on it */
-.ptabs { position: relative; display: flex; flex: none; gap: 0; margin: 0 14px 12px; border-bottom: 1px solid var(--line); }
+/* ---- the panel's rail: agents, allowances, usage, routing ---------------- */
+/* the panel's pages down a rail at its left, each an icon over its name, as
+   a menu bar app's panel has them; the page beside it keeps the width it
+   had (textsize.go panelWidth gives the rail its own) */
+body.panel { --prail-w: 60px; padding-left: var(--prail-w); }
+.ptabs { position: fixed; z-index: 5; left: 0; top: 0; bottom: 0; width: var(--prail-w); display: flex; flex-direction: column; gap: 2px; padding: 10px 6px; border-right: .5px solid var(--line); border-radius: 12px 0 0 12px; background: color-mix(in srgb, var(--fg) 3%, transparent); }
+body.linux.panel .ptabs { border-radius: 0; }
 /* the view scrolls, so it clips at its own top: the card's edge is a ring
-   outside its box and needs the 2px the tabs give up to be drawn whole */
+   outside its box and needs the 2px it is given to be drawn whole */
 body.panel .view { padding-top: 2px; }
-.ptabs > .thumb { top: auto; bottom: -1px; height: 2px; border-radius: 2px; background: var(--fg); box-shadow: none; }
+.ptabs > .thumb { display: none; }
 .ptabs[hidden] { display: none; }
-.ptabs button { position: relative; z-index: 1; flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; height: 32px; border-radius: 0; font-size: 12.5px; color: var(--muted); transition: color .15s, background-color .15s; }
-.ptabs button:hover:not(.on) { color: var(--fg-2); }
-.ptabs button.on { color: var(--fg); font-weight: 600; }
+.ptabs button { position: relative; z-index: 1; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 52px; padding: 7px 2px 6px; border-radius: 10px; font-size: 10.5px; line-height: 1.15; font-weight: 500; color: var(--muted); white-space: nowrap; transition: color .15s, background-color .15s; }
+.ptabs button > span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.ptabs .ptab-ic { flex: none; width: 20px; height: 20px; color: var(--muted); }
+.ptabs button:hover:not(.on) { color: var(--fg-2); background: var(--pill); }
+/* the page open: a soft ground, in the text's own ink */
+.ptabs button.on { color: var(--fg); font-weight: 600; background: color-mix(in srgb, var(--fg) 9%, transparent); }
+.ptabs button.on .ptab-ic { color: var(--fg); }
 .ptabs button[hidden] { display: none; }
-.ptabs em { padding: 0 5px; border-radius: 8px; font-style: normal; font-size: 10.5px; line-height: 16px; font-weight: 400; color: var(--muted); background: var(--card-2); font-variant-numeric: tabular-nums; }
+/* a count is a badge on the icon's corner */
+.ptabs em { position: absolute; top: 3px; left: calc(50% + 4px); min-width: 16px; padding: 0 4px; border-radius: 8px; font-style: normal; font-size: 10px; line-height: 16px; font-weight: 500; text-align: center; color: var(--fg-2); background: var(--card-2); box-shadow: 0 0 0 2px var(--bg); font-variant-numeric: tabular-nums; }
+.ptabs em:empty { display: none; }
+/* a panel too narrow to give the rail its room (a large text size on a
+   small screen) has the pages as tabs across its top again, the open one
+   underlined */
+@media (max-width: 419px) {
+  body.panel { padding-left: 0; --prail-w: 0px; }
+  .ptabs { position: relative; left: auto; top: auto; bottom: auto; width: auto; flex-direction: row; gap: 0; margin: 0 14px 12px; padding: 0; border-right: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: none; }
+  .ptabs > .thumb { display: block; top: auto; bottom: -1px; height: 2px; border-radius: 2px; background: var(--fg); box-shadow: none; }
+  .ptabs button { flex: 1; flex-direction: row; gap: 5px; min-height: 0; height: 32px; padding: 0; border-radius: 0; font-size: 12.5px; font-weight: 400; }
+  .ptabs button:hover:not(.on) { background: none; }
+  .ptabs button.on { font-weight: 600; background: none; }
+  .ptabs .ptab-ic { display: none; }
+  .ptabs em { position: static; min-width: 0; padding: 0 5px; font-size: 10.5px; font-weight: 400; color: var(--muted); box-shadow: none; }
+}
 body.panel[data-ptab="usage"] :is(#agents, #panelRouting, #panelUsage),
 body.panel[data-ptab="stats"] :is(#agents, #panelRouting, #panelQuota),
 body.panel[data-ptab="routing"] :is(#agents, #panelQuota, #panelUsage),
@@ -2053,7 +2057,7 @@ body.panel .foot .status { min-width: 0; overflow: hidden; text-overflow: ellips
 body.panel .profiles { display: none; }
 /* the chips a line of their own; a name field opened goes beside the button */
 body.panel .profiles.open {
-  display: flex; position: fixed; z-index: 30; left: 8px; width: min(360px, calc(100vw - 16px)); min-height: 0;
+  display: flex; position: fixed; z-index: 30; left: calc(var(--prail-w, 0px) + 8px); width: min(360px, calc(100vw - var(--prail-w, 0px) - 16px)); min-height: 0;
   flex-wrap: wrap; align-items: center; align-content: flex-start; gap: 8px; padding: 10px; overflow-y: auto; overscroll-behavior: contain;
   background: var(--pop-bg); -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px);
   border: 1px solid var(--line); border-radius: 11px; box-shadow: var(--shadow);

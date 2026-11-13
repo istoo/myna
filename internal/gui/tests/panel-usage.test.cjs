@@ -225,7 +225,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await p.locator("#panelUsage .pu-bar .segs .opt.on", { hasText: w.periods[3] }).waitFor();
       await p.locator("#panelUsage:not(.pu-loading)").waitFor();
       const segs = await p.locator("#panelUsage .pu-bar .segs").evaluate((e) => {
-        const bar = e.parentElement.getBoundingClientRect(), tops = [...e.children].map((c) => Math.round(c.getBoundingClientRect().top));
+        const bar = e.parentElement.getBoundingClientRect(), tops = [...e.querySelectorAll(".opt")].map((c) => Math.round(c.getBoundingClientRect().top));
         return { one: tops.every((y) => y === tops[0]), fits: e.getBoundingClientRect().right <= bar.right + 0.5 };
       });
       assert.deepEqual(segs, { one: true, fits: true }, "the four periods on one line, inside the bar");

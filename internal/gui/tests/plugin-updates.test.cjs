@@ -1,10 +1,9 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // Plugin updates: a plugin whose update waits for the reader (someone
 // else's, or one pinned) puts a dot on Plugins, which goes once it's
-// updated; a plugin owl updated by itself says so on its row. The dot
-// says itself in the sidebar: under Plugins, Installed reads "1 update" in
-// its count's place while it waits, and Plugins opens on Installed, where
-// the plugins with an update are named above the list. Every language, wide and narrow; the
+// updated; a plugin owl updated by itself says so on its row. Plugins then
+// opens on Installed, where the plugins with an update are named above the
+// list. Every language, wide and narrow; the
 // API is faked here.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
@@ -44,11 +43,11 @@ function server(lang) {
 }
 
 const L = {
-  en: { bar: "A newer version of opencode-copilot-auth is out", installed: "Installed", update: "Update", auto: "Auto-updated", out: "An update for opencode-copilot-auth is out", from: /from v0\.1\.3 to v0\.1\.4/, one: "1 update" },
-  zh: { bar: "opencode-copilot-auth 有新版本", installed: "已安装", update: "更新", auto: "已自动更新", out: "opencode-copilot-auth 有新版本", from: /从 v0\.1\.3 更新到 v0\.1\.4/, one: "1 个更新" },
-  "zh-TW": { bar: "opencode-copilot-auth 有新版本", out: "opencode-copilot-auth 有新版本", installed: "已安裝", one: "1 個更新" },
-  ja: { bar: "opencode-copilot-auth の新しいバージョンがあります", out: "opencode-copilot-auth のアップデートが公開されました", installed: "インストール済み", one: "1 件のアップデート" },
-  de: { bar: "Eine neue Version von opencode-copilot-auth ist da", out: "Ein Update für opencode-copilot-auth ist da", installed: "Installiert", one: "1 Update" },
+  en: { bar: "A newer version of opencode-copilot-auth is out", installed: "Installed", update: "Update", auto: "Auto-updated", out: "An update for opencode-copilot-auth is out", from: /from v0\.1\.3 to v0\.1\.4/ },
+  zh: { bar: "opencode-copilot-auth 有新版本", installed: "已安装", update: "更新", auto: "已自动更新", out: "opencode-copilot-auth 有新版本", from: /从 v0\.1\.3 更新到 v0\.1\.4/ },
+  "zh-TW": { bar: "opencode-copilot-auth 有新版本", out: "opencode-copilot-auth 有新版本", installed: "已安裝" },
+  ja: { bar: "opencode-copilot-auth の新しいバージョンがあります", out: "opencode-copilot-auth のアップデートが公開されました", installed: "インストール済み" },
+  de: { bar: "Eine neue Version von opencode-copilot-auth ist da", out: "Ein Update für opencode-copilot-auth ist da", installed: "Installiert" },
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
@@ -69,35 +68,22 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const nav = page.locator('#nav button[data-view="plugins"]');
         await page.waitForFunction(() => document.querySelector('#nav button[data-view="plugins"]')?.classList.contains("has-dot"));
         assert.equal(await nav.getAttribute("title"), w.out);
-        // the dot is drawn, small, inside the button (a little larger at the
-        // sidebar row's end than at a tab's corner)
+        // the dot is drawn, small, inside the button: a tab's corner, or in
+        // the rail at its icon's top right
+        const side = await page.evaluate(() => document.body.classList.contains("side-nav"));
+        assert.equal(side, width >= 1024, "a rail at " + width);
         const dot = await nav.evaluate((b) => { const s = getComputedStyle(b, "::after"); return { w: s.width, pos: s.position }; });
-        assert.deepEqual(dot, { w: await page.evaluate(() => document.body.classList.contains("side-nav")) ? "6px" : "5px", pos: "absolute" });
+        assert.deepEqual(dot, { w: side ? "6px" : "5px", pos: "absolute" });
+        if (side) {
+          const [d, ic, bt] = await nav.evaluate((b) => {
+            const s = getComputedStyle(b, "::after"), r = b.getBoundingClientRect(), i = b.querySelector(".nav-ic").getBoundingClientRect();
+            const top = r.top + parseFloat(s.top), right = r.right - parseFloat(s.right);
+            return [{ top, right, left: right - parseFloat(s.width) }, { top: i.top, right: i.right, left: i.left }, { top: r.top, right: r.right }];
+          });
+          assert.ok(d.top < ic.top + 6 && d.left >= ic.left && d.right <= bt.right, `at the icon's top right, in its row: ${JSON.stringify([d, ic, bt])}`);
+        }
 
         await navTo(page, "plugins");
-        // in the sidebar, the row the reader acts on says what the dot is
-        const side = await page.evaluate(() => document.body.classList.contains("side-nav"));
-        const up = page.locator(".nav-s em.up");
-        assert.equal(side, width >= 1024, "a sidebar at " + width);
-        if (side) {
-          await up.waitFor();
-          assert.equal(await up.textContent(), w.one);
-          assert.match(await up.evaluate((e) => e.parentElement.textContent), new RegExp("^" + w.installed));
-          // read where it is found, in one go: the rows are drawn again as
-          // the page's counts come in, so a label found a moment ago may be
-          // gone, and a gone one has no colour or box
-          const label = await page.evaluate(() => {
-            const e = document.querySelector(".nav-s em.up"), r = e.getBoundingClientRect(), b = e.parentElement.getBoundingClientRect();
-            const p = document.createElement("i");
-            p.style.color = "var(--accent)";
-            document.body.append(p);
-            const accent = getComputedStyle(p).color;
-            p.remove();
-            return { color: getComputedStyle(e).color, accent, fits: r.right <= b.right + 0.5 && r.left >= b.left };
-          });
-          assert.equal(label.color, label.accent, "in the dot's colour");
-          assert.ok(label.fits, "the label fits its row");
-        }
         // the dot, followed, lands on Installed (the page was last on
         // Discover), which names the plugins with an update first
         const view = page.locator("#view-plugins");
@@ -116,8 +102,6 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await view.getByRole("button", { name: w.update, exact: true }).first().click();
         await page.waitForFunction(() => !document.querySelector('#nav button[data-view="plugins"]').classList.contains("has-dot"));
         assert.equal(await nav.getAttribute("title"), null);
-        if (side) await page.locator(".nav-s", { hasText: w.installed }).locator("em:not(.up)").waitFor();
-        assert.equal(await up.count(), 0);
         assert.equal(await bar.count(), 0);
         assert.deepEqual(errors, []);
       });

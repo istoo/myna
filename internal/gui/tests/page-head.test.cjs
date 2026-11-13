@@ -114,8 +114,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         assert.deepEqual(await page.evaluate(() => [document.activeElement?.id, document.activeElement?.value, document.activeElement?.selectionStart]), ["pvQ", "op", 1], "the search's focus and caret");
         await page.locator("#pvQ").fill("");
 
-        // the Agents page: three in use, two cards to a row, today's calls on
-        // the two that made any
+        // the Agents page: three in use, the cards in rows of as many as the
+        // page has room for (three beside the rail at 1280), today's calls
+        // on the two that made any
         await page.locator('#nav button[data-view="agents"]').click();
         await page.locator("#view-agents > .ph").waitFor();
         assert.deepEqual(await page.locator("#view-agents > .ph .ph-s b").allTextContents(), ["3", "4"]);
@@ -124,7 +125,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const boxes = await cards.evaluateAll((rs) => rs.map((r) => { const b = r.getBoundingClientRect(); return { id: r.dataset.id, x: b.x, y: b.y, w: b.width, today: r.querySelector(".ag-today")?.textContent || "" }; }));
         assert.deepEqual(boxes.map((b) => b.id), ["claude", "codex", "gemini"]);
         assert.ok(Math.abs(boxes[0].y - boxes[1].y) < 1 && boxes[1].x > boxes[0].x + boxes[0].w, "the first two side by side");
-        assert.ok(boxes[2].y > boxes[0].y, "the third under them");
+        const cols = await page.locator("#agents").evaluate((g) => getComputedStyle(g).gridTemplateColumns.split(" ").length);
+        assert.ok(cols >= 2, `cards in a grid: ${cols} columns`);
+        if (cols >= 3) assert.ok(Math.abs(boxes[2].y - boxes[0].y) < 1 && boxes[2].x > boxes[1].x + boxes[1].w, "the third beside them, with room for three");
+        else assert.ok(boxes[2].y > boxes[0].y, "the third under them");
+        assert.ok(boxes.every((b) => Math.abs(b.w - boxes[0].w) < 1), "the cards one width");
         assert.match(boxes[0].today, /214/);
         assert.match(boxes[0].today, /18\.42/);
         assert.equal(boxes[2].today, "", "no calls, no line");

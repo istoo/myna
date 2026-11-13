@@ -41,7 +41,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
   test(`${engine}: the logo and name in the header`, async (t) => {
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     t.after(() => browser.close());
-    // in the header's row, and at the sidebar's top when the window is wide
+    // in the header's row, and at the rail's top when the window is wide (a
+    // Mac's title bar has it there too, the traffic lights over the rail)
     for (const width of [860, 1100]) for (const c of cases) {
       const context = await browser.newContext({ viewport: { width, height: 700 }, reducedMotion: "reduce" });
       await context.addInitScript((p) => Object.defineProperty(Navigator.prototype, "platform", { get: () => p }), c.platform);
@@ -54,18 +55,19 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.goto("http://owl.test/");
       await page.waitForSelector("#nav button.on");
       const where = `${c.web ? "web" : "window"} on ${c.platform} at ${width}px`;
-      const side = width >= 1024;
+      const side = width >= 1024 && !(!c.web && c.platform === "MacIntel");
       const brand = page.locator(side ? "#side .side-top .brand" : ".top .brand");
       assert.equal(await brand.isVisible(), c.shown, where);
       if (c.shown) {
         assert.ok(await brand.locator(".logo svg").isVisible(), `${where}: logo`);
-        // a header short of room keeps the logo only (fitTop's tight)
-        const tight = !side && await page.locator(".top.tight").count();
+        // a header short of room keeps the logo only (fitTop's tight), as
+        // the rail does, too narrow for the name
+        const tight = side || await page.locator(".top.tight").count();
         if (!tight) assert.ok(await brand.getByText("owl", { exact: true }).isVisible(), `${where}: name`);
-        // beside the tabs, not under them; above the sidebar's pages
+        // beside the tabs, not under them; above the rail's pages
         const [b, n] = [await brand.boundingBox(), await page.locator("#nav").boundingBox()];
         if (side) assert.ok(b.y + b.height <= n.y, `${where}: ${JSON.stringify(b)} overlaps the pages ${JSON.stringify(n)}`);
-        else assert.ok(b.x + b.width <= n.x, `${where}: ${JSON.stringify(b)} overlaps the tabs ${JSON.stringify(n)}`);
+        else if (width < 1024) assert.ok(b.x + b.width <= n.x, `${where}: ${JSON.stringify(b)} overlaps the tabs ${JSON.stringify(n)}`);
       }
       assert.deepEqual(errors, [], where);
       await context.close();

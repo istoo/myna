@@ -1,8 +1,9 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // Phone navigation and content stay usable in both languages (#391). The
 // desktop screenshots match BASE_REF within a small rendering tolerance
-// (origin/main by default), but for the Agents page while BASE_REF hasn't its
-// 「接入」 rows yet. Until BASE_REF has the visibility manager, its new footer
+// (origin/main by default): the wide window only once BASE_REF has the rail
+// (the pages beside it are drawn anew), and but for the Agents page while
+// BASE_REF hasn't its 「接入」 rows yet. Until BASE_REF has the visibility manager, its new footer
 // alone is excluded; agent-bulk-visibility and agent-grip cover that footer's
 // layout and controls. Its height is rounded only for the pixel comparison,
 // so unchanged text below keeps the baseline's subpixel antialiasing. API
@@ -335,7 +336,11 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         } finally { await page.close(); }
       });
       for (const width of [900, 1280]) {
-        await t.test(`${lang} ${width}: desktop matches ${base}`, async () => {
+        await t.test(`${lang} ${width}: desktop matches ${base}`, async (tt) => {
+          // the window's rail (icons over names, a status bar under the page)
+          // redraws every page beside it on purpose: until BASE_REF has it,
+          // only the header's layout, under SIDE_AT, is compared
+          if (width >= 1024 && !baselineFile("index.html").includes('id="sideStatus"')) return tt.skip(`${base} has no rail yet`);
           const current = await open(browser, lang, width, { touch: false, headless: !baselineHas("pagehead.js"), unsorted: !baselineHas("pmorder.js") });
           const original = await open(browser, lang, width, { touch: false, original: true });
           try {

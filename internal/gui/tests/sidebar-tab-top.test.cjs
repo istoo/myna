@@ -1,11 +1,16 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
-// #1844: a tab picked in the sidebar opens at its top (app.js navSubs). A page's
-// tabs share its one scroll: scrolled to the foot of Settings › General and
-// Allowances picked, or of Library › MCP servers and Skills picked, the new
-// tab was shown from where the old one had been left, at its foot. The tab
-// already open, picked again, leaves the page where it is, and another page
-// and back finds each where it was left. The page's own strip is unchanged.
-// Chromium and WebKit, every language; no backend, the API is faked here.
+// #1844: a tab picked beside the rail opens at its top. Beside the rail a
+// page whose head is only its tools (Settings, the Library, Plugins) has its
+// strip of tabs in the title bar, in sight wherever the page is scrolled,
+// as the sidebar's list of them was; the page's tabs share its one scroll,
+// so scrolled to the foot of Settings › General and Allowances picked, or
+// of Library › MCP servers and Skills picked, the new tab was shown from
+// where the old one had been left, at its foot. The tab already open,
+// picked again, leaves the page where it is, and another page and back
+// finds each where it was left. With the header's tabs (the rail off, or a
+// narrow window) the strip scrolls with the page, and a tab picked there
+// leaves the page where it is. Chromium and WebKit, every language; no
+// backend, the API is faked here.
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
@@ -43,7 +48,8 @@ function server(lang) {
   };
 }
 
-const sub = (page, name) => page.locator("#side .nav-sub:not(.leaving) .nav-s", { hasText: name });
+// a tab of the open page's strip, in the title bar beside the rail
+const sub = (page, name) => page.locator("main.view:not([hidden]) :is(#setTabs, .lib-tabs) > button:visible", { hasText: name });
 const top = (page, v) => page.locator(v).evaluate((e) => e.scrollTop);
 // down to the view's foot by the wheel, as the reader goes there
 async function toFoot(page, v) {
@@ -72,7 +78,7 @@ const words = {
 };
 
 for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium", "webkit"])) {
-  test(`${engine}: a tab picked in the sidebar opens at its top`, async (t) => {
+  test(`${engine}: a tab picked beside the rail opens at its top`, async (t) => {
     assert(["chromium", "webkit"].includes(engine), "BROWSER must be chromium or webkit");
     const browser = await (engine === "webkit" ? webkit.launch() : chromium.launch({ channel: "chromium" }));
     t.after(() => browser.close());
@@ -88,7 +94,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.route("**/*", server(lang));
       await page.goto("http://owl.test/");
       await page.waitForSelector("#nav button.on");
-      assert.ok(await page.evaluate(() => document.body.classList.contains("side-nav")), "the sidebar is shown");
+      assert.ok(await page.evaluate(() => document.body.classList.contains("side-nav")), "the rail is shown");
 
       // Settings › General at its foot, then Allowances
       const set = "#view-settings";

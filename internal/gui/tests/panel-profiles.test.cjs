@@ -107,7 +107,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         // left where it was
         const pos = await page.evaluate(() => {
           const p = document.querySelector(".profiles").getBoundingClientRect(), b = document.querySelector("#profBtn").getBoundingClientRect();
-          const f = document.querySelector(".foot").getBoundingClientRect(), tabs = document.querySelector("#ptabs").getBoundingClientRect();
+          const f = document.querySelector(".foot").getBoundingClientRect(), tabs = document.querySelector(".top").getBoundingClientRect();
           return { above: p.bottom <= b.top, near: b.top - p.bottom < 12, left: Math.abs(p.left - b.left) < 16 && b.left - f.left < 20, under: p.top >= tabs.bottom, count: document.querySelector("#profBtn").textContent, agents: getComputedStyle(document.querySelector("#agents")).display };
         });
         assert(pos.above && pos.near && pos.left && pos.under, JSON.stringify(pos));
@@ -194,7 +194,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         const button = page.locator("#save"), field = page.locator(".profiles > .chip-input");
         const chip = (name) => page.locator("#profiles .chip", { hasText: name });
         const where = () => page.evaluate(() => {
-          const v = document.querySelector(".profiles"), tabs = document.querySelector("#ptabs").getBoundingClientRect();
+          const v = document.querySelector(".profiles"), tabs = document.querySelector(".top").getBoundingClientRect();
           const c = document.querySelector("#profiles .chip");
           return { scroll: v.scrollTop, below: !c || c.getBoundingClientRect().top >= tabs.bottom, status: document.querySelector("#status").textContent };
         });
@@ -211,7 +211,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.waitForTimeout(300);
         let w = await where();
         assert.equal(w.scroll, 0, "saving must not scroll the list");
-        assert(w.below, "the chip saved must not be under the tabs");
+        assert(w.below, "the chip saved must not be under the header");
         assert.match(w.status, /hi/);
         assert.deepEqual(saved, ["hi"]);
 

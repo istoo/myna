@@ -3,8 +3,9 @@
 // held only the status line, so with nothing said it was an empty 28px strip
 // along the window's foot, and every page stopped above it, its last rows
 // cut off over a blank bar beside the sidebar. Now a page runs to the
-// window's foot, and a line said there floats as a pill over it, inside the
-// window, and goes. A press under a passing note reaches the page
+// window's foot, or beside the rail to the status bar that holds the
+// gateway's address and Settings (never an empty strip), and a line said
+// there floats as a pill over the page, inside the window, and goes. A press under a passing note reaches the page
 // (plugin-namesake's Install at the window's foot). The tray panel's footer, with Quit, is as it was.
 // Both engines, every language, with the sidebar and the header's tabs,
 // wide and narrow.
@@ -42,8 +43,12 @@ const look = (page) => page.evaluate(() => {
   const v = document.querySelector(".view:not([hidden])").getBoundingClientRect();
   const f = document.querySelector("footer.foot").getBoundingClientRect();
   const s = document.querySelector("#status"), sr = s.getBoundingClientRect(), cs = getComputedStyle(s);
+  const bar = document.querySelector("#sideStatus"), br = bar.getBoundingClientRect();
+  const side = document.body.classList.contains("side-nav");
   return {
-    side: document.body.classList.contains("side-nav"), vh: innerHeight, vw: innerWidth, view: v.bottom, foot: f.height,
+    side, vh: innerHeight, vw: innerWidth, view: v.bottom, foot: f.height,
+    // the page's foot: the status bar's top beside the rail, else the window's
+    end: side ? br.top : innerHeight, bar: bar.hidden ? null : { top: br.top, h: br.height, filled: !!bar.querySelector("#sideGw:not([hidden])") && !!bar.querySelector("#prefs") },
     status: { text: s.textContent, lift: s.classList.contains("lift"), h: sr.height, top: sr.top, bottom: sr.bottom, left: sr.left, right: sr.right, bg: cs.backgroundColor, cut: s.scrollWidth > s.clientWidth + 1 },
   };
 });
@@ -65,19 +70,26 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
         await page.locator(`#view-${view}:not([hidden])`).waitFor();
         if (width === 1200) await page.waitForFunction(() => document.body.classList.contains("side-nav"));
         let got = await look(page);
-        if (width === 1200) assert(got.side, "the sidebar at 1200");
-        // nothing said: no bar, the page runs to the window's foot
+        if (width === 1200) {
+          assert(got.side, "the rail at 1200");
+          await page.locator("#sideStatus #sideGw").waitFor();
+          got = await look(page);
+          // the one bar there is the status bar, holding what it is for
+          assert(got.bar && got.bar.filled && Math.abs(got.bar.top + got.bar.h - got.vh) < 1, `the status bar at the window's foot, the gateway and Settings in it: ${JSON.stringify(got)}`);
+        } else assert.equal(got.bar, null, "no status bar without the rail");
+        // nothing said: no footer bar, the page runs to the window's foot
+        // or to the status bar
         assert.equal(got.foot, 0, `the footer takes no room: ${JSON.stringify(got)}`);
-        assert(Math.abs(got.view - got.vh) < 1, `the page reaches the window's foot: ${JSON.stringify(got)}`);
+        assert(Math.abs(got.view - got.end) < 1, `the page reaches the window's foot: ${JSON.stringify(got)}`);
         // something said: a pill over the page's foot, in the window, whole
         await page.evaluate(() => status(t("Saved"), "ok"));
         got = await look(page);
         assert(got.status.text, "the line is said");
         assert(!got.status.lift && got.status.h <= 24, `a short line is one line, as it was in the footer: ${JSON.stringify(got)}`);
-        assert(got.status.bottom <= got.vh - 8 && got.status.top > got.vh - 80, `the pill is at the window's foot: ${JSON.stringify(got)}`);
+        assert(got.status.bottom <= got.end - 8 && got.status.top > got.end - 80, `the pill is at the page's foot, clear of the status bar: ${JSON.stringify(got)}`);
         assert(got.status.left >= 0 && got.status.right <= got.vw && !got.status.cut, `it fits: ${JSON.stringify(got)}`);
         assert.notEqual(got.status.bg, "rgba(0, 0, 0, 0)", "it has its own ground over the page");
-        assert(Math.abs(got.view - got.vh) < 1, `saying it doesn't make the page shorter: ${JSON.stringify(got)}`);
+        assert(Math.abs(got.view - got.end) < 1, `saying it doesn't make the page shorter: ${JSON.stringify(got)}`);
         // a press where the note is lands on the page under it; an error
         // stays on top, to be selected and copied
         const hit = () => page.evaluate(() => {

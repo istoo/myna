@@ -161,7 +161,10 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           await openList();
           await homeName.click();
           await detail.waitFor();
-          await page.mouse.click(420, 150);
+          // beside the list, in the page: the panel's rail moved the list
+          // right, so the gap is read from where it ends
+          const box = await open.boundingBox();
+          await page.mouse.click((box.x + box.width + page.viewportSize().width) / 2, 150);
           assert.equal(await open.count(), 0);
           await openList();
           assert.equal(await detail.count(), 0, "closed with the list, the details stay closed");

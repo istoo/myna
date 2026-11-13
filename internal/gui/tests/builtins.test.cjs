@@ -122,7 +122,8 @@ const rowsOf = (page) => page.evaluate(() => [...document.querySelectorAll("#bui
 
 // the Plugins page's tabs: the sidebar's, from 1024 points, or the page's
 // own strip
-const pluginTabs = (page, side) => page.locator(side ? ".nav-sub:not(.leaving) .nav-s" : "#view-plugins .lib-tabs .opt");
+// the page's own strip in both layouts: the rail lists no page's tabs
+const pluginTabs = (page) => page.locator("#view-plugins .lib-tabs .opt");
 async function builtinTab(page, side) {
   await pluginTabs(page, side).first().click();
   await page.waitForSelector("#builtinList .feat-row");

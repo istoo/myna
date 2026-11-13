@@ -19,12 +19,12 @@ func TestTextSizeFrames(t *testing.T) {
 		z          float64
 		room, w, h int
 	}{
-		{400, 1, 0, 440, 400},
-		{400, 1.5, 0, 660, 600},
-		{100, 1.25, 0, 550, 275},   // no shorter than panelMin, zoomed
-		{900, 1.5, 0, 660, 840},    // no taller than panelMax, zoomed
-		{900, 1.5, 700, 660, 700},  // nor than the screen has room for
-		{400, 1.1, 1000, 484, 440}, // 440 at 110%
+		{400, 1, 0, 500, 400},
+		{400, 1.5, 0, 750, 600},
+		{100, 1.25, 0, 625, 275},   // no shorter than panelMin, zoomed
+		{900, 1.5, 0, 750, 840},    // no taller than panelMax, zoomed
+		{900, 1.5, 700, 750, 700},  // nor than the screen has room for
+		{400, 1.1, 1000, 550, 440}, // 440 at 110%
 	} {
 		if w, h := panelFrame(c.page, c.z, c.room); w != c.w || h != c.h {
 			t.Errorf("panelFrame(%d, %v, %d) = %d×%d, want %d×%d", c.page, c.z, c.room, w, h, c.w, c.h)

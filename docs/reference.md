@@ -2108,7 +2108,7 @@ other machines are let in (Share on local network, or a `OWL_ADDR` on
 the network), the Gateway page's Connect starts at it until you pick
 another address there, Settings › About lists it beside the local URL, and
 `owl web` shows it as the gateway's address: on the Gateway page, in
-About's Gateway URL and at the sidebar's foot. Local agent configs still
+About's Gateway URL and in the status bar under the page. Local agent configs still
 use the local gateway address.
 
 Building an app or agent that should use owl, or get a row on the

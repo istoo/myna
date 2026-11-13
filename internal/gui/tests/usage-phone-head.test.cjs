@@ -175,6 +175,8 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     const h = await page.evaluate(HEAD);
     assert.ok(h.period, "the strip shows");
     assert.equal(h.menu, null, "no menu in its place");
-    assert.ok(h.opts.every((o) => o.h <= 23), "the tabs' size is a desktop's");
+    // a desktop's pill (app.css, the rail's pages: 26px), not a phone's
+    // tab taken at 44
+    assert.ok(h.opts.every((o) => o.h <= 26), "the tabs' size is a desktop's");
   });
 }

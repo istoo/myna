@@ -1,8 +1,9 @@
 // Run with Node's test runner and Playwright on the module path; see README.md.
 // The window's polish (docs/owl-design.md, 2026-11-11), in both engines and
 // every language:
-// - the sidebar's icons are one set: a 20 grid, a 1.6 stroke, drawn at 16px,
-//   Settings' gear too (it was a 24 grid's, at 15px);
+// - the rail's icons are one set: a 20 grid, a 1.6 stroke, drawn at 21px
+//   over their names, Settings' gear too, at 16px in the status bar (it was
+//   a 24 grid's, at 15px);
 // - a provider's row: the small switch (28×16) the Library and Plugins use,
 //   and under a pointer the row's ground and its › say it opens;
 // - a section's name and a tile's label in their own case at 12px, not in
@@ -76,7 +77,12 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
           return { at: s.closest("button").dataset.view || s.closest("button").id, box: s.getAttribute("viewBox"), strokes: [...new Set([...s.querySelectorAll("[stroke-width]")].map((e) => e.getAttribute("stroke-width")))], w: Math.round(r.width), h: Math.round(r.height) };
         }));
         assert.ok(icons.length >= 10, "the nine pages and Settings");
-        for (const i of icons) assert.deepEqual({ at: i.at, box: i.box, strokes: i.strokes, w: i.w, h: i.h }, { at: i.at, box: "0 0 20 20", strokes: ["1.6"], w: 16, h: 16 }, i.at);
+        // the rail's drawn at 21px over their names, Settings' gear at 16 in
+        // the status bar
+        for (const i of icons) {
+          const px = i.at === "prefs" ? 16 : 21;
+          assert.deepEqual({ at: i.at, box: i.box, strokes: i.strokes, w: i.w, h: i.h }, { at: i.at, box: "0 0 20 20", strokes: ["1.6"], w: px, h: px }, i.at);
+        }
 
         // a provider's switch is the small one
         const sw = await page.locator("#providers .row.provider .pswitch").first().boundingBox();

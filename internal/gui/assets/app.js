@@ -9118,8 +9118,20 @@ function thumbRefit(box) {
   thumbPut(th, to);
   if (control) thumbs.set(control, { th, pick, to });
 }
+// Put on the next frame, not in the observer's own call: a thumb's width
+// written there dirties layout mid-delivery, and WebKit reports the pills
+// sized again in that frame (the rail giving way to the top bar at
+// SIDE_AT) as a ResizeObserver loop (ctx-head-narrow). A window's resize
+// puts them at once (the listener below).
+const thumbDue = new Set();
+let thumbDueFrame = 0;
 const thumbFit = new ResizeObserver((es) => {
-  for (const { target: box } of es) box.isConnected ? thumbRefit(box) : thumbFit.unobserve(box);
+  for (const { target: box } of es) box.isConnected ? thumbDue.add(box) : thumbFit.unobserve(box);
+  if (thumbDue.size && !thumbDueFrame) thumbDueFrame = requestAnimationFrame(() => {
+    thumbDueFrame = 0;
+    for (const box of thumbDue) if (box.isConnected) thumbRefit(box);
+    thumbDue.clear();
+  });
 });
 addEventListener("resize", () => document.querySelectorAll(".segs").forEach(thumbRefit));
 function slide(box, key) {
@@ -16054,7 +16066,7 @@ if (mode === "panel") document.addEventListener("visibilitychange", () => {
 const profBtn = $("#profBtn"), profBox = $(".profiles");
 function placeProfiles() {
   if (!profBox.classList.contains("open")) return;
-  const r = profBtn.getBoundingClientRect(), top = $("#ptabs").getBoundingClientRect().bottom;
+  const r = profBtn.getBoundingClientRect(), top = $(".top").getBoundingClientRect().bottom;
   profBox.style.bottom = Math.round(innerHeight - r.top + 6) + "px";
   profBox.style.maxHeight = Math.max(120, Math.round(r.top - 6 - top - 4)) + "px";
 }
@@ -16225,6 +16237,7 @@ if (mode === "panel") {
   const tabs = $("#ptabs");
   tabs.hidden = false;
   tabs.setAttribute("role", "tablist");
+  tabs.setAttribute("aria-orientation", "vertical"); // a rail down the panel's left
   for (const b of tabs.querySelectorAll("button")) {
     b.setAttribute("role", "tab");
     // Allowances picked is the reader opening them (#1588)
@@ -22615,91 +22628,29 @@ function layoutNav() {
   const side = $("#side"), nav = $("#nav"), brand = $(".brand"), prefs = $("#prefs"), btn = $("#sideToggle");
   document.body.classList.toggle("side-nav", on);
   side.hidden = !on;
+  $("#sideStatus").hidden = !on;
   $("#crumb").hidden = !on;
   if (on) {
     side.addEventListener("pointerover", () => import("./navlamp.js").catch(() => {}), { once: true });
-    side.querySelector(".side-top").append(btn, brand);
+    // the button is in the one place whether the rail shows or not, as
+    // Finder's and Notes' is (ztf4080 on X): at the rail's top left with the
+    // owl; on a Mac the traffic lights have the rail's top, so the two start
+    // the title bar, the button where it is with the rail hidden (app.css)
+    if (document.body.classList.contains("mac")) $(".top").prepend(btn, brand);
+    else side.querySelector(".side-top").append(btn, brand);
     side.querySelector(".side-scroll").append(nav);
-    side.querySelector(".side-foot").prepend(prefs);
+    $("#sideStatus").append(prefs);
     nav.querySelector(":scope > .thumb")?.remove();
   } else {
     $(".top").prepend(btn, brand);
     $("#crumb").after(nav);
     $(".actions").insertBefore(prefs, $("#winclose"));
   }
-  navSubsAt = "";
-  // the sidebar coming or going isn't a list opening
-  navSubs.quiet = true;
   navSubs();
-  navSubs.quiet = false;
   if (!on) slide(nav, "nav"); else { sideGwRead(); renderSideGw(); }
   navTopGo(navTopOn(), false);
-  sideWidth();
   renderSideToggle();
   fitTop();
-}
-// the sidebar's width, the reader's own once they drag its edge (sideDrag):
-// kept for the window, as a Mac app keeps it; none set, app.css's. A narrow
-// window has it no wider than a third of itself and a little, so the page
-// keeps the room
-var SIDE_MIN = 168, SIDE_MAX = 320;
-var sideW = 0;
-try { sideW = Math.round(+localStorage.getItem("owl.sideWidth")) || 0; } catch { /* app.css's, then */ }
-function sideFit(w) { return Math.round(Math.max(SIDE_MIN, Math.min(w, SIDE_MAX, innerWidth * 0.36))); }
-function sideWidth() {
-  const edge = $("#sideEdge");
-  if (sideW) document.body.style.setProperty("--side-w", sideFit(sideW) + "px");
-  else document.body.style.removeProperty("--side-w");
-  if (!edge || !sideNav()) return;
-  const w = Math.round($("#side").getBoundingClientRect().width);
-  edge.setAttribute("aria-valuenow", String(w));
-  edge.setAttribute("aria-valuemin", String(SIDE_MIN));
-  edge.setAttribute("aria-valuemax", String(sideFit(SIDE_MAX)));
-  edge.setAttribute("aria-label", t("Sidebar width"));
-}
-function sideKeep(w) {
-  sideW = sideFit(w);
-  try { localStorage.setItem("owl.sideWidth", String(sideW)); } catch { /* this time only */ }
-  sideWidth();
-}
-// dragged, its edge follows the pointer; dragged well past its narrowest,
-// it folds away, as a Mac app's sidebar does, the width kept for when it
-// comes back. The arrow keys move it too
-function sideDrag(edge) {
-  edge.addEventListener("pointerdown", (e) => {
-    if (e.button !== 0 || !sideNav()) return;
-    e.preventDefault();
-    edge.setPointerCapture(e.pointerId);
-    const from = $("#side").getBoundingClientRect().width - e.clientX;
-    document.body.classList.add("side-drag");
-    let w = 0;
-    const move = (m) => {
-      const want = from + m.clientX;
-      // folded, it comes back as wide as it was before this drag
-      if (want < SIDE_MIN - 64) { w = 0; end(); sideWidth(); toggleSideNav(); return; }
-      w = sideFit(want);
-      document.body.style.setProperty("--side-w", w + "px");
-    };
-    const end = () => {
-      edge.removeEventListener("pointermove", move);
-      edge.removeEventListener("pointerup", end);
-      edge.removeEventListener("pointercancel", end);
-      if (edge.hasPointerCapture(e.pointerId)) edge.releasePointerCapture(e.pointerId);
-      document.body.classList.remove("side-drag");
-      if (w) sideKeep(w);
-    };
-    edge.addEventListener("pointermove", move);
-    edge.addEventListener("pointerup", end);
-    edge.addEventListener("pointercancel", end);
-  });
-  edge.addEventListener("keydown", (e) => {
-    const step = e.shiftKey ? 32 : 8;
-    const d = { ArrowLeft: -step, ArrowRight: step }[e.key];
-    if (!d || !sideNav()) return;
-    e.preventDefault();
-    sideKeep($("#side").getBoundingClientRect().width + d);
-  });
-  addEventListener("resize", () => { if (sideW) sideWidth(); });
 }
 // a box of the sidebar that runs longer than the window has no bar of its
 // own (app.css .side-bar): a thin one is laid over its edge while it
@@ -22708,7 +22659,7 @@ function sideDrag(edge) {
 function sideBars() {
   const side = $("#side");
   if (!side) return;
-  for (const box of side.querySelectorAll(".side-scroll, .side-foot")) {
+  for (const box of side.querySelectorAll(".side-scroll")) {
     const bar = document.createElement("div");
     bar.className = "side-bar";
     bar.setAttribute("aria-hidden", "true");
@@ -22804,122 +22755,24 @@ function navMorph(change) {
   const stuck = setTimeout(() => vt.skipTransition(), MORPH_MAX);
   vt.finished.finally(() => { clearTimeout(stuck); root.classList.remove("nav-morph"); });
 }
-// where the page shown keeps its own tabs: the sidebar lists them under it
-// and picks them there, the page's own strip hidden (app.css)
-var NAV_SUBS = {
-  usage: () => $("#usageTab"),
-  library: () => $("#view-library .lib-tabs"),
-  plugins: () => $("#view-plugins .lib-tabs"),
-  settings: () => $("#setTabs"),
-};
-function navSubItems(v) { return [...(NAV_SUBS[v]?.()?.querySelectorAll(":scope > button") || [])].filter((b) => !b.hidden); }
-var navSubsAt = "";
+// the rail and the header kept in step with the pages: a group none of
+// whose pages shows (gateway mode's) leaves out its line, and the header
+// says the page. The rail has no room for a page's tabs: the page keeps
+// its own strip, so the header doesn't name the tab again
 function navSubs() {
   if (mode !== "window") return;
   const nav = $("#nav");
-  // a group none of whose pages shows (gateway mode's) leaves out its name
   for (const gl of nav.querySelectorAll(".nav-gl")) {
     let any = false;
     for (let n = gl.nextElementSibling; n && !n.matches(".nav-gl"); n = n.nextElementSibling) if (n.dataset.view && !n.hidden && !n.dataset.replaced) any = true;
     gl.hidden = !any;
   }
-  const side = sideNav();
-  const items = side ? navSubItems(view) : [];
-  const at = view === "settings" ? $("#prefs") : nav.querySelector(`button[data-view="${view}"]`);
-  const sig = [side, view, locale, pluginUpdates, ...items.map((b) => b.textContent.trim() + (b.classList.contains("on") ? "*" : ""))].join("|");
-  if (sig === navSubsAt) return;
-  navSubsAt = sig;
-  let box = document.querySelector(".nav-sub:not(.leaving)");
-  const want = side && at && items.length > 1;
-  // another page's list folds away as this one's opens, both at once
-  // Settings' list is over its button, which stays put (jen_celeus on X)
-  const above = at?.id === "prefs";
-  if (box && (!want || box.dataset.view !== view || (above ? box.nextElementSibling : box.previousElementSibling) !== at)) { navSubLeave(box); box = null; }
-  if (want) {
-    const fresh = !box;
-    if (fresh) {
-      box = el("div", "nav-sub");
-      box.setAttribute("role", "tablist");
-      box.setAttribute("aria-orientation", "vertical"); // its keys are ↑/↓
-      box.dataset.view = view;
-      box.append(el("i", "nav-hl"));
-      box.onkeydown = (e) => {
-        const all = [...box.querySelectorAll(".nav-s")], i = all.indexOf(document.activeElement);
-        const to = { ArrowDown: i + 1, ArrowUp: i - 1, Home: 0, End: all.length - 1 }[e.key];
-        if (i < 0 || to === undefined) return;
-        e.preventDefault();
-        all[(to + all.length) % all.length].focus();
-      };
-      if (above) at.before(box); else at.after(box);
-    }
-    box.setAttribute("aria-label", (at.querySelector("span[data-t]") || at.querySelector("span"))?.textContent || "");
-    for (const s of box.querySelectorAll(".nav-s")) s.remove();
-    items.forEach((b, i) => {
-      const [name, n] = b.textContent.trim().split(" · ");
-      const s = el("button", "nav-s");
-      s.type = "button";
-      s.setAttribute("role", "tab");
-      if (b.id) s.dataset.of = b.id;
-      const cur = b.classList.contains("on");
-      s.classList.toggle("cur", cur);
-      s.setAttribute("aria-selected", String(cur));
-      s.tabIndex = cur ? 0 : -1;
-      s.append(el("span", "", name));
-      if (b.dataset.sub === "installed" && pluginUpdates) {
-        const up = el("em", "up", t(pluginUpdates === 1 ? "1 update" : "{n} updates", { n: pluginUpdates }));
-        s.title = t("Newer versions of your plugins are out: update them under Installed");
-        s.append(up);
-      } else if (n) s.append(el("em", "", n));
-      // the selection goes as the finger comes down, as iOS's does, not once
-      // the page has drawn the tab; let go off the row, it goes back
-      s.onpointerdown = (e) => { if (e.button === 0) navSubGlide(box, s); };
-      s.onpointercancel = () => navSubGlide(box, box.querySelector(".nav-s.cur"));
-      s.onpointerleave = (e) => { if (e.buttons & 1) navSubGlide(box, box.querySelector(".nav-s.cur")); };
-      // the page draws its strip again as it likes: the one there now is
-      // clicked at once, so what is typed next goes to the tab picked.
-      // Another tab opens at its top: the page's tabs share its one scroll,
-      // which would otherwise keep the place reached in the tab before.
-      s.onclick = (e) => {
-        navSubGlide(box, s);
-        for (const o of box.querySelectorAll(".nav-s")) o.classList.toggle("cur", o === s);
-        const b = navSubItems(view)[i];
-        if (!b) return;
-        const other = !b.classList.contains("on");
-        b.click();
-        if (other && scrollOnPurpose(e)) $("#view-" + view).scrollTop = 0;
-      };
-      box.append(s);
-    });
-    navSubMark(box, !fresh);
-    if (fresh && !navSubs.quiet) navSubEnter(box);
-  }
-  renderCrumb(items);
-  // the foot takes more room while Settings' list is open in it (app.css);
-  // a class rather than :has(), which Safari before 15.4 can't parse
-  $(".side-foot")?.classList.toggle("has-sub", !!(box && above));
+  renderCrumb();
 }
 // the sidebar's lists open and fold the way iOS's do: a spring that
 // starts quick and settles slowly, the rows coming in one after another
 var NAV_EASE = "cubic-bezier(.32, .72, 0, 1)";
 const navCalm = calm;
-// the selection is one shape that slides to the row picked
-function navSubMark(box, glide) {
-  const hl = box.querySelector(".nav-hl"), cur = box.querySelector(".nav-s.cur");
-  hl.classList.toggle("still", !glide);
-  hl.hidden = !cur;
-  if (!cur) return;
-  hl.style.transform = `translateY(${cur.offsetTop}px)`;
-  hl.style.height = cur.offsetHeight + "px";
-  if (!glide) requestAnimationFrame(() => hl.classList.remove("still"));
-}
-// the selection set off to a row now, ahead of the page (navSubMark puts
-// it on the tab the page then shows)
-function navSubGlide(box, row) {
-  const hl = box.querySelector(".nav-hl");
-  if (!hl || !row || hl.hidden) return;
-  hl.style.transform = `translateY(${row.offsetTop}px)`;
-  hl.style.height = row.offsetHeight + "px";
-}
 // The open page's row beside the sidebar is marked by one shape too
 // (.nav-top-hl), which moves to the row picked on a spring, as iOS moves a
 // selection: quick off the mark, settling softly with the least overshoot.
@@ -22991,8 +22844,7 @@ function navTopStep(now) {
     navTop.h += navTop.vh * d;
   }
   const still = Math.abs(ty - navTop.y) < 0.25 && Math.abs(navTop.vy) < 4 && Math.abs(th - navTop.h) < 0.25 && Math.abs(navTop.vh) < 4;
-  // at rest once there, and nothing above it still folding
-  if (still && !nav.querySelector(".nav-sub.moving, .nav-sub.leaving")) {
+  if (still) {
     navTopPut(hl, row);
     navTop.raf = 0;
     return;
@@ -23000,38 +22852,8 @@ function navTopStep(now) {
   navTopDraw(hl);
   navTop.raf = requestAnimationFrame(navTopStep);
 }
-function navSubEnter(box) {
-  if (navCalm()) return;
-  const cs = getComputedStyle(box);
-  const to = { height: box.offsetHeight + "px", marginTop: cs.marginTop, marginBottom: cs.marginBottom, opacity: 1 };
-  box.classList.add("moving");
-  box.animate([{ height: "0px", marginTop: "0px", marginBottom: "0px", opacity: 0 }, to], { duration: 460, easing: NAV_EASE })
-    .finished.then(() => box.classList.remove("moving"), () => {});
-  // Settings' rises from its button, the nearest row first
-  const up = !!box.closest(".side-foot");
-  const rows = [...box.querySelectorAll(".nav-s")];
-  if (up) rows.reverse();
-  rows.forEach((s, i) => s.animate(
-    [{ opacity: 0, transform: `translateY(${up ? 6 : -6}px)` }, { opacity: 1, transform: "none" }],
-    { duration: 380, delay: 60 + i * 28, easing: NAV_EASE, fill: "backwards" }));
-  box.querySelector(".nav-hl").animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, delay: 120, fill: "backwards" });
-}
-// a folding list is out of the way at once: not a tab, not reachable, not
-// found by what looks for the sidebar's rows
-function navSubLeave(box) {
-  box.classList.add("leaving");
-  box.removeAttribute("role");
-  box.inert = true;
-  for (const s of box.querySelectorAll(".nav-s")) s.classList.replace("nav-s", "nav-s-gone");
-  if (navCalm() || navSubs.quiet) { box.remove(); return; }
-  const cs = getComputedStyle(box);
-  box.classList.add("moving");
-  box.animate([{ height: box.offsetHeight + "px", marginTop: cs.marginTop, marginBottom: cs.marginBottom, opacity: 1 },
-    { height: "0px", marginTop: "0px", marginBottom: "0px", opacity: 0 }], { duration: 380, easing: NAV_EASE, fill: "forwards" })
-    .finished.then(() => box.remove(), () => box.remove());
-}
 // the header beside the sidebar: the group, the page, and its tab
-function renderCrumb(items) {
+function renderCrumb() {
   const c = $("#crumb");
   if (!c || c.hidden) return;
   const parts = [];
@@ -23044,8 +22866,6 @@ function renderCrumb(items) {
     // a plugin's page's tab has its own title, not one translated here
     if (b) parts.push((b.querySelector("span[data-t]") || b.querySelector("span"))?.textContent || "");
   }
-  const on = items.find((b) => b.classList.contains("on"));
-  if (on) parts.push(on.textContent.trim().split(" · ")[0]);
   c.replaceChildren(...parts.flatMap((p, i) => i ? [el("i", "", "/"), el(i === parts.length - 1 ? "b" : "span", "", p)] : [el(parts.length === 1 ? "b" : "span", "", p)]));
 }
 // the gateway at the sidebar's foot, boot.js's until providers says (#3429)
@@ -23106,7 +22926,6 @@ if (mode === "window") {
   sideQuery.addEventListener?.("change", layoutNav);
   layoutNav();
   $("#sideToggle").onclick = toggleSideNav;
-  sideDrag($("#sideEdge"));
   sideBars();
   if (!web) addEventListener("keydown", (e) => {
     const mac = /^Mac/.test(navigator.platform);
@@ -23115,12 +22934,21 @@ if (mode === "window") {
     e.preventDefault();
     toggleSideNav();
   }, true);
-  // the page's strip drawn again (a count, another language, a tab picked
-  // there or by a link) is drawn again in the sidebar, once a frame
-  let queued = false;
-  const again = () => { if (queued) return; queued = true; requestAnimationFrame(() => { queued = false; navSubs(); }); };
-  const mo = new MutationObserver(() => { again(); if (document.body.classList.contains("side-nav")) tools(); });
-  for (const v of Object.keys(NAV_SUBS)) mo.observe($("#view-" + v), { childList: true, subtree: true, attributes: true, attributeFilter: ["class", "hidden"] });
+  // a page's head drawn again (a count, another language, a tab picked)
+  // lays its tools in the title bar again
+  const mo = new MutationObserver(() => { if (document.body.classList.contains("side-nav")) tools(); });
+  // beside the rail a page's tabs stay in the title bar while the page
+  // scrolls under them: another tab picked there opens at its top, as it
+  // did from the sidebar's list (#1844), the tabs sharing the page's one
+  // scroll. Read before the strip's own click marks the tab picked
+  for (const v of ["usage", "library", "plugins", "settings"]) {
+    $("#view-" + v).addEventListener("click", (e) => {
+      const b = e.target.closest?.(":is(#usageTab, .lib-tabs, #setTabs) > button");
+      if (!b || !sideNav() || b.classList.contains("on")) return;
+      if (scrollOnPurpose(e)) requestAnimationFrame(() => { $("#view-" + v).scrollTop = 0; });
+    }, true);
+  }
+  for (const v of ["usage", "library", "plugins", "settings"]) mo.observe($("#view-" + v), { childList: true, subtree: true, attributes: true, attributeFilter: ["class", "hidden"] });
   // a page whose head is only its tools (Library, Plugins, Settings) has them
   // in the title bar beside the sidebar (app.css): between where the reader
   // is and the window's own buttons, so no row of its own stands empty
@@ -23264,9 +23092,8 @@ async function renderPluginDot() {
   const u = await api("plugins/updates").catch(() => null);
   const n = u?.waiting?.length || 0;
   b.classList.toggle("has-dot", n > 0);
-  // the dot says itself where the reader acts on it: Installed, under
-  // Plugins in the sidebar, reads "1 update" in its count's place
-  if (pluginUpdates !== n) { pluginUpdates = n; navSubs(); }
+  // Plugins then opens on Installed, where the reader acts on it
+  pluginUpdates = n;
   if (n) b.title = t(n === 1 ? "An update for {name} is out" : "Updates for {n} plugins are out", { n, name: u.waiting[0].package });
   else b.removeAttribute("title");
 }

@@ -109,7 +109,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.ok(await btn.isVisible(), "the button at every width");
       assert.equal(await side(page), false, "the header still");
       await headerFits(page);
-      // and the sidebar picked in a narrow window: narrower, the page beside it
+      // and the rail picked in a narrow window: the page beside it
       await page.setViewportSize({ width: 640, height: 760 });
       await frame(page);
       assert.ok(await btn.isVisible());
@@ -117,7 +117,7 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       await page.waitForFunction(() => document.body.classList.contains("side-nav"));
       await frame(page);
       assert.equal(await page.evaluate(() => localStorage.getItem("owl.navLayout")), "side");
-      assert.equal(Math.round((await page.locator("#side").boundingBox()).width), 184, "a narrower sidebar");
+      assert.equal(Math.round((await page.locator("#side").boundingBox()).width), 78, "the rail at its one width");
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), "the window does not scroll sideways");
       const [tb, cr, ac] = await page.evaluate(() => ["#sideToggle", "#crumb", ".top .actions"].map((q) => document.querySelector(q).getBoundingClientRect().toJSON()));
       assert.ok(tb.right <= cr.left + 0.5 && cr.right <= ac.left + 0.5, `the header's row apart: ${tb.right} ${cr.left} ${cr.right} ${ac.left}`);
@@ -136,9 +136,9 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
       assert.ok(await page.locator("#side .side-scroll #nav").isVisible());
       assert.equal(await btn.getAttribute("title"), `${hide} (${keys})`);
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth));
-      // Settings' tabs still listed under it
-      await page.locator("#prefs").click();
-      await page.locator("#side .nav-sub:not(.leaving) .nav-s").first().waitFor();
+      // Settings from the status bar under the page, its tabs in the page
+      await page.locator("#sideStatus #prefs").click();
+      await page.locator("#setTabs button").first().waitFor();
 
       assert.deepEqual(errors, []);
       await context.close();
@@ -148,34 +148,38 @@ for (const engine of (process.env.BROWSER ? [process.env.BROWSER] : ["chromium",
     // Finder's and Notes' is: it hid the sidebar from the sidebar's top and
     // came back elsewhere, after the owl (ztf4080 on X: "收起按钮在左上角，
     // 但是收起后展开按钮变了"). Each title bar, wide and narrow, every language
-    // and the sidebar at its narrowest
+    // (the rail has one width)
     for (const [os, platform] of [["Mac", "MacIntel"], ["Windows", "Win32"], ["Linux", "Linux x86_64"]]) {
       await t.test(`${os}: the button stays where it was`, async () => {
-        for (const lang of Object.keys(words)) for (const [width, sideW] of [[1280, 0], [900, 0], [640, 0], [1280, 168]]) {
+        for (const lang of Object.keys(words)) for (const width of [1280, 900, 640]) {
           const context = await browser.newContext({ viewport: { width, height: 700 }, reducedMotion: "reduce" });
           const page = await context.newPage();
           page.setDefaultTimeout(5000);
           page.setDefaultNavigationTimeout(60000);
           const errors = [];
           page.on("pageerror", (e) => errors.push(e.message));
-          await page.addInitScript(([p, w]) => {
+          await page.addInitScript((p) => {
             Object.defineProperty(Navigator.prototype, "platform", { get: () => p });
             localStorage.setItem("owl.navLayout", "side");
-            if (w) localStorage.setItem("owl.sideWidth", String(w));
-          }, [platform, sideW]);
+          }, platform);
           await page.route("**/*", serve(lang));
           await page.goto("http://owl.test/");
           await page.waitForSelector("#nav button.on");
           await frame(page);
-          const at = `${lang} ${width}${sideW ? ` sidebar ${sideW}` : ""}`;
+          const at = `${lang} ${width}`;
           const btn = page.locator("#sideToggle");
           const place = () => btn.evaluate((b) => { const r = b.getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; });
           assert.ok(await side(page), at);
           const shown = await place();
-          // the sidebar's top holds it and the owl, nothing running over its edge
-          assert.ok(await btn.evaluate((b) => !!b.closest("#side .side-top")), `${at}: in the sidebar's top`);
-          assert.ok(await page.evaluate(() => { const s = document.querySelector(".side-top"); return s.scrollWidth <= s.clientWidth; }), `${at}: the sidebar's top fits`);
-          assert.ok(shown.x + shown.w <= (await page.locator("#side").boundingBox()).width, `${at}: inside the sidebar`);
+          // the rail's top holds it and the owl, nothing running over its
+          // edge; a Mac's traffic lights have the rail's top, so there it
+          // starts the title bar
+          if (os === "Mac") assert.ok(await btn.evaluate((b) => !!b.closest(".top")), `${at}: in the title bar`);
+          else {
+            assert.ok(await btn.evaluate((b) => !!b.closest("#side .side-top")), `${at}: in the rail's top`);
+            assert.ok(await page.evaluate(() => { const s = document.querySelector(".side-top"); return s.scrollWidth <= s.clientWidth; }), `${at}: the rail's top fits`);
+            assert.ok(shown.x + shown.w <= (await page.locator("#side").boundingBox()).width, `${at}: inside the rail`);
+          }
           for (const want of [false, true]) {
             await btn.click();
             await page.waitForFunction((w) => document.body.classList.contains("side-nav") === w, want);
