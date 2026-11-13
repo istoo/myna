@@ -116,16 +116,17 @@ func TestDownloadResumesWhereItBrokeOff(t *testing.T) {
 }
 
 // The rest of a file sent with other bytes than the release's (a host
-// that resumes wrongly) fails the hash, which covers the whole file, and
-// nothing is kept.
+// that resumes wrongly) fails the hash, which covers the whole file. Those
+// bytes are not installed: the whole file is asked for again, and the one
+// that lands is the release's.
 func TestDownloadResumedFileIsStillChecked(t *testing.T) {
 	quickRetries(t)
 	body := bytes.Repeat([]byte("owl"), 50<<10)
 	sum := sha256.Sum256(body)
-	tries := 0
+	var ranges []string
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		tries++
-		if tries == 1 {
+		ranges = append(ranges, r.Header.Get("Range"))
+		if len(ranges) == 1 {
 			w.Header().Set("Content-Length", strconv.Itoa(len(body)))
 			w.Write(body[:1000])
 			w.(http.Flusher).Flush()
@@ -133,15 +134,46 @@ func TestDownloadResumedFileIsStillChecked(t *testing.T) {
 			conn.Close()
 			return
 		}
-		w.Header().Set("Content-Range", fmt.Sprintf("bytes 1000-%d/%d", len(body)-1, len(body)))
-		w.WriteHeader(http.StatusPartialContent)
-		w.Write(bytes.Repeat([]byte("x"), len(body)-1000))
+		if r.Header.Get("Range") != "" {
+			// the wrong bytes a host resuming wrongly sends
+			w.Header().Set("Content-Range", fmt.Sprintf("bytes 1000-%d/%d", len(body)-1, len(body)))
+			w.WriteHeader(http.StatusPartialContent)
+			w.Write(bytes.Repeat([]byte("x"), len(body)-1000))
+			return
+		}
+		w.Header().Set("Content-Length", strconv.Itoa(len(body)))
+		w.Write(body)
+	}))
+	defer srv.Close()
+	path := filepath.Join(t.TempDir(), "owl.new")
+	if err := download(context.Background(), Asset{URL: srv.URL, SHA256: hex.EncodeToString(sum[:])}, path); err != nil {
+		t.Fatal(err)
+	}
+	if b, _ := os.ReadFile(path); !bytes.Equal(b, body) {
+		t.Fatalf("file has %d bytes, not the release's", len(b))
+	}
+}
+
+// A release whose feed lists another hash is not downloaded over and over:
+// the mismatch is tried once more, whole, and then said.
+func TestDownloadChecksumMismatchIsTriedOnce(t *testing.T) {
+	quickRetries(t)
+	body := bytes.Repeat([]byte("owl"), 10<<10)
+	sum := sha256.Sum256([]byte("another release"))
+	tries := 0
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		tries++
+		w.Header().Set("Content-Length", strconv.Itoa(len(body)))
+		w.Write(body)
 	}))
 	defer srv.Close()
 	path := filepath.Join(t.TempDir(), "owl.new")
 	err := download(context.Background(), Asset{URL: srv.URL, SHA256: hex.EncodeToString(sum[:])}, path)
 	if err == nil || !strings.Contains(err.Error(), "does not match its checksum") {
 		t.Fatalf("err = %v, want a checksum mismatch", err)
+	}
+	if tries != 2 {
+		t.Fatalf("tries = %d, want 2", tries)
 	}
 	if _, serr := os.Stat(path); !os.IsNotExist(serr) {
 		t.Fatal("the mismatched file was kept")

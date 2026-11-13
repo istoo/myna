@@ -1085,6 +1085,7 @@ func download(ctx context.Context, a Asset, path string) error {
 		return err
 	}
 	var err error
+	hashTried := false
 	for try := 0; try <= len(retryWaits); try++ {
 		if try > 0 {
 			select {
@@ -1093,7 +1094,20 @@ func download(ctx context.Context, a Asset, path string) error {
 			case <-time.After(retryWaits[try-1]):
 			}
 		}
-		if err = fetch(ctx, a, path); err == nil || ctx.Err() != nil || !Network(err) {
+		if err = fetch(ctx, a, path); err == nil || ctx.Err() != nil {
+			break
+		}
+		if errors.As(err, new(*checksumFailed)) {
+			// the bytes came and were not the release's, and fetch left
+			// none of them behind: one more from the start, then the
+			// feed's hash is what is wrong, not the download
+			if hashTried {
+				break
+			}
+			hashTried = true
+			continue
+		}
+		if !Network(err) {
 			break
 		}
 	}
@@ -1258,10 +1272,22 @@ func fetch(ctx context.Context, a Asset, path string) error {
 		if u != a.URL {
 			err = fmt.Errorf("%s from the mirror %s does not match its checksum from %s; not installed", name, mirror, Site)
 		}
-		return fail(err)
+		return fail(&checksumFailed{err})
 	}
 	return nil
 }
+
+// checksumFailed is a download whose bytes are not the release's. The
+// network can mangle a body without breaking the connection off — a
+// proxy's truncation, a CDN's bad copy — so download tries it once more
+// from the start, which is what a user did by hand before this: owl
+// update said the file did not match its checksum and worked on the
+// second run.
+type checksumFailed struct{ err error }
+
+func (e *checksumFailed) Error() string { return e.err.Error() }
+
+func (e *checksumFailed) Unwrap() error { return e.err }
 
 // readErr keeps the error its reader returned, io.EOF aside.
 type readErr struct {
