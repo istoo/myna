@@ -8616,7 +8616,12 @@ func modelOf(body []byte) string {
 		Model string `json:"model"`
 	}
 	decodeJSON(body, &v)
-	return v.Model
+	// its own bytes: decodeJSON shares the body's for a value it can, and
+	// this one outlives the request — a route keeps it for 60 requests and
+	// the Recent-calls ring for 40, and a string over the body's bytes kept
+	// the whole body with it (60 one-megabyte requests held 84 MB live with
+	// toolScan's fixed alone, 31 with this too)
+	return strings.Clone(v.Model)
 }
 
 // rewriteModel swaps the model field, keeping every other byte as it was:

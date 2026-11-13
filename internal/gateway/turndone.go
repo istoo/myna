@@ -17,7 +17,6 @@ package gateway
 
 import (
 	"bytes"
-	"context"
 	"net/http"
 	"path/filepath"
 	"strings"
@@ -176,9 +175,12 @@ func (ts *turns) end(r *Route, final bool, now time.Time) {
 type toolScan struct {
 	tail  []byte
 	saw   bool
-	cut   bool            // the reply said it ended unfinished
-	ended bool            // the reply's last event, or a stop reason, went by
-	ctx   context.Context // the agent's request: done when it went away
+	cut   bool // the reply said it ended unfinished
+	ended bool // the reply's last event, or a stop reason, went by
+	// gone: the agent's request, closed when it went away. Its Done channel
+	// and not its context: a kept Route outlives the request, and the
+	// context carries the request's own holds, its body among them
+	gone <-chan struct{}
 }
 
 var toolValues = [][]byte{
@@ -297,7 +299,17 @@ func (s *toolScan) called() bool { return s != nil && s.saw }
 // it failed or was cut, or the agent went away before its end; false for a
 // nil scan.
 func (s *toolScan) unfinished() bool {
-	return s != nil && (s.cut || s.ctx != nil && s.ctx.Err() != nil && !s.ended)
+	return s != nil && (s.cut || s.gone != nil && closed(s.gone) && !s.ended)
+}
+
+// closed is whether c was closed: a request that ended, its error unread.
+func closed(c <-chan struct{}) bool {
+	select {
+	case <-c:
+		return true
+	default:
+		return false
+	}
 }
 
 // turnFinal says whether r's reply ends its turn: it went whole to the
@@ -324,7 +336,7 @@ func agentTurnOf(r *http.Request, kind string) (bool, *toolScan) {
 	if sub, _ := subagentOf(r.Header); kind != "" || sub != "" {
 		return false, nil
 	}
-	return true, &toolScan{ctx: r.Context()}
+	return true, &toolScan{gone: r.Context().Done()}
 }
 
 // dirOf reads the folder body says its agent works in, when asked.

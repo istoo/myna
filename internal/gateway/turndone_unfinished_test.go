@@ -58,12 +58,12 @@ func TestReplyScanUnfinished(t *testing.T) {
 	// as Codex hangs up once it has response.completed, is not
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
-	mid := &toolScan{ctx: ctx}
+	mid := &toolScan{gone: ctx.Done()}
 	mid.add([]byte(`data: {"type":"response.output_text.delta","delta":"wor"}`))
 	if !mid.unfinished() {
 		t.Error("gone mid-reply: finished")
 	}
-	whole := &toolScan{ctx: ctx}
+	whole := &toolScan{gone: ctx.Done()}
 	whole.add([]byte(`data: {"type":"response.completed","response":{"id":"r1","status":"completed"}}`))
 	if whole.unfinished() {
 		t.Error("gone after the reply's end: unfinished")
