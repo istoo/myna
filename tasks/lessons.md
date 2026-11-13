@@ -79,3 +79,11 @@ CI 日志、`ls`、`npm config` 里出现的那个 8 字符小写串，是 npm �
 - 2026-11-12：push 触发的 GUI 也是 4 个分片，容易当成全量；实际只跑 7 个冒烟文件。全量要读日志里的 `mode=full`
   和 `shard N/4, browser: X failed of Y`——它是报告模式，有红也 exit 0。
 - 规则：说“全量全绿”必须贴 `failed of` 的数字；本机跑全量并发最多 4（并发 6 在负载 27 时出现 180 秒卡顿）。
+
+## 活过请求的结构不能存请求的 context
+
+- 2026-11-13：`toolScan` 只为了 `ctx.Err()` 存了整个 `r.Context()`，而 Route 留 60 条、`recent` 留 40 条；
+  context 链上挂着这个请求的 hold（含请求本身与 body），于是每条保留的路由都钉住一整个请求体。
+  60 个 1 MB 请求 GC 后残留 147 MB，改成只存 `Done()` channel 后 31 MB（再给 `modelOf` 加 `strings.Clone` 后 18 MB）。
+- 规则：要判断"请求还在不在"就存 `context.Done()`；凡是会被长期结构保留的、从 body 读出的字符串（gjson/decodeJSON 可能共享底层字节），
+  一律 `strings.Clone`。新增长期结构时用"60 个 1 MB 请求后活堆不涨"的测试兜底（`route_bodies_test.go`）。
