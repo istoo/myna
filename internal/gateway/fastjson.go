@@ -160,6 +160,21 @@ func holdBody(ctx context.Context, body []byte) {
 	})
 }
 
+// heldBodyStats is what heldBodies holds: how many request bodies, and
+// their bytes, for owl heap's report.
+func heldBodyStats() (n int, bytes uint64) {
+	heldBodies.Lock()
+	defer heldBodies.Unlock()
+	l := heldBodies.list.Load()
+	if l == nil {
+		return 0, 0
+	}
+	for _, b := range *l {
+		bytes += uint64(len(b))
+	}
+	return len(*l), bytes
+}
+
 // checkHeldBody, set by the tests, is handed every body holdBody lists and
 // returns what checks, as it is released, that the body was not written
 // while held. A decoded value shares a held body's bytes, and what is

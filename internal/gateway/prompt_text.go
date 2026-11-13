@@ -64,6 +64,17 @@ func (t *trace) keepBody(id int64, from provider.Protocol, body []byte, plain bo
 	}
 }
 
+// keptBodyStats is what the trace keeps for prompts' text: how many
+// request bodies, and their bytes, for owl heap's report.
+func (t *trace) keptBodyStats() (n int, bytes uint64) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	for _, b := range t.bodies {
+		bytes += uint64(len(b.body))
+	}
+	return len(t.bodies), bytes
+}
+
 // maskedBody puts body, masked, in place of route id's plain kept body.
 func (t *trace) maskedBody(id int64, body []byte) {
 	t.mu.Lock()

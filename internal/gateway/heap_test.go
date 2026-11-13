@@ -3,6 +3,7 @@ package gateway
 import (
 	"bytes"
 	"compress/gzip"
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -11,6 +12,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/istoo/owl/internal/provider"
 	"github.com/istoo/owl/internal/settings"
 )
 
@@ -118,5 +120,43 @@ func profileCallersRefused(key string) []profileRefusal {
 		{"another machine with a key", "192.168.1.20:50123", "192.168.1.10:3425", []string{"Authorization", "Bearer " + key}},
 		{"a proxy's client", "127.0.0.1:50123", "127.0.0.1:3425", []string{"X-Forwarded-For", "203.0.113.9"}},
 		{"a proxy's client with a key", "127.0.0.1:50123", "127.0.0.1:3425", []string{"Cf-Connecting-IP", "203.0.113.9", "Authorization", "Bearer " + key}},
+	}
+}
+
+// A report of owl holding too much says what it holds past the requests:
+// the bodies listed for decodeJSON to share, and the ones kept for a
+// prompt's text. Both are counted for the header `owl heap` reads.
+func TestHeapStatsSayWhatIsHeld(t *testing.T) {
+	setup(t, provider.Anthropic, &fake{ctype: "application/json", reply: `{"id":"msg_1","type":"message","role":"assistant","model":"m1","content":[{"type":"text","text":"ok"}],"stop_reason":"end_turn","usage":{"input_tokens":300,"output_tokens":1}}`})
+	s := New()
+	h := s.Handler()
+	body := `{"model":"fake/m1","max_tokens":10,"messages":[{"role":"user","content":"` + strings.Repeat("x", 1<<20) + `"}]}`
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, httptest.NewRequest("POST", "/v1/messages", strings.NewReader(body)))
+	if rec.Code != http.StatusOK {
+		t.Fatalf("%d %s", rec.Code, rec.Body)
+	}
+	// a body held as one in flight is: the context can end and hasn't
+	ctx, end := context.WithCancel(context.Background())
+	defer end()
+	big := []byte(body)
+	holdBody(ctx, big)
+	r := httptest.NewRequest("GET", HeapPath, nil)
+	r.RemoteAddr, r.Host = "127.0.0.1:50123", "127.0.0.1:3425"
+	r.Header.Set("User-Agent", "Go-http-client/1.1")
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, r)
+	if w.Code != http.StatusOK {
+		t.Fatalf("%d %s", w.Code, w.Body)
+	}
+	var st HeapStats
+	if err := json.Unmarshal([]byte(w.Header().Get(HeapStatsHeader)), &st); err != nil {
+		t.Fatal(err)
+	}
+	if st.HeldBodies < 1 || st.HeldBodyBytes < uint64(len(big)) {
+		t.Errorf("held %d bodies, %d bytes; want the one held", st.HeldBodies, st.HeldBodyBytes)
+	}
+	if st.PromptBodies < 1 || st.PromptBodyBytes < 1<<20 {
+		t.Errorf("prompt text %d bodies, %d bytes; want the request's own", st.PromptBodies, st.PromptBodyBytes)
 	}
 }

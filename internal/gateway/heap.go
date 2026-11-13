@@ -47,6 +47,14 @@ type HeapStats struct {
 	LiveHeap     uint64 `json:"liveHeap"`
 	NumGC        uint32 `json:"numGC"`
 	Goroutines   int    `json:"goroutines"`
+	// the request bodies held past their requests, which a report of owl
+	// holding too much wants told apart from a leak: the ones listed for
+	// decodeJSON to share (heldBodies), and the ones kept for a prompt's
+	// text (trace.keepBody)
+	HeldBodies      int    `json:"heldBodies"`
+	HeldBodyBytes   uint64 `json:"heldBodyBytes"`
+	PromptBodies    int    `json:"promptBodies"`
+	PromptBodyBytes uint64 `json:"promptBodyBytes"`
 }
 
 // processStarted is when this process began, for HeapStats' Uptime.
@@ -75,6 +83,8 @@ func (s *Server) heapProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	exe, _ := os.Executable()
+	held, heldBytes := heldBodyStats()
+	kept, keptBytes := s.trace.keptBodyStats()
 	stats, _ := json.Marshal(HeapStats{
 		PID:          os.Getpid(),
 		Program:      filepath.Base(exe),
@@ -91,6 +101,11 @@ func (s *Server) heapProfile(w http.ResponseWriter, r *http.Request) {
 		LiveHeap:     after.HeapAlloc,
 		NumGC:        after.NumGC,
 		Goroutines:   goroutines,
+
+		HeldBodies:      held,
+		HeldBodyBytes:   heldBytes,
+		PromptBodies:    kept,
+		PromptBodyBytes: keptBytes,
 	})
 	h := w.Header()
 	h.Set("Content-Type", "application/octet-stream")

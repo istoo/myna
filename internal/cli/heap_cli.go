@@ -134,6 +134,10 @@ func heapSummary(st gateway.HeapStats) string {
 	fmt.Fprintf(&b, "  Sys         %s (all Go took from the system; a footprint far above it is outside Go)\n", bytesSize(st.Sys))
 	fmt.Fprintf(&b, "  NumGC       %d\n", st.NumGC)
 	fmt.Fprintf(&b, "  goroutines  %d\n", st.Goroutines)
+	if st.HeldBodies+st.PromptBodies > 0 {
+		fmt.Fprintf(&b, "  bodies      %d held (%s), %d kept for prompt text (%s)\n",
+			st.HeldBodies, bytesSize(st.HeldBodyBytes), st.PromptBodies, bytesSize(st.PromptBodyBytes))
+	}
 	return b.String()
 }
 
