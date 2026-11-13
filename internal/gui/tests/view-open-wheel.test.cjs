@@ -106,11 +106,13 @@ const UPS = `{
 const HEARD = process.env.OWL_OPEN_WHEEL_HEARD ? [process.env.OWL_OPEN_WHEEL_HEARD] : ["late", "unheard"];
 const LANGS = ["en", "zh", "zh-TW", "ja", "de"];
 
-for (const engine of ["chromium", "webkit"]) {
-  test(engine + ": a page scrolled as it opens keeps the reader's place when its data lands", { timeout: 900000 }, async (t) => {
+// one test a half and a language, each with its own browser and time: 80
+// subtests of ~16s under one 900s timeout ran out at the 57th alone (#25)
+for (const engine of ["chromium", "webkit"]) for (const heard of HEARD) for (const lang of LANGS) {
+  test(`${engine}: a page scrolled as it opens keeps the reader's place when its data lands (wheels ${heard}, ${lang})`, { timeout: 900000 }, async (t) => {
     const browser = await (engine === "webkit" ? webkit : chromium).launch();
     t.after(() => browser.close());
-    for (const heard of HEARD) for (const lang of LANGS) for (const width of [420, 1000]) for (const name of ["usage", "routing"]) for (const visit of ["opened", "opened again"]) {
+    for (const width of [420, 1000]) for (const name of ["usage", "routing"]) for (const visit of ["opened", "opened again"]) {
       await t.test(`${name}, ${visit}, wheels ${heard}, ${lang}, ${width}px`, async () => {
         const ctx = await browser.newContext({ viewport: { width, height: 600 }, reducedMotion: "reduce" });
         t.after(() => ctx.close());
