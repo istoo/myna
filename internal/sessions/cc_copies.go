@@ -109,7 +109,7 @@ func ccFamily(files []file) (copies, branches map[string]string) {
 		}
 		holds := func(b ccOne, uuid string) bool {
 			used[b.f.path] = true
-			return b.st.Leaf == uuid || ccUUIDsOf(*b.f)[uuid]
+			return b.st.Leaf == uuid || ccUUIDsOf(*b.f).has(uuid)
 		}
 		// before reports whether b is kept over a: the one that holds
 		// the other's first message too (a copy made after a compaction
@@ -215,7 +215,7 @@ var ccUUIDMemo = map[string]*ccUUIDs{}
 
 type ccUUIDs struct {
 	size, mod, off int64
-	set            map[string]bool
+	set            *ccUUIDSet
 	// forked is the session its messages say they were copied from
 	// (forkedFrom, which /branch writes on each), "" for none
 	forked string
@@ -233,12 +233,79 @@ func ccForkedFrom(f file) string {
 
 var ccForked = []byte(`"forkedFrom":{`)
 
+// ccUUIDSet is a file's message uuids, each in canonical form kept as its
+// 16 bytes. Kept as strings, one per message of every file in a pair, the
+// sets were 51 MB of a running owl's 234 MB live heap (0.2.18, 734 Claude
+// Code session files): a 48-byte string apiece beside its map slot. A uuid
+// not written in lower-case canonical form is kept as written, so a set
+// answers for exactly the strings put in it.
+type ccUUIDSet struct {
+	ids   map[[16]byte]struct{}
+	other map[string]struct{}
+}
+
+func newCCUUIDSet() *ccUUIDSet { return &ccUUIDSet{ids: map[[16]byte]struct{}{}} }
+
+func (s *ccUUIDSet) add(v string) {
+	if id, ok := ccUUIDBytes(v); ok {
+		s.ids[id] = struct{}{}
+		return
+	}
+	if s.other == nil {
+		s.other = map[string]struct{}{}
+	}
+	s.other[strings.Clone(v)] = struct{}{}
+}
+
+func (s *ccUUIDSet) has(v string) bool {
+	if s == nil {
+		return false
+	}
+	if id, ok := ccUUIDBytes(v); ok {
+		_, in := s.ids[id]
+		return in
+	}
+	_, in := s.other[v]
+	return in
+}
+
+// ccUUIDBytes is v's 16 bytes when v is a uuid in lower-case canonical
+// form (8-4-4-4-12 hex digits), as Claude Code writes them.
+func ccUUIDBytes(v string) (id [16]byte, ok bool) {
+	if len(v) != 36 || v[8] != '-' || v[13] != '-' || v[18] != '-' || v[23] != '-' {
+		return id, false
+	}
+	n := 0 // nibbles read
+	for i := 0; i < 36; i++ {
+		if i == 8 || i == 13 || i == 18 || i == 23 {
+			continue
+		}
+		d := ccHex(v[i])
+		if d < 0 {
+			return id, false
+		}
+		id[n/2] |= byte(d) << (4 * (1 - n%2))
+		n++
+	}
+	return id, n == 32
+}
+
+func ccHex(c byte) int {
+	switch {
+	case '0' <= c && c <= '9':
+		return int(c - '0')
+	case 'a' <= c && c <= 'f':
+		return int(c - 'a' + 10)
+	}
+	return -1
+}
+
 // ccUUIDsOf is the uuids of the messages in f, read on from where the last
 // read stopped while the file only grew.
-func ccUUIDsOf(f file) map[string]bool {
+func ccUUIDsOf(f file) *ccUUIDSet {
 	m := ccUUIDMemo[f.path]
 	if m == nil || f.size < m.size || f.size == m.size && f.mod.UnixNano() != m.mod {
-		m = &ccUUIDs{set: map[string]bool{}}
+		m = &ccUUIDs{set: newCCUUIDSet()}
 		ccUUIDMemo[f.path] = m
 	}
 	if m.size == f.size && m.mod == f.mod.UnixNano() {
@@ -250,7 +317,7 @@ func ccUUIDsOf(f file) map[string]bool {
 		}
 		r := gjson.GetManyBytes(b, "type", "uuid")
 		if t := r[0].String(); (t == "user" || t == "assistant") && r[1].Type == gjson.String {
-			m.set[r[1].String()] = true
+			m.set.add(r[1].Str)
 			if m.forked == "" && bytes.Contains(b, ccForked) {
 				m.forked = gjson.GetBytes(b, "forkedFrom.sessionId").String()
 			}
@@ -324,7 +391,7 @@ func ccRest(copyFile, keeper file) *state {
 			return true
 		}
 		r := gjson.GetManyBytes(b, "type", "uuid")
-		if t := r[0].String(); t != "user" && t != "assistant" || r[1].Type != gjson.String || held[r[1].String()] {
+		if t := r[0].String(); t != "user" && t != "assistant" || r[1].Type != gjson.String || held.has(r[1].Str) {
 			return true
 		}
 		line(s, b, copyFile.main)
