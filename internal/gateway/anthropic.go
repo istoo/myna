@@ -296,6 +296,10 @@ func readAnthropic(body []byte, clientMarks, facts bool) (*Request, error) {
 // mention it. That is what Anthropic's API assumes, but DeepSeek and other
 // vendors' Anthropic endpoints think by default, so Claude Code's requests
 // for a session title, sent without thinking, spent their tokens thinking.
+// thinkingOffField is what thinkingOffUnlessAsked adds to a body that asks
+// for no thinking.
+const thinkingOffField = `"thinking":{"type":"disabled"}}`
+
 func thinkingOffUnlessAsked(body []byte) []byte {
 	var v struct {
 		Thinking json.RawMessage `json:"thinking"`
@@ -308,11 +312,14 @@ func thinkingOffUnlessAsked(body []byte) []byte {
 	if len(b) < 2 || b[len(b)-1] != '}' {
 		return withFields(body, map[string]any{"thinking": map[string]any{"type": "disabled"}})
 	}
-	out := append([]byte{}, b[:len(b)-1]...)
+	// room for the field it adds in the same allocation: appending to a
+	// buffer of exactly len(b)-1 copied the whole body again
+	out := make([]byte, 0, len(b)+len(thinkingOffField))
+	out = append(out, b[:len(b)-1]...)
 	if len(bytes.TrimSpace(out)) > 1 {
 		out = append(out, ',')
 	}
-	return append(out, `"thinking":{"type":"disabled"}}`...)
+	return append(out, thinkingOffField...)
 }
 
 // anthropicReplaysThinking is whether model, served by host's Messages

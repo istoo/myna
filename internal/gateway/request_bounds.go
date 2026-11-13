@@ -310,7 +310,13 @@ func readSized(r io.Reader, declared int64) ([]byte, error) {
 				}
 				continue
 			}
-			b = append(make([]byte, 0, min(int64(cap(b))*2, declared)), b...)
+			// four times, not twice: a body of tens of MB grew through
+			// five copies of what was read so far (1, 2, 4, 8, 16 MB for
+			// a 24 MB request), each one zeroing and copying its
+			// predecessor; the first MB is still the most trusted before
+			// a byte has come, which is what the doubling was for (see
+			// sizedReadFirst)
+			b = append(make([]byte, 0, min(int64(cap(b))*4, declared)), b...)
 		}
 		n, err := r.Read(b[len(b):cap(b)])
 		b = b[:len(b)+n]
