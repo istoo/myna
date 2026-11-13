@@ -167,7 +167,12 @@ func (b *promptBuilder) add(kind, name, tag string, tokens int, pc PromptPiece) 
 	key := itemKey(tag, name)
 	it := m[key]
 	if it == nil {
-		it = &PromptItem{Name: name, Tag: tag}
+		// its own bytes: a name read from the body (a tool's, an MCP
+		// server's, a file's) is a string over bytes decodeJSON shared,
+		// and the trace keeps a route's prompt for 60 requests — the name
+		// pinned the whole body under it (56 one-megabyte bodies, 86 MB,
+		// in a live owl beside a prompt text cache of 10)
+		it = &PromptItem{Name: strings.Clone(name), Tag: tag}
 		m[key] = it
 	}
 	it.N++
