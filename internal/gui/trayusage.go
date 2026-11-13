@@ -443,7 +443,12 @@ var trayTotalSum = func(p usage.Period) usage.Totals { return trayTotals.sum(p, 
 // account that answers, seconds apart on a busy day, and each sum read
 // every session file's state (readRequestState) and built a page of the
 // Requests tab: 7s of CPU in 30s on the reporter's computer (#4366).
-const trayTotalFresh = time.Minute
+// A minute of it is still the largest thing an owl at rest does on a long
+// history: on 8,096 session files the sum's stat of them was 38% of the
+// idle samples (owl cpu, 0.45s in 30s), every directory read again for a
+// figure that moves by a few cents. Five minutes of lag on today's spend
+// is not seen; the four sums not read are.
+const trayTotalFresh = 5 * time.Minute
 
 var trayTotals trayTotalMemo
 

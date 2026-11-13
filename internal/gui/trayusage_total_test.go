@@ -129,8 +129,8 @@ func TestTrayTotalIsTheLedgers(t *testing.T) {
 }
 
 // #4366: the menu bar is read again seconds apart, and a total is summed
-// at most once a minute, again on another day.
-func TestTrayTotalSummedOnceAMinute(t *testing.T) {
+// at most once per trayTotalFresh, again on another day.
+func TestTrayTotalSummedOnlyWhenStale(t *testing.T) {
 	var n int
 	old := trayQuerySum
 	trayQuerySum = func(p usage.Period) usage.Totals { n++; return usage.Totals{Calls: n} }
@@ -146,13 +146,17 @@ func TestTrayTotalSummedOnceAMinute(t *testing.T) {
 		t.Fatalf("7d was given today's sum")
 	}
 	if m.sum(usage.Today, at.Add(trayTotalFresh)).Calls != 3 {
-		t.Fatalf("a minute old and not summed again")
+		t.Fatalf("as old as trayTotalFresh and not summed again")
 	}
-	// past midnight, under a minute after: the new day is summed
-	if m.sum(usage.Today, at.Add(trayTotalFresh+90*time.Second)).Calls != 4 {
+	// past midnight, inside the total's life: the new day is summed
+	var day trayTotalMemo
+	if day.sum(usage.Today, at).Calls != 4 {
+		t.Fatalf("took the count from the other memo")
+	}
+	if day.sum(usage.Today, at.Add(3*time.Minute)).Calls != 5 {
 		t.Fatalf("a new day was given yesterday's total")
 	}
-	if m.sum(usage.Today, at.Add(trayTotalFresh+100*time.Second)).Calls != 4 {
-		t.Fatalf("summed again within the minute")
+	if day.sum(usage.Today, at.Add(3*time.Minute+30*time.Second)).Calls != 5 {
+		t.Fatalf("summed again within the total's life")
 	}
 }
