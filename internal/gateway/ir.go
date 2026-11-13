@@ -893,13 +893,26 @@ func toolOutput(raw json.RawMessage) (string, []Part) {
 	return text, images
 }
 
-// effortOf normalises the reasoning effort names the APIs use.
+// effortOf normalises the reasoning effort names the APIs use. Each level
+// is its own constant, never s: s is read from a request's body, which
+// decodeJSON shares, and strings.ToLower hands back a string already in
+// lower case as it is — a route keeps its tries' efforts, so every route
+// kept its request's whole body, 60 of them (7.5 MB each, 450 MB live
+// in a live owl).
 func effortOf(s string) string {
 	switch strings.ToLower(strings.TrimSpace(s)) {
 	case "minimal", "none":
 		return "low"
-	case "low", "medium", "high", "xhigh", "max":
-		return strings.ToLower(s)
+	case "low":
+		return "low"
+	case "medium":
+		return "medium"
+	case "high":
+		return "high"
+	case "xhigh":
+		return "xhigh"
+	case "max":
+		return "max"
 	case "ultra": // Codex's max, with its own agents to hand work to
 		return "max"
 	}

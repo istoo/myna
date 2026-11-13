@@ -92,3 +92,11 @@ CI 日志、`ls`、`npm config` 里出现的那个 8 字符小写串，是 npm �
 
 - 2026-11-13：我用 `cat 等待器输出; git tag …` 串成一条命令，等待器输出的是 `failure attempt 1`（gofmt 因新测试文件少了行尾换行而红），标签却照样打上并推了，Release 已开始构建才被我发现；只能取消工作流、删本地与远端标签、修格式、重推、等新 run 再打。
 - 规则：标签只在读到 `success` 的分支里打——`grep -q '^success' || exit 1`，或先单独确认结论再执行下一条命令；本地提交前跑 `gofmt -l $(git ls-files '*.go')`，新文件尤其容易漏行尾换行。
+
+## 规范化函数可能原样返回入参，回归测试要用真实请求的形状
+
+- 2026-11-13：`effortOf` 写的是 `return strings.ToLower(s)`；s 已是小写时 Go 原样返回 s，而 s 是 decodeJSON 共享的 body 字节。
+  Route.Tries[].Effort 于是钉住整份改写后的 body（占位说明副本、翻译 buffer），0.2.17 真机 15 分钟活堆 779 MB。
+  上一轮的回归测试只发了不带 effort 的纯文本请求，所以绿着放过了它；fork 用简单请求"排除"了它，也是同一个盲区。
+- 规则：`strings.ToLower/TrimSpace/TrimPrefix`、切片、`NearestEffort` 这类函数都可能把入参原样交出——从 body 读出的值要长期保存，
+  就映射成常量或 `strings.Clone`。内存回归测试的请求体要照真实 agent 来写：effort、service_tier、脱敏占位、跨协议翻译、流式都带上。
