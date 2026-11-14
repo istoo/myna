@@ -33,6 +33,7 @@ type fakeService struct {
 	host string
 	path string
 	more chan struct{}
+	body string // what /api/chat read of its request, once more came
 }
 
 func newFakeService(t *testing.T) *fakeService {
@@ -50,6 +51,9 @@ func newFakeService(t *testing.T) *fakeService {
 			rw.Header().Set("Content-Type", "text/html; charset=utf-8")
 			fmt.Fprint(rw, `<!doctype html><title>chat</title><script src="app.js"></script>`)
 		case "/api/chat":
+			// it streams before it reads its request, as a chat service
+			// not written in Go does (net/http would read the body off)
+			http.NewResponseController(rw).EnableFullDuplex()
 			rw.Header().Set("Content-Type", "text/event-stream")
 			rw.WriteHeader(200)
 			// big enough that a compressor would hold nothing back for
@@ -61,6 +65,10 @@ func newFakeService(t *testing.T) *fakeService {
 			case <-r.Context().Done():
 				return
 			}
+			b, _ := io.ReadAll(r.Body)
+			f.mu.Lock()
+			f.body = string(b)
+			f.mu.Unlock()
 			fmt.Fprint(rw, "data: second\n\n")
 		case "/go":
 			http.Redirect(rw, r, "http://127.0.0.1:"+strconv.Itoa(f.port)+"/api/x?a=1", http.StatusFound)
@@ -330,6 +338,91 @@ func TestPluginPageServiceProxied(t *testing.T) {
 	}
 	if !strings.Contains(got, "data: second") {
 		t.Errorf("the rest of the stream: %q", got)
+	}
+}
+
+// A service that answers before it has read its request (a chat's
+// stream starts at once) gets the request whole, and the reply goes on.
+// Writing the reply's head while the request's body was still unread,
+// net/http read the rest of the body off itself, the proxy's read of the
+// same body raced it, and the service's connection was closed mid-stream
+// (#18): the body's end is held here until the first event is in.
+func TestPluginPageServiceStreamsWhileTheBodyComes(t *testing.T) {
+	f := newFakeService(t)
+	servicePlugins(t, `{"port": `+strconv.Itoa(f.port)+`}`, nil)
+	t.Setenv("OWL_ADDR", "127.0.0.1:3425")
+	page := serviceMux(true)
+	p := listed(t, page)
+	srv := httptest.NewServer(webHandler("3430", onePortWebKey, 0, page))
+	t.Cleanup(srv.Close)
+	pr, pw := io.Pipe()
+	// on a red, the service's stream and the request's body end with the
+	// test (before srv.Close, which waits for the request in flight)
+	t.Cleanup(func() {
+		pw.Close()
+		select {
+		case <-f.more:
+		default:
+			close(f.more)
+		}
+	})
+	req, _ := http.NewRequest("POST", srv.URL+strings.TrimSuffix(p.URL, "index.html")+pageServicePath+"api/chat", pr)
+	req.ContentLength = int64(len(`{"say":"hi"}`))
+	req.Header.Set("Origin", "null")
+	go pw.Write([]byte(`{"say":`))
+	type answer struct {
+		res *http.Response
+		err error
+	}
+	got := make(chan answer, 1)
+	go func() {
+		res, err := http.DefaultTransport.RoundTrip(req)
+		got <- answer{res, err}
+	}()
+	var res *http.Response
+	select {
+	case a := <-got:
+		if a.err != nil {
+			t.Fatal(a.err)
+		}
+		res = a.res
+	case <-time.After(10 * time.Second):
+		t.Fatal("the reply's head didn't come while the request's body was still coming")
+	}
+	defer res.Body.Close()
+	lines := make(chan string, 8)
+	go func() {
+		sc := bufio.NewScanner(res.Body)
+		for sc.Scan() {
+			lines <- sc.Text()
+		}
+		close(lines)
+	}()
+	select {
+	case l := <-lines:
+		if l != "data: first" {
+			t.Errorf("first line %q", l)
+		}
+	case <-time.After(10 * time.Second):
+		t.Fatal("the first event didn't arrive while the request's body was still coming")
+	}
+	if _, err := pw.Write([]byte(`"hi"}`)); err != nil {
+		t.Fatalf("the rest of the request's body: %v", err)
+	}
+	pw.Close()
+	close(f.more)
+	rest := ""
+	for l := range lines {
+		rest += l + "\n"
+	}
+	if !strings.Contains(rest, "data: second") {
+		t.Errorf("the rest of the stream: %q", rest)
+	}
+	f.mu.Lock()
+	body := f.body
+	f.mu.Unlock()
+	if body != `{"say":"hi"}` {
+		t.Errorf("the service read %q of its request", body)
 	}
 }
 

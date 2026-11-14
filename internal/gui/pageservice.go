@@ -123,6 +123,15 @@ func servePageService(rw http.ResponseWriter, r *http.Request, p *pluginPage, to
 		http.Error(rw, "this is a plugin page's service: only its page asks it", http.StatusForbidden)
 		return
 	}
+	// the request's body is the proxy's to send on as it comes: written
+	// before the body is read through (a chat's stream starts at once),
+	// net/http otherwise reads the rest of it off itself, racing the
+	// proxy's read of it, and the service's connection was closed
+	// mid-stream (#18), or the reply's head waited for a body still on
+	// its way
+	if err := http.NewResponseController(rw).EnableFullDuplex(); err != nil {
+		log.Printf("plugin page: %s's service: the request's body can't stream beside the reply: %v", p.Name, err)
+	}
 	port := p.servicePort()
 	target := net.JoinHostPort("127.0.0.1", strconv.Itoa(port))
 	root := pluginPagePrefix + tok + "/" + pageServicePath
