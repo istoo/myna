@@ -100,3 +100,15 @@ CI 日志、`ls`、`npm config` 里出现的那个 8 字符小写串，是 npm �
   上一轮的回归测试只发了不带 effort 的纯文本请求，所以绿着放过了它；fork 用简单请求"排除"了它，也是同一个盲区。
 - 规则：`strings.ToLower/TrimSpace/TrimPrefix`、切片、`NearestEffort` 这类函数都可能把入参原样交出——从 body 读出的值要长期保存，
   就映射成常量或 `strings.Clone`。内存回归测试的请求体要照真实 agent 来写：effort、service_tier、脱敏占位、跨协议翻译、流式都带上。
+
+## 反向代理在读完请求体前回复，net/http 会和代理抢读请求体（2026-11-14，#18）
+
+- 规则：handler 把请求体交给 ReverseProxy 往上游转发、而上游可能在读完请求体之前就开始回复（流式接口）时，先对 rw 调 `http.NewResponseController(rw).EnableFullDuplex()`。
+- 原因：响应头写出时如果请求体还没读完，net/http 会自己把剩下的请求体读掉丢弃（chunkWriter.writeHeader），和代理的 Transport 抢同一个 body。代理读到的 body 变短就报写错误，上游连接在流中途被关掉。body 还在路上时，响应头要等它整个到达才发得出去。
+- 复现：单独压测 900 次都是绿的。用 io.Pipe 压住请求体的后半段，等第一条事件到了再发，这样能稳定在旧代码上失败。测试里的 Go 假服务自己也要开 full duplex，否则卡住的是假服务而不是被测代码。
+
+## 按整个堆量的内存上限，要在只跑它自己的进程里量（2026-11-14，880db0b90 的 CI 红）
+
+- 规则：断言「某操作后存活堆增长不超过 N」的测试，用子进程只跑它自己来量（照 `TestClaudeIdleEvictionEnds` 的写法）。上限的依据是两种状态之间的差值（填满小请求体，再全部换成大请求体），不是一个绝对总量。
+- 原因：`runtime.ReadMemStats` 量的是整个进程的堆。同一个包里前面测试留下、还在跑的东西会算进来：全包顺序下同一个量起伏 70、58、-84 MB，CI 上 49 MB 越过了 45 MB 的上限，其实什么都没被扣住。
+- 怎么验证：分别把这个上限要防的几种回退手动放回去（这次是去掉 `strings.Clone`、撤回 effortOf 修复），看测试都会失败。正常情况要离上限远，回退的情况也要离上限远。
